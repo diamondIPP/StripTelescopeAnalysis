@@ -177,12 +177,11 @@ class TDetectorAlignment{
       Double_t GetXOffset(Int_t plane) {return det_x_offset[plane];};
       Double_t GetYOffset(Int_t plane) {return det_y_offset[plane];};
       Double_t GetZOffset(Int_t plane) {return det_z_offset[plane];};
-      Double_t GetPhiOffset(Int_t plane) {return det_phi_offset[plane];};
-      void SetPhiOffset(Int_t plane, Double_t off) {det_phi_offset[plane]=off;};
+      Double_t GetPhiXOffset(Int_t plane) {return det_phix_offset[plane];};
+      Double_t GetPhiYOffset(Int_t plane) {return det_phiy_offset[plane];};
       Double_t GetXResolution(Int_t plane) {return det_x_resolution[plane];};
       Double_t GetYResolution(Int_t plane) {return det_y_resolution[plane];};
-      Double_t GetZResolution(Int_t plane) {return det_z_resolution[plane];};
-      Double_t GetPhiResolution(Int_t plane) {return det_phi_resolution[plane];};
+      Double_t GetSiResolution();
       vector<Double_t> GetXOffsetHistory(Int_t plane) {return det_x_offset_history[plane];};
       vector<Double_t> GetYOffsetHistory(Int_t plane) {return det_y_offset_history[plane];};
       vector<Double_t> GetZOffsetHistory(Int_t plane) {return det_z_offset_history[plane];};
@@ -205,8 +204,6 @@ class TDetectorAlignment{
       void AlignDetectorXY(int subject_detector, bool verbose = true, bool justcheck = false);
       void AlignDetectorZ(Int_t subject_detector, bool graphs = false, bool verbose = true);
       void AlignDetectorZ(Int_t subject_detector, Int_t ref_detector1, Int_t ref_detector2, bool graphs = false, bool verbose = true);
-      void AlignDetectorPhi(Int_t subject_detector, bool graphs = false, bool verbose = true);
-      void AlignDetectorPhi(Int_t subject_detector, Int_t ref_detector1, Int_t ref_detector2, bool graphs = false, bool verbose = true);
       void CheckDetectorAlignmentXY(int subject_detector, int ref_detector1, int ref_detector2, bool verbose = true);
       void CheckDetectorAlignmentXY(int subject_detector, bool verbose = true);
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
@@ -238,17 +235,12 @@ class TDetectorAlignment{
       Double_t det_x_offset[6];
       Double_t det_y_offset[6];
       Double_t det_z_offset[6];
-      Double_t det_phi_offset[6];
       Double_t det_phix_offset[6];
       Double_t det_phiy_offset[6];
       
       //store resolutions here
       Double_t det_x_resolution[6];
       Double_t det_y_resolution[6];
-      Double_t det_z_resolution[6];
-      Double_t det_phi_resolution[6];
-      Double_t det_phix_resolution[6];
-      Double_t det_phiy_resolution[6];
       
       //store reconstructed offsets here
       vector<Double_t> det_x_offset_history[6];
@@ -284,16 +276,11 @@ TDetectorAlignment::TDetectorAlignment(string plots_path_string) {
       det_x_offset[i] = 0;
       det_y_offset[i] = 0;
       det_z_offset[i] = 0;
-      det_phi_offset[i] = 0;
       det_phix_offset[i] = 0;
       det_phiy_offset[i] = 0;
       
       det_x_resolution[i] = -1;
       det_y_resolution[i] = -1;
-      det_z_resolution[i] = -1;
-      det_phi_resolution[i] = -1;
-      det_phix_resolution[i] = -1;
-      det_phiy_resolution[i] = -1;
    }
    
    plots_path = plots_path_string;
@@ -315,16 +302,11 @@ TDetectorAlignment::TDetectorAlignment(string plots_path_string, vector<TDiamond
       det_x_offset[i] = 0;
       det_y_offset[i] = 0;
       det_z_offset[i] = 0;
-      det_phi_offset[i] = 0;
       det_phix_offset[i] = 0;
       det_phiy_offset[i] = 0;
       
       det_x_resolution[i] = -1;
       det_y_resolution[i] = -1;
-      det_z_resolution[i] = -1;
-      det_phi_resolution[i] = -1;
-      det_phix_resolution[i] = -1;
-      det_phiy_resolution[i] = -1;
    }
    
    LoadTracks(input_tracks);
@@ -338,6 +320,21 @@ void TDetectorAlignment::SaveCanvas(TCanvas* canv, string filename) {
    ostringstream plot_filename;
    plot_filename << plots_path << filename;
    canv->Print(plot_filename.str().c_str());
+}
+
+Double_t TDetectorAlignment::GetSiResolution() {
+   Int_t deta[] = {1,0,0,0}, detb[] = {0,1,2,3}, detc[] = {3,3,3,2};
+   Double_t zab, zbc, ref_residual_width, numerator=0, denominator=0;
+   for(int det=0; det<8; det++) {
+      if(det%2) ref_residual_width = det_y_resolution[det/2];
+      else ref_residual_width = det_x_resolution[det/2];
+      zab = TMath::Abs(track_storage[0].GetD(deta[det/2]).GetZ() - track_storage[0].GetD(detb[det/2]).GetZ());
+      zbc = TMath::Abs(track_storage[0].GetD(detb[det/2]).GetZ() - track_storage[0].GetD(detc[det/2]).GetZ());
+      numerator += ref_residual_width*ref_residual_width * (1 + (zab*zab + zbc*zbc)/(zab+zbc)/(zab+zbc));
+      denominator += (1 + (zab*zab + zbc*zbc)/(zab+zbc)/(zab+zbc)) * (1 + (zab*zab + zbc*zbc)/(zab+zbc)/(zab+zbc));
+   }
+   
+   return TMath::Sqrt(numerator/denominator);
 }
 
 void TDetectorAlignment::LoadData(TDiamondTrack track)
@@ -383,8 +380,6 @@ void TDetectorAlignment::LoadData(TDiamondTrack track)
       det_buffer[det].SetY((det_buffer[det].GetX()-64)*TMath::Sin(-det_phiy_offset[det]) +
             (det_buffer[det].GetY()-64)*TMath::Cos(det_phiy_offset[det]) + 64);
    }
-   
-   //TODO: might be good to use predicted Y as diamond Y positions, but then we'd mix in predicted Y with observed so it might bias our resolution measurement
    
    //load track
    TDiamondTrack temptrack(det_buffer[0],det_buffer[1],det_buffer[2],det_buffer[3],det_buffer[4]);
@@ -711,7 +706,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
          }
       }
       
-      if(t%track_storage.size()/5==0) {
+      if(0&&t%track_storage.size()/5==0) {
          cout<<"----\nobsvx = "<<obsvx<<"\tpredx = "<<predx<<"\tobsvx-predx = "<<obsvx-predx<<endl;
          cout<<"resxtest = "<<resxtest<<"\tresxmean = "<<resxmean<<"\tresxrms = "<<resxrms<<endl;
          
@@ -731,11 +726,11 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       sumv2 += predictedY[i] * predictedY[i];
       sumvr += predictedY[i] * (observedX[i] - predictedX[i]);
    }
-   x_offset = (sumr * sumv2 - sumvr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
-   phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
    
    //update offsets and resolutions
    if(!justcheck) {
+      x_offset = (sumr * sumv2 - sumvr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+      phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
       //update x-offsets
       det_x_offset[subject_detector] += x_offset;
       //if(subject_detector)
@@ -809,7 +804,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
             observedY.push_back(obsvy);
          }
          
-         if(1&&t%track_storage.size()/5==0) {
+         if(0&&t%track_storage.size()/5==0) {
             cout<<"----\nobsvx = "<<obsvx<<"\tpredx = "<<predx<<"\tobsvx-predx = "<<obsvx-predx<<endl;
             cout<<"resxtest = "<<resxtest<<"\tresxmean = "<<resxmean<<"\tresxrms = "<<resxrms<<endl;
             cout<<"----\nobsvy = "<<obsvy<<"\tpredy = "<<predy<<"\tobsvy-predy = "<<obsvy-predy<<endl;
@@ -825,11 +820,11 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
          sumv2 += predictedX[i] * predictedX[i];
          sumvr += predictedX[i] * (observedY[i] - predictedY[i]);
       }
-      y_offset = (sumr * sumv2 - sumvr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
-      phiy_offset = (observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
       
       //update offsets and resolutions
       if(!justcheck) {
+         y_offset = (sumr * sumv2 - sumvr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+         phiy_offset = (observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
          //update y-offsets
          det_y_offset[subject_detector] += y_offset;
          det_phiy_offset[subject_detector] += phiy_offset;
@@ -842,65 +837,62 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    residualsY.Reset();
       
       
-   if(!justcheck) {
-      
-      //generate residuals to get the new resolutions
-      for(Int_t t=0; t<(Int_t)track_storage.size(); t++) {
-         LoadData(track_storage[t]);
-         if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
-            PositionPredictor(subject_detector);
-         else 
-            PositionPredictor(subject_detector, ref_detector1, ref_detector2);
-         residualsX.Fill(track_holder.GetD(subject_detector).GetX()-GetPredictedX());
-         residualsY.Fill(track_holder.GetD(subject_detector).GetY()-GetPredictedY());
-      }
-      
-      //zoom residuals to get the right rms (wtf root)
-      residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
-      residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
-      residualsY.GetXaxis()->SetRangeUser(residualsY.GetMean()-3*residualsY.GetRMS(),residualsY.GetMean()+3*residualsY.GetRMS());
-      residualsY.GetXaxis()->SetRangeUser(residualsY.GetMean()-3*residualsY.GetRMS(),residualsY.GetMean()+3*residualsY.GetRMS());
-      
-      //fit gaussians to center of residuals
-      TF1 histofitx("histofitx","gaus",residualsX.GetMean()-2*residualsX.GetRMS(),residualsX.GetMean()+2*residualsX.GetRMS());
-      TF1 histofity("histofity","gaus",residualsY.GetMean()-2*residualsY.GetRMS(),residualsY.GetMean()+2*residualsY.GetRMS());
-      histofitx.SetLineColor(kBlue);
-      histofity.SetLineColor(kBlue);
-      residualsX.Fit(&histofitx,"rq"); // fit option "r" restricts the range of the fit; "q" quiets output
-      residualsY.Fit(&histofity,"rq");
-      
-      /*
-      //just for investigation purposes
-      //it looks like the rms changes depending on how far zoomed in you look
-      TCanvas canv("asdfa");
-      residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
-      residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
-      residualsX.Draw();
-      canv.Print("/home/jduris/diamond/runs/newcode_sandbox/residualsX.png");
-      */
-      
-      //update resolution
-      det_x_resolution[subject_detector] = histofitx.GetParameter(2);
-      det_y_resolution[subject_detector] = histofity.GetParameter(2);
-      //det_x_resolution[subject_detector] = residualsX.GetRMS();
-      //det_y_resolution[subject_detector] = residualsY.GetRMS();
-      
-      //cout << "For " << detector_name << "X mean is " << x_offset << " and RMS is " << residualsX->GetRMS() << endl;
-      //cout << "For " << detector_name << "Y mean is " << y_offset << " and RMS is " << residualsY->GetRMS() << endl;
-      
-      if(verbose) {
-         cout << "For " << detector_name.str() << "X change in offset is " << x_offset
-               << ", new offset is " << det_x_offset[subject_detector]
-               << ", phiX change in offset is " << phix_offset
-               << ", new offset is " << det_phix_offset[subject_detector]
-               << ", resolution is " << det_x_resolution[subject_detector] << endl;
-         if(1||subject_detector<4) {
-            cout << "For " << detector_name.str() << "Y change in offset is " << y_offset
-                 << ", new offset is " << det_y_offset[subject_detector]
-                 << ", phiY change in offset is " << phiy_offset
-                 << ", new offset is " << det_phiy_offset[subject_detector]
-                 << ", resolution is " << det_y_resolution[subject_detector] << endl;
-         }
+   //generate residuals to get the new resolutions
+   for(Int_t t=0; t<(Int_t)track_storage.size(); t++) {
+      LoadData(track_storage[t]);
+      if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
+         PositionPredictor(subject_detector);
+      else 
+         PositionPredictor(subject_detector, ref_detector1, ref_detector2);
+      residualsX.Fill(track_holder.GetD(subject_detector).GetX()-GetPredictedX());
+      residualsY.Fill(track_holder.GetD(subject_detector).GetY()-GetPredictedY());
+   }
+   
+   //zoom residuals to get the right rms (wtf root)
+   residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
+   residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
+   residualsY.GetXaxis()->SetRangeUser(residualsY.GetMean()-3*residualsY.GetRMS(),residualsY.GetMean()+3*residualsY.GetRMS());
+   residualsY.GetXaxis()->SetRangeUser(residualsY.GetMean()-3*residualsY.GetRMS(),residualsY.GetMean()+3*residualsY.GetRMS());
+   
+   //fit gaussians to center of residuals
+   TF1 histofitx("histofitx","gaus",residualsX.GetMean()-2*residualsX.GetRMS(),residualsX.GetMean()+2*residualsX.GetRMS());
+   TF1 histofity("histofity","gaus",residualsY.GetMean()-2*residualsY.GetRMS(),residualsY.GetMean()+2*residualsY.GetRMS());
+   histofitx.SetLineColor(kBlue);
+   histofity.SetLineColor(kBlue);
+   residualsX.Fit(&histofitx,"rq"); // fit option "r" restricts the range of the fit; "q" quiets output
+   residualsY.Fit(&histofity,"rq");
+   
+   /*
+   //just for investigation purposes
+   //it looks like the rms changes depending on how far zoomed in you look
+   TCanvas canv("asdfa");
+   residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
+   residualsX.GetXaxis()->SetRangeUser(residualsX.GetMean()-3*residualsX.GetRMS(),residualsX.GetMean()+3*residualsX.GetRMS());
+   residualsX.Draw();
+   canv.Print("/home/jduris/diamond/runs/newcode_sandbox/residualsX.png");
+   */
+   
+   //update resolution
+   det_x_resolution[subject_detector] = histofitx.GetParameter(2);
+   det_y_resolution[subject_detector] = histofity.GetParameter(2);
+   //det_x_resolution[subject_detector] = residualsX.GetRMS();
+   //det_y_resolution[subject_detector] = residualsY.GetRMS();
+   
+   //cout << "For " << detector_name << "X mean is " << x_offset << " and RMS is " << residualsX->GetRMS() << endl;
+   //cout << "For " << detector_name << "Y mean is " << y_offset << " and RMS is " << residualsY->GetRMS() << endl;
+   
+   if(verbose) {
+      cout << "For " << detector_name.str() << "X change in offset is " << x_offset
+            << ", new offset is " << det_x_offset[subject_detector]
+            << ", phiX change in offset is " << phix_offset
+            << ", new offset is " << det_phix_offset[subject_detector]
+            << ", resolution is " << det_x_resolution[subject_detector] << endl;
+      if(1||subject_detector<4) {
+         cout << "For " << detector_name.str() << "Y change in offset is " << y_offset
+               << ", new offset is " << det_y_offset[subject_detector]
+               << ", phiY change in offset is " << phiy_offset
+               << ", new offset is " << det_phiy_offset[subject_detector]
+               << ", resolution is " << det_y_resolution[subject_detector] << endl;
       }
    }
 }
@@ -1225,7 +1217,7 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
    det_z_offset_history[subject_detector].push_back(det_z_offset[subject_detector]);
    
    //update resolution
-   det_z_resolution[subject_detector] = report_zresolution_x;
+   //det_z_resolution[subject_detector] = report_zresolution_x;
    
    /*
    if(subject_detector==1) {
@@ -1381,375 +1373,3 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
    //delete middleresY;
    
 }
-
-void TDetectorAlignment::AlignDetectorPhi(Int_t subject_detector, bool graphs, bool verbose) {
-   AlignDetectorPhi(subject_detector, -1, -1, graphs, verbose);
-}
-
-void TDetectorAlignment::AlignDetectorPhi(Int_t subject_detector, Int_t ref_detector1, Int_t ref_detector2, bool graphs, bool verbose) {
-   
-   Double_t report_phioffset_x, report_phioffset_y; // to be deleted later
-   
-   std::ostringstream detector_name;
-   detector_name << "D" << subject_detector;
-   
-   string tempname = detector_name.str() + "PhiAlignmentResiduals";
-   TH1F residualsX, residualsY;
-   
-   TF1 fitdummy;
-   //DON'T DELETE NEXT LINE; root segfaults if next line is removed :(
-   vector<TDiamondTrack> temp_tracks; //  DON'T DELETE; root segfaults if this line is removed :(
-   vector<Double_t> phivals, resxmean, resymean, resxrms, resyrms, dresxrms, dresyrms, dresxyrms, dresxyrmsscaled;
-   Double_t bestphi = 0;
-   Double_t old_det_phi_offset = det_phi_offset[subject_detector];
-   det_phi_offset[subject_detector] = 0;
-   
-   //Int_t track_number = track_storage.size();
-   Double_t deltaphi = 0.05*3.14159265/180.; // in radians
-   Double_t phirange = 3.0*3.14159265/180.; // in radians (we'll crawl forward and backward by this amount)
-   
-   if(verbose) cout<<"z"<<"\t"<<"resXMean"<<"\t"<<"resYMean"<<"\t"<<"resXRMS"<<"\t"<<"resYRMS"<<endl;//<<"\t"<<"resXEntries"<<"\t"<<"resYEntries"<<endl;
-   
-   //loop over possible phi
-   for(Double_t phi=-phirange+old_det_phi_offset; phi<phirange+old_det_phi_offset; phi+=deltaphi)
-   {
-      det_phi_offset[subject_detector] = phi;
-      
-      residualsX.Reset();
-      residualsY.Reset();
-      CheckDetectorAlignmentXY(subject_detector, ref_detector1, ref_detector2, false);
-      
-      phivals.push_back(phi);
-      resxmean.push_back(residualsX.GetMean());
-      resymean.push_back(residualsY.GetMean());
-      resxrms.push_back(residualsX.GetRMS());
-      resyrms.push_back(residualsY.GetRMS());
-      
-      if(verbose) cout<<phi<<"\t"<<residualsX.GetMean()<<"\t"<<residualsY.GetMean()<<"\t"<<residualsX.GetRMS()<<"\t"<<residualsY.GetRMS()<<endl;
-      
-      //tempname += "_";
-      residualsX.Reset();
-      residualsY.Reset();
-   }
-   
-   //figure out derivatives
-   dresxrms.push_back((-3.*resxrms[0] + 4.*resxrms[1] - resxrms[2])/2./deltaphi);
-   for(Int_t i=1; i<(int)resxrms.size()-1; i++) 
-      dresxrms.push_back((resxrms[i+1] - resxrms[i-1])/2./deltaphi);
-   dresxrms.push_back((3.*resxrms[resxrms.size()-1] - 4.*resxrms[resxrms.size()-2] + resxrms[resxrms.size()-3])/2./deltaphi);
-   
-   dresyrms.push_back((-3.*resyrms[0] + 4.*resyrms[1] - resyrms[2])/2./deltaphi);
-   for(Int_t i=1; i<(int)resyrms.size()-1; i++) 
-      dresyrms.push_back((resyrms[i+1] - resyrms[i-1])/2./deltaphi);
-   dresyrms.push_back((3.*resyrms[resyrms.size()-1] - 4.*resyrms[resyrms.size()-2] + resyrms[resyrms.size()-3])/2./deltaphi);
-   
-   for(Int_t i=0; i<(int)resxrms.size(); i++) dresxyrms.push_back(TMath::Sqrt(dresxrms[i]*dresxrms[i]));// + dresyrms[i]*dresyrms[i]));
-   
-   /*
-   //print out diagnostics
-   cout<<"phi"<<"\t"<<"resXRMS"<<"\t"<<"resYRMS"<<"\t"<<"dresXRMS"<<"\t"<<"dresYRMS"<<"\t"<<"dresXYRMS"<<endl;
-   for(Int_t i=0; i<resxrms.size(); i++){
-   cout<<phivals[i]<<"\t"<<"\t"<<resxrms[i]<<"\t"<<resyrms[i]<<"\t"<<dresxrms[i]<<"\t"<<dresyrms[i]<<"\t"<<dresxyrms[i]<<endl;
-}
-   */
-   
-   //figure out best phi and rms there
-   bestphi=0;
-   for(Int_t i=0; i<(int)dresxyrms.size(); i++){
-      if(dresxyrms[i]<dresxyrms[(int)bestphi]) bestphi=i;
-   }
-   bestphi=phivals[(int)bestphi];
-   cout<<"Best phi is: "<<bestphi<<endl;
-   
-   bestphi=0;
-   for(Int_t i=0; i<(int)dresxrms.size(); i++){
-      if(TMath::Abs(dresxrms[i])<TMath::Abs(dresxrms[(int)bestphi])) bestphi=i;
-   }
-   Float_t report_phiresolution_x = resxrms[(int)bestphi]; // this is BS, but we'll leave until phi uncert calc ready
-   bestphi=phivals[(int)bestphi];
-   cout<<"Minimum for "<<detector_name.str()<<"X at: "<<bestphi<<endl;
-   report_phioffset_x = bestphi;
-   
-   bestphi=0;
-   for(Int_t i=0; i<(int)dresyrms.size(); i++){
-      if(TMath::Abs(dresyrms[i])<TMath::Abs(dresyrms[(int)bestphi])) bestphi=i;
-   }
-   Float_t report_phiresolution_y = resyrms[(int)bestphi]; // this is BS, but we'll leave until phi uncert calc ready
-   bestphi=phivals[(int)bestphi];
-   cout<<"Minimum for "<<detector_name.str()<<"Y at: "<<bestphi<<endl;
-   report_phioffset_y = bestphi;
-   
-   //update current offsets
-   det_phi_offset[subject_detector] = report_phioffset_x;
-   
-   //update offset history
-   det_phi_offset_history[subject_detector].push_back(det_phi_offset[subject_detector]);
-   
-   //update resolution
-   det_phi_resolution[subject_detector] = report_phiresolution_x;
-   
-   /*
-   if(subject_detector==1) {
-   report_offset_z = (track_storage[0].GetD(2).GetZ() + track_storage[0].GetD(0).GetZ())/2 - bestz;
-   cout<<"Best z for "<<detector_name.str()<<" is: "<<report_offset_z + track_storage[0].GetD(1).GetZ()<<endl;
-}
-   if(subject_detector==2) {
-   report_offset_z = (track_storage[0].GetD(3).GetZ() + track_storage[0].GetD(1).GetZ())/2 - bestz;
-   cout<<"Best z for "<<detector_name.str()<<" is: "<<report_offset_z + track_storage[0].GetD(2).GetZ()<<endl;
-}
-   if(subject_detector==3) {
-   report_offset_z = (track_storage[0].GetD(2).GetZ() + track_storage[0].GetD(1).GetZ())/2 - bestz;
-   cout<<"Best z for "<<detector_name.str()<<" is: "<<report_offset_z + track_storage[0].GetD(3).GetZ();
-}
-   cout<<"Best change in z for "<<detector_name.str()<<" is: "<<report_offset_z<<endl;
-   */
-   
-   //Plots
-   string titleresx = detector_name.str() + "X residuals rms vs phi";
-   string titleresy = detector_name.str() + "Y residuals rms vs phi";
-   string titleresxy = detector_name.str() + "X (red*) and Y (blue*) residuals rms and derivatives (dots) vs phi";
-   
-   string filenameresx = "alignment_phi_" + detector_name.str() + "XresidualRMSvsPhi.png";
-   string filenameresy = "alignment_phi_" + detector_name.str() + "YresidualRMSvsPhi.png";
-   string filenameresxy = "alignment_phi_" + detector_name.str() + "XandYresidualsRMSvsPhi.png";
-   
-   if(graphs) {
-      //graphs
-   //   TGraph *residualRMSXgraph = new TGraph(2*(int)(zrange/deltaz), zlist, residualRMSX);
-      TGraph *residualRMSXgraph = new TGraph(phivals.size(), (const Double_t*) &phivals[0], (const Double_t*) &resxrms[0]);
-      residualRMSXgraph->SetTitle(titleresx.c_str());
-      TCanvas *tempcan = new TCanvas("tempcanvas", "tempcanvas", 200, 10, 600, 400);
-      tempcan->cd(1);
-      residualRMSXgraph->Draw("A*");
-      gSystem->ProcessEvents();
-      SaveCanvas(tempcan, (char*)filenameresx.c_str());
-      delete tempcan;
-      
-      TGraph *residualRMSYgraph = new TGraph(phivals.size(), (const Double_t*) &phivals[0], (const Double_t*) &resyrms[0]);
-      residualRMSYgraph->SetTitle(titleresy.c_str());
-      tempcan = new TCanvas("tempcanvas", "tempcanvas", 200, 10, 600, 400);
-      tempcan->cd(1);
-      residualRMSYgraph->Draw("A*");
-      gSystem->ProcessEvents();
-      SaveCanvas(tempcan, (char*)filenameresy.c_str());
-      delete tempcan;
-      
-      //plot residuals and their derivatives on one graph for comparison
-      for(Int_t i=0; i<(int)resxrms.size(); i++) dresxyrmsscaled.push_back(dresxyrms[i]*TMath::Sqrt(resxrms[1]*resxrms[1]+resyrms[1]*resyrms[1])/dresxyrms[1]); //scale graph
-      TGraph *dresidualRMSXYgraph = new TGraph(phivals.size(), (const Double_t*) &phivals[0], (const Double_t*) &dresxyrmsscaled[0]);
-      residualRMSXgraph->SetTitle(titleresxy.c_str());
-      tempcan = new TCanvas("tempcanvas", "tempcanvas", 200, 10, 600, 600);
-      tempcan->cd(1);
-      //scale graphs
-      Double_t graphmin = resxrms[0];
-      Double_t graphmax = resxrms[0];
-      for(Int_t i=0; i<(int)resxrms.size(); i++){
-         if(resxrms[i]>graphmax) graphmax=resxrms[i];
-         if(resxrms[i]<graphmin) graphmin=resxrms[i];
-         if(resyrms[i]>graphmax) graphmax=resyrms[i];
-         if(resyrms[i]<graphmin) graphmin=resyrms[i];
-         if(dresxyrmsscaled[i]>graphmax) graphmax=dresxyrmsscaled[i];
-         if(dresxyrmsscaled[i]<graphmin) graphmin=dresxyrmsscaled[i];
-      }
-      graphmin -= 0.1*(graphmax-graphmin);
-      graphmax += 0.1*(graphmax-graphmin);
-      //cout<<"graphmin="<<graphmin<<"\tgraphmax="<<graphmax<<endl;
-      residualRMSXgraph->SetMinimum(graphmin);
-      residualRMSYgraph->SetMinimum(graphmin);
-      dresidualRMSXYgraph->SetMinimum(graphmin);
-      residualRMSXgraph->SetMaximum(graphmax);
-      residualRMSYgraph->SetMaximum(graphmax);
-      dresidualRMSXYgraph->SetMaximum(graphmax);
-      //draw graphs
-      residualRMSXgraph->SetMarkerColor(kRed);
-      residualRMSXgraph->Draw("A*");
-      residualRMSYgraph->SetMarkerColor(kBlue);
-      residualRMSYgraph->Draw("*same");
-      dresidualRMSXYgraph->SetMarkerStyle(20);
-      dresidualRMSXYgraph->SetMarkerSize(0.5);
-      dresidualRMSXYgraph->Draw("*same");
-      gSystem->ProcessEvents();
-      SaveCanvas(tempcan, (char*)filenameresxy.c_str());
-      delete tempcan;
-   }
-   
-}
-
-/*
-//_________________________________________________________________________________________________
-class TDiamondAlignment{
-
-   public:
-      TDiamondAlignment();
-      ~TDiamondAlignment();
-      void PositionPredictor(bool dia_x_aligned);
-      void TrackFit(Double_t &predicted_x);
-      Double_t const GetPredictedX() {return predicted_x;}
-      void LoadData(TDiamondTrack track);
-      void AlignDiamond(vector<TDiamondTrack> &input_tracks, vector<TDiamondTrack> &output_tracks, Int_t track_number, bool dia_x_aligned, Double_t &report_offset);
-      
-
-   protected:
-      TDetectorPlane D0;
-      TDetectorPlane D1;
-      TDetectorPlane D2;
-      TDetectorPlane D3;
-      TDetectorPlane Dia;
-
-   private:
-      Double_t D0_z_pos;
-      Double_t D1_z_pos;
-      Double_t D2_z_pos;
-      Double_t D3_z_pos;
-      Double_t Dia_z_pos;
-
-      Double_t D0_x_pos;
-      Double_t D1_x_pos;
-      Double_t D2_x_pos;
-      Double_t D3_x_pos;
-      Double_t Dia_x_pos;
-
-      Double_t D0_y_pos;
-      Double_t D1_y_pos;
-      Double_t D2_y_pos;
-      Double_t D3_y_pos;
-
-      Double_t predicted_pos;
-
-      Double_t x_array[4];
-      Double_t z_array[4];
-      Double_t subject_z;
-      Double_t predicted_x;
-
-};  
-
-TDiamondAlignment::TDiamondAlignment(){}
-TDiamondAlignment::~TDiamondAlignment(){}
-
-void TDiamondAlignment::LoadData(TDiamondTrack track)
-{
-   D0 = track.GetD0();
-   D1 = track.GetD1();
-   D2 = track.GetD2();
-   D3 = track.GetD3();
-   Dia = track.GetDia();
-
-   D0_x_pos = D0.GetX();
-   D0_y_pos = D0.GetY();
-   D0_z_pos = D0.GetZ();
-
-   D1_x_pos = D1.GetX();
-   D1_y_pos = D1.GetY();
-   D1_z_pos = D1.GetZ();
-
-   D2_x_pos = D2.GetX();
-   D2_y_pos = D2.GetY();
-   D2_z_pos = D2.GetZ();
-
-   D3_x_pos = D3.GetX();
-   D3_y_pos = D3.GetY();
-   D3_z_pos = D3.GetZ();
-   
-   Dia_x_pos = Dia.GetX();
-   Dia_z_pos = Dia.GetZ();
-}
-
-void TDiamondAlignment::PositionPredictor(bool dia_x_aligned)
-{
-   if(dia_x_aligned){ // are we fitting x coords here?
-      x_array[0] = D0_x_pos;
-      x_array[1] = D1_x_pos;
-      x_array[2] = D2_x_pos;
-      x_array[3] = D3_x_pos;
-   }
-   if(!dia_x_aligned){ // are we fitting y coords here?
-      x_array[0] = D0_y_pos;
-      x_array[1] = D1_y_pos;
-      x_array[2] = D2_y_pos;
-      x_array[3] = D3_y_pos;
-   }
-   z_array[0] = D0_z_pos;
-   z_array[1] = D1_z_pos;
-   z_array[2] = D2_z_pos;
-   z_array[3] = D3_z_pos;
-
-   subject_z = Dia_z_pos;
-
-   TrackFit(predicted_x);
-}
-
-void TDiamondAlignment::TrackFit(Double_t &predicted_x)
-{
-   TF1 *linear = new TF1("linear","([0]*x)+[1]",-40,40);
-   TGraph *trackx = new TGraph(4,z_array,x_array);
-   trackx->Fit("linear","Q");
-   Double_t slope = linear->GetParameter(0);
-   //cout << "xslope = " << slope << endl;
-   Double_t intercept = linear->GetParameter(1);
-   //cout << "xintercept = " << intercept << endl;
-   predicted_x = (subject_z*slope)+intercept;
-
-   //TCanvas *can= new TCanvas("can", "can",800,600,600,600);
-   //trackx->Draw("A*");
-   
-   delete trackx;
-   delete linear;
-}
-
-void TDiamondAlignment::AlignDiamond(vector<TDiamondTrack> &input_tracks, vector<TDiamondTrack> &output_tracks, Int_t track_number, bool dia_x_aligned, Double_t &report_offset)
-{
-   TH1F *residuals = new TH1F("residuals","residuals",200,-100,100);
-   vector<TDiamondTrack> new_tracks;
-
-   for(Int_t t=0; t<track_number; t++)
-   {
-      TDiamondTrack track = input_tracks[t]; // note: (*input_tracks)[t] is equivalent to input_tracks[0][t]
-      TDetectorPlane D0_buf = track.GetD0();
-      TDetectorPlane D1_buf = track.GetD1();
-      TDetectorPlane D2_buf = track.GetD2();
-      TDetectorPlane D3_buf = track.GetD3();
-      TDetectorPlane Dia_buf = track.GetDia();
-      //cout << "X:\t" << D0_buf.GetX() << "\t" << D1_buf.GetX() << "\t" << D2_buf.GetX() << "\t" << D3_buf.GetX() << endl;
-      LoadData(track);
-      PositionPredictor(dia_x_aligned); // if diamond is not x-oriented, will use y components of Si tracks
-      residuals->Fill(GetPredictedX()-Dia_buf.GetX());
-      //cout << "Predicted x " << GetPredictedX() << " and Actual X " << D1_buf.GetX() << endl;
-   }
-   Double_t x_offset = residuals->GetMean();
-
-   //cout << "For " << detector_name << "X mean is " << x_offset << " and RMS is " << residualsX->GetRMS() << endl;
-
-   for(Int_t t=0; t<track_number; t++)
-   {
-      TDiamondTrack track = input_tracks[t];
-      TDetectorPlane D0_buf = track.GetD0();
-      TDetectorPlane D1_buf = track.GetD1();
-      TDetectorPlane D2_buf = track.GetD2();
-      TDetectorPlane D3_buf = track.GetD3();
-      TDetectorPlane Dia_buf = track.GetDia();
-      //cout << "X:\t" << D0_buf.GetX() << "\t" << D1_buf.GetX() << "\t" << D2_buf.GetX() << "\t" << D3_buf.GetX() << endl;
-      
-      // !!!!!!!!!!!!!!!!!!!!  FIX UPDATE HERE
-      // !!!!!!!!!!!!!!!!!!!!  FIX UPDATE HERE
-      // !!!!!!!!!!!!!!!!!!!!  FIX UPDATE HERE
-      // !!!!!!!!!!!!!!!!!!!!  FIX UPDATE HERE
-      //Dia_buf.OffsetUpdate(x_offset,0); // second slot is for y offset update; but this is irrelevant since diamond is 1D detector
-      // !!!!!!!!!!!!!!!!!!!!  FIX UPDATE HERE
-      // !!!!!!!!!!!!!!!!!!!!  FIX UPDATE HERE
-      // !!!!!!!!!!!!!!!!!!!!  FIX UPDATE HERE
-     
-      TDiamondTrack new_track = TDiamondTrack(D0_buf, D1_buf, D2_buf, D3_buf, Dia_buf);
-      //cout << "X:\t" << D0_buf.GetX() << "\t" << D1_buf.GetX() << "\t" << D2_buf.GetX() << "\t" << D3_buf.GetX() << endl << endl;
-      output_tracks.push_back(new_track);
-   }
-   
-   report_offset = x_offset;
-   
-   cout << "For diamond, output tracks size is " << output_tracks.size() << endl;
-   cout << "For diamond, X mean is " << x_offset << " and RMS is " << residuals->GetRMS() << endl;
-   delete residuals;
-}
-*/
-
-
-

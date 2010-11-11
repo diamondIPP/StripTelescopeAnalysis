@@ -2676,6 +2676,8 @@ void Clustering::Align(bool plots) {
    }
    alignment_summary.close();
    
+   cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
+   
    /*
    //Plot out the offsets
    for(Int_t plane=1; plane<4; plane++) {
