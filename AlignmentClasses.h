@@ -207,7 +207,9 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXY(int subject_detector, int ref_detector1, int ref_detector2, bool verbose = true);
       void CheckDetectorAlignmentXY(int subject_detector, bool verbose = true);
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
-      void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
+	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
+	void CutFakeTracks();
+	Float_t *LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
 
    protected:
       TDetectorPlane D0;
@@ -726,6 +728,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       sumv2 += predictedY[i] * predictedY[i];
       sumvr += predictedY[i] * (observedX[i] - predictedX[i]);
    }
+	//TODO: take arctan of that?!
    
    //update offsets and resolutions
    if(!justcheck) {
@@ -1372,4 +1375,73 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
    //delete middleresX;
    //delete middleresY;
    
+}
+
+void TDetectorAlignment::CutFakeTracks() {
+	vector<Float_t> X_strips_X_positions, Y_strips_Y_positions, X_strips_Z_positions, Y_strips_Z_positions;
+	Float_t X_Mean, Y_Mean, Z_Mean;
+	Float_t res = GetSiResolution();
+	//TH1F *middleresX = new TH1F("middleresX", "middleresX", 10000,-100,100);
+	TH1F *histo_alignmentfitchi2_XStrips = new TH1F("histo_alignmentfitchi2_XStrips","histo_alignmentfitchi2_XStrips",100,0.,20.);
+	TH1F *histo_alignmentfitchi2_YStrips = new TH1F("histo_alignmentfitchi2_YStrips","histo_alignmentfitchi2_YStrips",100,0.,20.);
+	for (int i = 0; i < track_storage.size(); i++) {
+		LoadData(track_storage[i]);
+		X_strips_X_positions.clear();
+		Y_strips_Y_positions.clear();
+		X_strips_Z_positions.clear();
+		Y_strips_Z_positions.clear();
+		//		track_storage_aligned.push_back(track_holder);
+		for (int det = 0; det < 8; det++) {
+			if (det%2 == 0) { // x strips
+				X_strips_X_positions.push_back(track_holder.GetD(det).GetX());
+				X_strips_Z_positions.push_back(track_holder.GetD(det).GetZ());
+			}
+			else { // y strips
+				Y_strips_Y_positions.push_back(track_holder.GetD(det).GetY());
+				Y_strips_Z_positions.push_back(track_holder.GetD(det).GetZ());
+			}
+		}
+		Float_t *X_strips_par[3];
+		Float_t *Y_strips_par[3];
+		X_strips_par = LinTrackFit(X_strips_Z_positions, X_strips_X_positions, res);
+		Y_strips_par = LinTrackFit(Y_strips_Z_positions, Y_strips_Y_positions, res);
+		histo_alignmentfitchi2_XStrips->Fill(X_strips_par[2]);
+		histo_alignmentfitchi2_YStrips->Fill(Y_strips_par[2]);
+	}
+	tempcan = new TCanvas("tempcanvas");
+	histo_alignmentfitchi2_XStrips->Draw();
+	SaveCanvas(tempcan, "alignmentfitchi2_XStrips.png");
+	histo_alignmentfitchi2_YStrips->Draw();
+	SaveCanvas(tempcan, "alignmentfitchi2_YStrips.png");
+	delete tmpcan;
+}
+
+Float_t *TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res) {
+	// -- fits Y = par[0] + par[1] * x
+	// -- returns par, with par[2] = chi2
+	Float_t X_Mean = 0;
+	Float_t Y_Mean = 0;
+	Float_t tmp1 = 0;
+	Float_t tmp2 = 0;
+	Float_t tmp3 = 0;
+	Float_t *par[3];
+	if (X.size() != Y.size()) return -1;
+	for (int i = 0; i < X.size(); i++) {
+		X_Mean = X_Mean + X[i];
+		Y_Mean = Y_Mean + Y[i];
+	}
+	X_Mean = X_Mean / X.size();
+	Y_Mean = Y_Mean / Y.size();
+	for (int i = 0; i < X.size(); i++) {
+		tmp1 = tmp1 + ((X[i] - X_Mean) * (Y[i] - Y_Mean));
+		tmp2 = tmp2 + ((X[i] - X_Mean) * (X[i] - X_Mean));
+	}
+	par[1] = tmp1 / tmp2;
+	par[0] = Y_Mean - par[1] * X_Mean;
+	for (int i = 0; i < X.size(); i++) {
+		tmp1 = par[0] + par[1] * X[i];
+		tmp3 = tmp3 + (tmp1 - X[i]) * (tmp1 - X[i]);
+	}
+	par[2] = tmp3 / (res * res);
+	return &par[0];
 }
