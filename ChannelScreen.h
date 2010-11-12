@@ -7,6 +7,8 @@
 #include <iostream>
 #include "TMath.h"
 
+typedef unsigned int uint;
+
 class ChannelScreen {
 
    public:

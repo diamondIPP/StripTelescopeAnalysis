@@ -60,6 +60,8 @@ using namespace TMath;
 #include "ClusteredEvent.class.cpp"
 #include "AlignmentClasses.h"
 
+typedef unsigned int uint;
+
 class Clustering {
    public:
       Clustering(unsigned int RunNumber, string RunDescription = ""); //open files
@@ -2678,6 +2680,8 @@ void Clustering::Align(bool plots) {
    
    cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
    
+	align->CutFakeTracks();
+	
    /*
    //Plot out the offsets
    for(Int_t plane=1; plane<4; plane++) {

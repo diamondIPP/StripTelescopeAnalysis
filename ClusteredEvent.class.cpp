@@ -11,6 +11,8 @@
 
 #include "Cluster.class.cpp"
 
+typedef unsigned int uint;
+
 class ClusteredEvent {
    public:
       ClusteredEvent(int EventNumber = -1, float SiHitFactor = 3, float SiSeedFactor = 5, float DiHitFactor = 3, float DiSeedFactor = 5);

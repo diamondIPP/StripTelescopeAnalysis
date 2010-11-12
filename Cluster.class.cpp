@@ -8,6 +8,8 @@
 #include <iostream>
 #include "TMath.h"
 
+typedef unsigned int uint;
+
 class Cluster {
    public:
       Cluster(Float_t HitFactor = 3, Float_t SeedFactor = 5);

@@ -23,6 +23,8 @@
 #include "TGraph.h"
 #include "TCanvas.h"
 
+typedef unsigned int uint;
+
 using namespace std;
 //using namespace TMath;
 
