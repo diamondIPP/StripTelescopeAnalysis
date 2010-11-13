@@ -25,6 +25,7 @@
 //                    -> align adhoc without tracking
 //                    -> track with residuals' widths as uncertainties
 //                    -> align with tracking (this makes sure tracks are really tracks; thereby improving residuals)
+//2010-11-12 Blinded the alignment resolution determination
 
 //C++ standard libraries
 #include <fstream>
@@ -133,8 +134,8 @@ class Clustering {
          
          
       //Alignment
-      vector<TDiamondTrack> tracks;
-      vector<TDiamondTrack> tracks_fidcut;
+      vector<TDiamondTrack> tracks, tracks_fidcut;
+      vector<bool> tracks_mask, tracks_fidcut_mask;
 
       //Telescope geometry
       Double_t detectorD0Z;
@@ -160,6 +161,9 @@ class Clustering {
       vector<Float_t> alignment_y_offsets;
       vector<Float_t> alignment_phi_offsets;
       vector<Float_t> alignment_z_offsets;
+      
+      //fraction of tracks used to derive alignment constants
+      Float_t alignment_training_track_fraction;
       
       //paths
       string plots_path;
@@ -194,6 +198,7 @@ class Clustering {
       TFile *PedFile;
       TTree *PedTree;
       TDatime dateandtime;
+      TRandom3 rand;
       
    public:
       
@@ -236,6 +241,8 @@ class Clustering {
       //alignment counters
       int counter_alignment_tracks;
       int counter_alignment_fidcut_tracks;
+      int counter_alignment_only_tracks;
+      int counter_alignment_only_fidcut_tracks;
       int counter_alignment_tracks_zero_suppressed;
       
 };
@@ -312,7 +319,9 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    align_sil_fid_ylow = si_avg_fidcut_ylow;
    align_sil_fid_yhi = si_avg_fidcut_yhigh;
    
-
+   //fraction of tracks used to derive alignment constants
+   alignment_training_track_fraction = 0.25;
+   
    //default paths
    sys = gSystem;
    
@@ -631,6 +640,8 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    //alignment counters
    counter_alignment_tracks = 0;
    counter_alignment_fidcut_tracks = 0;
+   counter_alignment_only_tracks = 0;
+   counter_alignment_only_fidcut_tracks = 0;
    counter_alignment_tracks_zero_suppressed = 0;
    
    //Setting Style Attributes for Plots (Starting with Plain style and then making custom adjustments)
@@ -837,6 +848,10 @@ void Clustering::LoadSettings() {
       if(key=="alignment_z_offsets") {
          cout << key.c_str() << " = " << value.c_str() << endl;
          ParseFloatArray(value,alignment_z_offsets);
+      }
+      if(key=="alignment_training_track_fraction") {
+         cout << key.c_str() << " = " << value.c_str() << endl;
+         alignment_training_track_fraction = (float)strtod(value.c_str(),0);
       }
       if(key=="D0X_channel_screen_channels") {
          cout << key.c_str() << " = " << value.c_str() << endl;
@@ -1445,6 +1460,7 @@ void Clustering::BookHistograms() {
    D2.SetZ(detectorD2Z);
    D3.SetZ(detectorD3Z);
    Dia.SetZ(detectorDiaZ);
+   bool mask;
    
    //cut flow counters
    //Int_t total_events, goldengatecluster_events, badchannelcluster_events, singlesitrack_events, singlesitrack_1diamondclus_events, singlesitrack_fidcut_events, singlesitrack_fidcut_1diamondclus_events;
@@ -1586,9 +1602,12 @@ void Clustering::BookHistograms() {
          if(clustered_event.GetNClusters(8)==1 && fiducial_track) {
             if(clustered_event.GetCluster(8,0)->highest2_centroid!=-1) {
                Dia.SetX(clustered_event.GetCluster(8,0)->highest2_centroid);
-               counter_alignment_fidcut_tracks++;
                TDiamondTrack track_fidcut = TDiamondTrack(D0,D1,D2,D3,Dia);
                tracks_fidcut.push_back(track_fidcut);
+               counter_alignment_fidcut_tracks++;
+               mask = rand.Uniform()<alignment_training_track_fraction;
+               tracks_fidcut_mask.push_back(mask);
+               counter_alignment_only_fidcut_tracks += mask;
             }
          }
          else
@@ -1598,15 +1617,13 @@ void Clustering::BookHistograms() {
          //track.SetEventNumber(Silicon_tracks[t].Event_number);
          tracks.push_back(track);
          counter_alignment_tracks++;
+         mask = rand.Uniform()<alignment_training_track_fraction;
+         tracks_mask.push_back(mask);
+         counter_alignment_only_tracks += mask;
          
-      }//end a
+      }//end else
       
    }//end if one_and_only_one
-   
-   
-               
-      
-   
    
    uint nclusters;
    //loop over detectors
@@ -2460,15 +2477,15 @@ void Clustering::ClusterRun(bool plots) {
       GenerateHTML();
       ////DeleteHistograms(); //this causes segfaults for some unknown reason
    }
-      TCanvas tempcanv("tempcanv");
-      for(int det=0; det<9; det++) {
-         for(int chip=0; chip<2; chip++) {
-            ostringstream tempsstream;
-            tempsstream << plots_path << histo_hitpos[det][chip]->GetTitle() << ".png";
-            histo_hitpos[det][chip]->Draw();
-            tempcanv.Print(tempsstream.str().c_str());
-         }
+   TCanvas tempcanv("tempcanv");
+   for(int det=0; det<9; det++) {
+      for(int chip=0; chip<2; chip++) {
+         ostringstream tempsstream;
+         tempsstream << plots_path << histo_hitpos[det][chip]->GetTitle() << ".png";
+         histo_hitpos[det][chip]->Draw();
+         tempcanv.Print(tempsstream.str().c_str());
       }
+   }
    
    large_clusters_file.close();
    PedFile->Close(); // somehow histo_etaintegral[0][2][0] is deleted by this line?!
@@ -2496,7 +2513,11 @@ void Clustering::ClusterRun(bool plots) {
    cout<<"tracks_fidcut.size() = "<<tracks_fidcut.size()<<endl;
    cout<<"counter_alignment_tracks_zero_suppressed = "<<counter_alignment_tracks_zero_suppressed<<endl;
    cout<<"counter_alignment_tracks = "<<counter_alignment_tracks<<endl;
+   cout<<"counter_alignment_only_tracks = "<<counter_alignment_only_tracks<<endl;
+   cout<<"counter_alignment_only_tracks/float(counter_alignment_tracks) = "<<counter_alignment_only_tracks/float(counter_alignment_tracks)<<endl;
    cout<<"counter_alignment_fidcut_tracks = "<<counter_alignment_fidcut_tracks<<endl;
+   cout<<"counter_alignment_only_fidcut_tracks = "<<counter_alignment_only_fidcut_tracks<<endl;
+   cout<<"counter_alignment_only_fidcut_tracks/float(counter_alignment_fidcut_tracks) = "<<counter_alignment_only_fidcut_tracks/float(counter_alignment_fidcut_tracks)<<endl;
    cout<<"singlesitrack_fidcut_events = "<<singlesitrack_fidcut_events<<endl;
    
 }
@@ -2509,7 +2530,7 @@ void Clustering::Align(bool plots) {
    }
    
    // now start the telescope alignment!
-   TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks);
+   TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
    
    Int_t nPasses = 10;
    Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
@@ -2569,7 +2590,7 @@ void Clustering::Align(bool plots) {
    //Now align the diamond
    
    //load fidcut tracks w/ 1 diamond cluster
-   align->LoadTracks(tracks_fidcut);
+   align->LoadTracks(tracks_fidcut, tracks_fidcut_mask);
    
    //check that the silicon is still aligned for these tracks_fidcut
    cout<<"Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;

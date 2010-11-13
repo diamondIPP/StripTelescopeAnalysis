@@ -173,7 +173,7 @@ class TDetectorAlignment{
 
    public:
       TDetectorAlignment(string plots_path_string);
-      TDetectorAlignment(string plots_path_string, vector<TDiamondTrack> &input_tracks);
+      TDetectorAlignment(string plots_path_string, vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask);
       ~TDetectorAlignment() {};
       void SaveCanvas(TCanvas* canv, string filename);
       Double_t GetXOffset(Int_t plane) {return det_x_offset[plane];};
@@ -198,7 +198,7 @@ class TDetectorAlignment{
       void TrackFit3(Double_t &predicted_x, Double_t &predicted_y);
       Double_t GetPredictedX() {return predicted_x;}
       Double_t GetPredictedY() {return predicted_y;}
-      void LoadTracks(vector<TDiamondTrack> &input_tracks) {track_storage.clear(); track_storage = input_tracks; cout<<"TDetectAlignment::LoadTracks: "<<track_storage.size()<<" tracks loaded"<<endl;};
+      void LoadTracks(vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask);
       void LoadData(TDiamondTrack track);
       void PlotAngularDistribution();
       void PlotCartesianDistribution();
@@ -220,8 +220,11 @@ class TDetectorAlignment{
       TDetectorPlane D3;
 
    public:
-      //store tracks
+      //store tracks and masks for determining alignment constants
       vector<TDiamondTrack> track_storage;
+      vector<bool> track_mask_storage;
+      //TODO: instead of having multiple copies of tracks, why not store pointer to list in stored in Clustering::tracks
+      //TODO: instead of having tracks and tracks_fidcut, store boolean fidcut mask
       
    public:
       //temp data for calculations
@@ -292,7 +295,7 @@ TDetectorAlignment::TDetectorAlignment(string plots_path_string) {
    ClosePlotsOnSave = 1;
 }
 
-TDetectorAlignment::TDetectorAlignment(string plots_path_string, vector<TDiamondTrack> &input_tracks) {
+TDetectorAlignment::TDetectorAlignment(string plots_path_string, vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask) {
    
    nDetectors = 5;
    /*
@@ -313,7 +316,7 @@ TDetectorAlignment::TDetectorAlignment(string plots_path_string, vector<TDiamond
       det_y_resolution[i] = -1;
    }
    
-   LoadTracks(input_tracks);
+   LoadTracks(input_tracks, input_tracks_mask);
    
    plots_path = plots_path_string;
    SaveAllFilesSwitch = 1;
@@ -473,6 +476,13 @@ void TDetectorAlignment::TrackFit3(Double_t &predicted_x, Double_t &predicted_y)
    delete trackx;
    delete tracky;
    delete linear;
+}
+
+void TDetectorAlignment::LoadTracks(vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask) {
+   track_storage.clear(); track_storage = input_tracks; 
+   track_mask_storage.clear(); track_mask_storage = input_tracks_mask; 
+   cout<<"TDetectAlignment::LoadTracks: "<<track_storage.size()<<" tracks loaded"<<endl;
+   if(track_storage.size() != track_mask_storage.size()) cout<<"TDetectorAlignment::LoadTracks: track_storage.size()="<<track_storage.size()<<" and track_mask_storage.size()="<<track_mask_storage.size()<<" are not equal!"<<endl;
 }
 
 void TDetectorAlignment::PlotAngularDistribution()
@@ -654,6 +664,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    resyrms = 0;
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
+      //if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
@@ -675,6 +686,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    //now select tracks with reasonably small residuals
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
+      if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
@@ -735,7 +747,8 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    //update offsets and resolutions
    if(!justcheck) {
       x_offset = (sumr * sumv2 - sumvr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
-      phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+      //phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+      phix_offset = TMath::ATan(-(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv));
       //update x-offsets
       det_x_offset[subject_detector] += x_offset;
       //if(subject_detector)
@@ -764,6 +777,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       resyrms = 0;
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
       {
+         //if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
          LoadData(track_storage[t]);
          if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
             PositionPredictor(subject_detector);
@@ -785,6 +799,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       //now select tracks with reasonably small residuals
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
       {
+         if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
          LoadData(track_storage[t]);
          if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
             PositionPredictor(subject_detector);
@@ -829,7 +844,8 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       //update offsets and resolutions
       if(!justcheck) {
          y_offset = (sumr * sumv2 - sumvr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
-         phiy_offset = (observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+         //phiy_offset = (observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+         phiy_offset = TMath::ATan((observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv));
          //update y-offsets
          det_y_offset[subject_detector] += y_offset;
          det_phiy_offset[subject_detector] += phiy_offset;
@@ -844,6 +860,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       
    //generate residuals to get the new resolutions
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++) {
+      if(track_mask_storage[t]) continue; // skip tracks selected for determining alignment constants
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
@@ -936,6 +953,7 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
    
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
+      if(track_mask_storage[t]) continue; // skip tracks selected for determining alignment constants
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
