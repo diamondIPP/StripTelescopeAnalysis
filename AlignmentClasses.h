@@ -1403,18 +1403,18 @@ void TDetectorAlignment::CutFakeTracks() {
 				Y_strips_Z_positions.push_back(track_holder.GetD(det).GetZ());
 			}
 		}
-		Float_t *X_strips_par[3];
-		Float_t *Y_strips_par[3];
+		Float_t *X_strips_par;
+		Float_t *Y_strips_par;
 		X_strips_par = LinTrackFit(X_strips_Z_positions, X_strips_X_positions, res);
 		Y_strips_par = LinTrackFit(Y_strips_Z_positions, Y_strips_Y_positions, res);
 		histo_alignmentfitchi2_XStrips->Fill(X_strips_par[2]);
 		histo_alignmentfitchi2_YStrips->Fill(Y_strips_par[2]);
 	}
-	tempcan = new TCanvas("tempcanvas");
+	TCanvas *tmpcan = new TCanvas("tempcanvas");
 	histo_alignmentfitchi2_XStrips->Draw();
-	SaveCanvas(tempcan, "alignmentfitchi2_XStrips.png");
+	SaveCanvas(tmpcan, "alignmentfitchi2_XStrips.png");
 	histo_alignmentfitchi2_YStrips->Draw();
-	SaveCanvas(tempcan, "alignmentfitchi2_YStrips.png");
+	SaveCanvas(tmpcan, "alignmentfitchi2_YStrips.png");
 	delete tmpcan;
 }
 
@@ -1426,8 +1426,8 @@ Float_t *TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, F
 	Float_t tmp1 = 0;
 	Float_t tmp2 = 0;
 	Float_t tmp3 = 0;
-	Float_t *par[3];
-	if (X.size() != Y.size()) return -1;
+	Float_t par[3];
+	if (X.size() != Y.size()) return -99.;
 	for (int i = 0; i < X.size(); i++) {
 		X_Mean = X_Mean + X[i];
 		Y_Mean = Y_Mean + Y[i];
