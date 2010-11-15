@@ -211,7 +211,7 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
 	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
 	void CutFakeTracks();
-	Float_t *LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
+	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
 
    protected:
       TDetectorPlane D0;
@@ -1398,7 +1398,7 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
 }
 
 void TDetectorAlignment::CutFakeTracks() {
-	vector<Float_t> X_strips_X_positions, Y_strips_Y_positions, X_strips_Z_positions, Y_strips_Z_positions;
+	vector<Float_t> X_positions, Y_positions, Z_positions;
 	Float_t X_Mean, Y_Mean, Z_Mean;
 	Float_t res = GetSiResolution();
 	//TH1F *middleresX = new TH1F("middleresX", "middleresX", 10000,-100,100);
@@ -1406,46 +1406,42 @@ void TDetectorAlignment::CutFakeTracks() {
 	TH1F *histo_alignmentfitchi2_YStrips = new TH1F("histo_alignmentfitchi2_YStrips","histo_alignmentfitchi2_YStrips",100,0.,20.);
 	for (int i = 0; i < track_storage.size(); i++) {
 		LoadData(track_storage[i]);
-		X_strips_X_positions.clear();
-		Y_strips_Y_positions.clear();
-		X_strips_Z_positions.clear();
-		Y_strips_Z_positions.clear();
+		X_positions.clear();
+		Y_positions.clear();
+		Z_positions.clear();
 		//		track_storage_aligned.push_back(track_holder);
-		for (int det = 0; det < 8; det++) {
-			if (det%2 == 0) { // x strips
-				X_strips_X_positions.push_back(track_holder.GetD(det).GetX());
-				X_strips_Z_positions.push_back(track_holder.GetD(det).GetZ());
-			}
-			else { // y strips
-				Y_strips_Y_positions.push_back(track_holder.GetD(det).GetY());
-				Y_strips_Z_positions.push_back(track_holder.GetD(det).GetZ());
-			}
+		for (int det = 0; det < 4; det++) {
+			X_positions.push_back(track_holder.GetD(det).GetX());
+			Y_positions.push_back(track_holder.GetD(det).GetY());
+			Z_positions.push_back(track_holder.GetD(det).GetZ());
 		}
-		Float_t *X_strips_par;
-		Float_t *Y_strips_par;
-		X_strips_par = LinTrackFit(X_strips_Z_positions, X_strips_X_positions, res);
-		Y_strips_par = LinTrackFit(Y_strips_Z_positions, Y_strips_Y_positions, res);
-		histo_alignmentfitchi2_XStrips->Fill(X_strips_par[2]);
-		histo_alignmentfitchi2_YStrips->Fill(Y_strips_par[2]);
+		Float_t X_strips_par;
+		Float_t Y_strips_par;
+		X_strips_par = LinTrackFit(Z_positions, X_positions, res);
+//		cout << " chi2: " << X_strips_par[2] << endl;
+		Y_strips_par = LinTrackFit(Z_positions, Y_positions, res);
+//		cout << " chi2: " << Y_strips_par[2] << endl;
+		histo_alignmentfitchi2_XStrips->Fill(X_strips_par);
+		histo_alignmentfitchi2_YStrips->Fill(Y_strips_par);
 	}
 	TCanvas *tmpcan = new TCanvas("tempcanvas");
 	histo_alignmentfitchi2_XStrips->Draw();
-	SaveCanvas(tmpcan, "alignmentfitchi2_XStrips.png");
+	tmpcan->Print("alignmentfitchi2_XStrips.png");
 	histo_alignmentfitchi2_YStrips->Draw();
-	SaveCanvas(tmpcan, "alignmentfitchi2_YStrips.png");
+	tmpcan->Print("alignmentfitchi2_YStrips.png");
 	delete tmpcan;
 }
 
-Float_t *TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res) {
+Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res) {
 	// -- fits Y = par[0] + par[1] * x
-	// -- returns par, with par[2] = chi2
+	// -- returns chi2
 	Float_t X_Mean = 0;
 	Float_t Y_Mean = 0;
 	Float_t tmp1 = 0;
 	Float_t tmp2 = 0;
 	Float_t tmp3 = 0;
 	Float_t par[3];
-	if (X.size() != Y.size()) return -99.;
+	if (X.size() != Y.size()) return par[0];
 	for (int i = 0; i < X.size(); i++) {
 		X_Mean = X_Mean + X[i];
 		Y_Mean = Y_Mean + Y[i];
@@ -1458,10 +1454,13 @@ Float_t *TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, F
 	}
 	par[1] = tmp1 / tmp2;
 	par[0] = Y_Mean - par[1] * X_Mean;
+	cout << " --" << endl;
 	for (int i = 0; i < X.size(); i++) {
 		tmp1 = par[0] + par[1] * X[i];
-		tmp3 = tmp3 + (tmp1 - X[i]) * (tmp1 - X[i]);
+		tmp3 = tmp3 + (tmp1 - Y[i]) * (tmp1 - Y[i]);
+//		cout << "hit position: " << Y[i] << " fit position: " << tmp1 << endl;
 	}
 	par[2] = tmp3 / (res * res);
-	return &par[0];
+	cout << "chi2: " << par[2] << endl;
+	return par[2];
 }
