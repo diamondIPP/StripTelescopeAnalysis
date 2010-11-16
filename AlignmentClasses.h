@@ -5,6 +5,7 @@
 //2010-09-18 Plucked from dev-2010-04-30-eta_correction for adapatation in dev-2010-09-18-alignment
 //2010-09
 //           TODO: Several improvements would be tracking and aligning x and y planes separately and of course tearing the damn telescope apart to pin down the geometry
+//New comment
 
 //C++ Libraries
 #include <fstream>
