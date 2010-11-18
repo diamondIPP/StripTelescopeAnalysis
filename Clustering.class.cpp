@@ -71,6 +71,7 @@ class Clustering {
       void ParseIntArray(string value, vector<int> &vec);
       void ParseFloatArray(string value, vector<float> &vec);
       void ClusterEvent(bool verbose = 0);
+	void ClusterEventSeeds(bool verbose = 0);
       void BookHistograms();
       void SaveHistogram(TH1F* histo);
       void SaveHistogram(TH2F* histo);
@@ -1294,6 +1295,213 @@ void Clustering::ClusterEvent(bool verbose) {
    
 }
 
+// alternative function to ClusterEvent
+// channels are searched for a seed. clusters are build around located seeds.
+void Clustering::ClusterEventSeeds(bool verbose) {
+	PedTree->GetEvent(current_event);
+	if(verbose) cout<<endl<<endl;
+	if(current_event%1000==0) cout<<"Clustering::ClusterEvent(): current_event = "<<current_event<<endl;
+	
+	clustered_event.Clear();
+	clustered_event.SetEventNumber(current_event);
+	
+	vector<int> hits, cluster, badchannelclusterflags, goldengateclusterflags, lumpyclusterflags, saturatedclusterflags, seeds, cluster_channels;
+	vector< vector<int> > clusters;
+	int previouschan, currentchan, hasaseed, hasmasked, previousseed, isgoldengate, islumpy, peakchan, hassaturated;
+	float peakchan_psadc, currentchan_psadc, previouschan_psadc;
+	
+	for(int det=0; det<9; det++) {
+		hits.clear();
+		cluster.clear();
+		clusters.clear();
+		seeds.clear();
+		
+		//look for seeds
+		if (verbose) cout << endl << endl << "Detector " << det << " seeds: ";
+		for (int i=0; i < (int)Det_NChannels[det]; i++) {
+			if (det < 8 && Det_ADC[det][i]-Det_PedMean[det][i] > Si_Cluster_Seed_Factor*Det_PedWidth[det][i]) {
+				seeds.push_back(i);
+				if (verbose) {
+					cout<<(int)Det_Channels[det][i];
+					if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])) cout<<"(masked)";
+					cout<<", ";
+				}
+			}
+			if (det == 8 && Dia_ADC[i]-Det_PedMean[det][i] > Di_Cluster_Seed_Factor*Det_PedWidth[det][i]) {
+				seeds.push_back(i);
+				if (verbose) {
+					cout<<(int)Det_Channels[det][i];
+					if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])) cout<<"(masked)";
+					cout<<", ";
+				}
+			}
+		}
+		
+		goldengateclusterflags.clear();
+		badchannelclusterflags.clear();
+		lumpyclusterflags.clear();
+		saturatedclusterflags.clear();
+		cluster_channels.clear();
+		
+		/*		for (int i=0; i < seeds.size()-1; i++) {
+		 if (TMath::Abs(seeds[i]-seeds[i+1]) > 1) {
+		 goldengateclusterflags.push_back(seeds[i]);
+		 }
+		 }*/
+		
+		// detect cluster for every seed
+		for (int i=0; i < seeds.size(); i++) {
+			hasaseed=1;
+			hasmasked=0;
+			previousseed=-1;
+			isgoldengate=0;
+			islumpy=0;
+			hassaturated=0;
+			peakchan=-1;
+			peakchan_psadc=-5000;
+			cluster.clear();
+			if (det < 8) {
+				for (int j = seeds[i]-1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
+						cluster.push_back(j);
+						if (Det_ADC[det][j]-Det_PedMean[det][j] > Det_ADC[det][j+1]-Det_PedMean[det][j+1])
+							islumpy = 1;
+					}
+				}
+				for (int j = seeds[i]+1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
+						cluster.push_back(j);
+						if (Det_ADC[det][j]-Det_PedMean[det][j] > Det_ADC[det][j-1]-Det_PedMean[det][j-1])
+							islumpy = 1;
+					}
+				}
+			}
+			if (det == 8) {
+				for (int j = seeds[i]-1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
+						cluster.push_back(j);
+						if (Dia_ADC[j]-Det_PedMean[det][j] > Dia_ADC[j+1]-Det_PedMean[det][j+1])
+							islumpy = 1;
+					}
+				}
+				for (int j = seeds[i]+1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
+						cluster.push_back(j);
+						if (Dia_ADC[j]-Det_PedMean[det][j] > Dia_ADC[j-1]-Det_PedMean[det][j-1])
+							islumpy = 1;
+					}
+				}
+			}
+			islumpy = 0;
+			if (cluster.size() > 0) {
+				
+				//require no masked channels adjacent to the cluster
+				if((int)Det_Channels[det][cluster[0]]==0 || (int)Det_Channels[det][cluster[cluster.size()-1]]==255) {
+					hasmasked = 1;
+					if(verbose) cout<< "Cluster is up against edge of detector; flagging cluster as bad channel cluster." << endl;
+				}
+				else if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][cluster[0]]-1)
+						|| !Det_channel_screen[det].CheckChannel((int)Det_Channels[det][cluster[cluster.size()-1]]+1)) {
+					hasmasked = 1; 
+					if(verbose) cout<< "Channel(s) adjacent to the cluster is masked; flagging cluster as bad channel cluster." << endl;
+				}
+				
+				//if there's a seed in the cluster, save it
+				if(hasaseed) {
+					clusters.push_back(cluster); 
+					badchannelclusterflags.push_back(hasmasked); 
+					goldengateclusterflags.push_back(isgoldengate); 
+					lumpyclusterflags.push_back(islumpy);
+					saturatedclusterflags.push_back(hassaturated);
+					if(verbose) {
+						cout<<"storing cluster"<<endl;
+						if(hasmasked) cout<<"Flagged as BadChannelCluster!"<<endl;
+						if(isgoldengate) cout<<"Flagged as GoldenGateCluster!"<<endl;
+						if(islumpy) cout<<"Flagged as LumpyCluster!"<<endl;
+						if(hassaturated) cout<<"Flagged as SaturatedCluster!"<<endl;
+					}
+				}
+			}
+		}
+		
+		//now that we have lists of channels belonging to clusters, let's create Cluster objects to store the data
+		Cluster* current_cluster = 0;
+		int highest_index, nexthighest_index;
+		float highest_psadc, nexthighest_psadc, current_psadc;
+		if(clusters.size()>0) {
+			if(verbose) cout<<"det="<<det<<"\tclusters.size()="<<clusters.size()<<endl;
+			for(uint i=0; i<clusters.size(); i++) {
+				//add cluster to a different list in current event depending on flags
+				current_cluster = clustered_event.AddCluster(det,badchannelclusterflags[i]); //||goldengateclusterflags[i]||lumpyclusterflags[i]||saturatedclusterflags[i]);
+				//flag cluster
+				current_cluster->FlagBadChannelCluster(badchannelclusterflags[i]);
+				current_cluster->FlagGoldenGateCluster(goldengateclusterflags[i]);
+				current_cluster->FlagLumpyCluster(lumpyclusterflags[i]);
+				current_cluster->FlagSaturatedCluster(saturatedclusterflags[i]);
+				//calculate transparent eta while saving each channel to cluster (note that due to "zero supression" in the saved pedestal info, not all clusters will have an eta and will be reported as -1)
+				highest_index = -1; nexthighest_index = -1;
+				highest_psadc = 0; nexthighest_psadc = 0; current_psadc = 0;
+				for(uint j=0; j<clusters[i].size(); j++) { //save each cluster one channel at a time
+					currentchan = clusters[i][j];
+					if(det<8) {
+						current_cluster->AddHit(Det_Channels[det][currentchan], Det_ADC[det][currentchan], Det_PedMean[det][currentchan], Det_PedWidth[det][currentchan]);
+						current_psadc = Det_ADC[det][currentchan] - Det_PedMean[det][currentchan];
+					}
+					if(det==8) {
+						current_cluster->AddHit(Det_Channels[det][currentchan], Dia_ADC[currentchan], Det_PedMean[det][currentchan], Det_PedWidth[det][currentchan]);
+						current_psadc = Dia_ADC[currentchan] - Det_PedMean[det][currentchan];
+					}
+					if(verbose) cout<<"Detector "<<det<<": cluster_saved/all_clusters="<<i+1<<"/"<<clusters.size()<<"\tchan_to_save="<<j+1<<"/"<<clusters[i].size()<<"\tcurrentchan="<<(int)Det_Channels[det][currentchan]<<endl;
+					//locate highest seed
+					if(current_psadc>highest_psadc) {
+						highest_index = currentchan;
+						highest_psadc = current_psadc;
+					}
+				}//end loop over channels in a cluster to save
+				//check which channel has next highest psadc
+				if(highest_index<(int)Det_NChannels[det]-1) if(Det_Channels[det][highest_index+1]==Det_Channels[det][highest_index]+1 && Det_channel_screen[det].CheckChannel(Det_Channels[det][highest_index+1])) {
+					//first if the next channel is available and an ok channel, just assume it has the nexthighest_psadc
+					nexthighest_index = highest_index+1;
+					if(det==8) nexthighest_psadc = Dia_ADC[nexthighest_index] - Det_PedMean[det][nexthighest_index];
+					else nexthighest_psadc = Det_ADC[det][nexthighest_index] - Det_PedMean[det][nexthighest_index]; 
+				}
+				if(highest_index>0) if(Det_Channels[det][highest_index-1]==Det_Channels[det][highest_index]-1 && Det_channel_screen[det].CheckChannel(Det_Channels[det][highest_index-1])) {
+					//now if the previous channel is available and an ok channel, check whether it has a higher psadc than the next one
+					if(det==8) current_psadc = Dia_ADC[highest_index-1] - Det_PedMean[det][highest_index-1];
+					else current_psadc = Det_ADC[det][highest_index-1] - Det_PedMean[det][highest_index-1];
+					if(current_psadc>nexthighest_psadc) {
+						nexthighest_index = highest_index-1;
+						nexthighest_psadc = current_psadc;
+					}
+				}
+				//calculate eta and centroid for highest 2 channels (used later for alignment and tracking)
+				if(nexthighest_index>-1) {
+					//eta
+					if(highest_index>nexthighest_index) current_cluster->SetEta(highest_psadc/(highest_psadc+nexthighest_psadc));
+					else current_cluster->SetEta(nexthighest_psadc/(highest_psadc+nexthighest_psadc));
+					
+					//centroid
+					current_cluster->highest2_centroid=(Det_Channels[det][highest_index]*highest_psadc+Det_Channels[det][nexthighest_index]*nexthighest_psadc)/(highest_psadc+nexthighest_psadc);
+					
+					/*
+					 if(totalsurviving_events%1000==0) {
+					 cout<<"Event "<<&current_event-1<<"; detector "<<det<<":"<<endl; 
+					 cout<<"highest_index = "<<highest_index<<"\thighest_psadc="<<highest_psadc<<endl;
+					 cout<<"nexthighest_index = "<<nexthighest_index<<"\tnexthighest_psadc="<<nexthighest_psadc<<endl;
+					 cout<<"highest_psadc/(highest_psadc+nexthighest_psadc) = "<<highest_psadc/(highest_psadc+nexthighest_psadc)<<endl;
+					 cout<<"nexthighest_psadc/(highest_psadc+nexthighest_psadc) = "<<nexthighest_psadc/(highest_psadc+nexthighest_psadc)<<endl;
+					 }
+					 */
+				}
+			}//end loop over clusters
+		}
+		
+	}
+	current_event++;
+	// -- end of lukas' code
+	
+}
+
 void Clustering::SaveHistogram(TH1F* histo) {
    SaveHistogramPNG(histo);
    SaveHistogramROOT(histo);
@@ -2353,7 +2561,9 @@ void Clustering::ClusterRun(bool plots) {
    //loop over events
    for(uint e=0; e<PedTree->GetEntries(); e++) {
    //for(uint e=0; e<10000; e++) {
-      ClusterEvent();
+	   bool AlternativeClustering = false;
+	   if (!AlternativeClustering) ClusterEvent();
+	   else ClusterEventSeeds();
       if(e%10000==0) clustered_event.Print();
       BookHistograms();
       
@@ -2700,7 +2910,7 @@ void Clustering::Align(bool plots) {
    alignment_summary.close();
    
    cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
-   
+	align->LoadTracks(tracks, tracks_mask);
 	align->CutFakeTracks();
 	
    /*
