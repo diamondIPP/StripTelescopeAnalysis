@@ -1405,6 +1405,9 @@ void TDetectorAlignment::CutFakeTracks() {
 	//TH1F *middleresX = new TH1F("middleresX", "middleresX", 10000,-100,100);
 	TH1F *histo_alignmentfitchi2_XStrips = new TH1F("histo_alignmentfitchi2_XStrips","histo_alignmentfitchi2_XStrips",100,0.,20.);
 	TH1F *histo_alignmentfitchi2_YStrips = new TH1F("histo_alignmentfitchi2_YStrips","histo_alignmentfitchi2_YStrips",100,0.,20.);
+	TH1F *histo_alignmentfitchi2_XStripsWindow = new TH1F("histo_alignmentfitchi2_XStripsWindow","histo_alignmentfitchi2_XStripsWindow",100,0.,20.);
+	TH1F *histo_alignmentfitchi2_YStripsWindow = new TH1F("histo_alignmentfitchi2_YStripsWindow","histo_alignmentfitchi2_YStripsWindow",100,0.,20.);
+	TF1 *fcn_chi2 = new TF1("chi2","TMath::Exp((-1)*x/2) / 2", 0., 100.);
 	for (int i = 0; i < track_storage.size(); i++) {
 		LoadData(track_storage[i]);
 		X_positions.clear();
@@ -1416,20 +1419,35 @@ void TDetectorAlignment::CutFakeTracks() {
 			Y_positions.push_back(track_holder.GetD(det).GetY());
 			Z_positions.push_back(track_holder.GetD(det).GetZ());
 		}
-		Float_t X_strips_par;
-		Float_t Y_strips_par;
-		X_strips_par = LinTrackFit(Z_positions, X_positions, res);
-//		cout << " chi2: " << X_strips_par[2] << endl;
-		Y_strips_par = LinTrackFit(Z_positions, Y_positions, res);
-//		cout << " chi2: " << Y_strips_par[2] << endl;
-		histo_alignmentfitchi2_XStrips->Fill(X_strips_par);
-		histo_alignmentfitchi2_YStrips->Fill(Y_strips_par);
+		Float_t X_chi2;
+		Float_t Y_chi2;
+//		cout << "X: " << X_positions[0] << "\t Y: " << Y_positions[0] << "\t Z: " << Z_positions[0] << endl;
+		X_chi2 = LinTrackFit(Z_positions, X_positions, res);
+		Y_chi2 = LinTrackFit(Z_positions, Y_positions, res);
+		histo_alignmentfitchi2_XStrips->Fill(X_chi2);
+		histo_alignmentfitchi2_YStrips->Fill(Y_chi2);
+		if (X_positions[0] > 80. && X_positions[0] < 100. && Y_positions[0] > 80. && Y_positions[0] < 100.) {
+			histo_alignmentfitchi2_XStripsWindow->Fill(X_chi2);
+			histo_alignmentfitchi2_YStripsWindow->Fill(Y_chi2);
+		}
 	}
 	TCanvas *tmpcan = new TCanvas("tempcanvas");
+	histo_alignmentfitchi2_XStrips->Scale(1/histo_alignmentfitchi2_XStrips->GetEntries());
 	histo_alignmentfitchi2_XStrips->Draw();
+	fcn_chi2->Draw("same");
 	tmpcan->Print("alignmentfitchi2_XStrips.png");
+	histo_alignmentfitchi2_YStrips->Scale(1/histo_alignmentfitchi2_YStrips->GetEntries());
 	histo_alignmentfitchi2_YStrips->Draw();
+	fcn_chi2->Draw("same");
 	tmpcan->Print("alignmentfitchi2_YStrips.png");
+	histo_alignmentfitchi2_XStripsWindow->Scale(1/histo_alignmentfitchi2_XStripsWindow->GetEntries());
+	histo_alignmentfitchi2_XStripsWindow->Draw();
+	fcn_chi2->Draw("same");
+	tmpcan->Print("alignmentfitchi2_XStripsWindow.png");
+	histo_alignmentfitchi2_YStripsWindow->Scale(1/histo_alignmentfitchi2_YStripsWindow->GetEntries());
+	histo_alignmentfitchi2_YStripsWindow->Draw();
+	fcn_chi2->Draw("same");
+	tmpcan->Print("alignmentfitchi2_YStripsWindow.png");
 	delete tmpcan;
 }
 
@@ -1462,6 +1480,6 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Fl
 //		cout << "hit position: " << Y[i] << " fit position: " << tmp1 << endl;
 	}
 	par[2] = tmp3 / (res * res);
-	cout << "chi2: " << par[2] << endl;
+//	cout << "chi2: " << par[2] << endl;
 	return par[2];
 }
