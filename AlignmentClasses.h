@@ -211,7 +211,7 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXY(int subject_detector, bool verbose = true);
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
 	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
-	void CutFakeTracks();
+	void CutFakeTracks(bool CutFakeTracksOn = false);
 	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
 
    protected:
@@ -1398,7 +1398,7 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
    
 }
 
-void TDetectorAlignment::CutFakeTracks() {
+void TDetectorAlignment::CutFakeTracks(bool CutFakeTracksOn) {
 	vector<Float_t> X_positions, Y_positions, Z_positions;
 	Float_t X_Mean, Y_Mean, Z_Mean;
 	Float_t res = GetSiResolution();
@@ -1430,24 +1430,28 @@ void TDetectorAlignment::CutFakeTracks() {
 			histo_alignmentfitchi2_XStripsWindow->Fill(X_chi2);
 			histo_alignmentfitchi2_YStripsWindow->Fill(Y_chi2);
 		}
+		// cuts non-physical tracks for a further alignment
+		if (CutFakeTracksOn) {
+			if (X_chi2 > 8 || Y_chi2 > 8) track_mask_storage[i] = 0;
+		}
 	}
 	TCanvas *tmpcan = new TCanvas("tempcanvas");
-	histo_alignmentfitchi2_XStrips->Scale(1/histo_alignmentfitchi2_XStrips->GetEntries());
+	histo_alignmentfitchi2_XStrips->Scale(1/histo_alignmentfitchi2_XStrips->GetEntries()/histo_alignmentfitchi2_XStrips->GetBinWidth(1));
 	histo_alignmentfitchi2_XStrips->Draw();
 	fcn_chi2->Draw("same");
-	tmpcan->Print("alignmentfitchi2_XStrips.png");
-	histo_alignmentfitchi2_YStrips->Scale(1/histo_alignmentfitchi2_YStrips->GetEntries());
+	SaveCanvas(tmpcan, "alignmentfitchi2_XStrips.png");
+	histo_alignmentfitchi2_YStrips->Scale(1/histo_alignmentfitchi2_YStrips->GetEntries()/histo_alignmentfitchi2_YStrips->GetBinWidth(1));
 	histo_alignmentfitchi2_YStrips->Draw();
 	fcn_chi2->Draw("same");
-	tmpcan->Print("alignmentfitchi2_YStrips.png");
-	histo_alignmentfitchi2_XStripsWindow->Scale(1/histo_alignmentfitchi2_XStripsWindow->GetEntries());
+	SaveCanvas(tmpcan, "alignmentfitchi2_YStrips.png");
+	histo_alignmentfitchi2_XStripsWindow->Scale(1/histo_alignmentfitchi2_XStripsWindow->GetEntries()/histo_alignmentfitchi2_XStripsWindow->GetBinWidth(1));
 	histo_alignmentfitchi2_XStripsWindow->Draw();
 	fcn_chi2->Draw("same");
-	tmpcan->Print("alignmentfitchi2_XStripsWindow.png");
-	histo_alignmentfitchi2_YStripsWindow->Scale(1/histo_alignmentfitchi2_YStripsWindow->GetEntries());
+	SaveCanvas(tmpcan, "alignmentfitchi2_XStripsWindow.png");
+	histo_alignmentfitchi2_YStripsWindow->Scale(1/histo_alignmentfitchi2_YStripsWindow->GetEntries()/histo_alignmentfitchi2_YStripsWindow->GetBinWidth(1));
 	histo_alignmentfitchi2_YStripsWindow->Draw();
 	fcn_chi2->Draw("same");
-	tmpcan->Print("alignmentfitchi2_YStripsWindow.png");
+	SaveCanvas(tmpcan, "alignmentfitchi2_YStripsWindow.png");
 	delete tmpcan;
 }
 
@@ -1473,7 +1477,7 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Fl
 	}
 	par[1] = tmp1 / tmp2;
 	par[0] = Y_Mean - par[1] * X_Mean;
-	cout << " --" << endl;
+//	cout << " --" << endl;
 	for (int i = 0; i < X.size(); i++) {
 		tmp1 = par[0] + par[1] * X[i];
 		tmp3 = tmp3 + (tmp1 - Y[i]) * (tmp1 - Y[i]);
