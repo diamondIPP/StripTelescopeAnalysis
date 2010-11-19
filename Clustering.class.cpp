@@ -2741,7 +2741,7 @@ void Clustering::Align(bool plots) {
    
    // now start the telescope alignment!
    TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
-   
+
    Int_t nPasses = 10;
    Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
    
@@ -2756,6 +2756,10 @@ void Clustering::Align(bool plots) {
    align->CheckDetectorAlignmentXYPlots(1, 0, 3, prename);
    align->CheckDetectorAlignmentXYPlots(2, 0, 3, prename);
    align->CheckDetectorAlignmentXYPlots(3, 0, 2, prename);
+	
+	// cut non-physical tracks
+//	align->LoadTracks(tracks, tracks_mask);
+//	align->CutFakeTracks(true);
    
    // itterative alignment loop
    for(int i=0; i<nPasses; i++) {
@@ -2911,7 +2915,7 @@ void Clustering::Align(bool plots) {
    
    cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 	align->LoadTracks(tracks, tracks_mask);
-	align->CutFakeTracks();
+	align->CutFakeTracks(false);
 	
    /*
    //Plot out the offsets
