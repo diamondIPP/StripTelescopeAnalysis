@@ -83,7 +83,7 @@ class Clustering {
       void DeleteHistograms();
       void DrawHistograms();
       void GenerateHTML();
-      void ClusterRun(bool plots = 1);
+      void ClusterRun(bool plots = 1, bool AlternativeClustering = 0);
       void Align(bool plots = 1);
       
    private:
@@ -1310,15 +1310,16 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 	int previouschan, currentchan, hasaseed, hasmasked, previousseed, isgoldengate, islumpy, peakchan, hassaturated;
 	float peakchan_psadc, currentchan_psadc, previouschan_psadc;
 	
+	// -- loop over detectors
 	for(int det=0; det<9; det++) {
 		hits.clear();
 		cluster.clear();
 		clusters.clear();
 		seeds.clear();
 		
-		//look for seeds
+		// -- loop over channels and look for seeds
 		if (verbose) cout << endl << endl << "Detector " << det << " seeds: ";
-		for (int i=0; i < (int)Det_NChannels[det]; i++) {
+		for (int i = 0; i < (int)Det_NChannels[det]; i++) {
 			if (det < 8 && Det_ADC[det][i]-Det_PedMean[det][i] > Si_Cluster_Seed_Factor*Det_PedWidth[det][i]) {
 				seeds.push_back(i);
 				if (verbose) {
@@ -1335,7 +1336,7 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 					cout<<", ";
 				}
 			}
-		}
+		}	// end loop over channels
 		
 		goldengateclusterflags.clear();
 		badchannelclusterflags.clear();
@@ -1350,7 +1351,10 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 		 }*/
 		
 		// detect cluster for every seed
-		for (int i=0; i < seeds.size(); i++) {
+		for (int i = 0; i < seeds.size(); i++) {
+			bool channel_already_used = false;
+			int first_hit = 0;
+			int last_hit = 0;
 			hasaseed=1;
 			hasmasked=0;
 			previousseed=-1;
@@ -1360,8 +1364,28 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 			peakchan=-1;
 			peakchan_psadc=-5000;
 			cluster.clear();
+			
+			// check if channel is already used in another cluster
+			for (int j = 0; j < cluster_channels.size(); j++) {
+				if (seeds[i] == cluster_channels[j]) channel_already_used = true;
+			}
+			if (channel_already_used) continue;
+			
 			if (det < 8) {
+				// look for first hit of cluster
+				first_hit = seeds[i];
 				for (int j = seeds[i]-1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+					first_hit = j;
+				}
+				
+				// look for last hit of cluster and write hits to cluster
+				for (int j = first_hit; j < (int)Det_NChannels[det] && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+					cluster.push_back(j);
+					cluster_channels.push_back(j);
+				}
+				
+				
+/*				for (int j = seeds[i]-1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
 					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
 						cluster.push_back(j);
 						if (Det_ADC[det][j]-Det_PedMean[det][j] > Det_ADC[det][j+1]-Det_PedMean[det][j+1])
@@ -1374,10 +1398,23 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 						if (Det_ADC[det][j]-Det_PedMean[det][j] > Det_ADC[det][j-1]-Det_PedMean[det][j-1])
 							islumpy = 1;
 					}
-				}
+				}*/
 			}
 			if (det == 8) {
+				// look for first hit of the cluster
+				first_hit = seeds[i];
 				for (int j = seeds[i]-1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+					first_hit = j;
+				}
+				
+				// look for last hit of cluster and write hits to cluster
+				for (int j = first_hit; j < (int)Det_NChannels[det] && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+					cluster.push_back(j);
+					cluster_channels.push_back(j);
+				}
+				
+				
+/*				for (int j = seeds[i]-1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
 					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
 						cluster.push_back(j);
 						if (Dia_ADC[j]-Det_PedMean[det][j] > Dia_ADC[j+1]-Det_PedMean[det][j+1])
@@ -1390,7 +1427,7 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 						if (Dia_ADC[j]-Det_PedMean[det][j] > Dia_ADC[j-1]-Det_PedMean[det][j-1])
 							islumpy = 1;
 					}
-				}
+				}*/
 			}
 			islumpy = 0;
 			if (cluster.size() > 0) {
@@ -1496,7 +1533,7 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 			}//end loop over clusters
 		}
 		
-	}
+	}	// end loop over detectors
 	current_event++;
 	// -- end of lukas' code
 	
@@ -2535,7 +2572,7 @@ and plot the second 100k events,
 ********************/
 
 //sequentially cluster all events
-void Clustering::ClusterRun(bool plots) {
+void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
    
    //Start Timer
    TStopwatch Watch;
@@ -2561,7 +2598,7 @@ void Clustering::ClusterRun(bool plots) {
    //loop over events
    for(uint e=0; e<PedTree->GetEntries(); e++) {
    //for(uint e=0; e<10000; e++) {
-	   bool AlternativeClustering = false;
+//	   bool AlternativeClustering = false;
 	   if (!AlternativeClustering) ClusterEvent();
 	   else ClusterEventSeeds();
       if(e%10000==0) clustered_event.Print();
@@ -2915,7 +2952,7 @@ void Clustering::Align(bool plots) {
    
    cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 	align->LoadTracks(tracks, tracks_mask);
-	align->CutFakeTracks(false);
+	align->CutFakeTracks(false, false);
 	
    /*
    //Plot out the offsets
