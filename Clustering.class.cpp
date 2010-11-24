@@ -1429,7 +1429,6 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 					}
 				}*/
 			}
-			islumpy = 0;
 			if (cluster.size() > 0) {
 				
 				//require no masked channels adjacent to the cluster
@@ -1441,6 +1440,96 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 						|| !Det_channel_screen[det].CheckChannel((int)Det_Channels[det][cluster[cluster.size()-1]]+1)) {
 					hasmasked = 1; 
 					if(verbose) cout<< "Channel(s) adjacent to the cluster is masked; flagging cluster as bad channel cluster." << endl;
+				}
+				
+				// -- look for peak, ckeck golden gate, check saturation and require no masked hits in silicon
+				for(uint j=0; j<cluster.size(); j++) {
+					currentchan = cluster[j];
+					if(verbose) cout<<"cluster["<<j<<"]="<<cluster[j]<<" or channel "<<(int)Det_Channels[det][currentchan];
+					if(det<8) {
+						currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
+						
+						//check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
+//						if(cluster.size()>2) {
+							if(currentchan_psadc > peakchan_psadc) {
+								peakchan_psadc = currentchan_psadc;
+								peakchan = j;
+							}
+//						}
+						
+						// check for golden gate
+						if(currentchan_psadc > Si_Cluster_Seed_Factor*Det_PedWidth[det][currentchan]) {
+							if(verbose) cout<<" is a seed";
+							if(previousseed!=-1 && Det_Channels[det][currentchan]!=previousseed+1) {
+								isgoldengate=1;
+								if(verbose) cout<<" (goldengate cluster)";
+							}
+							previousseed=Det_Channels[det][currentchan];
+						}
+						
+						//check to see if the hit saturated the adc
+						if(Det_ADC[det][currentchan]>254) {
+							hassaturated=1;
+							if(verbose) cout<<" (saturated adc)";
+						}
+						
+						//require no masked hits in silicon
+						if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked hit)";}
+					}
+					if(det==8) {
+						currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+						
+						//check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
+//						if(cluster.size()>2)
+						if(currentchan_psadc > peakchan_psadc) {
+							peakchan_psadc = currentchan_psadc;
+							peakchan = j;
+						}
+						
+						//check for golden gate
+						if(currentchan_psadc > Di_Cluster_Seed_Factor*Det_PedWidth[det][currentchan]) {
+							if(verbose) cout<<" is a seed";
+							if(previousseed!=-1 && Det_Channels[det][currentchan]!=previousseed+1) {
+								isgoldengate=1;
+								if(verbose) cout<<" (goldengate cluster)";
+							}
+							previousseed=Det_Channels[det][currentchan];
+							//require no masked seeds in diamond
+							if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked seed)";}
+						}
+						
+						//check to see if the hit saturated the adc
+						if(Dia_ADC[currentchan]>4094) {
+							hassaturated=1;
+							if(verbose) cout<<" (saturated adc)";
+						}
+					}
+					if(verbose) cout<<endl;
+				}
+				
+				//Lumpy cluster check (can't have lumpy cluster with less than 3 hits)
+				if(cluster.size()>2) {
+					if(verbose) cout<<"Found peak at cluster hit "<<peakchan<<" or channel index "<<cluster[peakchan]<<" with PSADC of "<<peakchan_psadc<<endl;
+					//now scan right of peak to see if monotonically decreasing
+					previouschan_psadc = peakchan_psadc;
+					for(uint j=peakchan+1; j<cluster.size(); j++) {
+						currentchan = cluster[j];
+						if(det<8) currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
+						if(det==8) currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+						if(verbose) cout<<"LumpyClusterCheck: clusterhit="<<j<<"\tchanindex="<<currentchan<<"\tcurrentchan_psadc="<<currentchan_psadc<<"\tpreviouschan_psadc="<<previouschan_psadc<<endl;
+						if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)Det_Channels[det][currentchan]<<")"<<endl;}
+						previouschan_psadc = currentchan_psadc;
+					}
+					//now scan left of peak to see if monotonically decreasing
+					previouschan_psadc = peakchan_psadc;
+					for(int j=peakchan-1; j>=0; j--) {
+						currentchan = cluster[j];
+						if(det<8) currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
+						if(det==8) currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+						if(verbose) cout<<"LumpyClusterCheck: clusterhit="<<j<<"\tchanindex="<<currentchan<<"\tcurrentchan_psadc="<<currentchan_psadc<<"\tpreviouschan_psadc="<<previouschan_psadc<<endl;
+						if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)Det_Channels[det][currentchan]<<")"<<endl;}
+						previouschan_psadc = currentchan_psadc;
+					}
 				}
 				
 				//if there's a seed in the cluster, save it
