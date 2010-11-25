@@ -84,7 +84,8 @@ class Clustering {
       void DrawHistograms();
       void GenerateHTML();
       void ClusterRun(bool plots = 1, bool AlternativeClustering = 0);
-      void Align(bool plots = 1);
+      void Align(bool plots = 1, bool CutFakeTracksOn = false);
+	void AlignCutFakeTracks(bool plots = 1);
       
    private:
       //general settings
@@ -1654,8 +1655,12 @@ void Clustering::SaveHistogramROOT(TH1F* histo) {
    histo->Draw();
    pt->Draw();
    ostringstream plot_filename;
+	ostringstream histo_filename;
+	histo_filename << plots_path << histo->GetName() << "_histo.root";
    plot_filename << plots_path << histo->GetName() << ".root";
    plots_canvas.Print(plot_filename.str().c_str());
+	TFile f(histo_filename.str().c_str(),"new");
+	histo->Write();
 }
 
 void Clustering::SaveHistogramPNG(TH2F* histo) {
@@ -2858,7 +2863,7 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
    
 }
 
-void Clustering::Align(bool plots) {
+void Clustering::Align(bool plots, bool CutFakeTracksOn) {
    
    if(tracks.size()==0) {
       cout<<"Clustering::Align: No tracks found; calling Clustering::ClusterRun first..."<<endl;
@@ -2866,6 +2871,7 @@ void Clustering::Align(bool plots) {
    }
    
    // now start the telescope alignment!
+	for (int alignStep = 0; alignStep < 2; alignStep++) {
    TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
 
    Int_t nPasses = 10;
@@ -3040,9 +3046,10 @@ void Clustering::Align(bool plots) {
    alignment_summary.close();
    
    cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
+		if (!CutFakeTracksOn || alignStep == 1) break;
 	align->LoadTracks(tracks, tracks_mask);
-	align->CutFakeTracks(false, false);
-	
+	align->CutFakeTracks(true, false);
+	}
    /*
    //Plot out the offsets
    for(Int_t plane=1; plane<4; plane++) {
