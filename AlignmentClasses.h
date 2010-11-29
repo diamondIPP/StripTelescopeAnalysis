@@ -211,7 +211,8 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXY(int subject_detector, bool verbose = true);
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
 	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
-	void CutFakeTracks(bool CutFakeTracksOn = false);
+	void CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool CutFakeTracksOn = false, bool verbose = false);
+//	void CutFakeTracks(bool CutFakeTracksOn = false, bool verbose = false);
 	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
 
    protected:
@@ -1398,10 +1399,15 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
    
 }
 
-void TDetectorAlignment::CutFakeTracks(bool CutFakeTracksOn) {
+void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool CutFakeTracksOn, bool verbose) {
+//void TDetectorAlignment::CutFakeTracks(bool CutFakeTracksOn = false, bool verbose = false) {
+	LoadTracks(tracks, tracks_mask);
 	vector<Float_t> X_positions, Y_positions, Z_positions;
+	int NCutTracks = 0;
 	Float_t X_Mean, Y_Mean, Z_Mean;
+	if (verbose) cout << "calculating silicon resolution.." << endl;
 	Float_t res = GetSiResolution();
+	if (verbose) cout << "silicon resolution: " << res << endl;
 	//TH1F *middleresX = new TH1F("middleresX", "middleresX", 10000,-100,100);
 	TH1F *histo_alignmentfitchi2_XStrips = new TH1F("histo_alignmentfitchi2_XStrips","histo_alignmentfitchi2_XStrips",100,0.,20.);
 	TH1F *histo_alignmentfitchi2_YStrips = new TH1F("histo_alignmentfitchi2_YStrips","histo_alignmentfitchi2_YStrips",100,0.,20.);
@@ -1409,11 +1415,11 @@ void TDetectorAlignment::CutFakeTracks(bool CutFakeTracksOn) {
 	TH1F *histo_alignmentfitchi2_YStripsWindow = new TH1F("histo_alignmentfitchi2_YStripsWindow","histo_alignmentfitchi2_YStripsWindow",100,0.,20.);
 	TF1 *fcn_chi2 = new TF1("chi2","TMath::Exp((-1)*x/2) / 2", 0., 100.);
 	for (int i = 0; i < track_storage.size(); i++) {
+		if (!track_mask_storage[i]) continue;
 		LoadData(track_storage[i]);
 		X_positions.clear();
 		Y_positions.clear();
 		Z_positions.clear();
-		//		track_storage_aligned.push_back(track_holder);
 		for (int det = 0; det < 4; det++) {
 			X_positions.push_back(track_holder.GetD(det).GetX());
 			Y_positions.push_back(track_holder.GetD(det).GetY());
@@ -1422,6 +1428,7 @@ void TDetectorAlignment::CutFakeTracks(bool CutFakeTracksOn) {
 		Float_t X_chi2;
 		Float_t Y_chi2;
 //		cout << "X: " << X_positions[0] << "\t Y: " << Y_positions[0] << "\t Z: " << Z_positions[0] << endl;
+		if (verbose) cout << " -- fitting track " << i << " .." << endl << "res: " << res << endl;
 		X_chi2 = LinTrackFit(Z_positions, X_positions, res);
 		Y_chi2 = LinTrackFit(Z_positions, Y_positions, res);
 		histo_alignmentfitchi2_XStrips->Fill(X_chi2);
@@ -1430,11 +1437,19 @@ void TDetectorAlignment::CutFakeTracks(bool CutFakeTracksOn) {
 			histo_alignmentfitchi2_XStripsWindow->Fill(X_chi2);
 			histo_alignmentfitchi2_YStripsWindow->Fill(Y_chi2);
 		}
+		if (verbose) {
+			cout << "linear fit for track " << i << " results in \t chi2 = " << X_chi2 << " for the x direction and \t chi2 = " << Y_chi2 << " for the y direction" << endl;
+		}
 		// cuts non-physical tracks for a further alignment
 		if (CutFakeTracksOn) {
-			if (X_chi2 > 8 || Y_chi2 > 8) track_mask_storage[i] = 0;
+			if (X_chi2 > 8 || Y_chi2 > 8) tracks_mask[i] = 0;
+			NCutTracks++;
+			if (verbose) cout << "track " << i << " with X_chi2 = " << X_chi2 << ", Y_chi2 = " << Y_chi2 << " is masked as 0 and not used for further alignment." << endl;
 		}
 	}
+	if (verbose) cout << NCutTracks << " out of " << tracks.size() << " tracks have been cut." << endl;
+	
+	// -- book and fill chi2 histograms
 	TCanvas *tmpcan = new TCanvas("tempcanvas");
 	histo_alignmentfitchi2_XStrips->Scale(1/histo_alignmentfitchi2_XStrips->GetEntries()/histo_alignmentfitchi2_XStrips->GetBinWidth(1));
 	histo_alignmentfitchi2_XStrips->Draw();
@@ -1463,6 +1478,8 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Fl
 	Float_t tmp1 = 0;
 	Float_t tmp2 = 0;
 	Float_t tmp3 = 0;
+	Float_t tmp4 = 0;
+	Float_t rms = 0;
 	Float_t par[3];
 	if (X.size() != Y.size()) return par[0];
 	for (int i = 0; i < X.size(); i++) {
@@ -1478,12 +1495,16 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Fl
 	par[1] = tmp1 / tmp2;
 	par[0] = Y_Mean - par[1] * X_Mean;
 //	cout << " --" << endl;
+	// -- 
 	for (int i = 0; i < X.size(); i++) {
 		tmp1 = par[0] + par[1] * X[i];
 		tmp3 = tmp3 + (tmp1 - Y[i]) * (tmp1 - Y[i]);
-//		cout << "hit position: " << Y[i] << " fit position: " << tmp1 << endl;
+//		cout << "plane " << i << "\t hit position: ( " << X[i] << " , " << Y[i] << " ) fit position: " << tmp1 << endl;
+		tmp4 = tmp4 + (Y[i] - Y_Mean) * (Y[i] - Y_Mean);
 	}
 	par[2] = tmp3 / (res * res);
+	rms = TMath::Sqrt(tmp4/Y.size());
+//	cout << "rms: " << rms << endl;
 //	cout << "chi2: " << par[2] << endl;
 	return par[2];
 }

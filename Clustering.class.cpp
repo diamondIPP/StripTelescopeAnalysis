@@ -85,7 +85,6 @@ class Clustering {
       void GenerateHTML();
       void ClusterRun(bool plots = 1, bool AlternativeClustering = 0);
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
-	void AlignCutFakeTracks(bool plots = 1);
       
    private:
       //general settings
@@ -3047,8 +3046,9 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
    
    cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 		if (!CutFakeTracksOn || alignStep == 1) break;
-	align->LoadTracks(tracks, tracks_mask);
-	align->CutFakeTracks(true, false);
+//	align->LoadTracks(tracks, tracks_mask);
+	align->CutFakeTracks(tracks, tracks_mask, CutFakeTracksOn, true);
+		align->CutFakeTracks(tracks_fidcut, tracks_fidcut_mask, CutFakeTracksOn, true);
 	}
    /*
    //Plot out the offsets
