@@ -2863,193 +2863,207 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
 }
 
 void Clustering::Align(bool plots, bool CutFakeTracksOn) {
-   
-   if(tracks.size()==0) {
-      cout<<"Clustering::Align: No tracks found; calling Clustering::ClusterRun first..."<<endl;
-      ClusterRun(plots);
-   }
-   
-   // now start the telescope alignment!
-	for (int alignStep = 0; alignStep < 2; alignStep++) {
-   TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
-
-   Int_t nPasses = 10;
-   Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
-   
-   align->PlotAngularDistribution(); //look at angular distribution of tracks
-   align->PlotCartesianDistribution(); //look at slope distribution of tracks
-   
-   string prename = "alignment_PrealignmentResiduals";
-   string postname = "alignment_PostalignmentResiduals";
-   
-   // generate residuals before alignment
-   align->CheckDetectorAlignmentXYPlots(0, 1, 3, prename);
-   align->CheckDetectorAlignmentXYPlots(1, 0, 3, prename);
-   align->CheckDetectorAlignmentXYPlots(2, 0, 3, prename);
-   align->CheckDetectorAlignmentXYPlots(3, 0, 2, prename);
 	
-	// cut non-physical tracks
-//	align->LoadTracks(tracks, tracks_mask);
-//	align->CutFakeTracks(true);
-   
-   // itterative alignment loop
-   for(int i=0; i<nPasses; i++) {
-      cout << "\n\nPass " << i+1 << endl<< endl;
-      //xy alignment
-      align->CheckDetectorAlignmentXY(0, 1, 3);
-      align->AlignDetectorXY(1, 0, 3);
-      align->AlignDetectorXY(2, 0, 3);
-      //align->AlignDetectorXY(1, 0, 3);
-      //align->AlignDetectorXY(2, 0, 3);
-      //align->AlignDetectorXY(1, 0, 3);
-      //align->AlignDetectorXY(2, 0, 3);
-      align->AlignDetectorXY(3, 0, 2);
-      //align->AlignDetectorXY(2, 0, 3);
-      //align->AlignDetectorXY(1, 0, 3);
-   
-      //phi alignment: this chunk of code causes seg faulting in code at top of loop!
-      //align->AlignDetectorPhi(1, 0, 3, false, false);
-      //align->AlignDetectorPhi(2, 0, 3, false, false);
-      //align->AlignDetectorPhi(3, 0, 2, false, false);
-   
-      //phi alignment: this chunk of code causes seg faulting in code at top of loop!
-      //align->AlignDetectorZ(1, 0, 3, false, false);
-      //align->AlignDetectorZ(2, 0, 3, false, false);
-      //align->AlignDetectorZ(3, 0, 2, false, false);
-   }
-   
-   cout<<endl;
-   cout<<endl;
-   cout<<"Checking final residuals"<<endl;
-   cout<<endl;
-   
-   // generate residuals after alignment
-   align->CheckDetectorAlignmentXYPlots(0, 1, 3, postname);
-   align->CheckDetectorAlignmentXYPlots(1, 0, 3, postname);
-   align->CheckDetectorAlignmentXYPlots(2, 0, 3, postname);
-   align->CheckDetectorAlignmentXYPlots(3, 0, 2, postname);
-   
-   cout<<endl;
-   
-   
-   //Now align the diamond
-   
-   //load fidcut tracks w/ 1 diamond cluster
-   align->LoadTracks(tracks_fidcut, tracks_fidcut_mask);
-   
-   //check that the silicon is still aligned for these tracks_fidcut
-   cout<<"Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;
-   align->CheckDetectorAlignmentXY(0, 1, 3);
-   align->CheckDetectorAlignmentXY(1, 0, 3);
-   align->CheckDetectorAlignmentXY(2, 0, 3);
-   align->CheckDetectorAlignmentXY(3, 0, 2);
-   
-   // generate residuals before alignment
-   align->CheckDetectorAlignmentXYPlots(4, 1, 2, prename);
-   
-    // itterative alignment loop
-   for(int i=0; i<5; i++) {
-      cout << "\n\nPass " << i+1 << endl<< endl;
-      //xy alignment
-      align->AlignDetectorXY(4, 1, 2);
-      //align->AlignDetectorXY(4, 0, 3);
-      //align->AlignDetectorXY(4, 1, 3);
-      //align->AlignDetectorXY(4, 0, 2);
-      //align->AlignDetectorXY(4, 1, 2);
-   }
-   
-   cout<<endl;
-   cout<<endl;
-   cout<<"Checking final diamond residuals"<<endl;
-   cout<<endl;
-   
-   // generate residuals after alignment
-   align->CheckDetectorAlignmentXYPlots(4, 1, 2, postname);
-   
-   
-   //report results in a file
-   
-   ostringstream alignment_summary_path;
-   alignment_summary_path << plots_path << "Alignment_Summary.txt";
-   ofstream alignment_summary(alignment_summary_path.str().c_str());
-   
-   alignment_summary << "Alignment summary " << endl;
-   alignment_summary << "----------------- " << endl << endl;
-   
-   alignment_summary << "Offsets (multiples of 50um):" << endl << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << "det_x_offset[" << det << "] = " << align->det_x_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << "det_y_offset[" << det << "] = " << align->det_y_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << "det_z_offset[" << det << "] = " << align->det_z_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << "det_phix_offset[" << det << "] = " << align->det_phix_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << "det_phiy_offset[" << det << "] = " << align->det_phiy_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   
-   alignment_summary << "Resolutions (multiples of 50um):" << endl << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << "det_x_resolution[" << det << "] = " << align->det_x_resolution[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << "det_y_resolution[" << det << "] = " << align->det_y_resolution[det] <<endl; 
-   }
-   
-   
-   alignment_summary << endl << endl;
-   alignment_summary << "Alignment summary (for pasting into a spread sheet) " << endl;
-   alignment_summary << "--------------------------------------------------- " << endl << endl;
-   
-   alignment_summary << "Offsets (multiples of 50um):" << endl << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << align->det_x_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << align->det_y_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << align->det_z_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << align->det_phix_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << align->det_phiy_offset[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   
-   alignment_summary << "Resolutions (multiples of 50um):" << endl << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << align->det_x_resolution[det] <<endl; 
-   }
-   alignment_summary << endl; 
-   for(int det=0; det<5; det++) {
-      alignment_summary << align->det_y_resolution[det] <<endl; 
-   }
-   alignment_summary.close();
-   
-   cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
-		if (!CutFakeTracksOn || alignStep == 1) break;
-//	align->LoadTracks(tracks, tracks_mask);
-	align->CutFakeTracks(tracks, tracks_mask, CutFakeTracksOn, true);
-		align->CutFakeTracks(tracks_fidcut, tracks_fidcut_mask, CutFakeTracksOn, true);
+	if(tracks.size()==0) {
+		cout<<"Clustering::Align: No tracks found; calling Clustering::ClusterRun first..."<<endl;
+		ClusterRun(plots);
 	}
+	
+	if (tracks.size() == 0) {
+		cout << "No tracks available. Alignment not possible. (tracks.size() = " << tracks.size() << ")" << endl;
+		return;
+	}
+	
+	vector<TDiamondTrack> alignment_tracks = tracks;
+	vector<bool> alignment_tracks_mask = tracks_mask;
+	vector<TDiamondTrack> alignment_tracks_fidcut = tracks_fidcut;
+	vector<bool> alignment_tracks_fidcut_mask = tracks_fidcut_mask;
+	ostringstream plots_path_alignment, plots_path_alignment_CutFakeTracks;
+	plots_path_alignment << plots_path << "/alignment/";
+	plots_path_alignment_CutFakeTracks << plots_path << "/alignment_CutFakeTracks/";
+	plots_path = plots_path_alignment.str();
+	
+	// now start the telescope alignment!
+	// loop bla: align, cut fake tracks, align again (if CutFakeTracksOn is set true)
+	for (int alignStep = 0; alignStep < 2; alignStep++) {
+		sys->mkdir(plots_path.c_str());
+//		TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
+		TDetectorAlignment* align = new TDetectorAlignment(plots_path, alignment_tracks, alignment_tracks_mask);
+		
+		Int_t nPasses = 10;
+		Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
+		
+		align->PlotAngularDistribution(); //look at angular distribution of tracks
+		align->PlotCartesianDistribution(); //look at slope distribution of tracks
+		
+		string prename = "alignment_PrealignmentResiduals";
+		string postname = "alignment_PostalignmentResiduals";
+		
+		// generate residuals before alignment
+		align->CheckDetectorAlignmentXYPlots(0, 1, 3, prename);
+		align->CheckDetectorAlignmentXYPlots(1, 0, 3, prename);
+		align->CheckDetectorAlignmentXYPlots(2, 0, 3, prename);
+		align->CheckDetectorAlignmentXYPlots(3, 0, 2, prename);
+		
+		// itterative alignment loop
+		for(int i=0; i<nPasses; i++) {
+			cout << "\n\nPass " << i+1 << endl<< endl;
+			//xy alignment
+			align->CheckDetectorAlignmentXY(0, 1, 3);
+			align->AlignDetectorXY(1, 0, 3);
+			align->AlignDetectorXY(2, 0, 3);
+			//align->AlignDetectorXY(1, 0, 3);
+			//align->AlignDetectorXY(2, 0, 3);
+			//align->AlignDetectorXY(1, 0, 3);
+			//align->AlignDetectorXY(2, 0, 3);
+			align->AlignDetectorXY(3, 0, 2);
+			//align->AlignDetectorXY(2, 0, 3);
+			//align->AlignDetectorXY(1, 0, 3);
+			
+			//phi alignment: this chunk of code causes seg faulting in code at top of loop!
+			//align->AlignDetectorPhi(1, 0, 3, false, false);
+			//align->AlignDetectorPhi(2, 0, 3, false, false);
+			//align->AlignDetectorPhi(3, 0, 2, false, false);
+			
+			//phi alignment: this chunk of code causes seg faulting in code at top of loop!
+			//align->AlignDetectorZ(1, 0, 3, false, false);
+			//align->AlignDetectorZ(2, 0, 3, false, false);
+			//align->AlignDetectorZ(3, 0, 2, false, false);
+		}
+		
+		cout<<endl;
+		cout<<endl;
+		cout<<"Checking final residuals"<<endl;
+		cout<<endl;
+		
+		// generate residuals after alignment
+		align->CheckDetectorAlignmentXYPlots(0, 1, 3, postname);
+		align->CheckDetectorAlignmentXYPlots(1, 0, 3, postname);
+		align->CheckDetectorAlignmentXYPlots(2, 0, 3, postname);
+		align->CheckDetectorAlignmentXYPlots(3, 0, 2, postname);
+		
+		cout<<endl;
+		
+		
+		//Now align the diamond
+		
+		//load fidcut tracks w/ 1 diamond cluster
+//		align->LoadTracks(tracks_fidcut, tracks_fidcut_mask);
+		align->LoadTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask);
+		
+		//check that the silicon is still aligned for these tracks_fidcut
+		cout<<"Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;
+		align->CheckDetectorAlignmentXY(0, 1, 3);
+		align->CheckDetectorAlignmentXY(1, 0, 3);
+		align->CheckDetectorAlignmentXY(2, 0, 3);
+		align->CheckDetectorAlignmentXY(3, 0, 2);
+		
+		// generate residuals before alignment
+		align->CheckDetectorAlignmentXYPlots(4, 1, 2, prename);
+		
+		// itterative alignment loop
+		for(int i=0; i<5; i++) {
+			cout << "\n\nPass " << i+1 << endl<< endl;
+			//xy alignment
+			align->AlignDetectorXY(4, 1, 2);
+			//align->AlignDetectorXY(4, 0, 3);
+			//align->AlignDetectorXY(4, 1, 3);
+			//align->AlignDetectorXY(4, 0, 2);
+			//align->AlignDetectorXY(4, 1, 2);
+		}
+		
+		cout<<endl;
+		cout<<endl;
+		cout<<"Checking final diamond residuals"<<endl;
+		cout<<endl;
+		
+		// generate residuals after alignment
+		align->CheckDetectorAlignmentXYPlots(4, 1, 2, postname);
+		
+		
+		//report results in a file
+		
+		ostringstream alignment_summary_path;
+		alignment_summary_path << plots_path << "Alignment_Summary.txt";
+		ofstream alignment_summary(alignment_summary_path.str().c_str());
+		
+		alignment_summary << "Alignment summary " << endl;
+		alignment_summary << "----------------- " << endl << endl;
+		
+		alignment_summary << "Offsets (multiples of 50um):" << endl << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << "det_x_offset[" << det << "] = " << align->det_x_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << "det_y_offset[" << det << "] = " << align->det_y_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << "det_z_offset[" << det << "] = " << align->det_z_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << "det_phix_offset[" << det << "] = " << align->det_phix_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << "det_phiy_offset[" << det << "] = " << align->det_phiy_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		
+		alignment_summary << "Resolutions (multiples of 50um):" << endl << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << "det_x_resolution[" << det << "] = " << align->det_x_resolution[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << "det_y_resolution[" << det << "] = " << align->det_y_resolution[det] <<endl; 
+		}
+		
+		
+		alignment_summary << endl << endl;
+		alignment_summary << "Alignment summary (for pasting into a spread sheet) " << endl;
+		alignment_summary << "--------------------------------------------------- " << endl << endl;
+		
+		alignment_summary << "Offsets (multiples of 50um):" << endl << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << align->det_x_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << align->det_y_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << align->det_z_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << align->det_phix_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << align->det_phiy_offset[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		
+		alignment_summary << "Resolutions (multiples of 50um):" << endl << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << align->det_x_resolution[det] <<endl; 
+		}
+		alignment_summary << endl; 
+		for(int det=0; det<5; det++) {
+			alignment_summary << align->det_y_resolution[det] <<endl; 
+		}
+		alignment_summary.close();
+		
+		cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
+		if (!CutFakeTracksOn || alignStep == 1) break;
+		align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, CutFakeTracksOn, true);
+		align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, CutFakeTracksOn, true);
+		plots_path = plots_path_alignment_CutFakeTracks.str();
+	} // end loop bla
    /*
    //Plot out the offsets
    for(Int_t plane=1; plane<4; plane++) {

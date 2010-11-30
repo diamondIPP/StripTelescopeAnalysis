@@ -212,7 +212,6 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
 	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
 	void CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool CutFakeTracksOn = false, bool verbose = false);
-//	void CutFakeTracks(bool CutFakeTracksOn = false, bool verbose = false);
 	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
 
    protected:
@@ -1400,7 +1399,6 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
 }
 
 void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool CutFakeTracksOn, bool verbose) {
-//void TDetectorAlignment::CutFakeTracks(bool CutFakeTracksOn = false, bool verbose = false) {
 	LoadTracks(tracks, tracks_mask);
 	vector<Float_t> X_positions, Y_positions, Z_positions;
 	int NCutTracks = 0;
@@ -1408,7 +1406,6 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 	if (verbose) cout << "calculating silicon resolution.." << endl;
 	Float_t res = GetSiResolution();
 	if (verbose) cout << "silicon resolution: " << res << endl;
-	//TH1F *middleresX = new TH1F("middleresX", "middleresX", 10000,-100,100);
 	TH1F *histo_alignmentfitchi2_XStrips = new TH1F("histo_alignmentfitchi2_XStrips","histo_alignmentfitchi2_XStrips",100,0.,20.);
 	TH1F *histo_alignmentfitchi2_YStrips = new TH1F("histo_alignmentfitchi2_YStrips","histo_alignmentfitchi2_YStrips",100,0.,20.);
 	TH1F *histo_alignmentfitchi2_XStripsWindow = new TH1F("histo_alignmentfitchi2_XStripsWindow","histo_alignmentfitchi2_XStripsWindow",100,0.,20.);
