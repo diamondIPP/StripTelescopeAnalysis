@@ -137,6 +137,7 @@ class Clustering {
       //Alignment
       vector<TDiamondTrack> tracks, tracks_fidcut;
       vector<bool> tracks_mask, tracks_fidcut_mask;
+	Float_t alignment_chi2;
 
       //Telescope geometry
       Double_t detectorD0Z;
@@ -307,6 +308,9 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    //Double_t detectorD2Z = 12.725; // by definition
    //Double_t detectorD3Z = 13.625; // by definition
    //Double_t detectorDiaZ = 7.2; // by definition
+	
+	//cut tracks with chi2 > alignment_chi2
+	alignment_chi2 = 9999.;
 
    //Is the diamond aligned to Silicon x coordinates?
    dia_x_aligned = true;
@@ -962,6 +966,10 @@ void Clustering::LoadSettings() {
          cout << key.c_str() << " = " << value.c_str() << endl;
          snr_distribution_di_max = (int)strtod(value.c_str(),0);
       }
+	   if (key == "alignment_chi2") {
+		   cout << key.c_str() << " = " << value.c_str() << endl;
+		   alignment_chi2 = (Float_t)strtod(value.c_str(),0);
+	   }
    }
    
    file.close();
@@ -3060,8 +3068,8 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 		
 		cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 		if (!CutFakeTracksOn || alignStep == 1) break;
-		align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, CutFakeTracksOn, true);
-		align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, CutFakeTracksOn, true);
+		align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, alignment_chi2, CutFakeTracksOn, true);
+		align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, alignment_chi2, CutFakeTracksOn, true);
 		plots_path = plots_path_alignment_CutFakeTracks.str();
 	} // end loop bla
    /*

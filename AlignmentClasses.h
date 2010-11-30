@@ -211,7 +211,7 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXY(int subject_detector, bool verbose = true);
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
 	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
-	void CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool CutFakeTracksOn = false, bool verbose = false);
+	void CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, Float_t alignment_chi2 = 9999., bool CutFakeTracksOn = false, bool verbose = false);
 	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
 
    protected:
@@ -1398,11 +1398,14 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
    
 }
 
-void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool CutFakeTracksOn, bool verbose) {
+void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, Float_t alignment_chi2, bool CutFakeTracksOn, bool verbose) {
 	LoadTracks(tracks, tracks_mask);
 	vector<Float_t> X_positions, Y_positions, Z_positions;
 	int NCutTracks = 0;
 	Float_t X_Mean, Y_Mean, Z_Mean;
+	if (verbose) cout << "Fitting tracks linearly";
+	if (verbose && CutFakeTracksOn) cout << " and cut off tracks with a chi2 > " << alignment_chi2 << " for further alignment";
+	if (verbose) cout << "." << endl;
 	if (verbose) cout << "calculating silicon resolution.." << endl;
 	Float_t res = GetSiResolution();
 	if (verbose) cout << "silicon resolution: " << res << endl;
@@ -1439,7 +1442,7 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 		}
 		// cuts non-physical tracks for a further alignment
 		if (CutFakeTracksOn) {
-			if (X_chi2 > 8 || Y_chi2 > 8) tracks_mask[i] = 0;
+			if (X_chi2 > alignment_chi2 || Y_chi2 > alignment_chi2) tracks_mask[i] = 0;
 			NCutTracks++;
 			if (verbose) cout << "track " << i << " with X_chi2 = " << X_chi2 << ", Y_chi2 = " << Y_chi2 << " is masked as 0 and not used for further alignment." << endl;
 		}
