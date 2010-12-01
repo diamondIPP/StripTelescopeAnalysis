@@ -26,6 +26,8 @@
 //                    -> track with residuals' widths as uncertainties
 //                    -> align with tracking (this makes sure tracks are really tracks; thereby improving residuals)
 //2010-11-12 Blinded the alignment resolution determination
+//2010-12-01 Created AutoFidCut() to Clustering.class.cpp
+
 
 //C++ standard libraries
 #include <fstream>
@@ -52,6 +54,8 @@ using namespace std;
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TPaveText.h"
+#include "FidCutRegion.h"
+
 
 using namespace TMath;
 
@@ -85,6 +89,7 @@ class Clustering {
       void GenerateHTML();
       void ClusterRun(bool plots = 1, bool AlternativeClustering = 0);
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
+	  void AutoFidCut();
       
    private:
       //general settings
@@ -219,6 +224,21 @@ class Clustering {
       TH1F* histo_hitocc_saturated[9][2]; //second index: number saturated, fraction saturated
       TH1F* histo_clusters_average[9][3]; //second index: no fidcut, fidcut, no track req
       
+	  TH2F* histo_afc_clone;
+	  TH1F* histo_afc_x; //defined for AutoFidCut(), sum of hits per x bin, (max, 19.11.2010)
+	  TH1F* histo_afc_x_nzv; //definded for AutoFidCut(), # of non-zero values in x bins (max, 19.11.2010)
+	  TH1F* histo_afc_x_mean; //defined for AutoFidCut(), mean for x bins (max, 19.11.2010)
+	  TH1F* histo_afc_y; //defined for AutoFidCut(), sum of hits per y bin (max, 19.11.2010)
+	  TH1F* histo_afc_y_nzv; //defined for AutoFidCut(), # of non-zero values in y bins (max, 19.11.2010)
+	  TH1F* histo_afc_y_mean; //defined for AutoFidCut(), mean for y bins (max, 19.11.2010)
+	
+	  TH1F* histo_afc_x_cut;
+	  TH1F* histo_afc_y_cut;
+	
+	  FidCutRegion* FCR[4];	
+	
+	
+	
    private:
       
       //plots toggle switches
@@ -633,6 +653,18 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    }
 
    
+	histo_afc_x = new TH1F("histo_afc_x","histo_afc_x",256,0,255); // for afc (max, 19.11.2010)
+	histo_afc_y = new TH1F("histo_afc_y","histo_afc_y",256,0,255); // for afc (max, 19.11.2010)
+	histo_afc_clone = new TH2F("histo_afc_clone","histo_afc_clone",256,0,255,256,0,255);
+	
+	histo_afc_x_cut = new TH1F("histo_afc_x_cut","histo_afc_x_cut",256,0,255);
+	histo_afc_y_cut = new TH1F("histo_afc_y_cut","histo_afc_y_cut",256,0,255);
+	
+	for(int i=0;i<4;i++) {
+	 FCR[i] = new FidCutRegion(i);
+	 FCR[i]->SetAllValuesZero();
+	}
+	
    //initialize counters
    total_events = 0, totalsurviving_events = 0, singlesitrack_events = 0, singlesitrack_1diamondclus_events = 0, singlesitrack_fidcut_events = 0, singlesitrack_fidcut_1diamondclus_events = 0, CMNEvents = 0, ZeroDivisorEvents = 0;
    for(int i=0; i<4; i++) detectorxycluster_events[i] = 0;
@@ -2817,6 +2849,8 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
       }
    }
    
+	AutoFidCut(); //added 2010-12-01 (max)
+	
    //Draw plots and generate HTML
    if(plots) {
       DrawHistograms();
@@ -2868,6 +2902,209 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
    cout<<"counter_alignment_only_fidcut_tracks/float(counter_alignment_fidcut_tracks) = "<<counter_alignment_only_fidcut_tracks/float(counter_alignment_fidcut_tracks)<<endl;
    cout<<"singlesitrack_fidcut_events = "<<singlesitrack_fidcut_events<<endl;
    
+}
+
+void Clustering::AutoFidCut() {
+	
+	//define sum and counter vectors for x columns and y rows
+	int histo_afc_col_sums_x[256];
+	int histo_afc_col_sums_y[256];
+	
+	cout << "\n";
+	cout << "AutoFidCut: I'm the AutoFidCut function.\n\n";
+	
+	cout << "\n\n\n START AutoFidCut \n\n";
+	
+	
+	//calculate y bin values for each x column and count # of non-zero bins and set the corresponding histogram bins
+	for(int i=0;i<256;i++) {
+		histo_afc_col_sums_x[i] = 0;
+		for(int j=0;j<256;j++) {
+			histo_afc_col_sums_x[i] = histo_afc_col_sums_x[i] + histo_scatter[4][1]->GetBinContent(i,j);
+			histo_afc_x->SetBinContent(i,histo_afc_col_sums_x[i]);
+		}
+		
+	}
+	
+	//calculate x bin values for each y row and count # of non-zero bins and set the corresponding histogram bins
+	for(int j=0;j<256;j++) {
+		histo_afc_col_sums_y[j] = 0;
+		for(int i=0;i<256;i++) {
+			histo_afc_col_sums_y[j] = histo_afc_col_sums_y[j] + histo_scatter[4][1]->GetBinContent(i,j);
+			histo_afc_y->SetBinContent(j,histo_afc_col_sums_y[j]);
+		}
+		
+	}
+	
+	//get maximums for x and y histogram
+	int histo_afc_x_max = (int)histo_afc_x->GetMaximum();
+	int histo_afc_y_max = (int)histo_afc_y->GetMaximum();
+	
+	//set cut factor for pre-fidcut
+	float afc_cut_factor = 0.4;
+	
+	//write maxima of x and y histograms to stdout
+	cout << "histo_afc_x->GetMaximum() is:\t" << (int)histo_afc_x->GetMaximum() << "\n";
+	cout << "histo_afc_y->GetMaximum() is:\t" << (int)histo_afc_y->GetMaximum() << "\n";
+	
+	//set x and y fidcut histograms
+	for(int i=0;i<256;i++) {
+		if( (histo_afc_x->GetBinContent(i)) < (afc_cut_factor*histo_afc_x_max)) {
+			histo_afc_x_cut->SetBinContent(i,0);
+		} else {
+			histo_afc_x_cut->SetBinContent(i,histo_afc_x->GetBinContent(i));
+		}
+	}
+	
+	for(int j=0;j<256;j++) {
+		if( (histo_afc_y->GetBinContent(j)) < (afc_cut_factor*histo_afc_y_max)) {
+			histo_afc_y_cut->SetBinContent(j,0);
+		} else {
+			histo_afc_y_cut->SetBinContent(j,histo_afc_y->GetBinContent(j));
+		}
+		
+	}	
+	
+	
+	//TH2F histo_afc_scatter_firstfidcut = new TH2F("histo_afc_scatter_firstfidcut",256,0,255,256,0,255);
+	TH2F *histo_afc_scatter_firstfidcut = (TH2F*)histo_scatter[4][1]->Clone();
+	histo_afc_scatter_firstfidcut->SetName("histo_afc_scatter_firstfidcut");
+	
+	int afc_width_min = 20;
+	
+	int afc_width_counter = 0;
+	int afc_last_start = 0;
+	int afc_last_end = 0;
+	
+	int afc_block_count_x = 0;
+	int afc_block_count_y = 0;
+	
+	for(int j=1;j<256;j++) {
+		if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) == 0) ) {
+			afc_last_start = j;
+			afc_width_counter++;
+			afc_block_count_x++;
+			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+		} else if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) ) {
+			afc_width_counter++;
+			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			continue;
+		} else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
+			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			for(int k=afc_last_start;k<=j;k++) {
+				histo_afc_x_cut->SetBinContent(k,0);
+			}
+			afc_block_count_x--;
+			afc_width_counter = 0;
+			continue;
+		} else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
+			afc_width_counter = 0;
+			afc_block_count_x++;
+			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			
+		} else if ( (histo_afc_x_cut->GetBinContent(j) == 0) ) {
+			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			continue;
+		}
+		else {
+			afc_width_counter++;
+			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+		}
+	}
+	
+	
+	
+	for(int j=1;j<256;j++) {
+		if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) == 0) ) {
+			afc_last_start = j;
+			afc_width_counter++;
+			afc_block_count_y++;
+			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+		} else if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) ) {
+			afc_width_counter++;
+			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			continue;
+		} else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
+			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			for(int k=afc_last_start;k<=j;k++) {
+				histo_afc_y_cut->SetBinContent(k,0);
+			}
+			afc_block_count_y--;
+			afc_width_counter = 0;
+			continue;
+		} else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
+			afc_width_counter = 0;
+			afc_block_count_y++;
+			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			
+		} else if ( (histo_afc_y_cut->GetBinContent(j) == 0) ) {
+			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+			continue;
+		}
+		else {
+			afc_width_counter++;
+			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+		}
+	}
+	
+	for(int i=0;i<256;i++) {
+		if(histo_afc_x_cut->GetBinContent(i) == 0) {
+			for(int k=0;k<256;k++) {
+				histo_afc_scatter_firstfidcut->SetBinContent(i,k,0);
+			}
+		}
+	}
+	
+	for(int j=0;j<256;j++) {
+		if(histo_afc_y_cut->GetBinContent(j) == 0) {
+			for(int k=0;k<256;k++) {
+				histo_afc_scatter_firstfidcut->SetBinContent(k,j,0);
+			}
+		}
+	}
+	
+	
+	int afc_regions_count = (afc_block_count_x/2)*(afc_block_count_y/2);
+	int afc_regions_safety_delta = 5;
+	
+	cout << "\nafc_block_count_x is:\t" << afc_block_count_x << "\n";
+	cout << "afc_block_count_y is:\t" << afc_block_count_y << "\n";
+	cout << "That means, we have " << afc_block_count_x/2 << " block(s) in x- and " << afc_block_count_y/2 << " block(s) in y-direction. so: " << afc_regions_count << " in total.\n\n";
+	
+	
+	
+	//take afc_block_counts_x and afc_block_counts_y and populate FCRs
+	
+	
+	for(int i=0;i<afc_regions_count;i++) {
+		FCR[i]->SetAllValuesZero();
+		
+		
+		//		FCR[i]->SetValueXLow(some_var+afc_regions_safety_delta);
+		//		FCR[i]->SetValueXHigh(some_var-afc_regions_safety_delta);
+		//		FCR[i]->SetValueYLow(some_var+afc_regions_safety_delta);
+		//		FCR[i]->SetValueYHigh(some_var-afc_regions_safety_delta);
+	}
+	
+	histo_afc_scatter_firstfidcut->SetTitle("First Fidcut on Scatter Plot");
+	
+	
+	
+	FCR[0]->GetAllValues();
+	
+	FCR[3]->SetAllValuesZero();
+	FCR[3]->SetValueXLow(1);
+	FCR[3]->SetValueYHigh(2);
+	FCR[3]->GetAllValues();
+	
+	SaveHistogramPNG(histo_afc_x);
+	SaveHistogramPNG(histo_afc_y);
+	SaveHistogramPNG(histo_afc_x_cut);
+	SaveHistogramPNG(histo_afc_y_cut);
+	SaveHistogramPNG(histo_afc_scatter_firstfidcut);
+	
+	cout << "\n";
+	cout << "FINISHED AutoFidCut \n\n\n";
 }
 
 void Clustering::Align(bool plots, bool CutFakeTracksOn) {
