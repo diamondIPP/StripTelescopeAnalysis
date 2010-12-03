@@ -90,6 +90,7 @@ class Clustering {
       void ClusterRun(bool plots = 1, bool AlternativeClustering = 0);
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
 	  void AutoFidCut();
+	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool verbose = false);
       
    private:
       //general settings
@@ -1588,7 +1589,7 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 					}
 				}
 			}
-		}
+		} // end loop over seeds
 		
 		//now that we have lists of channels belonging to clusters, let's create Cluster objects to store the data
 		Cluster* current_cluster = 0;
@@ -1980,7 +1981,7 @@ void Clustering::BookHistograms() {
          if(clustered_event.GetNClusters(8)==1 && fiducial_track) {
             if(clustered_event.GetCluster(8,0)->highest2_centroid!=-1) {
                Dia.SetX(clustered_event.GetCluster(8,0)->highest2_centroid);
-               TDiamondTrack track_fidcut = TDiamondTrack(D0,D1,D2,D3,Dia);
+               TDiamondTrack track_fidcut = TDiamondTrack(clustered_event.event_number,D0,D1,D2,D3,Dia);
                tracks_fidcut.push_back(track_fidcut);
                counter_alignment_fidcut_tracks++;
                mask = rand.Uniform()<alignment_training_track_fraction;
@@ -1991,7 +1992,7 @@ void Clustering::BookHistograms() {
          else
             Dia.SetX(-1);
          
-         TDiamondTrack track = TDiamondTrack(D0,D1,D2,D3);
+         TDiamondTrack track = TDiamondTrack(clustered_event.event_number,D0,D1,D2,D3);
          //track.SetEventNumber(Silicon_tracks[t].Event_number);
          tracks.push_back(track);
          counter_alignment_tracks++;
@@ -3304,10 +3305,16 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 		alignment_summary.close();
 		
 		cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
-		if (!CutFakeTracksOn || alignStep == 1) break;
-		align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, alignment_chi2, CutFakeTracksOn, true);
-		align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, alignment_chi2, CutFakeTracksOn, true);
-		plots_path = plots_path_alignment_CutFakeTracks.str();
+		
+		if (CutFakeTracksOn && alignStep < 1) {
+			align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, alignment_chi2, CutFakeTracksOn, true);
+			align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, alignment_chi2, CutFakeTracksOn, true);
+			plots_path = plots_path_alignment_CutFakeTracks.str();
+		}
+		if (!CutFakeTracksOn || alignStep == 1) {
+//			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask);
+			break;
+		}
 	} // end loop bla
    /*
    //Plot out the offsets
@@ -3327,4 +3334,24 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
       cout<<align->GetPhiOffset(plane)<<endl;
    }
    */
+}
+
+// -- take track after alignment, point into diamond and produce a cluster with the surrounding channels
+void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool verbose) {
+	cout << "Starting transparent clustering.." << endl;
+	int event;
+	
+	// loop over tracks
+	for (int i = 0; i < tracks.size(); i++) {
+		if (!tracks_mask[i]) {
+			if (verbose) cout << "Track " << i << " is masked and skipped." << endl;
+			continue;
+		}
+		event = tracks[i].GetEventNumber();
+		if (event < 0) {
+			if (verbose) cout << "Track " << i << " has no event number. Skipping track.." << endl;
+			continue;
+		}
+		PedTree->GetEvent(event);
+	} // end loop over tracks
 }

@@ -84,8 +84,8 @@ class TDiamondTrack{
 
    public:
       TDiamondTrack() {};
-      TDiamondTrack(TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3);
-      TDiamondTrack(TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3, TDetectorPlane Dia);
+      TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3);
+      TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3, TDetectorPlane Dia);
       ~TDiamondTrack();
       TDetectorPlane const GetD0() { return D0;};
       TDetectorPlane const GetD1() { return D1;};
@@ -96,8 +96,11 @@ class TDiamondTrack{
       TDetectorPlane const GetD(Int_t detector);
       Float_t GetDetectorHitPosition(Int_t det /*det = 0 to 8*/);
       void SetDetectorHitPosition(Int_t det /*det = 0 to 8*/, Float_t pos);
+	int GetEventNumber() {return event_number;};
+	void SetEventNumber(int event) {event_number = event;};
 
    protected:
+	int event_number;
       TDetectorPlane D0;
       TDetectorPlane D1;
       TDetectorPlane D2;
@@ -105,21 +108,23 @@ class TDiamondTrack{
       TDetectorPlane D4;
 };
 
-TDiamondTrack::TDiamondTrack(TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3)
+TDiamondTrack::TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3)
 {
    D0 = Det0;
    D1 = Det1;
    D2 = Det2;
    D3 = Det3;
+	event_number = event;
 }
 
-TDiamondTrack::TDiamondTrack(TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3, TDetectorPlane Dia)
+TDiamondTrack::TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3, TDetectorPlane Dia)
 {
    D0 = Det0;
    D1 = Det1;
    D2 = Det2;
    D3 = Det3;
    D4 = Dia;
+	event_number = event;
 }
 
 
@@ -390,7 +395,7 @@ void TDetectorAlignment::LoadData(TDiamondTrack track)
    }
    
    //load track
-   TDiamondTrack temptrack(det_buffer[0],det_buffer[1],det_buffer[2],det_buffer[3],det_buffer[4]);
+   TDiamondTrack temptrack(-1,det_buffer[0],det_buffer[1],det_buffer[2],det_buffer[3],det_buffer[4]);
    track_holder = temptrack;
    
    /* //diagnostics
@@ -1149,7 +1154,7 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
          if(subject_detector == 2) D2_buf.SetZ(z);
          if(subject_detector == 3) D3_buf.SetZ(z);
      
-         TDiamondTrack new_track = TDiamondTrack(D0_buf, D1_buf, D2_buf, D3_buf);
+         TDiamondTrack new_track = TDiamondTrack(-1,D0_buf, D1_buf, D2_buf, D3_buf);
          temp_tracks.push_back(new_track);
       }
       det_z_offset[subject_detector] = z;
