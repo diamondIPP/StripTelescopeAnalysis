@@ -98,6 +98,7 @@ class TDiamondTrack{
       void SetDetectorHitPosition(Int_t det /*det = 0 to 8*/, Float_t pos);
 	int GetEventNumber() {return event_number;};
 	void SetEventNumber(int event) {event_number = event;};
+	bool FakeTrack;
 
    protected:
 	int event_number;
@@ -115,6 +116,7 @@ TDiamondTrack::TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1
    D2 = Det2;
    D3 = Det3;
 	event_number = event;
+	FakeTrack = false;
 }
 
 TDiamondTrack::TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3, TDetectorPlane Dia)
@@ -125,6 +127,7 @@ TDiamondTrack::TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1
    D3 = Det3;
    D4 = Dia;
 	event_number = event;
+	FakeTrack = false;
 }
 
 
@@ -395,7 +398,7 @@ void TDetectorAlignment::LoadData(TDiamondTrack track)
    }
    
    //load track
-   TDiamondTrack temptrack(-1,det_buffer[0],det_buffer[1],det_buffer[2],det_buffer[3],det_buffer[4]);
+   TDiamondTrack temptrack(track.GetEventNumber(),det_buffer[0],det_buffer[1],det_buffer[2],det_buffer[3],det_buffer[4]);
    track_holder = temptrack;
    
    /* //diagnostics
@@ -692,7 +695,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    //now select tracks with reasonably small residuals
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
-      if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
+      if(!track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
@@ -805,7 +808,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       //now select tracks with reasonably small residuals
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
       {
-         if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
+         if(!track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
          LoadData(track_storage[t]);
          if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
             PositionPredictor(subject_detector);
@@ -866,7 +869,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       
    //generate residuals to get the new resolutions
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++) {
-      if(track_mask_storage[t]) continue; // skip tracks selected for determining alignment constants
+      if(track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks selected for determining alignment constants or track is marked as fake track
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
@@ -959,7 +962,7 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
    
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
-      if(track_mask_storage[t]) continue; // skip tracks selected for determining alignment constants
+      if(track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks selected for determining alignment constants or track is marked as fake track
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
@@ -1420,7 +1423,7 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 	TH1F *histo_alignmentfitchi2_YStripsWindow = new TH1F("histo_alignmentfitchi2_YStripsWindow","histo_alignmentfitchi2_YStripsWindow",100,0.,20.);
 	TF1 *fcn_chi2 = new TF1("chi2","TMath::Exp((-1)*x/2) / 2", 0., 100.);
 	for (int i = 0; i < track_storage.size(); i++) {
-		if (!track_mask_storage[i]) continue;
+		if (track_storage[i].FakeTrack) continue;
 		LoadData(track_storage[i]);
 		X_positions.clear();
 		Y_positions.clear();
@@ -1447,8 +1450,10 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 		}
 		// cuts non-physical tracks for a further alignment
 		if (CutFakeTracksOn) {
-			if (X_chi2 > alignment_chi2 || Y_chi2 > alignment_chi2) tracks_mask[i] = 0;
-			NCutTracks++;
+			if (X_chi2 > alignment_chi2 || Y_chi2 > alignment_chi2) {
+				tracks[i].FakeTrack = true;
+				NCutTracks++;
+			}
 			if (verbose) cout << "track " << i << " with X_chi2 = " << X_chi2 << ", Y_chi2 = " << Y_chi2 << " is masked as 0 and not used for further alignment." << endl;
 		}
 	}

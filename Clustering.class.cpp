@@ -90,7 +90,8 @@ class Clustering {
       void ClusterRun(bool plots = 1, bool AlternativeClustering = 0);
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
 	  void AutoFidCut();
-	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool verbose = false);
+	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
+	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
       
    private:
       //general settings
@@ -144,6 +145,7 @@ class Clustering {
       vector<TDiamondTrack> tracks, tracks_fidcut;
       vector<bool> tracks_mask, tracks_fidcut_mask;
 	Float_t alignment_chi2;
+	vector<Float_t> dia_offset;
 
       //Telescope geometry
       Double_t detectorD0Z;
@@ -3120,6 +3122,16 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 		return;
 	}
 	
+/*	int count_true = 0;
+	int count_false = 0;
+	for (int i = 0; i < tracks_mask.size(); i++) {
+		cout << "track " << i << " has mask " << tracks_mask[i] << endl;
+		if (tracks_mask[i]) count_true++;
+		if (!tracks_mask[i]) count_false++;
+	}
+	cout << count_true << " tracks are masked as true and " << count_false << " tracks as false." << endl;
+	return;*/
+	
 	vector<TDiamondTrack> alignment_tracks = tracks;
 	vector<bool> alignment_tracks_mask = tracks_mask;
 	vector<TDiamondTrack> alignment_tracks_fidcut = tracks_fidcut;
@@ -3312,7 +3324,11 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 			plots_path = plots_path_alignment_CutFakeTracks.str();
 		}
 		if (!CutFakeTracksOn || alignStep == 1) {
-//			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask);
+			dia_offset.clear();
+			dia_offset.push_back(align->GetXOffset(5));
+			dia_offset.push_back(align->GetYOffset(5));
+			dia_offset.push_back(align->GetZOffset(5));
+//			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
 			break;
 		}
 	} // end loop bla
@@ -3337,21 +3353,95 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 }
 
 // -- take track after alignment, point into diamond and produce a cluster with the surrounding channels
-void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, bool verbose) {
+void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose) {
 	cout << "Starting transparent clustering.." << endl;
 	int event;
+	vector<Float_t> x_positions, y_positions, z_positions, par;
 	
 	// loop over tracks
 	for (int i = 0; i < tracks.size(); i++) {
+		// check if track is masked
 		if (!tracks_mask[i]) {
 			if (verbose) cout << "Track " << i << " is masked and skipped." << endl;
 			continue;
 		}
+		
+		// get event number for track
 		event = tracks[i].GetEventNumber();
+		
+		// check if event number is valid
 		if (event < 0) {
 			if (verbose) cout << "Track " << i << " has no event number. Skipping track.." << endl;
 			continue;
 		}
+		
+		// load data (apply offset)
+		align->LoadData(tracks[i]);
+		
+		// read out x, y, z positions
+		x_positions.clear();
+		y_positions.clear();
+		z_positions.clear();
+		for (int det = 0; det < 4; det++) {
+			x_positions.push_back(align->track_holder.GetD(det).GetX());
+			y_positions.push_back(align->track_holder.GetD(det).GetY());
+			z_positions.push_back(align->track_holder.GetD(det).GetZ());
+		}
+		
+		// fit track
+//		align->LinTrackFit(..)
+//	TODO: adapt TDetectorAlignment::CutFakeTracks(..) that fit parameters are returned
+		
+		// estimate hit position in diamond
+		
+		//get event
 		PedTree->GetEvent(event);
+		
+		// cluster diamond channels around estimated hit position
 	} // end loop over tracks
+}
+
+// -- fits Y = par[0] + par[1] * x
+void Clustering::LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par) {
+	Float_t X_Mean = 0;
+	Float_t Y_Mean = 0;
+	Float_t tmp1 = 0;
+	Float_t tmp2 = 0;
+	Float_t tmp3 = 0;
+	Float_t tmp4 = 0;
+	Float_t rms = 0;
+	Float_t p[2];
+	if (x_positions.size() != y_positions.size()) {
+		cout << "x_positions.size() != y_positions.size()" << endl;
+		return;
+	}
+	for (int i = 0; i < x_positions.size(); i++) {
+		X_Mean = X_Mean + x_positions[i];
+		Y_Mean = Y_Mean + y_positions[i];
+	}
+	X_Mean = X_Mean / x_positions.size();
+	Y_Mean = Y_Mean / y_positions.size();
+	for (int i = 0; i < x_positions.size(); i++) {
+		tmp1 = tmp1 + ((x_positions[i] - X_Mean) * (y_positions[i] - Y_Mean));
+		tmp2 = tmp2 + ((x_positions[i] - X_Mean) * (x_positions[i] - X_Mean));
+	}
+	p[1] = tmp1 / tmp2;
+	p[0] = Y_Mean - par[1] * X_Mean;
+	par.clear();
+	par.push_back(p[0]);
+	par.push_back(p[1]);
+	return;
+/*	//	cout << " --" << endl;
+	// -- 
+	for (int i = 0; i < x_positions.size(); i++) {
+		tmp1 = par[0] + par[1] * X[i];
+		tmp3 = tmp3 + (tmp1 - Y[i]) * (tmp1 - Y[i]);
+		//		cout << "plane " << i << "\t hit position: ( " << X[i] << " , " << Y[i] << " ) fit position: " << tmp1 << endl;
+		tmp4 = tmp4 + (Y[i] - Y_Mean) * (Y[i] - Y_Mean);
+	}
+	par[2] = tmp3 / (res * res);
+	rms = TMath::Sqrt(tmp4/Y.size());
+	//	cout << "rms: " << rms << endl;
+	//	cout << "chi2: " << par[2] << endl;
+	return par[2];*/
 }
