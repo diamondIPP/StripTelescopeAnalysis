@@ -238,8 +238,7 @@ class Clustering {
 	  TH1F* histo_afc_x_cut;
 	  TH1F* histo_afc_y_cut;
 	
-	  FidCutRegion* FCR[4];	
-	
+	  FidCutRegion* FCR[4];
 	
 	
    private:
@@ -375,6 +374,12 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pedfilepath << sys->pwd() << "/Pedestal." << RunNumber;
    if(RunDescription=="") pedfilepath << ".root";
    else pedfilepath << "-" << RunDescription << ".root";
+	
+	// create file histograms.root
+	ostringstream root_histo_file_path;
+	root_histo_file_path << plotspath.str().c_str() << "histograms.root";
+	cout << "creating " << root_histo_file_path.str().c_str() << " .." << endl;
+	TFile fplots(root_histo_file_path.str().c_str(),"RECREATE");
    
    LoadSettings();
    
@@ -1698,10 +1703,11 @@ void Clustering::SaveHistogramROOT(TH1F* histo) {
    pt->Draw();
    ostringstream plot_filename;
 	ostringstream histo_filename;
-	histo_filename << plots_path << histo->GetName() << "_histo.root";
+//	histo_filename << plots_path << histo->GetName() << "_histo.root";
+	histo_filename << plots_path << "histograms.root";
    plot_filename << plots_path << histo->GetName() << ".root";
    plots_canvas.Print(plot_filename.str().c_str());
-	TFile f(histo_filename.str().c_str(),"new");
+	TFile f(histo_filename.str().c_str(),"UPDATE");
 	histo->Write();
 }
 

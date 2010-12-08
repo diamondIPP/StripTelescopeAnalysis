@@ -274,7 +274,7 @@ class TDetectorAlignment{
       */
       Double_t residualsXmean, residualsYmean, residualsXrms, residualsYrms; 
       string plots_path;
-      int SaveAllFilesSwitch, ClosePlotsOnSave;
+      int SaveAllFilesSwitch, ClosePlotsOnSave, SaveAllRootFilesSwitch;
       
 };
 
@@ -1018,6 +1018,12 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
          delete tempcan;
       }
    }
+	if (SaveAllRootFilesSwitch) {
+		ostringstream histo_filename;
+		histo_filename << titleresx << ".root";
+		TFile f(histo_filename.str().c_str(),"new");
+		plotresidualsX.Write();
+	}
    
    tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
    //plotresidualsY.GetXaxis()->SetRangeUser(resymean-plot_width_factor*resyrms,resymean+plot_width_factor*resyrms);
@@ -1041,6 +1047,12 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
          delete tempcan;
       }
    }
+	if (SaveAllRootFilesSwitch) {
+		ostringstream histo_filename;
+		histo_filename << titleresy << ".root";
+		TFile f(histo_filename.str().c_str(),"new");
+		plotresidualsY.Write();
+	}
    
    gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
    tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
