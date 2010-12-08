@@ -220,7 +220,7 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
 	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
 	void CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, Float_t alignment_chi2 = 9999., bool CutFakeTracksOn = false, bool verbose = false);
-	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res);
+	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, vector<Float_t> &par, Float_t res = 9999.);
 
    protected:
       TDetectorPlane D0;
@@ -1449,8 +1449,9 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 		Float_t Y_chi2;
 //		cout << "X: " << X_positions[0] << "\t Y: " << Y_positions[0] << "\t Z: " << Z_positions[0] << endl;
 		if (verbose) cout << " -- fitting track " << i << " .." << endl << "res: " << res << endl;
-		X_chi2 = LinTrackFit(Z_positions, X_positions, res);
-		Y_chi2 = LinTrackFit(Z_positions, Y_positions, res);
+		vector<Float_t> par;
+		X_chi2 = LinTrackFit(Z_positions, X_positions, par, res);
+		Y_chi2 = LinTrackFit(Z_positions, Y_positions, par, res);
 		histo_alignmentfitchi2_XStrips->Fill(X_chi2);
 		histo_alignmentfitchi2_YStrips->Fill(Y_chi2);
 		if (X_positions[0] > 80. && X_positions[0] < 100. && Y_positions[0] > 80. && Y_positions[0] < 100.) {
@@ -1492,9 +1493,10 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 	delete tmpcan;
 }
 
-Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Float_t res) {
+Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, vector<Float_t> &par, Float_t res) {
 	// -- fits Y = par[0] + par[1] * x
 	// -- returns chi2
+	par.clear();
 	Float_t X_Mean = 0;
 	Float_t Y_Mean = 0;
 	Float_t tmp1 = 0;
@@ -1502,8 +1504,11 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Fl
 	Float_t tmp3 = 0;
 	Float_t tmp4 = 0;
 	Float_t rms = 0;
-	Float_t par[3];
-	if (X.size() != Y.size()) return par[0];
+//	Float_t par[3];
+	if (X.size() != Y.size()) {
+		cout << "TDetectorAlignment::LinTrackFit: number of x and y positions is different!" << endl;
+		return 9999.;
+	}
 	for (int i = 0; i < X.size(); i++) {
 		X_Mean = X_Mean + X[i];
 		Y_Mean = Y_Mean + Y[i];
@@ -1514,8 +1519,10 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Fl
 		tmp1 = tmp1 + ((X[i] - X_Mean) * (Y[i] - Y_Mean));
 		tmp2 = tmp2 + ((X[i] - X_Mean) * (X[i] - X_Mean));
 	}
-	par[1] = tmp1 / tmp2;
-	par[0] = Y_Mean - par[1] * X_Mean;
+//	par[1] = tmp1 / tmp2;
+//	par[0] = Y_Mean - par[1] * X_Mean;
+	par.push_back(Y_Mean - (tmp1 / tmp2 * X_Mean));
+	par.push_back(tmp1 / tmp2);
 //	cout << " --" << endl;
 	// -- 
 	for (int i = 0; i < X.size(); i++) {
@@ -1524,9 +1531,9 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, Fl
 //		cout << "plane " << i << "\t hit position: ( " << X[i] << " , " << Y[i] << " ) fit position: " << tmp1 << endl;
 		tmp4 = tmp4 + (Y[i] - Y_Mean) * (Y[i] - Y_Mean);
 	}
-	par[2] = tmp3 / (res * res);
+//	par[2] = tmp3 / (res * res);
 	rms = TMath::Sqrt(tmp4/Y.size());
 //	cout << "rms: " << rms << endl;
 //	cout << "chi2: " << par[2] << endl;
-	return par[2];
+	return tmp3 / (res * res);
 }
