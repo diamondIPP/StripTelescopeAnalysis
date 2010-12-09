@@ -91,7 +91,7 @@ class Clustering {
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
 	  void AutoFidCut();
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
-	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
+//	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
       
    private:
       //general settings
@@ -182,6 +182,7 @@ class Clustering {
       string root_file_char;
       TSystem* sys;
       string settings_file;
+	string pedfile_path;
       
       //processed event storage; read from pedtree
       UInt_t run_number;
@@ -238,6 +239,9 @@ class Clustering {
 	  TH1F* histo_afc_x_cut;
 	  TH1F* histo_afc_y_cut;
 	
+	TH1F* histo_transparentclustering_landau[5]; // index: n channels
+	TH1F* histo_transparentclustering_eta[5]; // index: n channels
+	
 	  FidCutRegion* FCR[4];
 	
 	
@@ -256,6 +260,9 @@ class Clustering {
       bool histoswitch_eta_vs_Q[9][2][2]; //second index: transparent,2hit; third index: first readout chip, 2nd readout chip
       bool histoswitch_hitocc_saturated[9][2]; //second index: number saturated, fraction saturated
       bool histoswitch_clusters_average[9][3]; //second index: no fidcut, fidcut, no track req
+	
+	bool histoswitch_transparentclustering_landau[5]; // index: n channels
+	bool histoswitch_transparentclustering_eta[5]; // index: n channels
       
       //fits
       TF1* histofit_dianoise[2];
@@ -374,6 +381,7 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pedfilepath << sys->pwd() << "/Pedestal." << RunNumber;
    if(RunDescription=="") pedfilepath << ".root";
    else pedfilepath << "-" << RunDescription << ".root";
+	pedfile_path = pedfilepath.str();
 	
 	// create file histograms.root
 	ostringstream root_histo_file_path;
@@ -659,6 +667,17 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
          }
       }
    }
+	cout << "init new histos..";
+	for (int i = 0; i < 5; i++) {
+		ostringstream histoname_landau, histoname_eta;
+		histoname_landau << "PulseHeight_Dia_" << (i+1) << "HitTransparClusters";
+		cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
+		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),2000,0.,2000.);
+		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
+		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
+		histo_transparentclustering_eta[i] = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),2000,0.,2000.);
+	}
+	cout << " done." << endl;
 
    
 	histo_afc_x = new TH1F("histo_afc_x","histo_afc_x",256,0,255); // for afc (max, 19.11.2010)
@@ -3334,7 +3353,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 			dia_offset.push_back(align->GetXOffset(5));
 			dia_offset.push_back(align->GetYOffset(5));
 			dia_offset.push_back(align->GetZOffset(5));
-//			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
+			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
 			break;
 		}
 	} // end loop bla
@@ -3363,17 +3382,31 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	cout << "Starting transparent clustering.." << endl;
 	int event;
 	vector<Float_t> x_positions, y_positions, z_positions, par;
+	Float_t diamond_hit_position = 0;
+	
+//	verbose = true;
+	
+	PedFile = new TFile(pedfile_path.c_str());
+	PedTree = (TTree*)PedFile->Get("PedTree");
+	if (!PedTree)
+	{
+		cerr << "PedTree not found!" << endl;
+	}
+	
+	cout << PedTree->GetEntries() << " events in PedTree " << endl;
 	
 	// loop over tracks
 	for (int i = 0; i < tracks.size(); i++) {
 		// check if track is masked
-		if (!tracks_mask[i]) {
-			if (verbose) cout << "Track " << i << " is masked and skipped." << endl;
+		if (tracks[i].FakeTrack) {
+			if (verbose) cout << "Clustering::TransparentClustering: Track " << i << " is masked as fake track and skipped." << endl;
 			continue;
 		}
 		
 		// get event number for track
+		if (verbose) cout << "Getting event number.. ";
 		event = tracks[i].GetEventNumber();
+		if (verbose) cout << " -> track " << i << " corresponds to event " << event << endl;
 		
 		// check if event number is valid
 		if (event < 0) {
@@ -3382,9 +3415,11 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		}
 		
 		// load data (apply offset)
+		cout << "load data.." << endl;
 		align->LoadData(tracks[i]);
 		
 		// read out x, y, z positions
+		cout << "read x, y, z positions.." << endl;
 		x_positions.clear();
 		y_positions.clear();
 		z_positions.clear();
@@ -3393,61 +3428,24 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 			y_positions.push_back(align->track_holder.GetD(det).GetY());
 			z_positions.push_back(align->track_holder.GetD(det).GetZ());
 		}
+		// read out z position of diamond
+//		align->track_holder.GetD(det).GetZ();
 		
 		// fit track
 //		align->LinTrackFit(..)
-//	TODO: adapt TDetectorAlignment::CutFakeTracks(..) that fit parameters are returned
+		par.clear();
+		align->LinTrackFit(z_positions, x_positions, par);
 		
 		// estimate hit position in diamond
+		diamond_hit_position = par[0] + par[1] * align->track_holder.GetD(4).GetZ();
+		
+		// TODO: check diamond hit position (0..128) and fid cut region!
 		
 		//get event
 		PedTree->GetEvent(event);
 		
 		// cluster diamond channels around estimated hit position
+		cout << "track " << i << " has an estimated hit position in channel " << (int)diamond_hit_position << endl;
+		cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << Dia_ADC[(int)diamond_hit_position]-Det_PedMean[8][(int)diamond_hit_position] << endl;
 	} // end loop over tracks
-}
-
-// -- fits Y = par[0] + par[1] * x
-void Clustering::LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par) {
-	Float_t X_Mean = 0;
-	Float_t Y_Mean = 0;
-	Float_t tmp1 = 0;
-	Float_t tmp2 = 0;
-	Float_t tmp3 = 0;
-	Float_t tmp4 = 0;
-	Float_t rms = 0;
-	Float_t p[2];
-	if (x_positions.size() != y_positions.size()) {
-		cout << "x_positions.size() != y_positions.size()" << endl;
-		return;
-	}
-	for (int i = 0; i < x_positions.size(); i++) {
-		X_Mean = X_Mean + x_positions[i];
-		Y_Mean = Y_Mean + y_positions[i];
-	}
-	X_Mean = X_Mean / x_positions.size();
-	Y_Mean = Y_Mean / y_positions.size();
-	for (int i = 0; i < x_positions.size(); i++) {
-		tmp1 = tmp1 + ((x_positions[i] - X_Mean) * (y_positions[i] - Y_Mean));
-		tmp2 = tmp2 + ((x_positions[i] - X_Mean) * (x_positions[i] - X_Mean));
-	}
-	p[1] = tmp1 / tmp2;
-	p[0] = Y_Mean - par[1] * X_Mean;
-	par.clear();
-	par.push_back(p[0]);
-	par.push_back(p[1]);
-	return;
-/*	//	cout << " --" << endl;
-	// -- 
-	for (int i = 0; i < x_positions.size(); i++) {
-		tmp1 = par[0] + par[1] * X[i];
-		tmp3 = tmp3 + (tmp1 - Y[i]) * (tmp1 - Y[i]);
-		//		cout << "plane " << i << "\t hit position: ( " << X[i] << " , " << Y[i] << " ) fit position: " << tmp1 << endl;
-		tmp4 = tmp4 + (Y[i] - Y_Mean) * (Y[i] - Y_Mean);
-	}
-	par[2] = tmp3 / (res * res);
-	rms = TMath::Sqrt(tmp4/Y.size());
-	//	cout << "rms: " << rms << endl;
-	//	cout << "chi2: " << par[2] << endl;
-	return par[2];*/
 }
