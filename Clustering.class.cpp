@@ -3383,6 +3383,9 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	int event;
 	vector<Float_t> x_positions, y_positions, z_positions, par;
 	Float_t diamond_hit_position = 0;
+	int diamond_hit_channel = 0;
+	int current_channel, current_sign;
+	Float_t cluster_adc = 0;
 	
 //	verbose = true;
 	
@@ -3415,11 +3418,9 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		}
 		
 		// load data (apply offset)
-		cout << "load data.." << endl;
 		align->LoadData(tracks[i]);
 		
 		// read out x, y, z positions
-		cout << "read x, y, z positions.." << endl;
 		x_positions.clear();
 		y_positions.clear();
 		z_positions.clear();
@@ -3438,6 +3439,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		
 		// estimate hit position in diamond
 		diamond_hit_position = par[0] + par[1] * align->track_holder.GetD(4).GetZ();
+		diamond_hit_channel = (int)diamond_hit_position;
 		
 		// TODO: check diamond hit position (0..128) and fid cut region!
 		
@@ -3445,7 +3447,31 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		PedTree->GetEvent(event);
 		
 		// cluster diamond channels around estimated hit position
-		cout << "track " << i << " has an estimated hit position in channel " << (int)diamond_hit_position << endl;
+		cout << " --" << endl;
+		cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
 		cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << Dia_ADC[(int)diamond_hit_position]-Det_PedMean[8][(int)diamond_hit_position] << endl;
+		
+		int sign;
+		
+		if (diamond_hit_position - diamond_hit_channel < 0.5) sign = 1;
+		else sign = -1;
+		
+		cout << "clusters for track " << i << ":" << endl;
+		for (int j = 0; j < 5; j++) {
+			cluster_adc = 0;
+			current_channel = diamond_hit_channel;
+			cout << "selected channels for " << j+1 << " hit transparent cluster: ";
+			current_sign = sign;
+			// sum adc for n channel cluster
+			for (int channel = 0; channel <= j; channel++) {
+				current_channel = current_channel + current_sign * channel;
+				current_sign = (-1) * current_sign;
+				cout << current_channel;
+				if (channel < j) cout << ", ";
+				cluster_adc += Dia_ADC[diamond_hit_channel]-Det_PedMean[8][diamond_hit_channel];
+			}
+			cout << endl;
+			histo_transparentclustering_landau[j]->Fill(cluster_adc);
+		}
 	} // end loop over tracks
 }
