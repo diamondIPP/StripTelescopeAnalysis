@@ -239,7 +239,7 @@ class Clustering {
 	  TH1F* histo_afc_x_cut;
 	  TH1F* histo_afc_y_cut;
 	
-	TH1F* histo_transparentclustering_landau[5]; // index: n channels
+	TH1F* histo_transparentclustering_landau[10]; // index: n channels
 	TH1F* histo_transparentclustering_eta[5]; // index: n channels
 	
 	  FidCutRegion* FCR[4];
@@ -667,7 +667,7 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
          }
       }
    }
-	cout << "init new histos..";
+/*	cout << "init new histos..";
 	for (int i = 0; i < 5; i++) {
 		ostringstream histoname_landau, histoname_eta;
 		histoname_landau << "PulseHeight_Dia_" << (i+1) << "HitTransparClusters";
@@ -677,7 +677,7 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
 		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 		histo_transparentclustering_eta[i] = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),2000,0.,2000.);
 	}
-	cout << " done." << endl;
+	cout << " done." << endl;*/
 
    
 	histo_afc_x = new TH1F("histo_afc_x","histo_afc_x",256,0,255); // for afc (max, 19.11.2010)
@@ -3157,6 +3157,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 	cout << count_true << " tracks are masked as true and " << count_false << " tracks as false." << endl;
 	return;*/
 	
+	string plots_path_save = plots_path;
 	vector<TDiamondTrack> alignment_tracks = tracks;
 	vector<bool> alignment_tracks_mask = tracks_mask;
 	vector<TDiamondTrack> alignment_tracks_fidcut = tracks_fidcut;
@@ -3350,9 +3351,11 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 		}
 		if (!CutFakeTracksOn || alignStep == 1) {
 			dia_offset.clear();
-			dia_offset.push_back(align->GetXOffset(5));
-			dia_offset.push_back(align->GetYOffset(5));
-			dia_offset.push_back(align->GetZOffset(5));
+//			dia_offset.push_back(align->GetXOffset(5));
+//			dia_offset.push_back(align->GetYOffset(5));
+//			dia_offset.push_back(align->GetZOffset(5));
+//			cout << "align->GetXOffset(4) = " << align->GetXOffset(4) << endl;
+//			cout << "align->GetXOffset(5) = " << align->GetXOffset(5) << endl;
 			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
 			break;
 		}
@@ -3375,17 +3378,35 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
       cout<<align->GetPhiOffset(plane)<<endl;
    }
    */
+	plots_path = plots_path_save;
 }
 
 // -- take track after alignment, point into diamond and produce a cluster with the surrounding channels
 void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose) {
-	cout << "Starting transparent clustering.." << endl;
+	cout << "Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
 	int event;
 	vector<Float_t> x_positions, y_positions, z_positions, par;
 	Float_t diamond_hit_position = 0;
 	int diamond_hit_channel = 0;
 	int current_channel, current_sign;
 	Float_t cluster_adc = 0;
+	vector<int> event_numbers;
+	Double_t diamond_x_offset = align->GetXOffset(4);
+	
+	cout << "diamond x offset: " << diamond_x_offset << endl;
+	cout << "diamond hit factor: " << Di_Cluster_Hit_Factor << endl;
+	
+	cout << "init histograms for transparent clustering.." << endl;
+	for (int i = 0; i < 10; i++) {
+		ostringstream histoname_landau, histoname_eta;
+		histoname_landau << "PulseHeight_Dia_" << (i+1) << "HitTransparClusters";
+		cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
+		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),200,0.,4000.);
+		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
+		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
+		histo_transparentclustering_eta[i] = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),2000,0.,2000.);
+	}
+	cout << " done." << endl;
 	
 //	verbose = true;
 	
@@ -3398,8 +3419,82 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	
 	cout << PedTree->GetEntries() << " events in PedTree " << endl;
 	
+	//Event Header Branches
+	PedTree->SetBranchAddress("RunNumber",&run_number);
+	PedTree->SetBranchAddress("EventNumber",&event_number);
+	PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
+	PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
+	PedTree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
+	
+	//Telescope Data Branches
+	PedTree->SetBranchAddress("D0X_NChannels",&Det_NChannels[0]);
+	PedTree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
+	PedTree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
+	PedTree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
+	PedTree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
+	PedTree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
+	PedTree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
+	PedTree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
+	PedTree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
+	PedTree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
+	PedTree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
+	PedTree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
+	PedTree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
+	PedTree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
+	PedTree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
+	PedTree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
+	PedTree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
+	PedTree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
+	PedTree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
+	PedTree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
+	PedTree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
+	PedTree->SetBranchAddress("D1Y_ADC",&Det_ADC[3]);
+	PedTree->SetBranchAddress("D2X_ADC",&Det_ADC[4]);
+	PedTree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
+	PedTree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
+	PedTree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
+	PedTree->SetBranchAddress("Dia_ADC",&Dia_ADC);
+	PedTree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
+	PedTree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
+	PedTree->SetBranchAddress("D1X_PedMean",&Det_PedMean[2]);
+	PedTree->SetBranchAddress("D1Y_PedMean",&Det_PedMean[3]);
+	PedTree->SetBranchAddress("D2X_PedMean",&Det_PedMean[4]);
+	PedTree->SetBranchAddress("D2Y_PedMean",&Det_PedMean[5]);
+	PedTree->SetBranchAddress("D3X_PedMean",&Det_PedMean[6]);
+	PedTree->SetBranchAddress("D3Y_PedMean",&Det_PedMean[7]);
+	PedTree->SetBranchAddress("Dia_PedMean",&Det_PedMean[8]);
+	PedTree->SetBranchAddress("D0X_PedWidth",&Det_PedWidth[0]);
+	PedTree->SetBranchAddress("D0Y_PedWidth",&Det_PedWidth[1]);
+	PedTree->SetBranchAddress("D1X_PedWidth",&Det_PedWidth[2]);
+	PedTree->SetBranchAddress("D1Y_PedWidth",&Det_PedWidth[3]);
+	PedTree->SetBranchAddress("D2X_PedWidth",&Det_PedWidth[4]);
+	PedTree->SetBranchAddress("D2Y_PedWidth",&Det_PedWidth[5]);
+	PedTree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
+	PedTree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
+	PedTree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
+	
+	PedTree->GetEvent(0);
+	cout<< "Loaded first event in PedTree: "<<event_number<<endl;
+	cout<< "RunNumber is: "<<run_number<<endl;
+	cout<< "StoreThreshold is: "<<store_threshold<<endl;
+	
+	event_numbers.clear();
+	for (int j = 0; j < PedTree->GetEntries(); j++) {
+		PedTree->GetEvent(j);
+//		cout << endl << endl << endl;
+//		cout << "event " << j << " in PedTree has event_number: " << event_number << endl;
+		event_numbers.push_back(event_number);
+//		for (int blablabla = 0; blablabla < 254; blablabla++) {
+//			cout << "Dia_ADC = " << Dia_ADC[blablabla] << ",\tDet_PedMean = " << Det_PedMean[8][blablabla] << endl;
+//			cout << "Collected charge in channel " << blablabla << " of diamond: " << Dia_ADC[blablabla]-Det_PedMean[8][blablabla] << endl;
+//		}
+	}
+//	return;
+	
 	// loop over tracks
 	for (int i = 0; i < tracks.size(); i++) {
+		if (verbose) cout << " -- starting transparent clustering for track " << i << endl;
+		
 		// check if track is masked
 		if (tracks[i].FakeTrack) {
 			if (verbose) cout << "Clustering::TransparentClustering: Track " << i << " is masked as fake track and skipped." << endl;
@@ -3413,7 +3508,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		
 		// check if event number is valid
 		if (event < 0) {
-			if (verbose) cout << "Track " << i << " has no event number. Skipping track.." << endl;
+			cout << "Track " << i << " has no event number. Skipping this track.." << endl;
 			continue;
 		}
 		
@@ -3429,49 +3524,71 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 			y_positions.push_back(align->track_holder.GetD(det).GetY());
 			z_positions.push_back(align->track_holder.GetD(det).GetZ());
 		}
-		// read out z position of diamond
-//		align->track_holder.GetD(det).GetZ();
 		
 		// fit track
-//		align->LinTrackFit(..)
 		par.clear();
 		align->LinTrackFit(z_positions, x_positions, par);
+		if (verbose) cout << "linear fit of track:\tpar[0] = " << par[0] << ",\tpar[1] = " << par[1] << endl;
 		
 		// estimate hit position in diamond
 		diamond_hit_position = par[0] + par[1] * align->track_holder.GetD(4).GetZ();
+		diamond_hit_position = diamond_hit_position + diamond_x_offset; // add offset
 		diamond_hit_channel = (int)diamond_hit_position;
-		
-		// TODO: check diamond hit position (0..128) and fid cut region!
+		if (verbose) cout << "z position of diamond is " << align->track_holder.GetD(4).GetZ() << endl;
 		
 		//get event
+		if (verbose) cout << "getting event " << event << ".." << endl;
 		PedTree->GetEvent(event);
+		if (verbose) cout << "event_number = " << event_number << endl;
 		
 		// cluster diamond channels around estimated hit position
-		cout << " --" << endl;
-		cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-		cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << Dia_ADC[(int)diamond_hit_position]-Det_PedMean[8][(int)diamond_hit_position] << endl;
+//		cout << " --" << endl;
+		if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
+		if (verbose) cout << "Dia_ADC = " << Dia_ADC[diamond_hit_channel] << ",\tDet_PedMean = " << Det_PedMean[8][diamond_hit_channel] << endl;
+		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << Dia_ADC[(int)diamond_hit_position]-Det_PedMean[8][(int)diamond_hit_position] << endl;
+		
+/*		for (int blablabla = 0; blablabla < 128; blablabla++) {
+			if (Dia_ADC[blablabla] - Det_PedMean[8][blablabla] > 5*Det_PedWidth[8][blablabla]) {
+				cout << "real real hit recognized!!!" << endl;
+				cout << "Collected charge in channel " << blablabla << " of diamond: " << Dia_ADC[blablabla]-Det_PedMean[8][blablabla] << endl;
+				cout << "Dia_ADC = " << Dia_ADC[blablabla] << ",\tDet_PedMean = " << Det_PedMean[8][blablabla] << ",\tDet_PedWidth = " << Det_PedWidth[8][blablabla] << endl;
+			}
+		}*/
+//		return;
 		
 		int sign;
 		
 		if (diamond_hit_position - diamond_hit_channel < 0.5) sign = 1;
 		else sign = -1;
 		
-		cout << "clusters for track " << i << ":" << endl;
-		for (int j = 0; j < 5; j++) {
+		if (verbose) cout << "clusters for track " << i << ":" << endl;
+		// loop over different cluster sizes
+		for (int j = 0; j < 10; j++) {
 			cluster_adc = 0;
 			current_channel = diamond_hit_channel;
-			cout << "selected channels for " << j+1 << " hit transparent cluster: ";
+			if (verbose) cout << "selected channels for " << j+1 << " hit transparent cluster: ";
 			current_sign = sign;
 			// sum adc for n channel cluster
 			for (int channel = 0; channel <= j; channel++) {
 				current_channel = current_channel + current_sign * channel;
 				current_sign = (-1) * current_sign;
-				cout << current_channel;
-				if (channel < j) cout << ", ";
-				cluster_adc += Dia_ADC[diamond_hit_channel]-Det_PedMean[8][diamond_hit_channel];
+				if (verbose) cout << current_channel;
+				if (verbose) if (channel < j) cout << ", ";
+				if (Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel])
+					cluster_adc = cluster_adc + Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
 			}
-			cout << endl;
+			if (verbose) cout << endl;
+			if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
+			if (verbose) cout << "histo_transparentclustering_landau[" << j << "] address: " << histo_transparentclustering_landau[j] << endl;
 			histo_transparentclustering_landau[j]->Fill(cluster_adc);
-		}
+		} // end loop over cluster sizes
 	} // end loop over tracks
+	
+	// save histograms
+	for (int i = 0; i < 10; i++) {
+		SaveHistogram(histo_transparentclustering_landau[i]);
+//		SaveHistogram(histo_transparentclustering_eta[i]);
+	}
+	
+	PedFile->Close();
 }
