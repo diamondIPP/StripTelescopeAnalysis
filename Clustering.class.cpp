@@ -240,7 +240,7 @@ class Clustering {
 	  TH1F* histo_afc_y_cut;
 	
 	TH1F* histo_transparentclustering_landau[10]; // index: n channels
-	TH1F* histo_transparentclustering_eta[5]; // index: n channels
+	TH1F* histo_transparentclustering_eta;
 	
 	  FidCutRegion* FCR[4];
 	
@@ -3388,8 +3388,11 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	vector<Float_t> x_positions, y_positions, z_positions, par;
 	Float_t diamond_hit_position = 0;
 	int diamond_hit_channel = 0;
+	int diamond_secondhit_channel = 0;
 	int current_channel, current_sign;
 	Float_t cluster_adc = 0;
+	Float_t transp_eta = 0;
+	Float_t firstchannel_adc, secondchannel_adc;
 	vector<int> event_numbers;
 	Double_t diamond_x_offset = align->GetXOffset(4);
 	
@@ -3401,11 +3404,13 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		ostringstream histoname_landau, histoname_eta;
 		histoname_landau << "PulseHeight_Dia_" << (i+1) << "HitTransparClusters";
 		cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
-		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),200,0.,4000.);
-		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
-		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
-		histo_transparentclustering_eta[i] = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),2000,0.,2000.);
+		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),200,0.,2000.);
+//		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
+//		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 	}
+	ostringstream histoname_eta;
+	histoname_eta << "Eta_Dia_2CentroidHits_TransparClusters";
+	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
 	cout << " done." << endl;
 	
 //	verbose = true;
@@ -3547,19 +3552,18 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		if (verbose) cout << "Dia_ADC = " << Dia_ADC[diamond_hit_channel] << ",\tDet_PedMean = " << Det_PedMean[8][diamond_hit_channel] << endl;
 		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << Dia_ADC[(int)diamond_hit_position]-Det_PedMean[8][(int)diamond_hit_position] << endl;
 		
-/*		for (int blablabla = 0; blablabla < 128; blablabla++) {
-			if (Dia_ADC[blablabla] - Det_PedMean[8][blablabla] > 5*Det_PedWidth[8][blablabla]) {
-				cout << "real real hit recognized!!!" << endl;
-				cout << "Collected charge in channel " << blablabla << " of diamond: " << Dia_ADC[blablabla]-Det_PedMean[8][blablabla] << endl;
-				cout << "Dia_ADC = " << Dia_ADC[blablabla] << ",\tDet_PedMean = " << Det_PedMean[8][blablabla] << ",\tDet_PedWidth = " << Det_PedWidth[8][blablabla] << endl;
-			}
-		}*/
-//		return;
-		
 		int sign;
 		
 		if (diamond_hit_position - diamond_hit_channel < 0.5) sign = 1;
 		else sign = -1;
+		
+		// calculate eta for the two closest two channels to the estimated hit position
+		diamond_secondhit_channel = diamond_hit_channel - sign;
+		firstchannel_adc = Dia_ADC[diamond_hit_channel]-Det_PedMean[8][diamond_hit_channel];
+		secondchannel_adc = Dia_ADC[diamond_secondhit_channel]-Det_PedMean[8][diamond_secondhit_channel];
+		if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
+		else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
+		histo_transparentclustering_eta->Fill(transp_eta);
 		
 		if (verbose) cout << "clusters for track " << i << ":" << endl;
 		// loop over different cluster sizes
@@ -3574,7 +3578,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 				current_sign = (-1) * current_sign;
 				if (verbose) cout << current_channel;
 				if (verbose) if (channel < j) cout << ", ";
-				if (Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel])
+				if (current_channel > 0 && current_channel < 128 && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel])
 					cluster_adc = cluster_adc + Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
 			}
 			if (verbose) cout << endl;
@@ -3587,8 +3591,8 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	// save histograms
 	for (int i = 0; i < 10; i++) {
 		SaveHistogram(histo_transparentclustering_landau[i]);
-//		SaveHistogram(histo_transparentclustering_eta[i]);
 	}
+	SaveHistogram(histo_transparentclustering_eta);
 	
 	PedFile->Close();
 }
