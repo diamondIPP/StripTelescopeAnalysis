@@ -994,7 +994,7 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
    
    //plot
    Double_t plot_width_factor = 7;
-   Double_t plot_fit_factor = 3/4.;
+   Double_t plot_fit_factor = 2; // 3/4. before
    
    TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
    //plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
