@@ -3139,7 +3139,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 	
 	if(tracks.size()==0) {
 		cout<<"Clustering::Align: No tracks found; calling Clustering::ClusterRun first..."<<endl;
-		ClusterRun(plots);
+		ClusterRun(plots,0); // doesn't use alternative clustering
 	}
 	
 	if (tracks.size() == 0) {
@@ -3356,7 +3356,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 //			dia_offset.push_back(align->GetZOffset(5));
 //			cout << "align->GetXOffset(4) = " << align->GetXOffset(4) << endl;
 //			cout << "align->GetXOffset(5) = " << align->GetXOffset(5) << endl;
-			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
+			TransparentClustering(alignment_tracks, alignment_tracks_mask, align);
 			break;
 		}
 	} // end loop bla
