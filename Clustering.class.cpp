@@ -3395,6 +3395,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	Float_t firstchannel_adc, secondchannel_adc;
 	vector<int> event_numbers;
 	Double_t diamond_x_offset = align->GetXOffset(4);
+	Double_t diamond_z_position = 10.2; // TODO: is the z position of the diamond always 10.2??
 	
 	cout << "diamond x offset: " << diamond_x_offset << endl;
 	cout << "diamond hit factor: " << Di_Cluster_Hit_Factor << endl;
@@ -3413,7 +3414,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
 	cout << " done." << endl;
 	
-//	verbose = true;
+	verbose = true;
 	
 	PedFile = new TFile(pedfile_path.c_str());
 	PedTree = (TTree*)PedFile->Get("PedTree");
@@ -3536,10 +3537,11 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		if (verbose) cout << "linear fit of track:\tpar[0] = " << par[0] << ",\tpar[1] = " << par[1] << endl;
 		
 		// estimate hit position in diamond
-		diamond_hit_position = par[0] + par[1] * align->track_holder.GetD(4).GetZ();
+//		diamond_z_position = align->track_holder.GetD(4).GetZ();
+		diamond_hit_position = par[0] + par[1] * diamond_z_position;
 		diamond_hit_position = diamond_hit_position + diamond_x_offset; // add offset
 		diamond_hit_channel = (int)diamond_hit_position;
-		if (verbose) cout << "z position of diamond is " << align->track_holder.GetD(4).GetZ() << endl;
+		if (verbose) cout << "z position of diamond is " << diamond_z_position << endl;
 		
 		//get event
 		if (verbose) cout << "getting event " << event << ".." << endl;
