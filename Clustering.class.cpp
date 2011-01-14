@@ -241,6 +241,7 @@ class Clustering {
 	
 	TH1F* histo_transparentclustering_landau[10]; // index: n channels
 	TH1F* histo_transparentclustering_eta;
+	TH1F* histo_transparentclustering_hitdiff;
 	
 	  FidCutRegion* FCR[4];
 	
@@ -3396,6 +3397,9 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	vector<int> event_numbers;
 	Double_t diamond_x_offset = align->GetXOffset(4);
 	Double_t diamond_z_position = 10.2; // TODO: is the z position of the diamond always 10.2??
+	Float_t eff_diamond_hit_position = 0;
+	int eff_diamond_hit_channel = 0;
+	Float_t hit_diff = 0;
 	
 	cout << "diamond x offset: " << diamond_x_offset << endl;
 	cout << "diamond hit factor: " << Di_Cluster_Hit_Factor << endl;
@@ -3412,6 +3416,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	ostringstream histoname_eta;
 	histoname_eta << "Eta_Dia_2CentroidHits_TransparClusters";
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
+	histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_Dia_TransparClusters","DiffEstEffHit_Dia_TransparClusters", 100, 0.,5.);
 	cout << " done." << endl;
 	
 	verbose = true;
@@ -3531,6 +3536,9 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 			z_positions.push_back(align->track_holder.GetD(det).GetZ());
 		}
 		
+		// read out effictive diamond hit position
+		eff_diamond_hit_position = align->track_holder.GetD(4).GetX();
+		
 		// fit track
 		par.clear();
 		align->LinTrackFit(z_positions, x_positions, par);
@@ -3543,10 +3551,24 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		diamond_hit_channel = (int)diamond_hit_position;
 		if (verbose) cout << "z position of diamond is " << diamond_z_position << endl;
 		
+		// difference between estimated and effective hit in diamond
+		hit_diff = TMath::Abs(eff_diamond_hit_position - diamond_hit_position);
+//		cout << "effective hit position in diamond:\t" << eff_diamond_hit_position << "\testimated position in diamond:\t" << diamond_hit_position << endl;
+		
 		//get event
 		if (verbose) cout << "getting event " << event << ".." << endl;
 		PedTree->GetEvent(event);
 		if (verbose) cout << "event_number = " << event_number << endl;
+		
+		// find biggest hit in diamond
+		eff_diamond_hit_channel = 0;
+		for (int i = 0; i < 128; i++) {
+			if (Dia_ADC[i]-Det_PedMean[8][i] > (Dia_ADC[eff_diamond_hit_channel]-Det_PedMean[8][eff_diamond_hit_channel])) {
+				eff_diamond_hit_channel = i;
+			}
+		}
+		histo_transparentclustering_hitdiff->Fill(TMath::Abs(eff_diamond_hit_channel - diamond_hit_position));
+		cout << "effective diamond hit channel: " << eff_diamond_hit_channel << endl;
 		
 		// cluster diamond channels around estimated hit position
 //		cout << " --" << endl;
@@ -3595,6 +3617,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		SaveHistogram(histo_transparentclustering_landau[i]);
 	}
 	SaveHistogram(histo_transparentclustering_eta);
+	SaveHistogram(histo_transparentclustering_hitdiff);
 	
 	PedFile->Close();
 }
