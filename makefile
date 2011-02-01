@@ -8,9 +8,9 @@ LDFLAGS = -L/usr/local/lib
 OBJ 	= main.cpp
 HEAD    = 
 
-ROOTCFLAGS    = -D_REENTRANT -pthread -I/usr/local/root/include
-ROOTLIBS      = -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -pthread -Wl,-rpath,/usr/local/root/lib -lm -ldl
-ROOTGLIBS     = -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -lGui -pthread -Wl,-rpath,/usr/local/root/lib -lm -ldl
+ROOTCFLAGS    = -D_REENTRANT -pthread -I$(ROOTSYS)/include
+ROOTLIBS      = -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -pthread -Wl,-rpath,$(ROOTSYS)/lib -lm -ldl
+ROOTGLIBS     = -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -lGui -pthread -Wl,-rpath,$(ROOTSYS)/lib -lm -ldl
 
 CFLAGS       += $(ROOTCFLAGS)
 
