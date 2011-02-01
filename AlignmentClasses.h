@@ -46,11 +46,11 @@ Int_t RoundValue(Double_t value)
    }
    if(value<0)
    {
-      if(fabs(diff)>=0.5)
+	   if(TMath::Abs(diff)>=0.5)
       {
          value = (int)value - 1;
       }
-      if(fabs(diff)<0.5)
+      if(TMath::Abs(diff)<0.5)
       {
          value = (int)value;
       }

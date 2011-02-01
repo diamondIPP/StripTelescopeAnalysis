@@ -60,7 +60,7 @@ using namespace std;
 using namespace TMath;
 
 //Class and stuct definitions
-#include "ChannelScreen.h" //Channel Screen Class
+//#include "ChannelScreen.h" //Channel Screen Class
 #include "Cluster.class.cpp"
 #include "ClusteredEvent.class.cpp"
 #include "AlignmentClasses.h"
