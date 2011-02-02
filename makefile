@@ -1,6 +1,6 @@
 # define compile command
 
-CC = g++
+CC = g++ -arch x86_64
 
 CFLAGS  = -g -Wno-deprecated
 LDFLAGS = -L/usr/local/lib
