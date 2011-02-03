@@ -16,12 +16,9 @@
 using namespace std;
 
 int main () {
-	cout << "hello world!" << endl;
+	cout << "starting main loop.." << endl;
 	initVariables();
 	RunListOK = ReadRunList();
-	
-	cout << "RunListOK? " << RunListOK << endl;
-	cout << "RUNNUMBER: " << RUNNUMBER << " NEVENTS: " << NEVENTS << " RUNDESCRIPTION: " << RUNDESCRIPTION << endl;
 	
 	cout << "Runnumbers ";
 	for (int i = 0; i < RunParameters.size(); i++) {
@@ -45,7 +42,6 @@ int main () {
 			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
 			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
 		}
-//		return 0;
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
 		if (DO_ALIGNMENT) {
 			cl.Align(PLOTS, ALTERNATIVECLUSTERING);
@@ -82,6 +78,7 @@ int ReadRunList() {
 	else cout << "RunList.ini" << " successfully opened." << endl << endl;
 	
 	while (!file.eof()) {
+		initVariables();
 		
 		//get next line
 		string line;
