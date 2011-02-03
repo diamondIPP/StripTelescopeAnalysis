@@ -41,11 +41,19 @@ int main () {
 		cout << "RUNNUMBER: " << RUNNUMBER << endl << "NEVENTS: " << NEVENTS << endl << "RUNDESCRIPTION: " << RUNDESCRIPTION << endl;
 		cout << endl << endl << endl;
 		
-		SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
-		sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
-		
+		if (DO_SLIDINGPEDESTAL) {
+			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
+			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
+		}
+//		return 0;
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
-		cl.ClusterRun(PLOTS,ALTERNATIVECLUSTERING);
+		if (DO_ALIGNMENT) {
+			cl.Align(PLOTS, ALTERNATIVECLUSTERING);
+		}
+		else {
+			cl.ClusterRun(PLOTS,ALTERNATIVECLUSTERING);
+		}
+
 		
 	}
 	return 0;
@@ -85,7 +93,7 @@ int ReadRunList() {
 		}
 		
 		
-		sscanf(line.c_str(), "%d %s %d %d", &RUNNUMBER, RunDescription, &NEvents, &Initial_Event);
+		sscanf(line.c_str(), "%d %s %d %d %d %d", &RUNNUMBER, RunDescription, &NEvents, &Initial_Event, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT);
 		if (NEvents != 0) NEVENTS = NEvents;
 		if (Initial_Event != 0) INITIAL_EVENT = Initial_Event;
 		cout << "RunDescription Char: " << RunDescription[0] << endl;

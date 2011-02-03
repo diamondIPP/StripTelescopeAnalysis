@@ -6,6 +6,7 @@ int HIT_OCCUPANCY;
 bool PLOTS;
 bool ALTERNATIVECLUSTERING;
 bool RunListOK;
+bool DO_SLIDINGPEDESTAL, DO_ALIGNMENT;
 
 void initVariables();
 int ReadRunList();
@@ -14,7 +15,7 @@ class RunInfo {
 public:
 	int RunNumber, NEvents, Initial_Event, Hit_Occupancy;
 	string RunDescription;
-	bool AlternativeClustering;
+	bool AlternativeClustering, DoAlignment, DoSlidingPedestal;
 	void SetParameters() {
 		RunNumber = RUNNUMBER;
 		NEvents = NEVENTS;
@@ -22,6 +23,8 @@ public:
 		Hit_Occupancy = HIT_OCCUPANCY;
 		RunDescription = RUNDESCRIPTION;
 		AlternativeClustering = ALTERNATIVECLUSTERING;
+		DoAlignment = DO_ALIGNMENT;
+		DoSlidingPedestal = DO_SLIDINGPEDESTAL;
 	}
 	void GetParameters() {
 		RUNNUMBER = RunNumber;
@@ -30,6 +33,8 @@ public:
 		HIT_OCCUPANCY = Hit_Occupancy;
 		RUNDESCRIPTION = RunDescription;
 		ALTERNATIVECLUSTERING = AlternativeClustering;
+		DO_ALIGNMENT = DoAlignment;
+		DO_SLIDINGPEDESTAL = DoSlidingPedestal;
 	}
 };
 vector<RunInfo> RunParameters;
