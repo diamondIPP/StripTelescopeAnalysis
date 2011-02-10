@@ -245,6 +245,8 @@ class Clustering {
 	TH1F* histo_transparentclustering_eta;
 	TH1F* histo_transparentclustering_hitdiff;
 	
+	TH2F* histo_scatter_autofidcut;
+	
 	  FidCutRegion* FCR[4];
 	
 	
@@ -538,6 +540,8 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
          histo_scatter[det][trackcut] = new TH2F(histo_name.c_str(),histo_name.c_str(),256,-0.5,255.5,256,-0.5,255.5); //first index: d0,d1,d2,d3,<all>; second index: si-track, si-track + diamond, fidcut
       }
    }
+	
+	histo_scatter_autofidcut = new TH2F("AutoFidCut_Silicon8HitsScatter_Average_1DiamondCluster","AutoFidCut_Silicon8HitsScatter_Average_1DiamondCluster",256,-0.5,255.5,256,-0.5,255.5);
    
    for(int det=0; det<9; det++) {
       
@@ -1768,6 +1772,7 @@ void Clustering::InitializeHistograms() {
    for(int i=0; i<9; i++) for(int j=0; j<2; j++) for(int k=0; k<2; k++) histo_eta_vs_Q[i][j][k] = 0;
    for(int i=0; i<9; i++) for(int j=0; j<2; j++) histo_hitocc_saturated[i][j] = 0;
    for(int i=0; i<9; i++) for(int j=0; j<3; j++) histo_clusters_average[i][j] = 0;
+	histo_scatter_autofidcut = 0;
 }
 
 void Clustering::DeleteHistograms() {
@@ -1784,6 +1789,7 @@ void Clustering::DeleteHistograms() {
    for(int i=0; i<9; i++) for(int j=0; j<2; j++) for(int k=0; k<2; k++) delete histo_eta_vs_Q[i][j][k];
    for(int i=0; i<9; i++) for(int j=0; j<2; j++) delete histo_hitocc_saturated[i][j];
    for(int i=0; i<9; i++) for(int j=0; j<3; j++) delete histo_clusters_average[i][j];
+	delete histo_scatter_autofidcut;
 }
 
 void Clustering::DrawHistograms() {
@@ -2759,9 +2765,11 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
       }
    }
 	
+	// doesn't work so far ;-(
 	UseAutoFidCut = false;
 	if (UseAutoFidCut) {
 		// produce necessary plots to detect fidcut region
+		cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
 		for (uint e=0; e<PedTree->GetEntries(); e++) {
 			if (!AlternativeClustering) ClusterEvent();
 			else ClusterEventSeeds();
@@ -2779,13 +2787,12 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
 				si_avg_x = si_avg_x/4;
 				si_avg_y = si_avg_y/4;
 				
-				// TODO: fill si_avg_x, si_avg_y in scatter histogram
+				histo_scatter_autofidcut->Fill(si_avg_x,si_avg_y);
 			}
 		}
-		
+		SaveHistogram(histo_scatter_autofidcut);
 		// TODO: call AutoFidCut here and delete all histograms afterwards.
 	}
-	
 
    //loop over events
    for(uint e=0; e<PedTree->GetEntries(); e++) {
