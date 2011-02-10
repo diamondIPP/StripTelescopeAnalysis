@@ -210,6 +210,8 @@ class Clustering {
       TTree *PedTree;
       TDatime dateandtime;
       TRandom3 rand;
+	
+	bool UseAutoFidCut;
       
    public:
       
@@ -2756,6 +2758,34 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
          histo_hitpos[det][chip] = new TH1F(histotitle.str().c_str(), histotitle.str().c_str(), 101, -0.005, 1.005);
       }
    }
+	
+	UseAutoFidCut = false;
+	if (UseAutoFidCut) {
+		// produce necessary plots to detect fidcut region
+		for (uint e=0; e<PedTree->GetEntries(); e++) {
+			if (!AlternativeClustering) ClusterEvent();
+			else ClusterEventSeeds();
+			if (e%10000==0) clustered_event.Print();
+//			BookHistograms(); // TODO: produce only the fidcut plot here.
+			
+			// -- produce scatter plot for AutoFidCut
+			bool one_and_only_one = clustered_event.HasOneSiliconTrack();
+			Float_t si_avg_x=0, si_avg_y=0;
+			if (one_and_only_one) {
+				for (int det=0; det<4; det++) {
+					si_avg_x += clustered_event.GetCluster(2*det,0)->Get1stMoment();
+					si_avg_y += clustered_event.GetCluster(2*det+1,0)->Get1stMoment();
+				}
+				si_avg_x = si_avg_x/4;
+				si_avg_y = si_avg_y/4;
+				
+				// TODO: fill si_avg_x, si_avg_y in scatter histogram
+			}
+		}
+		
+		// TODO: call AutoFidCut here and delete all histograms afterwards.
+	}
+	
 
    //loop over events
    for(uint e=0; e<PedTree->GetEntries(); e++) {
