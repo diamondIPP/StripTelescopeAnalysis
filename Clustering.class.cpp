@@ -2765,16 +2765,19 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
       }
    }
 	
-	// doesn't work so far ;-(
+	
 	UseAutoFidCut = false;
+	current_event = 0;
 	if (UseAutoFidCut) {
 		// produce necessary plots to detect fidcut region
 		cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
-		for (uint e=0; e<PedTree->GetEntries(); e++) {
+		cout << "running over " << PedTree->GetEntries() << " events.." << endl;
+		for (uint e=0; e<PedTree->GetEntries(); e++) { // maybe it's not necessary to run over all events for the AutoFidCut?!
 			if (!AlternativeClustering) ClusterEvent();
 			else ClusterEventSeeds();
 			if (e%10000==0) clustered_event.Print();
-//			BookHistograms(); // TODO: produce only the fidcut plot here.
+			
+//			current_cluster = 0;
 			
 			// -- produce scatter plot for AutoFidCut
 			bool one_and_only_one = clustered_event.HasOneSiliconTrack();
@@ -2787,12 +2790,17 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
 				si_avg_x = si_avg_x/4;
 				si_avg_y = si_avg_y/4;
 				
-				histo_scatter_autofidcut->Fill(si_avg_x,si_avg_y);
+				if (clustered_event.GetNClusters(8)==1)
+					histo_scatter_autofidcut->Fill(si_avg_x,si_avg_y);
 			}
 		}
+		cout << "plot production for AutoFidCut: done." << endl << endl;
 		SaveHistogram(histo_scatter_autofidcut);
-		// TODO: call AutoFidCut here and delete all histograms afterwards.
 	}
+	cout << "PedTree->GetEntries(): " << PedTree->GetEntries() << endl;
+	current_event = 0;
+	
+	// TODO: call AutoFidCut here..
 
    //loop over events
    for(uint e=0; e<PedTree->GetEntries(); e++) {
