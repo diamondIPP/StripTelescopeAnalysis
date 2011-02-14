@@ -1891,7 +1891,6 @@ void Clustering::BookHistograms() {
    //silicon: saturated, lumpy, goldengate
    //diamond: saturated,
    if(CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster()) {//|| !clustered_event.HasOneSiliconTrack()) {//clustered_event.HasBadChannelCluster()) {
-      
       if(CMNEvent_flag) CMNEvents++;
       if(ZeroDivisorEvent_flag) ZeroDivisorEvents++;
       
@@ -2766,7 +2765,7 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
    }
 	
 	
-	UseAutoFidCut = false;
+	UseAutoFidCut = true;
 	current_event = 0;
 	if (UseAutoFidCut) {
 		// produce necessary plots to detect fidcut region
@@ -2782,6 +2781,8 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
 			// -- produce scatter plot for AutoFidCut
 			bool one_and_only_one = clustered_event.HasOneSiliconTrack();
 			Float_t si_avg_x=0, si_avg_y=0;
+			if (CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster())
+				continue;
 			if (one_and_only_one) {
 				for (int det=0; det<4; det++) {
 					si_avg_x += clustered_event.GetCluster(2*det,0)->Get1stMoment();
