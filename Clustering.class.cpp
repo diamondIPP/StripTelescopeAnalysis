@@ -87,13 +87,14 @@ class Clustering {
       void DeleteHistograms();
       void DrawHistograms();
       void GenerateHTML();
-      void ClusterRun(bool plots = 1, bool AlternativeClustering = 0);
+      void ClusterRun(bool plots = 1);
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
 	  void AutoFidCut();
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 //	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
 	
 	bool UseAutoFidCut;
+	bool AlternativeClustering;
       
    private:
       //general settings
@@ -315,6 +316,8 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pulse_height_di_max = 3000;
    snr_distribution_si_max = 2500;
    snr_distribution_di_max = 2500;
+	UseAutoFidCut = 0;
+	AlternativeClustering = 0;
    
    //Hi/low eta slices
    eta_lowq_slice_low = 600;
@@ -1039,6 +1042,10 @@ void Clustering::LoadSettings() {
 	   if (key == "UseAutoFidCut") {
 		   cout << key.c_str() << " = " << value.c_str() << endl;
 		   UseAutoFidCut = (bool)strtod(value.c_str(),0);
+	   }
+	   if (key == "AlternativeClustering") {
+		   cout << key.c_str() << " = " << value.c_str() << endl;
+		   AlternativeClustering = (bool)strtod(value.c_str(),0);
 	   }
    }
    
@@ -2745,7 +2752,7 @@ and plot the second 100k events,
 ********************/
 
 //sequentially cluster all events
-void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
+void Clustering::ClusterRun(bool plots) {
    
    //Start Timer
    TStopwatch Watch;
@@ -3015,9 +3022,8 @@ void Clustering::AutoFidCut() {
 //	}
 	current_event = 0;
 	for (uint e=0; e<PedTree->GetEntries(); e++) { // maybe it's not necessary to run over all events for the AutoFidCut?!
-//		if (!AlternativeClustering)
-			ClusterEvent();
-//		else ClusterEventSeeds();
+		if (!AlternativeClustering) ClusterEvent();
+		else ClusterEventSeeds();
 		if (e%10000==0) clustered_event.Print();
 		
 		//			current_cluster = 0;
