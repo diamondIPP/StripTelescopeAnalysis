@@ -2809,8 +2809,6 @@ void Clustering::ClusterRun(bool plots) {
 		SaveHistogram(histo_scatter_autofidcut);
 	}
 	current_event = 0;
-	
-	// TODO: call AutoFidCut here..
 
    //loop over events
    for(uint e=0; e<PedTree->GetEntries(); e++) {

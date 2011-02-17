@@ -46,7 +46,6 @@ int main () {
 		if (cl.UseAutoFidCut) {
 			cl.AutoFidCut();
 		}
-		return 0; // TODO: remove this line!!
 		cl.AlternativeClustering = ALTERNATIVECLUSTERING;
 		if (DO_ALIGNMENT) {
 			cl.Align(PLOTS, CUTFAKETRACKS);
