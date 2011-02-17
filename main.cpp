@@ -43,6 +43,10 @@ int main () {
 			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
 		}
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
+		if (cl.UseAutoFidCut) {
+			cl.AutoFidCut();
+		}
+		return 0; // TODO: remove this line!!
 		if (DO_ALIGNMENT) {
 			cl.Align(PLOTS, CUTFAKETRACKS);
 		}

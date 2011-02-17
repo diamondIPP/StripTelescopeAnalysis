@@ -92,6 +92,8 @@ class Clustering {
 	  void AutoFidCut();
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 //	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
+	
+	bool UseAutoFidCut;
       
    private:
       //general settings
@@ -210,8 +212,6 @@ class Clustering {
       TTree *PedTree;
       TDatime dateandtime;
       TRandom3 rand;
-	
-	bool UseAutoFidCut;
       
    public:
       
@@ -1035,6 +1035,10 @@ void Clustering::LoadSettings() {
 	   if (key == "alignment_chi2") {
 		   cout << key.c_str() << " = " << value.c_str() << endl;
 		   alignment_chi2 = (Float_t)strtod(value.c_str(),0);
+	   }
+	   if (key == "UseAutoFidCut") {
+		   cout << key.c_str() << " = " << value.c_str() << endl;
+		   UseAutoFidCut = (bool)strtod(value.c_str(),0);
 	   }
    }
    
@@ -2765,9 +2769,8 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
    }
 	
 	
-	UseAutoFidCut = true;
 	current_event = 0;
-	if (UseAutoFidCut) {
+	if (false) { // TODO: remove this section (moved to AutoFidCut())
 		// produce necessary plots to detect fidcut region
 		cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
 		cout << "running over " << PedTree->GetEntries() << " events.." << endl;
@@ -2798,7 +2801,6 @@ void Clustering::ClusterRun(bool plots, bool AlternativeClustering) {
 		cout << "plot production for AutoFidCut: done." << endl << endl;
 		SaveHistogram(histo_scatter_autofidcut);
 	}
-	cout << "PedTree->GetEntries(): " << PedTree->GetEntries() << endl;
 	current_event = 0;
 	
 	// TODO: call AutoFidCut here..
@@ -2989,6 +2991,58 @@ void Clustering::AutoFidCut() {
 	cout << "AutoFidCut: I'm the AutoFidCut function.\n\n";
 	
 	cout << "\n\n\n START AutoFidCut \n\n";
+	
+	// TODO: move algorithm which fills the scatter plot over here and call AutoFidCut() in the main function
+	
+	// produce necessary plots to detect fidcut region
+	cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
+	cout << "running over " << PedTree->GetEntries() << " events.." << endl;
+	//record large clusters
+	string large_clusters_filename = plots_path + "large_clusters.txt";
+	ofstream large_clusters_file(large_clusters_filename.c_str());
+	large_clusters_file << "event\tdet\tclus\tnhits\tnseeds" << endl;
+	uint nclusters, nhits;
+	Cluster* current_cluster;
+	
+	//histograms of hit positions to find out if the eta correction helped
+//	TH1F* histo_hitpos[9][2];
+//	for(int det=0; det<9; det++) {
+//		for(int chip=0; chip<2; chip++) {
+//			ostringstream histotitle;
+//			histotitle << "Hit_Position_Interstrip_D" << det << "_chip" << chip;
+//			histo_hitpos[det][chip] = new TH1F(histotitle.str().c_str(), histotitle.str().c_str(), 101, -0.005, 1.005);
+//		}
+//	}
+	current_event = 0;
+	for (uint e=0; e<PedTree->GetEntries(); e++) { // maybe it's not necessary to run over all events for the AutoFidCut?!
+//		if (!AlternativeClustering)
+			ClusterEvent();
+//		else ClusterEventSeeds();
+		if (e%10000==0) clustered_event.Print();
+		
+		//			current_cluster = 0;
+		
+		// -- produce scatter plot for AutoFidCut
+		bool one_and_only_one = clustered_event.HasOneSiliconTrack();
+		Float_t si_avg_x=0, si_avg_y=0;
+		if (CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster())
+			continue;
+		if (one_and_only_one) {
+			for (int det=0; det<4; det++) {
+				si_avg_x += clustered_event.GetCluster(2*det,0)->Get1stMoment();
+				si_avg_y += clustered_event.GetCluster(2*det+1,0)->Get1stMoment();
+			}
+			si_avg_x = si_avg_x/4;
+			si_avg_y = si_avg_y/4;
+			
+			if (clustered_event.GetNClusters(8)==1)
+				histo_scatter_autofidcut->Fill(si_avg_x,si_avg_y);
+		}
+	}
+	cout << "plot production for AutoFidCut: done." << endl << endl;
+	SaveHistogram(histo_scatter_autofidcut);
+	// -- end of scatter plot production
+	return; // TODO: remove!!
 	
 	
 	//calculate y bin values for each x column and count # of non-zero bins and set the corresponding histogram bins
