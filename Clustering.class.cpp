@@ -92,6 +92,7 @@ class Clustering {
 	  void AutoFidCut();
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 //	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
+	void EventMonitor(int CurrentEvent = 0);
 	
 	bool UseAutoFidCut;
 	bool AlternativeClustering;
@@ -3244,7 +3245,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 	
 	if(tracks.size()==0) {
 		cout<<"Clustering::Align: No tracks found; calling Clustering::ClusterRun first..."<<endl;
-		ClusterRun(plots,0); // doesn't use alternative clustering
+		ClusterRun(plots); // doesn't use alternative clustering
 	}
 	
 	if (tracks.size() == 0) {
@@ -3724,4 +3725,10 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	SaveHistogram(histo_transparentclustering_hitdiff);
 	
 	PedFile->Close();
+}
+
+// --
+void Clustering::EventMonitor(int CurrentEvent) {
+	PedTree->GetEvent(CurrentEvent);
+	return;
 }
