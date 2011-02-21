@@ -721,7 +721,7 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    
    //Setting Style Attributes for Plots (Starting with Plain style and then making custom adjustments)
    gROOT->SetStyle("Plain"); //General style (see TStyle)
-   gStyle->SetOptStat(1110); //Stat options to be displayed
+   gStyle->SetOptStat(111110); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
    gStyle->SetOptFit(1111);  //Fit options to be displayed
    gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
    gStyle->SetPadRightMargin(0.15);
@@ -3731,4 +3731,71 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 void Clustering::EventMonitor(int CurrentEvent) {
 	PedTree->GetEvent(CurrentEvent);
 	return;
+	
+	
+	
+	//record large clusters
+	string large_clusters_filename = plots_path + "large_clusters.txt";
+	ofstream large_clusters_file(large_clusters_filename.c_str());
+	large_clusters_file << "event\tdet\tclus\tnhits\tnseeds" << endl;
+	uint nclusters, nhits;
+	Cluster* current_cluster;
+	
+	//histograms of hit positions to find out if the eta correction helped
+	TH1F* histo_hitpos[9][2];
+	for(int det=0; det<9; det++) {
+		for(int chip=0; chip<2; chip++) {
+			ostringstream histotitle;
+			histotitle << "Hit_Position_Interstrip_D" << det << "_chip" << chip;
+			histo_hitpos[det][chip] = new TH1F(histotitle.str().c_str(), histotitle.str().c_str(), 101, -0.005, 1.005);
+		}
+	}
+	
+	if (!AlternativeClustering) ClusterEvent();
+	else ClusterEventSeeds();
+//	if(e%10000==0) clustered_event.Print();
+//	BookHistograms();
+	
+	//record large clusters
+	//if a track, check whether it's in the silicon fiducial region
+	if(clustered_event.HasOneSiliconTrack()) {
+		
+		//loop over detectors to record large clusters to a txt file
+		for(int det=0; det<9; det++) {
+            nclusters = clustered_event.GetNClusters(det);
+            //loop over all *good* clusters
+            for(uint clus=0; clus<nclusters; clus++) {
+				current_cluster = clustered_event.GetCluster(det,clus);
+				nhits = current_cluster->GetNHits();
+				if(nhits>8) {
+					large_clusters_file << event_number << "\t" << det << "\t" << clus << "/" << nclusters << "\t" << nhits << "\t" << current_cluster->GetNSeeds();
+					if(current_cluster->IsBadChannelCluster()) large_clusters_file << " (bad chan cluster)"; // skip bad clusters
+					large_clusters_file << endl;
+				}
+            }
+		}//end large cluster record
+		
+	}
+	
+	
+	TH2F histo_det1_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
+	TH2F histo_det2_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
+	TH2F histo_det3_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
+	TH2F histo_det4_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
+	TH2F histo_dia_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
+	
+	TH2F* histo_clusters[4];
+	
+	for (int det = 0; det < 4; det++) {
+		histo_clusters[det] = new TH2F("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
+		Float_t si_avg_x=0, si_avg_y=0;
+		Float_t cluster_size = 0;
+//		int bin_x = 0, bin_y = 0, bin = 0;
+		si_avg_x = clustered_event.GetCluster(2*det, 0)->Get1stMoment();
+		si_avg_y = clustered_event.GetCluster(2*det+1, 0)->Get1stMoment();
+		cluster_size = (clustered_event.GetCluster(2*det, 0)->Get1stMoment() + clustered_event.GetCluster(2*det+1, 0)->Get1stMoment()) / 2.;
+//		bin_x = histo_clusters[det]->
+//		bin = histo_clusters[det]->GetBin(
+		histo_clusters[det]->SetBinContent(si_avg_x+1,si_avg_y+1,cluster_size);
+	}
 }
