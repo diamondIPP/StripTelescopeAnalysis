@@ -1976,6 +1976,10 @@ void Clustering::BookHistograms() {
             histo_scatter[det][1]->Fill(det_centroid[2*det],det_centroid[2*det+1]);
          //scatter of tracks in diamond averaged over silicon planes
          histo_scatter[4][1]->Fill(si_avg_x,si_avg_y);
+		  //check usual events
+//		  if (si_avg_x < 80) {
+//			  EventMonitor(current_event-1);
+//		  }
          //count diamond track events
          singlesitrack_1diamondclus_events++;
          //count fidcut diamond track events
@@ -3729,10 +3733,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 
 // --
 void Clustering::EventMonitor(int CurrentEvent) {
-	PedTree->GetEvent(CurrentEvent);
-	return;
-	
-	
+	current_event = current_event - 1;
 	
 	//record large clusters
 	string large_clusters_filename = plots_path + "large_clusters.txt";
@@ -3777,25 +3778,35 @@ void Clustering::EventMonitor(int CurrentEvent) {
 		
 	}
 	
+	TH2F* histo_clusters[5];
+	Float_t si_avg_x=0, si_avg_y=0;
 	
-	TH2F histo_det1_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
-	TH2F histo_det2_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
-	TH2F histo_det3_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
-	TH2F histo_det4_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
-	TH2F histo_dia_clusters("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
-	
-	TH2F* histo_clusters[4];
-	
-	for (int det = 0; det < 4; det++) {
-		histo_clusters[det] = new TH2F("Det1Clusters","Det1Clusters",256,-0.5,255.5,256,-0.5,255.5);
-		Float_t si_avg_x=0, si_avg_y=0;
+	for (int det = 0; det < 5; det++) {
+		ostringstream histo_clusters_name;
+		histo_clusters_name << "Event" << current_event << "Det" << det << "Clusters";
+		histo_clusters[det] = new TH2F(histo_clusters_name.str().c_str(),histo_clusters_name.str().c_str(),256,-0.5,255.5,256,-0.5,255.5);
+		Float_t si_x=0, si_y=0;
 		Float_t cluster_size = 0;
-//		int bin_x = 0, bin_y = 0, bin = 0;
-		si_avg_x = clustered_event.GetCluster(2*det, 0)->Get1stMoment();
-		si_avg_y = clustered_event.GetCluster(2*det+1, 0)->Get1stMoment();
-		cluster_size = (clustered_event.GetCluster(2*det, 0)->Get1stMoment() + clustered_event.GetCluster(2*det+1, 0)->Get1stMoment()) / 2.;
+		//		int bin_x = 0, bin_y = 0, bin = 0;
+		si_x = clustered_event.GetCluster(2*det, 0)->Get1stMoment();
+		if (det < 4) {
+			si_y = clustered_event.GetCluster(2*det+1, 0)->Get1stMoment();
+			cluster_size = (clustered_event.GetCluster(2*det, 0)->GetNHits() + clustered_event.GetCluster(2*det+1, 0)->GetNHits()) / 2.;
+			si_avg_x += si_x;
+			si_avg_y += si_y;
+		}
 //		bin_x = histo_clusters[det]->
 //		bin = histo_clusters[det]->GetBin(
-		histo_clusters[det]->SetBinContent(si_avg_x+1,si_avg_y+1,cluster_size);
+		if (det < 4) {
+			histo_clusters[det]->SetBinContent(si_x+1,si_y+1,cluster_size);
+		}
+		else {
+			si_avg_x = si_avg_x / 4;
+			si_avg_y = si_avg_y / 4;
+			histo_clusters[det]->SetBinContent(si_x+1,si_avg_y+1,clustered_event.GetCluster(2*det, 0)->GetNHits());
+		}
+
+		SaveHistogram(histo_clusters[det]);
 	}
+	current_event++;
 }
