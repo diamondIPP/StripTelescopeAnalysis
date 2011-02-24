@@ -43,17 +43,27 @@ int main () {
 			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
 		}
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
+		vector<FidCutRegion> FidCutRegions;
 		if (cl.UseAutoFidCut) {
 			cl.AutoFidCut();
+			if (FidCutRegions.size() == 0) cl.UseAutoFidCut = false;
 		}
-		cl.AlternativeClustering = ALTERNATIVECLUSTERING;
-		if (DO_ALIGNMENT) {
-			cl.Align(PLOTS, CUTFAKETRACKS);
+		if (FidCutRegions.size() > 0 && cl.UseAutoFidCut) {
+			for (int reg = 0; reg < FidCutRegions.size(); reg++) {
+				cl.SetRunParameters(reg,FidCutRegions[reg],FidCutRegions.size()-1);
+				// TODO: set different paths for the plots
+				cl.ClusterRun(PLOTS);
+			}
 		}
 		else {
-			cl.ClusterRun(PLOTS);
+			cl.AlternativeClustering = ALTERNATIVECLUSTERING;
+			if (DO_ALIGNMENT) {
+				cl.Align(PLOTS, CUTFAKETRACKS);
+			}
+			else {
+				cl.ClusterRun(PLOTS);
+			}
 		}
-
 		
 	}
 	return 0;

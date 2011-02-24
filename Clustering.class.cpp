@@ -93,6 +93,7 @@ class Clustering {
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 //	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
 	void EventMonitor(int CurrentEvent = 0);
+	void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
 	
 	bool UseAutoFidCut;
 	bool AlternativeClustering;
@@ -3809,4 +3810,32 @@ void Clustering::EventMonitor(int CurrentEvent) {
 		SaveHistogram(histo_clusters[det]);
 	}
 	current_event++;
+}
+
+void Clustering::SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions) {
+	si_avg_fidcut_xlow = current_region.GetValueXLow();
+	si_avg_fidcut_xhigh = current_region.GetValueXHigh();
+	si_avg_fidcut_ylow = current_region.GetValueYLow();
+	si_avg_fidcut_yhigh = current_region.GetValueYHigh();
+	
+	// TODO: alternative plots path only for more than 1 region!!
+	
+	if (MultiRegions) {
+		
+		ostringstream plotspath;
+		plotspath << plots_path.c_str() << "-FidCutRegion" << reg;
+		
+		//	plotspath << sys->pwd() << "/plots-" << RunNumber;
+		//	if(RunDescription=="") plotspath << "/";
+		//	else plotspath << "-" << RunDescription << "/";
+		
+		plotspath << "-FidCutRegion" << reg;
+		
+		plots_path = plotspath.str();
+		png_file_char = plotspath.str();
+		C_file_char = plotspath.str();
+		root_file_char = plotspath.str();
+		//make plots dir
+		sys->mkdir(plots_path.c_str());
+	}
 }
