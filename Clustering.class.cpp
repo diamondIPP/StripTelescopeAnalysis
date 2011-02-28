@@ -3779,7 +3779,11 @@ void Clustering::EventMonitor(int CurrentEvent) {
 		
 	}
 	
+	ostringstream histo_diamond_name;
+	histo_diamond_name << "Event" << current_event << "DiaClusters";
 	TH2F* histo_clusters[5];
+	TH1F* histo_diamond;
+	histo_diamond = new TH1F(histo_diamond_name.str().c_str(),histo_diamond_name.str().c_str(),256,-0.5,255.5);
 	Float_t si_avg_x=0, si_avg_y=0;
 	
 	for (int det = 0; det < 5; det++) {
@@ -3805,10 +3809,20 @@ void Clustering::EventMonitor(int CurrentEvent) {
 			si_avg_x = si_avg_x / 4;
 			si_avg_y = si_avg_y / 4;
 			histo_clusters[det]->SetBinContent(si_x+1,si_avg_y+1,clustered_event.GetCluster(2*det, 0)->GetNHits());
+			
+			for (int j = 0; j < Det_NChannels[8]; j++) {
+				if (Dia_ADC[j]-Det_PedMean[8][j] > Di_Cluster_Hit_Factor*Det_PedWidth[8][j] || true) {
+//					histo_diamond->SetBinContent(j+1,Dia_ADC[j]-Det_PedMean[8][j]);
+					histo_diamond->SetBinContent((int)Det_Channels[8][j],Dia_ADC[j]-Det_PedMean[8][j]);
+				}
+			}
+			SaveHistogram(histo_diamond);
+//			histo_diamond->SetBinContent(si_x+1,clustered_event.GetCluster(2*det, 0)->GetNHits());
 		}
 
 		SaveHistogram(histo_clusters[det]);
 	}
+	
 	current_event++;
 }
 
