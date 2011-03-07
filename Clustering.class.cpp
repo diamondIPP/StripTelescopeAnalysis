@@ -27,7 +27,7 @@
 //                    -> align with tracking (this makes sure tracks are really tracks; thereby improving residuals)
 //2010-11-12 Blinded the alignment resolution determination
 //2010-12-01 Created AutoFidCut() to Clustering.class.cpp
-//2011-03-07 XCode 4.0 Test max
+//2011-03-07 XCode 4.0 Test max AND second Xcode 4 Test!
 
 //C++ standard libraries
 #include <fstream>
