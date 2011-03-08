@@ -3579,7 +3579,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 	plots_path = plots_path_alignment.str();
 	
 	// now start the telescope alignment!
-	// loop bla: align, cut fake tracks, align again (if CutFakeTracksOn is set true)
+	// alignment loop: align, cut fake tracks, align again (if CutFakeTracksOn is set true)
 	for (int alignStep = 0; alignStep < 2; alignStep++) {
 		sys->mkdir(plots_path.c_str());
 //		TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
@@ -3770,7 +3770,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 			TransparentClustering(alignment_tracks, alignment_tracks_mask, align);
 			break;
 		}
-	} // end loop bla
+	} // end alignment loop
    /*
    //Plot out the offsets
    for(Int_t plane=1; plane<4; plane++) {
