@@ -13,11 +13,12 @@ int ReadRunList();
 
 class RunInfo {
 public:
-	int RunNumber, NEvents, Initial_Event, Hit_Occupancy;
+	int RunNumber, Verbosity, NEvents, Initial_Event, Hit_Occupancy;
 	string RunDescription;
 	bool AlternativeClustering, DoAlignment, DoSlidingPedestal, CutFakeTracks;
 	void SetParameters() {
 		RunNumber = RUNNUMBER;
+        Verbosity = VERBOSITY;
 		NEvents = NEVENTS;
 		Initial_Event = INITIAL_EVENT;
 		Hit_Occupancy = HIT_OCCUPANCY;
@@ -29,6 +30,7 @@ public:
 	}
 	void GetParameters() {
 		RUNNUMBER = RunNumber;
+        VERBOSITY = Verbosity;
 		NEVENTS = NEvents;
 		INITIAL_EVENT = Initial_Event;
 		HIT_OCCUPANCY = Hit_Occupancy;

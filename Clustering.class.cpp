@@ -75,7 +75,7 @@ class Clustering {
       void ParseIntArray(string value, vector<int> &vec);
       void ParseFloatArray(string value, vector<float> &vec);
       void ClusterEvent(bool verbose = 0);
-	void ClusterEventSeeds(bool verbose = 0);
+	  void ClusterEventSeeds(bool verbose = 0);
       void BookHistograms();
       void SaveHistogram(TH1F* histo);
       void SaveHistogram(TH2F* histo);
@@ -90,13 +90,13 @@ class Clustering {
       void ClusterRun(bool plots = 1);
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
 	  void AutoFidCut();
-	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
-//	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
-	void EventMonitor(int CurrentEvent = 0);
-	void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
+	  void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
+      //void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
+	  void EventMonitor(int CurrentEvent = 0);
+  	  void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
 	
-	bool UseAutoFidCut;
-	bool AlternativeClustering;
+	  bool UseAutoFidCut;
+	  bool AlternativeClustering;
       
    private:
       //general settings
@@ -149,8 +149,8 @@ class Clustering {
       //Alignment
       vector<TDiamondTrack> tracks, tracks_fidcut;
       vector<bool> tracks_mask, tracks_fidcut_mask;
-	Float_t alignment_chi2;
-	vector<Float_t> dia_offset;
+	  Float_t alignment_chi2;
+	  vector<Float_t> dia_offset;
 
       //Telescope geometry
       Double_t detectorD0Z;
@@ -187,7 +187,7 @@ class Clustering {
       string root_file_char;
       TSystem* sys;
       string settings_file;
-	string pedfile_path;
+	  string pedfile_path;
       
       //processed event storage; read from pedtree
       UInt_t run_number;
@@ -240,18 +240,24 @@ class Clustering {
 	  TH1F* histo_afc_y; //defined for AutoFidCut(), sum of hits per y bin (max, 19.11.2010)
 	  TH1F* histo_afc_y_nzv; //defined for AutoFidCut(), # of non-zero values in y bins (max, 19.11.2010)
 	  TH1F* histo_afc_y_mean; //defined for AutoFidCut(), mean for y bins (max, 19.11.2010)
-	
+
+      TH1F* histo_afc_unit_histo_1f;
+      TH2F* histo_afc_unit_histo_2f;
+      TH2F* histo_afc_region_1_mask;
+    
 	  TH1F* histo_afc_x_cut;
 	  TH1F* histo_afc_y_cut;
 	
-	TH1F* histo_transparentclustering_landau[10]; // index: n channels
-	TH1F* histo_transparentclustering_eta;
-	TH1F* histo_transparentclustering_hitdiff;
+	  TH1F* histo_transparentclustering_landau[10]; // index: n channels
+      TH1F* histo_transparentclustering_eta;
+	  TH1F* histo_transparentclustering_hitdiff;
 	
-	TH2F* histo_scatter_autofidcut;
+	  TH2F* histo_scatter_autofidcut;
 	
 	  FidCutRegion* FCR[4];
-	
+      
+      //added for handling of overall verbosity
+      int Verbosity;
 	
    private:
       
@@ -269,8 +275,8 @@ class Clustering {
       bool histoswitch_hitocc_saturated[9][2]; //second index: number saturated, fraction saturated
       bool histoswitch_clusters_average[9][3]; //second index: no fidcut, fidcut, no track req
 	
-	bool histoswitch_transparentclustering_landau[5]; // index: n channels
-	bool histoswitch_transparentclustering_eta[5]; // index: n channels
+	  bool histoswitch_transparentclustering_landau[5]; // index: n channels
+	  bool histoswitch_transparentclustering_eta[5]; // index: n channels
       
       //fits
       TF1* histofit_dianoise[2];
@@ -318,8 +324,8 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pulse_height_di_max = 3000;
    snr_distribution_si_max = 2500;
    snr_distribution_di_max = 2500;
-	UseAutoFidCut = 0;
-	AlternativeClustering = 0;
+   UseAutoFidCut = 0;
+   AlternativeClustering = 0;
    
    //Hi/low eta slices
    eta_lowq_slice_low = 600;
@@ -348,8 +354,8 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    //Double_t detectorD3Z = 13.625; // by definition
    //Double_t detectorDiaZ = 7.2; // by definition
 	
-	//cut tracks with chi2 > alignment_chi2
-	alignment_chi2 = 9999.;
+   //cut tracks with chi2 > alignment_chi2
+   alignment_chi2 = 9999.;
 
    //Is the diamond aligned to Silicon x coordinates?
    dia_x_aligned = true;
@@ -391,13 +397,13 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pedfilepath << sys->pwd() << "/Pedestal." << RunNumber;
    if(RunDescription=="") pedfilepath << ".root";
    else pedfilepath << "-" << RunDescription << ".root";
-	pedfile_path = pedfilepath.str();
+   pedfile_path = pedfilepath.str();
 	
-	// create file histograms.root
-	ostringstream root_histo_file_path;
-	root_histo_file_path << plotspath.str().c_str() << "histograms.root";
-	cout << "creating " << root_histo_file_path.str().c_str() << " .." << endl;
-	TFile fplots(root_histo_file_path.str().c_str(),"RECREATE");
+   // create file histograms.root
+   ostringstream root_histo_file_path;
+   root_histo_file_path << plotspath.str().c_str() << "histograms.root";
+   cout << "creating " << root_histo_file_path.str().c_str() << " .." << endl;
+   TFile fplots(root_histo_file_path.str().c_str(),"RECREATE");
    
    LoadSettings();
    
@@ -698,7 +704,11 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
 	
 	histo_afc_x_cut = new TH1F("histo_afc_x_cut","histo_afc_x_cut",256,0,255);
 	histo_afc_y_cut = new TH1F("histo_afc_y_cut","histo_afc_y_cut",256,0,255);
-	
+
+    histo_afc_unit_histo_1f = new TH1F("histo_afc_unit_histo_1f","histo_afc_unit_histo_1f",256,0,255);
+	histo_afc_unit_histo_2f = new TH2F("histo_afc_unit_histo_2f","histo_afc_unit_histo_2f",256,0,255,256,0,255);
+	histo_afc_region_1_mask = new TH2F("histo_afc_region_1_mask","histo_afc_region_1_mask",256,0,255,256,0,255);
+    
 	for(int i=0;i<4;i++) {
 	 FCR[i] = new FidCutRegion(i);
 	 FCR[i]->SetAllValuesZero();
@@ -774,8 +784,8 @@ Clustering::~Clustering() {
 
 
 void Clustering::LoadSettings() {
-   
-   cout<<endl<<"Overriding default settings with settings in Settings.ini"<<endl<<endl;
+
+   cout << endl << "Overriding default settings with settings in Settings.ini" << endl << endl;
    
    ifstream file(settings_file.c_str());
    if(!file) {
@@ -2993,21 +3003,26 @@ void Clustering::ClusterRun(bool plots) {
 }
 
 void Clustering::AutoFidCut() {
+		
+	histo_afc_unit_histo_1f->Reset();
+	histo_afc_unit_histo_2f->Reset();
+    
+	SaveHistogramPDF(histo_afc_unit_histo_1f);
+	SaveHistogramPDF(histo_afc_unit_histo_2f);
 	
 	//define sum and counter vectors for x columns and y rows
 	int histo_afc_col_sums_x[256];
 	int histo_afc_col_sums_y[256];
 	
-	cout << "\n";
+	
+    if(Verbosity>0) {
+    cout << "\n";
 	cout << "AutoFidCut: I'm the AutoFidCut function.\n\n";
-	
-	cout << "\n\n\n START AutoFidCut \n\n";
-	
-	// TODO: move algorithm which fills the scatter plot over here and call AutoFidCut() in the main function
-	
+	cout << " START AutoFidCut \n\n";	
 	// produce necessary plots to detect fidcut region
 	cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
 	cout << "running over " << PedTree->GetEntries() << " events.." << endl;
+    }
 	//record large clusters
 	string large_clusters_filename = plots_path + "large_clusters.txt";
 	ofstream large_clusters_file(large_clusters_filename.c_str());
@@ -3016,14 +3031,14 @@ void Clustering::AutoFidCut() {
 	Cluster* current_cluster;
 	
 	//histograms of hit positions to find out if the eta correction helped
-//	TH1F* histo_hitpos[9][2];
-//	for(int det=0; det<9; det++) {
-//		for(int chip=0; chip<2; chip++) {
-//			ostringstream histotitle;
-//			histotitle << "Hit_Position_Interstrip_D" << det << "_chip" << chip;
-//			histo_hitpos[det][chip] = new TH1F(histotitle.str().c_str(), histotitle.str().c_str(), 101, -0.005, 1.005);
-//		}
-//	}
+    //	TH1F* histo_hitpos[9][2];
+    //	for(int det=0; det<9; det++) {
+    //		for(int chip=0; chip<2; chip++) {
+    //			ostringstream histotitle;
+    //			histotitle << "Hit_Position_Interstrip_D" << det << "_chip" << chip;
+    //			histo_hitpos[det][chip] = new TH1F(histotitle.str().c_str(), histotitle.str().c_str(), 101, -0.005, 1.005);
+    //		}
+    //	}
 	current_event = 0;
 	for (uint e=0; e<PedTree->GetEntries(); e++) { // maybe it's not necessary to run over all events for the AutoFidCut?!
 		if (!AlternativeClustering) ClusterEvent();
@@ -3049,202 +3064,487 @@ void Clustering::AutoFidCut() {
 				histo_scatter_autofidcut->Fill(si_avg_x,si_avg_y);
 		}
 	}
+    if(Verbosity>0) {
 	cout << "plot production for AutoFidCut: done." << endl << endl;
+    }
 	SaveHistogram(histo_scatter_autofidcut);
+	
 	// -- end of scatter plot production
-	return; // TODO: remove!!
+    // BRAKE
+	
+    
+    //calculate y bin values for each x column and count # of non-zero bins and set the corresponding histogram bins
+    for(int i=0;i<256;i++) {
+        histo_afc_col_sums_x[i] = 0;
+        for(int j=0;j<256;j++) {
+            histo_afc_col_sums_x[i] = histo_afc_col_sums_x[i] + histo_scatter_autofidcut->GetBinContent(i,j);
+            histo_afc_x->SetBinContent(i,histo_afc_col_sums_x[i]);
+        }
+        
+    }
+    
+    //calculate x bin values for each y row and count # of non-zero bins and set the corresponding histogram bins
+    for(int j=0;j<256;j++) {
+        histo_afc_col_sums_y[j] = 0;
+        for(int i=0;i<256;i++) {
+            histo_afc_col_sums_y[j] = histo_afc_col_sums_y[j] + histo_scatter_autofidcut->GetBinContent(i,j);
+            histo_afc_y->SetBinContent(j,histo_afc_col_sums_y[j]);
+        }
+        
+    }
+    
+    //get maximums for x and y histogram
+    int histo_afc_x_max = (int)histo_afc_x->GetMaximum();
+    int histo_afc_y_max = (int)histo_afc_y->GetMaximum();
+    
+    //set cut factor for pre-fidcut
+    float afc_cut_factor = 0.4;
+    
+    //write maxima of x and y histograms to stdout
+    if(Verbosity>0) {
+    cout << "histo_afc_x->GetMaximum() is:\t" << (int)histo_afc_x->GetMaximum() << "\n";
+    cout << "histo_afc_y->GetMaximum() is:\t" << (int)histo_afc_y->GetMaximum() << "\n";
+    }
+        
+    //set x and y fidcut histograms
+    for(int i=0;i<256;i++) {
+        if( (histo_afc_x->GetBinContent(i)) < (afc_cut_factor*histo_afc_x_max)) {
+            histo_afc_x_cut->SetBinContent(i,0);
+        } else {
+            histo_afc_x_cut->SetBinContent(i,histo_afc_x->GetBinContent(i));
+        }
+    }
+    
+    for(int j=0;j<256;j++) {
+        if( (histo_afc_y->GetBinContent(j)) < (afc_cut_factor*histo_afc_y_max)) {
+            histo_afc_y_cut->SetBinContent(j,0);
+        } else {
+            histo_afc_y_cut->SetBinContent(j,histo_afc_y->GetBinContent(j));
+        }
+        
+    }	
+    
+    
+    //TH2F histo_afc_scatter_firstfidcut = new TH2F("histo_afc_scatter_firstfidcut",256,0,255,256,0,255);
+    TH2F *histo_afc_scatter_firstfidcut = (TH2F*)histo_scatter_autofidcut->Clone();
+    histo_afc_scatter_firstfidcut->SetName("histo_afc_scatter_firstfidcut");
+    
+    int afc_width_min = 20;
+    
+    int afc_width_counter = 0;
+    int afc_last_start = 0;
+    int afc_last_end = 0;
+    
+    int afc_block_count_x = 0;
+    int afc_block_count_y = 0;
+    
+    for(int j=1;j<256;j++) {
+        if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) == 0) ) {
+            afc_last_start = j;
+            afc_width_counter++;
+            afc_block_count_x++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+        } else if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) ) {
+            afc_width_counter++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            continue;
+        } else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            for(int k=afc_last_start;k<=j;k++) {
+                histo_afc_x_cut->SetBinContent(k,0);
+            }
+            afc_block_count_x--;
+            afc_width_counter = 0;
+            continue;
+        } else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
+            afc_width_counter = 0;
+            afc_block_count_x++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            
+        } else if ( (histo_afc_x_cut->GetBinContent(j) == 0) ) {
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            continue;
+        }
+        else {
+            afc_width_counter++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+        }
+    }
+    
+    
+    for(int j=1;j<256;j++) {
+        if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) == 0) ) {
+            afc_last_start = j;
+            afc_width_counter++;
+            afc_block_count_y++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+        } else if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) ) {
+            afc_width_counter++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            continue;
+        } else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            for(int k=afc_last_start;k<=j;k++) {
+                histo_afc_y_cut->SetBinContent(k,0);
+            }
+            afc_block_count_y--;
+            afc_width_counter = 0;
+            continue;
+        } else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
+            afc_width_counter = 0;
+            afc_block_count_y++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            
+        } else if ( (histo_afc_y_cut->GetBinContent(j) == 0) ) {
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            continue;
+        }
+        else {
+            afc_width_counter++;
+            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+        }
+    }
+    
 	
 	
-	//calculate y bin values for each x column and count # of non-zero bins and set the corresponding histogram bins
-	for(int i=0;i<256;i++) {
-		histo_afc_col_sums_x[i] = 0;
-		for(int j=0;j<256;j++) {
-			histo_afc_col_sums_x[i] = histo_afc_col_sums_x[i] + histo_scatter[4][1]->GetBinContent(i,j);
-			histo_afc_x->SetBinContent(i,histo_afc_col_sums_x[i]);
-		}
-		
+    //divide the detector plane in a maximum of four quadrants
+    
+    if(Verbosity>=1) {
+    cout << "#-#-#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#" << endl;
+    cout << "#" << endl;
+    cout << "# afc region recognition started..." << endl;
+    cout << "#" << endl;
 	}
 	
-	//calculate x bin values for each y row and count # of non-zero bins and set the corresponding histogram bins
-	for(int j=0;j<256;j++) {
-		histo_afc_col_sums_y[j] = 0;
-		for(int i=0;i<256;i++) {
-			histo_afc_col_sums_y[j] = histo_afc_col_sums_y[j] + histo_scatter[4][1]->GetBinContent(i,j);
-			histo_afc_y->SetBinContent(j,histo_afc_col_sums_y[j]);
-		}
+    int afc_x_divider = 0;
+    int afc_y_divider = 0;
+    bool one_and_only_afc_region_x = 1;
+    bool one_and_only_afc_region_y = 1;
+    bool one_and_only_afc_region = 0;
+	
+    if(Verbosity>=2) cout << "# x divider function called." << endl;
+    for(int i=2;i<256;i++) {			
+        if( (histo_afc_x_cut->GetBinContent(i-1) == 0) && (histo_afc_x_cut->GetBinContent(i) > 0) ) {
+            for(int j=i;j<256;j++) {
+                if ( (histo_afc_x_cut->GetBinContent(j-1) > 0) && (histo_afc_x_cut->GetBinContent(j) == 0) ) {
+                    afc_x_divider = j+5;
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    
+    for(int k=afc_x_divider-4;k<256;k++) {
+        if(histo_afc_x_cut->GetBinContent(k)!=0) {
+            one_and_only_afc_region_x = 0;
+        }
+    }
+	
+    if (one_and_only_afc_region_x) {
+        afc_x_divider = 0;
+        if(Verbosity>=1) cout << "# this run has one and only one afc region in x direction. afc_x_divider set to 0." << endl;
+    } else {
+        if(Verbosity>=1) cout << "# this run has more than one afc region in x direction." << endl;
+    }
+	
+    
+    if(Verbosity>=1) cout << "#" << endl << "# y divider function called." << endl;
+    for(int i=2;i<256;i++) {
+        if( (histo_afc_y_cut->GetBinContent(i-1) == 0) && (histo_afc_y_cut->GetBinContent(i) > 0) ) {
+            for(int j=i;j<256;j++) {
+                if ( (histo_afc_y_cut->GetBinContent(j-1) > 0) && (histo_afc_y_cut->GetBinContent(j) == 0) ) {
+                    afc_y_divider = j+5;
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    
+    for(int k=afc_y_divider-4;k<256;k++) {
+        if(histo_afc_y_cut->GetBinContent(k)!=0) {
+            one_and_only_afc_region_y = 0;
+        }
+    }
+	
+    if (one_and_only_afc_region_y) {
+        afc_y_divider = 0;
+        if(Verbosity>=1) cout << "# this run has one and only one afc region in y direction. afc_y_divider set to 0." << endl;
+    } else {
+        if(Verbosity>=1) cout << "# this run has more than one afc region in y direction." << endl;
+    }
+	
+    if( one_and_only_afc_region_x && one_and_only_afc_region_y ) {
+        one_and_only_afc_region = 1;
+        if(Verbosity>=1) cout << "#" << endl << "#" << endl << "# this run has one and only one afc region." << endl;
+    } else {
+        if(Verbosity>=1) cout << "#" << endl << "#" << endl << "# this run has more than one afc region." << endl;
+    }
+	
+    if(Verbosity>=1) cout << "#" << endl << "# afc region recognition ended..." << endl << "#" << endl << "#-#-#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#" << endl;
+	
+    //end divider code
+	
+	if(Verbosity>=1) { 
+    cout << endl;
+    cout << "# # # # # # # # # # # # # # # # # # # # # # #" << endl;
+    cout << "#" << endl;
+    cout << "# Famous afc_x_divider has value: " << afc_x_divider << endl;
+    cout << "#" << endl;
+    cout << "# Famous afc_y_divider has value: " << afc_y_divider << endl;
+    cout << "#" << endl;
+    cout << "# # # # # # # # # # # # # # # # # # # # # # #" << endl;	
+    cout << endl;
+    }
+	
+    for(int z=1;z<2;z++) {
+        for(int u=0;u<afc_x_divider;u++) {
+            for(int l=1;l<afc_y_divider;l++) {
+                histo_afc_unit_histo_2f->SetBinContent(u,l,1);
+                
+            }
+        }
+    }
+    
+    //		for(int z=1;z<2;z++) {
+    //			for(int u=afc_x_divider;u<256;u++) {
+    //				for(int l=1;l<256;l++) {
+    //					histo_afc_unit_histo_2f->SetBinContent(u,l,0);
+    //				
+    //				}
+    //			}
+    //		}
+	
+	
+	
+    histo_afc_unit_histo_2f->SetName("histo_afc_unit_histo_2f_r1");
+    
+    SaveHistogramPDF(histo_afc_unit_histo_2f);
+	
+    (*histo_afc_region_1_mask) = (*histo_afc_unit_histo_2f)*(*histo_afc_scatter_firstfidcut);
+	
+    histo_afc_region_1_mask->SetName("histo_afc_region_1_mask");
+	
+    SaveHistogramPDF(histo_afc_region_1_mask);
+    if(Verbosity>=2) cout << endl << endl << "afc_region_1 saved" << endl << endl;
+	
+    if(Verbosity>=2) cout << endl << "Calling HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
+    HistCleaner(9999, histo_afc_region_1_mask);
+    if(Verbosity>=2) cout << endl << "Finished HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
+	
+    //		SaveHistogramPDF(histo_afc_region_1_mask);
+    //		cout << endl << endl << "afc_region_1 saved" << endl << endl;
+	
+    //end divider stuff
+	
+    for(int i=0;i<256;i++) {
+        if(histo_afc_x_cut->GetBinContent(i) == 0) {
+            for(int k=0;k<256;k++) {
+                histo_afc_scatter_firstfidcut->SetBinContent(i,k,0);
+            }
+        }
+    }
+    
+    for(int j=0;j<256;j++) {
+        if(histo_afc_y_cut->GetBinContent(j) == 0) {
+            for(int k=0;k<256;k++) {
+                histo_afc_scatter_firstfidcut->SetBinContent(k,j,0);
+            }
+        }
+    }
+    
+	
+    int afc_region_counter_x = 0;
+    int afc_region_counter_y = 0;
+	
+    for(int i=2;i<256;i++) {
+        if( ((histo_afc_x_cut->GetBinContent(i-1) == 0) && (histo_afc_x_cut->GetBinContent(i) > 0)) || ((histo_afc_x_cut->GetBinContent(i-1) > 0) && (histo_afc_x_cut->GetBinContent(i) == 0))) {	
+            afc_region_counter_x++;
+        }
+    }
+	
+    for(int i=2;i<256;i++) {
+        if( ((histo_afc_y_cut->GetBinContent(i-1) == 0) && (histo_afc_y_cut->GetBinContent(i) > 0)) || ((histo_afc_y_cut->GetBinContent(i-1) > 0) && (histo_afc_y_cut->GetBinContent(i) == 0))) {	
+			afc_region_counter_y++;
+        }
+    }
+	
+    if(Verbosity>=1) {
+    cout << endl;
+    cout << endl;
+    cout << "#####################################################################" << endl;
+    cout << endl;
+    cout << "It is most likely that this detector setup has " << (afc_region_counter_x/2)*(afc_region_counter_y/2) << " active diamond regions, i guess." << endl;
+    cout << endl;
+    cout << "#####################################################################" << endl;
+    cout << endl;
+    }
+	
+    int xpos = 2;
+    int ypos = 2;
+	
+    for(int z=1;z<((afc_region_counter_x/2)*(afc_region_counter_y/2))+1;z++) {
+        
+		for(int i=xpos;i<256;i++) {
+			if( (histo_afc_x_cut->GetBinContent(i-1) == 0) && (histo_afc_x_cut->GetBinContent(i) > 0) ) {
+				FCR[z]->SetValueXLow(i+5);
+				if(Verbosity>=2) cout << "Setting FCR[" << z << "].ValueXLow to: " << i+5 << endl;
+				for(int j=i+5;j<256;j++) {
+					if ( (histo_afc_x_cut->GetBinContent(j-1) > 0) && (histo_afc_x_cut->GetBinContent(j) == 0) ) {
+                        FCR[z]->SetValueXHigh(j-5);
+                        if(Verbosity>=2) cout << "Setting FCR[" << z << "].ValueXHigh to: " << j-5 << endl;					
+                        xpos=j+5;
+                        break;
+					}} break;
+                //break;
+			}}
+        
 		
-	}
+    }
 	
-	//get maximums for x and y histogram
-	int histo_afc_x_max = (int)histo_afc_x->GetMaximum();
-	int histo_afc_y_max = (int)histo_afc_y->GetMaximum();
+    if(Verbosity>=2) {
+    cout << endl;
+    cout << "#####################################################################" << endl;
+    cout << endl;
+    cout << "FCR[1]->ValueXLow is: " << FCR[1]->GetValueXLow() << endl;
+    cout << "FCR[1]->ValueXHigh is: " << FCR[1]->GetValueXHigh() << endl;
+    cout << endl;
+    cout << "#####################################################################" << endl;
+    }
+    
+    int afc_regions_count = (afc_block_count_x/2)*(afc_block_count_y/2);
+    int afc_regions_safety_delta = 5;
+    
+    if(Verbosity>=2) {
+    cout << "\nafc_block_count_x is:\t" << afc_block_count_x << "\n";
+    cout << "afc_block_count_y is:\t" << afc_block_count_y << "\n";
+    cout << "That means, we have " << afc_block_count_x/2 << " block(s) in x- and " << afc_block_count_y/2 << " block(s) in y-direction. so: " << afc_regions_count << " in total.\n\n";
+    }
+    
+    
+    //take afc_block_counts_x and afc_block_counts_y and populate FCRs
+    
+    
+    for(int i=0;i<afc_regions_count;i++) {
+        FCR[i]->SetAllValuesZero();
+        
+        
+        //		FCR[i]->SetValueXLow(some_var+afc_regions_safety_delta);
+        //		FCR[i]->SetValueXHigh(some_var-afc_regions_safety_delta);
+        //		FCR[i]->SetValueYLow(some_var+afc_regions_safety_delta);
+        //		FCR[i]->SetValueYHigh(some_var-afc_regions_safety_delta);
+    }
+    
+    histo_afc_scatter_firstfidcut->SetTitle("First Fidcut on Scatter Plot");
+    histo_afc_scatter_firstfidcut->SetTitleFont(42);
+    
+    histo_afc_region_1_mask->Reset();
 	
-	//set cut factor for pre-fidcut
-	float afc_cut_factor = 0.4;
+    (*histo_afc_region_1_mask) = (*histo_afc_unit_histo_2f)*(*histo_afc_scatter_firstfidcut);
 	
-	//write maxima of x and y histograms to stdout
-	cout << "histo_afc_x->GetMaximum() is:\t" << (int)histo_afc_x->GetMaximum() << "\n";
-	cout << "histo_afc_y->GetMaximum() is:\t" << (int)histo_afc_y->GetMaximum() << "\n";
+    histo_afc_region_1_mask->SetName("histo_afc_region_1_mask_LATEST");
+    
+    int afc_region_start = 0;
 	
-	//set x and y fidcut histograms
-	for(int i=0;i<256;i++) {
-		if( (histo_afc_x->GetBinContent(i)) < (afc_cut_factor*histo_afc_x_max)) {
-			histo_afc_x_cut->SetBinContent(i,0);
-		} else {
-			histo_afc_x_cut->SetBinContent(i,histo_afc_x->GetBinContent(i));
-		}
-	}
+    if(afc_y_divider == 0) {
+        afc_region_start = 1;
+    }
 	
-	for(int j=0;j<256;j++) {
-		if( (histo_afc_y->GetBinContent(j)) < (afc_cut_factor*histo_afc_y_max)) {
-			histo_afc_y_cut->SetBinContent(j,0);
-		} else {
-			histo_afc_y_cut->SetBinContent(j,histo_afc_y->GetBinContent(j));
-		}
+	for(int i=1;i<5;i++) {
 		
-	}	
-	
-	
-	//TH2F histo_afc_scatter_firstfidcut = new TH2F("histo_afc_scatter_firstfidcut",256,0,255,256,0,255);
-	TH2F *histo_afc_scatter_firstfidcut = (TH2F*)histo_scatter[4][1]->Clone();
-	histo_afc_scatter_firstfidcut->SetName("histo_afc_scatter_firstfidcut");
-	
-	int afc_width_min = 20;
-	
-	int afc_width_counter = 0;
-	int afc_last_start = 0;
-	int afc_last_end = 0;
-	
-	int afc_block_count_x = 0;
-	int afc_block_count_y = 0;
-	
-	for(int j=1;j<256;j++) {
-		if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) == 0) ) {
-			afc_last_start = j;
-			afc_width_counter++;
-			afc_block_count_x++;
-			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-		} else if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) ) {
-			afc_width_counter++;
-			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			continue;
-		} else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
-			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			for(int k=afc_last_start;k<=j;k++) {
-				histo_afc_x_cut->SetBinContent(k,0);
+		ostringstream phname;
+		phname << "histo_current_2f_" << i;
+		
+		TH2F* afc_current_histo_2f = new TH2F(phname.str().c_str(),phname.str().c_str(),256,0,255,256,0,255);
+		
+		histo_afc_unit_histo_2f->Reset();
+		if(i==1) {
+			for(int a=2;a<afc_x_divider;a++) {
+				for(int b=1;b<afc_y_divider;b++) {
+					histo_afc_unit_histo_2f->SetBinContent(a,b,1);
+				}
 			}
-			afc_block_count_x--;
-			afc_width_counter = 0;
-			continue;
-		} else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
-			afc_width_counter = 0;
-			afc_block_count_x++;
-			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			
-		} else if ( (histo_afc_x_cut->GetBinContent(j) == 0) ) {
-			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			continue;
 		}
-		else {
-			afc_width_counter++;
-			cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-		}
-	}
-	
-	
-	
-	for(int j=1;j<256;j++) {
-		if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) == 0) ) {
-			afc_last_start = j;
-			afc_width_counter++;
-			afc_block_count_y++;
-			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-		} else if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) ) {
-			afc_width_counter++;
-			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			continue;
-		} else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
-			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			for(int k=afc_last_start;k<=j;k++) {
-				histo_afc_y_cut->SetBinContent(k,0);
-			}
-			afc_block_count_y--;
-			afc_width_counter = 0;
-			continue;
-		} else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
-			afc_width_counter = 0;
-			afc_block_count_y++;
-			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			
-		} else if ( (histo_afc_y_cut->GetBinContent(j) == 0) ) {
-			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-			continue;
-		}
-		else {
-			afc_width_counter++;
-			cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
-		}
-	}
-	
-	for(int i=0;i<256;i++) {
-		if(histo_afc_x_cut->GetBinContent(i) == 0) {
-			for(int k=0;k<256;k++) {
-				histo_afc_scatter_firstfidcut->SetBinContent(i,k,0);
+        
+		if(i==2) {
+			for(int a=afc_x_divider;a<256;a++) {
+				for(int b=1;b<afc_y_divider;b++) {
+					histo_afc_unit_histo_2f->SetBinContent(a,b,1);
+				}
 			}
 		}
-	}
-	
-	for(int j=0;j<256;j++) {
-		if(histo_afc_y_cut->GetBinContent(j) == 0) {
-			for(int k=0;k<256;k++) {
-				histo_afc_scatter_firstfidcut->SetBinContent(k,j,0);
+		
+		if(i==3) {
+			for(int a=2;a<afc_x_divider;a++) {
+				for(int b=afc_y_divider;b<256;b++) {
+					histo_afc_unit_histo_2f->SetBinContent(a,b,1);
+				}
 			}
 		}
-	}
-	
-	
-	int afc_regions_count = (afc_block_count_x/2)*(afc_block_count_y/2);
-	int afc_regions_safety_delta = 5;
-	
-	cout << "\nafc_block_count_x is:\t" << afc_block_count_x << "\n";
-	cout << "afc_block_count_y is:\t" << afc_block_count_y << "\n";
-	cout << "That means, we have " << afc_block_count_x/2 << " block(s) in x- and " << afc_block_count_y/2 << " block(s) in y-direction. so: " << afc_regions_count << " in total.\n\n";
-	
-	
-	
-	//take afc_block_counts_x and afc_block_counts_y and populate FCRs
-	
-	
-	for(int i=0;i<afc_regions_count;i++) {
-		FCR[i]->SetAllValuesZero();
+		
+		if(i==4) {
+			for(int a=afc_x_divider;a<256;a++) {
+				for(int b=afc_y_divider;b<256;b++) {
+					histo_afc_unit_histo_2f->SetBinContent(a,b,1);
+				}
+			}
+		}
 		
 		
-		//		FCR[i]->SetValueXLow(some_var+afc_regions_safety_delta);
-		//		FCR[i]->SetValueXHigh(some_var-afc_regions_safety_delta);
-		//		FCR[i]->SetValueYLow(some_var+afc_regions_safety_delta);
-		//		FCR[i]->SetValueYHigh(some_var-afc_regions_safety_delta);
+		(*afc_current_histo_2f) = (*histo_afc_scatter_firstfidcut)*(*histo_afc_unit_histo_2f); 
+		
+		afc_current_histo_2f->SetName(phname.str().c_str());
+		
+        if(Verbosity>=1) {
+		cout << "TENGTARATENG" << endl;
+		cout << "FOR LOOP FOR FIDCUT REGIONS. NAME OF CURRENT HISTO IS: " << afc_current_histo_2f->GetName() << "." << endl;
+        }
+		HistCleaner(i, afc_current_histo_2f);
+		
+		
+		SaveHistogramPDF(afc_current_histo_2f);
+		
+		afc_current_histo_2f->Delete();
+		
 	}
 	
-	histo_afc_scatter_firstfidcut->SetTitle("First Fidcut on Scatter Plot");
+	
+    
+    //		cout << endl << "Calling HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
+    HistCleaner(1, histo_afc_region_1_mask);
+    //		 cout << endl << "Finished HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;  
 	
 	
+    SaveHistogramPDF(histo_afc_region_1_mask);
+    
+    HistCleaner(1, histo_afc_scatter_firstfidcut);
 	
-	FCR[0]->GetAllValues();
-	
-	FCR[3]->SetAllValuesZero();
-	FCR[3]->SetValueXLow(1);
-	FCR[3]->SetValueYHigh(2);
-	FCR[3]->GetAllValues();
-	
-	SaveHistogramPNG(histo_afc_x);
-	SaveHistogramPNG(histo_afc_y);
-	SaveHistogramPNG(histo_afc_x_cut);
-	SaveHistogramPNG(histo_afc_y_cut);
-	SaveHistogramPNG(histo_afc_scatter_firstfidcut);
-	
-	cout << "\n";
-	cout << "FINISHED AutoFidCut \n\n\n";
-}
+    FCR[0]->GetAllValues();
+    
+    FCR[3]->SetAllValuesZero();
+    FCR[3]->SetValueXLow(1);
+    FCR[3]->SetValueYHigh(2);
+    FCR[3]->GetAllValues();
+    
+    SaveHistogramPDF(histo_afc_x);
+    SaveHistogramPDF(histo_afc_y);
+    SaveHistogramPDF(histo_afc_x_cut);
+    SaveHistogramPDF(histo_afc_y_cut);
+    SaveHistogramPDF(histo_afc_scatter_firstfidcut);
+    
+    
+    SaveHistogramPNG(histo_afc_x);
+    SaveHistogramPNG(histo_afc_y);
+    SaveHistogramPNG(histo_afc_x_cut);
+    SaveHistogramPNG(histo_afc_y_cut);
+    SaveHistogramPNG(histo_afc_scatter_firstfidcut);
+    
+    if(Verbosity>=0) {
+    cout << "\n";
+    cout << "FINISHED AutoFidCut \n\n\n";
+    }
+}	
 
 void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 	

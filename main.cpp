@@ -43,6 +43,7 @@ int main () {
 			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
 		}
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
+        cl.Verbosity = VERBOSITY;
 		vector<FidCutRegion> FidCutRegions;
 		if (cl.UseAutoFidCut) {
 			cl.AutoFidCut();
@@ -76,6 +77,7 @@ void initVariables() {
 	HIT_OCCUPANCY = 0;
 	PLOTS = 1;
 	ALTERNATIVECLUSTERING = 0;
+    VERBOSITY=0;
 }
 
 int ReadRunList() {
@@ -104,7 +106,7 @@ int ReadRunList() {
 		}
 		
 		
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d", &RUNNUMBER, RunDescription, &NEvents, &Initial_Event, &CUTFAKETRACKS, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT);
+		sscanf(line.c_str(), "%d %d %s %d %d %d %d %d", &RUNNUMBER, &VERBOSITY, RunDescription, &NEvents, &Initial_Event, &CUTFAKETRACKS, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT);
 		if (NEvents != 0) NEVENTS = NEvents;
 		if (Initial_Event != 0) INITIAL_EVENT = Initial_Event;
 		cout << "RunDescription Char: " << RunDescription[0] << endl;
