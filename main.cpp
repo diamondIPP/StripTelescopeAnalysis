@@ -49,7 +49,9 @@ int main () {
         ostringstream logfilename;
 		logfilename << "analyse_log_" << RUNNUMBER << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
         
-        freopen(*logfilename, "w", stdout);
+        FILE *log;
+        
+        log = freopen(logfilename.str().c_str(), "w", stdout);
         
 		if (DO_SLIDINGPEDESTAL) {
 			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
@@ -78,7 +80,7 @@ int main () {
 				cl.ClusterRun(PLOTS);
 			}
 		}
-	    fclose(*logfilename);	
+	    fclose(log);	
 	}
 
 	return 0;

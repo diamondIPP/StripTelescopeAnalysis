@@ -83,13 +83,16 @@ class Clustering {
       void SaveHistogramPNG(TH2F* histo);
       void SaveHistogramROOT(TH1F* histo);
       void SaveHistogramROOT(TH2F* histo);
+      void SaveHistogramPDF(TH1F* histo);
+      void SaveHistogramPDF(TH2F* histo);
       void InitializeHistograms();
       void DeleteHistograms();
       void DrawHistograms();
       void GenerateHTML();
       void ClusterRun(bool plots = 1);
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
-	  void AutoFidCut();
+	  void HistCleaner(int regid, TH2F* histo);
+      void AutoFidCut();
 	  void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
       //void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
 	  void EventMonitor(int CurrentEvent = 0);
@@ -1733,6 +1736,37 @@ void Clustering::SaveHistogram(TH1F* histo) {
 void Clustering::SaveHistogram(TH2F* histo) {
    SaveHistogramPNG(histo);
    SaveHistogramROOT(histo);
+}
+
+void Clustering::SaveHistogramPDF(TH1F* histo) {
+	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	plots_canvas.cd();
+	histo->Draw();
+	pt->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << histo->GetName() << ".pdf";
+	plots_canvas.Print(plot_filename.str().c_str());
+}
+
+void Clustering::SaveHistogramPDF(TH2F* histo) {
+	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	//plots_canvas.cd();
+	SetDuckStyle();
+	plots_canvas.cd();
+	cout << "Using SaveHistogrammPDF on TH2F histogram " << histo->GetName() << endl;
+	//histo->Draw();
+	gStyle->SetTitleFont(42);
+	gStyle->SetMarkerSize(0);
+	pt->SetTextSize(0.0250);
+	pt->SetTextColor(kBlack);
+	histo->SetTitleFont(42);
+	histo->UseCurrentStyle();
+	histo->Draw("colz");
+	pt->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << histo->GetName() << ".pdf";
+	plots_canvas.Print(plot_filename.str().c_str());	
+	//pt->SetTextSize(0.1);
 }
 
 void Clustering::SaveHistogramPNG(TH1F* histo) {
