@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include "main.h"
+#include "time.h"
 
 using namespace std;
 
@@ -37,7 +38,19 @@ int main () {
 		cout << "====================================" << endl << endl;
 		cout << "RUNNUMBER: " << RUNNUMBER << endl << "NEVENTS: " << NEVENTS << endl << "RUNDESCRIPTION: " << RUNDESCRIPTION << endl;
 		cout << endl << endl << endl;
-		
+
+        time_t rawtime;
+        tm *timestamp;
+        
+        time (&rawtime);
+        
+        timestamp = gmtime(&rawtime);
+        
+        ostringstream logfilename;
+		logfilename << "analyse_log_" << RUNNUMBER << "_" << timestamp->tm_year << "-" << timestamp->tm_month << "-" << timestamp->tm_day << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
+        
+        freopen(logfilename, "w", stdout);
+        
 		if (DO_SLIDINGPEDESTAL) {
 			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
 			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
@@ -67,6 +80,7 @@ int main () {
 		}
 		
 	}
+    fclose(logfilename);
 	return 0;
 }
 

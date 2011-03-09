@@ -3002,13 +3002,87 @@ void Clustering::ClusterRun(bool plots) {
    
 }
 
+void Clustering::HistCleaner(int regid, TH2F* histo) {
+    
+    
+	cout << endl << "Calling HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
+	cout << endl << "HistCleaner called on histogram " << histo->GetName() << "." << endl;
+	
+	int afc_current_histo_x_colsums[256];
+	int afc_current_histo_y_colsums[256];
+	
+	TH1F* afc_current_histo_x = new TH1F("afc_current_histo_x","afc_current_histo_x",256,0,255);
+	TH1F* afc_current_histo_y = new TH1F("afc_current_histo_y","afc_current_histo_y",256,0,255);
+	
+	for(int i=0;i<256;i++) {
+		afc_current_histo_x_colsums[i] = 0;
+		for(int j=0;j<256;j++) {
+			afc_current_histo_x_colsums[i] = afc_current_histo_x_colsums[i] + histo->GetBinContent(i,j);
+			afc_current_histo_x->SetBinContent(i,afc_current_histo_x_colsums[i]);
+		}
+		
+	}
+	
+	//calculate x bin values for each y row and count # of non-zero bins and set the corresponding histogram bins
+	for(int j=0;j<256;j++) {
+		afc_current_histo_y_colsums[j] = 0;
+		for(int i=0;i<256;i++) {
+			afc_current_histo_y_colsums[j] = afc_current_histo_y_colsums[j] + histo->GetBinContent(i,j);
+			afc_current_histo_y->SetBinContent(j,afc_current_histo_y_colsums[j]);
+		}
+		
+	}
+	
+	int xpos = 2;
+	int ypos = 2;
+    
+	cout << endl;
+	cout << "Results for histo " << histo->GetName() << " with region id " << regid << " are:" << endl << endl;
+    
+	
+	for(int i=xpos;i<256;i++) {
+		if( (afc_current_histo_x->GetBinContent(i-1) == 0) && (afc_current_histo_x->GetBinContent(i) > 0) ) {
+			//FCR[z]->SetValueXLow(i+5);
+			cout << "Setting " << histo->GetName() << ".ValueXLow to: " << i+5 << endl;
+			for(int j=i+5;j<256;j++) {
+				if ( (afc_current_histo_x->GetBinContent(j-1) > 0) && (afc_current_histo_x->GetBinContent(j) == 0) ) {
+                    //					FCR[z]->SetValueXHigh(j-5);
+					cout << "Setting " << histo->GetName() << ".ValueXHigh to: " << j-5 << endl;					
+					xpos=j+5;
+					break;
+				}} break;
+			//break;
+		}}
+    
+	for(int j=ypos;j<256;j++) {
+		if( (afc_current_histo_y->GetBinContent(j-1) == 0) && (afc_current_histo_y->GetBinContent(j) > 0) ) {
+			//FCR[z]->SetValueXLow(i+5);
+			cout << "Setting " << histo->GetName() << ".ValueYLow to: " << j+5 << endl;
+			for(int k=j+5;k<256;k++) {
+				if ( (afc_current_histo_y->GetBinContent(k-1) > 0) && (afc_current_histo_y->GetBinContent(k) == 0) ) {
+					//					FCR[z]->SetValueXHigh(j-5);
+					cout << "Setting " << histo->GetName() << ".ValueYHigh to: " << k-5 << endl;					
+					ypos=k+5;
+					break;
+				}} break;
+			//break;
+		}}
+	
+	
+	afc_current_histo_x->Delete();
+	afc_current_histo_y->Delete();
+    
+	cout << endl << "Finished HistCleaner on " << histo->GetName() << "." << endl;  
+	cout << "HistCleaner exiting..." << endl << endl;
+}
+
 void Clustering::AutoFidCut() {
 		
-	histo_afc_unit_histo_1f->Reset();
-	histo_afc_unit_histo_2f->Reset();
+	histo_afc_unit_histo_1f->Reset(); // reset 1f unit histogram (all bins zero)
+	histo_afc_unit_histo_2f->Reset(); // reset 2f unit histogram (all bins zero)
     
-	SaveHistogramPDF(histo_afc_unit_histo_1f);
-	SaveHistogramPDF(histo_afc_unit_histo_2f);
+	//SaveHistogramPDF(histo_afc_unit_histo_1f);
+	//SaveHistogramPDF(histo_afc_unit_histo_2f);
 	
 	//define sum and counter vectors for x columns and y rows
 	int histo_afc_col_sums_x[256];
@@ -3019,10 +3093,14 @@ void Clustering::AutoFidCut() {
     cout << "\n";
 	cout << "AutoFidCut: I'm the AutoFidCut function.\n\n";
 	cout << " START AutoFidCut \n\n";	
+    }    
+
+    if(Verbosity>0) {    
 	// produce necessary plots to detect fidcut region
 	cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
 	cout << "running over " << PedTree->GetEntries() << " events.." << endl;
     }
+    
 	//record large clusters
 	string large_clusters_filename = plots_path + "large_clusters.txt";
 	ofstream large_clusters_file(large_clusters_filename.c_str());
@@ -3030,22 +3108,13 @@ void Clustering::AutoFidCut() {
 	uint nclusters, nhits;
 	Cluster* current_cluster;
 	
-	//histograms of hit positions to find out if the eta correction helped
-    //	TH1F* histo_hitpos[9][2];
-    //	for(int det=0; det<9; det++) {
-    //		for(int chip=0; chip<2; chip++) {
-    //			ostringstream histotitle;
-    //			histotitle << "Hit_Position_Interstrip_D" << det << "_chip" << chip;
-    //			histo_hitpos[det][chip] = new TH1F(histotitle.str().c_str(), histotitle.str().c_str(), 101, -0.005, 1.005);
-    //		}
-    //	}
 	current_event = 0;
 	for (uint e=0; e<PedTree->GetEntries(); e++) { // maybe it's not necessary to run over all events for the AutoFidCut?!
 		if (!AlternativeClustering) ClusterEvent();
 		else ClusterEventSeeds();
 		if (e%10000==0) clustered_event.Print();
 		
-		//			current_cluster = 0;
+		// current_cluster = 0;
 		
 		// -- produce scatter plot for AutoFidCut
 		bool one_and_only_one = clustered_event.HasOneSiliconTrack();
@@ -3064,14 +3133,14 @@ void Clustering::AutoFidCut() {
 				histo_scatter_autofidcut->Fill(si_avg_x,si_avg_y);
 		}
 	}
+    
     if(Verbosity>0) {
 	cout << "plot production for AutoFidCut: done." << endl << endl;
     }
-	SaveHistogram(histo_scatter_autofidcut);
+	
+    SaveHistogram(histo_scatter_autofidcut);
 	
 	// -- end of scatter plot production
-    // BRAKE
-	
     
     //calculate y bin values for each x column and count # of non-zero bins and set the corresponding histogram bins
     for(int i=0;i<256;i++) {
@@ -3093,6 +3162,8 @@ void Clustering::AutoFidCut() {
         
     }
     
+    //algorithm for finding numeric differences between maxima of the x and y and a certain cut factor (afc_cut_factor)
+    
     //get maximums for x and y histogram
     int histo_afc_x_max = (int)histo_afc_x->GetMaximum();
     int histo_afc_y_max = (int)histo_afc_y->GetMaximum();
@@ -3106,7 +3177,7 @@ void Clustering::AutoFidCut() {
     cout << "histo_afc_y->GetMaximum() is:\t" << (int)histo_afc_y->GetMaximum() << "\n";
     }
         
-    //set x and y fidcut histograms
+    //set x and y fidcut histogram bin contents according to afc_cut_factor and maxima (set to zero if values are less than afc_cut_factor*maximum, keep if values are greater)
     for(int i=0;i<256;i++) {
         if( (histo_afc_x->GetBinContent(i)) < (afc_cut_factor*histo_afc_x_max)) {
             histo_afc_x_cut->SetBinContent(i,0);
@@ -3129,15 +3200,16 @@ void Clustering::AutoFidCut() {
     TH2F *histo_afc_scatter_firstfidcut = (TH2F*)histo_scatter_autofidcut->Clone();
     histo_afc_scatter_firstfidcut->SetName("histo_afc_scatter_firstfidcut");
     
-    int afc_width_min = 20;
+    int afc_width_min = 20; //variable for defining minimum block width to be recognized as partial fid cut region
     
-    int afc_width_counter = 0;
-    int afc_last_start = 0;
-    int afc_last_end = 0;
+    int afc_width_counter = 0; //temporary counter for the width of the current block
+    int afc_last_start = 0; //temporary variable to store last start position in block finder algorithm
+    int afc_last_end = 0; //temporary variable to store last end position in block finder algorithn
     
     int afc_block_count_x = 0;
     int afc_block_count_y = 0;
     
+    //loop for y direction to count projected consecutive blocks with a block width over afc_width_min
     for(int j=1;j<256;j++) {
         if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) == 0) ) {
             afc_last_start = j;
@@ -3171,7 +3243,7 @@ void Clustering::AutoFidCut() {
         }
     }
     
-    
+    //loop for y direction to count projected consecutive blocks with a block width over afc_width_min    
     for(int j=1;j<256;j++) {
         if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) == 0) ) {
             afc_last_start = j;
@@ -3329,6 +3401,7 @@ void Clustering::AutoFidCut() {
     SaveHistogramPDF(histo_afc_region_1_mask);
     if(Verbosity>=2) cout << endl << endl << "afc_region_1 saved" << endl << endl;
 	
+    // run HistCleaner on 
     if(Verbosity>=2) cout << endl << "Calling HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
     HistCleaner(9999, histo_afc_region_1_mask);
     if(Verbosity>=2) cout << endl << "Finished HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
@@ -3338,6 +3411,7 @@ void Clustering::AutoFidCut() {
 	
     //end divider stuff
 	
+    // set histogram bin value for histo_afc_scatter_firstfidcut
     for(int i=0;i<256;i++) {
         if(histo_afc_x_cut->GetBinContent(i) == 0) {
             for(int k=0;k<256;k++) {
@@ -3354,16 +3428,18 @@ void Clustering::AutoFidCut() {
         }
     }
     
-	
+	//define counter variables for region counters
     int afc_region_counter_x = 0;
     int afc_region_counter_y = 0;
 	
+    //count number of consecutive regions in x direction
     for(int i=2;i<256;i++) {
         if( ((histo_afc_x_cut->GetBinContent(i-1) == 0) && (histo_afc_x_cut->GetBinContent(i) > 0)) || ((histo_afc_x_cut->GetBinContent(i-1) > 0) && (histo_afc_x_cut->GetBinContent(i) == 0))) {	
             afc_region_counter_x++;
         }
     }
 	
+    //count number of consecutive regions in y direction
     for(int i=2;i<256;i++) {
         if( ((histo_afc_y_cut->GetBinContent(i-1) == 0) && (histo_afc_y_cut->GetBinContent(i) > 0)) || ((histo_afc_y_cut->GetBinContent(i-1) > 0) && (histo_afc_y_cut->GetBinContent(i) == 0))) {	
 			afc_region_counter_y++;
