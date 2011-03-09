@@ -47,9 +47,9 @@ int main () {
         timestamp = gmtime(&rawtime);
         
         ostringstream logfilename;
-		logfilename << "analyse_log_" << RUNNUMBER << "_" << timestamp->tm_year << "-" << timestamp->tm_month << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
+		logfilename << "analyse_log_" << RUNNUMBER << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
         
-        freopen(logfilename, "w", stdout);
+        freopen(*logfilename, "w", stdout);
         
 		if (DO_SLIDINGPEDESTAL) {
 			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
@@ -78,7 +78,7 @@ int main () {
 				cl.ClusterRun(PLOTS);
 			}
 		}
-	    fclose(logfilename);	
+	    fclose(*logfilename);	
 	}
 
 	return 0;
