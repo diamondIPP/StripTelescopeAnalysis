@@ -75,7 +75,7 @@ class Clustering {
       void ParseIntArray(string value, vector<int> &vec);
       void ParseFloatArray(string value, vector<float> &vec);
       void ClusterEvent(bool verbose = 0);
-	  void ClusterEventSeeds(bool verbose = 0);
+	void ClusterEventSeeds(bool verbose = 0);
       void BookHistograms();
       void SaveHistogram(TH1F* histo);
       void SaveHistogram(TH2F* histo);
@@ -93,13 +93,13 @@ class Clustering {
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
 	  void HistCleaner(int regid, TH2F* histo);
       void AutoFidCut();
-	  void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
-      //void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
-	  void EventMonitor(int CurrentEvent = 0);
-  	  void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
+	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
+//	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
+	void EventMonitor(int CurrentEvent = 0);
+	void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
 	
-	  bool UseAutoFidCut;
-	  bool AlternativeClustering;
+	bool UseAutoFidCut;
+	bool AlternativeClustering;
       
    private:
       //general settings
@@ -152,8 +152,8 @@ class Clustering {
       //Alignment
       vector<TDiamondTrack> tracks, tracks_fidcut;
       vector<bool> tracks_mask, tracks_fidcut_mask;
-	  Float_t alignment_chi2;
-	  vector<Float_t> dia_offset;
+	Float_t alignment_chi2;
+	vector<Float_t> dia_offset;
 
       //Telescope geometry
       Double_t detectorD0Z;
@@ -190,7 +190,7 @@ class Clustering {
       string root_file_char;
       TSystem* sys;
       string settings_file;
-	  string pedfile_path;
+	string pedfile_path;
       
       //processed event storage; read from pedtree
       UInt_t run_number;
@@ -251,11 +251,11 @@ class Clustering {
 	  TH1F* histo_afc_x_cut;
 	  TH1F* histo_afc_y_cut;
 	
-	  TH1F* histo_transparentclustering_landau[10]; // index: n channels
-      TH1F* histo_transparentclustering_eta;
-	  TH1F* histo_transparentclustering_hitdiff;
+	TH1F* histo_transparentclustering_landau[10]; // index: n channels
+	TH1F* histo_transparentclustering_eta;
+	TH1F* histo_transparentclustering_hitdiff;
 	
-	  TH2F* histo_scatter_autofidcut;
+	TH2F* histo_scatter_autofidcut;
 	
 	  FidCutRegion* FCR[4];
       
@@ -278,8 +278,8 @@ class Clustering {
       bool histoswitch_hitocc_saturated[9][2]; //second index: number saturated, fraction saturated
       bool histoswitch_clusters_average[9][3]; //second index: no fidcut, fidcut, no track req
 	
-	  bool histoswitch_transparentclustering_landau[5]; // index: n channels
-	  bool histoswitch_transparentclustering_eta[5]; // index: n channels
+	bool histoswitch_transparentclustering_landau[5]; // index: n channels
+	bool histoswitch_transparentclustering_eta[5]; // index: n channels
       
       //fits
       TF1* histofit_dianoise[2];
@@ -327,8 +327,8 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pulse_height_di_max = 3000;
    snr_distribution_si_max = 2500;
    snr_distribution_di_max = 2500;
-   UseAutoFidCut = 0;
-   AlternativeClustering = 0;
+	UseAutoFidCut = 0;
+	AlternativeClustering = 0;
    
    //Hi/low eta slices
    eta_lowq_slice_low = 600;
@@ -357,8 +357,8 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    //Double_t detectorD3Z = 13.625; // by definition
    //Double_t detectorDiaZ = 7.2; // by definition
 	
-   //cut tracks with chi2 > alignment_chi2
-   alignment_chi2 = 9999.;
+	//cut tracks with chi2 > alignment_chi2
+	alignment_chi2 = 9999.;
 
    //Is the diamond aligned to Silicon x coordinates?
    dia_x_aligned = true;
@@ -400,13 +400,13 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pedfilepath << sys->pwd() << "/Pedestal." << RunNumber;
    if(RunDescription=="") pedfilepath << ".root";
    else pedfilepath << "-" << RunDescription << ".root";
-   pedfile_path = pedfilepath.str();
+	pedfile_path = pedfilepath.str();
 	
-   // create file histograms.root
-   ostringstream root_histo_file_path;
-   root_histo_file_path << plotspath.str().c_str() << "histograms.root";
-   cout << "creating " << root_histo_file_path.str().c_str() << " .." << endl;
-   TFile fplots(root_histo_file_path.str().c_str(),"RECREATE");
+	// create file histograms.root
+	ostringstream root_histo_file_path;
+	root_histo_file_path << plotspath.str().c_str() << "histograms.root";
+	cout << "creating " << root_histo_file_path.str().c_str() << " .." << endl;
+	TFile fplots(root_histo_file_path.str().c_str(),"RECREATE");
    
    LoadSettings();
    
