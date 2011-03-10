@@ -47,32 +47,32 @@ int main () {
 		cout << "DO_SLIDINGPEDESTAL: " << DO_SLIDINGPEDESTAL << endl;
 		cout << "CUTFAKETRACKS: " << CUTFAKETRACKS << endl;
 		cout << endl << endl << endl;
-
-        time_t rawtime;
-        tm *timestamp;
-        
-        time (&rawtime);
-        
-        timestamp = gmtime(&rawtime);
-        
-        ostringstream logfilename;
+		
+		time_t rawtime;
+		tm *timestamp;
+		
+		time (&rawtime);
+		
+		timestamp = gmtime(&rawtime);
+		
+		ostringstream logfilename;
 		logfilename << "analyse_log_" << RUNNUMBER << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
-        
-        FILE *log;
-        
-        log = freopen(logfilename.str().c_str(), "w", stdout);
-        
+		
+		FILE *log;
+		
+		log = freopen(logfilename.str().c_str(), "w", stdout);
+		
 		if (DO_SLIDINGPEDESTAL) {
 			cout << endl;
 			cout << "==> Starting SlidingPedestal.." << endl;
-			cout << "SlidingPedestal sl(" << RUNNUMBER << "," << RUNDESCRIPTION << ");" << endl;
+			cout << "SlidingPedestal sl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\");" << endl;
 			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
 			cout << "sl.Slide(" << NEVENTS << "," << INITIAL_EVENT << "," << HIT_OCCUPANCY << ");" << endl;
 			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
 		}
 		cout << endl;
 		cout << "==> Starting Clustering.." << endl;
-		cout << "Clusterin cl(" << RUNNUMBER << "," << RUNDESCRIPTION << ")" << endl;
+		cout << "Clusterin cl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\")" << endl;
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
         cl.Verbosity = VERBOSITY;
 		vector<FidCutRegion> FidCutRegions;
