@@ -1811,7 +1811,7 @@ void Clustering::SaveHistogramPDF(TH1F* histo) {
 void Clustering::SaveHistogramPDF(TH2F* histo) {
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	//plots_canvas.cd();
-	SetDuckStyle();
+//	SetDuckStyle();
 	plots_canvas.cd();
 	cout << "Using SaveHistogrammPDF on TH2F histogram " << histo->GetName() << endl;
 	//histo->Draw();
@@ -3937,7 +3937,8 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 //			dia_offset.push_back(align->GetZOffset(5));
 //			cout << "align->GetXOffset(4) = " << align->GetXOffset(4) << endl;
 //			cout << "align->GetXOffset(5) = " << align->GetXOffset(5) << endl;
-			TransparentClustering(alignment_tracks, alignment_tracks_mask, align);
+//			TransparentClustering(alignment_tracks, alignment_tracks_mask, align);
+			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
 			break;
 		}
 	} // end alignment loop

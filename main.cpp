@@ -60,7 +60,7 @@ int main () {
 		
 		FILE *log;
 		
-		log = freopen(logfilename.str().c_str(), "w", stdout);
+//		log = freopen(logfilename.str().c_str(), "w", stdout);
 		
 		if (DO_SLIDINGPEDESTAL) {
 			cout << endl;
@@ -72,9 +72,9 @@ int main () {
 		}
 		cout << endl;
 		cout << "==> Starting Clustering.." << endl;
-		cout << "Clusterin cl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\")" << endl;
+		cout << "Clustering cl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\")" << endl;
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
-        cl.Verbosity = VERBOSITY;
+		cl.Verbosity = VERBOSITY;
 		vector<FidCutRegion> FidCutRegions;
 		if (cl.UseAutoFidCut) {
 			cout << endl;
@@ -102,7 +102,7 @@ int main () {
 				cl.ClusterRun(PLOTS);
 			}
 		}
-	    fclose(log);	
+//	    fclose(log);	
 	}
 
 	return 0;
