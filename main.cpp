@@ -144,7 +144,7 @@ int ReadRunList() {
 		}
 		
 		
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d", &RUNNUMBER, RunDescription, &VERBOSITY, &NEvents, &Initial_Event, &CUTFAKETRACKS, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT);
+		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d", &RUNNUMBER, RunDescription, &VERBOSITY, &NEvents, &Initial_Event, &CUTFAKETRACKS, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT, &ALTERNATIVECLUSTERING);
 		if (NEvents != 0) NEVENTS = NEvents;
 		if (Initial_Event != 0) INITIAL_EVENT = Initial_Event;
 		cout << "RunDescription Char: " << RunDescription[0] << endl;
