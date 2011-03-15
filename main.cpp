@@ -149,7 +149,16 @@ int ReadRunList() {
 		if (Initial_Event != 0) INITIAL_EVENT = Initial_Event;
 		cout << "RunDescription Char: " << RunDescription[0] << endl;
 		if (RunDescription[0] != '0') RUNDESCRIPTION = RunDescription;
-		
+		cout << "RUNNUMBER: " << RUNNUMBER << endl;
+		cout << "NEVENTS: " << NEVENTS << endl;
+		cout << "RUNDESCRIPTION: " << RUNDESCRIPTION << endl;
+		cout << "VERBOSITY: " << VERBOSITY << endl;
+		cout << "INITIAL_EVENT: " << INITIAL_EVENT << endl;
+		cout << "HIT_OCCUPANCY: " << HIT_OCCUPANCY << endl;
+		cout << "ALTERNATIVECLUSTERING: " << ALTERNATIVECLUSTERING << endl;
+		cout << "DO_ALIGNMENT: " << DO_ALIGNMENT << endl;
+		cout << "DO_SLIDINGPEDESTAL: " << DO_SLIDINGPEDESTAL << endl;
+		cout << "CUTFAKETRACKS: " << CUTFAKETRACKS << endl;
 		run.SetParameters();
 		RunParameters.push_back(run);
 	}
