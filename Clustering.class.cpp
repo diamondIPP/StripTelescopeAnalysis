@@ -1450,6 +1450,11 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 		 }
 		 }*/
 		
+		if (seeds.size() == 0) {
+//			cout << "No seeds found so skipping to next detector." << endl;
+			continue;
+		}
+		
 		// detect cluster for every seed
 		for (int i = 0; i < seeds.size(); i++) {
 			bool channel_already_used = false;
@@ -1474,12 +1479,13 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 			if (det < 8) {
 				// look for first hit of cluster
 				first_hit = seeds[i];
-				for (int j = seeds[i]-1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+				for (int j = seeds[i]-1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j] && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] == 1; j--) {
 					first_hit = j;
 				}
 				
 				// look for last hit of cluster and write hits to cluster
 				for (int j = first_hit; j < (int)Det_NChannels[det] && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+					if (cluster.size() > 0 && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] != 1) break;
 					cluster.push_back(j);
 					cluster_channels.push_back(j);
 				}
@@ -1503,12 +1509,13 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 			if (det == 8) {
 				// look for first hit of the cluster
 				first_hit = seeds[i];
-				for (int j = seeds[i]-1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+				for (int j = seeds[i]-1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j] && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] == 1; j--) {
 					first_hit = j;
 				}
 				
 				// look for last hit of cluster and write hits to cluster
 				for (int j = first_hit; j < (int)Det_NChannels[det] && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+					if (cluster.size() > 0 && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] != 1) break;
 					cluster.push_back(j);
 					cluster_channels.push_back(j);
 				}
@@ -2007,7 +2014,7 @@ void Clustering::BookHistograms() {
    //cut events containing the following clusters
    //silicon: saturated, lumpy, goldengate
    //diamond: saturated,
-   if(CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster()) {//|| !clustered_event.HasOneSiliconTrack()) {//clustered_event.HasBadChannelCluster()) {
+   if(CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() /*|| clustered_event.HasBadChannelCluster()*/) {//|| !clustered_event.HasOneSiliconTrack()) {//clustered_event.HasBadChannelCluster()) {
       if(CMNEvent_flag) CMNEvents++;
       if(ZeroDivisorEvent_flag) ZeroDivisorEvents++;
       
@@ -2397,6 +2404,8 @@ void Clustering::BookHistograms() {
             histo_clustersizefreq[det][0][1]->Fill(nhits);
             histo_clustersizefreq[det][1][1]->Fill(nseeds);
             histo_clustersizefreq[det][2][1]->Fill(stddev);
+			 
+//			 cout << "Clustersize from event " << current_event << " filled in hist_clustersizefreq[8][*][1].." << endl;
             
             //transparent eta
             if(eta!=-1) {
@@ -2885,39 +2894,7 @@ void Clustering::ClusterRun(bool plots) {
       }
    }
 	
-	
-	current_event = 0;
-	if (false) { // TODO: remove this section (moved to AutoFidCut())
-		// produce necessary plots to detect fidcut region
-		cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
-		cout << "running over " << PedTree->GetEntries() << " events.." << endl;
-		for (uint e=0; e<PedTree->GetEntries(); e++) { // maybe it's not necessary to run over all events for the AutoFidCut?!
-			if (!AlternativeClustering) ClusterEvent();
-			else ClusterEventSeeds();
-			if (e%10000==0) clustered_event.Print();
-			
-//			current_cluster = 0;
-			
-			// -- produce scatter plot for AutoFidCut
-			bool one_and_only_one = clustered_event.HasOneSiliconTrack();
-			Float_t si_avg_x=0, si_avg_y=0;
-			if (CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster())
-				continue;
-			if (one_and_only_one) {
-				for (int det=0; det<4; det++) {
-					si_avg_x += clustered_event.GetCluster(2*det,0)->Get1stMoment();
-					si_avg_y += clustered_event.GetCluster(2*det+1,0)->Get1stMoment();
-				}
-				si_avg_x = si_avg_x/4;
-				si_avg_y = si_avg_y/4;
-				
-				if (clustered_event.GetNClusters(8)==1)
-					histo_scatter_autofidcut->Fill(si_avg_x,si_avg_y);
-			}
-		}
-		cout << "plot production for AutoFidCut: done." << endl << endl;
-		SaveHistogram(histo_scatter_autofidcut);
-	}
+
 	current_event = 0;
 
    //loop over events
@@ -2928,6 +2905,16 @@ void Clustering::ClusterRun(bool plots) {
 	   else ClusterEventSeeds();
       if(e%10000==0) clustered_event.Print();
       BookHistograms();
+	   
+	   // -- output for events flagged by ClusterEventSeeds() but not by ClusterEvent() (TODO: REMOVE THIS SECTION)
+//	   if (event_number == 1706 || event_number == 3609 || event_number == 7509 || event_number == 9734) {
+//		   cout << "event " << event_number << " processed.." << endl;
+//		   cout << "GoldenGate: " << clustered_event.HasGoldenGateCluster(-1) << endl;
+//		   cout << "BadChannel: " << clustered_event.HasBadChannelCluster(-1) << endl;
+//		   cout << "Lumpy: " << clustered_event.HasLumpyCluster(-1) << endl;
+//		   cout << "Saturated: " << clustered_event.HasSaturatedCluster(-1) << endl;
+//		   cout << "OneSiliconTrack: " << clustered_event.HasOneSiliconTrack() << endl;
+//	   }// -- end of flag output
       
       //record large clusters
       //if a track, check whether it's in the silicon fiducial region
@@ -3041,7 +3028,7 @@ void Clustering::ClusterRun(bool plots) {
       }
    }
    
-	AutoFidCut(); //added 2010-12-01 (max)
+//	AutoFidCut(); //added 2010-12-01 (max)
 	
    //Draw plots and generate HTML
    if(plots) {

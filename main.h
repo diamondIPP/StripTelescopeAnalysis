@@ -5,7 +5,7 @@ int INITIAL_EVENT;
 int HIT_OCCUPANCY;
 int VERBOSITY;
 bool PLOTS;
-bool ALTERNATIVECLUSTERING;
+bool ALTCLUSTERING;
 bool RunListOK;
 bool DO_SLIDINGPEDESTAL, DO_ALIGNMENT, CUTFAKETRACKS;
 
@@ -24,7 +24,7 @@ public:
 		Initial_Event = INITIAL_EVENT;
 		Hit_Occupancy = HIT_OCCUPANCY;
 		RunDescription = RUNDESCRIPTION;
-		AlternativeClustering = ALTERNATIVECLUSTERING;
+		AlternativeClustering = ALTCLUSTERING;
 		DoAlignment = DO_ALIGNMENT;
 		DoSlidingPedestal = DO_SLIDINGPEDESTAL;
 		CutFakeTracks = CUTFAKETRACKS;
@@ -36,7 +36,7 @@ public:
 		INITIAL_EVENT = Initial_Event;
 		HIT_OCCUPANCY = Hit_Occupancy;
 		RUNDESCRIPTION = RunDescription;
-		ALTERNATIVECLUSTERING = AlternativeClustering;
+		ALTCLUSTERING = AlternativeClustering;
 		DO_ALIGNMENT = DoAlignment;
 		DO_SLIDINGPEDESTAL = DoSlidingPedestal;
 		CUTFAKETRACKS = CutFakeTracks;

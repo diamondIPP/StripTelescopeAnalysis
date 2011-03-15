@@ -42,7 +42,7 @@ int main () {
 		cout << "VERBOSITY: " << VERBOSITY << endl;
 		cout << "INITIAL_EVENT: " << INITIAL_EVENT << endl;
 		cout << "HIT_OCCUPANCY: " << HIT_OCCUPANCY << endl;
-		cout << "ALTERNATIVECLUSTERING: " << ALTERNATIVECLUSTERING << endl;
+		cout << "ALTCLUSTERING: " << ALTCLUSTERING << endl;
 		cout << "DO_ALIGNMENT: " << DO_ALIGNMENT << endl;
 		cout << "DO_SLIDINGPEDESTAL: " << DO_SLIDINGPEDESTAL << endl;
 		cout << "CUTFAKETRACKS: " << CUTFAKETRACKS << endl;
@@ -92,7 +92,7 @@ int main () {
 			}
 		}
 		else {
-			cl.AlternativeClustering = ALTERNATIVECLUSTERING;
+			cl.AlternativeClustering = ALTCLUSTERING;
 			if (DO_ALIGNMENT) {
 				cout << "cl.Align(" << PLOTS << "," << CUTFAKETRACKS << ");" << endl;
 				cl.Align(PLOTS, CUTFAKETRACKS);
@@ -114,7 +114,7 @@ void initVariables() {
 	INITIAL_EVENT = 1000;
 	HIT_OCCUPANCY = 0;
 	PLOTS = 1;
-	ALTERNATIVECLUSTERING = 0;
+	ALTCLUSTERING = 0;
     VERBOSITY=0;
 }
 
@@ -144,21 +144,11 @@ int ReadRunList() {
 		}
 		
 		
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d", &RUNNUMBER, RunDescription, &VERBOSITY, &NEvents, &Initial_Event, &CUTFAKETRACKS, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT, &ALTERNATIVECLUSTERING);
+		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d", &RUNNUMBER, RunDescription, &VERBOSITY, &NEvents, &Initial_Event, &CUTFAKETRACKS, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT/*, &ALTCLUSTERING*/);
 		if (NEvents != 0) NEVENTS = NEvents;
 		if (Initial_Event != 0) INITIAL_EVENT = Initial_Event;
 		cout << "RunDescription Char: " << RunDescription[0] << endl;
 		if (RunDescription[0] != '0') RUNDESCRIPTION = RunDescription;
-		cout << "RUNNUMBER: " << RUNNUMBER << endl;
-		cout << "NEVENTS: " << NEVENTS << endl;
-		cout << "RUNDESCRIPTION: " << RUNDESCRIPTION << endl;
-		cout << "VERBOSITY: " << VERBOSITY << endl;
-		cout << "INITIAL_EVENT: " << INITIAL_EVENT << endl;
-		cout << "HIT_OCCUPANCY: " << HIT_OCCUPANCY << endl;
-		cout << "ALTERNATIVECLUSTERING: " << ALTERNATIVECLUSTERING << endl;
-		cout << "DO_ALIGNMENT: " << DO_ALIGNMENT << endl;
-		cout << "DO_SLIDINGPEDESTAL: " << DO_SLIDINGPEDESTAL << endl;
-		cout << "CUTFAKETRACKS: " << CUTFAKETRACKS << endl;
 		run.SetParameters();
 		RunParameters.push_back(run);
 	}
