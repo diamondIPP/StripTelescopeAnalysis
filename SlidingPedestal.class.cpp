@@ -1085,10 +1085,13 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    //strcat(prun,run_number_label);
    std::ostringstream run_number_label;
    run_number_label << "Run " << run_number;
+	std::ostringstream pthresh3;
+	pthresh3 << NEvents << " Events in Data Set";
    TPaveText *pt = new TPaveText(0.07,0,0.22,0.10,"NDC");  //Normalized CoordinateSystem: Define with x1,y1 is left bottom of box text, x2,y2 is upper right of text box. Goes from 0,0 at bottom left corner of pad to 1,1 of upper right corner
    pt->SetTextSize(0.0250);
    pt->AddText(run_number_label.str().c_str());
-   pt->AddText(pthresh1);
+//   pt->AddText(pthresh1);
+	pt->AddText(pthresh3.str().c_str());
    pt->AddText(dateandtime.AsSQLString());
    pt->SetBorderSize(0); //Set Border to Zero
    pt->SetFillColor(0); //Set Fill to White
