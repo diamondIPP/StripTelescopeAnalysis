@@ -28,6 +28,7 @@
 //2010-11-12 Blinded the alignment resolution determination
 //2010-12-01 Created AutoFidCut() to Clustering.class.cpp
 //2011-03-07 XCode 4.0 Test max AND second Xcode 4 Test!
+//2011-03-28 Xcode 4 check by Lukas!
 
 //C++ standard libraries
 #include <fstream>
