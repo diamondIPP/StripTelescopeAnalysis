@@ -3988,7 +3988,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	ostringstream histoname_eta;
 	histoname_eta << "Eta_Dia_2CentroidHits_TransparClusters";
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
-	histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_Dia_TransparClusters","DiffEstEffHit_Dia_TransparClusters", 100, 0.,5.);
+	histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_Dia_TransparClusters","DiffEstEffHit_Dia_TransparClusters", 200, -5.,5.);
 	cout << " done." << endl;
 	
 	verbose = true;
@@ -4139,7 +4139,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 				eff_diamond_hit_channel = i;
 			}
 		}
-		histo_transparentclustering_hitdiff->Fill(TMath::Abs(eff_diamond_hit_channel - diamond_hit_position));
+		histo_transparentclustering_hitdiff->Fill(eff_diamond_hit_channel - diamond_hit_position);
 		cout << "effective diamond hit channel: " << eff_diamond_hit_channel << endl;
 		
 		// cluster diamond channels around estimated hit position
