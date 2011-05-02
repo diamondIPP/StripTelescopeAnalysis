@@ -4140,7 +4140,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 				eff_diamond_hit_channel = i;
 			}
 		}
-		histo_transparentclustering_hitdiff->Fill(eff_diamond_hit_channel - diamond_hit_position);
+		histo_transparentclustering_hitdiff->Fill(eff_diamond_hit_channel + 0.5 - diamond_hit_position); // added 0.5 to eff_diamond_hit_channel to take the middle of the channel instead of the edge
 		cout << "effective diamond hit channel: " << eff_diamond_hit_channel << endl;
 		
 		// cluster diamond channels around estimated hit position
