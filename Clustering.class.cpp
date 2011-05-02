@@ -3188,11 +3188,11 @@ void Clustering::AutoFidCut() {
     }
     
 	//record large clusters
-	string large_clusters_filename = plots_path + "large_clusters.txt";
-	ofstream large_clusters_file(large_clusters_filename.c_str());
-	large_clusters_file << "event\tdet\tclus\tnhits\tnseeds" << endl;
-	uint nclusters, nhits;
-	Cluster* current_cluster;
+//	string large_clusters_filename = plots_path + "large_clusters.txt";
+//	ofstream large_clusters_file(large_clusters_filename.c_str());
+//	large_clusters_file << "event\tdet\tclus\tnhits\tnseeds" << endl;
+//	uint nclusters, nhits;
+//	Cluster* current_cluster;
 	
 	current_event = 0;
 	for (uint e=0; e<PedTree->GetEntries(); e++) { // maybe it's not necessary to run over all events for the AutoFidCut?!
