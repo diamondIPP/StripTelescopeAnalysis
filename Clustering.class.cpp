@@ -3598,7 +3598,7 @@ void Clustering::AutoFidCut() {
         //		FCR[i]->SetValueYHigh(some_var-afc_regions_safety_delta);
     }
     
-    histo_afc_scatter_firstfidcut->SetTitle("First Fidcut on Scatter Plot");
+    histo_afc_scatter_firstfidcut->SetTitle("First AutoFidcut based on Scatter Plot");
     histo_afc_scatter_firstfidcut->SetTitleFont(42);
     
     histo_afc_region_1_mask->Reset();
