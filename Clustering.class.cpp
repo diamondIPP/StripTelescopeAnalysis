@@ -256,6 +256,7 @@ class Clustering {
 	TH1F* histo_transparentclustering_landau[10]; // index: n channels
 	TH1F* histo_transparentclustering_eta;
 	TH1F* histo_transparentclustering_hitdiff;
+    TH2F* histo_transparentclustering_hitdiff_scatter;
 	
 	TH2F* histo_scatter_autofidcut;
 	
@@ -3959,8 +3960,9 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose) {
 	cout << "Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
 	int event;
-	vector<Float_t> x_positions, y_positions, z_positions, par;
+	vector<Float_t> x_positions, y_positions, z_positions, par, par_y;
 	Float_t diamond_hit_position = 0;
+    Float_t diamond_hit_y_position = 0;
 	int diamond_hit_channel = 0;
 	int diamond_secondhit_channel = 0;
 	int current_channel, current_sign;
@@ -3969,12 +3971,18 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	Float_t firstchannel_adc, secondchannel_adc;
 	vector<int> event_numbers;
 	Double_t diamond_x_offset = align->GetXOffset(4);
+    Double_t diamond_y_offset = align->GetYOffset(4);
+    Double_t diamond_phi_offset = align->GetPhiXOffset(4);
+    Double_t diamond_phi_y_offset = align->GetPhiYOffset(4);
 	Double_t diamond_z_position = 10.2; // TODO: is the z position of the diamond always 10.2??
 	Float_t eff_diamond_hit_position = 0;
 	int eff_diamond_hit_channel = 0;
 	Float_t hit_diff = 0;
 	
 	cout << "diamond x offset: " << diamond_x_offset << endl;
+    cout << "diamond y offset: " << diamond_y_offset << endl;
+    cout << "diamond phi offset: " << diamond_phi_offset << endl;
+    cout << "diamond phi y offset: " << diamond_phi_y_offset << endl;
 	cout << "diamond hit factor: " << Di_Cluster_Hit_Factor << endl;
 	
 	cout << "init histograms for transparent clustering.." << endl;
@@ -3990,6 +3998,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	histoname_eta << "Eta_Dia_2CentroidHits_TransparClusters";
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
 	histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_Dia_TransparClusters","DiffEstEffHit_Dia_TransparClusters", 200, -5.,5.);
+	histo_transparentclustering_hitdiff_scatter = new TH2F("DiffEstEffHit_Scatter_Dia_TransparClusters","DiffEstEffHit_Scatter_Dia_TransparClusters", 200, -5.,5.,128,0,127);
 	cout << " done." << endl;
 	
 	verbose = true;
@@ -4107,6 +4116,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 			x_positions.push_back(align->track_holder.GetD(det).GetX());
 			y_positions.push_back(align->track_holder.GetD(det).GetY());
 			z_positions.push_back(align->track_holder.GetD(det).GetZ());
+            cout << "Det"<< det << " has z position " << align->track_holder.GetD(det).GetZ() << endl;
 		}
 		
 		// read out effictive diamond hit position
@@ -4116,11 +4126,19 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		par.clear();
 		align->LinTrackFit(z_positions, x_positions, par);
 		if (verbose) cout << "linear fit of track:\tpar[0] = " << par[0] << ",\tpar[1] = " << par[1] << endl;
+        
+        // fit y position
+        par_y.clear();
+        align->LinTrackFit(z_positions, y_positions, par_y);
+        if (verbose) cout << "linear fit of track:\tpar_y[0] = " << par_y[0] << ",\tpar_y[1] = " << par_y[1] << endl;
 		
 		// estimate hit position in diamond
 //		diamond_z_position = align->track_holder.GetD(4).GetZ();
 		diamond_hit_position = par[0] + par[1] * diamond_z_position;
+        diamond_hit_y_position = par_y[0] + par_y[1] * diamond_z_position;
 		diamond_hit_position = diamond_hit_position + diamond_x_offset; // add offset
+        diamond_hit_y_position = diamond_hit_y_position + diamond_y_offset;
+//        diamond_hit_position = (diamond_hit_position - 64) * TMath::Cos(diamond_phi_offset) - (diamond_y_offset - 64) * TMath::Sin(-1 * diamond_phi_offset) + 64; // add the tilt correction
 		diamond_hit_channel = (int)diamond_hit_position;
 		if (verbose) cout << "z position of diamond is " << diamond_z_position << endl;
 		
@@ -4141,6 +4159,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 			}
 		}
 		histo_transparentclustering_hitdiff->Fill(eff_diamond_hit_channel + 0.5 - diamond_hit_position); // added 0.5 to eff_diamond_hit_channel to take the middle of the channel instead of the edge
+        histo_transparentclustering_hitdiff_scatter->Fill(eff_diamond_hit_channel + 0.5 - diamond_hit_position, diamond_hit_y_position);
 		cout << "effective diamond hit channel: " << eff_diamond_hit_channel << endl;
 		
 		// cluster diamond channels around estimated hit position
@@ -4191,6 +4210,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	}
 	SaveHistogram(histo_transparentclustering_eta);
 	SaveHistogram(histo_transparentclustering_hitdiff);
+    SaveHistogram(histo_transparentclustering_hitdiff_scatter);
 	
 	PedFile->Close();
 }
