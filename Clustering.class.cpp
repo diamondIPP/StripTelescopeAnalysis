@@ -257,6 +257,7 @@ class Clustering {
 	TH1F* histo_transparentclustering_eta;
 	TH1F* histo_transparentclustering_hitdiff;
     TH2F* histo_transparentclustering_hitdiff_scatter;
+    TH1F* histo_transparentclustering_2Channel_PulseHeight;
 	
 	TH2F* histo_scatter_autofidcut;
 	
@@ -3999,6 +4000,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
 	histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_Dia_TransparClusters","DiffEstEffHit_Dia_TransparClusters", 200, -5.,5.);
 	histo_transparentclustering_hitdiff_scatter = new TH2F("DiffEstEffHit_Scatter_Dia_TransparClusters","DiffEstEffHit_Scatter_Dia_TransparClusters", 200, -5.,5.,128,0,127);
+    histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut","PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut",pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
 	cout << " done." << endl;
 	
 	verbose = true;
@@ -4139,6 +4141,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		diamond_hit_position = diamond_hit_position + diamond_x_offset; // add offset
         diamond_hit_y_position = diamond_hit_y_position + diamond_y_offset;
         diamond_hit_position = (diamond_hit_position - 64) * TMath::Cos(diamond_phi_offset) - (diamond_hit_y_position - 64) * TMath::Sin(diamond_phi_offset) + 64; // add the tilt correction
+        diamond_hit_position += 0.5; // added 0.5 to take the middle of the channel instead of the edge
 		diamond_hit_channel = (int)diamond_hit_position;
 		if (verbose) cout << "z position of diamond is " << diamond_z_position << endl;
 		
@@ -4180,6 +4183,9 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
 		else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
 		histo_transparentclustering_eta->Fill(transp_eta);
+        
+        // fill pulse height histogram
+        histo_transparentclustering_2Channel_PulseHeight->Fill(firstchannel_adc+secondchannel_adc);
 		
 		if (verbose) cout << "clusters for track " << i << ":" << endl;
 		// loop over different cluster sizes
@@ -4211,6 +4217,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	SaveHistogram(histo_transparentclustering_eta);
 	SaveHistogram(histo_transparentclustering_hitdiff);
     SaveHistogram(histo_transparentclustering_hitdiff_scatter);
+    SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
 	
 	PedFile->Close();
 }
