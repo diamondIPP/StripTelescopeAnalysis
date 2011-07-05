@@ -4138,7 +4138,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
         diamond_hit_y_position = par_y[0] + par_y[1] * diamond_z_position;
 		diamond_hit_position = diamond_hit_position + diamond_x_offset; // add offset
         diamond_hit_y_position = diamond_hit_y_position + diamond_y_offset;
-//        diamond_hit_position = (diamond_hit_position - 64) * TMath::Cos(diamond_phi_offset) - (diamond_y_offset - 64) * TMath::Sin(-1 * diamond_phi_offset) + 64; // add the tilt correction
+        diamond_hit_position = (diamond_hit_position - 64) * TMath::Cos(diamond_phi_offset) - (diamond_hit_y_position - 64) * TMath::Sin(diamond_phi_offset) + 64; // add the tilt correction
 		diamond_hit_channel = (int)diamond_hit_position;
 		if (verbose) cout << "z position of diamond is " << diamond_z_position << endl;
 		
