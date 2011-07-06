@@ -4200,12 +4200,13 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 				current_sign = (-1) * current_sign;
 				if (verbose) cout << current_channel;
 				if (verbose) if (channel < j) cout << ", ";
-				if (current_channel > 0 && current_channel < 128 && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel])
+				if (current_channel > 0 && current_channel < 128 /* && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel]*/)
 					cluster_adc = cluster_adc + Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
 			}
 			if (verbose) cout << endl;
 			if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
 			if (verbose) cout << "histo_transparentclustering_landau[" << j << "] address: " << histo_transparentclustering_landau[j] << endl;
+            if (current_channel <= 0 || current_channel >= 128) break;
 			histo_transparentclustering_landau[j]->Fill(cluster_adc);
 		} // end loop over cluster sizes
 	} // end loop over tracks
