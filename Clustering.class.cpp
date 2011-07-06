@@ -3991,7 +3991,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		ostringstream histoname_landau, histoname_eta;
 		histoname_landau << "PulseHeight_Dia_" << (i+1) << "HitTransparClusters";
 		cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
-		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),200,0.,2000.);
+		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
 //		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
 //		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 	}
