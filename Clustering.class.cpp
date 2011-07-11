@@ -95,7 +95,7 @@ class Clustering {
       void Align(bool plots = 1, bool CutFakeTracksOn = false);
 	  void HistCleaner(int regid, TH2F* histo);
       void AutoFidCut();
-    void TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose)
+    void TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 //	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
 	void EventMonitor(int CurrentEvent = 0);
@@ -227,6 +227,7 @@ class Clustering {
       //plots
       TPaveText *pt; //plot tag attached to all plots
       TH1F* histo_dianoise[2]; //if there's not a hit, fill the bin; second index: no fidcut, fidcut
+    TH1F* histo_detnoise[8];
       TH1F* histo_clusterocc[9][11][3]; //second index: 1,2,3,4,>=5,1&2,1-3,1-4,2&3,3&4,all; third index: no fidcut, fidcut, no track req
       TH1F* histo_landau[9][11][3][2]; //second index: 1,2,3,4,>=5,1&2,1-3,1-4,2&3,3&4,all; third index: no fidcut, fidcut, no track req; fourth index: psadc, snr
       TH1F* histo_clusterfreq[9][2]; //second index: nclusters, ngoodclusters
@@ -505,6 +506,7 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    for(int det=0; det<9; det++) for(int hits=0; hits<11; hits++) for(int cut=0; cut<3; cut++) for(int snr=0; snr<2; snr++) {
       if(det==8 && (cut==0||cut==1) && snr==0) histoswitch_landau[det][hits][cut][snr] = 1; //second index: 1,2,3,4,>=5,1&2,1-3,1-4,2&3,3&4,all; third index: no fidcut, fidcut, no track req; fourth index: psadc, snr
       else if(det<8 && (cut==1||cut==2) && snr==0 && (hits==0||hits==1||hits==2||hits==3||hits==4||hits==10)) histoswitch_landau[det][hits][cut][snr] = 1;
+      else if(hits==5 && cut==0 && snr==0) histoswitch_landau[det][hits][cut][snr] = 1;
       else histoswitch_landau[det][hits][cut][snr] = 0;
    }
    for(int det=0; det<9; det++) for(int cut=0; cut<2; cut++) histoswitch_clusterfreq[det][cut] = 1;
@@ -541,6 +543,20 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    
    histo_dianoise[0] = new TH1F("noise_diamond","noise_diamond",80,-40,40);
    histo_dianoise[1] = new TH1F("noise_diamond_fidcutevents","noise_diamond_fidcutevents",80,-40,40);
+    for (int det = 0; det < 8; det++) {
+        switch(det) {
+            case 0: det_name = "_D0X"; break;
+            case 1: det_name = "_D0Y"; break;
+            case 2: det_name = "_D1X"; break;
+            case 3: det_name = "_D1Y"; break;
+            case 4: det_name = "_D2X"; break;
+            case 5: det_name = "_D2Y"; break;
+            case 6: det_name = "_D3X"; break;
+            case 7: det_name = "_D3Y"; break;
+        }
+        histo_name = "Noise" + det_name;
+        histo_detnoise[det] = new TH1F(histo_name.c_str(),histo_name.c_str(),160,-20,20);
+    }
    
    for(int det=0; det<5; det++) {
       
@@ -1893,6 +1909,7 @@ void Clustering::SaveHistogramROOT(TH2F* histo) {
 
 void Clustering::InitializeHistograms() {
    for(int i=0; i<2; i++) histo_dianoise[i] = 0;
+    for (int i = 0; i < 8; i++) histo_detnoise[i] = 0;
    for(int i=0; i<5; i++) for(int j=0; j<3; j++) histo_scatter[i][j] = 0;
    for(int i=0; i<9; i++) for(int j=0; j<11; j++) for(int k=0; k<3; k++) histo_clusterocc[i][j][k] = 0;
    for(int i=0; i<9; i++) for(int j=0; j<11; j++) for(int k=0; k<3; k++) for(int l=0; l<2; l++) histo_landau[i][j][k][l] = 0;
@@ -1909,6 +1926,7 @@ void Clustering::InitializeHistograms() {
 
 void Clustering::DeleteHistograms() {
    for(int i=0; i<2; i++) delete histo_dianoise[i];
+    for (int i = 0; i < 8; i++) delete histo_detnoise[i];
    for(int i=0; i<2; i++) delete histofit_dianoise[i];
    for(int i=0; i<5; i++) for(int j=0; j<3; j++) delete histo_scatter[i][j];
    for(int i=0; i<9; i++) for(int j=0; j<11; j++) for(int k=0; k<3; k++) delete histo_clusterocc[i][j][k];
@@ -1934,6 +1952,10 @@ void Clustering::DrawHistograms() {
       histo_dianoise[cut]->Fit(tempname.c_str(),"r"); // fit option "r" restricts the range of the fit
       SaveHistogramPNG(histo_dianoise[cut]);
    }
+    
+    for (int det = 0; det < 8; det++) {
+        SaveHistogram(histo_detnoise[det]);
+    }
    
    for(int det=0; det<5; det++)
       for(int trackcut=0; trackcut<3; trackcut++)
@@ -2062,6 +2084,16 @@ void Clustering::BookHistograms() {
    //look to see if there are coincident hits in the silicon planes
    for(int d=0; d<4; d++)
       if(clustered_event.HasCoincidentClustersXY(d)) detectorxycluster_events[d]++;
+    
+    // silicon noise plots
+    for (int det = 0; det < 8; det++) {
+        for (int i = 0; i < Det_NChannels[det]; i++) {
+            float psadc = Det_ADC[det][i] - Det_PedMean[det][i];
+            if (Det_channel_screen[det].CheckChannel(Det_Channels[det][i]) && psadc<Si_Cluster_Hit_Factor*Det_PedWidth[det][i]) {
+                histo_detnoise[det]->Fill(psadc);
+            }
+        }
+    }
    
    //if a track, check whether it's in the silicon fiducial region
    bool fiducial_track = 0;
