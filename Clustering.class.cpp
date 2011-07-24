@@ -256,6 +256,7 @@ class Clustering {
 	  TH1F* histo_afc_y_cut;
 	
 	TH1F* histo_transparentclustering_landau[10]; // index: n channels
+    TH1F* histo_transparentclustering_landau_mean;
 	TH1F* histo_transparentclustering_eta;
 	TH1F* histo_transparentclustering_hitdiff;
     TH2F* histo_transparentclustering_hitdiff_scatter;
@@ -4028,6 +4029,7 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
         //		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
         //		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 	}
+    histo_transparentclustering_landau_mean = new TH1F("PulseHeightMeanVsChannels_Det?_TranspAna_","PulseHeightMeanVsChannels_Det?_TranspAna",10,0.5,10.5);
 	ostringstream histoname_eta;
 	histoname_eta << "Eta_D3X_2CentroidHits_TransparClusters";
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
@@ -4288,12 +4290,13 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	cout << "init histograms for transparent clustering.." << endl;
 	for (int i = 0; i < 10; i++) {
 		ostringstream histoname_landau, histoname_eta;
-		histoname_landau << "PulseHeight_Dia_" << (i+1) << "HitTransparClusters_8HitsFidcut";
+		histoname_landau << "PulseHeight_Dia_" << (i+1) << "ChannelsTransparAna_8HitsFidcut";
 		cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
 		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
 //		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
 //		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 	}
+    histo_transparentclustering_landau_mean = new TH1F("PulseHeightMeanVsChannels_Dia_TranspAna_","PulseHeightMeanVsChannels_Dia_TranspAna",10,0.5,10.5);
 	ostringstream histoname_eta;
 	histoname_eta << "Eta_Dia_2CentroidHits_TransparClusters";
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
@@ -4512,8 +4515,10 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	
 	// save histograms
 	for (int i = 0; i < 10; i++) {
+        histo_transparentclustering_landau_mean->SetBinContent(i+1,histo_transparentclustering_landau[i]->GetMean()); // plot pulse hight means into a histogram
 		SaveHistogram(histo_transparentclustering_landau[i]);
 	}
+    SaveHistogram(histo_transparentclustering_landau_mean);
 	SaveHistogram(histo_transparentclustering_eta);
 	SaveHistogram(histo_transparentclustering_hitdiff);
     SaveHistogram(histo_transparentclustering_hitdiff_scatter);
