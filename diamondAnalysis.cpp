@@ -11,12 +11,12 @@
 #include "Clustering.class.cpp"
 #include <fstream>
 #include <iostream>
-#include "main.h"
+#include "diamondAnalysis.h"
 #include "time.h"
 
 using namespace std;
 
-int main () {
+int main() {
 	cout << "starting main loop.." << endl;
 	initVariables();
 	RunListOK = ReadRunList();
@@ -119,6 +119,7 @@ void initVariables() {
 }
 
 int ReadRunList() {
+	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
 	RunInfo run;
 	char RunDescription[200];
 	int NEvents, Initial_Event;
