@@ -3952,7 +3952,7 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
     histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut","PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut",pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
 	cout << " done." << endl;
 	
-	verbose = true;
+//	verbose = true;
 	
 	PedFile = new TFile(pedfile_path.c_str());
 	PedTree = (TTree*)PedFile->Get("PedTree");
