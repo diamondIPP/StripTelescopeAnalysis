@@ -11,8 +11,8 @@
 #include "TFile.h"
 #include "TTree.h"
 
-#include "Cluster.class.cpp"
-#include "ClusteredEvent.class.cpp"
+#include "Cluster.class.hh"
+#include "ClusteredEvent.class.hh"
 #include "ChannelScreen.hh"
 
 

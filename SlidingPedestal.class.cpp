@@ -58,7 +58,11 @@ using namespace TMath;
 #include "TH2I.h"
 //AYSHA CHECK
 //Class and stuct definitions
-#include "Event_Classes.h" //Data Storage and Processing Events
+#include "TEvent_Array.hh"
+#include "TPed_and_RMS.hh"
+#include "TDetector_Data.hh"
+#include "TTrigger_Event.hh"
+//#include "Event_Classes.h" //Data Storage and Processing Events
 //#include "PSEvent.class.cpp" //Pedestal Subtracted Data Saved in PSEvent Class
 #include "ChannelScreen.hh" //Channel Screen Class
 #include "SaveToFile.h" //Functions to save plots as .png, .C or .root files

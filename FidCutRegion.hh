@@ -3,8 +3,9 @@
 //
 //2010-11-22 started (max)
 //
-
-
+#ifndef FITCUTREGION_HH
+#define FITCUTREGION_HH
+#include <iostream>
 class FidCutRegion {
 	int index;
 	bool active;
@@ -24,19 +25,5 @@ public:
 	int GetValueYLow() {return y_low;};
 	int GetValueYHigh() {return y_high;};
 };
+#endif /*CHANNELSCREEN_H*/
 
-FidCutRegion::FidCutRegion(int i) {
-	index = i;
-}
-
-void FidCutRegion::SetAllValuesZero() {
-	active = 0;
-	x_low = 0;
-	x_high = 0;
-	y_low = 0;
-	y_high = 0;
-}
-
-void FidCutRegion::GetAllValues () {
-	cout << "FidCutRegion #:\t" << index << "\t XLow:\t" << x_low << "\t XHigh:\t" << x_high << "\t YLow:\t" << y_low << "\t YHigh:\t" << y_high << "\n"; 
-}

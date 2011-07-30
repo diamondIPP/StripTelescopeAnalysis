@@ -14,8 +14,8 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "Cluster.class.cpp"
-#include "ClusteredEvent.class.cpp"
+#include "Cluster.class.hh"
+#include "ClusteredEvent.class.hh"
 #include "GetClusteredEvent.cpp"
 
 using namespace std;

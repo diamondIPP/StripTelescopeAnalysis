@@ -34,12 +34,12 @@ using namespace std;
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TPaveText.h"
-#include "FidCutRegion.h"
+#include "FidCutRegion.hh"
 
 
 using namespace TMath;
-#include "Cluster.class.cpp"
-#include "ClusteredEvent.class.cpp"
+#include "Cluster.class.hh"
+#include "ClusteredEvent.class.hh"
 #include "ChannelScreen.hh"
 #include "AlignmentClasses.h"
 #include "TDiamondTrack.hh"

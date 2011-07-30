@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-#include "Cluster.class.cpp"
+#include "Cluster.class.hh"
 
 class Track {
    public:

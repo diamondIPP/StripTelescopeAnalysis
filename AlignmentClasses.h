@@ -6,7 +6,8 @@
 //2010-09
 //           TODO: Several improvements would be tracking and aligning x and y planes separately and of course tearing the damn telescope apart to pin down the geometry
 //New comment
-
+#ifndef ALIGNMENTCLASSES_H
+#define ALIGNMENTCLASSES_H
 //C++ Libraries
 #include <fstream>
 #include <iostream>
@@ -33,41 +34,4 @@ using namespace std;
 //using namespace TMath;
 
 
-Int_t RoundValue(Double_t value)
-{
-   Double_t diff = value - (int)value;
-   if(value>=0)
-   {
-      if(diff>=0.5)
-      {
-         value = (int)value + 1;
-      }
-      if(diff<0.5)
-      {
-         value = (int)value;
-      }
-   }
-   if(value<0)
-   {
-	   if(TMath::Abs(diff)>=0.5)
-      {
-         value = (int)value - 1;
-      }
-      if(TMath::Abs(diff)<0.5)
-      {
-         value = (int)value;
-      }
-   }
-   
-   return (Int_t)value;
-}
-
-//_________________________________________________________________________________________________
-
-
-//_________________________________________________________________________________________________
-
-
-//_________________________________________________________________________________________________
-
-
+#endif /*ALIGNMENTCLASSES_H*/
