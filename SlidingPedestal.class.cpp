@@ -60,7 +60,7 @@ using namespace TMath;
 //Class and stuct definitions
 #include "Event_Classes.h" //Data Storage and Processing Events
 //#include "PSEvent.class.cpp" //Pedestal Subtracted Data Saved in PSEvent Class
-#include "ChannelScreen.h" //Channel Screen Class
+#include "ChannelScreen.hh" //Channel Screen Class
 #include "SaveToFile.h" //Functions to save plots as .png, .C or .root files
 #include "RZEvent.struct.cpp" //the header file that is connected to the Diamond/telescope data
 

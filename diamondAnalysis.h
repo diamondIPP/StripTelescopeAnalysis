@@ -1,3 +1,5 @@
+#include <fstream>
+#include <iostream>
 int RUNNUMBER;
 string RUNDESCRIPTION;
 int NEVENTS;
@@ -8,6 +10,9 @@ bool PLOTS;
 bool ALTCLUSTERING;
 bool RunListOK;
 int DO_SLIDINGPEDESTAL, DO_ALIGNMENT, CUTFAKETRACKS;
+string inputDir;
+string outputDir;
+string runListPath="RunList.ini";
 
 void initVariables();
 int ReadRunList();

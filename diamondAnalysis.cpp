@@ -9,14 +9,59 @@
 //#include "Clustering.class.cpp"
 #include "SlidingPedestal.class.cpp"
 #include "Clustering.class.cpp"
-#include <fstream>
-#include <iostream>
+
 #include "diamondAnalysis.h"
 #include "time.h"
 
 using namespace std;
+/*** USAGE ***/
+void printHelp( void )
+{
+	cout<<"*******************************************************"<<endl;
+	cout<<"diamondAnalysis: A Tool for anaylsis of RD42 test beams"<<endl;
+	cout<<"USEAGE:\n"<<endl;
+	cout<<"diamondAnalysis -i INPUTDIR -o OUTPUTDIR"<<endl;
+	cout<<"*******************************************************"<<endl;
 
-int main() {
+}
+bool checkDir(string dir){
+	return true;
+}
+
+bool readInputs(int argc,char ** argv){
+	bool inputDirSet=false;
+	bool outputDirSet=false;
+	for(int i=1; i < argc; i++) {
+			if(string(argv[i]) == "-h"||string(argv[i])=="--help")
+					{
+						printHelp();
+						exit(0);
+					}
+		}
+	for(int i=1; i<argc;i++) {
+		if((string(argv[i]) == "-i"||string(argv[i])=="-I"||string(argv[i])=="--input"||string(argv[i])=="--INPUT")&&i+1<argc){
+			i++;
+			inputDir=string(argv[i]);
+			inputDirSet=checkDir(inputDir);
+			cout<<"found inputDir: \""<<inputDir<<"\""<<endl;
+		}
+		if((string(argv[i]) == "-o"||string(argv[i])=="-O"||string(argv[i])=="--output"||string(argv[i])=="--output")&&i+1<argc){
+			i++;
+			outputDir=string(argv[i]);
+			outputDirSet=checkDir(outputDir);
+			cout<<"found inputDir: \""<<outputDir<<"\""<<endl;
+		}
+		if((string(argv[i]) == "-r"||string(argv[i])=="-R")&&i+1<argc){
+			i++;
+			runListPath=string(argv[i]);
+			cout<<"runListpath is set to:\""<<runListPath<<"\""<<endl;
+		}
+
+	}
+}
+
+int main(int argc, char ** argv) {
+	readInputs(argc,argv);
 	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
 	cout << "starting main loop.." << endl;
 	initVariables();
@@ -125,7 +170,7 @@ int ReadRunList() {
 	int NEvents, Initial_Event;
 	RunParameters.clear();
 	cout << endl << "reading runlist.." << endl;
-	ifstream file("RunList.ini");
+	ifstream file(runListPath.c_str());//"RunList.ini");
 	if (!file) {
 		cout << "An error has encountered while trying to open RunList.ini" << endl;
 		return 0;

@@ -40,9 +40,11 @@ using namespace std;
 using namespace TMath;
 #include "Cluster.class.cpp"
 #include "ClusteredEvent.class.cpp"
+#include "ChannelScreen.hh"
 #include "AlignmentClasses.h"
 #include "TDiamondTrack.hh"
 #include "TDetectorAlignment.hh"
+#include "HistogrammSaver.class.hh"
 typedef unsigned int uint;
 
 class Clustering {
@@ -55,14 +57,6 @@ class Clustering {
       void ClusterEvent(bool verbose = 0);
 	void ClusterEventSeeds(bool verbose = 0);
       void BookHistograms();
-      void SaveHistogram(TH1F* histo);
-      void SaveHistogram(TH2F* histo);
-      void SaveHistogramPNG(TH1F* histo);
-      void SaveHistogramPNG(TH2F* histo);
-      void SaveHistogramROOT(TH1F* histo);
-      void SaveHistogramROOT(TH2F* histo);
-      void SaveHistogramPDF(TH1F* histo);
-      void SaveHistogramPDF(TH2F* histo);
       void InitializeHistograms();
       void DeleteHistograms();
       void DrawHistograms();
@@ -197,6 +191,7 @@ class Clustering {
       TTree *PedTree;
       TDatime dateandtime;
       TRandom3 rand;
+      HistogrammSaver *histSaver;
 
    public:
 

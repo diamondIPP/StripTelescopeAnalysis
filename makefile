@@ -27,7 +27,8 @@ HEAD    		=
 LD              := g++
 LDFLAGS         := -g $(LLABLDFLAGS) $(ROOTLIBS)
 
-LIBFILES		:=	TDetectorPlane.o TDiamondTrack.o TDetectorAlignment.o
+LIBFILES		:=	HistogrammSaver.class.o ChannelScreen.o TDetectorPlane.o TDiamondTrack.o TDetectorAlignment.o 
+#Clustering.class.o
 
 PROGS			:= diamondAnalysis
 
@@ -57,5 +58,5 @@ $(PROGS):
 
 
 clean:	
-	rm *.o
+	rm -fv *.o
 

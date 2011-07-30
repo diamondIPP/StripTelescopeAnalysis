@@ -32,7 +32,7 @@
 //2011-04-26 Check by Lukas
 
 //Class and stuct definitions
-//#include "ChannelScreen.h" //Channel Screen Class
+//#include "ChannelScreen.hh" //Channel Screen Class
 #include "Clustering.class.hh"
 
 Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
@@ -532,7 +532,10 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    pt->AddText(dateandtime.AsSQLString());
    pt->SetBorderSize(0); //Set Border to Zero
    pt->SetFillColor(0); //Set Fill to White
-   
+   histSaver= new HistogrammSaver(Verbosity);
+   histSaver->SetRunNumber(run_number);
+   histSaver->SetNumberOfEvents((unsigned int)PedTree->GetEntries());
+   histSaver->SetPlotsPath(plots_path);
 }
 
 Clustering::~Clustering() {
@@ -1547,98 +1550,9 @@ void SetDuckStyle() {
 	//DuckStyle->SetTitleOffset(1.8, "Y"); // Another way to set the Offset
 	//	gStyle->SetTitleOffset(1.2, "X"); // Another way to set the Offset
 	DuckStyle->SetTitleOffset(1.2,"X");
-	
 	DuckStyle->cd();
 	
 	cout << "Using DuckStyle" << endl;
-}
-
-void Clustering::SaveHistogram(TH1F* histo) {
-   SaveHistogramPNG(histo);
-   SaveHistogramROOT(histo);
-}
-
-void Clustering::SaveHistogram(TH2F* histo) {
-   SaveHistogramPNG(histo);
-   SaveHistogramROOT(histo);
-}
-
-void Clustering::SaveHistogramPDF(TH1F* histo) {
-	TCanvas plots_canvas("plots_canvas","plots_canvas");
-	plots_canvas.cd();
-	histo->Draw();
-	pt->Draw();
-	ostringstream plot_filename;
-	plot_filename << plots_path << histo->GetName() << ".pdf";
-	plots_canvas.Print(plot_filename.str().c_str());
-}
-
-void Clustering::SaveHistogramPDF(TH2F* histo) {
-	TCanvas plots_canvas("plots_canvas","plots_canvas");
-	//plots_canvas.cd();
-//	SetDuckStyle();
-	plots_canvas.cd();
-	cout << "Using SaveHistogrammPDF on TH2F histogram " << histo->GetName() << endl;
-	//histo->Draw();
-	gStyle->SetTitleFont(42);
-	gStyle->SetMarkerSize(0);
-	pt->SetTextSize(0.0250);
-	pt->SetTextColor(kBlack);
-	histo->SetTitleFont(42);
-	histo->UseCurrentStyle();
-	histo->Draw("colz");
-	pt->Draw();
-	ostringstream plot_filename;
-	plot_filename << plots_path << histo->GetName() << ".pdf";
-	plots_canvas.Print(plot_filename.str().c_str());	
-	//pt->SetTextSize(0.1);
-}
-
-void Clustering::SaveHistogramPNG(TH1F* histo) {
-   TCanvas plots_canvas("plots_canvas","plots_canvas");
-   plots_canvas.cd();
-   histo->Draw();
-   pt->Draw();
-   ostringstream plot_filename;
-   plot_filename << plots_path << histo->GetName() << ".png";
-   plots_canvas.Print(plot_filename.str().c_str());
-}
-
-void Clustering::SaveHistogramROOT(TH1F* histo) {
-   TCanvas plots_canvas("plots_canvas","plots_canvas");
-   plots_canvas.cd();
-   histo->Draw();
-   pt->Draw();
-   ostringstream plot_filename;
-	ostringstream histo_filename;
-//	histo_filename << plots_path << histo->GetName() << "_histo.root";
-	histo_filename << plots_path << "histograms.root";
-   plot_filename << plots_path << histo->GetName() << ".root";
-   plots_canvas.Print(plot_filename.str().c_str());
-	TFile f(histo_filename.str().c_str(),"UPDATE");
-	histo->Write();
-}
-
-void Clustering::SaveHistogramPNG(TH2F* histo) {
-   TCanvas plots_canvas("plots_canvas","plots_canvas");
-   plots_canvas.cd();
-   histo->Draw();
-   histo->Draw("colz");
-   pt->Draw();
-   ostringstream plot_filename;
-   plot_filename << plots_path << histo->GetName() << ".png";
-   plots_canvas.Print(plot_filename.str().c_str());
-}
-
-void Clustering::SaveHistogramROOT(TH2F* histo) {
-   TCanvas plots_canvas("plots_canvas","plots_canvas");
-   plots_canvas.cd();
-   histo->Draw();
-   histo->Draw("colz");
-   pt->Draw();
-   ostringstream plot_filename;
-   plot_filename << plots_path << histo->GetName() << ".root";
-   plots_canvas.Print(plot_filename.str().c_str());
 }
 
 void Clustering::InitializeHistograms() {
@@ -1684,31 +1598,31 @@ void Clustering::DrawHistograms() {
       histofit_dianoise[cut] = new TF1(tempname.c_str(),"gaus",histo_dianoise[cut]->GetMean()-histo_dianoise[cut]->GetRMS(),histo_dianoise[cut]->GetMean()+histo_dianoise[cut]->GetRMS());
       histofit_dianoise[cut]->SetLineColor(kBlue);
       histo_dianoise[cut]->Fit(tempname.c_str(),"r"); // fit option "r" restricts the range of the fit
-      SaveHistogramPNG(histo_dianoise[cut]);
+      histSaver->SaveHistogramPNG(histo_dianoise[cut]);
    }
     
     for (int det = 0; det < 8; det++) {
-        SaveHistogram(histo_detnoise[det]);
+        histSaver->SaveHistogram(histo_detnoise[det]);
     }
    
    for(int det=0; det<5; det++)
       for(int trackcut=0; trackcut<3; trackcut++)
-         if(histoswitch_scatter[det][trackcut]) SaveHistogramPNG(histo_scatter[det][trackcut]);
+         if(histoswitch_scatter[det][trackcut]) histSaver->SaveHistogramPNG(histo_scatter[det][trackcut]);
    
    gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
    for(int det=0; det<9; det++) {
       
       for(int frac=0; frac<2; frac++)
-         if(histoswitch_hitocc_saturated[det][frac]) SaveHistogramPNG(histo_hitocc_saturated[det][frac]);
+         if(histoswitch_hitocc_saturated[det][frac]) histSaver->SaveHistogramPNG(histo_hitocc_saturated[det][frac]);
       
       for(int goodcut=0; goodcut<2; goodcut++)
-         if(histoswitch_clusterfreq[det][goodcut]) SaveHistogramPNG(histo_clusterfreq[det][goodcut]);
+         if(histoswitch_clusterfreq[det][goodcut]) histSaver->SaveHistogramPNG(histo_clusterfreq[det][goodcut]);
          
       histo_clusters_average[det][0]->SetNormFactor(histo_clusters_average[det][0]->Integral(-100,100)/singlesitrack_events);
       
       for(int chip=0; chip<2; chip++) {
          for(int etatype=0; etatype<2; etatype++) {
-            if(histoswitch_eta_vs_Q[det][etatype][chip]) SaveHistogramPNG(histo_eta_vs_Q[det][etatype][chip]);
+            if(histoswitch_eta_vs_Q[det][etatype][chip]) histSaver->SaveHistogramPNG(histo_eta_vs_Q[det][etatype][chip]);
          }
          
          //agregate eta plots
@@ -1723,32 +1637,32 @@ void Clustering::DrawHistograms() {
          etacanvas.Print(plot_filename.str().c_str());
          
          //individual eta plots_canvas
-         if(histo_etaintegral[det][0][chip]) SaveHistogramPNG(histo_etaintegral[det][0][chip]);
-         if(histo_etaintegral[det][2][chip]) SaveHistogramPNG(histo_etaintegral[det][2][chip]);
+         if(histo_etaintegral[det][0][chip]) histSaver->SaveHistogramPNG(histo_etaintegral[det][0][chip]);
+         if(histo_etaintegral[det][2][chip]) histSaver->SaveHistogramPNG(histo_etaintegral[det][2][chip]);
             
       }
       
       for(int trackcut=0; trackcut<3; trackcut++) {
 
-         if(histoswitch_clusters_average[det][trackcut]) SaveHistogramPNG(histo_clusters_average[det][trackcut]);
+         if(histoswitch_clusters_average[det][trackcut]) histSaver->SaveHistogramPNG(histo_clusters_average[det][trackcut]);
          
          for(int clussizeopt=0; clussizeopt<3; clussizeopt++)
-            if(histoswitch_clustersizefreq[det][clussizeopt][trackcut]) SaveHistogramPNG(histo_clustersizefreq[det][clussizeopt][trackcut]);
+            if(histoswitch_clustersizefreq[det][clussizeopt][trackcut]) histSaver->SaveHistogramPNG(histo_clustersizefreq[det][clussizeopt][trackcut]);
          
          for(int etaopt=0; etaopt<6; etaopt++) {
-            if(det==8) if(histoswitch_eta[det][etaopt][trackcut][0]) SaveHistogramPNG(histo_eta[det][etaopt][trackcut][0]);
+            if(det==8) if(histoswitch_eta[det][etaopt][trackcut][0]) histSaver->SaveHistogramPNG(histo_eta[det][etaopt][trackcut][0]);
             if(det<8) for(int chip=0; chip<2; chip++)
-               if(histoswitch_eta[det][etaopt][trackcut][chip]) SaveHistogramPNG(histo_eta[det][etaopt][trackcut][chip]);
+               if(histoswitch_eta[det][etaopt][trackcut][chip]) histSaver->SaveHistogramPNG(histo_eta[det][etaopt][trackcut][chip]);
          }
          
          for(int nhitsopt=0; nhitsopt<11; nhitsopt++) {
             //hitoccs
             if(histoswitch_clusterocc[det][nhitsopt][trackcut]) 
-               SaveHistogramPNG(histo_clusterocc[det][nhitsopt][trackcut]);
+            	histSaver->SaveHistogramPNG(histo_clusterocc[det][nhitsopt][trackcut]);
             
             //pulse heights
             for(int snr=0; snr<2; snr++) 
-               if(histoswitch_landau[det][nhitsopt][trackcut][snr]) SaveHistogram(histo_landau[det][nhitsopt][trackcut][snr]);
+               if(histoswitch_landau[det][nhitsopt][trackcut][snr]) histSaver->SaveHistogram(histo_landau[det][nhitsopt][trackcut][snr]);
          }
       }
    }
@@ -2993,7 +2907,7 @@ void Clustering::AutoFidCut() {
 	cout << "plot production for AutoFidCut: done." << endl << endl;
     }
 	
-    SaveHistogram(histo_scatter_autofidcut);
+    histSaver->SaveHistogram(histo_scatter_autofidcut);
 	
 	// -- end of scatter plot production
     
@@ -3247,13 +3161,13 @@ void Clustering::AutoFidCut() {
 	
     histo_afc_unit_histo_2f->SetName("histo_afc_unit_histo_2f_r1");
     
-    SaveHistogramPDF(histo_afc_unit_histo_2f);
+    histSaver->SaveHistogramPDF(histo_afc_unit_histo_2f);
 	
     (*histo_afc_region_1_mask) = (*histo_afc_unit_histo_2f)*(*histo_afc_scatter_firstfidcut);
 	
     histo_afc_region_1_mask->SetName("histo_afc_region_1_mask");
 	
-    SaveHistogramPDF(histo_afc_region_1_mask);
+    histSaver->SaveHistogramPDF(histo_afc_region_1_mask);
     if(Verbosity>=2) cout << endl << endl << "afc_region_1 saved" << endl << endl;
 	
     // run HistCleaner on 
@@ -3434,7 +3348,7 @@ void Clustering::AutoFidCut() {
 		HistCleaner(i, afc_current_histo_2f);
 		
 		
-		SaveHistogramPDF(afc_current_histo_2f);
+		histSaver->SaveHistogramPDF(afc_current_histo_2f);
 		
 		afc_current_histo_2f->Delete();
 		
@@ -3447,7 +3361,7 @@ void Clustering::AutoFidCut() {
     //		 cout << endl << "Finished HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;  
 	
 	
-    SaveHistogramPDF(histo_afc_region_1_mask);
+    histSaver->SaveHistogramPDF(histo_afc_region_1_mask);
     
     HistCleaner(1, histo_afc_scatter_firstfidcut);
 	
@@ -3458,18 +3372,18 @@ void Clustering::AutoFidCut() {
     FCR[3]->SetValueYHigh(2);
     FCR[3]->GetAllValues();
     
-    SaveHistogramPDF(histo_afc_x);
-    SaveHistogramPDF(histo_afc_y);
-    SaveHistogramPDF(histo_afc_x_cut);
-    SaveHistogramPDF(histo_afc_y_cut);
-    SaveHistogramPDF(histo_afc_scatter_firstfidcut);
+    histSaver->SaveHistogramPDF(histo_afc_x);
+    histSaver->SaveHistogramPDF(histo_afc_y);
+    histSaver->SaveHistogramPDF(histo_afc_x_cut);
+    histSaver->SaveHistogramPDF(histo_afc_y_cut);
+    histSaver->SaveHistogramPDF(histo_afc_scatter_firstfidcut);
     
     
-    SaveHistogramPNG(histo_afc_x);
-    SaveHistogramPNG(histo_afc_y);
-    SaveHistogramPNG(histo_afc_x_cut);
-    SaveHistogramPNG(histo_afc_y_cut);
-    SaveHistogramPNG(histo_afc_scatter_firstfidcut);
+    histSaver->SaveHistogramPNG(histo_afc_x);
+    histSaver->SaveHistogramPNG(histo_afc_y);
+    histSaver->SaveHistogramPNG(histo_afc_x_cut);
+    histSaver->SaveHistogramPNG(histo_afc_y_cut);
+    histSaver->SaveHistogramPNG(histo_afc_scatter_firstfidcut);
     
     if(Verbosity>=0) {
     cout << "\n";
@@ -3981,12 +3895,12 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
 	
 	// save histograms
 	for (int i = 0; i < 10; i++) {
-		SaveHistogram(histo_transparentclustering_landau[i]);
+		histSaver->SaveHistogram(histo_transparentclustering_landau[i]);
 	}
-	SaveHistogram(histo_transparentclustering_eta);
-	SaveHistogram(histo_transparentclustering_hitdiff);
-    SaveHistogram(histo_transparentclustering_hitdiff_scatter);
-    SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
+	histSaver->SaveHistogram(histo_transparentclustering_eta);
+	histSaver->SaveHistogram(histo_transparentclustering_hitdiff);
+	histSaver->SaveHistogram(histo_transparentclustering_hitdiff_scatter);
+	histSaver->SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
 	
 	PedFile->Close();
 }
@@ -4249,13 +4163,13 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	// save histograms
 	for (int i = 0; i < 10; i++) {
         histo_transparentclustering_landau_mean->SetBinContent(i+1,histo_transparentclustering_landau[i]->GetMean()); // plot pulse hight means into a histogram
-		SaveHistogram(histo_transparentclustering_landau[i]);
+        histSaver->SaveHistogram(histo_transparentclustering_landau[i]);
 	}
-    SaveHistogram(histo_transparentclustering_landau_mean);
-	SaveHistogram(histo_transparentclustering_eta);
-	SaveHistogram(histo_transparentclustering_hitdiff);
-    SaveHistogram(histo_transparentclustering_hitdiff_scatter);
-    SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
+	histSaver->SaveHistogram(histo_transparentclustering_landau_mean);
+	histSaver->SaveHistogram(histo_transparentclustering_eta);
+	histSaver->SaveHistogram(histo_transparentclustering_hitdiff);
+	histSaver->SaveHistogram(histo_transparentclustering_hitdiff_scatter);
+	histSaver->SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
 	
 	PedFile->Close();
 }
@@ -4344,11 +4258,11 @@ void Clustering::EventMonitor(int CurrentEvent) {
 					histo_diamond->SetBinContent((int)Det_Channels[8][j],Dia_ADC[j]-Det_PedMean[8][j]);
 				}
 			}
-			SaveHistogram(histo_diamond);
+			histSaver->SaveHistogram(histo_diamond);
 //			histo_diamond->SetBinContent(si_x+1,clustered_event.GetCluster(2*det, 0)->GetNHits());
 		}
 
-		SaveHistogram(histo_clusters[det]);
+		histSaver->SaveHistogram(histo_clusters[det]);
 	}
 	
 	current_event++;

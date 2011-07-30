@@ -13,7 +13,7 @@
 
 #include "Cluster.class.cpp"
 #include "ClusteredEvent.class.cpp"
-#include "ChannelScreen.h"
+#include "ChannelScreen.hh"
 
 
 void ParseIntArray(string value, vector<int> &vec) {
