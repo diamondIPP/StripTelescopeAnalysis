@@ -17,6 +17,7 @@
 using namespace std;
 
 int main() {
+	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
 	cout << "starting main loop.." << endl;
 	initVariables();
 	RunListOK = ReadRunList();
@@ -119,7 +120,6 @@ void initVariables() {
 }
 
 int ReadRunList() {
-	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
 	RunInfo run;
 	char RunDescription[200];
 	int NEvents, Initial_Event;

@@ -41,6 +41,8 @@ using namespace TMath;
 #include "Cluster.class.cpp"
 #include "ClusteredEvent.class.cpp"
 #include "AlignmentClasses.h"
+#include "TDiamondTrack.hh"
+#include "TDetectorAlignment.hh"
 typedef unsigned int uint;
 
 class Clustering {
