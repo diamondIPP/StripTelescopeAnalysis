@@ -1,17 +1,5 @@
 //Diamond data ranges from 0 to 2^12=4096 while silicon data ranges from 0 to 2^8=256 so use short (16 bits)
-#include <iostream>
-
-class RawDetector {
-   public:
-      //functions
-      RawDetector();
-      ~RawDetector();
-      void SetADC(int channel, unsigned short adc);
-      unsigned short GetADC(Int_t channel);
-      
-   protected:
-      unsigned short raw_detector_data[256];
-};
+#include "RawDetector.class.hh"
 
 RawDetector::RawDetector() {}
 RawDetector::~RawDetector() {}

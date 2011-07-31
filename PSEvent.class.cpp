@@ -1,34 +1,6 @@
 //Class for storing pedestal subtracted adc and noise for each channel
 
-#ifndef __PSEvent__
-#define __PSEvent__
-
-#include "PSDetector.class.cpp"
-#include "Event_Classes.h" //Data Storage and Processing Events
-#include "TMath.h"
-#include "TObject.h"
-
-class PSEvent {//: public TObject {
-   public:
-      //functions
-      PSEvent();
-      ~PSEvent();
-      void SetDetector(Int_t det, TDetector_Data Detector, TPed_and_RMS *Pedestal);
-      PSDetector GetDetector(Int_t det);
-      bool CMN3Flag, CMN5Flag, ErrorFlag;
-      void SetStoreThreshold(float StoreThreshold) {store_threshold = StoreThreshold;};
-      void SetEventNumber(int EventNumber) {event_number = EventNumber;};
-      int GetEventNumber() {return event_number;};
-      
-   //protected:
-      float store_threshold;
-      int event_number;
-      PSDetector pedsub_detector_data[9]; // scheme for storing and retrieving detectors: (2*n+i) where n={0,1,2,3,4} is detector and i={0,1} is x or y component
-      
-      //ClassDef(PSEvent,1);
-};
-
-#endif
+#include "PSEvent.class.hh"
 
 PSEvent::PSEvent() {
    //clear flags
