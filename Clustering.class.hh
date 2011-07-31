@@ -41,7 +41,6 @@ using namespace TMath;
 #include "Cluster.class.hh"
 #include "ClusteredEvent.class.hh"
 #include "ChannelScreen.hh"
-#include "AlignmentClasses.h"
 #include "TDiamondTrack.hh"
 #include "TDetectorAlignment.hh"
 #include "HistogrammSaver.class.hh"

@@ -2,7 +2,7 @@
 //2010-07-11 Function wrapper for class SlidingPedestal
 //2010-07-21 Compiles now but runs at 1/10 speed with command: g++ -o PedestalAnalyze.exe PedestalAnalyze.cpp `root-config --cflags --glibs`
 
-#include "SlidingPedestal.class.cpp"
+#include "SlidingPedestal.class.hh"
 #include <sstream>
 #include <iostream>
 

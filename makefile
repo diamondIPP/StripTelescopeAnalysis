@@ -29,7 +29,7 @@ LDFLAGS         := -g $(LLABLDFLAGS) $(ROOTLIBS)
 
 LIBFILES		:=	HistogrammSaver.class.o ChannelScreen.o TDetectorPlane.o TDiamondTrack.o TDetectorAlignment.o 
 LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o Clustering.class.o TDetector_Data.o TTrigger_Event.o
-LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o
+LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o SlidingPedestal.class.o
 
 PROGS			:= diamondAnalysis
 

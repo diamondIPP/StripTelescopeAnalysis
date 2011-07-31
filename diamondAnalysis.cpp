@@ -7,7 +7,7 @@
 
 //#include "TROOT.h"
 //#include "Clustering.class.cpp"
-#include "SlidingPedestal.class.cpp"
+#include "SlidingPedestal.class.hh"
 #include "Clustering.class.hh"
 
 #include "diamondAnalysis.h"

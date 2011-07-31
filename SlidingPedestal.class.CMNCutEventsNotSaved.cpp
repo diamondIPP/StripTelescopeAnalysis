@@ -53,10 +53,10 @@ using namespace TMath;
 #include "TText.h"
 
 //Class and stuct definitions
-#include "Event_Classes.h" //Data Storage and Processing Events
+//#include "Event_Classes.h" //Data Storage and Processing Events
 //#include "PSEvent.class.cpp" //Pedestal Subtracted Data Saved in PSEvent Class
 #include "ChannelScreen.hh" //Channel Screen Class
-#include "SaveToFile.h" //Functions to save plots as .png, .C or .root files
+#include "HistogrammSaver.class.hh" //Functions to save plots as .png, .C or .root files
 #include "RZEvent.struct.cpp" //the header file that is connected to the Diamond/telescope data
 
 
@@ -1806,7 +1806,7 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
 	
          gSystem->ProcessEvents();
 		
-         SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisNoiseHistos[s]->GetName());
+         HistogrammSaver::SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisNoiseHistos[s]->GetName());
          delete SingleChannelAnalysisNoiseHistos[s];
          delete SingleChannelAnalysisCanvas;
 	
@@ -1820,7 +1820,7 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
 	
          gSystem->ProcessEvents();
 		
-         SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisPulseHeightHistos[s]->GetName());
+         HistogrammSaver::SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisPulseHeightHistos[s]->GetName());
          delete SingleChannelAnalysisPulseHeightHistos[s];
          delete SingleChannelAnalysisCanvas;
 	
@@ -1935,9 +1935,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(channel_noise_can, png_file_char, "Channel_Noise_Initial");
-      SaveCanvasC(channel_noise_can, C_file_char, "Channel_Noise_Initial");
-      SaveCanvasRoot(channel_noise_can, root_file_char, "Channel_Noise_Initial");
+      HistogrammSaver::SaveCanvasPNG(channel_noise_can, png_file_char, "Channel_Noise_Initial");
+      HistogrammSaver::SaveCanvasC(channel_noise_can, C_file_char, "Channel_Noise_Initial");
+      HistogrammSaver::SaveCanvasRoot(channel_noise_can, root_file_char, "Channel_Noise_Initial");
       if(ClosePlotsOnSave == 1)
       {
          delete channel_noise_can;
@@ -1955,9 +1955,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(channel_noise_fin_can, png_file_char, "Channel_Noise_Final");
-      SaveCanvasC(channel_noise_fin_can, C_file_char, "Channel_Noise_Final");
-      SaveCanvasRoot(channel_noise_fin_can, root_file_char, "Channel_Noise_Final");
+      HistogrammSaver::SaveCanvasPNG(channel_noise_fin_can, png_file_char, "Channel_Noise_Final");
+      HistogrammSaver::SaveCanvasC(channel_noise_fin_can, C_file_char, "Channel_Noise_Final");
+      HistogrammSaver::SaveCanvasRoot(channel_noise_fin_can, root_file_char, "Channel_Noise_Final");
       if(ClosePlotsOnSave == 1)
       {
          delete channel_noise_fin_can;
@@ -1976,9 +1976,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(channel_pedestal_values_can, png_file_char, "Pedestal_Values");
-      SaveCanvasC(channel_pedestal_values_can, C_file_char, "Pedestal_Values");
-      SaveCanvasRoot(channel_pedestal_values_can, root_file_char, "Pedestal_Values");
+      HistogrammSaver::SaveCanvasPNG(channel_pedestal_values_can, png_file_char, "Pedestal_Values");
+      HistogrammSaver::SaveCanvasC(channel_pedestal_values_can, C_file_char, "Pedestal_Values");
+      HistogrammSaver::SaveCanvasRoot(channel_pedestal_values_can, root_file_char, "Pedestal_Values");
       if(ClosePlotsOnSave == 1)
       {
          delete channel_pedestal_values_can;
@@ -2050,9 +2050,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
       if(SaveAllFilesSwitch == 1)
       {
          gSystem->ProcessEvents();
-         SaveCanvasPNG(channel_noise_can, png_file_char, (char*) ped_title.c_str());
-         SaveCanvasC(channel_noise_can, C_file_char, (char*) ped_title.c_str());
-         SaveCanvasRoot(channel_noise_can, root_file_char, (char*) ped_title.c_str());
+         HistogrammSaver::SaveCanvasPNG(channel_noise_can, png_file_char, (char*) ped_title.c_str());
+         HistogrammSaver::SaveCanvasC(channel_noise_can, C_file_char, (char*) ped_title.c_str());
+         HistogrammSaver::SaveCanvasRoot(channel_noise_can, root_file_char, (char*) ped_title.c_str());
          if(ClosePlotsOnSave == 1)
          {
             delete channel_noise_can;
@@ -2071,9 +2071,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(noise_can, png_file_char, "noise_can");
-      SaveCanvasC(noise_can, C_file_char, "noise_can");
-      SaveCanvasRoot(noise_can, root_file_char, "noise_can");
+      HistogrammSaver::SaveCanvasPNG(noise_can, png_file_char, "noise_can");
+      HistogrammSaver::SaveCanvasC(noise_can, C_file_char, "noise_can");
+      HistogrammSaver::SaveCanvasRoot(noise_can, root_file_char, "noise_can");
       if(ClosePlotsOnSave == 1)
       {
          delete noise_can;
@@ -2088,9 +2088,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(CMN_noise_can, png_file_char, "CMN_noise_can");
-      SaveCanvasC(CMN_noise_can, C_file_char, "CMN_noise_can");
-      SaveCanvasRoot(CMN_noise_can, root_file_char, "CMN_noise_can");
+      HistogrammSaver::SaveCanvasPNG(CMN_noise_can, png_file_char, "CMN_noise_can");
+      HistogrammSaver::SaveCanvasC(CMN_noise_can, C_file_char, "CMN_noise_can");
+      HistogrammSaver::SaveCanvasRoot(CMN_noise_can, root_file_char, "CMN_noise_can");
       if(ClosePlotsOnSave == 1)
       {
          delete CMN_noise_can;
@@ -2105,9 +2105,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(CMN_noise_saved_can, png_file_char, "CMN_noise_saved_can");
-      SaveCanvasC(CMN_noise_saved_can, C_file_char, "CMN_noise_saved_can");
-      SaveCanvasRoot(CMN_noise_saved_can, root_file_char, "CMN_noise_saved_can");
+      HistogrammSaver::SaveCanvasPNG(CMN_noise_saved_can, png_file_char, "CMN_noise_saved_can");
+      HistogrammSaver::SaveCanvasC(CMN_noise_saved_can, C_file_char, "CMN_noise_saved_can");
+      HistogrammSaver::SaveCanvasRoot(CMN_noise_saved_can, root_file_char, "CMN_noise_saved_can");
       if(ClosePlotsOnSave == 1)
       {
          delete CMN_noise_saved_can;
@@ -2122,9 +2122,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(hit_occup_can, png_file_char, "hit_occup_can_dia");
-      SaveCanvasC(hit_occup_can, C_file_char, "hit_occup_can_dia");
-      SaveCanvasRoot(hit_occup_can, root_file_char, "hit_occup_can_dia");
+      HistogrammSaver::SaveCanvasPNG(hit_occup_can, png_file_char, "hit_occup_can_dia");
+      HistogrammSaver::SaveCanvasC(hit_occup_can, C_file_char, "hit_occup_can_dia");
+      HistogrammSaver::SaveCanvasRoot(hit_occup_can, root_file_char, "hit_occup_can_dia");
       if(ClosePlotsOnSave == 1)
       {
          delete hit_occup_can;
@@ -2141,9 +2141,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(raw_ADC_can, png_file_char, "raw_ADC_by_event");
-      SaveCanvasC(raw_ADC_can, C_file_char, "raw_ADC_by_event");
-      SaveCanvasRoot(raw_ADC_can, root_file_char, "raw_ADC_by_event");
+      HistogrammSaver::SaveCanvasPNG(raw_ADC_can, png_file_char, "raw_ADC_by_event");
+      HistogrammSaver::SaveCanvasC(raw_ADC_can, C_file_char, "raw_ADC_by_event");
+      HistogrammSaver::SaveCanvasRoot(raw_ADC_can, root_file_char, "raw_ADC_by_event");
       if(ClosePlotsOnSave == 1)
       {
          delete raw_ADC_can;
@@ -2199,7 +2199,7 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(raw_ADC_graph_CMN_cut_can, png_file_char, "Raw_ADC_vs_Event_CMN_cut_zoom");
+      HistogrammSaver::SaveCanvasPNG(raw_ADC_graph_CMN_cut_can, png_file_char, "Raw_ADC_vs_Event_CMN_cut_zoom");
       if(ClosePlotsOnSave == 1)
       {
          delete raw_ADC_graph_CMN_cut_can;
@@ -2226,7 +2226,7 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(PS_ADC_graph_can, png_file_char, "PS_ADC_vs_Event_zoom");
+      HistogrammSaver::SaveCanvasPNG(PS_ADC_graph_can, png_file_char, "PS_ADC_vs_Event_zoom");
       if(ClosePlotsOnSave == 1)
       {
          delete PS_ADC_graph_can;
@@ -2247,9 +2247,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(PS_ADC_graph_CMNcut_can, png_file_char, "PS_ADC_graph_CMNcut_can");
-      SaveCanvasC(PS_ADC_graph_CMNcut_can, C_file_char, "PS_ADC_graph_CMNcut_can");
-      SaveCanvasRoot(PS_ADC_graph_CMNcut_can, root_file_char, "PS_ADC_graph_CMNcut_can");
+      HistogrammSaver::SaveCanvasPNG(PS_ADC_graph_CMNcut_can, png_file_char, "PS_ADC_graph_CMNcut_can");
+      HistogrammSaver::SaveCanvasC(PS_ADC_graph_CMNcut_can, C_file_char, "PS_ADC_graph_CMNcut_can");
+      HistogrammSaver::SaveCanvasRoot(PS_ADC_graph_CMNcut_can, root_file_char, "PS_ADC_graph_CMNcut_can");
       if(ClosePlotsOnSave == 1)
       {
          delete PS_ADC_graph_CMNcut_can;
@@ -2264,9 +2264,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(corr_dist_can, png_file_char, "corr_dist_can");
-      SaveCanvasC(corr_dist_can, C_file_char, "corr_dist_can");
-      SaveCanvasRoot(corr_dist_can, root_file_char, "corr_dist_can");
+      HistogrammSaver::SaveCanvasPNG(corr_dist_can, png_file_char, "corr_dist_can");
+      HistogrammSaver::SaveCanvasC(corr_dist_can, C_file_char, "corr_dist_can");
+      HistogrammSaver::SaveCanvasRoot(corr_dist_can, root_file_char, "corr_dist_can");
       if(ClosePlotsOnSave == 1)
       {
          delete corr_dist_can;
@@ -2281,9 +2281,9 @@ void SlidingPedestal::Slide(Int_t Event_Number, Int_t Initial_Event, Int_t hit_o
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(CMN_RMS_dist_can, png_file_char, "CMN_RMS_dist_can");
-      SaveCanvasC(CMN_RMS_dist_can, C_file_char, "CMN_RMS_dist_can");
-      SaveCanvasRoot(CMN_RMS_dist_can, root_file_char, "CMN_RMS_dist_can");
+      HistogrammSaver::SaveCanvasPNG(CMN_RMS_dist_can, png_file_char, "CMN_RMS_dist_can");
+      HistogrammSaver::SaveCanvasC(CMN_RMS_dist_can, C_file_char, "CMN_RMS_dist_can");
+      HistogrammSaver::SaveCanvasRoot(CMN_RMS_dist_can, root_file_char, "CMN_RMS_dist_can");
       if(ClosePlotsOnSave == 1)
       {
          delete CMN_RMS_dist_can;

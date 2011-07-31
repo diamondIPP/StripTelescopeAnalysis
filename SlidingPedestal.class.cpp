@@ -17,189 +17,7 @@
 //           NOTE: Realize that due to scrambling of the data (example 0x3615abcd written in header as 0x1536cdab) and realizing that both silicon and diamond data is written down as 4-byte words, detectors should be swapped as follows: 0->3, 1->2, 2->1, 0->3, 4->5, 5->4; the last two say that dia0->dia1 and dia1->dia0
 //           Reversed silicon plane order and exchanged diamond inputs
 //2010-09-02 Taylor's diagnostic plots added
-
-
-//C++ standard libraries
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cstring>
-#include <vector>
-#include <deque>
-using namespace std;
-
-//ROOT Class Headers
-#include "TTree.h"
-#include "TFile.h"
-#include "TCanvas.h"
-#include "TGraph.h"
-#include "TH1.h"
-#include "TH1F.h"
-#include "TH2F.h"
-#include "TF1.h"
-#include "TStyle.h"
-#include "TStopwatch.h"
-#include "TMath.h"
-using namespace TMath;
-#include "TGraph.h"
-#include "TROOT.h"
-#include "TSystem.h"
-#include "TImage.h"
-//#include "TROOT.h"
-#include "TDatime.h"
-#include "TObjArray.h"
-#include "TPaveLabel.h"
-#include "TPaveText.h"
-#include "TText.h"
-
-//Taylor
-#include "TMultiGraph.h"
-#include "TH2I.h"
-//AYSHA CHECK
-//Class and stuct definitions
-#include "TEvent_Array.hh"
-#include "TPed_and_RMS.hh"
-#include "TDetector_Data.hh"
-#include "TTrigger_Event.hh"
-//#include "Event_Classes.h" //Data Storage and Processing Events
-//#include "PSEvent.class.cpp" //Pedestal Subtracted Data Saved in PSEvent Class
-#include "ChannelScreen.hh" //Channel Screen Class
-#include "SaveToFile.h" //Functions to save plots as .png, .C or .root files
-#include "RZEvent.struct.cpp" //the header file that is connected to the Diamond/telescope data
-
-
-class SlidingPedestal {
-   public: 
-      //functions
-      SlidingPedestal(unsigned int RunNumber, string RunDescription = "");
-      ~SlidingPedestal();
-      void LoadSettings();
-      void ParseIntArray(string value, vector<int> &vec);
-      void SetDetector(Int_t det, TDetector_Data Detector, TPed_and_RMS *Pedestal);
-      void PedIteration(TH1F *hist, TEvent_Array *Event, TPed_and_RMS *array, Int_t channel, Float_t hit_factor);
-      void BufferFill(TDetector_Data &Anyf, TPed_and_RMS *ped, vector< deque<Int_t> > *buffer_deque, Int_t channel_number, Int_t deque_size, Float_t Hit, Int_t initial_event);
-      void RunningPedestal(TDetector_Data detector_buff, TPed_and_RMS initial, TPed_and_RMS *store, vector< deque<Int_t> > &buffer_deque, Int_t channel_number, Int_t deque_size, Float_t threshold_factor, Int_t *zeroRMS, Int_t event);
-      void RunningCommonMode(deque<Double_t> &CMN_deque, Double_t &CMN_Mean, Double_t &CMN_RMS, Double_t new_ave, Int_t deque_size, Int_t event, Int_t *zeroRMS);
-      void Hit_Occupancy(ChannelScreen screen, TH1F *occup, TDetector_Data detector_buffer, TPed_and_RMS *ped_store, Float_t RMS_factor, Int_t chan_begin, Int_t chan_end, Int_t const dia_offset);
-      void PedRMSCalcFromBuffer(vector< deque<Int_t> > &buffer_deque, TPed_and_RMS *ped_store);
-      void Slide(Int_t NEvents, Int_t Initial_Event = 1000, Int_t hit_occupancy = 0);
-      
-      /**** Endian functions for interpreting the rz data ****/
-      //This function swaps the endianess of the read in data for a signed 32-bit integer.
-      void endian_swap(int& x) { x = (x >> 24) | ((x<<8) & 0x00FF0000) | ((x>>8) & 0x0000FF00) | (x<<24); }
-      //This function is overloaded to swap the endianness of the read in data for an unsigned 32-bit integer.
-      void uendian_swap(unsigned int& x) { x = (x >> 24) | ((x<<8) & 0x00FF0000) | ((x>>8) & 0x0000FF00) | (x<<24); }
-      //This function swaps the endianess of the read in data for a signed 16-bit integer.
-      void short_endian_swap(short int& x) { x = (x>>8) | (x<<8); }
-      //This function swaps the endianness of the read in data for an unsigned 16-bit integer.
-      void ushort_endian_swap(unsigned short int& x) { x = (x>>8) | (x<<8); }
-      //Note: Char variables do not need an endian swap routine because endianness is only effected at the byte level, and since the char is only 1 byte, a swaping routine does nothing.
-      /********************Main Routine for Reading in Data, Swapping Endianness and Output ****/
-      int ReadRawEvent(int EventNumber, bool verbose = 0);
-      
-      
-   protected:
-      string current_rz_filename;
-      ifstream current_rz_file;
-      RZEvent TEvent;
-      TDetector_Data D0X, D0Y, D1X, D1Y, D2X, D2Y, D3X, D3Y, Dia0, Dia1;
-      //PSEvent PedSubEvent;
-      int run_number, event_number;
-      
-      //Code revision declarations (to avoid editing ClusterVar.h needlessly):
-      float fix_dia_noise; // fix_dia_noise<0 disables diamond noise-fixing
-      float store_threshold; // zero suppression to reduce amount of data stored
-      
-   private:
-      //settings
-      Int_t SaveAllFilesSwitch; //1 for save files, 0 for don't
-      Int_t ClosePlotsOnSave;
-      Int_t IndexProduceSwitch;
-      bool single_channel_analysis_enable; // enable channel noise analysis
-      Int_t single_channel_analysis_eventwindow; // Number of events to put in each histogram 
-      Int_t dia_input; // 0 for 2006 and 1 for the rest
-      Float_t Si_Pedestal_Hit_Factor;
-      Float_t Di_Pedestal_Hit_Factor;
-      /***Common Mode Noise Constraints***/
-      //Range of Corrected Events from
-      Int_t CMN_corr_low;
-      //to
-      Int_t CMN_corr_high;
-      // i.e. any event in between 4sigma and 7sigma will be corrected
-      //CMN Cut Factor
-      Int_t CMN_cut;  //Should be less than or equal to CMN_coor_high
-      Int_t Iter_Size; //buffer size
-      Int_t Taylor_speed_throttle; //# of events to recalculate RMS the old way; set to 1 to disable
-      
-      //Channels to Screen
-      vector<int> single_channel_analysis_channels;
-      
-      //Channels to Screen
-      vector<int> Det_channel_screen_channels[9];
-      vector<int> Det_channel_screen_regions[9];
-      ChannelScreen Det_channel_screen[9];
-      
-      //paths
-      string plots_path;
-      string png_file_char;
-      string C_file_char;
-      string root_file_char;
-      TSystem* sys;
-      string settings_file;
-      ostringstream plotspath;
-      ostringstream settingspath;
-      ostringstream pedfilepath;
-      
-      //event storage; written to pedtree
-      UInt_t Det_NChannels[9];
-      UChar_t Det_Channels[9][256];
-      UChar_t Det_ADC[8][256];
-      UShort_t Dia_ADC[256];
-      Float_t Det_PedMean[9][256];
-      Float_t Det_PedWidth[9][256];
-      bool CMNEvent_flag;
-      bool ZeroDivisorEvent_flag;
-
-      //Taylor's stuff
-      Int_t plotChannel_on; //make RMS Difference plot for all detectors, and Buffer Noise plots for D0X
-      Int_t plotDiamond; //make Buffer Noise plots for the diamond instead
-      Int_t makeBufferPlots; //make Buffer Plot whenever sigma and rms differ by rms_sigma_difference_cut
-      //NOTE: only works if plotChannel_on = 1 and plottedChannel < 256
-      Int_t SingleChannel2000plots; //make SC_Pedestal plots for all silicon detectors and channels
-      Int_t makeDiamondPlots; //make DC_Pedestal plots for all diamond channels
-      Int_t makeHits2D; //make 2D histogram of hits and seeds
-      Int_t makeNoise2D; //make 2D histogram of noise per channel
-      Int_t makePullDist; //make pull distribution
-      Int_t makePedRMSTree; //make .root file of pedestal and rms values
-      Int_t eventPrintHex; //print hex (should match .rz data)
-
-      UInt_t plottedChannel; //256 = enter channel on run. also, set to 256 and type 256 to turn off buffer noise plots
-      TH1F *hRMSDifference;
-      //const Int_t numberPlottedBufferNoiseHistos;
-      Int_t numberPlottedBufferNoiseHistos;
-      vector<TH1F*> hBufferNoise;
-      vector<int> plottedBufferEvents;
-      //Taylor, change #6 7/6
-
-      Int_t maxBufferPlots;
-      Int_t nBufferPlots; //counter
-      Float_t rms_sigma_difference_cut;
-      Int_t high_rms_cut; //cut on absolute rms value instead of comparing to Gaussian
-      Float_t rms_cut; //value to use if high_rms_cut
-      //deque<TH1F*> bufferPlotsDeque;
-
-      Int_t zoomDiamondPlots; //zoom in on DC_Pedestal (100 event / window)
-
-      Int_t singleTrack2D; //plot single tracks only in 2D hits histogram
-      Int_t singleTrack2DmaxClusterSize; //max size of clusters in silicon track (cluster = Di_Hit_Factor hits; no check for seeds/shoulders)
-
-      Float_t maxNoise2D; //highest noise value plotted in 2D noise histogram
-
-      TH1F *hPullDist[128];
-      //end Taylor's stuff
-};
-
+#include "SlidingPedestal.class.hh"
 
 SlidingPedestal::SlidingPedestal(unsigned int RunNumber, string RunDescription) {
    //Code revision declarations (to avoid editing ClusterVar.h needlessly):
@@ -2126,13 +1944,13 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 	  if (high_rms_cut) {
 	    if (current_rms > rms_cut || current_rms < -rms_cut) {
 	       gSystem->ProcessEvents();
-	       SaveCanvasPNG(BufferNoiseCanvas, png_file_char, (char*)currentBufferPlot->GetName());
+	       HistogrammSaver::SaveCanvasPNG(BufferNoiseCanvas, png_file_char, (char*)currentBufferPlot->GetName());
 	       //bufferPlotsDeque.push_back(currentBufferPlot); //doing something wrong here
 	       nBufferPlots++;
 	    }
 	  } else if (Abs((current_rms - current_sigma) / current_rms) > rms_sigma_difference_cut) {
 	       gSystem->ProcessEvents();
-	       SaveCanvasPNG(BufferNoiseCanvas, png_file_char, (char*)currentBufferPlot->GetName());
+	       HistogrammSaver::SaveCanvasPNG(BufferNoiseCanvas, png_file_char, (char*)currentBufferPlot->GetName());
 	       //bufferPlotsDeque.push_back(currentBufferPlot); //doing something wrong here
 	       nBufferPlots++;
 	  }
@@ -2597,7 +2415,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 	
          gSystem->ProcessEvents();
 		
-         SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisNoiseHistos[s]->GetName());
+         HistogrammSaver::SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisNoiseHistos[s]->GetName());
          delete SingleChannelAnalysisNoiseHistos[s];
          delete SingleChannelAnalysisCanvas;
 	
@@ -2611,7 +2429,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 	
          gSystem->ProcessEvents();
 		
-         SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisPulseHeightHistos[s]->GetName());
+         HistogrammSaver::SaveCanvasPNG(SingleChannelAnalysisCanvas, png_file_char, (char*)SingleChannelAnalysisPulseHeightHistos[s]->GetName());
          delete SingleChannelAnalysisPulseHeightHistos[s];
          delete SingleChannelAnalysisCanvas;
 	
@@ -2726,9 +2544,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(channel_noise_can, png_file_char, "Channel_Noise_Initial");
-      SaveCanvasC(channel_noise_can, C_file_char, "Channel_Noise_Initial");
-      SaveCanvasRoot(channel_noise_can, root_file_char, "Channel_Noise_Initial");
+      HistogrammSaver::SaveCanvasPNG(channel_noise_can, png_file_char, "Channel_Noise_Initial");
+      //TODO: HistogrammSaver::SaveCanvasC(channel_noise_can,C_file_char,"Channel_Noise_Initial");
+      HistogrammSaver::SaveCanvasRoot(channel_noise_can, root_file_char, "Channel_Noise_Initial");
       if(ClosePlotsOnSave == 1)
       {
          delete channel_noise_can;
@@ -2746,9 +2564,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(channel_noise_fin_can, png_file_char, "Channel_Noise_Final");
-      SaveCanvasC(channel_noise_fin_can, C_file_char, "Channel_Noise_Final");
-      SaveCanvasRoot(channel_noise_fin_can, root_file_char, "Channel_Noise_Final");
+      HistogrammSaver::SaveCanvasPNG(channel_noise_fin_can, png_file_char, "Channel_Noise_Final");
+      //TODO:HistogrammSaver::SaveCanvasC(channel_noise_fin_can, C_file_char, "Channel_Noise_Final");
+      HistogrammSaver::SaveCanvasRoot(channel_noise_fin_can, root_file_char, "Channel_Noise_Final");
       if(ClosePlotsOnSave == 1)
       {
          delete channel_noise_fin_can;
@@ -2767,9 +2585,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(channel_pedestal_values_can, png_file_char, "Pedestal_Values");
-      SaveCanvasC(channel_pedestal_values_can, C_file_char, "Pedestal_Values");
-      SaveCanvasRoot(channel_pedestal_values_can, root_file_char, "Pedestal_Values");
+      HistogrammSaver::SaveCanvasPNG(channel_pedestal_values_can, png_file_char, "Pedestal_Values");
+      //TODO:HistogrammSaver::SaveCanvasC(channel_pedestal_values_can, C_file_char, "Pedestal_Values");
+      HistogrammSaver::SaveCanvasRoot(channel_pedestal_values_can, root_file_char, "Pedestal_Values");
       if(ClosePlotsOnSave == 1)
       {
          delete channel_pedestal_values_can;
@@ -2819,9 +2637,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       if(SaveAllFilesSwitch == 1)
       {
          gSystem->ProcessEvents();
-         SaveCanvasPNG(channel_pedestal_values_can, png_file_char, (char*) ped_title.c_str());
-         SaveCanvasC(channel_pedestal_values_can, C_file_char, (char*) ped_title.c_str());
-         SaveCanvasRoot(channel_pedestal_values_can, root_file_char, (char*) ped_title.c_str());
+         HistogrammSaver::SaveCanvasPNG(channel_pedestal_values_can, png_file_char, (char*) ped_title.c_str());
+         //TODO:HistogrammSaver::SaveCanvasC(channel_pedestal_values_can, C_file_char, (char*) ped_title.c_str());
+         HistogrammSaver::SaveCanvasRoot(channel_pedestal_values_can, root_file_char, (char*) ped_title.c_str());
          if(ClosePlotsOnSave == 1)
          {
             delete channel_pedestal_values_can;
@@ -2841,9 +2659,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       if(SaveAllFilesSwitch == 1)
       {
          gSystem->ProcessEvents();
-         SaveCanvasPNG(channel_noise_can, png_file_char, (char*) ped_title.c_str());
-         SaveCanvasC(channel_noise_can, C_file_char, (char*) ped_title.c_str());
-         SaveCanvasRoot(channel_noise_can, root_file_char, (char*) ped_title.c_str());
+         HistogrammSaver::SaveCanvasPNG(channel_noise_can, png_file_char, (char*) ped_title.c_str());
+         //TODO:HistogrammSaver::SaveCanvasC(channel_noise_can, C_file_char, (char*) ped_title.c_str());
+         HistogrammSaver::SaveCanvasRoot(channel_noise_can, root_file_char, (char*) ped_title.c_str());
          if(ClosePlotsOnSave == 1)
          {
             delete channel_noise_can;
@@ -2862,9 +2680,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(noise_can, png_file_char, "noise_can");
-      SaveCanvasC(noise_can, C_file_char, "noise_can");
-      SaveCanvasRoot(noise_can, root_file_char, "noise_can");
+      HistogrammSaver::SaveCanvasPNG(noise_can, png_file_char, "noise_can");
+      //TODO:HistogrammSaver::SaveCanvasC(noise_can, C_file_char, "noise_can");
+      HistogrammSaver::SaveCanvasRoot(noise_can, root_file_char, "noise_can");
       if(ClosePlotsOnSave == 1)
       {
          delete noise_can;
@@ -2879,9 +2697,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(CMN_noise_can, png_file_char, "CMN_noise_can");
-      SaveCanvasC(CMN_noise_can, C_file_char, "CMN_noise_can");
-      SaveCanvasRoot(CMN_noise_can, root_file_char, "CMN_noise_can");
+      HistogrammSaver::SaveCanvasPNG(CMN_noise_can, png_file_char, "CMN_noise_can");
+      //TODO:HistogrammSaver::SaveCanvasC(CMN_noise_can, C_file_char, "CMN_noise_can");
+      HistogrammSaver::SaveCanvasRoot(CMN_noise_can, root_file_char, "CMN_noise_can");
       if(ClosePlotsOnSave == 1)
       {
          delete CMN_noise_can;
@@ -2896,9 +2714,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(CMN_noise_saved_can, png_file_char, "CMN_noise_saved_can");
-      SaveCanvasC(CMN_noise_saved_can, C_file_char, "CMN_noise_saved_can");
-      SaveCanvasRoot(CMN_noise_saved_can, root_file_char, "CMN_noise_saved_can");
+      HistogrammSaver::SaveCanvasPNG(CMN_noise_saved_can, png_file_char, "CMN_noise_saved_can");
+      //TODO:HistogrammSaver::SaveCanvasC(CMN_noise_saved_can, C_file_char, "CMN_noise_saved_can");
+      HistogrammSaver::SaveCanvasRoot(CMN_noise_saved_can, root_file_char, "CMN_noise_saved_can");
       if(ClosePlotsOnSave == 1)
       {
          delete CMN_noise_saved_can;
@@ -2913,9 +2731,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(hit_occup_can, png_file_char, "hit_occup_can_dia");
-      SaveCanvasC(hit_occup_can, C_file_char, "hit_occup_can_dia");
-      SaveCanvasRoot(hit_occup_can, root_file_char, "hit_occup_can_dia");
+      HistogrammSaver::SaveCanvasPNG(hit_occup_can, png_file_char, "hit_occup_can_dia");
+      //TODO:HistogrammSaver::SaveCanvasC(hit_occup_can, C_file_char, "hit_occup_can_dia");
+      HistogrammSaver::SaveCanvasRoot(hit_occup_can, root_file_char, "hit_occup_can_dia");
       if(ClosePlotsOnSave == 1)
       {
          delete hit_occup_can;
@@ -2932,9 +2750,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(raw_ADC_can, png_file_char, "raw_ADC_by_event");
-      SaveCanvasC(raw_ADC_can, C_file_char, "raw_ADC_by_event");
-      SaveCanvasRoot(raw_ADC_can, root_file_char, "raw_ADC_by_event");
+      HistogrammSaver::SaveCanvasPNG(raw_ADC_can, png_file_char, "raw_ADC_by_event");
+      //TODO:HistogrammSaver::SaveCanvasC(raw_ADC_can, C_file_char, "raw_ADC_by_event");
+      HistogrammSaver::SaveCanvasRoot(raw_ADC_can, root_file_char, "raw_ADC_by_event");
       if(ClosePlotsOnSave == 1)
       {
          delete raw_ADC_can;
@@ -2956,14 +2774,14 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
 
-      SaveCanvasC(raw_ADC_graph_can, C_file_char, "Raw_ADC_vs_Event");
-      SaveCanvasRoot(raw_ADC_graph_can, root_file_char, "Raw_ADC_vs_Event");
+	   //TODO:HistogrammSaver::SaveCanvasC(raw_ADC_graph_can, C_file_char, "Raw_ADC_vs_Event");
+	   HistogrammSaver::SaveCanvasRoot(raw_ADC_graph_can, root_file_char, "Raw_ADC_vs_Event");
    }
    raw_ADC_by_event_graph->GetXaxis()->SetRangeUser(Initial_Event+500,Initial_Event+10500);
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(raw_ADC_graph_can, png_file_char, "Raw_ADC_vs_Event_zoom");
+      HistogrammSaver::SaveCanvasPNG(raw_ADC_graph_can, png_file_char, "Raw_ADC_vs_Event_zoom");
       if(ClosePlotsOnSave == 1)
       {
          delete raw_ADC_graph_can;
@@ -2983,14 +2801,14 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    RMS_threshold_by_event_graph_down->Draw("sameL");
    if(SaveAllFilesSwitch == 1)
    {
-      SaveCanvasC(raw_ADC_graph_CMN_cut_can, C_file_char, "Raw_ADC_vs_Event_CMN_cut");
-      SaveCanvasRoot(raw_ADC_graph_CMN_cut_can, root_file_char, "Raw_ADC_vs_Event_CMN_cut");
+	   //TODO:HistogrammSaver::SaveCanvasC(raw_ADC_graph_CMN_cut_can, C_file_char, "Raw_ADC_vs_Event_CMN_cut");
+	   HistogrammSaver::SaveCanvasRoot(raw_ADC_graph_CMN_cut_can, root_file_char, "Raw_ADC_vs_Event_CMN_cut");
    }
    raw_ADC_by_event_CMN_cut_graph->GetXaxis()->SetRangeUser(Initial_Event+500,Initial_Event+10500);
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(raw_ADC_graph_CMN_cut_can, png_file_char, "Raw_ADC_vs_Event_CMN_cut_zoom");
+      HistogrammSaver::SaveCanvasPNG(raw_ADC_graph_CMN_cut_can, png_file_char, "Raw_ADC_vs_Event_CMN_cut_zoom");
       if(ClosePlotsOnSave == 1)
       {
          delete raw_ADC_graph_CMN_cut_can;
@@ -3010,14 +2828,14 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    PS_RMS_threshold_by_event_graph_down->Draw("sameL");
    if(SaveAllFilesSwitch == 1)
    {
-      SaveCanvasC(PS_ADC_graph_can, C_file_char, "PS_ADC_vs_Event");
-      SaveCanvasRoot(PS_ADC_graph_can, root_file_char, "PS_ADC_vs_Event");
+	   //TODO:HistogrammSaver::SaveCanvasC(PS_ADC_graph_can, C_file_char, "PS_ADC_vs_Event");
+	   HistogrammSaver::SaveCanvasRoot(PS_ADC_graph_can, root_file_char, "PS_ADC_vs_Event");
    }
    PS_ADC_by_event_graph->GetXaxis()->SetRangeUser(Initial_Event+500,Initial_Event+10500);
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(PS_ADC_graph_can, png_file_char, "PS_ADC_vs_Event_zoom");
+      HistogrammSaver::SaveCanvasPNG(PS_ADC_graph_can, png_file_char, "PS_ADC_vs_Event_zoom");
       if(ClosePlotsOnSave == 1)
       {
          delete PS_ADC_graph_can;
@@ -3038,9 +2856,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(PS_ADC_graph_CMNcut_can, png_file_char, "PS_ADC_graph_CMNcut_can");
-      SaveCanvasC(PS_ADC_graph_CMNcut_can, C_file_char, "PS_ADC_graph_CMNcut_can");
-      SaveCanvasRoot(PS_ADC_graph_CMNcut_can, root_file_char, "PS_ADC_graph_CMNcut_can");
+      HistogrammSaver::SaveCanvasPNG(PS_ADC_graph_CMNcut_can, png_file_char, "PS_ADC_graph_CMNcut_can");
+      //TODO:HistogrammSaver::SaveCanvasC(PS_ADC_graph_CMNcut_can, C_file_char, "PS_ADC_graph_CMNcut_can");
+      HistogrammSaver::SaveCanvasRoot(PS_ADC_graph_CMNcut_can, root_file_char, "PS_ADC_graph_CMNcut_can");
       if(ClosePlotsOnSave == 1)
       {
          delete PS_ADC_graph_CMNcut_can;
@@ -3055,9 +2873,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(corr_dist_can, png_file_char, "corr_dist_can");
-      SaveCanvasC(corr_dist_can, C_file_char, "corr_dist_can");
-      SaveCanvasRoot(corr_dist_can, root_file_char, "corr_dist_can");
+      HistogrammSaver::SaveCanvasPNG(corr_dist_can, png_file_char, "corr_dist_can");
+      //TODO:HistogrammSaver::SaveCanvasC(corr_dist_can, C_file_char, "corr_dist_can");
+      HistogrammSaver::SaveCanvasRoot(corr_dist_can, root_file_char, "corr_dist_can");
       if(ClosePlotsOnSave == 1)
       {
          delete corr_dist_can;
@@ -3072,9 +2890,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
-      SaveCanvasPNG(CMN_RMS_dist_can, png_file_char, "CMN_RMS_dist_can");
-      SaveCanvasC(CMN_RMS_dist_can, C_file_char, "CMN_RMS_dist_can");
-      SaveCanvasRoot(CMN_RMS_dist_can, root_file_char, "CMN_RMS_dist_can");
+      HistogrammSaver::SaveCanvasPNG(CMN_RMS_dist_can, png_file_char, "CMN_RMS_dist_can");
+      //TODO:HistogrammSaver::SaveCanvasC(CMN_RMS_dist_can, C_file_char, "CMN_RMS_dist_can");
+      HistogrammSaver::SaveCanvasRoot(CMN_RMS_dist_can, root_file_char, "CMN_RMS_dist_can");
       if(ClosePlotsOnSave == 1)
       {
          delete CMN_RMS_dist_can;
@@ -3603,7 +3421,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
      gSystem->ProcessEvents();
 
-     SaveCanvasPNG(RMSDifferenceCanvas, png_file_char, "RMS_Difference_Histogram");
+     HistogrammSaver::SaveCanvasPNG(RMSDifferenceCanvas, png_file_char, "RMS_Difference_Histogram");
      delete hRMSDifference;
      delete RMSDifferenceCanvas;
 
@@ -3623,7 +3441,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
        gSystem->ProcessEvents();
        cout<<3609<<"\t";
 
-       SaveCanvasPNG(BufferNoiseCanvas, png_file_char, (char*)hBufferNoise[j]->GetName());
+       HistogrammSaver::SaveCanvasPNG(BufferNoiseCanvas, png_file_char, (char*)hBufferNoise[j]->GetName());
        cout<<3612<<"\t";
        delete hBufferNoise[j];
        cout<<3614<<"\t";
@@ -3681,7 +3499,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
        gSystem->ProcessEvents();
 
-       SaveCanvasPNG(DiamondChannelPedestalCanvas, png_file_char, (char*)DiamondChannelM[j]->GetName());
+       HistogrammSaver::SaveCanvasPNG(DiamondChannelPedestalCanvas, png_file_char, (char*)DiamondChannelM[j]->GetName());
        if (zoomDiamondPlots) {
          char DC_zoom[50];
          for (Int_t i = 0; i < Event_Number; i += 100) {
@@ -3693,7 +3511,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
            DiamondChannelM[j]->Draw("ALP");
            gSystem->ProcessEvents();
            sprintf(DC_zoom, "%s_%i", DiamondChannelM[j]->GetName(), 1500 + i);
-           SaveCanvasPNG(DiamondChannelPedestalCanvas, png_file_char, DC_zoom);
+           HistogrammSaver::SaveCanvasPNG(DiamondChannelPedestalCanvas, png_file_char, DC_zoom);
          }
        } // */
        //SaveCanvasPNG(DiamondChannelPedestalCanvas, png_file_char, (char*)DiamondChannelADC[j]->GetName());
@@ -3759,7 +3577,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
        gSystem->ProcessEvents();
 
        //SaveCanvasPNG(SingleChannelPedestalCanvas, png_file_char, (char*)SingleChannelPedestal[i][j]->GetName());
-       SaveCanvasPNG(SingleChannelPedestalCanvas, png_file_char, (char*)SingleChannelM[i][j]->GetName());
+       HistogrammSaver::SaveCanvasPNG(SingleChannelPedestalCanvas, png_file_char, (char*)SingleChannelM[i][j]->GetName());
 
        delete SingleChannelADC[i][j];
        delete SingleChannelPedestal[i][j];
@@ -3786,7 +3604,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
     Hits2D->Draw("colz");
     gSystem->ProcessEvents();
 
-    SaveCanvasPNG(Hits2DCanvas, png_file_char, (char*)Hits2D->GetName());
+    HistogrammSaver::SaveCanvasPNG(Hits2DCanvas, png_file_char, (char*)Hits2D->GetName());
     char H2D_zoom[50];
     for (Int_t i = 0; i < Event_Number; i += 100) {
       Hits2D->GetXaxis()->SetRangeUser(1500 + i, 1600 + i);
@@ -3794,7 +3612,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       Hits2D->Draw("colz");
       gSystem->ProcessEvents();
       sprintf(H2D_zoom, "%s_%i", Hits2D->GetName(), 1500 + i);
-      SaveCanvasPNG(Hits2DCanvas, png_file_char, H2D_zoom);
+      HistogrammSaver::SaveCanvasPNG(Hits2DCanvas, png_file_char, H2D_zoom);
     }
 
     delete Hits2D;
@@ -3810,7 +3628,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
     Noise2D->Draw("colz");
     gSystem->ProcessEvents();
 
-    SaveCanvasPNG(Noise2DCanvas, png_file_char, (char*)Noise2D->GetName());
+    HistogrammSaver::SaveCanvasPNG(Noise2DCanvas, png_file_char, (char*)Noise2D->GetName());
 
     delete Noise2D;
     delete Noise2DCanvas;
@@ -3848,7 +3666,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
        gSystem->ProcessEvents();
 
-       SaveCanvasPNG(PullDistCanvas, png_file_char, (char*)hPullDist[j]->GetName());
+       HistogrammSaver::SaveCanvasPNG(PullDistCanvas, png_file_char, (char*)hPullDist[j]->GetName());
 
        delete hPullDist[j];
        delete PullDistCanvas;
