@@ -9,7 +9,7 @@
 #define RAWEVENT_CLASS_HH_
 
 #include "RawDetector.class.hh"
-#include "RZEvent.struct.cpp"
+#include "RZEvent.struct.hh"
 
 class RawEvent {
    public:

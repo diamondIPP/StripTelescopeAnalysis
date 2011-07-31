@@ -57,7 +57,7 @@ using namespace TMath;
 #include "ChannelScreen.hh" //Channel Screen Class
 //#include "SaveToFile.h" //Functions to save plots as .png, .C or .root files
 #include "HistogrammSaver.class.hh"
-#include "RZEvent.struct.cpp" //the header file that is connected to the Diamond/telescope data
+#include "RZEvent.struct.hh" //the header file that is connected to the Diamond/telescope data
 
 
 class SlidingPedestal {
