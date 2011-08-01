@@ -23,6 +23,7 @@ using namespace std;
 #include "TFile.h"
 #include "TImage.h"
 #include "TObjArray.h"
+#include "TROOT.h"
 
 class HistogrammSaver {
 public:

@@ -18,6 +18,16 @@ HistogrammSaver::HistogrammSaver(int verbose) {
 	if(verbosity)cout<<"Created instance of HistogrammSaver"<<endl;
 	currentStyle= new TStyle("HistSaverStyle","HistSaverStyle");
 	currentStyle->SetPalette(1);
+	gROOT->SetStyle("Plain"); //General style (see TStyle)
+	gStyle->SetOptStat(111110); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
+	gStyle->SetOptFit(1111);  //Fit options to be displayed
+	gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
+	gStyle->SetPadRightMargin(0.15);
+	gStyle->SetPadTopMargin(0.15);
+	//gStyle->SetTitleColor(19,"");
+	gStyle->SetStatH(0.12); //Sets Height of Stats Box
+	gStyle->SetStatW(0.15); //Sets Width of Stats Box
+	gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
 }
 
 HistogrammSaver::~HistogrammSaver() {

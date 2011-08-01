@@ -42,5 +42,18 @@ class RawEvent {
       //RawSiliconDetector raw_si_detector_data[8]; // scheme for storing and retrieving detectors: (2*n+i) where n={0,1,2,3} is detector and i={0,1} is x or y component
       //RawDiamondDetector raw_di_detector_data[2]; // scheme for storing and retrieving detectors: (2*n+i) where n={0,1,2,3} is detector and i={0,1} is x or y component
       unsigned short raw_detector_data_chained_unflipped[4][512];
+
+   private:
+		UInt_t run_number;
+		UInt_t event_number;
+		Float_t store_threshold;
+		bool CMNEvent_flag;
+		bool ZeroDivisorEvent_flag;
+		UInt_t Det_NChannels[9];
+		UChar_t Det_Channels[9][256];
+		UChar_t Det_ADC[8][256];
+		UShort_t Dia_ADC[256];
+		Float_t Det_PedMean[9][256];
+		Float_t Det_PedWidth[9][256];
 };
 #endif /* RAWEVENT_CLASS_HH_ */

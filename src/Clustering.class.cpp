@@ -36,7 +36,7 @@
 #include "Clustering.class.hh"
 
 Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
-   
+   EventReader=NULL;
    //default general settings
    SaveAllFilesSwitch = 1; //1 for save files, 0 for don't
    ClosePlotsOnSave = 1;
@@ -44,7 +44,6 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    
    //default pedestal settings
    fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
-   store_threshold = 2;
    dia_input = 0; // 1 for 2006 and 0 for the rest
    Si_Pedestal_Hit_Factor = 5;
    Di_Pedestal_Hit_Factor = 5;
@@ -168,68 +167,10 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
       cerr << "PedTree not found!" << endl;
    }
       
-   cout << PedTree->GetEntries() << " events in PedTree " << endl;
-      
-   //Event Header Branches
-   PedTree->SetBranchAddress("RunNumber",&run_number);
-   PedTree->SetBranchAddress("EventNumber",&event_number);
-   PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
-   PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
-   PedTree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
-   
-   //Telescope Data Branches
-   PedTree->SetBranchAddress("D0X_NChannels",&Det_NChannels[0]);
-   PedTree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
-   PedTree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
-   PedTree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
-   PedTree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
-   PedTree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
-   PedTree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
-   PedTree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
-   PedTree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
-   PedTree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
-   PedTree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
-   PedTree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
-   PedTree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
-   PedTree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
-   PedTree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
-   PedTree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
-   PedTree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
-   PedTree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
-   PedTree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
-   PedTree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
-   PedTree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
-   PedTree->SetBranchAddress("D1Y_ADC",&Det_ADC[3]);
-   PedTree->SetBranchAddress("D2X_ADC",&Det_ADC[4]);
-   PedTree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
-   PedTree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
-   PedTree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
-   PedTree->SetBranchAddress("Dia_ADC",&Dia_ADC);
-   PedTree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
-   PedTree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
-   PedTree->SetBranchAddress("D1X_PedMean",&Det_PedMean[2]);
-   PedTree->SetBranchAddress("D1Y_PedMean",&Det_PedMean[3]);
-   PedTree->SetBranchAddress("D2X_PedMean",&Det_PedMean[4]);
-   PedTree->SetBranchAddress("D2Y_PedMean",&Det_PedMean[5]);
-   PedTree->SetBranchAddress("D3X_PedMean",&Det_PedMean[6]);
-   PedTree->SetBranchAddress("D3Y_PedMean",&Det_PedMean[7]);
-   PedTree->SetBranchAddress("Dia_PedMean",&Det_PedMean[8]);
-   PedTree->SetBranchAddress("D0X_PedWidth",&Det_PedWidth[0]);
-   PedTree->SetBranchAddress("D0Y_PedWidth",&Det_PedWidth[1]);
-   PedTree->SetBranchAddress("D1X_PedWidth",&Det_PedWidth[2]);
-   PedTree->SetBranchAddress("D1Y_PedWidth",&Det_PedWidth[3]);
-   PedTree->SetBranchAddress("D2X_PedWidth",&Det_PedWidth[4]);
-   PedTree->SetBranchAddress("D2Y_PedWidth",&Det_PedWidth[5]);
-   PedTree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
-   PedTree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
-   PedTree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
-   
+   EventReader = new TADCEventReader(PedTree);
+   cout << EventReader->GetEntries() << " events in EventReader " << endl;
    current_event = 0;
-   PedTree->GetEvent(current_event);
-   cout<< "Loaded first event in PedTree: "<<event_number<<endl;
-   cout<< "RunNumber is: "<<run_number<<endl;
-   cout<< "StoreThreshold is: "<<store_threshold<<endl;
-   
+
    //Determine which histos to make
    for(int cut=0; cut<2; cut++) histoswitch_dianoise[cut]=1; //if there's not a hit, fill the bin; second index: no fidcut, fidcut
    for(int det=0; det<9; det++) for(int hits=0; hits<11; hits++) for(int cut=0; cut<3; cut++) {
@@ -488,18 +429,6 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    counter_alignment_only_fidcut_tracks = 0;
    counter_alignment_tracks_zero_suppressed = 0;
    
-   //Setting Style Attributes for Plots (Starting with Plain style and then making custom adjustments)
-   gROOT->SetStyle("Plain"); //General style (see TStyle)
-   gStyle->SetOptStat(111110); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
-   gStyle->SetOptFit(1111);  //Fit options to be displayed
-   gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
-   gStyle->SetPadRightMargin(0.15);
-   gStyle->SetPadTopMargin(0.15);
-   //gStyle->SetTitleColor(19,"");
-   gStyle->SetStatH(0.12); //Sets Height of Stats Box
-   gStyle->SetStatW(0.15); //Sets Width of Stats Box
-   gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
-   
    //Plot Tag attached to all plots: Gives Run Number, Cut Threshold, Initial Number of Events, and Date/Time of Plot Creation
    char thresh1 [50];
    char datasetsize [50];
@@ -520,20 +449,10 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
 //   strcat(pthresh1,pspace);
    strcat(pthresh1,pdatasetsize);
    strcat(pthresh1,peventsinset);
-   std::ostringstream run_number_label;
-   run_number_label << "Run " << run_number;
-	std::ostringstream pthresh2;
-	pthresh2 << (int)PedTree->GetEntries() << " Events in Data Set";
-   pt = new TPaveText(0.07,0,0.22,0.10,"NDC");  //Normalized CoordinateSystem: Define with x1,y1 is left bottom of box text, x2,y2 is upper right of text box. Goes from 0,0 at bottom left corner of pad to 1,1 of upper right corner
-   pt->SetTextSize(0.0250);
-   pt->AddText(run_number_label.str().c_str());
-//   pt->AddText(pthresh1);
-	pt->AddText(pthresh2.str().c_str());
-   pt->AddText(dateandtime.AsSQLString());
-   pt->SetBorderSize(0); //Set Border to Zero
-   pt->SetFillColor(0); //Set Fill to White
+//   std::ostringstream run_number_label;
+
    histSaver= new HistogrammSaver(Verbosity);
-   histSaver->SetRunNumber(run_number);
+   histSaver->SetRunNumber(EventReader->run_number);
    histSaver->SetNumberOfEvents((unsigned int)PedTree->GetEntries());
    histSaver->SetPlotsPath(plots_path);
 }
@@ -619,10 +538,10 @@ void Clustering::LoadSettings() {
          cout << key.c_str() << " = " << value.c_str() << endl;
          fix_dia_noise = (int)strtod(value.c_str(),0);
       }
-      if(key=="store_threshold") {
+      /*if(key=="store_threshold") {//TODO It's needed in settings reader
          cout << key.c_str() << " = " << value.c_str() << endl;
-         store_threshold = (float)strtod(value.c_str(),0);
-      }
+        store_threshold = (float)strtod(value.c_str(),0);
+      }*/
       if(key=="CMN_cut") {
          cout << key.c_str() << " = " << value.c_str() << endl;
          CMN_cut = (int)strtod(value.c_str(),0);
@@ -874,6 +793,7 @@ void Clustering::ParseFloatArray(string value, vector<float> &vec) {
 //take current event and cluster
 void Clustering::ClusterEvent(bool verbose) {
    PedTree->GetEvent(current_event);
+   EventReader->GetEvent(current_event);
    if(verbose) cout<<endl<<endl;
    if(current_event%1000==0) cout<<"Clustering::ClusterEvent(): current_event = "<<current_event<<endl;
    
@@ -892,20 +812,21 @@ void Clustering::ClusterEvent(bool verbose) {
       
       //look for hits
       if(verbose) cout<<endl<<endl<<"Detector "<<det<<" hits: ";
-      for(int i=0; i<(int)Det_NChannels[det]; i++) {
-         if(det<8) if(Det_ADC[det][i]-Det_PedMean[det][i] > Si_Cluster_Hit_Factor*Det_PedWidth[det][i]) {
+      for(int i=0; i<(int)EventReader->Det_NChannels[det]; i++) {
+         if(det<8) if(EventReader->Det_ADC[det][i]-EventReader->Det_PedMean[det][i] > Si_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][i]) {
             hits.push_back(i);
             if(verbose) {
-               cout<<(int)Det_Channels[det][i];
-               if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])) cout<<"(masked)";
+               cout<<(int)EventReader->Det_Channels[det][i];
+               if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][i])) cout<<"(masked)";
                cout<<", ";
             }
          }
-         if(det==8) if(Dia_ADC[i]-Det_PedMean[det][i] > Di_Cluster_Hit_Factor*Det_PedWidth[det][i]) {
+         if(det==8) if(EventReader->Dia_ADC[i]-EventReader->Det_PedMean[det][i] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][i]) {
             hits.push_back(i);
             if(verbose) {
-               cout<<(int)Det_Channels[det][i];
-               if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])) cout<<"(masked)";
+               cout<<(int)EventReader->Det_Channels[det][i];
+               if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][i]))
+            	   cout<<"(masked)";
                cout<<", ";
             }
          }
@@ -913,7 +834,7 @@ void Clustering::ClusterEvent(bool verbose) {
       if(verbose) {
          cout<<endl<<"Channels screened: ";
          for(int i=0; i<256; i++) if(!Det_channel_screen[det].CheckChannel(i)) cout<<i<<", ";
-         cout<<endl<<hits.size()<<" hits found in "<<(int)Det_NChannels[det]<<" saved channels"<<endl;
+         cout<<endl<<hits.size()<<" hits found in "<<(int)EventReader->Det_NChannels[det]<<" saved channels"<<endl;
       }
       if(hits.size()==0) {
          if(verbose) cout<<"No hits found so skipping to next detector."<<endl;
@@ -933,14 +854,16 @@ void Clustering::ClusterEvent(bool verbose) {
       if(verbose) cout<<"after clear(): cluster.size()="<<cluster.size()<<" and cluster.size()="<<cluster.size()<<endl;
       previouschan=-1;
       for(uint i=0; i<hits.size(); i++) {
-         currentchan = Det_Channels[det][hits[i]];
+         currentchan = EventReader->Det_Channels[det][hits[i]];
          if(verbose) {
             if(hits[i]==-1) cout<<"examining hit "<<i<<" at channel index "<<hits[i]<<" or end of hits"<<endl;
             else {
                cout<<"examining hit "<<i<<" at channel index "<<hits[i]<<" or channel "<<currentchan<<" (";
-               if(det==8) currentchan_psadc = Dia_ADC[hits[i]]-Det_PedMean[det][hits[i]];
-               if(det<8) currentchan_psadc = Det_ADC[det][hits[i]]-Det_PedMean[det][hits[i]];
-               cout<<currentchan_psadc<<" psadc, "<<Det_PedWidth[det][hits[i]]<<" pedrms, "<<currentchan_psadc/Det_PedWidth[det][hits[i]]<<" snr)"<<endl;
+               if(det==8)
+            	   currentchan_psadc = EventReader->Dia_ADC[hits[i]]-EventReader->Det_PedMean[det][hits[i]];
+               if(det<8)
+            	   currentchan_psadc = EventReader->Det_ADC[det][hits[i]]-EventReader->Det_PedMean[det][hits[i]];
+               cout<<currentchan_psadc<<" psadc, "<<EventReader->Det_PedWidth[det][hits[i]]<<" pedrms, "<<currentchan_psadc/EventReader->Det_PedWidth[det][hits[i]]<<" snr)"<<endl;
             }
          }
          //build a cluster of hits
@@ -963,67 +886,71 @@ void Clustering::ClusterEvent(bool verbose) {
             peakchan_psadc=-5000;
             
             //require no masked channels adjacent to the cluster
-            if((int)Det_Channels[det][cluster[0]]==0 || (int)Det_Channels[det][cluster[cluster.size()-1]]==255) {
+            if((int)EventReader->Det_Channels[det][cluster[0]]==0 || (int)EventReader->Det_Channels[det][cluster[cluster.size()-1]]==255) {
                hasmasked = 1;
                if(verbose) cout<< "Cluster is up against edge of detector; flagging cluster as bad channel cluster." << endl;
             }
-            else if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][cluster[0]]-1)
-               || !Det_channel_screen[det].CheckChannel((int)Det_Channels[det][cluster[cluster.size()-1]]+1)) {
+            else if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][cluster[0]]-1)
+               || !Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][cluster[cluster.size()-1]]+1)) {
                hasmasked = 1; 
                if(verbose) cout<< "Channel(s) adjacent to the cluster is masked; flagging cluster as bad channel cluster." << endl;
             }
             
             for(uint j=0; j<cluster.size(); j++) {
                currentchan = cluster[j];
-               if(verbose) cout<<"cluster["<<j<<"]="<<cluster[j]<<" or channel "<<(int)Det_Channels[det][currentchan];
+               if(verbose) cout<<"cluster["<<j<<"]="<<cluster[j]<<" or channel "<<(int)EventReader->Det_Channels[det][currentchan];
                if(det<8) {
-                  currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
+                  currentchan_psadc = EventReader->Det_ADC[det][currentchan]-EventReader->Det_PedMean[det][currentchan];
                   //check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
                   if(cluster.size()>2) if(currentchan_psadc > peakchan_psadc) {
                      peakchan_psadc = currentchan_psadc;
                      peakchan = j;
                   }
                   //check for seed
-                  if(currentchan_psadc > Si_Cluster_Seed_Factor*Det_PedWidth[det][currentchan]) {
+                  if(currentchan_psadc > Si_Cluster_Seed_Factor*EventReader->Det_PedWidth[det][currentchan]) {
                      hasaseed=1; 
                      if(verbose) cout<<" is a seed";
-                     if(previousseed!=-1 && Det_Channels[det][currentchan]!=previousseed+1) {
+                     if(previousseed!=-1 && EventReader->Det_Channels[det][currentchan]!=previousseed+1) {
                         isgoldengate=1;
                         if(verbose) cout<<" (goldengate cluster)";
                      }
-                     else previousseed=Det_Channels[det][currentchan];
+                     else previousseed=EventReader->Det_Channels[det][currentchan];
                      //check to see if the hit saturated the adc
-                     if(Det_ADC[det][currentchan]>254) {
+                     if(EventReader->Det_ADC[det][currentchan]>254) {
                         hassaturated=1;
                         if(verbose) cout<<" (saturated adc)";
                      }
                   }
                   //require no masked hits in silicon
-                  if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked hit)";}
+                  if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][currentchan])) {
+                	  hasmasked=1; if(verbose) cout<< " (masked hit)";
+                  }
                }
                if(det==8) {
-                  currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+                  currentchan_psadc = EventReader->Dia_ADC[currentchan]-EventReader->Det_PedMean[det][currentchan];
                   //check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
                   if(cluster.size()>2) if(currentchan_psadc > peakchan_psadc) {
                      peakchan_psadc = currentchan_psadc;
                      peakchan = j;
                   }
                   //check for seed
-                  if(currentchan_psadc > Di_Cluster_Seed_Factor*Det_PedWidth[det][currentchan]) {
+                  if(currentchan_psadc > Di_Cluster_Seed_Factor*EventReader->Det_PedWidth[det][currentchan]) {
                      hasaseed=1; 
                      if(verbose) cout<<" is a seed";
-                     if(previousseed!=-1 && Det_Channels[det][currentchan]!=previousseed+1) {
+                     if(previousseed!=-1 && EventReader->Det_Channels[det][currentchan]!=previousseed+1) {
                         isgoldengate=1;
                         if(verbose) cout<<" (goldengate cluster)";
                      }
-                     else previousseed=Det_Channels[det][currentchan];
+                     else previousseed=EventReader->Det_Channels[det][currentchan];
                      //check to see if the hit saturated the adc
-                     if(Dia_ADC[currentchan]>4094) {
+                     if(EventReader->Dia_ADC[currentchan]>4094) {
                         hassaturated=1;
                         if(verbose) cout<<" (saturated adc)";
                      }
                      //require no masked seeds in diamond
-                     if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked seed)";}
+                     if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][currentchan])) {
+                    	 hasmasked=1; if(verbose) cout<< " (masked seed)";
+                     }
                   }
                }
                if(verbose) cout<<endl;
@@ -1035,20 +962,28 @@ void Clustering::ClusterEvent(bool verbose) {
                previouschan_psadc = peakchan_psadc;
                for(uint j=peakchan+1; j<cluster.size(); j++) {
                   currentchan = cluster[j];
-                  if(det<8) currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
-                  if(det==8) currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+                  if(det<8) currentchan_psadc = EventReader->Det_ADC[det][currentchan]-EventReader->Det_PedMean[det][currentchan];
+                  if(det==8) currentchan_psadc = EventReader->Dia_ADC[currentchan]-EventReader->Det_PedMean[det][currentchan];
                   if(verbose) cout<<"LumpyClusterCheck: clusterhit="<<j<<"\tchanindex="<<currentchan<<"\tcurrentchan_psadc="<<currentchan_psadc<<"\tpreviouschan_psadc="<<previouschan_psadc<<endl;
-                  if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)Det_Channels[det][currentchan]<<")"<<endl;}
+                  if(currentchan_psadc>previouschan_psadc) {
+                	  islumpy = 1;
+                	  if(verbose)
+                		  cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)EventReader->Det_Channels[det][currentchan]<<")"<<endl;
+                  }
                   previouschan_psadc = currentchan_psadc;
                }
                //now scan left of peak to see if monotonically decreasing
                previouschan_psadc = peakchan_psadc;
                for(int j=peakchan-1; j>=0; j--) {
                   currentchan = cluster[j];
-                  if(det<8) currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
-                  if(det==8) currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+                  if(det<8) currentchan_psadc = EventReader->Det_ADC[det][currentchan]-EventReader->Det_PedMean[det][currentchan];
+                  if(det==8) currentchan_psadc = EventReader->Dia_ADC[currentchan]-EventReader->Det_PedMean[det][currentchan];
                   if(verbose) cout<<"LumpyClusterCheck: clusterhit="<<j<<"\tchanindex="<<currentchan<<"\tcurrentchan_psadc="<<currentchan_psadc<<"\tpreviouschan_psadc="<<previouschan_psadc<<endl;
-                  if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)Det_Channels[det][currentchan]<<")"<<endl;}
+                  if(currentchan_psadc>previouschan_psadc) {
+                	  islumpy = 1;
+                	  if(verbose)
+                		  cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)EventReader->Det_Channels[det][currentchan]<<")"<<endl;
+                  }
                   previouschan_psadc = currentchan_psadc;
                }
             }
@@ -1098,14 +1033,15 @@ void Clustering::ClusterEvent(bool verbose) {
             for(uint j=0; j<clusters[i].size(); j++) { //save each cluster one channel at a time
                currentchan = clusters[i][j];
                if(det<8) {
-                  current_cluster->AddHit(Det_Channels[det][currentchan], Det_ADC[det][currentchan], Det_PedMean[det][currentchan], Det_PedWidth[det][currentchan]);
-                  current_psadc = Det_ADC[det][currentchan] - Det_PedMean[det][currentchan];
+                  current_cluster->AddHit(EventReader->Det_Channels[det][currentchan], EventReader->Det_ADC[det][currentchan], EventReader->Det_PedMean[det][currentchan], EventReader->Det_PedWidth[det][currentchan]);
+                  current_psadc = EventReader->Det_ADC[det][currentchan] - EventReader->Det_PedMean[det][currentchan];
                }
                if(det==8) {
-                  current_cluster->AddHit(Det_Channels[det][currentchan], Dia_ADC[currentchan], Det_PedMean[det][currentchan], Det_PedWidth[det][currentchan]);
-                  current_psadc = Dia_ADC[currentchan] - Det_PedMean[det][currentchan];
+                  current_cluster->AddHit(EventReader->Det_Channels[det][currentchan], EventReader->Dia_ADC[currentchan], EventReader->Det_PedMean[det][currentchan], EventReader->Det_PedWidth[det][currentchan]);
+                  current_psadc = EventReader->Dia_ADC[currentchan] - EventReader->Det_PedMean[det][currentchan];
                }
-               if(verbose) cout<<"Detector "<<det<<": cluster_saved/all_clusters="<<i+1<<"/"<<clusters.size()<<"\tchan_to_save="<<j+1<<"/"<<clusters[i].size()<<"\tcurrentchan="<<(int)Det_Channels[det][currentchan]<<endl;
+               if(verbose)
+            	   cout<<"Detector "<<det<<": cluster_saved/all_clusters="<<i+1<<"/"<<clusters.size()<<"\tchan_to_save="<<j+1<<"/"<<clusters[i].size()<<"\tcurrentchan="<<(int)EventReader->Det_Channels[det][currentchan]<<endl;
                //locate highest seed
                if(current_psadc>highest_psadc) {
                   highest_index = currentchan;
@@ -1113,16 +1049,16 @@ void Clustering::ClusterEvent(bool verbose) {
                }
             }//end loop over channels in a cluster to save
             //check which channel has next highest psadc
-            if(highest_index<(int)Det_NChannels[det]-1) if(Det_Channels[det][highest_index+1]==Det_Channels[det][highest_index]+1 && Det_channel_screen[det].CheckChannel(Det_Channels[det][highest_index+1])) {
+            if(highest_index<(int)EventReader->Det_NChannels[det]-1) if(EventReader->Det_Channels[det][highest_index+1]==EventReader->Det_Channels[det][highest_index]+1 && Det_channel_screen[det].CheckChannel(EventReader->Det_Channels[det][highest_index+1])) {
                //first if the next channel is available and an ok channel, just assume it has the nexthighest_psadc
                nexthighest_index = highest_index+1;
-               if(det==8) nexthighest_psadc = Dia_ADC[nexthighest_index] - Det_PedMean[det][nexthighest_index];
-               else nexthighest_psadc = Det_ADC[det][nexthighest_index] - Det_PedMean[det][nexthighest_index]; 
+               if(det==8) nexthighest_psadc = EventReader->Dia_ADC[nexthighest_index] - EventReader->Det_PedMean[det][nexthighest_index];
+               else nexthighest_psadc = EventReader->Det_ADC[det][nexthighest_index] - EventReader->Det_PedMean[det][nexthighest_index];
             }
-            if(highest_index>0) if(Det_Channels[det][highest_index-1]==Det_Channels[det][highest_index]-1 && Det_channel_screen[det].CheckChannel(Det_Channels[det][highest_index-1])) {
+            if(highest_index>0) if(EventReader->Det_Channels[det][highest_index-1]==EventReader->Det_Channels[det][highest_index]-1 && Det_channel_screen[det].CheckChannel(EventReader->Det_Channels[det][highest_index-1])) {
                //now if the previous channel is available and an ok channel, check whether it has a higher psadc than the next one
-               if(det==8) current_psadc = Dia_ADC[highest_index-1] - Det_PedMean[det][highest_index-1];
-               else current_psadc = Det_ADC[det][highest_index-1] - Det_PedMean[det][highest_index-1];
+               if(det==8) current_psadc = EventReader->Dia_ADC[highest_index-1] - EventReader->Det_PedMean[det][highest_index-1];
+               else current_psadc = EventReader->Det_ADC[det][highest_index-1] - EventReader->Det_PedMean[det][highest_index-1];
                if(current_psadc>nexthighest_psadc) {
                   nexthighest_index = highest_index-1;
                   nexthighest_psadc = current_psadc;
@@ -1135,7 +1071,7 @@ void Clustering::ClusterEvent(bool verbose) {
                else current_cluster->SetEta(nexthighest_psadc/(highest_psadc+nexthighest_psadc));
                
                //centroid
-               current_cluster->highest2_centroid=(Det_Channels[det][highest_index]*highest_psadc+Det_Channels[det][nexthighest_index]*nexthighest_psadc)/(highest_psadc+nexthighest_psadc);
+               current_cluster->highest2_centroid=(EventReader->Det_Channels[det][highest_index]*highest_psadc+EventReader->Det_Channels[det][nexthighest_index]*nexthighest_psadc)/(highest_psadc+nexthighest_psadc);
                
                /*
                if(totalsurviving_events%1000==0) {
@@ -1180,20 +1116,20 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 		
 		// -- loop over channels and look for seeds
 		if (verbose) cout << endl << endl << "Detector " << det << " seeds: ";
-		for (int i = 0; i < (int)Det_NChannels[det]; i++) {
-			if (det < 8 && Det_ADC[det][i]-Det_PedMean[det][i] > Si_Cluster_Seed_Factor*Det_PedWidth[det][i]) {
+		for (int i = 0; i < (int)EventReader->Det_NChannels[det]; i++) {
+			if (det < 8 && EventReader->Det_ADC[det][i]-EventReader->Det_PedMean[det][i] > Si_Cluster_Seed_Factor*EventReader->Det_PedWidth[det][i]) {
 				seeds.push_back(i);
 				if (verbose) {
-					cout<<(int)Det_Channels[det][i];
-					if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])) cout<<"(masked)";
+					cout<<(int)EventReader->Det_Channels[det][i];
+					if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][i])) cout<<"(masked)";
 					cout<<", ";
 				}
 			}
-			if (det == 8 && Dia_ADC[i]-Det_PedMean[det][i] > Di_Cluster_Seed_Factor*Det_PedWidth[det][i]) {
+			if (det == 8 && EventReader->Dia_ADC[i]-EventReader->Det_PedMean[det][i] > Di_Cluster_Seed_Factor*EventReader->Det_PedWidth[det][i]) {
 				seeds.push_back(i);
 				if (verbose) {
-					cout<<(int)Det_Channels[det][i];
-					if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])) cout<<"(masked)";
+					cout<<(int)EventReader->Det_Channels[det][i];
+					if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][i])) cout<<"(masked)";
 					cout<<", ";
 				}
 			}
@@ -1240,29 +1176,29 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 			if (det < 8) {
 				// look for first hit of cluster
 				first_hit = seeds[i];
-				for (int j = seeds[i]-1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j] && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] == 1; j--) {
+				for (int j = seeds[i]-1; j >= 0 && EventReader->Det_ADC[det][j]-EventReader->Det_PedMean[det][j] > Si_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j] && (int)EventReader->Det_Channels[det][j]-(int)EventReader->Det_Channels[det][j-1] == 1; j--) {
 					first_hit = j;
 				}
 				
 				// look for last hit of cluster and write hits to cluster
-				for (int j = first_hit; j < (int)Det_NChannels[det] && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
-					if (cluster.size() > 0 && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] != 1) break;
+				for (int j = first_hit; j < (int)EventReader->Det_NChannels[det] && EventReader->Det_ADC[det][j]-EventReader->Det_PedMean[det][j] > Si_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j]; j++) {
+					if (cluster.size() > 0 && (int)EventReader->Det_Channels[det][j]-(int)EventReader->Det_Channels[det][j-1] != 1) break;
 					cluster.push_back(j);
 					cluster_channels.push_back(j);
 				}
 				
 				
-/*				for (int j = seeds[i]-1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+/*				for (int j = seeds[i]-1; j >= 0 && EventReader->Det_ADC[det][j]-EventReader->Det_PedMean[det][j] > Si_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j]; j--) {
 					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
 						cluster.push_back(j);
-						if (Det_ADC[det][j]-Det_PedMean[det][j] > Det_ADC[det][j+1]-Det_PedMean[det][j+1])
+						if (EventReader->Det_ADC[det][j]-EventReader->Det_PedMean[det][j] > EventReader->Det_ADC[det][j+1]-EventReader->Det_PedMean[det][j+1])
 							islumpy = 1;
 					}
 				}
-				for (int j = seeds[i]+1; j >= 0 && Det_ADC[det][j]-Det_PedMean[det][j] > Si_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+				for (int j = seeds[i]+1; j >= 0 && EventReader->Det_ADC[det][j]-EventReader->Det_PedMean[det][j] > Si_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j]; j++) {
 					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
 						cluster.push_back(j);
-						if (Det_ADC[det][j]-Det_PedMean[det][j] > Det_ADC[det][j-1]-Det_PedMean[det][j-1])
+						if (EventReader->Det_ADC[det][j]-EventReader->Det_PedMean[det][j] > EventReader->Det_ADC[det][j-1]-EventReader->Det_PedMean[det][j-1])
 							islumpy = 1;
 					}
 				}*/
@@ -1270,29 +1206,29 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 			if (det == 8) {
 				// look for first hit of the cluster
 				first_hit = seeds[i];
-				for (int j = seeds[i]-1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j] && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] == 1; j--) {
+				for (int j = seeds[i]-1; j >= 0 && EventReader->Dia_ADC[j]-EventReader->Det_PedMean[det][j] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j] && (int)EventReader->Det_Channels[det][j]-(int)EventReader->Det_Channels[det][j-1] == 1; j--) {
 					first_hit = j;
 				}
 				
 				// look for last hit of cluster and write hits to cluster
-				for (int j = first_hit; j < (int)Det_NChannels[det] && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
-					if (cluster.size() > 0 && (int)Det_Channels[det][j]-(int)Det_Channels[det][j-1] != 1) break;
+				for (int j = first_hit; j < (int)EventReader->Det_NChannels[det] && EventReader->Dia_ADC[j]-EventReader->Det_PedMean[det][j] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j]; j++) {
+					if (cluster.size() > 0 && (int)EventReader->Det_Channels[det][j]-(int)EventReader->Det_Channels[det][j-1] != 1) break;
 					cluster.push_back(j);
 					cluster_channels.push_back(j);
 				}
 				
 				
-/*				for (int j = seeds[i]-1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j--) {
+/*				for (int j = seeds[i]-1; j >= 0 && EventReader->Dia_ADC[j]-EventReader->Det_PedMean[det][j] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j]; j--) {
 					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
 						cluster.push_back(j);
-						if (Dia_ADC[j]-Det_PedMean[det][j] > Dia_ADC[j+1]-Det_PedMean[det][j+1])
+						if (EventReader->Dia_ADC[j]-EventReader->Det_PedMean[det][j] > EventReader->Dia_ADC[j+1]-EventReader->Det_PedMean[det][j+1])
 							islumpy = 1;
 					}
 				}
-				for (int j = seeds[i]+1; j >= 0 && Dia_ADC[j]-Det_PedMean[det][j] > Di_Cluster_Hit_Factor*Det_PedWidth[det][j]; j++) {
+				for (int j = seeds[i]+1; j >= 0 && EventReader->Dia_ADC[j]-EventReader->Det_PedMean[det][j] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][j]; j++) {
 					if (find(cluster_channels.begin(), cluster_channels.end(), j) == cluster_channels.end()) {
 						cluster.push_back(j);
-						if (Dia_ADC[j]-Det_PedMean[det][j] > Dia_ADC[j-1]-Det_PedMean[det][j-1])
+						if (EventReader->Dia_ADC[j]-EventReader->Det_PedMean[det][j] > EventReader->Dia_ADC[j-1]-EventReader->Det_PedMean[det][j-1])
 							islumpy = 1;
 					}
 				}*/
@@ -1300,12 +1236,12 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 			if (cluster.size() > 0) {
 				
 				//require no masked channels adjacent to the cluster
-				if((int)Det_Channels[det][cluster[0]]==0 || (int)Det_Channels[det][cluster[cluster.size()-1]]==255) {
+				if((int)EventReader->Det_Channels[det][cluster[0]]==0 || (int)EventReader->Det_Channels[det][cluster[cluster.size()-1]]==255) {
 					hasmasked = 1;
 					if(verbose) cout<< "Cluster is up against edge of detector; flagging cluster as bad channel cluster." << endl;
 				}
-				else if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][cluster[0]]-1)
-						|| !Det_channel_screen[det].CheckChannel((int)Det_Channels[det][cluster[cluster.size()-1]]+1)) {
+				else if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][cluster[0]]-1)
+						|| !Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][cluster[cluster.size()-1]]+1)) {
 					hasmasked = 1; 
 					if(verbose) cout<< "Channel(s) adjacent to the cluster is masked; flagging cluster as bad channel cluster." << endl;
 				}
@@ -1313,9 +1249,9 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 				// -- look for peak, ckeck golden gate, check saturation and require no masked hits in silicon
 				for(uint j=0; j<cluster.size(); j++) {
 					currentchan = cluster[j];
-					if(verbose) cout<<"cluster["<<j<<"]="<<cluster[j]<<" or channel "<<(int)Det_Channels[det][currentchan];
+					if(verbose) cout<<"cluster["<<j<<"]="<<cluster[j]<<" or channel "<<(int)EventReader->Det_Channels[det][currentchan];
 					if(det<8) {
-						currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
+						currentchan_psadc = EventReader->Det_ADC[det][currentchan]-EventReader->Det_PedMean[det][currentchan];
 						
 						//check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
 //						if(cluster.size()>2) {
@@ -1326,26 +1262,26 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 //						}
 						
 						// check for golden gate
-						if(currentchan_psadc > Si_Cluster_Seed_Factor*Det_PedWidth[det][currentchan]) {
+						if(currentchan_psadc > Si_Cluster_Seed_Factor*EventReader->Det_PedWidth[det][currentchan]) {
 							if(verbose) cout<<" is a seed";
-							if(previousseed!=-1 && Det_Channels[det][currentchan]!=previousseed+1) {
+							if(previousseed!=-1 && EventReader->Det_Channels[det][currentchan]!=previousseed+1) {
 								isgoldengate=1;
 								if(verbose) cout<<" (goldengate cluster)";
 							}
-							previousseed=Det_Channels[det][currentchan];
+							previousseed=EventReader->Det_Channels[det][currentchan];
 						}
 						
 						//check to see if the hit saturated the adc
-						if(Det_ADC[det][currentchan]>254) {
+						if(EventReader->Det_ADC[det][currentchan]>254) {
 							hassaturated=1;
 							if(verbose) cout<<" (saturated adc)";
 						}
 						
 						//require no masked hits in silicon
-						if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked hit)";}
+						if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked hit)";}
 					}
 					if(det==8) {
-						currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+						currentchan_psadc = EventReader->Dia_ADC[currentchan]-EventReader->Det_PedMean[det][currentchan];
 						
 						//check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
 //						if(cluster.size()>2)
@@ -1355,19 +1291,19 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 						}
 						
 						//check for golden gate
-						if(currentchan_psadc > Di_Cluster_Seed_Factor*Det_PedWidth[det][currentchan]) {
+						if(currentchan_psadc > Di_Cluster_Seed_Factor*EventReader->Det_PedWidth[det][currentchan]) {
 							if(verbose) cout<<" is a seed";
-							if(previousseed!=-1 && Det_Channels[det][currentchan]!=previousseed+1) {
+							if(previousseed!=-1 && EventReader->Det_Channels[det][currentchan]!=previousseed+1) {
 								isgoldengate=1;
 								if(verbose) cout<<" (goldengate cluster)";
 							}
-							previousseed=Det_Channels[det][currentchan];
+							previousseed=EventReader->Det_Channels[det][currentchan];
 							//require no masked seeds in diamond
-							if(!Det_channel_screen[det].CheckChannel((int)Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked seed)";}
+							if(!Det_channel_screen[det].CheckChannel((int)EventReader->Det_Channels[det][currentchan])) {hasmasked=1; if(verbose) cout<< " (masked seed)";}
 						}
 						
 						//check to see if the hit saturated the adc
-						if(Dia_ADC[currentchan]>4094) {
+						if(EventReader->Dia_ADC[currentchan]>4094) {
 							hassaturated=1;
 							if(verbose) cout<<" (saturated adc)";
 						}
@@ -1382,20 +1318,20 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 					previouschan_psadc = peakchan_psadc;
 					for(uint j=peakchan+1; j<cluster.size(); j++) {
 						currentchan = cluster[j];
-						if(det<8) currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
-						if(det==8) currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+						if(det<8) currentchan_psadc = EventReader->Det_ADC[det][currentchan]-EventReader->Det_PedMean[det][currentchan];
+						if(det==8) currentchan_psadc = EventReader->Dia_ADC[currentchan]-EventReader->Det_PedMean[det][currentchan];
 						if(verbose) cout<<"LumpyClusterCheck: clusterhit="<<j<<"\tchanindex="<<currentchan<<"\tcurrentchan_psadc="<<currentchan_psadc<<"\tpreviouschan_psadc="<<previouschan_psadc<<endl;
-						if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)Det_Channels[det][currentchan]<<")"<<endl;}
+						if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)EventReader->Det_Channels[det][currentchan]<<")"<<endl;}
 						previouschan_psadc = currentchan_psadc;
 					}
 					//now scan left of peak to see if monotonically decreasing
 					previouschan_psadc = peakchan_psadc;
 					for(int j=peakchan-1; j>=0; j--) {
 						currentchan = cluster[j];
-						if(det<8) currentchan_psadc = Det_ADC[det][currentchan]-Det_PedMean[det][currentchan];
-						if(det==8) currentchan_psadc = Dia_ADC[currentchan]-Det_PedMean[det][currentchan];
+						if(det<8) currentchan_psadc = EventReader->Det_ADC[det][currentchan]-EventReader->Det_PedMean[det][currentchan];
+						if(det==8) currentchan_psadc = EventReader->Dia_ADC[currentchan]-EventReader->Det_PedMean[det][currentchan];
 						if(verbose) cout<<"LumpyClusterCheck: clusterhit="<<j<<"\tchanindex="<<currentchan<<"\tcurrentchan_psadc="<<currentchan_psadc<<"\tpreviouschan_psadc="<<previouschan_psadc<<endl;
-						if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)Det_Channels[det][currentchan]<<")"<<endl;}
+						if(currentchan_psadc>previouschan_psadc) {islumpy = 1; if(verbose) cout<<"LumpyClusterCheck: Cluster is lumpy (clusterhit "<<j<<", index "<<currentchan<<", or chan "<<(int)EventReader->Det_Channels[det][currentchan]<<")"<<endl;}
 						previouschan_psadc = currentchan_psadc;
 					}
 				}
@@ -1438,14 +1374,14 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 				for(uint j=0; j<clusters[i].size(); j++) { //save each cluster one channel at a time
 					currentchan = clusters[i][j];
 					if(det<8) {
-						current_cluster->AddHit(Det_Channels[det][currentchan], Det_ADC[det][currentchan], Det_PedMean[det][currentchan], Det_PedWidth[det][currentchan]);
-						current_psadc = Det_ADC[det][currentchan] - Det_PedMean[det][currentchan];
+						current_cluster->AddHit(EventReader->Det_Channels[det][currentchan], EventReader->Det_ADC[det][currentchan], EventReader->Det_PedMean[det][currentchan], EventReader->Det_PedWidth[det][currentchan]);
+						current_psadc = EventReader->Det_ADC[det][currentchan] - EventReader->Det_PedMean[det][currentchan];
 					}
 					if(det==8) {
-						current_cluster->AddHit(Det_Channels[det][currentchan], Dia_ADC[currentchan], Det_PedMean[det][currentchan], Det_PedWidth[det][currentchan]);
-						current_psadc = Dia_ADC[currentchan] - Det_PedMean[det][currentchan];
+						current_cluster->AddHit(EventReader->Det_Channels[det][currentchan], EventReader->Dia_ADC[currentchan], EventReader->Det_PedMean[det][currentchan], EventReader->Det_PedWidth[det][currentchan]);
+						current_psadc = EventReader->Dia_ADC[currentchan] - EventReader->Det_PedMean[det][currentchan];
 					}
-					if(verbose) cout<<"Detector "<<det<<": cluster_saved/all_clusters="<<i+1<<"/"<<clusters.size()<<"\tchan_to_save="<<j+1<<"/"<<clusters[i].size()<<"\tcurrentchan="<<(int)Det_Channels[det][currentchan]<<endl;
+					if(verbose) cout<<"Detector "<<det<<": cluster_saved/all_clusters="<<i+1<<"/"<<clusters.size()<<"\tchan_to_save="<<j+1<<"/"<<clusters[i].size()<<"\tcurrentchan="<<(int)EventReader->Det_Channels[det][currentchan]<<endl;
 					//locate highest seed
 					if(current_psadc>highest_psadc) {
 						highest_index = currentchan;
@@ -1453,16 +1389,16 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 					}
 				}//end loop over channels in a cluster to save
 				//check which channel has next highest psadc
-				if(highest_index<(int)Det_NChannels[det]-1) if(Det_Channels[det][highest_index+1]==Det_Channels[det][highest_index]+1 && Det_channel_screen[det].CheckChannel(Det_Channels[det][highest_index+1])) {
+				if(highest_index<(int)EventReader->Det_NChannels[det]-1) if(EventReader->Det_Channels[det][highest_index+1]==EventReader->Det_Channels[det][highest_index]+1 && Det_channel_screen[det].CheckChannel(EventReader->Det_Channels[det][highest_index+1])) {
 					//first if the next channel is available and an ok channel, just assume it has the nexthighest_psadc
 					nexthighest_index = highest_index+1;
-					if(det==8) nexthighest_psadc = Dia_ADC[nexthighest_index] - Det_PedMean[det][nexthighest_index];
-					else nexthighest_psadc = Det_ADC[det][nexthighest_index] - Det_PedMean[det][nexthighest_index]; 
+					if(det==8) nexthighest_psadc = EventReader->Dia_ADC[nexthighest_index] - EventReader->Det_PedMean[det][nexthighest_index];
+					else nexthighest_psadc = EventReader->Det_ADC[det][nexthighest_index] - EventReader->Det_PedMean[det][nexthighest_index];
 				}
-				if(highest_index>0) if(Det_Channels[det][highest_index-1]==Det_Channels[det][highest_index]-1 && Det_channel_screen[det].CheckChannel(Det_Channels[det][highest_index-1])) {
+				if(highest_index>0) if(EventReader->Det_Channels[det][highest_index-1]==EventReader->Det_Channels[det][highest_index]-1 && Det_channel_screen[det].CheckChannel(EventReader->Det_Channels[det][highest_index-1])) {
 					//now if the previous channel is available and an ok channel, check whether it has a higher psadc than the next one
-					if(det==8) current_psadc = Dia_ADC[highest_index-1] - Det_PedMean[det][highest_index-1];
-					else current_psadc = Det_ADC[det][highest_index-1] - Det_PedMean[det][highest_index-1];
+					if(det==8) current_psadc = EventReader->Dia_ADC[highest_index-1] - EventReader->Det_PedMean[det][highest_index-1];
+					else current_psadc = EventReader->Det_ADC[det][highest_index-1] - EventReader->Det_PedMean[det][highest_index-1];
 					if(current_psadc>nexthighest_psadc) {
 						nexthighest_index = highest_index-1;
 						nexthighest_psadc = current_psadc;
@@ -1475,7 +1411,7 @@ void Clustering::ClusterEventSeeds(bool verbose) {
 					else current_cluster->SetEta(nexthighest_psadc/(highest_psadc+nexthighest_psadc));
 					
 					//centroid
-					current_cluster->highest2_centroid=(Det_Channels[det][highest_index]*highest_psadc+Det_Channels[det][nexthighest_index]*nexthighest_psadc)/(highest_psadc+nexthighest_psadc);
+					current_cluster->highest2_centroid=(EventReader->Det_Channels[det][highest_index]*highest_psadc+EventReader->Det_Channels[det][nexthighest_index]*nexthighest_psadc)/(highest_psadc+nexthighest_psadc);
 					
 					/*
 					 if(totalsurviving_events%1000==0) {
@@ -1692,9 +1628,9 @@ void Clustering::BookHistograms() {
    //cut events containing the following clusters
    //silicon: saturated, lumpy, goldengate
    //diamond: saturated,
-   if(CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() /*|| clustered_event.HasBadChannelCluster()*/) {//|| !clustered_event.HasOneSiliconTrack()) {//clustered_event.HasBadChannelCluster()) {
-      if(CMNEvent_flag) CMNEvents++;
-      if(ZeroDivisorEvent_flag) ZeroDivisorEvents++;
+   if(EventReader->CMNEvent_flag || EventReader->ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() /*|| clustered_event.HasBadChannelCluster()*/) {//|| !clustered_event.HasOneSiliconTrack()) {//clustered_event.HasBadChannelCluster()) {
+      if(EventReader->CMNEvent_flag) CMNEvents++;
+      if(EventReader->ZeroDivisorEvent_flag) ZeroDivisorEvents++;
       
       //count cut types of events here
       
@@ -1735,9 +1671,9 @@ void Clustering::BookHistograms() {
     
     // silicon noise plots
     for (int det = 0; det < 8; det++) {
-        for (int i = 0; i < Det_NChannels[det]; i++) {
-            float psadc = Det_ADC[det][i] - Det_PedMean[det][i];
-            if (Det_channel_screen[det].CheckChannel(Det_Channels[det][i]) && psadc<Si_Cluster_Hit_Factor*Det_PedWidth[det][i]) {
+        for (int i = 0; i < EventReader->Det_NChannels[det]; i++) {
+            float psadc = EventReader->Det_ADC[det][i] - EventReader->Det_PedMean[det][i];
+            if (Det_channel_screen[det].CheckChannel(EventReader->Det_Channels[det][i]) && psadc<Si_Cluster_Hit_Factor*EventReader->Det_PedWidth[det][i]) {
                 histo_detnoise[det]->Fill(psadc);
             }
         }
@@ -1797,9 +1733,9 @@ void Clustering::BookHistograms() {
       
       //diamond noise plots
       float psadc;
-      for(uint i=0; i<Det_NChannels[8]; i++) {
-         psadc=Dia_ADC[i]-Det_PedMean[8][i];
-         if(Det_channel_screen[8].CheckChannel(Det_Channels[8][i]) && psadc<Di_Cluster_Hit_Factor*Det_PedWidth[8][i]) {
+      for(uint i=0; i<EventReader->Det_NChannels[8]; i++) {
+         psadc=EventReader->Dia_ADC[i]-EventReader->Det_PedMean[8][i];
+         if(Det_channel_screen[8].CheckChannel(EventReader->Det_Channels[8][i]) && psadc<Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[8][i]) {
             histo_dianoise[0]->Fill(psadc);
             if(fiducial_track) histo_dianoise[1]->Fill(psadc);
          }
@@ -2205,7 +2141,7 @@ void Clustering::BookHistograms() {
 }
 
 void Clustering::GenerateHTML() {
-   
+   if(EventReader=NULL) return;
    int section, subsection;
    
    //summary page
@@ -2214,7 +2150,7 @@ void Clustering::GenerateHTML() {
    cout << "Run summary HTML created at " << html_summary_path << endl;
    
    html_summary << "<html>" << endl; 
-   html_summary << "<title>Run "<<run_number<<" analysis results - Summary</title>" << endl;
+   html_summary << "<title>Run "<<EventReader->run_number<<" analysis results - Summary</title>" << endl;
    html_summary << "<body bgcolor=\"White\">" << endl;
    html_summary << "<font face=\"Arial,Sans\" size=2>"<<endl;
    html_summary << "<a name=\"top\"></a>" << endl;
@@ -2228,7 +2164,7 @@ void Clustering::GenerateHTML() {
                 << "<a href=\"d5.html\">D2Y</a>||"
                 << "<a href=\"d6.html\">D3X</a>||"
                 << "<a href=\"d7.html\">D3Y</a><p>"<<endl;
-   html_summary << "<center><font color=\"#000000\"><h1>Run "<<run_number<<" analysis results - Summary</h1></font></center>"<<endl;
+   html_summary << "<center><font color=\"#000000\"><h1>Run "<<EventReader->run_number<<" analysis results - Summary</h1></font></center>"<<endl;
    html_summary << "<hr size=\"10\" Color=\"#ffff33\">" << endl; 
    html_summary << "Results from " << dateandtime.GetMonth() << "/ " << dateandtime.GetDay() << "/" << dateandtime.GetYear() << " at " << dateandtime.GetHour() << ":" << dateandtime.GetMinute() << ":" << dateandtime.GetSecond() << ")<p>" << endl;
    
@@ -2237,7 +2173,7 @@ void Clustering::GenerateHTML() {
    if(dia_input==1) html_summary<<"Dia1 or sirocco input 5 selected for analysis<br>"<<endl;
    html_summary<<"Buffer size of "<<Iter_Size<<" events used for pedestal analysis.<br>"<<endl;
    if(fix_dia_noise>=0) html_summary<<"Noise for all diamond channels FIXED at "<<fix_dia_noise<<"<br>"<<endl;
-   html_summary<<"Silicon channel adc and pedestal info saved for psadc fluctuations >"<<store_threshold<<"sigma<br>"<<endl;
+   if(EventReader!=NULL)html_summary<<"Silicon channel adc and pedestal info saved for psadc fluctuations >"<<EventReader->store_threshold<<"sigma<br>"<<endl;
    html_summary<<"For pedestal analysis, a silicon hit is >"<< Si_Pedestal_Hit_Factor <<"sigma and a diamond hit is >"<< Di_Pedestal_Hit_Factor <<"sigma<br>"<<endl;
    html_summary<<"Events with diamond common mode noise fluctations >"<<CMN_cut<<"sigma flagged for removal from subsequent clustering analysis<br>"<<endl;
    if(Taylor_speed_throttle==1) html_summary<<"Taylor's RMS speed tweak disabled<br>"<<endl;
@@ -2616,7 +2552,7 @@ void Clustering::ClusterRun(bool plots) {
                current_cluster = clustered_event.GetCluster(det,clus);
                nhits = current_cluster->GetNHits();
                if(nhits>8) {
-                  large_clusters_file << event_number << "\t" << det << "\t" << clus << "/" << nclusters << "\t" << nhits << "\t" << current_cluster->GetNSeeds();
+                  large_clusters_file << EventReader->event_number << "\t" << det << "\t" << clus << "/" << nclusters << "\t" << nhits << "\t" << current_cluster->GetNSeeds();
                   if(current_cluster->IsBadChannelCluster()) large_clusters_file << " (bad chan cluster)"; // skip bad clusters
                   large_clusters_file << endl;
                }
@@ -2888,7 +2824,7 @@ void Clustering::AutoFidCut() {
 		// -- produce scatter plot for AutoFidCut
 		bool one_and_only_one = clustered_event.HasOneSiliconTrack();
 		Float_t si_avg_x=0, si_avg_y=0;
-		if (CMNEvent_flag || ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster())
+		if (EventReader->CMNEvent_flag || EventReader->ZeroDivisorEvent_flag || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster())
 			continue;
 		if (one_and_only_one) {
 			for (int det=0; det<4; det++) {
@@ -3686,84 +3622,16 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
 	cout << " done." << endl;
 	
 	verbose = true;
-	
-	PedFile = new TFile(pedfile_path.c_str());
-	PedTree = (TTree*)PedFile->Get("PedTree");
-	if (!PedTree)
-	{
-		cerr << "PedTree not found!" << endl;
-	}
-	
-	cout << PedTree->GetEntries() << " events in PedTree " << endl;
-	
-	//Event Header Branches
-	PedTree->SetBranchAddress("RunNumber",&run_number);
-	PedTree->SetBranchAddress("EventNumber",&event_number);
-	PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
-	PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
-	PedTree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
-	
-	//Telescope Data Branches
-	PedTree->SetBranchAddress("D0X_NChannels",&Det_NChannels[0]);
-	PedTree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
-	PedTree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
-	PedTree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
-	PedTree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
-	PedTree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
-	PedTree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
-	PedTree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
-	PedTree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
-	PedTree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
-	PedTree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
-	PedTree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
-	PedTree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
-	PedTree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
-	PedTree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
-	PedTree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
-	PedTree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
-	PedTree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
-	PedTree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
-	PedTree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
-	PedTree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
-	PedTree->SetBranchAddress("D1Y_ADC",&Det_ADC[3]);
-	PedTree->SetBranchAddress("D2X_ADC",&Det_ADC[4]);
-	PedTree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
-	PedTree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
-	PedTree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
-	PedTree->SetBranchAddress("Dia_ADC",&Dia_ADC);
-	PedTree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
-	PedTree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
-	PedTree->SetBranchAddress("D1X_PedMean",&Det_PedMean[2]);
-	PedTree->SetBranchAddress("D1Y_PedMean",&Det_PedMean[3]);
-	PedTree->SetBranchAddress("D2X_PedMean",&Det_PedMean[4]);
-	PedTree->SetBranchAddress("D2Y_PedMean",&Det_PedMean[5]);
-	PedTree->SetBranchAddress("D3X_PedMean",&Det_PedMean[6]);
-	PedTree->SetBranchAddress("D3Y_PedMean",&Det_PedMean[7]);
-	PedTree->SetBranchAddress("Dia_PedMean",&Det_PedMean[8]);
-	PedTree->SetBranchAddress("D0X_PedWidth",&Det_PedWidth[0]);
-	PedTree->SetBranchAddress("D0Y_PedWidth",&Det_PedWidth[1]);
-	PedTree->SetBranchAddress("D1X_PedWidth",&Det_PedWidth[2]);
-	PedTree->SetBranchAddress("D1Y_PedWidth",&Det_PedWidth[3]);
-	PedTree->SetBranchAddress("D2X_PedWidth",&Det_PedWidth[4]);
-	PedTree->SetBranchAddress("D2Y_PedWidth",&Det_PedWidth[5]);
-	PedTree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
-	PedTree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
-	PedTree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
-	
-	PedTree->GetEvent(0);
-	cout<< "Loaded first event in PedTree: "<<event_number<<endl;
-	cout<< "RunNumber is: "<<run_number<<endl;
-	cout<< "StoreThreshold is: "<<store_threshold<<endl;
-	
+
 	event_numbers.clear();
 	for (int j = 0; j < PedTree->GetEntries(); j++) {
 		PedTree->GetEvent(j);
         //		cout << endl << endl << endl;
         //		cout << "event " << j << " in PedTree has event_number: " << event_number << endl;
-		event_numbers.push_back(event_number);
+		event_numbers.push_back(EventReader->event_number);
         //		for (int blablabla = 0; blablabla < 254; blablabla++) {
-        //			cout << "Dia_ADC = " << Dia_ADC[blablabla] << ",\tDet_PedMean = " << Det_PedMean[8][blablabla] << endl;
-        //			cout << "Collected charge in channel " << blablabla << " of diamond: " << Dia_ADC[blablabla]-Det_PedMean[8][blablabla] << endl;
+        //			cout << "EventReader->Dia_ADC = " << EventReader->Dia_ADC[blablabla] << ",\tEventReader->Det_PedMean = " << EventReader->Det_PedMean[8][blablabla] << endl;
+        //			cout << "Collected charge in channel " << blablabla << " of diamond: " << EventReader->Dia_ADC[blablabla]-EventReader->Det_PedMean[8][blablabla] << endl;
         //		}
 	}
     //	return;
@@ -3834,12 +3702,12 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
 		//get event
 		if (verbose) cout << "getting event " << event << ".." << endl;
 		PedTree->GetEvent(event);
-		if (verbose) cout << "event_number = " << event_number << endl;
+		if (verbose) cout << "event_number = " << EventReader->event_number << endl;
 		
 		// find biggest hit in diamond
 		eff_diamond_hit_channel = 0;
 		for (int j = 0; j < 128; j++) {
-			if (Det_ADC[6][j]-Det_PedMean[6][j] > (Det_ADC[6][eff_diamond_hit_channel]-Det_PedMean[6][eff_diamond_hit_channel])) {
+			if (EventReader->Det_ADC[6][j]-EventReader->Det_PedMean[6][j] > (EventReader->Det_ADC[6][eff_diamond_hit_channel]-EventReader->Det_PedMean[6][eff_diamond_hit_channel])) {
 				eff_diamond_hit_channel = j;
 			}
 		}
@@ -3850,8 +3718,8 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
 		// cluster diamond channels around estimated hit position
         //		cout << " --" << endl;
 		if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-		if (verbose) cout << "Det_ADC[6] = " << Det_ADC[6][diamond_hit_channel] << ",\tDet_PedMean = " << Det_PedMean[6][diamond_hit_channel] << endl;
-		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of D3X: " << Det_ADC[6][(int)diamond_hit_position]-Det_PedMean[6][(int)diamond_hit_position] << endl;
+		if (verbose) cout << "EventReader->Det_ADC[6] = " << EventReader->Det_ADC[6][diamond_hit_channel] << ",\tEventReader->Det_PedMean = " << EventReader->Det_PedMean[6][diamond_hit_channel] << endl;
+		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of D3X: " << EventReader->Det_ADC[6][(int)diamond_hit_position]-EventReader->Det_PedMean[6][(int)diamond_hit_position] << endl;
 		
 		int sign;
 		
@@ -3860,8 +3728,8 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
 		
 		// calculate eta for the two closest two channels to the estimated hit position
 		diamond_secondhit_channel = diamond_hit_channel - sign;
-		firstchannel_adc = Det_ADC[6][diamond_hit_channel]-Det_PedMean[6][diamond_hit_channel];
-		secondchannel_adc = Det_ADC[6][diamond_secondhit_channel]-Det_PedMean[6][diamond_secondhit_channel];
+		firstchannel_adc = EventReader->Det_ADC[6][diamond_hit_channel]-EventReader->Det_PedMean[6][diamond_hit_channel];
+		secondchannel_adc = EventReader->Det_ADC[6][diamond_secondhit_channel]-EventReader->Det_PedMean[6][diamond_secondhit_channel];
 		if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
 		else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
 		histo_transparentclustering_eta->Fill(transp_eta);
@@ -3882,8 +3750,8 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
 				current_sign = (-1) * current_sign;
 				if (verbose) cout << current_channel;
 				if (verbose) if (channel < j) cout << ", ";
-				if (current_channel > 0 && current_channel < 128 /* && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel]*/)
-					cluster_adc = cluster_adc + Det_ADC[6][current_channel]-Det_PedMean[6][current_channel];
+				if (current_channel > 0 && current_channel < 128 /* && EventReader->Dia_ADC[current_channel]-EventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[8][current_channel]*/)
+					cluster_adc = cluster_adc + EventReader->Det_ADC[6][current_channel]-EventReader->Det_PedMean[6][current_channel];
 			}
 			if (verbose) cout << endl;
 			if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
@@ -3954,83 +3822,21 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	
 //	verbose = true;
 	
-	PedFile = new TFile(pedfile_path.c_str());
-	PedTree = (TTree*)PedFile->Get("PedTree");
-	if (!PedTree)
-	{
-		cerr << "PedTree not found!" << endl;
-	}
 	
-	cout << PedTree->GetEntries() << " events in PedTree " << endl;
-	
-	//Event Header Branches
-	PedTree->SetBranchAddress("RunNumber",&run_number);
-	PedTree->SetBranchAddress("EventNumber",&event_number);
-	PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
-	PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
-	PedTree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
-	
-	//Telescope Data Branches
-	PedTree->SetBranchAddress("D0X_NChannels",&Det_NChannels[0]);
-	PedTree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
-	PedTree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
-	PedTree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
-	PedTree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
-	PedTree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
-	PedTree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
-	PedTree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
-	PedTree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
-	PedTree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
-	PedTree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
-	PedTree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
-	PedTree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
-	PedTree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
-	PedTree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
-	PedTree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
-	PedTree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
-	PedTree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
-	PedTree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
-	PedTree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
-	PedTree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
-	PedTree->SetBranchAddress("D1Y_ADC",&Det_ADC[3]);
-	PedTree->SetBranchAddress("D2X_ADC",&Det_ADC[4]);
-	PedTree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
-	PedTree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
-	PedTree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
-	PedTree->SetBranchAddress("Dia_ADC",&Dia_ADC);
-	PedTree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
-	PedTree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
-	PedTree->SetBranchAddress("D1X_PedMean",&Det_PedMean[2]);
-	PedTree->SetBranchAddress("D1Y_PedMean",&Det_PedMean[3]);
-	PedTree->SetBranchAddress("D2X_PedMean",&Det_PedMean[4]);
-	PedTree->SetBranchAddress("D2Y_PedMean",&Det_PedMean[5]);
-	PedTree->SetBranchAddress("D3X_PedMean",&Det_PedMean[6]);
-	PedTree->SetBranchAddress("D3Y_PedMean",&Det_PedMean[7]);
-	PedTree->SetBranchAddress("Dia_PedMean",&Det_PedMean[8]);
-	PedTree->SetBranchAddress("D0X_PedWidth",&Det_PedWidth[0]);
-	PedTree->SetBranchAddress("D0Y_PedWidth",&Det_PedWidth[1]);
-	PedTree->SetBranchAddress("D1X_PedWidth",&Det_PedWidth[2]);
-	PedTree->SetBranchAddress("D1Y_PedWidth",&Det_PedWidth[3]);
-	PedTree->SetBranchAddress("D2X_PedWidth",&Det_PedWidth[4]);
-	PedTree->SetBranchAddress("D2Y_PedWidth",&Det_PedWidth[5]);
-	PedTree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
-	PedTree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
-	PedTree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
-	
-	PedTree->GetEvent(0);
-	cout<< "Loaded first event in PedTree: "<<event_number<<endl;
-	cout<< "RunNumber is: "<<run_number<<endl;
-	cout<< "StoreThreshold is: "<<store_threshold<<endl;
+	EventReader->GetEvent(0);
+	cout<< "Loaded first event in EventReader: "<<EventReader->event_number<<endl;
+	cout<< "RunNumber is: "<<EventReader->run_number<<endl;
+	cout<< "StoreThreshold is: "<<EventReader->store_threshold<<endl;
 	
 	event_numbers.clear();
-	for (int j = 0; j < PedTree->GetEntries(); j++) {
-		PedTree->GetEvent(j);
+	for (int j = 0; j < EventReader->GetEntries(); j++) {
+		EventReader->GetEvent(j);
 //		cout << endl << endl << endl;
 //		cout << "event " << j << " in PedTree has event_number: " << event_number << endl;
-		event_numbers.push_back(event_number);
+		event_numbers.push_back(EventReader->event_number);
 //		for (int blablabla = 0; blablabla < 254; blablabla++) {
-//			cout << "Dia_ADC = " << Dia_ADC[blablabla] << ",\tDet_PedMean = " << Det_PedMean[8][blablabla] << endl;
-//			cout << "Collected charge in channel " << blablabla << " of diamond: " << Dia_ADC[blablabla]-Det_PedMean[8][blablabla] << endl;
+//			cout << "EventReader->Dia_ADC = " << EventReader->Dia_ADC[blablabla] << ",\tEventReader->Det_PedMean = " << EventReader->Det_PedMean[8][blablabla] << endl;
+//			cout << "Collected charge in channel " << blablabla << " of diamond: " << EventReader->Dia_ADC[blablabla]-EventReader->Det_PedMean[8][blablabla] << endl;
 //		}
 	}
 //	return;
@@ -4100,13 +3906,13 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		
 		//get event
 		if (verbose) cout << "getting event " << event << ".." << endl;
-		PedTree->GetEvent(event);
-		if (verbose) cout << "event_number = " << event_number << endl;
+		EventReader->GetEvent(event);
+		if (verbose) cout << "event_number = " << EventReader->event_number << endl;
 		
 		// find biggest hit in diamond
 		eff_diamond_hit_channel = 0;
 		for (int j = 0; j < 128; j++) {
-			if (Dia_ADC[j]-Det_PedMean[8][j] > (Dia_ADC[eff_diamond_hit_channel]-Det_PedMean[8][eff_diamond_hit_channel])) {
+			if (EventReader->Dia_ADC[j]-EventReader->Det_PedMean[8][j] > (EventReader->Dia_ADC[eff_diamond_hit_channel]-EventReader->Det_PedMean[8][eff_diamond_hit_channel])) {
 				eff_diamond_hit_channel = j;
 			}
 		}
@@ -4117,8 +3923,8 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		// cluster diamond channels around estimated hit position
 //		cout << " --" << endl;
 		if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-		if (verbose) cout << "Dia_ADC = " << Dia_ADC[diamond_hit_channel] << ",\tDet_PedMean = " << Det_PedMean[8][diamond_hit_channel] << endl;
-		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << Dia_ADC[(int)diamond_hit_position]-Det_PedMean[8][(int)diamond_hit_position] << endl;
+		if (verbose) cout << "EventReader->Dia_ADC = " << EventReader->Dia_ADC[diamond_hit_channel] << ",\tEventReader->Det_PedMean = " << EventReader->Det_PedMean[8][diamond_hit_channel] << endl;
+		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << EventReader->Dia_ADC[(int)diamond_hit_position]-EventReader->Det_PedMean[8][(int)diamond_hit_position] << endl;
 		
 		int sign;
 		
@@ -4127,8 +3933,8 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		
 		// calculate eta for the two closest two channels to the estimated hit position
 		diamond_secondhit_channel = diamond_hit_channel - sign;
-		firstchannel_adc = Dia_ADC[diamond_hit_channel]-Det_PedMean[8][diamond_hit_channel];
-		secondchannel_adc = Dia_ADC[diamond_secondhit_channel]-Det_PedMean[8][diamond_secondhit_channel];
+		firstchannel_adc = EventReader->Dia_ADC[diamond_hit_channel]-EventReader->Det_PedMean[8][diamond_hit_channel];
+		secondchannel_adc = EventReader->Dia_ADC[diamond_secondhit_channel]-EventReader->Det_PedMean[8][diamond_secondhit_channel];
 		if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
 		else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
 		histo_transparentclustering_eta->Fill(transp_eta);
@@ -4149,8 +3955,8 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 				current_sign = (-1) * current_sign;
 				if (verbose) cout << current_channel;
 				if (verbose) if (channel < j) cout << ", ";
-				if (current_channel > 0 && current_channel < 128 /* && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel]*/)
-					cluster_adc = cluster_adc + Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
+				if (current_channel > 0 && current_channel < 128 /* && EventReader->Dia_ADC[current_channel]-EventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[8][current_channel]*/)
+					cluster_adc = cluster_adc + EventReader->Dia_ADC[current_channel]-EventReader->Det_PedMean[8][current_channel];
 			}
 			if (verbose) cout << endl;
 			if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
@@ -4212,7 +4018,7 @@ void Clustering::EventMonitor(int CurrentEvent) {
 				current_cluster = clustered_event.GetCluster(det,clus);
 				nhits = current_cluster->GetNHits();
 				if(nhits>8) {
-					large_clusters_file << event_number << "\t" << det << "\t" << clus << "/" << nclusters << "\t" << nhits << "\t" << current_cluster->GetNSeeds();
+					large_clusters_file << EventReader->event_number << "\t" << det << "\t" << clus << "/" << nclusters << "\t" << nhits << "\t" << current_cluster->GetNSeeds();
 					if(current_cluster->IsBadChannelCluster()) large_clusters_file << " (bad chan cluster)"; // skip bad clusters
 					large_clusters_file << endl;
 				}
@@ -4252,10 +4058,10 @@ void Clustering::EventMonitor(int CurrentEvent) {
 			si_avg_y = si_avg_y / 4;
 			histo_clusters[det]->SetBinContent(si_x+1,si_avg_y+1,clustered_event.GetCluster(2*det, 0)->GetNHits());
 			
-			for (int j = 0; j < Det_NChannels[8]; j++) {
-				if (Dia_ADC[j]-Det_PedMean[8][j] > Di_Cluster_Hit_Factor*Det_PedWidth[8][j] || true) {
-//					histo_diamond->SetBinContent(j+1,Dia_ADC[j]-Det_PedMean[8][j]);
-					histo_diamond->SetBinContent((int)Det_Channels[8][j],Dia_ADC[j]-Det_PedMean[8][j]);
+			for (int j = 0; j < EventReader->Det_NChannels[8]; j++) {
+				if (EventReader->Dia_ADC[j]-EventReader->Det_PedMean[8][j] > Di_Cluster_Hit_Factor*EventReader->Det_PedWidth[8][j] || true) {
+//					histo_diamond->SetBinContent(j+1,EventReader->Dia_ADC[j]-EventReader->Det_PedMean[8][j]);
+					histo_diamond->SetBinContent((int)EventReader->Det_Channels[8][j],EventReader->Dia_ADC[j]-EventReader->Det_PedMean[8][j]);
 				}
 			}
 			histSaver->SaveHistogram(histo_diamond);

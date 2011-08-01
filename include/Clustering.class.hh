@@ -44,6 +44,7 @@ using namespace TMath;
 #include "TDiamondTrack.hh"
 #include "TDetectorAlignment.hh"
 #include "HistogrammSaver.class.hh"
+#include "TADCEventReader.hh"
 typedef unsigned int uint;
 
 class Clustering {
@@ -164,18 +165,9 @@ class Clustering {
       string settings_file;
 	string pedfile_path;
 
+	TADCEventReader *EventReader;
       //processed event storage; read from pedtree
-      UInt_t run_number;
-      UInt_t event_number;
-      Float_t store_threshold;
-      UInt_t Det_NChannels[9];
-      UChar_t Det_Channels[9][256];
-      UChar_t Det_ADC[8][256];
-      UShort_t Dia_ADC[256];
-      Float_t Det_PedMean[9][256];
-      Float_t Det_PedWidth[9][256];
-      bool CMNEvent_flag;
-      bool ZeroDivisorEvent_flag;
+      //UInt_t run_number;
 
       //output clusters
       ClusteredEvent clustered_event;
