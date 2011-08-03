@@ -24,6 +24,7 @@ using namespace std;
 #include "TImage.h"
 #include "TObjArray.h"
 #include "TROOT.h"
+#include "TSystem.h"
 
 class HistogrammSaver {
 public:
@@ -41,7 +42,9 @@ public:
     void SetRunNumber(unsigned int runNumber);
     void SetNumberOfEvents(unsigned int nEvents);
     void SetPlotsPath(string Path);
+    string GetPlotsPath(){return plots_path;}
     void SetStyle(TStyle newStyle);
+    void SetDuckStyle();
 
     static void SaveCanvasPNG(TCanvas *canvas, string location, string file_name);
     static void SaveCanvasC(TCanvas *canvas, string location, string file_name);
@@ -55,6 +58,7 @@ private:
     unsigned int nEvents;
     void UpdatePaveText();
     TStyle *currentStyle;
+    TSystem *sys;
 };
 
 #endif /* HISTOGRAMMSAVER_CLASS_HH_ */

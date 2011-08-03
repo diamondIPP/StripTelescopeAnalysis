@@ -7,18 +7,33 @@
 
 #include "AlignmentClass.hh"
 
-AlignmentClass::AlignmentClass() {
+AlignmentClass::AlignmentClass(TTree* tree,UInt_t nEventNumber) {
 	// TODO Auto-generated constructor stub
+	align =NULL;
+	eventReader=NULL;
+	histSaver=NULL;
+	histSaverAlignment=NULL;
+	histSaverAlignmentFakedTracks=NULL;
 	nAlignSteps =2;
 	histSaver= new HistogrammSaver(0);
-
-	/*histSaver->SetRunNumber(run_number);
-	histSaver->SetNumberOfEvents((unsigned int)PedTree->GetEntries());
-	histSaver->SetPlotsPath(plots_path);*/
+	eventReader = new TADCEventReader(tree);
+	histSaverAlignment = new HistogrammSaver(0);
+	histSaverAlignmentFakedTracks = new HistogrammSaver(0);
+	eventReader->GetEvent(nEventNumber);
 }
 
 AlignmentClass::~AlignmentClass() {
 	// TODO Auto-generated destructor stub
+	if(eventReader!=NULL) delete eventReader;
+	if(histSaver!=NULL) delete histSaver;
+}
+void AlignmentClass::SetPlotsPath(string plotsPath){
+	histSaver->SetPlotsPath(plotsPath);
+	ostringstream plots_path_alignment, plots_path_alignment_CutFakeTracks;
+	plots_path_alignment << plotsPath << "/alignment/";
+	plots_path_alignment_CutFakeTracks << plotsPath << "/alignment_CutFakeTracks/";
+	histSaverAlignment->SetPlotsPath(plots_path_alignment.str());
+	histSaverAlignmentFakedTracks->SetPlotsPath(plots_path_alignment_CutFakeTracks.str());
 }
 
 int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
@@ -43,22 +58,17 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 	cout << count_true << " tracks are masked as true and " << count_false << " tracks as false." << endl;
 	return;*/
 
-	//*string plots_path_save = plots_path;
 	vector<TDiamondTrack> alignment_tracks = tracks;
 	//*vector<bool> alignment_tracks_mask = tracks_mask;
 	//*vector<TDiamondTrack> alignment_tracks_fidcut = tracks_fidcut;
 	//*vector<bool> alignment_tracks_fidcut_mask = tracks_fidcut_mask;
-	ostringstream plots_path_alignment, plots_path_alignment_CutFakeTracks;
-	plots_path_alignment << plots_path << "/alignment/";
-	plots_path_alignment_CutFakeTracks << plots_path << "/alignment_CutFakeTracks/";
-	plots_path = plots_path_alignment.str();
 
 	// now start the telescope alignment!
 	// alignment loop: align, cut fake tracks, align again (if CutFakeTracksOn is set true)
 	for (int alignStep = 0; alignStep < nAlignSteps; alignStep++) {
-		sys->mkdir(plots_path.c_str());
-		//		TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
-		TDetectorAlignment* align = new TDetectorAlignment(plots_path, alignment_tracks, alignment_tracks_mask);
+		//TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
+		if (align!=NULL) delete align;
+		align = new TDetectorAlignment(histSaver->GetPlotsPath(), alignment_tracks, alignment_tracks_mask);
 
 		Int_t nPasses = 10;
 		Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
@@ -151,89 +161,13 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 		align->CheckDetectorAlignmentXYPlots(4, 1, 2, postname);
 
 
-		//report results in a file
-
-		ostringstream alignment_summary_path;
-		alignment_summary_path << plots_path << "Alignment_Summary.txt";
-		ofstream alignment_summary(alignment_summary_path.str().c_str());
-
-		alignment_summary << "Alignment summary " << endl;
-		alignment_summary << "----------------- " << endl << endl;
-
-		alignment_summary << "Offsets (multiples of 50um):" << endl << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << "det_x_offset[" << det << "] = " << align->det_x_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << "det_y_offset[" << det << "] = " << align->det_y_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << "det_z_offset[" << det << "] = " << align->det_z_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << "det_phix_offset[" << det << "] = " << align->det_phix_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << "det_phiy_offset[" << det << "] = " << align->det_phiy_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-
-		alignment_summary << "Resolutions (multiples of 50um):" << endl << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << "det_x_resolution[" << det << "] = " << align->det_x_resolution[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << "det_y_resolution[" << det << "] = " << align->det_y_resolution[det] <<endl;
-		}
-
-
-		alignment_summary << endl << endl;
-		alignment_summary << "Alignment summary (for pasting into a spread sheet) " << endl;
-		alignment_summary << "--------------------------------------------------- " << endl << endl;
-
-		alignment_summary << "Offsets (multiples of 50um):" << endl << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << align->det_x_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << align->det_y_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << align->det_z_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << align->det_phix_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << align->det_phiy_offset[det] <<endl;
-		}
-		alignment_summary << endl;
-
-		alignment_summary << "Resolutions (multiples of 50um):" << endl << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << align->det_x_resolution[det] <<endl;
-		}
-		alignment_summary << endl;
-		for(int det=0; det<5; det++) {
-			alignment_summary << align->det_y_resolution[det] <<endl;
-		}
-		alignment_summary.close();
+		this->createAlignmentSummary();
 
 		cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 
 		if (CutFakeTracksOn && alignStep < 1) {
-			align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, alignment_chi2, CutFakeTracksOn, true);
-			align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, alignment_chi2, CutFakeTracksOn, true);
-			plots_path = plots_path_alignment_CutFakeTracks.str();
+			align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, settings->getAlignment_chi2(), CutFakeTracksOn, true);
+			align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, settings->getAlignment_chi2(), CutFakeTracksOn, true);
 		}
 		if (!CutFakeTracksOn || alignStep == 1) {
 			dia_offset.clear();
@@ -315,83 +249,17 @@ cout << " done." << endl;
 
 verbose = true;
 
-PedFile = new TFile(pedfile_path.c_str());
-PedTree = (TTree*)PedFile->Get("PedTree");
-if (!PedTree)
-{
-	cerr << "PedTree not found!" << endl;
-}
 
-cout << PedTree->GetEntries() << " events in PedTree " << endl;
-
-//Event Header Branches
-PedTree->SetBranchAddress("RunNumber",&run_number);
-PedTree->SetBranchAddress("EventNumber",&event_number);
-PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
-PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
-PedTree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
-
-//Telescope Data Branches
-PedTree->SetBranchAddress("D0X_NChannels",&Det_NChannels[0]);
-PedTree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
-PedTree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
-PedTree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
-PedTree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
-PedTree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
-PedTree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
-PedTree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
-PedTree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
-PedTree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
-PedTree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
-PedTree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
-PedTree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
-PedTree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
-PedTree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
-PedTree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
-PedTree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
-PedTree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
-PedTree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
-PedTree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
-PedTree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
-PedTree->SetBranchAddress("D1Y_ADC",&Det_ADC[3]);
-PedTree->SetBranchAddress("D2X_ADC",&Det_ADC[4]);
-PedTree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
-PedTree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
-PedTree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
-PedTree->SetBranchAddress("Dia_ADC",&Dia_ADC);
-PedTree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
-PedTree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
-PedTree->SetBranchAddress("D1X_PedMean",&Det_PedMean[2]);
-PedTree->SetBranchAddress("D1Y_PedMean",&Det_PedMean[3]);
-PedTree->SetBranchAddress("D2X_PedMean",&Det_PedMean[4]);
-PedTree->SetBranchAddress("D2Y_PedMean",&Det_PedMean[5]);
-PedTree->SetBranchAddress("D3X_PedMean",&Det_PedMean[6]);
-PedTree->SetBranchAddress("D3Y_PedMean",&Det_PedMean[7]);
-PedTree->SetBranchAddress("Dia_PedMean",&Det_PedMean[8]);
-PedTree->SetBranchAddress("D0X_PedWidth",&Det_PedWidth[0]);
-PedTree->SetBranchAddress("D0Y_PedWidth",&Det_PedWidth[1]);
-PedTree->SetBranchAddress("D1X_PedWidth",&Det_PedWidth[2]);
-PedTree->SetBranchAddress("D1Y_PedWidth",&Det_PedWidth[3]);
-PedTree->SetBranchAddress("D2X_PedWidth",&Det_PedWidth[4]);
-PedTree->SetBranchAddress("D2Y_PedWidth",&Det_PedWidth[5]);
-PedTree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
-PedTree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
-PedTree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
-
-PedTree->GetEvent(0);
-cout<< "Loaded first event in PedTree: "<<event_number<<endl;
-cout<< "RunNumber is: "<<run_number<<endl;
-cout<< "StoreThreshold is: "<<store_threshold<<endl;
 
 event_numbers.clear();
-for (int j = 0; j < PedTree->GetEntries(); j++) {
-	PedTree->GetEvent(j);
+for (int j = 0; j < eventReader->GetEntries(); j++) {
+	eventReader->GetEvent(j);
 	//		cout << endl << endl << endl;
-	//		cout << "event " << j << " in PedTree has event_number: " << event_number << endl;
-	event_numbers.push_back(event_number);
+	//		cout << "event " << j << " in PedTree has eventReader->event_number: " << eventReader->event_number << endl;
+	event_numbers.push_back(eventReader->event_number);
 	//		for (int blablabla = 0; blablabla < 254; blablabla++) {
-	//			cout << "Dia_ADC = " << Dia_ADC[blablabla] << ",\tDet_PedMean = " << Det_PedMean[8][blablabla] << endl;
-	//			cout << "Collected charge in channel " << blablabla << " of diamond: " << Dia_ADC[blablabla]-Det_PedMean[8][blablabla] << endl;
+	//			cout << "eventReader->Dia_ADC = " << eventReader->Dia_ADC[blablabla] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[8][blablabla] << endl;
+	//			cout << "Collected charge in channel " << blablabla << " of diamond: " << eventReader->Dia_ADC[blablabla]-eventReader->Det_PedMean[8][blablabla] << endl;
 	//		}
 }
 //	return;
@@ -461,13 +329,13 @@ for (int i = 0; i < tracks.size(); i++) {
 
 	//get event
 	if (verbose) cout << "getting event " << event << ".." << endl;
-	PedTree->GetEvent(event);
-	if (verbose) cout << "event_number = " << event_number << endl;
+	eventReader->GetEvent(event);
+	if (verbose) cout << "eventReader->event_number = " << eventReader->event_number << endl;
 
 	// find biggest hit in diamond
 	eff_diamond_hit_channel = 0;
 	for (int j = 0; j < 128; j++) {
-		if (Det_ADC[6][j]-Det_PedMean[6][j] > (Det_ADC[6][eff_diamond_hit_channel]-Det_PedMean[6][eff_diamond_hit_channel])) {
+		if (eventReader->Det_ADC[6][j]-eventReader->Det_PedMean[6][j] > (eventReader->Det_ADC[6][eff_diamond_hit_channel]-eventReader->Det_PedMean[6][eff_diamond_hit_channel])) {
 			eff_diamond_hit_channel = j;
 		}
 	}
@@ -478,8 +346,8 @@ for (int i = 0; i < tracks.size(); i++) {
 	// cluster diamond channels around estimated hit position
 	//		cout << " --" << endl;
 	if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-	if (verbose) cout << "Det_ADC[6] = " << Det_ADC[6][diamond_hit_channel] << ",\tDet_PedMean = " << Det_PedMean[6][diamond_hit_channel] << endl;
-	if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of D3X: " << Det_ADC[6][(int)diamond_hit_position]-Det_PedMean[6][(int)diamond_hit_position] << endl;
+	if (verbose) cout << "eventReader->Det_ADC[6] = " << eventReader->Det_ADC[6][diamond_hit_channel] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[6][diamond_hit_channel] << endl;
+	if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of D3X: " << eventReader->Det_ADC[6][(int)diamond_hit_position]-eventReader->Det_PedMean[6][(int)diamond_hit_position] << endl;
 
 	int sign;
 
@@ -488,8 +356,8 @@ for (int i = 0; i < tracks.size(); i++) {
 
 	// calculate eta for the two closest two channels to the estimated hit position
 	diamond_secondhit_channel = diamond_hit_channel - sign;
-	firstchannel_adc = Det_ADC[6][diamond_hit_channel]-Det_PedMean[6][diamond_hit_channel];
-	secondchannel_adc = Det_ADC[6][diamond_secondhit_channel]-Det_PedMean[6][diamond_secondhit_channel];
+	firstchannel_adc = eventReader->Det_ADC[6][diamond_hit_channel]-eventReader->Det_PedMean[6][diamond_hit_channel];
+	secondchannel_adc = eventReader->Det_ADC[6][diamond_secondhit_channel]-eventReader->Det_PedMean[6][diamond_secondhit_channel];
 	if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
 	else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
 	histo_transparentclustering_eta->Fill(transp_eta);
@@ -510,8 +378,8 @@ for (int i = 0; i < tracks.size(); i++) {
 			current_sign = (-1) * current_sign;
 			if (verbose) cout << current_channel;
 			if (verbose) if (channel < j) cout << ", ";
-			if (current_channel > 0 && current_channel < 128 /* && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel]*/)
-				cluster_adc = cluster_adc + Det_ADC[6][current_channel]-Det_PedMean[6][current_channel];
+			if (current_channel > 0 && current_channel < 128 /* && eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*eventReader->Det_PedWidth[8][current_channel]*/)
+				cluster_adc = cluster_adc + eventReader->Det_ADC[6][current_channel]-eventReader->Det_PedMean[6][current_channel];
 		}
 		if (verbose) cout << endl;
 		if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
@@ -530,9 +398,7 @@ histSaver->SaveHistogram(histo_transparentclustering_hitdiff);
 histSaver->SaveHistogram(histo_transparentclustering_hitdiff_scatter);
 histSaver->SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
 
-PedFile->Close();
 }
-
 
 
 void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vector<bool> & tracks_mask, TDetectorAlignment *align, bool verbose)
@@ -585,85 +451,17 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 	histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut","PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut",pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
 	cout << " done." << endl;
 
-	//	verbose = true;
-
-	PedFile = new TFile(pedfile_path.c_str());
-	PedTree = (TTree*)PedFile->Get("PedTree");
-	if (!PedTree)
-	{
-		cerr << "PedTree not found!" << endl;
-	}
-
-	cout << PedTree->GetEntries() << " events in PedTree " << endl;
-
-	//Event Header Branches
-	PedTree->SetBranchAddress("RunNumber",&run_number);
-	PedTree->SetBranchAddress("EventNumber",&event_number);
-	PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
-	PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
-	PedTree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
 
 	//Telescope Data Branches
-	PedTree->SetBranchAddress("D0X_NChannels",&Det_NChannels[0]);
-	PedTree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
-	PedTree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
-	PedTree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
-	PedTree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
-	PedTree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
-	PedTree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
-	PedTree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
-	PedTree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
-	PedTree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
-	PedTree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
-	PedTree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
-	PedTree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
-	PedTree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
-	PedTree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
-	PedTree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
-	PedTree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
-	PedTree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
-	PedTree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
-	PedTree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
-	PedTree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
-	PedTree->SetBranchAddress("D1Y_ADC",&Det_ADC[3]);
-	PedTree->SetBranchAddress("D2X_ADC",&Det_ADC[4]);
-	PedTree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
-	PedTree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
-	PedTree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
-	PedTree->SetBranchAddress("Dia_ADC",&Dia_ADC);
-	PedTree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
-	PedTree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
-	PedTree->SetBranchAddress("D1X_PedMean",&Det_PedMean[2]);
-	PedTree->SetBranchAddress("D1Y_PedMean",&Det_PedMean[3]);
-	PedTree->SetBranchAddress("D2X_PedMean",&Det_PedMean[4]);
-	PedTree->SetBranchAddress("D2Y_PedMean",&Det_PedMean[5]);
-	PedTree->SetBranchAddress("D3X_PedMean",&Det_PedMean[6]);
-	PedTree->SetBranchAddress("D3Y_PedMean",&Det_PedMean[7]);
-	PedTree->SetBranchAddress("Dia_PedMean",&Det_PedMean[8]);
-	PedTree->SetBranchAddress("D0X_PedWidth",&Det_PedWidth[0]);
-	PedTree->SetBranchAddress("D0Y_PedWidth",&Det_PedWidth[1]);
-	PedTree->SetBranchAddress("D1X_PedWidth",&Det_PedWidth[2]);
-	PedTree->SetBranchAddress("D1Y_PedWidth",&Det_PedWidth[3]);
-	PedTree->SetBranchAddress("D2X_PedWidth",&Det_PedWidth[4]);
-	PedTree->SetBranchAddress("D2Y_PedWidth",&Det_PedWidth[5]);
-	PedTree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
-	PedTree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
-	PedTree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
-
-	PedTree->GetEvent(0);
-	cout<< "Loaded first event in PedTree: "<<event_number<<endl;
-	cout<< "RunNumber is: "<<run_number<<endl;
-	cout<< "StoreThreshold is: "<<store_threshold<<endl;
-
 	event_numbers.clear();
-	for (int j = 0; j < PedTree->GetEntries(); j++) {
-		PedTree->GetEvent(j);
+	for (int j = 0; j < eventReader->GetEntries(); j++) {
+		eventReader->GetEvent(j);
 		//		cout << endl << endl << endl;
-		//		cout << "event " << j << " in PedTree has event_number: " << event_number << endl;
-		event_numbers.push_back(event_number);
+		//		cout << "event " << j << " in PedTree has eventReader->event_number: " << eventReader->event_number << endl;
+		event_numbers.push_back(eventReader->event_number);
 		//		for (int blablabla = 0; blablabla < 254; blablabla++) {
-		//			cout << "Dia_ADC = " << Dia_ADC[blablabla] << ",\tDet_PedMean = " << Det_PedMean[8][blablabla] << endl;
-		//			cout << "Collected charge in channel " << blablabla << " of diamond: " << Dia_ADC[blablabla]-Det_PedMean[8][blablabla] << endl;
+		//			cout << "eventReader->Dia_ADC = " << eventReader->Dia_ADC[blablabla] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[8][blablabla] << endl;
+		//			cout << "Collected charge in channel " << blablabla << " of diamond: " << eventReader->Dia_ADC[blablabla]-eventReader->Det_PedMean[8][blablabla] << endl;
 		//		}
 	}
 	//	return;
@@ -733,13 +531,13 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 
 		//get event
 		if (verbose) cout << "getting event " << event << ".." << endl;
-		PedTree->GetEvent(event);
-		if (verbose) cout << "event_number = " << event_number << endl;
+		eventReader->GetEvent(event);
+		if (verbose) cout << "eventReader->event_number = " << eventReader->event_number << endl;
 
 		// find biggest hit in diamond
 		eff_diamond_hit_channel = 0;
 		for (int j = 0; j < 128; j++) {
-			if (Dia_ADC[j]-Det_PedMean[8][j] > (Dia_ADC[eff_diamond_hit_channel]-Det_PedMean[8][eff_diamond_hit_channel])) {
+			if (eventReader->Dia_ADC[j]-eventReader->Det_PedMean[8][j] > (eventReader->Dia_ADC[eff_diamond_hit_channel]-eventReader->Det_PedMean[8][eff_diamond_hit_channel])) {
 				eff_diamond_hit_channel = j;
 			}
 		}
@@ -750,8 +548,8 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 		// cluster diamond channels around estimated hit position
 		//		cout << " --" << endl;
 		if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-		if (verbose) cout << "Dia_ADC = " << Dia_ADC[diamond_hit_channel] << ",\tDet_PedMean = " << Det_PedMean[8][diamond_hit_channel] << endl;
-		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << Dia_ADC[(int)diamond_hit_position]-Det_PedMean[8][(int)diamond_hit_position] << endl;
+		if (verbose) cout << "eventReader->Dia_ADC = " << eventReader->Dia_ADC[diamond_hit_channel] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[8][diamond_hit_channel] << endl;
+		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << eventReader->Dia_ADC[(int)diamond_hit_position]-eventReader->Det_PedMean[8][(int)diamond_hit_position] << endl;
 
 		int sign;
 
@@ -760,8 +558,8 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 
 		// calculate eta for the two closest two channels to the estimated hit position
 		diamond_secondhit_channel = diamond_hit_channel - sign;
-		firstchannel_adc = Dia_ADC[diamond_hit_channel]-Det_PedMean[8][diamond_hit_channel];
-		secondchannel_adc = Dia_ADC[diamond_secondhit_channel]-Det_PedMean[8][diamond_secondhit_channel];
+		firstchannel_adc = eventReader->Dia_ADC[diamond_hit_channel]-eventReader->Det_PedMean[8][diamond_hit_channel];
+		secondchannel_adc = eventReader->Dia_ADC[diamond_secondhit_channel]-eventReader->Det_PedMean[8][diamond_secondhit_channel];
 		if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
 		else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
 		histo_transparentclustering_eta->Fill(transp_eta);
@@ -782,8 +580,8 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 				current_sign = (-1) * current_sign;
 				if (verbose) cout << current_channel;
 				if (verbose) if (channel < j) cout << ", ";
-				if (current_channel > 0 && current_channel < 128 /* && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel]*/)
-					cluster_adc = cluster_adc + Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
+				if (current_channel > 0 && current_channel < 128 /* && eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*eventReader->Det_PedWidth[8][current_channel]*/)
+					cluster_adc = cluster_adc + eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel];
 			}
 			if (verbose) cout << endl;
 			if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
@@ -803,8 +601,85 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 	histSaver->SaveHistogram(histo_transparentclustering_hitdiff);
 	histSaver->SaveHistogram(histo_transparentclustering_hitdiff_scatter);
 	histSaver->SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
+}
 
-	PedFile->Close();
+void AlignmentClass::createAlignmentSummary(){
+	//report results in a file
+
+			ostringstream alignment_summary_path;
+			alignment_summary_path << histSaver->GetPlotsPath() << "Alignment_Summary.txt";
+			ofstream alignment_summary(alignment_summary_path.str().c_str());
+
+			alignment_summary << "Alignment summary " << endl;
+			alignment_summary << "----------------- " << endl << endl;
+
+			alignment_summary << "Offsets (multiples of 50um):" << endl << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << "det_x_offset[" << det << "] = " << align->det_x_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << "det_y_offset[" << det << "] = " << align->det_y_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << "det_z_offset[" << det << "] = " << align->det_z_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << "det_phix_offset[" << det << "] = " << align->det_phix_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << "det_phiy_offset[" << det << "] = " << align->det_phiy_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+
+			alignment_summary << "Resolutions (multiples of 50um):" << endl << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << "det_x_resolution[" << det << "] = " << align->det_x_resolution[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << "det_y_resolution[" << det << "] = " << align->det_y_resolution[det] <<endl;
+			}
+
+
+			alignment_summary << endl << endl;
+			alignment_summary << "Alignment summary (for pasting into a spread sheet) " << endl;
+			alignment_summary << "--------------------------------------------------- " << endl << endl;
+
+			alignment_summary << "Offsets (multiples of 50um):" << endl << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << align->det_x_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << align->det_y_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << align->det_z_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << align->det_phix_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << align->det_phiy_offset[det] <<endl;
+			}
+			alignment_summary << endl;
+
+			alignment_summary << "Resolutions (multiples of 50um):" << endl << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << align->det_x_resolution[det] <<endl;
+			}
+			alignment_summary << endl;
+			for(int det=0; det<5; det++) {
+				alignment_summary << align->det_y_resolution[det] <<endl;
+			}
+			alignment_summary.close();
 }
 
 

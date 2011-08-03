@@ -122,14 +122,14 @@ int main(int argc, char ** argv) {
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
 		cl.Verbosity = VERBOSITY;
 		vector<FidCutRegion> FidCutRegions;
-		if (cl.UseAutoFidCut) {
+		if (cl.getUseAutoFidCut()) {
 			cout << endl;
 			cout << "==> Starting AutoFidCut.." << endl;
 			cout << "cl.AutoFidCut()" << endl;
 			cl.AutoFidCut();
-			if (FidCutRegions.size() == 0) cl.UseAutoFidCut = false;
+			if (FidCutRegions.size() == 0) cl.setUseAutoFidCut(false);
 		}
-		if (FidCutRegions.size() > 0 && cl.UseAutoFidCut) {
+		if (FidCutRegions.size() > 0 && cl.getUseAutoFidCut()) {
 			for (int reg = 0; reg < FidCutRegions.size(); reg++) {
 				cl.SetRunParameters(reg,FidCutRegions[reg],FidCutRegions.size()-1);
 				// TODO: set different paths for the plots
@@ -138,7 +138,7 @@ int main(int argc, char ** argv) {
 			}
 		}
 		else {
-			cl.AlternativeClustering = ALTCLUSTERING;
+			cl.setAlternativeClustering(ALTCLUSTERING);
 			if (DO_ALIGNMENT) {
 				cout << "cl.Align(" << PLOTS << "," << CUTFAKETRACKS << ");" << endl;
 				cl.Align(PLOTS, CUTFAKETRACKS);

@@ -45,15 +45,13 @@ using namespace TMath;
 #include "TDetectorAlignment.hh"
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
+#include "TSettings.class.hh"
 typedef unsigned int uint;
 
 class Clustering {
    public:
       Clustering(unsigned int RunNumber, string RunDescription = ""); //open files
       ~Clustering(); //close files
-      void LoadSettings();
-      void ParseIntArray(string value, vector<int> &vec);
-      void ParseFloatArray(string value, vector<float> &vec);
       void ClusterEvent(bool verbose = 0);
 	void ClusterEventSeeds(bool verbose = 0);
       void BookHistograms();
@@ -70,62 +68,23 @@ class Clustering {
 //	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
 	void EventMonitor(int CurrentEvent = 0);
 	void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
-
-	bool UseAutoFidCut;
-	bool AlternativeClustering;
+   public://See if needded
+	bool getUseAutoFidCut(){return settings->getUseAutoFidCut();};
+	void setAlternativeClustering(bool value){settings->setAlternativeClustering(value);}
+	void setUseAutoFidCut(bool value){settings->setUseAutoFidCut(value);}
+//
+//	bool UseAutoFidCut;
+//	bool AlternativeClustering;
 
    private:
-      //general settings
-      Int_t SaveAllFilesSwitch; //1 for save files, 0 for don't
-      Int_t ClosePlotsOnSave;
-      Int_t IndexProduceSwitch;
+	TSettings *settings;
 
-      //pedestal settings
-      float fix_dia_noise; // fix_dia_noise<0 disables diamond noise-fixing
-      Int_t Iter_Size; //buffer size
-      Int_t Taylor_speed_throttle; //# of events to recalculate RMS the old way; set to 1 to disable
-      Int_t dia_input; // 1 for 2006 and 0 for the rest
-      Float_t Si_Pedestal_Hit_Factor;
-      Float_t Di_Pedestal_Hit_Factor;
-      Int_t CMN_cut;  //Should be less than or equal to CMN_coor_high
-
-      //clustering settings
-      Float_t Si_Cluster_Seed_Factor;
-      Float_t Si_Cluster_Hit_Factor;
-      Float_t Di_Cluster_Seed_Factor;
-      Float_t Di_Cluster_Hit_Factor;
-      Float_t si_avg_fidcut_xlow;
-      Float_t si_avg_fidcut_xhigh;
-      Float_t si_avg_fidcut_ylow;
-      Float_t si_avg_fidcut_yhigh;
-      Int_t pulse_height_num_bins;
-      Float_t pulse_height_si_max;
-      Float_t pulse_height_di_max;
-      Float_t snr_distribution_si_max;
-      Float_t snr_distribution_di_max;
-
-      //Hi/low eta slices
-      Float_t eta_lowq_slice_low;
-      Float_t eta_lowq_slice_hi;
-      Float_t eta_hiq_slice_low;
-      Float_t eta_hiq_slice_hi;
-
-      //Number of slices (<1 to disable)
-      Int_t etavsq_n_landau_slices;
-
-      Int_t snr_plots_enable;
       vector<int> single_channel_analysis_channels;
-
-      //Channels to Screen
-      vector<int> Det_channel_screen_channels[9];
-      vector<int> Det_channel_screen_regions[9];
-      ChannelScreen Det_channel_screen[9];
 
 
       //Alignment
       vector<TDiamondTrack> tracks, tracks_fidcut;
       vector<bool> tracks_mask, tracks_fidcut_mask;
-	Float_t alignment_chi2;
 	vector<Float_t> dia_offset;
 
       //Telescope geometry
@@ -136,25 +95,11 @@ class Clustering {
       Double_t detectorDiaZ;
 
       //Is the diamond aligned to Silicon x coordinates?
-      bool dia_x_aligned;
+
 
       //How should charge interpolation be done for two hit clusters?
-      bool eta_correction;
 
-      //Filter tracks not in good fiducial region w/o bad strips
-      Int_t align_sil_fid_xlow;
-      Int_t align_sil_fid_xhi;
-      Int_t align_sil_fid_ylow;
-      Int_t align_sil_fid_yhi;
 
-      //Alignment constants for tracking
-      vector<Float_t> alignment_x_offsets;
-      vector<Float_t> alignment_y_offsets;
-      vector<Float_t> alignment_phi_offsets;
-      vector<Float_t> alignment_z_offsets;
-
-      //fraction of tracks used to derive alignment constants
-      Float_t alignment_training_track_fraction;
 
       //paths
       string plots_path;
@@ -165,7 +110,7 @@ class Clustering {
       string settings_file;
 	string pedfile_path;
 
-	TADCEventReader *EventReader;
+	TADCEventReader *eventReader;
       //processed event storage; read from pedtree
       //UInt_t run_number;
 
@@ -230,6 +175,7 @@ class Clustering {
 
       //added for handling of overall verbosity
       int Verbosity;
+      int verbosity;
 
    private:
 

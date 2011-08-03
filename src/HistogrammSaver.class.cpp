@@ -9,12 +9,15 @@
 
 HistogrammSaver::HistogrammSaver(int verbose) {
 	// TODO Auto-generated constructor stub
+	sys=NULL;
+	pt=NULL;
 	verbosity=verbose;
 	runNumber=0;
 	nEvents=0;
 	plots_path=".";
 	pt = new TPaveText(0.07,0,0.22,0.10,"NDC");
 	UpdatePaveText();
+	sys=new TSystem();
 	if(verbosity)cout<<"Created instance of HistogrammSaver"<<endl;
 	currentStyle= new TStyle("HistSaverStyle","HistSaverStyle");
 	currentStyle->SetPalette(1);
@@ -65,6 +68,7 @@ void HistogrammSaver::SetNumberOfEvents(unsigned int nNewEvents){
 void HistogrammSaver::SetPlotsPath(string path){
 	plots_path.assign(path);
 	if(verbosity)cout<<"Set Plotspath: \""<<plots_path<<"\""<<endl;
+	sys->mkdir(plots_path.c_str());
 }
 
 void HistogrammSaver::SetStyle(TStyle newStyle){
@@ -223,4 +227,63 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, string location, string fil
    img->WriteImage(png_file);
    cout << ".png file was created at: " << png_file << endl;
    delete img;
+}
+
+void HistogrammSaver::SetDuckStyle() {
+	TStyle* DuckStyle = new TStyle("DuckStyle", "Famous Duck Style");
+	DuckStyle->SetOptStat(1110); //Stat options to be displayed
+	//	DuckStyle->SetOptFit(1111);  //Fit options to be displayed
+	DuckStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
+	DuckStyle->SetPadRightMargin(0.15);
+	DuckStyle->SetPadTopMargin(0.15);
+	DuckStyle->SetTitleColor(kBlack);
+	DuckStyle->SetFrameLineWidth(0.05);
+	DuckStyle->SetStatFont(42);
+	DuckStyle->SetStatBorderSize(0);
+	DuckStyle->SetPadBorderSize(0);
+	DuckStyle->SetPadTopMargin(1);
+	DuckStyle->SetLegendBorderSize(0);
+	DuckStyle->SetStatFontSize(0.02);
+	DuckStyle->SetStatStyle(0);
+	DuckStyle->SetStatH(0.12); //Sets Height of Stats Box
+	DuckStyle->SetStatW(0.15); //Sets Width of Stats Box
+	DuckStyle->SetStatX(0.9);
+	DuckStyle->SetStatY(0.97);
+	DuckStyle->SetTitleOffset(1.0,"Y");
+	DuckStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+	DuckStyle->SetCanvasBorderMode(0);
+	DuckStyle->SetTitleFont(42,"XYZ");
+	DuckStyle->SetTitleFontSize(0.038);
+	//	DuckStyle->SetTitleTextSize(0.03);
+	DuckStyle->SetTitleTextColor(kBlack);
+	DuckStyle->SetFrameLineStyle(0);
+	DuckStyle->SetGridStyle(0);
+	DuckStyle->SetHatchesLineWidth(0);
+	//	DuckStyle->SetOptTitle(0);
+	DuckStyle->SetPadTickX(0);
+	DuckStyle->SetPadTickY(0);
+	DuckStyle->SetTitleX(0.07);
+	DuckStyle->SetTitleY(0.925);
+
+	DuckStyle->SetTitleSize(0.02,"XYZ");
+	DuckStyle->SetLineWidth(0.05);
+	DuckStyle->SetHistLineWidth(1);
+	//	DuckStyle->SetTitleStyle(0);
+	DuckStyle->SetTitleBorderSize(0);
+	DuckStyle->SetTitleFillColor(0);
+	DuckStyle->SetHistLineWidth(0.05);
+
+	//	DuckStyle->SetTickLength(0,"XY");
+	//	gStyle->SetBarOffset(0.5);
+	//	gStyle->SetStatFont(42);
+	//	gStyle->SetTextSize(0.01);
+	DuckStyle->SetLabelFont(42,"XYZ");
+	DuckStyle->SetLabelColor(kBlack,"XYZ");
+	DuckStyle->SetLabelSize(0.025,"XYZ");
+	//DuckStyle->SetTitleOffset(1.8, "Y"); // Another way to set the Offset
+	//	gStyle->SetTitleOffset(1.2, "X"); // Another way to set the Offset
+	DuckStyle->SetTitleOffset(1.2,"X");
+	DuckStyle->cd();
+
+	cout << "Using DuckStyle" << endl;
 }

@@ -21,6 +21,7 @@ TADCEventReader::TADCEventReader(TTree *tree) {
 
 TADCEventReader::~TADCEventReader() {
 	// TODO Auto-generated destructor stub
+	cout<< "deleting instance of TADCEventReader"<<endl;
 }
 
 bool TADCEventReader::SetTree(TTree *tree){
