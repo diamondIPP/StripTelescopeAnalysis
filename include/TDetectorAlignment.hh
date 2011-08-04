@@ -133,5 +133,8 @@ class TDetectorAlignment{
       string plots_path;
       int SaveAllFilesSwitch, ClosePlotsOnSave, SaveAllRootFilesSwitch;
 
+   private:
+      int verbosity;
+
 };
 #endif /* TDETECTORALIGNMENT_HH_ */

@@ -45,6 +45,7 @@ using namespace TMath;
 #include "TDetectorAlignment.hh"
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
+#include "AlignmentClass.hh"
 #include "TSettings.class.hh"
 typedef unsigned int uint;
 
@@ -60,7 +61,8 @@ class Clustering {
       void DrawHistograms();
       void GenerateHTML();
       void ClusterRun(bool plots = 1);
-      void Align(bool plots = 1, bool CutFakeTracksOn = false);
+
+      void Alignment(bool plots, bool CutFakeTracksOn);
 	  void HistCleaner(int regid, TH2F* histo);
       void AutoFidCut();
     void TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
@@ -72,12 +74,16 @@ class Clustering {
 	bool getUseAutoFidCut(){return settings->getUseAutoFidCut();};
 	void setAlternativeClustering(bool value){settings->setAlternativeClustering(value);}
 	void setUseAutoFidCut(bool value){settings->setUseAutoFidCut(value);}
+   private:
+	void Align(bool plots = 1, bool CutFakeTracksOn = false);
 //
 //	bool UseAutoFidCut;
 //	bool AlternativeClustering;
 
    private:
 	TSettings *settings;
+    AlignmentClass* alignment;
+
 
       vector<int> single_channel_analysis_channels;
 
@@ -129,6 +135,7 @@ class Clustering {
       TRandom3 rand;
       HistogrammSaver *histSaver;
 
+
    public:
 
       //plots
@@ -174,7 +181,6 @@ class Clustering {
 	  FidCutRegion* FCR[4];
 
       //added for handling of overall verbosity
-      int Verbosity;
       int verbosity;
 
    private:

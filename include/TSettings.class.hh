@@ -67,6 +67,7 @@ public:
 	vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
+	string getFileName() const;
 
 	void setAlignment_training_track_fraction(Float_t alignment_training_track_fraction);
 	void setFix_dia_noise(float fix_dia_noise);

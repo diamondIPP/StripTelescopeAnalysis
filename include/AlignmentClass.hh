@@ -26,15 +26,19 @@ public:
 	int Align(bool plots = 1, bool CutFakeTracksOn = false);
     void TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
-	void SetSettings(TSettings settings);
+	void SetSettings(TSettings* settings);
 	void SetPlotsPath(string plotspath);
+	void SetTracks(vector<TDiamondTrack> tracks);
+	void SetAlignment_tracks_mask(vector<bool> tracks_mask);
+	void SetAlignment_tracks_fidcut_mask(vector<bool> alignment_tracks_fidcut_mask);
+	void SetAlignment_tracks_fidcut(vector<TDiamondTrack> alignment_tracks_fidcut);
 private:
 	void createAlignmentSummary();
 
 private:/**needed variables*/
 	TDetectorAlignment* align;
-	vector<TDiamondTrack> tracks;
 
+	vector<TDiamondTrack> alignment_tracks;
 	vector<bool> alignment_tracks_mask;
 	vector<TDiamondTrack> alignment_tracks_fidcut;
 	vector<bool> alignment_tracks_fidcut_mask;
@@ -43,10 +47,10 @@ private:/**needed variables*/
 	TSettings *settings;
 	TADCEventReader *eventReader;
 
-	//clustering settings
-	Float_t Di_Cluster_Hit_Factor;
-    Float_t pulse_height_di_max;
-    Int_t pulse_height_num_bins;
+//	//clustering settings
+//	Float_t Di_Cluster_Hit_Factor;
+//    Float_t pulse_height_di_max;
+//    Int_t pulse_height_num_bins;
 
 	//histos
     TH1F* histo_transparentclustering_landau[10];
@@ -67,6 +71,9 @@ private:/*see if needed*/
 	HistogrammSaver *histSaver;
 	HistogrammSaver *histSaverAlignment;
 	HistogrammSaver *histSaverAlignmentFakedTracks;
+
+private:
+	int verbosity;
 };
 
 #endif /* ALIGNMENTCLASS_HH_ */

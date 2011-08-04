@@ -40,6 +40,7 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
 	if(verbosity)cout<<"Clustering::Clustering"<<endl;
 	eventReader=NULL;
 	settings =NULL;
+	alignment=NULL;
 
 	//Alignment
 
@@ -138,7 +139,12 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
 	counter_alignment_only_fidcut_tracks = 0;
 	counter_alignment_tracks_zero_suppressed = 0;
 
-	histSaver= new HistogrammSaver(Verbosity);
+	//create alignment class
+	alignment = new AlignmentClass(PedTree,0);
+	alignment->SetSettings(settings);
+	alignment->SetPlotsPath(plots_path);
+
+	histSaver= new HistogrammSaver(verbosity);
 	histSaver->SetRunNumber(eventReader->run_number);
 	histSaver->SetNumberOfEvents((unsigned int)eventReader->GetEntries());
 	histSaver->SetPlotsPath(plots_path);
@@ -2089,7 +2095,7 @@ and plot the second 100k events,
 
 //sequentially cluster all events
 void Clustering::ClusterRun(bool plots) {
-	cout<<"Clustering::ClusterRun()"<<endl;
+	if(verbosity)	cout<<"Clustering::ClusterRun() \""<<plots_path<<"\""<<endl;
    //Start Timer
    TStopwatch Watch;
    Watch.Start();
@@ -2115,6 +2121,7 @@ void Clustering::ClusterRun(bool plots) {
 	current_event = 0;
 
    //loop over events
+	if(verbosity)	cout<<"Clustering::ClusterRun()::StartLoop"<<endl;
    for(uint e=0; e<eventReader->GetEntries(); e++) {
    //for(uint e=0; e<10000; e++) {
 //	   bool AlternativeClustering = false;
@@ -2242,7 +2249,7 @@ void Clustering::ClusterRun(bool plots) {
             hit_position = int(hit_position) + histo_etaintegral[det][0][1]->GetBinContent(int(nbins*(hit_position-int(hit_position))+0.5));
             if(det==8) histo_hitpos[det][1]->Fill(hit_position-int(hit_position));
          }
-         tracks_fidcut[t].SetDetectorHitPosition(det, hit_position);
+         tracks_fidcut.at(t).SetDetectorHitPosition(det, hit_position);
       }
    }
    
@@ -2379,6 +2386,8 @@ void Clustering::HistCleaner(int regid, TH2F* histo) {
 }
 
 
+
+
 void Clustering::AutoFidCut() {
 		
 	histo_afc_unit_histo_1f->Reset(); // reset 1f unit histogram (all bins zero)
@@ -2392,13 +2401,13 @@ void Clustering::AutoFidCut() {
 	int histo_afc_col_sums_y[256];
 	
 	
-    if(Verbosity>0) {
+    if(verbosity>0) {
     cout << "\n";
 	cout << "AutoFidCut: I'm the AutoFidCut function.\n\n";
 	cout << " START AutoFidCut \n\n";	
     }    
 
-    if(Verbosity>0) {    
+    if(verbosity>0) {    
 	// produce necessary plots to detect fidcut region
 	cout << endl << endl << "-- produce plot for AutoFidCut().." << endl;
 	cout << "running over " << eventReader->GetEntries() << " events.." << endl;
@@ -2437,7 +2446,7 @@ void Clustering::AutoFidCut() {
 		}
 	}
     
-    if(Verbosity>0) {
+    if(verbosity>0) {
 	cout << "plot production for AutoFidCut: done." << endl << endl;
     }
 	
@@ -2475,7 +2484,7 @@ void Clustering::AutoFidCut() {
     float afc_cut_factor = 0.4;
     
     //write maxima of x and y histograms to stdout
-    if(Verbosity>0) {
+    if(verbosity>0) {
     cout << "histo_afc_x->GetMaximum() is:\t" << (int)histo_afc_x->GetMaximum() << "\n";
     cout << "histo_afc_y->GetMaximum() is:\t" << (int)histo_afc_y->GetMaximum() << "\n";
     }
@@ -2518,13 +2527,13 @@ void Clustering::AutoFidCut() {
             afc_last_start = j;
             afc_width_counter++;
             afc_block_count_x++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
         } else if ( (histo_afc_x_cut->GetBinContent(j) > 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) ) {
             afc_width_counter++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             continue;
         } else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             for(int k=afc_last_start;k<=j;k++) {
                 histo_afc_x_cut->SetBinContent(k,0);
             }
@@ -2534,15 +2543,15 @@ void Clustering::AutoFidCut() {
         } else if ( (histo_afc_x_cut->GetBinContent(j) == 0) && (histo_afc_x_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
             afc_width_counter = 0;
             afc_block_count_x++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             
         } else if ( (histo_afc_x_cut->GetBinContent(j) == 0) ) {
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             continue;
         }
         else {
             afc_width_counter++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_x_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
         }
     }
     
@@ -2552,13 +2561,13 @@ void Clustering::AutoFidCut() {
             afc_last_start = j;
             afc_width_counter++;
             afc_block_count_y++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 1 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
         } else if ( (histo_afc_y_cut->GetBinContent(j) > 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) ) {
             afc_width_counter++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 2 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             continue;
         } else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter < afc_width_min) ) {
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 3 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             for(int k=afc_last_start;k<=j;k++) {
                 histo_afc_y_cut->SetBinContent(k,0);
             }
@@ -2568,15 +2577,15 @@ void Clustering::AutoFidCut() {
         } else if ( (histo_afc_y_cut->GetBinContent(j) == 0) && (histo_afc_y_cut->GetBinContent(j-1) > 0) && (afc_width_counter > afc_width_min) ) {
             afc_width_counter = 0;
             afc_block_count_y++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 5 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             
         } else if ( (histo_afc_y_cut->GetBinContent(j) == 0) ) {
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 0 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
             continue;
         }
         else {
             afc_width_counter++;
-            if(Verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
+            if(verbosity>=2) cout << "column:\t" << j << " has value: " << histo_afc_y_cut->GetBinContent(j) << " is case 4 width afc_last_start= " << afc_last_start << " and widthcounter= " << afc_width_counter << "\n";
         }
     }
     
@@ -2584,7 +2593,7 @@ void Clustering::AutoFidCut() {
 	
     //divide the detector plane in a maximum of four quadrants
     
-    if(Verbosity>=1) {
+    if(verbosity>=1) {
     cout << "#-#-#�#�#�#�#�#�#�#�#�#�#�#�#�#" << endl;
     cout << "#" << endl;
     cout << "# afc region recognition started..." << endl;
@@ -2597,7 +2606,7 @@ void Clustering::AutoFidCut() {
     bool one_and_only_afc_region_y = 1;
     bool one_and_only_afc_region = 0;
 	
-    if(Verbosity>=2) cout << "# x divider function called." << endl;
+    if(verbosity>=2) cout << "# x divider function called." << endl;
     for(int i=2;i<256;i++) {			
         if( (histo_afc_x_cut->GetBinContent(i-1) == 0) && (histo_afc_x_cut->GetBinContent(i) > 0) ) {
             for(int j=i;j<256;j++) {
@@ -2618,13 +2627,13 @@ void Clustering::AutoFidCut() {
 	
     if (one_and_only_afc_region_x) {
         afc_x_divider = 0;
-        if(Verbosity>=1) cout << "# this run has one and only one afc region in x direction. afc_x_divider set to 0." << endl;
+        if(verbosity>=1) cout << "# this run has one and only one afc region in x direction. afc_x_divider set to 0." << endl;
     } else {
-        if(Verbosity>=1) cout << "# this run has more than one afc region in x direction." << endl;
+        if(verbosity>=1) cout << "# this run has more than one afc region in x direction." << endl;
     }
 	
     
-    if(Verbosity>=1) cout << "#" << endl << "# y divider function called." << endl;
+    if(verbosity>=1) cout << "#" << endl << "# y divider function called." << endl;
     for(int i=2;i<256;i++) {
         if( (histo_afc_y_cut->GetBinContent(i-1) == 0) && (histo_afc_y_cut->GetBinContent(i) > 0) ) {
             for(int j=i;j<256;j++) {
@@ -2645,23 +2654,23 @@ void Clustering::AutoFidCut() {
 	
     if (one_and_only_afc_region_y) {
         afc_y_divider = 0;
-        if(Verbosity>=1) cout << "# this run has one and only one afc region in y direction. afc_y_divider set to 0." << endl;
+        if(verbosity>=1) cout << "# this run has one and only one afc region in y direction. afc_y_divider set to 0." << endl;
     } else {
-        if(Verbosity>=1) cout << "# this run has more than one afc region in y direction." << endl;
+        if(verbosity>=1) cout << "# this run has more than one afc region in y direction." << endl;
     }
 	
     if( one_and_only_afc_region_x && one_and_only_afc_region_y ) {
         one_and_only_afc_region = 1;
-        if(Verbosity>=1) cout << "#" << endl << "#" << endl << "# this run has one and only one afc region." << endl;
+        if(verbosity>=1) cout << "#" << endl << "#" << endl << "# this run has one and only one afc region." << endl;
     } else {
-        if(Verbosity>=1) cout << "#" << endl << "#" << endl << "# this run has more than one afc region." << endl;
+        if(verbosity>=1) cout << "#" << endl << "#" << endl << "# this run has more than one afc region." << endl;
     }
 	
-    if(Verbosity>=1) cout << "#" << endl << "# afc region recognition ended..." << endl << "#" << endl << "#-#-#�#�#�#�#�#�#�#�#�#�#�#�#�#" << endl;
+    if(verbosity>=1) cout << "#" << endl << "# afc region recognition ended..." << endl << "#" << endl << "#-#-#�#�#�#�#�#�#�#�#�#�#�#�#�#" << endl;
 	
     //end divider code
 	
-	if(Verbosity>=1) { 
+	if(verbosity>=1) { 
     cout << endl;
     cout << "# # # # # # # # # # # # # # # # # # # # # # #" << endl;
     cout << "#" << endl;
@@ -2702,12 +2711,12 @@ void Clustering::AutoFidCut() {
     histo_afc_region_1_mask->SetName("histo_afc_region_1_mask");
 	
     histSaver->SaveHistogramPDF(histo_afc_region_1_mask);
-    if(Verbosity>=2) cout << endl << endl << "afc_region_1 saved" << endl << endl;
+    if(verbosity>=2) cout << endl << endl << "afc_region_1 saved" << endl << endl;
 	
     // run HistCleaner on 
-    if(Verbosity>=2) cout << endl << "Calling HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
+    if(verbosity>=2) cout << endl << "Calling HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
     HistCleaner(9999, histo_afc_region_1_mask);
-    if(Verbosity>=2) cout << endl << "Finished HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
+    if(verbosity>=2) cout << endl << "Finished HistCleaner on " << histo_afc_region_1_mask->GetName() << "." << endl;
 	
     //		SaveHistogramPDF(histo_afc_region_1_mask);
     //		cout << endl << endl << "afc_region_1 saved" << endl << endl;
@@ -2749,7 +2758,7 @@ void Clustering::AutoFidCut() {
         }
     }
 	
-    if(Verbosity>=1) {
+    if(verbosity>=1) {
     cout << endl;
     cout << endl;
     cout << "#####################################################################" << endl;
@@ -2768,11 +2777,11 @@ void Clustering::AutoFidCut() {
 		for(int i=xpos;i<256;i++) {
 			if( (histo_afc_x_cut->GetBinContent(i-1) == 0) && (histo_afc_x_cut->GetBinContent(i) > 0) ) {
 				FCR[z]->SetValueXLow(i+5);
-				if(Verbosity>=2) cout << "Setting FCR[" << z << "].ValueXLow to: " << i+5 << endl;
+				if(verbosity>=2) cout << "Setting FCR[" << z << "].ValueXLow to: " << i+5 << endl;
 				for(int j=i+5;j<256;j++) {
 					if ( (histo_afc_x_cut->GetBinContent(j-1) > 0) && (histo_afc_x_cut->GetBinContent(j) == 0) ) {
                         FCR[z]->SetValueXHigh(j-5);
-                        if(Verbosity>=2) cout << "Setting FCR[" << z << "].ValueXHigh to: " << j-5 << endl;					
+                        if(verbosity>=2) cout << "Setting FCR[" << z << "].ValueXHigh to: " << j-5 << endl;					
                         xpos=j+5;
                         break;
 					}} break;
@@ -2782,7 +2791,7 @@ void Clustering::AutoFidCut() {
 		
     }
 	
-    if(Verbosity>=2) {
+    if(verbosity>=2) {
     cout << endl;
     cout << "#####################################################################" << endl;
     cout << endl;
@@ -2795,7 +2804,7 @@ void Clustering::AutoFidCut() {
     int afc_regions_count = (afc_block_count_x/2)*(afc_block_count_y/2);
     int afc_regions_safety_delta = 5;
     
-    if(Verbosity>=2) {
+    if(verbosity>=2) {
     cout << "\nafc_block_count_x is:\t" << afc_block_count_x << "\n";
     cout << "afc_block_count_y is:\t" << afc_block_count_y << "\n";
     cout << "That means, we have " << afc_block_count_x/2 << " block(s) in x- and " << afc_block_count_y/2 << " block(s) in y-direction. so: " << afc_regions_count << " in total.\n\n";
@@ -2875,7 +2884,7 @@ void Clustering::AutoFidCut() {
 		
 		afc_current_histo_2f->SetName(phname.str().c_str());
 		
-        if(Verbosity>=1) {
+        if(verbosity>=1) {
 		cout << "TENGTARATENG" << endl;
 		cout << "FOR LOOP FOR FIDCUT REGIONS. NAME OF CURRENT HISTO IS: " << afc_current_histo_2f->GetName() << "." << endl;
         }
@@ -2919,12 +2928,32 @@ void Clustering::AutoFidCut() {
     histSaver->SaveHistogramPNG(histo_afc_y_cut);
     histSaver->SaveHistogramPNG(histo_afc_scatter_firstfidcut);
     
-    if(Verbosity>=0) {
+    if(verbosity>=0) {
     cout << "\n";
     cout << "FINISHED AutoFidCut \n\n\n";
     }
 }	
 
+
+void Clustering::Alignment(bool plots, bool CutFakeTracksOn){
+	//Align(plots, CutFakeTracksOn);
+
+	alignment->GetEvent(current_event);
+	alignment->SetTracks(tracks);
+	alignment->SetAlignment_tracks_fidcut(tracks_fidcut);
+	alignment->SetAlignment_tracks_fidcut_mask(tracks_fidcut_mask);
+	if( alignment->Align(0,CutFakeTracksOn)==-1){
+		if(verbosity) cout<<"Clustering::Alignment::No Clusters build yet, do ClusterRun"<<endl;
+		ClusterRun(0);
+		if(verbosity) cout<<"Clustering::Alignment::track size: "<<tracks.size()<<endl;
+		alignment->SetTracks(tracks);
+		alignment->SetAlignment_tracks_mask(tracks_mask);
+		alignment->SetAlignment_tracks_fidcut(tracks_fidcut);
+		alignment->SetAlignment_tracks_fidcut_mask(tracks_fidcut_mask);
+		if(alignment->Align(0,CutFakeTracksOn)==-1) cout<<"clustering::Alignment:Clustering did not worked"<<endl;
+		exit (-1);
+	}
+}
 
 void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 	
@@ -3175,7 +3204,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 
 // -- transparent analysis for any plane
 void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose) {
-    cout << "Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
+    cout << "Clustering::TransparentAnalysis:Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
 	int event;
 	vector<Float_t> x_positions, y_positions, z_positions, par, par_y;
 	Float_t diamond_hit_position = 0;

@@ -120,7 +120,7 @@ int main(int argc, char ** argv) {
 		cout << "==> Starting Clustering.." << endl;
 		cout << "Clustering cl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\")" << endl;
 		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
-		cl.Verbosity = VERBOSITY;
+		cl.verbosity = VERBOSITY;
 		vector<FidCutRegion> FidCutRegions;
 		if (cl.getUseAutoFidCut()) {
 			cout << endl;
@@ -141,7 +141,7 @@ int main(int argc, char ** argv) {
 			cl.setAlternativeClustering(ALTCLUSTERING);
 			if (DO_ALIGNMENT) {
 				cout << "cl.Align(" << PLOTS << "," << CUTFAKETRACKS << ");" << endl;
-				cl.Align(PLOTS, CUTFAKETRACKS);
+				cl.Alignment(PLOTS, CUTFAKETRACKS);
 			}
 			else {
 				cout << "cl.ClusterRun(" << PLOTS << ");" << endl;

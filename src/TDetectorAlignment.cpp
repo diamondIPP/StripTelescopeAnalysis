@@ -10,7 +10,7 @@
 
 
 TDetectorAlignment::TDetectorAlignment(string plots_path_string) {
-
+	verbosity=1;
    nDetectors = 5;
    /*residualsX = TH1F("residualsX","residualsX",10000,-100,100);
    residualsY = TH1F("residualsY","residualsY",10000,-100,100);
@@ -86,6 +86,7 @@ Double_t TDetectorAlignment::GetSiResolution() {
 
 void TDetectorAlignment::LoadData(TDiamondTrack track)
 {
+	//if(verbosity>2)cout<<"TDetectorAlignment::LoadData"<<endl;
    TDetectorPlane det_buffer[5];
 
    for(Int_t det=0; det<5; det++) det_buffer[det] = track.GetD(det);
@@ -143,6 +144,8 @@ void TDetectorAlignment::LoadData(TDiamondTrack track)
    cout<<track_holder.GetD(0).GetX()<<"\t"<<track_holder.GetD(0).GetY()<<"\t"<<track_holder.GetD(0).GetZ()<<endl;
    cout<<track_holder.GetD(1).GetX()<<"\t"<<track_holder.GetD(1).GetY()<<"\t"<<track_holder.GetD(1).GetZ()<<endl;
    */
+
+	//if(verbosity>2)cout<<"TDetectorAlignment::LoadData:DONE"<<endl;
 }
 
 void TDetectorAlignment::PositionPredictor(int subject_detector, int ref_detector1, int ref_detector2)
@@ -327,7 +330,7 @@ void TDetectorAlignment::PlotCartesianDistribution()
    cout << "Tracks have mean y-intercept of " << yint_spread.GetMean() << " and RMS of " << yint_spread.GetRMS() << endl;
    cout << "Tracks have mean x-slope of " << xslope_spread.GetMean() << " and RMS of " << xslope_spread.GetRMS() << endl;
    cout << "Tracks have mean y-slope of " << yslope_spread.GetMean() << " and RMS of " << yslope_spread.GetRMS() << endl;
-
+   if(verbosity)cout<<"TDetectorAlignment::PlotCartesianDistribution: create plots1"<<endl;
    TCanvas* tempcanangle = new TCanvas("trackdistributiontempcanv","trackdistributiontempcanv",800,600);
    xint_spread.GetXaxis()->SetRangeUser(xint_spread.GetMean()-3*xint_spread.GetRMS(),xint_spread.GetMean()+3*xint_spread.GetRMS());
    xint_spread.Draw();
@@ -336,6 +339,7 @@ void TDetectorAlignment::PlotCartesianDistribution()
    //SaveCanvas(tempcanangle, "alignment_tracks_xintercept.C");
    delete tempcanangle;
 
+   if(verbosity)cout<<"TDetectorAlignment::PlotCartesianDistribution: create plots2"<<endl;
    tempcanangle = new TCanvas("trackdistributiontempcanv","trackdistributiontempcanv",800,600);
    yint_spread.GetXaxis()->SetRangeUser(yint_spread.GetMean()-3*yint_spread.GetRMS(),yint_spread.GetMean()+3*yint_spread.GetRMS());
    yint_spread.Draw();
@@ -344,6 +348,7 @@ void TDetectorAlignment::PlotCartesianDistribution()
    //SaveCanvas(tempcanangle, "alignment_tracks_yintercept.C");
    delete tempcanangle;
 
+   if(verbosity)cout<<"TDetectorAlignment::PlotCartesianDistribution: create plots3"<<endl;
    tempcanangle = new TCanvas("trackdistributiontempcanv","trackdistributiontempcanv",800,600);
    xslope_spread.GetXaxis()->SetRangeUser(xslope_spread.GetMean()-3*xslope_spread.GetRMS(),xslope_spread.GetMean()+3*xslope_spread.GetRMS());
    xslope_spread.Draw();
@@ -352,6 +357,7 @@ void TDetectorAlignment::PlotCartesianDistribution()
    //SaveCanvas(tempcanangle, "alignment_tracks_xslope.C");
    delete tempcanangle;
 
+   if(verbosity)cout<<"TDetectorAlignment::PlotCartesianDistribution: create plots4"<<endl;
    tempcanangle = new TCanvas("trackdistributiontempcanv","trackdistributiontempcanv",800,600);
    yslope_spread.GetXaxis()->SetRangeUser(yslope_spread.GetMean()-3*yslope_spread.GetRMS(),yslope_spread.GetMean()+3*yslope_spread.GetRMS());
    yslope_spread.Draw();
@@ -660,19 +666,24 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 }
 
 void TDetectorAlignment::AlignDetectorXY(int subject_detector, bool verbose, bool justcheck) {
+	if(verbosity)cout<<"AlignmentClass::Align::AlignDetectorXY"<<endl;
    AlignDetectorXY(subject_detector, -1, -1, verbose, justcheck);
 }
 
 void TDetectorAlignment::CheckDetectorAlignmentXY(int subject_detector, int ref_detector1, int ref_detector2, bool verbose) {
+	if(verbosity)cout<<"AlignmentClass::Align::CheckDetectorAlignmentXY"<<endl;
    AlignDetectorXY(subject_detector, ref_detector1, ref_detector2, verbose, true);
 }
 
 void TDetectorAlignment::CheckDetectorAlignmentXY(int subject_detector, bool verbose) {
+	if(verbosity)cout<<"AlignmentClass::Align::CheckDetectorAlignmentXY"<<endl;
    AlignDetectorXY(subject_detector, verbose, true);
 }
 
 void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string& histo_title) {
-   TF1 residualsXfit, residualsYfit; //to be fixed
+	if(verbosity)cout<<"TDetectorAlignment::CheckDetectorAlignmentXYPlots"<<endl;
+
+	TF1 residualsXfit, residualsYfit; //to be fixed
 
    std::ostringstream detector_name;
    detector_name << "D" << subject_detector;
@@ -691,10 +702,15 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
 
    Double_t resxmean = 0, resxrms = 0, resymean = 0, resyrms = 0, resxtest, resytest;
 
+
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
-      if(track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks selected for determining alignment constants or track is marked as fake track
-      LoadData(track_storage[t]);
+	   if(verbosity&&t==0)cout<<"TDetectorAlignment::CheckDetectorAlignmentXYPlots:start for loop"<<endl;
+	  LoadData(track_storage.at(t));
+
+	  if(track_mask_storage.size()<=t||track_storage.size()<=t)cout<<"TDetectorAlignment::CheckDetectorAlignmentXYPlots::size not correct"<<endl;
+      if(track_mask_storage.at(t) || track_storage.at(t).FakeTrack) continue; // skip tracks selected for determining alignment constants or track is marked as fake track
+
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5)
          PositionPredictor(subject_detector);
       else
@@ -727,6 +743,7 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
    Double_t plot_width_factor = 7;
    Double_t plot_fit_factor = 2; // 3/4. before
 
+   if(verbosity)cout<<"TDetectorAlignment::CheckDetectorAlignmentXYPlots: create plots"<<endl;
    TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
    //plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
    //TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);

@@ -804,3 +804,8 @@ void TSettings::setUseAutoFidCut(bool UseAutoFidCut)
 {
     this->UseAutoFidCut = UseAutoFidCut;
 }
+
+string TSettings::getFileName() const
+{
+	return this->fileName;
+}

@@ -35,6 +35,7 @@ LIBFILES		+=	TSettings.class.o
 
 PROGS			:= diamondAnalysis
 
+
 all: diamondAnalysis
 
 #all: $(OBJ) $(HEAD) makefile

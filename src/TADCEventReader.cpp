@@ -37,7 +37,9 @@ bool TADCEventReader::SetTree(TTree *tree){
 		return false;
 	}
 }
-
+bool TADCEventReader::isOK(){
+	return (PedTree!=NULL);
+}
 void TADCEventReader::SetBranchAddresses(){
 	//Event Header Branches
 	PedTree->SetBranchAddress("RunNumber",&run_number);
@@ -114,7 +116,7 @@ bool TADCEventReader::GetNextEvent(){
 	return false;
 }
 bool TADCEventReader::GetEvent(UInt_t EventNumber){
-	if(PedTree==NULL) return true;
+	if(PedTree==NULL) return false;
 	if(EventNumber<PedTree->GetEntries()){
 			current_event=EventNumber;
 			PedTree->GetEvent(current_event);
@@ -126,6 +128,10 @@ bool TADCEventReader::GetEvent(UInt_t EventNumber){
 }
 
 Long64_t TADCEventReader::GetEntries(){
+	if (verbosity) {
+		cout<<"TADCEventReader::GetEntries:"<<PedTree<<flush;
+		cout<<" "<<PedTree->GetEntries();
+	}
 	if(PedTree!=NULL)
 		return PedTree->GetEntries();
 	else return -1;

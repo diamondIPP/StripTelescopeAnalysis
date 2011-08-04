@@ -25,6 +25,7 @@ public:
 	bool GetNextEvent();
 	bool GetEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
+	bool isOK();
 private:
 	void SetBranchAddresses();
 	bool SetTree(TTree *tree);

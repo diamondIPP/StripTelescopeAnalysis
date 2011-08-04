@@ -14,19 +14,29 @@ AlignmentClass::AlignmentClass(TTree* tree,UInt_t nEventNumber) {
 	histSaver=NULL;
 	histSaverAlignment=NULL;
 	histSaverAlignmentFakedTracks=NULL;
+	settings=NULL;
 	nAlignSteps =2;
 	histSaver= new HistogrammSaver(0);
 	eventReader = new TADCEventReader(tree);
 	histSaverAlignment = new HistogrammSaver(0);
 	histSaverAlignmentFakedTracks = new HistogrammSaver(0);
 	eventReader->GetEvent(nEventNumber);
+	verbosity=1;
+	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:"<<eventReader->isOK()<<" "<<eventReader<<endl;
 }
 
 AlignmentClass::~AlignmentClass() {
 	// TODO Auto-generated destructor stub
 	if(eventReader!=NULL) delete eventReader;
 	if(histSaver!=NULL) delete histSaver;
+	if (settings!=NULL) delete settings;
 }
+
+void AlignmentClass::SetSettings(TSettings *newSettings){
+	if(settings!=NULL) delete settings;
+	settings = new TSettings(newSettings->getFileName());
+}
+
 void AlignmentClass::SetPlotsPath(string plotsPath){
 	histSaver->SetPlotsPath(plotsPath);
 	ostringstream plots_path_alignment, plots_path_alignment_CutFakeTracks;
@@ -36,15 +46,42 @@ void AlignmentClass::SetPlotsPath(string plotsPath){
 	histSaverAlignmentFakedTracks->SetPlotsPath(plots_path_alignment_CutFakeTracks.str());
 }
 
+bool AlignmentClass::GetEvent(UInt_t nEvent){
+	return eventReader->GetEvent(nEvent);
+}
+
+void AlignmentClass::SetTracks(vector<TDiamondTrack> tracks)
+{
+	this->alignment_tracks=tracks;
+}
+
+void AlignmentClass::SetAlignment_tracks_mask(vector<bool> tracks_mask) {
+	this->alignment_tracks_mask=tracks_mask;
+}
+
+void AlignmentClass::SetAlignment_tracks_fidcut(vector<TDiamondTrack> alignment_tracks_fidcut){
+	this-> alignment_tracks_fidcut= alignment_tracks_fidcut;
+}
+
+void AlignmentClass::SetAlignment_tracks_fidcut_mask(vector<bool> alignment_tracks_fidcut_mask){
+	this->alignment_tracks_fidcut_mask=alignment_tracks_fidcut_mask;
+}
+
 int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
-	if(tracks.size()==0) {
-		cout<<"Clustering::Align: No tracks found; need to CallClustering::ClusterRun first..."<<endl;
+	if (verbosity){
+		cout<<"AlignentClass::Align:Starting \""<<histSaver->GetPlotsPath()<<"\""<<endl;
+		cout<<"\t\t"<<alignment_tracks.size()<<" "<<alignment_tracks_mask.size()<< " ";
+		cout<<		  alignment_tracks_fidcut.size()<<" "<<alignment_tracks_fidcut_mask.size()<<endl;
+		cout << "\t\t "<<eventReader<<" ."<<endl;
+	}
+	if(alignment_tracks.size()==0) {
+		cout<<"AlignmentClass::Align: No tracks found; need to CallClustering::ClusterRun first..."<<endl;
 		return -1;
 		//ClusterRun(plots); // doesn't use alternative clustering
 	}
 
-	if (tracks.size() == 0) {
-		cout << "No tracks available. Alignment not possible. (tracks.size() = " << tracks.size() << ")" << endl;
+	if (alignment_tracks.size() == 0) {
+		cout << "AlignmentClass::Align:No tracks available. Alignment not possible. (tracks.size() = " << alignment_tracks.size() << ")" << endl;
 		return 0;
 	}
 
@@ -58,7 +95,6 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 	cout << count_true << " tracks are masked as true and " << count_false << " tracks as false." << endl;
 	return;*/
 
-	vector<TDiamondTrack> alignment_tracks = tracks;
 	//*vector<bool> alignment_tracks_mask = tracks_mask;
 	//*vector<TDiamondTrack> alignment_tracks_fidcut = tracks_fidcut;
 	//*vector<bool> alignment_tracks_fidcut_mask = tracks_fidcut_mask;
@@ -80,12 +116,14 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 		string postname = "alignment_PostalignmentResiduals";
 
 		// generate residuals before alignment
+		if(verbosity)cout<<"AlignmentClass::Align::CheckDetectorAlignment"<<endl;
 		align->CheckDetectorAlignmentXYPlots(0, 1, 3, prename);
 		align->CheckDetectorAlignmentXYPlots(1, 0, 3, prename);
 		align->CheckDetectorAlignmentXYPlots(2, 0, 3, prename);
 		align->CheckDetectorAlignmentXYPlots(3, 0, 2, prename);
 
 		// itterative alignment loop
+		if(verbosity)cout<<"AlignmentClass::Align::alignmentloop"<<endl;
 		for(int i=0; i<nPasses; i++) {
 			cout << "\n\nPass " << i+1 << endl<< endl;
 			//xy alignment
@@ -113,7 +151,7 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 
 		cout<<endl;
 		cout<<endl;
-		cout<<"Checking final residuals"<<endl;
+		cout<<"AlignmentClass::Align:Checking final residuals"<<endl;
 		cout<<endl;
 
 		// generate residuals after alignment
@@ -132,7 +170,7 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 		align->LoadTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask);
 
 		//check that the silicon is still aligned for these tracks_fidcut
-		cout<<"Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;
+		cout<<"AlignmentClass::Align:Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;
 		align->CheckDetectorAlignmentXY(0, 1, 3);
 		align->CheckDetectorAlignmentXY(1, 0, 3);
 		align->CheckDetectorAlignmentXY(2, 0, 3);
@@ -154,7 +192,7 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 
 		cout<<endl;
 		cout<<endl;
-		cout<<"Checking final diamond residuals"<<endl;
+		cout<<"AlignmentClass::Align:Checking final diamond residuals"<<endl;
 		cout<<endl;
 
 		// generate residuals after alignment
@@ -163,7 +201,7 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 
 		this->createAlignmentSummary();
 
-		cout << "Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
+		cout << "AlignmentClass::Align:Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 
 		if (CutFakeTracksOn && alignStep < 1) {
 			align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, settings->getAlignment_chi2(), CutFakeTracksOn, true);
@@ -202,7 +240,7 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 }
 
 void AlignmentClass::TransparentAnalysis(vector<TDiamondTrack> & tracks, vector<bool> & tracks_mask, TDetectorAlignment *align, bool verbose)
-{ cout << "Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
+{ cout << "AlignmentClass::TransparentAnalysis:Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
 int event;
 vector<Float_t> x_positions, y_positions, z_positions, par, par_y;
 Float_t diamond_hit_position = 0;
@@ -227,14 +265,14 @@ cout << "diamond x offset: " << diamond_x_offset << endl;
 cout << "diamond y offset: " << diamond_y_offset << endl;
 cout << "diamond phi offset: " << diamond_phi_offset << endl;
 cout << "diamond phi y offset: " << diamond_phi_y_offset << endl;
-cout << "diamond hit factor: " << Di_Cluster_Hit_Factor << endl;
+cout << "diamond hit factor: " << settings->getDi_Cluster_Hit_Factor() << endl;
 
-cout << "init histograms for transparent clustering.." << endl;
+cout << "AlignmentClass::TransparentAnalysis:init histograms for transparent clustering.." << endl;
 for (int i = 0; i < 10; i++) {
 	ostringstream histoname_landau, histoname_eta;
 	histoname_landau << "PulseHeight_D3X_" << (i+1) << "HitTransparClusters_8HitsFidcut";
 	cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
-	histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
+	histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),settings->getPulse_height_num_bins(),-0.5,settings->getPulse_height_di_max()+0.5);
 	//		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
 	//		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 }
@@ -244,7 +282,7 @@ histoname_eta << "Eta_D3X_2CentroidHits_TransparClusters";
 histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
 histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_D3X_TransparClusters","DiffEstEffHit_D3X_TransparClusters", 200, -5.,5.);
 histo_transparentclustering_hitdiff_scatter = new TH2F("DiffEstEffHit_Scatter_Dia_TransparClusters","DiffEstEffHit_Scatter_Dia_TransparClusters", 200, -5.,5.,128,0,127);
-histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_D3X_2Channel_TranspCluster_8HitsFidcut","PulseHeight_D3X_2Channel_TranspCluster_8HitsFidcut",pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
+histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_D3X_2Channel_TranspCluster_8HitsFidcut","PulseHeight_D3X_2Channel_TranspCluster_8HitsFidcut",settings->getPulse_height_num_bins(),-0.5,settings->getPulse_height_di_max()+0.5);
 cout << " done." << endl;
 
 verbose = true;
@@ -346,7 +384,7 @@ for (int i = 0; i < tracks.size(); i++) {
 	// cluster diamond channels around estimated hit position
 	//		cout << " --" << endl;
 	if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-	if (verbose) cout << "eventReader->Det_ADC[6] = " << eventReader->Det_ADC[6][diamond_hit_channel] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[6][diamond_hit_channel] << endl;
+	if (verbose) cout << "evenDet_PedMeantReader->Det_ADC[6] = " << eventReader->Det_ADC[6][diamond_hit_channel] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[6][diamond_hit_channel] << endl;
 	if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of D3X: " << eventReader->Det_ADC[6][(int)diamond_hit_position]-eventReader->Det_PedMean[6][(int)diamond_hit_position] << endl;
 
 	int sign;
@@ -365,7 +403,7 @@ for (int i = 0; i < tracks.size(); i++) {
 	// fill pulse height histogram
 	histo_transparentclustering_2Channel_PulseHeight->Fill(firstchannel_adc+secondchannel_adc);
 
-	if (verbose) cout << "clusters for track " << i << ":" << endl;
+	if (verbose) cout << "AlignmentClass::TransparentAnalysis:clusters for track " << i << ":" << endl;
 	// loop over different cluster sizes
 	for (int j = 0; j < 10; j++) {
 		cluster_adc = 0;
@@ -403,7 +441,8 @@ histSaver->SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
 
 void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vector<bool> & tracks_mask, TDetectorAlignment *align, bool verbose)
 {
-	cout << "Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
+	if(verbosity) cout << "AlignmentClass::TransparentClustering::Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
+	cout << "AlignmentClass::TransparentClustering::get Event Reader: "<<eventReader<<" ."<<endl;
 	int event;
 	vector<Float_t> x_positions, y_positions, z_positions, par, par_y;
 	Float_t diamond_hit_position = 0;
@@ -428,16 +467,16 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 	cout << "diamond y offset: " << diamond_y_offset << endl;
 	cout << "diamond phi offset: " << diamond_phi_offset << endl;
 	cout << "diamond phi y offset: " << diamond_phi_y_offset << endl;
-	cout << "diamond hit factor: " << Di_Cluster_Hit_Factor << endl;
+	cout << "diamond hit factor: " << settings->getDi_Cluster_Hit_Factor() << endl;
 
-	cout << "init histograms for transparent clustering.." << endl;
+	if (verbosity) cout << "AlignmentClass::TransparentClustering::init histograms for transparent clustering.." << endl;
 	for (int i = 0; i < 10; i++) {
 		ostringstream histoname_landau, histoname_eta;
 		histoname_landau << "PulseHeight_Dia_" << (i+1) << "ChannelsTransparAna_8HitsFidcut";
 		cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
 
 
-		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
+		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),settings->getPulse_height_num_bins(),-0.5,settings->getPulse_height_di_max()+0.5);
 		//		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
 		//		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 	}
@@ -448,17 +487,28 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
 	histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_Dia_TransparClusters","DiffEstEffHit_Dia_TransparClusters", 200, -5.,5.);
 	histo_transparentclustering_hitdiff_scatter = new TH2F("DiffEstEffHit_Scatter_Dia_TransparClusters","DiffEstEffHit_Scatter_Dia_TransparClusters", 200, -5.,5.,128,0,127);
-	histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut","PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut",pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
+	histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut","PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut",settings->getPulse_height_num_bins(),-0.5,settings->getPulse_height_di_max()+0.5);
 	cout << " done." << endl;
 
 
 	//Telescope Data Branches
 	event_numbers.clear();
+
+	if(verbosity) {
+		cout << "AlignmentClass::TransparentClustering::get Event numbers: "<<eventReader<<" ."<<flush;
+		cout<<eventReader->isOK()<<flush;
+		cout <<". "<< eventReader->GetEntries()<<endl;
+	}
 	for (int j = 0; j < eventReader->GetEntries(); j++) {
-		eventReader->GetEvent(j);
+
+		if(verbosity) cout << "AlignmentClass::TransparentClustering::get Event"<<j<<flush;
+		if(!eventReader->GetEvent(j)) continue;
 		//		cout << endl << endl << endl;
 		//		cout << "event " << j << " in PedTree has eventReader->event_number: " << eventReader->event_number << endl;
+
+		if(verbosity) cout << " push back "<<flush;
 		event_numbers.push_back(eventReader->event_number);
+		if(verbosity) cout << " done. "<<endl;
 		//		for (int blablabla = 0; blablabla < 254; blablabla++) {
 		//			cout << "eventReader->Dia_ADC = " << eventReader->Dia_ADC[blablabla] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[8][blablabla] << endl;
 		//			cout << "Collected charge in channel " << blablabla << " of diamond: " << eventReader->Dia_ADC[blablabla]-eventReader->Det_PedMean[8][blablabla] << endl;
@@ -467,6 +517,7 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 	//	return;
 
 	// loop over tracks
+	if(verbosity) cout << "AlignmentClass::TransparentClustering::loop over tracks"<<endl;
 	for (int i = 0; i < tracks.size(); i++) {
 		if (verbose) cout << " -- starting transparent clustering for track " << i << endl;
 
