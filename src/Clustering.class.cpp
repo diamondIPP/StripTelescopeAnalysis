@@ -159,8 +159,13 @@ Clustering::~Clustering() {
 
 //take current event and cluster
 void Clustering::ClusterEvent(bool verbose) {
+	verbosity=1;
+	if(verbosity){
+		cout<<"Get Event: "<<current_event<<"\t"<<eventReader<<flush;
+		cout<<eventReader->isOk();
+	}
    eventReader->GetEvent(current_event);
-   if(verbose) cout<<endl<<endl;
+   if(verbosity) cout<<endl<<endl;
    if(current_event%1000==0) cout<<"Clustering::ClusterEvent(): current_event = "<<current_event<<endl;
 
    clustered_event.Clear();
