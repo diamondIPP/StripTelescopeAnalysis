@@ -9,6 +9,8 @@
 #define TEVENT_ARRAY_H_
 #include "TMath.h"
 #include <iostream>
+#include <vector>
+#include "Rtypes.h"
 class TEvent_Array {
 public:
 	TEvent_Array(Int_t size);
