@@ -232,30 +232,34 @@ void Clustering::ClusterEvent(bool verbose) {
       previouschan=-1;
       if(verbosity>=2)cout<<"Clustering::ClusterEvent::Start hits loop"<<hits.size()<<endl;
       for(uint i=0; i<hits.size(); i++) {
+    	  if(hits.at(i)==-1){
+    		  if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop hist.at("<<i<<")==-1"<<endl;
+    	  }
     	  if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop i="<<i<<endl;
-         currentchan = eventReader->getDet_Channels(det,hits[i]);
+         currentchan = eventReader->getDet_Channels(det,hits.at(i));
          if(verbose) {
-            if(hits[i]==-1) cout<<"examining hit "<<i<<" at channel index "<<hits[i]<<" or end of hits"<<endl;
+            if(hits.at(i)==-1) cout<<"examining hit "<<i<<" at channel index "<<hits.at(i)<<" or end of hits"<<endl;
             else {
-               cout<<"examining hit "<<i<<" at channel index "<<hits[i]<<" or channel "<<currentchan<<" (";
+               cout<<"examining hit "<<i<<" at channel index "<<hits.at(i)<<" or channel "<<currentchan<<" (";
                if(det==8)
-            	   currentchan_psadc = eventReader->getDia_ADC(hits[i])-eventReader->getDet_PedMean(det,hits[i]);
+            	   currentchan_psadc = eventReader->getDia_ADC(hits.at(i))-eventReader->getDet_PedMean(det,hits.at(i));
                if(det<8)
-            	   currentchan_psadc = eventReader->getDet_ADC(det,hits[i])-eventReader->getDet_PedMean(det,hits[i]);
-               cout<<currentchan_psadc<<" psadc, "<<eventReader->getDet_PedWidth(det,hits[i])<<" pedrms, "<<currentchan_psadc/eventReader->getDet_PedWidth(det,hits[i])<<" snr)"<<endl;
+            	   currentchan_psadc = eventReader->getDet_ADC(det,hits.at(i))-eventReader->getDet_PedMean(det,hits.at(i));
+               cout<<currentchan_psadc<<" psadc, "<<eventReader->getDet_PedWidth(det,hits.at(i))<<" pedrms, "<<currentchan_psadc/eventReader->getDet_PedWidth(det,hits.at(i))<<" snr)"<<endl;
             }
          }
          //build a cluster of hits
          if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop"<<i<<"build a cluster of a hit"<<endl;
-         if((previouschan==-1 || currentchan==previouschan+1) && hits[i]!=-1) {
+         if((previouschan==-1 || currentchan==previouschan+1) && hits.at(i)!=-1) {
             if(verbose) cout<<"adding channel to cluster"<<endl;
-            cluster.push_back(hits[i]);
+            cluster.push_back(hits.at(i));
             previouschan = currentchan;
          }
          //found end of cluster so search current cluster for a seed
-         if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop"<<i<<"found enf of cluster search seed"<<endl;
          else {
-            if(hits[i]!=-1) i--;
+             if(verbosity>=2)
+            	 cout<<"Clustering::ClusterEvent::hits loop"<<i<<"found enf of cluster search seed"<<endl;
+            if(hits.at(i)!=-1) i--;
             if(verbose) cout<<"found end of cluster; looking for seed:"<<endl;
             hasaseed=0;
             hasmasked=0;
