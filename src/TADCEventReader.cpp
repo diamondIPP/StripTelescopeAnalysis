@@ -49,6 +49,7 @@ bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 	}
 }
 bool TADCEventReader::isOK(){
+	cout<<"TADCEventReader::isOK \""<<PedTree<<"\""<<endl;
 	return (PedTree!=NULL);
 }
 void TADCEventReader::SetBranchAddresses(){

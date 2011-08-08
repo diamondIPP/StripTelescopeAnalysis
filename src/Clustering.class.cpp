@@ -162,7 +162,7 @@ void Clustering::ClusterEvent(bool verbose) {
 	verbosity=1;
 	if(verbosity){
 		cout<<"Get Event: "<<current_event<<"\t"<<eventReader<<flush;
-		cout<<eventReader->isOk();
+		cout<<eventReader->isOK();
 	}
    eventReader->GetEvent(current_event);
    if(verbosity) cout<<endl<<endl;
