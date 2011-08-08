@@ -1,6 +1,7 @@
 //class for organizing clusters in a track for a given event
 
 #include "Track.class.hh"
+using namespace std;
 
 Track::Track(int EventNumber, float SiHitFactor, float SiSeedFactor, float DiHitFactor, float DiSeedFactor) {
    event_number = EventNumber;

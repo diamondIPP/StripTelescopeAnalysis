@@ -35,8 +35,8 @@ class Track {
       void Print();
 
    public:
-      vector<Cluster> detector_clusters[9]; //array (index for each detector) of vectors of Clusters
-      vector<Cluster> detector_clusters_cut[9]; //array (index for each detector) of vectors of Clusters
+      std::vector<Cluster> detector_clusters[9]; //array (index for each detector) of vectors of Clusters
+      std::vector<Cluster> detector_clusters_cut[9]; //array (index for each detector) of vectors of Clusters
       int event_number;
       Float_t Si_Cluster_Hit_Factor;
       Float_t Si_Cluster_Seed_Factor;
