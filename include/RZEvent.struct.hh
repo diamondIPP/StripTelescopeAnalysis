@@ -1,6 +1,5 @@
 //*********************Diamond and Silicon Detectors Structure Header*****************//
 #include <string>
-using namespace std;
 
 //***Variables and Constants***//
 const int DIAMOND_MEM = 256; //263 appears to be the necessary number of 4-byte words that should be

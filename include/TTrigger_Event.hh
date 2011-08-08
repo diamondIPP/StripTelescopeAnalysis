@@ -11,8 +11,6 @@
 #include <iostream>
 #include "TDetector_Data.hh"
 
-using namespace std;
-
 class TTrigger_Event {
 
    public:

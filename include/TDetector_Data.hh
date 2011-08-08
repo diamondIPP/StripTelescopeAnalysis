@@ -10,7 +10,6 @@
 #include "TMath.h"
 #include <iostream>
 
-using namespace std;
 class TDetector_Data {
 public:
 	TDetector_Data();

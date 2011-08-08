@@ -27,7 +27,6 @@
 
 typedef unsigned int uint;
 
-using namespace std;
 
 class TDiamondTrack{
 

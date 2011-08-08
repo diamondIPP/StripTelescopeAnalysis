@@ -14,7 +14,6 @@
 #include "TMath.h"
 
 typedef unsigned int uint;
-using namespace std;
 
 class Cluster {
    public:
@@ -61,10 +60,10 @@ class Cluster {
       float pedmean[10];
       float pedwidth[10];
       */
-      vector<unsigned char> channel;
-      vector<short> adc;
-      vector<float> pedmean;
-      vector<float> pedwidth;
+      std::vector<unsigned char> channel;
+      std::vector<short> adc;
+      std::vector<float> pedmean;
+      std::vector<float> pedwidth;
       float highest2_eta, highest2_centroid;
       bool flag_golden_gate_cluster;
       bool flag_bad_channel_cluster;

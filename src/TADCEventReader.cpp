@@ -6,6 +6,7 @@
  */
 
 #include "TADCEventReader.hh"
+using namespace std;
 
 TADCEventReader::TADCEventReader(string fileName) {
 	verbosity=0;

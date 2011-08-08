@@ -7,6 +7,8 @@
 //#pragma once //limit each file from being included more than once
 #include "ClusteredEvent.class.hh"
 
+using namespace std;
+
 ClusteredEvent::ClusteredEvent(int EventNumber, float SiHitFactor, float SiSeedFactor, float DiHitFactor, float DiSeedFactor) {
    event_number = EventNumber;
    Si_Cluster_Hit_Factor = SiHitFactor;

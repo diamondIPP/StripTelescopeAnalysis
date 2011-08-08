@@ -3,6 +3,7 @@
 //           GetTotalADC function for raw landaus
 
 #include "Cluster.class.hh"
+using namespace std;
 
 Cluster::Cluster(Float_t HitFactor, Float_t SeedFactor) {
    hit_threshold = HitFactor;

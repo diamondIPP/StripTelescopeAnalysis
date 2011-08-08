@@ -17,7 +17,6 @@
 #include <cstring>
 #include <vector>
 #include <deque>
-using namespace std;
 
 //ROOT Class Headers
 #include "TTree.h"
@@ -63,17 +62,17 @@ using namespace TMath;
 class SlidingPedestal {
    public:
       //functions
-      SlidingPedestal(unsigned int RunNumber, string RunDescription = "");
+      SlidingPedestal(unsigned int RunNumber, std::string RunDescription = "");
       ~SlidingPedestal();
       void LoadSettings();
-      void ParseIntArray(string value, vector<int> &vec);
+      void ParseIntArray(std::string value, std::vector<int> &vec);
       void SetDetector(Int_t det, TDetector_Data Detector, TPed_and_RMS *Pedestal);
       void PedIteration(TH1F *hist, TEvent_Array *Event, TPed_and_RMS *array, Int_t channel, Float_t hit_factor);
-      void BufferFill(TDetector_Data &Anyf, TPed_and_RMS *ped, vector< deque<Int_t> > *buffer_deque, Int_t channel_number, Int_t deque_size, Float_t Hit, Int_t initial_event);
-      void RunningPedestal(TDetector_Data detector_buff, TPed_and_RMS initial, TPed_and_RMS *store, vector< deque<Int_t> > &buffer_deque, Int_t channel_number, Int_t deque_size, Float_t threshold_factor, Int_t *zeroRMS, Int_t event);
-      void RunningCommonMode(deque<Double_t> &CMN_deque, Double_t &CMN_Mean, Double_t &CMN_RMS, Double_t new_ave, Int_t deque_size, Int_t event, Int_t *zeroRMS);
+      void BufferFill(TDetector_Data &Anyf, TPed_and_RMS *ped, std::vector< std::deque<Int_t> > *buffer_deque, Int_t channel_number, Int_t deque_size, Float_t Hit, Int_t initial_event);
+      void RunningPedestal(TDetector_Data detector_buff, TPed_and_RMS initial, TPed_and_RMS *store, std::vector< std::deque<Int_t> > &buffer_deque, Int_t channel_number, Int_t deque_size, Float_t threshold_factor, Int_t *zeroRMS, Int_t event);
+      void RunningCommonMode(std::deque<Double_t> &CMN_deque, Double_t &CMN_Mean, Double_t &CMN_RMS, Double_t new_ave, Int_t deque_size, Int_t event, Int_t *zeroRMS);
       void Hit_Occupancy(ChannelScreen screen, TH1F *occup, TDetector_Data detector_buffer, TPed_and_RMS *ped_store, Float_t RMS_factor, Int_t chan_begin, Int_t chan_end, Int_t const dia_offset);
-      void PedRMSCalcFromBuffer(vector< deque<Int_t> > &buffer_deque, TPed_and_RMS *ped_store);
+      void PedRMSCalcFromBuffer(std::vector< std::deque<Int_t> > &buffer_deque, TPed_and_RMS *ped_store);
       void Slide(Int_t NEvents, Int_t Initial_Event = 1000, Int_t hit_occupancy = 0);
 
       /**** Endian functions for interpreting the rz data ****/
@@ -91,7 +90,7 @@ class SlidingPedestal {
 
 
    protected:
-      string current_rz_filename;
+      std::string current_rz_filename;
       ifstream current_rz_file;
       RZEvent TEvent;
       TDetector_Data D0X, D0Y, D1X, D1Y, D2X, D2Y, D3X, D3Y, Dia0, Dia1;
@@ -124,23 +123,23 @@ class SlidingPedestal {
       Int_t Taylor_speed_throttle; //# of events to recalculate RMS the old way; set to 1 to disable
 
       //Channels to Screen
-      vector<int> single_channel_analysis_channels;
+      std::vector<int> single_channel_analysis_channels;
 
       //Channels to Screen
-      vector<int> Det_channel_screen_channels[9];
-      vector<int> Det_channel_screen_regions[9];
+      std::vector<int> Det_channel_screen_channels[9];
+      std::vector<int> Det_channel_screen_regions[9];
       ChannelScreen Det_channel_screen[9];
 
       //paths
-      string plots_path;
-      string png_file_char;
-      string C_file_char;
-      string root_file_char;
+      std::string plots_path;
+      std::string png_file_char;
+      std::string C_file_char;
+      std::string root_file_char;
       TSystem* sys;
-      string settings_file;
-      ostringstream plotspath;
-      ostringstream settingspath;
-      ostringstream pedfilepath;
+      std::string settings_file;
+      std::stringstream plotspath;
+      std::stringstream settingspath;
+      std::stringstream pedfilepath;
 
       //event storage; written to pedtree
       UInt_t Det_NChannels[9];
@@ -169,8 +168,8 @@ class SlidingPedestal {
       TH1F *hRMSDifference;
       //const Int_t numberPlottedBufferNoiseHistos;
       Int_t numberPlottedBufferNoiseHistos;
-      vector<TH1F*> hBufferNoise;
-      vector<int> plottedBufferEvents;
+      std::vector<TH1F*> hBufferNoise;
+      std::vector<int> plottedBufferEvents;
       //Taylor, change #6 7/6
 
       Int_t maxBufferPlots;
@@ -178,7 +177,7 @@ class SlidingPedestal {
       Float_t rms_sigma_difference_cut;
       Int_t high_rms_cut; //cut on absolute rms value instead of comparing to Gaussian
       Float_t rms_cut; //value to use if high_rms_cut
-      //deque<TH1F*> bufferPlotsDeque;
+      //std::deque<TH1F*> bufferPlotsstd::deque;
 
       Int_t zoomDiamondPlots; //zoom in on DC_Pedestal (100 event / window)
 

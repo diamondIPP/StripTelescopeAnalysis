@@ -38,10 +38,10 @@
 class TDetectorAlignment{
 
    public:
-      TDetectorAlignment(string plots_path_string);
-      TDetectorAlignment(string plots_path_string, vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask);
+      TDetectorAlignment(std::string plots_path_string);
+      TDetectorAlignment(std::string plots_path_string, std::vector<TDiamondTrack> &input_tracks, std::vector<bool> &input_tracks_mask);
       ~TDetectorAlignment() {};
-      void SaveCanvas(TCanvas* canv, string filename);
+      void SaveCanvas(TCanvas* canv, std::string filename);
       Double_t GetXOffset(Int_t plane) {return det_x_offset[plane];};
       Double_t GetYOffset(Int_t plane) {return det_y_offset[plane];};
       Double_t GetZOffset(Int_t plane) {return det_z_offset[plane];};
@@ -50,10 +50,10 @@ class TDetectorAlignment{
       Double_t GetXResolution(Int_t plane) {return det_x_resolution[plane];};
       Double_t GetYResolution(Int_t plane) {return det_y_resolution[plane];};
       Double_t GetSiResolution();
-      vector<Double_t> GetXOffsetHistory(Int_t plane) {return det_x_offset_history[plane];};
-      vector<Double_t> GetYOffsetHistory(Int_t plane) {return det_y_offset_history[plane];};
-      vector<Double_t> GetZOffsetHistory(Int_t plane) {return det_z_offset_history[plane];};
-      vector<Double_t> GetPhiOffsetHistory(Int_t plane) {return det_phi_offset_history[plane];};
+      std::vector<Double_t> GetXOffsetHistory(Int_t plane) {return det_x_offset_history[plane];};
+      std::vector<Double_t> GetYOffsetHistory(Int_t plane) {return det_y_offset_history[plane];};
+      std::vector<Double_t> GetZOffsetHistory(Int_t plane) {return det_z_offset_history[plane];};
+      std::vector<Double_t> GetPhiOffsetHistory(Int_t plane) {return det_phi_offset_history[plane];};
       void PlotXOffsetHistory(Int_t plane);
       void PlotYOffsetHistory(Int_t plane);
       void PlotZOffsetHistory(Int_t plane);
@@ -64,7 +64,7 @@ class TDetectorAlignment{
       void TrackFit3(Double_t &predicted_x, Double_t &predicted_y);
       Double_t GetPredictedX() {return predicted_x;}
       Double_t GetPredictedY() {return predicted_y;}
-      void LoadTracks(vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask);
+      void LoadTracks(std::vector<TDiamondTrack> &input_tracks, std::vector<bool> &input_tracks_mask);
       void LoadData(TDiamondTrack track);
       void PlotAngularDistribution();
       void PlotCartesianDistribution();
@@ -74,10 +74,10 @@ class TDetectorAlignment{
       void AlignDetectorZ(Int_t subject_detector, Int_t ref_detector1, Int_t ref_detector2, bool graphs = false, bool verbose = true);
       void CheckDetectorAlignmentXY(int subject_detector, int ref_detector1, int ref_detector2, bool verbose = true);
       void CheckDetectorAlignmentXY(int subject_detector, bool verbose = true);
-      void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
-	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
-	void CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, Float_t alignment_chi2 = 9999., bool CutFakeTracksOn = false, bool verbose = false);
-	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, vector<Float_t> &par, Float_t res = 9999.);
+      void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, std::string &histo_title);
+	void CheckDetectorAlignmentXYPlots(int subject_detector, std::string &histo_title);
+	void CutFakeTracks(std::vector<TDiamondTrack> &tracks, std::vector<bool> &tracks_mask, Float_t alignment_chi2 = 9999., bool CutFakeTracksOn = false, bool verbose = false);
+	Float_t LinTrackFit(std::vector<Float_t> X, std::vector<Float_t> Y, std::vector<Float_t> &par, Float_t res = 9999.);
 
    protected:
       TDetectorPlane D0;
@@ -87,8 +87,8 @@ class TDetectorAlignment{
 
    public:
       //store tracks and masks for determining alignment constants
-      vector<TDiamondTrack> track_storage;
-      vector<bool> track_mask_storage;
+      std::vector<TDiamondTrack> track_storage;
+      std::vector<bool> track_mask_storage;
       //TODO: instead of having multiple copies of tracks, why not store pointer to list in stored in Clustering::tracks
       //TODO: instead of having tracks and tracks_fidcut, store boolean fidcut mask
 
@@ -116,10 +116,10 @@ class TDetectorAlignment{
       Double_t det_y_resolution[6];
 
       //store reconstructed offsets here
-      vector<Double_t> det_x_offset_history[6];
-      vector<Double_t> det_y_offset_history[6];
-      vector<Double_t> det_z_offset_history[6];
-      vector<Double_t> det_phi_offset_history[6];
+      std:: vector<Double_t> det_x_offset_history[6];
+      std::vector<Double_t> det_y_offset_history[6];
+      std::vector<Double_t> det_z_offset_history[6];
+      std::vector<Double_t> det_phi_offset_history[6];
 
    public:
       /*
@@ -130,7 +130,7 @@ class TDetectorAlignment{
       TH2F residualsYvsX;
       */
       Double_t residualsXmean, residualsYmean, residualsXrms, residualsYrms;
-      string plots_path;
+      std::string plots_path;
       int SaveAllFilesSwitch, ClosePlotsOnSave, SaveAllRootFilesSwitch;
 
    private:

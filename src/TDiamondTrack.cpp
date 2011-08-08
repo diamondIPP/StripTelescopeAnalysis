@@ -7,6 +7,7 @@
 
 #include "TDiamondTrack.hh"
 
+using namespace std;
 
 TDiamondTrack::TDiamondTrack(int event, TDetectorPlane Det0, TDetectorPlane Det1, TDetectorPlane Det2, TDetectorPlane Det3)
 {

@@ -6,10 +6,10 @@
  */
 
 #include "TDetectorAlignment.hh"
+using namespace std;
 
 
-
-TDetectorAlignment::TDetectorAlignment(string plots_path_string) {
+TDetectorAlignment::TDetectorAlignment(std::string plots_path_string) {
 	verbosity=1;
    nDetectors = 5;
    /*residualsX = TH1F("residualsX","residualsX",10000,-100,100);

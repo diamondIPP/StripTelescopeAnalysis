@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 int RUNNUMBER;
-string RUNDESCRIPTION;
+std::string RUNDESCRIPTION;
 int NEVENTS;
 int INITIAL_EVENT;
 int HIT_OCCUPANCY;
@@ -10,9 +10,9 @@ bool PLOTS;
 bool ALTCLUSTERING;
 bool RunListOK;
 int DO_SLIDINGPEDESTAL, DO_ALIGNMENT, CUTFAKETRACKS;
-string inputDir;
-string outputDir;
-string runListPath="RunList.ini";
+std::string inputDir;
+std::string outputDir;
+std::string runListPath="RunList.ini";
 
 void initVariables();
 int ReadRunList();
@@ -20,7 +20,7 @@ int ReadRunList();
 class RunInfo {
 public:
 	int RunNumber, Verbosity, NEvents, Initial_Event, Hit_Occupancy;
-	string RunDescription;
+	std::string RunDescription;
 	bool AlternativeClustering, DoAlignment, DoSlidingPedestal, CutFakeTracks;
 	void SetParameters() {
 		RunNumber = RUNNUMBER;
@@ -47,4 +47,4 @@ public:
 		CUTFAKETRACKS = CutFakeTracks;
 	}
 };
-vector<RunInfo> RunParameters;
+std::vector<RunInfo> RunParameters;

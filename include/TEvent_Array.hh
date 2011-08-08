@@ -9,7 +9,6 @@
 #define TEVENT_ARRAY_H_
 #include "TMath.h"
 #include <iostream>
-using namespace std;
 class TEvent_Array {
 public:
 	TEvent_Array(Int_t size);
@@ -23,7 +22,7 @@ public:
 
  private:
     Int_t Iteration_Size;
-    vector<Int_t> Channel_ADC_values;
+    std::vector<Int_t> Channel_ADC_values;
     //Int_t Channel_ADC_values[1000];
     //Int_t Channel_ADC_values_squared[1000]; //Taylor
 };

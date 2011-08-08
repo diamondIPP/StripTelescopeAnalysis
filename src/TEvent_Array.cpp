@@ -7,6 +7,7 @@
 
 #include "TEvent_Array.hh"
 
+using namespace std;
 
 TEvent_Array::TEvent_Array(Int_t size)
 {

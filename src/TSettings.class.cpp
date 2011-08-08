@@ -6,6 +6,7 @@
  */
 
 #include "TSettings.class.hh"
+using namespace std;
 
 TSettings::TSettings(string fileName){
 	verbosity=1;

@@ -16,34 +16,33 @@
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
 #include "TSettings.class.hh"
-using namespace std;
 
 class AlignmentClass {
 public:
-	AlignmentClass(string fileName,UInt_t nEventNumber=0);
+	AlignmentClass(std::string fileName,UInt_t nEventNumber=0);
 	virtual ~AlignmentClass();
 	bool GetEvent(UInt_t nEvent);
 
 	int Align(bool plots = 1, bool CutFakeTracksOn = false);
-    void TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
-	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
+    void TransparentAnalysis(std::vector<TDiamondTrack> &tracks, std::vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
+	void TransparentClustering(std::vector<TDiamondTrack> &tracks, std::vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 
 	void SetSettings(TSettings* settings);
-	void SetPlotsPath(string plotspath);
-	void SetTracks(vector<TDiamondTrack> tracks);
-	void SetAlignment_tracks_mask(vector<bool> tracks_mask);
-	void SetAlignment_tracks_fidcut_mask(vector<bool> alignment_tracks_fidcut_mask);
-	void SetAlignment_tracks_fidcut(vector<TDiamondTrack> alignment_tracks_fidcut);
+	void SetPlotsPath(std::string plotspath);
+	void SetTracks(std::vector<TDiamondTrack> tracks);
+	void SetAlignment_tracks_mask(std::vector<bool> tracks_mask);
+	void SetAlignment_tracks_fidcut_mask(std::vector<bool> alignment_tracks_fidcut_mask);
+	void SetAlignment_tracks_fidcut(std::vector<TDiamondTrack> alignment_tracks_fidcut);
 private:
 	void createAlignmentSummary();
 
 private:/**needed variables*/
 	TDetectorAlignment* align;
 
-	vector<TDiamondTrack> alignment_tracks;
-	vector<bool> alignment_tracks_mask;
-	vector<TDiamondTrack> alignment_tracks_fidcut;
-	vector<bool> alignment_tracks_fidcut_mask;
+	std::vector<TDiamondTrack> alignment_tracks;
+	std::vector<bool> alignment_tracks_mask;
+	std::vector<TDiamondTrack> alignment_tracks_fidcut;
+	std::vector<bool> alignment_tracks_fidcut_mask;
 
 	//Event SETTINGS
 	TSettings *settings;
@@ -63,7 +62,7 @@ private:/**needed variables*/
 	TH1F* histo_transparentclustering_2Channel_PulseHeight;
 
 private: /* not used at the moment*/
-	vector<Float_t> dia_offset;
+	std::vector<Float_t> dia_offset;
 
 
 private:/*constants*/
@@ -75,7 +74,7 @@ private:/*see if needed*/
 	HistogrammSaver *histSaverAlignmentFakedTracks;
 
 private:
-	string PedFileName;
+	std::string PedFileName;
 	int verbosity;
 };
 

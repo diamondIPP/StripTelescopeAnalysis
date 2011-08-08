@@ -6,6 +6,7 @@
  */
 
 #include "TDetector_Data.hh"
+using namespace std;
 
 TDetector_Data::TDetector_Data()
 {

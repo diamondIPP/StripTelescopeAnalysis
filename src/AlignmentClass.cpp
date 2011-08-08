@@ -6,6 +6,7 @@
  */
 
 #include "AlignmentClass.hh"
+using namespace std;
 
 AlignmentClass::AlignmentClass(string fileName,UInt_t nEventNumber) {
 	PedFileName=fileName;

@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
 
 //ROOT Class Headers
 #include "TTree.h"
@@ -51,7 +50,7 @@ typedef unsigned int uint;
 
 class Clustering {
    public:
-      Clustering(unsigned int RunNumber, string RunDescription = ""); //open files
+      Clustering(unsigned int RunNumber, std::string RunDescription = ""); //open files
       ~Clustering(); //close files
       void ClusterEvent(bool verbose = 0);
 	void ClusterEventSeeds(bool verbose = 0);
@@ -65,7 +64,7 @@ class Clustering {
       void Alignment(bool plots, bool CutFakeTracksOn);
 	  void HistCleaner(int regid, TH2F* histo);
       void AutoFidCut();
-//	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
+//	void LinTrackFit(std::vector<Float_t> x_positions, std::vector<Float_t> y_positions, std::vector<Float_t> &par);
 	void EventMonitor(int CurrentEvent = 0);
 	void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
    public://See if needded
@@ -81,13 +80,13 @@ class Clustering {
     AlignmentClass* alignment;
 
 
-      vector<int> single_channel_analysis_channels;
+      std::vector<int> single_channel_analysis_channels;
 
 
       //Alignment
-      vector<TDiamondTrack> tracks, tracks_fidcut;
-      vector<bool> tracks_mask, tracks_fidcut_mask;
-	vector<Float_t> dia_offset;
+      std::vector<TDiamondTrack> tracks, tracks_fidcut;
+      std::vector<bool> tracks_mask, tracks_fidcut_mask;
+	std::vector<Float_t> dia_offset;
 
       //Telescope geometry
       Double_t detectorD0Z;
@@ -104,13 +103,13 @@ class Clustering {
 
 
       //paths
-      string plots_path;
-      string png_file_char;
-      string C_file_char;
-      string root_file_char;
+      std::string plots_path;
+      std::string png_file_char;
+      std::string C_file_char;
+      std::string root_file_char;
       TSystem* sys;
-      string settings_file;
-	string pedfile_path;
+      std::string settings_file;
+	std::string pedfile_path;
 
 	TADCEventReader *eventReader;
       //processed event storage; read from pedtree

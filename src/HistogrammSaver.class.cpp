@@ -7,6 +7,8 @@
 
 #include "HistogrammSaver.class.hh"
 
+using namespace std;
+
 HistogrammSaver::HistogrammSaver(int verbose) {
 	sys=NULL;
 	pt=NULL;
@@ -238,7 +240,7 @@ void HistogrammSaver::SetDuckStyle() {
 	DuckStyle->SetPadRightMargin(0.15);
 	DuckStyle->SetPadTopMargin(0.15);
 	DuckStyle->SetTitleColor(kBlack);
-	DuckStyle->SetFrameLineWidth(0.05);
+	DuckStyle->SetFrameLineWidth(1);
 	DuckStyle->SetStatFont(42);
 	DuckStyle->SetStatBorderSize(0);
 	DuckStyle->SetPadBorderSize(0);
@@ -267,12 +269,12 @@ void HistogrammSaver::SetDuckStyle() {
 	DuckStyle->SetTitleY(0.925);
 
 	DuckStyle->SetTitleSize(0.02,"XYZ");
-	DuckStyle->SetLineWidth(0.05);
+	DuckStyle->SetLineWidth(1);
 	DuckStyle->SetHistLineWidth(1);
 	//	DuckStyle->SetTitleStyle(0);
 	DuckStyle->SetTitleBorderSize(0);
 	DuckStyle->SetTitleFillColor(0);
-	DuckStyle->SetHistLineWidth(0.05);
+	DuckStyle->SetHistLineWidth(1);
 
 	//	DuckStyle->SetTickLength(0,"XY");
 	//	gStyle->SetBarOffset(0.5);

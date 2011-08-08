@@ -13,7 +13,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-using namespace std;
 #include "TH1F.h"
 #include "TCanvas.h"
 #include "TH2F.h"
@@ -41,19 +40,19 @@ public:
     void SetVerbosity(unsigned int i);
     void SetRunNumber(unsigned int runNumber);
     void SetNumberOfEvents(unsigned int nEvents);
-    void SetPlotsPath(string Path);
-    string GetPlotsPath(){return plots_path;}
+    void SetPlotsPath(std::string Path);
+    std::string GetPlotsPath(){return plots_path;}
     void SetStyle(TStyle newStyle);
     void SetDuckStyle();
 
-    static void SaveCanvasPNG(TCanvas *canvas, string location, string file_name);
-    static void SaveCanvasC(TCanvas *canvas, string location, string file_name);
-    static void SaveCanvasRoot(TCanvas *canvas, string location, string file_name);
+    static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
+    static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
+    static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
 private:
     unsigned int verbosity;
     TPaveText *pt;
     TDatime dateandtime;
-    string plots_path;
+    std::string plots_path;
     unsigned int runNumber;
     unsigned int nEvents;
     void UpdatePaveText();

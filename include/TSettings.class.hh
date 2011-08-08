@@ -18,12 +18,11 @@
 
 
 #include "ChannelScreen.hh"
-using namespace std;
 
 
 class TSettings {
 public:
-	TSettings(string fileName);
+	TSettings(std::string fileName);
 	virtual ~TSettings();
 
 	Float_t getAlignment_chi2() const;
@@ -55,19 +54,19 @@ public:
 	Float_t getEta_hiq_slice_low() const;
 	Float_t getEta_lowq_slice_hi() const;
 	Float_t getEta_lowq_slice_low() const;
-	vector<Float_t> getAlignment_phi_offsets() const;
-	vector<Float_t> getAlignment_x_offsets() const;
-	vector<Float_t> getAlignment_y_offsets() const;
-	vector<Float_t> getAlignment_z_offsets() const;
+	std::vector<Float_t> getAlignment_phi_offsets() const;
+	std::vector<Float_t> getAlignment_x_offsets() const;
+	std::vector<Float_t> getAlignment_y_offsets() const;
+	std::vector<Float_t> getAlignment_z_offsets() const;
 	Int_t getEtavsq_n_landau_slices() const;
 	Int_t getSnr_plots_enable() const;
 	Float_t getAlignment_training_track_fraction() const;
 	ChannelScreen getDet_channel_screen(int i);
-	vector<int> getDet_channel_screen_channels(int i) const;
-	vector<int> getDet_channel_screen_regions(int i) const;
+	std::vector<int> getDet_channel_screen_channels(int i) const;
+	std::vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
-	string getFileName() const;
+	std::string getFileName() const;
 
 	void setAlignment_training_track_fraction(Float_t alignment_training_track_fraction);
 	void setFix_dia_noise(float fix_dia_noise);
@@ -97,27 +96,27 @@ public:
 	void setEta_hiq_slice_low(Float_t eta_hiq_slice_low);
 	void setEta_lowq_slice_hi(Float_t eta_lowq_slice_hi);
 	void setEta_lowq_slice_low(Float_t eta_lowq_slice_low);
-	void setAlignment_phi_offsets(vector<Float_t> alignment_phi_offsets);
-	void setAlignment_x_offsets(vector<Float_t> alignment_x_offsets);
-	void setAlignment_y_offsets(vector<Float_t> alignment_y_offsets);
-	void setAlignment_z_offsets(vector<Float_t> alignment_z_offsets);
+	void setAlignment_phi_offsets(std::vector<Float_t> alignment_phi_offsets);
+	void setAlignment_x_offsets(std::vector<Float_t> alignment_x_offsets);
+	void setAlignment_y_offsets(std::vector<Float_t> alignment_y_offsets);
+	void setAlignment_z_offsets(std::vector<Float_t> alignment_z_offsets);
 	void setEtavsq_n_landau_slices(Int_t etavsq_n_landau_slices);
 	void setSnr_plots_enable(Int_t snr_plots_enable);
 	void setDet_channel_screen(int i,ChannelScreen Det_channel_screen);
-	void setDet_channel_screen_channels(int i,vector<int> Det_channel_screen_channels);
-	void setDet_channel_screen_regions(int i,vector<int> Det_channel_screen_regions);
+	void setDet_channel_screen_channels(int i,std::vector<int> Det_channel_screen_channels);
+	void setDet_channel_screen_regions(int i,std::vector<int> Det_channel_screen_regions);
 	void setAlternativeClustering(bool AlternativeClustering);
 	void setUseAutoFidCut(bool UseAutoFidCut);
 
 protected:
 private:
-	void SetFileName(string fileName);
+	void SetFileName(std::string fileName);
 	void LoadSettings();
 	void DefaultLoadDefaultSettings();
-	void ParseFloatArray(string value, vector<float> & vec);
-	void ParseIntArray(string value, vector<int> & vec);
+	void ParseFloatArray(std::string value, std::vector<float> & vec);
+	void ParseIntArray(std::string value, std::vector<int> & vec);
 private:
-	string fileName;
+	std::string fileName;
 private:
 	Int_t SaveAllFilesSwitch;
 	Int_t ClosePlotsOnSave;
@@ -152,13 +151,13 @@ private:
 
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
-	vector<Float_t> alignment_x_offsets;
-	vector<Float_t> alignment_y_offsets;
-	vector<Float_t> alignment_phi_offsets;
-	vector<Float_t> alignment_z_offsets;
+	std::vector<Float_t> alignment_x_offsets;
+	std::vector<Float_t> alignment_y_offsets;
+	std::vector<Float_t> alignment_phi_offsets;
+	std::vector<Float_t> alignment_z_offsets;
 	Float_t alignment_training_track_fraction;
-	vector<int> Det_channel_screen_channels[9];
-	vector<int> Det_channel_screen_regions[9];
+	std::vector<int> Det_channel_screen_channels[9];
+	std::vector<int> Det_channel_screen_regions[9];
 	ChannelScreen Det_channel_screen[9];
     bool dia_x_aligned;
     bool eta_correction;

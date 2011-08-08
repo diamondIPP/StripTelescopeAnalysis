@@ -19,6 +19,8 @@
 //2010-09-02 Taylor's diagnostic plots added
 #include "SlidingPedestal.class.hh"
 
+using namespace std;
+
 SlidingPedestal::SlidingPedestal(unsigned int RunNumber, string RunDescription) {
    //Code revision declarations (to avoid editing ClusterVar.h needlessly):
    run_number = RunNumber;

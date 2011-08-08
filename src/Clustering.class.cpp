@@ -35,6 +35,7 @@
 //#include "ChannelScreen.hh" //Channel Screen Class
 #include "Clustering.class.hh"
 
+using namespace std;
 Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
 	verbosity=1;
 	if(verbosity)cout<<"Clustering::Clustering"<<endl;
@@ -159,7 +160,7 @@ Clustering::~Clustering() {
 
 //take current event and cluster
 void Clustering::ClusterEvent(bool verbose) {
-	verbosity=2;
+	verbosity=1;
 	if(verbosity>=2){
 		cout<<"Get Event: "<<current_event<<"\t"<<eventReader<<flush;
 		cout<<eventReader->isOK();
@@ -236,7 +237,8 @@ void Clustering::ClusterEvent(bool verbose) {
     		  if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop hist.at("<<i<<")==-1"<<endl;
     	  }
     	  if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop i="<<i<<endl;
-         currentchan = eventReader->getDet_Channels(det,hits.at(i));
+         if(hits.at(i)!=-1)
+        	 currentchan = eventReader->getDet_Channels(det,hits.at(i));
          if(verbose) {
             if(hits.at(i)==-1) cout<<"examining hit "<<i<<" at channel index "<<hits.at(i)<<" or end of hits"<<endl;
             else {

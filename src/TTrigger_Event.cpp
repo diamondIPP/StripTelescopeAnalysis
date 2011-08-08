@@ -6,6 +6,8 @@
  */
 
 #include "TTrigger_Event.hh"
+using namespace std;
+
 
 TTrigger_Event::TTrigger_Event() {
 }

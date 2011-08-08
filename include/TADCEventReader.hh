@@ -18,10 +18,9 @@
 #include "TMath.h"
 #include "TTree.h"
 #include "TFile.h"
-using namespace std;
 class TADCEventReader {
 public:
-	TADCEventReader(string fileName);
+	TADCEventReader(std::string fileName);
 	virtual ~TADCEventReader();
 	bool GetNextEvent();
 	bool GetEvent(UInt_t EventNumber);
@@ -44,7 +43,7 @@ public:
 
 private:
 	void SetBranchAddresses();
-	bool SetTree(string fileName);//TTree *tree);
+	bool SetTree(std::string fileName);//TTree *tree);
 	void initialiseTree();
 private:
 	UInt_t run_number;
