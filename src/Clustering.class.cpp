@@ -473,7 +473,7 @@ void Clustering::ClusterEvent(bool verbose) {
 void Clustering::ClusterEventSeeds(bool verbose) {
 	eventReader->GetEvent(current_event);
 	if(verbose) cout<<endl<<endl;
-	if(current_event%1000==0) cout<<"Clustering::ClusterEvent(): current_event = "<<current_event<<endl;
+	if(current_event%1000==0) cout<<"Clustering::ClusterEventSeed(): current_event = "<<current_event<<endl;
 
 	clustered_event.Clear();
 	clustered_event.SetEventNumber(current_event);
