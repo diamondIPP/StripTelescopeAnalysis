@@ -166,6 +166,7 @@ UChar_t TADCEventReader::getDet_ADC(UInt_t i , UInt_t j) const
 
 UChar_t TADCEventReader::getDet_Channels(UInt_t i , UInt_t j) const
 {
+	if (i>8||j>255)cout<<"TADCEventReader::getDet_Channels not Valid "<<i<<" "<<j<<endl;
     return Det_Channels[i][j];
 }
 

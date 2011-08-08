@@ -230,9 +230,9 @@ void Clustering::ClusterEvent(bool verbose) {
       saturatedclusterflags.clear();
       if(verbose) cout<<"after clear(): cluster.size()="<<cluster.size()<<" and cluster.size()="<<cluster.size()<<endl;
       previouschan=-1;
-      if(verbosity>=2)cout<<"Clustering::ClusterEvent::Start hits loop"<<endl;
+      if(verbosity>=2)cout<<"Clustering::ClusterEvent::Start hits loop"<<hits.size()<<endl;
       for(uint i=0; i<hits.size(); i++) {
-    	  if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loopp i="<<i<<endl;
+    	  if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop i="<<i<<endl;
          currentchan = eventReader->getDet_Channels(det,hits[i]);
          if(verbose) {
             if(hits[i]==-1) cout<<"examining hit "<<i<<" at channel index "<<hits[i]<<" or end of hits"<<endl;
@@ -246,12 +246,14 @@ void Clustering::ClusterEvent(bool verbose) {
             }
          }
          //build a cluster of hits
+         if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop"<<i<<"build a cluster of a hit"<<endl;
          if((previouschan==-1 || currentchan==previouschan+1) && hits[i]!=-1) {
             if(verbose) cout<<"adding channel to cluster"<<endl;
             cluster.push_back(hits[i]);
             previouschan = currentchan;
          }
          //found end of cluster so search current cluster for a seed
+         if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop"<<i<<"found enf of cluster search seed"<<endl;
          else {
             if(hits[i]!=-1) i--;
             if(verbose) cout<<"found end of cluster; looking for seed:"<<endl;
@@ -265,6 +267,8 @@ void Clustering::ClusterEvent(bool verbose) {
             peakchan_psadc=-5000;
             
             //require no masked channels adjacent to the cluster
+
+            if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loop"<<i<<"require no masked channels"<<endl;
             if((int)eventReader->getDet_Channels(det,cluster[0])==0 || (int)eventReader->getDet_Channels(det,cluster[cluster.size()-1])==255) {
                hasmasked = 1;
                if(verbose) cout<< "Cluster is up against edge of detector; flagging cluster as bad channel cluster." << endl;
@@ -274,11 +278,15 @@ void Clustering::ClusterEvent(bool verbose) {
                hasmasked = 1;
                if(verbose) cout<< "Channel(s) adjacent to the cluster is masked; flagging cluster as bad channel cluster." << endl;
             }
-            
+
+            if(verbosity>=2)cout<<"Clustering::ClusterEvent::cluster loop"<<cluster.size()<<endl;
             for(uint j=0; j<cluster.size(); j++) {
+            	if(verbosity>=2)cout<<"Clustering::ClusterEvent::cluster loop "<< j<<endl;
                currentchan = cluster[j];
                if(verbose) cout<<"cluster["<<j<<"]="<<cluster[j]<<" or channel "<<(int)eventReader->getDet_Channels(det,currentchan);
                if(det<8) {
+
+               	if(verbosity>=2)cout<<"Clustering::ClusterEvent::cluster loop det <8"<<endl;
                   currentchan_psadc = eventReader->getDet_ADC(det,currentchan)-eventReader->getDet_PedMean(det,currentchan);
                   //check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
                   if(cluster.size()>2) if(currentchan_psadc > peakchan_psadc) {
@@ -306,6 +314,8 @@ void Clustering::ClusterEvent(bool verbose) {
                   }
                }
                if(det==8) {
+
+               	if(verbosity>=2)cout<<"Clustering::ClusterEvent::cluster loop det =8"<<endl;
                   currentchan_psadc = eventReader->getDia_ADC(currentchan)-eventReader->getDet_PedMean(det,currentchan);
                   //check for peak (for lumpy cluster check; can only have lumpy cluster for >2 hits)
                   if(cluster.size()>2) if(currentchan_psadc > peakchan_psadc) {
