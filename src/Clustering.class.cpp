@@ -386,6 +386,7 @@ void Clustering::ClusterEvent(bool verbose) {
             //move on to the next cluster
          }//end else (found end of candidate cluster)
       }//end loop over hits in detector
+      if(verbosity>=2)cout<<"Clustering::ClusterEvent::finished hits loop"<<endl;
       
       if(clusters.size()==0) {
          if(verbose) cout<<"No clusters found so skipping to next detector."<<endl;
@@ -396,8 +397,10 @@ void Clustering::ClusterEvent(bool verbose) {
       Cluster* current_cluster = 0;
       int highest_index, nexthighest_index;
       float highest_psadc, nexthighest_psadc, current_psadc;
+      if(verbosity>=2)cout<<"Clustering::ClusterEvent::found "<<cluster.size()<<" Cluster"<<endl;
       if(clusters.size()>0) {
          if(verbose) cout<<"det="<<det<<"\tclusters.size()="<<clusters.size()<<endl;
+         if(verbosity>=2)cout<<"Clustering::ClusterEvent::Start clusters loop"<<endl;
          for(uint i=0; i<clusters.size(); i++) {
             //add cluster to a different list in current event depending on flags
             current_cluster = clustered_event.AddCluster(det,badchannelclusterflags[i]); //||goldengateclusterflags[i]||lumpyclusterflags[i]||saturatedclusterflags[i]);
