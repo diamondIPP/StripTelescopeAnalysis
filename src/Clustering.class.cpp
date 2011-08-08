@@ -159,8 +159,8 @@ Clustering::~Clustering() {
 
 //take current event and cluster
 void Clustering::ClusterEvent(bool verbose) {
-	verbosity=1;
-	if(verbosity){
+	verbosity=2;
+	if(verbosity>=2){
 		cout<<"Get Event: "<<current_event<<"\t"<<eventReader<<flush;
 		cout<<eventReader->isOK();
 	}
@@ -175,7 +175,7 @@ void Clustering::ClusterEvent(bool verbose) {
    vector< vector<int> > clusters;
    int previouschan, currentchan, hasaseed, hasmasked, previousseed, isgoldengate, islumpy, peakchan, hassaturated;
    float peakchan_psadc, currentchan_psadc, previouschan_psadc;
-
+   if(verbosity>=2)cout<<"Clustering::ClusterEvent::Start det loop"<<endl;
    for(int det=0; det<9; det++) {
       hits.clear();
       cluster.clear();
@@ -184,6 +184,7 @@ void Clustering::ClusterEvent(bool verbose) {
       //look for hits
       if(verbose) cout<<endl<<endl<<"Detector "<<det<<" hits: ";
       for(int i=0; i<(int)eventReader->getDet_NChannels(det); i++) {
+    	  if(verbosity>=2)cout<<"Clustering::ClusterEvent::i = "<<i<<endl;
          if(det<8)
         	 if(eventReader->getDet_ADC(det,i)-eventReader->getDet_PedMean(det,i) >
 			 settings->getSi_Cluster_Hit_Factor()*eventReader->getDet_PedWidth(det,i)) {
@@ -206,6 +207,7 @@ void Clustering::ClusterEvent(bool verbose) {
             }
          }
       }
+
       if(verbose) {
          cout<<endl<<"Channels screened: ";
          for(int i=0; i<256; i++) if(!settings->getDet_channel_screen(det).CheckChannel(i)) cout<<i<<", ";
@@ -228,7 +230,9 @@ void Clustering::ClusterEvent(bool verbose) {
       saturatedclusterflags.clear();
       if(verbose) cout<<"after clear(): cluster.size()="<<cluster.size()<<" and cluster.size()="<<cluster.size()<<endl;
       previouschan=-1;
+      if(verbosity>=2)cout<<"Clustering::ClusterEvent::Start hits loop"<<endl;
       for(uint i=0; i<hits.size(); i++) {
+    	  if(verbosity>=2)cout<<"Clustering::ClusterEvent::hits loopp i="<<i<<endl;
          currentchan = eventReader->getDet_Channels(det,hits[i]);
          if(verbose) {
             if(hits[i]==-1) cout<<"examining hit "<<i<<" at channel index "<<hits[i]<<" or end of hits"<<endl;
