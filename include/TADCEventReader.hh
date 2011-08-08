@@ -17,20 +17,36 @@
 
 #include "TMath.h"
 #include "TTree.h"
+#include "TFile.h"
 using namespace std;
 class TADCEventReader {
 public:
-	TADCEventReader(TTree* tree);
+	TADCEventReader(string fileName);
 	virtual ~TADCEventReader();
 	bool GetNextEvent();
 	bool GetEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
 	bool isOK();
+    bool getCMNEvent_flag() const;
+    UInt_t getCurrent_event() const;
+    UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
+    UChar_t getDet_Channels(UInt_t i , UInt_t j) const;
+    UInt_t getDet_NChannels(UInt_t i) const;
+    Float_t getDet_PedMean(UInt_t i, UInt_t j) const;
+    Float_t getDet_PedWidth(UInt_t i, UInt_t j) const;
+    UShort_t getDia_ADC(UInt_t i) const;
+    UInt_t getEvent_number() const;
+    TTree *getPedTree() const;
+    UInt_t getRun_number() const;
+    Float_t getStore_threshold() const;
+    UInt_t getVerbosity() const;
+    bool getZeroDivisorEvent_flag() const;
+
 private:
 	void SetBranchAddresses();
-	bool SetTree(TTree *tree);
+	bool SetTree(string fileName);//TTree *tree);
 	void initialiseTree();
-public:
+private:
 	UInt_t run_number;
 	UInt_t event_number;
 	Float_t store_threshold;
@@ -44,6 +60,7 @@ public:
 	Float_t Det_PedWidth[9][256];
 private:
 //is that needed?
+	TFile *PedFile;
     TTree *PedTree;
     UInt_t current_event;
 

@@ -17,6 +17,7 @@ public:
 	virtual ~TDetector_Data();
 	int GetADC_value(Int_t index);
 	void SetADC_value(Int_t index, Int_t value);
+
 	int ADC_values[256];
 };
 

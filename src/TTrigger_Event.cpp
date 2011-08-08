@@ -8,12 +8,9 @@
 #include "TTrigger_Event.hh"
 
 TTrigger_Event::TTrigger_Event() {
-	// TODO Auto-generated constructor stub
-
 }
 
 TTrigger_Event::~TTrigger_Event() {
-	// TODO Auto-generated destructor stub
 }
 
 void TTrigger_Event::SetD0X(TDetector_Data Detector)

@@ -20,12 +20,14 @@ using namespace std;
 
 class AlignmentClass {
 public:
-	AlignmentClass(TTree *Tree,UInt_t nEventNumber=0);
+	AlignmentClass(string fileName,UInt_t nEventNumber=0);
 	virtual ~AlignmentClass();
 	bool GetEvent(UInt_t nEvent);
+
 	int Align(bool plots = 1, bool CutFakeTracksOn = false);
     void TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
+
 	void SetSettings(TSettings* settings);
 	void SetPlotsPath(string plotspath);
 	void SetTracks(vector<TDiamondTrack> tracks);
@@ -73,6 +75,7 @@ private:/*see if needed*/
 	HistogrammSaver *histSaverAlignmentFakedTracks;
 
 private:
+	string PedFileName;
 	int verbosity;
 };
 

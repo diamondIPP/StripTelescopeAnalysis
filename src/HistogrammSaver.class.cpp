@@ -8,7 +8,6 @@
 #include "HistogrammSaver.class.hh"
 
 HistogrammSaver::HistogrammSaver(int verbose) {
-	// TODO Auto-generated constructor stub
 	sys=NULL;
 	pt=NULL;
 	verbosity=verbose;
@@ -34,7 +33,9 @@ HistogrammSaver::HistogrammSaver(int verbose) {
 }
 
 HistogrammSaver::~HistogrammSaver() {
-	// TODO Auto-generated destructor stub
+	this->pt->Delete();
+	currentStyle->Delete();
+	sys->Delete();
 }
 
 void HistogrammSaver::UpdatePaveText(){

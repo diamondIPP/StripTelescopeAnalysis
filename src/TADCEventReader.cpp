@@ -7,26 +7,37 @@
 
 #include "TADCEventReader.hh"
 
-TADCEventReader::TADCEventReader(TTree *tree) {
-	// TODO Auto-generated constructor stub
+TADCEventReader::TADCEventReader(string fileName) {
 	verbosity=0;
 	current_event = 0;
 	store_threshold = 2;
 	PedTree =NULL;
+	PedFile=NULL;
 	/*run_number=RunNumber;
 	event_number=EventNumber;*/
-	SetTree(tree);
+	SetTree(fileName);//tree);
 	initialiseTree();
+	if(!this->isOK()){
+		cout<<"TADCEventReader::TADCEventReader is not correctly initialized.. EXIT PROGRAM"<<endl;
+		exit(-1);
+	}
+	if (verbosity) cout<<"PedTree Entries():"<<PedTree->GetEntries()<<endl;
 }
 
 TADCEventReader::~TADCEventReader() {
-	// TODO Auto-generated destructor stub
 	cout<< "deleting instance of TADCEventReader"<<endl;
+	delete PedTree;
+	delete PedFile;
 }
 
-bool TADCEventReader::SetTree(TTree *tree){
+bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 	if(PedTree!=NULL) PedTree->Delete();
-	PedTree= (TTree*)tree->Clone();
+	if(PedFile!=NULL) PedFile->Delete();
+	PedTree=NULL;
+	PedFile=NULL;
+	PedFile = new TFile(fileName.c_str());
+	PedFile->GetObject("PedTree",PedTree);
+
 	if(PedTree!=NULL){
 		SetBranchAddresses();
 		return true;
@@ -134,7 +145,76 @@ Long64_t TADCEventReader::GetEntries(){
 	}
 	if(PedTree!=NULL)
 		return PedTree->GetEntries();
-	else return -1;
+	else return 0;
 }
 
+bool TADCEventReader::getCMNEvent_flag() const
+{
+    return CMNEvent_flag;
+}
+
+UInt_t TADCEventReader::getCurrent_event() const
+{
+    return current_event;
+}
+
+UChar_t TADCEventReader::getDet_ADC(UInt_t i , UInt_t j) const
+{
+    return Det_ADC[i][j];
+}
+
+UChar_t TADCEventReader::getDet_Channels(UInt_t i , UInt_t j) const
+{
+    return Det_Channels[i][j];
+}
+
+UInt_t TADCEventReader::getDet_NChannels(UInt_t i)  const
+{
+    return Det_NChannels[i];
+}
+
+Float_t TADCEventReader::getDet_PedMean(UInt_t i, UInt_t j) const
+{
+    return Det_PedMean[i][j];
+}
+
+Float_t TADCEventReader::getDet_PedWidth(UInt_t i, UInt_t j) const
+{
+    return Det_PedWidth[i][j];
+}
+
+UShort_t TADCEventReader::getDia_ADC(UInt_t i) const
+{
+    return Dia_ADC[i];
+}
+
+UInt_t TADCEventReader::getEvent_number() const
+{
+    return event_number;
+}
+
+TTree * TADCEventReader::getPedTree() const
+{
+    return PedTree;
+}
+
+UInt_t  TADCEventReader::getRun_number() const
+{
+    return run_number;
+}
+
+Float_t  TADCEventReader::getStore_threshold() const
+{
+    return store_threshold;
+}
+
+UInt_t  TADCEventReader::getVerbosity() const
+{
+    return verbosity;
+}
+
+bool  TADCEventReader::getZeroDivisorEvent_flag() const
+{
+    return ZeroDivisorEvent_flag;
+}
 

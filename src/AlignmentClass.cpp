@@ -7,8 +7,8 @@
 
 #include "AlignmentClass.hh"
 
-AlignmentClass::AlignmentClass(TTree* tree,UInt_t nEventNumber) {
-	// TODO Auto-generated constructor stub
+AlignmentClass::AlignmentClass(string fileName,UInt_t nEventNumber) {
+	PedFileName=fileName;
 	align =NULL;
 	eventReader=NULL;
 	histSaver=NULL;
@@ -17,16 +17,20 @@ AlignmentClass::AlignmentClass(TTree* tree,UInt_t nEventNumber) {
 	settings=NULL;
 	nAlignSteps =2;
 	histSaver= new HistogrammSaver(0);
-	eventReader = new TADCEventReader(tree);
+	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:loading:"<<endl;
+	if (eventReader==NULL) eventReader = new TADCEventReader(PedFileName);
+	if (eventReader==NULL || !eventReader->isOK()){
+		cout<<"AlignmentClass::eventReader could not be initialized... EXIT PROGRAM"<<endl;
+		exit (-1);
+	}
 	histSaverAlignment = new HistogrammSaver(0);
 	histSaverAlignmentFakedTracks = new HistogrammSaver(0);
 	eventReader->GetEvent(nEventNumber);
 	verbosity=1;
-	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:"<<eventReader->isOK()<<" "<<eventReader<<endl;
+	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:"<<eventReader->isOK()<<" "<<eventReader<<" entries:"<<eventReader->GetEntries()<<endl;
 }
 
 AlignmentClass::~AlignmentClass() {
-	// TODO Auto-generated destructor stub
 	if(eventReader!=NULL) delete eventReader;
 	if(histSaver!=NULL) delete histSaver;
 	if (settings!=NULL) delete settings;
@@ -293,8 +297,8 @@ event_numbers.clear();
 for (int j = 0; j < eventReader->GetEntries(); j++) {
 	eventReader->GetEvent(j);
 	//		cout << endl << endl << endl;
-	//		cout << "event " << j << " in PedTree has eventReader->event_number: " << eventReader->event_number << endl;
-	event_numbers.push_back(eventReader->event_number);
+	//		cout << "event " << j << " in PedTree has eventReader->getEvent_number(): " << eventReader->getEvent_number() << endl;
+	event_numbers.push_back(eventReader->getEvent_number());
 	//		for (int blablabla = 0; blablabla < 254; blablabla++) {
 	//			cout << "eventReader->Dia_ADC = " << eventReader->Dia_ADC[blablabla] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[8][blablabla] << endl;
 	//			cout << "Collected charge in channel " << blablabla << " of diamond: " << eventReader->Dia_ADC[blablabla]-eventReader->Det_PedMean[8][blablabla] << endl;
@@ -368,12 +372,12 @@ for (int i = 0; i < tracks.size(); i++) {
 	//get event
 	if (verbose) cout << "getting event " << event << ".." << endl;
 	eventReader->GetEvent(event);
-	if (verbose) cout << "eventReader->event_number = " << eventReader->event_number << endl;
+	if (verbose) cout << "eventReader->getEvent_number() = " << eventReader->getEvent_number() << endl;
 
 	// find biggest hit in diamond
 	eff_diamond_hit_channel = 0;
 	for (int j = 0; j < 128; j++) {
-		if (eventReader->Det_ADC[6][j]-eventReader->Det_PedMean[6][j] > (eventReader->Det_ADC[6][eff_diamond_hit_channel]-eventReader->Det_PedMean[6][eff_diamond_hit_channel])) {
+		if (eventReader->getDet_ADC(6,j)-eventReader->getDet_PedMean(6,j) > (eventReader->getDet_ADC(6,eff_diamond_hit_channel)-eventReader->getDet_PedMean(6,eff_diamond_hit_channel))) {
 			eff_diamond_hit_channel = j;
 		}
 	}
@@ -384,8 +388,8 @@ for (int i = 0; i < tracks.size(); i++) {
 	// cluster diamond channels around estimated hit position
 	//		cout << " --" << endl;
 	if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-	if (verbose) cout << "evenDet_PedMeantReader->Det_ADC[6] = " << eventReader->Det_ADC[6][diamond_hit_channel] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[6][diamond_hit_channel] << endl;
-	if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of D3X: " << eventReader->Det_ADC[6][(int)diamond_hit_position]-eventReader->Det_PedMean[6][(int)diamond_hit_position] << endl;
+	if (verbose) cout << "evenDet_PedMeantReader->Det_ADC[6] = " << eventReader->getDet_ADC(6,diamond_hit_channel) << ",\teventReader->Det_PedMean = " << eventReader->getDet_PedMean(6,diamond_hit_channel) << endl;
+	if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of D3X: " << eventReader->getDet_ADC(6,(int)diamond_hit_position)-eventReader->getDet_PedMean(6,(int)diamond_hit_position) << endl;
 
 	int sign;
 
@@ -394,8 +398,8 @@ for (int i = 0; i < tracks.size(); i++) {
 
 	// calculate eta for the two closest two channels to the estimated hit position
 	diamond_secondhit_channel = diamond_hit_channel - sign;
-	firstchannel_adc = eventReader->Det_ADC[6][diamond_hit_channel]-eventReader->Det_PedMean[6][diamond_hit_channel];
-	secondchannel_adc = eventReader->Det_ADC[6][diamond_secondhit_channel]-eventReader->Det_PedMean[6][diamond_secondhit_channel];
+	firstchannel_adc = eventReader->getDet_ADC(6,diamond_hit_channel)-eventReader->getDet_PedMean(6,diamond_hit_channel);
+	secondchannel_adc = eventReader->getDet_ADC(6,diamond_secondhit_channel)-eventReader->getDet_PedMean(6,diamond_secondhit_channel);
 	if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
 	else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
 	histo_transparentclustering_eta->Fill(transp_eta);
@@ -417,7 +421,7 @@ for (int i = 0; i < tracks.size(); i++) {
 			if (verbose) cout << current_channel;
 			if (verbose) if (channel < j) cout << ", ";
 			if (current_channel > 0 && current_channel < 128 /* && eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*eventReader->Det_PedWidth[8][current_channel]*/)
-				cluster_adc = cluster_adc + eventReader->Det_ADC[6][current_channel]-eventReader->Det_PedMean[6][current_channel];
+				cluster_adc = cluster_adc + eventReader->getDet_ADC(6,current_channel)-eventReader->getDet_PedMean(6,current_channel);
 		}
 		if (verbose) cout << endl;
 		if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
@@ -493,7 +497,7 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 
 	//Telescope Data Branches
 	event_numbers.clear();
-
+	eventReader=new TADCEventReader(PedFileName);
 	if(verbosity) {
 		cout << "AlignmentClass::TransparentClustering::get Event numbers: "<<eventReader<<" ."<<flush;
 		cout<<eventReader->isOK()<<flush;
@@ -504,10 +508,10 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 		if(verbosity) cout << "AlignmentClass::TransparentClustering::get Event"<<j<<flush;
 		if(!eventReader->GetEvent(j)) continue;
 		//		cout << endl << endl << endl;
-		//		cout << "event " << j << " in PedTree has eventReader->event_number: " << eventReader->event_number << endl;
+		//		cout << "event " << j << " in PedTree has eventReader->getEvent_number(): " << eventReader->getEvent_number() << endl;
 
 		if(verbosity) cout << " push back "<<flush;
-		event_numbers.push_back(eventReader->event_number);
+		event_numbers.push_back(eventReader->getEvent_number());
 		if(verbosity) cout << " done. "<<endl;
 		//		for (int blablabla = 0; blablabla < 254; blablabla++) {
 		//			cout << "eventReader->Dia_ADC = " << eventReader->Dia_ADC[blablabla] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[8][blablabla] << endl;
@@ -583,12 +587,12 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 		//get event
 		if (verbose) cout << "getting event " << event << ".." << endl;
 		eventReader->GetEvent(event);
-		if (verbose) cout << "eventReader->event_number = " << eventReader->event_number << endl;
+		if (verbose) cout << "eventReader->getEvent_number() = " << eventReader->getEvent_number() << endl;
 
 		// find biggest hit in diamond
 		eff_diamond_hit_channel = 0;
 		for (int j = 0; j < 128; j++) {
-			if (eventReader->Dia_ADC[j]-eventReader->Det_PedMean[8][j] > (eventReader->Dia_ADC[eff_diamond_hit_channel]-eventReader->Det_PedMean[8][eff_diamond_hit_channel])) {
+			if (eventReader->getDia_ADC(j)-eventReader->getDet_PedMean(8,j) > (eventReader->getDia_ADC(eff_diamond_hit_channel)-eventReader->getDet_PedMean(8,eff_diamond_hit_channel))) {
 				eff_diamond_hit_channel = j;
 			}
 		}
@@ -599,8 +603,8 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 		// cluster diamond channels around estimated hit position
 		//		cout << " --" << endl;
 		if (verbose) cout << "track " << i << " has an estimated hit position at " << diamond_hit_position << " (channel " << diamond_hit_channel << ")" << endl;
-		if (verbose) cout << "eventReader->Dia_ADC = " << eventReader->Dia_ADC[diamond_hit_channel] << ",\teventReader->Det_PedMean = " << eventReader->Det_PedMean[8][diamond_hit_channel] << endl;
-		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << eventReader->Dia_ADC[(int)diamond_hit_position]-eventReader->Det_PedMean[8][(int)diamond_hit_position] << endl;
+		if (verbose) cout << "eventReader->Dia_ADC = " << eventReader->getDia_ADC(diamond_hit_channel) << ",\teventReader->Det_PedMean = " << eventReader->getDet_PedMean(8,diamond_hit_channel) << endl;
+		if (verbose) cout << "Collected charge in channel " << (int)diamond_hit_position << " of diamond: " << eventReader->getDia_ADC((int)diamond_hit_position)-eventReader->getDet_PedMean(8,(int)diamond_hit_position) << endl;
 
 		int sign;
 
@@ -609,8 +613,8 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 
 		// calculate eta for the two closest two channels to the estimated hit position
 		diamond_secondhit_channel = diamond_hit_channel - sign;
-		firstchannel_adc = eventReader->Dia_ADC[diamond_hit_channel]-eventReader->Det_PedMean[8][diamond_hit_channel];
-		secondchannel_adc = eventReader->Dia_ADC[diamond_secondhit_channel]-eventReader->Det_PedMean[8][diamond_secondhit_channel];
+		firstchannel_adc = eventReader->getDia_ADC(diamond_hit_channel)-eventReader->getDet_PedMean(8,diamond_hit_channel);
+		secondchannel_adc = eventReader->getDia_ADC(diamond_secondhit_channel)-eventReader->getDet_PedMean(8,diamond_secondhit_channel);
 		if (sign == 1) transp_eta = firstchannel_adc / (firstchannel_adc + secondchannel_adc);
 		else transp_eta = secondchannel_adc / (firstchannel_adc + secondchannel_adc);
 		histo_transparentclustering_eta->Fill(transp_eta);
@@ -632,7 +636,7 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 				if (verbose) cout << current_channel;
 				if (verbose) if (channel < j) cout << ", ";
 				if (current_channel > 0 && current_channel < 128 /* && eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*eventReader->Det_PedWidth[8][current_channel]*/)
-					cluster_adc = cluster_adc + eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel];
+					cluster_adc = cluster_adc + eventReader->getDia_ADC(current_channel)-eventReader->getDet_PedMean(8,current_channel);
 			}
 			if (verbose) cout << endl;
 			if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;

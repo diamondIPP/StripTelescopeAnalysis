@@ -65,8 +65,6 @@ class Clustering {
       void Alignment(bool plots, bool CutFakeTracksOn);
 	  void HistCleaner(int regid, TH2F* histo);
       void AutoFidCut();
-    void TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
-	void TransparentClustering(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 //	void LinTrackFit(vector<Float_t> x_positions, vector<Float_t> y_positions, vector<Float_t> &par);
 	void EventMonitor(int CurrentEvent = 0);
 	void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
@@ -74,8 +72,6 @@ class Clustering {
 	bool getUseAutoFidCut(){return settings->getUseAutoFidCut();};
 	void setAlternativeClustering(bool value){settings->setAlternativeClustering(value);}
 	void setUseAutoFidCut(bool value){settings->setUseAutoFidCut(value);}
-   private:
-	void Align(bool plots = 1, bool CutFakeTracksOn = false);
 //
 //	bool UseAutoFidCut;
 //	bool AlternativeClustering;
@@ -129,8 +125,6 @@ class Clustering {
 
       //io
       UInt_t current_event;
-      TFile *PedFile;
-      TTree *PedTree;
       TDatime dateandtime;
       TRandom3 rand;
       HistogrammSaver *histSaver;
