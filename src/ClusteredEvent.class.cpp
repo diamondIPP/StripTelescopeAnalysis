@@ -238,6 +238,6 @@ void ClusteredEvent::Print() {
          }
       }
    }
-   cout<<"--------------------"<<endl<<endl;
+   cout<<"--------------------."<<endl<<endl;
 }
 

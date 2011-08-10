@@ -9,17 +9,18 @@
 
 using namespace std;
 
-HistogrammSaver::HistogrammSaver(int verbose) {
+HistogrammSaver::HistogrammSaver(int verbosity) {
 	sys=NULL;
 	pt=NULL;
-	verbosity=verbose;
+	this->verbosity=verbosity;
 	runNumber=0;
 	nEvents=0;
 	plots_path=".";
 	pt = new TPaveText(0.07,0,0.22,0.10,"NDC");
 	UpdatePaveText();
+	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: get new TSystem"<<endl;
 	sys=new TSystem();
-	if(verbosity)cout<<"Created instance of HistogrammSaver"<<endl;
+	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: Set Style"<<endl;
 	currentStyle= new TStyle("HistSaverStyle","HistSaverStyle");
 	currentStyle->SetPalette(1);
 	gROOT->SetStyle("Plain"); //General style (see TStyle)
@@ -32,6 +33,7 @@ HistogrammSaver::HistogrammSaver(int verbose) {
 	gStyle->SetStatH(0.12); //Sets Height of Stats Box
 	gStyle->SetStatW(0.15); //Sets Width of Stats Box
 	gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
 }
 
 HistogrammSaver::~HistogrammSaver() {
@@ -70,7 +72,7 @@ void HistogrammSaver::SetNumberOfEvents(unsigned int nNewEvents){
 }
 void HistogrammSaver::SetPlotsPath(string path){
 	plots_path.assign(path);
-	if(verbosity)cout<<"Set Plotspath: \""<<plots_path<<"\""<<endl;
+	if(verbosity)cout<<"HistogrammSaver::Set Plotspath: \""<<plots_path<<"\""<<endl;
 	sys->mkdir(plots_path.c_str());
 }
 

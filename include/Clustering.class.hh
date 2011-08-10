@@ -52,7 +52,7 @@ class Clustering {
    public:
       Clustering(unsigned int RunNumber, std::string RunDescription = ""); //open files
       ~Clustering(); //close files
-      void ClusterEvent(bool verbose = 0);
+      void ClusterEvent();
 	void ClusterEventSeeds(bool verbose = 0);
       void BookHistograms();
       void InitializeHistograms();

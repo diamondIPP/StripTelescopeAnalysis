@@ -23,6 +23,7 @@ TADCEventReader::TADCEventReader(string fileName) {
 		exit(-1);
 	}
 	if (verbosity) cout<<"PedTree Entries():"<<PedTree->GetEntries()<<endl;
+	this->GetEvent(0);
 }
 
 TADCEventReader::~TADCEventReader() {
@@ -122,7 +123,7 @@ bool TADCEventReader::GetNextEvent(){
 	if(current_event+1<PedTree->GetEntries()){
 		current_event++;
 		PedTree->GetEvent(current_event);
-		if(verbosity==2)
+		if(verbosity>=2)
 			cout<<"Got next Event, new event number: "<<current_event<<endl;
 		return true;
 	}
@@ -133,7 +134,7 @@ bool TADCEventReader::GetEvent(UInt_t EventNumber){
 	if(EventNumber<PedTree->GetEntries()){
 			current_event=EventNumber;
 			PedTree->GetEvent(current_event);
-			if(verbosity==2)
+			if(verbosity>=2)
 				cout<<"Got Event: "<<current_event<<endl;
 			return true;
 		}
@@ -141,7 +142,7 @@ bool TADCEventReader::GetEvent(UInt_t EventNumber){
 }
 
 Long64_t TADCEventReader::GetEntries(){
-	if (verbosity) {
+	if (verbosity>=2) {
 		cout<<"TADCEventReader::GetEntries:"<<PedTree<<flush;
 		cout<<" "<<PedTree->GetEntries();
 	}
@@ -167,7 +168,10 @@ UChar_t TADCEventReader::getDet_ADC(UInt_t i , UInt_t j) const
 
 UChar_t TADCEventReader::getDet_Channels(UInt_t i , UInt_t j) const
 {
-	if (i>8||j>255)cout<<"TADCEventReader::getDet_Channels not Valid "<<i<<" "<<j<<endl;
+	if (i>8||j>255){
+		cout<<"TADCEventReader::getDet_Channels not Valid "<<i<<" "<<j<<endl;
+		exit (-1);
+	}
     return Det_Channels[i][j];
 }
 
