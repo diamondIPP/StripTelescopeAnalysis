@@ -70,8 +70,9 @@ class SlidingPedestal {
       void PedIteration(TH1F *hist, TEvent_Array *Event, TPed_and_RMS *array, Int_t channel, Float_t hit_factor);
       void BufferFill(TDetector_Data &Anyf, TPed_and_RMS *ped, std::vector< std::deque<Int_t> > *buffer_deque, Int_t channel_number, Int_t deque_size, Float_t Hit, Int_t initial_event);
       void RunningPedestal(TDetector_Data detector_buff, TPed_and_RMS initial, TPed_and_RMS *store, std::vector< std::deque<Int_t> > &buffer_deque, Int_t channel_number, Int_t deque_size, Float_t threshold_factor, Int_t *zeroRMS, Int_t event);
-      void RunningCommonMode(std::deque<Double_t> &CMN_deque, Double_t &CMN_Mean, Double_t &CMN_RMS, Double_t new_ave, Int_t deque_size, Int_t event, Int_t *zeroRMS);
-      void Hit_Occupancy(ChannelScreen screen, TH1F *occup, TDetector_Data detector_buffer, TPed_and_RMS *ped_store, Float_t RMS_factor, Int_t chan_begin, Int_t chan_end, Int_t const dia_offset);
+     // void RunningCommonMode(std::deque<Double_t> &CMN_deque, Double_t &CMN_Mean, Double_t &CMN_RMS, Double_t new_ave, Int_t deque_size, Int_t event, Int_t *zeroRMS);
+      void RunningPedestal_CMN(TDetector_Data detector_buff, TPed_and_RMS initial, TPed_and_RMS *store, std::vector< std::deque<Float_t> > &buffer_deque, Int_t channel_number, Int_t deque_size, Float_t threshold_factor, Int_t *zeroRMS, Int_t event, Float_t correction);
+      void Hit_Occupancy(ChannelScreen screen, TH1F *occup, TDetector_Data detector_buffer, TPed_and_RMS *ped_store, Float_t RMS_factor, Int_t chan_begin, Int_t chan_end, Int_t const dia_offset, Float_t correction);
       void PedRMSCalcFromBuffer(std::vector< std::deque<Int_t> > &buffer_deque, TPed_and_RMS *ped_store);
       void Slide(Int_t NEvents, Int_t Initial_Event = 1000, Int_t hit_occupancy = 0);
 
@@ -113,6 +114,7 @@ class SlidingPedestal {
       Float_t Di_Pedestal_Hit_Factor;
       /***Common Mode Noise Constraints***/
       //Range of Corrected Events from
+      Int_t DO_CMC;
       Int_t CMN_corr_low;
       //to
       Int_t CMN_corr_high;

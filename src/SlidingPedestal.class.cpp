@@ -37,6 +37,7 @@ SlidingPedestal::SlidingPedestal(unsigned int RunNumber, string RunDescription) 
    dia_input = 0; // 1 for 2006 and 0 for the rest
    Si_Pedestal_Hit_Factor = 5;
    Di_Pedestal_Hit_Factor = 5;
+   DO_CMC = 1;
    /***Common Mode Noise Constraints***/
    //Range of Corrected Events from
    CMN_corr_low = 3;
@@ -221,6 +222,10 @@ void SlidingPedestal::LoadSettings() {
       if(key=="Di_Pedestal_Hit_Factor") {
          cout << key.c_str() << " = " << value.c_str() << endl;
          Di_Pedestal_Hit_Factor = (float)strtod(value.c_str(),0);
+      }
+      if(key=="DO_CMC") {
+	cout << key.c_str() << " = " << value.c_str() << endl;
+	DO_CMC = (int)strtod(value.c_str(),0);
       }
       if(key=="CMN_corr_low") {
          cout << key.c_str() << " = " << value.c_str() << endl;
@@ -564,6 +569,104 @@ void SlidingPedestal::BufferFill(TDetector_Data &Anyf, TPed_and_RMS *ped, vector
    *buffer_deque = buffer;
 }
 
+//aysha modification: added common mode correction parameter and used floats for buffer deque
+
+
+
+void SlidingPedestal::RunningPedestal_CMN(TDetector_Data detector_buff, TPed_and_RMS initial, TPed_and_RMS *store, vector< deque<Float_t> > &buffer_deque, Int_t channel_number, Int_t deque_size, Float_t threshold_factor, Int_t *zeroRMS, Int_t event, Float_t correction)
+{
+   Float_t divisor = (Float_t) deque_size;
+   TPed_and_RMS Ped_buffer;
+   //TEvent_Array RMS_buffer(deque_size);
+   Ped_buffer = *store;
+   /* for(Int_t s=0; s<channel_number; s++)
+   {
+      if(Abs(detector_buff.GetADC_value(s)-store->GetPedValues(s))>(threshold_factor*store->GetRMSValues(s)))
+      {
+         continue;
+      }
+      Float_t Remove = buffer_deque[s][0]/divisor;
+      Float_t Add = (detector_buff.GetADC_value(s)/divisor);
+      if(s==64)  //(57+7))
+      {
+         //cout << "s is: " << s << " ADC Value: " << detector_buff.GetADC_value(s) << " Ped Before: " << Ped_buffer.GetPedValues(s) << " and after: " << Ped_buffer.GetPedValues(s)+Add-Remove << " Add: " << Add << " Remove: " << Remove << endl;
+      }
+      store->SetPedValues(s,(Ped_buffer.GetPedValues(s))+Add-Remove);
+      buffer_deque[s].pop_front();
+      buffer_deque[s].push_back(detector_buff.GetADC_value(s));
+      for(Int_t y=0; y<deque_size; y++)
+      {
+         RMS_buffer.SetChannelValue(buffer_deque[s][y],y);
+         RMS_buffer.SetChannelValueSquared(buffer_deque[s][y],y);
+      }
+   store->SetRMSValues(s,RMS_buffer.CalculateSigma()); */ //old code
+
+   Float_t detector_buff_ADC_value, buffer_front;
+   Float_t new_mean, new_sigma, store_Ped_Value, store_RMS_Value;
+   Double_t Remove, Add;
+   for (Int_t s = 0; s < channel_number; s++) {
+     detector_buff_ADC_value = detector_buff.GetADC_value(s) - correction;
+     store_Ped_Value = store->GetPedValues(s);
+     store_RMS_Value = store->GetRMSValues(s);
+
+     if (Abs(detector_buff_ADC_value - store_Ped_Value) > threshold_factor * store_RMS_Value)
+       continue;
+
+     buffer_front = buffer_deque[s][0];
+     buffer_deque[s].pop_front();
+     buffer_deque[s].push_back(detector_buff_ADC_value);
+
+     if (event % Taylor_speed_throttle) {
+       Remove = buffer_front / divisor;
+       Add = detector_buff_ADC_value / divisor;
+
+       new_mean = store_Ped_Value + Add - Remove;
+
+       new_sigma = Sqrt(store_RMS_Value * store_RMS_Value * divisor * divisor + (divisor - 1.) * (detector_buff_ADC_value + buffer_front) * (detector_buff_ADC_value - buffer_front) - 2 * (divisor * store_Ped_Value - buffer_front) * (detector_buff_ADC_value - buffer_front)) / divisor;
+       //new_sigma = Sqrt(store_RMS_Value * store_RMS_Value + (divisor - 1.) * (Add * Add - Remove * Remove) - 2 * (store_Ped_Value - Remove) * (Add - Remove)); //Taylor: less precise value (maximum difference about 0.3%), but accurate and much faster
+
+       //compare sigma values
+       if (s == (Int_t)plottedChannel) {
+         TEvent_Array_F RMS_buffer(deque_size);
+
+         for (Int_t y = 0; y < deque_size; y++)
+           RMS_buffer.SetChannelValue(buffer_deque[s][y], y);
+
+         Float_t old_sigma = RMS_buffer.CalculateSigma();
+
+         hRMSDifference->Fill((new_sigma - old_sigma) / old_sigma);
+       } // */ //Taylor
+     } else {
+       TEvent_Array_F RMS_buffer(deque_size);
+
+       for (Int_t y = 0; y < deque_size; y++)
+         RMS_buffer.SetChannelValue(buffer_deque[s][y], y);
+
+       new_sigma = RMS_buffer.CalculateSigma(new_mean);
+     } //Taylor: calculate old way to make sure value doesn't drift away
+
+     store->SetPedValues(s, new_mean);
+     store->SetRMSValues(s, new_sigma);
+     //new code
+
+
+      if(store->GetRMSValues(s)< 0.1*(initial.GetRMSValues(s)) || store->GetRMSValues(s) == 0)  //0.1 is the scale factor for the initial value (brings it closer to zero, but makes sure it never hits zero)
+      {
+         store->SetRMSValues(s,0.1*(initial.GetRMSValues(s)));
+         if(store->GetRMSValues(s)==0)
+         {
+            store->SetRMSValues(s,0.1);
+         }
+      }
+      if(store->GetRMSValues(s)==0)
+      {
+         *zeroRMS = 1;
+         cout << "RMS zeroed!!!" << " at event: " << event << " and channel " << s << endl;
+         break;
+      }
+         
+   }
+}
 
 void SlidingPedestal::RunningPedestal(TDetector_Data detector_buff, TPed_and_RMS initial, TPed_and_RMS *store, vector< deque<Int_t> > &buffer_deque, Int_t channel_number, Int_t deque_size, Float_t threshold_factor, Int_t *zeroRMS, Int_t event)
 {
@@ -661,7 +764,7 @@ void SlidingPedestal::RunningPedestal(TDetector_Data detector_buff, TPed_and_RMS
 }
 
 
-void SlidingPedestal::RunningCommonMode(deque<Double_t> &CMN_deque, Double_t &CMN_Mean, Double_t &CMN_RMS, Double_t new_ave, Int_t deque_size, Int_t event, Int_t *zeroRMS)
+/*void SlidingPedestal::RunningCommonMode(deque<Double_t> &CMN_deque, Double_t &CMN_Mean, Double_t &CMN_RMS, Double_t new_ave, Int_t deque_size, Int_t event, Int_t *zeroRMS)
 {
    Double_t divisor = (Double_t) deque_size;
    Double_t RMS_buffer2 = 0;
@@ -702,14 +805,14 @@ void SlidingPedestal::RunningCommonMode(deque<Double_t> &CMN_deque, Double_t &CM
       cout << "Mean^2 : " << CMN_Mean*CMN_Mean << endl;
    }
 }
+*/
 
-
-void SlidingPedestal::Hit_Occupancy(ChannelScreen screen, TH1F *occup, TDetector_Data detector_buffer, TPed_and_RMS *ped_store, Float_t RMS_factor, Int_t chan_begin, Int_t chan_end, Int_t const dia_offset) {
+void SlidingPedestal::Hit_Occupancy(ChannelScreen screen, TH1F *occup, TDetector_Data detector_buffer, TPed_and_RMS *ped_store, Float_t RMS_factor, Int_t chan_begin, Int_t chan_end, Int_t const dia_offset, Float_t common_mode) {
    for(Int_t i = chan_begin+dia_offset; i<chan_end+dia_offset; i++)
    {
       if(screen.CheckChannel(i-dia_offset)==1)
       {
-         if(TMath::Abs(detector_buffer.GetADC_value(i)-ped_store->GetPedValues(i)) > RMS_factor*ped_store->GetRMSValues(i))
+         if(TMath::Abs(detector_buffer.GetADC_value(i)-common_mode-ped_store->GetPedValues(i)) > RMS_factor*ped_store->GetRMSValues(i))
          {
             occup->Fill(i-dia_offset);
          }
@@ -1251,9 +1354,43 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
      }
     }
    } //Taylor
+//Aysha commented out old CMN calculation and replaced Common_Mode_Dia1_Mean and Common_Mode_Dia1_Mean calculation with Raw_ADC_Mean calculation for RawADC vs Event graph ranges
+Double_t Raw_ADC_Mean = 0;
+   for(Int_t i=0; i<(Iter_Size/5); i++)
+   {
+      Double_t mean_buffer=0;
+      Double_t divisor = (Double_t) 128;
+      if(dia_input==0)  {
+      for(Int_t s=0+DIA_OFFSET; s<(128+DIA_OFFSET); s++)
+      {
+         if(screen.CheckChannel(s)==0)
+         {
+            divisor--;
+            continue;
+         }
+         mean_buffer +=  Dia0buffer[s][i];
+      }
+			}
+      if(dia_input==1)  {
+      for(Int_t s=0+DIA_OFFSET; s<(128+DIA_OFFSET); s++)
+      {
+         if(screen.CheckChannel(s)==0)
+         {
+            divisor--;
+            continue;
+         }
+         mean_buffer += Dia1buffer[s][i];
+      }
+			}
+      mean_buffer = mean_buffer/(float(divisor));
+      Raw_ADC_Mean += mean_buffer;
+   }
+
+Raw_ADC_Mean = Raw_ADC_Mean/(Iter_Size/5);
+
 
    //Initialize Common Mode Noise Cut -Take average pedestal value over diamond channels and then average these over a sample of events (typically 100) to get an RMS for a cutoff value
-   deque<Double_t> Common_Mode_Dia0_deque;
+/*   deque<Double_t> Common_Mode_Dia0_deque;
    deque<Double_t> Common_Mode_Dia1_deque;
    deque<Double_t> Common_Mode_Dia0_deque2;
    deque<Double_t> Common_Mode_Dia1_deque2;
@@ -1261,9 +1398,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    Double_t Common_Mode_Dia1_Mean;
    Double_t Common_Mode_Dia0_RMS;
    Double_t Common_Mode_Dia1_RMS;
-
+*/
    //Placeholders for analysis
-   Double_t Common_Mode_Mean = 0;
+  /* Double_t Common_Mode_Mean = 0;
    Double_t Common_Mode_RMS = 0;
 
 
@@ -1338,6 +1475,28 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
       
    cout << endl << "Finished Initializing Common Mode Noise..." << endl;
+*/
+//Aysha copied diamond buffers to float equivalents for running ped
+
+   vector< deque<Float_t> > Dia0buffer_F(256);
+   vector< deque<Float_t> > Dia1buffer_F(256);
+if((dia_input==0) && (DO_CMC==1))
+{
+   for(int i=0; i<Iter_Size; i++)
+  {
+   for(int s=0; s<256; s++)   
+   {Dia0buffer_F[s].push_back(Dia0buffer[s][i]);}
+  }
+}
+
+if((dia_input==1) && (DO_CMC==1))
+{
+   for(int i=0; i<Iter_Size; i++)
+  {
+   for(int s=0; s<256; s++)   
+   {Dia1buffer_F[s].push_back(Dia1buffer[s][i]);}
+  }
+}
 
    TPed_and_RMS *Ped_Store_D0X = new TPed_and_RMS;
    TPed_and_RMS *Ped_Store_D0Y = new TPed_and_RMS;
@@ -1396,6 +1555,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    TTrigger_Event New_Event;
    Int_t rmscount = 0;
    Int_t *prmscount = &rmscount;
+   Float_t Correction = 0;
 
    //store output pedestal subtracted data
    TFile *PedFile = new TFile(pedfilepath.str().c_str(),"recreate");
@@ -1409,7 +1569,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    PedTree->Branch("RunNumber",&run_number,"RunNumber/i");
    PedTree->Branch("EventNumber",&event_number,"EventNumber/i");
    PedTree->Branch("StoreThreshold",&store_threshold,"StoreThreshold/F");
-   PedTree->Branch("CMNEvent_flag",&CMNEvent_flag,"CMNEvent_flag/O");
+ //  PedTree->Branch("CMNEvent_flag",&CMNEvent_flag,"CMNEvent_flag/O");
    PedTree->Branch("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag,"ZeroDivisorEvent_flag/O");
    
    //PedTree->Branch("EventNumber",&PedSubEvent.event_number,"EventNumber/i");
@@ -1461,7 +1621,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    PedTree->Branch("D3X_PedWidth",&Det_PedWidth[6],"D3X_PedWidth[D3X_NChannels]/F");
    PedTree->Branch("D3Y_PedWidth",&Det_PedWidth[7],"D3Y_PedWidth[D3Y_NChannels]/F");
    PedTree->Branch("Dia_PedWidth",&Det_PedWidth[8],"Dia_PedWidth[Dia_NChannels]/F");
-   /*
+	if(DO_CMC==1)
+   {PedTree->Branch("CommonModeCorrection", &Correction,"CMN_Correction/F");}  
+ /*
    PedTree->Branch("D0X_NChannels",&PedSubEvent.pedsub_detector_data[0].nchannels,"D0X_NChannels/i");
    PedTree->Branch("D0Y_NChannels",&PedSubEvent.pedsub_detector_data[1].nchannels,"D0Y_NChannels/i");
    PedTree->Branch("D1X_NChannels",&PedSubEvent.pedsub_detector_data[2].nchannels,"D1X_NChannels/i");
@@ -1522,11 +1684,11 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    Int_t Triggered_Events = 0; //Number of Triggers
    Int_t Bad_Events = 0; //Number of events which have a zero divisor
    Int_t ZeroDivisor_Events = 0; //Number of events which have a zero divisor
-   Int_t CMN_Events = 0; // number of cmn events
-   Int_t Events_Sent_Into_Corrector = 0; //Number of events which are remaining after removal of bad events
-   Int_t Corrected_Events = 0; //Number of Events that get corrected
+//   Int_t CMN_Events = 0; // number of cmn events
+//   Int_t Events_Sent_Into_Corrector = 0; //Number of events which are remaining after removal of bad events
+//   Int_t Corrected_Events = 0; //Number of Events that get corrected
    Int_t PostCorr_Bad_Events = 0; //Number of events which have a zero divisor after the CMN correction (should remain zero in general)
-   Int_t PostCorr_Events_Outside_CMN_win = 0; //Events that are cut after the correction
+//   Int_t PostCorr_Events_Outside_CMN_win = 0; //Events that are cut after the correction
    Int_t Events_Saved = 0; //Final Number of Events saved 
 
    //Int_t Events_Outside_Large_Win = 0; //Number of Events whose Pedestal Average fell outside the large window
@@ -1548,8 +1710,8 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    TH1F *corr_dist = new TH1F("corr_dist", "Distribution of Corrections", 200,-100,100);
    corr_dist->SetDirectory(0);
 
-   TH1F *CMN_RMS_dist = new TH1F("CMN_RMS_dist", "CMN RMS Distribution", 100,0,40);
-   CMN_RMS_dist->SetDirectory(0);
+  // TH1F *CMN_RMS_dist = new TH1F("CMN_RMS_dist", "CMN RMS Distribution", 100,0,40);
+  // CMN_RMS_dist->SetDirectory(0);
 
 
    TH1F *hit_occup = new TH1F("hit_occup","Diamond Hit Occupancy",128,-0.5,127.5);
@@ -1559,14 +1721,14 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    raw_ADC_by_event->SetDirectory(0);
 
    TGraph *raw_ADC_by_event_graph = new TGraph(NEvents+1);
-   TGraph *RMS_threshold_by_event_graph_up = new TGraph(NEvents+1);
-   TGraph *RMS_threshold_by_event_graph_down = new TGraph(NEvents+1);
+  // TGraph *RMS_threshold_by_event_graph_up = new TGraph(NEvents+1);
+ //  TGraph *RMS_threshold_by_event_graph_down = new TGraph(NEvents+1);
 
    TGraph *raw_ADC_by_event_CMN_cut_graph = new TGraph(NEvents+1);
 
    TGraph *PS_ADC_by_event_graph = new TGraph(NEvents+1);
-   TGraph *PS_RMS_threshold_by_event_graph_up = new TGraph(NEvents+1);
-   TGraph *PS_RMS_threshold_by_event_graph_down = new TGraph(NEvents+1);
+ //  TGraph *PS_RMS_threshold_by_event_graph_up = new TGraph(NEvents+1);
+ //  TGraph *PS_RMS_threshold_by_event_graph_down = new TGraph(NEvents+1);
 
    TGraph *PS_ADC_by_event_CMN_cut_graph = new TGraph(NEvents+1);
    
@@ -1608,7 +1770,6 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    
    // Finished initializing the single channel analysis
    //--------------------------------------------------
-   
    
    //-----------------------------------------------
    // Starting the main sliding pedestal calculation
@@ -1656,7 +1817,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       //Double_t ps_divisor = 128;
       Double_t divisor = (Double_t) 128;
       Float_t correction = 0;
-      
+    
       for(Int_t s=0+DIA_OFFSET; s<(128+DIA_OFFSET); s++)
       {
 	  
@@ -1668,14 +1829,14 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
          sum_buffer = sum_buffer + detector_buffer.GetADC_value(s);
          ps_sum_buffer = ps_sum_buffer + (detector_buffer.GetADC_value(s)-Ped_Store->GetPedValues(s)); //Sum of Pedestal Subtracted channels
       }
-
+/*
       if(e==500 || e==3203 || e==4336 || e==4335 || e==4337)
       {
          cout << "for event " << e << " sum buffer/divisor is " << sum_buffer/divisor << " and ps sum buffer is " << ps_sum_buffer/divisor << endl;
       }
-      
+  */    
 
-      CMNEvent_flag = 0;
+     // CMNEvent_flag = 0;
       ZeroDivisorEvent_flag = 0;
             
       //Remove any bad events that have a divisor of 0
@@ -1693,24 +1854,25 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       //Plots and Files
       if(divisor!=0) {
          CMN_noise->Fill(ps_sum_buffer/divisor);
-         CMN_RMS_dist->Fill(Common_Mode_RMS);
+         //CMN_RMS_dist->Fill(Common_Mode_RMS);
          average_ped_file << sum_buffer/divisor << endl;
          //raw_ADC_by_event->Fill(e,sum_buffer/divisor);
          ped_subtracted_file << ps_sum_buffer/divisor << endl;
          //Graphs
          Double_t doub_event = (Double_t) e; //converts e into double for TGraph argument requirements
          raw_ADC_by_event_graph->SetPoint(event_index,doub_event,sum_buffer/divisor);
-         RMS_threshold_by_event_graph_up->SetPoint(event_index,doub_event,Common_Mode_Mean+(Common_Mode_RMS*CMN_cut));
-         RMS_threshold_by_event_graph_down->SetPoint(event_index,doub_event,Common_Mode_Mean-(Common_Mode_RMS*CMN_cut));
+         //RMS_threshold_by_event_graph_up->SetPoint(event_index,doub_event,Common_Mode_Mean+(Common_Mode_RMS*CMN_cut));
+         //RMS_threshold_by_event_graph_down->SetPoint(event_index,doub_event,Common_Mode_Mean-(Common_Mode_RMS*CMN_cut));
          PS_ADC_by_event_graph->SetPoint(event_index,doub_event,ps_sum_buffer/divisor);
-         PS_RMS_threshold_by_event_graph_up->SetPoint(event_index,doub_event,(0+Common_Mode_RMS*CMN_cut));
-         PS_RMS_threshold_by_event_graph_down->SetPoint(event_index,doub_event,0-(Common_Mode_RMS*CMN_cut));
-         Events_Sent_Into_Corrector++;
+  //       PS_RMS_threshold_by_event_graph_up->SetPoint(event_index,doub_event,(0+Common_Mode_RMS*CMN_cut));
+  //       PS_RMS_threshold_by_event_graph_down->SetPoint(event_index,doub_event,0-(Common_Mode_RMS*CMN_cut));
+  //       Events_Sent_Into_Corrector++;
 
-
+//aysha modification: new common mode correction	
+if(DO_CMC==1)	{correction = (ps_sum_buffer)/divisor;}
          //Begin Correction of some events (i.e. correct events approx above 3-4sigma and below 6-7sigma)
          //if(Abs((sum_buffer/divisor)-(Common_Mode_Mean)) > ((CMN_corr_low)*(Common_Mode_RMS) && Abs((sum_buffer/divisor)-(Common_Mode_Mean) < (CMN_corr_high)*(Common_Mode_RMS)))) //&& Abs((sum_buffer/divisor)-Common_Mode_Dia1_Mean)<)
-         if(Abs((sum_buffer/divisor)-Common_Mode_Mean) > ((CMN_corr_low)*Common_Mode_RMS) && Abs((sum_buffer/divisor)-Common_Mode_Mean) < (CMN_corr_high)*Common_Mode_RMS) //&& Abs((sum_buffer/divisor)-Common_Mode_Dia1_Mean)<)
+         /*if(Abs((sum_buffer/divisor)-Common_Mode_Mean) > ((CMN_corr_low)*Common_Mode_RMS) && Abs((sum_buffer/divisor)-Common_Mode_Mean) < (CMN_corr_high)*Common_Mode_RMS) //&& Abs((sum_buffer/divisor)-Common_Mode_Dia1_Mean)<)
          {
             //2010-08-08: Don't change the ADC values; just store as is and flag as CMN event.
             CMNEvent_flag = 1;
@@ -1740,11 +1902,11 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
                
             }
             
-         }
+         }*/
       }
       
       //Once the events needing correction have been corrected, we repeat the process
-      sum_buffer = 0; //reset raw sum value
+//      sum_buffer = 0; //reset raw sum value
       ps_sum_buffer = 0; //reset ped_subtracted sum value
       divisor = 128; //reset divisor value
 
@@ -1752,7 +1914,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       for(Int_t s=0+DIA_OFFSET; s<(128+DIA_OFFSET); s++)
       {
 	
-         if(Abs(detector_buffer.GetADC_value(s)-Ped_Store->GetPedValues(s))>(Di_Pedestal_Hit_Factor*Ped_Store->GetRMSValues(s)) || screen.CheckChannel(s)==0)
+         if(Abs(detector_buffer.GetADC_value(s)-correction-Ped_Store->GetPedValues(s))>(Di_Pedestal_Hit_Factor*Ped_Store->GetRMSValues(s)) || screen.CheckChannel(s)==0)
          {
             if(single_channel_analysis_enable){
 		//we have a hit so fill the pulse height histo
@@ -1760,7 +1922,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
                {
                   if(s-DIA_OFFSET == single_channel_analysis_channels[t])
                   {
-                     SingleChannelAnalysisPulseHeightHistos[t + NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow) ]->Fill(detector_buffer.GetADC_value(s)-Ped_Store->GetPedValues(s));
+                     SingleChannelAnalysisPulseHeightHistos[t + NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow) ]->Fill(detector_buffer.GetADC_value(s)-correction-Ped_Store->GetPedValues(s));
                   }
                }
             }
@@ -1783,14 +1945,14 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 	//               cout<<"NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow) = "<<NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow)<<endl;
 	//               cout<<"t + NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow) = "<<t + NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow)<<endl;
 	
-                  SingleChannelAnalysisNoiseHistos[t + NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow) ]->Fill(detector_buffer.GetADC_value(s)-Ped_Store->GetPedValues(s));
+                  SingleChannelAnalysisNoiseHistos[t + NumberSingleChannelAnalysisChannels * Int_t((e-Initial_Event-Iter_Size) / single_channel_analysis_eventwindow) ]->Fill(detector_buffer.GetADC_value(s)-correction-Ped_Store->GetPedValues(s));
 	//               if(e%100==0) cout<<"Fill: detector_buffer.GetADC_value(s)-Ped_Store->GetPedValues(s) = "<<detector_buffer.GetADC_value(s)-Ped_Store->GetPedValues(s)<<endl;
                }
             }
          }
          
          
-         sum_buffer = sum_buffer + detector_buffer.GetADC_value(s);
+      //   sum_buffer = sum_buffer + detector_buffer.GetADC_value(s);
          ps_sum_buffer = ps_sum_buffer + (detector_buffer.GetADC_value(s)-Ped_Store->GetPedValues(s)); //Sum of Pedestal Subtracted channels 
          
       }
@@ -1813,7 +1975,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       
       //2010-08-13: Don't throw out the event; just store as is and flag as CMN event.
       //remove any events now with a average pedestal greater than some sigma which should be equal to or less than the correction window (i.e. about 5 sigma)
-      if(Abs((sum_buffer/divisor)-Common_Mode_Mean)>((CMN_cut)*Common_Mode_RMS))
+     /* if(Abs((sum_buffer/divisor)-Common_Mode_Mean)>((CMN_cut)*Common_Mode_RMS))
       {
          if(!CMNEvent_flag) {
             CMNEvent_flag = 1;
@@ -1825,7 +1987,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
          event_index--; //keeps index of TGraph from skipping a value
          continue;
          
-      }
+      }*/
       //cout << " and still is: " << detector_buffer.GetADC_value(57) << endl;
       //cout << " and sum_buffer/divisor after is: " << sum_buffer/divisor << " (" << sum_buffer << "/" << divisor << ")" << endl;
 
@@ -1835,7 +1997,13 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       raw_ADC_by_event_CMN_cut_graph->SetPoint(event_index,doub_event,sum_buffer/divisor);
       PS_ADC_by_event_CMN_cut_graph->SetPoint(event_index,doub_event,ps_sum_buffer/divisor);
       */
-      Events_Saved++;
+	if(DO_CMC==1)
+	{
+           correction = ps_sum_buffer/divisor;
+	   Correction = correction;
+	   corr_dist->Fill(correction);
+	}
+	Events_Saved++;
 
       //if(sum_buffer/divisor<1640)
       //{
@@ -1853,12 +2021,12 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       //fill various plots and files
       if(e%1==0)
       {
-         Hit_Occupancy(screen, hit_occup, detector_buffer, Ped_Store, Di_Pedestal_Hit_Factor, 0, 128, DIA_OFFSET);
+         Hit_Occupancy(screen, hit_occup, detector_buffer, Ped_Store, Di_Pedestal_Hit_Factor, 0, 128, DIA_OFFSET, correction);
          for(Int_t i=(0+DIA_OFFSET); i<(128+DIA_OFFSET); i++)
          {
-            if(TMath::Abs(detector_buffer.GetADC_value(i)-Ped_Store->GetPedValues(i) <= Di_Pedestal_Hit_Factor*Ped_Store->GetRMSValues(i)))
+            if(TMath::Abs(detector_buffer.GetADC_value(i)-correction-Ped_Store->GetPedValues(i) <= Di_Pedestal_Hit_Factor*Ped_Store->GetRMSValues(i)))
             {
-               noise->Fill(detector_buffer.GetADC_value(i)-Ped_Store->GetPedValues(i));
+               noise->Fill(detector_buffer.GetADC_value(i)-correction-Ped_Store->GetPedValues(i));
             }
          }
          for(Int_t i=(75+DIA_OFFSET); i<(76+DIA_OFFSET); i++)
@@ -1882,7 +2050,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       }
 
       
-      //Store all current values for the event and write the the TTree
+      //Store all current values for the event and write to the TTree
       SetDetector(0,D0X,Ped_Store_D0X);
       SetDetector(1,D0Y,Ped_Store_D0Y);
       SetDetector(2,D1X,Ped_Store_D1X);
@@ -1897,7 +2065,15 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       }
       if(fix_dia_noise>0) SetDetector(8, detector_buffer, Ped_Store_fixed_noise);
       else SetDetector(8,detector_buffer,Ped_Store);
-      event_number = e;
+    
+	if(DO_CMC==1)
+	{
+	  for(int i=0; i<128; i++)
+		{
+		  Det_PedMean[8][i] += correction;
+ 		}
+	 }
+	event_number = e;
       //PedSubEvent.SetEventNumber(e);
       //PedSubEvent->SetTriggerAmount(NEvents); //total number of events analyzed
       //cout << "Store Event " << PedSubEvent->GetTriggerAmount() << endl;
@@ -1933,9 +2109,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
 	  for (Int_t y = 0; y < Iter_Size; y++) {
 	    if (dia_input == 0)
-	      currentBufferPlot->Fill(Dia0buffer[s][y] - pedDia_s);
+	      currentBufferPlot->Fill(Dia0buffer_F[s][y] - pedDia_s);
 	    if (dia_input == 1)
-	      currentBufferPlot->Fill(Dia1buffer[s][y] - pedDia_s);
+	      currentBufferPlot->Fill(Dia1buffer_F[s][y] - pedDia_s);
 	  }
 
 	  currentBufferPlot->Draw();
@@ -1976,9 +2152,9 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
 	    for (Int_t y = 0; y < Iter_Size; y++) {
 	      if (dia_input == 0)
-	        hBufferNoise[j]->Fill(Dia0buffer[plottedChannel][y] - pedDia);
+	        hBufferNoise[j]->Fill(Dia0buffer_F[plottedChannel][y] - pedDia);
 	      if (dia_input == 1)
-	        hBufferNoise[j]->Fill(Dia1buffer[plottedChannel][y] - pedDia);
+	        hBufferNoise[j]->Fill(Dia1buffer_F[plottedChannel][y] - pedDia);
 	    }
 	   } else {
 	    Float_t pedD0X = Ped_Store_D0X->GetPedValues(plottedChannel);
@@ -2005,16 +2181,16 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 	 if (k > 0) {
 	  DiamondChannelADC[s]->GetPoint(k - 1, previous_x, previous_y);
           if (!previous_x) { //to prevent CMN cut from ruining everything in the graphs
-            DiamondChannelADC[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedestal[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedUp[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedUp2[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedUp3[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedUp5[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedDown[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedDown2[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedDown3[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
-            DiamondChannelPedDown5[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s));
+            DiamondChannelADC[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedestal[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedUp[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedUp2[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedUp3[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedUp5[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedDown[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedDown2[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedDown3[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
+            DiamondChannelPedDown5[s]->SetPoint(k - 1, e - 1, detector_buffer.GetADC_value(s) - correction);
             /* DiamondChannelADC[s]->SetPoint(k - 1, e - 1, New_Event.GetDia0().GetADC_value(s));
             DiamondChannelPedestal[s]->SetPoint(k - 1, e - 1, New_Event.GetDia0().GetADC_value(s));
             DiamondChannelPedUp[s]->SetPoint(k - 1, e - 1, New_Event.GetDia0().GetADC_value(s));
@@ -2038,7 +2214,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
           }
 	 }
 
-          DiamondChannelADC[s]->SetPoint(k, e, detector_buffer.GetADC_value(s));
+          DiamondChannelADC[s]->SetPoint(k, e, detector_buffer.GetADC_value(s) - correction);
           DiamondChannelPedestal[s]->SetPoint(k, e, diamondPed);
           DiamondChannelPedUp[s]->SetPoint(k, e, diamondPed + diamondRMS);
           DiamondChannelPedUp2[s]->SetPoint(k, e, diamondPed + 2 * diamondRMS);
@@ -2149,7 +2325,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
         Float_t diaPS_ADC, diaSNR;
         for (Int_t s = 0; s < 128; s++) {
           //diaPS_ADC = New_Event.GetDia0().GetADC_value(s) - Ped_Store->GetPedValues(s);
-          diaPS_ADC = detector_buffer.GetADC_value(s) - Ped_Store->GetPedValues(s);
+          diaPS_ADC = detector_buffer.GetADC_value(s) - correction - Ped_Store->GetPedValues(s);
           diaSNR = diaPS_ADC / Ped_Store->GetRMSValues(s);
 
           if (makePullDist) {
@@ -2340,6 +2516,20 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
       
       //Running Pedestal for each channel
+
+	if(DO_CMC==1){
+      if(dia_input == 0)
+      {
+         RunningPedestal_CMN(detector_buffer, Initialized_Values_Dia0, Ped_Store, Dia0buffer_F, Channel_Number, Iter_Size, Di_Pedestal_Hit_Factor, prmscount, e, correction);
+      }
+      if(dia_input == 1)
+      {
+         RunningPedestal_CMN(detector_buffer, Initialized_Values_Dia1, Ped_Store, Dia1buffer_F, Channel_Number, Iter_Size, Di_Pedestal_Hit_Factor, prmscount, e, correction);
+      }
+		     }
+
+
+	if(DO_CMC==0){
       if(dia_input == 0)
       {
          RunningPedestal(detector_buffer, Initialized_Values_Dia0, Ped_Store, Dia0buffer, Channel_Number, Iter_Size, Di_Pedestal_Hit_Factor, prmscount, e);
@@ -2348,6 +2538,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       {
          RunningPedestal(detector_buffer, Initialized_Values_Dia1, Ped_Store, Dia1buffer, Channel_Number, Iter_Size, Di_Pedestal_Hit_Factor, prmscount, e);
       }
+		     }
 
       //if running pedestal RMS of any channel hits zero, the loops is broken and code stopped. Something's wrong.
       if(rmscount==1)
@@ -2357,11 +2548,11 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       }
 
       //don't use bad events in the pedestal and CMN calculation
-      if(!(CMNEvent_flag || ZeroDivisorEvent_flag))
+      if(/*(CMNEvent_flag ||*/ ZeroDivisorEvent_flag )
          continue;
 
       //Calculate Running Common Mode Noise (running average Pedestal)
-      if(dia_input == 0)
+     /* if(dia_input == 0)
       {
          RunningCommonMode(Common_Mode_Dia0_deque, Common_Mode_Mean, Common_Mode_RMS, sum_buffer/divisor, Iter_Size, e, prmscount);
          //Common_Mode_Mean = Common_Mode_Dia0_Mean;
@@ -2374,7 +2565,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
          //Common_Mode_RMS = Common_Mode_Dia1_RMS;
       }
 
-
+*/
       //Calculate running peds of rest of the detectors for the next event.
       detector_buffer = New_Event.GetD0X();
       RunningPedestal(detector_buffer, Initialized_Values_D0X, Ped_Store_D0X, D0Xbuffer, Channel_Number, Iter_Size, Si_Pedestal_Hit_Factor, prmscount, e);
@@ -2767,12 +2958,12 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    raw_ADC_by_event_graph->Draw("AL");
    raw_ADC_by_event_graph->GetXaxis()->SetTitle("Event");
    raw_ADC_by_event_graph->GetYaxis()->SetTitle("ADC Value");
-   raw_ADC_by_event_graph->GetYaxis()->SetRangeUser(Common_Mode_Dia1_Mean-100,Common_Mode_Dia1_Mean+100);
+   raw_ADC_by_event_graph->GetYaxis()->SetRangeUser(/*Common_Mode_Dia1_Mean*/ Raw_ADC_Mean-100,/*Common_Mode_Dia1_Mean*/ Raw_ADC_Mean+100);
    pt->Draw();
-   RMS_threshold_by_event_graph_up->SetLineColor(kRed);
-   RMS_threshold_by_event_graph_up->Draw("sameL");
-   RMS_threshold_by_event_graph_down->SetLineColor(kRed);
-   RMS_threshold_by_event_graph_down->Draw("sameL");
+  // RMS_threshold_by_event_graph_up->SetLineColor(kRed);
+ //  RMS_threshold_by_event_graph_up->Draw("sameL");
+ //  RMS_threshold_by_event_graph_down->SetLineColor(kRed);
+ //  RMS_threshold_by_event_graph_down->Draw("sameL");
    if(SaveAllFilesSwitch == 1)
    {
 
@@ -2795,12 +2986,12 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    raw_ADC_by_event_CMN_cut_graph->Draw("AL");
    raw_ADC_by_event_CMN_cut_graph->GetXaxis()->SetTitle("Event");
    raw_ADC_by_event_CMN_cut_graph->GetYaxis()->SetTitle("ADC Value");
-   raw_ADC_by_event_CMN_cut_graph->GetYaxis()->SetRangeUser(Common_Mode_Dia1_Mean-100,Common_Mode_Dia1_Mean+100);
+   raw_ADC_by_event_CMN_cut_graph->GetYaxis()->SetRangeUser(/*Common_Mode_Dia1_Mean*/ Raw_ADC_Mean-100,/*Common_Mode_Dia1_Mean*/ Raw_ADC_Mean+100);
    pt->Draw();
-   RMS_threshold_by_event_graph_up->SetLineColor(kRed);
-   RMS_threshold_by_event_graph_up->Draw("sameL");
-   RMS_threshold_by_event_graph_down->SetLineColor(kRed);
-   RMS_threshold_by_event_graph_down->Draw("sameL");
+   //RMS_threshold_by_event_graph_up->SetLineColor(kRed);
+  // RMS_threshold_by_event_graph_up->Draw("sameL");
+  // RMS_threshold_by_event_graph_down->SetLineColor(kRed);
+  // RMS_threshold_by_event_graph_down->Draw("sameL");
    if(SaveAllFilesSwitch == 1)
    {
 	   //TODO:HistogrammSaver::SaveCanvasC(raw_ADC_graph_CMN_cut_can, C_file_char, "Raw_ADC_vs_Event_CMN_cut");
@@ -2824,10 +3015,10 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    PS_ADC_by_event_graph->GetYaxis()->SetRangeUser(-100,100);
    PS_ADC_by_event_graph->GetYaxis()->SetTitle("ADC Value");
    pt->Draw();
-   PS_RMS_threshold_by_event_graph_up->SetLineColor(kRed);
-   PS_RMS_threshold_by_event_graph_up->Draw("sameL");
-   PS_RMS_threshold_by_event_graph_down->SetLineColor(kRed);
-   PS_RMS_threshold_by_event_graph_down->Draw("sameL");
+//   PS_RMS_threshold_by_event_graph_up->SetLineColor(kRed);
+//   PS_RMS_threshold_by_event_graph_up->Draw("sameL");
+//   PS_RMS_threshold_by_event_graph_down->SetLineColor(kRed);
+//   PS_RMS_threshold_by_event_graph_down->Draw("sameL");
    if(SaveAllFilesSwitch == 1)
    {
 	   //TODO:HistogrammSaver::SaveCanvasC(PS_ADC_graph_can, C_file_char, "PS_ADC_vs_Event");
@@ -2851,10 +3042,10 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    PS_ADC_by_event_CMN_cut_graph->GetYaxis()->SetRangeUser(-100,100);
    PS_ADC_by_event_CMN_cut_graph->GetYaxis()->SetTitle("ADC Value");
    pt->Draw();
-   PS_RMS_threshold_by_event_graph_up->SetLineColor(kRed);
-   PS_RMS_threshold_by_event_graph_up->Draw("sameL");
-   PS_RMS_threshold_by_event_graph_down->SetLineColor(kRed);
-   PS_RMS_threshold_by_event_graph_down->Draw("sameL");
+  // PS_RMS_threshold_by_event_graph_up->SetLineColor(kRed);
+  // PS_RMS_threshold_by_event_graph_up->Draw("sameL");
+  // PS_RMS_threshold_by_event_graph_down->SetLineColor(kRed);
+ //  PS_RMS_threshold_by_event_graph_down->Draw("sameL");
    if(SaveAllFilesSwitch == 1)
    {
       gSystem->ProcessEvents();
@@ -2883,7 +3074,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
          delete corr_dist_can;
       }
    }
-
+/*
    TCanvas *CMN_RMS_dist_can = new TCanvas("CMN_RMS_dist_can","CMN RMS Distribution Canvas",200,400,800,600);
    CMN_RMS_dist_can->cd(1);
    CMN_RMS_dist->Draw();
@@ -2899,7 +3090,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       {
          delete CMN_RMS_dist_can;
       }
-   }
+   }*/
 
    PedTree->Write();
    PedFile->Write();
@@ -2914,21 +3105,21 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    cout << "Triggered Events: " << Triggered_Events << endl;
    cout << "Bad Events: " << Bad_Events << endl;
    cout << "Events flagged with ZeroDivisorEvent_flag: " << ZeroDivisor_Events << endl;
-   cout << "Events flagged with CMNEvent_flag: " << CMN_Events << endl;
-   cout << "Events Sent into Corrector: " << Events_Sent_Into_Corrector << endl;
-   cout << "Corrected Events: " << Corrected_Events << endl;
+//   cout << "Events flagged with CMNEvent_flag: " << CMN_Events << endl;
+//   cout << "Events Sent into Corrector: " << Events_Sent_Into_Corrector << endl;
+//   cout << "Corrected Events: " << Corrected_Events << endl;
    cout << "Post Correction Bad Events: " << PostCorr_Bad_Events << endl;
-   cout << "Post Correct CMN cut events: " << PostCorr_Events_Outside_CMN_win << endl;
+//   cout << "Post Correct CMN cut events: " << PostCorr_Events_Outside_CMN_win << endl;
    cout << "Final Number of Events Saved: " << Events_Saved << endl;
 
    runstats_file << "Triggered Events: " << Triggered_Events << endl;
    runstats_file << "Bad Events: " << Bad_Events << endl;
    runstats_file << "Events flagged with ZeroDivisorEvent_flag: " << ZeroDivisor_Events << endl;
-   runstats_file << "Events flagged with CMNEvent_flag: " << CMN_Events << endl;
-   runstats_file << "Events Sent into Corrector: " << Events_Sent_Into_Corrector << endl;
-   runstats_file << "Corrected Events: " << Corrected_Events << endl;
+  // runstats_file << "Events flagged with CMNEvent_flag: " << CMN_Events << endl;
+  // runstats_file << "Events Sent into Corrector: " << Events_Sent_Into_Corrector << endl;
+  // runstats_file << "Corrected Events: " << Corrected_Events << endl;
    runstats_file << "Post Correction Bad Events: " << PostCorr_Bad_Events << endl;
-   runstats_file << "Post Correct CMN cut events: " << PostCorr_Events_Outside_CMN_win << endl;
+  // runstats_file << "Post Correct CMN cut events: " << PostCorr_Events_Outside_CMN_win << endl;
    runstats_file << "Final Number of Events Saved: " << Events_Saved << endl;
 
 

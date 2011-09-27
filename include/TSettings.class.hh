@@ -33,6 +33,7 @@ public:
 	Float_t getDi_Pedestal_Hit_Factor() const;
 	Int_t getDia_input() const;
 	Float_t getSi_Pedestal_Hit_Factor() const;
+	Int_t getDO_CMC() const;
 	Int_t getCMN_cut() const;
 	Float_t getDi_Cluster_Hit_Factor() const;
 	Float_t getDi_Cluster_Seed_Factor() const;
@@ -75,6 +76,7 @@ public:
 	void setDi_Pedestal_Hit_Factor(Float_t Di_Pedestal_Hit_Factor);
 	void setDia_input(Int_t dia_input);
 	void setSi_Pedestal_Hit_Factor(Float_t Si_Pedestal_Hit_Factor);
+	void setDO_CMC(Int_t DO_CMC);
 	void setCMN_cut(Int_t CMN_cut);
 	void setDi_Cluster_Hit_Factor(Float_t Di_Cluster_Hit_Factor);
 	void setDi_Cluster_Seed_Factor(Float_t Di_Cluster_Seed_Factor);
@@ -128,6 +130,7 @@ private:
 	Float_t Si_Pedestal_Hit_Factor;
 	Float_t Di_Pedestal_Hit_Factor;
 
+	Int_t DO_CMC;
 	Int_t CMN_cut;
 	Float_t Si_Cluster_Seed_Factor;
 	Float_t Si_Cluster_Hit_Factor;

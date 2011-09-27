@@ -103,6 +103,10 @@ void TSettings::LoadSettings(){
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
 	      }*/
+		if(key=="DO_CMC") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			DO_CMC = (int)strtod(value.c_str(),0);
+		}
 		if(key=="CMN_cut") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			CMN_cut = (int)strtod(value.c_str(),0);
@@ -331,6 +335,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	dia_input = 0; // 1 for 2006 and 0 for the rest
 	Si_Pedestal_Hit_Factor = 5;
 	Di_Pedestal_Hit_Factor = 5;
+	DO_CMC = 1;
 	CMN_cut = 4;  //Should be less than or equal to CMN_coor_high
 	Iter_Size = 500; //buffer size
 	Taylor_speed_throttle = 1000; //# of events to recalculate RMS the old way; set to 1 to disable
@@ -482,6 +487,11 @@ Int_t TSettings::getCMN_cut() const
 	return CMN_cut;
 }
 
+Int_t TSettings::getDO_CMC() const
+{
+	return DO_CMC;
+}
+
 Float_t TSettings::getDi_Cluster_Hit_Factor() const
 {
 	return Di_Cluster_Hit_Factor;
@@ -525,6 +535,11 @@ Float_t TSettings::getSi_avg_fidcut_ylow() const
 void TSettings::setCMN_cut(Int_t CMN_cut)
 {
 	this->CMN_cut = CMN_cut;
+}
+
+void TSettings::setDO_CMC(Int_t DO_CMC)
+{
+	this->DO_CMC = DO_CMC;
 }
 
 void TSettings::setDi_Cluster_Hit_Factor(Float_t Di_Cluster_Hit_Factor)
