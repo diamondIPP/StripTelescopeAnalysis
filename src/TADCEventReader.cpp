@@ -59,7 +59,7 @@ void TADCEventReader::SetBranchAddresses(){
 	PedTree->SetBranchAddress("RunNumber",&run_number);
 	PedTree->SetBranchAddress("EventNumber",&event_number);
 	PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
-	PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
+//	PedTree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
 	PedTree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
 
 	//Telescope Data Branches
@@ -151,10 +151,10 @@ Long64_t TADCEventReader::GetEntries(){
 	else return 0;
 }
 
-bool TADCEventReader::getCMNEvent_flag() const
+/*bool TADCEventReader::getCMNEvent_flag() const
 {
     return CMNEvent_flag;
-}
+}*/
 
 UInt_t TADCEventReader::getCurrent_event() const
 {

@@ -47,7 +47,7 @@ class RawEvent {
 		UInt_t run_number;
 		UInt_t event_number;
 		Float_t store_threshold;
-		bool CMNEvent_flag;
+//		bool CMNEvent_flag;
 		bool ZeroDivisorEvent_flag;
 		UInt_t Det_NChannels[9];
 		UChar_t Det_Channels[9][256];

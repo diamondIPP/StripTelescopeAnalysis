@@ -1238,8 +1238,8 @@ void Clustering::BookHistograms() {
    //cut events containing the following clusters
    //silicon: saturated, lumpy, goldengate
    //diamond: saturated,
-   if(eventReader->getCMNEvent_flag() || eventReader->getZeroDivisorEvent_flag() || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() /*|| clustered_event.HasBadChannelCluster()*/) {//|| !clustered_event.HasOneSiliconTrack()) {//clustered_event.HasBadChannelCluster()) {
-      if(eventReader->getCMNEvent_flag()) CMNEvents++;
+   if(/*eventReader->getCMNEvent_flag() ||*/ eventReader->getZeroDivisorEvent_flag() || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() /*|| clustered_event.HasBadChannelCluster()*/) {//|| !clustered_event.HasOneSiliconTrack()) {//clustered_event.HasBadChannelCluster()) {
+ //     if(eventReader->getCMNEvent_flag()) CMNEvents++;
       if(eventReader->getZeroDivisorEvent_flag()) ZeroDivisorEvents++;
       
       //count cut types of events here
@@ -2474,7 +2474,7 @@ void Clustering::AutoFidCut() {
 		// -- produce scatter plot for AutoFidCut
 		bool one_and_only_one = clustered_event.HasOneSiliconTrack();
 		Float_t si_avg_x=0, si_avg_y=0;
-		if (eventReader->getCMNEvent_flag() || eventReader->getZeroDivisorEvent_flag() || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster())
+		if (/*eventReader->getCMNEvent_flag() || */ eventReader->getZeroDivisorEvent_flag() || clustered_event.HasSaturatedCluster() || clustered_event.HasSaturatedCluster(8) || clustered_event.HasLumpyCluster() || clustered_event.HasGoldenGateCluster() || clustered_event.HasBadChannelCluster())
 			continue;
 		if (one_and_only_one) {
 			for (int det=0; det<4; det++) {

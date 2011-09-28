@@ -26,7 +26,7 @@ public:
 	bool GetEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
 	bool isOK();
-    bool getCMNEvent_flag() const;
+//    bool getCMNEvent_flag() const;
     UInt_t getCurrent_event() const;
     UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
     UChar_t getDet_Channels(UInt_t i , UInt_t j) const;
@@ -49,7 +49,7 @@ private:
 	UInt_t run_number;
 	UInt_t event_number;
 	Float_t store_threshold;
-	bool CMNEvent_flag;
+//	bool CMNEvent_flag;
 	bool ZeroDivisorEvent_flag;
 	UInt_t Det_NChannels[9];
 	UChar_t Det_Channels[9][256];

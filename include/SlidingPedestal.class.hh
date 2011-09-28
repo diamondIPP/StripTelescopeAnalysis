@@ -150,7 +150,7 @@ class SlidingPedestal {
       UShort_t Dia_ADC[256];
       Float_t Det_PedMean[9][256];
       Float_t Det_PedWidth[9][256];
-      bool CMNEvent_flag;
+//      bool CMNEvent_flag;
       bool ZeroDivisorEvent_flag;
 
       //Taylor's stuff
