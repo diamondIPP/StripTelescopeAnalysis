@@ -87,9 +87,10 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
  * *********************************************************
  * *********************************************************
  */
-void HistogrammSaver::SaveHistogram(TH1F* histo) {
-   SaveHistogramPNG(histo);
-   SaveHistogramROOT(histo);
+void HistogrammSaver::SaveHistogram(TH1F* histo, bool fitGauss) {
+	if (fitGauss) SaveHistogramFitGaussPNG(histo);
+	else SaveHistogramPNG(histo);
+	SaveHistogramROOT(histo);
 }
 
 void HistogrammSaver::SaveHistogram(TH2F* histo) {
@@ -131,11 +132,32 @@ void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 void HistogrammSaver::SaveHistogramPNG(TH1F* histo) {
    TCanvas plots_canvas("plots_canvas","plots_canvas");
    plots_canvas.cd();
+	histo->SetMinimum(0.);
    histo->Draw();
    pt->Draw();
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".png";
    plots_canvas.Print(plot_filename.str().c_str());
+}
+
+void HistogrammSaver::SaveHistogramFitGaussPNG(TH1F* histo) {
+	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
+	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
+	//TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);
+	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
+	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
+	TF1 histofitx("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
+	histofitx.SetLineColor(kBlue);
+	histo->Fit(&histofitx,"rq");
+	histo->Draw();
+	
+	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	plots_canvas.cd();
+	histo->Draw();
+	pt->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << histo->GetName() << ".png";
+	plots_canvas.Print(plot_filename.str().c_str());
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH1F* histo) {

@@ -24,15 +24,17 @@
 #include "TObjArray.h"
 #include "TROOT.h"
 #include "TSystem.h"
+#include "TF1.h"
 
 class HistogrammSaver {
 public:
 	HistogrammSaver(int verbosity=0);
 	virtual ~HistogrammSaver();
-    void SaveHistogram(TH1F* histo);
+    void SaveHistogram(TH1F* histo, bool fitGauss = 0);
     void SaveHistogram(TH2F* histo);
     void SaveHistogramPNG(TH1F* histo);
     void SaveHistogramPNG(TH2F* histo);
+	void SaveHistogramFitGaussPNG(TH1F* histo);
     void SaveHistogramROOT(TH1F* histo);
     void SaveHistogramROOT(TH2F* histo);
     void SaveHistogramPDF(TH1F* histo);

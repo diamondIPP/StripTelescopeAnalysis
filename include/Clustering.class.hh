@@ -84,7 +84,7 @@ class Clustering {
 
 
       //Alignment
-      std::vector<TDiamondTrack> tracks, tracks_fidcut;
+      std::vector<TDiamondTrack> tracks, tracks_fidcut, tracks_transparent;
       std::vector<bool> tracks_mask, tracks_fidcut_mask;
 	std::vector<Float_t> dia_offset;
 
@@ -162,12 +162,6 @@ class Clustering {
 	  TH1F* histo_afc_x_cut;
 	  TH1F* histo_afc_y_cut;
 
-	TH1F* histo_transparentclustering_landau[10]; // index: n channels
-    TH1F* histo_transparentclustering_landau_mean;
-	TH1F* histo_transparentclustering_eta;
-	TH1F* histo_transparentclustering_hitdiff;
-    TH2F* histo_transparentclustering_hitdiff_scatter;
-    TH1F* histo_transparentclustering_2Channel_PulseHeight;
 
 	TH2F* histo_scatter_autofidcut;
 
@@ -175,6 +169,8 @@ class Clustering {
 
       //added for handling of overall verbosity
       int verbosity;
+	
+	Float_t dianoise_sigma[2];
 
    private:
 

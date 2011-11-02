@@ -1134,9 +1134,10 @@ void Clustering::DrawHistograms() {
    string tempname = "tempname";
    for(int cut=0; cut<2; cut++) if(histoswitch_dianoise[cut]) {
       tempname += "0";
-      histofit_dianoise[cut] = new TF1(tempname.c_str(),"gaus",histo_dianoise[cut]->GetMean()-histo_dianoise[cut]->GetRMS(),histo_dianoise[cut]->GetMean()+histo_dianoise[cut]->GetRMS());
+      histofit_dianoise[cut] = new TF1(tempname.c_str(),"gaus",histo_dianoise[cut]->GetMean()-2*histo_dianoise[cut]->GetRMS(),histo_dianoise[cut]->GetMean()+2*histo_dianoise[cut]->GetRMS());
       histofit_dianoise[cut]->SetLineColor(kBlue);
       histo_dianoise[cut]->Fit(tempname.c_str(),"r"); // fit option "r" restricts the range of the fit
+	   dianoise_sigma[cut] = histofit_dianoise[cut]->GetParameter(2);
       histSaver->SaveHistogramPNG(histo_dianoise[cut]);
    }
     
@@ -1395,6 +1396,11 @@ void Clustering::BookHistograms() {
          }
          else
             Dia.SetX(-1);
+		  
+		  if (fiducial_track) {
+			  TDiamondTrack track_transparent = TDiamondTrack(clustered_event.event_number,D0,D1,D2,D3);
+			  tracks_transparent.push_back(track_transparent);
+		  }
          
          TDiamondTrack track = TDiamondTrack(clustered_event.event_number,D0,D1,D2,D3);
          //track.SetEventNumber(Silicon_tracks[t].Event_number);
