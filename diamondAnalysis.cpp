@@ -76,6 +76,8 @@ int main(int argc, char ** argv) {
 	
 	if (!RunListOK) return 0;
 	
+	/**Start with Analyising, read RunParameteres of the Run and start analysis with that parameters
+	*/
 	for (int i = 0; i < RunParameters.size(); i++) {
 		RunParameters[i].GetParameters();
 		cout << endl << endl << endl << endl;

@@ -1,6 +1,7 @@
 //*********************Diamond and Silicon Detectors Structure Header*****************//
 #include <string>
-
+#ifndef RZEVENT_STRUCT_HH_
+#define RZEVENT_STRUCT_HH_
 //***Variables and Constants***//
 const int DIAMOND_MEM = 256; //263 appears to be the necessary number of 4-byte words that should be
                              //allotted for the diamond data so that the last 4-byte words is the Trailer.
@@ -81,3 +82,4 @@ struct RZEvent
 };
 
 //end of structure declaration
+#endif RZEVENT_STRUCT_HH_

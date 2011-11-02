@@ -26,7 +26,7 @@ X and Y. Thus the first detector, X layer is D0X and so on. The diamond detector
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TBrowser.h"
-#include "RZEvent.struct.cpp"
+#include "RZEvent.struct.hh"
 #include "RawEvent.class.cpp"
 
 #include <fstream>

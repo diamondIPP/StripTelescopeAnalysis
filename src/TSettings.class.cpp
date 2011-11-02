@@ -99,10 +99,34 @@ void TSettings::LoadSettings(){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			fix_dia_noise = (int)strtod(value.c_str(),0);
 		}
+	    if(key=="single_channel_analysis_channels") {
+			 cout << key.c_str() << " = " << value.c_str() << endl;
+			 ParseIntArray(value,single_channel_analysis_channels);
+		  }
+		if(key=="single_channel_analysis_enable") {
+		         cout << key.c_str() << " = " << value.c_str() << endl;
+		         single_channel_analysis_enable = (int)strtod(value.c_str(),0);
+		      }
+		  if(key=="single_channel_analysis_eventwindow") {
+			 cout << key.c_str() << " = " << value.c_str() << endl;
+			 single_channel_analysis_eventwindow = (int)strtod(value.c_str(),0);
+		  }
 		/*if(key=="store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
 	      }*/
+		  if(key=="CMN_corr_low") {
+		  		         cout << key.c_str() << " = " << value.c_str() << endl;
+		  		         CMN_corr_low = (int)strtod(value.c_str(),0);
+		  		      }
+		  if(key=="CMN_corr_high") {
+		         cout << key.c_str() << " = " << value.c_str() << endl;
+		         CMN_corr_high = (int)strtod(value.c_str(),0);
+		      }
+		if(key=="CMN_cut") {
+		    cout << key.c_str() << " = " << value.c_str() << endl;
+		    CMN_cut = (int)strtod(value.c_str(),0);
+		}
 		if(key=="DO_CMC") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			DO_CMC = (int)strtod(value.c_str(),0);
@@ -307,6 +331,72 @@ void TSettings::LoadSettings(){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			AlternativeClustering = (bool)strtod(value.c_str(),0);
 		}
+		 if(key=="store_threshold") {
+			 cout << key.c_str() << " = " << value.c_str() << endl;
+			 store_threshold = (float)strtod(value.c_str(),0);
+		  }
+	      if(key=="plotChannel_on") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         plotChannel_on = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="SingleChannel2000plots") {
+	    	  cout << key.c_str() << " = " << value.c_str() << endl;
+	    	  SingleChannel2000plots = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="makeDiamondPlots") {
+	    	  cout << key.c_str() << " = " << value.c_str() << endl;
+	    	  makeDiamondPlots = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="makeHits2D") {
+	    	  cout << key.c_str() << " = " << value.c_str() << endl;
+	    	  makeHits2D = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="makeNoise2D") {
+	    	  cout << key.c_str() << " = " << value.c_str() << endl;
+	    	  makeNoise2D = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="makePullDist") {
+	    	  cout << key.c_str() << " = " << value.c_str() << endl;
+	    	  makePullDist = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="makePedRMSTree") {
+	    	  cout << key.c_str() << " = " << value.c_str() << endl;
+	    	  makePedRMSTree = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="eventPrintHex") {
+	    	  cout << key.c_str() << " = " << value.c_str() << endl;
+	    	  eventPrintHex = (int)strtod(value.c_str(),0);
+	      }
+
+	      if(key=="plottedChannel") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         //plottedChannel = (int)strtod(value.c_str(),0);
+	      }
+
+	      if(key=="high_rms_cut") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         high_rms_cut = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="rms_cut") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         rms_cut = (float)strtod(value.c_str(),0);
+	      }
+	      if(key=="zoomDiamondPlots") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         zoomDiamondPlots = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="singleTrack2D") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         singleTrack2D = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="singleTrack2DmaxClusterSize") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         singleTrack2DmaxClusterSize = (int)strtod(value.c_str(),0);
+	      }
+	      if(key=="maxNoise2D") {
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	         maxNoise2D = (float)strtod(value.c_str(),0);
+	      }
 	}
 
 	file.close();
@@ -329,6 +419,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	SaveAllFilesSwitch = 1; //1 for save files, 0 for don't
 	ClosePlotsOnSave = 1;
 	IndexProduceSwitch = 1;
+	store_threshold=2;
 
 	//default pedestal settings
 	fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
@@ -339,6 +430,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CMN_cut = 4;  //Should be less than or equal to CMN_coor_high
 	Iter_Size = 500; //buffer size
 	Taylor_speed_throttle = 1000; //# of events to recalculate RMS the old way; set to 1 to disable
+	CMN_corr_high=7;
+	CMN_corr_low=3;
 
 	//default clustering settings
 	snr_plots_enable = 0;
@@ -366,6 +459,36 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	//Number of slices (<1 to disable)
 	etavsq_n_landau_slices = 0;
+
+	plotChannel_on = 0; //make RMS Difference plot for all detectors, and Buffer Noise plots for D0X
+	plotDiamond = 1; //make Buffer Noise plots for the diamond instead
+	makeBufferPlots = 0; //make Buffer Plot whenever sigma and rms differ by rms_sigma_difference_cut
+	//NOTE: only works if plotChannel_on = 1 and plottedChannel < 256
+	SingleChannel2000plots = 0; //make SC_Pedestal plots for all silicon detectors and channels
+	makeDiamondPlots = 0; //make DC_Pedestal plots for all diamond channels
+	makeHits2D = 0; //make 2D histogram of hits and seeds
+	makeNoise2D = 0; //make 2D histogram of noise per channel
+	makePullDist = 0; //make pull distribution
+	makePedRMSTree = 0; //make .root file of pedestal and rms values
+	eventPrintHex = 10000; //print hex (should match .rz data)
+
+	maxBufferPlots = 100;
+	rms_sigma_difference_cut = 0.3;
+
+	high_rms_cut = 1; //cut on absolute rms value instead of comparing to Gaussian
+	rms_cut = 20.; //value to use if high_rms_cut
+
+
+	zoomDiamondPlots = 0; //zoom in on DC_Pedestal (100 event / window)
+
+	singleTrack2D = 1; //plot single tracks only in 2D hits histogram
+	singleTrack2DmaxClusterSize = 2; //max size of clusters in silicon track (cluster = Di_Hit_Factor hits; no check for seeds/shoulders)
+
+	maxNoise2D = 20.; //highest noise value plotted in 2D noise histogram
+	single_channel_analysis_enable=false;
+	   //default settings
+	single_channel_analysis_eventwindow=5000; // Number of events to put in each histogram
+	plottedChannel=256; //256 = enter channel on run. also, set to 256 and type 256 to turn off buffer noise plots
 }
 
 void TSettings::ParseFloatArray(string value, vector<float> &vec) {
@@ -387,6 +510,189 @@ void TSettings::ParseFloatArray(string value, vector<float> &vec) {
 		if(value.find_first_of(';')<2) break;
 		value = value.substr(offset2+1,value.length()-(offset2+1));
 	}
+}
+
+
+
+
+Int_t TSettings::getMakeBufferPlots() const
+{
+    return makeBufferPlots;
+}
+
+Int_t TSettings::getPlotDiamond() const
+{
+    return plotDiamond;
+}
+
+void TSettings::setMakeBufferPlots(Int_t makeBufferPlots)
+{
+    this->makeBufferPlots = makeBufferPlots;
+}
+
+void TSettings::setPlotDiamond(Int_t plotDiamond)
+{
+    this->plotDiamond = plotDiamond;
+}
+
+Int_t TSettings::getEventPrintHex() const
+{
+    return eventPrintHex;
+}
+
+Int_t TSettings::getMakeDiamondPlots() const
+{
+    return makeDiamondPlots;
+}
+
+Int_t TSettings::getMakeHits2D() const
+{
+    return makeHits2D;
+}
+
+Int_t TSettings::getMakeNoise2D() const
+{
+    return makeNoise2D;
+}
+
+Int_t TSettings::getMakePedRmsTree() const
+{
+    return makePedRMSTree;
+}
+
+Int_t TSettings::getMakePullDist() const
+{
+    return makePullDist;
+}
+
+Int_t TSettings::getSingleChannel2000plots() const
+{
+    return SingleChannel2000plots;
+}
+
+void TSettings::setEventPrintHex(Int_t eventPrintHex)
+{
+    this->eventPrintHex = eventPrintHex;
+}
+
+void TSettings::setMakeDiamondPlots(Int_t makeDiamondPlots)
+{
+    this->makeDiamondPlots = makeDiamondPlots;
+}
+
+void TSettings::setMakeHits2D(Int_t makeHits2D)
+{
+    this->makeHits2D = makeHits2D;
+}
+
+void TSettings::setMakeNoise2D(Int_t makeNoise2D)
+{
+    this->makeNoise2D = makeNoise2D;
+}
+
+void TSettings::setMakePedRmsTree(Int_t makePedRmsTree)
+{
+    makePedRMSTree = makePedRmsTree;
+}
+
+void TSettings::setMakePullDist(Int_t makePullDist)
+{
+    this->makePullDist = makePullDist;
+}
+
+void TSettings::setSingleChannel2000plots(Int_t singleChannel2000plots)
+{
+    SingleChannel2000plots = singleChannel2000plots;
+}
+
+UInt_t TSettings::getPlottedChannel() const
+{
+    return plottedChannel;
+}
+
+void TSettings::setPlottedChannel(UInt_t plottedChannel)
+{
+    this->plottedChannel = plottedChannel;
+}
+
+Int_t TSettings::getMaxBufferPlots() const
+{
+    return maxBufferPlots;
+}
+
+void TSettings::setMaxBufferPlots(Int_t maxBufferPlots)
+{
+    this->maxBufferPlots = maxBufferPlots;
+}
+
+Float_t TSettings::getRmsSigmaDifferenceCut() const
+{
+    return rms_sigma_difference_cut;
+}
+
+void TSettings::setRmsSigmaDifferenceCut(Float_t rmsSigmaDifferenceCut)
+{
+    rms_sigma_difference_cut = rmsSigmaDifferenceCut;
+}
+
+Int_t TSettings::getHighRmsCut() const
+{
+    return high_rms_cut;
+}
+
+Float_t TSettings::getRmsCut() const
+{
+    return rms_cut;
+}
+
+void TSettings::setHighRmsCut(Int_t highRmsCut)
+{
+    high_rms_cut = highRmsCut;
+}
+
+void TSettings::setRmsCut(Float_t rmsCut)
+{
+    rms_cut = rmsCut;
+}
+
+Float_t TSettings::getMaxNoise2D() const
+{
+    return maxNoise2D;
+}
+
+Int_t TSettings::getSingleTrack2D() const
+{
+    return singleTrack2D;
+}
+
+Int_t TSettings::getSingleTrack2DmaxClusterSize() const
+{
+    return singleTrack2DmaxClusterSize;
+}
+
+Int_t TSettings::getZoomDiamondPlots() const
+{
+    return zoomDiamondPlots;
+}
+
+void TSettings::setMaxNoise2D(Float_t maxNoise2D)
+{
+    this->maxNoise2D = maxNoise2D;
+}
+
+void TSettings::setSingleTrack2D(Int_t singleTrack2D)
+{
+    this->singleTrack2D = singleTrack2D;
+}
+
+void TSettings::setSingleTrack2DmaxClusterSize(Int_t singleTrack2DmaxClusterSize)
+{
+    this->singleTrack2DmaxClusterSize = singleTrack2DmaxClusterSize;
+}
+
+void TSettings::setZoomDiamondPlots(Int_t zoomDiamondPlots)
+{
+    this->zoomDiamondPlots = zoomDiamondPlots;
 }
 
 void TSettings::ParseIntArray(string value, vector<int> &vec) {
@@ -580,6 +886,26 @@ void TSettings::setSi_avg_fidcut_yhigh(Float_t si_avg_fidcut_yhigh)
 void TSettings::setSi_avg_fidcut_ylow(Float_t si_avg_fidcut_ylow)
 {
 	this->si_avg_fidcut_ylow = si_avg_fidcut_ylow;
+}
+
+bool TSettings::getSingle_channel_analysis_enable()
+{
+	return this->single_channel_analysis_enable;
+}
+
+Int_t TSettings::getSingle_channel_analysis_eventwindow()
+{
+	return this->single_channel_analysis_eventwindow;
+}
+
+void TSettings::setSingle_channel_analysis_enable(bool singleChannelAnalysisEnable)
+{
+	this->single_channel_analysis_enable=singleChannelAnalysisEnable;
+}
+
+void TSettings::setSingle_channel_analysis_eventwindow(Int_t singleChannelAnalysisEventWindow)
+{
+	this->single_channel_analysis_eventwindow=singleChannelAnalysisEventWindow;
 }
 
 Int_t TSettings::getClosePlotsOnSave() const
@@ -824,4 +1150,52 @@ void TSettings::setUseAutoFidCut(bool UseAutoFidCut)
 string TSettings::getFileName() const
 {
 	return this->fileName;
+}
+
+
+
+Int_t TSettings::getCMN_corr_low()
+{
+	return this->CMN_corr_low;
+}
+
+void TSettings::setCMN_corr_low(Int_t CMN_corr_low)
+{
+	this->CMN_corr_low=CMN_corr_low;
+}
+
+Int_t TSettings::getCMN_corr_high()
+{
+	return this->CMN_corr_high;
+}
+
+void TSettings::setCMN_corr_high(Int_t CMN_corr_high)
+{
+	this->CMN_corr_high=CMN_corr_high;
+}
+
+
+std::vector<int> TSettings::getSingle_channel_analysis_channels()
+{
+	return this->single_channel_analysis_channels;
+}
+
+float TSettings::getStore_threshold()
+{
+	return this->store_threshold;
+}
+
+
+void TSettings::setStore_threshold(float storeThreshold)
+{
+	this->store_threshold=storeThreshold;
+}
+Int_t TSettings::getPlotChannelOn() const
+{
+    return plotChannel_on;
+}
+
+void TSettings::setPlotChannelOn(Int_t plotChannelOn)
+{
+    this->plotChannel_on = plotChannelOn;
 }

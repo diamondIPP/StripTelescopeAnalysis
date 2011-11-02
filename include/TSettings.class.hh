@@ -68,6 +68,12 @@ public:
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
 	std::string getFileName() const;
+	bool getSingle_channel_analysis_enable();
+	Int_t getSingle_channel_analysis_eventwindow();
+	Int_t getCMN_corr_low();
+	Int_t getCMN_corr_high();
+	std::vector<int> getSingle_channel_analysis_channels();
+	float getStore_threshold();
 
 	void setAlignment_training_track_fraction(Float_t alignment_training_track_fraction);
 	void setFix_dia_noise(float fix_dia_noise);
@@ -109,73 +115,137 @@ public:
 	void setDet_channel_screen_regions(int i,std::vector<int> Det_channel_screen_regions);
 	void setAlternativeClustering(bool AlternativeClustering);
 	void setUseAutoFidCut(bool UseAutoFidCut);
-
+	void setSingle_channel_analysis_enable(bool singleChannelAnalysisEnable);
+	void setSingle_channel_analysis_eventwindow(Int_t singleChannelAnalysisEventWindow);
+	void setCMN_corr_low(Int_t CMN_corr_low);
+	void setCMN_corr_high(Int_t CMN_corr_high);
+	void setStore_threshold(float storeThreshold);
+    Int_t getPlotChannelOn() const;
+    void setPlotChannelOn(Int_t plotChannelOn);
+    Int_t getMakeBufferPlots() const;
+    Int_t getPlotDiamond() const;
+    void setMakeBufferPlots(Int_t makeBufferPlots);
+    void setPlotDiamond(Int_t plotDiamond);
+    Int_t getEventPrintHex() const;
+    Int_t getMakeDiamondPlots() const;
+    Int_t getMakeHits2D() const;
+    Int_t getMakeNoise2D() const;
+    Int_t getMakePedRmsTree() const;
+    Int_t getMakePullDist() const;
+    Int_t getSingleChannel2000plots() const;
+    void setEventPrintHex(Int_t eventPrintHex);
+    void setMakeDiamondPlots(Int_t makeDiamondPlots);
+    void setMakeHits2D(Int_t makeHits2D);
+    void setMakeNoise2D(Int_t makeNoise2D);
+    void setMakePedRmsTree(Int_t makePedRmsTree);
+    void setMakePullDist(Int_t makePullDist);
+    void setSingleChannel2000plots(Int_t singleChannel2000plots);
+    UInt_t getPlottedChannel() const;
+    void setPlottedChannel(UInt_t plottedChannel);
+    Int_t getMaxBufferPlots() const;
+    void setMaxBufferPlots(Int_t maxBufferPlots);
+    Float_t getRmsSigmaDifferenceCut() const;
+    void setRmsSigmaDifferenceCut(Float_t rmsSigmaDifferenceCut);
+    Int_t getHighRmsCut() const;
+    Float_t getRmsCut() const;
+    void setHighRmsCut(Int_t highRmsCut);
+    void setRmsCut(Float_t rmsCut);
+    Float_t getMaxNoise2D() const;
+    Int_t getSingleTrack2D() const;
+    Int_t getSingleTrack2DmaxClusterSize() const;
+    Int_t getZoomDiamondPlots() const;
+    void setMaxNoise2D(Float_t maxNoise2D);
+    void setSingleTrack2D(Int_t singleTrack2D);
+    void setSingleTrack2DmaxClusterSize(Int_t singleTrack2DmaxClusterSize);
+    void setZoomDiamondPlots(Int_t zoomDiamondPlots);
 protected:
+    float store_threshold;
 private:
-	void SetFileName(std::string fileName);
-	void LoadSettings();
-	void DefaultLoadDefaultSettings();
-	void ParseFloatArray(std::string value, std::vector<float> & vec);
-	void ParseIntArray(std::string value, std::vector<int> & vec);
+    void SetFileName(std::string fileName);
+    void LoadSettings();
+    void DefaultLoadDefaultSettings();
+    void ParseFloatArray(std::string value, std::vector<float> & vec);
+    void ParseIntArray(std::string value, std::vector<int> & vec);
 private:
-	std::string fileName;
+    std::string fileName;
 private:
-	Int_t SaveAllFilesSwitch;
-	Int_t ClosePlotsOnSave;
-	Int_t IndexProduceSwitch;
-	float fix_dia_noise;
-	Int_t Iter_Size;
-	Int_t Taylor_speed_throttle;
-	Int_t dia_input;
-	Float_t Si_Pedestal_Hit_Factor;
-	Float_t Di_Pedestal_Hit_Factor;
-
-	Int_t DO_CMC;
-	Int_t CMN_cut;
-	Float_t Si_Cluster_Seed_Factor;
-	Float_t Si_Cluster_Hit_Factor;
-	Float_t Di_Cluster_Seed_Factor;
-	Float_t Di_Cluster_Hit_Factor;
-	Float_t si_avg_fidcut_xlow;
-	Float_t si_avg_fidcut_xhigh;
-	Float_t si_avg_fidcut_ylow;
-	Float_t si_avg_fidcut_yhigh;
-
-	Int_t pulse_height_num_bins;
-	Float_t pulse_height_si_max;
-	Float_t pulse_height_di_max;
-	Float_t snr_distribution_si_max;
-	Float_t snr_distribution_di_max;
-
-	Float_t eta_lowq_slice_low;
-	Float_t eta_lowq_slice_hi;
-	Float_t eta_hiq_slice_low;
-	Float_t eta_hiq_slice_hi;
-
-	Int_t etavsq_n_landau_slices;
-	Int_t snr_plots_enable;
-	std::vector<Float_t> alignment_x_offsets;
-	std::vector<Float_t> alignment_y_offsets;
-	std::vector<Float_t> alignment_phi_offsets;
-	std::vector<Float_t> alignment_z_offsets;
-	Float_t alignment_training_track_fraction;
-	std::vector<int> Det_channel_screen_channels[9];
-	std::vector<int> Det_channel_screen_regions[9];
-	ChannelScreen Det_channel_screen[9];
+    Int_t SaveAllFilesSwitch;
+    Int_t ClosePlotsOnSave;
+    Int_t IndexProduceSwitch;
+    float fix_dia_noise;
+    Int_t Iter_Size;
+    Int_t Taylor_speed_throttle;
+    Int_t dia_input;
+    Float_t Si_Pedestal_Hit_Factor;
+    Float_t Di_Pedestal_Hit_Factor;
+    bool single_channel_analysis_enable;
+    Int_t single_channel_analysis_eventwindow;
+    std::vector<int> single_channel_analysis_channels;
+    Int_t DO_CMC;
+    Int_t CMN_cut;
+    Int_t CMN_corr_low;
+    Int_t CMN_corr_high;
+    Float_t Si_Cluster_Seed_Factor;
+    Float_t Si_Cluster_Hit_Factor;
+    Float_t Di_Cluster_Seed_Factor;
+    Float_t Di_Cluster_Hit_Factor;
+    Float_t si_avg_fidcut_xlow;
+    Float_t si_avg_fidcut_xhigh;
+    Float_t si_avg_fidcut_ylow;
+    Float_t si_avg_fidcut_yhigh;
+    Int_t pulse_height_num_bins;
+    Float_t pulse_height_si_max;
+    Float_t pulse_height_di_max;
+    Float_t snr_distribution_si_max;
+    Float_t snr_distribution_di_max;
+    Float_t eta_lowq_slice_low;
+    Float_t eta_lowq_slice_hi;
+    Float_t eta_hiq_slice_low;
+    Float_t eta_hiq_slice_hi;
+    Int_t etavsq_n_landau_slices;
+    Int_t snr_plots_enable;
+    std::vector<Float_t> alignment_x_offsets;
+    std::vector<Float_t> alignment_y_offsets;
+    std::vector<Float_t> alignment_phi_offsets;
+    std::vector<Float_t> alignment_z_offsets;
+    Float_t alignment_training_track_fraction;
+    std::vector<int> Det_channel_screen_channels[9];
+    std::vector<int> Det_channel_screen_regions[9];
+    ChannelScreen Det_channel_screen[9];
     bool dia_x_aligned;
     bool eta_correction;
-	Float_t alignment_chi2;
-	bool UseAutoFidCut;
-	bool AlternativeClustering;
+    Float_t alignment_chi2;
+    bool UseAutoFidCut;
+    bool AlternativeClustering;
+    Int_t plotChannel_on;
+    Int_t plotDiamond; //make Buffer Noise plots for the diamond instead
+    Int_t makeBufferPlots; //make Buffer Plot whenever sigma and rms differ by rms_sigma_difference_cut
+    Int_t SingleChannel2000plots; //make SC_Pedestal plots for all silicon detectors and channels
+    Int_t makeDiamondPlots; //make DC_Pedestal plots for all diamond channels
+    Int_t makeHits2D; //make 2D histogram of hits and seeds
+    Int_t makeNoise2D; //make 2D histogram of noise per channel
+    Int_t makePullDist; //make pull distribution
+    Int_t makePedRMSTree; //make .root file of pedestal and rms values
+    Int_t eventPrintHex; //print hex (should match .rz data)
+    UInt_t plottedChannel;
+    Int_t maxBufferPlots;
+    Float_t rms_sigma_difference_cut;
+    Int_t high_rms_cut; //cut on absolute rms value instead of comparing to Gaussian
+    Float_t rms_cut; //value to use if high_rms_cut
 
+    Int_t zoomDiamondPlots; //zoom in on DC_Pedestal (100 event / window)
+
+    Int_t singleTrack2D; //plot single tracks only in 2D hits histogram
+    Int_t singleTrack2DmaxClusterSize; //max size of clusters in silicon track (cluster = Di_Hit_Factor hits; no check for seeds/shoulders)
+
+    Float_t maxNoise2D; //highest noise value plotted in 2D noise histogram
 private:
     //Filter tracks not in good fiducial region w/o bad strips
-     Int_t align_sil_fid_xlow;
-     Int_t align_sil_fid_xhi;
-     Int_t align_sil_fid_ylow;
-     Int_t align_sil_fid_yhi;
-
-private: int verbosity;
-
+    Int_t align_sil_fid_xlow;
+    Int_t align_sil_fid_xhi;
+    Int_t align_sil_fid_ylow;
+    Int_t align_sil_fid_yhi;
+private:
+    int verbosity;
 };
 #endif
