@@ -433,6 +433,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CMN_corr_high=7;
 	CMN_corr_low=3;
 
+	alignment_training_track_fraction=0.25;
+
 	//default clustering settings
 	snr_plots_enable = 0;
 	Si_Cluster_Seed_Factor = 5;

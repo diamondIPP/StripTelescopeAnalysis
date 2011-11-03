@@ -78,6 +78,8 @@ class TDetectorAlignment{
 	void CheckDetectorAlignmentXYPlots(int subject_detector, std::string &histo_title);
 	void CutFakeTracks(std::vector<TDiamondTrack> &tracks, std::vector<bool> &tracks_mask, Float_t alignment_chi2 = 9999., bool CutFakeTracksOn = false, bool verbose = false);
 	Float_t LinTrackFit(std::vector<Float_t> X, std::vector<Float_t> Y, std::vector<Float_t> &par, Float_t res = 9999.);
+    int getVerbosity() const;
+    void setVerbosity(int verbosity);
 
    protected:
       TDetectorPlane D0;

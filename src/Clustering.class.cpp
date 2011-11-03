@@ -1249,10 +1249,16 @@ void Clustering::BookHistograms() {
    }
    
    //count various types of events surviving the above cuts
-   if(clustered_event.HasGoldenGateCluster()) goldengatecluster_events[9]++;
-   for(int det=0; det<9; det++) if(clustered_event.HasGoldenGateCluster(det)) goldengatecluster_events[det]++;
-   if(clustered_event.HasBadChannelCluster()) badchannelcluster_events[9]++;
-   for(int det=0; det<9; det++) if(clustered_event.HasBadChannelCluster(det)) badchannelcluster_events[det]++;
+   if(clustered_event.HasGoldenGateCluster())
+	   goldengatecluster_events[9]++;
+   for(int det=0; det<9; det++)
+	   if(clustered_event.HasGoldenGateCluster(det))
+		   goldengatecluster_events[det]++;
+   if(clustered_event.HasBadChannelCluster())
+	   badchannelcluster_events[9]++;
+   for(int det=0; det<9; det++)
+	   if(clustered_event.HasBadChannelCluster(det))
+		   badchannelcluster_events[det]++;
    if(clustered_event.HasLumpyCluster()) lumpycluster_events[9]++;
    for(int det=0; det<9; det++) if(clustered_event.HasLumpyCluster(det)) lumpycluster_events[det]++;
    if(clustered_event.HasSaturatedCluster()) saturatedcluster_events[9]++;
@@ -1389,7 +1395,8 @@ void Clustering::BookHistograms() {
                TDiamondTrack track_fidcut = TDiamondTrack(clustered_event.event_number,D0,D1,D2,D3,Dia);
                tracks_fidcut.push_back(track_fidcut);
                counter_alignment_fidcut_tracks++;
-               mask = rand.Uniform()<settings->getAlignment_training_track_fraction();
+               float randomVariable=rand.Uniform();
+               mask = randomVariable<settings->getAlignment_training_track_fraction();
                tracks_fidcut_mask.push_back(mask);
                counter_alignment_only_fidcut_tracks += mask;
             }
@@ -2337,13 +2344,13 @@ void Clustering::ClusterRun(bool plots) {
    cout<<"   [ ]badchannelcluster_events[9] = "<<badchannelcluster_events[9]<<endl;
    cout<<"   [ ]lumpycluster_events[9] = "<<lumpycluster_events[9]<<endl;
    cout<<"   [ ]saturatedcluster_events[9] = "<<saturatedcluster_events[9]<<endl;
-   for(int d=0; d<4; d++)
-   cout<<"   [ ]detectorxycluster_events["<<d<<"] = "<<detectorxycluster_events[d]<<endl;
-   cout<<"   [b]singlesitrack_events = "<<singlesitrack_events<<endl;
-   cout<<"      [ ]singlesitrack_1diamondclus_events = "<<singlesitrack_1diamondclus_events<<endl;
-   cout<<"      [c]singlesitrack_fidcut_events = "<<singlesitrack_fidcut_events<<endl;
-   cout<<"         [ ]singlesitrack_fidcut_1diamondclus_events = "<<singlesitrack_fidcut_1diamondclus_events<<endl;
-         
+   for(int d=0; d<4; d++){
+	   cout<<"   [ ]detectorxycluster_events["<<d<<"] = "<<detectorxycluster_events[d]<<endl;
+	   cout<<"   [b]singlesitrack_events = "<<singlesitrack_events<<endl;
+	   cout<<"      [ ]singlesitrack_1diamondclus_events = "<<singlesitrack_1diamondclus_events<<endl;
+	   cout<<"      [c]singlesitrack_fidcut_events = "<<singlesitrack_fidcut_events<<endl;
+	   cout<<"         [ ]singlesitrack_fidcut_1diamondclus_events = "<<singlesitrack_fidcut_1diamondclus_events<<endl;
+   }
    Watch.Stop();
    Watch.Print("u");
    cout<<"tracks.size() = "<<tracks.size()<<endl;
@@ -2985,14 +2992,19 @@ void Clustering::AutoFidCut() {
 
 
 void Clustering::Alignment(bool plots, bool CutFakeTracksOn){
+	cout<<"Clustering::Alignment:Start with function"<<endl;
 	alignment->GetEvent(current_event);
 	alignment->SetTracks(tracks);
+	alignment->SetAlignment_tracks_mask(tracks_mask);
 	alignment->SetAlignment_tracks_fidcut(tracks_fidcut);
 	alignment->SetAlignment_tracks_fidcut_mask(tracks_fidcut_mask);
+
 	if( alignment->Align(0,CutFakeTracksOn)==-1){
 		if(verbosity) cout<<"Clustering::Alignment::No Clusters build yet, do ClusterRun"<<endl;
 		ClusterRun(1);
 		if(verbosity) cout<<"Clustering::Alignment::track size: "<<tracks.size()<<endl;
+		for(int l=0;l<tracks_mask.size();l+=5)
+				//cout<<"track_mask:\t"<<tracks_mask.at(l)<<tracks_mask.at(l+1)<<tracks_mask.at(l+2)<<tracks_mask.at(l+3)<<tracks_mask.at(l+4)<<endl;
 		alignment->SetTracks(tracks);
 		alignment->SetAlignment_tracks_mask(tracks_mask);
 		alignment->SetAlignment_tracks_fidcut(tracks_fidcut);

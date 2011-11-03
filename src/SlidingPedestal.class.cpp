@@ -1273,50 +1273,50 @@ if((settings->getDia_input()==1) && (settings->getDO_CMC()==1))
    //PedTree->Branch("StoreThreshold",&PedSubEvent.store_threshold,"StoreThreshold/F");
 
    //Telescope Data Branches
-   PedTree->Branch("rawEventReader->getD0X()_NChannels",&Det_NChannels[0],"rawEventReader->getD0X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD0Y()_NChannels",&Det_NChannels[1],"rawEventReader->getD0Y()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD1X()_NChannels",&Det_NChannels[2],"rawEventReader->getD1X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD1Y()_NChannels",&Det_NChannels[3],"rawEventReader->getD1Y()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD2X()_NChannels",&Det_NChannels[4],"rawEventReader->getD2X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD2Y()_NChannels",&Det_NChannels[5],"rawEventReader->getD2Y()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD3X()_NChannels",&Det_NChannels[6],"rawEventReader->getD3X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD3Y()_NChannels",&Det_NChannels[7],"rawEventReader->getD3Y()_NChannels/i");
+   PedTree->Branch("D0X_NChannels",&Det_NChannels[0],"D0X_NChannels/i");
+   PedTree->Branch("D0Y_NChannels",&Det_NChannels[1],"D0Y_NChannels/i");
+   PedTree->Branch("D1X_NChannels",&Det_NChannels[2],"D1X_NChannels/i");
+   PedTree->Branch("D1Y_NChannels",&Det_NChannels[3],"D1Y_NChannels/i");
+   PedTree->Branch("D2X_NChannels",&Det_NChannels[4],"D2X_NChannels/i");
+   PedTree->Branch("D2Y_NChannels",&Det_NChannels[5],"D2Y_NChannels/i");
+   PedTree->Branch("D3X_NChannels",&Det_NChannels[6],"D3X_NChannels/i");
+   PedTree->Branch("D3Y_NChannels",&Det_NChannels[7],"D3Y_NChannels/i");
    PedTree->Branch("Dia_NChannels",&Det_NChannels[8],"Dia_NChannels/i");
-   PedTree->Branch("rawEventReader->getD0X()_Channels",&Det_Channels[0],"rawEventReader->getD0X()_Channels[rawEventReader->getD0X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD0Y()_Channels",&Det_Channels[1],"rawEventReader->getD0Y()_Channels[rawEventReader->getD0Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1X()_Channels",&Det_Channels[2],"rawEventReader->getD1X()_Channels[rawEventReader->getD1X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1Y()_Channels",&Det_Channels[3],"rawEventReader->getD1Y()_Channels[rawEventReader->getD1Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2X()_Channels",&Det_Channels[4],"rawEventReader->getD2X()_Channels[rawEventReader->getD2X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2Y()_Channels",&Det_Channels[5],"rawEventReader->getD2Y()_Channels[rawEventReader->getD2Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3X()_Channels",&Det_Channels[6],"rawEventReader->getD3X()_Channels[rawEventReader->getD3X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3Y()_Channels",&Det_Channels[7],"rawEventReader->getD3Y()_Channels[rawEventReader->getD3Y()_NChannels]/b");
+   PedTree->Branch("D0X_Channels",&Det_Channels[0],"D0X_Channels[D0X_NChannels]/b");
+   PedTree->Branch("D0Y_Channels",&Det_Channels[1],"D0Y_Channels[D0Y_NChannels]/b");
+   PedTree->Branch("D1X_Channels",&Det_Channels[2],"D1X_Channels[D1X_NChannels]/b");
+   PedTree->Branch("D1Y_Channels",&Det_Channels[3],"D1Y_Channels[D1Y_NChannels]/b");
+   PedTree->Branch("D2X_Channels",&Det_Channels[4],"D2X_Channels[D2X_NChannels]/b");
+   PedTree->Branch("D2Y_Channels",&Det_Channels[5],"D2Y_Channels[D2Y_NChannels]/b");
+   PedTree->Branch("D3X_Channels",&Det_Channels[6],"D3X_Channels[D3X_NChannels]/b");
+   PedTree->Branch("D3Y_Channels",&Det_Channels[7],"D3Y_Channels[D3Y_NChannels]/b");
    PedTree->Branch("Dia_Channels",&Det_Channels[8],"Dia_Channels[Dia_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD0X()_ADC",&Det_ADC[0],"rawEventReader->getD0X()_ADC[rawEventReader->getD0X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD0Y()_ADC",&Det_ADC[1],"rawEventReader->getD0Y()_ADC[rawEventReader->getD0Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1X()_ADC",&Det_ADC[2],"rawEventReader->getD1X()_ADC[rawEventReader->getD1X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1Y()_ADC",&Det_ADC[3],"rawEventReader->getD1Y()_ADC[rawEventReader->getD1Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2X()_ADC",&Det_ADC[4],"rawEventReader->getD2X()_ADC[rawEventReader->getD2X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2Y()_ADC",&Det_ADC[5],"rawEventReader->getD2Y()_ADC[rawEventReader->getD2Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3X()_ADC",&Det_ADC[6],"rawEventReader->getD3X()_ADC[rawEventReader->getD3X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3Y()_ADC",&Det_ADC[7],"rawEventReader->getD3Y()_ADC[rawEventReader->getD3Y()_NChannels]/b");
+   PedTree->Branch("D0X_ADC",&Det_ADC[0],"D0X_ADC[D0X_NChannels]/b");
+   PedTree->Branch("D0Y_ADC",&Det_ADC[1],"D0Y_ADC[D0Y_NChannels]/b");
+   PedTree->Branch("D1X_ADC",&Det_ADC[2],"D1X_ADC[D1X_NChannels]/b");
+   PedTree->Branch("D1Y_ADC",&Det_ADC[3],"D1Y_ADC[D1Y_NChannels]/b");
+   PedTree->Branch("D2X_ADC",&Det_ADC[4],"D2X_ADC[D2X_NChannels]/b");
+   PedTree->Branch("D2Y_ADC",&Det_ADC[5],"D2Y_ADC[D2Y_NChannels]/b");
+   PedTree->Branch("D3X_ADC",&Det_ADC[6],"D3X_ADC[D3X_NChannels]/b");
+   PedTree->Branch("D3Y_ADC",&Det_ADC[7],"D3Y_ADC[D3Y_NChannels]/b");
    PedTree->Branch("Dia_ADC",&Dia_ADC,"Dia_ADC[Dia_NChannels]/s");
-   PedTree->Branch("rawEventReader->getD0X()_PedMean",&Det_PedMean[0],"rawEventReader->getD0X()_PedMean[rawEventReader->getD0X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD0Y()_PedMean",&Det_PedMean[1],"rawEventReader->getD0Y()_PedMean[rawEventReader->getD0Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1X()_PedMean",&Det_PedMean[2],"rawEventReader->getD1X()_PedMean[rawEventReader->getD1X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1Y()_PedMean",&Det_PedMean[3],"rawEventReader->getD1Y()_PedMean[rawEventReader->getD1Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2X()_PedMean",&Det_PedMean[4],"rawEventReader->getD2X()_PedMean[rawEventReader->getD2X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2Y()_PedMean",&Det_PedMean[5],"rawEventReader->getD2Y()_PedMean[rawEventReader->getD2Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3X()_PedMean",&Det_PedMean[6],"rawEventReader->getD3X()_PedMean[rawEventReader->getD3X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3Y()_PedMean",&Det_PedMean[7],"rawEventReader->getD3Y()_PedMean[rawEventReader->getD3Y()_NChannels]/F");
+   PedTree->Branch("D0X_PedMean",&Det_PedMean[0],"D0X_PedMean[D0X_NChannels]/F");
+   PedTree->Branch("D0Y_PedMean",&Det_PedMean[1],"D0Y_PedMean[D0Y_NChannels]/F");
+   PedTree->Branch("D1X_PedMean",&Det_PedMean[2],"D1X_PedMean[D1X_NChannels]/F");
+   PedTree->Branch("D1Y_PedMean",&Det_PedMean[3],"D1Y_PedMean[D1Y_NChannels]/F");
+   PedTree->Branch("D2X_PedMean",&Det_PedMean[4],"D2X_PedMean[D2X_NChannels]/F");
+   PedTree->Branch("D2Y_PedMean",&Det_PedMean[5],"D2Y_PedMean[D2Y_NChannels]/F");
+   PedTree->Branch("D3X_PedMean",&Det_PedMean[6],"D3X_PedMean[D3X_NChannels]/F");
+   PedTree->Branch("D3Y_PedMean",&Det_PedMean[7],"D3Y_PedMean[D3Y_NChannels]/F");
    PedTree->Branch("Dia_PedMean",&Det_PedMean[8],"Dia_PedMean[Dia_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD0X()_PedWidth",&Det_PedWidth[0],"rawEventReader->getD0X()_PedWidth[rawEventReader->getD0X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD0Y()_PedWidth",&Det_PedWidth[1],"rawEventReader->getD0Y()_PedWidth[rawEventReader->getD0Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1X()_PedWidth",&Det_PedWidth[2],"rawEventReader->getD1X()_PedWidth[rawEventReader->getD1X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1Y()_PedWidth",&Det_PedWidth[3],"rawEventReader->getD1Y()_PedWidth[rawEventReader->getD1Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2X()_PedWidth",&Det_PedWidth[4],"rawEventReader->getD2X()_PedWidth[rawEventReader->getD2X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2Y()_PedWidth",&Det_PedWidth[5],"rawEventReader->getD2Y()_PedWidth[rawEventReader->getD2Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3X()_PedWidth",&Det_PedWidth[6],"rawEventReader->getD3X()_PedWidth[rawEventReader->getD3X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3Y()_PedWidth",&Det_PedWidth[7],"rawEventReader->getD3Y()_PedWidth[rawEventReader->getD3Y()_NChannels]/F");
+   PedTree->Branch("D0X_PedWidth",&Det_PedWidth[0],"D0X_PedWidth[D0X_NChannels]/F");
+   PedTree->Branch("D0Y_PedWidth",&Det_PedWidth[1],"D0Y_PedWidth[D0Y_NChannels]/F");
+   PedTree->Branch("D1X_PedWidth",&Det_PedWidth[2],"D1X_PedWidth[D1X_NChannels]/F");
+   PedTree->Branch("D1Y_PedWidth",&Det_PedWidth[3],"D1Y_PedWidth[D1Y_NChannels]/F");
+   PedTree->Branch("D2X_PedWidth",&Det_PedWidth[4],"D2X_PedWidth[D2X_NChannels]/F");
+   PedTree->Branch("D2Y_PedWidth",&Det_PedWidth[5],"D2Y_PedWidth[D2Y_NChannels]/F");
+   PedTree->Branch("D3X_PedWidth",&Det_PedWidth[6],"D3X_PedWidth[D3X_NChannels]/F");
+   PedTree->Branch("D3Y_PedWidth",&Det_PedWidth[7],"D3Y_PedWidth[D3Y_NChannels]/F");
    PedTree->Branch("Dia_PedWidth",&Det_PedWidth[8],"Dia_PedWidth[Dia_NChannels]/F");
 	if(settings->getDO_CMC()==1)
    {PedTree->Branch("CommonModeCorrection", &Correction,"CMN_Correction/F");}  
@@ -2489,28 +2489,28 @@ if(settings->getDO_CMC()==1)	{correction = (ps_sum_buffer)/divisor;}
    for(Int_t det = 0; det<8; det++) {
       switch(det) {
          case 0:
-            det_name = "rawEventReader->getD0X()";
+            det_name = "D0X";
             break;
          case 1:
-            det_name = "rawEventReader->getD1X()";
+            det_name = "D1X";
             break;
          case 2:
-            det_name = "rawEventReader->getD2X()";
+            det_name = "D2X";
             break;
          case 3:
-            det_name = "rawEventReader->getD3X()";
+            det_name = "D3X";
             break;
          case 4:
-            det_name = "rawEventReader->getD0Y()";
+            det_name = "D0Y";
             break;
          case 5:
-            det_name = "rawEventReader->getD1Y()";
+            det_name = "D1Y";
             break;
          case 6:
-            det_name = "rawEventReader->getD2Y()";
+            det_name = "D2Y";
             break;
          case 7:
-            det_name = "rawEventReader->getD3Y()";
+            det_name = "D3Y";
             break;
       }
       

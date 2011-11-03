@@ -10,7 +10,7 @@ using namespace std;
 
 
 TDetectorAlignment::TDetectorAlignment(std::string plots_path_string) {
-	verbosity=1;
+	verbosity=5;
    nDetectors = 5;
    /*residualsX = TH1F("residualsX","residualsX",10000,-100,100);
    residualsY = TH1F("residualsY","residualsY",10000,-100,100);
@@ -86,10 +86,11 @@ Double_t TDetectorAlignment::GetSiResolution() {
 
 void TDetectorAlignment::LoadData(TDiamondTrack track)
 {
-	//if(verbosity>2)cout<<"TDetectorAlignment::LoadData"<<endl;
+   if(verbosity>4)cout<<"TDetectorAlignment::LoadData "<<verbosity<<endl;
    TDetectorPlane det_buffer[5];
 
-   for(Int_t det=0; det<5; det++) det_buffer[det] = track.GetD(det);
+   for(Int_t det=0; det<5; det++)
+	   det_buffer[det] = track.GetD(det);
 
    /*
    //rotate planes; the 128's shift the axis of the rotation to go through the center of each plane
@@ -133,17 +134,17 @@ void TDetectorAlignment::LoadData(TDiamondTrack track)
    TDiamondTrack temptrack(track.GetEventNumber(),det_buffer[0],det_buffer[1],det_buffer[2],det_buffer[3],det_buffer[4]);
    track_holder = temptrack;
 
-   /* //diagnostics
-   cout<<det_x_offset[1]<<"\t"<<det_y_offset[1]<<"\t"<<det_z_offset[1]<<"\t"<<det_phi_offset[1]<<endl;
-   cout<<track.GetD(0).GetX()<<"\t"<<track.GetD(0).GetY()<<"\t"<<track.GetD(0).GetZ()<<endl;
-   cout<<track.GetD(1).GetX()<<"\t"<<track.GetD(1).GetY()<<"\t"<<track.GetD(1).GetZ()<<endl;
-   cout<<det_buffer[0].GetX()<<"\t"<<det_buffer[0].GetY()<<"\t"<<det_buffer[0].GetZ()<<endl;
-   cout<<det_buffer[1].GetX()<<"\t"<<det_buffer[1].GetY()<<"\t"<<det_buffer[1].GetZ()<<endl;
-   cout<<temptrack.GetD(0).GetX()<<"\t"<<temptrack.GetD(0).GetY()<<"\t"<<temptrack.GetD(0).GetZ()<<endl;
-   cout<<temptrack.GetD(1).GetX()<<"\t"<<temptrack.GetD(1).GetY()<<"\t"<<temptrack.GetD(1).GetZ()<<endl;
-   cout<<track_holder.GetD(0).GetX()<<"\t"<<track_holder.GetD(0).GetY()<<"\t"<<track_holder.GetD(0).GetZ()<<endl;
-   cout<<track_holder.GetD(1).GetX()<<"\t"<<track_holder.GetD(1).GetY()<<"\t"<<track_holder.GetD(1).GetZ()<<endl;
-   */
+    //diagnostics
+   if(verbosity>4)cout<<det_x_offset[1]<<"\t"<<det_y_offset[1]<<"\t"<<det_z_offset[1]<<"\t"<<det_phix_offset[1]<<endl;
+   if(verbosity>4)cout<<track.GetD(0).GetX()<<"\t"<<track.GetD(0).GetY()<<"\t"<<track.GetD(0).GetZ()<<endl;
+   if(verbosity>4)cout<<track.GetD(1).GetX()<<"\t"<<track.GetD(1).GetY()<<"\t"<<track.GetD(1).GetZ()<<endl;
+   if(verbosity>4)cout<<det_buffer[0].GetX()<<"\t"<<det_buffer[0].GetY()<<"\t"<<det_buffer[0].GetZ()<<endl;
+   if(verbosity>4)cout<<det_buffer[1].GetX()<<"\t"<<det_buffer[1].GetY()<<"\t"<<det_buffer[1].GetZ()<<endl;
+   if(verbosity>4)cout<<temptrack.GetD(0).GetX()<<"\t"<<temptrack.GetD(0).GetY()<<"\t"<<temptrack.GetD(0).GetZ()<<endl;
+   if(verbosity>4)cout<<temptrack.GetD(1).GetX()<<"\t"<<temptrack.GetD(1).GetY()<<"\t"<<temptrack.GetD(1).GetZ()<<endl;
+   if(verbosity>4)cout<<track_holder.GetD(0).GetX()<<"\t"<<track_holder.GetD(0).GetY()<<"\t"<<track_holder.GetD(0).GetZ()<<endl;
+   if(verbosity>4)cout<<track_holder.GetD(1).GetX()<<"\t"<<track_holder.GetD(1).GetY()<<"\t"<<track_holder.GetD(1).GetZ()<<endl;
+   //*/
 
 	//if(verbosity>2)cout<<"TDetectorAlignment::LoadData:DONE"<<endl;
 }
@@ -223,7 +224,8 @@ void TDetectorAlignment::TrackFit3(Double_t &predicted_x, Double_t &predicted_y)
 
 void TDetectorAlignment::LoadTracks(vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask) {
    track_storage.clear(); track_storage = input_tracks;
-   track_mask_storage.clear(); track_mask_storage = input_tracks_mask;
+   track_mask_storage.clear();
+   track_mask_storage = input_tracks_mask;
    cout<<"TDetectAlignment::LoadTracks: "<<track_storage.size()<<" tracks loaded"<<endl;
    if(track_storage.size() != track_mask_storage.size()) cout<<"TDetectorAlignment::LoadTracks: track_storage.size()="<<track_storage.size()<<" and track_mask_storage.size()="<<track_mask_storage.size()<<" are not equal!"<<endl;
 }
@@ -368,7 +370,7 @@ void TDetectorAlignment::PlotCartesianDistribution()
 }
 
 void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1, int ref_detector2, bool verbose, bool justcheck) {
-
+   cout<<"TDetectorAlignment::AlignDetctorXY in "<<subject_detector<<" with " << ref_detector1<< " and "<<ref_detector2<< " /t with verbosity "<<verbosity<<endl;
    std::ostringstream detector_name;
    detector_name << "D" << subject_detector;
 
@@ -428,11 +430,24 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    resymean = resymean / Double_t(track_storage.size());
    resxrms = TMath::Sqrt(resxrms / Double_t(track_storage.size()) - resxmean*resxmean);
    resyrms = TMath::Sqrt(resyrms / Double_t(track_storage.size()) - resymean*resymean);
+   if(verbosity>=0){
+	   cout<<"resxmean: "<<resxmean <<"+/-"<<resxrms<<endl;
+	   cout<<"resymean: "<<resymean << "+/-"<<resyrms<<endl;
+   }
 
+//   for(int l=0; l<(int)track_mask_storage.size();l+=5)
+//	   cout<<track_mask_storage.at(l)<<track_mask_storage.at(l+1)<<track_mask_storage.at(l+2)<<track_mask_storage.at(l+3)<<track_mask_storage.at(l+4)<<endl;
    //now select tracks with reasonably small residuals
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
-      if(!track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
+      if(!track_mask_storage[t] || track_storage[t].FakeTrack) {
+//    	  cout<<"skip track no."<<t;
+//    	  if(track_storage[t].FakeTrack)
+//    		  cout<<" track is marked as a fake track:!|"<<endl;
+//    	  else
+//    		  cout<<" reack is not selceted for determining alignment constant"<<endl;
+    	  continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
+      }
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5)
          PositionPredictor(subject_detector);
@@ -444,11 +459,17 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 
       predx=GetPredictedX();
       predy=GetPredictedY();
+      if(verbosity>3){
+    	  cout<<"Predicted Position in track "<<t<<" is: ("<<predx<<"/"<<predy<<")"<<endl;
+      }
       obsvx=track_holder.GetD(subject_detector).GetX();
       obsvy=track_holder.GetD(subject_detector).GetY();
-
+      if(verbosity>3)
+    	  cout<<"Observed Position in track "<< t << " is: ("<<obsvx<<"/"<<obsvy<<endl;
       resxtest=TMath::Abs(obsvx-predx-resxmean)/resxrms/res_keep_factor;
       resytest=TMath::Abs(obsvy-predy-resymean)/resyrms/res_keep_factor;
+      if(verbosity>3)
+    	  cout<<"Residum in track "<< t << " is: ("<<resxtest<<"/"<<resytest<<endl;
 
       if(subject_detector<4) {
          if(resxtest<1 && resytest<1) {
@@ -492,7 +513,14 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 
    //update offsets and resolutions
    if(!justcheck) {
-      x_offset = (sumr * sumv2 - sumvr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+	   float variableDif= (observedX.size() * sumv2 - sumv * sumv);
+	   if(variableDif==0){
+		   cout<<"*****************************************************************ERRORR*******************************************"<<endl;
+		   cout<<"*****************************************************************ERRORR*******************************************"<<endl;
+		   cout<<"*****************************************************************ERRORR*******************************************"<<endl;
+		   exit(-1);
+	   }
+      x_offset = (sumr * sumv2 - sumvr * sumv) / variableDif;
       //phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
       phix_offset = TMath::ATan(-(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv));
       //update x-offsets
@@ -649,7 +677,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    //cout << "For " << detector_name << "X mean is " << x_offset << " and RMS is " << residualsX->GetRMS() << endl;
    //cout << "For " << detector_name << "Y mean is " << y_offset << " and RMS is " << residualsY->GetRMS() << endl;
 
-   if(verbose) {
+   if(verbosity) {
       cout << "For " << detector_name.str() << "X change in offset is " << x_offset
             << ", new offset is " << det_x_offset[subject_detector]
             << ", phiX change in offset is " << phix_offset
@@ -703,9 +731,11 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
    Double_t resxmean = 0, resxrms = 0, resymean = 0, resyrms = 0, resxtest, resytest;
 
 
+
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
 	   if(verbosity&&t==0)cout<<"TDetectorAlignment::CheckDetectorAlignmentXYPlots:start for loop"<<endl;
+	   this->setVerbosity(0);
 	  LoadData(track_storage.at(t));
 
 	  if(track_mask_storage.size()<=t||track_storage.size()<=t)cout<<"TDetectorAlignment::CheckDetectorAlignmentXYPlots::size not correct"<<endl;
@@ -1285,3 +1315,18 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, ve
 //	cout << "chi2: " << par[2] << endl;
 	return tmp3 / (res * res);
 }
+
+int TDetectorAlignment::getVerbosity() const
+{
+    return verbosity;
+}
+
+void TDetectorAlignment::setVerbosity(int verbosity)
+{
+	if(verbosity!=this->verbosity){
+		cout<<"TDetectorAlignment::setVerbosity from "<<getVerbosity()<<" to "<<verbosity<<endl;
+		this->verbosity = verbosity;
+	}
+}
+
+
