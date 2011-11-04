@@ -8,14 +8,38 @@
 #ifndef ALIGNMENTCLASS_HH_
 #define ALIGNMENTCLASS_HH_
 
-#include <vector>
+//C++ standard libraries
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <vector>
+
+
+//ROOT Class Headers
 #include "TTree.h"
+#include "TFile.h"
+#include "TROOT.h" // for adding your own classes to ROOT's library
+#include "TStyle.h"
+#include "TStopwatch.h"
+#include "TDatime.h"
+#include "TMath.h"
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TH1F.h"
+#include "TH2F.h"
+//#include "TGraph.h"
+#include "TF1.h"
+#include "TCanvas.h"
+#include "TPaveText.h"
+#include "FidCutRegion.hh"
+
 #include "TDiamondTrack.hh"
 #include "TDetectorAlignment.hh"
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
 #include "TSettings.class.hh"
+#include "TTransparentClustering.hh"
 
 class AlignmentClass {
 public:
@@ -26,6 +50,7 @@ public:
 	int Align(bool plots = 1, bool CutFakeTracksOn = false);
     void TransparentAnalysis(std::vector<TDiamondTrack> &tracks, std::vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 	void TransparentClustering(std::vector<TDiamondTrack> &tracks, std::vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
+	void TransparentClustering2(std::vector<TDiamondTrack> &tracks, std::vector<bool> &tracks_mask, TDetectorAlignment *align, bool verbose = false);
 
 	void SetSettings(TSettings* settings);
 	void SetPlotsPath(std::string plotspath);

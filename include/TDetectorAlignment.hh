@@ -54,10 +54,6 @@ class TDetectorAlignment{
       std::vector<Double_t> GetYOffsetHistory(Int_t plane) {return det_y_offset_history[plane];};
       std::vector<Double_t> GetZOffsetHistory(Int_t plane) {return det_z_offset_history[plane];};
       std::vector<Double_t> GetPhiOffsetHistory(Int_t plane) {return det_phi_offset_history[plane];};
-      void PlotXOffsetHistory(Int_t plane);
-      void PlotYOffsetHistory(Int_t plane);
-      void PlotZOffsetHistory(Int_t plane);
-      void PlotPhiOffsetHistory(Int_t plane);
       void PositionPredictor(int subject_detector, int ref_detector1, int ref_detector2);
       void PositionPredictor(int subject_detector);
       void TrackFit(Double_t &predicted_x, Double_t &predicted_y);

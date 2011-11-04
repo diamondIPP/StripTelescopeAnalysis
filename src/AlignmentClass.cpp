@@ -17,9 +17,9 @@ AlignmentClass::AlignmentClass(string fileName,UInt_t nEventNumber) {
 	histSaverAlignment=NULL;
 	histSaverAlignmentFakedTracks=NULL;
 	settings=NULL;
-	dianoise_sigma[0]=1;
+	dianoise_sigma[0]=1;//THIS VALUES ARE NOT CORRECT FIGURE OUT HOW TO SET THEM CORRECTLY!!!!!
 	dianoise_sigma[1]=1;
-	nAlignSteps =2;
+	nAlignSteps =1;
 	histSaver= new HistogrammSaver(0);
 	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:loading:"<<endl;
 	if (eventReader==NULL) eventReader = new TADCEventReader(PedFileName);
@@ -225,42 +225,41 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
 			align->CutFakeTracks(alignment_tracks, alignment_tracks_mask, settings->getAlignment_chi2(), CutFakeTracksOn, true);
 			align->CutFakeTracks(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, settings->getAlignment_chi2(), CutFakeTracksOn, true);
 		}
-		if (!CutFakeTracksOn || alignStep == 1) {
-			dia_offset.clear();
-			//			dia_offset.push_back(align->GetXOffset(5));
-			//			dia_offset.push_back(align->GetYOffset(5));
-			//			dia_offset.push_back(align->GetZOffset(5));
-			//			cout << "align->GetXOffset(4) = " << align->GetXOffset(4) << endl;
-			//			cout << "align->GetXOffset(5) = " << align->GetXOffset(5) << endl;
-			//			TransparentClustering(alignment_tracks, alignment_tracks_mask, align);
 
-			this->TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
-//			this->TransparentClustering(tracks_transparent, alignment_tracks_fidcut_mask, align);
-			break;
-		}
 	} // end alignment loop
-	/*
-   //Plot out the offsets
-   for(Int_t plane=1; plane<4; plane++) {
-      align->PlotXOffsetHistory(plane);
-      align->PlotYOffsetHistory(plane);
-      align->PlotZOffsetHistory(plane);
-      align->PlotPhiOffsetHistory(plane);
-   }
+
 
    //Print out the offsets
+	cout<<"*******************************************************"<<endl;
+	cout<<"*******************************************************"<<endl;
+	cout<<"******AlignmentClass::Align::Results of Alignment******"<<endl;
+	cout<<"*******************************************************"<<endl;
+	cout<<"*******************************************************"<<endl;
+	cout<<"Detector D  \t XOff\tYOff\tYOff\tPhiX\tPhiY\n";
    for(Int_t plane=1; plane<4; plane++) {
       cout<<"Detector D"<<plane<<":\t";
       cout<<align->GetXOffset(plane)<<"\t";
       cout<<align->GetYOffset(plane)<<"\t";
       cout<<align->GetZOffset(plane)<<"\t";
-      cout<<align->GetPhiOffset(plane)<<endl;
+      cout<<align->GetPhiYOffset(plane)<<"\t";
+      cout<<align->GetPhiXOffset(plane)<<endl;
    }
-	 */
+	cout<<"*******************************************************/n/n/n"<<endl;
+   this->verbosity=1;
+   if (!CutFakeTracksOn) {
+		dia_offset.clear();
+		this->TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align,false);
+		//			this->TransparentClustering(tracks_transparent, alignment_tracks_fidcut_mask, align);
+	}
 }
 
 void AlignmentClass::TransparentAnalysis(vector<TDiamondTrack> & tracks, vector<bool> & tracks_mask, TDetectorAlignment *align, bool verbose)
 {
+	cout<<"/n/n/n/n/n********************************************************"<<endl;
+	cout<<"********************************************************"<<endl;
+	cout<<"****** AlignmentClass::TransparentAnalysis::START ******"<<endl;
+	cout<<"*******************************************************"<<endl;
+	cout<<"********************************************************\n\n"<<endl;
 	cout << "AlignmentClass::TransparentAnalysis:Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
 	int event;
 	vector<Float_t> x_positions, y_positions, z_positions, par, par_y;
@@ -462,6 +461,12 @@ void AlignmentClass::TransparentAnalysis(vector<TDiamondTrack> & tracks, vector<
 
 void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vector<bool> & tracks_mask, TDetectorAlignment *align, bool verbose)
 {
+
+	cout<<"/n/n/n/n/n********************************************************"<<endl;
+	cout<<"********************************************************"<<endl;
+	cout<<"****** AlignmentClass::TransparentClustering ******"<<endl;
+	cout<<"*******************************************************"<<endl;
+	cout<<"********************************************************\n\n"<<endl;
 	if(verbosity) cout << "AlignmentClass::TransparentClustering::Starting transparent clustering with " << tracks.size() << " tracks.." << endl;
 	cout << "AlignmentClass::TransparentClustering::get Event Reader: "<<eventReader<<" ."<<endl;
 	int event;
@@ -890,6 +895,24 @@ void AlignmentClass::createAlignmentSummary(){
 			alignment_summary.close();
 }
 
+
+void AlignmentClass::TransparentClustering2(vector<TDiamondTrack> & tracks, vector<bool> & tracks_mask, TDetectorAlignment *align, bool verbose)
+{
+	Double_t diamond_x_offset = align->GetXOffset(3);
+	Double_t diamond_y_offset = align->GetYOffset(3);
+	Double_t diamond_phi_offset = align->GetPhiXOffset(3);
+	Double_t diamond_phi_y_offset = align->GetPhiYOffset(3);
+	TTransparentClustering* myTransparentClustering=NULL;
+	myTransparentClustering = new TTransparentClustering(PedFileName);
+	myTransparentClustering->setDiamondXOffset(align->GetPhiXOffset(3));
+	myTransparentClustering->setDiamondYOffset(align->GetPhiYOffset(3));
+	myTransparentClustering->setDiamondPhiOffset(align->GetPhiXOffset(3));
+	myTransparentClustering->setDiamondPhiYOffset(align->GetPhiYOffset(3));
+	myTransparentClustering->setSiRes(align->GetSiResolution());
+	myTransparentClustering->SetSettings(settings);
+	myTransparentClustering->SetPlotsPath(histSaver->GetPlotsPath());//TODO: gegebenfalls anpassen dass alles in einen ordner TransparentClustering kommt
+	myTransparentClustering->setTracks(tracks);
+}
 
 
 
