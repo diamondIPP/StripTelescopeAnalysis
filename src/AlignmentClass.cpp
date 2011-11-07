@@ -248,7 +248,7 @@ int AlignmentClass::Align(bool plots, bool CutFakeTracksOn){
    this->verbosity=1;
    if (!CutFakeTracksOn) {
 		dia_offset.clear();
-		this->TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align,false);
+		this->TransparentClustering2(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align,false);
 		//			this->TransparentClustering(tracks_transparent, alignment_tracks_fidcut_mask, align);
 	}
 }
@@ -904,6 +904,7 @@ void AlignmentClass::TransparentClustering2(vector<TDiamondTrack> & tracks, vect
 	Double_t diamond_phi_y_offset = align->GetPhiYOffset(3);
 	TTransparentClustering* myTransparentClustering=NULL;
 	myTransparentClustering = new TTransparentClustering(PedFileName);
+	myTransparentClustering->setVerbosity(3);
 	myTransparentClustering->setDiamondXOffset(align->GetPhiXOffset(3));
 	myTransparentClustering->setDiamondYOffset(align->GetPhiYOffset(3));
 	myTransparentClustering->setDiamondPhiOffset(align->GetPhiXOffset(3));
@@ -912,6 +913,9 @@ void AlignmentClass::TransparentClustering2(vector<TDiamondTrack> & tracks, vect
 	myTransparentClustering->SetSettings(settings);
 	myTransparentClustering->SetPlotsPath(histSaver->GetPlotsPath());//TODO: gegebenfalls anpassen dass alles in einen ordner TransparentClustering kommt
 	myTransparentClustering->setTracks(tracks);
+	myTransparentClustering->setVerbosity(3);
+	myTransparentClustering->setCurrentAlignment(align);
+	myTransparentClustering->MakeTransparentClustering();
 }
 
 

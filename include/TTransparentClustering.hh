@@ -67,8 +67,15 @@ public:
 	void SetSettings(TSettings* settings);
 	void SetPlotsPath(std::string plotspath);
     vector<TDiamondTrack> getTracks() const;
+    Int_t getVerbosity() const;
+    void setVerbosity(Int_t verbosity);
 private:
     void initHistogramms();
+    void createEventNumberList();
+    void LoadXYZPositions();
+    void GetEffectiveDiamondPosition();
+    void SaveHistogramms();
+    void CalculateEffektiveHitPosition();
 private:
     TSettings *settings;
 	HistogrammSaver *histSaver;
@@ -85,7 +92,19 @@ private:
 
 private:
     Int_t verbosity;
+	vector<int> event_numbers;
+	int eventNumberDifference;
+	vector<Float_t> x_positions, y_positions, z_positions;
+	vector<Float_t> par, par_y;
+	Float_t diamond_hit_position;
+	Float_t diamond_hit_y_position;
+	int diamond_hit_channel;
+	int diamond_secondhit_channel;
 
+	Float_t eff_diamond_hit_position;
+	int eff_diamond_hit_channel;
+	Float_t chi2X;
+	Float_t chi2Y;
 private:
     TH1F* histo_transparentclustering_landau[10];
     TH1F* histo_transparentclustering_landau_mean;
