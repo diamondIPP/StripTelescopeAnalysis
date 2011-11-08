@@ -23,6 +23,8 @@ using namespace std;
 
 SlidingPedestal::SlidingPedestal(unsigned int RunNumber, string RunDescription) {
    //Code revision declarations (to avoid editing ClusterVar.h needlessly):
+	 Channel_Number = 256;
+	  Iteration_Number = 6;
 	settings=NULL;
 	rawEventReader=NULL;
    run_number = RunNumber;
@@ -680,24 +682,25 @@ void SlidingPedestal::createPlotTag(Int_t NEvents){
 	   pt->SetBorderSize(0); //Set Border to Zero
 	   pt->SetFillColor(0); //Set Fill to White
 }
-void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupancy) {
+void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitOccupancy) {
+
+	this->NEvents=NumberOfEvents;
+	this->Initial_Event=InitialEvent;
+	this->hit_occupancy=HitOccupancy;
    //Taylor
 
-
-
-   if (settings->getPlotChannelOn() && settings->getPlottedChannel() == 256) {
+	if (settings->getPlotChannelOn() && settings->getPlottedChannel() == 256) {
      cout << "Channel to be plotted (0 to 255): "<<endl;
      Int_t a=256;
      cin >> a;
      settings->setPlottedChannel(a);
    }
 
-   Int_t Event_Number = NEvents; // which did Taylor intend?
-   //Int_t Event_Number = event_number; // which did Taylor intend?
+   //Int_t Event_Number = NEvents; // which did Taylor intend?
    
 
-   this->initialiseDiamondHistogramms(Event_Number);
-   this->initialisetSingleChannel2000plots(Event_Number);
+   this->initialiseDiamondHistogramms(NEvents);
+   this->initialisetSingleChannel2000plots(NEvents);
 
    if (settings->getMakePullDist()) {
      char PD_buffer[50], hPD_title[50];
@@ -729,70 +732,13 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
 
    //**********BEGINNING OF PEDESTAL CALC*******************************************//
 
-   deque<TTrigger_Event> Events_deque;
+
    //Int_t const Iter_Size = 100; //because of def of TEvent_Array in Event_Classes.h this cannot be more than 300
-   Int_t const Channel_Number = 256;
-   Int_t const Iteration_Number = 6;
+
    //Detector_Data test_data;
 
 
-   //Taylor
-   //*** must change to reflect Iter_Size
-   //*** also, when Iter_Size ~500+, must change BufferFill() to overflow less quickly
-   //39.894228 = 100 / sqrt(2 pi)
-   ostringstream TF1formula;
-   TF1formula << settings->getIter_Size() << " * 0.39894228 / [1] * exp(-0.5 * ((x - [0]) / [1])**2)";
-   TF1 *normalizedGaus = new TF1("normalizedGaus", TF1formula.str().c_str());
-   normalizedGaus->SetParName(0, "Mean");
-   normalizedGaus->SetParName(1, "Sigma");
-   normalizedGaus->SetParameter(0, 0);
-   normalizedGaus->SetParameter(1, 1);
-   normalizedGaus->SetParLimits(0, -100, 100);
-   normalizedGaus->SetParLimits(1, 0, 100);
-   //normalizedGaus->SetRange(-10, 10);
-   //area normalized to 100
-   
-   TH2I *Hits2D;
-   TH2F *Noise2D;
-   TH1F *tempplot;
-   if (settings->getMakeHits2D())
-     Hits2D = new TH2I("Hits2D", "Hits and seeds;Event;Channel", Event_Number, Initial_Event + settings->getIter_Size() - 0.5, Initial_Event + settings->getIter_Size() + Event_Number - 0.5, 128, -0.5, 127.5);
-   if (settings->getMakeHits2D())
-     Noise2D = new TH2F("Noise2D", "Noise distribution per channel;Channel;Noise", 128, -0.5, 127.5, (int)(settings->getMaxNoise2D() * 10) + 1, -0.05, settings->getMaxNoise2D() + 0.05);
-
-   if (settings->getPlotChannelOn() && settings->getPlottedChannel() < 256) {
-     char BN_buffer[50];
-     char hBN_title[50];
-
-     for (Int_t i = 0; i < numberPlottedBufferNoiseHistos; i++) {
-       plottedBufferEvents.push_back(Initial_Event + settings->getIter_Size() + Event_Number * i / numberPlottedBufferNoiseHistos);
-       cout<<"plottedBufferEvents["<<i<<"]="<<plottedBufferEvents[i]<<"\t"<<Initial_Event + settings->getIter_Size() + Event_Number * i / numberPlottedBufferNoiseHistos<<endl;
-     }
-
-     for (Int_t i = 0; i < numberPlottedBufferNoiseHistos; i++) {
-       sprintf(BN_buffer, "Buffer_Noise_%i", i);
-       //sprintf(hBN_title, "Buffer Noise, Ch %u, Event %i", settings->getPlottedChannel(), plottedBufferEvents[i]);
-       sprintf(hBN_title, "Buffer Noise, Ch %u, Event %i", settings->getPlottedChannel(), Initial_Event + settings->getIter_Size() + Event_Number * i / numberPlottedBufferNoiseHistos);
-       if(settings->getPlotDiamond()) {
-    //tempplot = new TH1F(BN_buffer, hBN_title, 100, -50, 50);
-    //hBufferNoise.push_back(tempplot);
-    hBufferNoise.push_back(new TH1F(BN_buffer, hBN_title, 100, -50, 50));
-       } else {
-	 //tempplot = new TH1F(BN_buffer, hBN_title, 20, -10, 10);
-    //hBufferNoise.push_back(tempplot);
-    hBufferNoise.push_back(new TH1F(BN_buffer, hBN_title, 20, -10, 10));
-       }
-     } // */
-   } //Taylor
-
-   if (settings->getMakePedRmsTree()) {
-     char PRT_title[50];
-     sprintf(PRT_title, "PedRMSBuffer%i.root", settings->getIter_Size());
-     PedRMSFile = new TFile(PRT_title, "recreate");
-     PedRMSTree = new TTree("PedRMSTree", "a tree with TPed_and_RMS data");
-     PedRMSTree->Branch("Pedestal", &PedestalForBufferStudy, "PedestalForBufferStudy[128]/F");
-     PedRMSTree->Branch("PedRMS", &PedRMSForBufferStudy, "PedRMSForBufferStudy[128]/F");
-   } //end Taylor
+   this->initialisePedestalHistograms();
 
 //Channel Screen
    ChannelScreen screen;
@@ -804,171 +750,23 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
       screen.ChannelOff(settings->getDet_channel_screen_channels(8).at(i));
    }
 
-   for(Int_t i=Initial_Event; i<(Initial_Event+settings->getIter_Size()); i++)  //Initialzation begins at the first event
-   {
-      rawEventReader->ReadRawEvent(i);
-      TTrigger_Event Event;
-      Event.SetD0X(rawEventReader->getD0X());
-      Event.SetD0Y(rawEventReader->getD0Y());
-      Event.SetD1X(rawEventReader->getD1X());
-      Event.SetD1Y(rawEventReader->getD1Y());
-      Event.SetD2X(rawEventReader->getD2X());
-      Event.SetD2Y(rawEventReader->getD2Y());
-      Event.SetD3X(rawEventReader->getD3X());
-      Event.SetD3Y(rawEventReader->getD3Y());
-      Event.SetDia0(rawEventReader->getDia0());
-      Event.SetDia1(rawEventReader->getDia1());
-      Events_deque.push_back(Event);
-      //cout << i << "\t" << test_data.GetADC_value(161) << endl;
-   }
+   this->readRawEvents();
    
-   TPed_and_RMS *Initial_D0X = new TPed_and_RMS;
-   TPed_and_RMS *Initial_D0Y = new TPed_and_RMS;
-   TPed_and_RMS *Initial_D1X = new TPed_and_RMS;
-   TPed_and_RMS *Initial_D1Y = new TPed_and_RMS;
-   TPed_and_RMS *Initial_D2X = new TPed_and_RMS;
-   TPed_and_RMS *Initial_D2Y = new TPed_and_RMS;
-   TPed_and_RMS *Initial_D3X = new TPed_and_RMS;
-   TPed_and_RMS *Initial_D3Y = new TPed_and_RMS;
-   TPed_and_RMS *Initial_Dia0 = new TPed_and_RMS;
-   TPed_and_RMS *Initial_Dia1 = new TPed_and_RMS;
 
-   for(Int_t s=0; s<Channel_Number; s++) //loop over  # of channels in each detector
-   {
-         
-      TEvent_Array *EA_D0X = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_D0Y = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_D1X = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_D1Y = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_D2X = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_D2Y = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_D3X = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_D3Y = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_Dia0 = new TEvent_Array(settings->getIter_Size());
-      TEvent_Array *EA_Dia1 = new TEvent_Array(settings->getIter_Size());
+   Initial_D0X = new TPed_and_RMS;
+   Initial_D0Y = new TPed_and_RMS;
+   Initial_D1X = new TPed_and_RMS;
+   Initial_D1Y = new TPed_and_RMS;
+   Initial_D2X = new TPed_and_RMS;
+   Initial_D2Y = new TPed_and_RMS;
+   Initial_D3X = new TPed_and_RMS;
+   Initial_D3Y = new TPed_and_RMS;
+   Initial_Dia0 = new TPed_and_RMS;
+   Initial_Dia1 = new TPed_and_RMS;
 
-      for(Int_t n=0; n<settings->getIter_Size(); n++)
-      {
-         int secretchan = 254;
-         if(s==secretchan) cout<<n<<"\t";
-         TTrigger_Event Event;
-         Event = Events_deque[n];
-         TDetector_Data Detector;
-         Detector = Event.GetD0X();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D0X->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetD0Y();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D0Y->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetD1X();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D1X->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetD1Y();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D1Y->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetD2X();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D2X->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetD2Y();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D2Y->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetD3X();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D3X->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetD3Y();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_D3Y->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetDia0();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
-         EA_Dia0->SetChannelValue(Detector.GetADC_value(s),n);
-         Detector = Event.GetDia1();
-         if(s==secretchan) cout<<Detector.GetADC_value(s)<<endl;
-         EA_Dia1->SetChannelValue(Detector.GetADC_value(s),n);
-            
-      }
-      for(Int_t j=0; j<Iteration_Number; j++)
-      {
-         /*
-         TH1F *D0X_pedestal = new TH1F("D0X_pedestal", "DOX Pedestal value for each channel",5000,0,5000);
-         TH1F *D0Y_pedestal = new TH1F("D0Y_pedestal", "rawEventReader->getD0Y() Pedestal value for each channel",5000,0,5000);
-         TH1F *D1X_pedestal = new TH1F("D1X_pedestal", "rawEventReader->getD1X() Pedestal value for each channel",5000,0,5000);
-         TH1F *D1Y_pedestal = new TH1F("D1Y_pedestal", "rawEventReader->getD1Y() Pedestal value for each channel",5000,0,5000);
-         TH1F *D2X_pedestal = new TH1F("D2X_pedestal", "rawEventReader->getD2X() Pedestal value for each channel",5000,0,5000);
-         TH1F *D2Y_pedestal = new TH1F("D2Y_pedestal", "rawEventReader->getD2Y() Pedestal value for each channel",5000,0,5000);
-         TH1F *D3X_pedestal = new TH1F("D3X_pedestal", "rawEventReader->getD3X() Pedestal value for each channel",5000,0,5000);
-         TH1F *D3Y_pedestal = new TH1F("D3Y_pedestal", "rawEventReader->getD3Y() Pedestal value for each channel",5000,0,5000);
-         TH1F *Dia0_pedestal = new TH1F("Dia0_pedestal", "0 Pedestal value for each channel",5000,0,5000);
-         TH1F *Dia1_pedestal = new TH1F("Dia1_pedestal", "1 Pedestal value for each channel",5000,0,5000);*/
-         int silicon_adc_res = 255;
-         int diamond_adc_res = 4095;
-         TH1F *D0X_pedestal = new TH1F("D0X_pedestal", "DOX Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *D0Y_pedestal = new TH1F("D0Y_pedestal", "rawEventReader->getD0Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *D1X_pedestal = new TH1F("D1X_pedestal", "rawEventReader->getD1X() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *D1Y_pedestal = new TH1F("D1Y_pedestal", "rawEventReader->getD1Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *D2X_pedestal = new TH1F("D2X_pedestal", "rawEventReader->getD2X() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *D2Y_pedestal = new TH1F("D2Y_pedestal", "rawEventReader->getD2Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *D3X_pedestal = new TH1F("D3X_pedestal", "rawEventReader->getD3X() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *D3Y_pedestal = new TH1F("D3Y_pedestal", "rawEventReader->getD3Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
-         TH1F *Dia0_pedestal = new TH1F("Dia0_pedestal", "rawEventReader->getDia0() Pedestal value for each channel",diamond_adc_res+1,0,diamond_adc_res);
-         TH1F *Dia1_pedestal = new TH1F("Dia1_pedestal", "rawEventReader->getDia1() Pedestal value for each channel",diamond_adc_res+1,0,diamond_adc_res);
-            
-         //cout << "For Channel " << s << " RMS: " << Initial_D0X->GetRMSValues(s) << " Ped: " << Initial_D0X->GetPedValues(s) << endl;
-         PedIteration(D0X_pedestal, EA_D0X, Initial_D0X, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(D0Y_pedestal, EA_D0Y, Initial_D0Y, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(D1X_pedestal, EA_D1X, Initial_D1X, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(D1Y_pedestal, EA_D1Y, Initial_D1Y, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(D2X_pedestal, EA_D2X, Initial_D2X, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(D2Y_pedestal, EA_D2Y, Initial_D2Y, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(D3X_pedestal, EA_D3X, Initial_D3X, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(D3Y_pedestal, EA_D3Y, Initial_D3Y, s, settings->getSi_Pedestal_Hit_Factor());
-         PedIteration(Dia0_pedestal, EA_Dia0, Initial_Dia0, s, settings->getDi_Pedestal_Hit_Factor());
-         PedIteration(Dia1_pedestal, EA_Dia1, Initial_Dia1, s, settings->getDi_Pedestal_Hit_Factor());
 
-         delete D0X_pedestal;
-         delete D0Y_pedestal;
-         delete D1X_pedestal;
-         delete D1Y_pedestal;
-         delete D2X_pedestal;
-         delete D2Y_pedestal;
-         delete D3X_pedestal;
-         delete D3Y_pedestal;
-         delete Dia0_pedestal;
-         delete Dia1_pedestal;
-         D0X_pedestal = 0;
-         D0Y_pedestal = 0;
-         D1X_pedestal = 0;
-         D1Y_pedestal = 0;
-         D2X_pedestal = 0;
-         D2Y_pedestal = 0;
-         D3X_pedestal = 0;
-         D3Y_pedestal = 0;
-         Dia0_pedestal = 0;
-         Dia1_pedestal = 0;
-      }
-      
-      delete EA_D0X;
-      delete EA_D0Y;
-      delete EA_D1X;
-      delete EA_D1Y;
-      delete EA_D2X;
-      delete EA_D2Y;
-      delete EA_D3X;
-      delete EA_D3Y;
-      delete EA_Dia0;
-      delete EA_Dia1;
 
-      EA_D0X = 0;
-      EA_D0Y = 0;
-      EA_D1X = 0;
-      EA_D1Y = 0;
-      EA_D2X = 0;
-      EA_D2Y = 0;
-      EA_D3X = 0;
-      EA_D3Y = 0;
-      EA_Dia0 = 0;
-      EA_Dia1 = 0;
 
-   }
    for(Int_t i=0; i<128; i++)
    {
       //cout << "Channel: " << i << " Pedestal: " << Initial_Dia0->GetPedValues(i) << " RMS: " << Initial_Dia0->GetRMSValues(i) << endl;
@@ -992,7 +790,7 @@ void SlidingPedestal::Slide(Int_t NEvents, Int_t Initial_Event, Int_t hit_occupa
    vector< deque<Int_t> > Dia1buffer(256);
 
    //Buffer Filling should begin at the same starting event as the Initialization of the Pedestal
-   
+
    BufferFill(rawEventReader->D0X, Initial_D0X, &D0Xbuffer, Channel_Number, settings->getIter_Size(), settings->getSi_Pedestal_Hit_Factor(), Initial_Event);
    BufferFill(rawEventReader->D0Y, Initial_D0Y, &D0Ybuffer, Channel_Number, settings->getIter_Size(), settings->getSi_Pedestal_Hit_Factor(), Initial_Event);
    BufferFill(rawEventReader->D1X, Initial_D1X, &D1Xbuffer, Channel_Number, settings->getIter_Size(), settings->getSi_Pedestal_Hit_Factor(), Initial_Event);
@@ -1252,121 +1050,17 @@ if((settings->getDia_input()==1) && (settings->getDO_CMC()==1))
    TTrigger_Event New_Event;
    Int_t rmscount = 0;
    Int_t *prmscount = &rmscount;
-   Float_t Correction = 0;
+   CommonModeCorrection = 0;
 
    //store output pedestal subtracted data
    TFile *PedFile = new TFile(pedfilepath.str().c_str(),"recreate");
-   TTree *PedTree = new TTree("PedTree","A Tree for Pedestal Subtracted Data");
+   PedTree = new TTree("PedTree","A Tree for Pedestal Subtracted Data");
 //   PedTree->SetMaxTreeSize(8000000000); 
 //   PedTree->SetMaxTreeSize(Long64_t(TMath::Power(2,63))); // http://lists.healthgrid.org/archives/gate-users/2004-December/000396.html
    PedTree->SetMaxTreeSize(Long64_t(TMath::Power(2,45)));  // Gives ~1TB (actually 4TB) max file size
    //PedTree->Branch("EventBranch","PSEvent",&store_event,24000,0); //address must be address of a pointer to a stored event
    
-   //Event Header Branches
-   PedTree->Branch("RunNumber",&run_number,"RunNumber/i");
-   PedTree->Branch("EventNumber",&event_number,"EventNumber/i");
-   PedTree->Branch("StoreThreshold",&store_threshold,"StoreThreshold/F");
- //  PedTree->Branch("CMNEvent_flag",&CMNEvent_flag,"CMNEvent_flag/O");
-   PedTree->Branch("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag,"ZeroDivisorEvent_flag/O");
-   
-   //PedTree->Branch("EventNumber",&PedSubEvent.event_number,"EventNumber/i");
-   //PedTree->Branch("StoreThreshold",&PedSubEvent.store_threshold,"StoreThreshold/F");
-
-   //Telescope Data Branches
-   PedTree->Branch("D0X_NChannels",&Det_NChannels[0],"D0X_NChannels/i");
-   PedTree->Branch("D0Y_NChannels",&Det_NChannels[1],"D0Y_NChannels/i");
-   PedTree->Branch("D1X_NChannels",&Det_NChannels[2],"D1X_NChannels/i");
-   PedTree->Branch("D1Y_NChannels",&Det_NChannels[3],"D1Y_NChannels/i");
-   PedTree->Branch("D2X_NChannels",&Det_NChannels[4],"D2X_NChannels/i");
-   PedTree->Branch("D2Y_NChannels",&Det_NChannels[5],"D2Y_NChannels/i");
-   PedTree->Branch("D3X_NChannels",&Det_NChannels[6],"D3X_NChannels/i");
-   PedTree->Branch("D3Y_NChannels",&Det_NChannels[7],"D3Y_NChannels/i");
-   PedTree->Branch("Dia_NChannels",&Det_NChannels[8],"Dia_NChannels/i");
-   PedTree->Branch("D0X_Channels",&Det_Channels[0],"D0X_Channels[D0X_NChannels]/b");
-   PedTree->Branch("D0Y_Channels",&Det_Channels[1],"D0Y_Channels[D0Y_NChannels]/b");
-   PedTree->Branch("D1X_Channels",&Det_Channels[2],"D1X_Channels[D1X_NChannels]/b");
-   PedTree->Branch("D1Y_Channels",&Det_Channels[3],"D1Y_Channels[D1Y_NChannels]/b");
-   PedTree->Branch("D2X_Channels",&Det_Channels[4],"D2X_Channels[D2X_NChannels]/b");
-   PedTree->Branch("D2Y_Channels",&Det_Channels[5],"D2Y_Channels[D2Y_NChannels]/b");
-   PedTree->Branch("D3X_Channels",&Det_Channels[6],"D3X_Channels[D3X_NChannels]/b");
-   PedTree->Branch("D3Y_Channels",&Det_Channels[7],"D3Y_Channels[D3Y_NChannels]/b");
-   PedTree->Branch("Dia_Channels",&Det_Channels[8],"Dia_Channels[Dia_NChannels]/b");
-   PedTree->Branch("D0X_ADC",&Det_ADC[0],"D0X_ADC[D0X_NChannels]/b");
-   PedTree->Branch("D0Y_ADC",&Det_ADC[1],"D0Y_ADC[D0Y_NChannels]/b");
-   PedTree->Branch("D1X_ADC",&Det_ADC[2],"D1X_ADC[D1X_NChannels]/b");
-   PedTree->Branch("D1Y_ADC",&Det_ADC[3],"D1Y_ADC[D1Y_NChannels]/b");
-   PedTree->Branch("D2X_ADC",&Det_ADC[4],"D2X_ADC[D2X_NChannels]/b");
-   PedTree->Branch("D2Y_ADC",&Det_ADC[5],"D2Y_ADC[D2Y_NChannels]/b");
-   PedTree->Branch("D3X_ADC",&Det_ADC[6],"D3X_ADC[D3X_NChannels]/b");
-   PedTree->Branch("D3Y_ADC",&Det_ADC[7],"D3Y_ADC[D3Y_NChannels]/b");
-   PedTree->Branch("Dia_ADC",&Dia_ADC,"Dia_ADC[Dia_NChannels]/s");
-   PedTree->Branch("D0X_PedMean",&Det_PedMean[0],"D0X_PedMean[D0X_NChannels]/F");
-   PedTree->Branch("D0Y_PedMean",&Det_PedMean[1],"D0Y_PedMean[D0Y_NChannels]/F");
-   PedTree->Branch("D1X_PedMean",&Det_PedMean[2],"D1X_PedMean[D1X_NChannels]/F");
-   PedTree->Branch("D1Y_PedMean",&Det_PedMean[3],"D1Y_PedMean[D1Y_NChannels]/F");
-   PedTree->Branch("D2X_PedMean",&Det_PedMean[4],"D2X_PedMean[D2X_NChannels]/F");
-   PedTree->Branch("D2Y_PedMean",&Det_PedMean[5],"D2Y_PedMean[D2Y_NChannels]/F");
-   PedTree->Branch("D3X_PedMean",&Det_PedMean[6],"D3X_PedMean[D3X_NChannels]/F");
-   PedTree->Branch("D3Y_PedMean",&Det_PedMean[7],"D3Y_PedMean[D3Y_NChannels]/F");
-   PedTree->Branch("Dia_PedMean",&Det_PedMean[8],"Dia_PedMean[Dia_NChannels]/F");
-   PedTree->Branch("D0X_PedWidth",&Det_PedWidth[0],"D0X_PedWidth[D0X_NChannels]/F");
-   PedTree->Branch("D0Y_PedWidth",&Det_PedWidth[1],"D0Y_PedWidth[D0Y_NChannels]/F");
-   PedTree->Branch("D1X_PedWidth",&Det_PedWidth[2],"D1X_PedWidth[D1X_NChannels]/F");
-   PedTree->Branch("D1Y_PedWidth",&Det_PedWidth[3],"D1Y_PedWidth[D1Y_NChannels]/F");
-   PedTree->Branch("D2X_PedWidth",&Det_PedWidth[4],"D2X_PedWidth[D2X_NChannels]/F");
-   PedTree->Branch("D2Y_PedWidth",&Det_PedWidth[5],"D2Y_PedWidth[D2Y_NChannels]/F");
-   PedTree->Branch("D3X_PedWidth",&Det_PedWidth[6],"D3X_PedWidth[D3X_NChannels]/F");
-   PedTree->Branch("D3Y_PedWidth",&Det_PedWidth[7],"D3Y_PedWidth[D3Y_NChannels]/F");
-   PedTree->Branch("Dia_PedWidth",&Det_PedWidth[8],"Dia_PedWidth[Dia_NChannels]/F");
-	if(settings->getDO_CMC()==1)
-   {PedTree->Branch("CommonModeCorrection", &Correction,"CMN_Correction/F");}  
- /*
-   PedTree->Branch("rawEventReader->getD0X()_NChannels",&PedSubEvent.pedsub_detector_data[0].nchannels,"rawEventReader->getD0X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD0Y()_NChannels",&PedSubEvent.pedsub_detector_data[1].nchannels,"rawEventReader->getD0Y()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD1X()_NChannels",&PedSubEvent.pedsub_detector_data[2].nchannels,"rawEventReader->getD1X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD1Y()_NChannels",&PedSubEvent.pedsub_detector_data[3].nchannels,"rawEventReader->getD1Y()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD2X()_NChannels",&PedSubEvent.pedsub_detector_data[4].nchannels,"rawEventReader->getD2X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD2Y()_NChannels",&PedSubEvent.pedsub_detector_data[5].nchannels,"rawEventReader->getD2Y()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD3X()_NChannels",&PedSubEvent.pedsub_detector_data[6].nchannels,"rawEventReader->getD3X()_NChannels/i");
-   PedTree->Branch("rawEventReader->getD3Y()_NChannels",&PedSubEvent.pedsub_detector_data[7].nchannels,"rawEventReader->getD3Y()_NChannels/i");
-   PedTree->Branch("Dia_NChannels",&PedSubEvent.pedsub_detector_data[8].nchannels,"Dia_NChannels/i");
-   PedTree->Branch("rawEventReader->getD0X()_Channels",&PedSubEvent.pedsub_detector_data[0].channel,"rawEventReader->getD0X()_Channels[rawEventReader->getD0X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD0Y()_Channels",&PedSubEvent.pedsub_detector_data[1].channel,"rawEventReader->getD0Y()_Channels[rawEventReader->getD0Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1X()_Channels",&PedSubEvent.pedsub_detector_data[2].channel,"rawEventReader->getD1X()_Channels[rawEventReader->getD1X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1Y()_Channels",&PedSubEvent.pedsub_detector_data[3].channel,"rawEventReader->getD1Y()_Channels[rawEventReader->getD1Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2X()_Channels",&PedSubEvent.pedsub_detector_data[4].channel,"rawEventReader->getD2X()_Channels[rawEventReader->getD2X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2Y()_Channels",&PedSubEvent.pedsub_detector_data[5].channel,"rawEventReader->getD2Y()_Channels[rawEventReader->getD2Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3X()_Channels",&PedSubEvent.pedsub_detector_data[6].channel,"rawEventReader->getD3X()_Channels[rawEventReader->getD3X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3Y()_Channels",&PedSubEvent.pedsub_detector_data[7].channel,"rawEventReader->getD3Y()_Channels[rawEventReader->getD3Y()_NChannels]/b");
-   PedTree->Branch("Dia_Channels",&PedSubEvent.pedsub_detector_data[8].channel,"Dia_Channels[Dia_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD0X()_ADC",&PedSubEvent.pedsub_detector_data[0].adc,"rawEventReader->getD0X()_ADC[rawEventReader->getD0X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD0Y()_ADC",&PedSubEvent.pedsub_detector_data[1].adc,"rawEventReader->getD0Y()_ADC[rawEventReader->getD0Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1X()_ADC",&PedSubEvent.pedsub_detector_data[2].adc,"rawEventReader->getD1X()_ADC[rawEventReader->getD1X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD1Y()_ADC",&PedSubEvent.pedsub_detector_data[3].adc,"rawEventReader->getD1Y()_ADC[rawEventReader->getD1Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2X()_ADC",&PedSubEvent.pedsub_detector_data[4].adc,"rawEventReader->getD2X()_ADC[rawEventReader->getD2X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD2Y()_ADC",&PedSubEvent.pedsub_detector_data[5].adc,"rawEventReader->getD2Y()_ADC[rawEventReader->getD2Y()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3X()_ADC",&PedSubEvent.pedsub_detector_data[6].adc,"rawEventReader->getD3X()_ADC[rawEventReader->getD3X()_NChannels]/b");
-   PedTree->Branch("rawEventReader->getD3Y()_ADC",&PedSubEvent.pedsub_detector_data[7].adc,"rawEventReader->getD3Y()_ADC[rawEventReader->getD3Y()_NChannels]/b");
-   PedTree->Branch("Dia_ADC",&PedSubEvent.pedsub_detector_data[8].adc,"Dia_ADC[Dia_NChannels]/s");
-   PedTree->Branch("rawEventReader->getD0X()_PedMean",&PedSubEvent.pedsub_detector_data[0].pedmean,"rawEventReader->getD0X()_PedMean[rawEventReader->getD0X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD0Y()_PedMean",&PedSubEvent.pedsub_detector_data[1].pedmean,"rawEventReader->getD0Y()_PedMean[rawEventReader->getD0Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1X()_PedMean",&PedSubEvent.pedsub_detector_data[2].pedmean,"rawEventReader->getD1X()_PedMean[rawEventReader->getD1X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1Y()_PedMean",&PedSubEvent.pedsub_detector_data[3].pedmean,"rawEventReader->getD1Y()_PedMean[rawEventReader->getD1Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2X()_PedMean",&PedSubEvent.pedsub_detector_data[4].pedmean,"rawEventReader->getD2X()_PedMean[rawEventReader->getD2X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2Y()_PedMean",&PedSubEvent.pedsub_detector_data[5].pedmean,"rawEventReader->getD2Y()_PedMean[rawEventReader->getD2Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3X()_PedMean",&PedSubEvent.pedsub_detector_data[6].pedmean,"rawEventReader->getD3X()_PedMean[rawEventReader->getD3X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3Y()_PedMean",&PedSubEvent.pedsub_detector_data[7].pedmean,"rawEventReader->getD3Y()_PedMean[rawEventReader->getD3Y()_NChannels]/F");
-   PedTree->Branch("Dia_PedMean",&PedSubEvent.pedsub_detector_data[8].pedmean,"Dia_PedMean[Dia_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD0X()_PedWidth",&PedSubEvent.pedsub_detector_data[0].pedwidth,"rawEventReader->getD0X()_PedWidth[rawEventReader->getD0X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD0Y()_PedWidth",&PedSubEvent.pedsub_detector_data[1].pedwidth,"rawEventReader->getD0Y()_PedWidth[rawEventReader->getD0Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1X()_PedWidth",&PedSubEvent.pedsub_detector_data[2].pedwidth,"rawEventReader->getD1X()_PedWidth[rawEventReader->getD1X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD1Y()_PedWidth",&PedSubEvent.pedsub_detector_data[3].pedwidth,"rawEventReader->getD1Y()_PedWidth[rawEventReader->getD1Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2X()_PedWidth",&PedSubEvent.pedsub_detector_data[4].pedwidth,"rawEventReader->getD2X()_PedWidth[rawEventReader->getD2X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD2Y()_PedWidth",&PedSubEvent.pedsub_detector_data[5].pedwidth,"rawEventReader->getD2Y()_PedWidth[rawEventReader->getD2Y()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3X()_PedWidth",&PedSubEvent.pedsub_detector_data[6].pedwidth,"rawEventReader->getD3X()_PedWidth[rawEventReader->getD3X()_NChannels]/F");
-   PedTree->Branch("rawEventReader->getD3Y()_PedWidth",&PedSubEvent.pedsub_detector_data[7].pedwidth,"rawEventReader->getD3Y()_PedWidth[rawEventReader->getD3Y()_NChannels]/F");
-   PedTree->Branch("Dia_PedWidth",&PedSubEvent.pedsub_detector_data[8].pedwidth,"Dia_PedWidth[Dia_NChannels]/F");
-    */
+   SetBranches();
    
    ofstream pedestal_file("running_ped.txt");
    ofstream average_ped_file("average_ped.txt");
@@ -1697,7 +1391,7 @@ if(settings->getDO_CMC()==1)	{correction = (ps_sum_buffer)/divisor;}
 	if(settings->getDO_CMC()==1)
 	{
            correction = ps_sum_buffer/divisor;
-	   Correction = correction;
+	   CommonModeCorrection = correction;
 	   corr_dist->Fill(correction);
 	}
 	Events_Saved++;
@@ -3392,7 +3086,7 @@ if(settings->getDO_CMC()==1)	{correction = (ps_sum_buffer)/divisor;}
        HistogrammSaver::SaveCanvasPNG(DiamondChannelPedestalCanvas, png_file_char, (char*)DiamondChannelM[j]->GetName());
        if (settings->getZoomDiamondPlots()) {
          char DC_zoom[50];
-         for (Int_t i = 0; i < Event_Number; i += 100) {
+         for (Int_t i = 0; i < NEvents; i += 100) {
            DiamondChannelADC[j]->SetLineWidth(3);
            DiamondChannelADC[j]->SetMarkerStyle(21);
            DiamondChannelADC[j]->SetMarkerSize(0.4);
@@ -3496,7 +3190,7 @@ if(settings->getDO_CMC()==1)	{correction = (ps_sum_buffer)/divisor;}
 
     HistogrammSaver::SaveCanvasPNG(Hits2DCanvas, png_file_char, (char*)Hits2D->GetName());
     char H2D_zoom[50];
-    for (Int_t i = 0; i < Event_Number; i += 100) {
+    for (Int_t i = 0; i < NEvents; i += 100) {
       Hits2D->GetXaxis()->SetRangeUser(1500 + i, 1600 + i);
       Hits2D->GetXaxis()->SetNdivisions(20);
       Hits2D->Draw("colz");
@@ -3755,3 +3449,308 @@ if(settings->getDO_CMC()==1)	{correction = (ps_sum_buffer)/divisor;}
 //} //end of binary data read-in while loop
 
 
+void SlidingPedestal::SetBranches(){
+	//Event Header Branches
+	PedTree->Branch("RunNumber",&run_number,"RunNumber/i");
+	PedTree->Branch("EventNumber",&event_number,"EventNumber/i");
+	PedTree->Branch("StoreThreshold",&store_threshold,"StoreThreshold/F");
+	//  PedTree->Branch("CMNEvent_flag",&CMNEvent_flag,"CMNEvent_flag/O");
+	PedTree->Branch("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag,"ZeroDivisorEvent_flag/O");
+
+	//PedTree->Branch("EventNumber",&PedSubEvent.event_number,"EventNumber/i");
+	//PedTree->Branch("StoreThreshold",&PedSubEvent.store_threshold,"StoreThreshold/F");
+
+	//Telescope Data Branches
+	PedTree->Branch("D0X_NChannels",&Det_NChannels[0],"D0X_NChannels/i");
+	PedTree->Branch("D0Y_NChannels",&Det_NChannels[1],"D0Y_NChannels/i");
+	PedTree->Branch("D1X_NChannels",&Det_NChannels[2],"D1X_NChannels/i");
+	PedTree->Branch("D1Y_NChannels",&Det_NChannels[3],"D1Y_NChannels/i");
+	PedTree->Branch("D2X_NChannels",&Det_NChannels[4],"D2X_NChannels/i");
+	PedTree->Branch("D2Y_NChannels",&Det_NChannels[5],"D2Y_NChannels/i");
+	PedTree->Branch("D3X_NChannels",&Det_NChannels[6],"D3X_NChannels/i");
+	PedTree->Branch("D3Y_NChannels",&Det_NChannels[7],"D3Y_NChannels/i");
+	PedTree->Branch("Dia_NChannels",&Det_NChannels[8],"Dia_NChannels/i");
+	PedTree->Branch("D0X_Channels",&Det_Channels[0],"D0X_Channels[D0X_NChannels]/b");
+	PedTree->Branch("D0Y_Channels",&Det_Channels[1],"D0Y_Channels[D0Y_NChannels]/b");
+	PedTree->Branch("D1X_Channels",&Det_Channels[2],"D1X_Channels[D1X_NChannels]/b");
+	PedTree->Branch("D1Y_Channels",&Det_Channels[3],"D1Y_Channels[D1Y_NChannels]/b");
+	PedTree->Branch("D2X_Channels",&Det_Channels[4],"D2X_Channels[D2X_NChannels]/b");
+	PedTree->Branch("D2Y_Channels",&Det_Channels[5],"D2Y_Channels[D2Y_NChannels]/b");
+	PedTree->Branch("D3X_Channels",&Det_Channels[6],"D3X_Channels[D3X_NChannels]/b");
+	PedTree->Branch("D3Y_Channels",&Det_Channels[7],"D3Y_Channels[D3Y_NChannels]/b");
+	PedTree->Branch("Dia_Channels",&Det_Channels[8],"Dia_Channels[Dia_NChannels]/b");
+	PedTree->Branch("D0X_ADC",&Det_ADC[0],"D0X_ADC[D0X_NChannels]/b");
+	PedTree->Branch("D0Y_ADC",&Det_ADC[1],"D0Y_ADC[D0Y_NChannels]/b");
+	PedTree->Branch("D1X_ADC",&Det_ADC[2],"D1X_ADC[D1X_NChannels]/b");
+	PedTree->Branch("D1Y_ADC",&Det_ADC[3],"D1Y_ADC[D1Y_NChannels]/b");
+	PedTree->Branch("D2X_ADC",&Det_ADC[4],"D2X_ADC[D2X_NChannels]/b");
+	PedTree->Branch("D2Y_ADC",&Det_ADC[5],"D2Y_ADC[D2Y_NChannels]/b");
+	PedTree->Branch("D3X_ADC",&Det_ADC[6],"D3X_ADC[D3X_NChannels]/b");
+	PedTree->Branch("D3Y_ADC",&Det_ADC[7],"D3Y_ADC[D3Y_NChannels]/b");
+	PedTree->Branch("Dia_ADC",&Dia_ADC,"Dia_ADC[Dia_NChannels]/s");
+	PedTree->Branch("D0X_PedMean",&Det_PedMean[0],"D0X_PedMean[D0X_NChannels]/F");
+	PedTree->Branch("D0Y_PedMean",&Det_PedMean[1],"D0Y_PedMean[D0Y_NChannels]/F");
+	PedTree->Branch("D1X_PedMean",&Det_PedMean[2],"D1X_PedMean[D1X_NChannels]/F");
+	PedTree->Branch("D1Y_PedMean",&Det_PedMean[3],"D1Y_PedMean[D1Y_NChannels]/F");
+	PedTree->Branch("D2X_PedMean",&Det_PedMean[4],"D2X_PedMean[D2X_NChannels]/F");
+	PedTree->Branch("D2Y_PedMean",&Det_PedMean[5],"D2Y_PedMean[D2Y_NChannels]/F");
+	PedTree->Branch("D3X_PedMean",&Det_PedMean[6],"D3X_PedMean[D3X_NChannels]/F");
+	PedTree->Branch("D3Y_PedMean",&Det_PedMean[7],"D3Y_PedMean[D3Y_NChannels]/F");
+	PedTree->Branch("Dia_PedMean",&Det_PedMean[8],"Dia_PedMean[Dia_NChannels]/F");
+	PedTree->Branch("D0X_PedWidth",&Det_PedWidth[0],"D0X_PedWidth[D0X_NChannels]/F");
+	PedTree->Branch("D0Y_PedWidth",&Det_PedWidth[1],"D0Y_PedWidth[D0Y_NChannels]/F");
+	PedTree->Branch("D1X_PedWidth",&Det_PedWidth[2],"D1X_PedWidth[D1X_NChannels]/F");
+	PedTree->Branch("D1Y_PedWidth",&Det_PedWidth[3],"D1Y_PedWidth[D1Y_NChannels]/F");
+	PedTree->Branch("D2X_PedWidth",&Det_PedWidth[4],"D2X_PedWidth[D2X_NChannels]/F");
+	PedTree->Branch("D2Y_PedWidth",&Det_PedWidth[5],"D2Y_PedWidth[D2Y_NChannels]/F");
+	PedTree->Branch("D3X_PedWidth",&Det_PedWidth[6],"D3X_PedWidth[D3X_NChannels]/F");
+	PedTree->Branch("D3Y_PedWidth",&Det_PedWidth[7],"D3Y_PedWidth[D3Y_NChannels]/F");
+	PedTree->Branch("Dia_PedWidth",&Det_PedWidth[8],"Dia_PedWidth[Dia_NChannels]/F");
+	if(settings->getDO_CMC()==1)
+	{
+		PedTree->Branch("CommonModeCorrection", &CommonModeCorrection,"CMN_Correction/F");
+	}
+	 /*
+	   PedTree->Branch("rawEventReader->getD0X()_NChannels",&PedSubEvent.pedsub_detector_data[0].nchannels,"rawEventReader->getD0X()_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD0Y()_NChannels",&PedSubEvent.pedsub_detector_data[1].nchannels,"rawEventReader->getD0Y()_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD1X()_NChannels",&PedSubEvent.pedsub_detector_data[2].nchannels,"rawEventReader->getD1X()_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD1Y()_NChannels",&PedSubEvent.pedsub_detector_data[3].nchannels,"rawEventReader->getD1Y()_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD2X()_NChannels",&PedSubEvent.pedsub_detector_data[4].nchannels,"rawEventReader->getD2X()_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD2Y()_NChannels",&PedSubEvent.pedsub_detector_data[5].nchannels,"rawEventReader->getD2Y()_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD3X()_NChannels",&PedSubEvent.pedsub_detector_data[6].nchannels,"rawEventReader->getD3X()_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD3Y()_NChannels",&PedSubEvent.pedsub_detector_data[7].nchannels,"rawEventReader->getD3Y()_NChannels/i");
+	   PedTree->Branch("Dia_NChannels",&PedSubEvent.pedsub_detector_data[8].nchannels,"Dia_NChannels/i");
+	   PedTree->Branch("rawEventReader->getD0X()_Channels",&PedSubEvent.pedsub_detector_data[0].channel,"rawEventReader->getD0X()_Channels[rawEventReader->getD0X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD0Y()_Channels",&PedSubEvent.pedsub_detector_data[1].channel,"rawEventReader->getD0Y()_Channels[rawEventReader->getD0Y()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD1X()_Channels",&PedSubEvent.pedsub_detector_data[2].channel,"rawEventReader->getD1X()_Channels[rawEventReader->getD1X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD1Y()_Channels",&PedSubEvent.pedsub_detector_data[3].channel,"rawEventReader->getD1Y()_Channels[rawEventReader->getD1Y()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD2X()_Channels",&PedSubEvent.pedsub_detector_data[4].channel,"rawEventReader->getD2X()_Channels[rawEventReader->getD2X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD2Y()_Channels",&PedSubEvent.pedsub_detector_data[5].channel,"rawEventReader->getD2Y()_Channels[rawEventReader->getD2Y()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD3X()_Channels",&PedSubEvent.pedsub_detector_data[6].channel,"rawEventReader->getD3X()_Channels[rawEventReader->getD3X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD3Y()_Channels",&PedSubEvent.pedsub_detector_data[7].channel,"rawEventReader->getD3Y()_Channels[rawEventReader->getD3Y()_NChannels]/b");
+	   PedTree->Branch("Dia_Channels",&PedSubEvent.pedsub_detector_data[8].channel,"Dia_Channels[Dia_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD0X()_ADC",&PedSubEvent.pedsub_detector_data[0].adc,"rawEventReader->getD0X()_ADC[rawEventReader->getD0X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD0Y()_ADC",&PedSubEvent.pedsub_detector_data[1].adc,"rawEventReader->getD0Y()_ADC[rawEventReader->getD0Y()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD1X()_ADC",&PedSubEvent.pedsub_detector_data[2].adc,"rawEventReader->getD1X()_ADC[rawEventReader->getD1X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD1Y()_ADC",&PedSubEvent.pedsub_detector_data[3].adc,"rawEventReader->getD1Y()_ADC[rawEventReader->getD1Y()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD2X()_ADC",&PedSubEvent.pedsub_detector_data[4].adc,"rawEventReader->getD2X()_ADC[rawEventReader->getD2X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD2Y()_ADC",&PedSubEvent.pedsub_detector_data[5].adc,"rawEventReader->getD2Y()_ADC[rawEventReader->getD2Y()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD3X()_ADC",&PedSubEvent.pedsub_detector_data[6].adc,"rawEventReader->getD3X()_ADC[rawEventReader->getD3X()_NChannels]/b");
+	   PedTree->Branch("rawEventReader->getD3Y()_ADC",&PedSubEvent.pedsub_detector_data[7].adc,"rawEventReader->getD3Y()_ADC[rawEventReader->getD3Y()_NChannels]/b");
+	   PedTree->Branch("Dia_ADC",&PedSubEvent.pedsub_detector_data[8].adc,"Dia_ADC[Dia_NChannels]/s");
+	   PedTree->Branch("rawEventReader->getD0X()_PedMean",&PedSubEvent.pedsub_detector_data[0].pedmean,"rawEventReader->getD0X()_PedMean[rawEventReader->getD0X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD0Y()_PedMean",&PedSubEvent.pedsub_detector_data[1].pedmean,"rawEventReader->getD0Y()_PedMean[rawEventReader->getD0Y()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD1X()_PedMean",&PedSubEvent.pedsub_detector_data[2].pedmean,"rawEventReader->getD1X()_PedMean[rawEventReader->getD1X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD1Y()_PedMean",&PedSubEvent.pedsub_detector_data[3].pedmean,"rawEventReader->getD1Y()_PedMean[rawEventReader->getD1Y()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD2X()_PedMean",&PedSubEvent.pedsub_detector_data[4].pedmean,"rawEventReader->getD2X()_PedMean[rawEventReader->getD2X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD2Y()_PedMean",&PedSubEvent.pedsub_detector_data[5].pedmean,"rawEventReader->getD2Y()_PedMean[rawEventReader->getD2Y()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD3X()_PedMean",&PedSubEvent.pedsub_detector_data[6].pedmean,"rawEventReader->getD3X()_PedMean[rawEventReader->getD3X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD3Y()_PedMean",&PedSubEvent.pedsub_detector_data[7].pedmean,"rawEventReader->getD3Y()_PedMean[rawEventReader->getD3Y()_NChannels]/F");
+	   PedTree->Branch("Dia_PedMean",&PedSubEvent.pedsub_detector_data[8].pedmean,"Dia_PedMean[Dia_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD0X()_PedWidth",&PedSubEvent.pedsub_detector_data[0].pedwidth,"rawEventReader->getD0X()_PedWidth[rawEventReader->getD0X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD0Y()_PedWidth",&PedSubEvent.pedsub_detector_data[1].pedwidth,"rawEventReader->getD0Y()_PedWidth[rawEventReader->getD0Y()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD1X()_PedWidth",&PedSubEvent.pedsub_detector_data[2].pedwidth,"rawEventReader->getD1X()_PedWidth[rawEventReader->getD1X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD1Y()_PedWidth",&PedSubEvent.pedsub_detector_data[3].pedwidth,"rawEventReader->getD1Y()_PedWidth[rawEventReader->getD1Y()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD2X()_PedWidth",&PedSubEvent.pedsub_detector_data[4].pedwidth,"rawEventReader->getD2X()_PedWidth[rawEventReader->getD2X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD2Y()_PedWidth",&PedSubEvent.pedsub_detector_data[5].pedwidth,"rawEventReader->getD2Y()_PedWidth[rawEventReader->getD2Y()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD3X()_PedWidth",&PedSubEvent.pedsub_detector_data[6].pedwidth,"rawEventReader->getD3X()_PedWidth[rawEventReader->getD3X()_NChannels]/F");
+	   PedTree->Branch("rawEventReader->getD3Y()_PedWidth",&PedSubEvent.pedsub_detector_data[7].pedwidth,"rawEventReader->getD3Y()_PedWidth[rawEventReader->getD3Y()_NChannels]/F");
+	   PedTree->Branch("Dia_PedWidth",&PedSubEvent.pedsub_detector_data[8].pedwidth,"Dia_PedWidth[Dia_NChannels]/F");
+	    */
+}
+
+
+void SlidingPedestal::initialisePedestalHistograms(){
+
+	   //*** must change to reflect Iter_Size
+	   //*** also, when Iter_Size ~500+, must change BufferFill() to overflow less quickly
+	   //39.894228 = 100 / sqrt(2 pi)
+	   ostringstream TF1formula;
+	   TF1formula << settings->getIter_Size() << " * 0.39894228 / [1] * exp(-0.5 * ((x - [0]) / [1])**2)";
+	   normalizedGaus = new TF1("normalizedGaus", TF1formula.str().c_str());
+	   normalizedGaus->SetParName(0, "Mean");
+	   normalizedGaus->SetParName(1, "Sigma");
+	   normalizedGaus->SetParameter(0, 0);
+	   normalizedGaus->SetParameter(1, 1);
+	   normalizedGaus->SetParLimits(0, -100, 100);
+	   normalizedGaus->SetParLimits(1, 0, 100);
+	   //normalizedGaus->SetRange(-10, 10);
+	   //area normalized to 100
+
+	   if (settings->getMakeHits2D())
+		   Hits2D = new TH2I("Hits2D", "Hits and seeds;Event;Channel", NEvents, Initial_Event + settings->getIter_Size() - 0.5, Initial_Event + settings->getIter_Size() + NEvents - 0.5, 128, -0.5, 127.5);
+	   if (settings->getMakeHits2D())
+		   Noise2D = new TH2F("Noise2D", "Noise distribution per channel;Channel;Noise", 128, -0.5, 127.5, (int)(settings->getMaxNoise2D() * 10) + 1, -0.05, settings->getMaxNoise2D() + 0.05);
+
+	   if (settings->getPlotChannelOn() && settings->getPlottedChannel() < 256) {
+		   char BN_buffer[50];
+		   char hBN_title[50];
+
+		   for (Int_t i = 0; i < numberPlottedBufferNoiseHistos; i++) {
+			   plottedBufferEvents.push_back(Initial_Event + settings->getIter_Size() + NEvents * i / numberPlottedBufferNoiseHistos);
+			   cout<<"plottedBufferEvents["<<i<<"]="<<plottedBufferEvents[i]<<"\t"<<Initial_Event + settings->getIter_Size() + NEvents * i / numberPlottedBufferNoiseHistos<<endl;
+		   }
+
+		   for (Int_t i = 0; i < numberPlottedBufferNoiseHistos; i++) {
+			   sprintf(BN_buffer, "Buffer_Noise_%i", i);
+			   //sprintf(hBN_title, "Buffer Noise, Ch %u, Event %i", settings->getPlottedChannel(), plottedBufferEvents[i]);
+			   sprintf(hBN_title, "Buffer Noise, Ch %u, Event %i", settings->getPlottedChannel(), Initial_Event + settings->getIter_Size() + NEvents * i / numberPlottedBufferNoiseHistos);
+			   if(settings->getPlotDiamond()) {
+				   hBufferNoise.push_back(new TH1F(BN_buffer, hBN_title, 100, -50, 50));
+			   } else {
+				   hBufferNoise.push_back(new TH1F(BN_buffer, hBN_title, 20, -10, 10));
+			   }
+		   } // */
+	   }
+}
+
+//rad raw Events with rawEventReader,set data of planes to Event and oush Event in Events_deque
+void SlidingPedestal::readRawEvents(){
+	for(Int_t i=Initial_Event; i<(Initial_Event+settings->getIter_Size()); i++)  //Initialzation begins at the first event
+	   {
+	      rawEventReader->ReadRawEvent(i);
+	      TTrigger_Event Event;
+	      Event.SetD0X(rawEventReader->getD0X());
+	      Event.SetD0Y(rawEventReader->getD0Y());
+	      Event.SetD1X(rawEventReader->getD1X());
+	      Event.SetD1Y(rawEventReader->getD1Y());
+	      Event.SetD2X(rawEventReader->getD2X());
+	      Event.SetD2Y(rawEventReader->getD2Y());
+	      Event.SetD3X(rawEventReader->getD3X());
+	      Event.SetD3Y(rawEventReader->getD3Y());
+	      Event.SetDia0(rawEventReader->getDia0());
+	      Event.SetDia1(rawEventReader->getDia1());
+	      Events_deque.push_back(Event);
+	      //cout << i << "\t" << test_data.GetADC_value(161) << endl;
+	   }
+
+}
+
+
+void SlidingPedestal::DoPedestalIteration()
+{
+	   for(Int_t s=0; s<Channel_Number; s++) //loop over  # of channels in each detector
+	   {
+
+	      TEvent_Array *EA_D0X = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_D0Y = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_D1X = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_D1Y = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_D2X = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_D2Y = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_D3X = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_D3Y = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_Dia0 = new TEvent_Array(settings->getIter_Size());
+	      TEvent_Array *EA_Dia1 = new TEvent_Array(settings->getIter_Size());
+
+	      for(Int_t n=0; n<settings->getIter_Size(); n++)
+	      {
+	         int secretchan = 254;
+	         if(s==secretchan) cout<<n<<"\t";
+	         TTrigger_Event Event;
+	         Event = Events_deque[n];
+	         TDetector_Data Detector;
+	         Detector = Event.GetD0X();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D0X->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetD0Y();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D0Y->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetD1X();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D1X->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetD1Y();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D1Y->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetD2X();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D2X->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetD2Y();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D2Y->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetD3X();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D3X->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetD3Y();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_D3Y->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetDia0();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<"\t";
+	         EA_Dia0->SetChannelValue(Detector.GetADC_value(s),n);
+	         Detector = Event.GetDia1();
+	         if(s==secretchan) cout<<Detector.GetADC_value(s)<<endl;
+	         EA_Dia1->SetChannelValue(Detector.GetADC_value(s),n);
+
+	      }
+	      for(Int_t j=0; j<Iteration_Number; j++)
+	      {
+	         int silicon_adc_res = 255;
+	         int diamond_adc_res = 4095;
+	         TH1F *D0X_pedestal = new TH1F("D0X_pedestal", "DOX Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *D0Y_pedestal = new TH1F("D0Y_pedestal", "rawEventReader->getD0Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *D1X_pedestal = new TH1F("D1X_pedestal", "rawEventReader->getD1X() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *D1Y_pedestal = new TH1F("D1Y_pedestal", "rawEventReader->getD1Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *D2X_pedestal = new TH1F("D2X_pedestal", "rawEventReader->getD2X() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *D2Y_pedestal = new TH1F("D2Y_pedestal", "rawEventReader->getD2Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *D3X_pedestal = new TH1F("D3X_pedestal", "rawEventReader->getD3X() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *D3Y_pedestal = new TH1F("D3Y_pedestal", "rawEventReader->getD3Y() Pedestal value for each channel",silicon_adc_res+1,0,silicon_adc_res);
+	         TH1F *Dia0_pedestal = new TH1F("Dia0_pedestal", "rawEventReader->getDia0() Pedestal value for each channel",diamond_adc_res+1,0,diamond_adc_res);
+	         TH1F *Dia1_pedestal = new TH1F("Dia1_pedestal", "rawEventReader->getDia1() Pedestal value for each channel",diamond_adc_res+1,0,diamond_adc_res);
+
+	         PedIteration(D0X_pedestal, EA_D0X, Initial_D0X, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(D0Y_pedestal, EA_D0Y, Initial_D0Y, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(D1X_pedestal, EA_D1X, Initial_D1X, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(D1Y_pedestal, EA_D1Y, Initial_D1Y, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(D2X_pedestal, EA_D2X, Initial_D2X, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(D2Y_pedestal, EA_D2Y, Initial_D2Y, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(D3X_pedestal, EA_D3X, Initial_D3X, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(D3Y_pedestal, EA_D3Y, Initial_D3Y, s, settings->getSi_Pedestal_Hit_Factor());
+	         PedIteration(Dia0_pedestal, EA_Dia0, Initial_Dia0, s, settings->getDi_Pedestal_Hit_Factor());
+	         PedIteration(Dia1_pedestal, EA_Dia1, Initial_Dia1, s, settings->getDi_Pedestal_Hit_Factor());
+
+	         delete D0X_pedestal;
+	         delete D0Y_pedestal;
+	         delete D1X_pedestal;
+	         delete D1Y_pedestal;
+	         delete D2X_pedestal;
+	         delete D2Y_pedestal;
+	         delete D3X_pedestal;
+	         delete D3Y_pedestal;
+	         delete Dia0_pedestal;
+	         delete Dia1_pedestal;
+	         D0X_pedestal = 0;
+	         D0Y_pedestal = 0;
+	         D1X_pedestal = 0;
+	         D1Y_pedestal = 0;
+	         D2X_pedestal = 0;
+	         D2Y_pedestal = 0;
+	         D3X_pedestal = 0;
+	         D3Y_pedestal = 0;
+	         Dia0_pedestal = 0;
+	         Dia1_pedestal = 0;
+	      }
+
+	      delete EA_D0X;
+	      delete EA_D0Y;
+	      delete EA_D1X;
+	      delete EA_D1Y;
+	      delete EA_D2X;
+	      delete EA_D2Y;
+	      delete EA_D3X;
+	      delete EA_D3Y;
+	      delete EA_Dia0;
+	      delete EA_Dia1;
+
+	      EA_D0X = 0;
+	      EA_D0Y = 0;
+	      EA_D1X = 0;
+	      EA_D1Y = 0;
+	      EA_D2X = 0;
+	      EA_D2Y = 0;
+	      EA_D3X = 0;
+	      EA_D3Y = 0;
+	      EA_Dia0 = 0;
+	      EA_Dia1 = 0;
+
+	   }
+}

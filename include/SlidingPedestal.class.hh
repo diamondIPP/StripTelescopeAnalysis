@@ -87,7 +87,27 @@ class SlidingPedestal {
 //      //Note: Char variables do not need an endian swap routine because endianness is only effected at the byte level, and since the char is only 1 byte, a swaping routine does nothing.
 //      /********************Main Routine for Reading in Data, Swapping Endianness and Output ****/
 //      int ReadRawEvent(int EventNumber, bool verbose = 0);
+private:
+      Int_t Channel_Number;
+      Int_t Iteration_Number;
+      void SetBranches();
+      void readRawEvents();
+      deque<TTrigger_Event> Events_deque;
+      Int_t NEvents;
+      Int_t Initial_Event;
+      Int_t hit_occupancy;
 
+      void DoPedestalIteration();
+      TPed_and_RMS *Initial_D0X;
+      TPed_and_RMS *Initial_D0Y;
+      TPed_and_RMS *Initial_D1X;
+      TPed_and_RMS *Initial_D1Y;
+      TPed_and_RMS *Initial_D2X;
+      TPed_and_RMS *Initial_D2Y;
+      TPed_and_RMS *Initial_D3X;
+      TPed_and_RMS *Initial_D3Y;
+      TPed_and_RMS *Initial_Dia0;
+      TPed_and_RMS *Initial_Dia1;
 private:
       void initialiseDiamondHistogramms(Int_t EventNumber);
       TMultiGraph *DiamondChannelM[128];
@@ -114,6 +134,12 @@ private:
       TGraph *SingleChannelPedDown3[8][256];
       TGraph *SingleChannelPedDown5[8][256];
 
+
+
+      void initialisePedestalHistograms();
+      TH2I *Hits2D;
+      TH2F *Noise2D;
+      TF1 *normalizedGaus;
       void createPlotTag(Int_t NEvents);
       TDatime dateandtime;
       TPaveText *pt;
@@ -126,10 +152,12 @@ private:
       float store_threshold; // zero suppression to reduce amount of data stored
 
    private:
+      TTree *PedTree;
       TRawEventReader* rawEventReader;
       TSettings *settings;
 
       ChannelScreen Det_channel_screen[9];
+      Float_t CommonModeCorrection;
 
       //paths
       std::string plots_path;

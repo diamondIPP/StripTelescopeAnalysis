@@ -483,11 +483,13 @@ void TTransparentClustering::CalculateEffektiveHitPosition()
 {
 	// find biggest hit in diamond
 	eff_diamond_hit_channel = 0;
+	if(verbosity>=3)cout<<"."<<flush;
 	for (int j = 0; j < 128; j++) {
 		if (eventReader->getDia_ADC(j)-eventReader->getDet_PedMean(8,j) > (eventReader->getDia_ADC(eff_diamond_hit_channel)-eventReader->getDet_PedMean(8,eff_diamond_hit_channel))) {
 			eff_diamond_hit_channel = j;
 		}
 	}
+	if(verbosity>=3)cout<<"."<<flush;
 	// charge weighted effictive hit position (3 strips)ENABLED
 	if (true) {
 		Float_t q1,q2,q3;
@@ -496,6 +498,7 @@ void TTransparentClustering::CalculateEffektiveHitPosition()
 		q3 = eventReader->getDia_ADC(eff_diamond_hit_channel+1)-eventReader->getDet_PedMean(8,eff_diamond_hit_channel+1);
 		eff_diamond_hit_position = eff_diamond_hit_channel - q2/(q1+q2+q3) + q3/(q1+q2+q3);
 	}
+	if(verbosity>=3)cout<<"."<<flush;
 
 	// charge weighted effictive hit position (2 strips)DISABLED
 	if (false) {
@@ -513,7 +516,7 @@ void TTransparentClustering::CalculateEffektiveHitPosition()
 		}
 	}
 
-
+	if(verbosity>=3)cout<<"."<<flush;
 
 
 }
@@ -542,8 +545,6 @@ void TTransparentClustering::FillHistogramms(float charge_mean, float cluster_ad
 }
 
 void TTransparentClustering::PrintAlignment(){
-
-
 	cout << "D0: x offset: " << currentAlignment->GetXOffset(0) << "\ty offset: " << currentAlignment->GetYOffset(0) << "\tphix offset: " << currentAlignment->GetPhiXOffset(0) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(0) << endl;
 	cout << "D1: x offset: " << currentAlignment->GetXOffset(1) << "\ty offset: " << currentAlignment->GetYOffset(1) << "\tphix offset: " << currentAlignment->GetPhiXOffset(1) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(1) << endl;
 	cout << "D2: x offset: " << currentAlignment->GetXOffset(2) << "\ty offset: " << currentAlignment->GetYOffset(2) << "\tphix offset: " << currentAlignment->GetPhiXOffset(2) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(2) << endl;
