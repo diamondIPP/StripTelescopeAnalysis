@@ -56,22 +56,10 @@ void TTransparentClustering::MakeTransparentClustering()
 	chi2X = 0;
 	chi2Y = 0;
 
+	this->PrintAlignment();
+	this->initHistogramms();
 
-	cout << "D0: x offset: " << currentAlignment->GetXOffset(0) << "\ty offset: " << currentAlignment->GetYOffset(0) << "\tphix offset: " << currentAlignment->GetPhiXOffset(0) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(0) << endl;
-	cout << "D1: x offset: " << currentAlignment->GetXOffset(1) << "\ty offset: " << currentAlignment->GetYOffset(1) << "\tphix offset: " << currentAlignment->GetPhiXOffset(1) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(1) << endl;
-	cout << "D2: x offset: " << currentAlignment->GetXOffset(2) << "\ty offset: " << currentAlignment->GetYOffset(2) << "\tphix offset: " << currentAlignment->GetPhiXOffset(2) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(2) << endl;
-	cout << "D3: x offset: " << currentAlignment->GetXOffset(3) << "\ty offset: " << currentAlignment->GetYOffset(3) << "\tphix offset: " << currentAlignment->GetPhiXOffset(3) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(3) << endl;
-	cout << "D4: x offset: " << currentAlignment->GetXOffset(4) << "\ty offset: " << currentAlignment->GetYOffset(4) << "\tphix offset: " << currentAlignment->GetPhiXOffset(4) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(4) << endl;
-	cout << "silicon resolution: " << SiRes << endl;
-	cout << "diamond x offset: " << diamond_x_offset << endl;
-	cout << "diamond y offset: " << diamond_y_offset << endl;
-	cout << "diamond phi offset: " << diamond_phi_offset << endl;
-	cout << "diamond phi y offset: " << diamond_phi_y_offset << endl;
-	//cout << "diamond hit factor: " << settings->getDi_Cluster_Hit_Factor() << endl;
-
-	initHistogramms();
-
-	createEventNumberList();
+	this->createEventNumberList();
 
 
 	//Telescope Data Branches
@@ -128,7 +116,6 @@ void TTransparentClustering::MakeTransparentClustering()
 		if (verbosity>=3) cout << "eventReader->getEvent_number() = " << eventReader->getEvent_number() << endl;
 
 
-
 		CalculateEffektiveHitPosition();
 		// cluster diamond channels around estimated hit position
 		//		cout << " --" << endl;
@@ -153,8 +140,7 @@ void TTransparentClustering::MakeTransparentClustering()
 //		histo_transparentclustering_2Channel_PulseHeight->Fill(firstchannel_adc+secondchannel_adc);
 
 		if (verbosity>=3) cout << "clusters for track " << i << ":" <<endl;
-		Float_t charge_mean, charge_weighted_position, charge_weighted_2largest_position;
-		int dia_largest_hit, dia_second_largest_hit;
+		Float_t charge_mean;
 		// loop over different cluster sizes
 		for (int j = 0; j < 10; j++) {
 			cluster_adc = 0;
@@ -163,7 +149,6 @@ void TTransparentClustering::MakeTransparentClustering()
 			current_sign = sign;
 //			Float_t qtot = 0;
 			charge_mean = 0;
-			charge_weighted_position = 0;
 			dia_largest_hit = 0;
 			// sum adc for n channel cluster
 			for (int channel = 0; channel <= j; channel++) {
@@ -171,12 +156,10 @@ void TTransparentClustering::MakeTransparentClustering()
 				current_sign = (-1) * current_sign;
 				if (verbosity>=3) cout << current_channel;
 				if (verbosity>=3) if (channel < j) cout << ", ";
-				if (current_channel > 0 && current_channel < 128 /* && eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*eventReader->Det_PedWidth[8][current_channel]*/) {
+				if (current_channel > 0 && current_channel < 128){// /* && eventReader->Dia_ADC[current_channel]-eventReader->Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*eventReader->Det_PedWidth[8][current_channel]*/) {
 					cluster_adc = cluster_adc + eventReader->getDia_ADC(current_channel)-eventReader->getDet_PedMean(8,current_channel);
-					//					qtot += Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
 					charge_mean += (eventReader->getDia_ADC(current_channel)-eventReader->getDet_PedMean(8,current_channel)) * (current_channel+0.5);
-					//					cout << "Dia_ADC["<<current_channel<<"]-Det_PedMean[8]["<<current_channel<<"] = " << Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
-					//					cout << "\tcharge_mean = " << charge_mean << endl;
+
 					if (dia_largest_hit == 0 || (eventReader->getDia_ADC(current_channel)-eventReader->getDet_PedMean(8,current_channel)) > (eventReader->getDia_ADC(dia_largest_hit)-eventReader->getDet_PedMean(8,dia_largest_hit))) {
 						dia_second_largest_hit = dia_largest_hit;
 						dia_largest_hit = current_channel;
@@ -190,41 +173,23 @@ void TTransparentClustering::MakeTransparentClustering()
 					}//else (dia_largest_hit == 0 ||
 				}//IF 128>current_channel>0&&c
 				else {
-					cout<<"current_channel not between 0 and 128"<<endl;
+					if(verbosity >=4)cout<<"current_channel not between 0 and 128"<<endl;
 				}
 			}//end for channel
 			if(cluster_adc!=0){
-				charge_weighted_position = charge_mean / cluster_adc;
-				if (j == 9) {
-					Float_t q1,q2;
-					q1 = eventReader->getDia_ADC(dia_largest_hit)-eventReader->getDet_PedMean(8,dia_largest_hit);
-					q2 = eventReader->getDia_ADC(dia_second_largest_hit)-eventReader->getDet_PedMean(8,dia_second_largest_hit);
-					charge_weighted_2largest_position = 1/(q1+q2) * (q1*(Float_t)dia_largest_hit + q2*(Float_t)dia_second_largest_hit);
-					histo_transparentclustering_residuals_2largest_hits->Fill(charge_weighted_2largest_position + 0.5 - diamond_hit_position);
-					histo_transparentclustering_residuals_2largest_hits_scatter->Fill(charge_weighted_2largest_position + 0.5 - diamond_hit_position, diamond_hit_y_position);
-					histo_transparentclustering_2Channel_PulseHeight->Fill(q1+q2);
-				}
-				histo_transparentclustering_residuals[j]->Fill(charge_weighted_position - diamond_hit_position);
-				histo_transparentclustering_residuals_scatter[j]->Fill(charge_weighted_position - diamond_hit_position, diamond_hit_y_position);
-				histo_transparentclustering_residuals_largest_hit[j]->Fill(dia_largest_hit + 0.5 - diamond_hit_position);
-				histo_transparentclustering_residuals_largest_hit_scatter[j]->Fill(dia_largest_hit + 0.5 - diamond_hit_position, diamond_hit_y_position);
-				if (verbosity) cout << endl;
-				if (verbosity) cout << "total charge of " << j+1 << " strips: " << cluster_adc << "\tcharge_weighted_position: " << charge_weighted_position << endl;
-				if (verbosity) cout << "total charge of cluster: " << cluster_adc << endl;
-				if (verbosity) cout << "histo_transparentclustering_landau[" << j << "] address: " << histo_transparentclustering_landau[j] << endl;
+				FillHistogramms(charge_mean,cluster_adc,j);
 				if (current_channel <= 0 || current_channel >= 128) break;
-				histo_transparentclustering_landau[j]->Fill(cluster_adc);
 			}
 			else{
-				cout<<"cluster_adc == 0 ==> BREAK"<<endl;
+				cout<<"cluster_adc == 0 ==> next Event"<<endl;
 				continue;
 			}
 
 		} // end loop over cluster sizes
 	} // end loop over tracks
-
 	Float_t noise_multiple_channels = dianoise_sigma[1];
-
+	cout<<"\nDone with TransparentClustering."<<endl;
+	this->SaveHistogramms();
 }
 
 
@@ -307,6 +272,71 @@ void TTransparentClustering::setCurrentAlignment(TDetectorAlignment *currentAlig
     this->currentAlignment = currentAlignment;
 }
 
+
+
+
+
+
+void TTransparentClustering::SetSettings(TSettings *newSettings){
+	if (verbosity)cout<<"TTransparentClustering::SetSettings: getting Settings."<<flush;
+	if(settings!=NULL) delete settings;
+	settings = new TSettings(newSettings->getFileName());
+	if (verbosity)cout<<"...DONE."<<endl;
+}
+
+void TTransparentClustering::SetPlotsPath(string plotsPath){
+	plotsPath+="TransparentClustering/";
+	cout<<"TTransparentClustering::SetPlotsPath:\""<<plotsPath<<"\""<<endl;
+	histSaver->SetPlotsPath(plotsPath);
+}
+
+vector<TDiamondTrack> TTransparentClustering::getTracks() const
+{
+    return tracks;
+}
+
+void TTransparentClustering::setTracks(vector<TDiamondTrack> tracks){
+	if(verbosity)cout<< "TTransparentClustering::setTracks"<<endl;
+//	this->tracks.clear();
+//	for(int i=0;i<tracks.size();i++)
+//		this->tracks.push_back(tracks.at(i));
+	this->tracks=tracks;
+}
+
+Int_t TTransparentClustering::getVerbosity() const
+{
+    return verbosity;
+}
+
+void TTransparentClustering::setVerbosity(Int_t verbosity)
+{
+    this->verbosity = verbosity;
+}
+
+
+void TTransparentClustering::createEventNumberList()
+{
+	/*creating list of eventnumbers: event_numbers*/
+	if(verbosity) {
+		cout << "AlignmentClass::TransparentClustering::get Event numbers: "<<eventReader<<" ."<<flush;
+		cout<<eventReader->isOK()<<flush;
+		cout <<". "<< eventReader->GetEntries()<<endl;
+	}
+	event_numbers.clear();
+	for (int j = 0; j < eventReader->GetEntries(); j++) {
+
+		if(verbosity>=4) cout << "AlignmentClass::TransparentClustering::get Event"<<j<<flush;
+		if(!eventReader->GetEvent(j)) continue;
+		if(verbosity>=4) cout << " push back "<<flush;
+		event_numbers.push_back(eventReader->getEvent_number());
+		if(verbosity>=4) cout << " done. "<<endl;
+	}
+	if(verbosity>=3)cout<<"DONE"<<endl;
+
+}
+
+
+
 void TTransparentClustering::initHistogramms()
 {
 	if (verbosity) cout << "AlignmentClass::TransparentClustering::init histograms for transparent clustering.." << endl;
@@ -352,55 +382,6 @@ void TTransparentClustering::initHistogramms()
 
 
 
-
-
-
-
-void TTransparentClustering::SetSettings(TSettings *newSettings){
-	if (verbosity)cout<<"TTransparentClustering::SetSettings: getting Settings."<<flush;
-	if(settings!=NULL) delete settings;
-	settings = new TSettings(newSettings->getFileName());
-	if (verbosity)cout<<"...DONE."<<endl;
-}
-
-void TTransparentClustering::SetPlotsPath(string plotsPath){
-	histSaver->SetPlotsPath(plotsPath);
-}
-
-vector<TDiamondTrack> TTransparentClustering::getTracks() const
-{
-    return tracks;
-}
-
-void TTransparentClustering::setTracks(vector<TDiamondTrack> tracks){
-	if(verbosity)cout<< "TTransparentClustering::setTracks"<<endl;
-//	this->tracks.clear();
-//	for(int i=0;i<tracks.size();i++)
-//		this->tracks.push_back(tracks.at(i));
-	this->tracks=tracks;
-}
-
-void TTransparentClustering::createEventNumberList()
-{
-	/*creating list of eventnumbers: event_numbers*/
-	if(verbosity) {
-		cout << "AlignmentClass::TransparentClustering::get Event numbers: "<<eventReader<<" ."<<flush;
-		cout<<eventReader->isOK()<<flush;
-		cout <<". "<< eventReader->GetEntries()<<endl;
-	}
-	event_numbers.clear();
-	for (int j = 0; j < eventReader->GetEntries(); j++) {
-
-		if(verbosity>=4) cout << "AlignmentClass::TransparentClustering::get Event"<<j<<flush;
-		if(!eventReader->GetEvent(j)) continue;
-		if(verbosity>=4) cout << " push back "<<flush;
-		event_numbers.push_back(eventReader->getEvent_number());
-		if(verbosity>=4) cout << " done. "<<endl;
-	}
-	if(verbosity>=3)cout<<"DONE"<<endl;
-
-}
-
 void TTransparentClustering::LoadXYZPositions()
 {
 
@@ -416,16 +397,6 @@ void TTransparentClustering::LoadXYZPositions()
 		if (verbosity>=3) cout << det<<"\t" << currentAlignment->track_holder.GetD(det).GetX()<<"\t" << currentAlignment->track_holder.GetD(det).GetY()<<"\t" << currentAlignment->track_holder.GetD(det).GetZ() << endl;
 	}
 
-}
-
-Int_t TTransparentClustering::getVerbosity() const
-{
-    return verbosity;
-}
-
-void TTransparentClustering::setVerbosity(Int_t verbosity)
-{
-    this->verbosity = verbosity;
 }
 
 void TTransparentClustering::GetEffectiveDiamondPosition()
@@ -473,7 +444,8 @@ void TTransparentClustering::GetEffectiveDiamondPosition()
 
 void TTransparentClustering::SaveHistogramms()
 {
-
+	cout<<"Save Histograms"<<endl;
+	cout<<"\t"<<histSaver->GetPlotsPath()<<endl;
 	// save histograms
 	for (int i = 0; i < 10; i++) {
         histo_transparentclustering_landau_mean->SetBinContent(i+2,histo_transparentclustering_landau[i]->GetMean()); // plot pulse hight means into a histogram
@@ -486,23 +458,25 @@ void TTransparentClustering::SaveHistogramms()
 		histSaver->SaveHistogram(histo_transparentclustering_residuals_largest_hit[i],0);
 		histSaver->SaveHistogram(histo_transparentclustering_residuals_largest_hit_scatter[i]);
 	}
+	cout<<"."<<flush;
 	histSaver->SaveHistogram(histo_transparentclustering_residuals_2largest_hits,1);
 	histSaver->SaveHistogram(histo_transparentclustering_residuals_2largest_hits_scatter);
 	histo_transparentclustering_landau_mean->Scale(1/histo_transparentclustering_landau[9]->GetMean());
-
+	cout<<"."<<flush;
 	histSaver->SaveHistogram(histo_transparentclustering_chi2X);
 	histSaver->SaveHistogram(histo_transparentclustering_chi2Y);
 
 	histSaver->SaveHistogram(histo_transparentclustering_hitdiff,1);
-
+	cout<<"."<<flush;
 
     histSaver->SaveHistogram(histo_transparentclustering_landau_mean);
 	histSaver->SaveHistogram(histo_transparentclustering_SNR_vs_channel);
 	histSaver->SaveHistogram(histo_transparentclustering_eta);
 	//	histSaver->SaveHistogram(histo_transparentclustering_hitdiff);
+	cout<<"."<<flush;
     histSaver->SaveHistogram(histo_transparentclustering_hitdiff_scatter);
     histSaver->SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
-
+    cout<<"DONE"<<flush;
 }
 
 void TTransparentClustering::CalculateEffektiveHitPosition()
@@ -544,8 +518,43 @@ void TTransparentClustering::CalculateEffektiveHitPosition()
 
 }
 
+void TTransparentClustering::FillHistogramms(float charge_mean, float cluster_adc,int j){
+
+	float charge_weighted_position = charge_mean / cluster_adc;
+	if (j == 9) {
+		Float_t q1,q2;
+		q1 = eventReader->getDia_ADC(dia_largest_hit)-eventReader->getDet_PedMean(8,dia_largest_hit);
+		q2 = eventReader->getDia_ADC(dia_second_largest_hit)-eventReader->getDet_PedMean(8,dia_second_largest_hit);
+		float charge_weighted_2largest_position = 1/(q1+q2) * (q1*(Float_t)dia_largest_hit + q2*(Float_t)dia_second_largest_hit);
+		histo_transparentclustering_residuals_2largest_hits->Fill(charge_weighted_2largest_position + 0.5 - diamond_hit_position);
+		histo_transparentclustering_residuals_2largest_hits_scatter->Fill(charge_weighted_2largest_position + 0.5 - diamond_hit_position, diamond_hit_y_position);
+		histo_transparentclustering_2Channel_PulseHeight->Fill(q1+q2);
+	}
+	histo_transparentclustering_residuals[j]->Fill(charge_weighted_position - diamond_hit_position);
+	histo_transparentclustering_residuals_scatter[j]->Fill(charge_weighted_position - diamond_hit_position, diamond_hit_y_position);
+	histo_transparentclustering_residuals_largest_hit[j]->Fill(dia_largest_hit + 0.5 - diamond_hit_position);
+	histo_transparentclustering_residuals_largest_hit_scatter[j]->Fill(dia_largest_hit + 0.5 - diamond_hit_position, diamond_hit_y_position);
+	if (verbosity) cout << endl;
+	if (verbosity) cout << "total charge of " << j+1 << " strips: " << cluster_adc << "\tcharge_weighted_position: " << charge_weighted_position << endl;
+	if (verbosity) cout << "total charge of cluster: " << cluster_adc << endl;
+	if (verbosity) cout << "histo_transparentclustering_landau[" << j << "] address: " << histo_transparentclustering_landau[j] << endl;
+	histo_transparentclustering_landau[j]->Fill(cluster_adc);
+}
+
+void TTransparentClustering::PrintAlignment(){
 
 
+	cout << "D0: x offset: " << currentAlignment->GetXOffset(0) << "\ty offset: " << currentAlignment->GetYOffset(0) << "\tphix offset: " << currentAlignment->GetPhiXOffset(0) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(0) << endl;
+	cout << "D1: x offset: " << currentAlignment->GetXOffset(1) << "\ty offset: " << currentAlignment->GetYOffset(1) << "\tphix offset: " << currentAlignment->GetPhiXOffset(1) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(1) << endl;
+	cout << "D2: x offset: " << currentAlignment->GetXOffset(2) << "\ty offset: " << currentAlignment->GetYOffset(2) << "\tphix offset: " << currentAlignment->GetPhiXOffset(2) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(2) << endl;
+	cout << "D3: x offset: " << currentAlignment->GetXOffset(3) << "\ty offset: " << currentAlignment->GetYOffset(3) << "\tphix offset: " << currentAlignment->GetPhiXOffset(3) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(3) << endl;
+	cout << "D4: x offset: " << currentAlignment->GetXOffset(4) << "\ty offset: " << currentAlignment->GetYOffset(4) << "\tphix offset: " << currentAlignment->GetPhiXOffset(4) << "\tphiy offset: " << currentAlignment->GetPhiYOffset(4) << endl;
+	cout << "silicon resolution: " << SiRes << endl;
+	cout << "diamond x offset: " << diamond_x_offset << endl;
+	cout << "diamond y offset: " << diamond_y_offset << endl;
+	cout << "diamond phi offset: " << diamond_phi_offset << endl;
+	cout << "diamond phi y offset: " << diamond_phi_y_offset << endl;
+	//cout << "diamond hit factor: " << settings->getDi_Cluster_Hit_Factor() << endl;
 
-
+}
 

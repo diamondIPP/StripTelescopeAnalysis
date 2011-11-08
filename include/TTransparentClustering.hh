@@ -63,7 +63,6 @@ public:
     TDetectorAlignment *getCurrentAlignment() const;
     void setCurrentAlignment(TDetectorAlignment *currentAlignment);
 
-
 	void SetSettings(TSettings* settings);
 	void SetPlotsPath(std::string plotspath);
     vector<TDiamondTrack> getTracks() const;
@@ -76,6 +75,9 @@ private:
     void GetEffectiveDiamondPosition();
     void SaveHistogramms();
     void CalculateEffektiveHitPosition();
+    void FillHistogramms(float charge_mean, float cluster_adc,int j);
+    void PrintAlignment();
+	int dia_largest_hit, dia_second_largest_hit;
 private:
     TSettings *settings;
 	HistogrammSaver *histSaver;
@@ -105,6 +107,7 @@ private:
 	int eff_diamond_hit_channel;
 	Float_t chi2X;
 	Float_t chi2Y;
+	int nDiamondPlane;
 private:
     TH1F* histo_transparentclustering_landau[10];
     TH1F* histo_transparentclustering_landau_mean;

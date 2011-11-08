@@ -63,7 +63,7 @@ private:
 
 private:/**needed variables*/
 	TDetectorAlignment* align;
-
+	std::string plotsPath;
 	std::vector<TDiamondTrack> alignment_tracks;
 	std::vector<bool> alignment_tracks_mask;
 	std::vector<TDiamondTrack> alignment_tracks_fidcut;

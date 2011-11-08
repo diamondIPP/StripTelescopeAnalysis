@@ -25,6 +25,9 @@
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TF1.h"
+#include <sys/dir.h>
+#include <sys/dirent.h>
+#include <sys/stat.h>
 
 class HistogrammSaver {
 public:

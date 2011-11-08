@@ -50,10 +50,12 @@ void AlignmentClass::SetSettings(TSettings *newSettings){
 }
 
 void AlignmentClass::SetPlotsPath(string plotsPath){
-	histSaver->SetPlotsPath(plotsPath);
 	ostringstream plots_path_alignment, plots_path_alignment_CutFakeTracks;
+	this->plotsPath=plotsPath;
 	plots_path_alignment << plotsPath << "/alignment/";
 	plots_path_alignment_CutFakeTracks << plotsPath << "/alignment_CutFakeTracks/";
+
+	histSaver->SetPlotsPath(plots_path_alignment.str());
 	histSaverAlignment->SetPlotsPath(plots_path_alignment.str());
 	histSaverAlignmentFakedTracks->SetPlotsPath(plots_path_alignment_CutFakeTracks.str());
 }
@@ -911,7 +913,7 @@ void AlignmentClass::TransparentClustering2(vector<TDiamondTrack> & tracks, vect
 	myTransparentClustering->setDiamondPhiYOffset(align->GetPhiYOffset(3));
 	myTransparentClustering->setSiRes(align->GetSiResolution());
 	myTransparentClustering->SetSettings(settings);
-	myTransparentClustering->SetPlotsPath(histSaver->GetPlotsPath());//TODO: gegebenfalls anpassen dass alles in einen ordner TransparentClustering kommt
+	myTransparentClustering->SetPlotsPath(plotsPath);//TODO: gegebenfalls anpassen dass alles in einen ordner TransparentClustering kommt
 	myTransparentClustering->setTracks(tracks);
 	myTransparentClustering->setVerbosity(3);
 	myTransparentClustering->setCurrentAlignment(align);
