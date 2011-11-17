@@ -52,6 +52,7 @@ public:
 	TRawEventReader(Int_t runNumber);
 	virtual ~TRawEventReader();
 	int ReadRawEvent(int EventNumber, bool verbose = 0);
+	TDetector_Data getPlane(int det);
     TDetector_Data getD0X() const;
     void setD0X(TDetector_Data d0X);
     TDetector_Data getD0Y() const;
@@ -76,8 +77,9 @@ private:
     Int_t EventsPerFile;
     std::string current_rz_filename;
     ifstream current_rz_file;
-    Int_t run_number;
+    int run_number;
     RZEvent rzEvent;
+    int verbosity;
 public://TODO: Get them in the private area...
     TDetector_Data D0X;
     TDetector_Data D1X;

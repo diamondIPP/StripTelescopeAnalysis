@@ -682,12 +682,14 @@ void SlidingPedestal::createPlotTag(Int_t NEvents){
 	   pt->SetBorderSize(0); //Set Border to Zero
 	   pt->SetFillColor(0); //Set Fill to White
 }
+
+
+
 void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitOccupancy) {
 
 	this->NEvents=NumberOfEvents;
 	this->Initial_Event=InitialEvent;
 	this->hit_occupancy=HitOccupancy;
-   //Taylor
 
 	if (settings->getPlotChannelOn() && settings->getPlottedChannel() == 256) {
      cout << "Channel to be plotted (0 to 255): "<<endl;
@@ -695,9 +697,6 @@ void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitO
      cin >> a;
      settings->setPlottedChannel(a);
    }
-
-   //Int_t Event_Number = NEvents; // which did Taylor intend?
-   
 
    this->initialiseDiamondHistogramms(NEvents);
    this->initialisetSingleChannel2000plots(NEvents);
@@ -715,7 +714,6 @@ void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitO
    Float_t PedRMSForBufferStudy[128];
    TFile *PedRMSFile;
    TTree *PedRMSTree;
-   //end Taylor
 
    //Start Timer//
    TStopwatch Watch;
@@ -724,19 +722,8 @@ void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitO
 
    this->createPlotTag(NEvents);
 
-
    //Data is read in with function ReadRawEvent and stored as class member data
-
-
-
-
    //**********BEGINNING OF PEDESTAL CALC*******************************************//
-
-
-   //Int_t const Iter_Size = 100; //because of def of TEvent_Array in Event_Classes.h this cannot be more than 300
-
-   //Detector_Data test_data;
-
 
    this->initialisePedestalHistograms();
 
@@ -751,27 +738,6 @@ void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitO
    }
 
    this->readRawEvents();
-   
-
-   Initial_D0X = new TPed_and_RMS;
-   Initial_D0Y = new TPed_and_RMS;
-   Initial_D1X = new TPed_and_RMS;
-   Initial_D1Y = new TPed_and_RMS;
-   Initial_D2X = new TPed_and_RMS;
-   Initial_D2Y = new TPed_and_RMS;
-   Initial_D3X = new TPed_and_RMS;
-   Initial_D3Y = new TPed_and_RMS;
-   Initial_Dia0 = new TPed_and_RMS;
-   Initial_Dia1 = new TPed_and_RMS;
-
-
-
-
-   for(Int_t i=0; i<128; i++)
-   {
-      //cout << "Channel: " << i << " Pedestal: " << Initial_Dia0->GetPedValues(i) << " RMS: " << Initial_Dia0->GetRMSValues(i) << endl;
-   }
-   cout << endl << "Finished Initializing Pedestal and RMS..." << endl;
 
    Int_t size_scale[256];
    for(Int_t i=0; i<256; i++) {size_scale[i] = 0;}
@@ -816,7 +782,6 @@ void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitO
    PedRMSCalcFromBuffer(Dia1buffer, Initial_Dia1);
 
 
-   //Taylor
    if (settings->getPlotChannelOn() && settings->getPlottedChannel() < 256) {
     Float_t offset;
 
@@ -848,7 +813,8 @@ void SlidingPedestal::Slide(Int_t NumberOfEvents, Int_t InitialEvent, Int_t HitO
        hBufferNoise[0]->Fill(D0Xbuffer[settings->getPlottedChannel()][y] - pedD0X);
      }
     }
-   } //Taylor
+   }
+
 //Aysha commented out old CMN calculation and replaced Common_Mode_rawEventReader->getDia1()_Mean and Common_Mode_rawEventReader->getDia1()_Mean calculation with Raw_ADC_Mean calculation for RawADC vs Event graph ranges
 Double_t Raw_ADC_Mean = 0;
    for(Int_t i=0; i<(settings->getIter_Size()/5); i++)
@@ -3602,10 +3568,26 @@ void SlidingPedestal::initialisePedestalHistograms(){
 			   }
 		   } // */
 	   }
+
+
+
+	   Initial_D0X = new TPed_and_RMS;
+	   Initial_D0Y = new TPed_and_RMS;
+	   Initial_D1X = new TPed_and_RMS;
+	   Initial_D1Y = new TPed_and_RMS;
+	   Initial_D2X = new TPed_and_RMS;
+	   Initial_D2Y = new TPed_and_RMS;
+	   Initial_D3X = new TPed_and_RMS;
+	   Initial_D3Y = new TPed_and_RMS;
+	   Initial_Dia0 = new TPed_and_RMS;
+	   Initial_Dia1 = new TPed_and_RMS;
+	   cout << endl << "Finished Initializing Pedestal and RMS..." << endl;
+
 }
 
 //rad raw Events with rawEventReader,set data of planes to Event and oush Event in Events_deque
 void SlidingPedestal::readRawEvents(){
+	cout<<"SlidingPedestal::read Raw Events..."<<flush;
 	for(Int_t i=Initial_Event; i<(Initial_Event+settings->getIter_Size()); i++)  //Initialzation begins at the first event
 	   {
 	      rawEventReader->ReadRawEvent(i);
@@ -3623,6 +3605,7 @@ void SlidingPedestal::readRawEvents(){
 	      Events_deque.push_back(Event);
 	      //cout << i << "\t" << test_data.GetADC_value(161) << endl;
 	   }
+	cout<<"DONE"<<endl;
 
 }
 

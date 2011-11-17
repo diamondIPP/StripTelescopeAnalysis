@@ -9,9 +9,11 @@
 //#include "Clustering.class.cpp"
 #include "SlidingPedestal.class.hh"
 #include "Clustering.class.hh"
-
+#include "TRawEventSaver.hh"
+#include "TPedestalCalculation.hh"
 #include "diamondAnalysis.h"
 #include "time.h"
+#include "TSystem.h"
 
 using namespace std;
 /*** USAGE ***/
@@ -66,7 +68,8 @@ int main(int argc, char ** argv) {
 	cout << "starting main loop.." << endl;
 	initVariables();
 	RunListOK = ReadRunList();
-	
+	TSystem* sys = gSystem;
+	std::string currentDir = sys->pwd();
 	cout << "Runnumbers ";
 	for (int i = 0; i < RunParameters.size(); i++) {
 		cout << RunParameters[i].RunNumber;
@@ -109,47 +112,60 @@ int main(int argc, char ** argv) {
 		FILE *log;
 		
 //		log = freopen(logfilename.str().c_str(), "w", stdout);
-		
-		if (DO_SLIDINGPEDESTAL) {
-			cout << endl;
-			cout << "==> Starting SlidingPedestal.." << endl;
-			cout << "SlidingPedestal sl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\");" << endl;
-			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
-			cout << "sl.Slide(" << NEVENTS << "," << INITIAL_EVENT << "," << HIT_OCCUPANCY << ");" << endl;
-			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
-		}
-		cout << endl;
-		cout << "==> Starting Clustering.." << endl;
-		cout << "Clustering cl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\")" << endl;
-		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
-		cl.verbosity = VERBOSITY;
-		vector<FidCutRegion> FidCutRegions;
-		if (cl.getUseAutoFidCut()) {
-			cout << endl;
-			cout << "==> Starting AutoFidCut.." << endl;
-			cout << "cl.AutoFidCut()" << endl;
-			cl.AutoFidCut();
-			if (FidCutRegions.size() == 0) cl.setUseAutoFidCut(false);
-		}
-		if (FidCutRegions.size() > 0 && cl.getUseAutoFidCut()) {
-			for (int reg = 0; reg < FidCutRegions.size(); reg++) {
-				cl.SetRunParameters(reg,FidCutRegions[reg],FidCutRegions.size()-1);
-				// TODO: set different paths for the plots
-				cout << "cl.ClusterRun(" << PLOTS << ");" << endl;
-				cl.ClusterRun(PLOTS);
-			}
-		}
-		else {
-			cl.setAlternativeClustering(ALTCLUSTERING);
-			if (DO_ALIGNMENT) {
-				cout << "cl.Align(" << PLOTS << "," << CUTFAKETRACKS << ");" << endl;
-				cl.Alignment(PLOTS, CUTFAKETRACKS);
-			}
-			else {
-				cout << "cl.ClusterRun(" << PLOTS << ");" << endl;
-				cl.ClusterRun(PLOTS);
-			}
-		}
+
+		//Save Events to RUNNUMBER/rawDATA.RUNNUMBER.root
+		TRawEventSaver *eventSaver;
+		eventSaver = new TRawEventSaver(RUNNUMBER);
+		eventSaver->saveEvents(NEVENTS);
+		delete eventSaver;
+
+		//Calculate Pedestal
+		sys->cd(currentDir.c_str());
+		TPedestalCalculation* pedestalCalculation;
+		pedestalCalculation = new TPedestalCalculation(RUNNUMBER);
+		pedestalCalculation->calculatePedestals();
+		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
+		delete pedestalCalculation;
+//		if (DO_SLIDINGPEDESTAL) {
+//			cout << endl;
+//			cout << "==> Starting SlidingPedestal.." << endl;
+//			cout << "SlidingPedestal sl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\");" << endl;
+//			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
+//			cout << "sl.Slide(" << NEVENTS << "," << INITIAL_EVENT << "," << HIT_OCCUPANCY << ");" << endl;
+//			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
+//		}
+//		cout << endl;
+//		cout << "==> Starting Clustering.." << endl;
+//		cout << "Clustering cl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\")" << endl;
+//		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
+//		cl.verbosity = VERBOSITY;
+//		vector<FidCutRegion> FidCutRegions;
+//		if (cl.getUseAutoFidCut()) {
+//			cout << endl;
+//			cout << "==> Starting AutoFidCut.." << endl;
+//			cout << "cl.AutoFidCut()" << endl;
+//			cl.AutoFidCut();
+//			if (FidCutRegions.size() == 0) cl.setUseAutoFidCut(false);
+//		}
+//		if (FidCutRegions.size() > 0 && cl.getUseAutoFidCut()) {
+//			for (int reg = 0; reg < FidCutRegions.size(); reg++) {
+//				cl.SetRunParameters(reg,FidCutRegions[reg],FidCutRegions.size()-1);
+//				// TODO: set different paths for the plots
+//				cout << "cl.ClusterRun(" << PLOTS << ");" << endl;
+//				cl.ClusterRun(PLOTS);
+//			}
+//		}
+//		else {
+//			cl.setAlternativeClustering(ALTCLUSTERING);
+//			if (DO_ALIGNMENT) {
+//				cout << "cl.Align(" << PLOTS << "," << CUTFAKETRACKS << ");" << endl;
+//				cl.Alignment(PLOTS, CUTFAKETRACKS);
+//			}
+//			else {
+//				cout << "cl.ClusterRun(" << PLOTS << ");" << endl;
+//				cl.ClusterRun(PLOTS);
+//			}
+//		}
 //	    fclose(log);	
 	}
 
@@ -164,6 +180,7 @@ void initVariables() {
 	PLOTS = 1;
 	ALTCLUSTERING = 0;
     VERBOSITY=0;
+
 }
 
 int ReadRunList() {

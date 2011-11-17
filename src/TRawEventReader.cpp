@@ -10,6 +10,7 @@
 
 TRawEventReader::TRawEventReader(Int_t runNumber) {
 	// TODO Auto-generated constructor stub
+	verbosity=0;
 	 EventsPerFile = 10000;
 	 this->run_number=runNumber;
 	 current_rz_filename="";
@@ -114,39 +115,6 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 	   {
 	      //NOTE: Realized that due to scrambling of the data (example 0x3615abcd written in header as 0x1536cdab)
 	      //and realizing that both silicon and diamond data is written down as 4-byte words, detectors should be
-	      //swapped as follows: 0->3, 1->2, 2->1, 0->3, 4->5, 5->4; the last two say that dia0->dia1 and dia1->dia0
-
-	      /*
-	      //Old way of mapping detectors
-	      D0X.ADC_values[255-i]=rzEvent.Input[4*i]; //The 0X and 2X detectors are actually physically flipped so we need to reverse the values with the program
-	      D1X.ADC_values[i]=rzEvent.Input[4*i+1];
-	      D2X.ADC_values[255-i]=rzEvent.Input[4*i+2];
-	      D3X.ADC_values[i]=rzEvent.Input[4*i+3];
-
-	      D0Y.ADC_values[i]=rzEvent.Input[4*i+1024];
-	      D1Y.ADC_values[i]=rzEvent.Input[4*i+1+1024];
-	      D2Y.ADC_values[i]=rzEvent.Input[4*i+2+1024];
-	      D3Y.ADC_values[i]=rzEvent.Input[4*i+3+1024];
-
-	      Dia0.ADC_values[i]=rzEvent.RD42[i*2];
-	      Dia1.ADC_values[i]=rzEvent.RD42[i*2+1];
-	      */
-	      /*
-	      //New way of mapping detectors
-	      D0X.ADC_values[255-i]=rzEvent.Input[4*i+3]; //The 0X and 2X detectors are actually physically flipped so we need to reverse the values with the program
-	      D1X.ADC_values[i]=rzEvent.Input[4*i+2];
-	      D2X.ADC_values[255-i]=rzEvent.Input[4*i+1];
-	      D3X.ADC_values[i]=rzEvent.Input[4*i];
-
-	      D0Y.ADC_values[i]=rzEvent.Input[4*i+3+1024];
-	      D1Y.ADC_values[i]=rzEvent.Input[4*i+2+1024];
-	      D2Y.ADC_values[i]=rzEvent.Input[4*i+1+1024];
-	      D3Y.ADC_values[i]=rzEvent.Input[4*i+1024];
-
-	      Dia0.ADC_values[i]=rzEvent.RD42[i*2+1];
-	      Dia1.ADC_values[i]=rzEvent.RD42[i*2];
-	      */
-
 
 	      //New way of mapping detectors
 	      D0X.ADC_values[i]=rzEvent.Input[4*i+3]; //The 1X and 3X detectors are actually physically flipped so we need to reverse the values with the program
@@ -161,27 +129,12 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 
 	      Dia0.ADC_values[i]=rzEvent.RD42[i*2+1];
 	      Dia1.ADC_values[i]=rzEvent.RD42[i*2];
-
-
-	      /*
-	      //Try reversing the inputs to see what happens to eta
-	      D0X.ADC_values[255-i]=rzEvent.Input[4*i+3]; //The 1X and 3X detectors are actually physically flipped so we need to reverse the values with the program
-	      D1X.ADC_values[i]=rzEvent.Input[4*i+2];
-	      D2X.ADC_values[255-i]=rzEvent.Input[4*i+1];
-	      D3X.ADC_values[i]=rzEvent.Input[4*i];
-
-	      D0Y.ADC_values[255-i]=rzEvent.Input[4*i+3+1024];
-	      D1Y.ADC_values[255-i]=rzEvent.Input[4*i+2+1024];
-	      D2Y.ADC_values[255-i]=rzEvent.Input[4*i+1+1024];
-	      D3Y.ADC_values[255-i]=rzEvent.Input[4*i+1024];
-
-	      Dia0.ADC_values[255-i]=rzEvent.RD42[i*2+1];
-	      Dia1.ADC_values[255-i]=rzEvent.RD42[i*2];
-	      */
+	      //if(i<20)cout<<rzEvent.RD42[i*2]<<" "<<Dia0.ADC_values[i]<<"  ";
 	   }
+	  // cout<<endl;
 
 	   //Memory Consistancy check. If The amounof Diamond memory is not 263 bytes worth, then this will output a non sensical number.
-	   if (EventNumber%1000 == 0)
+	   if (verbosity&&(EventNumber%1000 == 0))
 	   {
 	      cout << "For requested event " << EventNumber << ", the current value of EvTrig and EvPos is: " << rzEvent.EvTrig << " and " << rzEvent.EvPos << endl;
 	   }
@@ -283,6 +236,23 @@ void TRawEventReader::setD3Y(TDetector_Data d3Y)
 void TRawEventReader::setDia0(TDetector_Data dia0)
 {
     Dia0 = dia0;
+}
+
+TDetector_Data TRawEventReader::getPlane(int det)
+{
+	{
+		switch(det){
+			case 0: return D0X;break;
+			case 1: return D0Y;break;
+			case 2: return D1X;break;
+			case 3: return D1Y;break;
+			case 4: return D2X;break;
+			case 5: return D2Y;break;
+			case 6: return D3X;break;
+			case 7: return D3Y;break;
+			case 8: return Dia1;break;
+		}
+	}
 }
 
 void TRawEventReader::setDia1(TDetector_Data dia1)

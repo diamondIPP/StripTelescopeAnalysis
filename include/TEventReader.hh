@@ -1,12 +1,12 @@
 /*
- * TADCEvent.hh
+ * TEventReader.hh
  *
  *  Created on: 01.08.2011
  *      Author: Felix Bachmair
  */
 
-#ifndef TADCEVENT_H_
-#define TADCEVENT_H_
+#ifndef TEVENT_H_
+#define TEVENT_H_
 
 //C++ standard libraries
 #include <fstream>
@@ -18,11 +18,10 @@
 #include "TMath.h"
 #include "TTree.h"
 #include "TFile.h"
-#include "TKey.h"
-class TADCEventReader {
+class TEventReader {
 public:
-	TADCEventReader(std::string fileName);
-	virtual ~TADCEventReader();
+	TEventReader(std::string fileName);
+	virtual ~TEventReader();
 	bool GetNextEvent();
 	bool GetEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
@@ -41,27 +40,19 @@ public:
     Float_t getStore_threshold() const;
     UInt_t getVerbosity() const;
     bool getZeroDivisorEvent_flag() const;
-    TTree *getTree() const;
-    static std::string getStringForPlane(int i);
 
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
 	void initialiseTree();
-	int hasTree();
-	TObject* getTreeName();
 private:
 	UInt_t run_number;
 	UInt_t event_number;
 	Float_t store_threshold;
 //	bool CMNEvent_flag;
 	bool ZeroDivisorEvent_flag;
-	UInt_t Det_NChannels[9];
-	UChar_t Det_Channels[9][256];
 	UChar_t Det_ADC[8][256];
-	UShort_t Dia_ADC[128];
-	Float_t Det_PedMean[9][256];
-	Float_t Det_PedWidth[9][256];
+	UShort_t Dia_ADC[256];
 private:
 //is that needed?
 	TFile *file;
@@ -72,4 +63,4 @@ private:
 	UInt_t verbosity;
 };
 
-#endif /* TADCEVENT_H_ */
+#endif /* TEVENT_H_ */
