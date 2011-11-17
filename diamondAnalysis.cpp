@@ -122,7 +122,7 @@ int main(int argc, char ** argv) {
 		//Calculate Pedestal
 		sys->cd(currentDir.c_str());
 		TPedestalCalculation* pedestalCalculation;
-		pedestalCalculation = new TPedestalCalculation(RUNNUMBER);
+		pedestalCalculation = new TPedestalCalculation(RUNNUMBER,NEVENTS);
 		pedestalCalculation->calculatePedestals();
 		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 		delete pedestalCalculation;

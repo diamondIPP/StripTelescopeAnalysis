@@ -7,7 +7,7 @@
 
 #include "../include/TPedestalCalculation.hh"
 
-TPedestalCalculation::TPedestalCalculation(int runNumber) {
+TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
 	// TODO Auto-generated constructor stub
 	slidingLength=1000;
 	eventReader=NULL;
@@ -29,7 +29,7 @@ TPedestalCalculation::TPedestalCalculation(int runNumber) {
 	cout<<rawfilepath.str()<<endl;
 	eventReader=new TADCEventReader(rawfilepath.str());
 	cout<<eventReader->GetEntries()<<endl;
-	//createPedestalTree();
+	createPedestalTree(nEvents);
 }
 
 TPedestalCalculation::~TPedestalCalculation() {
@@ -81,11 +81,11 @@ void TPedestalCalculation::calculatePedestals(){
 
 void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
 	cout<<"calculate Sliding Pedestals"<<endl;
-	if(!createPedestalTree(nEvents)){
-		cout<<"PedestalFile and PedestalTree already exists and has enough events. No update needed..."<<endl;
+
+	if(pedestalTree->GetEntries()>=nEvents){
+		cout<<"NO Sliding PEdestal Calculation needed, calculations already done."<<endl;
 		return;
 	}
-
 	TStopwatch watch;
 	watch.Start(true);
 	//clear adcValues
@@ -304,16 +304,20 @@ bool TPedestalCalculation::createPedestalTree(int nEvents)
 		pedestalFile= new TFile(pedestalfilepath.str().c_str(),"CREATE");
 		pedestalFile->cd();
 	}
-	else
+	else{
 		createdNewFile=false;
+		cout<<"File exists"<<endl;
+	}
 	pedestalFile->cd();
 	stringstream treeDescription;
 	treeDescription<<"Pedestal Data of run "<<runNumber;
 	pedestalFile->GetObject("pedestalTree",pedestalTree);
 	if(pedestalTree!=NULL){
+		cout<<"File and Tree Exists... \t"<<flush;
 		if(pedestalTree->GetEntries()>=nEvents){
 			createdNewTree=false;
 			setBranchAdresses();
+			cout<<"tree has enough entries...."<<endl;
 			return false;
 		}
 		else{

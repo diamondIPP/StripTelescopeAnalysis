@@ -33,7 +33,7 @@ using namespace std;
 #define N_DIA_CHANNELS 128
 class TPedestalCalculation {
 public:
-	TPedestalCalculation(int runNumber);
+	TPedestalCalculation(int runNumber, int nEvents);
 	virtual ~TPedestalCalculation();
 	void calculatePedestals();
 	void calculateSlidingPedestals(int nEvents);
