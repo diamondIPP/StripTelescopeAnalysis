@@ -7,16 +7,15 @@
 
 #include "../include/TEventReader.hh"
 
-TEventReader::TEventReader(std::string filename) {
+TEventReader::TEventReader(std::string pathName) {
 	// TODO Auto-generated constructor stub
 	verbosity=0;
 	current_event = 0;
 	store_threshold = 2;
 	tree =NULL;
 	file=NULL;
-	/*run_number=RunNumber;
-	event_number=EventNumber;*/
-	SetTree(fileName);//tree);
+
+	SetTree(pathName);//tree);
 	initialiseTree();
 	if(!this->isOK()){
 		cout<<"TADCEventReader::TADCEventReader is not correctly initialized.. EXIT PROGRAM"<<endl;

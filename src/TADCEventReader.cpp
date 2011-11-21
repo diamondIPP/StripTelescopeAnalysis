@@ -8,7 +8,7 @@
 #include "TADCEventReader.hh"
 using namespace std;
 
-TADCEventReader::TADCEventReader(string fileName) {
+TADCEventReader::TADCEventReader(string FileName) {
 	verbosity=0;
 	current_event = 0;
 	store_threshold = 2;
@@ -16,7 +16,7 @@ TADCEventReader::TADCEventReader(string fileName) {
 	file=NULL;
 	/*run_number=RunNumber;
 	event_number=EventNumber;*/
-	SetTree(fileName);//tree);
+	SetTree(FileName);//tree);
 	initialiseTree();
 	if(!this->isOK()){
 		cout<<"TADCEventReader::TADCEventReader is not correctly initialized.. EXIT PROGRAM"<<endl;
@@ -24,6 +24,7 @@ TADCEventReader::TADCEventReader(string fileName) {
 	}
 	if (verbosity) cout<<"tree Entries():"<<tree->GetEntries()<<endl;
 	this->GetEvent(0);
+	this->fileName=FileName;
 }
 
 TADCEventReader::~TADCEventReader() {
@@ -116,6 +117,8 @@ void TADCEventReader::SetBranchAddresses(){
 	tree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
 	tree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
 	tree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
+	tree->SetBranchAddress("PedestalMean",&pedestalMean);
+	tree->SetBranchAddress("PedestalSigma",&pedestalSigma);
 }
 
 void TADCEventReader::initialiseTree(){
@@ -262,6 +265,21 @@ std::string TADCEventReader::getStringForPlane(int i)
 	}
 }
 
+TFile *TADCEventReader::getFile() const
+{
+	return this->file;
+}
+
+Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch)
+{
+	return this->pedestalMean[det][ch];
+}
+
+Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch)
+{
+	return this->pedestalSigma[det][ch];
+}
+
 TObject* TADCEventReader::getTreeName(){
 	cout<<"TADCEventReader::getTreeName:"<<endl;
 	if(file==NULL) exit(-1);
@@ -289,6 +307,9 @@ TTree *TADCEventReader::getTree() const
     return tree;
 }
 
+std::string TADCEventReader::getFilePath(){
+	return this->fileName;
+}
 
 
 

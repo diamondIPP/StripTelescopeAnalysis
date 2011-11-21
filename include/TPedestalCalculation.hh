@@ -35,10 +35,10 @@ class TPedestalCalculation {
 public:
 	TPedestalCalculation(int runNumber, int nEvents);
 	virtual ~TPedestalCalculation();
-	void calculatePedestals();
+	void calculatePedestals(int nEvents);
 	void calculateSlidingPedestals(int nEvents);
 private:
-	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<UShort_t> DiaAdcQueue[N_DIA_CHANNELS]);
+	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<UShort_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
 	pair <float,float> calculateFirstPedestalDet(int det,int ch, deque<UChar_t> adcQueue, float mean, float sigma, int iterations=6,float maxSigma=7);
 	pair <float,float> calculateFirstPedestalDia(int ch, deque<UShort_t> adcQueue, float mean, float sigma, int iterations=6,float maxSigma=7);
 	pair <float,float> checkPedestalDet(int det, int ch,int maxSigma=7);
@@ -53,7 +53,9 @@ private:
     TSystem* sys;
 	UInt_t runNumber;
 	Float_t pedestalMean[9][N_DET_CHANNELS];
+	Float_t diaPedestalMean[N_DIA_CHANNELS];
 	Float_t  pedestalSigma[9][N_DET_CHANNELS];
+	Float_t diaPedestalSigma[N_DIA_CHANNELS];
 	double sigmaValues[9][N_DET_CHANNELS];
 	double meanValues[9][N_DET_CHANNELS];
 	int slidingLength;
@@ -69,6 +71,7 @@ private:
 	ULong_t diaSUM2[N_DIA_CHANNELS];
 	int detEventsInSum[8][N_DET_CHANNELS];
 	int diaEventsInSum[N_DIA_CHANNELS];
+	stringstream rawfilepath;
 };
 
 #endif /* PEDESTALCALCULATION_HH_ */

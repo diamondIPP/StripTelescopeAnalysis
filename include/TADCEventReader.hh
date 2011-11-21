@@ -43,6 +43,10 @@ public:
     bool getZeroDivisorEvent_flag() const;
     TTree *getTree() const;
     static std::string getStringForPlane(int i);
+    TFile* getFile() const;
+    std::string getFilePath();
+    Float_t getPedestalMean(UInt_t det, UInt_t ch);
+    Float_t getPedestalSigma(UInt_t det, UInt_t ch);
 
 private:
 	void SetBranchAddresses();
@@ -51,6 +55,7 @@ private:
 	int hasTree();
 	TObject* getTreeName();
 private:
+	std::string fileName;
 	UInt_t run_number;
 	UInt_t event_number;
 	Float_t store_threshold;
@@ -62,6 +67,8 @@ private:
 	UShort_t Dia_ADC[128];
 	Float_t Det_PedMean[9][256];
 	Float_t Det_PedWidth[9][256];
+	Float_t pedestalMean[9][256];
+	Float_t pedestalSigma[9][256];
 private:
 //is that needed?
 	TFile *file;

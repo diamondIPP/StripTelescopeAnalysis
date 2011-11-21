@@ -9,7 +9,7 @@
 
 TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
 	// TODO Auto-generated constructor stub
-	slidingLength=1000;
+	slidingLength=2500;
 	eventReader=NULL;
 	pedestalTree=NULL;
 	pedestalFile=NULL;
@@ -22,7 +22,6 @@ TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
 
 	sys->cd(runString.str().c_str());
 
-	stringstream rawfilepath;
 	rawfilepath.str("");
 	rawfilepath<<"rawData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
@@ -34,15 +33,24 @@ TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
 
 TPedestalCalculation::~TPedestalCalculation() {
 	// TODO Auto-generated destructor stub
+
+	pedestalTree->AddFriend(eventReader->getTree()->GetName(),rawfilepath.str().c_str());
+	cout<<pedestalTree->GetListOfFriends()->GetEntries()<<endl;
 	delete eventReader;
 	pedestalFile->cd();
 	pedestalTree->Write();
 	pedestalTree->Delete();
 	pedestalFile->Close();
+	sys->cd("..");
+	cout<<"Closing TPedestalCalculation\n\n\n"<<endl;
 }
 
 
-void TPedestalCalculation::calculatePedestals(){
+void TPedestalCalculation::calculatePedestals(int nEvents){
+	if(pedestalTree->GetEntries()>=nEvents){
+		cout<<"NO Sliding PEdestal Calculation needed, calculations already done."<<endl;
+		return;
+	}
 	double meanSquared[9][256];
 	cout<<"initialise arrays"<<endl;
 	for(int det=0;det<9;det++)
@@ -81,13 +89,14 @@ void TPedestalCalculation::calculatePedestals(){
 
 void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
 	cout<<"calculate Sliding Pedestals"<<endl;
-
+	int MAXSIGMA = 3;
 	if(pedestalTree->GetEntries()>=nEvents){
 		cout<<"NO Sliding PEdestal Calculation needed, calculations already done."<<endl;
 		return;
 	}
 	TStopwatch watch;
 	watch.Start(true);
+
 	//clear adcValues
 	for(int det=0;det <8;det++){
 		for(int ch=0;ch<N_DET_CHANNELS;ch++){
@@ -98,7 +107,6 @@ void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
 		diaAdcValues[ch].clear();
 
 //	int nEvents=eventReader->GetEntries();
-	TRawEventSaver::showStatusBar(0,nEvents,true);
 
 	//initialise detAdcValues, diaAdcValues with values from rawTree
 	for(nEvent=0;nEvent<slidingLength;nEvent++){
@@ -112,7 +120,7 @@ void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
 			diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
 	}
 
-	calculateFirstPedestals(detAdcValues,diaAdcValues);
+	calculateFirstPedestals(detAdcValues,diaAdcValues,MAXSIGMA);
 
 	//save Sliding Pedestal Values for first slidingLength Events
 	for(nEvent=0;nEvent<slidingLength;nEvent++){
@@ -120,22 +128,20 @@ void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
 		pedestalTree->Fill();
 	}
 
-	TRawEventSaver::showStatusBar(slidingLength,nEvents,true);
 
 	//calculate sliding Pedestal Values for rest of Events and save them
-
-
 
 	for(nEvent=slidingLength;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		//Add next Event to detAdcValues, diaAdcValues
 		//Remove first Event from Queue
 		eventReader->GetEvent(nEvent);
+		//SILICON PLANES
 		for(int det=0;det <8;det++){
 			for(int ch=0;ch<N_DET_CHANNELS;ch++){
 				detAdcValues[det][ch].push_back(eventReader->getDet_ADC(det,ch));
 				pair<float,float> values;
-				values=	checkPedestalDet(det,ch);
+				values=	checkPedestalDet(det,ch,MAXSIGMA);
 				pedestalMean[det][ch]=values.first;
 				pedestalSigma[det][ch]=values.second;
 
@@ -143,11 +149,13 @@ void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
 				detAdcValues[det][ch].pop_front();
 			}
 		}
+
+		//DIAMOND PLANE
 		for(int ch=0;ch<N_DIA_CHANNELS;ch++){
 			diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
 
 			pair<float,float> values;
-			values = checkPedestalDia(ch);
+			values = checkPedestalDia(ch,MAXSIGMA);
 			pedestalMean[8][ch]=values.first;
 			pedestalSigma[8][ch]=values.second;
 
@@ -165,17 +173,19 @@ void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
 	watch.Print();
 }
 
-void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<UShort_t> DiaAdcQueue[N_DIA_CHANNELS]){
+void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<UShort_t> DiaAdcQueue[N_DIA_CHANNELS], int maxSigma){
 //	this->pedestalMean.clear();
 //	this->pedestalMean.resize(9);
 //	this->pedestalSigma.clear();
 //	this->pedestalSigma.resize(9);
+	cout<<"calculate Pedestal for the first "<<slidingLength<<" Entries..."<<endl;
 	for(int det=0;det <8;det++){
 //		pedestalMean.at(det).resize(N_DET_CHANNELS);
 //		pedestalSigma.at(det).resize(N_DET_CHANNELS);
 		for(int ch=0;ch<N_DET_CHANNELS;ch++){
+			TRawEventSaver::showStatusBar(256*det+ch,256*8,10);
 			pair<float,float> values;
-			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch]);
+			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,maxSigma);
 			pedestalMean[det][ch]=values.first;
 			pedestalSigma[det][ch]=values.second;
 //			pedestalMean.at(det).at(ch)=values.first;
@@ -184,10 +194,11 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 	}
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<float,float> values;
-		values=this->calculateFirstPedestalDia(ch,DiaAdcQueue[ch],meanValues[8][ch],sigmaValues[8][ch]);
+		values=this->calculateFirstPedestalDia(ch,DiaAdcQueue[ch],meanValues[8][ch],sigmaValues[8][ch],7,maxSigma);
 		pedestalMean[8][ch]=values.first;
 		pedestalSigma[8][ch]=values.second;
 	}
+	cout<<"\tDONE!"<<endl;
 }
 
 
@@ -240,26 +251,37 @@ pair<float,float> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxS
 		cout<<"detEventInUse has wrong length"<<detEventUsed[det][ch].size();
 	if(detAdcValues[det][ch].size()!=slidingLength+1)
 		cout<<"detAdcValues has wrong length..."<<detAdcValues[det][ch].size()<<endl;
+
+
 	float mean =this->detSUM[det][ch]/(float)this->detEventsInSum[det][ch];
 	float sigma=this->detSUM2[det][ch]/(float)this->detEventsInSum[det][ch]-mean*mean;
+
+//	if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)
+//		cout<<"\r"<<nEvent<<"\t"<<mean<<" +/- "<<sigma<<"\t"<<detSUM[det][ch]<<"\t"<<detSUM2[det][ch]<<"\t"<<(int)detAdcValues[det][ch].back()<<"\t"<<((detAdcValues[det][ch].back()<mean+sigma*maxSigma))<<flush;
+
+
+	//the sum is calculated  from events 0-slidingLength-1
 	if(this->detEventUsed[det][ch].front()){
-		this->detSUM[det][ch]-=this->detAdcValues[det][ch].front();
-		this->detSUM2[det][ch]-=this->detAdcValues[det][ch].front()*this->detAdcValues[det][ch].front();
+//		if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<"det in use remove"<<(int)detAdcValues[det][ch].front()<<" "<<flush;
+		this->detSUM[det][ch]-=(ULong_t)this->detAdcValues[det][ch].front();
+		this->detSUM2[det][ch]-=(ULong_t)this->detAdcValues[det][ch].front()*this->detAdcValues[det][ch].front();
 		this->detEventsInSum[det][ch]--;
 	}
-	if(detAdcValues[det][ch].back()<mean+sigma*maxSigma){
-		this->detSUM[det][ch]+=this->detAdcValues[det][ch].back();
-		this->detSUM2[det][ch]+=this->detAdcValues[det][ch].back()*this->detAdcValues[det][ch].back();
+	//now the sum is calculated from events 1-slidingLength-1
+	if(detAdcValues[det][ch].back()<mean+sigma*maxSigma&&detAdcValues[det][ch].back()>mean-sigma*maxSigma){
+//		if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<"new pedestalEvent "<<(int)detAdcValues[det][ch].back()<<" "<<flush;
+		this->detSUM[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back();
+		this->detSUM2[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back()*this->detAdcValues[det][ch].back();
 		this->detEventsInSum[det][ch]++;
 		this->detEventUsed[det][ch].push_back(true);
 	}
 	else
 		this->detEventUsed[det][ch].push_back(false);
-
+	//now the sum is calculated for events 1-slidingLength
 
 	mean =this->detSUM[det][ch]/(float)this->detEventsInSum[det][ch];
 	sigma=TMath::Sqrt(this->detSUM2[det][ch]/(float)this->detEventsInSum[det][ch]-mean*mean);
-
+//	if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<mean<<" "<<sigma<<" "<<detEventsInSum[det][ch]<<endl;
 	return make_pair(mean,sigma);
 }
 
@@ -273,7 +295,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 		this->diaSUM2[ch]-=this->diaAdcValues[ch].front()*this->diaAdcValues[ch].front();
 		this->diaEventsInSum[ch]--;
 	}
-	if(diaAdcValues[ch].back()<mean+sigma*maxSigma){
+	if(diaAdcValues[ch].back()<mean+sigma*maxSigma&&diaAdcValues[ch].back()>mean-sigma*maxSigma){
 		this->diaSUM[ch]+=this->diaAdcValues[ch].back();
 		this->diaSUM2[ch]+=this->diaAdcValues[ch].back()*this->diaAdcValues[ch].back();
 		this->diaEventsInSum[ch]++;

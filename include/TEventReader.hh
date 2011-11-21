@@ -20,7 +20,7 @@
 #include "TFile.h"
 class TEventReader {
 public:
-	TEventReader(std::string fileName);
+	TEventReader(std::string pathName, int runNumber);
 	virtual ~TEventReader();
 	bool GetNextEvent();
 	bool GetEvent(UInt_t EventNumber);
