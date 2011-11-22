@@ -48,7 +48,7 @@ TPedestalCalculation::~TPedestalCalculation() {
 
 void TPedestalCalculation::calculatePedestals(int nEvents){
 	if(pedestalTree->GetEntries()>=nEvents){
-		cout<<"NO Sliding PEdestal Calculation needed, calculations already done."<<endl;
+		cout<<"NO Sliding Pedestal Calculation needed, calculations already done."<<endl;
 		return;
 	}
 	double meanSquared[9][256];
@@ -63,26 +63,26 @@ void TPedestalCalculation::calculatePedestals(int nEvents){
 	/*
 	 * calulate Pedestal mean and sigma with trick: ped=<x> and sigma=<x^2>-<x>^2
 	 */
-	for(int event=0;event<eventReader->GetEntries();event++){
+	for(int event=0;event<nEvents;event++){
 		eventReader->GetEvent(event);
 		for(int det=0;det <8;det++){
 			for(int ch=0;ch<256;ch++){
-				meanValues[det][ch]+=eventReader->getDet_ADC(det,ch);
-				meanSquared[det][ch]+=eventReader->getDet_ADC(det,ch)*(int)eventReader->getDet_ADC(det,ch);
+				meanValues[det][ch]+=(int)eventReader->getDet_ADC(det,ch);
+				meanSquared[det][ch]+=(int)eventReader->getDet_ADC(det,ch)*(int)eventReader->getDet_ADC(det,ch);
 			}
 		}
 		for(int ch=0;ch<N_DIA_CHANNELS;ch++){
-			meanValues[8][ch]+=eventReader->getDia_ADC(ch);
-			meanSquared[8][ch]+=eventReader->getDia_ADC(ch)*eventReader->getDia_ADC(ch);
+			meanValues[8][ch]+=(int)eventReader->getDia_ADC(ch);
+			meanSquared[8][ch]+=(int)eventReader->getDia_ADC(ch)*(int)eventReader->getDia_ADC(ch);
 		}
 	}
 	for(int det=0;det<9;det++)
-	for(int ch=0;ch<N_DET_CHANNELS;ch++){
-		meanValues[det][ch]=meanValues[det][ch]/(double)eventReader->GetEntries();
-		meanSquared[det][ch]=meanSquared[det][ch]/(double)eventReader->GetEntries();
-		sigmaValues[det][ch]=meanSquared[det][ch]-meanValues[det][ch]*meanValues[det][ch];
-		sigmaValues[det][ch]=TMath::Sqrt(sigmaValues[det][ch]);
-	}
+		for(int ch=0;ch<N_DET_CHANNELS;ch++){
+			meanValues[det][ch]=meanValues[det][ch]/(double)nEvents;
+			meanSquared[det][ch]=meanSquared[det][ch]/(double)nEvents;
+			sigmaValues[det][ch]=meanSquared[det][ch]-meanValues[det][ch]*meanValues[det][ch];
+			sigmaValues[det][ch]=TMath::Sqrt(sigmaValues[det][ch]);
+		}
 	cout<<"DONE"<<endl;
 
 }
