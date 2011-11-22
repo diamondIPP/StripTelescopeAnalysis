@@ -19,6 +19,7 @@
 #include <vector>
 #include <utility>
 #include <deque>
+#include <algorithm>
 #include "TSystem.h"
 #include "TH1F.h"
 #include "TH1.h"
@@ -72,6 +73,7 @@ private:
 	int detEventsInSum[8][N_DET_CHANNELS];
 	int diaEventsInSum[N_DIA_CHANNELS];
 	stringstream rawfilepath;
+	int MAXSIGMA;
 };
 
 #endif /* PEDESTALCALCULATION_HH_ */

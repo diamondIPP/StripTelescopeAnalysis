@@ -1,6 +1,6 @@
 
 # define compile command
-ROOTCFLAGS  	:= -D_REENTRANT -pthread  $(shell root-config --cflags) 
+ROOTCFLAGS  	:=  $(shell root-config --cflags) 
 #-I$(ROOTSYS)/include
 ROOTLIBS    	:= $(shell root-config --libs)
 #-L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -pthread -Wl,-rpath,$(ROOTSYS)/lib -lm -ldl
@@ -13,9 +13,9 @@ CC 				:= g++
 SRCDIR          := src
 INCLUDEDIR      := include
 
-CFLAGS  		:= -g -Wno-deprecated -I$(INCLUDEDIR)
+CFLAGS  		:= -g -Wall -I$(INCLUDEDIR) -D_REENTRANT 
 CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS)
-LDFLAGS 		:= -L/usr/local/lib
+LDFLAGS 		:= -L/usr/local/lib $(ROOTLIBS) $(ROOTGLIBS)
 
 OBJ 			:= diamondAnalysis.cpp
 HEAD    		:= 
@@ -32,12 +32,12 @@ LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o Clustering.c
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o SlidingPedestal.class.o PSDetector.class.o PSEvent.class.o
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o AlignmentClass.o TADCEventReader.o
 LIBFILES		+=	TSettings.class.o TRawEventReader.o TTransparentClustering.o TRawEventSaver.o TPedestalCalculation.o TDeadChannels.o
-LIBFILES		+=  TClustering.o TCluster.o
+LIBFILES		+=  TClustering.o libTCluster.so
 
 PROGS			:= diamondAnalysis
 
 
-all: diamondAnalysis
+all: rootclean diamondAnalysis
 
 #all: $(OBJ) $(HEAD) makefile
 #	$(CC) $(CFLAGS) $(LDFLAGS) $(ROOTGLIBS) $(OBJ) -o diamondAnalysis 
@@ -52,6 +52,24 @@ $(PROGS):
         #
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
 
+libTCluster.so: TClusterDict.o TCluster.o 	
+		g++ -g -Wall -m64 -shared $(LDFLAGS) -o $@ $^
+ 
+ 
+ 
+TClusterDict.cpp: $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/TClusterLinkDef.h
+		#
+		# compiling $@
+		#
+		#echo $(ROOTSYS)/bin/rootcint -v $(CFLAGS) -f TClusterDict.cpp -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/LinkDef.h
+		$(ROOTSYS)/bin/rootcint -v  -f TClusterDict.cpp  -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/TClusterLinkDef.h
+
+TClusterDict.o: TClusterDict.cpp
+		#
+		#
+		#
+		g++ $(CFLAGS) -c -m64 -o $@ $<
+		
 %.o: $(SRCDIR)/%.cpp $(INCLUDEDIR)/%.hh
         #
         # compiling $@
@@ -62,6 +80,10 @@ $(PROGS):
         #
 
 
+
 clean:	
 	rm -fv *.o diamondAnalysis
+	
+rootclean:
+	rm -fv *Dict.*
 

@@ -15,11 +15,13 @@
 #include <iomanip>
 #include <sstream>
 #include "TSystem.h"
+#include "TObject.h"
 using namespace std;
-class TCluster {
+class TCluster :public TObject{
 public:
 	enum calculationMode_t {maxValue=1, chargeWeighted=2};
-	TCluster(int eventNumber,int seedSigma,int hitSigma);
+	TCluster(){numberOfSeeds=0;numberOfHits=0;seedSigma=0;seedSigma=10;hitSigma=7;isSaturated=false;isGoldenGate=false;};
+	TCluster(int eventNumber,int seedSigma=10,int hitSigma=7);
 	virtual ~TCluster();
 	void addChannel(int channel,Float_t signal,Float_t signalInSigma);
 	Float_t getPosition();
@@ -31,7 +33,7 @@ public:
 	void setPositionCalulation(calculationMode_t mode);
 	int size();
 
-	//whats up with eta?
+
 private:
 	deque< pair<int,Float_t> > cluster;
 	int numberOfSeeds;
@@ -40,6 +42,8 @@ private:
 	int hitSigma;
 	bool isSaturated;
 	bool isGoldenGate;
+	calculationMode_t mode;
+	ClassDef(TCluster,2);
 };
 
 #endif /* TCLUSTER_HH_ */

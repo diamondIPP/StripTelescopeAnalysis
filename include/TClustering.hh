@@ -47,6 +47,12 @@ private:
     int seedSigma;
     int hitSigma;
     int verbosity;
+    bool createClusterTree(int nEvents);
+    void setBranchAdresses();
+	stringstream  filepath;
+    TTree *clusterTree;
+    TFile *clusterFile;
+    int runNumber;
 };
 
 #endif /* TCLUSTERING_HH_ */

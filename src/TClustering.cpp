@@ -16,7 +16,6 @@ TClustering::TClustering(int runNumber,int seedSigma,int hitSigma) {
 	sys->MakeDirectory(runString.str().c_str());
 
 	sys->cd(runString.str().c_str());
-	stringstream  filepath;
 	filepath.str("");
 	filepath<<"pedestalData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
@@ -32,11 +31,16 @@ TClustering::TClustering(int runNumber,int seedSigma,int hitSigma) {
 	sys->cd("..");
 	this->seedSigma=seedSigma;
 	this->hitSigma=hitSigma;
+	this->runNumber=runNumber;
 	verbosity=0;
 }
 
 TClustering::~TClustering() {
 	// TODO Auto-generated destructor stub
+	if(clusterTree!=NULL){
+		clusterTree->AddFriend(eventReader->getTree()->GetName(),filepath.str().c_str());
+		cout<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
+	}
 	delete eventReader;
 	delete histSaver;
 	sys->cd("..");
@@ -44,6 +48,7 @@ TClustering::~TClustering() {
 
 void TClustering::ClusterEvents(int nEvents)
 {
+	if(!createClusterTree(nEvents)) return;
 	cout<<"\n\n******************************************\n";
 	cout<<    "**************Start Clustering...*********\n";
 	cout<<"******************************************\n\n"<<endl;
@@ -132,6 +137,58 @@ int TClustering::combineCluster(int det, int ch){
 	if(verbosity>2)cout<<"\tclusterSize: "<<cluster->size()<<endl;
 	return currentCh;
 }
+
+bool TClustering::createClusterTree(int nEvents)
+{
+	bool createdNewFile=false;
+	bool createdNewTree=false;
+	stringstream clusterfilepath;
+	clusterfilepath<<sys->pwd();
+	clusterfilepath<<"/clusterData."<<runNumber<<".root";
+	cout<<"Try to open \""<<clusterfilepath.str()<<"\""<<endl;
+	clusterFile=new TFile(clusterfilepath.str().c_str(),"READ");
+	if(clusterFile->IsZombie()){
+		cout<<"clusterfile does not exist, create new one..."<<endl;
+		createdNewFile =true;
+		clusterFile= new TFile(clusterfilepath.str().c_str(),"CREATE");
+		clusterFile->cd();
+	}
+	else{
+		createdNewFile=false;
+		cout<<"File exists"<<endl;
+	}
+	clusterFile->cd();
+	stringstream treeDescription;
+	treeDescription<<"Cluster Data of run "<<runNumber;
+	clusterFile->GetObject("clusterTree",clusterTree);
+	if(clusterTree!=NULL){
+		cout<<"File and Tree Exists... \t"<<flush;
+		if(clusterTree->GetEntries()>=nEvents){
+			createdNewTree=false;
+			cout<<"tree has enough entries...."<<endl;
+			return false;
+		}
+		else{
+			clusterTree->Delete();
+			clusterTree=NULL;
+		}
+	}
+	if(clusterTree==NULL){
+		clusterFile->Close();
+		clusterFile=new TFile(clusterfilepath.str().c_str(),"RECREATE");
+		this->clusterTree=new TTree("clusterTree",treeDescription.str().c_str());
+		createdNewTree=true;
+		cout<<"there exists no tree:\'clusterTree\"\tcreate new one."<<clusterTree<<endl;
+	}
+
+	return createdNewTree;
+}
+
+
+void TClustering::setBranchAdresses(){
+
+}
+
 
 
 

@@ -6,6 +6,7 @@
  */
 
 #include "../include/TCluster.hh"
+ClassImp(TCluster)
 
 TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma) {
 	// TODO Auto-generated constructor stub
@@ -28,8 +29,11 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma){
 		cerr<<"No valid channel added to cluster:"<<ch<<" "<<signal<<" "<<signalInSigma<<" "<<seedSigma<<" "<<hitSigma<<(signalInSigma>hitSigma)<<endl;
 		return;
 	}
-	cluster.push_back(make_pair(ch,signal));
+	//cluster.push_back(make_pair(ch,signal));
 
+}
+Float_t TCluster::getPosition(){
+	return 0;//todo;
 }
 
 int TCluster::size()
@@ -37,4 +41,25 @@ int TCluster::size()
 	return numberOfSeeds+numberOfHits;
 }
 
+void TCluster::clear(){
+	numberOfSeeds=0;
+	numberOfHits=0;
+	//cluster.clear();
+}
+bool TCluster::isLumpy(){
+	return false;//todo
+}
+bool TCluster::isGoldenGateCluster(){
+	return false; //todo
+}
+bool TCluster::hasSaturatedChannels(){
+	return false;//todo
+}
+Float_t TCluster::getCharge(){
+	return 0;//todo
+}
+
+void TCluster::setPositionCalulation(calculationMode_t mode){
+this->mode=mode;
+}
 
