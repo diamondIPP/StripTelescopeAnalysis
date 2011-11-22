@@ -12,6 +12,7 @@
 #include "TRawEventSaver.hh"
 #include "TPedestalCalculation.hh"
 #include "TDeadChannels.hh"
+#include "TClustering.hh"
 #include "diamondAnalysis.h"
 #include "time.h"
 #include "TSystem.h"
@@ -127,10 +128,15 @@ int main(int argc, char ** argv) {
 		pedestalCalculation->calculatePedestals(NEVENTS);
 		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 		delete pedestalCalculation;
-		TDeadChannels* deadChannels;
+		/*TDeadChannels* deadChannels;
 		deadChannels= new TDeadChannels(RUNNUMBER);
 		deadChannels->doAnalysis();
-		delete deadChannels;
+		delete deadChannels;*/
+		TClustering* clustering;
+		clustering=new TClustering(RUNNUMBER);
+		std::cout<<"cluster"<<endl;
+		clustering->ClusterEvents(NEVENTS);
+		delete clustering;
 //		if (DO_SLIDINGPEDESTAL) {
 //			cout << endl;
 //			cout << "==> Starting SlidingPedestal.." << endl;

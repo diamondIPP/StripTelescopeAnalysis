@@ -29,17 +29,24 @@ using namespace std;
 #include "HistogrammSaver.class.hh"
 
 #include "TADCEventReader.hh"
+#include "TCluster.hh"
+#define N_DET_CHANNELS 256
 class TClustering {
 public:
-	TClustering(int runNumber,int seedSigma,int hitSigma);
+	TClustering(int runNumber,int seedSigma=10,int hitSigma=7);
 	virtual ~TClustering();
+	void ClusterEvents(int nEvents);
 private:
+	void ClusterEvent();
+	int combineCluster(int det,int ch);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
+    vector<TCluster*> vecCluster;
     int nEvent;
     int seedSigma;
     int hitSigma;
+    int verbosity;
 };
 
 #endif /* TCLUSTERING_HH_ */
