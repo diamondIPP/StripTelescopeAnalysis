@@ -54,6 +54,7 @@ $(PROGS):
 
 libTCluster.so: TClusterDict.o TCluster.o 	
 		g++ -g -Wall -m64 -shared $(LDFLAGS) -o $@ $^
+		cp -rfv libTCluster.so ~/lib/ 
  
  
  

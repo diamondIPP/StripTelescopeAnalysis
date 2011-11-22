@@ -37,7 +37,7 @@ public:
 	TPedestalCalculation(int runNumber, int nEvents);
 	virtual ~TPedestalCalculation();
 	void calculatePedestals(int nEvents);
-	void calculateSlidingPedestals(int nEvents);
+	void calculateSlidingPedestals(UInt_t nEvents);
 private:
 	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<UShort_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
 	pair <float,float> calculateFirstPedestalDet(int det,int ch, deque<UChar_t> adcQueue, float mean, float sigma, int iterations=6,float maxSigma=7);
@@ -59,7 +59,7 @@ private:
 	Float_t diaPedestalSigma[N_DIA_CHANNELS];
 	double sigmaValues[9][N_DET_CHANNELS];
 	double meanValues[9][N_DET_CHANNELS];
-	int slidingLength;
+	UInt_t slidingLength;
 	deque<UChar_t> detAdcValues[8][N_DET_CHANNELS];
 	deque<UShort_t> diaAdcValues[N_DIA_CHANNELS];
 	deque<bool> detEventUsed[8][N_DET_CHANNELS];

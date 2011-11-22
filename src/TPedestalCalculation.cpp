@@ -88,7 +88,7 @@ void TPedestalCalculation::calculatePedestals(int nEvents){
 
 }
 
-void TPedestalCalculation::calculateSlidingPedestals(int nEvents){
+void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 	cout<<"calculate Sliding Pedestals"<<endl;
 
 	if(pedestalTree->GetEntries()>=nEvents){
@@ -186,7 +186,7 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 		for(int ch=0;ch<N_DET_CHANNELS;ch++){
 			TRawEventSaver::showStatusBar(256*det+ch,256*8,10);
 			pair<float,float> values;
-			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,maxSigma);
+			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,maxSigma);//7 iteration for first pedestal
 			pedestalMean[det][ch]=values.first;
 			pedestalSigma[det][ch]=values.second;
 //			pedestalMean.at(det).at(ch)=values.first;
@@ -195,7 +195,7 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 	}
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<float,float> values;
-		values=this->calculateFirstPedestalDia(ch,DiaAdcQueue[ch],meanValues[8][ch],sigmaValues[8][ch],7,maxSigma);
+		values=this->calculateFirstPedestalDia(ch,DiaAdcQueue[ch],meanValues[8][ch],sigmaValues[8][ch],7,maxSigma);//7 iterations for first pedestal
 		pedestalMean[8][ch]=values.first;
 		pedestalSigma[8][ch]=values.second;
 	}
@@ -209,7 +209,8 @@ pair <float,float> TPedestalCalculation::calculateFirstPedestalDet(int det,int c
 
 	this->detEventUsed[det][ch].clear();
 	for(nEvent=0;nEvent<adcQueue.size();nEvent++){
-		if(adcQueue.at(nEvent)>=meanChannel-max(sigmaChannel*maxSigma,(float)1.)&&adcQueue.at(nEvent)<=meanChannel+max(sigmaChannel*maxSigma,(float)1.)){
+		if(  ( (float)adcQueue.at(nEvent) >= meanChannel-(max(sigmaChannel*maxSigma,(float)1.)) )
+		   &&( (float)adcQueue.at(nEvent) <= meanChannel+(max(sigmaChannel*maxSigma,(float)1.)) ) ){
 			detEventUsed[det][ch].push_back(true);
 			detSUM[det][ch]+=adcQueue.at(nEvent);
 			detSUM2[det][ch]+=adcQueue.at(nEvent)*adcQueue.at(nEvent);
@@ -230,8 +231,9 @@ pair <float,float> TPedestalCalculation::calculateFirstPedestalDia(int ch,deque<
 	diaSUM2[ch]=0;
 	diaEventsInSum[ch]=0;
 	this->diaEventUsed[ch].clear();
-	for(int nEvent=0;nEvent<adcQueue.size();nEvent++){
-		if(adcQueue.at(nEvent)>=meanChannel-max(sigmaChannel*maxSigma,(float)1.)&&adcQueue.at(nEvent)<=meanChannel+max(sigmaChannel*maxSigma,(float)1.)){
+	for(UInt_t nEvent=0;nEvent<adcQueue.size();nEvent++){
+		if(   ((float)adcQueue.at(nEvent) >= (meanChannel-max(sigmaChannel*maxSigma,(float)1.)) )
+		   && ((float)adcQueue.at(nEvent) <= (meanChannel+max(sigmaChannel*maxSigma,(float)1.))) ){
 			diaEventUsed[ch].push_back(true);
 			diaSUM[ch]+=adcQueue.at(nEvent);
 			diaSUM2[ch]+=(adcQueue.at(nEvent)*adcQueue.at(nEvent));
@@ -265,14 +267,14 @@ pair<float,float> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxS
 	if(this->detEventUsed[det][ch].front()){
 //		if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<"det in use remove"<<(int)detAdcValues[det][ch].front()<<" "<<flush;
 		this->detSUM[det][ch]-=(ULong_t)this->detAdcValues[det][ch].front();
-		this->detSUM2[det][ch]-=(ULong_t)this->detAdcValues[det][ch].front()*this->detAdcValues[det][ch].front();
+		this->detSUM2[det][ch]-=(ULong_t)this->detAdcValues[det][ch].front()*(ULong_t)this->detAdcValues[det][ch].front();
 		this->detEventsInSum[det][ch]--;
 	}
 	//now the sum is calculated from events 1-slidingLength-1
-	if(detAdcValues[det][ch].back()<=mean+max(sigma*maxSigma,(float)1.)&&detAdcValues[det][ch].back()>=mean-max(sigma*maxSigma,(float)1.)){
+	if((float)detAdcValues[det][ch].back()<=mean+max(sigma*maxSigma,(float)1.)&&(float)detAdcValues[det][ch].back()>=mean-max(sigma*maxSigma,(float)1.)){
 //		if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<"new pedestalEvent "<<(int)detAdcValues[det][ch].back()<<" "<<flush;
 		this->detSUM[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back();
-		this->detSUM2[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back()*this->detAdcValues[det][ch].back();
+		this->detSUM2[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back()*(ULong_t)this->detAdcValues[det][ch].back();
 		this->detEventsInSum[det][ch]++;
 		this->detEventUsed[det][ch].push_back(true);
 	}
