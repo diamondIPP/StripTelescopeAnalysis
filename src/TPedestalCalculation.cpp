@@ -206,6 +206,7 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 pair <float,float> TPedestalCalculation::calculateFirstPedestalDet(int det,int ch,deque<UChar_t> adcQueue, float meanChannel, float sigmaChannel,int iterations,float maxSigma){
 	detSUM[det][ch]=0;
 	detSUM2[det][ch]=0;
+	detEventsInSum[det][ch]=0;
 
 	this->detEventUsed[det][ch].clear();
 	for(nEvent=0;nEvent<adcQueue.size();nEvent++){
