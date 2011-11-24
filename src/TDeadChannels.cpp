@@ -18,7 +18,7 @@ TDeadChannels::TDeadChannels(int runNumber,int seedSigma,int hitSigma) {
 	sys->cd(runString.str().c_str());
 	stringstream  filepath;
 	filepath.str("");
-	filepath<<"pedestalData."<<runNumber<<".root";
+	filepath<<"clusterData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<filepath.str()<<endl;
 	eventReader=new TADCEventReader(filepath.str());
@@ -33,6 +33,7 @@ TDeadChannels::TDeadChannels(int runNumber,int seedSigma,int hitSigma) {
 	initialiseHistos();
 	this->seedSigma=seedSigma;
 	this->hitSigma=hitSigma;
+	cout<<"end initialise"<<endl;
 }
 
 TDeadChannels::~TDeadChannels() {
@@ -43,14 +44,19 @@ TDeadChannels::~TDeadChannels() {
 }
 
 
-void TDeadChannels::doAnalysis()
+void TDeadChannels::doAnalysis(int nEvents)
 {
 	cout<<"find dead channels..."<<endl;
-	int nEvents=eventReader->GetEntries();
+	if(nEvents!=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->GetEvent(nEvent);
+		cout<<nEvent;
+		for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
+			for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
+			cout<<" "<<eventReader->getCluster()->at(det).at(cl).getChargeWeightedMean()<<flush;//*/
+		cout<<endl;
 		checkForDeadChannels();
 		checkForSaturatedChannels();
 	}

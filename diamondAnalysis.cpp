@@ -62,6 +62,7 @@ bool readInputs(int argc,char ** argv){
 		}
 
 	}
+	return true;
 }
 
 int main(int argc, char ** argv) {
@@ -73,7 +74,7 @@ int main(int argc, char ** argv) {
 	TSystem* sys = gSystem;
 	std::string currentDir = sys->pwd();
 	cout << "Runnumbers ";
-	for (int i = 0; i < RunParameters.size(); i++) {
+	for (unsigned int i = 0; i < RunParameters.size(); i++) {
 		cout << RunParameters[i].RunNumber;
 		if (i+1 < RunParameters.size()) cout << ", ";
 	}
@@ -83,7 +84,7 @@ int main(int argc, char ** argv) {
 	
 	/**Start with Analyising, read RunParameteres of the Run and start analysis with that parameters
 	*/
-	for (int i = 0; i < RunParameters.size(); i++) {
+	for (unsigned int i = 0; i < RunParameters.size(); i++) {
 		RunParameters[i].GetParameters();
 		cout << endl << endl << endl << endl;
 		cout << "====================================" << endl;
@@ -111,7 +112,7 @@ int main(int argc, char ** argv) {
 		ostringstream logfilename;
 		logfilename << "analyse_log_" << RUNNUMBER << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
 		
-		FILE *log;
+		//FILE *log;
 		
 //		log = freopen(logfilename.str().c_str(), "w", stdout);
 
@@ -128,15 +129,16 @@ int main(int argc, char ** argv) {
 		pedestalCalculation->calculatePedestals(NEVENTS);
 		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 		delete pedestalCalculation;
-		/*TDeadChannels* deadChannels;
-		deadChannels= new TDeadChannels(RUNNUMBER);
-		deadChannels->doAnalysis();
-		delete deadChannels;*/
+
 		TClustering* clustering;
 		clustering=new TClustering(RUNNUMBER);
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
+		TDeadChannels* deadChannels;
+		deadChannels= new TDeadChannels(RUNNUMBER);
+		deadChannels->doAnalysis(100);
+		delete deadChannels;//*/
 //		if (DO_SLIDINGPEDESTAL) {
 //			cout << endl;
 //			cout << "==> Starting SlidingPedestal.." << endl;
@@ -228,4 +230,5 @@ int ReadRunList() {
 		run.SetParameters();
 		RunParameters.push_back(run);
 	}
+	return 1;
 }

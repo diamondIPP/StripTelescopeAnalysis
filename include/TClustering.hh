@@ -36,7 +36,6 @@ using namespace std;
 class TClustering {
 
 public:
-	typedef  vector< vector<TCluster*> > vecvecTCluster;
 	TClustering(int runNumber,int seedSigma=10,int hitSigma=7);
 	virtual ~TClustering();
 	void ClusterEvents(int nEvents);
@@ -47,8 +46,12 @@ private:
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
-    vector<TCluster*> vecCluster;
-    vecvecTCluster vecvecCluster;
+    vector<TCluster> vecCluster[9];
+    vector< vector <UShort_t> > vecvecAdc[9];
+    vector< vector <Float_t> > vecvecSignal[9];
+    vector< vector <UInt_t> > vecvecChannel[9];
+    TCluster::vecvecTCluster vecvecCluster;
+    TCluster::vecvecTCluster* pVecvecCluster;
     int nEvent;
     int seedSigma;
     int hitSigma;

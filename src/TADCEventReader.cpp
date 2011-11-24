@@ -25,6 +25,7 @@ TADCEventReader::TADCEventReader(string FileName) {
 	if (verbosity) cout<<"tree Entries():"<<tree->GetEntries()<<endl;
 	this->GetEvent(0);
 	this->fileName=FileName;
+	pVecvecCluster=0;
 }
 
 TADCEventReader::~TADCEventReader() {
@@ -119,9 +120,13 @@ void TADCEventReader::SetBranchAddresses(){
 	tree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
 	tree->SetBranchAddress("PedestalMean",&pedestalMean);
 	tree->SetBranchAddress("PedestalSigma",&pedestalSigma);
+	tree->SetBranchAddress("clusters",&pVecvecCluster);
+	cout<<"DONE"<<endl;
+
 }
 
 void TADCEventReader::initialiseTree(){
+	cout<<"initialise tree"<<tree->GetEntries()<<endl;
 	current_event = 0;
 	tree->GetEvent(current_event);
 	cout<< "Loaded first event in PedTree: "<<event_number<<endl;
@@ -278,6 +283,12 @@ Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch)
 Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch)
 {
 	return this->pedestalSigma[det][ch];
+}
+
+TCluster::vecvecTCluster* TADCEventReader::getCluster() const
+{
+	//std::cout<<pVecvecCluster->size()<<std::endl;
+	return this->pVecvecCluster;
 }
 
 TObject* TADCEventReader::getTreeName(){

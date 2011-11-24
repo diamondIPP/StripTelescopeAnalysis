@@ -35,7 +35,7 @@ class TDeadChannels {
 public:
 	TDeadChannels(int runnumber,int seedSigma=10,int hitSigma=7);
 	virtual ~TDeadChannels();
-	void	doAnalysis();
+	void	doAnalysis(int nEvents=0);
 private:
 	void checkForDeadChannels();
 	void initialiseHistos();

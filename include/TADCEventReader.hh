@@ -19,6 +19,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TKey.h"
+#include "TCluster.hh"
 class TADCEventReader {
 public:
 	TADCEventReader(std::string fileName);
@@ -47,6 +48,7 @@ public:
     std::string getFilePath();
     Float_t getPedestalMean(UInt_t det, UInt_t ch);
     Float_t getPedestalSigma(UInt_t det, UInt_t ch);
+    TCluster::vecvecTCluster* getCluster() const;
 
 private:
 	void SetBranchAddresses();
@@ -69,6 +71,7 @@ private:
 	Float_t Det_PedWidth[9][256];
 	Float_t pedestalMean[9][256];
 	Float_t pedestalSigma[9][256];
+	TCluster::vecvecTCluster* pVecvecCluster;
 private:
 //is that needed?
 	TFile *file;
