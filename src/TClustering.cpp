@@ -34,7 +34,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	this->seedDetSigma=seedDetSigma;
 	this->hitDetSigma=hitDetSigma;
 	this->runNumber=runNumber;
-	verbosity=1;
+	verbosity=2;
 	this->maxDetAdcValue=255;
 	this->maxDiaAdcValue=4095;
 
@@ -107,9 +107,9 @@ void TClustering::clusterPlane(int det){
 	int maxChannels= (det==8)?N_DIA_CHANNELS:N_DET_CHANNELS;
 	for(int ch=0;ch<maxChannels;ch++){
 		Float_t sigma=eventReader->getPedestalSigma(det,ch);
-		Float_t signal = (Float_t)eventReader->getDet_ADC(det,ch)-eventReader->getPedestalMean(det,ch);
+		Float_t signal = (Float_t)eventReader->getAdcValue(det,ch)-eventReader->getPedestalMean(det,ch);
 		if(verbosity>2&&nEvent==0&&det==0&&ch<20)cout<<nEvent<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
-
+		//if(det==8)cout<<nEvent<<" # "<<det<<" # "<<ch<<" "<<signal<<" "<<sigma<<" "<<endl;
 		if(sigma==0){
 			if(verbosity>1)cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
 			continue;
@@ -123,15 +123,15 @@ void TClustering::clusterPlane(int det){
 			if(verbosity>2)cout<<"new channel no.:"<<ch<<endl;
 		}
 		if(det==8 && adcValueInSigma>this->seedDiaSigma){
-					//if(verbosity>2)cout<<"Found a Seed "<<nEvent<<" "<<det<<" "<<ch<<" "<<signal<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<flush;
-					ch=combineCluster(det,ch,this->maxDiaAdcValue);
-					if(verbosity>2)cout<<"new channel no.:"<<ch<<endl;
-				}
+			//cout<<"Found a DiaSeed "<<nEvent<<" "<<det<<" "<<ch<<" "<<signal<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<flush;
+			ch=combineCluster(det,ch,this->maxDiaAdcValue);
+			if(verbosity>2)cout<<"new channel no.:"<<ch<<endl;
+		}
 	}
-	if(verbosity>1){
+	if(verbosity>1&&det==8){
 		cout<<"Clustered Plane "<<det<<" with "<<nClusters[det]<<" "<<vecCluster[det].size()<<"with size: ";
 		for(unsigned int cl=0;cl<vecCluster[det].size();cl++)
-			cout<<" "<<vecCluster[det].at(cl).size();
+			cout<<" "<<vecCluster[det].at(cl).size()<<"/"<<vecCluster[det].at(cl).getCharge();
 		cout<<endl;
 	}
 }
@@ -156,7 +156,7 @@ void TClustering::clusterPlane(int det){
 int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	if(verbosity>2)cout<<"combine Cluster...start:"<<ch<<" ";
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
-	Float_t signal = (Float_t)eventReader->getDet_ADC(det,ch)-eventReader->getPedestalMean(det,ch);
+	Float_t signal = (Float_t)eventReader->getAdcValue(det,ch)-eventReader->getPedestalMean(det,ch);
 	Float_t adcValueInSigma=signal/sigma;
 
 	//create Cluster
@@ -176,12 +176,12 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	vector<UInt_t> vecChannel;
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>2)cout<<cluster.size()<<" ";
-	for(int currentCh=ch;adcValueInSigma>hitDetSigma&&currentCh>=0;currentCh--){
+	for(int currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0;currentCh--){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
-		signal = (Float_t)eventReader->getDet_ADC(det,currentCh)-eventReader->getPedestalMean(det,currentCh);
-		UShort_t adcValue=eventReader->getDet_ADC(det,currentCh);
+		UShort_t adcValue=eventReader->getAdcValue(det,currentCh);
+		signal = (Float_t)adcValue-eventReader->getPedestalMean(det,currentCh);
 		adcValueInSigma=signal/sigma;
-		if(sigma!=0&&adcValueInSigma>hitDetSigma){
+		if(sigma!=0&&adcValueInSigma>hitSigma){
 			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue);//todo add saturated
 		}
 		else{
@@ -193,13 +193,13 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	int currentCh;
 	for(currentCh=ch+1;currentCh<N_DET_CHANNELS;currentCh++){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
-		UShort_t adcValue=eventReader->getDet_ADC(det,currentCh);
+		UShort_t adcValue=eventReader->getAdcValue(det,currentCh);
 		if(sigma==0)cout<<"$";
 		signal = (Float_t)adcValue-eventReader->getPedestalMean(det,currentCh);
 		adcValueInSigma=signal/sigma;
-		if(sigma!=0&&adcValueInSigma>hitDetSigma&&sigma!=0){
+		if(sigma!=0&&adcValueInSigma>hitSigma&&sigma!=0){
 			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue);
-			vecAdc.push_back(eventReader->getDet_ADC(det,currentCh));
+			vecAdc.push_back(eventReader->getAdcValue(det,currentCh));
 			vecSignal.push_back(signal);
 			vecChannel.push_back(currentCh);
 		}

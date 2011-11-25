@@ -29,6 +29,7 @@ public:
 	Long64_t GetEntries();
 	bool isOK();
 //    bool getCMNEvent_flag() const;
+	UInt_t getAdcValue(UInt_t det,UInt_t ch);
     UInt_t getCurrent_event() const;
     UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
     UChar_t getDet_Channels(UInt_t i , UInt_t j) const;

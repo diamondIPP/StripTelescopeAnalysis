@@ -16,6 +16,7 @@
 #include "diamondAnalysis.h"
 #include "time.h"
 #include "TSystem.h"
+#include "TAlignment.hh"
 
 using namespace std;
 /*** USAGE ***/
@@ -135,10 +136,17 @@ int main(int argc, char ** argv) {
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
-		TDeadChannels* deadChannels;
-		deadChannels= new TDeadChannels(RUNNUMBER);
-		deadChannels->doAnalysis(100);
-		delete deadChannels;//*/
+
+//		TDeadChannels* deadChannels;
+//		deadChannels= new TDeadChannels(RUNNUMBER);
+//		deadChannels->doAnalysis(100);
+//		delete deadChannels;
+//
+		TAlignment *alignment;
+		alignment= new TAlignment(RUNNUMBER);
+		alignment->createVectors(NEVENTS);
+		delete alignment;
+		//*/
 //		if (DO_SLIDINGPEDESTAL) {
 //			cout << endl;
 //			cout << "==> Starting SlidingPedestal.." << endl;

@@ -43,7 +43,7 @@ private:
 	pair <float,float> calculateFirstPedestalDet(int det,int ch, deque<UChar_t> adcQueue, float mean, float sigma, int iterations=6,float maxSigma=7);
 	pair <float,float> calculateFirstPedestalDia(int ch, deque<UShort_t> adcQueue, float mean, float sigma, int iterations=6,float maxSigma=7);
 	pair <float,float> checkPedestalDet(int det, int ch,int maxSigma=7);
-	pair <float,float> checkPedestalDia(int ch,int maxSigma=7);
+	pair <float,float> checkPedestalDia(int ch,int maxSigma=3);
 	bool createPedestalTree(int nEvents);
 	void setBranchAdresses();
 	TADCEventReader* eventReader;

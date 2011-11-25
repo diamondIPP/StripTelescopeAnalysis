@@ -291,6 +291,14 @@ TCluster::vecvecTCluster* TADCEventReader::getCluster() const
 	return this->pVecvecCluster;
 }
 
+UInt_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)
+{
+	if (det==8)
+		return (UInt_t)this->getDia_ADC(ch);
+	else
+		return (UInt_t)this->getDet_ADC(det,ch);
+}
+
 TObject* TADCEventReader::getTreeName(){
 	cout<<"TADCEventReader::getTreeName:"<<endl;
 	if(file==NULL) exit(-1);

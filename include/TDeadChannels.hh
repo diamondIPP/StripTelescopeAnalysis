@@ -43,6 +43,7 @@ private:
 	void checkForSaturatedChannels();
 	TH1F *hSaturatedChannels[8];
 	TH1F *hSeedMap[8];
+	TH1F *hSeedMap2[8];
 	TH1F *hClusterMap[8];
 	TH1F* hNumberOfSeeds[8];
 	TADCEventReader* eventReader;

@@ -59,7 +59,9 @@ void TDeadChannels::doAnalysis(int nEvents)
 		cout<<endl;
 		checkForDeadChannels();
 		checkForSaturatedChannels();
+		analyseForSeeds();
 	}
+
 	for (int det=0;det<8;det++){
 		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
 		histSaver->SaveHistogramPNG(hSaturatedChannels[det]);
@@ -70,6 +72,11 @@ void TDeadChannels::doAnalysis(int nEvents)
 		histSaver->SaveHistogramPNG(hSeedMap[det]);
 		hSeedMap[det]->Delete();
 	}
+	for (int det=0;det<8;det++){
+			cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
+			histSaver->SaveHistogramPNG(hSeedMap2[det]);
+			hSeedMap2[det]->Delete();
+		}
 	for (int det=0;det<8;det++){
 		cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
 		histSaver->SaveHistogramPNG(hNumberOfSeeds[det]);
@@ -91,8 +98,8 @@ void TDeadChannels::checkForDeadChannels()
 		};
 		Float_t adcValueInSigma=signal/sigma;
 		if(adcValueInSigma>10){
-			//hSeedMap[det]->Fill(ch);
-//			cout<<"Found a Seed "<<det<<" "<<ch<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<endl;
+			hSeedMap[det]->Fill(ch);
+			cout<<"Found a Seed "<<det<<" "<<ch<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<endl;
 			numberOfSeeds++;
 			seedQueue.push_back(make_pair(ch,signal));
 		}
@@ -105,7 +112,7 @@ void TDeadChannels::analyseForSeeds(){
 	for(int det=0;det<8;det++){
 			int nClusters = eventReader->getCluster()->at(det).size();
 			if(nClusters==1)
-				hSeedMap[det]->Fill(eventReader->getCluster()->at(det).at(1).getMaximumChannel());
+				hSeedMap2[det]->Fill(eventReader->getCluster()->at(det).at(0).getMaximumChannel());
 	}
 }
 
@@ -118,8 +125,13 @@ void TDeadChannels::initialiseHistos()
 	}
 	for (int det=0;det<8;det++){
 		stringstream histoName;
-		histoName<<TADCEventReader::getStringForPlane(det)<<"_SeedMap";
+		histoName<<TADCEventReader::getStringForPlane(det)<<"_allSeedMap";
 		hSeedMap[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
+	}
+	for (int det=0;det<8;det++){
+		stringstream histoName;
+		histoName<<TADCEventReader::getStringForPlane(det)<<"_maximumSeedMap";
+		hSeedMap2[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 	}
 	for (int det=0;det<8;det++){
 		stringstream histoName;
