@@ -91,7 +91,7 @@ void TDeadChannels::checkForDeadChannels()
 		};
 		Float_t adcValueInSigma=signal/sigma;
 		if(adcValueInSigma>10){
-			hSeedMap[det]->Fill(ch);
+			//hSeedMap[det]->Fill(ch);
 //			cout<<"Found a Seed "<<det<<" "<<ch<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<endl;
 			numberOfSeeds++;
 			seedQueue.push_back(make_pair(ch,signal));
@@ -100,6 +100,13 @@ void TDeadChannels::checkForDeadChannels()
 	hNumberOfSeeds[det]->Fill(numberOfSeeds);
 	}
 
+}
+void TDeadChannels::analyseForSeeds(){
+	for(int det=0;det<8;det++){
+			int nClusters = eventReader->getCluster()->at(det).size();
+			if(nClusters==1)
+				hSeedMap[det]->Fill(eventReader->getCluster()->at(det).at(1).getMaximumChannel());
+	}
 }
 
 void TDeadChannels::initialiseHistos()

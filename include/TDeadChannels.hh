@@ -38,6 +38,7 @@ public:
 	void	doAnalysis(int nEvents=0);
 private:
 	void checkForDeadChannels();
+	void analyseForSeeds();
 	void initialiseHistos();
 	void checkForSaturatedChannels();
 	TH1F *hSaturatedChannels[8];

@@ -111,6 +111,8 @@ void TCluster::checkCluster(){
 
 void TCluster::checkForGoldenGate(){
 	this->isGoldenGate=false;
+	if(cluster.size()<=2)
+		return;
 	int previousSeed=-1;
 	for(int i=0;i<cluster.size()&&!isGoldenGate;i++){
 		if(cluster2.at(i).second>seedSigma){
@@ -127,4 +129,24 @@ void TCluster::checkForLumpyCluster(){
 	this->isLumpy=false;
 	if(cluster.size()<=2)
 		return;//for lumpy cluster at least 3 hits are needed
+	bool isfalling;
+	Float_t lastSeed;
+	for(int i=0;i<cluster.size()&&!isLumpy;i++){
+			if(cluster2.at(i).second>seedSigma){
+				if(lastSeed<cluster.at(i).second&&!isfalling){
+					lastSeed=cluster.at(i).second;
+				}
+				if(lastSeed<cluster2.at(i).second&&isfalling)
+					isLumpy=true;
+				else
+					isfalling=true;
+			}
+	}
 }
+
+bool TCluster::isSeed(UInt_t cl){
+	if(cluster.size()>cl)
+		return (cluster2.at(cl).second>this->seedSigma);
+	return false;
+}
+

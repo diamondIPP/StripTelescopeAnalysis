@@ -18,7 +18,7 @@
 #include "TObject.h"
 using namespace std;
 class TCluster :public TObject{
-#define TCLUSTER_REVISION 4 //UPDATE REVISION IF YOU MAKE CHANGES IN TCLUSTER!!!!!
+#define TCLUSTER_REVISION 5 //UPDATE REVISION IF YOU MAKE CHANGES IN TCLUSTER!!!!!
 public:
 	typedef  vector< vector<TCluster> > vecvecTCluster;
 	enum calculationMode_t {maxValue=1, chargeWeighted=2};
@@ -37,6 +37,7 @@ public:
 	int getMaximumChannel();
 	Float_t getChargeWeightedMean();
 	void checkCluster();
+	bool isSeed(UInt_t cl);
 
 
 private:
