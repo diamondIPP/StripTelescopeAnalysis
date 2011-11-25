@@ -17,13 +17,18 @@ TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma) {
 	this->seedSigma=seedSigma;
 	this->hitSigma=hitSigma;
 	verbosity=0;
+	revisionNumber=TCLUSTER_REVISION;
+	isChecked=false;
+	isSaturated=false;
+	isLumpy=false;
+	isGoldenGate=false;
 }
 
 TCluster::~TCluster() {
 	// TODO Auto-generated destructor stub
 }
 
-void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,bool bSaturated){
+void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated){
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
 	this->isSaturated=bSaturated;
 	if(signalInSigma>seedSigma)
@@ -39,7 +44,14 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,bool bSat
 		maxChannel=ch;
 	}
 	charge+=signal;
-	cluster.push_back(make_pair(ch,signal));
+	if(cluster.size()>0&&ch<cluster.at(0).first){
+		cluster.push_back(make_pair(ch,signal));
+		cluster2.push_back(make_pair(adcValue,signalInSigma));
+	}
+	else{
+		cluster.push_back(make_pair(ch,signal));
+		cluster2.push_back(make_pair(adcValue,signalInSigma));
+	}
 
 }
 Float_t TCluster::getPosition(){
@@ -56,12 +68,15 @@ void TCluster::clear(){
 	numberOfHits=0;
 	//cluster.clear();
 }
-bool TCluster::isLumpy(){
-	return false;//todo
+bool TCluster::isLumpyCluster(){
+	return isLumpy;//todo
 }
 bool TCluster::isGoldenGateCluster(){
-	return false; //todo
+	if (!isChecked)
+		checkCluster();
+	return this->isGoldenGate; //todo
 }
+
 bool TCluster::hasSaturatedChannels(){
 	return isSaturated;//todo
 }
@@ -87,3 +102,29 @@ void TCluster::setPositionCalulation(calculationMode_t mode){
 this->mode=mode;
 }
 
+
+void TCluster::checkCluster(){
+	this->checkForGoldenGate();
+	this->checkForLumpyCluster();
+	isChecked=true;
+}
+
+void TCluster::checkForGoldenGate(){
+	this->isGoldenGate=false;
+	int previousSeed=-1;
+	for(int i=0;i<cluster.size()&&!isGoldenGate;i++){
+		if(cluster2.at(i).second>seedSigma){
+			if( previousSeed!=-1 && previousSeed+1!=cluster.at(i).first )
+				isGoldenGate=true;
+
+			previousSeed=cluster.at(i).first;
+		}
+	}
+
+}
+
+void TCluster::checkForLumpyCluster(){
+	this->isLumpy=false;
+	if(cluster.size()<=2)
+		return;//for lumpy cluster at least 3 hits are needed
+}

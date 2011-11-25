@@ -86,7 +86,7 @@ void TDeadChannels::checkForDeadChannels()
 		Float_t sigma=eventReader->getPedestalSigma(det,ch);
 		Float_t signal = (Float_t)eventReader->getDet_ADC(det,ch)-eventReader->getPedestalMean(det,ch);
 		if(sigma==0){
-				cout<<nEvent<<" "<<det<<ch<<" sigma==0"<<endl;
+				cout<<nEvent<<" "<<det<<" "<<ch<<" sigma==0"<<endl;
 				continue;
 		};
 		Float_t adcValueInSigma=signal/sigma;

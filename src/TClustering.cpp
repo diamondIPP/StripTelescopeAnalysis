@@ -3,11 +3,13 @@
  *
  *  Created on: 21.11.2011
  *      Author: bachmair
+ *
+ *      UPDATE TCLUSTER_REVISION IN HEADER FILE IF YOU MAKE CHANGES IN TCLUSTER!!!!!
  */
 
 #include "../include/TClustering.hh"
 
-TClustering::TClustering(int runNumber,int seedSigma,int hitSigma) {
+TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
 	stringstream  runString;
@@ -29,10 +31,12 @@ TClustering::TClustering(int runNumber,int seedSigma,int hitSigma) {
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
 	sys->cd("..");
-	this->seedSigma=seedSigma;
-	this->hitSigma=hitSigma;
+	this->seedDetSigma=seedDetSigma;
+	this->hitDetSigma=hitDetSigma;
 	this->runNumber=runNumber;
 	verbosity=1;
+	this->maxDetAdcValue=255;
+	this->maxDiaAdcValue=4095;
 
 	pVecvecCluster=&vecvecCluster;
 }
@@ -72,7 +76,9 @@ void TClustering::ClusterEvents(int nEvents)
 
 void TClustering::clusterEvent()
 {
-	for(unsigned int det=0;det<8;det++){
+
+	//Cluster Silicon Planes
+	for(unsigned int det=0;det<9;det++){
 		//clear vecCluster
 		vecCluster[det].clear();
 
@@ -90,6 +96,7 @@ void TClustering::clusterEvent()
 		//hNumberOfSeeds[det]->Fill(numberOfSeeds);
 	}
 
+
 }
 
 void TClustering::clusterPlane(int det){
@@ -97,23 +104,29 @@ void TClustering::clusterPlane(int det){
 	vecvecAdc[det].clear();
 	vecvecSignal[det].clear();
 	vecvecChannel[det].clear();
-	for(int ch=0;ch<N_DET_CHANNELS;ch++){
+	int maxChannels= (det==8)?N_DIA_CHANNELS:N_DET_CHANNELS;
+	for(int ch=0;ch<maxChannels;ch++){
 		Float_t sigma=eventReader->getPedestalSigma(det,ch);
 		Float_t signal = (Float_t)eventReader->getDet_ADC(det,ch)-eventReader->getPedestalMean(det,ch);
 		if(verbosity>2&&nEvent==0&&det==0&&ch<20)cout<<nEvent<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
 
 		if(sigma==0){
-			if(verbosity>1)cout<<nEvent<<" "<<det<<" "<<ch<<" sigma==0"<<endl;
+			if(verbosity>1)cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
 			continue;
 		}
 		Float_t adcValueInSigma=signal/sigma;
 		if(verbosity>2&&nEvent==0&&det==0&&ch<20)cout<<adcValueInSigma<<endl;
 
-		if(adcValueInSigma>this->seedSigma){
+		if(det<8 && adcValueInSigma>this->seedDetSigma){
 			//if(verbosity>2)cout<<"Found a Seed "<<nEvent<<" "<<det<<" "<<ch<<" "<<signal<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<flush;
-			ch=combineCluster(det,ch);
+			ch=combineCluster(det,ch,this->maxDetAdcValue);
 			if(verbosity>2)cout<<"new channel no.:"<<ch<<endl;
 		}
+		if(det==8 && adcValueInSigma>this->seedDiaSigma){
+					//if(verbosity>2)cout<<"Found a Seed "<<nEvent<<" "<<det<<" "<<ch<<" "<<signal<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<flush;
+					ch=combineCluster(det,ch,this->maxDiaAdcValue);
+					if(verbosity>2)cout<<"new channel no.:"<<ch<<endl;
+				}
 	}
 	if(verbosity>1){
 		cout<<"Clustered Plane "<<det<<" with "<<nClusters[det]<<" "<<vecCluster[det].size()<<"with size: ";
@@ -140,28 +153,36 @@ void TClustering::clusterPlane(int det){
  *
  * 			\return first channel which is not part of the cluster
  */
-int TClustering::combineCluster(int det, int ch){
+int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	if(verbosity>2)cout<<"combine Cluster...start:"<<ch<<" ";
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
 	Float_t signal = (Float_t)eventReader->getDet_ADC(det,ch)-eventReader->getPedestalMean(det,ch);
 	Float_t adcValueInSigma=signal/sigma;
 
 	//create Cluster
-	TCluster cluster(nEvent,this->seedSigma,this->hitSigma);
+	int seedSigma;
+	int hitSigma;
+	if (det==8){
+		hitSigma=this->hitDiaSigma;
+		seedSigma=this->seedDiaSigma;
+	}
+	else{
+		hitSigma=this->hitDetSigma;
+		seedSigma=this->seedDetSigma;
+	}
+	TCluster cluster(nEvent,seedSigma,hitSigma);
 	vector<UShort_t> vecAdc;
 	vector<Float_t> vecSignal;
 	vector<UInt_t> vecChannel;
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>2)cout<<cluster.size()<<" ";
-	for(int currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0;currentCh--){
+	for(int currentCh=ch;adcValueInSigma>hitDetSigma&&currentCh>=0;currentCh--){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
 		signal = (Float_t)eventReader->getDet_ADC(det,currentCh)-eventReader->getPedestalMean(det,currentCh);
+		UShort_t adcValue=eventReader->getDet_ADC(det,currentCh);
 		adcValueInSigma=signal/sigma;
-		if(sigma!=0&&adcValueInSigma>hitSigma){
-			cluster.addChannel(currentCh,signal,adcValueInSigma,false);//todo add saturated
-			vecAdc.push_back(eventReader->getDet_ADC(det,currentCh));
-			vecSignal.push_back(signal);
-			vecChannel.push_back(currentCh);
+		if(sigma!=0&&adcValueInSigma>hitDetSigma){
+			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue);//todo add saturated
 		}
 		else{
 			if(verbosity>2)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<sigma<<"/"<<adcValueInSigma<<"] ";
@@ -172,11 +193,12 @@ int TClustering::combineCluster(int det, int ch){
 	int currentCh;
 	for(currentCh=ch+1;currentCh<N_DET_CHANNELS;currentCh++){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
+		UShort_t adcValue=eventReader->getDet_ADC(det,currentCh);
 		if(sigma==0)cout<<"$";
-		signal = (Float_t)eventReader->getDet_ADC(det,currentCh)-eventReader->getPedestalMean(det,currentCh);
+		signal = (Float_t)adcValue-eventReader->getPedestalMean(det,currentCh);
 		adcValueInSigma=signal/sigma;
-		if(sigma!=0&&adcValueInSigma>hitSigma&&sigma!=0){
-			cluster.addChannel(currentCh,signal,adcValueInSigma,false);//todo add saturated
+		if(sigma!=0&&adcValueInSigma>hitDetSigma&&sigma!=0){
+			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue);
 			vecAdc.push_back(eventReader->getDet_ADC(det,currentCh));
 			vecSignal.push_back(signal);
 			vecChannel.push_back(currentCh);
@@ -186,6 +208,7 @@ int TClustering::combineCluster(int det, int ch){
 			break;
 		}
 	}
+	cluster.checkCluster();
 	vecCluster[det].push_back(cluster);
 	vecvecAdc[det].push_back(vecAdc);
 	vecvecSignal[det].push_back(vecSignal);
@@ -222,8 +245,21 @@ bool TClustering::createClusterTree(int nEvents)
 		cout<<"File and Tree Exists... \t"<<flush;
 		if(clusterTree->GetEntries()>=nEvents){
 			createdNewTree=false;
-			cout<<"tree has enough entries...."<<endl;
-			return false;
+			cout<<"tree has enough entries....check Rev"<<endl;
+			clusterRev=-1;
+			cout<<"#";
+			clusterTree->SetBranchAddress("clusterRev",&clusterRev);
+			cout<<"#";
+			clusterTree->GetEvent(0);
+			cout<<"#";
+			cout<<"ClusterTree has revision: rev."<<clusterRev<<" current rev."<<TCLUSTER_REVISION<<endl;
+			if(clusterRev==TCLUSTER_REVISION)
+				return false;
+			else{
+				cout<<"ClusterTree has wrong revision: rev."<<clusterRev<<" instead of rev."<<TCLUSTER_REVISION<<endl;
+				clusterTree->Delete();
+				clusterTree=NULL;
+			}
 		}
 		else{
 			clusterTree->Delete();
@@ -235,7 +271,11 @@ bool TClustering::createClusterTree(int nEvents)
 		clusterFile=new TFile(clusterfilepath.str().c_str(),"RECREATE");
 		this->clusterTree=new TTree("clusterTree",treeDescription.str().c_str());
 		createdNewTree=true;
-		cout<<"there exists no tree:\'clusterTree\"\tcreate new one."<<clusterTree<<endl;
+		cout<<"\n\n\n***************************************************************\n";
+		cout<<"***************************************************************\n";
+		cout<<"there exists no tree:\'clusterTree\"\tcreate new one."<<clusterTree<<"\n";
+		cout<<"***************************************************************\n";
+		cout<<"***************************************************************\n"<<endl;
 	}
 
 	return createdNewTree;
@@ -244,9 +284,11 @@ bool TClustering::createClusterTree(int nEvents)
 
 void TClustering::setBranchAdresses(){
 	cout<<"set Branch adresses..."<<endl;
+	clusterRev=TCLUSTER_REVISION;
 	clusterTree->Branch("eventNumber",&nEvent,"eventNumber/i");
 	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");
 	clusterTree->Branch("nClusters",&nClusters,"nClusters/i[9]");
+	clusterTree->Branch("clusterRev",&clusterRev,"clusterRev/I");
 	//clusterTree->Branch("vecvecChannel",&vecvecChannel[0])
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
 	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
