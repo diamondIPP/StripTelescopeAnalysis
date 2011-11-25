@@ -9,7 +9,7 @@
 
 TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
 	// TODO Auto-generated constructor stub
-	slidingLength=2500;
+	slidingLength=1000;
 	eventReader=NULL;
 	pedestalTree=NULL;
 	pedestalFile=NULL;
@@ -29,7 +29,8 @@ TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
 	eventReader=new TADCEventReader(rawfilepath.str());
 	cout<<eventReader->GetEntries()<<endl;
 	createPedestalTree(nEvents);
-	MAXSIGMA=7;
+	MAXSDETSIGMA=7;
+	MAXDIASIGMA=7;
 }
 
 TPedestalCalculation::~TPedestalCalculation() {
@@ -121,14 +122,13 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 			diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
 	}
 
-	calculateFirstPedestals(detAdcValues,diaAdcValues,MAXSIGMA);
+	calculateFirstPedestals(detAdcValues,diaAdcValues,MAXSDETSIGMA);
 
 	//save Sliding Pedestal Values for first slidingLength Events
 	for(nEvent=0;nEvent<slidingLength;nEvent++){
 		//Fill tree
 		pedestalTree->Fill();
 	}
-
 
 	//calculate sliding Pedestal Values for rest of Events and save them
 
@@ -142,7 +142,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 			for(int ch=0;ch<N_DET_CHANNELS;ch++){
 				detAdcValues[det][ch].push_back(eventReader->getDet_ADC(det,ch));
 				pair<float,float> values;
-				values=	checkPedestalDet(det,ch,MAXSIGMA);
+				values=	checkPedestalDet(det,ch,MAXSDETSIGMA);
 				pedestalMean[det][ch]=values.first;
 				pedestalSigma[det][ch]=values.second;
 
@@ -156,7 +156,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 			diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
 
 			pair<float,float> values;
-			values = checkPedestalDia(ch,MAXSIGMA);
+			values = checkPedestalDia(ch,MAXDIASIGMA);
 			pedestalMean[8][ch]=values.first;
 			pedestalSigma[8][ch]=values.second;
 
@@ -186,7 +186,7 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 		for(int ch=0;ch<N_DET_CHANNELS;ch++){
 			TRawEventSaver::showStatusBar(256*det+ch,256*8,10);
 			pair<float,float> values;
-			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,maxSigma);//7 iteration for first pedestal
+			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,MAXDIASIGMA);//7 iteration for first pedestal
 			pedestalMean[det][ch]=values.first;
 			pedestalSigma[det][ch]=values.second;
 //			pedestalMean.at(det).at(ch)=values.first;
@@ -195,7 +195,7 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 	}
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<float,float> values;
-		values=this->calculateFirstPedestalDia(ch,DiaAdcQueue[ch],meanValues[8][ch],sigmaValues[8][ch],7,maxSigma);//7 iterations for first pedestal
+		values=this->calculateFirstPedestalDia(ch,DiaAdcQueue[ch],meanValues[8][ch],sigmaValues[8][ch],7,MAXDIASIGMA);//7 iterations for first pedestal
 		pedestalMean[8][ch]=values.first;
 		pedestalSigma[8][ch]=values.second;
 	}
@@ -258,7 +258,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxS
 
 
 	float mean =this->detSUM[det][ch]/(float)this->detEventsInSum[det][ch];
-	float sigma=this->detSUM2[det][ch]/(float)this->detEventsInSum[det][ch]-mean*mean;
+	float sigma=TMath::Sqrt(this->detSUM2[det][ch]/(float)this->detEventsInSum[det][ch]-mean*mean);
 
 //	if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)
 //		cout<<"\r"<<nEvent<<"\t"<<mean<<" +/- "<<sigma<<"\t"<<detSUM[det][ch]<<"\t"<<detSUM2[det][ch]<<"\t"<<(int)detAdcValues[det][ch].back()<<"\t"<<((detAdcValues[det][ch].back()<mean+sigma*maxSigma))<<flush;
@@ -292,7 +292,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxS
 
 pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	float mean =this->diaSUM[ch]/(float)this->diaEventsInSum[ch];
-	float sigma=this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean;
+	float sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);
 	//cout<<mean<<" "<<sigma<<" "<<this->diaAdcValues[ch].front()<<" "<<this->diaAdcValues[ch].back()<<" "<<diaEventUsed[ch].front()<<" "<<(diaAdcValues[ch].back()<mean+sigma*maxSigma)<<endl;
 	if(this->diaEventUsed[ch].front()){
 		this->diaSUM[ch]-=this->diaAdcValues[ch].front();

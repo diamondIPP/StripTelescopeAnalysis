@@ -11,7 +11,7 @@
 #include "Clustering.class.hh"
 #include "TRawEventSaver.hh"
 #include "TPedestalCalculation.hh"
-#include "TDeadChannels.hh"
+#include "TAnalysisOfClustering.hh"
 #include "TClustering.hh"
 #include "diamondAnalysis.h"
 #include "time.h"
@@ -137,15 +137,17 @@ int main(int argc, char ** argv) {
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
 
-//		TDeadChannels* deadChannels;
-//		deadChannels= new TDeadChannels(RUNNUMBER);
-//		deadChannels->doAnalysis(100);
-//		delete deadChannels;
 //
-		TAlignment *alignment;
-		alignment= new TAlignment(RUNNUMBER);
-		alignment->createVectors(NEVENTS);
-		delete alignment;
+//		TAlignment *alignment;
+//		alignment= new TAlignment(RUNNUMBER);
+//		alignment->createVectors(NEVENTS);
+//		delete alignment;
+
+//
+//		TAnalysisOfClustering* analysisClustering;
+//		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
+//		analysisClustering->doAnalysis(NEVENTS);
+//		delete analysisClustering;
 		//*/
 //		if (DO_SLIDINGPEDESTAL) {
 //			cout << endl;

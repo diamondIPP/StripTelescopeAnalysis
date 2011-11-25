@@ -31,21 +31,26 @@
 #define N_DET_CHANNELS 256
 using namespace std;
 
-class TDeadChannels {
+class TAnalysisOfClustering {
 public:
-	TDeadChannels(int runnumber,int seedSigma=10,int hitSigma=7);
-	virtual ~TDeadChannels();
+	TAnalysisOfClustering(int runnumber,int seedSigma=10,int hitSigma=7);
+	virtual ~TAnalysisOfClustering();
 	void	doAnalysis(int nEvents=0);
 private:
+	void saveHistos();
 	void checkForDeadChannels();
 	void analyseForSeeds();
+	void getBiggestHit();
 	void initialiseHistos();
 	void checkForSaturatedChannels();
 	TH1F *hSaturatedChannels[8];
 	TH1F *hSeedMap[8];
-	TH1F *hSeedMap2[8];
+	TH1F *hSeedMap2[9];
 	TH1F *hClusterMap[8];
 	TH1F* hNumberOfSeeds[8];
+	TH1F* hChannelBiggestHit[8];
+	TH1F* hPulsHeightBiggestHit[8];
+	TH1F* hPulsHeightNextBiggestHit[8];
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;

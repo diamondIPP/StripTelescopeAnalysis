@@ -299,6 +299,14 @@ UInt_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)
 		return (UInt_t)this->getDet_ADC(det,ch);
 }
 
+Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch)
+{
+	if(getPedestalSigma(det,ch)==0)
+		return 0;
+	else
+		return (((Float_t)this->getAdcValue(det,ch)-this->getPedestalMean(det,ch))/this->getPedestalSigma(det,ch));
+}
+
 TObject* TADCEventReader::getTreeName(){
 	cout<<"TADCEventReader::getTreeName:"<<endl;
 	if(file==NULL) exit(-1);
