@@ -135,29 +135,29 @@ void TAnalysisOfClustering::getBiggestHit(){
 void TAnalysisOfClustering::analyseBiggestHit() {
     for (int det = 0; det < 8; det++) {
         for (int i = 0; i < 253; i++) {
-            if (det < 8 && i < 253 && i > 70 && i < 170) {
-                if (Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) && Det_ADC[det][i] < 255) {
-                    if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]/* && Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])*/) {
-                        second_biggest_hit_channel = biggest_hit_channel;
-                        biggest_hit_channel = i;
-                    }
-                    else {
-                        if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) {
-                            second_biggest_hit_channel = i;
-                        }
-                    }
-                }
-                else {
-                    if (Det_ADC[det][i] < 255) {
-                        cout << endl << endl;
-                        cout << "current_event: " << current_event << " Det" << det << "\tchannel: " << i << " Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]): " << Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) << endl;
-                        cout << "Det_ADC: " << (int)Det_ADC[det][i] << "\tDet_PedMean: " << Det_PedMean[det][i] << "\tDetPedWidth: " << Det_PedWidth[det][i] << "\tPH: " << (Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i] << endl;
-                    }
-                }
-                if ((int)Det_Channels[det][i] == 125 && Det_ADC[det][i] < 255) {
-                    histo_pulseheight_sigma125[det]->Fill((Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i]);
-                }
-            }
+//            if (det < 8 && i < 253 && i > 70 && i < 170) {
+//                if (Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) && Det_ADC[det][i] < 255) {
+//                    if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]/* && Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])*/) {
+//                        second_biggest_hit_channel = biggest_hit_channel;
+//                        biggest_hit_channel = i;
+//                    }
+//                    else {
+//                        if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) {
+//                            second_biggest_hit_channel = i;
+//                        }
+//                    }
+//                }
+//                else {
+//                    if (Det_ADC[det][i] < 255) {
+//                        cout << endl << endl;
+//                        cout << "current_event: " << current_event << " Det" << det << "\tchannel: " << i << " Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]): " << Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) << endl;
+//                        cout << "Det_ADC: " << (int)Det_ADC[det][i] << "\tDet_PedMean: " << Det_PedMean[det][i] << "\tDetPedWidth: " << Det_PedWidth[det][i] << "\tPH: " << (Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i] << endl;
+//                    }
+//                }
+//                if ((int)Det_Channels[det][i] == 125 && Det_ADC[det][i] < 255) {
+//                    histo_pulseheight_sigma125[det]->Fill((Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i]);
+//                }
+//            }
         }//end loop over channels
     }//end loop over detectors
 }
