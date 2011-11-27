@@ -137,11 +137,11 @@ int main(int argc, char ** argv) {
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
 
-//
-//		TAlignment *alignment;
-//		alignment= new TAlignment(RUNNUMBER);
-//		alignment->createVectors(NEVENTS);
-//		delete alignment;
+
+		TAlignment *alignment;
+		alignment= new TAlignment(RUNNUMBER);
+		alignment->createVectors(NEVENTS);
+		delete alignment;
 
 //
 //		TAnalysisOfClustering* analysisClustering;

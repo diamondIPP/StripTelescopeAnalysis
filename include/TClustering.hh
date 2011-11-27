@@ -47,7 +47,7 @@ private:
 	HistogrammSaver* histSaver;
     TSystem* sys;
     vector<TCluster> vecCluster[9];
-    int clusterRev;
+    UInt_t clusterRev;
     vector< vector <UShort_t> > vecvecAdc[9];
     vector< vector <Float_t> > vecvecSignal[9];
     vector< vector <UInt_t> > vecvecChannel[9];
