@@ -14,8 +14,9 @@ SRCDIR          := src
 INCLUDEDIR      := include
 
 CFLAGS  		:= -g -Wall -I$(INCLUDEDIR) -D_REENTRANT 
-CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS)
-LDFLAGS 		:= -L/usr/local/lib $(ROOTLIBS) $(ROOTGLIBS)
+CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC
+LDFLAGS 		:= -L/usr/local/lib $(ROOTLIBS) $(ROOTGLIBS) -fPIC
+
 
 OBJ 			:= diamondAnalysis.cpp
 HEAD    		:= 
@@ -53,7 +54,7 @@ $(PROGS):
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
 
 libTCluster.so: TClusterDict.o TCluster.o 	
-		g++ -g -Wall -m64 -shared $(LDFLAGS) -o $@ $^
+		g++  -g -fPIC -Wall -m64 -shared $(LDFLAGS) -o $@ $^
 		cp -rfv libTCluster.so ~/lib/ 
  
  
@@ -69,7 +70,7 @@ TClusterDict.o: TClusterDict.cpp
 		#
 		#
 		#
-		g++ $(CFLAGS) -c -m64 -o $@ $<
+		g++ $(CFLAGS) -fPIC -c -m64 -o $@ $<
 		
 %.o: $(SRCDIR)/%.cpp $(INCLUDEDIR)/%.hh
         #
