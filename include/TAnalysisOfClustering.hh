@@ -44,7 +44,7 @@ private:
 	void initialiseHistos();
 	void checkForSaturatedChannels();
 	void analyseCluster();
-    void analyseBiggestHit()
+    void analyseBiggestHit();
 	TH1F *hSaturatedChannels[8];
 	TH1F *hSeedMap[8];
 	TH1F *hSeedMap2[9];
