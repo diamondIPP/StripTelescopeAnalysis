@@ -36,7 +36,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	this->seedDiaSigma=seedDiaSigma;
 	this->hitDiaSigma=hitDiaSigma;
 	this->runNumber=runNumber;
-	verbosity=1;
+	verbosity=0;
 	this->maxDetAdcValue=255;
 	this->maxDiaAdcValue=4095;
 	pVecvecCluster=&vecvecCluster;
@@ -104,9 +104,6 @@ void TClustering::clusterEvent()
 
 void TClustering::clusterPlane(int det){
 	nClusters[det]=0;
-	vecvecAdc[det].clear();
-	vecvecSignal[det].clear();
-	vecvecChannel[det].clear();
 	int maxChannels= (det==8)?N_DIA_CHANNELS:N_DET_CHANNELS;
 	for(int ch=0;ch<maxChannels;ch++){
 		Float_t sigma=eventReader->getPedestalSigma(det,ch);
@@ -281,7 +278,7 @@ bool TClustering::createClusterTree(int nEvents)
 
 void TClustering::setBranchAdresses(){
 	cout<<"set Branch adresses..."<<endl;
-	//clusterRev.Write();
+
 	clusterRev=TCLUSTER_REVISION;
 	clusterTree->Branch("eventNumber",&nEvent,"eventNumber/i");
 	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");

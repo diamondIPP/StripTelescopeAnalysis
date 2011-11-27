@@ -43,6 +43,7 @@ private:
 	void getBiggestHit();
 	void initialiseHistos();
 	void checkForSaturatedChannels();
+	void analyseCluster();
 	TH1F *hSaturatedChannels[8];
 	TH1F *hSeedMap[8];
 	TH1F *hSeedMap2[9];
@@ -51,6 +52,8 @@ private:
 	TH1F* hChannelBiggestHit[8];
 	TH1F* hPulsHeightBiggestHit[8];
 	TH1F* hPulsHeightNextBiggestHit[8];
+	TH1F* hNumberOfClusters[9];
+	TH1F* hClusterSize[9];
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;

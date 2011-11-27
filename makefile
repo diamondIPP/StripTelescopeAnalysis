@@ -46,18 +46,28 @@ all: rootclean diamondAnalysis
 	
 	
 diamondAnalysis: $(LIBFILES)
+		#
+		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
+        #
         
 $(PROGS):
         #
         # linking $@
         #
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
+		@echo  "\n\nPlease do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib"
 
 libTCluster.so: TClusterDict.o TCluster.o 	
+		#
+		# Creating Shared ROOT Lib
+		#
+		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
+		#
 		g++  -g -fPIC -Wall -m64 -shared $(LDFLAGS) -o $@ $^
 		cp -rfv libTCluster.so ~/lib/ 
- 
- 
+ 		#
+ 		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
+ 		#
  
 TClusterDict.cpp: $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/TClusterLinkDef.h
 		#

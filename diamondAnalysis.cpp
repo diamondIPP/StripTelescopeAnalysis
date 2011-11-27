@@ -143,11 +143,11 @@ int main(int argc, char ** argv) {
 		alignment->createVectors(NEVENTS);
 		delete alignment;
 
-//
-//		TAnalysisOfClustering* analysisClustering;
-//		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
-//		analysisClustering->doAnalysis(NEVENTS);
-//		delete analysisClustering;
+
+		TAnalysisOfClustering* analysisClustering;
+		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
+		analysisClustering->doAnalysis(NEVENTS);
+		delete analysisClustering;
 		//*/
 //		if (DO_SLIDINGPEDESTAL) {
 //			cout << endl;

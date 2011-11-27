@@ -76,10 +76,10 @@ void TAlignment::createVectors(UInt_t nEvents){
 		}
 		if(candidate){
 			TCluster cluster = eventReader->getCluster()->at(8).at(0);
-			if(cluster.size()>2){
-				candidate=false;
-				falseClusterSizeDia++;
-			}
+//			if(cluster.size()>2){
+//				candidate=false;
+//				falseClusterSizeDia++;
+//			}
 		}
 		//events with candidate=true areevents which have exactly one cluster in each plane
 		// and the cluster size is 2

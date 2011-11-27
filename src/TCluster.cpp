@@ -150,3 +150,20 @@ bool TCluster::isSeed(UInt_t cl){
 	return false;
 }
 
+
+UInt_t TCluster::getMinChannelNumber()
+{
+	if(size()>=0){
+		return cluster.front().first;
+	}
+	return 0;
+}
+
+UInt_t TCluster::getMaxChannelNumber()
+{
+
+	if(size()>=0){
+		return cluster.back().first;
+	}
+	return 0;
+}

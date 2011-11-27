@@ -52,15 +52,16 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->GetEvent(nEvent);
-		cout<<nEvent;
+		/*cout<<nEvent;
 		for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
 			for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
-			cout<<" "<<eventReader->getCluster()->at(det).at(cl).getChargeWeightedMean()<<flush;//*/
-		cout<<endl;
-		checkForDeadChannels();
-		checkForSaturatedChannels();
-		getBiggestHit();
-		analyseForSeeds();
+			cout<<" "<<eventReader->getCluster()->at(det).at(cl).getChargeWeightedMean()<<flush;
+		cout<<endl;//*/
+//		checkForDeadChannels();
+//		checkForSaturatedChannels();
+//		getBiggestHit();
+//		analyseForSeeds();
+		analyseCluster();
 	}
 	saveHistos();
 }
@@ -169,6 +170,15 @@ void TAnalysisOfClustering::initialiseHistos()
 		hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 	}
 
+	for(int det=0;det<9;det++){
+		stringstream histoName;
+		histoName<<"ClusterSize_"<<TADCEventReader::getStringForPlane(det);
+		hClusterSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
+		histoName.str("");
+		histoName<<"NumberOfClusters_"<<TADCEventReader::getStringForPlane(det);
+		hNumberOfClusters[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
+	}
+
 }
 
 
@@ -208,7 +218,26 @@ void TAnalysisOfClustering::saveHistos(){
 		histSaver->SaveHistogramPNG(hChannelBiggestHit[det]);
 		hChannelBiggestHit[det]->Delete();
 	}
+	for(int det=0;det<9;det++){
+		histSaver->SaveHistogramPNG(this->hClusterSize[det]);
+		histSaver->SaveHistogramPNG(this->hNumberOfClusters[det]);
+		delete hClusterSize[det];
+		delete hNumberOfClusters[det];
+	}
 }
+
+void TAnalysisOfClustering::analyseCluster()
+{
+	for(int det=0;det<9;det++){
+		hNumberOfClusters[det]->Fill(eventReader->getCluster()->at(det).size());
+		for(int cl=0;cl<eventReader->getCluster()->at(det).size();cl++){
+			hClusterSize[det]->Fill(eventReader->getCluster()->at(det).at(cl).size());
+		}
+	}
+
+}
+
+
 
 
 
