@@ -321,6 +321,7 @@ TObject* TADCEventReader::getTreeName(){
 	{
 		obj = key->ReadObj();
 		if ((obj->IsA()->InheritsFrom("TTree"))){
+			cout<<"name of it: "<<obj->GetName()<<endl;
 			return obj;
 		}
 		else

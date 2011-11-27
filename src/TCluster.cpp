@@ -6,7 +6,7 @@
  */
 
 #include "../include/TCluster.hh"
-ClassImp(TCluster)
+ClassImp(TCluster);
 
 TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma) {
 	// TODO Auto-generated constructor stub
@@ -17,11 +17,12 @@ TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma) {
 	this->seedSigma=seedSigma;
 	this->hitSigma=hitSigma;
 	verbosity=0;
-	revisionNumber=TCLUSTER_REVISION;
+	revisionNumber=TCluster::TCLUSTER_REVISION();
 	isChecked=false;
 	isSaturated=false;
 	isLumpy=false;
 	isGoldenGate=false;
+	hasBadChannel=false;
 }
 
 TCluster::~TCluster() {
@@ -55,10 +56,11 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t 
 
 }
 Float_t TCluster::getPosition(){
+	return this->getChargeWeightedMean();
 	return 0;//todo;
 }
 
-int TCluster::size()
+UInt_t TCluster::size()
 {
 	return numberOfSeeds+numberOfHits;
 }
@@ -125,6 +127,26 @@ void TCluster::checkForGoldenGate(){
 
 }
 
+int TCluster::getHitSigma() const
+{
+    return hitSigma;
+}
+
+int TCluster::getSeedSigma() const
+{
+    return seedSigma;
+}
+
+void TCluster::setHitSigma(int hitSigma)
+{
+    this->hitSigma = hitSigma;
+}
+
+void TCluster::setSeedSigma(int seedSigma)
+{
+    this->seedSigma = seedSigma;
+}
+
 void TCluster::checkForLumpyCluster(){
 	this->isLumpy=false;
 	if(cluster.size()<=2)
@@ -166,4 +188,52 @@ UInt_t TCluster::getMaxChannelNumber()
 		return cluster.back().first;
 	}
 	return 0;
+}
+
+
+
+Float_t TCluster::getSignal(UInt_t clusterPos)
+{
+	if(clusterPos<size())
+		return this->cluster.at(clusterPos).second;
+	else return -1;
+}
+
+Float_t TCluster::getSNR(UInt_t clusterPos)
+{
+
+	if(clusterPos<size())
+		return this->cluster2.at(clusterPos).second;
+	else return -1;
+
+}
+Float_t TCluster::getPedestalMean(UInt_t clusterPos)
+{
+
+	if(clusterPos<size())
+		return getAdcValue(clusterPos)-getSignal(clusterPos);
+	else return -1;
+
+}
+
+Float_t TCluster::getPedestalSigma(UInt_t clusterPos)
+{
+	if(clusterPos<size())
+		return getSignal(clusterPos)/getSNR(clusterPos);
+	else return -1;
+
+}
+
+UShort_t TCluster::getAdcValue(UInt_t clusterPos)
+{
+	if(clusterPos<size())
+		return this->cluster2.at(clusterPos).first;
+	else return 0;
+}
+
+UInt_t TCluster::getChannel(UInt_t clusterPos)
+{
+	if(clusterPos<size())
+		return this->cluster.at(clusterPos).first;
+	else return 5000;
 }

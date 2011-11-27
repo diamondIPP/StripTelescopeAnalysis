@@ -21,8 +21,10 @@ AlignmentClass::AlignmentClass(string fileName,UInt_t nEventNumber) {
 	dianoise_sigma[1]=1;
 	nAlignSteps =1;
 	histSaver= new HistogrammSaver(0);
-	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:loading:"<<endl;
+
+	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:loading:"<<PedFileName<<endl;
 	if (eventReader==NULL) eventReader = new TADCEventReader(PedFileName);
+	if (verbosity)cout<<"AlignmentClass::AlignmentClass: DONE WITH LOADING 1:"<<endl;
 	if (eventReader==NULL || !eventReader->isOK()){
 		cout<<"AlignmentClass::eventReader could not be initialized... EXIT PROGRAM"<<endl;
 		exit (-1);

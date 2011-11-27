@@ -246,11 +246,11 @@ bool TClustering::createClusterTree(int nEvents)
 			cout<<"#";
 			clusterTree->GetEvent(0);
 			cout<<"#";
-			cout<<"ClusterTree has revision: rev."<<clusterRev<<" current rev."<<TCLUSTER_REVISION<<endl;
-			if(clusterRev==TCLUSTER_REVISION)
+			cout<<"ClusterTree has revision: rev."<<clusterRev<<" current rev."<<TCluster::TCLUSTER_REVISION()<<endl;
+			if(clusterRev==TCluster::TCLUSTER_REVISION())
 				return false;
 			else{
-				cout<<"ClusterTree has wrong revision: rev."<<clusterRev<<" instead of rev."<<TCLUSTER_REVISION<<endl;
+				cout<<"ClusterTree has wrong revision: rev."<<clusterRev<<" instead of rev."<<TCluster::TCLUSTER_REVISION()<<endl;
 				clusterTree->Delete();
 				clusterTree=NULL;
 			}
@@ -279,7 +279,7 @@ bool TClustering::createClusterTree(int nEvents)
 void TClustering::setBranchAdresses(){
 	cout<<"set Branch adresses..."<<endl;
 
-	clusterRev=TCLUSTER_REVISION;
+	clusterRev=TCluster::TCLUSTER_REVISION();
 	clusterTree->Branch("eventNumber",&nEvent,"eventNumber/i");
 	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");
 	clusterTree->Branch("nClusters",&nClusters,"nClusters/i[9]");

@@ -55,9 +55,9 @@ TDetectorAlignment::TDetectorAlignment(string plots_path_string, vector<TDiamond
       det_x_resolution[i] = -1;
       det_y_resolution[i] = -1;
    }
-
+   cout<<"TDetectorAlignment::TDetectorAlignment:Load Tracks "<<input_tracks.size()<<" "<<input_tracks_mask.size()<<flush;
    LoadTracks(input_tracks, input_tracks_mask);
-
+   cout<<" "<<this->track_storage.size()<<" "<<this->track_mask_storage.size()<<endl;
    plots_path = plots_path_string;
    SaveAllFilesSwitch = 1;
    ClosePlotsOnSave = 1;
@@ -232,6 +232,7 @@ void TDetectorAlignment::LoadTracks(vector<TDiamondTrack> &input_tracks, vector<
 
 void TDetectorAlignment::PlotAngularDistribution()
 {
+	cout<<"Plot Angular Disribution of "<<track_storage.size()<<" entries..."<<endl;
    Double_t deltaX = 0;
    Double_t deltaY = 0;
    Double_t deltaZ = track_storage[0].GetD3().GetZ() - track_storage[0].GetD0().GetZ();
@@ -370,7 +371,7 @@ void TDetectorAlignment::PlotCartesianDistribution()
 }
 
 void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1, int ref_detector2, bool verbose, bool justcheck) {
-   cout<<"TDetectorAlignment::AlignDetctorXY in "<<subject_detector<<" with " << ref_detector1<< " and "<<ref_detector2<< " /t with verbosity "<<verbosity<<endl;
+   cout<<"TDetectorAlignment::AlignDetctorXY in "<<subject_detector<<" with " << ref_detector1<< " and "<<ref_detector2<< "\t with verbosity "<<verbosity<<endl;
    std::ostringstream detector_name;
    detector_name << "D" << subject_detector;
 
