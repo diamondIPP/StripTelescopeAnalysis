@@ -60,6 +60,17 @@ private:
     int nEvent;
     int seedSigma;
     int hitSigma;
+    TH1F *histo_pulseheight_sigma[8];
+	TH1F *histo_pulseheight_sigma_second[8];
+	TH1F *histo_pulseheight_sigma125[8];
+	TH1F *histo_second_biggest_hit_direction[8];
+	TH1F *histo_pulseheight_sigma_second_left[8];
+	TH1F *histo_pulseheight_sigma_second_right[8];
+	TH1F *histo_biggest_hit_map[8];
+	TH1F *histo_pulseheight_left_sigma[8];
+	TH1F *histo_pulseheight_left_sigma_second[8];
+	TH1F *histo_pulseheight_right_sigma[8];
+	TH1F *histo_pulseheight_right_sigma_second[8];
 };
 
 #endif /* TDEADCHANNELS_HH_ */

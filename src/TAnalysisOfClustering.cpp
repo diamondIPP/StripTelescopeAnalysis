@@ -132,6 +132,36 @@ void TAnalysisOfClustering::getBiggestHit(){
 
 }
 
+void TAnalysisOfClustering::analyseBiggestHit() {
+    for (int det = 0; det < 8; det++) {
+        for (int i = 0; i < 253; i++) {
+            if (det < 8 && i < 253 && i > 70 && i < 170) {
+                if (Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) && Det_ADC[det][i] < 255) {
+                    if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]/* && Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])*/) {
+                        second_biggest_hit_channel = biggest_hit_channel;
+                        biggest_hit_channel = i;
+                    }
+                    else {
+                        if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) {
+                            second_biggest_hit_channel = i;
+                        }
+                    }
+                }
+                else {
+                    if (Det_ADC[det][i] < 255) {
+                        cout << endl << endl;
+                        cout << "current_event: " << current_event << " Det" << det << "\tchannel: " << i << " Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]): " << Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) << endl;
+                        cout << "Det_ADC: " << (int)Det_ADC[det][i] << "\tDet_PedMean: " << Det_PedMean[det][i] << "\tDetPedWidth: " << Det_PedWidth[det][i] << "\tPH: " << (Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i] << endl;
+                    }
+                }
+                if ((int)Det_Channels[det][i] == 125 && Det_ADC[det][i] < 255) {
+                    histo_pulseheight_sigma125[det]->Fill((Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i]);
+                }
+            }
+        }//end loop over channels
+    }//end loop over detectors
+}
+
 void TAnalysisOfClustering::initialiseHistos()
 {
 	for (int det=0;det<8;det++){
@@ -178,6 +208,48 @@ void TAnalysisOfClustering::initialiseHistos()
 		histoName<<"NumberOfClusters_"<<TADCEventReader::getStringForPlane(det);
 		hNumberOfClusters[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 	}
+    
+    for (int det = 0; det < 8; det++) {
+        stringstream histoName;
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "BiggestHitChannelInSigma";
+        histo_pulseheight_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+        
+        histoName.str("");
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitChannelInSigma";
+        histo_pulseheight_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+        
+        histoName.str("");
+        histoName << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitMinusBiggestHitPosition";
+        histo_second_biggest_hit_direction[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),2,-2.,2.);
+        
+        histoName.str("");
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitChannelInSigmaLeft";
+        histo_pulseheight_sigma_second_left[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+        
+        histoName.str("");
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitChannelInSigmaRight";
+        histo_pulseheight_sigma_second_right[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+        
+        histoName.str("");
+        histoName << TADCEventReader::getStringForPlane(det) << "BiggestHitMap";
+        histo_biggest_hit_map[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0.,255.);
+        
+        histoName.str("");
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "LeftChipBiggestHitChannelInSigma";
+        histo_pulseheight_left_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+        
+        histoName.str("");
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "RightChipBiggestHitChannelInSigma";
+        histo_pulseheight_right_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+        
+        histoName.str("");
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "LeftChipSecondBiggestHitChannelInSigma";
+        histo_pulseheight_left_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+        
+        histoName.str("");
+        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "RightChipSecondBiggestHitChannelInSigma";
+        histo_pulseheight_right_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),250,0.,50.);
+    }
 
 }
 
@@ -224,6 +296,27 @@ void TAnalysisOfClustering::saveHistos(){
 		delete hClusterSize[det];
 		delete hNumberOfClusters[det];
 	}
+    
+    for (int det = 0; det < 8; det++) {
+        histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma[det]);
+		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma_second[det]);
+		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma125[det]);
+		histSaver->SaveHistogramPNG(this->histo_second_biggest_hit_direction[det]);
+		histSaver->SaveHistogramPNG(this->histo_biggest_hit_map[det]);
+		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma[det]);
+		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma_second[det]);
+		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma[det]);
+		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma_second[det]);
+        delete histo_pulseheight_sigma[det];
+		delete histo_pulseheight_sigma_second[det];
+		delete histo_pulseheight_sigma125[det];
+		delete histo_second_biggest_hit_direction[det];
+		delete histo_biggest_hit_map[det];
+		delete histo_pulseheight_left_sigma[det];
+		delete histo_pulseheight_left_sigma_second[det];
+		delete histo_pulseheight_right_sigma[det];
+		delete histo_pulseheight_right_sigma_second[det];
+    }
 }
 
 void TAnalysisOfClustering::analyseCluster()
