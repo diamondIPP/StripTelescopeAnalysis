@@ -18,6 +18,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	sys->MakeDirectory(runString.str().c_str());
 
 	sys->cd(runString.str().c_str());
+	rawFilePath<<"rawData."<<runNumber<<".root";
 	filepath.str("");
 	filepath<<"pedestalData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
@@ -49,6 +50,7 @@ TClustering::~TClustering() {
 	clusterTree->Write();
 	if(clusterTree!=NULL){
 		clusterTree->AddFriend(eventReader->getTree()->GetName(),filepath.str().c_str());
+		clusterTree->AddFriend("rawTree",rawFilePath.str().c_str());
 		cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 	}
 	clusterTree->Delete();

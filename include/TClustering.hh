@@ -59,6 +59,7 @@ private:
     bool createClusterTree(int nEvents);
     void setBranchAdresses();
 	stringstream  filepath;
+	stringstream rawFilePath;
     TTree *clusterTree;
     TFile *clusterFile;
     int runNumber;
