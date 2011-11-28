@@ -57,11 +57,11 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 			for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
 			cout<<" "<<eventReader->getCluster()->at(det).at(cl).getChargeWeightedMean()<<flush;
 		cout<<endl;//*/
-//		checkForDeadChannels();
-//		checkForSaturatedChannels();
-//		getBiggestHit();
-//		analyseForSeeds();
-//		analyseCluster();
+		checkForDeadChannels();
+		checkForSaturatedChannels();
+		getBiggestHit();
+		analyseForSeeds();
+		analyseCluster();
 		analyseBiggestHit();
 	}
 	saveHistos();
