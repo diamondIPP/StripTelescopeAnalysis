@@ -89,7 +89,7 @@ void TADCEventReader::SetBranchAddresses(){
 	tree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
 	tree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
 	tree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
-	//tree->SetBranchAddress("Det_ADC",&Det_ADC[0][0]);
+	tree->SetBranchAddress("Det_ADC",&Det_ADC[0][0]);
 	tree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
 	tree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
 	tree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
