@@ -13,7 +13,7 @@ TAlignment::TAlignment(int runNumber) {
 	stringstream settingsFilePath;
 	settingsFilePath<<sys->pwd()<<"/Settings."<<runNumber<<".ini";
 	cout<<settingsFilePath.str()<<endl;
-	settings = new TSettings(settingsFilePath.str());
+	settings = new TSettings("");//settingsFilePath.str());
 
 	stringstream  runString;
 	runString.str("");
@@ -107,8 +107,13 @@ void TAlignment::createVectors(UInt_t nEvents){
 	cout<<tracks.size()<<" "<<tracks_masked.size()<<" "<<tracks_fidcut.size()<<" "<<tracks_masked_fidcut.size()<<endl;
 
 	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
+		Float_t xPos=tracks.at(trackNo).GetDetectorHitPosition(0);
 		cout<<trackNo<<" "<<tracks.at(trackNo).GetEventNumber()<<flush;
-		for(int det=0;det<9;det++)cout<<" "<<tracks.at(trackNo).GetDetectorHitPosition(det);
+		for(int no=0;no<3;no++){
+			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2+2)-xPos;
+			cout<<" "<<deltaX;
+			hXPositionDifference[no]->Fill(deltaX);
+		}
 		cout<<endl;
 	}
 }
@@ -119,6 +124,11 @@ void TAlignment::initialiseHistos(){
 		histName<<"ScatterPlot_VectorCreation_8Hits_Plane_"<<no;
 		this->hScatterPosition[no] = new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,255,256,0,255);
 	}
+	for(int no=0;no<3;no++){
+		stringstream histName;
+		histName<<"xPos_Difference_D0X-"<<TADCEventReader::getStringForPlane((no+1)*2);
+		this->hXPositionDifference[no]=new TH1F(histName.str().c_str(),histName.str().c_str(),2048,-256,256);
+	}
 }
 
 void TAlignment::saveHistos(){
@@ -126,6 +136,10 @@ void TAlignment::saveHistos(){
 	for(int no=0;no<4;no++){
 		this->histSaver->SaveHistogramPNG(this->hScatterPosition[no]);
 		delete this->hScatterPosition[no];
+	}
+	for(int no=0;no<3;no++){
+		this->histSaver->SaveHistogramPNG(hXPositionDifference[no]);
+		delete hXPositionDifference[no];
 	}
 }
 
@@ -144,9 +158,9 @@ void TAlignment::addEventToTracks()
 	Dia.SetZ(detectorDiaZ);
 
 	D0.SetX(eventReader->getCluster()->at(0).at(0).getPosition());
-	D1.SetX(255-eventReader->getCluster()->at(2).at(0).getPosition());
+	D1.SetX(eventReader->getCluster()->at(2).at(0).getPosition());
 	D2.SetX(eventReader->getCluster()->at(4).at(0).getPosition());
-	D3.SetX(255-eventReader->getCluster()->at(4).at(0).getPosition());
+	D3.SetX(eventReader->getCluster()->at(4).at(0).getPosition());
 
 	D0.SetY(eventReader->getCluster()->at(1).at(0).getPosition());
 	D1.SetY(eventReader->getCluster()->at(3).at(0).getPosition());
@@ -163,7 +177,7 @@ void TAlignment::addEventToTracks()
 	newDiamondTrack.SetDetectorHitPosition(1,yPos);
 	hScatterPosition[0]->Fill(xPos,yPos);
 
-	xPos=255-eventReader->getCluster()->at(2).at(0).getPosition();
+	xPos=eventReader->getCluster()->at(2).at(0).getPosition();
 	yPos=eventReader->getCluster()->at(3).at(0).getPosition();
 	newDiamondTrack.SetDetectorHitPosition(2,xPos);
 	newDiamondTrack.SetDetectorHitPosition(3,yPos);
@@ -175,7 +189,7 @@ void TAlignment::addEventToTracks()
 	newDiamondTrack.SetDetectorHitPosition(5,yPos);
 	hScatterPosition[2]->Fill(xPos,yPos);
 
-	xPos=255-eventReader->getCluster()->at(6).at(0).getPosition();
+	xPos=eventReader->getCluster()->at(6).at(0).getPosition();
 	yPos=eventReader->getCluster()->at(7).at(0).getPosition();
 	newDiamondTrack.SetDetectorHitPosition(6,xPos);
 	newDiamondTrack.SetDetectorHitPosition(7,yPos);

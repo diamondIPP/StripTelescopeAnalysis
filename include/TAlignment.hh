@@ -50,7 +50,6 @@ private:
 	void addEventToTracks();
 	void doDetAlignmentStep();
 	void doDiaAlignmentStep();
-	TH2F* hScatterPosition[4];
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
@@ -72,6 +71,10 @@ private:
     Double_t detectorDiaZ; // by definition
     int verbosity;
     int nAlignSteps;
+private:
+
+	TH2F* hScatterPosition[4];
+	TH1F* hXPositionDifference[3];
 };
 
 #endif /* TALIGNMENT_HH_ */

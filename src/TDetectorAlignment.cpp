@@ -223,11 +223,16 @@ void TDetectorAlignment::TrackFit3(Double_t &predicted_x, Double_t &predicted_y)
 }
 
 void TDetectorAlignment::LoadTracks(vector<TDiamondTrack> &input_tracks, vector<bool> &input_tracks_mask) {
-   track_storage.clear(); track_storage = input_tracks;
+	if(track_storage.size() != track_mask_storage.size()){
+		cout<<"TDetectorAlignment::LoadTracks: track_storage.size()="<<track_storage.size()<<" and track_mask_storage.size()="<<track_mask_storage.size()<<" are not equal!"<<endl;
+		return;
+	}
+   track_storage.clear();
+   track_storage = input_tracks;
    track_mask_storage.clear();
    track_mask_storage = input_tracks_mask;
    cout<<"TDetectAlignment::LoadTracks: "<<track_storage.size()<<" tracks loaded"<<endl;
-   if(track_storage.size() != track_mask_storage.size()) cout<<"TDetectorAlignment::LoadTracks: track_storage.size()="<<track_storage.size()<<" and track_mask_storage.size()="<<track_mask_storage.size()<<" are not equal!"<<endl;
+
 }
 
 void TDetectorAlignment::PlotAngularDistribution()
