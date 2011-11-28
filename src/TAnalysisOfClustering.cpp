@@ -354,18 +354,27 @@ void TAnalysisOfClustering::saveHistos(){
 	}
     
     for (int det = 0; det < 8; det++) {
+		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
         histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma[det]);
+		cout << "saving histogram" << this->histo_pulseheight_sigma_second[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma_second[det]);
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma125[det]);
+//		cout << "saving histogram" << this->histo_pulseheight_sigma125[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma125[det]);
+		cout << "saving histogram" << this->histo_second_biggest_hit_direction[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogramPNG(this->histo_second_biggest_hit_direction[det]);
+		cout << "saving histogram" << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogramPNG(this->histo_biggest_hit_map[det]);
+		cout << "saving histogram" << this->histo_pulseheight_left_sigma[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma[det]);
+		cout << "saving histogram" << this->histo_pulseheight_left_sigma_second[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma_second[det]);
+		cout << "saving histogram" << this->histo_pulseheight_right_sigma[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma[det]);
+		cout << "saving histogram" << this->histo_pulseheight_right_sigma_second[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma_second[det]);
         delete histo_pulseheight_sigma[det];
 		delete histo_pulseheight_sigma_second[det];
-		delete histo_pulseheight_sigma125[det];
+//		delete histo_pulseheight_sigma125[det];
 		delete histo_second_biggest_hit_direction[det];
 		delete histo_biggest_hit_map[det];
 		delete histo_pulseheight_left_sigma[det];
