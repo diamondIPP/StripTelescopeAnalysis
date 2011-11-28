@@ -61,7 +61,8 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 //		checkForSaturatedChannels();
 //		getBiggestHit();
 //		analyseForSeeds();
-		analyseCluster();
+//		analyseCluster();
+		analyseBiggestHit();
 	}
 	saveHistos();
 }
@@ -134,7 +135,27 @@ void TAnalysisOfClustering::getBiggestHit(){
 
 void TAnalysisOfClustering::analyseBiggestHit() {
     for (int det = 0; det < 8; det++) {
+		Float_t biggestSignal = (Float_t)eventReader->getAdcValue(det,0)-eventReader->getPedestalMean(det,0);
+		Float_t secondbiggestSignal = (Float_t)eventReader->getAdcValue(det,0)-eventReader->getPedestalMean(det,0);
+		int biggest_hit_channel = 0;
+		int second_biggest_hit_channel = 0;
         for (int i = 0; i < 253; i++) {
+			int adcValue = eventReader->getAdcValue(det,i);
+			Float_t PedMean = eventReader->getPedestalMean(det,i);
+			Float_t PedSigma = eventReader->getPedestalSigma(det,i);
+			Float_t signal = (Float_t)adcValue-PedMean;
+			if (i > 70 && i < 170 && adcValue < 255) {
+				if (signal > biggestSignal) {
+					second_biggest_hit_channel = biggest_hit_channel;
+					biggest_hit_channel = i;
+					secondbiggestSignal = biggestSignal;
+					biggestSignal = signal;
+				}
+				else
+					if (signal > secondbiggestSignal) {
+						second_biggest_hit_channel = i;
+						secondbiggestSignal = signal;
+					}
 //            if (det < 8 && i < 253 && i > 70 && i < 170) {
 //                if (Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) && Det_ADC[det][i] < 255) {
 //                    if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]/* && Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])*/) {
@@ -158,7 +179,42 @@ void TAnalysisOfClustering::analyseBiggestHit() {
 //                    histo_pulseheight_sigma125[det]->Fill((Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i]);
 //                }
 //            }
+			}//end if fidcut region
         }//end loop over channels
+		
+		Float_t biggestSignalSigma = biggestSignal / eventReader->getPedestalSigma(det,biggest_hit_channel);
+		Float_t secondbiggestSignalSigma = secondbiggestSignal / eventReader->getPedestalSigma(det,second_biggest_hit_channel);
+		
+		if (biggest_hit_channel > 0 && biggest_hit_channel < 255 && biggestSignalSigma > 10) {
+			// -- look for second biggest hit next to biggest hit
+			if ((Float_t)eventReader->getAdcValue(det,biggest_hit_channel-1)-eventReader->getPedestalMean(det,biggest_hit_channel-1) < (Float_t)eventReader->getAdcValue(det,biggest_hit_channel+1)-eventReader->getPedestalMean(det,biggest_hit_channel+1)) {
+				second_biggest_hit_channel = biggest_hit_channel + 1;
+				histo_second_biggest_hit_direction[det]->Fill(1.);
+			}
+			else {
+				second_biggest_hit_channel = biggest_hit_channel - 1;
+				histo_second_biggest_hit_direction[det]->Fill(-1.);
+			}
+			secondbiggestSignal = (Float_t)eventReader->getAdcValue(det,second_biggest_hit_channel)-eventReader->getPedestalMean(det,second_biggest_hit_channel);
+			secondbiggestSignalSigma = secondbiggestSignal / eventReader->getPedestalSigma(det,second_biggest_hit_channel);
+			
+			// -- start filling the histograms
+			histo_pulseheight_sigma[det]->Fill(biggestSignalSigma);
+			histo_pulseheight_sigma_second[det]->Fill(secondbiggestSignalSigma);
+			
+			// -- left chip
+			if (biggest_hit_channel < 128) {
+				histo_pulseheight_left_sigma[det]->Fill(biggestSignalSigma);
+				histo_pulseheight_left_sigma_second[det]->Fill(secondbiggestSignalSigma);
+			}
+			// -- right chip
+			else {
+				histo_pulseheight_right_sigma[det]->Fill(biggestSignalSigma);
+				histo_pulseheight_right_sigma_second[det]->Fill(secondbiggestSignalSigma);
+			}
+			
+			histo_biggest_hit_map[det]->Fill(biggest_hit_channel);
+		}
     }//end loop over detectors
 }
 
