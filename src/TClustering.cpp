@@ -55,12 +55,15 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 TClustering::~TClustering() {
 	// TODO Auto-generated destructor stub
 	clusterFile->cd();
-	clusterTree->Write();
 	if(clusterTree!=NULL){
+		cout<<"CLOSING TREE"<<endl;
+		cout<<eventReader->getTree()->GetName()<<" "<<filepath.str().c_str()<<endl;
 		clusterTree->AddFriend(eventReader->getTree()->GetName(),filepath.str().c_str());
+		cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
 		clusterTree->AddFriend("rawTree",rawFilePath.str().c_str());
 		cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 	}
+	clusterTree->Write();
 	clusterTree->Delete();
 	clusterFile->Close();
 	delete eventReader;

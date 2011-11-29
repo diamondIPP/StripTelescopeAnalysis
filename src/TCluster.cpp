@@ -172,6 +172,21 @@ bool TCluster::isScreened(UInt_t cl)
 
 }
 
+
+Float_t TCluster::highest2_centroid()
+{
+	UInt_t maxCh = this->getMaximumChannel();
+	UInt_t clPos;
+	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
+	}
+	if(this->getSignal(clPos-1)<getSignal(clPos+1))
+		return ( getSignal(clPos)*clPos+getSignal(clPos+1)*(clPos+1))/(getSignal(clPos)+getSignal(clPos+1));
+	else
+		return ( getSignal(clPos)*clPos+getSignal(clPos-11)*(clPos-1))/(getSignal(clPos)+getSignal(clPos-1));
+
+}
+
+
 void TCluster::checkForLumpyCluster(){
 	this->isLumpy=false;
 	if(cluster.size()<=2)

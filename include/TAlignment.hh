@@ -75,6 +75,11 @@ private:
 
 	TH2F* hScatterPosition[4];
 	TH1F* hXPositionDifference[3];
+	TH2F* hXYPositionDifference[3];
+	TH2F* hXXPositionDifference[3];
+	TH1F* hYPositionDifference[3];
+	TH2F* hYYPositionDifference[3];
+	TH2F* hYXPositionDifference[3];
 };
 
 #endif /* TALIGNMENT_HH_ */

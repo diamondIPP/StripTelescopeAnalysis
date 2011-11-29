@@ -73,6 +73,7 @@ public:
     bool isBadChannelCluster(){return hasBadChannel;}
     bool isScreened();
     bool isScreened(UInt_t cl);
+    Float_t highest2_centroid();
 
 private:
     void checkForGoldenGate();

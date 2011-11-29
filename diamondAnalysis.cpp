@@ -148,14 +148,14 @@ int main(int argc, char ** argv) {
 		TAlignment *alignment;
 		alignment= new TAlignment(RUNNUMBER);
 		alignment->createVectors(NEVENTS);
-		alignment->Align();
+		//alignment->Align();
 		delete alignment;
 
 //
-//		TAnalysisOfClustering* analysisClustering;
-//		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
-//		analysisClustering->doAnalysis(NEVENTS);
-//		delete analysisClustering;
+		TAnalysisOfClustering* analysisClustering;
+		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
+		analysisClustering->doAnalysis(NEVENTS);
+		delete analysisClustering;
 
 
 

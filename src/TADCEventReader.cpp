@@ -98,7 +98,7 @@ void TADCEventReader::SetBranchAddresses(){
 	tree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
 	tree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
 	tree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
-	tree->SetBranchAddress("Dia_ADC",&Dia_ADC);
+	//tree->SetBranchAddress("Dia_ADC",&Dia_ADC);
 	tree->SetBranchAddress("DiaADC",&Dia_ADC);
 	tree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
 	tree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
@@ -293,9 +293,9 @@ TCluster::vecvecTCluster* TADCEventReader::getCluster() const
 
 UInt_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)
 {
-	if (det==8)
+	if (det==8&&ch<128)
 		return (UInt_t)this->getDia_ADC(ch);
-	else
+	else if(ch<256)
 		return (UInt_t)this->getDet_ADC(det,ch);
 }
 
@@ -305,6 +305,22 @@ Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch)
 		return 0;
 	else
 		return (((Float_t)this->getAdcValue(det,ch)-this->getPedestalMean(det,ch))/this->getPedestalSigma(det,ch));
+}
+
+TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
+{
+	if(this->pVecvecCluster->at(det).size()>cl)
+		return pVecvecCluster->at(det).at(cl);
+	else {
+		cout<<"CLUSTER DOES NOT EXIST!!!!!! there are:"<<pVecvecCluster->at(det).size()<<" CLuster..."<<endl;
+		return TCluster();
+	}
+}
+
+void TADCEventReader::checkADC(){
+	this->GetEvent(100);
+	for(int ch=0;ch<256;ch++)
+		cout<<this->getAdcValue(0,ch)<<" "<<this->getAdcValue(1,ch)<<" "<<this->getAdcValue(8,ch)<<endl;
 }
 
 TObject* TADCEventReader::getTreeName(){

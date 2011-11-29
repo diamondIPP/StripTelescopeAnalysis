@@ -51,7 +51,8 @@ public:
     Float_t getPedestalMean(UInt_t det, UInt_t ch);
     Float_t getPedestalSigma(UInt_t det, UInt_t ch);
     TCluster::vecvecTCluster* getCluster() const;
-
+    TCluster getCluster(UInt_t det,UInt_t cl);
+    void checkADC();
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);

@@ -50,6 +50,7 @@ TAnalysisOfClustering::~TAnalysisOfClustering() {
 void TAnalysisOfClustering::doAnalysis(int nEvents)
 {
 	cout<<"find dead channels..."<<endl;
+	eventReader->checkADC();
 	if(nEvents!=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
@@ -62,10 +63,10 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 		cout<<endl;//*/
 		checkForDeadChannels();
 		checkForSaturatedChannels();
-		getBiggestHit();
+//		getBiggestHit();
 		analyseForSeeds();
 		analyseCluster();
-		analyseBiggestHit();
+//		analyseBiggestHit();
 	}
 	saveHistos();
 }

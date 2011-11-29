@@ -23,7 +23,7 @@ TAlignment::TAlignment(int runNumber) {
 	runString.str("");
 	runString<<runNumber;
 	sys->MakeDirectory(runString.str().c_str());
-
+	gErrorIgnoreLevel=1001;
 	sys->cd(runString.str().c_str());
 	stringstream  filepath;
 	filepath.str("");
@@ -31,6 +31,7 @@ TAlignment::TAlignment(int runNumber) {
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<filepath.str()<<endl;
 	eventReader=new TADCEventReader(filepath.str());
+	eventReader->checkADC();
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("alignment");
 	sys->cd("alignment");
@@ -42,11 +43,12 @@ TAlignment::TAlignment(int runNumber) {
 	initialiseHistos();
 	cout<<"end initialise"<<endl;
 	alignmentPercentage=1;
-	detectorD0Z = 0.725; // by definition
-	detectorD1Z = 1.625; // by definition
-	detectorD2Z = 18.725; // by definition
-	detectorD3Z = 19.625; // by definition
-	detectorDiaZ = 10.2; // by definition
+	Float_t stripSize= 50./10000.;//mu m
+	detectorD0Z = 0.725/stripSize; // by definition in cm
+	detectorD1Z = 1.625/stripSize; // by definition in cm
+	detectorD2Z = 18.725/stripSize; // by definition in cm
+	detectorD3Z = 19.625/stripSize; // by definition in cm
+	detectorDiaZ = 10.2/stripSize; // by definition in cm
 	this->runNumber=runNumber;
 	verbosity=2;
 	nAlignSteps=1;
@@ -122,11 +124,22 @@ void TAlignment::createVectors(UInt_t nEvents){
 
 	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
 		Float_t xPos=tracks.at(trackNo).GetDetectorHitPosition(0);
+		Float_t yPos=tracks.at(trackNo).GetDetectorHitPosition(1);
 		cout<<trackNo<<" "<<tracks.at(trackNo).GetEventNumber()<<flush;
-		for(int no=0;no<3;no++){
-			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2+2)-xPos;
+		for(int no=1;no<4;no++){
+			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2)-xPos;
 			cout<<" "<<deltaX;
-			hXPositionDifference[no]->Fill(deltaX);
+			hXPositionDifference[no-1]->Fill(deltaX);
+			hXXPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2));
+			hXYPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
+		}
+		cout<<"\ty:  ";
+		for(int no=1;no<4;no++){
+			Float_t deltaY = tracks.at(trackNo).GetDetectorHitPosition(no*2+1)-yPos;
+			cout<<" "<<deltaY;
+			hYPositionDifference[no-1]->Fill(deltaY);
+			hYXPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2));
+			hYYPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
 		}
 		cout<<endl;
 	}
@@ -139,9 +152,33 @@ void TAlignment::initialiseHistos(){
 		this->hScatterPosition[no] = new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,255,256,0,255);
 	}
 	for(int no=0;no<3;no++){
+		//*******************XPOS******************************************
 		stringstream histName;
 		histName<<"xPos_Difference_D0X-"<<TADCEventReader::getStringForPlane((no+1)*2);
 		this->hXPositionDifference[no]=new TH1F(histName.str().c_str(),histName.str().c_str(),2048,-256,256);
+
+		histName.str("");
+		histName<<"xPos_Difference_D0X-"<<TADCEventReader::getStringForPlane((no)*2+2)<<"_vsX";
+		this->hXXPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
+
+		histName.str("");
+		histName<<"xPos_Difference_D0X-"<<TADCEventReader::getStringForPlane((no)*2+2)<<"_vsY";
+		this->hXYPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
+
+		//*********************YPOS***********************************************
+
+		histName.str("");
+		histName<<"yPos_Difference_D0Y-"<<TADCEventReader::getStringForPlane((no)*2+3);
+		this->hYPositionDifference[no]=new TH1F(histName.str().c_str(),histName.str().c_str(),2048,-256,256);
+
+		histName.str("");
+		histName<<"yPos_Difference_D0Y-"<<TADCEventReader::getStringForPlane((no)*2+3)<<"_vsX";
+		this->hYXPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
+
+		histName.str("");
+		histName<<"yPos_Difference_D0Y-"<<TADCEventReader::getStringForPlane((no)*2+3)<<"_vsY";
+		this->hYYPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
+
 	}
 }
 
@@ -152,11 +189,36 @@ void TAlignment::saveHistos(){
 		delete this->hScatterPosition[no];
 	}
 	for(int no=0;no<3;no++){
+		//** XPOS***
 		float mean = hXPositionDifference[no]->GetMean();
 		float sigma= hXPositionDifference[no]->GetRMS();
 		hXPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
 		this->histSaver->SaveHistogramPNG(hXPositionDifference[no]);
 		delete hXPositionDifference[no];
+		hXXPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
+		hXXPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
+		hXYPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
+		hXYPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
+		this->histSaver->SaveHistogramPNG(hXXPositionDifference[no]);
+		this->histSaver->SaveHistogramPNG(hXYPositionDifference[no]);
+		delete this->hXXPositionDifference[no];
+		delete this->hXYPositionDifference[no];
+
+		//** YPOS***
+
+		mean = hYPositionDifference[no]->GetMean();
+		sigma= hYPositionDifference[no]->GetRMS();
+		hYPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
+		hYXPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
+		hYYPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
+		hXYPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
+		hYYPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
+		this->histSaver->SaveHistogramPNG(hYPositionDifference[no]);
+		this->histSaver->SaveHistogramPNG(hYXPositionDifference[no]);
+		this->histSaver->SaveHistogramPNG(hYYPositionDifference[no]);
+		delete hYPositionDifference[no];
+		delete this->hYXPositionDifference[no];
+		delete this->hYYPositionDifference[no];
 	}
 }
 
