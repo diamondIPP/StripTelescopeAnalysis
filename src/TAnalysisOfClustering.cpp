@@ -8,6 +8,9 @@
 #include "../include/TAnalysisOfClustering.hh"
 
 TAnalysisOfClustering::TAnalysisOfClustering(int runNumber,int seedSigma,int hitSigma) {
+	cout<<"**********************************************************"<<endl;
+	cout<<"*********TAnalysisOfClustering::TAnalysisOfClustering*****"<<endl;
+	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
 	stringstream  runString;

@@ -10,6 +10,13 @@
 #include "../include/TClustering.hh"
 
 TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
+	cout<<"**********************************************************"<<endl;
+	cout<<"*************TClustering::TClustering*********************"<<endl;
+	cout<<"**********************************************************"<<endl;
+	cout<<runNumber<<endl;
+	cout<<seedDetSigma<<"/"<<hitDetSigma<<endl;
+	cout<<seedDiaSigma<<"/"<<hitDiaSigma<<endl;
+
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
 	stringstream  runString;
@@ -41,6 +48,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	this->maxDetAdcValue=255;
 	this->maxDiaAdcValue=4095;
 	pVecvecCluster=&vecvecCluster;
+	settings=NULL;
 
 }
 
@@ -60,8 +68,13 @@ TClustering::~TClustering() {
 	sys->cd("..");
 }
 
+void TClustering::setSettings(TSettings* settings){
+	this->settings=settings;
+}
+
 void TClustering::ClusterEvents(int nEvents)
 {
+	if(settings==NULL)settings=new TSettings("");//todo anpassen
 	vecvecCluster.resize(9);
 	if(!createClusterTree(nEvents)) return;
 	setBranchAdresses();
@@ -162,10 +175,12 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
 	Float_t signal = (Float_t)eventReader->getAdcValue(det,ch)-eventReader->getPedestalMean(det,ch);
 	Float_t adcValueInSigma=signal/sigma;
+	UShort_t adcValue;
 
 	//create Cluster
 	int seedSigma;
 	int hitSigma;
+	bool isScreened;
 	if (det==8){
 		hitSigma=this->hitDiaSigma;
 		seedSigma=this->seedDiaSigma;
@@ -178,35 +193,41 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>2)cout<<cluster.size()<<" ";
-	for(int currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0;currentCh--){
+	int currentCh;
+	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0;currentCh--){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
-		UShort_t adcValue=eventReader->getAdcValue(det,currentCh);
+		adcValue=eventReader->getAdcValue(det,currentCh);
 		signal = (Float_t)adcValue-eventReader->getPedestalMean(det,currentCh);
+		isScreened=this->settings->isDet_channel_screened(det,currentCh);
 		adcValueInSigma=signal/sigma;
 		if(sigma!=0&&adcValueInSigma>hitSigma){
-			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue);//todo add saturated
+			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 		}
 		else{
 			if((verbosity>2&&det==8)||verbosity>3)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<sigma<<"/"<<adcValueInSigma<<"] ";
 			break;
 		}
 	}
+	if(currentCh>=0)
+		cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 	if((verbosity>2&&det==8)||verbosity>3)cout<<" ."<<cluster.size()<<". ";
-	int currentCh;
 	for(currentCh=ch+1;currentCh<N_DET_CHANNELS;currentCh++){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
-		UShort_t adcValue=eventReader->getAdcValue(det,currentCh);
+		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(sigma==0)cout<<"$";
 		signal = (Float_t)adcValue-eventReader->getPedestalMean(det,currentCh);
 		adcValueInSigma=signal/sigma;
+		isScreened=this->settings->isDet_channel_screened(det,currentCh);
 		if(sigma!=0&&adcValueInSigma>hitSigma&&sigma!=0){
-			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue);
+			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);
 		}
 		else{
 			if((verbosity>2&&det==8)||verbosity>3)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<adcValueInSigma<<"] ";
 			break;
 		}
 	}
+	if(currentCh<256)
+		cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 	cluster.checkCluster();
 	vecCluster[det].push_back(cluster);
 	nClusters[det]++;
@@ -276,7 +297,6 @@ bool TClustering::createClusterTree(int nEvents)
 
 	return createdNewTree;
 }
-
 
 void TClustering::setBranchAdresses(){
 	cout<<"set Branch adresses..."<<endl;

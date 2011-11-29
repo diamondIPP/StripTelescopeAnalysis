@@ -8,7 +8,7 @@
 #include "../include/TCluster.hh"
 ClassImp(TCluster);
 
-TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma) {
+TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma,UInt_t nChannels) {
 	// TODO Auto-generated constructor stub
 	numberOfSeeds=0;
 	numberOfHits=0;
@@ -29,7 +29,7 @@ TCluster::~TCluster() {
 	// TODO Auto-generated destructor stub
 }
 
-void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated){
+void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
 	this->isSaturated=bSaturated;
 	if(signalInSigma>seedSigma)
@@ -37,8 +37,8 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t 
 	else if(signalInSigma>hitSigma)
 		numberOfHits++;
 	else{
-		cerr<<"No valid channel added to cluster:"<<ch<<" "<<signal<<" "<<signalInSigma<<" "<<seedSigma<<" "<<hitSigma<<(signalInSigma>hitSigma)<<endl;
-		return;
+		//cerr<<"No valid channel added to cluster:"<<ch<<" "<<signal<<" "<<signalInSigma<<" "<<seedSigma<<" "<<hitSigma<<(signalInSigma>hitSigma)<<endl;
+		numberOfNoHits++;
 	}
 	if(signal>maximumSignal){
 		maximumSignal=signal;
@@ -48,6 +48,7 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t 
 	if(cluster.size()>0&&ch<cluster.at(0).first){
 		cluster.push_back(make_pair(ch,signal));
 		cluster2.push_back(make_pair(adcValue,signalInSigma));
+		this->clusterChannelScreened.push_back(screened);
 	}
 	else{
 		cluster.push_back(make_pair(ch,signal));
@@ -94,12 +95,17 @@ Float_t TCluster::getChargeWeightedMean(){
 	Float_t sum=0;
 	Float_t charged=0;
 	for(int i=0;i<this->cluster.size();i++){
-		sum+=cluster.at(i).first*cluster.at(i).second;
-		charged+=cluster.at(i).second;
+		if(cluster2.at(i).second>hitSigma){
+			//todo . take at least second biggest hit for =charge weighted mean
+			sum+=cluster.at(i).first*cluster.at(i).second;
+			charged+=cluster.at(i).second;
+		}
 	}
 
-		return sum/charge;
+	return sum/charge;
 }
+
+
 void TCluster::setPositionCalulation(calculationMode_t mode){
 this->mode=mode;
 }
@@ -145,6 +151,25 @@ void TCluster::setHitSigma(int hitSigma)
 void TCluster::setSeedSigma(int seedSigma)
 {
     this->seedSigma = seedSigma;
+}
+
+bool TCluster::isScreened()
+{
+	bool isOneChannelScreened=false;
+	for(int cl;cl<clusterChannelScreened.size();cl++)
+		isOneChannelScreened+=clusterChannelScreened.at(cl);
+	isOneChannelScreened+=((this->getMinChannelNumber()==0)||this->getMaxChannelNumber()==nChannels-1);
+}
+
+bool TCluster::isScreened(UInt_t cl)
+{
+	if(cl<this->clusterChannelScreened.size())
+		return clusterChannelScreened.at(cl);
+	else{
+		cout<<"tried to get isScreend for not valid channel from cluster:"<<cl<<endl;
+		return true;
+	}
+
 }
 
 void TCluster::checkForLumpyCluster(){

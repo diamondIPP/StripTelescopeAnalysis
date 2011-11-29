@@ -22,7 +22,7 @@
 
 class TSettings {
 public:
-	TSettings(std::string fileName);
+	TSettings(std::string fileName,UInt_t runNumber=0);
 	virtual ~TSettings();
 
 	Float_t getAlignment_chi2() const;
@@ -63,6 +63,7 @@ public:
 	Int_t getSnr_plots_enable() const;
 	Float_t getAlignment_training_track_fraction() const;
 	ChannelScreen getDet_channel_screen(int i);
+	bool isDet_channel_screened(UInt_t det,UInt_t ch);
 	std::vector<int> getDet_channel_screen_channels(int i) const;
 	std::vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
@@ -74,6 +75,7 @@ public:
 	Int_t getCMN_corr_high();
 	std::vector<int> getSingle_channel_analysis_channels();
 	float getStore_threshold();
+	UInt_t getRunNumber();
 
 	void setAlignment_training_track_fraction(Float_t alignment_training_track_fraction);
 	void setFix_dia_noise(float fix_dia_noise);
@@ -239,6 +241,7 @@ private:
     Int_t singleTrack2DmaxClusterSize; //max size of clusters in silicon track (cluster = Di_Hit_Factor hits; no check for seeds/shoulders)
 
     Float_t maxNoise2D; //highest noise value plotted in 2D noise histogram
+    UInt_t runNumber;
 private:
     //Filter tracks not in good fiducial region w/o bad strips
     Int_t align_sil_fid_xlow;

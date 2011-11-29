@@ -17,6 +17,7 @@
 #include "time.h"
 #include "TSystem.h"
 #include "TAlignment.hh"
+#include "TSettings.class.hh"
 
 using namespace std;
 /*** USAGE ***/
@@ -118,6 +119,11 @@ int main(int argc, char ** argv) {
 //		log = freopen(logfilename.str().c_str(), "w", stdout);
 
 		//Save Events to RUNNUMBER/rawDATA.RUNNUMBER.root
+
+		stringstream settingsFileName;
+		settingsFileName<<"settings."<<RUNNUMBER<<".ini";
+		TSettings *settings=NULL;
+		settings=new TSettings(settingsFileName.str(),RUNNUMBER);
 		TRawEventSaver *eventSaver;
 		eventSaver = new TRawEventSaver(RUNNUMBER);
 		eventSaver->saveEvents(NEVENTS);
@@ -133,6 +139,7 @@ int main(int argc, char ** argv) {
 
 		TClustering* clustering;
 		clustering=new TClustering(RUNNUMBER);
+		clustering->setSettings(settings);
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
@@ -141,15 +148,18 @@ int main(int argc, char ** argv) {
 		TAlignment *alignment;
 		alignment= new TAlignment(RUNNUMBER);
 		alignment->createVectors(NEVENTS);
-	//	alignment->Align();
+		alignment->Align();
 		delete alignment;
 
+//
+//		TAnalysisOfClustering* analysisClustering;
+//		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
+//		analysisClustering->doAnalysis(NEVENTS);
+//		delete analysisClustering;
 
-		TAnalysisOfClustering* analysisClustering;
-		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
-		analysisClustering->doAnalysis(NEVENTS);
-		delete analysisClustering;
 
+
+		if (settings!=NULL)delete settings;
 //		if (DO_SLIDINGPEDESTAL) {
 //			cout << endl;
 //			cout << "==> Starting SlidingPedestal.." << endl;

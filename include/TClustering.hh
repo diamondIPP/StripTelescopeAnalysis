@@ -30,6 +30,7 @@ using namespace std;
 
 #include "TADCEventReader.hh"
 #include "TCluster.hh"
+#include "TSettings.class.hh"
 #define N_DET_CHANNELS 256
 #define N_DIA_CHANNELS 128
 
@@ -39,6 +40,7 @@ public:
 	TClustering(int runNumber,int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 	virtual ~TClustering();
 	void ClusterEvents(int nEvents);
+	void setSettings(TSettings* settings);
 private:
 	void clusterEvent();
 	void clusterPlane(int det);
@@ -46,6 +48,7 @@ private:
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
+    TSettings *settings;
     vector<TCluster> vecCluster[9];
     UInt_t clusterRev;
     TCluster::vecvecTCluster vecvecCluster;
@@ -66,6 +69,7 @@ private:
     UInt_t nClusters[9];
     UShort_t maxDetAdcValue;
     UShort_t maxDiaAdcValue;
+
 };
 
 #endif /* TCLUSTERING_HH_ */

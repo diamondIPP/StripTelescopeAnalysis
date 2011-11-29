@@ -8,12 +8,16 @@
 #include "../include/TAlignment.hh"
 
 TAlignment::TAlignment(int runNumber) {
+	cout<<"**********************************************************"<<endl;
+	cout<<"*************TAlignment::TAlignment***********************"<<endl;
+	cout<<"**********************************************************"<<endl;
+	cout<<runNumber<<endl;
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
 	stringstream settingsFilePath;
 	settingsFilePath<<sys->pwd()<<"/Settings."<<runNumber<<".ini";
 	cout<<settingsFilePath.str()<<endl;
-	settings = new TSettings("");//settingsFilePath.str());
+	settings = new TSettings("settingsFilePath.str()");
 
 	stringstream  runString;
 	runString.str("");
@@ -44,7 +48,7 @@ TAlignment::TAlignment(int runNumber) {
 	detectorD3Z = 19.625; // by definition
 	detectorDiaZ = 10.2; // by definition
 	this->runNumber=runNumber;
-	verbosity=1;
+	verbosity=2;
 	nAlignSteps=1;
 
 	align=NULL;
@@ -68,6 +72,8 @@ void TAlignment::createVectors(UInt_t nEvents){
 	int noHitDia=0;
 	int falseClusterSizeDia=0;
 	int nCandidates=0;
+	int nScreened=0;
+	bool isScreened=false;
 	cout<<"ANALYSE VECTORS...."<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
@@ -98,12 +104,20 @@ void TAlignment::createVectors(UInt_t nEvents){
 		//events with candidate=true areevents which have exactly one cluster in each plane
 		// and the cluster size is 2
 		if (candidate){
+			isScreened=eventReader->getCluster()->at(8).at(0).isScreened();
+			if(isScreened){
+				nScreened++;
+				candidate=false;
+			}
+		}
+		if (candidate){
 			nCandidates++;
 			addEventToTracks();
 		}
 	}
-	cout<<"\n\nDetAnalysed "<<nEvents<<": "<<nCandidates<<" Candidates while "<< noHitDet<<" Events have not exactly one Cluster and "<<falseClusterSizeDet<<" Events have wrong cluster size"<<endl;
+	cout<<"\n\nDetAnalysed "<<nEvents<<": "<<nEvents-noHitDet-falseClusterSizeDet<<" Candidates while "<< noHitDet<<" Events have not exactly one Cluster and "<<falseClusterSizeDet<<" Events have wrong cluster size"<<endl;
 	cout<<"\n\nDiaAnalysed "<<nEvents-noHitDet-falseClusterSizeDet<<": "<<nCandidates<<" Candidates while "<< noHitDia<<" Events have not exactly one Cluster and "<<falseClusterSizeDia<<" Events have wrong cluster size"<<endl;
+	cout<<"EVENTS SCREENED:"<<nScreened<<endl;
 	cout<<tracks.size()<<" "<<tracks_masked.size()<<" "<<tracks_fidcut.size()<<" "<<tracks_masked_fidcut.size()<<endl;
 
 	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
@@ -138,6 +152,9 @@ void TAlignment::saveHistos(){
 		delete this->hScatterPosition[no];
 	}
 	for(int no=0;no<3;no++){
+		float mean = hXPositionDifference[no]->GetMean();
+		float sigma= hXPositionDifference[no]->GetRMS();
+		hXPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
 		this->histSaver->SaveHistogramPNG(hXPositionDifference[no]);
 		delete hXPositionDifference[no];
 	}
@@ -145,7 +162,6 @@ void TAlignment::saveHistos(){
 
 void TAlignment::addEventToTracks()
 {
-
 	TDetectorPlane D0;
 	TDetectorPlane D1;
 	TDetectorPlane D2;
@@ -201,7 +217,7 @@ void TAlignment::addEventToTracks()
 	tracks.push_back(newDiamondTrack);
 	tracks_masked.push_back((rand.Rndm()>this->alignmentPercentage));
 	tracks_fidcut.push_back(newDiamondTrack);
-	tracks_masked_fidcut.push_back((rand.Rndm()<this->alignmentPercentage));
+	tracks_masked_fidcut.push_back((rand.Rndm()>this->alignmentPercentage));
 
 }
 
@@ -249,7 +265,7 @@ int TAlignment::Align()
 
 void TAlignment::doDetAlignmentStep(){
 	Int_t nPasses = 10;
-	Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
+	//Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
 	if(verbosity)cout<<"TAlignment::doAlignmentStep::PlotAngularDistribution"<<endl;
 
 	align->PlotAngularDistribution(); //look at angular distribution of tracks
@@ -259,27 +275,27 @@ void TAlignment::doDetAlignmentStep(){
 	string postname = "alignment_PostalignmentResiduals";
 
 	// generate residuals before alignment
-	if(verbosity)cout<<"AlignmentClass::Align::CheckDetectorAlignment"<<endl;
+	if(verbosity)cout<<"TAlignment::Align::CheckDetectorAlignment"<<endl;
 	//align->LoadTracks(this->tracks, this->tracks_masked);
 	align->CheckDetectorAlignmentXYPlots(0, 1, 3, prename);
 	align->CheckDetectorAlignmentXYPlots(1, 0, 3, prename);
 	align->CheckDetectorAlignmentXYPlots(2, 0, 3, prename);
 	align->CheckDetectorAlignmentXYPlots(3, 0, 2, prename);
 	// itterative alignment loop
-	if(verbosity)cout<<"AlignmentClass::Align::alignmentloop"<<endl;
+	if(verbosity)cout<<"TAlignment::doDetAlignmentStep::alignmentloop"<<endl;
 
-	align->setVerbosity(0);
+	align->setVerbosity(verbosity-1);
 	for(int i=0; i<nPasses; i++) {
 		cout << "\n\nPass " << i+1 << endl<< endl;
 		//xy alignment
 		align->CheckDetectorAlignmentXY(0, 1, 3);
-		align->AlignDetectorXY(1, 0, 3);
-		align->AlignDetectorXY(2, 0, 3);
+		align->AlignDetectorXY(1, 0, 3,verbosity>1);
+		align->AlignDetectorXY(2, 0, 3,verbosity>1);
 		//align->AlignDetectorXY(1, 0, 3);
 		//align->AlignDetectorXY(2, 0, 3);
 		//align->AlignDetectorXY(1, 0, 3);
 		//align->AlignDetectorXY(2, 0, 3);
-		align->AlignDetectorXY(3, 0, 2);
+		align->AlignDetectorXY(3, 0, 2,verbosity>1);
 		//align->AlignDetectorXY(2, 0, 3);
 		//align->AlignDetectorXY(1, 0, 3);
 
@@ -296,7 +312,7 @@ void TAlignment::doDetAlignmentStep(){
 
 	cout<<endl;
 	cout<<endl;
-	cout<<"AlignmentClass::Align:Checking final Silicon residuals"<<endl;
+	cout<<"TAlignment::doDetAlignmentStep:Checking final Silicon residuals"<<endl;
 	cout<<endl;
 
 	// generate residuals after alignment
@@ -313,7 +329,7 @@ void TAlignment::doDiaAlignmentStep()
 	align->LoadTracks(tracks_fidcut, tracks_masked_fidcut);
 
 	//check that the silicon is still aligned for these tracks_fidcut
-	cout<<"AlignmentClass::Align:Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;
+	cout<<"TAlignment::doDiaAlignmentStep:Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;
 	align->CheckDetectorAlignmentXY(0, 1, 3);
 	align->CheckDetectorAlignmentXY(1, 0, 3);
 	align->CheckDetectorAlignmentXY(2, 0, 3);
@@ -338,7 +354,7 @@ void TAlignment::doDiaAlignmentStep()
 
 	cout<<endl;
 	cout<<endl;
-	cout<<"AlignmentClass::Align:Checking final diamond residuals"<<endl;
+	cout<<"TAlignment::doDiaAlignmentStep:Checking final diamond residuals"<<endl;
 	cout<<endl;
 
 	// generate residuals after alignment

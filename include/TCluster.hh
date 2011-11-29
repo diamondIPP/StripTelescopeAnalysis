@@ -20,7 +20,7 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static int TCLUSTER_REVISION() {return 7;};
+	static UInt_t TCLUSTER_REVISION() {return 9;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2};
     TCluster()
@@ -39,10 +39,12 @@ public:
         revisionNumber=TCLUSTER_REVISION();
         isChecked = false;
         hasBadChannel=false;
+        numberOfNoHits=0;
+        nChannels=256;
     };
-    TCluster(int eventNumber, int seedSigma = 10, int hitSigma = 7);
+    TCluster(int eventNumber, int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
     virtual ~TCluster();
-    void addChannel(int channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated);
+    void addChannel(int channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
     Float_t getPosition();
     void clear();
     bool isLumpyCluster();
@@ -69,14 +71,18 @@ public:
     void setSeedSigma(int seedSigma);
     bool isSaturatedCluster(){return isSaturated;};
     bool isBadChannelCluster(){return hasBadChannel;}
+    bool isScreened();
+    bool isScreened(UInt_t cl);
 
 private:
     void checkForGoldenGate();
     void checkForLumpyCluster();
     deque<pair<int,Float_t> > cluster; //ch,signal
     deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
+    deque<bool> clusterChannelScreened;
     UInt_t numberOfSeeds;
     UInt_t numberOfHits;
+    UInt_t numberOfNoHits;
     int seedSigma;
     int hitSigma;
     bool isSaturated;
@@ -90,6 +96,7 @@ private:
     Float_t maximumSignal;
     int maxChannel;
     int revisionNumber;
+    UInt_t nChannels;
     ClassDef(TCluster,TCLUSTER_REVISION());
 };
 

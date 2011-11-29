@@ -416,9 +416,11 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    resxrms = 0;
    resymean = 0;
    resyrms = 0;
+   UInt_t nNotMasked=0;
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
-      //if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
+      if(track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
+      nNotMasked++;
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5)
          PositionPredictor(subject_detector);
@@ -432,13 +434,14 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       resxrms += resxtest * resxtest;
       resyrms += resytest * resytest;
    }
-   resxmean = resxmean / Double_t(track_storage.size());
-   resymean = resymean / Double_t(track_storage.size());
-   resxrms = TMath::Sqrt(resxrms / Double_t(track_storage.size()) - resxmean*resxmean);
-   resyrms = TMath::Sqrt(resyrms / Double_t(track_storage.size()) - resymean*resymean);
+   resxmean = resxmean /(Double_t)nNotMasked;
+   resymean = resymean /(Double_t)nNotMasked;
+   resxrms = TMath::Sqrt(resxrms / (Double_t)nNotMasked - resxmean*resxmean);
+   resyrms = TMath::Sqrt(resyrms / (Double_t)nNotMasked- resymean*resymean);
    if(verbosity>=0){
-	   cout<<"resxmean: "<<resxmean <<"+/-"<<resxrms<<endl;
-	   cout<<"resymean: "<<resymean << "+/-"<<resyrms<<endl;
+	   cout<<"\tmaskedChannels: "<<track_mask_storage.size()-nNotMasked<<"\tmasked: "<<nNotMasked<<endl;
+	   cout<<"\tresxmean: "<<resxmean <<"+/-"<<resxrms<<endl;
+	   cout<<"\tresymean: "<<resymean << "+/-"<<resyrms<<endl;
    }
 
 //   for(int l=0; l<(int)track_mask_storage.size();l+=5)
@@ -446,12 +449,13 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    //now select tracks with reasonably small residuals
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
-      if(!track_mask_storage[t] || track_storage[t].FakeTrack) {
-//    	  cout<<"skip track no."<<t;
-//    	  if(track_storage[t].FakeTrack)
-//    		  cout<<" track is marked as a fake track:!|"<<endl;
-//    	  else
-//    		  cout<<" reack is not selceted for determining alignment constant"<<endl;
+      if(track_mask_storage[t] || track_storage[t].FakeTrack) {
+    	  if(verbose){
+    	  cout<<"skip track no."<<t;
+    	  if(track_storage[t].FakeTrack)
+    		  cout<<" track is marked as a fake track:!|"<<endl;
+    	  else
+    		  cout<<" reack is not selceted for determining alignment constant"<<endl;}
     	  continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
       }
       LoadData(track_storage[t]);
@@ -555,9 +559,11 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       resxrms = 0;
       resymean = 0;
       resyrms = 0;
+      UInt_t nNotMasked=0;
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
       {
-         //if(!track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
+         if(track_mask_storage[t]) continue; // skip tracks not selected for determining alignment constants
+         nNotMasked++;
          LoadData(track_storage[t]);
          if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5)
             PositionPredictor(subject_detector);
@@ -571,15 +577,15 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
          resxrms += resxtest * resxtest;
          resyrms += resytest * resytest;
       }
-      resxmean = resxmean / Double_t(track_storage.size());
-      resymean = resymean / Double_t(track_storage.size());
-      resxrms = TMath::Sqrt(resxrms / Double_t(track_storage.size()) - resxmean*resxmean);
-      resyrms = TMath::Sqrt(resyrms / Double_t(track_storage.size()) - resymean*resymean);
-
+      resxmean = resxmean / (Double_t)nNotMasked;
+      resymean = resymean / (Double_t)nNotMasked;
+      resxrms = TMath::Sqrt(resxrms /  (Double_t)nNotMasked - resxmean*resxmean);
+      resyrms = TMath::Sqrt(resyrms /  (Double_t)nNotMasked - resymean*resymean);
+      //cout<<"\tmaskedChannels: "<<track_mask_storage.size()-nNotMasked<<"\tmasked: "<<nNotMasked<<endl;
       //now select tracks with reasonably small residuals
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
       {
-         if(!track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
+         if(track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
          LoadData(track_storage[t]);
          if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5)
             PositionPredictor(subject_detector);
@@ -700,17 +706,17 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 }
 
 void TDetectorAlignment::AlignDetectorXY(int subject_detector, bool verbose, bool justcheck) {
-	if(verbosity)cout<<"AlignmentClass::Align::AlignDetectorXY"<<endl;
+	if(verbosity)cout<<"TDetectorAlignment::Align::AlignDetectorXY"<<endl;
    AlignDetectorXY(subject_detector, -1, -1, verbose, justcheck);
 }
 
 void TDetectorAlignment::CheckDetectorAlignmentXY(int subject_detector, int ref_detector1, int ref_detector2, bool verbose) {
-	if(verbosity)cout<<"AlignmentClass::Align::CheckDetectorAlignmentXY"<<endl;
+	if(verbosity)cout<<"TDetectorAlignment::Align::CheckDetectorAlignmentXY"<<endl;
    AlignDetectorXY(subject_detector, ref_detector1, ref_detector2, verbose, true);
 }
 
 void TDetectorAlignment::CheckDetectorAlignmentXY(int subject_detector, bool verbose) {
-	if(verbosity)cout<<"AlignmentClass::Align::CheckDetectorAlignmentXY"<<endl;
+	if(verbosity)cout<<"TDetectorAlignment::Align::CheckDetectorAlignmentXY"<<endl;
    AlignDetectorXY(subject_detector, verbose, true);
 }
 
@@ -805,7 +811,7 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
 	if (SaveAllRootFilesSwitch) {
 		ostringstream histo_filename;
 		histo_filename << titleresx << ".root";
-		TFile f(histo_filename.str().c_str(),"new");
+		TFile f(histo_filename.str().c_str(),"RECRATE");
 		plotresidualsX.Write();
 	}
 
@@ -834,7 +840,7 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
 	if (SaveAllRootFilesSwitch) {
 		ostringstream histo_filename;
 		histo_filename << titleresy << ".root";
-		TFile f(histo_filename.str().c_str(),"new");
+		TFile f(histo_filename.str().c_str(),"RECREATE");
 		plotresidualsY.Write();
 	}
 

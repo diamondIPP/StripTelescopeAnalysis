@@ -8,7 +8,7 @@
 #include "TSettings.class.hh"
 using namespace std;
 
-TSettings::TSettings(string fileName){
+TSettings::TSettings(string fileName,UInt_t runNumber){
 	verbosity=1;
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
@@ -697,6 +697,14 @@ void TSettings::setZoomDiamondPlots(Int_t zoomDiamondPlots)
     this->zoomDiamondPlots = zoomDiamondPlots;
 }
 
+bool TSettings::isDet_channel_screened(UInt_t det, UInt_t ch)
+{
+	if(det<9&&ch<256)
+		return this->Det_channel_screen[det].CheckChannel(ch);
+	else
+		return true;
+}
+
 void TSettings::ParseIntArray(string value, vector<int> &vec) {
 
 	int index=0;
@@ -1200,4 +1208,8 @@ Int_t TSettings::getPlotChannelOn() const
 void TSettings::setPlotChannelOn(Int_t plotChannelOn)
 {
     this->plotChannel_on = plotChannelOn;
+}
+
+UInt_t TSettings::getRunNumber(){
+	return this->runNumber;
 }
