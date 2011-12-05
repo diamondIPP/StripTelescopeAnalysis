@@ -12,6 +12,7 @@
 #include "TRawEventSaver.hh"
 #include "TPedestalCalculation.hh"
 #include "TAnalysisOfClustering.hh"
+#include "TAnalysisOfPedestal.hh"
 #include "TClustering.hh"
 #include "diamondAnalysis.h"
 #include "time.h"
@@ -137,25 +138,30 @@ int main(int argc, char ** argv) {
 		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 		delete pedestalCalculation;
 
-		TClustering* clustering;
-		clustering=new TClustering(RUNNUMBER);
-		clustering->setSettings(settings);
-		std::cout<<"cluster"<<endl;
-		clustering->ClusterEvents(NEVENTS);
-		delete clustering;
-
-
-		TAlignment *alignment;
-		alignment= new TAlignment(RUNNUMBER);
-		alignment->createVectors(NEVENTS);
-		//alignment->Align();
-		delete alignment;
-
+//		TClustering* clustering;
+//		clustering=new TClustering(RUNNUMBER);
+//		clustering->setSettings(settings);
+//		std::cout<<"cluster"<<endl;
+//		clustering->ClusterEvents(NEVENTS);
+//		delete clustering;
 //
-		TAnalysisOfClustering* analysisClustering;
-		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
-		analysisClustering->doAnalysis(NEVENTS);
-		delete analysisClustering;
+//
+//		TAlignment *alignment;
+//		alignment= new TAlignment(RUNNUMBER);
+//		alignment->createVectors(NEVENTS);
+//		//alignment->Align();
+//		delete alignment;
+
+
+//		TAnalysisOfClustering* analysisClustering;
+//		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
+//		analysisClustering->doAnalysis(NEVENTS);
+//		delete analysisClustering;
+		
+		TAnalysisOfPedestal* analysisPedestal;
+		analysisPedestal = new TAnalysisOfPedestal(RUNNUMBER);
+		analysisPedestal->doAnalysis(NEVENTS);
+		delete analysisPedestal;
 
 
 

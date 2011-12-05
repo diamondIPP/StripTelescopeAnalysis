@@ -1,12 +1,14 @@
-/*
- * TDeadChannels.hh
- *
- *  Created on: 18.11.2011
- *      Author: bachmair
- */
+//
+//  TAnalysisOfPedestal.hh
+//  Diamond Analysis
+//
+//  Created by Lukas Bäni on 30.11.11.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//
 
-#ifndef TDEADCHANNELS_HH_
-#define TDEADCHANNELS_HH_
+
+#ifndef TANALYSISOFPEDESTAL_HH_
+#define TANALYSISOFPEDESTAL_HH_
 
 #include <fstream>
 #include <iostream>
@@ -31,10 +33,10 @@
 #define N_DET_CHANNELS 256
 using namespace std;
 
-class TAnalysisOfClustering {
+class TAnalysisOfPedestal {
 public:
-	TAnalysisOfClustering(int runnumber,int seedSigma=10,int hitSigma=7);
-	virtual ~TAnalysisOfClustering();
+	TAnalysisOfPedestal(int runnumber,int seedSigma=10,int hitSigma=7);
+	virtual ~TAnalysisOfPedestal();
 	void	doAnalysis(int nEvents=0);
 private:
 	void saveHistos();
@@ -44,6 +46,7 @@ private:
 	void initialiseHistos();
 	void checkForSaturatedChannels();
 	void analyseCluster();
+    void analyseBiggestHit();
 	TH1F *hSaturatedChannels[8];
 	TH1F *hSeedMap[8];
 	TH1F *hSeedMap2[9];
@@ -73,4 +76,5 @@ private:
 	TH1F *histo_pulseheight_right_sigma_second[8];
 };
 
-#endif /* TDEADCHANNELS_HH_ */
+#endif /* TANALYSISOFPEDESTAL_HH_ */
+
