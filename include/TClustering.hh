@@ -39,7 +39,7 @@ class TClustering {
 public:
 	TClustering(int runNumber,int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 	virtual ~TClustering();
-	void ClusterEvents(int nEvents);
+	void ClusterEvents(UInt_t nEvents);
 	void setSettings(TSettings* settings);
 private:
 	void clusterEvent();
@@ -53,19 +53,20 @@ private:
     UInt_t clusterRev;
     TCluster::vecvecTCluster vecvecCluster;
     TCluster::vecvecTCluster* pVecvecCluster;
-    int nEvent;
+    UInt_t nEvent;
     int seedDetSigma;
     int hitDetSigma;
     int seedDiaSigma;
     int hitDiaSigma;
     int verbosity;
+    bool createdTree;
     bool createClusterTree(int nEvents);
     void setBranchAdresses();
 	stringstream  filepath;
 	stringstream rawFilePath;
     TTree *clusterTree;
     TFile *clusterFile;
-    int runNumber;
+    UInt_t runNumber;
     UInt_t nClusters[9];
     UShort_t maxDetAdcValue;
     UShort_t maxDiaAdcValue;

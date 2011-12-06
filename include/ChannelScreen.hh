@@ -21,6 +21,7 @@ class ChannelScreen {
       void ChannelOff(Int_t index);
       void PrintScreenedChannels();
       Int_t CheckChannel(Int_t index);
+      bool isScreened(UInt_t channel);
       
    private:
       Int_t channel_switch[256];

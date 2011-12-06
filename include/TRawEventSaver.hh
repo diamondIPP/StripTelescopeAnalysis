@@ -29,9 +29,9 @@ public:
 	TRawEventSaver(unsigned int RunNumber, std::string RunDescription = "");
 	virtual ~TRawEventSaver();
 	void saveEvents(int nEvents);
-	static void showStatusBar(int nEvent,int nEvents,int updateIntervall=1000,bool show=false);
+	static void showStatusBar(int nEvent,int nEvents,int updateIntervall=100,bool show=false);
 private:
-	int runNumber;
+	UInt_t runNumber;
 	string runDesciption;
 	TRawEventReader* rawEventReader;
 	void setBranches();
@@ -48,7 +48,7 @@ private:
     bool needToReloadEvents;
     UChar_t Det_ADC[8][256];
     UShort_t Dia_ADC[128];
-    int eventNumber;
+    UInt_t eventNumber;
 };
 
 #endif /* TRAWEVENTSAVER_HH_ */

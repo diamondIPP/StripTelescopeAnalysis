@@ -16,7 +16,11 @@ ChannelScreen::ChannelScreen()
 ChannelScreen::~ChannelScreen() {}
 
 void ChannelScreen::ScreenChannels(std::vector<int> channels_to_screen) {
-   for(uint i=0; i<channels_to_screen.size(); i++) ChannelOff(channels_to_screen[i]);
+	std::cout<<"Screen Channels: "<<channels_to_screen.size()<<" "<<std::endl;
+   for(uint i=0; i<channels_to_screen.size(); i++) {
+	   ChannelOff(channels_to_screen[i]);
+   }
+   this->PrintScreenedChannels();
 }
 
 void ChannelScreen::ScreenRegions(std::vector<int> regions_to_screen) {
@@ -37,11 +41,13 @@ void ChannelScreen::ScreenRegions(std::vector<int> regions_to_screen) {
 
 void ChannelScreen::ChannelOff(Int_t index)
 {
+	   std::cout<<index<<":";
    if(index>255||index<0) {
       std::cout<<"ChannelScreen::ChannelOff: "<<index<<" is an invalid channel to screen"<<std::endl;
       return;
    }
    else channel_switch[index] = 0;
+   std::cout<<channel_switch[index]<<" ";
 }
 
 Int_t ChannelScreen::CheckChannel(Int_t index)
@@ -53,7 +59,15 @@ Int_t ChannelScreen::CheckChannel(Int_t index)
    else return channel_switch[index];
 }
 
+bool ChannelScreen::isScreened(UInt_t channel){
+	return (CheckChannel(channel)==0);
+}
+
 void ChannelScreen::PrintScreenedChannels() {
-   for(int i=0; i<256; i++)
+	std::cout<<std::endl;
+   for(int i=0; i<256; i++){
+	  // std::cout<<CheckChannel(i);
       if(channel_switch[i]==0) std::cout<<i<<", ";
+   }
+   std::cout<<std::endl;
 }

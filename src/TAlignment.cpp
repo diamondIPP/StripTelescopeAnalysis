@@ -7,31 +7,32 @@
 
 #include "../include/TAlignment.hh"
 
-TAlignment::TAlignment(int runNumber) {
+TAlignment::TAlignment(TSettings* settings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*************TAlignment::TAlignment***********************"<<endl;
 	cout<<"**********************************************************"<<endl;
-	cout<<runNumber<<endl;
+
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-	stringstream settingsFilePath;
-	settingsFilePath<<sys->pwd()<<"/Settings."<<runNumber<<".ini";
-	cout<<settingsFilePath.str()<<endl;
-	settings = new TSettings("settingsFilePath.str()");
-
+	setSettings(settings);
+	runNumber=settings->getRunNumber();
+	cout<<runNumber<<endl;
 	stringstream  runString;
 	runString.str("");
-	runString<<runNumber;
+	runString<<settings->getRunNumber();
+
 	sys->MakeDirectory(runString.str().c_str());
 	gErrorIgnoreLevel=1001;
 	sys->cd(runString.str().c_str());
 	stringstream  filepath;
 	filepath.str("");
-	filepath<<"clusterData."<<runNumber<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<filepath.str()<<endl;
+	filepath<<sys->pwd();
+	filepath<<"/clusterData."<<runNumber<<".root";
+//	cout<<"currentPath: "<<sys->pwd()<<endl;
+//	cout<<filepath.str()<<endl;
+	cout<<"OPEN eventReader with file \""<<filepath.str()<<endl;
 	eventReader=new TADCEventReader(filepath.str());
-	eventReader->checkADC();
+	//eventReader->checkADC();
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("alignment");
 	sys->cd("alignment");
@@ -43,7 +44,7 @@ TAlignment::TAlignment(int runNumber) {
 	initialiseHistos();
 	cout<<"end initialise"<<endl;
 	alignmentPercentage=1;
-	Float_t stripSize= 50./10000.;//mu m
+	Float_t stripSize=1.;// 50./10000.;//mu m
 	detectorD0Z = 0.725/stripSize; // by definition in cm
 	detectorD1Z = 1.625/stripSize; // by definition in cm
 	detectorD2Z = 18.725/stripSize; // by definition in cm
@@ -63,6 +64,10 @@ TAlignment::~TAlignment() {
 	delete eventReader;
 	delete histSaver;
 	sys->cd("..");
+}
+
+void TAlignment::setSettings(TSettings* settings){
+	this->settings=settings;
 }
 
 void TAlignment::createVectors(){

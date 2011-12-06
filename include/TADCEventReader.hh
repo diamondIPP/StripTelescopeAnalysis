@@ -31,6 +31,7 @@ public:
 //    bool getCMNEvent_flag() const;
 	UInt_t getAdcValue(UInt_t det,UInt_t ch);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch);
+	Float_t getSignal(UInt_t det,UInt_t ch);
     UInt_t getCurrent_event() const;
     UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
     UChar_t getDet_Channels(UInt_t i , UInt_t j) const;
@@ -52,6 +53,8 @@ public:
     Float_t getPedestalSigma(UInt_t det, UInt_t ch);
     TCluster::vecvecTCluster* getCluster() const;
     TCluster getCluster(UInt_t det,UInt_t cl);
+    UInt_t getNClusters(UInt_t det);
+    bool isSaturated(UInt_t det,UInt_t ch);
     void checkADC();
 private:
 	void SetBranchAddresses();

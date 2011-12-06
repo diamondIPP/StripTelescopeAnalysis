@@ -14,6 +14,7 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	DefaultLoadDefaultSettings();
 	SetFileName(fileName);
+	this->runNumber=runNumber;
 }
 
 TSettings::~TSettings(){
@@ -244,8 +245,9 @@ void TSettings::LoadSettings(){
 			ParseIntArray(value,Det_channel_screen_channels[7]);
 		}
 		if(key=="Dia_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
+			cout << key.c_str() << " = " << value.c_str() << " size:";
 			ParseIntArray(value,Det_channel_screen_channels[8]);
+			cout<<Det_channel_screen_channels[8].size()<<endl;
 		}
 		if(key=="D0X_channel_screen_regions") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
@@ -402,8 +404,8 @@ void TSettings::LoadSettings(){
 	file.close();
 
 	for(int det=0; det<9; det++) {
-		this->getDet_channel_screen(det).ScreenChannels(this->getDet_channel_screen_channels(det));
-		this->getDet_channel_screen(det).ScreenRegions(this->getDet_channel_screen_regions(det));
+		this->Det_channel_screen[det].ScreenChannels(this->getDet_channel_screen_channels(det));
+		//this->getDet_channel_screen(det).ScreenRegions(this->getDet_channel_screen_regions(det));
 		cout<<"Detector "<<det<<" screened channels: ";
 		this->getDet_channel_screen(det).PrintScreenedChannels();
 		cout<<endl;

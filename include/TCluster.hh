@@ -16,13 +16,13 @@
 #include <sstream>
 #include "TSystem.h"
 #include "TObject.h"
-//#define TCLUSTER_REVISION 7;
+//#define TCLUSTER_REVISION 12;
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 9;};
+	static UInt_t TCLUSTER_REVISION() {return 12;};
     typedef vector<vector<TCluster> > vecvecTCluster;
-    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2};
+    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3};
     TCluster()
     {
         numberOfSeeds = 0;
@@ -41,22 +41,26 @@ public:
         hasBadChannel=false;
         numberOfNoHits=0;
         nChannels=256;
+
     };
-    TCluster(int eventNumber, int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
+    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
     virtual ~TCluster();
     void addChannel(int channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
-    Float_t getPosition();
+    Float_t getPosition(calculationMode_t mode=highest2Centroid);
     void clear();
     bool isLumpyCluster();
     bool isGoldenGateCluster();
     bool hasSaturatedChannels();
     Float_t getCharge();
+    Float_t getCharge(UInt_t clusters);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
-    int getMaximumChannel();
+    UInt_t getMaximumChannel();
     Float_t getChargeWeightedMean();
     void checkCluster();
     bool isSeed(UInt_t cl);
+    bool isHit(UInt_t cl);
+    Float_t getSignalOfChannel(UInt_t channel);
     UInt_t getMinChannelNumber();
     UInt_t getMaxChannelNumber();
     Float_t getSignal(UInt_t clusterPos);
@@ -73,7 +77,8 @@ public:
     bool isBadChannelCluster(){return hasBadChannel;}
     bool isScreened();
     bool isScreened(UInt_t cl);
-    Float_t highest2_centroid();
+    Float_t getHighest2Centroid();
+    void Print();
 
 private:
     void checkForGoldenGate();
@@ -98,7 +103,9 @@ private:
     int maxChannel;
     int revisionNumber;
     UInt_t nChannels;
-    ClassDef(TCluster,TCLUSTER_REVISION());
+    UChar_t det;
+    UInt_t eventNumber;
+    ClassDef(TCluster,12);
 };
 
 #endif /* TCLUSTER_HH_ */

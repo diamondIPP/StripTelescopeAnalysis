@@ -13,6 +13,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <iomanip>
 //#include <deque>
 #include <ctime> // seed the random number generator
 #include <cstdlib> // random number generator
@@ -41,6 +42,7 @@ class TDetectorAlignment{
       TDetectorAlignment(std::string plots_path_string);
       TDetectorAlignment(std::string plots_path_string, std::vector<TDiamondTrack> &input_tracks, std::vector<bool> &input_tracks_mask);
       ~TDetectorAlignment() {};
+      void PrintDiamondTracks();
       void SaveCanvas(TCanvas* canv, std::string filename);
       Double_t GetXOffset(Int_t plane) {return det_x_offset[plane];};
       Double_t GetYOffset(Int_t plane) {return det_y_offset[plane];};

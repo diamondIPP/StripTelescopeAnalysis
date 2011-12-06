@@ -62,6 +62,22 @@ TDetectorAlignment::TDetectorAlignment(string plots_path_string, vector<TDiamond
    SaveAllFilesSwitch = 1;
    ClosePlotsOnSave = 1;
 }
+void TDetectorAlignment::PrintDiamondTracks(){
+	cout<<"\n\n\n\n";
+	for(UInt_t trackNo=0;trackNo<track_storage.size();trackNo++){
+		cout<<trackNo<<" "<<track_storage.at(trackNo).GetEventNumber()<<"\t";
+		cout<<std::setprecision(1);
+		for(UInt_t det=0;det<4;det++){
+			cout<<"(";
+			cout<<setw(5)<<track_storage.at(trackNo).GetD(det).GetX()<<"/";
+			cout<<setw(5)<<track_storage.at(trackNo).GetD(det).GetY()<<"/";
+			cout<<setw(5)<<track_storage.at(trackNo).GetD(det).GetZ()<<") ";
+		}
+		cout<<"\n";
+	}
+	cout<<"\n\n\n\n"<<endl;
+}
+
 
 void TDetectorAlignment::SaveCanvas(TCanvas* canv, string filename) {
    ostringstream plot_filename;
@@ -232,7 +248,7 @@ void TDetectorAlignment::LoadTracks(vector<TDiamondTrack> &input_tracks, vector<
    track_mask_storage.clear();
    track_mask_storage = input_tracks_mask;
    cout<<"TDetectAlignment::LoadTracks: "<<track_storage.size()<<" tracks loaded"<<endl;
-
+   PrintDiamondTracks();
 }
 
 void TDetectorAlignment::PlotAngularDistribution()
@@ -399,7 +415,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    Double_t phix_offset;
    Double_t phiy_offset;
 
-   Double_t resxtest, resytest, resxmean, resxrms, resymean, resyrms, res_keep_factor = 2;
+   Double_t resxtest, resytest, resxmean, resXsigma, resymean, resYsigma, res_keep_factor = 2;
    Double_t predx, predy, obsvx, obsvy;
 
    residualsX.Reset();
@@ -413,9 +429,9 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 
    //first estimate residuals widths
    resxmean = 0;
-   resxrms = 0;
+   resXsigma = 0;
    resymean = 0;
-   resyrms = 0;
+   resYsigma = 0;
    UInt_t nNotMasked=0;
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
@@ -427,21 +443,21 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       else
          PositionPredictor(subject_detector, ref_detector1, ref_detector2);
       if(subject_detector==4) track_storage[t].SetDetectorHitPosition(9,GetPredictedY());
-      resxtest = track_holder.GetD(subject_detector).GetX()-GetPredictedX();
+      resxtest = track_holder.GetD(subject_detector).GetX()-GetPredictedX();//X_OBS-X_Pred
       resytest = track_holder.GetD(subject_detector).GetY()-GetPredictedY();
       resxmean += resxtest;
       resymean += resytest;
-      resxrms += resxtest * resxtest;
-      resyrms += resytest * resytest;
+      resXsigma += resxtest * resxtest;
+      resYsigma += resytest * resytest;
    }
    resxmean = resxmean /(Double_t)nNotMasked;
    resymean = resymean /(Double_t)nNotMasked;
-   resxrms = TMath::Sqrt(resxrms / (Double_t)nNotMasked - resxmean*resxmean);
-   resyrms = TMath::Sqrt(resyrms / (Double_t)nNotMasked- resymean*resymean);
+   resXsigma = TMath::Sqrt(resXsigma / (Double_t)nNotMasked - resxmean*resxmean);
+   resYsigma = TMath::Sqrt(resYsigma / (Double_t)nNotMasked- resymean*resymean);
    if(verbosity>=0){
 	   cout<<"\tmaskedChannels: "<<track_mask_storage.size()-nNotMasked<<"\tmasked: "<<nNotMasked<<endl;
-	   cout<<"\tresxmean: "<<resxmean <<"+/-"<<resxrms<<endl;
-	   cout<<"\tresymean: "<<resymean << "+/-"<<resyrms<<endl;
+	   cout<<"\tresxmean: "<<resxmean <<"+/-"<<resXsigma<<endl;
+	   cout<<"\tresymean: "<<resymean << "+/-"<<resYsigma<<endl;
    }
 
 //   for(int l=0; l<(int)track_mask_storage.size();l+=5)
@@ -476,8 +492,8 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       obsvy=track_holder.GetD(subject_detector).GetY();
       if(verbosity>3)
     	  cout<<"Observed Position in track "<< t << " is: ("<<obsvx<<"/"<<obsvy<<endl;
-      resxtest=TMath::Abs(obsvx-predx-resxmean)/resxrms/res_keep_factor;
-      resytest=TMath::Abs(obsvy-predy-resymean)/resyrms/res_keep_factor;
+      resxtest=TMath::Abs(obsvx-predx-resxmean)/resXsigma/res_keep_factor;
+      resytest=TMath::Abs(obsvy-predy-resymean)/resYsigma/res_keep_factor;
       if(verbosity>3)
     	  cout<<"Residum in track "<< t << " is: ("<<resxtest<<"/"<<resytest<<endl;
 
@@ -501,7 +517,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 
       if(0&&t%track_storage.size()/5==0) {
          cout<<"----\nobsvx = "<<obsvx<<"\tpredx = "<<predx<<"\tobsvx-predx = "<<obsvx-predx<<endl;
-         cout<<"resxtest = "<<resxtest<<"\tresxmean = "<<resxmean<<"\tresxrms = "<<resxrms<<endl;
+         cout<<"resxtest = "<<resxtest<<"\tresxmean = "<<resxmean<<"\tresxrms = "<<resXsigma<<endl;
 
          if(1&&subject_detector==4) {
             cout<<"resxtest = "<<resxtest<<"\tresxtest<1 = "<<int(resxtest<1)<<endl;
@@ -556,9 +572,9 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 
       //first estimate residuals widths
       resxmean = 0;
-      resxrms = 0;
+      resXsigma = 0;
       resymean = 0;
-      resyrms = 0;
+      resYsigma = 0;
       UInt_t nNotMasked=0;
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
       {
@@ -574,13 +590,13 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
          resytest = track_holder.GetD(subject_detector).GetY()-GetPredictedY();
          resxmean += resxtest;
          resymean += resytest;
-         resxrms += resxtest * resxtest;
-         resyrms += resytest * resytest;
+         resXsigma += resxtest * resxtest;
+         resYsigma += resytest * resytest;
       }
       resxmean = resxmean / (Double_t)nNotMasked;
       resymean = resymean / (Double_t)nNotMasked;
-      resxrms = TMath::Sqrt(resxrms /  (Double_t)nNotMasked - resxmean*resxmean);
-      resyrms = TMath::Sqrt(resyrms /  (Double_t)nNotMasked - resymean*resymean);
+      resXsigma = TMath::Sqrt(resXsigma /  (Double_t)nNotMasked - resxmean*resxmean);
+      resYsigma = TMath::Sqrt(resYsigma /  (Double_t)nNotMasked - resymean*resymean);
       //cout<<"\tmaskedChannels: "<<track_mask_storage.size()-nNotMasked<<"\tmasked: "<<nNotMasked<<endl;
       //now select tracks with reasonably small residuals
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
@@ -600,8 +616,8 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
          obsvx=track_holder.GetD(subject_detector).GetX();
          obsvy=track_holder.GetD(subject_detector).GetY();
 
-         resxtest=TMath::Abs(obsvx-predx-resxmean)/resxrms/res_keep_factor;
-         resytest=TMath::Abs(obsvy-predy-resymean)/resyrms/res_keep_factor;
+         resxtest=TMath::Abs(obsvx-predx-resxmean)/resXsigma/res_keep_factor;
+         resytest=TMath::Abs(obsvy-predy-resymean)/resYsigma/res_keep_factor;
 
          if(0||(resxtest<1 && resytest<1)) {
             predictedX.push_back(predx);
@@ -612,9 +628,9 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
 
          if(0&&t%track_storage.size()/5==0) {
             cout<<"----\nobsvx = "<<obsvx<<"\tpredx = "<<predx<<"\tobsvx-predx = "<<obsvx-predx<<endl;
-            cout<<"resxtest = "<<resxtest<<"\tresxmean = "<<resxmean<<"\tresxrms = "<<resxrms<<endl;
+            cout<<"resxtest = "<<resxtest<<"\tresxmean = "<<resxmean<<"\tresxrms = "<<resXsigma<<endl;
             cout<<"----\nobsvy = "<<obsvy<<"\tpredy = "<<predy<<"\tobsvy-predy = "<<obsvy-predy<<endl;
-            cout<<"resytest = "<<resytest<<"\tresymean = "<<resymean<<"\tresyrms = "<<resyrms<<endl;
+            cout<<"resytest = "<<resytest<<"\tresymean = "<<resymean<<"\tresyrms = "<<resYsigma<<endl;
          }
       }
       cout<<"D"<<subject_detector<<"Y: "<<observedX.size()<<" / "<<track_storage.size()<<" = "<<float(observedX.size())/track_storage.size()<<" of tracks survived a "<<res_keep_factor<<" sigma residual cut"<<endl;
@@ -1299,13 +1315,13 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, ve
 		cout << "TDetectorAlignment::LinTrackFit: number of x and y positions is different!" << endl;
 		return 9999.;
 	}
-	for (int i = 0; i < X.size(); i++) {
+	for (UInt_t i = 0; i < X.size(); i++) {
 		X_Mean = X_Mean + X[i];
 		Y_Mean = Y_Mean + Y[i];
 	}
 	X_Mean = X_Mean / X.size();
 	Y_Mean = Y_Mean / Y.size();
-	for (int i = 0; i < X.size(); i++) {
+	for (UInt_t i = 0; i < X.size(); i++) {
 		tmp1 = tmp1 + ((X[i] - X_Mean) * (Y[i] - Y_Mean));
 		tmp2 = tmp2 + ((X[i] - X_Mean) * (X[i] - X_Mean));
 	}
@@ -1315,7 +1331,7 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, ve
 	par.push_back(tmp1 / tmp2);
 //	cout << " --" << endl;
 	// --
-	for (int i = 0; i < X.size(); i++) {
+	for (UInt_t i = 0; i < X.size(); i++) {
 		tmp1 = par[0] + par[1] * X[i];
 		tmp3 = tmp3 + (tmp1 - Y[i]) * (tmp1 - Y[i]);
 //		cout << "plane " << i << "\t hit position: ( " << X[i] << " , " << Y[i] << " ) fit position: " << tmp1 << endl;

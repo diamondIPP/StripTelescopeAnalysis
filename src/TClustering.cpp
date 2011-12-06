@@ -49,21 +49,22 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	this->maxDiaAdcValue=4095;
 	pVecvecCluster=&vecvecCluster;
 	settings=NULL;
+	createdTree=false;
 
 }
 
 TClustering::~TClustering() {
 	// TODO Auto-generated destructor stub
 	clusterFile->cd();
-	if(clusterTree!=NULL){
+	if(clusterTree!=NULL&&this->createdTree){
 		cout<<"CLOSING TREE"<<endl;
 		cout<<eventReader->getTree()->GetName()<<" "<<filepath.str().c_str()<<endl;
 		clusterTree->AddFriend(eventReader->getTree()->GetName(),filepath.str().c_str());
 		cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
 		clusterTree->AddFriend("rawTree",rawFilePath.str().c_str());
 		cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
+		clusterTree->Write();
 	}
-	clusterTree->Write();
 	clusterTree->Delete();
 	clusterFile->Close();
 	delete eventReader;
@@ -75,11 +76,12 @@ void TClustering::setSettings(TSettings* settings){
 	this->settings=settings;
 }
 
-void TClustering::ClusterEvents(int nEvents)
+void TClustering::ClusterEvents(UInt_t nEvents)
 {
 	if(settings==NULL)settings=new TSettings("");//todo anpassen
 	vecvecCluster.resize(9);
-	if(!createClusterTree(nEvents)) return;
+	createdTree=createClusterTree(nEvents);
+	if(!createdTree) return;
 	setBranchAdresses();
 	cout<<"\n\n******************************************\n";
 	cout<<    "**************Start Clustering...*********\n";
@@ -105,12 +107,12 @@ void TClustering::clusterEvent()
 
 		//cluster Plane
 		clusterPlane(det);
-
 		//fill clusters in vecvecCluster
 		if(vecvecCluster.size()>det){
 			vecvecCluster.at(det).clear();
-			for(unsigned int cl=0;cl<vecCluster[det].size();cl++)
+			for(unsigned int cl=0;cl<vecCluster[det].size();cl++){
 				vecvecCluster.at(det).push_back(vecCluster[det].at(cl));
+			}
 		}
 		else
 			cout<<"Something is going wrong vecvecCluster is to small....."<<endl;
@@ -147,12 +149,6 @@ void TClustering::clusterPlane(int det){
 			if(verbosity>2)cout<<"new channel no.:"<<ch<<endl;
 		}
 	}
-	if(verbosity>1&&det==8){
-		cout<<"Clustered Plane "<<det<<" with "<<nClusters[det]<<" "<<vecCluster[det].size()<<"with size: ";
-		for(unsigned int cl=0;cl<vecCluster[det].size();cl++)
-			cout<<" "<<vecCluster[det].at(cl).size()<<"/"<<vecCluster[det].at(cl).getCharge();
-		cout<<endl;
-	}
 }
 
 /**
@@ -184,15 +180,17 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	int seedSigma;
 	int hitSigma;
 	bool isScreened;
+	int maxChannel=256;
 	if (det==8){
 		hitSigma=this->hitDiaSigma;
 		seedSigma=this->seedDiaSigma;
+		maxChannel=128;
 	}
 	else{
 		hitSigma=this->hitDetSigma;
 		seedSigma=this->seedDetSigma;
 	}
-	TCluster cluster(nEvent,seedSigma,hitSigma);
+	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel);
 
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>2)cout<<cluster.size()<<" ";
@@ -229,12 +227,14 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 			break;
 		}
 	}
-	if(currentCh<256)
+	if((currentCh<N_DET_CHANNELS&&det<8)||(currentCh<N_DIA_CHANNELS&&det==8)){
 		cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
+	}
 	cluster.checkCluster();
 	vecCluster[det].push_back(cluster);
 	nClusters[det]++;
 	if((verbosity>2&&det==8)||verbosity>3)cout<<"\tclusterSize: "<<cluster.size()<<endl;
+	if(verbosity>1)cluster.Print();
 	return currentCh;
 }
 
@@ -308,7 +308,7 @@ void TClustering::setBranchAdresses(){
 	clusterTree->Branch("eventNumber",&nEvent,"eventNumber/i");
 	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");
 	clusterTree->Branch("nClusters",&nClusters,"nClusters/i[9]");
-	clusterTree->Branch("clusterRev",&clusterRev,"clusterRev/I");
+	clusterTree->Branch("clusterRev",&clusterRev,"clusterRev/i");
 	//clusterTree->Branch("vecvecChannel",&vecvecChannel[0])
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
 	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);

@@ -8,7 +8,7 @@
 #include "../include/TCluster.hh"
 ClassImp(TCluster);
 
-TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma,UInt_t nChannels) {
+TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels) {
 	// TODO Auto-generated constructor stub
 	numberOfSeeds=0;
 	numberOfHits=0;
@@ -23,6 +23,8 @@ TCluster::TCluster(int eventNumber,int seedSigma,int hitSigma,UInt_t nChannels) 
 	isLumpy=false;
 	isGoldenGate=false;
 	hasBadChannel=false;
+	this->det=det;
+	this->eventNumber=nEvent;
 }
 
 TCluster::~TCluster() {
@@ -44,11 +46,11 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t 
 		maximumSignal=signal;
 		maxChannel=ch;
 	}
-	charge+=signal;
+	if(signalInSigma>hitSigma) charge+=signal;
 	if(cluster.size()>0&&ch<cluster.at(0).first){
-		cluster.push_back(make_pair(ch,signal));
-		cluster2.push_back(make_pair(adcValue,signalInSigma));
-		this->clusterChannelScreened.push_back(screened);
+		cluster.push_front(make_pair(ch,signal));
+		cluster2.push_front(make_pair(adcValue,signalInSigma));
+		this->clusterChannelScreened.push_front(screened);
 	}
 	else{
 		cluster.push_back(make_pair(ch,signal));
@@ -56,8 +58,14 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t 
 	}
 
 }
-Float_t TCluster::getPosition(){
-	return this->getChargeWeightedMean();
+Float_t TCluster::getPosition(calculationMode_t mode){
+	if(mode==maxValue)
+		return this->getMaxChannelNumber();
+	else if(mode==chargeWeighted)
+		return this->getChargeWeightedMean();
+	else if(mode==highest2Centroid)
+		return this->getHighest2Centroid();
+	else
 	return 0;//todo;
 }
 
@@ -86,7 +94,31 @@ bool TCluster::hasSaturatedChannels(){
 Float_t TCluster::getCharge(){
 	return charge;
 }
-int TCluster::getMaximumChannel()
+
+
+Float_t TCluster::getCharge(UInt_t nClusterEntries){
+	if(nClusterEntries==0)return 0;
+	Float_t clusterCharge=getSignalOfChannel(this->getMaximumChannel());
+	bool b2ndHighestStripIsBigger = (getMaximumChannel()-this->getHighest2Centroid()<0);
+	for(UInt_t nCl=1;nCl<nClusterEntries&&nCl<this->cluster.size();nCl++){
+		if(b2ndHighestStripIsBigger){
+			if(nCl%2==1)
+				clusterCharge=clusterCharge + this->getSignalOfChannel(getMaximumChannel()+(nCl/2)+1);
+			else
+				clusterCharge=clusterCharge + this->getSignalOfChannel(getMaximumChannel()-(nCl/2));
+		}
+		else{
+			if(nCl%2==1)
+				clusterCharge+=this->getSignalOfChannel(getMaximumChannel()-(nCl/2)-1);
+			else
+				clusterCharge+=this->getSignalOfChannel(getMaximumChannel()+(nCl/2));
+		}
+
+	}
+	return clusterCharge;
+}
+
+UInt_t TCluster::getMaximumChannel()
 {
 	return maxChannel;
 }
@@ -94,15 +126,15 @@ int TCluster::getMaximumChannel()
 Float_t TCluster::getChargeWeightedMean(){
 	Float_t sum=0;
 	Float_t charged=0;
-	for(int i=0;i<this->cluster.size();i++){
-		if(cluster2.at(i).second>hitSigma){
+	for(UInt_t cl=0;cl<this->cluster.size();cl++){
+		if(isHit(cl)){
 			//todo . take at least second biggest hit for =charge weighted mean
-			sum+=cluster.at(i).first*cluster.at(i).second;
-			charged+=cluster.at(i).second;
+			sum+=cluster.at(cl).first*cluster.at(cl).second;//kanalnummer*signalNummer
+			charged+=cluster.at(cl).second;//signal
 		}
 	}
 
-	return sum/charge;
+	return sum/charged;
 }
 
 
@@ -122,7 +154,7 @@ void TCluster::checkForGoldenGate(){
 	if(cluster.size()<=2)
 		return;
 	int previousSeed=-1;
-	for(int i=0;i<cluster.size()&&!isGoldenGate;i++){
+	for(UInt_t i=0;i<cluster.size()&&!isGoldenGate;i++){
 		if(cluster2.at(i).second>seedSigma){
 			if( previousSeed!=-1 && previousSeed+1!=cluster.at(i).first )
 				isGoldenGate=true;
@@ -156,7 +188,7 @@ void TCluster::setSeedSigma(int seedSigma)
 bool TCluster::isScreened()
 {
 	bool isOneChannelScreened=false;
-	for(int cl;cl<clusterChannelScreened.size();cl++)
+	for(UInt_t cl;cl<clusterChannelScreened.size();cl++)
 		isOneChannelScreened+=clusterChannelScreened.at(cl);
 	isOneChannelScreened+=((this->getMinChannelNumber()==0)||this->getMaxChannelNumber()==nChannels-1);
 }
@@ -173,17 +205,31 @@ bool TCluster::isScreened(UInt_t cl)
 }
 
 
-Float_t TCluster::highest2_centroid()
+Float_t TCluster::getHighest2Centroid()
 {
 	UInt_t maxCh = this->getMaximumChannel();
 	UInt_t clPos;
 	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
 	}
-	if(this->getSignal(clPos-1)<getSignal(clPos+1))
-		return ( getSignal(clPos)*clPos+getSignal(clPos+1)*(clPos+1))/(getSignal(clPos)+getSignal(clPos+1));
-	else
-		return ( getSignal(clPos)*clPos+getSignal(clPos-11)*(clPos-1))/(getSignal(clPos)+getSignal(clPos-1));
-
+//	cout<<"  h2C:"<<clPos<<","<<cluster.at(clPos).first<<flush;
+	Float_t retVal;
+	UInt_t channel=getChannel(clPos);
+	Float_t signal=getSignal(clPos);
+	Float_t nextChannelSignal;
+	UInt_t nextChannel;
+	if(this->getSignal(clPos-1)<getSignal(clPos+1)){
+		nextChannel=getChannel(clPos+1);
+		nextChannelSignal=getSignal(clPos+1);
+//		cout<<"r"<<flush;
+	}
+	else{
+		nextChannel=getChannel(clPos-1);
+		nextChannelSignal=getSignal(clPos-1);
+//		cout<<"l"<<flush;
+	}
+	retVal=(channel*signal+nextChannel*nextChannelSignal)/(signal+nextChannelSignal);
+//	cout<<signal<<"*"<<channel<<"+"<<nextChannelSignal<<"*"<<nextChannel<<":"<<retVal<<" "<<flush;
+	return retVal;
 }
 
 
@@ -193,7 +239,7 @@ void TCluster::checkForLumpyCluster(){
 		return;//for lumpy cluster at least 3 hits are needed
 	bool isfalling;
 	Float_t lastSeed;
-	for(int i=0;i<cluster.size()&&!isLumpy;i++){
+	for(UInt_t i=0;i<cluster.size()&&!isLumpy;i++){
 			if(cluster2.at(i).second>seedSigma){
 				if(lastSeed<cluster.at(i).second&&!isfalling){
 					lastSeed=cluster.at(i).second;
@@ -212,6 +258,11 @@ bool TCluster::isSeed(UInt_t cl){
 	return false;
 }
 
+bool TCluster::isHit(UInt_t cl){
+	if(cluster.size()>cl)
+		return (cluster2.at(cl).second>this->hitSigma);
+	return false;
+}
 
 UInt_t TCluster::getMinChannelNumber()
 {
@@ -234,15 +285,24 @@ UInt_t TCluster::getMaxChannelNumber()
 
 Float_t TCluster::getSignal(UInt_t clusterPos)
 {
-	if(clusterPos<size())
+	if(clusterPos<cluster.size())
 		return this->cluster.at(clusterPos).second;
 	else return -1;
 }
 
+Float_t TCluster::getSignalOfChannel(UInt_t channel)
+{
+	if(channel<this->getMinChannelNumber()&&channel>this->getMaximumChannel()) return 0;
+	UInt_t clPos;
+	for(clPos=0;clPos<cluster.size()&&getChannel(clPos)!=channel;clPos++){}
+	return getSignal(clPos);
+}
+
+
 Float_t TCluster::getSNR(UInt_t clusterPos)
 {
 
-	if(clusterPos<size())
+	if(clusterPos<cluster.size())
 		return this->cluster2.at(clusterPos).second;
 	else return -1;
 
@@ -250,7 +310,7 @@ Float_t TCluster::getSNR(UInt_t clusterPos)
 Float_t TCluster::getPedestalMean(UInt_t clusterPos)
 {
 
-	if(clusterPos<size())
+	if(clusterPos<cluster.size())
 		return getAdcValue(clusterPos)-getSignal(clusterPos);
 	else return -1;
 
@@ -258,7 +318,7 @@ Float_t TCluster::getPedestalMean(UInt_t clusterPos)
 
 Float_t TCluster::getPedestalSigma(UInt_t clusterPos)
 {
-	if(clusterPos<size())
+	if(clusterPos<cluster.size())
 		return getSignal(clusterPos)/getSNR(clusterPos);
 	else return -1;
 
@@ -266,14 +326,30 @@ Float_t TCluster::getPedestalSigma(UInt_t clusterPos)
 
 UShort_t TCluster::getAdcValue(UInt_t clusterPos)
 {
-	if(clusterPos<size())
+	if(clusterPos<cluster.size())
 		return this->cluster2.at(clusterPos).first;
 	else return 0;
 }
 
 UInt_t TCluster::getChannel(UInt_t clusterPos)
 {
-	if(clusterPos<size())
+	if(clusterPos<cluster.size())
 		return this->cluster.at(clusterPos).first;
 	else return 5000;
+}
+
+void TCluster::Print(){
+	cout<<"Cluster of Event "<<flush;
+	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries"<<flush;
+	for(UInt_t cl=0;cl<cluster.size();cl++){
+		if(this->isSeed(cl))
+			cout<<"\t{"<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"}"<<flush;
+		else if(this->isHit(cl))
+					cout<<"\t("<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<")"<<flush;
+		else
+					cout<<"\t["<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"]"<<flush;
+	}
+	cout<<"\t||"<<this->getMaximumChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean();
+	cout<<endl;
+
 }

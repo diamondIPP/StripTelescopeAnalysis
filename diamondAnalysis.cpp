@@ -12,8 +12,8 @@
 #include "TRawEventSaver.hh"
 #include "TPedestalCalculation.hh"
 #include "TAnalysisOfClustering.hh"
-#include "TAnalysisOfPedestal.hh"
 #include "TClustering.hh"
+#include "TSelectionClass.hh"
 #include "diamondAnalysis.h"
 #include "time.h"
 #include "TSystem.h"
@@ -68,6 +68,46 @@ bool readInputs(int argc,char ** argv){
 	return true;
 }
 
+
+
+void process_mem_usage(double& vm_usage, double& resident_set)
+{
+   using std::ios_base;
+   using std::ifstream;
+   using std::string;
+
+   vm_usage     = 0.0;
+   resident_set = 0.0;
+
+   // 'file' stat seems to give the most reliable results
+   //
+   ifstream stat_stream("/proc/self/stat",ios_base::in);
+
+   // dummy vars for leading entries in stat that we don't care about
+   //
+   string pid, comm, state, ppid, pgrp, session, tty_nr;
+   string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+   string utime, stime, cutime, cstime, priority, nice;
+   string O, itrealvalue, starttime;
+
+   // the two fields we want
+   //
+   unsigned long vsize;
+   long rss;
+
+   stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+               >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+               >> utime >> stime >> cutime >> cstime >> priority >> nice
+               >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
+
+   stat_stream.close();
+
+   long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
+   vm_usage     = vsize / 1024.0;
+   resident_set = rss * page_size_kb;
+}
+
+
 int main(int argc, char ** argv) {
 	readInputs(argc,argv);
 	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
@@ -120,6 +160,10 @@ int main(int argc, char ** argv) {
 //		log = freopen(logfilename.str().c_str(), "w", stdout);
 
 		//Save Events to RUNNUMBER/rawDATA.RUNNUMBER.root
+		double vm2, rss2;
+		process_mem_usage(vm2, rss2);
+		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+
 
 		stringstream settingsFileName;
 		settingsFileName<<"settings."<<RUNNUMBER<<".ini";
@@ -130,6 +174,10 @@ int main(int argc, char ** argv) {
 		eventSaver->saveEvents(NEVENTS);
 		delete eventSaver;
 
+		process_mem_usage(vm2, rss2);
+		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+
+
 		//Calculate Pedestal
 		sys->cd(currentDir.c_str());
 		TPedestalCalculation* pedestalCalculation;
@@ -138,31 +186,41 @@ int main(int argc, char ** argv) {
 		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 		delete pedestalCalculation;
 
-//		TClustering* clustering;
-//		clustering=new TClustering(RUNNUMBER);
-//		clustering->setSettings(settings);
-//		std::cout<<"cluster"<<endl;
-//		clustering->ClusterEvents(NEVENTS);
-//		delete clustering;
-//
-//
-//		TAlignment *alignment;
-//		alignment= new TAlignment(RUNNUMBER);
-//		alignment->createVectors(NEVENTS);
-//		//alignment->Align();
-//		delete alignment;
+
+		process_mem_usage(vm2, rss2);
+		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
 
+		TClustering* clustering;
+		clustering=new TClustering(RUNNUMBER);
+		clustering->setSettings(settings);
+		std::cout<<"cluster"<<endl;
+		clustering->ClusterEvents(NEVENTS);
+		delete clustering;
+
+		process_mem_usage(vm2, rss2);
+		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+
+		TSelectionClass* selectionClass;
+		selectionClass=new TSelectionClass(settings);
+		selectionClass->MakeSelection(NEVENTS);
+		delete selectionClass;
+
+
+		TAlignment *alignment;
+		alignment= new TAlignment(settings);
+		alignment->setSettings(settings);
+//		alignment->Align();
+		delete alignment;
+
+//
 //		TAnalysisOfClustering* analysisClustering;
 //		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
 //		analysisClustering->doAnalysis(NEVENTS);
 //		delete analysisClustering;
-		
-		TAnalysisOfPedestal* analysisPedestal;
-		analysisPedestal = new TAnalysisOfPedestal(RUNNUMBER);
-		analysisPedestal->doAnalysis(NEVENTS);
-		delete analysisPedestal;
 
+		process_mem_usage(vm2, rss2);
+		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
 
 		if (settings!=NULL)delete settings;

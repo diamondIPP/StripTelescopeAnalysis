@@ -39,10 +39,11 @@
 
 class TAlignment {
 public:
-	TAlignment(int runNumber);
+	TAlignment(TSettings* settings);
 	virtual ~TAlignment();
 	int Align();
 	void createVectors(UInt_t nEvents);
+	void setSettings(TSettings* settings);
 private:
 	void createVectors();
 	void initialiseHistos();

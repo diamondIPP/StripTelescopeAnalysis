@@ -39,6 +39,7 @@ public:
 private:
 	void saveHistos();
 	void checkForDeadChannels();
+	void compareCentroid_ChargeWeightedMean();
 	void analyseForSeeds();
 	void getBiggestHit();
 	void initialiseHistos();
@@ -52,6 +53,7 @@ private:
 	TH1F* hChannelBiggestHit[8];
 	TH1F* hPulsHeightBiggestHit[8];
 	TH1F* hPulsHeightNextBiggestHit[8];
+	TH1F* hDifferenceCWM_Centroid[9];
 	TH1F* hNumberOfClusters[9];
 	TH1F* hClusterSize[9];
 	TADCEventReader* eventReader;

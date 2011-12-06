@@ -128,6 +128,7 @@ void TADCEventReader::SetBranchAddresses(){
 void TADCEventReader::initialiseTree(){
 	cout<<"initialise tree"<<tree->GetEntries()<<endl;
 	current_event = 0;
+	cout<<tree->IsZombie()<<endl;
 	tree->GetEvent(current_event);
 	cout<< "Loaded first event in PedTree: "<<event_number<<endl;
 	cout<< "RunNumber is: "<<run_number<<endl;
@@ -321,6 +322,27 @@ void TADCEventReader::checkADC(){
 	this->GetEvent(100);
 	for(int ch=0;ch<256;ch++)
 		cout<<this->getAdcValue(0,ch)<<" "<<this->getAdcValue(1,ch)<<" "<<this->getAdcValue(8,ch)<<endl;
+}
+
+bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
+{
+	if(det<8)
+		return getAdcValue(det,ch)>253;
+	else if(det==8)
+		return getAdcValue(det,ch)>4094;
+	return true;
+}
+
+Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch)
+{
+	return getAdcValue(det,ch)-getPedestalMean(det,ch);
+}
+
+UInt_t TADCEventReader::getNClusters(UInt_t det)
+{
+	if(det<9)
+	return this->getCluster()->at(det).size();
+	return 0;
 }
 
 TObject* TADCEventReader::getTreeName(){
