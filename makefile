@@ -33,7 +33,8 @@ LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o Clustering.c
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o SlidingPedestal.class.o PSDetector.class.o PSEvent.class.o
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o AlignmentClass.o TADCEventReader.o
 LIBFILES		+=	TSettings.class.o TRawEventReader.o TTransparentClustering.o TRawEventSaver.o TPedestalCalculation.o
-LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o
+LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTransparentAnalysis.o TTrack.o
+LIBFILES		+=	TEvent.o TPlane.o
 LIBFILES		+=  TSelectionClass.o
 LIBFILES		+=  TAlignment.o TClustering.o libTCluster.so 
 
