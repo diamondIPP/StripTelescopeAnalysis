@@ -121,6 +121,13 @@ void TADCEventReader::SetBranchAddresses(){
 	tree->SetBranchAddress("PedestalMean",&pedestalMean);
 	tree->SetBranchAddress("PedestalSigma",&pedestalSigma);
 	tree->SetBranchAddress("clusters",&pVecvecCluster);
+	tree->SetBranchAddress("isDetMasked",&bIsDetMasked);
+	tree->SetBranchAddress("hasValidSiliconTrack",&hasValidSiliconTrack);
+	tree->SetBranchAddress("nDiamondHits",&nDiamondClusters);
+	tree->SetBranchAddress("isInFiducialCut",&bIsInFiducialCut);
+	tree->SetBranchAddress("isDiaMasked",&this->maskedDiaClusters);
+//	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
+//	UInt_t nDiamondHits; //number of clusters in diamond plane;
 	cout<<"DONE"<<endl;
 
 }
@@ -343,6 +350,33 @@ UInt_t TADCEventReader::getNClusters(UInt_t det)
 	if(det<9)
 	return this->getCluster()->at(det).size();
 	return 0;
+}
+
+bool TADCEventReader::isValidTrack()
+{
+	return this->hasValidSiliconTrack;
+}
+
+UInt_t TADCEventReader::getNDiamondClusters()
+{
+	return this->nDiamondClusters;
+}
+
+bool TADCEventReader::isInFiducialCut()
+{
+	return this->bIsInFiducialCut;
+}
+
+bool TADCEventReader::isDiaClusterMasked(UInt_t cl)
+{
+	if(this->maskedDiaClusters.size()>cl)
+		return maskedDiaClusters.at(cl);
+	return true;
+}
+
+bool TADCEventReader::isDetMasked()
+{
+	return this->bIsDetMasked;
 }
 
 TObject* TADCEventReader::getTreeName(){

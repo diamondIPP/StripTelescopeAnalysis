@@ -8,7 +8,7 @@
 #include "../include/TAlignment.hh"
 
 TAlignment::TAlignment(TSettings* settings) {
-	cout<<"**********************************************************"<<endl;
+	cout<<"\n\n\n**********************************************************"<<endl;
 	cout<<"*************TAlignment::TAlignment***********************"<<endl;
 	cout<<"**********************************************************"<<endl;
 
@@ -27,7 +27,7 @@ TAlignment::TAlignment(TSettings* settings) {
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<sys->pwd();
-	filepath<<"/clusterData."<<runNumber<<".root";
+	filepath<<"/selectionData."<<runNumber<<".root";
 //	cout<<"currentPath: "<<sys->pwd()<<endl;
 //	cout<<filepath.str()<<endl;
 	cout<<"OPEN eventReader with file \""<<filepath.str()<<endl;
@@ -60,9 +60,10 @@ TAlignment::TAlignment(TSettings* settings) {
 
 TAlignment::~TAlignment() {
 	// TODO Auto-generated destructor stub
+	cout<<"TAlignment deconstructor"<<endl;
 	saveHistos();
-	delete eventReader;
 	delete histSaver;
+	delete eventReader;
 	sys->cd("..");
 }
 
@@ -80,74 +81,52 @@ void TAlignment::createVectors(UInt_t nEvents){
 	int falseClusterSizeDia=0;
 	int nCandidates=0;
 	int nScreened=0;
-	bool isScreened=false;
 	cout<<"ANALYSE VECTORS...."<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->GetEvent(nEvent);
 		//check if every plane has exactly one cluster
-		bool candidate=true;
-		for(UInt_t det=0;det<8&&candidate;det++){
-			if(eventReader->getCluster()->at(det).size()!=1){
-				candidate=false;
-				noHitDet++;
-				break;
-			}
-			if(candidate){
-				TCluster cluster = eventReader->getCluster()->at(det).at(0);
-				if(cluster.size()>2){
-					candidate=false;
-					falseClusterSizeDet++;
-					break;
-				}
-			}
-		}//for det
-		if(candidate&&eventReader->getCluster()->at(8).size()!=1){
-			candidate=false;
-			//cout<<"dia size:"<<eventReader->getCluster()->at(8).size()<<endl;
-			noHitDia++;
+		if(!eventReader->isValidTrack()){
+			noHitDet++;
+			continue;
 		}
-
-		//events with candidate=true areevents which have exactly one cluster in each plane
-		// and the cluster size is 2
-		if (candidate){
-			isScreened=eventReader->getCluster()->at(8).at(0).isScreened();
-			if(isScreened){
-				nScreened++;
-				candidate=false;
-			}
+		if (eventReader->isDetMasked()){
+			nScreened++;
+			continue;
 		}
-		if (candidate){
-			nCandidates++;
-			addEventToTracks();
+		if(eventReader->getNDiamondClusters()!=1){
+			falseClusterSizeDia++;
+			continue;
 		}
+		nCandidates++;
+		this->addEventToTracks();
 	}
 	cout<<"\n\nDetAnalysed "<<nEvents<<": "<<nEvents-noHitDet-falseClusterSizeDet<<" Candidates while "<< noHitDet<<" Events have not exactly one Cluster and "<<falseClusterSizeDet<<" Events have wrong cluster size"<<endl;
 	cout<<"\n\nDiaAnalysed "<<nEvents-noHitDet-falseClusterSizeDet<<": "<<nCandidates<<" Candidates while "<< noHitDia<<" Events have not exactly one Cluster and "<<falseClusterSizeDia<<" Events have wrong cluster size"<<endl;
 	cout<<"EVENTS SCREENED:"<<nScreened<<endl;
 	cout<<tracks.size()<<" "<<tracks_masked.size()<<" "<<tracks_fidcut.size()<<" "<<tracks_masked_fidcut.size()<<endl;
 
-	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
-		Float_t xPos=tracks.at(trackNo).GetDetectorHitPosition(0);
-		Float_t yPos=tracks.at(trackNo).GetDetectorHitPosition(1);
-		cout<<trackNo<<" "<<tracks.at(trackNo).GetEventNumber()<<flush;
-		for(int no=1;no<4;no++){
-			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2)-xPos;
-			cout<<" "<<deltaX;
-			hXPositionDifference[no-1]->Fill(deltaX);
-			hXXPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2));
-			hXYPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
-		}
-		cout<<"\ty:  ";
-		for(int no=1;no<4;no++){
-			Float_t deltaY = tracks.at(trackNo).GetDetectorHitPosition(no*2+1)-yPos;
-			cout<<" "<<deltaY;
-			hYPositionDifference[no-1]->Fill(deltaY);
-			hYXPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2));
-			hYYPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
-		}
-		cout<<endl;
-	}
+//	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
+//		Float_t xPos=tracks.at(trackNo).GetDetectorHitPosition(0);
+//		Float_t yPos=tracks.at(trackNo).GetDetectorHitPosition(1);
+//		cout<<trackNo<<" "<<tracks.at(trackNo).GetEventNumber()<<flush;
+//		for(int no=1;no<4;no++){
+//			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2)-xPos;
+//			cout<<" "<<deltaX;
+//			hXPositionDifference[no-1]->Fill(deltaX);
+//			hXXPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2));
+//			hXYPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
+//		}
+//		cout<<"\ty:  ";
+//		for(int no=1;no<4;no++){
+//			Float_t deltaY = tracks.at(trackNo).GetDetectorHitPosition(no*2+1)-yPos;
+//			cout<<" "<<deltaY;
+//			hYPositionDifference[no-1]->Fill(deltaY);
+//			hYXPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2));
+//			hYYPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
+//		}
+//		cout<<endl;
+//	}
 }
 
 void TAlignment::initialiseHistos(){
@@ -239,7 +218,9 @@ void TAlignment::addEventToTracks()
 	D2.SetZ(detectorD2Z);
 	D3.SetZ(detectorD3Z);
 	Dia.SetZ(detectorDiaZ);
-
+//	for(int det=0;det<eventReader->getCluster()->size();det++)
+//		cout<<eventReader->getCluster()->at(det).size();
+//	cout<<endl;
 	D0.SetX(eventReader->getCluster()->at(0).at(0).getPosition());
 	D1.SetX(eventReader->getCluster()->at(2).at(0).getPosition());
 	D2.SetX(eventReader->getCluster()->at(4).at(0).getPosition());

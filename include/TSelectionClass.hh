@@ -39,6 +39,7 @@ private:
 	TTree* selectionTree;
 	bool createdNewTree;
 	bool createdNewFile;
+	stringstream runString;
 	stringstream rawfilepath;
 	stringstream pedestalfilepath;
 	stringstream clusterfilepath;
@@ -51,7 +52,7 @@ private:
 	UInt_t nDiamondHits; //number of clusters in diamond plane;
 	bool hasValidSiliconTrack; //One and only one cluster in each silicon plane;
 	bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
-
+	bool createdTree;
 };
 
 #endif /* TSELECTIONCLASS_HH_ */

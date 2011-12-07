@@ -9,7 +9,7 @@
 
 TSelectionClass::TSelectionClass(TSettings* settings) {
 	// TODO Auto-generated constructor stub
-	cout<<"**********************************************************"<<endl;
+	cout<<"\n\n\n	**********************************************************"<<endl;
 	cout<<"************TSelectionClass::TSelectionClass**************"<<endl;
 	cout<<"**********************************************************"<<endl;
 	this->settings=settings;
@@ -17,7 +17,6 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-	stringstream  runString;
 	runString.str("");
 	runString<<settings->getRunNumber();
 	sys->MakeDirectory(runString.str().c_str());
@@ -36,22 +35,40 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<clusterfilepath.str()<<endl;
 	eventReader=new TADCEventReader(clusterfilepath.str());
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("selctions");
+	sys->MakeDirectory("selections");
 	sys->cd("selections");
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(settings->getRunNumber());
 	sys->cd("..");
-	verbosity=0;
+	cout<<"HISTSAVER:"<<sys->pwd()<<endl;
+
+			verbosity=0;
+
+	createdTree=false;
 
 }
 
 TSelectionClass::~TSelectionClass() {
 	// TODO Auto-generated destructor stub
 	cout<<"\n\nClosing TSelectionClass"<<endl;
+	selectionFile->cd();
+	if(selectionTree!=NULL&&this->createdTree){
+		cout<<"CLOSING TREE"<<endl;
+		cout<<eventReader->getTree()->GetName()<<" "<<clusterfilepath.str().c_str()<<endl;
+		selectionTree->AddFriend(eventReader->getTree()->GetName(),clusterfilepath.str().c_str());
+		cout<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
+		selectionTree->AddFriend("pedestalTree",pedestalfilepath.str().c_str());
+		cout<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
+		selectionTree->AddFriend("rawTree",rawfilepath.str().c_str());
+		cout<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
+		selectionTree->Write();
+	}
+	selectionFile->Close();
 	delete eventReader;
 	delete histSaver;
+	sys->cd("..");
 }
 
 void TSelectionClass::MakeSelection()
@@ -63,28 +80,34 @@ void TSelectionClass::MakeSelection()
 
 void TSelectionClass::MakeSelection(UInt_t nEvents)
 {
+	createdTree=createSelectionTree(nEvents);
+	if(!createdTree) return;
+	this->setBranchAdressess();
 	cout<<"start selection with "<<nEvents<<" Events"<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->GetEvent(nEvent);
 		resetVariables();
 		setVariables();
-
+		selectionTree->Fill();
 	}
 }
 bool TSelectionClass::createSelectionTree(int nEvents)
 {
+	cout<<"TSelectionClass::checkTree"<<endl;
 	bool createdNewFile=false;
 	bool createdNewTree=false;
 	stringstream selectionfilepath;
+	sys->cd(	runString.str().c_str());
 	selectionfilepath<<sys->pwd();
-	selectionfilepath<<"/clusterData."<<settings->getRunNumber()<<".root";
+	selectionfilepath<<"/selectionData."<<settings->getRunNumber()<<".root";
 	cout<<"Try to open \""<<selectionfilepath.str()<<"\""<<endl;
 	selectionFile=new TFile(selectionfilepath.str().c_str(),"READ");
 	if(selectionFile->IsZombie()){
-		cout<<"clusterfile does not exist, create new one..."<<endl;
+		cout<<"selectionfile does not exist, create new one..."<<endl;
 		createdNewFile =true;
-		selectionFile= new TFile(clusterfilepath.str().c_str(),"CREATE");
+		selectionFile= new TFile(selectionfilepath.str().c_str(),"CREATE");
+		cout<<"DONE"<<flush;
 		selectionFile->cd();
 	}
 	else{
@@ -92,9 +115,12 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 		cout<<"File exists"<<endl;
 	}
 	selectionFile->cd();
+	cout<<"get Tree"<<endl;
 	stringstream treeDescription;
 	treeDescription<<"Selection Data of run "<<settings->getRunNumber();
-	selectionFile->GetObject("selectionTree",selectionFile);
+	cout<<"get Tree2"<<endl;
+	selectionFile->GetObject("selectionTree",selectionTree);
+	cout<<"check Selection Tree:"<<selectionTree<<endl;
 	if(selectionTree!=NULL){
 		cout<<"File and Tree Exists... \t"<<flush;
 		if(selectionTree->GetEntries()>=nEvents){
@@ -103,18 +129,25 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 				return false;
 		}
 		else{
+			cout<<"selectionTree.events !- nEvents"<<flush;
 			selectionTree->Delete();
 			selectionTree=NULL;
 		}
 	}
+
 	if(selectionTree==NULL){
-		selectionFile->Close();
+		cout<<"selectionTree does not exists, close file"<<endl;
+		delete selectionFile;
+		cout<<"."<<endl;
+		cout<<selectionfilepath.str().c_str()<<endl;
 		selectionFile=new TFile(selectionfilepath.str().c_str(),"RECREATE");
+		cout<<"."<<endl;
 		this->selectionTree=new TTree("selectionTree",treeDescription.str().c_str());
+		cout<<"."<<endl;
 		createdNewTree=true;
 		cout<<"\n\n\n***************************************************************\n";
 		cout<<"***************************************************************\n";
-		cout<<"there exists no tree:\'clusterTree\"\tcreate new one."<<selectionTree<<"\n";
+		cout<<"there exists no tree:\'selectionTree\"\tcreate new one."<<selectionTree<<"\n";
 		cout<<"***************************************************************\n";
 		cout<<"***************************************************************\n"<<endl;
 	}
@@ -143,11 +176,26 @@ void TSelectionClass::setVariables(){
 		isDiaMasked.push_back(checkDetMasked(8,cl));
 //		cout<<isDiaMasked[cl];
 	}
-	cout<<endl;
-//		bool isDetMasked;//one of the Silicon Planes contains a Cluster with a masked channel
-//		vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
+	nDiamondHits=eventReader->getNClusters(8);
+	isInFiducialCut=true;
+	if(hasValidSiliconTrack){
+		Float_t fiducialValueX=0;
+		Float_t fiducialValueY=0;
+		for(UInt_t plane=0;plane<4;plane++){
+			fiducialValueX+=eventReader->getCluster(plane*2,0).getPosition();
+			fiducialValueY+=eventReader->getCluster(plane*2+1,0).getPosition();
+		}
+		fiducialValueX/=4.;
+		fiducialValueY/=4.;
+		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_xlow();
+		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_xhigh();
+		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_ylow();
+		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_yhigh();
+//		cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<":"<<isInFiducialCut<<endl;
+	}
+	else
+		isInFiducialCut=false;
 //		UInt_t nDiamondHits; //number of clusters in diamond plane;
-//		bool hasValidSiliconTrack; //One and only one cluster in each silicon plane;
 //		bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
 }
 
@@ -176,4 +224,12 @@ bool TSelectionClass::checkDetMasked(UInt_t det,UInt_t cl){
 	return isMasked;
 
 	return false;
+}
+
+void TSelectionClass::setBranchAdressess(){
+	selectionTree->Branch("nDiamondHits",&nDiamondHits,"nDiamondHits/i");
+	selectionTree->Branch("isInFiducialCut",&isInFiducialCut,"isInFiducialCut/O");
+	selectionTree->Branch("isDetMasked",&isDetMasked,"isDetMasked/O");
+	selectionTree->Branch("hasValidSiliconTrack",&hasValidSiliconTrack,"hasValidSiliconTrack/O");
+	selectionTree->Branch("isDiaMasked",&this->isDiaMasked,"isDiaMasked");
 }

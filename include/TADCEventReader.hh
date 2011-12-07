@@ -29,6 +29,7 @@ public:
 	Long64_t GetEntries();
 	bool isOK();
 //    bool getCMNEvent_flag() const;
+	bool isValidTrack();
 	UInt_t getAdcValue(UInt_t det,UInt_t ch);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch);
 	Float_t getSignal(UInt_t det,UInt_t ch);
@@ -56,6 +57,10 @@ public:
     UInt_t getNClusters(UInt_t det);
     bool isSaturated(UInt_t det,UInt_t ch);
     void checkADC();
+    UInt_t getNDiamondClusters();
+    bool isInFiducialCut();
+    bool isDiaClusterMasked(UInt_t cl);
+    bool isDetMasked();
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
@@ -78,6 +83,11 @@ private:
 	Float_t pedestalMean[9][256];
 	Float_t pedestalSigma[9][256];
 	TCluster::vecvecTCluster* pVecvecCluster;
+	bool bIsDetMasked;
+	bool hasValidSiliconTrack;
+	UInt_t nDiamondClusters;
+	bool bIsInFiducialCut;
+	vector<bool> maskedDiaClusters;
 private:
 //is that needed?
 	TFile *file;
