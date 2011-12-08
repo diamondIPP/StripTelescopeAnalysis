@@ -50,10 +50,10 @@ class TPlane {
 public:
 	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters);
 	virtual ~TPlane();
-	
-private:
 	Float_t getXPosition(int cl){return xClusters[cl].getPosition();};
 	Float_t getYPosition(int cl){return yClusters[cl].getPosition();};
+	
+private:
 	
 	vector<TCluster> xClusters, yClusters;
 	

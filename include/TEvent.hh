@@ -44,18 +44,19 @@
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
 #include "TDetectorAlignment.hh"
+#include "TPlane.hh"
 
 class TEvent {
 public:
 	TEvent();
 	virtual ~TEvent();
+	int getEventNumber(){return -9999;}; // TODO:
+	TPlane getPlane(int plane){return planes[plane];};
 	
 private:
 	void setPositions(TDetectorAlignment align);
 	
 	vector<TPlane> planes;
-	int getEventNumber(){return -9999}; // TODO:
-	TPlane getPlane(int plane){return planes[plane]};
 	
 public:
 	

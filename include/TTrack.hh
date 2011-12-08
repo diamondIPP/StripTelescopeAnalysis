@@ -44,6 +44,7 @@
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
 #include "TDetectorAlignment.hh"
+#include "TEvent.hh"
 
 class TTrack {
 public:
