@@ -6,5 +6,17 @@
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#include "../include/TPlane.hh"
-ClassImp(TPlane);
+#include "../include/TEvent.hh"
+ClassImp(TEvent);
+
+TEvent::TEvent(){
+
+}
+
+TEvent::~TEvent(){
+
+}
+//
+//void TEvent::setPositions(TDetectorAlignment align){
+//
+//}

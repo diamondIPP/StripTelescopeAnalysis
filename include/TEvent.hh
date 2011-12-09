@@ -40,7 +40,6 @@
 #include "FidCutRegion.hh"
 
 #include "TSettings.class.hh"
-#include "TDiamondTrack.hh"
 #include "TDetectorAlignment.hh"
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
@@ -53,7 +52,7 @@ public:
 	virtual ~TEvent();
 	TPlane getPlane(int plane){return planes[plane];};
 	int getEventNumber(){return -9999;}; // TODO:
-	void setPositions(TDetectorAlignment align){};
+//	void setPositions(TDetectorAlignment align);
 	
 private:
 	

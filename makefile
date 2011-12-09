@@ -7,16 +7,17 @@ ROOTLIBS    	:= $(shell root-config --libs)
 ROOTGLIBS   	:= $(shell root-config --glibs)
 # -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -lGui -pthread -Wl,-rpath,$(ROOTSYS)/lib -lm -ldl
 
+ROOTCINT		:= $(ROOTSYS)/bin/rootcint
 SVNDEV 			:= -D'SVN_REV="$(shell svnversion -n .)"'
 
 CC 				:= g++
 SRCDIR          := src
 INCLUDEDIR      := include
 OBJDIR			:= obj
+LIBDIR			:= ~/lib
 
 CFLAGS  		:= -g -Wall -I$(INCLUDEDIR) -D_REENTRANT 
 CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC
-LDFLAGS 		:= -L/usr/local/lib $(ROOTLIBS) $(ROOTGLIBS) -fPIC
 
 
 OBJ 			:= diamondAnalysis.cpp
@@ -27,7 +28,8 @@ HEAD    		:=
 
 
 LD              := g++
-LDFLAGS         := -g $(LLABLDFLAGS) $(ROOTLIBS)
+
+LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64
 
 LIBFILES		:=	HistogrammSaver.class.o ChannelScreen.o TDetectorPlane.o TDiamondTrack.o TDetectorAlignment.o 
 LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o Clustering.class.o TDetector_Data.o TTrigger_Event.o
@@ -37,8 +39,7 @@ LIBFILES		+=	TSettings.class.o TRawEventReader.o TTransparentClustering.o TRawEv
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTransparentAnalysis.o 
 LIBFILES		+=  TSelectionClass.o
 LIBFILES		+=  TAlignment.o TClustering.o
-#LIBFILES 		+=	libTCluster.so 
-LIBFILES		+=	libTPlane.so #libTEvent.so
+LIBFILES		+=	libTEvent.so
 
 PROGS			:= diamondAnalysis
 
@@ -62,40 +63,15 @@ $(PROGS):
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
 		@echo  "\n\nPlease do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib"
 
-libTCluster.so: TClusterDict.o TCluster.o 	
-		#
-		# Creating Shared ROOT Lib
-		#
-		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
-		#
-		g++  -g -fPIC -Wall -m64 -shared $(LDFLAGS) -o $@ $^
-		cp -rfv libTCluster.so ~/lib/ 
- 		#
- 		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
- 		#
- 
-TClusterDict.cpp: $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/TClusterLinkDef.h
-		#
-		# compiling $@
-		#
-		#echo $(ROOTSYS)/bin/rootcint -v $(CFLAGS) -f TClusterDict.cpp -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/LinkDef.h
-		$(ROOTSYS)/bin/rootcint -v  -f TClusterDict.cpp  -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/TClusterLinkDef.h
-
-TClusterDict.o: TClusterDict.cpp
-		#
-		#
-		#
-		g++ $(CFLAGS) -fPIC -c -m64 -o $@ $<
-
 libTPlane.so: TPlaneDict.o TPlane.o  TCluster.o
-		#TClusterDict.o TCluster.o	
+		#TPlaneDict.o TPlane.o TCluster.o	
 		#
 		# Creating Shared ROOT Lib
 		#
 		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
 		#
-		g++  -g -fPIC -Wall -m64 -shared $(LDFLAGS) -o $@ $^
-		cp -rfv libTPlane.so ~/lib/ 
+		$(LD)  -shared $(LDFLAGS) -o $@ $^
+		cp -rfv libTPlane.so $(LIBDIR) 
  		#
  		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
  		#
@@ -104,24 +80,24 @@ TPlaneDict.cpp: $(INCLUDEDIR)/TPlane.hh $(INCLUDEDIR)/TPlaneLinkDef.h
 		#
 		# compiling $@
 		#
-		#echo $(ROOTSYS)/bin/rootcint -v  -f TPlaneDict.cpp  -c $(INCLUDEDIR)/TPlane.hh $(INCLUDEDIR)/TPlaneLinkDef.h
-		$(ROOTSYS)/bin/rootcint -v -f TPlaneDict.cpp -c -p -I$(INCLUDEDIR) TCluster.hh TPlane.hh TPlaneLinkDef.h
+		#echo $(ROOTCINT) -v  -f TPlaneDict.cpp  -c $(INCLUDEDIR)/TPlane.hh $(INCLUDEDIR)/TPlaneLinkDef.h
+		$(ROOTCINT) -v -f TPlaneDict.cpp -c -p -I$(INCLUDEDIR) TCluster.hh TPlane.hh TPlaneLinkDef.h
 
 TPlaneDict.o: TPlaneDict.cpp
 		#
 		#
 		#
-		g++ $(CFLAGS) -fPIC -c -m64 -o $@ $<
+		$(CC) $(CFLAGS) -fPIC -c -m64 -o $@ $<
 		
 
-libTEvent.so: TEventDict.o TEvent.o 	
+libTEvent.so: TEventDict.o TEvent.o  TPlane.o  TCluster.o	
 		#
 		# Creating Shared ROOT Lib
 		#
 		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
 		#
-		g++  -g -fPIC -Wall -m64 -shared $(LDFLAGS) -o $@ $^
-		cp -rfv libTEvent.so ~/lib/ 
+		$(LD) -m64 -shared $(LDFLAGS) -o $@ $^
+		cp -rfv libTEvent.so $(LIBDIR) 
  		#
  		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
  		#
@@ -130,25 +106,23 @@ TEventDict.cpp: $(INCLUDEDIR)/TEvent.hh $(INCLUDEDIR)/TEventLinkDef.h
 		#
 		# compiling $@
 		#
-		#echo $(ROOTSYS)/bin/rootcint -v $(CFLAGS) -f TClusterDict.cpp -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/LinkDef.h
-		$(ROOTSYS)/bin/rootcint -v  -f TEventDict.cpp  -c $(INCLUDEDIR)/TEvent.hh $(INCLUDEDIR)/TEventLinkDef.h
+		#echo $(ROOTCINT) -v $(CFLAGS) -f TClusterDict.cpp -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/LinkDef.h
+		$(ROOTCINT) -v  -f TEventDict.cpp  -c -p -I$(INCLUDEDIR) TCluster.hh TPlane.hh TEvent.hh TEventLinkDef.h
 
 TEventDict.o: TEventDict.cpp
 		#
 		#
 		#
-		g++ $(CFLAGS) -fPIC -c -m64 -o $@ $<
+		$(CC) $(CFLAGS) -fPIC -c -m64 -o $@ $<
 				
 %.o: $(SRCDIR)/%.cpp $(INCLUDEDIR)/%.hh
         #
         # compiling $@
         #
         #(cd $(SRCDIR); g++ $(CPPFLAGS) -c $< )
-		g++ $(CFLAGS) -c $<
+		$(CC) $(CFLAGS) -c $<
         # DONE
         #
-
-
 
 clean:	
 	rm -fv *.o diamondAnalysis
