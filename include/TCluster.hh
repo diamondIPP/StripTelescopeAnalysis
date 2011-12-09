@@ -16,6 +16,7 @@
 #include <sstream>
 #include "TSystem.h"
 #include "TObject.h"
+#include "TROOT.h"
 //#define TCLUSTER_REVISION 12;
 using namespace std;
 class TCluster :public TObject{

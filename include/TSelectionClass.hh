@@ -48,7 +48,7 @@ private:
 private:
 	UInt_t nEvent;
 	bool isDetMasked;//one of the Silicon Planes contains a Cluster with a masked channel
-	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
+	deque<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
 	UInt_t nDiamondHits; //number of clusters in diamond plane;
 	bool hasValidSiliconTrack; //One and only one cluster in each silicon plane;
 	bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region

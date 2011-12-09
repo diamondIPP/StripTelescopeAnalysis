@@ -24,6 +24,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TROOT.h" // for adding your own classes to ROOT's library
+#include "TObject.h"
 #include "TStyle.h"
 #include "TStopwatch.h"
 #include "TDatime.h"
@@ -46,17 +47,19 @@
 #include "TDetectorAlignment.hh"
 #include "TCluster.hh"
 
-class TPlane {
+//class TCluster;
+class TPlane:public TObject {
 public:
+	TPlane();
 	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters);
 	virtual ~TPlane();
 	Float_t getXPosition(int cl){return xClusters[cl].getPosition();};
 	Float_t getYPosition(int cl){return yClusters[cl].getPosition();};
-	
 private:
 	
-	vector<TCluster> xClusters, yClusters;
 	
+	vector<TCluster> xClusters, yClusters;
+    ClassDef(TPlane,1);
 };
 
 #endif // TPlane_hh

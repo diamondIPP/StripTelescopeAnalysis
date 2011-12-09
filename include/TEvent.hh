@@ -24,6 +24,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TROOT.h" // for adding your own classes to ROOT's library
+#include "TObject.h"
 #include "TStyle.h"
 #include "TStopwatch.h"
 #include "TDatime.h"
@@ -46,18 +47,19 @@
 #include "TDetectorAlignment.hh"
 #include "TPlane.hh"
 
-class TEvent {
+class TEvent:public TObject {
 public:
 	TEvent();
 	virtual ~TEvent();
-	int getEventNumber(){return -9999;}; // TODO:
 	TPlane getPlane(int plane){return planes[plane];};
+	int getEventNumber(){return -9999;}; // TODO:
+	void setPositions(TDetectorAlignment align){};
 	
 private:
-	void setPositions(TDetectorAlignment align);
 	
 	vector<TPlane> planes;
-	
+
+    ClassDef(TEvent,1);
 public:
 	
 };

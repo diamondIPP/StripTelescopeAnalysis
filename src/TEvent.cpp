@@ -6,4 +6,5 @@
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#include <iostream>
+#include "../include/TPlane.hh"
+ClassImp(TPlane);

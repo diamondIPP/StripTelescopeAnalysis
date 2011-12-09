@@ -7,7 +7,7 @@
 //
 
 #include "../include/TPlane.hh"
-
+ClassImp(TPlane);
 TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters) {
 	this->xClusters = xClusters;
 	this->yClusters = yClusters;
