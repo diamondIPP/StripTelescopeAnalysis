@@ -50,13 +50,16 @@
 //class TCluster;
 class TPlane:public TObject {
 public:
-	TPlane(){};
-	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters);
+	TPlane(){type = kUndefined;};
+	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
+	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type);
 	virtual ~TPlane();
 	Float_t getXPosition(int cl){return xClusters[cl].getPosition();};
 	Float_t getYPosition(int cl){return yClusters[cl].getPosition();};
+    UInt_t getDetectorType() const;
+    void setDetectorType(enumDetectorType type);
 private:
-	
+	enumDetectorType type;
 	
 	vector<TCluster> xClusters, yClusters;
     ClassDef(TPlane,1);

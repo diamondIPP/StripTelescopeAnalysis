@@ -8,7 +8,7 @@
 
 #include "../include/TPlane.hh"
 ClassImp(TPlane);
-TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters) {
+TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type) {
 	this->xClusters = xClusters;
 	this->yClusters = yClusters;
 }
@@ -16,3 +16,15 @@ TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters) {
 TPlane::~TPlane() {
 	
 }
+
+UInt_t TPlane::getDetectorType() const
+{
+    return type;
+}
+
+void TPlane::setDetectorType(enumDetectorType type)
+{
+    this->type = type;
+}
+
+

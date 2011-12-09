@@ -52,6 +52,8 @@ public:
 	virtual ~TEvent();
 	TPlane getPlane(int plane){return planes[plane];};
 	int getEventNumber(){return -9999;}; // TODO:
+	void addPlane(TPlane plane,Int_t pos=-1);
+	bool  isValidSiliconTrack();
 //	void setPositions(TDetectorAlignment align);
 	
 private:

@@ -16,7 +16,20 @@ TEvent::TEvent(){
 TEvent::~TEvent(){
 
 }
-//
-//void TEvent::setPositions(TDetectorAlignment align){
-//
-//}
+void TEvent::addPlane(TPlane plane, Int_t pos){
+	if(pos==-1)
+		this->planes.push_back(plane);
+	else{
+		if (planes.size()+1<pos){
+			planes.resize(pos+1);
+			planes.at(pos)=plane;
+		}
+		else
+			planes.at(pos)=plane;
+	}
+}
+
+bool TEvent::isValidSiliconTrack(){
+
+
+}
