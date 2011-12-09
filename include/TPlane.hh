@@ -50,7 +50,7 @@
 //class TCluster;
 class TPlane:public TObject {
 public:
-	TPlane();
+	TPlane(){};
 	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters);
 	virtual ~TPlane();
 	Float_t getXPosition(int cl){return xClusters[cl].getPosition();};
