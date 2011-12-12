@@ -132,7 +132,7 @@ void TClustering::clusterEvent()
 	if(pEvent!=NULL) {delete pEvent;pEvent=NULL;}
 	pEvent = new TEvent(nEvent);
 	if(verbosity>10)cout<<"."<<flush;
-	for(UInt_t nplane=0;nplane<3;nplane++){
+	for(UInt_t nplane=0;nplane<4;nplane++){
 		TPlane plane(vecCluster[nplane*2],vecCluster[nplane*2+1],TPlane::kSilicon);
 		pEvent->addPlane(plane,nplane);
 		if(verbosity>10)cout<<nplane<<"."<<flush;
