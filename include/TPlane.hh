@@ -47,15 +47,20 @@
 #include "TDetectorAlignment.hh"
 #include "TCluster.hh"
 
+
+#define N_INVALID -9999
 //class TCluster;
 class TPlane:public TObject {
 public:
 	TPlane(){type = kUndefined;};
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
-	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type);
+	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type=kSilicon);
 	virtual ~TPlane();
-	Float_t getXPosition(int cl){return xClusters[cl].getPosition();};
-	Float_t getYPosition(int cl){return yClusters[cl].getPosition();};
+	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	UInt_t getNXClusters();
+	UInt_t getNYClusters();
+	bool isValidPlane();
     UInt_t getDetectorType() const;
     void setDetectorType(enumDetectorType type);
 private:

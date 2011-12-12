@@ -30,6 +30,10 @@ void TEvent::addPlane(TPlane plane, Int_t pos){
 }
 
 bool TEvent::isValidSiliconTrack(){
-
-
+	bool validTrack=true;
+	for(UInt_t plane=0;plane<planes.size();plane++){
+		if(planes.at(plane).getDetectorType() == (TPlane::kSilicon))
+			validTrack=validTrack&&planes.at(plane).isValidPlane();
+	}
+	return validTrack;
 }
