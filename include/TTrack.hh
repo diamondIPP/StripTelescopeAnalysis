@@ -48,23 +48,25 @@
 
 class TTrack {
 public:
-	TTrack(TEvent event);
+	TTrack(TDetectorAlignment alignment);
 	virtual ~TTrack();
 	UInt_t getNClusters(int det);
-	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
+//	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
+	void setEvent(TEvent *event){this->event = event;};
+	Float_t getXPosition(int plane);
+	Float_t getYPosition(int plane);
+	vector<Float_t> getSiXPositions();
+	vector<Float_t> getSiYPositions();
 	
 private:
-	void setPositions(TEvent event);
-	Float_t getXOffset(int plane){return 0;}; // TODO: get offsets
-	Float_t getYOffset(int plane){return 0;};
-	Float_t getPhiXOffset(int plane){return 0;};
-	Float_t getPhiYOffset(int plane){return 0;};
+//	void setPositions(TEvent event);
+	Float_t getXOffset(int plane){return this->alignment.GetXOffset(plane);}; // TODO: get offsets
+	Float_t getYOffset(int plane){return this->alignment.GetYOffset(plane);};
+	Float_t getPhiXOffset(int plane){return this->alignment.GetPhiXOffset(plane);};
+	Float_t getPhiYOffset(int plane){return this->alignment.GetPhiYOffset(plane);};
 	
-	
-	
-	vector<Float_t> xPositions, yPositions, zPositions;
-	
-public:
+	TEvent *event;
+	TDetectorAlignment alignment;
 	
 };
 
