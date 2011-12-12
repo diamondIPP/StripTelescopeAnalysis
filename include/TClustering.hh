@@ -30,6 +30,8 @@ using namespace std;
 
 #include "TADCEventReader.hh"
 #include "TCluster.hh"
+#include "TEvent.hh"
+#include "TPlane.hh"
 #include "TSettings.class.hh"
 #define N_DET_CHANNELS 256
 #define N_DIA_CHANNELS 128
@@ -70,6 +72,7 @@ private:
     UInt_t nClusters[9];
     UShort_t maxDetAdcValue;
     UShort_t maxDiaAdcValue;
+    TEvent *pEvent;
 
 };
 

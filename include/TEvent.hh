@@ -48,17 +48,18 @@
 
 class TEvent:public TObject {
 public:
-	TEvent();
+	TEvent(UInt_t nEvent=0);
 	virtual ~TEvent();
 	TPlane getPlane(int plane){return planes[plane];};
-	int getEventNumber(){return -9999;}; // TODO:
 	void addPlane(TPlane plane,Int_t pos=-1);
 	bool  isValidSiliconTrack();
+	UInt_t getEventNumber(){return eventNumber;};
 //	void setPositions(TDetectorAlignment align);
 	
 private:
 	
 	vector<TPlane> planes;
+	UInt_t eventNumber;
 
     ClassDef(TEvent,1);
 public:

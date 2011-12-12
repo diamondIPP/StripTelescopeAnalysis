@@ -13,6 +13,10 @@ TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetect
 	this->yClusters = yClusters;
 }
 
+TPlane::TPlane(vector<TCluster> xClusters,enumDetectorType type){
+	this->xClusters = xClusters;
+}
+
 TPlane::~TPlane() {
 	
 }

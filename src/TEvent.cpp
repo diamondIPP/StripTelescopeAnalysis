@@ -9,8 +9,8 @@
 #include "../include/TEvent.hh"
 ClassImp(TEvent);
 
-TEvent::TEvent(){
-
+TEvent::TEvent(UInt_t nEvent){
+	eventNumber=nEvent;
 }
 
 TEvent::~TEvent(){

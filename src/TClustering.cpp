@@ -50,6 +50,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	pVecvecCluster=&vecvecCluster;
 	settings=NULL;
 	createdTree=false;
+	pEvent=NULL;
 
 }
 
@@ -118,6 +119,15 @@ void TClustering::clusterEvent()
 			cout<<"Something is going wrong vecvecCluster is to small....."<<endl;
 		//hNumberOfSeeds[det]->Fill(numberOfSeeds);
 	}
+	if(pEvent!=NULL) {delete pEvent;pEvent=NULL;}
+	pEvent = new TEvent(nEvent);
+	for(UInt_t nplane=0;nplane<3;nplane++){
+		TPlane plane(vecCluster[nplane*2],vecCluster[nplane*2+1]);
+		pEvent->addPlane(plane,nplane);
+	}
+	TPlane plane(vecCluster[8]);
+	pEvent->addPlane(plane,4);
+
 
 
 }
@@ -312,6 +322,7 @@ void TClustering::setBranchAdresses(){
 	//clusterTree->Branch("vecvecChannel",&vecvecChannel[0])
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
 	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
+	clusterTree->Branch("event","TEvent",&pEvent);
 }
 
 

@@ -55,6 +55,7 @@ public:
 	TPlane(){type = kUndefined;};
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
 	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type=kSilicon);
+	TPlane(vector<TCluster> xCluster,enumDetectorType type=kDiamond);
 	virtual ~TPlane();
 	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
