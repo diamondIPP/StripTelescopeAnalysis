@@ -50,6 +50,8 @@ class TTrack {
 public:
 	TTrack(TEvent event);
 	virtual ~TTrack();
+	UInt_t getNClusters(int det);
+	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
 	
 private:
 	void setPositions(TEvent event);

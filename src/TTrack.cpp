@@ -17,13 +17,13 @@ TTrack::~TTrack() {
 }
 
 void TTrack::setPositions(TEvent event) {
-	for (int det = 0; det < 4; det++) {
-		Float_t xOffset = this->getXOffset(det);
-		Float_t yOffset = this->getYOffset(det);
-		Float_t phiXOffset = this->getPhiXOffset(det);
-		Float_t phiYOffset = this->getPhiXOffset(det);
-		Float_t xPosition = event.getPlane(det).getXPosition(0);
-		Float_t yPosition = event.getPlane(det).getYPosition(0);
+	for (int plane = 0; plane < 4; plane++) {
+		Float_t xOffset = this->getXOffset(plane);
+		Float_t yOffset = this->getYOffset(plane);
+		Float_t phiXOffset = this->getPhiXOffset(plane);
+		Float_t phiYOffset = this->getPhiXOffset(plane);
+		Float_t xPosition = event.getPlane(plane).getXPosition(0);
+		Float_t yPosition = event.getPlane(plane).getYPosition(0);
 		
 		// apply offsets
 		xPosition -= xOffset;
@@ -33,5 +33,14 @@ void TTrack::setPositions(TEvent event) {
 		
 		this->xPositions.push_back(xPosition);
 		this->yPositions.push_back(yPosition);
+	}
+}
+
+UInt_t getNClusters(int det) {
+	if (det%2 == 0) {
+		return event.getPlane(plane).getNXClusters();
+	}
+	else {
+		return event.getPlane(plane).getNYClusters();
 	}
 }

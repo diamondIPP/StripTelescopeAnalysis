@@ -43,6 +43,7 @@
 #include "TDetectorAlignment.hh"
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
+#include "TTrack.hh"
 
 using namespace std;
 
@@ -51,12 +52,13 @@ public:
 	TTransparentAnalysis(int runNumber);
 	virtual ~TTransparentAnalysis();
 	void	doAnalysis(int nEvents=0);
+	void analyze(int nEvents);
 	
 private:
 	void initHistograms();
 	void saveHistograms();
 	void fitTrack();
-	void analyze(int nEvents);
+	void analyzeTrack(TTrack track);
 	
 	
     TSystem* sys;
