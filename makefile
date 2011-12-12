@@ -38,7 +38,7 @@ LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o AlignmentClass.o
 LIBFILES		+=	TSettings.class.o TRawEventReader.o TTransparentClustering.o TRawEventSaver.o TPedestalCalculation.o
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTransparentAnalysis.o 
 LIBFILES		+=  TSelectionClass.o
-LIBFILES		+=  TAlignment.o TClustering.o
+LIBFILES		+=  TAlignment.o TClustering.o TTrack.o
 LIBFILES		+=	libTEvent.so
 
 PROGS			:= diamondAnalysis

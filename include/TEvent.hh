@@ -52,7 +52,10 @@ public:
 	virtual ~TEvent();
 	TPlane getPlane(int plane){return planes[plane];};
 	void addPlane(TPlane plane,Int_t pos=-1);
-	bool  isValidSiliconTrack();
+	UInt_t getNXClusters(UInt_t plane){if(planes.size()>plane)return planes.at(plane).getNXClusters();else return 0;}
+	UInt_t getNYClusters(UInt_t plane){if(planes.size()>plane)return planes.at(plane).getNXClusters();else return 0;}
+	UInt_t getNPlanes();
+	bool  isValidSiliconEvent();
 	UInt_t getEventNumber(){return eventNumber;};
 //	void setPositions(TDetectorAlignment align);
 	

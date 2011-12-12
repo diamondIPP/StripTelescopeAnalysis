@@ -8,7 +8,9 @@
 #include "TDetectorAlignment.hh"
 using namespace std;
 
-
+TDetectorAlignment::TDetectorAlignment(){
+	TDetectorAlignment("default");
+}
 TDetectorAlignment::TDetectorAlignment(std::string plots_path_string) {
 	verbosity=5;
    nDetectors = 5;

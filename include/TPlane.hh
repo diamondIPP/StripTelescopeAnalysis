@@ -62,7 +62,7 @@ public:
 	UInt_t getNXClusters();
 	UInt_t getNYClusters();
 	bool isValidPlane();
-    UInt_t getDetectorType() const;
+    enum enumDetectorType getDetectorType() const;
     void setDetectorType(enumDetectorType type);
 private:
 	enumDetectorType type;

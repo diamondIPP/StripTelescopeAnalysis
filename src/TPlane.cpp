@@ -11,19 +11,28 @@ ClassImp(TPlane);
 TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type) {
 	this->xClusters = xClusters;
 	this->yClusters = yClusters;
+	this->type=type;
 }
 
 TPlane::TPlane(vector<TCluster> xClusters,enumDetectorType type){
 	this->xClusters = xClusters;
+	this->type=type;
 }
 
 TPlane::~TPlane() {
 	
 }
 
-UInt_t TPlane::getDetectorType() const
+enum TPlane::enumDetectorType TPlane::getDetectorType() const
 {
-    return type;
+	return type;
+//	if(type==kSilicon)
+//		return 1;
+//	else if(type ==kDiamond)
+//		return 2;
+//	else if(type==kUndefined)
+//		return 0;
+//	else return 20;
 }
 
 void TPlane::setDetectorType(enumDetectorType type)

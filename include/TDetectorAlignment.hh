@@ -39,6 +39,7 @@
 class TDetectorAlignment{
 
    public:
+	TDetectorAlignment();
       TDetectorAlignment(std::string plots_path_string);
       TDetectorAlignment(std::string plots_path_string, std::vector<TDiamondTrack> &input_tracks, std::vector<bool> &input_tracks_mask);
       ~TDetectorAlignment() {};
