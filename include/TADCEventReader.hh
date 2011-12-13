@@ -20,12 +20,14 @@
 #include "TFile.h"
 #include "TKey.h"
 #include "TCluster.hh"
+//#include "TPlane.hh"
+#include "TEvent.hh"
 class TADCEventReader {
 public:
 	TADCEventReader(std::string fileName);
 	virtual ~TADCEventReader();
 	bool GetNextEvent();
-	bool GetEvent(UInt_t EventNumber);
+	bool LoadEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
 	bool isOK();
 //    bool getCMNEvent_flag() const;
@@ -61,6 +63,7 @@ public:
     bool isInFiducialCut();
     bool isDiaClusterMasked(UInt_t cl);
     bool isDetMasked();
+    TEvent* getEvent();
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
@@ -83,6 +86,7 @@ private:
 	Float_t pedestalMean[9][256];
 	Float_t pedestalSigma[9][256];
 	TCluster::vecvecTCluster* pVecvecCluster;
+	TEvent *pEvent;
 	bool bIsDetMasked;
 	bool hasValidSiliconTrack;
 	UInt_t nDiamondClusters;

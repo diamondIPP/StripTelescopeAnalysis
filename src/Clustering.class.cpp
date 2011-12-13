@@ -165,7 +165,7 @@ void Clustering::ClusterEvent() {
 		cout<<"Get Event: "<<current_event<<"\t"<<eventReader<<flush;
 		cout<<eventReader->isOK();
 	}
-	eventReader->GetEvent(current_event);
+	eventReader->LoadEvent(current_event);
 	if(verbosity>=3) cout<<endl<<endl;
 	if(current_event%1000==0) cout<<"Clustering::ClusterEvent(): current_event = "<<current_event<<endl;
 
@@ -500,7 +500,7 @@ void Clustering::ClusterEvent() {
 // alternative function to ClusterEvent
 // channels are searched for a seed. clusters are build around located seeds.
 void Clustering::ClusterEventSeeds(bool verbose) {
-	eventReader->GetEvent(current_event);
+	eventReader->LoadEvent(current_event);
 	if(verbose) cout<<endl<<endl;
 	if(current_event%1000==0) cout<<"Clustering::ClusterEventSeed(): current_event = "<<current_event<<endl;
 

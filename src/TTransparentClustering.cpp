@@ -112,7 +112,7 @@ void TTransparentClustering::MakeTransparentClustering()
 			cout<<"event is bigger than number of events in tree: take next event..."<<endl;
 			continue;
 		}
-		eventReader->GetEvent(event);
+		eventReader->LoadEvent(event);
 		if (verbosity>=3) cout << "eventReader->getEvent_number() = " << eventReader->getEvent_number() << endl;
 
 
@@ -326,7 +326,7 @@ void TTransparentClustering::createEventNumberList()
 	for (int j = 0; j < eventReader->GetEntries(); j++) {
 
 		if(verbosity>=4) cout << "AlignmentClass::TransparentClustering::get Event"<<j<<flush;
-		if(!eventReader->GetEvent(j)) continue;
+		if(!eventReader->LoadEvent(j)) continue;
 		if(verbosity>=4) cout << " push back "<<flush;
 		event_numbers.push_back(eventReader->getEvent_number());
 		if(verbosity>=4) cout << " done. "<<endl;

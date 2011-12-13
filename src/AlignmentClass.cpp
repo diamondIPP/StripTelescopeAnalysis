@@ -33,7 +33,7 @@ AlignmentClass::AlignmentClass(string fileName,UInt_t nEventNumber) {
 	histSaverAlignment = new HistogrammSaver(0);
 	histSaverAlignmentFakedTracks = new HistogrammSaver(0);
 	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:get Event:"<<nEventNumber<<endl;
-	eventReader->GetEvent(nEventNumber);
+	eventReader->LoadEvent(nEventNumber);
 	verbosity=3;
 	if (verbosity)cout<<"AlignmentClass::AlignmentClass: eventReader:"<<eventReader->isOK()<<" "<<eventReader<<" entries:"<<eventReader->GetEntries()<<endl;
 }
@@ -63,7 +63,7 @@ void AlignmentClass::SetPlotsPath(string plotsPath){
 }
 
 bool AlignmentClass::GetEvent(UInt_t nEvent){
-	return eventReader->GetEvent(nEvent);
+	return eventReader->LoadEvent(nEvent);
 }
 
 void AlignmentClass::SetTracks(vector<TDiamondTrack> tracks)
@@ -315,7 +315,7 @@ void AlignmentClass::TransparentAnalysis(vector<TDiamondTrack> & tracks, vector<
 
 	event_numbers.clear();
 	for (int j = 0; j < eventReader->GetEntries(); j++) {
-		eventReader->GetEvent(j);
+		eventReader->LoadEvent(j);
 		//		cout << endl << endl << endl;
 		//		cout << "event " << j << " in PedTree has eventReader->getEvent_number(): " << eventReader->getEvent_number() << endl;
 		event_numbers.push_back(eventReader->getEvent_number());
@@ -391,7 +391,7 @@ void AlignmentClass::TransparentAnalysis(vector<TDiamondTrack> & tracks, vector<
 
 		//get event
 		if (verbosity>2) cout << "getting event " << event << ".." << endl;
-		eventReader->GetEvent(event);
+		eventReader->LoadEvent(event);
 		if (verbosity>2) cout << "eventReader->getEvent_number() = " << eventReader->getEvent_number() << endl;
 
 		// find biggest hit in diamond
@@ -560,7 +560,7 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 	for (int j = 0; j < eventReader->GetEntries(); j++) {
 
 		if(verbosity>=4) cout << "AlignmentClass::TransparentClustering::get Event"<<j<<flush;
-		if(!eventReader->GetEvent(j)) continue;
+		if(!eventReader->LoadEvent(j)) continue;
 		//		cout << endl << endl << endl;
 		//		cout << "event " << j << " in PedTree has eventReader->getEvent_number(): " << eventReader->getEvent_number() << endl;
 
@@ -662,7 +662,7 @@ void AlignmentClass::TransparentClustering(vector<TDiamondTrack> & tracks, vecto
 
 		//get event
 		if (verbosity>=3) cout << "getting event " << event << ".." << endl;
-		eventReader->GetEvent(event);
+		eventReader->LoadEvent(event);
 		if (verbosity>=3) cout << "eventReader->getEvent_number() = " << eventReader->getEvent_number() << endl;
 
 		// find biggest hit in diamond

@@ -66,7 +66,7 @@ void TPedestalCalculation::calculatePedestals(int nEvents){
 	 * calulate Pedestal mean and sigma with trick: ped=<x> and sigma=<x^2>-<x>^2
 	 */
 	for(int event=0;event<nEvents;event++){
-		eventReader->GetEvent(event);
+		eventReader->LoadEvent(event);
 		for(int det=0;det <8;det++){
 			for(int ch=0;ch<256;ch++){
 				meanValues[det][ch]+=(int)eventReader->getDet_ADC(det,ch);
@@ -112,7 +112,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 
 	//initialise detAdcValues, diaAdcValues with values from rawTree
 	for(nEvent=0;nEvent<slidingLength;nEvent++){
-		eventReader->GetEvent(nEvent);
+		eventReader->LoadEvent(nEvent);
 		for(int det=0;det <8;det++){
 			for(int ch=0;ch<N_DET_CHANNELS;ch++){
 				detAdcValues[det][ch].push_back(eventReader->getDet_ADC(det,ch));
@@ -136,7 +136,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		//Add next Event to detAdcValues, diaAdcValues
 		//Remove first Event from Queue
-		eventReader->GetEvent(nEvent);
+		eventReader->LoadEvent(nEvent);
 		//SILICON PLANES
 		for(int det=0;det <8;det++){
 			for(int ch=0;ch<N_DET_CHANNELS;ch++){

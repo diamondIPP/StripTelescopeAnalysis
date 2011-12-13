@@ -21,29 +21,9 @@
 
 
 //ROOT Class Headers
-#include "TTree.h"
-#include "TFile.h"
 #include "TROOT.h" // for adding your own classes to ROOT's library
 #include "TObject.h"
-#include "TStyle.h"
-#include "TStopwatch.h"
-#include "TDatime.h"
-#include "TMath.h"
-#include "TROOT.h"
-#include "TSystem.h"
-#include "TH1F.h"
-#include "TH2F.h"
-//#include "TGraph.h"
-#include "TF1.h"
-#include "TCanvas.h"
-#include "TPaveText.h"
-#include "FidCutRegion.hh"
 
-#include "TSettings.class.hh"
-#include "TDetectorAlignment.hh"
-#include "HistogrammSaver.class.hh"
-#include "TADCEventReader.hh"
-#include "TDetectorAlignment.hh"
 #include "TPlane.hh"
 
 class TEvent:public TObject {

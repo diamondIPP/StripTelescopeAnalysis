@@ -23,9 +23,10 @@ TADCEventReader::TADCEventReader(string FileName) {
 		exit(-1);
 	}
 	if (verbosity) cout<<"tree Entries():"<<tree->GetEntries()<<endl;
-	this->GetEvent(0);
+	this->LoadEvent(0);
 	this->fileName=FileName;
-	pVecvecCluster=0;
+	pVecvecCluster=NULL;
+	pEvent=NULL;
 }
 
 TADCEventReader::~TADCEventReader() {
@@ -126,6 +127,7 @@ void TADCEventReader::SetBranchAddresses(){
 	tree->SetBranchAddress("nDiamondHits",&nDiamondClusters);
 	tree->SetBranchAddress("isInFiducialCut",&bIsInFiducialCut);
 	tree->SetBranchAddress("isDiaMasked",&this->maskedDiaClusters);
+	tree->SetBranchAddress("event",&pEvent);
 //	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
 //	UInt_t nDiamondHits; //number of clusters in diamond plane;
 	cout<<"DONE"<<endl;
@@ -153,7 +155,7 @@ bool TADCEventReader::GetNextEvent(){
 	}
 	return false;
 }
-bool TADCEventReader::GetEvent(UInt_t EventNumber){
+bool TADCEventReader::LoadEvent(UInt_t EventNumber){
 	if(tree==NULL) return false;
 	if(EventNumber<tree->GetEntries()){
 			current_event=EventNumber;
@@ -326,7 +328,7 @@ TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 }
 
 void TADCEventReader::checkADC(){
-	this->GetEvent(100);
+	this->LoadEvent(100);
 	for(int ch=0;ch<256;ch++)
 		cout<<this->getAdcValue(0,ch)<<" "<<this->getAdcValue(1,ch)<<" "<<this->getAdcValue(8,ch)<<endl;
 }
@@ -377,6 +379,11 @@ bool TADCEventReader::isDiaClusterMasked(UInt_t cl)
 bool TADCEventReader::isDetMasked()
 {
 	return this->bIsDetMasked;
+}
+
+TEvent* TADCEventReader::getEvent()
+{
+	return this->pEvent;
 }
 
 TObject* TADCEventReader::getTreeName(){

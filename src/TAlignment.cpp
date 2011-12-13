@@ -84,7 +84,7 @@ void TAlignment::createVectors(UInt_t nEvents){
 	cout<<"ANALYSE VECTORS...."<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
-		eventReader->GetEvent(nEvent);
+		eventReader->LoadEvent(nEvent);
 		//check if every plane has exactly one cluster
 		if(!eventReader->isValidTrack()){
 			noHitDet++;

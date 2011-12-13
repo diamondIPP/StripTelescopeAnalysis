@@ -93,7 +93,7 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
-		eventReader->GetEvent(nEvent);
+		eventReader->LoadEvent(nEvent);
 		clusterEvent();
 		clusterTree->Fill();
 		if(pEvent->isValidSiliconEvent())

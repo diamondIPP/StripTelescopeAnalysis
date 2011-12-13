@@ -86,7 +86,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	cout<<"start selection with "<<nEvents<<" Events"<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
-		eventReader->GetEvent(nEvent);
+		eventReader->LoadEvent(nEvent);
 		resetVariables();
 		setVariables();
 		selectionTree->Fill();
