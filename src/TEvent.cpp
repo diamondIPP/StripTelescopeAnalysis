@@ -46,6 +46,10 @@ bool TEvent::isValidSiliconEvent(){
 	return validTrack;
 }
 
+bool TEvent::isMasked(){
+	//todo
+	return false;
+}
 UInt_t TEvent::getNPlanes(){
 	return planes.size();
 }

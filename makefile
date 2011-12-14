@@ -2,9 +2,9 @@
 # define compile command
 ROOTCFLAGS  	:=  $(shell root-config --cflags) 
 #-I$(ROOTSYS)/include
-ROOTLIBS    	:= $(shell root-config --libs)
+ROOTLIBS    	:= $(shell root-config --libs) -lMinuit
 #-L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -pthread -Wl,-rpath,$(ROOTSYS)/lib -lm -ldl
-ROOTGLIBS   	:= $(shell root-config --glibs)
+ROOTGLIBS   	:= $(shell root-config --glibs) -lMinuit
 # -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -lGui -pthread -Wl,-rpath,$(ROOTSYS)/lib -lm -ldl
 
 ROOTCINT		:= $(ROOTSYS)/bin/rootcint
@@ -38,7 +38,7 @@ LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o SlidingPedestal.class.o PSDetector.c
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o AlignmentClass.o TADCEventReader.o
 LIBFILES		+=	TSettings.class.o TRawEventReader.o TTransparentClustering.o TRawEventSaver.o TPedestalCalculation.o
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTransparentAnalysis.o 
-LIBFILES		+=  TSelectionClass.o
+LIBFILES		+=  TSelectionClass.o TPositionPrediction.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o
 
 PROGS			:= diamondAnalysis
@@ -63,32 +63,6 @@ $(PROGS):
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
 		@echo  "\n\nPlease do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib"
 
-libTPlane.so: TPlaneDict.o TPlane.o  TCluster.o
-		#TPlaneDict.o TPlane.o TCluster.o	
-		#
-		# Creating Shared ROOT Lib
-		#
-		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
-		#
-		$(LD)  -shared $(LDFLAGS) -o $@ $^
-		cp -rfv libTPlane.so $(LIBDIR) 
- 		#
- 		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
- 		#
- 
-TPlaneDict.cpp: $(INCLUDEDIR)/TPlane.hh $(INCLUDEDIR)/TPlaneLinkDef.h
-		#
-		# compiling $@
-		#
-		#echo $(ROOTCINT) -v  -f TPlaneDict.cpp  -c $(INCLUDEDIR)/TPlane.hh $(INCLUDEDIR)/TPlaneLinkDef.h
-		$(ROOTCINT) -v -f TPlaneDict.cpp -c -p -I$(INCLUDEDIR) TCluster.hh TPlane.hh TPlaneLinkDef.h
-
-TPlaneDict.o: TPlaneDict.cpp
-		#
-		#
-		#
-		$(CC) $(CFLAGS) -fPIC -c -m64 -o $@ $<
-		
 
 libTEvent.so: TEventDict.o TEvent.o  TPlane.o  TCluster.o	
 		#

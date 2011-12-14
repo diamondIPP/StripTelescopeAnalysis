@@ -32,18 +32,22 @@
 //class TCluster;
 class TPlane:public TObject {
 public:
+
 	TPlane(){type = kUndefined;};
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
+	enum enumCoordinate{ X_COR =1, Y_COR=2, Z_COR =3, XY_COR=4,};
 	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type=kSilicon);
 	TPlane(vector<TCluster> xCluster,enumDetectorType type=kDiamond);
 	virtual ~TPlane();
 	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getPosition(enumCoordinate cor, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	UInt_t getNXClusters();
 	UInt_t getNYClusters();
 	bool isValidPlane();
     enum enumDetectorType getDetectorType() const;
     void setDetectorType(enumDetectorType type);
+    static string getCoordinateString(enumCoordinate cor);
 private:
 	enumDetectorType type;
 	

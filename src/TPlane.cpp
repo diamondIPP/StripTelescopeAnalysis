@@ -55,6 +55,15 @@ Float_t TPlane::getYPosition(UInt_t cl,TCluster::calculationMode_t mode){
 			return N_INVALID;
 }
 
+Float_t TPlane::getPosition(enumCoordinate cor, UInt_t cl, TCluster::calculationMode_t mode)
+{
+	if(cor== X_COR)
+		return getXPosition(cl,mode);
+	else if(cor== Y_COR)
+		return getYPosition(cl,mode);
+	else
+		return N_INVALID;
+}
 
 UInt_t TPlane::getNXClusters(){
 	return xClusters.size();
@@ -69,4 +78,14 @@ bool TPlane::isValidPlane(){
 		return (getNXClusters()==1&&getNYClusters()==1);
 	else
 		return (getNXClusters()==1);
+}
+
+string TPlane::getCoordinateString(enumCoordinate cor){
+	switch (cor){
+	case X_COR: return "X";break;
+	case Y_COR: return "Y";break;
+	case Z_COR: return "Z";break;
+	case XY_COR:return "X&Y"; break;
+	default: return "UNDEFINDED";
+	}
 }

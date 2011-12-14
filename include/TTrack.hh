@@ -32,6 +32,7 @@
 #include "TSystem.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TLinearFitter.h"
 //#include "TGraph.h"
 #include "TF1.h"
 #include "TCanvas.h"
@@ -45,18 +46,24 @@
 #include "TADCEventReader.hh"
 #include "TDetectorAlignment.hh"
 #include "TEvent.hh"
+#include "TPositionPrediction.hh"
 
 class TTrack {
 public:
+
 	TTrack(TDetectorAlignment alignment);
 	virtual ~TTrack();
 	UInt_t getNClusters(int det);
 //	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
 	void setEvent(TEvent *event){this->event = event;};
-	Float_t getXPosition(int plane);
-	Float_t getYPosition(int plane);
+	Float_t getXPosition(UInt_t plane);
+	Float_t getYPosition(UInt_t plane);
+	Float_t getPosition(TPlane::enumCoordinate cor,UInt_t plane);
+	TPositionPrediction predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes);
 	vector<Float_t> getSiXPositions();
 	vector<Float_t> getSiYPositions();
+	TEvent* getEvent(){return event;}
+	void setDetectorAlignment(TDetectorAlignment alignment);
 	
 private:
 //	void setPositions(TEvent event);
@@ -67,6 +74,7 @@ private:
 	
 	TEvent *event;
 	TDetectorAlignment alignment;
+	UInt_t verbosity;
 	
 };
 

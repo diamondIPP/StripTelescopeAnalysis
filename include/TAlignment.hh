@@ -36,6 +36,18 @@
 #include "AlignmentClass.hh"
 #include "TSettings.class.hh"
 #include "TDetectorAlignment.hh"
+#include "TTrack.hh"
+#include "TPlane.hh"
+
+	struct TResiduum{ Float_t resXMean, resXSigma,resYMean,resYSigma;Float_t sumRx;
+	Float_t sumRy;
+	Float_t sumVx;
+	Float_t sumVy;
+	Float_t sumV2x;
+	Float_t sumV2y;
+	Float_t sumVRx;
+	Float_t sumVRy;
+	UInt_t nUsedTracks;};
 
 class TAlignment {
 public:
@@ -51,6 +63,13 @@ private:
 	void addEventToTracks();
 	void doDetAlignmentStep();
 	void doDiaAlignmentStep();
+	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
+	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
+	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
+	void AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
+	TResiduum getResiduum(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
+	TResiduum calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY);
+	TResiduum calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY,TResiduum res);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
@@ -72,6 +91,8 @@ private:
     Double_t detectorDiaZ; // by definition
     int verbosity;
     int nAlignSteps;
+    TTrack* myTrack;
+    Float_t res_keep_factor;
 private:
 
 	TH2F* hScatterPosition[4];

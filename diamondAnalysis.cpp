@@ -200,7 +200,7 @@ int main(int argc, char ** argv) {
 
 		process_mem_usage(vm2, rss2);
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-//
+
 		TSelectionClass* selectionClass;
 		selectionClass=new TSelectionClass(settings);
 		selectionClass->MakeSelection(NEVENTS);
