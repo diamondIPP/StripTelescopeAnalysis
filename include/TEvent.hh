@@ -38,8 +38,7 @@ public:
 	bool  isValidSiliconEvent();
 	bool isMasked();
 	UInt_t getEventNumber(){return eventNumber;};
-//	void setPositions(TDetectorAlignment align);
-	
+	void Print(UInt_t level);
 private:
 	
 	vector<TPlane> planes;

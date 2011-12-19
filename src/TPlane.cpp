@@ -89,3 +89,24 @@ string TPlane::getCoordinateString(enumCoordinate cor){
 	default: return "UNDEFINDED";
 	}
 }
+
+string TPlane::getDetectortypeString(enumDetectorType type){
+	switch (type){
+	case kSilicon: 	return "Silicon";
+	case kDiamond:	return "Diamond";
+	default:		return "UNDEFINED";
+	}
+}
+
+void TPlane::Print(UInt_t level)
+{
+	cout<< TCluster::Intent(level)<<getDetectortypeString(this->getDetectorType())<<"-Plane with "<<getNXClusters()<<"/"<<getNYClusters()<<endl;
+	cout<<"X:";
+	for(UInt_t i=0;i<getNXClusters();i++){
+		this->xClusters.at(i).Print(level+1);
+	}
+	cout<<"Y:";
+	for(UInt_t i=0;i<getNYClusters();i++){
+		this->yClusters.at(i).Print(level+1);
+	}
+}

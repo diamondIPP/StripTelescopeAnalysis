@@ -50,6 +50,13 @@ bool TEvent::isMasked(){
 	//todo
 	return false;
 }
+
 UInt_t TEvent::getNPlanes(){
 	return planes.size();
+}
+
+void TEvent::Print(UInt_t level){
+	cout<<TCluster::Intent(level)<<"EventNo"<<getEventNumber()<<" with "<<getNPlanes()<< "Planes:"<<endl;
+	for(UInt_t plane=0;plane<getNPlanes();plane++)
+		planes.at(plane).Print(level+1);
 }

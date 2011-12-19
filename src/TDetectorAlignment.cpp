@@ -1351,6 +1351,37 @@ int TDetectorAlignment::getVerbosity() const
     return verbosity;
 }
 
+void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
+{
+	if(plane<6){
+		vecDetPhiXOffset[plane].push_back(addPhiXOffset);
+		det_phix_offset[plane]+=addPhiXOffset;
+	}
+}
+void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
+{
+	if(plane<6){
+		vecDetPhiYOffset[plane].push_back(addPhiYOffset);
+		det_phiy_offset[plane]+=addPhiYOffset;
+	}
+}
+
+void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
+{
+	if(plane<6){
+		vecDetXOffset[plane].push_back(addXOffset);
+		det_x_offset[plane]+=addXOffset;
+	}
+}
+
+void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
+{
+	if(plane<6){
+		vecDetYOffset[plane].push_back(addYOffset);
+		det_y_offset[plane]+=addYOffset;
+	}
+}
+
 void TDetectorAlignment::setVerbosity(int verbosity)
 {
 	if(verbosity!=this->verbosity){

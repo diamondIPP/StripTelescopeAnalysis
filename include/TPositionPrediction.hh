@@ -10,6 +10,7 @@
 
 #include "TPlane.hh"
 #include "TObject.h"
+#include "TCluster.hh"
 class TPositionPrediction:public TObject {
 public:
 	TPositionPrediction(){xPos=0;yPos=0;xSigma=0;ySigma=0;xChi2=0;yChi2=0;bValid=false;};
@@ -32,7 +33,7 @@ public:
 	Float_t getChi2Y(){return yChi2;};
 	bool isValid(){return bValid;};
 	void setValid(bool bValid){this->bValid=bValid;};
-	void Print();
+	void Print(UInt_t level=0);
 private:
 	Float_t xPos;
 	Float_t yPos;

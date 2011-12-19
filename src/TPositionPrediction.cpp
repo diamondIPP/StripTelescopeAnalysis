@@ -81,9 +81,9 @@ void TPositionPrediction::setySigma(Float_t sigma)
     ySigma = sigma;
 }
 
-void TPositionPrediction::Print(){
-	cout<<"TPositionPrediction::Print:"<<endl;
-	cout<< "\tPredicted Position of Track is: " <<xPos<<"+/-"<<xSigma<<" / "<<yPos<<"+/-"<<ySigma<<endl;
-	cout<< "\tThe Fit has Chi2 values of "<<xChi2<<" and "<<yChi2<<endl;
+void TPositionPrediction::Print(UInt_t level){
+	cout<<TCluster::Intent(level)<<"TPositionPrediction::Print:"<<endl;
+	cout<<TCluster::Intent(level+1)<<"Predicted Position of Track is: " <<xPos<<"+/-"<<xSigma<<" / "<<yPos<<"+/-"<<ySigma<<endl;
+	cout<<TCluster::Intent(level+1)<< "The Fit has Chi2 values of "<<xChi2<<" and "<<yChi2<<endl;
 }
 

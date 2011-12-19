@@ -34,12 +34,67 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	gStyle->SetStatW(0.15); //Sets Width of Stats Box
 	gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
+
+
 }
 
 HistogrammSaver::~HistogrammSaver() {
 	this->pt->Delete();
 	currentStyle->Delete();
 	sys->Delete();
+}
+
+TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, UInt_t nBins)
+{
+	Float_t factor = 0.05;//5% bigger INtervall...
+	if(posX.size()!=posY.size()||posX.size()==0) {
+		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<endl;
+		return TH2F();
+	}
+	Float_t maxX = posX.at(0);
+	Float_t maxY = posY.at(0);
+	Float_t minX = posY.at(0);
+	Float_t minY = posY.at(0);
+	for(UInt_t i=0;i<posX.size();i++){
+		if(posX.at(i)>maxX)maxX=posX.at(i);
+		if(posX.at(i)<minX)minX=posX.at(i);
+	}
+	for(UInt_t i=0;i<posY.size();i++){
+		if(posY.at(i)>maxY)maxY=posX.at(i);
+		else if(posY.at(i)<minY)minY=posX.at(i);
+	}
+	Float_t deltaX=maxX-minX;
+	Float_t deltaY=maxY-minY;
+	TH2F histo = TH2F(name.c_str(),name.c_str(),nBins,minX-factor*deltaX,maxX+factor*deltaX,nBins,minY-factor*deltaY,maxY+factor*deltaY);
+	for(UInt_t i=0;i<posX.size();i++)
+		histo.Fill(posX.at(i),posY.at(i));
+	histo.GetXaxis()->SetTitle("X-Position");
+	histo.GetYaxis()->SetTitle("Y-Position");
+	return histo;
+}
+
+TH2F HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos, UInt_t nBins)
+{
+	TH2F histo = CreateScatterHisto(name,pos,Delta,nBins);
+	histo.GetXaxis()->SetTitle("Position");
+	histo.GetXaxis()->SetTitle("Difference");
+	return histo;
+}
+
+TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins)
+{
+	Float_t factor = 0.05;//5% bigger INtervall...
+	if(vec.size()==0)
+		return TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
+	Float_t max = vec.at(0);
+	Float_t min = vec.at(0);
+	for(UInt_t i=0;i<vec.size();i++){
+		if (max<vec.at(i))max=vec.at(i);
+		if (min>vec.at(i))min=vec.at(i);
+	}
+	Float_t delta = max-min;
+	TH1F histo = TH1F(name.c_str(),name.c_str(),nBins,min-delta*factor,max+delta*factor);
+	return histo;
 }
 
 void HistogrammSaver::UpdatePaveText(){

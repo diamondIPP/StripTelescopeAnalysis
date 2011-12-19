@@ -49,12 +49,12 @@ class TDetectorAlignment{
       Double_t GetYOffset(Int_t plane) {return det_y_offset[plane];};
       Double_t GetZOffset(Int_t plane) {return det_z_offset[plane];};
       void SetZOffset(Int_t plane,Float_t zOffset) {if(plane<6)det_z_offset[plane]=zOffset;};
-      void AddToXOffset(UInt_t plane, Float_t addXOffset){if(plane<6)det_x_offset[plane]+=addXOffset;}
-      void AddToYOffset(UInt_t plane, Float_t addYOffset){if(plane<6)det_y_offset[plane]+=addYOffset;}
+      void AddToXOffset(UInt_t plane, Float_t addXOffset);//{if(plane<6)det_x_offset[plane]+=addXOffset;}
+      void AddToYOffset(UInt_t plane, Float_t addYOffset);//{if(plane<6)det_y_offset[plane]+=addYOffset;}
       Double_t GetPhiXOffset(Int_t plane) {return det_phix_offset[plane];};
-      void AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset){if(plane<6)det_phix_offset[plane]+=addPhiXOffset;}
+      void AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset);
       Double_t GetPhiYOffset(Int_t plane) {return det_phiy_offset[plane];};
-      void AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset){if(plane<6)det_phiy_offset[plane]+=addPhiYOffset;}
+      void AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset);//{if(plane<6)det_phiy_offset[plane]+=addPhiYOffset;}
       Double_t GetXResolution(Int_t plane) {return det_x_resolution[plane];};
       Double_t GetYResolution(Int_t plane) {return det_y_resolution[plane];};
       Double_t GetSiResolution();
@@ -112,10 +112,15 @@ class TDetectorAlignment{
 
       //store global offsets here
       Double_t det_x_offset[6];
+      std::vector<Double_t> vecDetXOffset[6];
       Double_t det_y_offset[6];
+      std::vector<Double_t> vecDetYOffset[6];
       Double_t det_z_offset[6];
+      std::vector<Double_t> vecDetZOffset[6];
       Double_t det_phix_offset[6];
+      std::vector<Double_t> vecDetPhiXOffset[6];
       Double_t det_phiy_offset[6];
+      std::vector<Double_t> vecDetPhiYOffset[6];
 
       //store resolutions here
       Double_t det_x_resolution[6];

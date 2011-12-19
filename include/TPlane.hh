@@ -48,6 +48,8 @@ public:
     enum enumDetectorType getDetectorType() const;
     void setDetectorType(enumDetectorType type);
     static string getCoordinateString(enumCoordinate cor);
+    static string getDetectortypeString(enumDetectorType type);
+    void Print(UInt_t level=0);
 private:
 	enumDetectorType type;
 	

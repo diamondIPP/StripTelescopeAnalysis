@@ -307,9 +307,9 @@ int TAlignment::Align()
 		cout<<"TAlignment::Align::created new TTrack";
 	}
 
-	AlignDetector(TPlane::XY_COR,1,0,0);
-	AlignDetector(TPlane::XY_COR,2,0,0);
-	AlignDetector(TPlane::XY_COR,3,0,0);
+	AlignDetector(TPlane::XY_COR,1,0,0,true);
+	AlignDetector(TPlane::XY_COR,2,0,0,true);
+	AlignDetector(TPlane::XY_COR,3,0,0,true);
 	myTrack->setDetectorAlignment(*align);
 	cout<<endl;
 	for(UInt_t nSteps=0;nSteps<5;nSteps++){
@@ -321,9 +321,9 @@ int TAlignment::Align()
 		myTrack->setDetectorAlignment(*align);
 		cout<<endl;
 	}
-	AlignDetector(TPlane::XY_COR,3,0,2);
-	AlignDetector(TPlane::XY_COR,1,0,2);
-	AlignDetector(TPlane::XY_COR,2,0,3);
+	AlignDetector(TPlane::XY_COR,3,0,2,true);
+	AlignDetector(TPlane::XY_COR,1,0,2,true);
+	AlignDetector(TPlane::XY_COR,2,0,3,true);
 
 	// now start the telescope alignment!
 	// alignment loop: align, cut fake tracks, align again (if CutFakeTracksOn is set true)
@@ -457,14 +457,14 @@ void TAlignment::AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t re
 	AlignDetector(TPlane::Y_COR,subjectPlane,refPlane1,refPlane2);
 }
 
-void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
+void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot)
 {
 	cout<<"TAlignment::AlignDetector\n\t align "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
 	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
 		return;
 	}
 
-	TResiduum res = getResiduum(cor,subjectPlane,refPlane1,refPlane2);
+	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2);
 	if(refPlane1==refPlane2){
 		if(cor==TPlane::XY_COR||cor==TPlane::X_COR)
 			align->AddToXOffset(subjectPlane,res.resXMean);
@@ -473,26 +473,33 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
 		return;
 	}
 	else{
-		Float_t y_offset = (res.sumRy * res.sumV2y - res.sumVRy * res.sumVy) / (res.nUsedTracks * res.sumV2y - res.sumVy * res.sumVy);
+		Float_t variableDif = (res.nUsedTracks * res.sumV2y - res.sumVy * res.sumVy);
+		Float_t y_offset = (res.sumRy * res.sumV2y - res.sumVRy * res.sumVy) / variableDif;
 		//phiy_offset = (observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
 		Float_t phiy_offset = TMath::ATan((res.nUsedTracks* res.sumVRy - res.sumRy * res.sumVy) / (res.nUsedTracks * res.sumV2y - res.sumVy * res.sumVy));
 		if(cor==TPlane::XY_COR||cor==TPlane::Y_COR){
 			align->AddToYOffset(subjectPlane,y_offset);
 			align->AddToPhiYOffset(subjectPlane,phiy_offset);
-			cout<<y_offset<<" "<<phiy_offset<<endl;
+			cout<<"/tY:"<<y_offset<<" "<<phiy_offset<<endl;
 		}
-//
-//		float variableDif= (observedX.size() * sumv2 - sumv * sumv);
-//
-//		x_offset = (sumr * sumv2 - sumvr * sumv) / variableDif;
-//		//phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
-//		phix_offset = TMath::ATan(-(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv));
+
+		variableDif= (res.nUsedTracks * res.sumV2x - res.sumVx * res.sumVx);
+		Float_t x_offset = (res.sumRx * res.sumV2x - res.sumVRx * res.sumVx) / variableDif;
+		//phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
+		Float_t phix_offset = TMath::ATan(-(res.nUsedTracks * res.sumVRx - res.sumRx * res.sumVx) / (res.nUsedTracks * res.sumV2x - res.sumVx * res.sumVx));
+		if(cor==TPlane::XY_COR||cor==TPlane::X_COR){
+			align->AddToXOffset(subjectPlane,x_offset);
+			align->AddToPhiXOffset(subjectPlane,phix_offset);
+			cout<<"/tX:"<<x_offset<<" "<<phix_offset<<endl;
+		}
 	}
 }
 
-TResiduum TAlignment::getResiduum(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){
+TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot){
 	vector<Float_t> vecXPred;
 	vector<Float_t> vecYPred;
+	vector<Float_t> vecXObs;
+	vector<Float_t> vecYObs;
 	vector<Float_t> vecDeltaX;
 	vector<Float_t> vecDeltaY;
 
@@ -511,7 +518,8 @@ TResiduum TAlignment::getResiduum(TPlane::enumCoordinate cor, UInt_t subjectPlan
 		//if(verbosity>3)	cout<<myTrack->getEvent()->getEventNumber()<<" "<<myTrack->getPosition(cor,subjectPlane)<<" "<<eventReader->getEvent()->getPlane(subjectPlane).getXPosition(0)<<endl;;
 		Float_t xPositionObserved  = myTrack->getPosition(TPlane::X_COR,subjectPlane);
 		Float_t yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane);
-
+		vecXObs.push_back(xPositionObserved);
+		vecYObs.push_back(yPositionObserved);
 		TPositionPrediction predictedPostion = myTrack->predictPosition(subjectPlane,vecRefPlanes);
 		if(verbosity>3)	predictedPostion.Print();
 		if(verbosity>3)	cout<<xPositionObserved<<" / "<<yPositionObserved<<endl;
@@ -526,12 +534,23 @@ TResiduum TAlignment::getResiduum(TPlane::enumCoordinate cor, UInt_t subjectPlan
 
 	if(verbosity>2)cout<<vecDeltaX.size()<<" "<<vecDeltaY.size()<<" "<< vecXPred.size()<<" "<<vecYPred.size()<<endl;
 	//first estimate residuals widths
-	TResiduum residuum = calculateResidual(cor,vecXPred,vecDeltaX,vecYPred,vecDeltaY);
+	TResidual residuum = calculateResidual(cor,vecXPred,vecDeltaX,vecYPred,vecDeltaY);
+	if(plot){
+		stringstream histName;
+		histName<<"hScatterPlot_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2<<"_alignment";
+		histSaver->SaveHistogramPNG((TH2F*)histSaver->CreateScatterHisto(histName.str(),vecXObs,vecYObs).Clone());
+		histName.str("");
+		histName<<"hDistributionPlot_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2<<"DeltaY_alignment";
+	//	histSaver->SaveHistogramPNG((TH2F*)histSaver->CreateDistributionHisto)histName.str(),vecYObs,vecDeltaX).Clone());
+		histName.str("");
+		histName<<"hDistributionPlot_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2<<"DeltaY_alignment";
+	//	histSaver->SaveHistogramPNG((TH2F*)histSaver->CreateDistributionHisto(histName.str(),vecYObs,vecDeltaX).Clone());
+	}
 	return residuum;
 }
 
-TResiduum TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY){
-	TResiduum res;
+TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY){
+	TResidual res;
 	res.resXMean=0;
 	res.resXSigma=10000;
 	res.resYMean=0;
@@ -540,7 +559,7 @@ TResiduum TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 	return calculateResidual(cor,xPred,deltaX,yPred,deltaY,res);
 }
 
-TResiduum TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t>yPred,vector<Float_t> deltaY,TResiduum res)
+TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t>yPred,vector<Float_t> deltaY,TResidual res)
 {
 	Float_t resxmean = 0;
 	Float_t resXsigma = 0;
@@ -600,7 +619,7 @@ TResiduum TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 	if(verbosity>0)	cout<<"\tused "<<nUsedTracks<<" Tracks"<<endl;
 	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<resxmean<<"+/-"<<resXsigma<<endl;
 	if(verbosity>0)	cout<<"\tY: "<<resymean<<"+/-"<<resYsigma<<endl;
-	TResiduum residuum;
+	TResidual residuum;
 	residuum.resXMean=resxmean;
 	residuum.resXSigma=resXsigma;
 	residuum.resYMean=resymean;
@@ -614,6 +633,7 @@ TResiduum TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 	residuum.sumVx =sumVx;
 	residuum.sumVy = sumVy;
 	residuum.nUsedTracks=nUsedTracks;
+
 	return residuum;
 }
 

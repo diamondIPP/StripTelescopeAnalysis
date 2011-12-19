@@ -338,8 +338,22 @@ UInt_t TCluster::getChannel(UInt_t clusterPos)
 	else return 5000;
 }
 
-void TCluster::Print(){
-	cout<<"Cluster of Event "<<flush;
+/**
+ * small function to Intend cout-output;
+ * @input level level of intention
+ * @return string with level tabs
+ */
+string TCluster::Intent(UInt_t level){
+	stringstream output;
+	output.str("");
+	for(UInt_t i=0;i<level;i++){
+		output<<"\t";
+	}
+	return output.str();
+}
+
+void TCluster::Print(UInt_t level){
+	cout<<Intent(level)<<"Cluster of Event "<<flush;
 	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries"<<flush;
 	for(UInt_t cl=0;cl<cluster.size();cl++){
 		if(this->isSeed(cl))

@@ -39,7 +39,7 @@
 #include "TTrack.hh"
 #include "TPlane.hh"
 
-	struct TResiduum{ Float_t resXMean, resXSigma,resYMean,resYSigma;Float_t sumRx;
+	struct TResidual{ Float_t resXMean, resXSigma,resYMean,resYSigma;Float_t sumRx;
 	Float_t sumRy;
 	Float_t sumVx;
 	Float_t sumVy;
@@ -66,10 +66,10 @@ private:
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
-	void AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
-	TResiduum getResiduum(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
-	TResiduum calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY);
-	TResiduum calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY,TResiduum res);
+	void AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false);
+	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false);
+	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY);
+	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY,TResidual res);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
