@@ -356,7 +356,7 @@ UInt_t TADCEventReader::getNClusters(UInt_t det)
 
 bool TADCEventReader::isValidTrack()
 {
-	return this->hasValidSiliconTrack;
+	return this->hasValidSiliconTrack; // one & only one hit in silicone planes
 }
 
 UInt_t TADCEventReader::getNDiamondClusters()

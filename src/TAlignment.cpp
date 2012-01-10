@@ -130,6 +130,36 @@ void TAlignment::createVectors(UInt_t nEvents){
 //	}
 }
 
+void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
+	if (nEvents == 0) nEvents = eventReader->GetEntries();
+	int noHitDet=0;
+	int falseClusterSizeDet=0;
+	int noHitDia=0;
+	int falseClusterSizeDia=0;
+	int nCandidates=0;
+	int nScreened=0;
+	cout << "CREATING VECTOR OF VALID EVENTS..." << endl;
+	
+	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
+		TRawEventSaver::showStatusBar(nEvent-startEvent,nEvents,100);
+		eventReader->LoadEvent(nEvent);
+		if(!eventReader->isValidTrack()){
+			noHitDet++;
+			continue;
+		}
+		if (eventReader->isDetMasked()){
+			nScreened++;
+			continue;
+		}
+		if(eventReader->getNDiamondClusters()!=1){
+			falseClusterSizeDia++;
+			continue;
+		}
+		nCandidates++;
+		this->events.push_back(*eventReader->getEvent());
+	}
+}
+
 void TAlignment::initialiseHistos(){
 	for(int no = 0;no <4;no++){
 		stringstream histName;

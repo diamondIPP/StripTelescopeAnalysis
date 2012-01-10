@@ -55,6 +55,7 @@ public:
 	virtual ~TAlignment();
 	int Align();
 	void createVectors(UInt_t nEvents);
+	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent);
 private:
@@ -92,6 +93,8 @@ private:
     int nAlignSteps;
     TTrack* myTrack;
     Float_t res_keep_factor;
+	
+	vector<TEvent> events;
 private:
 
 	TH2F* hScatterPosition[4];
