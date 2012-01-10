@@ -130,6 +130,11 @@ void TAlignment::createVectors(UInt_t nEvents){
 //	}
 }
 
+/**
+ *
+ * @param nEvents
+ * @param startEvent
+ */
 void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
 	if (nEvents == 0) nEvents = eventReader->GetEntries();
 	int noHitDet=0;
@@ -237,6 +242,9 @@ void TAlignment::saveHistos(){
 	}
 }
 
+/**
+ *
+ */
 void TAlignment::addEventToTracks()
 {
 	TDetectorPlane D0;
@@ -300,7 +308,10 @@ void TAlignment::addEventToTracks()
 
 }
 
-
+/**
+ *
+ * @return
+ */
 int TAlignment::Align()
 {
 	if(tracks.size()==0)
@@ -368,26 +379,49 @@ int TAlignment::Align()
 	return 1;
 }
 
-
+/**
+ *
+ * @param subjectPlane
+ * @param refPlane1
+ * @param refPlane2
+ */
 void TAlignment::AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
 {
 	AlignDetector(TPlane::XY_COR,subjectPlane,refPlane1,refPlane2);
 }
 
 
-
+/**
+ *
+ * @param subjectPlane
+ * @param refPlane1
+ * @param refPlane2
+ */
 void TAlignment::AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
 {
 	AlignDetector(TPlane::X_COR,subjectPlane,refPlane1,refPlane2);
 }
 
 
-
+/**
+ *
+ * @param subjectPlane
+ * @param refPlane1
+ * @param refPlane2
+ */
 void TAlignment::AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
 {
 	AlignDetector(TPlane::Y_COR,subjectPlane,refPlane1,refPlane2);
 }
 
+/**
+ *
+ * @param cor
+ * @param subjectPlane
+ * @param refPlane1
+ * @param refPlane2
+ * @param bPlot
+ */
 void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot)
 {
 	cout<<"TAlignment::AlignDetector\n\t align "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
@@ -427,10 +461,18 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
 }
 
 /**
- * @brief:
+ * @brief
+ *
+ * creates a vector of pedicted X positions, predicted Y positions, delta X and delta Y
+ * and use the function calculateResidual to get the residual with this vectors
+ * @param	cor
+ * @param	subjectPlane
+ * @param	refPlane1
+ * @param	refPlane2
+ * @param	bPlot
  */
-TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot){
-	if(verbosity)cout<<"TAlignment::getResidual"<<subjectPlane<<" "<<refPlane1<<" "<<refPlane2<<" "<<plot<<" with "<<alignmentPercentage<<endl;
+TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot){
+	if(verbosity)cout<<"TAlignment::getResidual"<<subjectPlane<<" "<<refPlane1<<" "<<refPlane2<<" "<<bPlot<<" with "<<alignmentPercentage<<endl;
 	vector<Float_t> vecXPred;
 	vector<Float_t> vecYPred;
 	vector<Float_t> vecXObs;
@@ -444,15 +486,10 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 	if(refPlane1!=refPlane2)
 		vecRefPlanes.push_back(refPlane2);
 
-	for(Int_t nEvent=0; nEvent<eventReader->GetEntries(); nEvent++)
+	for(UInt_t nEvent=0; nEvent<events.size(); nEvent++)
 	{
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
-		if (rand.Rndm()>this->alignmentPercentage) continue; //skip randomly to use only a part alignmentPercentage for alignment //todo improve method!
-		eventReader->LoadEvent(nEvent);
-		if (eventReader->getEvent()->isMasked()) continue; // skip tracks not selected for determining alignment constants
-		if (!eventReader->getEvent()->isValidSiliconEvent()) continue;
-
-		myTrack->setEvent(eventReader->getEvent());
+		myTrack->setEvent(&events.at(nEvent));
 		//if(verbosity>3)	cout<<myTrack->getEvent()->getEventNumber()<<" "<<myTrack->getPosition(cor,subjectPlane)<<" "<<eventReader->getEvent()->getPlane(subjectPlane).getXPosition(0)<<endl;;
 		Float_t xPositionObserved  = myTrack->getPosition(TPlane::X_COR,subjectPlane);
 		Float_t yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane);
@@ -473,7 +510,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 	if(verbosity>2)cout<<vecDeltaX.size()<<" "<<vecDeltaY.size()<<" "<< vecXPred.size()<<" "<<vecYPred.size()<<endl;
 	//first estimate residuals widths
 	TResidual residuum = calculateResidual(cor,vecXPred,vecDeltaX,vecYPred,vecDeltaY);
-	if(plot){
+	if(bPlot){
 		stringstream histName;
 		histName<<"hScatterPlot_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2<<"_alignment";
 		histSaver->SaveHistogramPNG((TH2F*)histSaver->CreateScatterHisto(histName.str(),vecXObs,vecYObs).Clone());
@@ -509,24 +546,21 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
  * resxtest= TMath::Abs(deltaX.at(i)-res.resXMean)/res.resXSigm < res_keep_factor
  * resytest= TMath::Abs(deltaY.at(i)-res.resYMean)/res.resYSigma < res_keep_factor
  *
+ * @param 	cor		which coordinate (X,Y,X&Y) should be used
+ * @param	xPred	vector of predicted x Positions
+ * @param	deltaX	vector of difference between predicted and measured x Positions
+ * @param	yPred	vector of predicted y Position
+ * @param	deltaY	vector of difference between predicted and measured y Positions
+ * @param	res		current residuals for use if res_keep_factor
+ *
+ * @return calculated Residual
  */
 TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t>yPred,vector<Float_t> deltaY,TResidual res)
 {
-	Float_t resxmean = 0;
-	Float_t resXsigma = 0;
-	Float_t resymean = 0;
-	Float_t resYsigma = 0;
+	TResidual residual;
+	residual.init();
 	Float_t resxtest;
 	Float_t resytest;
-	UInt_t nUsedTracks=0;
-	Float_t sumRx=0;
-	Float_t sumRy=0;
-	Float_t sumVx=0;
-	Float_t sumVy=0;
-	Float_t sumV2x=0;
-	Float_t sumV2y=0;
-	Float_t sumVRx=0;
-	Float_t sumVRy=0;
 	if(verbosity>2)cout<<"\tcalculate Residuum "<<res_keep_factor<<endl;
 	if(verbosity>2)cout<<"\t"<<deltaX.size()<<" "<<deltaY.size()<<" "<< xPred.size()<<" "<<yPred.size()<<endl;
 	for(UInt_t i=0;i<deltaX.size();i++){
@@ -535,67 +569,60 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 		bool used=false;
 		//only add if restest is smaller than res_keep_factor
 		if((cor==TPlane::X_COR)&&resxtest<res_keep_factor){
-			resxmean += deltaX.at(i);
-			resXsigma +=deltaX.at(i)*deltaX.at(i);
+			residual.resXMean += deltaX.at(i);
+			residual.resXSigma +=deltaX.at(i)*deltaX.at(i);
 			used=true;
 		}//end if
 		else if((cor==TPlane::X_COR)&&resytest<res_keep_factor){
-			resymean += deltaY.at(i);
-			resYsigma += deltaY.at(i)*deltaY.at(i);
+			residual.resYMean += deltaY.at(i);
+			residual.resYSigma += deltaY.at(i)*deltaY.at(i);
 			used=true;
 		}//end else if
 		else if((cor==TPlane::XY_COR)&&resxtest<res_keep_factor&&resytest<res_keep_factor){
-			resymean += deltaY.at(i);
-			resYsigma += deltaY.at(i)*deltaY.at(i);
-			resxmean += deltaX.at(i);
-			resXsigma +=deltaX.at(i)*deltaX.at(i);
+			residual.resYMean += deltaY.at(i);
+			residual.resYSigma += deltaY.at(i)*deltaY.at(i);
+			residual.resXMean += deltaX.at(i);
+			residual.resXSigma +=deltaX.at(i)*deltaX.at(i);
 			used=true;
 		}//end else if
 
 		//if track can be used (restest<res_keep_factor), add values
 		if(used){
-			sumRx+=deltaX.at(i);
-			sumRy+=deltaY.at(i);
-			sumVx+=yPred.at(i);
-			sumVy+=xPred.at(i);
-			sumV2x+=yPred.at(i)*yPred.at(i);
-			sumV2y+=xPred.at(i)*xPred.at(i);
-			sumVRx+=yPred.at(i)*deltaX.at(i);
-			sumVRy+=xPred.at(i)*deltaY.at(i);
-			nUsedTracks++;
+			residual.sumRx+=deltaX.at(i);
+			residual.sumRy+=deltaY.at(i);
+			residual.sumVx+=yPred.at(i);
+			residual.sumVy+=xPred.at(i);
+			residual.sumV2x+=yPred.at(i)*yPred.at(i);
+			residual.sumV2y+=xPred.at(i)*xPred.at(i);
+			residual.sumVRx+=yPred.at(i)*deltaX.at(i);
+			residual.sumVRy+=xPred.at(i)*deltaY.at(i);
+			residual.nUsedTracks++;
 		}//end if
 	}//end for loop
-	resxmean = resxmean /(Double_t)nUsedTracks;
-	resymean = resymean /(Double_t)nUsedTracks;
-	resXsigma = TMath::Sqrt(resXsigma / (Double_t)nUsedTracks - resxmean*resxmean);
-	resYsigma = TMath::Sqrt(resYsigma / (Double_t)nUsedTracks- resymean*resymean);
+	residual.resXMean = residual.resXMean /(Double_t)residual.nUsedTracks;
+	residual.resYMean = residual.resYMean /(Double_t)residual.nUsedTracks;
+	residual.resXSigma = TMath::Sqrt(residual.resXSigma / (Double_t)residual.nUsedTracks - residual.resXMean*residual.resXMean);
+	residual.resYSigma = TMath::Sqrt(residual.resYSigma / (Double_t)residual.nUsedTracks- residual.resYMean*residual.resYMean);
 
-	if(verbosity>0)	cout<<"\tused "<<nUsedTracks<<" Tracks"<<endl;
-	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<resxmean<<"+/-"<<resXsigma<<endl;
-	if(verbosity>0)	cout<<"\tY: "<<resymean<<"+/-"<<resYsigma<<endl;
+	if(verbosity>0)	cout<<"\tused "<<residual.nUsedTracks<<" Tracks"<<endl;
+	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<residual.resXMean<<"+/-"<<residual.resXSigma<<endl;
+	if(verbosity>0)	cout<<"\tY: "<<residual.resYMean<<"+/-"<<residual.resYSigma<<endl;
 	//set values
-	TResidual residual;
-	residual.resXMean=resxmean;
-	residual.resXSigma=resXsigma;
-	residual.resYMean=resymean;
-	residual.resYSigma=resYsigma;
-	residual.sumRx=sumRx;
-	residual.sumRy=sumRy;
-	residual.sumV2x=sumV2x;
-	residual.sumV2y=sumV2y;
-	residual.sumVRx=sumVRx;
-	residual.sumVRy=sumVRy;
-	residual.sumVx =sumVx;
-	residual.sumVy = sumVy;
-	residual.nUsedTracks=nUsedTracks;
-
 	return residual;
 }
 
 
-void TAlignment::PrintEvents(UInt_t maxEvent){
+/**
+ * @brief: Print Informations for all Events smaller than maxEvent, starting with startEvent
+ * @param	maxEvent	maximum Event No to print event
+ * @param: 	startEvent	first Event where to start with printing Event Information
+ *
+ */
+void TAlignment::PrintEvents(UInt_t maxEvent,UInt_t startEvent){
+	if(maxEvent==0)maxEvent=eventReader->GetEntries();
+	if(maxEvent>eventReader->GetEntries())maxEvent=eventReader->GetEntries();
 	cout<<"\n\n\n\n\n\nPrintEVENTS"<<maxEvent<<"\n\n\n"<<flush;
-	for(UInt_t event=0;event<maxEvent;event++){
+	for(UInt_t event=startEvent;event<maxEvent;event++){
 		eventReader->LoadEvent(event);
 		cout<<event<<":\t"<<flush;
 		eventReader->getEvent()->Print(1);

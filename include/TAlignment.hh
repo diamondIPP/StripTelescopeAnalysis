@@ -39,7 +39,9 @@
 #include "TTrack.hh"
 #include "TPlane.hh"
 
-	struct TResidual{ Float_t resXMean, resXSigma,resYMean,resYSigma;Float_t sumRx;
+struct TResidual {
+	Float_t resXMean, resXSigma,resYMean,resYSigma;
+	Float_t sumRx;
 	Float_t sumRy;
 	Float_t sumVx;
 	Float_t sumVy;
@@ -47,7 +49,24 @@
 	Float_t sumV2y;
 	Float_t sumVRx;
 	Float_t sumVRy;
-	UInt_t nUsedTracks;};
+	UInt_t nUsedTracks;
+
+	void init(){
+		resXMean=0;
+		resXSigma=0;
+		resYMean=0;
+		resYSigma=0;
+		sumRx=0;
+		sumRy=0;
+		sumVx=0;
+		sumVy=0;
+		sumV2x=0;
+		sumV2y=0;
+		sumVRx=0;
+		sumVRy=0;
+		nUsedTracks=0;
+		};
+};
 
 class TAlignment {
 public:
@@ -57,7 +76,7 @@ public:
 	void createVectors(UInt_t nEvents);
 	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
-	void PrintEvents(UInt_t maxEvent);
+	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 private:
 	void createVectors();
 	void initialiseHistos();

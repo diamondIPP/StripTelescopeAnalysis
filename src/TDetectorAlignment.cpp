@@ -21,7 +21,7 @@ TDetectorAlignment::TDetectorAlignment(){
    }
 }
 
-
+//TODO: where to we put get SiResolution...
 //Double_t TDetectorAlignment::GetSiResolution() {
 //   Int_t deta[] = {1,0,0,0}, detb[] = {0,1,2,3}, detc[] = {3,3,3,2};
 //   Double_t zab, zbc, ref_residual_width, numerator=0, denominator=0;
@@ -71,6 +71,14 @@ void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 	if(plane<6){
 		vecDetYOffset[plane].push_back(addYOffset);
 		det_y_offset[plane]+=addYOffset;
+	}
+}
+
+void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
+{
+	if(plane<6){
+		vecDetZOffset[plane].push_back(addZOffset);
+		det_z_offset[plane]+=addZOffset;
 	}
 }
 
