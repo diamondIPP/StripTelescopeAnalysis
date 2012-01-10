@@ -56,6 +56,7 @@ public:
 	int Align();
 	void createVectors(UInt_t nEvents);
 	void setSettings(TSettings* settings);
+	void PrintEvents(UInt_t maxEvent);
 private:
 	void createVectors();
 	void initialiseHistos();
