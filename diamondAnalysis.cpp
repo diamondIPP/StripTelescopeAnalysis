@@ -210,7 +210,7 @@ int main(int argc, char ** argv) {
 		TAlignment *alignment;
 		alignment= new TAlignment(settings);
 		alignment->setSettings(settings);
-		alignment->PrintEvents(1511);
+		alignment->PrintEvents(1511,1501);
 		alignment->Align();
 		delete alignment;
 

@@ -12,6 +12,7 @@ TTrack::TTrack(TDetectorAlignment alignment) {
 	// TODO: check if event has the one & only one cluster flag
 	verbosity=0;
 	this->alignment = alignment;
+	event=NULL;
 }
 
 TTrack::~TTrack() {
@@ -39,6 +40,7 @@ TTrack::~TTrack() {
 //}
 
 UInt_t TTrack::getNClusters(int det) {
+	if(event==NULL)return N_INVALID;
 	if (det%2 == 0) {
 		int plane = det / 2;
 		return this->event->getPlane(plane).getNXClusters();
@@ -50,6 +52,7 @@ UInt_t TTrack::getNClusters(int det) {
 }
 
 Float_t TTrack::getXPosition(UInt_t plane) {
+	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
@@ -70,6 +73,7 @@ Float_t TTrack::getXPosition(UInt_t plane) {
 }
 
 Float_t TTrack::getYPosition(UInt_t plane) {
+	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
@@ -90,6 +94,7 @@ Float_t TTrack::getYPosition(UInt_t plane) {
 }
 
 Float_t TTrack::getPosition(TPlane::enumCoordinate cor, UInt_t plane){
+	if(event==NULL)return 0;
 	if(cor == TPlane::X_COR)
 		return getXPosition(plane);
 	else if(cor == TPlane::Y_COR)
@@ -98,16 +103,14 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor, UInt_t plane){
 		return N_INVALID;
 }
 
-vector<Float_t> TTrack::getSiXPositions() {
-	vector<Float_t> xPositions;
-	for (int plane = 0; plane < 4; plane++) {
-		xPositions.push_back(this->getXPosition(plane));
-	}
-	return xPositions;
-}
 
 TPositionPrediction TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes)
 {
+	if(event==NULL){
+		cerr<<"TTrack:predictPosition no ReferencePlanes are defined..."<<endl;
+		TPositionPrediction prediction;
+		return prediction;
+	}
 	if(vecRefPlanes.size()==0){
 		cerr<<"TTrack:predictPosition no ReferencePlanes are defined..."<<endl;
 		TPositionPrediction prediction;
@@ -166,8 +169,19 @@ new TLinearFitter((Int_t)1,"pol1","D");
 	return prediction;
 }
 
+vector<Float_t> TTrack::getSiXPositions() {
+	vector<Float_t> xPositions;
+	if(event==NULL)return xPositions;
+	for (int plane = 0; plane < 4; plane++) {
+		xPositions.push_back(this->getXPosition(plane));
+	}
+	return xPositions;
+}
+
 vector<Float_t> TTrack::getSiYPositions() {
+
 	vector<Float_t> yPositions;
+	if(event==NULL)return yPositions;
 	for (int plane; plane < 4; plane++) {
 		yPositions.push_back(this->getYPosition(plane));
 	}

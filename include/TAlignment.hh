@@ -73,15 +73,13 @@ public:
 	TAlignment(TSettings* settings);
 	virtual ~TAlignment();
 	int Align();
-	void createVectors(UInt_t nEvents);
 	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 private:
-	void createVectors();
 	void initialiseHistos();
 	void saveHistos();
-	void addEventToTracks();
+//	void addEventToTracks();
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);

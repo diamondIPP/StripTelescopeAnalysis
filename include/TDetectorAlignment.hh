@@ -34,6 +34,7 @@
 
 #include "TDiamondTrack.hh"
 #include "TDetectorPlane.hh"
+#include "TCluster.hh"
 
 
 class TDetectorAlignment{
@@ -46,7 +47,9 @@ class TDetectorAlignment{
       Double_t GetYOffset(Int_t plane) {return det_y_offset[plane];};
       Double_t GetZOffset(Int_t plane) {return det_z_offset[plane];};
 
-      void SetZOffset(Int_t plane,Float_t zOffset) {if(plane<6)det_z_offset[plane]=zOffset;};
+      void SetXOffset(Int_t plane,Float_t xOffset) {if(plane<nDetectors)det_x_offset[plane]=xOffset;};
+      void SetYOffset(Int_t plane,Float_t yOffset) {if(plane<nDetectors)det_y_offset[plane]=yOffset;};
+      void SetZOffset(Int_t plane,Float_t zOffset) {if(plane<nDetectors)det_z_offset[plane]=zOffset;};
 
       void AddToXOffset(UInt_t plane, Float_t addXOffset);//{if(plane<6)det_x_offset[plane]+=addXOffset;}
       void AddToYOffset(UInt_t plane, Float_t addYOffset);//{if(plane<6)det_y_offset[plane]+=addYOffset;}
@@ -63,6 +66,12 @@ class TDetectorAlignment{
       std::vector<Double_t> GetZOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetZOffset[plane];std::vector<Double_t> a;return a;};
       std::vector<Double_t> GetPhiXOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetPhiXOffset[plane];std::vector<Double_t> a;return a;};
       std::vector<Double_t> GetPhiYOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetPhiYOffset[plane];std::vector<Double_t> a;return a;};
+
+      void PrintXOffset(UInt_t plane,UInt_t level);
+      void PrintYOffset(UInt_t plane,UInt_t level);
+      void PrintZOffset(UInt_t plane,UInt_t level);
+
+      void PrintResults(UInt_t level);
 
       int getVerbosity() const;
       void setVerbosity(int verbosity);

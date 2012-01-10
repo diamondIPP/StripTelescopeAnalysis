@@ -82,6 +82,44 @@ void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
 	}
 }
 
+void TDetectorAlignment::PrintXOffset(UInt_t plane,UInt_t level)
+{
+	cout<<TCluster::Intent(level)<<"X-Offset:" <<det_x_offset[plane]<<"\t";
+	vector<Double_t> vecHis = this->GetXOffsetHistory(plane);
+	for(UInt_t i=0;i<vecHis.size();i++)
+		cout<<" "<<vecHis.at(i);
+	cout<<endl;
+}
+
+void TDetectorAlignment::PrintYOffset(UInt_t plane,UInt_t level)
+{
+	cout<<TCluster::Intent(level)<<"Y-Offset:" <<det_y_offset[plane]<<"\t";
+	vector<Double_t> vecHis = this->GetYOffsetHistory(plane);
+	for(UInt_t i=0;i<vecHis.size();i++)
+		cout<<" "<<vecHis.at(i);
+	cout<<endl;
+}
+
+void TDetectorAlignment::PrintZOffset(UInt_t plane,UInt_t level)
+{
+	cout<<TCluster::Intent(level)<<"Z-Offset:" <<det_z_offset[plane]<<"\t";
+	vector<Double_t> vecHis = this->GetZOffsetHistory(plane);
+	for(UInt_t i=0;i<vecHis.size();i++)
+		cout<<" "<<vecHis.at(i);
+	cout<<endl;
+}
+
+void TDetectorAlignment::PrintResults(UInt_t level)
+{
+	cout<<"Alignment Results"<<endl;
+	for(UInt_t plane=1;plane<this->nDetectors;plane++){
+		cout<<TCluster::Intent(level)<<"Plane "<<plane<<endl;
+		PrintXOffset(plane,level+1);
+		PrintYOffset(plane,level+1);
+		PrintZOffset(plane,level+1);
+	}
+}
+
 void TDetectorAlignment::setVerbosity(int verbosity)
 {
 	if(verbosity!=this->verbosity){

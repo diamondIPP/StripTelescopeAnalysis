@@ -71,72 +71,71 @@ TAlignment::~TAlignment() {
 void TAlignment::setSettings(TSettings* settings){
 	this->settings=settings;
 }
-
-void TAlignment::createVectors(){
-	createVectors(eventReader->GetEntries());
-}
-void TAlignment::createVectors(UInt_t nEvents){
-	int noHitDet=0;
-	int falseClusterSizeDet=0;
-	int noHitDia=0;
-	int falseClusterSizeDia=0;
-	int nCandidates=0;
-	int nScreened=0;
-	cout<<"ANALYSE VECTORS...."<<endl;
-	for(nEvent=0;nEvent<nEvents;nEvent++){
-		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
-		eventReader->LoadEvent(nEvent);
-		//check if every plane has exactly one cluster
-		if(!eventReader->isValidTrack()){
-			noHitDet++;
-			continue;
-		}
-		if (eventReader->isDetMasked()){
-			nScreened++;
-			continue;
-		}
-		if(eventReader->getNDiamondClusters()!=1){
-			falseClusterSizeDia++;
-			continue;
-		}
-		nCandidates++;
-		this->addEventToTracks();
-	}
-	cout<<"\n\nDetAnalysed "<<nEvents<<": "<<nEvents-noHitDet-falseClusterSizeDet<<" Candidates while "<< noHitDet<<" Events have not exactly one Cluster and "<<falseClusterSizeDet<<" Events have wrong cluster size"<<endl;
-	cout<<"\n\nDiaAnalysed "<<nEvents-noHitDet-falseClusterSizeDet<<": "<<nCandidates<<" Candidates while "<< noHitDia<<" Events have not exactly one Cluster and "<<falseClusterSizeDia<<" Events have wrong cluster size"<<endl;
-	cout<<"EVENTS SCREENED:"<<nScreened<<endl;
-	cout<<tracks.size()<<" "<<tracks_masked.size()<<" "<<tracks_fidcut.size()<<" "<<tracks_masked_fidcut.size()<<endl;
-
-//	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
-//		Float_t xPos=tracks.at(trackNo).GetDetectorHitPosition(0);
-//		Float_t yPos=tracks.at(trackNo).GetDetectorHitPosition(1);
-//		cout<<trackNo<<" "<<tracks.at(trackNo).GetEventNumber()<<flush;
-//		for(int no=1;no<4;no++){
-//			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2)-xPos;
-//			cout<<" "<<deltaX;
-//			hXPositionDifference[no-1]->Fill(deltaX);
-//			hXXPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2));
-//			hXYPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
+//
+//void TAlignment::createVectors(UInt_t nEvents){
+//	int noHitDet=0;
+//	int falseClusterSizeDet=0;
+//	int noHitDia=0;
+//	int falseClusterSizeDia=0;
+//	int nCandidates=0;
+//	int nScreened=0;
+//	cout<<"ANALYSE VECTORS...."<<endl;
+//	for(nEvent=0;nEvent<nEvents;nEvent++){
+//		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
+//		eventReader->LoadEvent(nEvent);
+//		//check if every plane has exactly one cluster
+//		if(!eventReader->isValidTrack()){
+//			noHitDet++;
+//			continue;
 //		}
-//		cout<<"\ty:  ";
-//		for(int no=1;no<4;no++){
-//			Float_t deltaY = tracks.at(trackNo).GetDetectorHitPosition(no*2+1)-yPos;
-//			cout<<" "<<deltaY;
-//			hYPositionDifference[no-1]->Fill(deltaY);
-//			hYXPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2));
-//			hYYPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
+//		if (eventReader->isDetMasked()){
+//			nScreened++;
+//			continue;
 //		}
-//		cout<<endl;
+//		if(eventReader->getNDiamondClusters()!=1){
+//			falseClusterSizeDia++;
+//			continue;
+//		}
+//		nCandidates++;
+//		this->addEventToTracks();
 //	}
-}
+//	cout<<"\n\nDetAnalysed "<<nEvents<<": "<<nEvents-noHitDet-falseClusterSizeDet<<" Candidates while "<< noHitDet<<" Events have not exactly one Cluster and "<<falseClusterSizeDet<<" Events have wrong cluster size"<<endl;
+//	cout<<"\n\nDiaAnalysed "<<nEvents-noHitDet-falseClusterSizeDet<<": "<<nCandidates<<" Candidates while "<< noHitDia<<" Events have not exactly one Cluster and "<<falseClusterSizeDia<<" Events have wrong cluster size"<<endl;
+//	cout<<"EVENTS SCREENED:"<<nScreened<<endl;
+//	cout<<tracks.size()<<" "<<tracks_masked.size()<<" "<<tracks_fidcut.size()<<" "<<tracks_masked_fidcut.size()<<endl;
+//
+////	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
+////		Float_t xPos=tracks.at(trackNo).GetDetectorHitPosition(0);
+////		Float_t yPos=tracks.at(trackNo).GetDetectorHitPosition(1);
+////		cout<<trackNo<<" "<<tracks.at(trackNo).GetEventNumber()<<flush;
+////		for(int no=1;no<4;no++){
+////			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2)-xPos;
+////			cout<<" "<<deltaX;
+////			hXPositionDifference[no-1]->Fill(deltaX);
+////			hXXPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2));
+////			hXYPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
+////		}
+////		cout<<"\ty:  ";
+////		for(int no=1;no<4;no++){
+////			Float_t deltaY = tracks.at(trackNo).GetDetectorHitPosition(no*2+1)-yPos;
+////			cout<<" "<<deltaY;
+////			hYPositionDifference[no-1]->Fill(deltaY);
+////			hYXPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2));
+////			hYYPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
+////		}
+////		cout<<endl;
+////	}
+//}
 
 /**
  *
  * @param nEvents
  * @param startEvent
+ * @todo	chekc of fiduccial cut and other stuff...
  */
 void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
-	if (nEvents == 0) nEvents = eventReader->GetEntries();
+	if (nEvents == 0) nEvents = eventReader->GetEntries()-startEvent;
+	if (nEvents+startEvent>eventReader->GetEntries())nEvents=eventReader->GetEntries()-startEvent;
 	int noHitDet=0;
 	int falseClusterSizeDet=0;
 	int noHitDia=0;
@@ -245,68 +244,68 @@ void TAlignment::saveHistos(){
 /**
  *
  */
-void TAlignment::addEventToTracks()
-{
-	TDetectorPlane D0;
-	TDetectorPlane D1;
-	TDetectorPlane D2;
-	TDetectorPlane D3;
-	TDetectorPlane Dia;
-	D0.SetZ(detectorD0Z);
-	D1.SetZ(detectorD1Z);
-	D2.SetZ(detectorD2Z);
-	D3.SetZ(detectorD3Z);
-	Dia.SetZ(detectorDiaZ);
-//	for(int det=0;det<eventReader->getCluster()->size();det++)
-//		cout<<eventReader->getCluster()->at(det).size();
-//	cout<<endl;
-	D0.SetX(eventReader->getCluster()->at(0).at(0).getPosition());
-	D1.SetX(eventReader->getCluster()->at(2).at(0).getPosition());
-	D2.SetX(eventReader->getCluster()->at(4).at(0).getPosition());
-	D3.SetX(eventReader->getCluster()->at(4).at(0).getPosition());
-
-	D0.SetY(eventReader->getCluster()->at(1).at(0).getPosition());
-	D1.SetY(eventReader->getCluster()->at(3).at(0).getPosition());
-	D2.SetY(eventReader->getCluster()->at(5).at(0).getPosition());
-	D3.SetY(eventReader->getCluster()->at(7).at(0).getPosition());
-
-	Dia.SetX(eventReader->getCluster()->at(8).at(0).getPosition());
-
-	TDiamondTrack newDiamondTrack(nEvent,D0,D1,D2,D3,Dia);
-
-	Float_t xPos=eventReader->getCluster()->at(0).at(0).getPosition();
-	Float_t yPos=eventReader->getCluster()->at(1).at(0).getPosition();
-	newDiamondTrack.SetDetectorHitPosition(0,xPos);
-	newDiamondTrack.SetDetectorHitPosition(1,yPos);
-	hScatterPosition[0]->Fill(xPos,yPos);
-
-	xPos=eventReader->getCluster()->at(2).at(0).getPosition();
-	yPos=eventReader->getCluster()->at(3).at(0).getPosition();
-	newDiamondTrack.SetDetectorHitPosition(2,xPos);
-	newDiamondTrack.SetDetectorHitPosition(3,yPos);
-	hScatterPosition[1]->Fill(xPos,yPos);
-
-	xPos=eventReader->getCluster()->at(4).at(0).getPosition();
-	yPos=eventReader->getCluster()->at(5).at(0).getPosition();
-	newDiamondTrack.SetDetectorHitPosition(4,xPos);
-	newDiamondTrack.SetDetectorHitPosition(5,yPos);
-	hScatterPosition[2]->Fill(xPos,yPos);
-
-	xPos=eventReader->getCluster()->at(6).at(0).getPosition();
-	yPos=eventReader->getCluster()->at(7).at(0).getPosition();
-	newDiamondTrack.SetDetectorHitPosition(6,xPos);
-	newDiamondTrack.SetDetectorHitPosition(7,yPos);
-	hScatterPosition[3]->Fill(xPos,yPos);
-
-	xPos=eventReader->getCluster()->at(8).at(0).getPosition();
-	newDiamondTrack.SetDetectorHitPosition(8,xPos);
-
-	tracks.push_back(newDiamondTrack);
-	tracks_masked.push_back((rand.Rndm()>this->alignmentPercentage));
-	tracks_fidcut.push_back(newDiamondTrack);
-	tracks_masked_fidcut.push_back((rand.Rndm()>this->alignmentPercentage));
-
-}
+//void TAlignment::addEventToTracks()
+//{
+//	TDetectorPlane D0;
+//	TDetectorPlane D1;
+//	TDetectorPlane D2;
+//	TDetectorPlane D3;
+//	TDetectorPlane Dia;
+//	D0.SetZ(detectorD0Z);
+//	D1.SetZ(detectorD1Z);
+//	D2.SetZ(detectorD2Z);
+//	D3.SetZ(detectorD3Z);
+//	Dia.SetZ(detectorDiaZ);
+////	for(int det=0;det<eventReader->getCluster()->size();det++)
+////		cout<<eventReader->getCluster()->at(det).size();
+////	cout<<endl;
+//	D0.SetX(eventReader->getCluster()->at(0).at(0).getPosition());
+//	D1.SetX(eventReader->getCluster()->at(2).at(0).getPosition());
+//	D2.SetX(eventReader->getCluster()->at(4).at(0).getPosition());
+//	D3.SetX(eventReader->getCluster()->at(4).at(0).getPosition());
+//
+//	D0.SetY(eventReader->getCluster()->at(1).at(0).getPosition());
+//	D1.SetY(eventReader->getCluster()->at(3).at(0).getPosition());
+//	D2.SetY(eventReader->getCluster()->at(5).at(0).getPosition());
+//	D3.SetY(eventReader->getCluster()->at(7).at(0).getPosition());
+//
+//	Dia.SetX(eventReader->getCluster()->at(8).at(0).getPosition());
+//
+//	TDiamondTrack newDiamondTrack(nEvent,D0,D1,D2,D3,Dia);
+//
+//	Float_t xPos=eventReader->getCluster()->at(0).at(0).getPosition();
+//	Float_t yPos=eventReader->getCluster()->at(1).at(0).getPosition();
+//	newDiamondTrack.SetDetectorHitPosition(0,xPos);
+//	newDiamondTrack.SetDetectorHitPosition(1,yPos);
+//	hScatterPosition[0]->Fill(xPos,yPos);
+//
+//	xPos=eventReader->getCluster()->at(2).at(0).getPosition();
+//	yPos=eventReader->getCluster()->at(3).at(0).getPosition();
+//	newDiamondTrack.SetDetectorHitPosition(2,xPos);
+//	newDiamondTrack.SetDetectorHitPosition(3,yPos);
+//	hScatterPosition[1]->Fill(xPos,yPos);
+//
+//	xPos=eventReader->getCluster()->at(4).at(0).getPosition();
+//	yPos=eventReader->getCluster()->at(5).at(0).getPosition();
+//	newDiamondTrack.SetDetectorHitPosition(4,xPos);
+//	newDiamondTrack.SetDetectorHitPosition(5,yPos);
+//	hScatterPosition[2]->Fill(xPos,yPos);
+//
+//	xPos=eventReader->getCluster()->at(6).at(0).getPosition();
+//	yPos=eventReader->getCluster()->at(7).at(0).getPosition();
+//	newDiamondTrack.SetDetectorHitPosition(6,xPos);
+//	newDiamondTrack.SetDetectorHitPosition(7,yPos);
+//	hScatterPosition[3]->Fill(xPos,yPos);
+//
+//	xPos=eventReader->getCluster()->at(8).at(0).getPosition();
+//	newDiamondTrack.SetDetectorHitPosition(8,xPos);
+//
+//	tracks.push_back(newDiamondTrack);
+//	tracks_masked.push_back((rand.Rndm()>this->alignmentPercentage));
+//	tracks_fidcut.push_back(newDiamondTrack);
+//	tracks_masked_fidcut.push_back((rand.Rndm()>this->alignmentPercentage));
+//
+//}
 
 /**
  *
@@ -315,23 +314,12 @@ void TAlignment::addEventToTracks()
 int TAlignment::Align()
 {
 	if(tracks.size()==0)
-		createVectors();
+		createEventVectors(10000);//todo anpassen
 
 	if (verbosity){
 		cout<<"\n\n\nTAlignment::Align:Starting \""<<histSaver->GetPlotsPath()<<"\""<<endl;
-		cout<<"\t\t"<<tracks.size()<<" "<<tracks_masked.size()<< " ";
-		cout<<		  tracks_fidcut.size()<<" "<<tracks_masked_fidcut.size()<<endl;
+		cout<<"\t\t"<<events.size()<<"\t";
 		cout << "\t\t "<<eventReader<<" ."<<endl;
-	}
-	if(tracks.size()==0) {
-		cout<<"TAlignment::Align: No tracks found; need to CallClustering::ClusterRun first..."<<endl;
-		return -1;
-		//ClusterRun(plots); // doesn't use alternative clustering
-	}
-
-	if (tracks.size() == 0) {
-		cout << "TAlignment::Align:No tracks available. Alignment not possible. (tracks.size() = " << tracks.size() << ")" << endl;
-		return 0;
 	}
 
 	if(align==NULL){
@@ -344,9 +332,13 @@ int TAlignment::Align()
 		align->SetZOffset(4,detectorDiaZ);
 	}
 	if(myTrack==NULL){
+		cout<<"TAlignment::Align::create new TTrack"<<endl;
 		myTrack = new TTrack(*align);
-		cout<<"TAlignment::Align::created new TTrack";
+		cout<<"TAlignment::Align::created new TTrack"<<endl;
 	}
+	cout<<"~"<<endl;
+	cout<<"~"<<endl;
+	cout<<"~"<<endl;
 
 	AlignDetector(TPlane::XY_COR,1,0,0,true);
 	AlignDetector(TPlane::XY_COR,2,0,0,true);
@@ -376,6 +368,13 @@ int TAlignment::Align()
 //		cout << "AlignmentClass::Align:Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 //		doDiaAlignmentStep();
 //	}
+
+	cout<<"**********************************************"<<endl;
+	cout<<"**********************************************"<<endl;
+	cout<<"******** TAlignment::Align:RESULTS ***********"<<endl;
+	cout<<"**********************************************"<<endl;
+	cout<<"**********************************************"<<endl;
+	align->PrintResults(1);
 	return 1;
 }
 
@@ -424,7 +423,7 @@ void TAlignment::AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t re
  */
 void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot)
 {
-	cout<<"TAlignment::AlignDetector\n\t align "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
+	cout<<"\n\nTAlignment::AlignDetector\n\t align "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
 	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
 		return;
 	}
@@ -445,9 +444,9 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
 		if(cor==TPlane::XY_COR||cor==TPlane::Y_COR){
 			align->AddToYOffset(subjectPlane,y_offset);
 			align->AddToPhiYOffset(subjectPlane,phiy_offset);
-			cout<<"/tY:"<<y_offset<<" "<<phiy_offset<<endl;
+			cout<<"\tY:"<<y_offset<<" "<<phiy_offset<<endl;
 		}
-
+		res = getResidual(cor,subjectPlane,refPlane1,refPlane2);
 		variableDif= (res.nUsedTracks * res.sumV2x - res.sumVx * res.sumVx);
 		Float_t x_offset = (res.sumRx * res.sumV2x - res.sumVRx * res.sumVx) / variableDif;
 		//phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
@@ -455,7 +454,7 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
 		if(cor==TPlane::XY_COR||cor==TPlane::X_COR){
 			align->AddToXOffset(subjectPlane,x_offset);
 			align->AddToPhiXOffset(subjectPlane,phix_offset);
-			cout<<"/tX:"<<x_offset<<" "<<phix_offset<<endl;
+			cout<<"\tX:"<<x_offset<<""<<phix_offset<<endl;
 		}
 	}
 }
@@ -472,7 +471,7 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
  * @param	bPlot
  */
 TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot){
-	if(verbosity)cout<<"TAlignment::getResidual"<<subjectPlane<<" "<<refPlane1<<" "<<refPlane2<<" "<<bPlot<<" with "<<alignmentPercentage<<endl;
+	if(verbosity)cout<<"TAlignment::getResidual of Plane "<<subjectPlane<<" with "<<refPlane1<<" and "<<refPlane2<<", plotting"<<bPlot<<" with "<<alignmentPercentage<<endl;
 	vector<Float_t> vecXPred;
 	vector<Float_t> vecYPred;
 	vector<Float_t> vecXObs;
@@ -488,7 +487,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 
 	for(UInt_t nEvent=0; nEvent<events.size(); nEvent++)
 	{
-		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
+		TRawEventSaver::showStatusBar(nEvent,events.size());
 		myTrack->setEvent(&events.at(nEvent));
 		//if(verbosity>3)	cout<<myTrack->getEvent()->getEventNumber()<<" "<<myTrack->getPosition(cor,subjectPlane)<<" "<<eventReader->getEvent()->getPlane(subjectPlane).getXPosition(0)<<endl;;
 		Float_t xPositionObserved  = myTrack->getPosition(TPlane::X_COR,subjectPlane);
@@ -557,11 +556,12 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
  */
 TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t>yPred,vector<Float_t> deltaY,TResidual res)
 {
+	cout<<"\nTAlignment::calculateResidual"<<endl;
 	TResidual residual;
 	residual.init();
 	Float_t resxtest;
 	Float_t resytest;
-	if(verbosity>2)cout<<"\tcalculate Residuum "<<res_keep_factor<<endl;
+	if(verbosity>2)cout<<"\tcalculate Residual "<<res_keep_factor<<endl;
 	if(verbosity>2)cout<<"\t"<<deltaX.size()<<" "<<deltaY.size()<<" "<< xPred.size()<<" "<<yPred.size()<<endl;
 	for(UInt_t i=0;i<deltaX.size();i++){
 		resxtest= TMath::Abs(deltaX.at(i)-res.resXMean)/res.resXSigma;
@@ -604,9 +604,9 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 	residual.resXSigma = TMath::Sqrt(residual.resXSigma / (Double_t)residual.nUsedTracks - residual.resXMean*residual.resXMean);
 	residual.resYSigma = TMath::Sqrt(residual.resYSigma / (Double_t)residual.nUsedTracks- residual.resYMean*residual.resYMean);
 
-	if(verbosity>0)	cout<<"\tused "<<residual.nUsedTracks<<" Tracks"<<endl;
+	if(verbosity>0)	cout<<"\n\tused "<<residual.nUsedTracks<<" Tracks"<<endl;
 	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<residual.resXMean<<"+/-"<<residual.resXSigma<<endl;
-	if(verbosity>0)	cout<<"\tY: "<<residual.resYMean<<"+/-"<<residual.resYSigma<<endl;
+	if(verbosity>0)	cout<<"\tY: "<<residual.resYMean<<"+/-"<<residual.resYSigma<<"\n"<<endl;
 	//set values
 	return residual;
 }
@@ -628,5 +628,5 @@ void TAlignment::PrintEvents(UInt_t maxEvent,UInt_t startEvent){
 		eventReader->getEvent()->Print(1);
 	}
 	cout<<"\n\n\n\n\n\n"<<flush;
-	sleep(10);
+
 }
