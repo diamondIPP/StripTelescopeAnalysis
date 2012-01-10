@@ -33,11 +33,12 @@ LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64
 
 LIBFILES		:=	HistogrammSaver.class.o ChannelScreen.o TDetectorPlane.o TDiamondTrack.o TDetectorAlignment.o 
 LIBFILES		+=	libTEvent.so
-LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o Clustering.class.o TDetector_Data.o TTrigger_Event.o
+LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o SlidingPedestal.class.o PSDetector.class.o PSEvent.class.o
-LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o AlignmentClass.o TADCEventReader.o
-LIBFILES		+=	TSettings.class.o TRawEventReader.o TTransparentClustering.o TRawEventSaver.o TPedestalCalculation.o
-LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTransparentAnalysis.o 
+LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o TADCEventReader.o
+LIBFILES		+=	TSettings.class.o TRawEventReader.o  TRawEventSaver.o TPedestalCalculation.o
+LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o 
+#LIBFILES		+=  TTransparentClustering.o TTransparentAnalysis.o AlignmentClass.o Clustering.class.o 
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o
 

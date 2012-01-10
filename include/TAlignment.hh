@@ -62,8 +62,6 @@ private:
 	void initialiseHistos();
 	void saveHistos();
 	void addEventToTracks();
-	void doDetAlignmentStep();
-	void doDiaAlignmentStep();
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);

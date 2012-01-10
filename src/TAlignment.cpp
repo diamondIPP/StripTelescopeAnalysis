@@ -294,7 +294,7 @@ int TAlignment::Align()
 	}
 
 	if(align==NULL){
-		align = new TDetectorAlignment(histSaver->GetPlotsPath(), tracks, tracks_masked);
+		align = new TDetectorAlignment();//histSaver->GetPlotsPath(), tracks, tracks_masked);
 		cout<<"TAlignment::Align::Detectoralignment did not exist, so created new DetectorAlignment"<<endl;
 		align->SetZOffset(0,detectorD0Z);
 		align->SetZOffset(1,detectorD1Z);
@@ -338,105 +338,6 @@ int TAlignment::Align()
 	return 1;
 }
 
-
-void TAlignment::doDetAlignmentStep(){
-	Int_t nPasses = 10;
-	//Double_t plot_width_factor = 3; // scales the widths of the plots; range is a 3*width of distribution centered on mean
-	if(verbosity)cout<<"TAlignment::doAlignmentStep::PlotAngularDistribution"<<endl;
-
-	align->PlotAngularDistribution(); //look at angular distribution of tracks
-	align->PlotCartesianDistribution(); //look at slope distribution of tracks
-
-	string prename = "alignment_PrealignmentResiduals";
-	string postname = "alignment_PostalignmentResiduals";
-
-	// generate residuals before alignment
-	if(verbosity)cout<<"TAlignment::Align::CheckDetectorAlignment"<<endl;
-	//align->LoadTracks(this->tracks, this->tracks_masked);
-	align->CheckDetectorAlignmentXYPlots(0, 1, 3, prename);
-	align->CheckDetectorAlignmentXYPlots(1, 0, 3, prename);
-	align->CheckDetectorAlignmentXYPlots(2, 0, 3, prename);
-	align->CheckDetectorAlignmentXYPlots(3, 0, 2, prename);
-	// itterative alignment loop
-	if(verbosity)cout<<"TAlignment::doDetAlignmentStep::alignmentloop"<<endl;
-
-	align->setVerbosity(verbosity-1);
-	for(int i=0; i<nPasses; i++) {
-		cout << "\n\nPass " << i+1 << endl<< endl;
-		//xy alignment
-		align->CheckDetectorAlignmentXY(0, 1, 3);
-		align->AlignDetectorXY(1, 0, 3,verbosity>1);
-		align->AlignDetectorXY(2, 0, 3,verbosity>1);
-		//align->AlignDetectorXY(1, 0, 3);
-		//align->AlignDetectorXY(2, 0, 3);
-		//align->AlignDetectorXY(1, 0, 3);
-		//align->AlignDetectorXY(2, 0, 3);
-		align->AlignDetectorXY(3, 0, 2,verbosity>1);
-		//align->AlignDetectorXY(2, 0, 3);
-		//align->AlignDetectorXY(1, 0, 3);
-
-		//phi alignment: this chunk of code causes seg faulting in code at top of loop!
-		//align->AlignDetectorPhi(1, 0, 3, false, false);
-		//align->AlignDetectorPhi(2, 0, 3, false, false);
-		//align->AlignDetectorPhi(3, 0, 2, false, false);
-
-		//phi alignment: this chunk of code causes seg faulting in code at top of loop!
-		//align->AlignDetectorZ(1, 0, 3, false, false);
-		//align->AlignDetectorZ(2, 0, 3, false, false);
-		//align->AlignDetectorZ(3, 0, 2, false, false);
-	}
-
-	cout<<endl;
-	cout<<endl;
-	cout<<"TAlignment::doDetAlignmentStep:Checking final Silicon residuals"<<endl;
-	cout<<endl;
-
-	// generate residuals after alignment
-	align->CheckDetectorAlignmentXYPlots(0, 1, 3, postname);
-	align->CheckDetectorAlignmentXYPlots(1, 0, 3, postname);
-	align->CheckDetectorAlignmentXYPlots(2, 0, 3, postname);
-	align->CheckDetectorAlignmentXYPlots(3, 0, 2, postname);
-
-	cout<<endl;
-}
-
-void TAlignment::doDiaAlignmentStep()
-{
-	align->LoadTracks(tracks_fidcut, tracks_masked_fidcut);
-
-	//check that the silicon is still aligned for these tracks_fidcut
-	cout<<"TAlignment::doDiaAlignmentStep:Check that the telescope alignment still holds for fidcut tracks w/ single diamond cluster"<<endl;
-	align->CheckDetectorAlignmentXY(0, 1, 3);
-	align->CheckDetectorAlignmentXY(1, 0, 3);
-	align->CheckDetectorAlignmentXY(2, 0, 3);
-	align->CheckDetectorAlignmentXY(3, 0, 2);
-
-	string prename = "alignment_PrealignmentResiduals";
-	string postname = "alignment_PostalignmentResiduals";
-
-	// generate residuals before alignment
-	align->CheckDetectorAlignmentXYPlots(4, 1, 2, prename);
-
-	// itterative alignment loop
-	for(int i=0; i<5; i++) {
-		cout << "\n\nPass " << i+1 << endl<< endl;
-		//xy alignment
-		align->AlignDetectorXY(4, 1, 2);
-		//align->AlignDetectorXY(4, 0, 3);
-		//align->AlignDetectorXY(4, 1, 3);
-		//align->AlignDetectorXY(4, 0, 2);
-		//align->AlignDetectorXY(4, 1, 2);
-	}
-
-	cout<<endl;
-	cout<<endl;
-	cout<<"TAlignment::doDiaAlignmentStep:Checking final diamond residuals"<<endl;
-	cout<<endl;
-
-	// generate residuals after alignment
-	align->CheckDetectorAlignmentXYPlots(4, 1, 2, postname);
-
-}
 
 void TAlignment::AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
 {
