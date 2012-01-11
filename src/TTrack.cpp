@@ -59,16 +59,16 @@ Float_t TTrack::getXPosition(UInt_t plane) {
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
-//	Float_t phiYOffset = this->getPhiXOffset(plane);
-	Float_t xPosition = event->getPlane(plane).getXPosition(0);
-	Float_t yPosition = event->getPlane(plane).getYPosition(0);
+	Float_t phiYOffset = this->getPhiXOffset(plane);
+	Float_t xMeasured = event->getPlane(plane).getXPosition(0);
+	Float_t yMeasured = event->getPlane(plane).getYPosition(0);
 	
 	// apply offsets
+	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) - (yMeasured) * TMath::Sin(-phiXOffset);
+	Float_t yPosition = (xMeasured) * TMath::Sin(-phiYOffset) + (yMeasured) * TMath::Cos(phiYOffset);
 	xPosition -= xOffset;
 	yPosition -= yOffset;
-	xPosition = (xPosition-128) * TMath::Cos(phiXOffset) - (yPosition-128) * TMath::Sin(-phiXOffset) + 128;
-//	yPosition = (xPosition-128) * TMath::Sin(-phiYOffset) + (yPosition-128) * TMath::Cos(phiYOffset) + 128;
-	
+
 	return xPosition;
 }
 
@@ -81,14 +81,14 @@ Float_t TTrack::getYPosition(UInt_t plane) {
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiXOffset(plane);
-	Float_t xPosition = event->getPlane(plane).getXPosition(0);
-	Float_t yPosition = event->getPlane(plane).getYPosition(0);
+	Float_t xMeasured = event->getPlane(plane).getXPosition(0);
+	Float_t yMeasured = event->getPlane(plane).getYPosition(0);
 	
 	// apply offsets
+	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) - (yMeasured) * TMath::Sin(phiXOffset);
+	Float_t yPosition = (xMeasured) * TMath::Sin(phiYOffset) + (yMeasured) * TMath::Cos(phiYOffset);
 	xPosition -= xOffset;
 	yPosition -= yOffset;
-	xPosition = (xPosition-128) * TMath::Cos(phiXOffset) - (yPosition-128) * TMath::Sin(-phiXOffset) + 128;
-	yPosition = (xPosition-128) * TMath::Sin(-phiYOffset) + (yPosition-128) * TMath::Cos(phiYOffset) + 128;
 	
 	return yPosition;
 }
@@ -122,7 +122,7 @@ TPositionPrediction TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> 
 		return prediction;
 	}
 	TLinearFitter* linFitX = new TLinearFitter(1,"pol1","D");
-new TLinearFitter((Int_t)1,"pol1","D");
+new TLinearFitter((Int_t)1,"pol1","D");//todo:????
 	TLinearFitter* linFitY= new TLinearFitter(1,"pol1");
 	vector<Double_t>vecXPos;
 	vector<Double_t>vecYPos;

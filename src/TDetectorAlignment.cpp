@@ -45,17 +45,21 @@ int TDetectorAlignment::getVerbosity() const
 
 void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
 {
+	cout<<"TDetectorAlignment::addPhiXOffset of Plane "<<plane<<": "<<addPhiXOffset<<", new Value: "<<flush;
 	if(plane<6){
 		vecDetPhiXOffset[plane].push_back(addPhiXOffset);
 		det_phix_offset[plane]+=addPhiXOffset;
 	}
+	cout<<det_phix_offset[plane]<<endl;
 }
 void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 {
+	cout<<"TDetectorAlignment::addPhiYOffset of Plane "<<plane<<": "<<addPhiYOffset<<", new Value: "<<flush;
 	if(plane<6){
 		vecDetPhiYOffset[plane].push_back(addPhiYOffset);
 		det_phiy_offset[plane]+=addPhiYOffset;
 	}
+	cout<<det_phiy_offset[plane]<<endl;
 }
 
 void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)

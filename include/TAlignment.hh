@@ -49,13 +49,11 @@ public:
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 private:
-	void initialiseHistos();
-	void saveHistos();
-//	void addEventToTracks();
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false);
+	void CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=true);
 	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false);
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY);
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY,TResidual res);
@@ -86,15 +84,6 @@ private:
 	vector<TEvent> events;
 	UInt_t alignmentSteps;
 	Int_t nAlignmentStep;
-private:
-
-	TH2F* hScatterPosition[4];
-	TH1F* hXPositionDifference[3];
-	TH2F* hXYPositionDifference[3];
-	TH2F* hXXPositionDifference[3];
-	TH1F* hYPositionDifference[3];
-	TH2F* hYYPositionDifference[3];
-	TH2F* hYXPositionDifference[3];
 };
 
 #endif /* TALIGNMENT_HH_ */

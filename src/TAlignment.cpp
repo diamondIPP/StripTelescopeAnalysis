@@ -41,7 +41,6 @@ TAlignment::TAlignment(TSettings* settings) {
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
 	sys->cd("..");
-	initialiseHistos();
 	cout<<"end initialise"<<endl;
 	alignmentPercentage=0.1;
 	Float_t stripSize=1.;// 50./10000.;//mu m
@@ -56,7 +55,7 @@ TAlignment::TAlignment(TSettings* settings) {
 	res_keep_factor = 1000;//todo anpassen
 	align=NULL;
 	myTrack=NULL;
-	alignmentSteps=2;
+	alignmentSteps=5;
 	nAlignmentStep=-1;
 
 }
@@ -64,7 +63,6 @@ TAlignment::TAlignment(TSettings* settings) {
 TAlignment::~TAlignment() {
 	// TODO Auto-generated destructor stub
 	cout<<"TAlignment deconstructor"<<endl;
-	saveHistos();
 	delete histSaver;
 	delete eventReader;
 	sys->cd("..");
@@ -73,61 +71,7 @@ TAlignment::~TAlignment() {
 void TAlignment::setSettings(TSettings* settings){
 	this->settings=settings;
 }
-//
-//void TAlignment::createVectors(UInt_t nEvents){
-//	int noHitDet=0;
-//	int falseClusterSizeDet=0;
-//	int noHitDia=0;
-//	int falseClusterSizeDia=0;
-//	int nCandidates=0;
-//	int nScreened=0;
-//	cout<<"ANALYSE VECTORS...."<<endl;
-//	for(nEvent=0;nEvent<nEvents;nEvent++){
-//		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
-//		eventReader->LoadEvent(nEvent);
-//		//check if every plane has exactly one cluster
-//		if(!eventReader->isValidTrack()){
-//			noHitDet++;
-//			continue;
-//		}
-//		if (eventReader->isDetMasked()){
-//			nScreened++;
-//			continue;
-//		}
-//		if(eventReader->getNDiamondClusters()!=1){
-//			falseClusterSizeDia++;
-//			continue;
-//		}
-//		nCandidates++;
-//		this->addEventToTracks();
-//	}
-//	cout<<"\n\nDetAnalysed "<<nEvents<<": "<<nEvents-noHitDet-falseClusterSizeDet<<" Candidates while "<< noHitDet<<" Events have not exactly one Cluster and "<<falseClusterSizeDet<<" Events have wrong cluster size"<<endl;
-//	cout<<"\n\nDiaAnalysed "<<nEvents-noHitDet-falseClusterSizeDet<<": "<<nCandidates<<" Candidates while "<< noHitDia<<" Events have not exactly one Cluster and "<<falseClusterSizeDia<<" Events have wrong cluster size"<<endl;
-//	cout<<"EVENTS SCREENED:"<<nScreened<<endl;
-//	cout<<tracks.size()<<" "<<tracks_masked.size()<<" "<<tracks_fidcut.size()<<" "<<tracks_masked_fidcut.size()<<endl;
-//
-////	for(UInt_t trackNo=0;trackNo<tracks.size();trackNo++){
-////		Float_t xPos=tracks.at(trackNo).GetDetectorHitPosition(0);
-////		Float_t yPos=tracks.at(trackNo).GetDetectorHitPosition(1);
-////		cout<<trackNo<<" "<<tracks.at(trackNo).GetEventNumber()<<flush;
-////		for(int no=1;no<4;no++){
-////			Float_t deltaX = tracks.at(trackNo).GetDetectorHitPosition(no*2)-xPos;
-////			cout<<" "<<deltaX;
-////			hXPositionDifference[no-1]->Fill(deltaX);
-////			hXXPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2));
-////			hXYPositionDifference[no-1]->Fill(deltaX,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
-////		}
-////		cout<<"\ty:  ";
-////		for(int no=1;no<4;no++){
-////			Float_t deltaY = tracks.at(trackNo).GetDetectorHitPosition(no*2+1)-yPos;
-////			cout<<" "<<deltaY;
-////			hYPositionDifference[no-1]->Fill(deltaY);
-////			hYXPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2));
-////			hYYPositionDifference[no-1]->Fill(deltaY,tracks.at(trackNo).GetDetectorHitPosition(no*2+1));
-////		}
-////		cout<<endl;
-////	}
-//}
+
 
 /**
  *
@@ -163,83 +107,6 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
 		}
 		nCandidates++;
 		this->events.push_back(*eventReader->getEvent());
-	}
-}
-
-void TAlignment::initialiseHistos(){
-	for(int no = 0;no <4;no++){
-		stringstream histName;
-		histName<<"ScatterPlot_VectorCreation_8Hits_Plane_"<<no;
-		this->hScatterPosition[no] = new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,255,256,0,255);
-	}
-	for(int no=0;no<3;no++){
-		//*******************XPOS******************************************
-		stringstream histName;
-		histName<<"xPos_Difference_D0X-"<<TADCEventReader::getStringForPlane((no+1)*2);
-		this->hXPositionDifference[no]=new TH1F(histName.str().c_str(),histName.str().c_str(),2048,-256,256);
-
-		histName.str("");
-		histName<<"xPos_Difference_D0X-"<<TADCEventReader::getStringForPlane((no)*2+2)<<"_vsX";
-		this->hXXPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
-
-		histName.str("");
-		histName<<"xPos_Difference_D0X-"<<TADCEventReader::getStringForPlane((no)*2+2)<<"_vsY";
-		this->hXYPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
-
-		//*********************YPOS***********************************************
-
-		histName.str("");
-		histName<<"yPos_Difference_D0Y-"<<TADCEventReader::getStringForPlane((no)*2+3);
-		this->hYPositionDifference[no]=new TH1F(histName.str().c_str(),histName.str().c_str(),2048,-256,256);
-
-		histName.str("");
-		histName<<"yPos_Difference_D0Y-"<<TADCEventReader::getStringForPlane((no)*2+3)<<"_vsX";
-		this->hYXPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
-
-		histName.str("");
-		histName<<"yPos_Difference_D0Y-"<<TADCEventReader::getStringForPlane((no)*2+3)<<"_vsY";
-		this->hYYPositionDifference[no]=new TH2F(histName.str().c_str(),histName.str().c_str(),2048,-256,256,2048,0,256);
-
-	}
-}
-
-void TAlignment::saveHistos(){
-
-	for(int no=0;no<4;no++){
-		this->histSaver->SaveHistogramPNG(this->hScatterPosition[no]);
-		delete this->hScatterPosition[no];
-	}
-	for(int no=0;no<3;no++){
-		//** XPOS***
-		float mean = hXPositionDifference[no]->GetMean();
-		float sigma= hXPositionDifference[no]->GetRMS();
-		hXPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
-		this->histSaver->SaveHistogramPNG(hXPositionDifference[no]);
-		delete hXPositionDifference[no];
-		hXXPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
-		hXXPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
-		hXYPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
-		hXYPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
-		this->histSaver->SaveHistogramPNG(hXXPositionDifference[no]);
-		this->histSaver->SaveHistogramPNG(hXYPositionDifference[no]);
-		delete this->hXXPositionDifference[no];
-		delete this->hXYPositionDifference[no];
-
-		//** YPOS***
-
-		mean = hYPositionDifference[no]->GetMean();
-		sigma= hYPositionDifference[no]->GetRMS();
-		hYPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
-		hYXPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
-		hYYPositionDifference[no]->GetXaxis()->SetRangeUser(mean-4*sigma,mean+4*sigma);
-		hXYPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
-		hYYPositionDifference[no]->GetYaxis()->SetRangeUser(50,170);
-		this->histSaver->SaveHistogramPNG(hYPositionDifference[no]);
-		this->histSaver->SaveHistogramPNG(hYXPositionDifference[no]);
-		this->histSaver->SaveHistogramPNG(hYYPositionDifference[no]);
-		delete hYPositionDifference[no];
-		delete this->hYXPositionDifference[no];
-		delete this->hYYPositionDifference[no];
 	}
 }
 
@@ -343,12 +210,16 @@ int TAlignment::Align()
 	cout<<"~"<<endl;
 
 	nAlignmentStep=-1;
+	CheckDetectorAlignment(TPlane::XY_COR,1,0,3,true);
+	CheckDetectorAlignment(TPlane::XY_COR,2,0,3,true);
+	CheckDetectorAlignment(TPlane::XY_COR,3,0,2,true);
 	AlignDetector(TPlane::XY_COR,1,0,0,true);
 	AlignDetector(TPlane::XY_COR,2,0,0,true);
 	AlignDetector(TPlane::XY_COR,3,0,0,true);
 	myTrack->setDetectorAlignment(*align);
 	cout<<endl;
 	for(nAlignmentStep=0;nAlignmentStep<alignmentSteps;nAlignmentStep++){
+		cout<<"\n\n\nALIGNMENT STEP:\t"<<nAlignmentStep<<" of "<<alignmentSteps<<"\n\n\n"<<endl;
 		AlignDetector(TPlane::XY_COR,3,0,2);
 		myTrack->setDetectorAlignment(*align);
 		AlignDetector(TPlane::XY_COR,1,0,2);
@@ -357,6 +228,7 @@ int TAlignment::Align()
 		myTrack->setDetectorAlignment(*align);
 		cout<<endl;
 	}
+	nAlignmentStep=alignmentSteps;
 	AlignDetector(TPlane::XY_COR,3,0,2,true);
 	AlignDetector(TPlane::XY_COR,1,0,2,true);
 	AlignDetector(TPlane::XY_COR,2,0,3,true);
@@ -426,13 +298,13 @@ void TAlignment::AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t re
  */
 void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot)
 {
-	cout<<"\n\nTAlignment::AlignDetector\n\t align "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
+	//cout<<"\n\nTAlignment::AlignDetector\n\t align "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
 	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
 		return;
 	}
 
 	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot);
-	res.Print(0);
+	//res.Print(0);
 	if(refPlane1==refPlane2){
 		if(cor==TPlane::XY_COR||cor==TPlane::X_COR)
 			align->AddToXOffset(subjectPlane,res.getXMean());
@@ -446,16 +318,16 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
 		if(cor==TPlane::XY_COR||cor==TPlane::Y_COR){
 			align->AddToYOffset(subjectPlane,y_offset);
 			align->AddToPhiYOffset(subjectPlane,phiy_offset);
-			cout<<"\tY:"<<y_offset<<" "<<phiy_offset<<endl;
+		//	cout<<"\tY:"<<y_offset<<" "<<phiy_offset<<endl;
 		}
 		res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot);
-		res.Print();
+		//res.Print();
 		Float_t x_offset = res.getXOffset();
 		Float_t phix_offset = res.getPhiXOffset();
 		if(cor==TPlane::XY_COR||cor==TPlane::X_COR){
 			align->AddToXOffset(subjectPlane,x_offset);
 			align->AddToPhiXOffset(subjectPlane,phix_offset);
-			cout<<"\tX:"<<x_offset<<""<<phix_offset<<endl;
+			//cout<<"\tX:"<<x_offset<<""<<phix_offset<<endl;
 		}
 	}
 }
@@ -516,7 +388,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 		//DistributionPlot DeltaX
 		histName.str("");
 		if(nAlignmentStep==-1)histName<<"hPreAlignment";
-					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else if(nAlignmentStep==alignmentSteps)histName<<"hPostAlignment";
 					else histName<<"h_"<<nAlignmentStep<<"_Step";
 		histName<<"_DistributionPlot_DeltaX";
 		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
@@ -525,7 +397,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 		//DistributionPlot DeltaY
 		histName.str("");
 		if(nAlignmentStep==-1)histName<<"hPreAlignment";
-					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else if(nAlignmentStep==alignmentSteps)histName<<"hPostAlignment";
 					else histName<<"h_"<<nAlignmentStep<<"_Step";
 		histName<<"_DistributionPlot_DeltaY";
 		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
@@ -534,7 +406,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 		//DistributionPlot DeltaX vs Ypred
 		histName.str("");
 		if(nAlignmentStep==-1)histName<<"hPreAlignment";
-					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else if(nAlignmentStep==alignmentSteps)histName<<"hPostAlignment";
 					else histName<<"h_"<<nAlignmentStep<<"_Step";
 		histName<<"_ScatterPlot_YPred_vs_DeltaX";
 		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
@@ -543,7 +415,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 		//DistributionPlot DeltaY vs Xpred
 		histName.str("");
 		if(nAlignmentStep==-1)histName<<"hPreAlignment";
-					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else if(nAlignmentStep==alignmentSteps)histName<<"hPostAlignment";
 					else histName<<"h_"<<nAlignmentStep<<"_Step";
 		histName<<"_ScatterPlot_XPred_vs_DeltaY";
 		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
@@ -565,6 +437,17 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 	return calculateResidual(cor,xPred,deltaX,yPred,deltaY,res);
 }
 
+void TAlignment::CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2, bool bPlot)
+{
+	cout<<"\n\nTAlignment::AlignDetector\n\t align "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
+	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
+		return;
+	}
+
+	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot);
+	res.Print();
+}
+
 /**
  * calculating residual:
  * uses the input TResidual res to use only events with
@@ -582,7 +465,7 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
  */
 TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t>yPred,vector<Float_t> deltaY,TResidual res)
 {
-	cout<<"\nTAlignment::calculateResidual"<<endl;
+	//cout<<"\nTAlignment::calculateResidual"<<endl;
 	TResidual residual;
 	Float_t resxtest;
 	Float_t resytest;
