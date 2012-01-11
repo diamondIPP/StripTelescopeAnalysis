@@ -60,18 +60,22 @@ void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 
 void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 {
+	cout<<"TDetectorAlignment::AddToXOffset of Plane "<<plane<<": "<<addXOffset<<", new Value: "<<flush;
 	if(plane<6){
 		vecDetXOffset[plane].push_back(addXOffset);
 		det_x_offset[plane]+=addXOffset;
 	}
+	cout<<det_x_offset[plane]<<endl;
 }
 
 void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 {
+	cout<<"TDetectorAlignment::AddToYOffset of Plane "<<plane<<": "<<addYOffset<<", new Value: "<<flush;
 	if(plane<6){
 		vecDetYOffset[plane].push_back(addYOffset);
 		det_y_offset[plane]+=addYOffset;
 	}
+	cout<<det_y_offset[plane]<<endl;
 }
 
 void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)

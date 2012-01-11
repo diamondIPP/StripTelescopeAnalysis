@@ -43,20 +43,20 @@ class TDetectorAlignment{
 	TDetectorAlignment();
       ~TDetectorAlignment() {};
 
-      Double_t GetXOffset(Int_t plane) {return det_x_offset[plane];};
-      Double_t GetYOffset(Int_t plane) {return det_y_offset[plane];};
-      Double_t GetZOffset(Int_t plane) {return det_z_offset[plane];};
+      Double_t GetXOffset(UInt_t plane) {return det_x_offset[plane];};
+      Double_t GetYOffset(UInt_t plane) {return det_y_offset[plane];};
+      Double_t GetZOffset(UInt_t plane) {return det_z_offset[plane];};
 
-      void SetXOffset(Int_t plane,Float_t xOffset) {if(plane<nDetectors)det_x_offset[plane]=xOffset;};
-      void SetYOffset(Int_t plane,Float_t yOffset) {if(plane<nDetectors)det_y_offset[plane]=yOffset;};
-      void SetZOffset(Int_t plane,Float_t zOffset) {if(plane<nDetectors)det_z_offset[plane]=zOffset;};
+      void SetXOffset(UInt_t plane,Float_t xOffset) {if(plane<nDetectors)det_x_offset[plane]=xOffset;};
+      void SetYOffset(UInt_t plane,Float_t yOffset) {if(plane<nDetectors)det_y_offset[plane]=yOffset;};
+      void SetZOffset(UInt_t plane,Float_t zOffset) {if(plane<nDetectors)det_z_offset[plane]=zOffset;};
 
       void AddToXOffset(UInt_t plane, Float_t addXOffset);//{if(plane<6)det_x_offset[plane]+=addXOffset;}
       void AddToYOffset(UInt_t plane, Float_t addYOffset);//{if(plane<6)det_y_offset[plane]+=addYOffset;}
       void AddToZOffset(UInt_t plane, Float_t addZOffset);
 
-      Double_t GetPhiXOffset(Int_t plane) {return det_phix_offset[plane];};
-      Double_t GetPhiYOffset(Int_t plane) {return det_phiy_offset[plane];};
+      Double_t GetPhiXOffset(UInt_t plane) {return det_phix_offset[plane];};
+      Double_t GetPhiYOffset(UInt_t plane) {return det_phiy_offset[plane];};
 
       void AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset);
       void AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset);

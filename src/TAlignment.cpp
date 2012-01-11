@@ -56,6 +56,8 @@ TAlignment::TAlignment(TSettings* settings) {
 	res_keep_factor = 1000;//todo anpassen
 	align=NULL;
 	myTrack=NULL;
+	alignmentSteps=2;
+	nAlignmentStep=-1;
 
 }
 
@@ -340,12 +342,13 @@ int TAlignment::Align()
 	cout<<"~"<<endl;
 	cout<<"~"<<endl;
 
+	nAlignmentStep=-1;
 	AlignDetector(TPlane::XY_COR,1,0,0,true);
 	AlignDetector(TPlane::XY_COR,2,0,0,true);
 	AlignDetector(TPlane::XY_COR,3,0,0,true);
 	myTrack->setDetectorAlignment(*align);
 	cout<<endl;
-	for(UInt_t nSteps=0;nSteps<5;nSteps++){
+	for(nAlignmentStep=0;nAlignmentStep<alignmentSteps;nAlignmentStep++){
 		AlignDetector(TPlane::XY_COR,3,0,2);
 		myTrack->setDetectorAlignment(*align);
 		AlignDetector(TPlane::XY_COR,1,0,2);
@@ -428,29 +431,27 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
 		return;
 	}
 
-	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2);
+	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot);
+	res.Print(0);
 	if(refPlane1==refPlane2){
 		if(cor==TPlane::XY_COR||cor==TPlane::X_COR)
-			align->AddToXOffset(subjectPlane,res.resXMean);
+			align->AddToXOffset(subjectPlane,res.getXMean());
 		if(cor==TPlane::XY_COR||cor==TPlane::Y_COR)
-			align->AddToYOffset(subjectPlane,res.resYMean);
+			align->AddToYOffset(subjectPlane,res.getYMean());
 		return;
 	}
 	else{
-		Float_t variableDif = (res.nUsedTracks * res.sumV2y - res.sumVy * res.sumVy);
-		Float_t y_offset = (res.sumRy * res.sumV2y - res.sumVRy * res.sumVy) / variableDif;
-		//phiy_offset = (observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
-		Float_t phiy_offset = TMath::ATan((res.nUsedTracks* res.sumVRy - res.sumRy * res.sumVy) / (res.nUsedTracks * res.sumV2y - res.sumVy * res.sumVy));
+		Float_t y_offset = res.getYOffset();
+		Float_t phiy_offset = res.getPhiYOffset();
 		if(cor==TPlane::XY_COR||cor==TPlane::Y_COR){
 			align->AddToYOffset(subjectPlane,y_offset);
 			align->AddToPhiYOffset(subjectPlane,phiy_offset);
 			cout<<"\tY:"<<y_offset<<" "<<phiy_offset<<endl;
 		}
-		res = getResidual(cor,subjectPlane,refPlane1,refPlane2);
-		variableDif= (res.nUsedTracks * res.sumV2x - res.sumVx * res.sumVx);
-		Float_t x_offset = (res.sumRx * res.sumV2x - res.sumVRx * res.sumVx) / variableDif;
-		//phix_offset = -(observedX.size() * sumvr - sumr * sumv) / (observedX.size() * sumv2 - sumv * sumv);
-		Float_t phix_offset = TMath::ATan(-(res.nUsedTracks * res.sumVRx - res.sumRx * res.sumVx) / (res.nUsedTracks * res.sumV2x - res.sumVx * res.sumVx));
+		res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot);
+		res.Print();
+		Float_t x_offset = res.getXOffset();
+		Float_t phix_offset = res.getPhiXOffset();
 		if(cor==TPlane::XY_COR||cor==TPlane::X_COR){
 			align->AddToXOffset(subjectPlane,x_offset);
 			align->AddToPhiXOffset(subjectPlane,phix_offset);
@@ -460,7 +461,7 @@ void TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, 
 }
 
 /**
- * @brief
+ * @brief creates element TResidual to adjust the alignment
  *
  * creates a vector of pedicted X positions, predicted Y positions, delta X and delta Y
  * and use the function calculateResidual to get the residual with this vectors
@@ -508,19 +509,47 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 
 	if(verbosity>2)cout<<vecDeltaX.size()<<" "<<vecDeltaY.size()<<" "<< vecXPred.size()<<" "<<vecYPred.size()<<endl;
 	//first estimate residuals widths
-	TResidual residuum = calculateResidual(cor,vecXPred,vecDeltaX,vecYPred,vecDeltaY);
-	if(bPlot){
+	TResidual res = calculateResidual(cor,vecXPred,vecDeltaX,vecYPred,vecDeltaY);
+	if(bPlot){//todo
 		stringstream histName;
-		histName<<"hScatterPlot_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2<<"_alignment";
-		histSaver->SaveHistogramPNG((TH2F*)histSaver->CreateScatterHisto(histName.str(),vecXObs,vecYObs).Clone());
+
+		//DistributionPlot DeltaX
 		histName.str("");
-		histName<<"hDistributionPlot_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2<<"DeltaY_alignment";
-		//histSaver->SaveHistogramPNG((TH2F*)histSaver->CreateDistributionHisto(histName.str(),vecYObs,vecDeltaX).Clone());
+		if(nAlignmentStep==-1)histName<<"hPreAlignment";
+					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else histName<<"h_"<<nAlignmentStep<<"_Step";
+		histName<<"_DistributionPlot_DeltaX";
+		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
+		histSaver->SaveHistogramPNG((TH1F*)histSaver->CreateDistributionHisto(histName.str(),vecDeltaX,4096).Clone());
+
+		//DistributionPlot DeltaY
 		histName.str("");
-		histName<<"hDistributionPlot_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2<<"DeltaY_alignment";
-	//	histSaver->SaveHistogramPNG((TH2F*)histSaver->CreateDistributionHisto(histName.str(),vecYObs,vecDeltaX).Clone());
+		if(nAlignmentStep==-1)histName<<"hPreAlignment";
+					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else histName<<"h_"<<nAlignmentStep<<"_Step";
+		histName<<"_DistributionPlot_DeltaY";
+		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
+		histSaver->SaveHistogramPNG((TH1F*)histSaver->CreateDistributionHisto(histName.str(),vecDeltaY,4096).Clone());
+
+		//DistributionPlot DeltaX vs Ypred
+		histName.str("");
+		if(nAlignmentStep==-1)histName<<"hPreAlignment";
+					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else histName<<"h_"<<nAlignmentStep<<"_Step";
+		histName<<"_ScatterPlot_YPred_vs_DeltaX";
+		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
+		histSaver->SaveHistogramPNG((TH1F*)histSaver->CreateScatterHisto(histName.str(),vecYPred,vecDeltaX,4096).Clone());
+
+		//DistributionPlot DeltaY vs Xpred
+		histName.str("");
+		if(nAlignmentStep==-1)histName<<"hPreAlignment";
+					else if(nAlignmentStep==alignmentSteps-1)histName<<"hPostAlignment";
+					else histName<<"h_"<<nAlignmentStep<<"_Step";
+		histName<<"_ScatterPlot_XPred_vs_DeltaY";
+		histName<<"_-_Plane_"<<subjectPlane<<"_with"<<refPlane1<<"_and_"<<refPlane2;
+		histSaver->SaveHistogramPNG((TH1F*)histSaver->CreateScatterHisto(histName.str(),vecXPred,vecDeltaY,4096).Clone());
 	}
-	return residuum;
+	return res;
 }
 
 
@@ -531,10 +560,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
  */
 TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY){
 	TResidual res;
-	res.resXMean=0;
-	res.resXSigma=10000;
-	res.resYMean=0;
-	res.resYSigma=10000;
+	res.SetTestResidual();
 	if(verbosity>2)cout<<"\t"<<deltaX.size()<<" "<<deltaY.size()<<" "<< xPred.size()<<" "<<yPred.size()<<endl;
 	return calculateResidual(cor,xPred,deltaX,yPred,deltaY,res);
 }
@@ -558,55 +584,28 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 {
 	cout<<"\nTAlignment::calculateResidual"<<endl;
 	TResidual residual;
-	residual.init();
 	Float_t resxtest;
 	Float_t resytest;
 	if(verbosity>2)cout<<"\tcalculate Residual "<<res_keep_factor<<endl;
 	if(verbosity>2)cout<<"\t"<<deltaX.size()<<" "<<deltaY.size()<<" "<< xPred.size()<<" "<<yPred.size()<<endl;
 	for(UInt_t i=0;i<deltaX.size();i++){
-		resxtest= TMath::Abs(deltaX.at(i)-res.resXMean)/res.resXSigma;
-		resytest= TMath::Abs(deltaY.at(i)-res.resYMean)/res.resYSigma;
-		bool used=false;
+		resxtest= TMath::Abs(deltaX.at(i)-res.getXMean())/res.getXSigma();
+		resytest= TMath::Abs(deltaY.at(i)-res.getYMean())/res.getYSigma();
 		//only add if restest is smaller than res_keep_factor
 		if((cor==TPlane::X_COR)&&resxtest<res_keep_factor){
-			residual.resXMean += deltaX.at(i);
-			residual.resXSigma +=deltaX.at(i)*deltaX.at(i);
-			used=true;
+			residual.addDataPoint(deltaX.at(i),xPred.at(i),deltaY.at(i),yPred.at(i));
 		}//end if
 		else if((cor==TPlane::X_COR)&&resytest<res_keep_factor){
-			residual.resYMean += deltaY.at(i);
-			residual.resYSigma += deltaY.at(i)*deltaY.at(i);
-			used=true;
+			residual.addDataPoint(deltaX.at(i),xPred.at(i),deltaY.at(i),yPred.at(i));
 		}//end else if
 		else if((cor==TPlane::XY_COR)&&resxtest<res_keep_factor&&resytest<res_keep_factor){
-			residual.resYMean += deltaY.at(i);
-			residual.resYSigma += deltaY.at(i)*deltaY.at(i);
-			residual.resXMean += deltaX.at(i);
-			residual.resXSigma +=deltaX.at(i)*deltaX.at(i);
-			used=true;
+			residual.addDataPoint(deltaX.at(i),xPred.at(i),deltaY.at(i),yPred.at(i));
 		}//end else if
-
-		//if track can be used (restest<res_keep_factor), add values
-		if(used){
-			residual.sumRx+=deltaX.at(i);
-			residual.sumRy+=deltaY.at(i);
-			residual.sumVx+=yPred.at(i);
-			residual.sumVy+=xPred.at(i);
-			residual.sumV2x+=yPred.at(i)*yPred.at(i);
-			residual.sumV2y+=xPred.at(i)*xPred.at(i);
-			residual.sumVRx+=yPred.at(i)*deltaX.at(i);
-			residual.sumVRy+=xPred.at(i)*deltaY.at(i);
-			residual.nUsedTracks++;
-		}//end if
 	}//end for loop
-	residual.resXMean = residual.resXMean /(Double_t)residual.nUsedTracks;
-	residual.resYMean = residual.resYMean /(Double_t)residual.nUsedTracks;
-	residual.resXSigma = TMath::Sqrt(residual.resXSigma / (Double_t)residual.nUsedTracks - residual.resXMean*residual.resXMean);
-	residual.resYSigma = TMath::Sqrt(residual.resYSigma / (Double_t)residual.nUsedTracks- residual.resYMean*residual.resYMean);
 
-	if(verbosity>0)	cout<<"\n\tused "<<residual.nUsedTracks<<" Tracks"<<endl;
-	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<residual.resXMean<<"+/-"<<residual.resXSigma<<endl;
-	if(verbosity>0)	cout<<"\tY: "<<residual.resYMean<<"+/-"<<residual.resYSigma<<"\n"<<endl;
+	if(verbosity>0)	cout<<"\n\tused "<<residual.getUsedTracks()<<" Tracks"<<endl;
+	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<residual.getXMean()<<"+/-"<<residual.getXSigma()<<endl;
+	if(verbosity>0)	cout<<"\tY: "<<residual.getYMean()<<"+/-"<<residual.getYSigma()<<"\n"<<endl;
 	//set values
 	return residual;
 }

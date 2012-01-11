@@ -38,35 +38,7 @@
 #include "TDetectorAlignment.hh"
 #include "TTrack.hh"
 #include "TPlane.hh"
-
-struct TResidual {
-	Float_t resXMean, resXSigma,resYMean,resYSigma;
-	Float_t sumRx;
-	Float_t sumRy;
-	Float_t sumVx;
-	Float_t sumVy;
-	Float_t sumV2x;
-	Float_t sumV2y;
-	Float_t sumVRx;
-	Float_t sumVRy;
-	UInt_t nUsedTracks;
-
-	void init(){
-		resXMean=0;
-		resXSigma=0;
-		resYMean=0;
-		resYSigma=0;
-		sumRx=0;
-		sumRy=0;
-		sumVx=0;
-		sumVy=0;
-		sumV2x=0;
-		sumV2y=0;
-		sumVRx=0;
-		sumVRy=0;
-		nUsedTracks=0;
-		};
-};
+#include "TResidual.hh"
 
 class TAlignment {
 public:
@@ -112,6 +84,8 @@ private:
     Float_t res_keep_factor;
 	
 	vector<TEvent> events;
+	UInt_t alignmentSteps;
+	Int_t nAlignmentStep;
 private:
 
 	TH2F* hScatterPosition[4];

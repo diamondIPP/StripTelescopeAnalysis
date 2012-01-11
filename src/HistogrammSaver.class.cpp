@@ -57,12 +57,11 @@ TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> 
 	Float_t minY = posY.at(0);
 	for(UInt_t i=0;i<posX.size();i++){
 		if(posX.at(i)>maxX)maxX=posX.at(i);
-		if(posX.at(i)<minX)minX=posX.at(i);
+		else if(posX.at(i)<minX)minX=posX.at(i);
+		if(posY.at(i)>maxY)maxY=posY.at(i);
+		else if(posY.at(i)<minY)minY=posY.at(i);
 	}
-	for(UInt_t i=0;i<posY.size();i++){
-		if(posY.at(i)>maxY)maxY=posX.at(i);
-		else if(posY.at(i)<minY)minY=posX.at(i);
-	}
+	cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
 	Float_t deltaX=maxX-minX;
 	Float_t deltaY=maxY-minY;
 	TH2F histo = TH2F(name.c_str(),name.c_str(),nBins,minX-factor*deltaX,maxX+factor*deltaX,nBins,minY-factor*deltaY,maxY+factor*deltaY);
@@ -94,6 +93,9 @@ TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Floa
 	}
 	Float_t delta = max-min;
 	TH1F histo = TH1F(name.c_str(),name.c_str(),nBins,min-delta*factor,max+delta*factor);
+	for(UInt_t i=0;i<vec.size();i++){
+		histo.Fill(vec.at(i));
+	}
 	return histo;
 }
 

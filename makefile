@@ -40,7 +40,7 @@ LIBFILES		+=	TSettings.class.o TRawEventReader.o  TRawEventSaver.o TPedestalCalc
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o 
 #LIBFILES		+=  TTransparentClustering.o TTransparentAnalysis.o AlignmentClass.o Clustering.class.o 
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o
-LIBFILES		+=  TAlignment.o TClustering.o TTrack.o
+LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 
 PROGS			:= diamondAnalysis
 
