@@ -71,6 +71,10 @@ class TDetectorAlignment{
       void PrintYOffset(UInt_t plane,UInt_t level);
       void PrintZOffset(UInt_t plane,UInt_t level);
 
+      void PrintPhiXOffset(UInt_t plane,UInt_t level);
+      void PrintPhiYOffset(UInt_t plane,UInt_t level);
+
+
       void PrintResults(UInt_t level);
 
       int getVerbosity() const;
@@ -83,7 +87,6 @@ class TDetectorAlignment{
       Double_t det_x_offset[6];
       Double_t det_y_offset[6];
       Double_t det_z_offset[6];
-
       std::vector<Double_t> vecDetXOffset[6];
       std::vector<Double_t> vecDetYOffset[6];
       std::vector<Double_t> vecDetZOffset[6];

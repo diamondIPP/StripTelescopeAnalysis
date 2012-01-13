@@ -61,7 +61,7 @@ TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> 
 		if(posY.at(i)>maxY)maxY=posY.at(i);
 		else if(posY.at(i)<minY)minY=posY.at(i);
 	}
-	cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
+	//cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
 	Float_t deltaX=maxX-minX;
 	Float_t deltaY=maxY-minY;
 	TH2F histo = TH2F(name.c_str(),name.c_str(),nBins,minX-factor*deltaX,maxX+factor*deltaX,nBins,minY-factor*deltaY,maxY+factor*deltaY);
@@ -70,6 +70,21 @@ TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> 
 	histo.GetXaxis()->SetTitle("X-Position");
 	histo.GetYaxis()->SetTitle("Y-Position");
 	return histo;
+}
+
+TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos)
+{
+	if(Delta.size()!=pos.size()||pos.size()==0) {
+		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<Delta.size()<<" "<<pos.size()<<endl;
+		return TGraph();
+	}
+
+	//cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
+	TGraph hGraph = TGraph(Delta.size(),&pos.at(0),&Delta.at(0));
+	hGraph.GetXaxis()->SetName("PredictedPosition");
+	hGraph.GetYaxis()->SetName("Delta");
+	hGraph.SetTitle(name.c_str());
+	return hGraph;
 }
 
 TH2F HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos, UInt_t nBins)
@@ -173,6 +188,11 @@ void HistogrammSaver::SaveHistogram(TH2F* histo) {
    SaveHistogramROOT(histo);
 }
 
+void HistogrammSaver::SaveGraph(TGraph* graph,std::string name,std::string option){
+	SaveGraphPNG(graph,name,option);
+	SaveGraphROOT(graph,name,option);
+}
+
 void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
@@ -215,6 +235,15 @@ void HistogrammSaver::SaveHistogramPNG(TH1F* histo) {
    plots_canvas.Print(plot_filename.str().c_str());
 }
 
+void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
+	   TCanvas plots_canvas("plots_canvas","plots_canvas");
+	   plots_canvas.cd();
+	   graph->Draw(option.c_str());
+	   pt->Draw();
+	   ostringstream plot_filename;
+	   plot_filename << plots_path << name << ".png";
+	   plots_canvas.Print(plot_filename.str().c_str());
+}
 void HistogrammSaver::SaveHistogramFitGaussPNG(TH1F* histo) {
 	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
 	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
@@ -270,6 +299,17 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".root";
    plots_canvas.Print(plot_filename.str().c_str());
+}
+
+void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
+	   TCanvas plots_canvas("plots_canvas","plots_canvas");
+	   plots_canvas.cd();
+	   graph->Draw(option.c_str());
+	   pt->Draw();
+	   ostringstream plot_filename;
+	   plot_filename << plots_path << name<< ".root";
+	   plots_canvas.Print(plot_filename.str().c_str());
+
 }
 
 void HistogrammSaver::SetVerbosity(unsigned int i)

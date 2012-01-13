@@ -211,7 +211,7 @@ int main(int argc, char ** argv) {
 		alignment= new TAlignment(settings);
 		alignment->setSettings(settings);
 		alignment->PrintEvents(1511,1501);
-		alignment->Align();
+		alignment->Align(10000);
 		delete alignment;
 
 //

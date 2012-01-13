@@ -23,10 +23,19 @@
 #include <ctime> // seed the random number generator
 #include <cstdlib> // random number generator
 #include <sstream>
-
+/** Residual Calculation Class
+ *
+ * This class is used to calculated the values to correct the current Alignment
+ * With adding datapoint the residual will be updated
+ * The current correction results can be read out all the time
+ * @author Felix Bachmair
+ * @date	12.1.2012	last update
+ * @date	10.1.2012	creation
+ *
+ */
 class TResidual {
 public:
-	TResidual();
+	TResidual(bool bTest=false);
 	virtual ~TResidual();
 	void Print(UInt_t level=0);
 	void addDataPoint(Float_t deltaX,Float_t predX,Float_t deltaY,Float_t predY);
@@ -34,15 +43,34 @@ public:
 	Float_t getYMean();
 	Float_t getXSigma();
 	Float_t getYSigma();
+
+	Float_t getDeltaXMean();
+	Float_t getDeltaYMean();
+
+	Float_t getPredXMean();
+	Float_t getPredYMean();
+
 	UInt_t getUsedTracks(){return nUsedTracks;}
 
 	Float_t getXOffset();
 	Float_t getYOffset();
 
+//
+//	Float_t getLinRegOffsetX();
+//	Float_t getLinRegOffsetY();
+//	Float_t getLinRegSlopeX();
+//	Float_t getLinRegSlopeY();
+
+
 	Float_t getPhiXOffset();
 	Float_t getPhiYOffset();
 	void SetTestResidual(bool value=true){bTestResidual=value;}
+
 private:
+	std::vector<Float_t> vecDeltaX;
+	std::vector<Float_t> vecPredX;
+	std::vector<Float_t> vecDeltaY;
+	std::vector<Float_t> vecPredY;
 	Float_t resXMean, resXSigma,resYMean,resYSigma;
 	Float_t sumRx;
 	Float_t sumRy;
@@ -53,7 +81,6 @@ private:
 	Float_t sumVRx;
 	Float_t sumVRy;
 	UInt_t nUsedTracks;
-
 	bool bTestResidual;
 };
 

@@ -40,11 +40,27 @@
 #include "TPlane.hh"
 #include "TResidual.hh"
 
+
+/**
+ * @brief alignment of all subdetectors
+ *
+ * @author Felix Bachmair
+ * @date 12.1.2012 15:30		Last Change - Felix Bachmair
+ *
+ * Alignment of all stripe detectors
+ * main function is Align()
+ * it creates first a vector of events to make the whole alignment faster
+ * afterwards it calculates the residuals before alignment
+ * last step alignment of the planes.
+ *
+ * @bug The alignment of the y Coordinate is not working 100%
+ *
+ */
 class TAlignment {
 public:
 	TAlignment(TSettings* settings);
 	virtual ~TAlignment();
-	int Align();
+	int Align(UInt_t nEvents=0,UInt_t startEvent=0);
 	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
@@ -52,9 +68,9 @@ private:
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
-	void AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false);
-	void CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=true);
-	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false);
+	TResidual AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false,TResidual res=TResidual(true));
+	TResidual CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=true,TResidual  res=TResidual(true));
+	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true));
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY);
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY,TResidual res);
 	TADCEventReader* eventReader;
@@ -82,8 +98,11 @@ private:
     Float_t res_keep_factor;
 	
 	vector<TEvent> events;
-	UInt_t alignmentSteps;
+	Int_t alignmentSteps;
 	Int_t nAlignmentStep;
+
+private:
+	std::vector<TResidual> vecRes103;
 };
 
 #endif /* TALIGNMENT_HH_ */
