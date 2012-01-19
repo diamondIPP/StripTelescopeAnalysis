@@ -24,6 +24,7 @@
 #include "TImage.h"
 #include "TObjArray.h"
 #include "TROOT.h"
+#include "TMath.h"
 #include "TSystem.h"
 #include "TF1.h"
 #include <sys/dir.h>
@@ -32,6 +33,9 @@
 
 class HistogrammSaver {
 public:
+	enum EnumAxisRange{
+		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
+	};
 	HistogrammSaver(int verbosity=0);
 	virtual ~HistogrammSaver();
     void SaveHistogram(TH1F* histo, bool fitGauss = 0);
@@ -53,11 +57,12 @@ public:
     std::string GetPlotsPath(){return plots_path;}
     void SetStyle(TStyle newStyle);
     void SetDuckStyle();
+    void SetRange(Float_t min,Float_t max);
 
     static TH2F CreateScatterHisto(std::string name,std::vector<Float_t> posX, std::vector<Float_t> posY,UInt_t nBins=4096);
     static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos);
     static TH2F CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=4096);
-    static TH1F CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096);
+    static TH1F CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096,EnumAxisRange range=maxWidth);
     static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
     static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
     static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
@@ -71,6 +76,7 @@ private:
     void UpdatePaveText();
     TStyle *currentStyle;
     TSystem *sys;
+    TFile* histoFile;
 };
 
 #endif /* HISTOGRAMMSAVER_CLASS_HH_ */

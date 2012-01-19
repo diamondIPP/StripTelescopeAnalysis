@@ -7,6 +7,7 @@
 
 #include "TDetectorAlignment.hh"
 using namespace std;
+ClassImp(TDetectorAlignment);
 /*
  *   XY		 YX					   XY		YX
  *   ||      ||				       ||       ||
@@ -21,6 +22,8 @@ using namespace std;
  */
 
 TDetectorAlignment::TDetectorAlignment(){
+	this->SetName("currentAlignment");
+	this->SetTitle("currentAlignment");
 	verbosity=0;
    nDetectors = 5;
 
@@ -30,6 +33,8 @@ TDetectorAlignment::TDetectorAlignment(){
       det_z_offset[i] = 0;
       det_phix_offset[i] = 0;
       det_phiy_offset[i] = 0;
+      xResolution[i]=0.3;
+      yResolution[i]=0.3;
    }
 }
 
@@ -151,16 +156,42 @@ void TDetectorAlignment::PrintResults(UInt_t level)
 {
 	cout<<"Alignment Results"<<endl;
 	for(UInt_t plane=1;plane<this->nDetectors;plane++){
-		cout<<TCluster::Intent(level)<<"Plane "<<plane<<endl;
-		PrintXOffset(plane,level+1);
-		PrintYOffset(plane,level+1);
-		PrintZOffset(plane,level+1);
+		cout<<TCluster::Intent(level+1)<<" Plane "<< plane<<endl;
+		PrintXOffset(plane,level+2);
+		PrintYOffset(plane,level+2);
+		PrintZOffset(plane,level+2);
+//		cout<<endl;
+		PrintPhiXOffset(plane,level+2);
+		PrintPhiYOffset(plane,level+2);
 		cout<<endl;
-		PrintPhiXOffset(plane,level+1);
-		PrintPhiYOffset(plane,level+1);
 	}
 }
 
+Double_t TDetectorAlignment::getXResolution(UInt_t plane)
+{
+	if(plane<6)
+    return xResolution[plane];
+}
+
+void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
+{
+	printf("Set X-Resolution of Plane %d to %2.6",plane,xres);
+	if(plane<6)
+    xResolution[plane] = xres;
+}
+
+Double_t TDetectorAlignment::getYResolution(UInt_t plane)
+{
+	if(plane<6)
+    return yResolution[plane];
+}
+
+void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)
+{
+	printf("Set Y-Resolution of Plane %d to %2.6",plane,resolution);
+	if(plane<6)
+		yResolution[plane] = resolution;
+}
 
 void TDetectorAlignment::setVerbosity(int verbosity)
 {

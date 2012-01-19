@@ -12,6 +12,18 @@ using namespace std;
  * initialise all the variables
  */
 TResidual::TResidual(bool bTest){
+	this->resetResidual();
+	this->SetTestResidual(bTest);
+}
+
+/** aut-generated destructor
+ * up to now it is making nothig
+ */
+TResidual::~TResidual() {
+	// TODO Auto-generated destructor stub
+}
+
+void TResidual::resetResidual(){
 	resXMean=0;
 	resXSigma=0;
 	resYMean=0;
@@ -25,14 +37,6 @@ TResidual::TResidual(bool bTest){
 	sumVRx=0;
 	sumVRy=0;
 	nUsedTracks=0;
-	this->SetTestResidual(bTest);
-}
-
-/** aut-generated destructor
- * up to now it is making nothig
- */
-TResidual::~TResidual() {
-	// TODO Auto-generated destructor stub
 }
 
 /** Prints the results of the ResidualCalulation
@@ -40,12 +44,16 @@ TResidual::~TResidual() {
  * @param level how far to intent the output
  */
 void TResidual::Print(UInt_t level){
+
 	cout<<"\n\n";
-	cout<<TCluster::Intent(level)<<"residual results of "<<nUsedTracks<<" used Tracks"<<endl;
-	cout<<TCluster::Intent(level)<<"\tX: "<<getXMean()<<"+/-"<<getXSigma()<<"\t"<<sumRx<<" "<<sumVx<<" "<<sumV2x<<" "<<sumVRx<<endl;
-	cout<<TCluster::Intent(level)<<"\tY: "<<getYMean()<<"+/-"<<getYSigma()<<"\t"<<sumRy<<" "<<sumVy<<" "<<sumV2y<<" "<<sumVRy<<endl;
-	cout<<TCluster::Intent(level)<<"\t Xoff: "<<getXOffset()<<"\tPhiXoff: "<<getPhiXOffset()<<endl;
-	cout<<TCluster::Intent(level)<<"\t Yoff: "<<getYOffset()<<"\tPhiYoff: "<<getPhiYOffset()<<endl;
+	if(isTestResidual()){cout<<TCluster::Intent(level)<<"residual is a testresidual"<<endl;}
+	else{
+		cout<<TCluster::Intent(level)<<"residual results of "<<nUsedTracks<<" used Tracks"<<endl;
+		cout<<TCluster::Intent(level)<<"\tX: "<<getXMean()<<"+/-"<<getXSigma()<<"\t"<<sumRx<<" "<<sumVx<<" "<<sumV2x<<" "<<sumVRx<<endl;
+		cout<<TCluster::Intent(level)<<"\tY: "<<getYMean()<<"+/-"<<getYSigma()<<"\t"<<sumRy<<" "<<sumVy<<" "<<sumV2y<<" "<<sumVRy<<endl;
+		cout<<TCluster::Intent(level)<<"\t Xoff: "<<getXOffset()<<"\tPhiXoff: "<<getPhiXOffset()<<endl;
+		cout<<TCluster::Intent(level)<<"\t Yoff: "<<getYOffset()<<"\tPhiYoff: "<<getPhiYOffset()<<endl;
+	}
 	cout<<"\n\n\n"<<endl;
 }
 
@@ -58,10 +66,6 @@ void TResidual::Print(UInt_t level){
  */
 void TResidual::addDataPoint(Float_t deltaX, Float_t predX, Float_t deltaY, Float_t predY)
 {
-	vecDeltaX.push_back(deltaX);
-	vecDeltaY.push_back(deltaY);
-	vecPredX.push_back(predX);
-	vecPredY.push_back(predY);
 	this->resYMean += deltaY;
 	this->resYSigma += deltaY*deltaY;
 	this->resXMean += deltaX;

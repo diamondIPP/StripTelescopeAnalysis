@@ -8,6 +8,7 @@
 #pragma link off all functions;
 #pragma link C++ class deque<bool>+;
 #pragma link C++ class vector<bool>+;
+#pragma link C++ class vector<Double_t>+;
 #pragma link C++ class pair< unsigned short, float>+;
 #pragma link C++ class pair< UShort_t, Float_t>+;
 #pragma link C++ class pair< int, Float_t>+;
@@ -21,4 +22,5 @@
 #pragma link C++ class TPlane+;
 #pragma link C++ class vector<TPlane>+;
 #pragma link C++ class TEvent+;
+#pragma link C++ class TDetectorAlignment+;
 #endif

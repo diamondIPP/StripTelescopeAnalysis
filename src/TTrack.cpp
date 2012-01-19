@@ -17,10 +17,19 @@ TTrack::TTrack(TDetectorAlignment *alignment) {
 	verbosity=0;
 	this->alignment = alignment;
 	event=NULL;
+
+	linFitX = new TLinearFitter(1,"pol1","D");
+	linFitY= new TLinearFitter(1,"pol1","D");
+	linFitX->StoreData(true);
+	linFitY->StoreData(true);
+
+	linFitX->SetFormula("pol1");
+	linFitY->SetFormula("pol1");
 }
 
 TTrack::~TTrack() {
-	
+	delete linFitX;
+	delete linFitY;
 }
 
 
@@ -101,47 +110,39 @@ Float_t TTrack::getZPosition(UInt_t plane){
 
 
 
-TPositionPrediction TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes)
+TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bPrint)
 {
+	linFitX->ClearPoints();
+	linFitY->ClearPoints();
 	if(event==NULL){
 		cerr<<"TTrack:predictPosition no ReferencePlanes are defined..."<<endl;
-		TPositionPrediction prediction;
+		TPositionPrediction* prediction=0;
 		return prediction;
 	}
 	if(vecRefPlanes.size()==0){
 		cerr<<"TTrack:predictPosition no ReferencePlanes are defined..."<<endl;
-		TPositionPrediction prediction;
+		TPositionPrediction *prediction=0;
 		return prediction;
 	}
 	if(vecRefPlanes.size()==1){
 		if(verbosity>3)	cout<<"TTrack::predictPosition with 1 refPlane"<<endl;
-		TPositionPrediction prediction(getXPosition(vecRefPlanes.at(0)), 0.,0.,getYPosition(vecRefPlanes.at(0)),0.,0.);
+		TPositionPrediction *prediction=new TPositionPrediction(getXPosition(vecRefPlanes.at(0)), 0.,0.,getYPosition(vecRefPlanes.at(0)),0.,0.);
 		return prediction;
 	}
-	TLinearFitter* linFitX = new TLinearFitter(1,"pol1","D");
-new TLinearFitter((Int_t)1,"pol1","D");//todo:????
-	TLinearFitter* linFitY= new TLinearFitter(1,"pol1");
-	vector<Double_t>vecXPos;
-	vector<Double_t>vecYPos;
-	vector<Double_t>vecZPos;
-	vector<Double_t> vecZSigma;
 	vector<Double_t> zPosVec;//todo add xsigma ysigma
+	if(bPrint)cout<<"Prediction of Track in Plane "<<subjectPlane<<"with "<<vecRefPlanes.size()<<" Planes:"<<endl;
 	for(UInt_t pl=0;pl<vecRefPlanes.size();pl++){
 		UInt_t plane=vecRefPlanes.at(pl);
-		vecXPos.push_back(getXPosition(plane));
-		vecYPos.push_back(getYPosition(plane));
-		vecZPos.push_back(getZPosition(plane));
-		vecZSigma.push_back(0.0);//todo correct value...
 		zPosVec.clear();
 		zPosVec.push_back(alignment->GetZOffset(plane));
-		linFitX->AddPoint(&zPosVec.at(0),(Double_t)getXPosition(plane),0.001);
-		linFitY->AddPoint(&zPosVec.at(0),(Double_t)getYPosition(plane),0.001);
-		if(verbosity>3)	cout<<"Add "<<getXPosition(plane)<<"/"<<getYPosition(plane)<<"/"<<getZPosition(plane)<<endl;
+		linFitX->AddPoint(&zPosVec.at(0),(Double_t)getXPosition(plane),this->alignment->getXResolution(plane));//todo anpassen des SIGMA
+		linFitY->AddPoint(&zPosVec.at(0),(Double_t)getYPosition(plane),this->alignment->getYResolution(plane));//todo anpassen des sigma 0.001
+		if(verbosity>3||bPrint)	cout<<"\tAdd in Plane "<<plane<<"  "<<getXPosition(plane)<<"+/-"<<alignment->getXResolution(plane)<<"/"<<getYPosition(plane)<<"+/-"<<alignment->getYResolution(plane)<<"/"<<getZPosition(plane)<<endl;
 	}
-//	linFitX->AssignData(vecXPos.size(),1,&vecZPos.at(0),&vecXPos.at(0),&vecZPos.at(0));
-//	linFitY->AssignData(vecYPos.size(),1,&vecZPos.at(0),&vecYPos.at(0),&vecZPos.at(0));
-	linFitX->Eval();
-	linFitY->Eval();
+	int fitOKX=linFitX->Eval();
+	int FitOKY=linFitY->Eval();
+	linFitX->Chisquare();
+	linFitY->Chisquare();
 	Float_t zPos = alignment->GetZOffset(subjectPlane);
 	Float_t zSigma = 0; //todo
 	Float_t mx = linFitX->GetParameter(1);
@@ -160,9 +161,10 @@ new TLinearFitter((Int_t)1,"pol1","D");//todo:????
 	xSigma = TMath::Sqrt(xSigma);
 	Float_t ySigma = (zPos*sigma_my)*(zPos*sigma_my)+(my*zSigma)*(my*zSigma)+(sigma_by*sigma_by);
 	ySigma = TMath::Sqrt(ySigma);
-	TPositionPrediction prediction(xPos,xSigma,xChi2,yPos,ySigma,yChi2);
-	if(verbosity>3)	cout<<mx<<"+/-"<<sigma_mx<<"    "<<bx<<"+/-"<<sigma_bx<<endl;
-	if(verbosity>3)	cout<<my<<"+/-"<<sigma_my<<"    "<<by<<"+/-"<<sigma_by<<endl;
+	TPositionPrediction* prediction=new TPositionPrediction(xPos,xSigma,xChi2,yPos,ySigma,yChi2);
+	if(verbosity>3||bPrint)	cout<<"  Predition of Plane "<<subjectPlane<<" with "<<"Planes: ZPosition: "<<zPos<<endl;
+	if(verbosity>3||bPrint)	cout<<"\tX: "<<xPos<<" +/- "<<xSigma<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
+	if(verbosity>3||bPrint)	cout<<"\tY: "<<yPos<<" +/- "<<ySigma<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
 	return prediction;
 }
 
@@ -191,5 +193,12 @@ void TTrack::setDetectorAlignment(TDetectorAlignment *alignment)
 		delete this->alignment;
 	this->alignment=alignment;
 }
+
+UInt_t TTrack::getVerbosity() const
+{
+    return verbosity;
+}
+
+
 
 

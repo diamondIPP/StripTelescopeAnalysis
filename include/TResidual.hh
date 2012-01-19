@@ -39,6 +39,7 @@ public:
 	virtual ~TResidual();
 	void Print(UInt_t level=0);
 	void addDataPoint(Float_t deltaX,Float_t predX,Float_t deltaY,Float_t predY);
+	void resetResidual();
 	Float_t getXMean();
 	Float_t getYMean();
 	Float_t getXSigma();
@@ -65,12 +66,9 @@ public:
 	Float_t getPhiXOffset();
 	Float_t getPhiYOffset();
 	void SetTestResidual(bool value=true){bTestResidual=value;}
+	bool isTestResidual(){return bTestResidual;}
 
 private:
-	std::vector<Float_t> vecDeltaX;
-	std::vector<Float_t> vecPredX;
-	std::vector<Float_t> vecDeltaY;
-	std::vector<Float_t> vecPredY;
 	Float_t resXMean, resXSigma,resYMean,resYSigma;
 	Float_t sumRx;
 	Float_t sumRy;

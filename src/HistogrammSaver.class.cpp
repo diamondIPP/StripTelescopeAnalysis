@@ -39,6 +39,9 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 }
 
 HistogrammSaver::~HistogrammSaver() {
+	sys->mkdir("root-Files");
+	sys->Exec("mv -v *.root root-Files");
+
 	this->pt->Delete();
 	currentStyle->Delete();
 	sys->Delete();
@@ -95,19 +98,65 @@ TH2F HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_
 	return histo;
 }
 
-TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins)
+void HistogrammSaver::SetRange(Float_t min,Float_t max){
+
+}
+
+TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(vec.size()==0)
 		return TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
 	Float_t max = vec.at(0);
 	Float_t min = vec.at(0);
-	for(UInt_t i=0;i<vec.size();i++){
-		if (max<vec.at(i))max=vec.at(i);
-		if (min>vec.at(i))min=vec.at(i);
+	if (range==maxWidth){
+		for(UInt_t i=0;i<vec.size();i++){
+			if (max<vec.at(i))max=vec.at(i);
+			if (min>vec.at(i))min=vec.at(i);
+		}
+		Float_t delta = max-min;
+		min =min-delta*factor;
+		max=max+delta*factor;
 	}
-	Float_t delta = max-min;
-	TH1F histo = TH1F(name.c_str(),name.c_str(),nBins,min-delta*factor,max+delta*factor);
+	else if(range==fiveSigma||range==threeSigma){
+		Float_t mean=0;
+		Float_t sigma=0;
+		for(UInt_t i=0;i<vec.size();i++){
+			mean+=vec.at(i);
+			sigma+=vec.at(i)*vec.at(i);
+		}
+		mean/=(Float_t)vec.size();
+		sigma/=(Float_t)vec.size();
+		sigma = sigma -mean*mean;
+		sigma=TMath::Sqrt((Double_t)sigma);
+		UInt_t nSigma = (range==fiveSigma)? 5:3;
+		max=mean+nSigma*sigma;
+		min=mean-nSigma*sigma;
+	}
+	else if(range==positiveArea){
+		min=0;
+		for(UInt_t i=0;i<vec.size();i++)
+				if (max<vec.at(i))max=vec.at(i);
+		max*=(1+factor);
+	}
+	else if(range==positiveSigma){
+			min=0;
+			Float_t mean=0;
+			Float_t sigma=0;
+			for(UInt_t i=0;i<vec.size();i++){
+				mean+=vec.at(i);
+				sigma+=vec.at(i)*vec.at(i);
+			}
+			mean/=(Float_t)vec.size();
+			sigma/=(Float_t)vec.size();
+			sigma = sigma -mean*mean;
+			sigma=TMath::Sqrt(sigma);
+			UInt_t nSigma = 3;
+			max=mean+nSigma*sigma;
+		}
+
+
+	TH1F histo = TH1F(name.c_str(),name.c_str(),nBins,min,max);
 	for(UInt_t i=0;i<vec.size();i++){
 		histo.Fill(vec.at(i));
 	}

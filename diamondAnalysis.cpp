@@ -7,8 +7,8 @@
 
 //#include "TROOT.h"
 //#include "Clustering.class.cpp"
-#include "SlidingPedestal.class.hh"
-#include "Clustering.class.hh"
+//#include "SlidingPedestal.class.hh"
+//#include "Clustering.class.hh"
 #include "TRawEventSaver.hh"
 #include "TPedestalCalculation.hh"
 #include "TAnalysisOfClustering.hh"
@@ -201,17 +201,23 @@ int main(int argc, char ** argv) {
 		process_mem_usage(vm2, rss2);
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
-		TSelectionClass* selectionClass;
-		selectionClass=new TSelectionClass(settings);
-		selectionClass->MakeSelection(NEVENTS);
-		delete selectionClass;
+//		TSelectionClass* selectionClass;
+//		selectionClass=new TSelectionClass(settings);
+//		selectionClass->MakeSelection(NEVENTS);
+//		delete selectionClass;
 
 
 		TAlignment *alignment;
 		alignment= new TAlignment(settings);
 		alignment->setSettings(settings);
-		alignment->PrintEvents(1511,1501);
-		alignment->Align(10000);
+		//alignment->PrintEvents(1511,1501);
+		process_mem_usage(vm2, rss2);
+		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+
+		//alignment->createEventVectors(1000);
+		process_mem_usage(vm2, rss2);
+		cout << "\nMemory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+		alignment->Align(1000);
 		delete alignment;
 
 //

@@ -16,8 +16,10 @@ INCLUDEDIR      := include
 OBJDIR			:= obj
 LIBDIR			:= ~/lib
 
+
+OPTIMAZATIONFLAG :=	-O0 -g
 CFLAGS  		:= -g -Wall -I$(INCLUDEDIR) -D_REENTRANT 
-CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC
+CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
 
 
 OBJ 			:= diamondAnalysis.cpp
@@ -29,9 +31,9 @@ HEAD    		:=
 
 LD              := g++
 
-LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64
+LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
-LIBFILES		:=	HistogrammSaver.class.o ChannelScreen.o TDetectorPlane.o TDiamondTrack.o TDetectorAlignment.o 
+LIBFILES		:=	HistogrammSaver.class.o ChannelScreen.o TDetectorPlane.o TDiamondTrack.o 
 LIBFILES		+=	libTEvent.so
 LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o SlidingPedestal.class.o PSDetector.class.o PSEvent.class.o
@@ -42,6 +44,8 @@ LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 
+
+ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o 
 PROGS			:= diamondAnalysis
 
 
@@ -65,7 +69,7 @@ $(PROGS):
 		@echo  "\n\nPlease do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib"
 
 
-libTEvent.so: TEventDict.o TEvent.o  TPlane.o  TCluster.o	
+libTEvent.so: $(ROOTLIBFILES)	
 		#
 		# Creating Shared ROOT Lib
 		#
@@ -82,7 +86,7 @@ TEventDict.cpp: $(INCLUDEDIR)/TEvent.hh $(INCLUDEDIR)/TEventLinkDef.h
 		# compiling $@
 		#
 		#echo $(ROOTCINT) -v $(CFLAGS) -f TClusterDict.cpp -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/LinkDef.h
-		$(ROOTCINT) -v  -f TEventDict.cpp  -c -p -I$(INCLUDEDIR) TCluster.hh TPlane.hh TEvent.hh TEventLinkDef.h
+		$(ROOTCINT) -v  -f TEventDict.cpp  -c -p -I$(INCLUDEDIR) TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TEventLinkDef.h
 
 TEventDict.o: TEventDict.cpp
 		#

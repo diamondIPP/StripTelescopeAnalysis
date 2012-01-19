@@ -65,22 +65,22 @@ public:
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 private:
+	void saveAlignment();
+	void getChi2Distribution();
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	TResidual AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false,TResidual res=TResidual(true));
 	TResidual CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=true,TResidual  res=TResidual(true));
 	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true));
-	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY);
-	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>xPred,vector<Float_t> deltaX,vector<Float_t> yPred,vector<Float_t> deltaY,TResidual res);
+	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY);
+	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
+
+	TResidual calculateResidualWithChi2(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool plot=false);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
     TRandom rand;
-    vector<TDiamondTrack> tracks;
-    vector<bool> tracks_masked;
-    vector<TDiamondTrack> tracks_fidcut;
-    vector<bool> tracks_masked_fidcut;
     UInt_t nEvent;
     Float_t alignmentPercentage;
     UInt_t runNumber;
@@ -98,11 +98,17 @@ private:
     Float_t res_keep_factor;
 	
 	vector<TEvent> events;
-	Int_t alignmentSteps;
 	Int_t nAlignmentStep;
 
 private:
 	std::vector<TResidual> vecRes103;
+	vector<Float_t> vecXPred;
+	vector<Float_t> vecYPred;
+	vector<Float_t> vecXObs;
+	vector<Float_t> vecYObs;
+	vector<Float_t> vecDeltaX;
+	vector<Float_t> vecDeltaY;
+
 };
 
 #endif /* TALIGNMENT_HH_ */

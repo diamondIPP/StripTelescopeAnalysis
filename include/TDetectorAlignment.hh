@@ -18,26 +18,27 @@
 #include <ctime> // seed the random number generator
 #include <cstdlib> // random number generator
 #include <sstream>
-
-#include "TRandom3.h"
-#include "TMath.h"
-#include "TF1.h"
-#include "TGraph.h"
-#include "TCanvas.h"
-#include "TH1F.h"
+//
+//#include "TRandom3.h"
+//#include "TMath.h"
+//#include "TF1.h"
+//#include "TGraph.h"
+//#include "TCanvas.h"
+//#include "TH1F.h"
 #include "TROOT.h"
-#include "TApplication.h"
-#include "TSystem.h"
-#include "TH2F.h"
-#include "TFile.h"
-#include "TStyle.h"
-
-#include "TDiamondTrack.hh"
-#include "TDetectorPlane.hh"
+#include "TNamed.h"
+//#include "TApplication.h"
+//#include "TSystem.h"
+//#include "TH2F.h"
+//#include "TFile.h"
+//#include "TStyle.h"
+//
+//#include "TDiamondTrack.hh"
+//#include "TDetectorPlane.hh"
 #include "TCluster.hh"
 
 
-class TDetectorAlignment{
+class TDetectorAlignment:public TNamed{
 
    public:
 	TDetectorAlignment();
@@ -79,28 +80,30 @@ class TDetectorAlignment{
 
       int getVerbosity() const;
       void setVerbosity(int verbosity);
+      Double_t getXResolution(UInt_t plane);
+      void setXResolution(Double_t xRes,UInt_t plane);
+
+      Double_t getYResolution(UInt_t plane);
+      void setYResolution(Double_t yRes,UInt_t plane);
 
 
-   private:
-
-      //store global offsets here
-      Double_t det_x_offset[6];
-      Double_t det_y_offset[6];
-      Double_t det_z_offset[6];
-      std::vector<Double_t> vecDetXOffset[6];
-      std::vector<Double_t> vecDetYOffset[6];
-      std::vector<Double_t> vecDetZOffset[6];
-
-      Double_t det_phix_offset[6];
-      Double_t det_phiy_offset[6];
-
-      std::vector<Double_t> vecDetPhiXOffset[6];
-      std::vector<Double_t> vecDetPhiYOffset[6];
-
-      UInt_t nDetectors;
-   private:
-      int verbosity;
-
-
+   public:
+    Double_t xResolution[6];
+    Double_t yResolution[6];
+    //store global offsets here
+    Double_t det_x_offset[6];
+    Double_t det_y_offset[6];
+    Double_t det_z_offset[6];
+    std::vector<Double_t> vecDetXOffset[6];
+    std::vector<Double_t> vecDetYOffset[6];
+    std::vector<Double_t> vecDetZOffset[6];
+    Double_t det_phix_offset[6];
+    Double_t det_phiy_offset[6];
+    std::vector<Double_t> vecDetPhiXOffset[6];
+    std::vector<Double_t> vecDetPhiYOffset[6];
+    UInt_t nDetectors;
+public:
+    int verbosity;
+    ClassDef(TDetectorAlignment,1);
 };
 #endif /* TDETECTORALIGNMENT_HH_ */
