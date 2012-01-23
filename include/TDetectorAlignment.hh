@@ -75,8 +75,10 @@ class TDetectorAlignment:public TNamed{
       void PrintPhiXOffset(UInt_t plane,UInt_t level);
       void PrintPhiYOffset(UInt_t plane,UInt_t level);
 
+      void PrintResolution(UInt_t plane,UInt_t level);
 
-      void PrintResults(UInt_t level);
+
+      void PrintResults(UInt_t level=0);
 
       int getVerbosity() const;
       void setVerbosity(int verbosity);

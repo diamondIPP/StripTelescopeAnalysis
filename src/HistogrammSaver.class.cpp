@@ -47,7 +47,7 @@ HistogrammSaver::~HistogrammSaver() {
 	sys->Delete();
 }
 
-TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, UInt_t nBins)
+TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(posX.size()!=posY.size()||posX.size()==0) {

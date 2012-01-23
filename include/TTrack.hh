@@ -60,6 +60,8 @@ public:
 	Float_t getXPosition(UInt_t plane);
 	Float_t getYPosition(UInt_t plane);
 	Float_t getZPosition(UInt_t plane);
+	Float_t getXDelta(UInt_t plane);
+	Float_t getYDelta(UInt_t plane);
 	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPrint=false);
 	vector<Float_t> getSiXPositions();
 	vector<Float_t> getSiYPositions();
@@ -97,6 +99,7 @@ private:
     ;
     TEvent *event;
     TDetectorAlignment *alignment;
+    TPositionPrediction* predictedPosition;
     UInt_t verbosity;
     TLinearFitter *linFitX;
     TLinearFitter *linFitY;

@@ -128,5 +128,6 @@ void TRawEventSaver::showStatusBar(int nEvent,int nEvents,int updateIntervall,bo
 			else cout<<"_";
 		cout<<" "<<flush;
 	}
+	if(nEvent+1==nEvent)cout<<endl;
 }
 

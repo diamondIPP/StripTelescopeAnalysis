@@ -162,7 +162,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t ySigma = (zPos*sigma_my)*(zPos*sigma_my)+(my*zSigma)*(my*zSigma)+(sigma_by*sigma_by);
 	ySigma = TMath::Sqrt(ySigma);
 	TPositionPrediction* prediction=new TPositionPrediction(xPos,xSigma,xChi2,yPos,ySigma,yChi2);
-	if(verbosity>3||bPrint)	cout<<"  Predition of Plane "<<subjectPlane<<" with "<<"Planes: ZPosition: "<<zPos<<endl;
+	if(verbosity>3||bPrint)	cout<<"\n  Predition of Plane "<<subjectPlane<<" with "<<"Planes: ZPosition: "<<zPos<<endl;
 	if(verbosity>3||bPrint)	cout<<"\tX: "<<xPos<<" +/- "<<xSigma<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
 	if(verbosity>3||bPrint)	cout<<"\tY: "<<yPos<<" +/- "<<ySigma<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
 	return prediction;

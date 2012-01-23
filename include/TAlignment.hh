@@ -66,17 +66,23 @@ public:
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 private:
 	void saveAlignment();
-	void getChi2Distribution();
+	void getChi2Distribution(Float_t maxChi2=1000);
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
+	void getFinalAlignmentResuluts();
+	void setDetectorResolution(Float_t maxChi2);
+	void CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,string refPlaneString,bool bPlot=true, bool bUpdateAlignment=false);
 	TResidual AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false,TResidual res=TResidual(true));
 	TResidual CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=true,TResidual  res=TResidual(true));
+	TResidual CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
 	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true));
+	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool plot=false,TResidual res=TResidual(true));
+
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY);
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
 
-	TResidual calculateResidualWithChi2(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool plot=false);
+	TResidual calculateResidualWithChi2(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool bAlign=false,bool plot=false);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
@@ -108,6 +114,8 @@ private:
 	vector<Float_t> vecYObs;
 	vector<Float_t> vecDeltaX;
 	vector<Float_t> vecDeltaY;
+	vector<Float_t> vecXChi2;
+	vector<Float_t> vecYChi2;
 
 };
 

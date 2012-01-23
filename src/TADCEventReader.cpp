@@ -145,15 +145,7 @@ void TADCEventReader::initialiseTree(){
 }
 
 bool TADCEventReader::GetNextEvent(){
-	if(tree==NULL) return true;
-	if(current_event+1<tree->GetEntries()){
-		current_event++;
-		tree->GetEvent(current_event);
-		if(verbosity>=2)
-			cout<<"Got next Event, new event number: "<<current_event<<endl;
-		return true;
-	}
-	return false;
+	return LoadEvent(current_event+1);
 }
 bool TADCEventReader::LoadEvent(UInt_t EventNumber){
 	if(tree==NULL) return false;
