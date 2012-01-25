@@ -53,7 +53,6 @@
  * afterwards it calculates the residuals before alignment
  * last step alignment of the planes.
  *
- * @bug The alignment of the y Coordinate is not working 100%
  *
  */
 class TAlignment {
@@ -65,19 +64,27 @@ public:
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 private:
+	void AlignSiliconPlanes();
+	void AlignDiamondPlane();
 	void saveAlignment();
 	void getChi2Distribution(Float_t maxChi2=1000);
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
-	void getFinalAlignmentResuluts();
-	void setDetectorResolution(Float_t maxChi2);
+	void getFinalSiliconAlignmentResuluts();
+	void setSiliconDetectorResolution(Float_t maxChi2);
 	void CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,string refPlaneString,bool bPlot=true, bool bUpdateAlignment=false);
+	TResidual AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t>vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
 	TResidual AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false,TResidual res=TResidual(true));
+	TResidual AlignStripDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t>vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
+
 	TResidual CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=true,TResidual  res=TResidual(true));
 	TResidual CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
+	TResidual CheckStripDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
+
 	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true));
 	TResidual getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool plot=false,TResidual res=TResidual(true));
+	TResidual getStripResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool plot=false,TResidual res=TResidual(true));
 
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY);
 	TResidual calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
@@ -99,13 +106,15 @@ private:
     Double_t detectorD3Z; // by definition
     Double_t detectorDiaZ; // by definition
     int verbosity;
-    int nAlignSteps;
     TTrack* myTrack;
     Float_t res_keep_factor;
 	
 	vector<TEvent> events;
 	Int_t nAlignmentStep;
+    Int_t nAlignSteps;
 
+    Int_t nDiaAlignmentStep;
+    Int_t nDiaAlignSteps;
 private:
 	std::vector<TResidual> vecRes103;
 	vector<Float_t> vecXPred;

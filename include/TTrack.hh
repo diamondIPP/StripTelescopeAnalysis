@@ -56,12 +56,14 @@ public:
 	UInt_t getNClusters(int det);
 //	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
 	void setEvent(TEvent *newEvent){this->event = newEvent;};
+	Float_t getStripXPosition(UInt_t plane,Float_t yPred);
 	Float_t getPosition(TPlane::enumCoordinate cor,UInt_t plane);
 	Float_t getXPosition(UInt_t plane);
 	Float_t getYPosition(UInt_t plane);
 	Float_t getZPosition(UInt_t plane);
-	Float_t getXDelta(UInt_t plane);
-	Float_t getYDelta(UInt_t plane);
+	Float_t getXMeasured(UInt_t plane);
+	Float_t getYMeasured(UInt_t plane);
+	Float_t getMeasured(TPlane::enumCoordinate cor,UInt_t plane);
 	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPrint=false);
 	vector<Float_t> getSiXPositions();
 	vector<Float_t> getSiYPositions();

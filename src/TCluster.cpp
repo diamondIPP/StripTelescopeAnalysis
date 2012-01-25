@@ -347,7 +347,7 @@ string TCluster::Intent(UInt_t level){
 	stringstream output;
 	output.str("");
 	for(UInt_t i=0;i<level;i++){
-		output<<"\t";
+		output<<"  ";
 	}
 	return output.str();
 }

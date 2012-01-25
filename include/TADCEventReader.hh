@@ -27,7 +27,7 @@ public:
 	TADCEventReader(std::string fileName);
 	virtual ~TADCEventReader();
 	bool GetNextEvent();
-	bool LoadEvent(UInt_t EventNumber);
+	virtual bool LoadEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
 	bool isOK();
 //    bool getCMNEvent_flag() const;

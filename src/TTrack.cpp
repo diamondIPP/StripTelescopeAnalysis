@@ -84,6 +84,36 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane){
 	}
 }
 
+
+/**
+ * Calculation of Hitposition of event using the measured Offsets
+ * in this transformation it transform the measured hitPosition in the
+ * plane space into the space of the first plane
+ * @param cor enum of Coordinate from which you want to have the result
+ * @param plane number of plane for which you are calculating the hitposition
+ * @return calculated hit position
+ */
+Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred){
+	if(event==NULL)return N_INVALID;
+	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
+		return N_INVALID;
+	// get offsets
+	Float_t xOffset = this->getXOffset(plane);
+	Float_t yOffset = this->getYOffset(plane);
+	Float_t phiXOffset = this->getPhiXOffset(plane);
+	Float_t phiYOffset = this->getPhiYOffset(plane);
+	Float_t xMeasured = event->getPlane(plane).getXPosition(0);//-xOffset;
+	Float_t yMeasured = event->getPlane(plane).getYPosition(0);//-yOffset;
+
+	// apply offsets
+	Float_t xPosition = (xMeasured) / TMath::Cos(phiXOffset) + (yPred) * TMath::Tan(phiXOffset);
+	xPosition += xOffset;
+	if(verbosity)cout<<"Xpos of"<<plane<<": with "<<phiXOffset<<" and  "<<xOffset<<" measured: "<<xMeasured<<", "<<xPosition<<"/"<<yPred<<endl;
+
+	return xPosition;
+}
+
+
 /**
  * gives the xPosition of "event" in the telescope space
  * this function uses getPosition(X_COR,plane)
@@ -192,6 +222,29 @@ void TTrack::setDetectorAlignment(TDetectorAlignment *alignment)
 	if(alignment!=this->alignment)
 		delete this->alignment;
 	this->alignment=alignment;
+}
+
+Float_t TTrack::getXMeasured(UInt_t plane)
+{
+	return getMeasured(TPlane::X_COR,plane);
+}
+
+Float_t TTrack::getYMeasured(UInt_t plane)
+{
+	return getMeasured(TPlane::Y_COR,plane);
+}
+
+Float_t TTrack::getMeasured(TPlane::enumCoordinate cor, UInt_t plane)
+{
+	if(event==NULL)return N_INVALID;
+	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
+	return N_INVALID;
+// get offsets
+	switch(cor){
+	case TPlane::X_COR:return event->getPlane(plane).getXPosition(0);break;
+	case TPlane::Y_COR:return event->getPlane(plane).getYPosition(0);break;
+	default: return N_INVALID;
+	}
 }
 
 UInt_t TTrack::getVerbosity() const
