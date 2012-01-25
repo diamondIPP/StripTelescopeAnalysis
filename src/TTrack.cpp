@@ -58,7 +58,7 @@ UInt_t TTrack::getNClusters(int det) {
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane){
+Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
 	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
@@ -67,8 +67,15 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane){
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiYOffset(plane);
-	Float_t xMeasured = event->getPlane(plane).getXPosition(0);//-xOffset;
-	Float_t yMeasured = event->getPlane(plane).getYPosition(0);//-yOffset;
+	Float_t xMeasured,yMeasured;
+	if(event->getPlane(plane).getDetectorType()==TPlane::kDiamond){
+		xMeasured = event->getPlane(plane).getXPosition(0,TCluster::chargeWeighted);//-xOffset;
+		yMeasured = event->getPlane(plane).getYPosition(0,TCluster::chargeWeighted);//-yOffset;
+	}
+	else{
+		xMeasured = event->getPlane(plane).getXPosition(0);//-xOffset;
+		yMeasured = event->getPlane(plane).getYPosition(0);//-yOffset;
+	}
 	
 	// apply offsets
 	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) + (yMeasured) * TMath::Sin(phiYOffset);
