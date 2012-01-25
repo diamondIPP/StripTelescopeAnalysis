@@ -89,8 +89,8 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
 	if (nEvents == 0) nEvents = eventReader->GetEntries()-startEvent;
 	if (nEvents+startEvent>eventReader->GetEntries())nEvents=eventReader->GetEntries()-startEvent;
 	int noHitDet=0;
-	int falseClusterSizeDet=0;
-	int noHitDia=0;
+//	int falseClusterSizeDet=0;
+	//int noHitDia=0;
 	int falseClusterSizeDia=0;
 	int nCandidates=0;
 	int nScreened=0;
@@ -183,13 +183,13 @@ TResidual TAlignment::AlignStripDetector(TPlane::enumCoordinate cor,UInt_t subje
 			if(vecRefPlanes.at(i)==subjectPlane)cerr<<"Plane "<<subjectPlane<<" is used as a reference Plane and as a subject Plane"<<endl;
 	}
 	//get residual
-	TResidual res = this->getStripResidual(cor,subjectPlane,vecRefPlanes,bPlot,resOld);
+	TResidual res = this->getStripResidual(cor,subjectPlane,vecRefPlanes,false,bPlot,resOld);
 	Float_t x_offset = res.getXOffset();
 	Float_t phix_offset = res.getPhiYOffset();
 	Float_t y_offset = res.getYOffset();
 	Float_t phiy_offset = res.getPhiXOffset();
 
-	printf("Correction Values: X: %2.6f,  PhiX: %2.6f,   Y: %2.6f,  PhiY: %2.6f\n",x_offset,phix_offset,y_offset,phiy_offset);
+	if(verbosity)printf("Correction Values: X: %2.6f,  PhiX: %2.6f,   Y: %2.6f,  PhiY: %2.6f\n",x_offset,phix_offset,y_offset,phiy_offset);
 	//save corrections to alignment
 	if(vecRefPlanes.size()==1){
 		if(TPlane::X_COR==cor||TPlane::XY_COR==cor)
@@ -231,7 +231,6 @@ TResidual TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPl
 	}
 
 	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot,resOld);
-	//res.Print(0);
 	if(refPlane1==refPlane2){//todo ersetzen durch "echtes alignment?"
 		if(cor==TPlane::XY_COR||cor==TPlane::X_COR)
 			align->AddToXOffset(subjectPlane,res.getXMean());
@@ -263,7 +262,6 @@ TResidual TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPl
 				printf("\tUpdate Plane %d, Y: %2.6f, PhiY: %2.6f\n",subjectPlane,y_offset,phiy_offset);
 		}
 		//
-		//res.Print();
 
 	}
 	return res;
@@ -272,16 +270,16 @@ TResidual TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPl
 
 TResidual TAlignment::AlignDetector(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld)
 {
-	cout<<"TAlignment::AlignDetector::\taligning Plane "<<subjectPlane<<TPlane::getCoordinateString(cor)<<" with "<<vecRefPlanes.size()<< " Planes: ";
+	if(verbosity)cout<<"TAlignment::AlignDetector::\taligning Plane "<<subjectPlane<<TPlane::getCoordinateString(cor)<<" with "<<vecRefPlanes.size()<< " Planes: ";
 	for(UInt_t i=0;i<vecRefPlanes.size();i++)
-		cout<<vecRefPlanes.at(i)<<" ";
-	cout<<"\t";
-	if(bPlot)cout<<" plots are created\t";
+		if(verbosity)cout<<vecRefPlanes.at(i)<<" ";
+	if(verbosity)cout<<"\t";
+	if(bPlot)if(verbosity)cout<<" plots are created\t";
 	if(resOld.isTestResidual())
-		cout<<"resOld is a testResidual"<<endl;
+		if(verbosity)cout<<"resOld is a testResidual"<<endl;
 	else{
-		cout<<endl;
-		resOld.Print(2);
+		if(verbosity)cout<<endl;
+		if(verbosity)resOld.Print(2);
 	}
 	for(UInt_t i=0;i<vecRefPlanes.size();i++)
 		if(vecRefPlanes.at(i)==subjectPlane)cerr<<"Plane "<<subjectPlane<<" is used as a reference Plane and as a subject Plane"<<endl;
@@ -355,9 +353,6 @@ int TAlignment::Align(UInt_t nEvents,UInt_t startEvent)
 		myTrack = new TTrack(align);
 		cout<<"TAlignment::Align::created new TTrack"<<endl;
 	}
-	cout<<"~"<<endl;
-	cout<<"~"<<endl;
-	cout<<"~"<<endl;
 	AlignSiliconPlanes();
 	AlignDiamondPlane();
 	align->PrintResults(1);
@@ -377,9 +372,7 @@ int TAlignment::Align(UInt_t nEvents,UInt_t startEvent)
 //	for (int alignStep = 0; alignStep < nAlignSteps; alignStep++) {
 //		//TDetectorAlignment* align = new TDetectorAlignment(plots_path, tracks, tracks_mask);
 //		align->LoadTracks(tracks,tracks_masked);
-//		if (verbosity) cout<<"TAlignment::Align:start with alignmentStep no. "<<alignStep+1 << " of " <<nAlignSteps<<endl;
 //		doDetAlignmentStep();
-//		cout << "AlignmentClass::Align:Intrinsic silicon resolution " << align->GetSiResolution() << " strips or " << align->GetSiResolution() * 50 << "um" << endl;
 //		doDiaAlignmentStep();
 //	}
 
@@ -403,22 +396,21 @@ void TAlignment::AlignSiliconPlanes(){
 //	res103=CheckDetectorAlignment(TPlane::XY_COR,1,0,3,false);//test
 //	AlignDetector(TPlane::XY_COR,1,0,3,false,res103);//test
 
-	cout<<endl;
+	if(verbosity)cout<<endl;
 	for(nAlignmentStep=0;nAlignmentStep<nAlignSteps;nAlignmentStep++){
 		cout<<"\n\n\nALIGNMENT STEP:\t"<<nAlignmentStep+1<<" of "<<nAlignSteps<<"\n\n"<<endl;
 
 		res103=CheckDetectorAlignment(TPlane::XY_COR,1,0,3,false);
 		vecRes103.push_back(res103);
-		printf("\n1 with 0 and 3:%d,%1.2f+/-%1.2f\n",res103.isTestResidual(),res103.getXMean(),res103.getXSigma());
+		if(verbosity)printf("\n1 with 0 and 3:%d,%1.2f+/-%1.2f\n",res103.isTestResidual(),res103.getXMean(),res103.getXSigma());
 		AlignDetector(TPlane::XY_COR,1,0,3,false,res103);
 
 		res203=CheckDetectorAlignment(TPlane::XY_COR,2,0,3,false);
-		res203=CheckDetectorAlignment(TPlane::XY_COR,2,0,3,false);
-		printf("\n2 with 0 and 3:%d,%1.2f+/-%1.2f\n",res312.isTestResidual(),res203.getXMean(),res203.getXSigma());
+		if(verbosity)printf("\n2 with 0 and 3:%d,%1.2f+/-%1.2f\n",res312.isTestResidual(),res203.getXMean(),res203.getXSigma());
 		AlignDetector(TPlane::XY_COR,2,0,3,false,res203);
 
 		res312=CheckDetectorAlignment(TPlane::XY_COR,3,1,2,false);
-		printf("\n3 with 1 and 2:%d,%1.2f+/-%1.2f\n",res312.isTestResidual(),res312.getXMean(),res312.getXSigma());
+		if(verbosity)printf("\n3 with 1 and 2:%d,%1.2f+/-%1.2f\n",res312.isTestResidual(),res312.getXMean(),res312.getXSigma());
 		res312=AlignDetector(TPlane::XY_COR,3,1,2,false,res312);
 	}
 
@@ -426,11 +418,12 @@ void TAlignment::AlignSiliconPlanes(){
 	res103=this->CheckDetectorAlignment(TPlane::XY_COR,1,0,3,false);
 	res203=this->CheckDetectorAlignment(TPlane::XY_COR,2,0,3,false);
 	res312=this->CheckDetectorAlignment(TPlane::XY_COR,3,1,2,false);
-	res103=this->CheckDetectorAlignment(TPlane::XY_COR,1,0,3,true,res103);
-	res103=this->CheckDetectorAlignment(TPlane::XY_COR,1,0,3,true,res103);
-	vecRes103.push_back(res103);
-	res203=this->CheckDetectorAlignment(TPlane::XY_COR,2,0,3,true,res203);
-	res312=this->CheckDetectorAlignment(TPlane::XY_COR,3,1,2,true,res312);
+//
+//
+//	res103=this->CheckDetectorAlignment(TPlane::XY_COR,1,0,3,true,res103);
+//	vecRes103.push_back(res103);
+//	res203=this->CheckDetectorAlignment(TPlane::XY_COR,2,0,3,true,res203);
+//	res312=this->CheckDetectorAlignment(TPlane::XY_COR,3,1,2,true,res312);
 
 	getFinalSiliconAlignmentResuluts();
 }
@@ -449,16 +442,16 @@ void TAlignment::AlignDiamondPlane(){
 	align->setVerbosity(5);
 //	this->verbosity=5;
 	nDiaAlignmentStep=-1;
-	TResidual resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes,true);
+	TResidual resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes,false,true);
 	//myTrack->setVerbosity(1);
 	for(nDiaAlignmentStep=0;nDiaAlignmentStep<nDiaAlignSteps;nDiaAlignmentStep++){
 		cout<<"\n "<<nDiaAlignmentStep<<" of "<<nDiaAlignSteps<<" Steps...\n"<<endl;
 		if(nDiaAlignmentStep==1||nDiaAlignmentStep==2)verbosity=1;
 		else verbosity=0;
-		AlignStripDetector(TPlane::X_COR,diaPlane,vecRefPlanes,true,resDia);
-		resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes,false);
+		AlignStripDetector(TPlane::X_COR,diaPlane,vecRefPlanes,false,resDia);
+		resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes);
 	}
-	resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes,true);
+	resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes,true,true,resDia);
 }
 
 TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot,TResidual resOld){
@@ -474,7 +467,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld)
 {
 	stringstream  refPlaneString;
-	for(int i=0;i<vecRefPlanes.size();i++)
+	for(UInt_t i=0;i<vecRefPlanes.size();i++)
 		if(i==0)
 			refPlaneString<<vecRefPlanes.at(i);
 		else if(i+1<vecRefPlanes.size())
@@ -546,10 +539,10 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 }
 
 
-TResidual TAlignment::getStripResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld){
+TResidual TAlignment::getStripResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, TResidual resOld){
 
 	stringstream  refPlaneString;
-		for(int i=0;i<vecRefPlanes.size();i++)
+		for(UInt_t i=0;i<vecRefPlanes.size();i++)
 			if(i==0)
 				refPlaneString<<vecRefPlanes.at(i);
 			else if(i+1<vecRefPlanes.size())
@@ -634,32 +627,32 @@ TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_
 
 TResidual TAlignment::CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2, bool bPlot,TResidual resOld)
 {
-	cout<<"\n\nTAlignment::checkDetectorAlignment\n\t check "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
+	if(verbosity)cout<<"\n\nTAlignment::checkDetectorAlignment\n\t check "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
 	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
 		return TResidual(true);
 	}
 	int verb=verbosity;
 	verbosity=0;
 	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2,false,resOld);
-	cout<<endl;
+	if(verbosity)cout<<endl;
 	res.SetTestResidual(false);
 	res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot,res);
 	verbosity=verb;
-	res.Print();
+	if(verbosity)res.Print();
 	return res;
 }
 
 
 TResidual TAlignment::CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld)
 {
-	cout<<"\n\nTAlignment::checkDetectorAlignment\n\t check "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes"<<endl;
+	if(verbosity)cout<<"\n\nTAlignment::checkDetectorAlignment\n\t check "<<TPlane::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes"<<endl;
 //	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
 //		return TResidual(true);
 //	}
 	int verb=verbosity;
 	verbosity=0;
 	TResidual res = getResidual(cor,subjectPlane,vecRefPlanes,false,resOld);
-	cout<<endl;
+	if(verbosity)cout<<endl;
 	res.SetTestResidual(false);
 	res = getResidual(cor,subjectPlane,vecRefPlanes,bPlot,res);
 	verbosity=verb;
@@ -667,13 +660,13 @@ TResidual TAlignment::CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t 
 	return res;
 }
 
-TResidual TAlignment::CheckStripDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld){
+TResidual TAlignment::CheckStripDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, TResidual resOld){
 	int verb=verbosity;
 	verbosity=0;
-	TResidual res = getStripResidual(cor,subjectPlane,vecRefPlanes,false,resOld);
-	cout<<endl;
+	TResidual res = getStripResidual(cor,subjectPlane,vecRefPlanes,false,false,resOld);
+	if(verbosity)cout<<endl;
 	res.SetTestResidual(false);
-	res = getStripResidual(cor,subjectPlane,vecRefPlanes,bPlot,res);
+	res = getStripResidual(cor,subjectPlane,vecRefPlanes,false,bPlot,res);
 	verbosity=verb;
 	res.Print();
 	return res;
@@ -705,7 +698,7 @@ void TAlignment::getChi2Distribution(Float_t maxChi2)
 {
 	vecXChi2.clear();
 	vecYChi2.clear();
-	cout<<"TAlignment::getChi2Distribution"<<endl;
+	if(verbosity)cout<<"TAlignment::getChi2Distribution"<<endl;
 //	Float_t xPositionObserved,yPositionObserved,deltaX,deltaY,resxtest,resytest;
 	TPositionPrediction* predictedPosition=0;
 	vector<UInt_t> vecRefPlanes;
@@ -802,7 +795,7 @@ void TAlignment::getChi2Distribution(Float_t maxChi2)
 TResidual TAlignment::calculateResidual(TPlane::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>*yPred,vector<Float_t>* deltaY,TResidual resOld)
 {
 	if(verbosity)cout<<"\n\tTAlignment::calculateResidual with "<<resOld.getXMean()<<"+/-"<<resOld.getXSigma()<<"\t"<<resOld.getYMean()<<"+/-"<<resOld.getYSigma();
-	if(resOld.isTestResidual())cout<<"\tno residual Correction, inputRes is a TestResidual";
+	if(verbosity)if(resOld.isTestResidual())cout<<"\tno residual Correction, inputRes is a TestResidual";
 	if(verbosity)cout<<endl;
 	TResidual residual(false);
 	Float_t resxtest;
@@ -863,13 +856,13 @@ void TAlignment::getFinalSiliconAlignmentResuluts()
 //	setDetectorResolution(maxChi2);
 	setSiliconDetectorResolution(maxChi2);
 
-	vector<UInt_t>vecRefPlanes;
-	for(UInt_t plane=0;plane<5;plane++){
-		vecRefPlanes.clear();
-		for(UInt_t i=0;i<4;i++)
-			if(i!=plane)vecRefPlanes.push_back(i);
-			TResidual res0=calculateResidualWithChi2(TPlane::XY_COR,plane,vecRefPlanes,maxChi2,false,true);
-	}
+//	vector<UInt_t>vecRefPlanes;
+//	for(UInt_t plane=0;plane<4;plane++){
+//		vecRefPlanes.clear();
+//		for(UInt_t i=0;i<4;i++)
+//			if(i!=plane)vecRefPlanes.push_back(i);
+//			TResidual res0=calculateResidualWithChi2(TPlane::XY_COR,plane,vecRefPlanes,maxChi2,false,true);
+//	}
 
 	getChi2Distribution(15);
 }
@@ -886,11 +879,12 @@ void TAlignment::setSiliconDetectorResolution(Float_t maxChi2)
 		align->setXResolution(res.getXSigma(),plane);
 		align->setYResolution(res.getYSigma(),plane);
 	}
+
 	for(UInt_t plane=0;plane<4;plane++){
 		vector<UInt_t>vecRefPlanes;
 		for(UInt_t i=0;i<4;i++)
 			if(i!=plane)vecRefPlanes.push_back(i);
-		TResidual res=calculateResidualWithChi2(TPlane::XY_COR,plane,vecRefPlanes,maxChi2,true);
+		TResidual res=calculateResidualWithChi2(TPlane::XY_COR,plane,vecRefPlanes,maxChi2,true,true);
 //		align->setXResolution(res.getXSigma(),plane);
 //		align->setYResolution(res.getYSigma(),plane);
 	}
@@ -901,7 +895,6 @@ void TAlignment::setSiliconDetectorResolution(Float_t maxChi2)
 void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,string refPlaneString, bool bPlot, bool bUpdateAlignment)
 {
 	if(!bPlot&&!bUpdateAlignment)return;
-	Float_t maxChi2=-1;
 	stringstream preName;
 	if(subjectPlane==4){
 		preName<<"hDiamond_";
@@ -931,12 +924,14 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 			histo->Fit(fitGausX);
 			align->setXResolution(fitGausX->GetParameter(2),subjectPlane);
 		}
+		histo->GetXaxis()->SetTitle("Delta X in Channels");
+		histo->GetYaxis()->SetTitle("Number of entries");
 		if(bPlot)histSaver->SaveHistogram(histo);
 		delete fitGausX;
 		delete histo;
 	}
 
-	if(cor==TPlane::XY_COR||cor==TPlane::Y_COR){//DistributionPlot DeltaY
+	if(subjectPlane<4&&(cor==TPlane::XY_COR||cor==TPlane::Y_COR)){//DistributionPlot DeltaY
 		histName.str("");
 		histName<<preName.str();
 		histName<<"_DistributionPlot_DeltaY";
@@ -949,6 +944,9 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 			cout<<"RESOLUTION FIT Y in Plane "<<subjectPlane<<": "<<fitGausY->GetParameter(2)<<endl;
 			align->setYResolution(fitGausY->GetParameter(2),subjectPlane);
 		}
+
+		histo->GetXaxis()->SetTitle("Delta Y in Channels");
+		histo->GetYaxis()->SetTitle("Number of entries");
 		if(bPlot)histSaver->SaveHistogram(histo);
 		delete fitGausY;
 		delete histo;
@@ -966,10 +964,13 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 		histSaver->SaveHistogram(&histo);
 		histName<<"_graph";
 		TGraph graph =histSaver->CreateDipendencyGraph(histName.str(),vecDeltaX,vecYPred);
+		graph.Draw("APL");
+		graph.GetXaxis()->SetTitle("predicted Y position in ChannelNo.");
+		graph.GetYaxis()->SetTitle("delta X in Channel No.");
 		histSaver->SaveGraph((TGraph*)graph.Clone(),histName.str());
 	}
 
-	if(bPlot&&(cor==TPlane::XY_COR||cor==TPlane::Y_COR)){//ScatterPlot DeltaY vs Xpred
+	if(bPlot&&subjectPlane<4&&(cor==TPlane::XY_COR||cor==TPlane::Y_COR)){//ScatterPlot DeltaY vs Xpred
 		histName.str("");
 		histName<<preName.str();
 		histName<<"_ScatterPlot_XPred_vs_DeltaY";
@@ -985,7 +986,7 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 		histSaver->SaveGraph((TGraph*)graph.Clone(),histName.str());
 	}
 
-	if(bPlot&&(cor==TPlane::XY_COR||cor==TPlane::Y_COR)){//ScatterHisto DeltaY vs Xpred
+	if(bPlot&&subjectPlane<4&&(cor==TPlane::XY_COR||cor==TPlane::Y_COR)){//ScatterHisto XObs vs YObs
 		histName.str("");
 		histName<<preName.str();
 		histName<<"_ScatterPlot_YPred_vs_YObs";
@@ -1011,15 +1012,15 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 		//graph.Draw("APLgoff");
 		histSaver->SaveGraph((TGraph*)graph.Clone(),histName.str());
 	}
-	if(bPlot&&(cor==TPlane::XY_COR||cor==TPlane::Y_COR)){//ScatterHisto DeltaY vs Chi2Y
+	if(bPlot&&subjectPlane<4&&(cor==TPlane::XY_COR||cor==TPlane::Y_COR)){//ScatterHisto DeltaY vs Chi2Y
 		histName.str("");
 		histName<<preName.str();
 		histName<<"_ScatterPlot_DeltaX_vs_Chi2X";
 		histName<<"_-_Plane_"<<subjectPlane<<"_with_"<<refPlaneString;;//<<"_with"<<refPlane1<<"_and_"<<refPlane2;
 		TH2F histo=histSaver->CreateScatterHisto(histName.str(),vecDeltaY,vecYChi2,256);
 		histo.Draw("goff");
-		histo.GetXaxis()->SetTitle("Delta Y");
-		histo.GetYaxis()->SetTitle("Chi2 Y");
+		histo.GetYaxis()->SetTitle("Delta Y");
+		histo.GetXaxis()->SetTitle("Chi2 Y");
 		histSaver->SaveHistogram((TH2F*)histo.Clone());
 		histName<<"_graph";
 		TGraph graph =histSaver->CreateDipendencyGraph(histName.str(),vecDeltaY,vecYChi2);
@@ -1031,7 +1032,7 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 
 TResidual TAlignment::calculateResidualWithChi2(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,Float_t maxChi2, bool bAlign,bool bPlot)
 {
-	cout<<"\n\nTAlignment::calculateResidualWithChi2"<<endl;
+	if(verbosity)cout<<"\n\nTAlignment::calculateResidualWithChi2"<<endl;
 	vecXObs.clear();
 	vecYObs.clear();
 	vecDeltaX.clear();
@@ -1041,7 +1042,7 @@ TResidual TAlignment::calculateResidualWithChi2(TPlane::enumCoordinate cor, UInt
 	vecXChi2.clear();
 	vecYChi2.clear();
 	stringstream  refPlaneString;
-	for(int i=0;i<vecRefPlanes.size();i++){
+	for(UInt_t i=0;i<vecRefPlanes.size();i++){
 		if(i==0)
 			refPlaneString<<vecRefPlanes.at(i);
 		else if(i+1<vecRefPlanes.size())

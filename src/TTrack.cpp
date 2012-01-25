@@ -183,8 +183,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t sigma_my = linFitY->GetParError(1);
 	Float_t by = linFitY->GetParameter(0);
 	Float_t sigma_by = linFitY->GetParError(0);
-	Float_t xChi2 = linFitX->GetChisquare();
-	Float_t yChi2 = linFitY->GetChisquare();
+	Float_t xChi2 = linFitX->GetChisquare()/linFitX->GetNumberFreeParameters();
+	Float_t yChi2 = linFitY->GetChisquare()/linFitY->GetNumberFreeParameters();
 	Float_t xPos = mx*zPos+bx;
 	Float_t yPos = my*zPos+by;
 	Float_t xSigma = (zPos*sigma_mx)*(zPos*sigma_mx)+(mx*zSigma)*(mx*zSigma)+(sigma_bx*sigma_bx);
