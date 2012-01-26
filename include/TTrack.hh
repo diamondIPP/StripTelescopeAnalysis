@@ -71,6 +71,7 @@ public:
 	void setDetectorAlignment(TDetectorAlignment *alignment);
     UInt_t getVerbosity() const;
     void setVerbosity(UInt_t verbosity = 0){this->verbosity = verbosity;}
+	UInt_t getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred); // returns the raw channel number for a x,y position in lab system
 
     ;
 private:

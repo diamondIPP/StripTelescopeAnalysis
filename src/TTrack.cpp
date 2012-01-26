@@ -254,6 +254,18 @@ Float_t TTrack::getMeasured(TPlane::enumCoordinate cor, UInt_t plane)
 	}
 }
 
+// returns the raw channel number for a x,y position in lab system
+UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
+{
+	UInt_t plane = det / 2;
+	if (det%2 == 0) {
+		//TODO
+	}
+	else {
+		
+	}
+}
+
 UInt_t TTrack::getVerbosity() const
 {
     return verbosity;

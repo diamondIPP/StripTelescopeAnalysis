@@ -21,12 +21,16 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber) {
 	sys->MakeDirectory(runString.str().c_str());
 	
 	sys->cd(runString.str().c_str());
-	stringstream  filepath;
+	stringstream  filepath, alignmentFileName;
 	filepath.str("");
+	alignmentFileName.str("");
 	filepath<<"clusterData."<<runNumber<<".root";
+	alignmentFileName << "alignment." << runNumber << ".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str());
+	
+	tracking = new TTracking(filepath.str(),alignmentFileName.str());
+	
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("transparentAnalysis");
 	sys->cd("transparentAnalysis");
@@ -39,14 +43,25 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber) {
 //	this->seedSigma=seedSigma;
 //	this->hitSigma=hitSigma;
 	cout<<"end initialise"<<endl;
+	
+	
+	
+	
 }
 
 TTransparentAnalysis::~TTransparentAnalysis() {
 	// TODO Auto-generated destructor stub
 }
 
-void TTransparentAnalysis::analyze(int nEvents) {
-	
+void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
+	cout<<"\n\n******************************************\n";
+	cout<<    "******Start Transparent Analysis...*******\n";
+	cout<<"******************************************\n\n"<<endl;
+	for (int nEvent = startEvent; nEvent < nEvents; nEvent++) {
+		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
+		tracking->LoadEvent(nEvent);
+		
+	}
 }
 
 void TTransparentAnalysis::initHistograms() {

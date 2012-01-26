@@ -44,6 +44,8 @@
 #include "HistogrammSaver.class.hh"
 #include "TADCEventReader.hh"
 #include "TTrack.hh"
+#include "TTracking.hh"
+#include "TRawEventSaver.hh"
 
 using namespace std;
 
@@ -52,13 +54,15 @@ public:
 	TTransparentAnalysis(int runNumber);
 	virtual ~TTransparentAnalysis();
 	void	doAnalysis(int nEvents=0);
-	void analyze(int nEvents);
+	void analyze(int nEvents, int startEvent);
 	
 private:
 	void initHistograms();
 	void saveHistograms();
 	void fitTrack();
 	void analyzeTrack(TTrack track);
+	
+	TTracking* tracking;
 	
 	
     TSystem* sys;
@@ -85,41 +89,7 @@ private:
 	
 	
 	
-//	void saveHistos();
-//	void checkForDeadChannels();
-//	void analyseForSeeds();
-//	void getBiggestHit();
-//	void initialiseHistos();
-//	void checkForSaturatedChannels();
-//	void analyseCluster();
-//    void analyseBiggestHit();
-//	TH1F *hSaturatedChannels[8];
-//	TH1F *hSeedMap[8];
-//	TH1F *hSeedMap2[9];
-//	TH1F *hClusterMap[8];
-//	TH1F* hNumberOfSeeds[8];
-//	TH1F* hChannelBiggestHit[8];
-//	TH1F* hPulsHeightBiggestHit[8];
-//	TH1F* hPulsHeightNextBiggestHit[8];
-//	TH1F* hNumberOfClusters[9];
-//	TH1F* hClusterSize[9];
-//	TADCEventReader* eventReader;
-//	HistogrammSaver* histSaver;
-//    TSystem* sys;
-//    int nEvent;
-//    int seedSigma;
-//    int hitSigma;
-//    TH1F *histo_pulseheight_sigma[8];
-//	TH1F *histo_pulseheight_sigma_second[8];
-//	TH1F *histo_pulseheight_sigma125[8];
-//	TH1F *histo_second_biggest_hit_direction[8];
-//	TH1F *histo_pulseheight_sigma_second_left[8];
-//	TH1F *histo_pulseheight_sigma_second_right[8];
-//	TH1F *histo_biggest_hit_map[8];
-//	TH1F *histo_pulseheight_left_sigma[8];
-//	TH1F *histo_pulseheight_left_sigma_second[8];
-//	TH1F *histo_pulseheight_right_sigma[8];
-//	TH1F *histo_pulseheight_right_sigma_second[8];
+
 };
 
 
