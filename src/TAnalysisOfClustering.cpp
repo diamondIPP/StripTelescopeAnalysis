@@ -250,9 +250,9 @@ void TAnalysisOfClustering::saveHistos(){
 	cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
 	histSaver->SaveHistogram(histo_CWM_biggestHit);
 	histo_CWM_biggestHit->Delete();
-	cout<<"plot histo "<<histo_H2C_biggestHit->GetName();
-	histSaver->SaveHistogram(histo_H2C_biggestHit);
-	histo_H2C_biggestHit->Delete();
+//	cout<<"plot histo "<<histo_H2C_biggestHit->GetName();
+//	histSaver->SaveHistogram(histo_H2C_biggestHit);
+//	histo_H2C_biggestHit->Delete();
 
 
 	for (int det=0;det<8;det++){
@@ -336,11 +336,11 @@ void TAnalysisOfClustering::compareCentroid_ChargeWeightedMean()
 		Float_t xH2C=(Float_t)eventReader->getCluster(8,0).getHighest2Centroid();
 		Float_t delta=xCWM-xHit;
 		this->histo_CWM_biggestHit->Fill(delta,eventReader->getCluster(8,0).size());
-		delta = xH2C - xHit;
-		this->histo_H2C_biggestHit->Fill(delta);
-		Float_t charge = eventReader->getCluster(8,0).getCharge();
-		Float_t signal2ndHighestHit=eventReader->getCluster(8,0).getCharge(2)-eventReader->getCluster(8,0).getCharge(1);
-		Float_t q =signal2ndHighestHit/charge;
+//		delta = xH2C - xHit;
+//		this->histo_H2C_biggestHit->Fill(delta);
+//		Float_t charge = eventReader->getCluster(8,0).getCharge();
+//		Float_t signal2ndHighestHit=eventReader->getCluster(8,0).getCharge(2)-eventReader->getCluster(8,0).getCharge(1);
+//		Float_t q =signal2ndHighestHit/charge;
 
 
 	}

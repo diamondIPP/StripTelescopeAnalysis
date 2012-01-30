@@ -65,55 +65,101 @@ bool TADCEventReader::isOK(){
 }
 void TADCEventReader::SetBranchAddresses(){
 	//Event Header Branches
-	if(tree->GetLeaf("RunNumber"))
+	if(tree->GetLeaf("RunNumber")){
 		tree->SetBranchAddress("RunNumber",&run_number);
-	if(tree->GetLeaf("runNumber"))
+		cout<<"Set Branch \"RunNumber\""<<endl;
+	}
+	else if(tree->GetLeaf("runNumber")){
 			tree->SetBranchAddress("runNumber",&run_number);
-	if(tree->GetLeaf("EventNumber"))
+			cout<<"Set Branch \"runNumber\""<<endl;
+	}
+	if(tree->GetLeaf("EventNumber")){
 		tree->SetBranchAddress("EventNumber",&event_number);
-	if(tree->GetLeaf("StoreThreshold"))
+		cout<<"Set Branch \"EventNumber\""<<endl;
+	}
+	if(tree->GetLeaf("StoreThreshold")){
 		tree->SetBranchAddress("StoreThreshold",&store_threshold);
+		cout<<"Set Branch \"StoreThreshold\""<<endl;
+	}
 //	tree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
 
-	if(tree->GetLeaf("ZeroDivisorEvent_flag"))
+	if(tree->GetLeaf("ZeroDivisorEvent_flag")){
 		tree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
+		cout<<"Set Branch \"ZeroDivisorEvent_flag\""<<endl;
+	}//why do we have that????
 	//Telescope Data Branches
-	if(tree->GetLeaf("D0X_NChannels"))
+	if(tree->GetLeaf("D0X_NChannels")){
 		tree->SetBranchAddress("D0X_NChannels",&Det_NChannels[0]);
-	if(tree->GetLeaf("D0Y_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D0X_NChannels\""<<endl;
+	}
+	if(tree->GetLeaf("D0Y_NChannels")){
 		tree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
-	if(tree->GetLeaf("D1X_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D0Y_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("D1X_NChannels")){
 		tree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
-	if(tree->GetLeaf("D1Y_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D1X_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("D1Y_NChannels")){
 		tree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
-	if(tree->GetLeaf("D2X_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D1Y_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("D2X_NChannels")){
 		tree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
-	if(tree->GetLeaf("D2Y_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D2X_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("D2Y_NChannels")){
 		tree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
-	if(tree->GetLeaf("D3X_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D2Y_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("D3X_NChannels")){
 		tree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
-	if(tree->GetLeaf("D3Y_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D3X_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("D3Y_NChannels")){
 		tree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
-	if(tree->GetLeaf("Dia_NChannels"))
+		if(verbosity)cout<<"Set Branch \"D3Y_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("Dia_NChannels")){
 		tree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
-	if(tree->GetLeaf("D0X_Channels"))
+		if(verbosity)cout<<"Set Branch \"Dia_NChannels\""<<endl;
+		}
+	if(tree->GetLeaf("D0X_Channels")){
 		tree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
-	if(tree->GetLeaf("D0Y_Channels"))
+		if(verbosity)cout<<"Set Branch \"D0X_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("D0Y_Channels")){
 		tree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
-	if(tree->GetLeaf("D1X_Channels"))
+		if(verbosity)cout<<"Set Branch \"D0Y_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("D1X_Channels")){
 		tree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
-	if(tree->GetLeaf("D1Y_Channels"))
+		if(verbosity)cout<<"Set Branch \"D1X_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("D1Y_Channels")){
 		tree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
-	if(tree->GetLeaf("D2X_Channels"))
+		if(verbosity)cout<<"Set Branch \"D1Y_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("D2X_Channels")){
 		tree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
-	if(tree->GetLeaf("D2Y_Channels"))
+		if(verbosity)cout<<"Set Branch \"D2X_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("D2Y_Channels")){
 		tree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
-	if(tree->GetLeaf("D3X_Channels"))
+		if(verbosity)cout<<"Set Branch \"D2Y_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("D3X_Channels")){
 		tree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
-	if(tree->GetLeaf("D3Y_Channels"))
+		if(verbosity)cout<<"Set Branch \"D3X_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("D3Y_Channels")){
 		tree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
-	if(tree->GetLeaf("Dia_Channels"))
+		if(verbosity)cout<<"Set Branch \"D3Y_Channels\""<<endl;
+		}
+	if(tree->GetLeaf("Dia_Channels")){
 		tree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
+		if(verbosity)cout<<"Set Branch \"Dia_Channels\""<<endl;
+		}
 	//tree->SetBranchAddress("Det_ADC",&Det_ADC[0][0]);
 	if(tree->GetLeaf("D0X_ADC"))
 		tree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
