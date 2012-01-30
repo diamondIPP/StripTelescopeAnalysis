@@ -125,6 +125,7 @@ private:
 	vector<Float_t> vecDeltaY;
 	vector<Float_t> vecXChi2;
 	vector<Float_t> vecYChi2;
+	vector<Float_t> vecClusterSize;
 
 };
 

@@ -26,8 +26,8 @@ TAnalysisOfClustering::TAnalysisOfClustering(int runNumber,int seedSigma,int hit
 	cout<<filepath.str()<<endl;
 	eventReader=new TADCEventReader(filepath.str());
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("deadChannels");
-	sys->cd("deadChannels");
+	sys->MakeDirectory("clustering");
+	sys->cd("clustering");
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
@@ -63,9 +63,10 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 		cout<<endl;//*/
 		checkForDeadChannels();
 		checkForSaturatedChannels();
-//		getBiggestHit();
+//		getBiggestHit();//not working
 		analyseForSeeds();
 		analyseCluster();
+		compareCentroid_ChargeWeightedMean();
 //		analyseBiggestHit(); // moved to TAnalysisOfPedestal.cpp
 	}
 	saveHistos();
@@ -99,7 +100,7 @@ void TAnalysisOfClustering::analyseForSeeds(){
 	for(int det=0;det<9;det++){
 			int nClusters = eventReader->getCluster()->at(det).size();
 			if(nClusters==1)
-				hSeedMap2[det]->Fill(eventReader->getCluster()->at(det).at(0).getMaximumChannel());
+				hSeedMap2[det]->Fill(eventReader->getCluster()->at(det).at(0).getHighestSignalChannel());
 	}
 }
 
@@ -118,7 +119,7 @@ void TAnalysisOfClustering::getBiggestHit(){
 		int biggestHit=0;
 		Float_t biggestHitInSigma=0;
 		int chBiggestHit;
-		for(int ch=70;ch<200;ch++){
+		for(int ch=70;ch<200;ch++){//why
 			int adcValue=eventReader->getAdcValue(det,ch);
 			if (adcValue<253)
 				if(adcValue>biggestHit){
@@ -140,6 +141,15 @@ void TAnalysisOfClustering::getBiggestHit(){
 
 void TAnalysisOfClustering::initialiseHistos()
 {
+	{
+		stringstream histoName;
+		histoName<<"CWM_Minus_BiggestHit_DiamondPlane";
+		histo_CWM_biggestHit=new TH2F(histoName.str().c_str(),histoName.str().c_str(),512,-1,1,10,0,9);
+		histoName.str("");
+		histoName<<"highest2Centroid_Minus_BiggestHit_DiamondPlane";
+		histo_H2C_biggestHit==new TH1F(histoName.str().c_str(),histoName.str().c_str(),512,-1,1);
+	}
+
 	for (int det=0;det<8;det++){
 		stringstream histoName;
 		histoName<<"SaturatedChannels_"<<TADCEventReader::getStringForPlane(det)<<"";
@@ -237,6 +247,13 @@ void TAnalysisOfClustering::initialiseHistos()
 
 
 void TAnalysisOfClustering::saveHistos(){
+	cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
+	histSaver->SaveHistogram(histo_CWM_biggestHit);
+	histo_CWM_biggestHit->Delete();
+	cout<<"plot histo "<<histo_H2C_biggestHit->GetName();
+	histSaver->SaveHistogram(histo_H2C_biggestHit);
+	histo_H2C_biggestHit->Delete();
+
 
 	for (int det=0;det<8;det++){
 		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
@@ -306,6 +323,27 @@ void TAnalysisOfClustering::saveHistos(){
 		delete histo_pulseheight_right_sigma[det];
 		delete histo_pulseheight_right_sigma_second[det];
     }
+}
+
+void TAnalysisOfClustering::compareCentroid_ChargeWeightedMean()
+{
+	bool check=true;
+	for(int det=0;det<9;det++)
+		check=eventReader->getNClusters(det)==1;
+	if(check==true){
+		Float_t xCWM=eventReader->getCluster(8,0).getChargeWeightedMean();
+		Float_t xHit=(Float_t)eventReader->getCluster(8,0).getHighestSignalChannel();
+		Float_t xH2C=(Float_t)eventReader->getCluster(8,0).getHighest2Centroid();
+		Float_t delta=xCWM-xHit;
+		this->histo_CWM_biggestHit->Fill(delta,eventReader->getCluster(8,0).size());
+		delta = xH2C - xHit;
+		this->histo_H2C_biggestHit->Fill(delta);
+		Float_t charge = eventReader->getCluster(8,0).getCharge();
+		Float_t signal2ndHighestHit=eventReader->getCluster(8,0).getCharge(2)-eventReader->getCluster(8,0).getCharge(1);
+		Float_t q =signal2ndHighestHit/charge;
+
+
+	}
 }
 
 void TAnalysisOfClustering::analyseCluster()

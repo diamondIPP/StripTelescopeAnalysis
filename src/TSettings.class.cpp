@@ -426,8 +426,6 @@ void TSettings::DefaultLoadDefaultSettings(){
 	//default pedestal settings
 	fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
 	dia_input = 0; // 1 for 2006 and 0 for the rest
-	Si_Pedestal_Hit_Factor = 5;
-	Di_Pedestal_Hit_Factor = 5;
 	DO_CMC = 1;
 	CMN_cut = 4;  //Should be less than or equal to CMN_coor_high
 	Iter_Size = 500; //buffer size
@@ -436,20 +434,30 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CMN_corr_low=3;
 
 	alignment_training_track_fraction=0.25;
+	alignment_training_track_number=10000;
+	trainingMethod=enumFraction;
 
 	//default clustering settings
 	snr_plots_enable = 0;
+
+	Di_Cluster_Seed_Factor = 10;
+	Di_Cluster_Hit_Factor = 7;
+
 	Si_Cluster_Seed_Factor = 5;
 	Si_Cluster_Hit_Factor = 3;
-	Di_Cluster_Seed_Factor = 5;
-	Di_Cluster_Hit_Factor = 3;
+
+	Si_Pedestal_Hit_Factor = 5;
+	Di_Pedestal_Hit_Factor = 5;
+
 	si_avg_fidcut_xlow = 90;
 	si_avg_fidcut_xhigh = 165;
 	si_avg_fidcut_ylow = 80;
 	si_avg_fidcut_yhigh = 160;
+
 	pulse_height_num_bins = 300;
 	pulse_height_si_max = 300;
 	pulse_height_di_max = 3000;
+
 	snr_distribution_si_max = 2500;
 	snr_distribution_di_max = 2500;
 	UseAutoFidCut = 0;
@@ -475,6 +483,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	makePullDist = 0; //make pull distribution
 	makePedRMSTree = 0; //make .root file of pedestal and rms values
 	eventPrintHex = 10000; //print hex (should match .rz data)
+
+	res_keep_factor=2;
 
 	maxBufferPlots = 100;
 	rms_sigma_difference_cut = 0.3;
@@ -705,6 +715,16 @@ bool TSettings::isDet_channel_screened(UInt_t det, UInt_t ch)
 		return this->Det_channel_screen[det].CheckChannel(ch);
 	else
 		return true;
+}
+
+TSettings::enumAlignmentTrainingMethod TSettings::getTrainingMethod() const
+{
+    return trainingMethod;
+}
+
+void TSettings::setTrainingMethod(enumAlignmentTrainingMethod trainingMethod)
+{
+    this->trainingMethod = trainingMethod;
 }
 
 void TSettings::ParseIntArray(string value, vector<int> &vec) {
@@ -1214,4 +1234,8 @@ void TSettings::setPlotChannelOn(Int_t plotChannelOn)
 
 UInt_t TSettings::getRunNumber(){
 	return this->runNumber;
+}
+
+Float_t TSettings::getRes_keep_factor(){
+	return this->res_keep_factor;
 }

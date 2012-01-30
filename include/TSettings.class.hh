@@ -25,6 +25,8 @@ public:
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	virtual ~TSettings();
 
+	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
+
 	Float_t getAlignment_chi2() const;
 	void setAlignment_chi2(Float_t alignment_chi2);
 	float getFix_dia_noise() const;
@@ -160,6 +162,9 @@ public:
     void setSingleTrack2D(Int_t singleTrack2D);
     void setSingleTrack2DmaxClusterSize(Int_t singleTrack2DmaxClusterSize);
     void setZoomDiamondPlots(Int_t zoomDiamondPlots);
+    Float_t getRes_keep_factor();
+    enumAlignmentTrainingMethod getTrainingMethod() const;
+    void setTrainingMethod(enumAlignmentTrainingMethod trainingMethod);
 protected:
     float store_threshold;
 private:
@@ -206,11 +211,15 @@ private:
     Float_t eta_hiq_slice_hi;
     Int_t etavsq_n_landau_slices;
     Int_t snr_plots_enable;
+
     std::vector<Float_t> alignment_x_offsets;
     std::vector<Float_t> alignment_y_offsets;
     std::vector<Float_t> alignment_phi_offsets;
     std::vector<Float_t> alignment_z_offsets;
+
     Float_t alignment_training_track_fraction;
+    UInt_t alignment_training_track_number;
+    enumAlignmentTrainingMethod trainingMethod;
     std::vector<int> Det_channel_screen_channels[9];
     std::vector<int> Det_channel_screen_regions[9];
     ChannelScreen Det_channel_screen[9];
@@ -220,6 +229,7 @@ private:
     bool UseAutoFidCut;
     bool AlternativeClustering;
     Int_t plotChannel_on;
+    Float_t res_keep_factor;
     Int_t plotDiamond; //make Buffer Noise plots for the diamond instead
     Int_t makeBufferPlots; //make Buffer Plot whenever sigma and rms differ by rms_sigma_difference_cut
     Int_t SingleChannel2000plots; //make SC_Pedestal plots for all silicon detectors and channels

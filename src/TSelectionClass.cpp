@@ -9,7 +9,7 @@
 
 TSelectionClass::TSelectionClass(TSettings* settings) {
 	// TODO Auto-generated constructor stub
-	cout<<"\n\n\n	**********************************************************"<<endl;
+	cout<<"\n\n\n**********************************************************"<<endl;
 	cout<<"************TSelectionClass::TSelectionClass**************"<<endl;
 	cout<<"**********************************************************"<<endl;
 	this->settings=settings;
@@ -30,10 +30,12 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	rawfilepath<<"rawData."<<settings->getRunNumber()<<".root";
 	pedestalfilepath.str("");
 	pedestalfilepath<<"pedestalData."<<settings->getRunNumber()<<".root";
-	clusterfilepath<<"clusterData."<<settings->getRunNumber()<<".root";
+	clusterfilepath<<sys->pwd()<<"/clusterData."<<settings->getRunNumber()<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<clusterfilepath.str()<<endl;
+	cout<<"\""<<clusterfilepath.str()<<"\""<<endl;
+	cout<<"OPEN TADCEventReader"<<flush;
 	eventReader=new TADCEventReader(clusterfilepath.str());
+	cout<<" DONE"<<endl;
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("selections");
 	sys->cd("selections");

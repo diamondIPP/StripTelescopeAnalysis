@@ -56,7 +56,7 @@ public:
     Float_t getCharge(UInt_t clusters);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
-    UInt_t getMaximumChannel();
+    UInt_t getHighestSignalChannel();
     Float_t getChargeWeightedMean();
     void checkCluster();
     bool isSeed(UInt_t cl);
@@ -107,7 +107,7 @@ private:
     UInt_t nChannels;
     UChar_t det;
     UInt_t eventNumber;
-    ClassDef(TCluster,12);
+    ClassDef(TCluster,13);
 };
 
 #endif /* TCLUSTER_HH_ */

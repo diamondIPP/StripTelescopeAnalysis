@@ -44,7 +44,7 @@ private:
 	vector<TPlane> planes;
 	UInt_t eventNumber;
 
-    ClassDef(TEvent,1);
+    ClassDef(TEvent,2);
 public:
 	
 };

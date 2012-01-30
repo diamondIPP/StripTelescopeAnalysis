@@ -60,7 +60,7 @@ void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t 
 }
 Float_t TCluster::getPosition(calculationMode_t mode){
 	if(mode==maxValue)
-		return this->getMaxChannelNumber();
+		return this->getHighestSignalChannel();
 	else if(mode==chargeWeighted)
 		return this->getChargeWeightedMean();
 	else if(mode==highest2Centroid)
@@ -98,27 +98,27 @@ Float_t TCluster::getCharge(){
 
 Float_t TCluster::getCharge(UInt_t nClusterEntries){
 	if(nClusterEntries==0)return 0;
-	Float_t clusterCharge=getSignalOfChannel(this->getMaximumChannel());
-	bool b2ndHighestStripIsBigger = (getMaximumChannel()-this->getHighest2Centroid()<0);
+	Float_t clusterCharge=getSignalOfChannel(this->getHighestSignalChannel());
+	bool b2ndHighestStripIsBigger = (getHighestSignalChannel()-this->getHighest2Centroid()<0);
 	for(UInt_t nCl=1;nCl<nClusterEntries&&nCl<this->cluster.size();nCl++){
 		if(b2ndHighestStripIsBigger){
 			if(nCl%2==1)
-				clusterCharge=clusterCharge + this->getSignalOfChannel(getMaximumChannel()+(nCl/2)+1);
+				clusterCharge=clusterCharge + this->getSignalOfChannel(getHighestSignalChannel()+(nCl/2)+1);
 			else
-				clusterCharge=clusterCharge + this->getSignalOfChannel(getMaximumChannel()-(nCl/2));
+				clusterCharge=clusterCharge + this->getSignalOfChannel(getHighestSignalChannel()-(nCl/2));
 		}
 		else{
 			if(nCl%2==1)
-				clusterCharge+=this->getSignalOfChannel(getMaximumChannel()-(nCl/2)-1);
+				clusterCharge+=this->getSignalOfChannel(getHighestSignalChannel()-(nCl/2)-1);
 			else
-				clusterCharge+=this->getSignalOfChannel(getMaximumChannel()+(nCl/2));
+				clusterCharge+=this->getSignalOfChannel(getHighestSignalChannel()+(nCl/2));
 		}
 
 	}
 	return clusterCharge;
 }
 
-UInt_t TCluster::getMaximumChannel()
+UInt_t TCluster::getHighestSignalChannel()
 {
 	return maxChannel;
 }
@@ -207,7 +207,7 @@ bool TCluster::isScreened(UInt_t cl)
 
 Float_t TCluster::getHighest2Centroid()
 {
-	UInt_t maxCh = this->getMaximumChannel();
+	UInt_t maxCh = this->getHighestSignalChannel();
 	UInt_t clPos;
 	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
 	}
@@ -292,7 +292,7 @@ Float_t TCluster::getSignal(UInt_t clusterPos)
 
 Float_t TCluster::getSignalOfChannel(UInt_t channel)
 {
-	if(channel<this->getMinChannelNumber()&&channel>this->getMaximumChannel()) return 0;
+	if(channel<this->getMinChannelNumber()&&channel>this->getHighestSignalChannel()) return 0;
 	UInt_t clPos;
 	for(clPos=0;clPos<cluster.size()&&getChannel(clPos)!=channel;clPos++){}
 	return getSignal(clPos);
@@ -342,6 +342,7 @@ UInt_t TCluster::getChannel(UInt_t clusterPos)
  * small function to Intend cout-output;
  * @input level level of intention
  * @return string with level tabs
+ * @todo move to "string stuff" class
  */
 string TCluster::Intent(UInt_t level){
 	stringstream output;
@@ -363,7 +364,7 @@ void TCluster::Print(UInt_t level){
 		else
 					cout<<"\t["<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"]"<<flush;
 	}
-	cout<<"\t||"<<this->getMaximumChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean();
+	cout<<"\t||"<<this->getHighestSignalChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean();
 	cout<<endl;
 
 }

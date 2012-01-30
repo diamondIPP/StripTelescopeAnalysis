@@ -68,7 +68,7 @@ void TAnalysisOfPedestal::doAnalysis(int nEvents)
 		//		getBiggestHit();
 //		analyseForSeeds();
 //		analyseCluster();
-		analyseBiggestHit();
+//		analyseBiggestHit();
 	}
 	saveHistos();
 }
@@ -101,7 +101,7 @@ void TAnalysisOfPedestal::analyseForSeeds(){
 	for(int det=0;det<9;det++){
 		int nClusters = eventReader->getCluster()->at(det).size();
 		if(nClusters==1)
-			hSeedMap2[det]->Fill(eventReader->getCluster()->at(det).at(0).getMaximumChannel());
+			hSeedMap2[det]->Fill(eventReader->getCluster()->at(det).at(0).getHighestSignalChannel());
 	}
 }
 

@@ -59,7 +59,7 @@ all: rootclean diamondAnalysis
 	
 diamondAnalysis: $(LIBFILES)
 		#
-		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
+		# Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
         #
         
 $(PROGS):

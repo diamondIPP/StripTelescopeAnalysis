@@ -54,7 +54,7 @@ private:
 	enumDetectorType type;
 	
 	vector<TCluster> xClusters, yClusters;
-    ClassDef(TPlane,1);
+    ClassDef(TPlane,2);
 };
 
 #endif // TPlane_hh

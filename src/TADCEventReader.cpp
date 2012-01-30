@@ -135,7 +135,7 @@ void TADCEventReader::SetBranchAddresses(){
 }
 
 void TADCEventReader::initialiseTree(){
-	cout<<"initialise tree"<<tree->GetEntries()<<endl;
+	cout<<"initialise tree with "<<tree->GetEntries()<<" Entires."<<endl;
 	current_event = 0;
 	cout<<tree->IsZombie()<<endl;
 	tree->GetEvent(current_event);

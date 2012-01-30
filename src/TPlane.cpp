@@ -105,8 +105,10 @@ void TPlane::Print(UInt_t level)
 	for(UInt_t i=0;i<getNXClusters();i++){
 		this->xClusters.at(i).Print(level+1);
 	}
-	cout<<"Y:";
-	for(UInt_t i=0;i<getNYClusters();i++){
-		this->yClusters.at(i).Print(level+1);
+	if(this->getDetectorType()==kSilicon){
+		cout<<"Y:";
+		for(UInt_t i=0;i<getNYClusters();i++){
+			this->yClusters.at(i).Print(level+1);
+		}
 	}
 }

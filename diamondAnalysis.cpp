@@ -185,26 +185,32 @@ int main(int argc, char ** argv) {
 		pedestalCalculation->calculatePedestals(NEVENTS);
 		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 		delete pedestalCalculation;
-
-
-		process_mem_usage(vm2, rss2);
-		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+//
+//
+//		process_mem_usage(vm2, rss2);
+//		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
 
 		TClustering* clustering;
-		clustering=new TClustering(RUNNUMBER);
+		clustering=new TClustering(RUNNUMBER);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 		clustering->setSettings(settings);
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
 
-		process_mem_usage(vm2, rss2);
-		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+		TAnalysisOfClustering* analysisClustering;
+		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
+		analysisClustering->doAnalysis(NEVENTS);
+		delete analysisClustering;
 
-//		TSelectionClass* selectionClass;
-//		selectionClass=new TSelectionClass(settings);
-//		selectionClass->MakeSelection(NEVENTS);
-//		delete selectionClass;
+
+//		process_mem_usage(vm2, rss2);
+//		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+
+		TSelectionClass* selectionClass;
+		selectionClass=new TSelectionClass(settings);
+		selectionClass->MakeSelection(NEVENTS);
+		delete selectionClass;
 
 
 		TAlignment *alignment;
@@ -217,14 +223,10 @@ int main(int argc, char ** argv) {
 		//alignment->createEventVectors(1000);
 		process_mem_usage(vm2, rss2);
 		cout << "\nMemory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-		alignment->Align(100000);
+		alignment->Align(NEVENTS);
 		delete alignment;
 
-//
-//		TAnalysisOfClustering* analysisClustering;
-//		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
-//		analysisClustering->doAnalysis(NEVENTS);
-//		delete analysisClustering;
+
 
 		process_mem_usage(vm2, rss2);
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;

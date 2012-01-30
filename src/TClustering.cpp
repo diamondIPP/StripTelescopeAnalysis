@@ -74,12 +74,17 @@ TClustering::~TClustering() {
 }
 
 void TClustering::setSettings(TSettings* settings){
-	this->settings=settings;
+	this->settings = settings;
+	seedDiaSigma = settings->getDi_Cluster_Seed_Factor();
+	hitDiaSigma  = settings->getDi_Cluster_Hit_Factor();
+
+	seedDetSigma = settings->getSi_Cluster_Seed_Factor();
+	hitDetSigma  = settings->getSi_Cluster_Hit_Factor();
 }
 
 void TClustering::ClusterEvents(UInt_t nEvents)
 {
-	if(settings==NULL)settings=new TSettings("");//todo anpassen
+	if(settings==NULL) settings=new TSettings("");//todo anpassen
 	vecvecCluster.resize(9);
 	createdTree=createClusterTree(nEvents);
 	if(!createdTree) return;
@@ -282,9 +287,10 @@ bool TClustering::createClusterTree(int nEvents)
 	cout<<"Try to open \""<<clusterfilepath.str()<<"\""<<endl;
 	clusterFile=new TFile(clusterfilepath.str().c_str(),"READ");
 	if(clusterFile->IsZombie()){
+		delete clusterFile;
 		cout<<"clusterfile does not exist, create new one..."<<endl;
 		createdNewFile =true;
-		clusterFile= new TFile(clusterfilepath.str().c_str(),"CREATE");
+		clusterFile= new TFile(clusterfilepath.str().c_str(),"RECREATE");
 		clusterFile->cd();
 	}
 	else{

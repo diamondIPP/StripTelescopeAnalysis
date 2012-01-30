@@ -21,6 +21,34 @@ TTracking::~TTracking() {
 	// TODO Auto-generated destructor stub
 }
 
+TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPrint)
+{
+	if(myTrack==0)
+		return 0;
+	return myTrack->predictPosition(subjectPlane,vecRefPlanes,bPrint);
+}
+
+Float_t TTracking::getXPosition(UInt_t plane)
+{
+	if(myTrack==0)
+			return 0;
+		return myTrack->getXPosition(plane);
+}
+
+Float_t TTracking::getYPosition(UInt_t plane)
+{
+	if(myTrack==0)
+			return 0;
+		return myTrack->getYPosition(plane);
+}
+
+Float_t TTracking::getZPosition(UInt_t plane)
+{
+	if(myTrack==0)
+			return 0;
+		return myTrack->getZPosition(plane);
+}
+
 bool TTracking::setAlignment(std::string alignmentName){
 	if(this->alignmentFile!=NULL) alignmentFile->Delete();
 	alignmentFile=NULL;
@@ -28,7 +56,7 @@ bool TTracking::setAlignment(std::string alignmentName){
 	alignmentFile = new TFile(alignmentName.c_str());
 	alignmentFile->GetObject("alignment",myAlignment);
 	if(myAlignment==NULL){
-		cerr<<"COULD NOT READTHE ALIGNMENT FILE..."<<endl;
+		cerr<<"COULD NOT READ THE ALIGNMENT FILE..."<<endl;
 		return false;
 	}
 	else{

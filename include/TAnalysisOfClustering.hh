@@ -73,6 +73,8 @@ private:
 	TH1F *histo_pulseheight_left_sigma_second[8];
 	TH1F *histo_pulseheight_right_sigma[8];
 	TH1F *histo_pulseheight_right_sigma_second[8];
+	TH1F *histo_H2C_biggestHit;
+	TH2F *histo_CWM_biggestHit;
 };
 
 #endif /* TDEADCHANNELS_HH_ */
