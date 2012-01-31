@@ -118,6 +118,10 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries){
 	return clusterCharge;
 }
 
+/**
+ *
+ * @return channel no of highest Signal
+ */
 UInt_t TCluster::getHighestSignalChannel()
 {
 	return maxChannel;
@@ -127,7 +131,7 @@ Float_t TCluster::getChargeWeightedMean(){
 	Float_t sum=0;
 	Float_t charged=0;
 	for(UInt_t cl=0;cl<this->cluster.size();cl++){
-		if(isHit(cl)){
+		if(true||isHit(cl)){//todo anpassen
 			//todo . take at least second biggest hit for =charge weighted mean
 			sum+=cluster.at(cl).first*cluster.at(cl).second;//kanalnummer*signalNummer
 			charged+=cluster.at(cl).second;//signal
@@ -205,12 +209,24 @@ bool TCluster::isScreened(UInt_t cl)
 }
 
 
+UInt_t TCluster::getHighestHitClusterPosition()
+{
+	UInt_t maxCh = this->getHighestSignalChannel();
+	UInt_t clPos;
+	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
+	}
+	if(maxCh==getChannel(clPos))
+		return clPos;
+	else return 9999;
+}
+
 Float_t TCluster::getHighest2Centroid()
 {
 	UInt_t maxCh = this->getHighestSignalChannel();
 	UInt_t clPos;
 	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
 	}
+
 //	cout<<"  h2C:"<<clPos<<","<<cluster.at(clPos).first<<flush;
 	Float_t retVal;
 	UInt_t channel=getChannel(clPos);
@@ -282,12 +298,26 @@ UInt_t TCluster::getMaxChannelNumber()
 }
 
 
+Float_t TCluster::getHighestSignal(){
+	return this->maximumSignal;
+}
+
 
 Float_t TCluster::getSignal(UInt_t clusterPos)
 {
-	if(clusterPos<cluster.size())
-		return this->cluster.at(clusterPos).second;
+	if(clusterPos<cluster.size()){
+		 Float_t signal = this->cluster.at(clusterPos).second;
+		 if(signal<0)return 0;
+		 else return signal;
+	}
 	else return -1;
+}
+
+UInt_t TCluster::getClusterPosition(UInt_t channelNo){
+	if(channelNo<this->getMinChannelNumber()&&channelNo>this->getHighestSignalChannel()) return 9999;
+	UInt_t clPos;
+	for(clPos=0;clPos<cluster.size()&&getChannel(clPos)!=channelNo;clPos++){}
+	return clPos;
 }
 
 Float_t TCluster::getSignalOfChannel(UInt_t channel)

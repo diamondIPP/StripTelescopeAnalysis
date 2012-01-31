@@ -331,10 +331,8 @@ bool TClustering::createClusterTree(int nEvents)
 		clusterFile=new TFile(clusterfilepath.str().c_str(),"RECREATE");
 		this->clusterTree=new TTree("clusterTree",treeDescription.str().c_str());
 		createdNewTree=true;
-		cout<<"\n\n\n***************************************************************\n";
-		cout<<"***************************************************************\n";
+		cout<<"\n\n***************************************************************\n";
 		cout<<"there exists no tree:\'clusterTree\"\tcreate new one."<<clusterTree<<"\n";
-		cout<<"***************************************************************\n";
 		cout<<"***************************************************************\n"<<endl;
 	}
 

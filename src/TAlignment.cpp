@@ -22,7 +22,6 @@ TAlignment::TAlignment(TSettings* settings) {
 	runString<<settings->getRunNumber();
 
 	sys->MakeDirectory(runString.str().c_str());
-	gErrorIgnoreLevel=1001;
 	sys->cd(runString.str().c_str());
 	stringstream  filepath;
 	filepath.str("");

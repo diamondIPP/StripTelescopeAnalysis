@@ -64,9 +64,12 @@ public:
     Float_t getSignalOfChannel(UInt_t channel);
     UInt_t getMinChannelNumber();
     UInt_t getMaxChannelNumber();
+    Float_t getHighestSignal();
     Float_t getSignal(UInt_t clusterPos);
     Float_t getSNR(UInt_t clusterPos);
     UShort_t getAdcValue(UInt_t clusterPos);
+    UInt_t getHighestHitClusterPosition();
+    UInt_t getClusterPosition(UInt_t channelNo);
     UInt_t getChannel(UInt_t clusterPos);
     Float_t getPedestalSigma(UInt_t clusterPos);
     Float_t getPedestalMean(UInt_t clusterPos);
@@ -107,7 +110,7 @@ private:
     UInt_t nChannels;
     UChar_t det;
     UInt_t eventNumber;
-    ClassDef(TCluster,13);
+    ClassDef(TCluster,17);
 };
 
 #endif /* TCLUSTER_HH_ */

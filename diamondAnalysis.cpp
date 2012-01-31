@@ -177,14 +177,16 @@ int main(int argc, char ** argv) {
 		process_mem_usage(vm2, rss2);
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
-
-		//Calculate Pedestal
 		sys->cd(currentDir.c_str());
-		TPedestalCalculation* pedestalCalculation;
-		pedestalCalculation = new TPedestalCalculation(RUNNUMBER,NEVENTS);
-		pedestalCalculation->calculatePedestals(NEVENTS);
-		pedestalCalculation->calculateSlidingPedestals(NEVENTS);
-		delete pedestalCalculation;
+
+		if (DO_SLIDINGPEDESTAL){
+			//Calculate Pedestal
+
+			TPedestalCalculation* pedestalCalculation;
+			pedestalCalculation = new TPedestalCalculation(RUNNUMBER,NEVENTS);
+			pedestalCalculation->calculatePedestals(NEVENTS);
+			pedestalCalculation->calculateSlidingPedestals(NEVENTS);
+			delete pedestalCalculation;
 //
 //
 //		process_mem_usage(vm2, rss2);
@@ -197,6 +199,8 @@ int main(int argc, char ** argv) {
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
+
+		}
 
 		TAnalysisOfClustering* analysisClustering;
 		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
@@ -212,20 +216,20 @@ int main(int argc, char ** argv) {
 		selectionClass->MakeSelection(NEVENTS);
 		delete selectionClass;
 
+		if (DO_ALIGNMENT){
+			TAlignment *alignment;
+			alignment= new TAlignment(settings);
+			alignment->setSettings(settings);
+			//alignment->PrintEvents(1511,1501);
+			process_mem_usage(vm2, rss2);
+			cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
-		TAlignment *alignment;
-		alignment= new TAlignment(settings);
-		alignment->setSettings(settings);
-		//alignment->PrintEvents(1511,1501);
-		process_mem_usage(vm2, rss2);
-		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-
-		//alignment->createEventVectors(1000);
-		process_mem_usage(vm2, rss2);
-		cout << "\nMemory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-		alignment->Align(NEVENTS);
-		delete alignment;
-
+			//alignment->createEventVectors(1000);
+			process_mem_usage(vm2, rss2);
+			cout << "\nMemory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+			alignment->Align(NEVENTS);
+			delete alignment;
+		}
 
 
 		process_mem_usage(vm2, rss2);

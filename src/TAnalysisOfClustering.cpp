@@ -49,7 +49,7 @@ TAnalysisOfClustering::~TAnalysisOfClustering() {
 
 void TAnalysisOfClustering::doAnalysis(int nEvents)
 {
-	cout<<"find dead channels..."<<endl;
+	cout<<"analyis clusterin results..."<<endl;
 	eventReader->checkADC();
 	if(nEvents!=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
@@ -67,6 +67,7 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 		analyseForSeeds();
 		analyseCluster();
 		compareCentroid_ChargeWeightedMean();
+		analyse2ndHighestHit();
 //		analyseBiggestHit(); // moved to TAnalysisOfPedestal.cpp
 	}
 	saveHistos();
@@ -113,41 +114,16 @@ void TAnalysisOfClustering::checkForSaturatedChannels()
 		}
 	}
 }
-void TAnalysisOfClustering::getBiggestHit(){
-
-	for(int det=0;det<8;det++){
-		int biggestHit=0;
-		Float_t biggestHitInSigma=0;
-		int chBiggestHit;
-		for(int ch=70;ch<200;ch++){//why
-			int adcValue=eventReader->getAdcValue(det,ch);
-			if (adcValue<253)
-				if(adcValue>biggestHit){
-					biggestHit=eventReader->getAdcValue(det,ch);
-					biggestHitInSigma=eventReader->getSignalInSigma(det,ch);
-					chBiggestHit=ch;
-				}
-		}
-		hPulsHeightBiggestHit[det]->Fill(biggestHitInSigma);
-		hChannelBiggestHit[det]->Fill(chBiggestHit);
-		if(eventReader->getAdcValue(det,chBiggestHit-1)<eventReader->getAdcValue(det,chBiggestHit+1))
-			hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit+1));
-		else
-			hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit-1));
-	}
-
-}
-
 
 void TAnalysisOfClustering::initialiseHistos()
 {
 	{
 		stringstream histoName;
-		histoName<<"CWM_Minus_BiggestHit_DiamondPlane";
-		histo_CWM_biggestHit=new TH2F(histoName.str().c_str(),histoName.str().c_str(),512,-1,1,10,0,9);
+		histoName<<"hDiamond_Delta_CWM_BiggestHit";
+		histo_CWM_biggestHit=new TH2F(histoName.str().c_str(),histoName.str().c_str(),512,-0.6,0.6,10,0,9);
 		histoName.str("");
-		histoName<<"highest2Centroid_Minus_BiggestHit_DiamondPlane";
-		histo_H2C_biggestHit==new TH1F(histoName.str().c_str(),histoName.str().c_str(),512,-1,1);
+		histoName<<"hDiamond_Delta_highest2Centroid_BiggestHit";
+		histo_H2C_biggestHit=new TH1F(histoName.str().c_str(),histoName.str().c_str(),512,-0.6,0.6);
 	}
 
 	for (int det=0;det<8;det++){
@@ -241,7 +217,30 @@ void TAnalysisOfClustering::initialiseHistos()
         histo_pulseheight_right_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
     }
 
+    for(int det=0;det<9;det++){//analayse2ndHighestHit
+    	stringstream histName;
+    	histName<<"h2ndBiggestHitSignal_"<<TADCEventReader::getStringForPlane(det);
+    	h2ndBiggestHitSignal[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1023);
+    	h2ndBiggestHitSignal[det]->GetXaxis()->SetTitle("Signal of 2nd Biggest Hit of Cluster");
+    	histName.str("");
+    	histName<<"h2ndBiggestHitOverCharge_"<<TADCEventReader::getStringForPlane(det);
+    	h2ndBiggestHitOverCharge[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
+    	h2ndBiggestHitOverCharge[det]->GetXaxis()->SetTitle("Signal of 2nd Biggest Hit of Cluster over Sum of all signals of cluster");
+    	histName.str("");
+    	histName<<"h2ndBiggestHitPosition_"<<TADCEventReader::getStringForPlane(det);
+    	h2ndBiggestHitPosition[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),3,-1.5,1.5);
+    	h2ndBiggestHitPosition[det]->GetXaxis()->SetTitle("position of snd biggest hit in respect to biggest Hit");
+    	histName.str("");
+    	histName<<"hLeftHitOverLeftAndRight_"<<TADCEventReader::getStringForPlane(det);
+    	hLeftHitOverLeftAndRight[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
+    	hLeftHitOverLeftAndRight[det]->GetXaxis()->SetTitle("Q_L/(Q_R +Q_L)");
+    	histName.str("");
+    	histName<<"hDeltaLeftRightHitOverLeftAndRight_"<<TADCEventReader::getStringForPlane(det);
+    	hDeltaLeftRightHitOverLeftAndRight[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),2048,-1,1);
+    	hDeltaLeftRightHitOverLeftAndRight[det]->GetXaxis()->SetTitle("(Q_L-Q_R)/(Q_R +Q_L)");
+    }
 }
+
 
 
 
@@ -250,69 +249,81 @@ void TAnalysisOfClustering::saveHistos(){
 	cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
 	histSaver->SaveHistogram(histo_CWM_biggestHit);
 	histo_CWM_biggestHit->Delete();
-//	cout<<"plot histo "<<histo_H2C_biggestHit->GetName();
-//	histSaver->SaveHistogram(histo_H2C_biggestHit);
-//	histo_H2C_biggestHit->Delete();
-
+	cout<<"plot histo "<<histo_H2C_biggestHit->GetName();
+	histSaver->SaveHistogram(histo_H2C_biggestHit);
+	histo_H2C_biggestHit->Delete();
+    for(int det=0;det<9;det++){//analyse 2nd biggest Hit
+    	cout<<"plot histo "<<det<<"  h2ndBiggestHitSignal_"<<TADCEventReader::getStringForPlane(det);
+    	histSaver->SaveHistogram(h2ndBiggestHitSignal[det]);
+    	delete h2ndBiggestHitSignal[det];
+    	cout<<"plot histo "<<det<<"  h2ndBiggestHitOverCharge_"<<TADCEventReader::getStringForPlane(det);
+    	histSaver->SaveHistogram(h2ndBiggestHitOverCharge[det]);
+    	delete h2ndBiggestHitOverCharge[det];
+    	cout<<"plot histo "<<h2ndBiggestHitPosition[det]->GetName()<<endl;
+    	histSaver->SaveHistogram(h2ndBiggestHitPosition[det]);
+    	histSaver->SaveHistogram(h2ndBiggestHitPosition[det]);
+    	histSaver->SaveHistogram(hLeftHitOverLeftAndRight[det]);
+    	histSaver->SaveHistogram(hDeltaLeftRightHitOverLeftAndRight[det]);
+    }
 
 	for (int det=0;det<8;det++){
 		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
-		histSaver->SaveHistogramPNG(hSaturatedChannels[det]);
+		histSaver->SaveHistogram(hSaturatedChannels[det]);
 		hSaturatedChannels[det]->Delete();
 	}
 	for (int det=0;det<8;det++){
 		cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
-		histSaver->SaveHistogramPNG(hSeedMap[det]);
+		histSaver->SaveHistogram(hSeedMap[det]);
 		hSeedMap[det]->Delete();
 	}
 	for (int det=0;det<9;det++){
 			cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
-			histSaver->SaveHistogramPNG(hSeedMap2[det]);
+			histSaver->SaveHistogram(hSeedMap2[det]);
 			hSeedMap2[det]->Delete();
 		}
 	for (int det=0;det<8;det++){
 		cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
-		histSaver->SaveHistogramPNG(hNumberOfSeeds[det]);
+		histSaver->SaveHistogram(hNumberOfSeeds[det]);
 		hNumberOfSeeds[det]->Delete();
 	}
 	for(int det=0;det<8;det++){
-			histSaver->SaveHistogramPNG(hPulsHeightBiggestHit[det]);
+			histSaver->SaveHistogram(hPulsHeightBiggestHit[det]);
 			hPulsHeightBiggestHit[det]->Delete();
 	}
 	for(int det=0;det<8;det++){
-		histSaver->SaveHistogramPNG(hPulsHeightNextBiggestHit[det]);
+		histSaver->SaveHistogram(hPulsHeightNextBiggestHit[det]);
 		hPulsHeightNextBiggestHit[det]->Delete();
 	}
 	for(int det=0;det<8;det++){
-		histSaver->SaveHistogramPNG(hChannelBiggestHit[det]);
+		histSaver->SaveHistogram(hChannelBiggestHit[det]);
 		hChannelBiggestHit[det]->Delete();
 	}
 	for(int det=0;det<9;det++){
-		histSaver->SaveHistogramPNG(this->hClusterSize[det]);
-		histSaver->SaveHistogramPNG(this->hNumberOfClusters[det]);
+		histSaver->SaveHistogram(this->hClusterSize[det]);
+		histSaver->SaveHistogram(this->hNumberOfClusters[det]);
 		delete hClusterSize[det];
 		delete hNumberOfClusters[det];
 	}
     
     for (int det = 0; det < 8; det++) {
 		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
-        histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma[det]);
+        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
 		cout << "saving histogram" << this->histo_pulseheight_sigma_second[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma_second[det]);
+		histSaver->SaveHistogram(this->histo_pulseheight_sigma_second[det]);
 //		cout << "saving histogram" << this->histo_pulseheight_sigma125[det]->GetName() << ".." << endl;
-//		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma125[det]);
+//		histSaver->SaveHistogram(this->histo_pulseheight_sigma125[det]);
 		cout << "saving histogram" << this->histo_second_biggest_hit_direction[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_second_biggest_hit_direction[det]);
+		histSaver->SaveHistogram(this->histo_second_biggest_hit_direction[det]);
 		cout << "saving histogram" << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_biggest_hit_map[det]);
+		histSaver->SaveHistogram(this->histo_biggest_hit_map[det]);
 		cout << "saving histogram" << this->histo_pulseheight_left_sigma[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma[det]);
+		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma[det]);
 		cout << "saving histogram" << this->histo_pulseheight_left_sigma_second[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma_second[det]);
+		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma_second[det]);
 		cout << "saving histogram" << this->histo_pulseheight_right_sigma[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma[det]);
+		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma[det]);
 		cout << "saving histogram" << this->histo_pulseheight_right_sigma_second[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma_second[det]);
+		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma_second[det]);
         delete histo_pulseheight_sigma[det];
 		delete histo_pulseheight_sigma_second[det];
 //		delete histo_pulseheight_sigma125[det];
@@ -336,11 +347,13 @@ void TAnalysisOfClustering::compareCentroid_ChargeWeightedMean()
 		Float_t xH2C=(Float_t)eventReader->getCluster(8,0).getHighest2Centroid();
 		Float_t delta=xCWM-xHit;
 		this->histo_CWM_biggestHit->Fill(delta,eventReader->getCluster(8,0).size());
-//		delta = xH2C - xHit;
-//		this->histo_H2C_biggestHit->Fill(delta);
-//		Float_t charge = eventReader->getCluster(8,0).getCharge();
-//		Float_t signal2ndHighestHit=eventReader->getCluster(8,0).getCharge(2)-eventReader->getCluster(8,0).getCharge(1);
-//		Float_t q =signal2ndHighestHit/charge;
+		delta = xH2C - xHit;
+		this->histo_H2C_biggestHit->Fill(delta);
+//		if(eventReader->getNClusters(8)>=1){
+//			Float_t charge = eventReader->getCluster(8,0).getCharge();
+//			Float_t signal2ndHighestHit=eventReader->getCluster(8,0).getCharge(2)-eventReader->getCluster(8,0).getCharge(1);
+//			Float_t q =signal2ndHighestHit/charge;
+//		}
 
 
 	}
@@ -357,6 +370,35 @@ void TAnalysisOfClustering::analyseCluster()
 
 }
 
+
+void TAnalysisOfClustering::analyse2ndHighestHit(){
+	for(int det=0;det<9;det++){
+		for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
+			TCluster cluster=eventReader->getCluster(det,cl);
+			Float_t signalLeft = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()-1);
+			Float_t signalRight = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()+1);
+			Float_t signalHighest = cluster.getHighestSignal();
+
+			if(signalLeft>signalRight){
+				h2ndBiggestHitSignal[det]->Fill(signalLeft);
+				h2ndBiggestHitOverCharge[det]->Fill(signalLeft/cluster.getCharge());
+			}
+			else{
+				h2ndBiggestHitSignal[det]->Fill(signalRight);
+				h2ndBiggestHitOverCharge[det]->Fill(signalRight/cluster.getCharge());
+			}
+			if(signalLeft>signalRight){
+				h2ndBiggestHitPosition[det]->Fill(-1);
+			}
+			else if(signalLeft<signalRight)
+				h2ndBiggestHitPosition[det]->Fill(+1);
+			else
+				h2ndBiggestHitPosition[det]->Fill(0);
+			hDeltaLeftRightHitOverLeftAndRight[det]->Fill((signalLeft-signalRight)/(signalLeft+signalRight));
+			hLeftHitOverLeftAndRight[det]->Fill((signalLeft)/(signalLeft+signalRight));
+		}
+	}
+}
 
 
 

@@ -38,11 +38,12 @@ public:
 	void	doAnalysis(int nEvents=0);
 private:
 	void saveHistos();
+
+	void initialiseHistos();
 	void checkForDeadChannels();
 	void compareCentroid_ChargeWeightedMean();
 	void analyseForSeeds();
-	void getBiggestHit();
-	void initialiseHistos();
+	void analyse2ndHighestHit();
 	void checkForSaturatedChannels();
 	void analyseCluster();
 	TH1F *hSaturatedChannels[8];
@@ -53,7 +54,6 @@ private:
 	TH1F* hChannelBiggestHit[8];
 	TH1F* hPulsHeightBiggestHit[8];
 	TH1F* hPulsHeightNextBiggestHit[8];
-	TH1F* hDifferenceCWM_Centroid[9];
 	TH1F* hNumberOfClusters[9];
 	TH1F* hClusterSize[9];
 	TADCEventReader* eventReader;
@@ -75,6 +75,12 @@ private:
 	TH1F *histo_pulseheight_right_sigma_second[8];
 	TH1F *histo_H2C_biggestHit;
 	TH2F *histo_CWM_biggestHit;
+private:
+	TH1F *h2ndBiggestHitSignal[9];
+	TH1F *h2ndBiggestHitOverCharge[9];
+	TH1F *h2ndBiggestHitPosition[9];
+	TH1F *hLeftHitOverLeftAndRight[9];
+	TH1F *hDeltaLeftRightHitOverLeftAndRight[9];
 };
 
 #endif /* TDEADCHANNELS_HH_ */

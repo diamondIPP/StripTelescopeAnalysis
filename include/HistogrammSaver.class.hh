@@ -28,6 +28,9 @@
 #include "TSystem.h"
 #include "TF1.h"
 #include <sys/dir.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 //#include <sys/dirent.h>
 #include <sys/stat.h>
 
