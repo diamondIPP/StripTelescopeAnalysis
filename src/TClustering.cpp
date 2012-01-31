@@ -50,7 +50,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	pVecvecCluster=&vecvecCluster;
 	settings=NULL;
 	createdTree=false;
-	pEvent=NULL;
+	pEvent=new TEvent();
 
 }
 
@@ -345,13 +345,19 @@ void TClustering::setBranchAdresses(){
 	cout<<"set Branch adresses..."<<endl;
 
 	clusterRev=TCluster::TCLUSTER_REVISION();
+	cout<<"Branch eventNumber"<<endl;
 	clusterTree->Branch("eventNumber",&nEvent,"eventNumber/i");
+	cout<<"Branch runNumber"<<endl;
 	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");
+	cout<<"Branch nClusters"<<endl;
 	clusterTree->Branch("nClusters",&nClusters,"nClusters/i[9]");
+	cout<<"Branch clusterRev"<<endl;
 	clusterTree->Branch("clusterRev",&clusterRev,"clusterRev/i");
+	cout<<"Branch clusters"<<endl;
 	//clusterTree->Branch("vecvecChannel",&vecvecChannel[0])
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
 	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
+	cout<<"Branch event"<<endl;
 	clusterTree->Branch("event","TEvent",&pEvent);
 }
 
