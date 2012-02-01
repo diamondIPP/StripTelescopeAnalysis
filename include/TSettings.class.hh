@@ -165,6 +165,7 @@ public:
     Float_t getRes_keep_factor();
     enumAlignmentTrainingMethod getTrainingMethod() const;
     void setTrainingMethod(enumAlignmentTrainingMethod trainingMethod);
+    void Print();
 protected:
     float store_threshold;
 private:

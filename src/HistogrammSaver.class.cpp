@@ -391,7 +391,7 @@ TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> 
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(posX.size()!=posY.size()||posX.size()==0) {
-		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<endl;
+		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
 		return TH2F();
 	}
 	Float_t maxX = posX.at(0);
@@ -442,7 +442,7 @@ void HistogrammSaver::SetRange(Float_t min,Float_t max){
 
 }
 
-TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range)
+TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(vec.size()==0)
@@ -494,6 +494,10 @@ TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Floa
 			UInt_t nSigma = 3;
 			max=mean+nSigma*sigma;
 		}
+	else if(range==manual){
+		max =xmax;
+		min=xmin;
+	}
 
 
 	TH1F histo = TH1F(name.c_str(),name.c_str(),nBins,min,max);

@@ -407,7 +407,7 @@ void TAlignment::AlignSiliconPlanes(){
 		if(verbosity)printf("\n2 with 0 and 3:%d,%1.2f+/-%1.2f\n",res312.isTestResidual(),res203.getXMean(),res203.getXSigma());
 		AlignDetector(TPlane::XY_COR,2,0,3,false,res203);
 
-		cout<<"\nAlign Plane 3 with Plane 1 and 3"<<endl;
+		cout<<"\nAlign Plane 3 with Plane 1 and 2"<<endl;
 		res312=CheckDetectorAlignment(TPlane::XY_COR,3,1,2,false);
 		if(verbosity)printf("\n3 with 1 and 2:%d,%1.2f+/-%1.2f\n",res312.isTestResidual(),res312.getXMean(),res312.getXSigma());
 		res312=AlignDetector(TPlane::XY_COR,3,1,2,false,res312);
@@ -429,7 +429,7 @@ void TAlignment::AlignSiliconPlanes(){
 }
 
 void TAlignment::AlignDiamondPlane(){
-	verbosity=0;
+	verbosity=1;
 	cout<<"\n\n\n*******************************************************"<<endl;
 	cout<<"*******************************************************"<<endl;
 	cout<<"***************** Align Diamond ***********************"<<endl;
@@ -447,8 +447,8 @@ void TAlignment::AlignDiamondPlane(){
 	//myTrack->setVerbosity(1);
 	for(nDiaAlignmentStep=0;nDiaAlignmentStep<nDiaAlignSteps;nDiaAlignmentStep++){
 		cout<<"\n\n "<<nDiaAlignmentStep<<" of "<<nDiaAlignSteps<<" Steps..."<<endl;
-//		if(nDiaAlignmentStep==2)verbosity=4;
-//		else verbosity=0;
+		if(nDiaAlignmentStep==0)verbosity=4;
+		else verbosity=0;
 		AlignStripDetector(TPlane::X_COR,diaPlane,vecRefPlanes,false,resDia);
 		resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes);
 	}
@@ -602,6 +602,7 @@ TResidual TAlignment::getStripResidual(TPlane::enumCoordinate cor, UInt_t subjec
 		}
 
 		if(verbosity>2)cout<<vecDeltaX.size()<<" "<<vecDeltaY.size()<<" "<< vecXPred.size()<<" "<<vecYPred.size()<<endl;
+
 		//first estimate residuals widths
 		TResidual res = calculateResidual(cor,&vecXPred,&vecDeltaX,&vecYPred,&vecDeltaY,resOld);
 		this->CreatePlots(cor, subjectPlane,refPlaneString.str(),bPlot,bAlign);
@@ -944,7 +945,7 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 		histName<<preName.str();
 		histName<<"_DistributionPlot_DeltaX";
 		histName<<"_-_Plane_"<<subjectPlane<<"_with_"<<refPlaneString;;//<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-		TH1F* histo=(TH1F*)histSaver->CreateDistributionHisto(histName.str(),vecDeltaX,8096).Clone();
+		TH1F* histo=(TH1F*)histSaver->CreateDistributionHisto(histName.str(),vecDeltaX,512,HistogrammSaver::threeSigma).Clone();
 		TF1* fitGausX=new TF1("fitGaus","gaus",-1,1);
 		if(bUpdateAlignment){
 			cout<<"Alignment for plane"<<subjectPlane<<endl;
@@ -966,7 +967,7 @@ void TAlignment::CreatePlots(TPlane::enumCoordinate cor, UInt_t subjectPlane,str
 		histName<<preName.str();
 		histName<<"_DistributionPlot_DeltaY";
 		histName<<"_-_Plane_"<<subjectPlane<<"_with_"<<refPlaneString;//<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-		TH1F* histo = (TH1F*)histSaver->CreateDistributionHisto(histName.str(),vecDeltaY,8096).Clone();
+		TH1F* histo = (TH1F*)histSaver->CreateDistributionHisto(histName.str(),vecDeltaY,512,HistogrammSaver::threeSigma).Clone();
 		TF1* fitGausY=new TF1("fitGaus","gaus",-1,1);
 		if(bUpdateAlignment){
 			histo->Draw("goff");

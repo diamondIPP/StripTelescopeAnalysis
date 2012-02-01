@@ -52,8 +52,8 @@ public:
     bool isLumpyCluster();
     bool isGoldenGateCluster();
     bool hasSaturatedChannels();
-    Float_t getCharge();
-    Float_t getCharge(UInt_t clusters);
+    Float_t getCharge(bool useSmallSignals=false);
+    Float_t getCharge(UInt_t clusters,bool useSmallSignals=false);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
     UInt_t getHighestSignalChannel();
@@ -110,7 +110,7 @@ private:
     UInt_t nChannels;
     UChar_t det;
     UInt_t eventNumber;
-    ClassDef(TCluster,17);
+    ClassDef(TCluster,18);
 };
 
 #endif /* TCLUSTER_HH_ */

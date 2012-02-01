@@ -50,7 +50,7 @@ TAnalysisOfClustering::~TAnalysisOfClustering() {
 void TAnalysisOfClustering::doAnalysis(int nEvents)
 {
 	cout<<"analyis clusterin results..."<<endl;
-	eventReader->checkADC();
+//	eventReader->checkADC();
 	if(nEvents!=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
@@ -377,15 +377,22 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 			TCluster cluster=eventReader->getCluster(det,cl);
 			Float_t signalLeft = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()-1);
 			Float_t signalRight = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()+1);
+			if(signalLeft<0)
+				cout<<"signalLeft is smaller than 0"<<endl;
+			if(signalRight<0)
+							cout<<"signalLeft is smaller than 0"<<endl;
 			Float_t signalHighest = cluster.getHighestSignal();
+			Float_t deltaSignals = signalLeft-signalRight;
+			Float_t sumSignals = signalLeft+signalRight;
+			Float_t allCharge=cluster.getCharge(true);
 
 			if(signalLeft>signalRight){
 				h2ndBiggestHitSignal[det]->Fill(signalLeft);
-				h2ndBiggestHitOverCharge[det]->Fill(signalLeft/cluster.getCharge());
+				h2ndBiggestHitOverCharge[det]->Fill(signalLeft/allCharge);
 			}
 			else{
 				h2ndBiggestHitSignal[det]->Fill(signalRight);
-				h2ndBiggestHitOverCharge[det]->Fill(signalRight/cluster.getCharge());
+				h2ndBiggestHitOverCharge[det]->Fill(signalRight/allCharge);
 			}
 			if(signalLeft>signalRight){
 				h2ndBiggestHitPosition[det]->Fill(-1);
@@ -394,8 +401,9 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 				h2ndBiggestHitPosition[det]->Fill(+1);
 			else
 				h2ndBiggestHitPosition[det]->Fill(0);
-			hDeltaLeftRightHitOverLeftAndRight[det]->Fill((signalLeft-signalRight)/(signalLeft+signalRight));
-			hLeftHitOverLeftAndRight[det]->Fill((signalLeft)/(signalLeft+signalRight));
+			if (TMath::Abs(deltaSignals/sumSignals)!=1)
+				hDeltaLeftRightHitOverLeftAndRight[det]->Fill((deltaSignals)/(sumSignals));
+			if(signalLeft!=0)hLeftHitOverLeftAndRight[det]->Fill((signalLeft)/(sumSignals));
 		}
 	}
 }

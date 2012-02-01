@@ -319,7 +319,7 @@ void TADCEventReader::initialiseTree(){
 	current_event = 0;
 	cout<<tree->IsZombie()<<endl;
 	tree->GetEvent(current_event);
-	cout<< "Loaded first event in PedTree: "<<event_number<<endl;
+	cout<< "Loaded first event in Tree: "<<event_number<<endl;
 	cout<< "RunNumber is: "<<run_number<<endl;
 	cout<< "StoreThreshold is: "<<store_threshold<<endl;
 }

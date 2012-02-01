@@ -179,7 +179,6 @@ int main(int argc, char ** argv) {
 
 		sys->cd(currentDir.c_str());
 
-		if (DO_SLIDINGPEDESTAL){
 			//Calculate Pedestal
 
 			TPedestalCalculation* pedestalCalculation;
@@ -192,7 +191,7 @@ int main(int argc, char ** argv) {
 //		process_mem_usage(vm2, rss2);
 //		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
-
+			sys->cd(currentDir.c_str());
 		TClustering* clustering;
 		clustering=new TClustering(RUNNUMBER);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 		clustering->setSettings(settings);
@@ -200,23 +199,24 @@ int main(int argc, char ** argv) {
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
 
-		}
-
+	if (DO_SLIDINGPEDESTAL){
+		sys->cd(currentDir.c_str());
 		TAnalysisOfClustering* analysisClustering;
 		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
 		analysisClustering->doAnalysis(NEVENTS);
 		delete analysisClustering;
-
+	}
 
 //		process_mem_usage(vm2, rss2);
 //		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-
+		sys->cd(currentDir.c_str());
 		TSelectionClass* selectionClass;
 		selectionClass=new TSelectionClass(settings);
 		selectionClass->MakeSelection(NEVENTS);
 		delete selectionClass;
 
 		if (DO_ALIGNMENT){
+			sys->cd(currentDir.c_str());
 			TAlignment *alignment;
 			alignment= new TAlignment(settings);
 			alignment->setSettings(settings);

@@ -1239,3 +1239,8 @@ UInt_t TSettings::getRunNumber(){
 Float_t TSettings::getRes_keep_factor(){
 	return this->res_keep_factor;
 }
+
+
+void Print(){
+
+}

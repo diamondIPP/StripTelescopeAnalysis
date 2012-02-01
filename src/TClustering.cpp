@@ -50,7 +50,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	pVecvecCluster=&vecvecCluster;
 	settings=NULL;
 	createdTree=false;
-	pEvent=new TEvent();
+	pEvent=0;//new TEvent();
 
 }
 
@@ -356,6 +356,7 @@ void TClustering::setBranchAdresses(){
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
 	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
 	cout<<"Branch event"<<endl;
+	pEvent=0;
 	clusterTree->Branch("event","TEvent",&pEvent);
 }
 
