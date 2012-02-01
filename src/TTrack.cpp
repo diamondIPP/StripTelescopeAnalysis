@@ -258,11 +258,30 @@ Float_t TTrack::getMeasured(TPlane::enumCoordinate cor, UInt_t plane)
 UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
 {
 	UInt_t plane = det / 2;
+	int rawChannel = 9999;
+	// x planes:
 	if (det%2 == 0) {
 		//TODO
+		rawChannel = (int)((xPred-this->getXOffset(plane) - (yPred/*-this->getYOffset(plane)*/)*TMath::Tan(this->getPhiXOffset(plane))) * TMath::Cos(this->getPhiXOffset(plane)));
 	}
+	// y planes:
 	else {
-		
+		this->getYOffset(plane);
+		this->getPhiYOffset(plane);
+	}
+	// telescope
+	if (det < 8) {
+		if (rawChannel > -1 && rawChannel < 256) {
+			return rawChannel;
+		}
+		else return 9999;
+	}
+	// diamond
+	else {
+		if (rawChannel > -1 && rawChannel < 128) {
+			return rawChannel;
+		}
+		else return 9999;
 	}
 }
 

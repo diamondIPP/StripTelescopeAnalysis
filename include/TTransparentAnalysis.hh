@@ -46,23 +46,30 @@
 #include "TTrack.hh"
 #include "TTracking.hh"
 #include "TRawEventSaver.hh"
+#include "TCluster.hh"
 
 using namespace std;
 
 class TTransparentAnalysis {
 public:
-	TTransparentAnalysis(int runNumber);
+	TTransparentAnalysis(int runNumber, TSettings settings);
 	virtual ~TTransparentAnalysis();
 	void	doAnalysis(int nEvents=0);
 	void analyze(int nEvents, int startEvent);
 	
 private:
 	void initHistograms();
+	void fillHistograms();
 	void saveHistograms();
 	void fitTrack();
 	void analyzeTrack(TTrack track);
+	TCluster makeTransparentCluster(UInt_t det, UInt_t centerChannel, UInt_t clusterSize, int direction = 1);
 	
 	TTracking* tracking;
+	vector<UInt_t> siliconPlanes;
+	TPositionPrediction* positionPrediction;
+    TSettings* settings;
+	vector<TCluster> transparentClusters;
 	
 	
     TSystem* sys;
