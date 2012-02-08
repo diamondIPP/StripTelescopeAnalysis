@@ -75,6 +75,8 @@ public:
     void setVerbosity(UInt_t verbosity = 0){this->verbosity = verbosity;}
 	UInt_t getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred); // returns the raw channel number for a x,y position in lab system
 	Float_t getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
+	Float_t getXPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
+	Float_t getYPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
 
     ;
 private:

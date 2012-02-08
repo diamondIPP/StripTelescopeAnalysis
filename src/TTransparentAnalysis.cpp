@@ -60,9 +60,16 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 	cout<<"\n\n******************************************\n";
 	cout<<    "******Start Transparent Analysis...*******\n";
 	cout<<"******************************************\n\n"<<endl;
+	
+	
+	// TODO: move these setting to the proper place
+	subjectDetector = 8;
 	for (int i = 0; i < 8; i++) {
-		siliconPlanes.push_back(i);
+		refPlanes.push_back(i);
 	}
+	transparentMaxClusterSize = 10;
+	
+	
 	
 	nAnalyzedEvents = 0;
 	regionNotOnPlane = 0;
@@ -78,14 +85,14 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 			continue;
 		}
 		transparentClusters.clear();
-		positionPrediction = tracking->predictPosition(8,siliconPlanes);
+		positionPrediction = tracking->predictPosition(subjectDetector,refPlanes);
 		this->predXPosition = positionPrediction->getPositionX();
 		this->predYPosition = positionPrediction->getPositionY();
 		// TODO: position in det system
 //		this->positionInDetSystem = getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
-		if (this->checkPredictedRegion(8, this->positionInDetSystem, 10) == false) continue;
-		for (UInt_t clusterSize = 1; clusterSize < 11; clusterSize++) {
-			transparentClusters.push_back(this->makeTransparentCluster(8, this->positionInDetSystem, clusterSize));
+		if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystem, transparentMaxClusterSize) == false) continue;
+		for (UInt_t clusterSize = 1; clusterSize < transparentMaxClusterSize+1; clusterSize++) {
+			transparentClusters.push_back(this->makeTransparentCluster(subjectDetector, this->positionInDetSystem, clusterSize));
 		}
 		nAnalyzedEvents++;
 		this->fillHistograms();

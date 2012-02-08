@@ -68,7 +68,9 @@ private:
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	
 	TTracking* tracking;
-	vector<UInt_t> siliconPlanes;
+	UInt_t subjectDetector;
+	vector<UInt_t> refPlanes;
+	UInt_t transparentMaxClusterSize;
 	TPositionPrediction* positionPrediction;
     TSettings* settings;
 	vector<TCluster> transparentClusters;
