@@ -64,7 +64,8 @@ private:
 	void saveHistograms();
 	void fitTrack();
 	void analyzeTrack(TTrack track);
-	TCluster makeTransparentCluster(UInt_t det, UInt_t centerChannel, UInt_t clusterSize, int direction = 1);
+	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
+	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	
 	TTracking* tracking;
 	vector<UInt_t> siliconPlanes;
@@ -72,10 +73,20 @@ private:
     TSettings* settings;
 	vector<TCluster> transparentClusters;
 	
+	Float_t predXPosition, predYPosition;
+	Float_t positionInDetSystem;
+	
 	
     TSystem* sys;
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
+	
+	// cut flow
+	UInt_t nAnalyzedEvents;
+	UInt_t regionNotOnPlane;
+	UInt_t saturatedChannel;
+	UInt_t screenedChannel;
+	UInt_t noValidTrack;
 	
 	
 	// histograms

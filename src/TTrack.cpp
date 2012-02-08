@@ -282,6 +282,11 @@ UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
 	}
 }
 
+Float_t TTrack::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
+{
+	// TODO: write getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)!!!
+}
+
 UInt_t TTrack::getVerbosity() const
 {
     return verbosity;

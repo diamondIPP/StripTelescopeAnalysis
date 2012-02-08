@@ -64,25 +64,77 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 		siliconPlanes.push_back(i);
 	}
 	
+	nAnalyzedEvents = 0;
+	regionNotOnPlane = 0;
+	saturatedChannel = 0;
+	screenedChannel = 0;
+	noValidTrack = 0;
+	
 	for (int nEvent = startEvent; nEvent < nEvents; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
 		tracking->LoadEvent(nEvent);
-		if (tracking->isValidTrack() == 0) continue;	// TODO: cut flow
+		if (tracking->isValidTrack() == 0) {
+			noValidTrack++;
+			continue;
+		}
 		transparentClusters.clear();
 		positionPrediction = tracking->predictPosition(8,siliconPlanes);
+		this->predXPosition = positionPrediction->getPositionX();
+		this->predYPosition = positionPrediction->getPositionY();
+		// TODO: position in det system
+//		this->positionInDetSystem = getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
+		if (this->checkPredictedRegion(8, this->positionInDetSystem, 10) == false) continue;
 		for (UInt_t clusterSize = 1; clusterSize < 11; clusterSize++) {
-			transparentClusters.push_back(this->makeTransparentCluster(8, positionPrediction->getPositionX(), clusterSize, 1)); // TODO: check centerChannel and direction!!
+			transparentClusters.push_back(this->makeTransparentCluster(8, this->positionInDetSystem, clusterSize));
 		}
+		nAnalyzedEvents++;
+		this->fillHistograms();
 	}
 }
 
-// TODO: avoid wrong channel numbers (>128, <0)
-TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, UInt_t centerChannel, UInt_t clusterSize, int direction) {
-	direction = direction / TMath::Abs(direction);
-	TCluster transparentCluster = TCluster(tracking->getEvent_number(), det, 0, 0, 128); // TODO: modify for to use for telescope planes
+bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
+	// TODO: cut flow!!
+	UInt_t centerChannel = (UInt_t)centerPosition;
+	int direction = 1;
+	if (centerPosition-(int)centerPosition<0.5) {
+		direction = -1;
+	}
 	int currentChannel = centerChannel;
-	for (UInt_t iChannel; iChannel < clusterSize; iChannel++) {
-		currentChannel -= direction * iChannel;
+	for (int iChannel = 0; iChannel < clusterSize; iChannel++) {
+		direction *= -1;
+		currentChannel += direction * iChannel;
+		if (currentChannel < 0) {
+			regionNotOnPlane++;
+			return false;
+		}
+		if (currentChannel > TPlaneProperties::getNChannels(det)-1) {
+			regionNotOnPlane++;
+			return false;
+		}
+		if (this->settings->getDet_channel_screen(det).isScreened(currentChannel) == true) {
+			screenedChannel++;
+			return false;
+		}
+		if (tracking->isSaturated(det, currentChannel) == true) {
+			saturatedChannel++;
+			return false;
+		}
+	}
+	return true;
+}
+
+// TODO: avoid wrong channel numbers (>128, <0)
+TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
+	UInt_t centerChannel = (UInt_t)centerPosition;
+	int direction = 1;
+	if (centerPosition-(int)centerPosition<0.5) {
+		direction = -1;
+	}
+	TCluster transparentCluster = TCluster(tracking->getEvent_number(), det, 0, 0, TPlaneProperties::getNChannels(det));
+	int currentChannel = centerChannel;
+	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
+		direction *= -1;
+		currentChannel += direction * iChannel;
 		transparentCluster.addChannel(currentChannel, tracking->getSignal(det,currentChannel), tracking->getSignalInSigma(det,currentChannel), tracking->getAdcValue(det,currentChannel), tracking->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
 	return transparentCluster;
