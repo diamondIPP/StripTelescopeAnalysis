@@ -21,6 +21,8 @@ public:
 	static UInt_t getMaxSignalHeightSilicon(){return 255;};
 	static UInt_t getMaxSignalHeightDiamond(){return 4095;};
 	static UInt_t getMaxSignalHeight(UInt_t det);
+	static UInt_t getPlaneNumber(UInt_t det){return det/2;};
+	// TODO: getPlaneCoordinate(UInt_t plane);
 
 };
 
