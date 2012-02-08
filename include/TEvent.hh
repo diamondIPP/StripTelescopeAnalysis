@@ -24,16 +24,21 @@
 #include "TROOT.h" // for adding your own classes to ROOT's library
 #include "TObject.h"
 
+#include "TPlaneProperties.hh"
 #include "TPlane.hh"
 
 class TEvent:public TObject {
 public:
 	TEvent(UInt_t nEvent=0);
+	TEvent(const TEvent& rhs);
 	virtual ~TEvent();
 	TPlane getPlane(int plane){return planes[plane];};
 	void addPlane(TPlane plane,Int_t pos=-1);
 	UInt_t getNXClusters(UInt_t plane){if(planes.size()>plane)return planes.at(plane).getNXClusters();else return 0;}
 	UInt_t getNYClusters(UInt_t plane){if(planes.size()>plane)return planes.at(plane).getNXClusters();else return 0;}
+	UInt_t getNClusters(UInt_t det);
+	TCluster getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
+	TCluster getCluster(UInt_t det, UInt_t cl);
 	UInt_t getNPlanes();
 	bool  isValidSiliconEvent();
 	bool isMasked();
@@ -44,7 +49,7 @@ private:
 	vector<TPlane> planes;
 	UInt_t eventNumber;
 
-    ClassDef(TEvent,2);
+    ClassDef(TEvent,4);
 public:
 	
 };

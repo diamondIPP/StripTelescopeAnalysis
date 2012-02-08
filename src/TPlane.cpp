@@ -8,22 +8,34 @@
 
 #include "../include/TPlane.hh"
 ClassImp(TPlane);
-TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type) {
-	this->xClusters = xClusters;
-	this->yClusters = yClusters;
+TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
+	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
+		this->xClusters.push_back(xClusters.at(xCl));
+	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
+		this->yClusters.push_back(yClusters.at(yCl));
 	this->type=type;
 }
 
-TPlane::TPlane(vector<TCluster> xClusters,enumDetectorType type){
-	this->xClusters = xClusters;
+TPlane::TPlane(vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
+	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
+		this->xClusters.push_back(xClusters.at(xCl));
+	yClusters.clear();
 	this->type=type;
+}
+
+TPlane::TPlane(const TPlane& rhs){
+	for(UInt_t xCl=0;xCl<rhs.xClusters.size();xCl++)
+		this->xClusters.push_back(rhs.xClusters.at(xCl));
+	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
+		this->yClusters.push_back(rhs.yClusters.at(yCl));
+	this->type=rhs.type;
 }
 
 TPlane::~TPlane() {
 	
 }
 
-enum TPlane::enumDetectorType TPlane::getDetectorType() const
+enum TPlaneProperties::enumDetectorType TPlane::getDetectorType() const
 {
 	return type;
 //	if(type==kSilicon)
@@ -35,7 +47,7 @@ enum TPlane::enumDetectorType TPlane::getDetectorType() const
 //	else return 20;
 }
 
-void TPlane::setDetectorType(enumDetectorType type)
+void TPlane::setDetectorType(TPlaneProperties::enumDetectorType type)
 {
     this->type = type;
 }
@@ -73,8 +85,12 @@ UInt_t TPlane::getNYClusters(){
 	return yClusters.size();
 }
 
+/**
+ * a Plane is valid if one and only one cluster is in each plane
+ * @return
+ */
 bool TPlane::isValidPlane(){
-	if(this->type == kSilicon)
+	if(this->type == TPlaneProperties::kSilicon)
 		return (getNXClusters()==1&&getNYClusters()==1);
 	else
 		return (getNXClusters()==1);
@@ -90,12 +106,19 @@ string TPlane::getCoordinateString(enumCoordinate cor){
 	}
 }
 
-string TPlane::getDetectortypeString(enumDetectorType type){
+string TPlane::getDetectortypeString(TPlaneProperties::enumDetectorType type){
 	switch (type){
-	case kSilicon: 	return "Silicon";
-	case kDiamond:	return "Diamond";
+	case TPlaneProperties::kSilicon: 	return "Silicon";
+	case TPlaneProperties::kDiamond:	return "Diamond";
 	default:		return "UNDEFINED";
 	}
+}
+
+TCluster TPlane::getCluster(enumCoordinate cor, UInt_t cl){
+	if(cor==X_COR)
+		return xClusters.at(cl);
+	else
+		return yClusters.at(cl);
 }
 
 void TPlane::Print(UInt_t level)
@@ -105,7 +128,7 @@ void TPlane::Print(UInt_t level)
 	for(UInt_t i=0;i<getNXClusters();i++){
 		this->xClusters.at(i).Print(level+1);
 	}
-	if(this->getDetectorType()==kSilicon){
+	if(this->getDetectorType()==TPlaneProperties::kSilicon){
 		cout<<"Y:";
 		for(UInt_t i=0;i<getNYClusters();i++){
 			this->yClusters.at(i).Print(level+1);

@@ -173,7 +173,10 @@ void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH1F* histo) {
-	if(histo->GetEntries()==0)return;
+	if(histo->GetEntries()==0){
+		cout<<"Histogram has no entries..."<<endl;
+		 return;
+	}
    TCanvas plots_canvas("plots_canvas","plots_canvas");
    plots_canvas.cd();
 	histo->SetMinimum(0.);

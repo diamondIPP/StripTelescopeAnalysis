@@ -527,7 +527,17 @@ void TSettings::ParseFloatArray(string value, vector<float> &vec) {
 }
 
 
+Float_t TSettings::getClusterSeedFactor(UInt_t det){
+	if(det==8)
+		return getDi_Cluster_Seed_Factor();
+	return getSi_Cluster_Seed_Factor();
+}
 
+Float_t TSettings::getClusterHitFactor(UInt_t det){
+	if(det==8)
+		return getDi_Cluster_Hit_Factor();
+	return getSi_Cluster_Hit_Factor();
+}
 
 Int_t TSettings::getMakeBufferPlots() const
 {

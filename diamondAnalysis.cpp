@@ -11,6 +11,7 @@
 //#include "Clustering.class.hh"
 #include "TRawEventSaver.hh"
 #include "TPedestalCalculation.hh"
+#include "TAnalysisOfPedestal.hh"
 #include "TAnalysisOfClustering.hh"
 #include "TClustering.hh"
 #include "TSelectionClass.hh"
@@ -186,6 +187,12 @@ int main(int argc, char ** argv) {
 			pedestalCalculation->calculatePedestals(NEVENTS);
 			pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 			delete pedestalCalculation;
+
+
+			TAnalysisOfPedestal *analysisOfPedestal;
+			analysisOfPedestal = new TAnalysisOfPedestal(settings);
+			analysisOfPedestal->doAnalysis(NEVENTS);
+			delete analysisOfPedestal;
 //
 //
 //		process_mem_usage(vm2, rss2);

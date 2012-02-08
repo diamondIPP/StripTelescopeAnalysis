@@ -1,10 +1,14 @@
-//
-//  TAnalysisOfPedestal.hh
-//  Diamond Analysis
-//
-//  Created by Lukas Bäni on 30.11.11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
-//
+/**
+ *  TAnalysisOfPedestal.hh
+ *  Diamond Analysis
+ *
+ *
+ *  Created by Lukas Baeni on 30.11.11.
+ *
+ *
+ *  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+ *
+ */
 
 
 #ifndef TANALYSISOFPEDESTAL_HH_
@@ -29,13 +33,13 @@
 #include "HistogrammSaver.class.hh"
 
 #include "TADCEventReader.hh"
+#include "TSettings.class.hh"
 
-#define N_DET_CHANNELS 256
 using namespace std;
 
 class TAnalysisOfPedestal {
 public:
-	TAnalysisOfPedestal(int runnumber,int seedSigma=10,int hitSigma=7);
+	TAnalysisOfPedestal(TSettings* settings);
 	virtual ~TAnalysisOfPedestal();
 	void	doAnalysis(int nEvents=0);
 private:
@@ -47,33 +51,32 @@ private:
 	void checkForSaturatedChannels();
 	void analyseCluster();
     void analyseBiggestHit();
-	TH1F *hSaturatedChannels[8];
-	TH1F *hSeedMap[8];
+	TH1F *hSaturatedChannels[9];
+	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
-	TH1F *hClusterMap[8];
-	TH1F* hNumberOfSeeds[8];
-	TH1F* hChannelBiggestHit[8];
-	TH1F* hPulsHeightBiggestHit[8];
-	TH1F* hPulsHeightNextBiggestHit[8];
-	TH1F* hNumberOfClusters[9];
-	TH1F* hClusterSize[9];
+	TH1F *hClusterMap[9];
+	TH1F* hNumberOfSeeds[9];
+	TH1F* hChannelBiggestHit[9];
+	TH1F* hPulsHeightBiggestHit[9];
+	TH1F* hPulsHeightNextBiggestHit[9];
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
+    TSettings *settings;
     int nEvent;
     int seedSigma;
     int hitSigma;
-    TH1F *histo_pulseheight_sigma[8];
-	TH1F *histo_pulseheight_sigma_second[8];
-	TH1F *histo_pulseheight_sigma125[8];
-	TH1F *histo_second_biggest_hit_direction[8];
-	TH1F *histo_pulseheight_sigma_second_left[8];
-	TH1F *histo_pulseheight_sigma_second_right[8];
-	TH1F *histo_biggest_hit_map[8];
-	TH1F *histo_pulseheight_left_sigma[8];
-	TH1F *histo_pulseheight_left_sigma_second[8];
-	TH1F *histo_pulseheight_right_sigma[8];
-	TH1F *histo_pulseheight_right_sigma_second[8];
+    TH1F *histo_pulseheight_sigma[9];
+	TH1F *histo_pulseheight_sigma_second[9];
+	TH1F *histo_pulseheight_sigma125[9];
+	TH1F *histo_second_biggest_hit_direction[9];
+	TH1F *histo_pulseheight_sigma_second_left[9];
+	TH1F *histo_pulseheight_sigma_second_right[9];
+	TH1F *histo_biggest_hit_map[9];
+	TH1F *histo_pulseheight_left_sigma[9];
+	TH1F *histo_pulseheight_left_sigma_second[9];
+	TH1F *histo_pulseheight_right_sigma[9];
+	TH1F *histo_pulseheight_right_sigma_second[9];
 };
 
 #endif /* TANALYSISOFPEDESTAL_HH_ */

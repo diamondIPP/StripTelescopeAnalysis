@@ -21,7 +21,7 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 12;};
+	static UInt_t TCLUSTER_REVISION() {return 19;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3};
     TCluster()
@@ -45,6 +45,7 @@ public:
 
     };
     TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
+    TCluster(const TCluster& a);
     virtual ~TCluster();
     void addChannel(int channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
     Float_t getPosition(calculationMode_t mode=highest2Centroid);
@@ -57,7 +58,7 @@ public:
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
     UInt_t getHighestSignalChannel();
-    Float_t getChargeWeightedMean();
+    Float_t getChargeWeightedMean(bool useNonHits=false);
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
@@ -89,28 +90,28 @@ private:
     void checkForGoldenGate();
     void checkForLumpyCluster();
     deque<pair<int,Float_t> > cluster; //ch,signal
-    deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
-    deque<bool> clusterChannelScreened;
-    UInt_t numberOfSeeds;
-    UInt_t numberOfHits;
-    UInt_t numberOfNoHits;
-    int seedSigma;
-    int hitSigma;
-    bool isSaturated;
-    bool isGoldenGate;
-    bool isLumpy;
-    bool isChecked;
-    bool hasBadChannel;
-    calculationMode_t mode;
-    int verbosity;
-    Float_t charge;
-    Float_t maximumSignal;
-    int maxChannel;
-    int revisionNumber;
-    UInt_t nChannels;
-    UChar_t det;
-    UInt_t eventNumber;
-    ClassDef(TCluster,18);
+        deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
+        deque<bool> clusterChannelScreened;
+        UInt_t numberOfSeeds;
+        UInt_t numberOfHits;
+        UInt_t numberOfNoHits;
+        int seedSigma;
+        int hitSigma;
+        bool isSaturated;
+        bool isGoldenGate;
+        bool isLumpy;
+        bool isChecked;
+        bool hasBadChannel;
+        calculationMode_t mode;
+        int verbosity;
+        Float_t charge;
+        Float_t maximumSignal;
+        int maxChannel;
+        int revisionNumber;
+        UInt_t nChannels;
+        UChar_t det;
+        UInt_t eventNumber;
+    ClassDef(TCluster,19);
 };
 
 #endif /* TCLUSTER_HH_ */

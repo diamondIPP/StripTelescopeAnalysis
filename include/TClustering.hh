@@ -33,8 +33,8 @@ using namespace std;
 #include "TEvent.hh"
 #include "TPlane.hh"
 #include "TSettings.class.hh"
-#define N_DET_CHANNELS 256
-#define N_DIA_CHANNELS 128
+//#define N_DET_CHANNELS 256
+//#define N_DIA_CHANNELS 128
 
 class TClustering {
 

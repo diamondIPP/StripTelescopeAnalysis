@@ -68,7 +68,7 @@ void TRawEventSaver::saveEvents(int nEvents){
 		this->setBranches();
 		cout<<endl;
 		for (int i=0;i<nEvents;i++){
-			showStatusBar(i,nEvents);
+			showStatusBar(i,nEvents,100);
 			rawEventReader->ReadRawEvent(i,false);
 			loadEvent();
 			eventNumber=i;
@@ -117,7 +117,7 @@ bool TRawEventSaver::treeExists(int nEvents){
 }
 
 void TRawEventSaver::showStatusBar(int nEvent,int nEvents,int updateIntervall,bool show){
-	nEvent++;
+	if(nEvent!=nEvents)nEvent++;
 	cout.precision(3);
 	int percentageLength=50;
 	if(nEvent%(int)updateIntervall==0||nEvent==nEvents-1||show){

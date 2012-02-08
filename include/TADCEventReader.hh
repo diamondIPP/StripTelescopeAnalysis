@@ -19,7 +19,9 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TKey.h"
+#include "TSystem.h"
 #include "TCluster.hh"
+#include "TPlaneProperties.hh"
 //#include "TPlane.hh"
 #include "TEvent.hh"
 class TADCEventReader {
@@ -85,7 +87,7 @@ private:
 	Float_t Det_PedWidth[9][256];
 	Float_t pedestalMean[9][256];
 	Float_t pedestalSigma[9][256];
-	TCluster::vecvecTCluster* pVecvecCluster;
+	//TCluster::vecvecTCluster* pVecvecCluster;
 	TEvent *pEvent;
 	bool bIsDetMasked;
 	bool hasValidSiliconTrack;
@@ -97,6 +99,7 @@ private:
 	TFile *file;
     TTree *tree;
     UInt_t current_event;
+    TSystem* sys;
 
 private:
 	UInt_t verbosity;

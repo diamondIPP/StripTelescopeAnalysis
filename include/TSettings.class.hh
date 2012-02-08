@@ -27,6 +27,8 @@ public:
 
 	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
 
+	Float_t getClusterSeedFactor(UInt_t det);
+	Float_t getClusterHitFactor(UInt_t det);
 	Float_t getAlignment_chi2() const;
 	void setAlignment_chi2(Float_t alignment_chi2);
 	float getFix_dia_noise() const;

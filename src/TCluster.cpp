@@ -10,9 +10,14 @@ ClassImp(TCluster);
 
 TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels) {
 	// TODO Auto-generated constructor stub
+	cluster.clear();
+	cluster2.clear();
+	clusterChannelScreened.clear();
 	numberOfSeeds=0;
 	numberOfHits=0;
+	numberOfNoHits=0;
 	maximumSignal=0;
+	maxChannel=0;
 	charge=0;
 	this->seedSigma=seedSigma;
 	this->hitSigma=hitSigma;
@@ -25,10 +30,46 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	hasBadChannel=false;
 	this->det=det;
 	this->eventNumber=nEvent;
+	mode=highest2Centroid;
+	verbosity=0;
+	this->nChannels=nChannels;
 }
 
 TCluster::~TCluster() {
 	// TODO Auto-generated destructor stub
+}
+
+TCluster::TCluster(const TCluster& rhs){
+	//TODO WIe gehe ich vor mit den ganzen TObject kram???
+	//cout<<"copy TClsuter"<<endl;
+	for(UInt_t i=0;i<rhs.cluster.size()&& i<rhs.cluster2.size();i++){
+		pair<int,Float_t> valueCluster= make_pair(rhs.cluster.at(i).first,rhs.cluster.at(i).second);
+		pair<UShort_t,Float_t> valueCluster2=make_pair(rhs.cluster2.at(i).first,rhs.cluster2.at(i).second);
+		cluster.push_back(valueCluster);
+		cluster.push_back(valueCluster2);
+	}
+	for(UInt_t i=0;i<rhs.clusterChannelScreened.size();i++)
+		clusterChannelScreened.push_back(rhs.clusterChannelScreened.at(i));
+	this->numberOfSeeds=rhs.numberOfSeeds;
+	numberOfHits=rhs.numberOfHits;
+	numberOfNoHits=rhs.numberOfNoHits;
+	seedSigma=rhs.seedSigma;
+	hitSigma=rhs.hitSigma;
+	isSaturated=rhs.isSaturated;
+	isGoldenGate=rhs.isGoldenGate;
+	isLumpy=rhs.isLumpy;
+	isChecked=rhs.isChecked;
+	hasBadChannel=rhs.hasBadChannel;
+	mode=rhs.mode;
+	verbosity=rhs.verbosity;
+	charge=rhs.charge;
+	maximumSignal=rhs.maximumSignal;
+	maxChannel=rhs.maxChannel;
+	revisionNumber=rhs.revisionNumber;
+	nChannels=rhs.nChannels;
+	det=rhs.det;
+	eventNumber=rhs.eventNumber;
+
 }
 
 void TCluster::addChannel(int ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
@@ -106,7 +147,7 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries,bool useSmallSignals){
 	if(nClusterEntries==0)return 0;
 	Float_t clusterCharge=getSignalOfChannel(this->getHighestSignalChannel());
 	bool b2ndHighestStripIsBigger = (getHighestSignalChannel()-this->getHighest2Centroid()<0);
-	for(UInt_t nCl=1;nCl<nClusterEntries&&nCl<this->cluster.size();nCl++){
+	for(UInt_t nCl=1;nCl<nClusterEntries&&nCl<this->cluster.size()&&nCl<this->cluster2.size();nCl++){
 		if(b2ndHighestStripIsBigger){
 			if(nCl%2==1){
 				if (useSmallSignals||isHit(getHighestSignalChannel()+(nCl/2)+1))
@@ -142,11 +183,11 @@ UInt_t TCluster::getHighestSignalChannel()
 	return maxChannel;
 }
 
-Float_t TCluster::getChargeWeightedMean(){
+Float_t TCluster::getChargeWeightedMean(bool useNonHits){
 	Float_t sum=0;
 	Float_t charged=0;
-	for(UInt_t cl=0;cl<this->cluster.size();cl++){
-		if(true||isHit(cl)){//todo anpassen
+	for(UInt_t cl=0;cl<this->cluster.size()&&cl<this->cluster2.size();cl++){
+		if(useNonHits||isHit(cl)){//todo anpassen
 			//todo . take at least second biggest hit for =charge weighted mean
 			sum+=cluster.at(cl).first*cluster.at(cl).second;//kanalnummer*signalNummer
 			charged+=cluster.at(cl).second;//signal
@@ -173,7 +214,7 @@ void TCluster::checkForGoldenGate(){
 	if(cluster.size()<=2)
 		return;
 	int previousSeed=-1;
-	for(UInt_t i=0;i<cluster.size()&&!isGoldenGate;i++){
+	for(UInt_t i=0;i<cluster.size()&&i<this->cluster2.size()&&!isGoldenGate;i++){
 		if(cluster2.at(i).second>seedSigma){
 			if( previousSeed!=-1 && previousSeed+1!=cluster.at(i).first )
 				isGoldenGate=true;
@@ -270,7 +311,7 @@ void TCluster::checkForLumpyCluster(){
 		return;//for lumpy cluster at least 3 hits are needed
 	bool isfalling;
 	Float_t lastSeed;
-	for(UInt_t i=0;i<cluster.size()&&!isLumpy;i++){
+	for(UInt_t i=0;i<cluster.size()&&i<this->cluster2.size()&&!isLumpy;i++){
 			if(cluster2.at(i).second>seedSigma){
 				if(lastSeed<cluster.at(i).second&&!isfalling){
 					lastSeed=cluster.at(i).second;
@@ -284,13 +325,13 @@ void TCluster::checkForLumpyCluster(){
 }
 
 bool TCluster::isSeed(UInt_t cl){
-	if(cluster.size()>cl)
+	if(cluster.size()>cl&&cl<this->cluster2.size())
 		return (cluster2.at(cl).second>this->seedSigma);
 	return false;
 }
 
 bool TCluster::isHit(UInt_t cl){
-	if(cluster.size()>cl)
+	if(cluster.size()>cl&&cl<this->cluster2.size())
 		return (cluster2.at(cl).second>this->hitSigma);
 	return false;
 }
@@ -303,6 +344,11 @@ UInt_t TCluster::getMinChannelNumber()
 	return 0;
 }
 
+/**
+ * highest channel number of cluster...
+ * goes to end of cluster and looks what is the channel no
+ * @return highest channel number of cluster
+ */
 UInt_t TCluster::getMaxChannelNumber()
 {
 
@@ -314,13 +360,29 @@ UInt_t TCluster::getMaxChannelNumber()
 
 
 Float_t TCluster::getHighestSignal(){
+	Float_t signal=0;
+	UInt_t highestSignalClusterPos;
+	UInt_t highestSignalChannelPos;
+	for(UInt_t clPos=0;clPos<cluster.size()&&clPos<this->cluster2.size();clPos++){
+		if(getSignal(clPos)>signal){
+			signal=getSignal(clPos);
+			highestSignalClusterPos=clPos;
+		}
+	}
+	highestSignalChannelPos=getChannel(highestSignalClusterPos);
+	if(maximumSignal!=signal){
+		cout<<"maximumSignal "<<maximumSignal<<" and highest signal "<<signal<<" does not match... Something is wrong:";
+		cout<<"highestSignalChannelPos: "<<highestSignalChannelPos<<"\thighesSignalClusterPos: "<<highestSignalClusterPos<<" "<<getHighestHitClusterPosition()<<endl;
+
+	}
+
 	return this->maximumSignal;
 }
 
 
 Float_t TCluster::getSignal(UInt_t clusterPos)
 {
-	if(clusterPos<cluster.size()){
+	if(clusterPos<cluster.size()&&clusterPos<this->cluster2.size()){
 		 Float_t signal = this->cluster.at(clusterPos).second;
 		 if(signal<0)return 0;
 		 else return signal;
@@ -331,7 +393,7 @@ Float_t TCluster::getSignal(UInt_t clusterPos)
 UInt_t TCluster::getClusterPosition(UInt_t channelNo){
 	if(channelNo<this->getMinChannelNumber()&&channelNo>this->getHighestSignalChannel()) return 9999;
 	UInt_t clPos;
-	for(clPos=0;clPos<cluster.size()&&getChannel(clPos)!=channelNo;clPos++){}
+	for(clPos=0;clPos<cluster.size()&&clPos<this->cluster2.size()&&getChannel(clPos)!=channelNo;clPos++){}
 	return clPos;
 }
 
@@ -339,7 +401,7 @@ Float_t TCluster::getSignalOfChannel(UInt_t channel)
 {
 	if(channel<this->getMinChannelNumber()&&channel>this->getHighestSignalChannel()) return 0;
 	UInt_t clPos;
-	for(clPos=0;clPos<cluster.size()&&getChannel(clPos)!=channel;clPos++){};
+	for(clPos=0;clPos<cluster.size()&&clPos<this->cluster2.size()&&getChannel(clPos)!=channel;clPos++){};
 	Float_t signal = getSignal(clPos);
 	if (signal<0)
 		return 0;
@@ -350,7 +412,7 @@ Float_t TCluster::getSignalOfChannel(UInt_t channel)
 Float_t TCluster::getSNR(UInt_t clusterPos)
 {
 
-	if(clusterPos<cluster.size())
+	if(clusterPos<cluster.size()&&clusterPos<this->cluster2.size())
 		return this->cluster2.at(clusterPos).second;
 	else return -1;
 
@@ -358,7 +420,7 @@ Float_t TCluster::getSNR(UInt_t clusterPos)
 Float_t TCluster::getPedestalMean(UInt_t clusterPos)
 {
 
-	if(clusterPos<cluster.size())
+	if(clusterPos<cluster.size()&&clusterPos<this->cluster2.size())
 		return getAdcValue(clusterPos)-getSignal(clusterPos);
 	else return -1;
 
@@ -366,7 +428,7 @@ Float_t TCluster::getPedestalMean(UInt_t clusterPos)
 
 Float_t TCluster::getPedestalSigma(UInt_t clusterPos)
 {
-	if(clusterPos<cluster.size())
+	if(clusterPos<cluster.size()&&clusterPos<this->cluster2.size())
 		return getSignal(clusterPos)/getSNR(clusterPos);
 	else return -1;
 
@@ -374,14 +436,14 @@ Float_t TCluster::getPedestalSigma(UInt_t clusterPos)
 
 UShort_t TCluster::getAdcValue(UInt_t clusterPos)
 {
-	if(clusterPos<cluster.size())
+	if(clusterPos<cluster.size()&&clusterPos<this->cluster2.size())
 		return this->cluster2.at(clusterPos).first;
 	else return 0;
 }
 
 UInt_t TCluster::getChannel(UInt_t clusterPos)
 {
-	if(clusterPos<cluster.size())
+	if(clusterPos<cluster.size()&&clusterPos<this->cluster2.size())
 		return this->cluster.at(clusterPos).first;
 	else return 5000;
 }
@@ -404,7 +466,7 @@ string TCluster::Intent(UInt_t level){
 void TCluster::Print(UInt_t level){
 	cout<<Intent(level)<<"Cluster of Event "<<flush;
 	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries"<<flush;
-	for(UInt_t cl=0;cl<cluster.size();cl++){
+	for(UInt_t cl=0;cl<cluster.size()&&cl<this->cluster2.size();cl++){
 		if(this->isSeed(cl))
 			cout<<"\t{"<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"}"<<flush;
 		else if(this->isHit(cl))

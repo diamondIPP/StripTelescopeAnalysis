@@ -9,13 +9,16 @@
 
 #include "../include/TAnalysisOfPedestal.hh"
 
-TAnalysisOfPedestal::TAnalysisOfPedestal(int runNumber,int seedSigma,int hitSigma) {
+TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*********TAnalysisOfPedestal::TAnalysisOfPedestal*****"<<endl;
 	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
+	if(settings==0)
+		exit(0);
 	sys = gSystem;
 	stringstream  runString;
+	UInt_t runNumber=settings->getRunNumber();
 	runString.str("");
 	runString<<runNumber;
 	sys->MakeDirectory(runString.str().c_str());
@@ -36,8 +39,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(int runNumber,int seedSigma,int hitSigm
 	histSaver->SetRunNumber(runNumber);
 	sys->cd("..");
 	initialiseHistos();
-	this->seedSigma=seedSigma;
-	this->hitSigma=hitSigma;
+	this->settings=settings;
 	cout<<"end initialise"<<endl;
 }
 
@@ -68,17 +70,18 @@ void TAnalysisOfPedestal::doAnalysis(int nEvents)
 		//		getBiggestHit();
 //		analyseForSeeds();
 //		analyseCluster();
-//		analyseBiggestHit();
+		analyseBiggestHit();
 	}
 	saveHistos();
 }
 
 void TAnalysisOfPedestal::checkForDeadChannels()
 {
-	for(int det=0;det<8;det++){
+	for(int det=0;det<9;det++){
 		int numberOfSeeds=0;
 		deque< pair<int, Float_t> > seedQueue;
-		for(int ch=0;ch<N_DET_CHANNELS;ch++){
+		UInt_t maxChannels=TPlaneProperties::getNChannels(det);
+		for(UInt_t ch=0;ch<maxChannels;ch++){
 			Float_t sigma=eventReader->getPedestalSigma(det,ch);
 			Float_t signal = (Float_t)eventReader->getDet_ADC(det,ch)-eventReader->getPedestalMean(det,ch);
 			if(sigma==0){
@@ -99,24 +102,26 @@ void TAnalysisOfPedestal::checkForDeadChannels()
 }
 void TAnalysisOfPedestal::analyseForSeeds(){
 	for(int det=0;det<9;det++){
-		int nClusters = eventReader->getCluster()->at(det).size();
+		int nClusters = eventReader->getNClusters(det);
 		if(nClusters==1)
-			hSeedMap2[det]->Fill(eventReader->getCluster()->at(det).at(0).getHighestSignalChannel());
+			hSeedMap2[det]->Fill(eventReader->getCluster(det,0).getHighestSignalChannel());
 	}
 }
 
 void TAnalysisOfPedestal::checkForSaturatedChannels()
 {
-	for(int det=0;det<8;det++)
-		for(int ch=0;ch<N_DET_CHANNELS;ch++){
+	for(int det=0;det<9;det++){
+		UInt_t maxChannel = TPlaneProperties::getNChannels(det);
+		for(UInt_t ch=0;ch<maxChannel;ch++){
 			if(eventReader->getAdcValue(det,ch)>=254){
 				hSaturatedChannels[det]->Fill(ch);
 			}
 		}
+	}
 }
 void TAnalysisOfPedestal::getBiggestHit(){
 	
-	for(int det=0;det<8;det++){
+	for(int det=0;det<9;det++){
 		int biggestHit=0;
 		Float_t biggestHitInSigma=0;
 		int chBiggestHit;
@@ -140,38 +145,37 @@ void TAnalysisOfPedestal::getBiggestHit(){
 }
 
 void TAnalysisOfPedestal::analyseBiggestHit() {
-    for (int det = 0; det < 8; det++) {
-		Float_t biggestSignal = (Float_t)eventReader->getAdcValue(det,0)-eventReader->getPedestalMean(det,0);
-		Float_t secondbiggestSignal = (Float_t)eventReader->getAdcValue(det,0)-eventReader->getPedestalMean(det,0);
-		int biggest_hit_channel = 0;
-		int second_biggest_hit_channel = 0;
-        for (int i = 0; i < 253; i++) {
-			int adcValue = eventReader->getAdcValue(det,i);
-			Float_t PedMean = eventReader->getPedestalMean(det,i);
-			Float_t PedSigma = eventReader->getPedestalSigma(det,i);
-			Float_t signal = (Float_t)adcValue-PedMean;
+    for (int det = 0; det < 8; det++) {//todo change to 9
+		Float_t biggestSignal =eventReader->getSignal(det,0);
+		Float_t secondbiggestSignal =eventReader->getSignal(det,0);
+		UInt_t biggest_hit_channel = 0;
+		UInt_t second_biggest_hit_channel = 0;
+        for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++) {
+			Float_t signal = eventReader->getSignal(det,ch);
 //			cout << "event: " << nEvent << "\tdet: " << det << "\tchannel: " << i << "\tadc: " << adcValue << "\tPedMean: " << PedMean << "\tPedSigma: " << PedSigma << "\tsignal: " << signal << endl;
-			if (/*i > 70 && i < 170 &&*/ adcValue < 255) {
+			if (/*i > 70 && i < 170 &&*/ !eventReader->isSaturated(det,ch)){
 				if (signal > biggestSignal) {
 					second_biggest_hit_channel = biggest_hit_channel;
-					biggest_hit_channel = i;
+					biggest_hit_channel = ch;
 					secondbiggestSignal = biggestSignal;
 					biggestSignal = signal;
 				}
 				else
 					if (signal > secondbiggestSignal) {
-						second_biggest_hit_channel = i;
+						second_biggest_hit_channel = ch;
 						secondbiggestSignal = signal;
 					}
 			}//end if fidcut region
         }//end loop over channels
 		
-		Float_t biggestSignalSigma = biggestSignal / eventReader->getPedestalSigma(det,biggest_hit_channel);
-		Float_t secondbiggestSignalSigma = secondbiggestSignal / eventReader->getPedestalSigma(det,second_biggest_hit_channel);
+		Float_t biggestSignalSigma = eventReader->getSignalInSigma(det,biggest_hit_channel);
+		Float_t secondbiggestSignalSigma =  eventReader->getSignalInSigma(det,second_biggest_hit_channel);
 		
-		if (biggest_hit_channel > 0 && biggest_hit_channel < 255 && biggestSignalSigma > 10) {
+		if (biggest_hit_channel > 0 && biggest_hit_channel < TPlaneProperties::getNChannels(det) && biggestSignalSigma > settings->getClusterHitFactor(det)) {
 			// -- look for second biggest hit next to biggest hit
-			if ((Float_t)eventReader->getAdcValue(det,biggest_hit_channel-1)-eventReader->getPedestalMean(det,biggest_hit_channel-1) < (Float_t)eventReader->getAdcValue(det,biggest_hit_channel+1)-eventReader->getPedestalMean(det,biggest_hit_channel+1)) {
+			Float_t leftHitSignal= eventReader->getSignal(det,biggest_hit_channel-1);
+			Float_t rightHitSignal = eventReader->getSignal(det,biggest_hit_channel+1);
+			if (leftHitSignal < rightHitSignal) {
 				second_biggest_hit_channel = biggest_hit_channel + 1;
 				histo_second_biggest_hit_direction[det]->Fill(1.);
 			}
@@ -179,19 +183,15 @@ void TAnalysisOfPedestal::analyseBiggestHit() {
 				second_biggest_hit_channel = biggest_hit_channel - 1;
 				histo_second_biggest_hit_direction[det]->Fill(-1.);
 			}
-			secondbiggestSignal = (Float_t)eventReader->getAdcValue(det,second_biggest_hit_channel)-eventReader->getPedestalMean(det,second_biggest_hit_channel);
-			secondbiggestSignalSigma = secondbiggestSignal / eventReader->getPedestalSigma(det,second_biggest_hit_channel);
-			
-//			cout << "event: " << nEvent << endl;
-//			cout << "biggest channel:\t" << biggest_hit_channel << "\tsignal: " << biggestSignal << "\tsigma: " << eventReader->getPedestalSigma(det,biggest_hit_channel) << "\tsignal in sigma: " << biggestSignalSigma << endl;
-//			cout << "2nd biggest channel:\t" << second_biggest_hit_channel << "\tsignal: " << secondbiggestSignal << "\tsigma: " << eventReader->getPedestalSigma(det,second_biggest_hit_channel) << "\tsignal in sigma: " << secondbiggestSignalSigma << endl;
+			secondbiggestSignal = eventReader->getSignal(det,second_biggest_hit_channel);
+			secondbiggestSignalSigma = eventReader->getSignalInSigma(det,second_biggest_hit_channel);
 			
 			// -- start filling the histograms
 			histo_pulseheight_sigma[det]->Fill(biggestSignalSigma);
 			histo_pulseheight_sigma_second[det]->Fill(secondbiggestSignalSigma);
 			
 			// -- left chip
-			if (biggest_hit_channel < 128) {
+			if (biggest_hit_channel < TPlaneProperties::getNChannels(det)/2) {
 				histo_pulseheight_left_sigma[det]->Fill(biggestSignalSigma);
 				histo_pulseheight_left_sigma_second[det]->Fill(secondbiggestSignalSigma);
 			}
@@ -208,82 +208,78 @@ void TAnalysisOfPedestal::analyseBiggestHit() {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
-	for (int det=0;det<8;det++){
+	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"SaturatedChannels_"<<TADCEventReader::getStringForPlane(det)<<"";
-		hSaturatedChannels[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
-	}
-	for (int det=0;det<8;det++){
-		stringstream histoName;
-		histoName<<"SeedPos_"<<TADCEventReader::getStringForPlane(det)<<"_allSeeds";
-		hSeedMap[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
+		histoName<<"hSaturatedChannels_"<<TADCEventReader::getStringForPlane(det)<<"";
+		UInt_t nChannels=TPlaneProperties::getNChannels(det);
+		hSaturatedChannels[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels-1);
 	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"maxSeedPos_"<<TADCEventReader::getStringForPlane(det);
-		hSeedMap2[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
+		histoName<<"hSeedPosAllSeeds_"<<TADCEventReader::getStringForPlane(det);
+		UInt_t nChannels=TPlaneProperties::getNChannels(det);
+		hSeedMap[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels-1);
 	}
-	for (int det=0;det<8;det++){
+	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<TADCEventReader::getStringForPlane(det)<<"_NumberOfSeeds";
+		histoName<<"hMaxSeedPos_"<<TADCEventReader::getStringForPlane(det);
+		UInt_t nChannels=TPlaneProperties::getNChannels(det);
+		hSeedMap2[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels-1);
+	}
+	for (int det=0;det<9;det++){
+		stringstream histoName;
+		histoName<<"hNumberOfSeeds_"<<TADCEventReader::getStringForPlane(det);
 		hNumberOfSeeds[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),31,0,30);
 	}
-	for (int det=0;det<8;det++){
+	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"PulseHeight_"<<TADCEventReader::getStringForPlane(det)<<"_BiggestHitChannelInSigma";
+		histoName<<"hPulseHeight__BiggestHitChannelInSigma_"<<TADCEventReader::getStringForPlane(det);
 		hPulsHeightBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
-	for (int det=0;det<8;det++){
+	for (int det=0;det<9;det++){//todo why such a big histo?so big?
 		stringstream histoName;
-		histoName<<"PulseHeight_"<<TADCEventReader::getStringForPlane(det)<<"_BiggestHitNextToBiggestHit_ChannelInSigma";
+		histoName<<"hPulseHeight_BiggestHitNextToBiggestHit_ChannelInSigma"<<TADCEventReader::getStringForPlane(det);
 		hPulsHeightNextBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
-	for (int det=0;det<8;det++){
+	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"Channel_"<<TADCEventReader::getStringForPlane(det)<<"_BiggestHit";
-		hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
-	}
-	
-	for(int det=0;det<9;det++){
-		stringstream histoName;
-		histoName<<"ClusterSize_"<<TADCEventReader::getStringForPlane(det);
-		hClusterSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
-		histoName.str("");
-		histoName<<"NumberOfClusters_"<<TADCEventReader::getStringForPlane(det);
-		hNumberOfClusters[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
+		histoName<<"hChannel_BiggestHit_"<<TADCEventReader::getStringForPlane(det);
+		UInt_t nChannels=TPlaneProperties::getNChannels(det);
+		hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels);
 	}
     
-    for (int det = 0; det < 8; det++) {
-		int nbins = 250;
+    for (int det = 0; det < 9; det++) {
+		int nbins = 256;
 		Float_t min = 0.;
-		Float_t max = 50.;
+		Float_t max = 64.;
 		
         stringstream histoName;
-        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "BiggestHitChannelInSigma";
+        histoName << "hPulseHeight_BiggestHitChannelInSigma" << TADCEventReader::getStringForPlane(det) ;
         histo_pulseheight_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
+
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitChannelInSigma";
+        histoName << "hPulseHeight_SecondBiggestHitChannelInSigma_" << TADCEventReader::getStringForPlane(det);
         histo_pulseheight_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitMinusBiggestHitPosition";
-        histo_second_biggest_hit_direction[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),2,-2.,2.);
+        histoName << "hSecondBiggestHitMinusBiggestHitPosition_" << TADCEventReader::getStringForPlane(det);
+        histo_second_biggest_hit_direction[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),3,-1.5,1.5);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitChannelInSigmaLeft";
+        histoName << "hPulseHeightSecondBiggestHitChannelInSigmaLeft" << TADCEventReader::getStringForPlane(det);
         histo_pulseheight_sigma_second_left[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "SecondBiggestHitChannelInSigmaRight";
+        histoName << "hPulseHeightSecondBiggestHitChannelInSigmaRight" << TADCEventReader::getStringForPlane(det) ;
         histo_pulseheight_sigma_second_right[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << TADCEventReader::getStringForPlane(det) << "BiggestHitMap";
-        histo_biggest_hit_map[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0.,255.);
+        histoName << "hBiggestHitMap"<< TADCEventReader::getStringForPlane(det);
+        histo_biggest_hit_map[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),TPlaneProperties::getNChannels(det),0.,TPlaneProperties::getNChannels(det)-1);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForPlane(det) << "LeftChipBiggestHitChannelInSigma";
+        histoName << "hPulseHeightLeftChipBiggestHitChannelInSigma" << TADCEventReader::getStringForPlane(det);
         histo_pulseheight_left_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
@@ -306,35 +302,35 @@ void TAnalysisOfPedestal::initialiseHistos()
 
 void TAnalysisOfPedestal::saveHistos(){
 	
-//	for (int det=0;det<8;det++){
-//		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
-//		histSaver->SaveHistogramPNG(hSaturatedChannels[det]);
-//		hSaturatedChannels[det]->Delete();
-//	}
-//	for (int det=0;det<8;det++){
-//		cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
-//		histSaver->SaveHistogramPNG(hSeedMap[det]);
-//		hSeedMap[det]->Delete();
-//	}
-//	for (int det=0;det<9;det++){
-//		cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
-//		histSaver->SaveHistogramPNG(hSeedMap2[det]);
-//		hSeedMap2[det]->Delete();
-//	}
-//	for (int det=0;det<8;det++){
-//		cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
-//		histSaver->SaveHistogramPNG(hNumberOfSeeds[det]);
-//		hNumberOfSeeds[det]->Delete();
-//	}
-//	for(int det=0;det<8;det++){
+	for (int det=0;det<9;det++){
+		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
+		histSaver->SaveHistogramPNG(hSaturatedChannels[det]);
+		hSaturatedChannels[det]->Delete();
+	}
+	for (int det=0;det<9;det++){
+		cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
+		histSaver->SaveHistogramPNG(hSeedMap[det]);
+		hSeedMap[det]->Delete();
+	}
+	for (int det=0;det<9;det++){
+		cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
+		histSaver->SaveHistogramPNG(hSeedMap2[det]);
+		hSeedMap2[det]->Delete();
+	}
+	for (int det=0;det<9;det++){
+		cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
+		histSaver->SaveHistogramPNG(hNumberOfSeeds[det]);
+		hNumberOfSeeds[det]->Delete();
+	}
+//	for(int det=0;det<9;det++){
 //		histSaver->SaveHistogramPNG(hPulsHeightBiggestHit[det]);
 //		hPulsHeightBiggestHit[det]->Delete();
 //	}
-//	for(int det=0;det<8;det++){
+//	for(int det=0;det<9;det++){
 //		histSaver->SaveHistogramPNG(hPulsHeightNextBiggestHit[det]);
 //		hPulsHeightNextBiggestHit[det]->Delete();
 //	}
-//	for(int det=0;det<8;det++){
+//	for(int det=0;det<9;det++){
 //		histSaver->SaveHistogramPNG(hChannelBiggestHit[det]);
 //		hChannelBiggestHit[det]->Delete();
 //	}
@@ -345,25 +341,25 @@ void TAnalysisOfPedestal::saveHistos(){
 //		delete hNumberOfClusters[det];
 //	}
     
-    for (int det = 0; det < 8; det++) {
-		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
-        histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma[det]);
-		cout << "saving histogram" << this->histo_pulseheight_sigma_second[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma_second[det]);
+    for (int det = 0; det < 9; det++) {
+		cout << "saving histogram " << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
+        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
+		cout << "saving histogram " << this->histo_pulseheight_sigma_second[det]->GetName() << ".." << endl;
+		histSaver->SaveHistogram(this->histo_pulseheight_sigma_second[det]);
 		//		cout << "saving histogram" << this->histo_pulseheight_sigma125[det]->GetName() << ".." << endl;
 		//		histSaver->SaveHistogramPNG(this->histo_pulseheight_sigma125[det]);
-		cout << "saving histogram" << this->histo_second_biggest_hit_direction[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_second_biggest_hit_direction[det]);
-		cout << "saving histogram" << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_biggest_hit_map[det]);
-		cout << "saving histogram" << this->histo_pulseheight_left_sigma[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma[det]);
-		cout << "saving histogram" << this->histo_pulseheight_left_sigma_second[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_left_sigma_second[det]);
-		cout << "saving histogram" << this->histo_pulseheight_right_sigma[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma[det]);
+		cout << "saving histogram " << this->histo_second_biggest_hit_direction[det]->GetName() << ".." << endl;
+		histSaver->SaveHistogram(this->histo_second_biggest_hit_direction[det]);
+		cout << "saving histogram " << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
+		histSaver->SaveHistogram(this->histo_biggest_hit_map[det]);
+		cout << "saving histogram " << this->histo_pulseheight_left_sigma[det]->GetName() << ".." << endl;
+		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma[det]);
+		cout << "saving histogram " << this->histo_pulseheight_left_sigma_second[det]->GetName() << ".." << endl;
+		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma_second[det]);
+		cout << "saving histogram " << this->histo_pulseheight_right_sigma[det]->GetName() << ".." << endl;
+		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma[det]);
 		cout << "saving histogram" << this->histo_pulseheight_right_sigma_second[det]->GetName() << ".." << endl;
-		histSaver->SaveHistogramPNG(this->histo_pulseheight_right_sigma_second[det]);
+		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma_second[det]);
         delete histo_pulseheight_sigma[det];
 		delete histo_pulseheight_sigma_second[det];
 		//		delete histo_pulseheight_sigma125[det];
@@ -375,18 +371,6 @@ void TAnalysisOfPedestal::saveHistos(){
 		delete histo_pulseheight_right_sigma_second[det];
     }
 }
-
-void TAnalysisOfPedestal::analyseCluster()
-{
-	for(int det=0;det<9;det++){
-		hNumberOfClusters[det]->Fill(eventReader->getCluster()->at(det).size());
-		for(int cl=0;cl<eventReader->getCluster()->at(det).size();cl++){
-			hClusterSize[det]->Fill(eventReader->getCluster()->at(det).at(cl).size());
-		}
-	}
-	
-}
-
 
 
 

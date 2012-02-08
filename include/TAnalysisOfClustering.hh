@@ -29,6 +29,7 @@
 #include "TADCEventReader.hh"
 
 #define N_DET_CHANNELS 256
+#define N_DIA_CHANNELS 128
 using namespace std;
 
 class TAnalysisOfClustering {
@@ -46,14 +47,14 @@ private:
 	void analyse2ndHighestHit();
 	void checkForSaturatedChannels();
 	void analyseCluster();
-	TH1F *hSaturatedChannels[8];
-	TH1F *hSeedMap[8];
+	TH1F *hSaturatedChannels[9];
+	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
-	TH1F *hClusterMap[8];
-	TH1F* hNumberOfSeeds[8];
-	TH1F* hChannelBiggestHit[8];
-	TH1F* hPulsHeightBiggestHit[8];
-	TH1F* hPulsHeightNextBiggestHit[8];
+	TH1F *hClusterMap[9];
+	TH1F* hNumberOfSeeds[9];
+	TH1F* hChannelBiggestHit[9];
+	TH1F* hPulsHeightBiggestHit[9];
+	TH1F* hPulsHeightNextBiggestHit[9];
 	TH1F* hNumberOfClusters[9];
 	TH1F* hClusterSize[9];
 	TADCEventReader* eventReader;
@@ -81,6 +82,7 @@ private:
 	TH1F *h2ndBiggestHitPosition[9];
 	TH1F *hLeftHitOverLeftAndRight[9];
 	TH1F *hDeltaLeftRightHitOverLeftAndRight[9];
+	TH1F *hHighestTo2ndHighestSignalRatio[9];
 };
 
 #endif /* TDEADCHANNELS_HH_ */

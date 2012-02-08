@@ -26,6 +26,7 @@
 
 //own classes
 #include "TCluster.hh"
+#include "TPlaneProperties.hh"
 
 
 #define N_INVALID -9999
@@ -33,28 +34,29 @@
 class TPlane:public TObject {
 public:
 
-	TPlane(){type = kUndefined;};
-	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
+	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();};
 	enum enumCoordinate{ X_COR =1, Y_COR=2, Z_COR =3, XY_COR=4,};
-	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,enumDetectorType type=kSilicon);
-	TPlane(vector<TCluster> xCluster,enumDetectorType type=kDiamond);
+	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
+	TPlane(vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
+	TPlane(const TPlane& rhs);
 	virtual ~TPlane();
+	TCluster getCluster(enumCoordinate cor, UInt_t cl);
 	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPosition(enumCoordinate cor, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	UInt_t getNXClusters();
 	UInt_t getNYClusters();
 	bool isValidPlane();
-    enum enumDetectorType getDetectorType() const;
-    void setDetectorType(enumDetectorType type);
+    enum TPlaneProperties::enumDetectorType getDetectorType() const;
+    void setDetectorType(TPlaneProperties::enumDetectorType type);
     static string getCoordinateString(enumCoordinate cor);
-    static string getDetectortypeString(enumDetectorType type);
+    static string getDetectortypeString(TPlaneProperties::enumDetectorType type);//todo verschieben
     void Print(UInt_t level=0);
 private:
-	enumDetectorType type;
+    TPlaneProperties::enumDetectorType type;
 	
 	vector<TCluster> xClusters, yClusters;
-    ClassDef(TPlane,2);
+    ClassDef(TPlane,3);
 };
 
 #endif // TPlane_hh

@@ -68,7 +68,7 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::ca
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiYOffset(plane);
 	Float_t xMeasured,yMeasured;
-	if(event->getPlane(plane).getDetectorType()==TPlane::kDiamond){
+	if(event->getPlane(plane).getDetectorType()==TPlaneProperties::kDiamond){
 		xMeasured = event->getPlane(plane).getXPosition(0,TCluster::chargeWeighted);//-xOffset;
 		yMeasured = event->getPlane(plane).getYPosition(0,TCluster::chargeWeighted);//-yOffset;
 	}
@@ -106,11 +106,8 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred){
 		return N_INVALID;
 	// get offsets
 	Float_t xOffset = this->getXOffset(plane);
-	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
-	Float_t phiYOffset = this->getPhiYOffset(plane);
 	Float_t xMeasured = event->getPlane(plane).getXPosition(0);//-xOffset;
-	Float_t yMeasured = event->getPlane(plane).getYPosition(0);//-yOffset;
 
 	// apply offsets
 	Float_t xPosition = (xMeasured) / TMath::Cos(phiXOffset) + (yPred) * TMath::Tan(phiXOffset);
@@ -176,8 +173,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		linFitY->AddPoint(&zPosVec.at(0),(Double_t)getYPosition(plane),this->alignment->getYResolution(plane));//todo anpassen des sigma 0.001
 		if(verbosity>3||bPrint)	cout<<"\tAdd in Plane "<<plane<<"  "<<getXPosition(plane)<<"+/-"<<alignment->getXResolution(plane)<<"/"<<getYPosition(plane)<<"+/-"<<alignment->getYResolution(plane)<<"/"<<getZPosition(plane)<<endl;
 	}
-	int fitOKX=linFitX->Eval();
-	int FitOKY=linFitY->Eval();
+	linFitX->Eval();
+	linFitY->Eval();
 	linFitX->Chisquare();
 	linFitY->Chisquare();
 	Float_t zPos = alignment->GetZOffset(subjectPlane);

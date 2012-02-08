@@ -14,6 +14,7 @@ TADCEventReader::TADCEventReader(string FileName) {
 	store_threshold = 2;
 	tree =NULL;
 	file=NULL;
+	sys=new TSystem();
 	/*run_number=RunNumber;
 	event_number=EventNumber;*/
 	SetTree(FileName);//tree);
@@ -25,14 +26,14 @@ TADCEventReader::TADCEventReader(string FileName) {
 	if (verbosity) cout<<"tree Entries():"<<tree->GetEntries()<<endl;
 	this->LoadEvent(0);
 	this->fileName=FileName;
-	pVecvecCluster=NULL;
+//	pVecvecCluster=NULL;
 	pEvent=NULL;
 }
 
 TADCEventReader::~TADCEventReader() {
 	cout<< "deleting instance of TADCEventReader"<<endl;
-	delete tree;
-	delete file;
+	//delete tree;
+	file->Delete();
 }
 
 bool TADCEventReader::SetTree(string fileName){//TTree *tree){
@@ -40,7 +41,11 @@ bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 	if(file!=NULL) file->Delete();
 	tree=NULL;
 	file=NULL;
-	cout<<"load File: \""<<fileName<<"\""<<endl;
+//	cout<<"TADCEventReader-PATH: "<<sys->pwd()<<endl;
+	std::cout<<"load File: \""<<fileName<<"\""<<endl;
+//	stringstream fileString;
+//	fileString<<sys->pwd()<<"/"<<fileName;
+//	std::cout<<"Open "<<fileString.str()<<endl;
 	file = new TFile(fileName.c_str());
 	file->GetObject("tree",tree);
 	if(tree==NULL)
@@ -59,10 +64,12 @@ bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 		return false;
 	}
 }
+
 bool TADCEventReader::isOK(){
-	cout<<"TADCEventReader::isOK \""<<tree<<"\""<<endl;
-	return (tree!=NULL);
+	cout<<"TADCEventReader::isOK \""<<tree<<"\""<<!tree->IsZombie()<<endl;
+	return (tree!=NULL&&!tree->IsZombie());
 }
+
 void TADCEventReader::SetBranchAddresses(){
 	//Event Header Branches
 	if(tree->FindBranch("RunNumber")){
@@ -278,10 +285,10 @@ void TADCEventReader::SetBranchAddresses(){
 		tree->SetBranchAddress("PedestalSigma",&pedestalSigma);
 		if(verbosity)cout<<"Set Branch \"PedestalSigma\""<<endl;
 		}
-	if(tree->FindBranch("clusters")){
-		tree->SetBranchAddress("clusters",&pVecvecCluster);
-		if(verbosity)cout<<"Set Branch \"clusters\""<<endl;
-		}
+//	if(tree->FindBranch("clusters")){
+//		//tree->SetBranchAddress("clusters",&pVecvecCluster);
+//		if(verbosity)cout<<"Set Branch \"clusters\""<<endl;
+//		}
 	if(tree->FindBranch("isDetMasked")){
 		tree->SetBranchAddress(	"isDetMasked",&bIsDetMasked);
 		if(verbosity)cout<<"Set Branch \"isDetMasked\""<<endl;
@@ -361,7 +368,9 @@ UInt_t TADCEventReader::getCurrent_event() const
 
 UChar_t TADCEventReader::getDet_ADC(UInt_t det , UInt_t ch) const
 {
+	if(det<9&& TPlaneProperties::getNChannels(det)>ch)
     return Det_ADC[det][ch];
+	return -1;
 }
 
 UChar_t TADCEventReader::getDet_Channels(UInt_t i , UInt_t j) const
@@ -373,9 +382,9 @@ UChar_t TADCEventReader::getDet_Channels(UInt_t i , UInt_t j) const
     return Det_Channels[i][j];
 }
 
-UInt_t TADCEventReader::getDet_NChannels(UInt_t i)  const
+UInt_t TADCEventReader::getDet_NChannels(UInt_t det)  const
 {
-    return Det_NChannels[i];
+    return Det_NChannels[det];
 }
 
 Float_t TADCEventReader::getDet_PedMean(UInt_t i, UInt_t j) const
@@ -449,7 +458,9 @@ std::string TADCEventReader::getStringForPlane(int i)
 	case 6: return "D3X";
 	case 7: return "D3Y";
 	case 8: return "Dia";
+	default: return "Invalid";
 	}
+	return "Invalid";
 }
 
 TFile *TADCEventReader::getFile() const
@@ -459,26 +470,34 @@ TFile *TADCEventReader::getFile() const
 
 Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch)
 {
-	return this->pedestalMean[det][ch];
+	if(det<9&&ch<TPlaneProperties::getNChannels(det))
+		return this->pedestalMean[det][ch];
+	return -99999;
 }
 
 Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch)
 {
-	return this->pedestalSigma[det][ch];
+	if(det<9&&ch<TPlaneProperties::getNChannels(det))
+		if(this->pedestalSigma[det][ch]>=0)
+			return this->pedestalSigma[det][ch];
+	return 0;
 }
 
-TCluster::vecvecTCluster* TADCEventReader::getCluster() const
-{
-	//std::cout<<pVecvecCluster->size()<<std::endl;
-	return this->pVecvecCluster;
-}
+//TCluster::vecvecTCluster* TADCEventReader::getCluster() const
+//{
+//	//std::cout<<pVecvecCluster->size()<<std::endl;
+//	return this->pVecvecCluster;
+//}
 
 UInt_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)
 {
-	if (det==8&&ch<128)
+	if(det<9 &&ch<TPlaneProperties::getNChannels(det)){
+		if (det==8)
 		return (UInt_t)this->getDia_ADC(ch);
-	else if(ch<256)
+	else
 		return (UInt_t)this->getDet_ADC(det,ch);
+	}
+	return -1;
 }
 
 Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch)
@@ -491,12 +510,7 @@ Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch)
 
 TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 {
-	if(this->pVecvecCluster->at(det).size()>cl)
-		return pVecvecCluster->at(det).at(cl);
-	else {
-		cout<<"CLUSTER DOES NOT EXIST!!!!!! there are:"<<pVecvecCluster->at(det).size()<<" CLuster..."<<endl;
-		return TCluster();
-	}
+	return this->pEvent->getCluster(det,cl);
 }
 
 void TADCEventReader::checkADC(){
@@ -507,22 +521,27 @@ void TADCEventReader::checkADC(){
 
 bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 {
-	if(det<8)
-		return getAdcValue(det,ch)>253;
+	if(det<9)
+		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det);
 	else if(det==8)
-		return getAdcValue(det,ch)>4094;
+		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det);
 	return true;
 }
 
 Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch)
 {
-	return getAdcValue(det,ch)-getPedestalMean(det,ch);
+	if(det>=9) return -9999999;
+
+	Float_t signal =getAdcValue(det,ch)-getPedestalMean(det,ch);
+	if(signal<0)return 0;
+
+	return signal;
 }
 
 UInt_t TADCEventReader::getNClusters(UInt_t det)
 {
 	if(det<9)
-	return this->getCluster()->at(det).size();
+		return this->pEvent->getNClusters(det);
 	return 0;
 }
 
@@ -589,6 +608,4 @@ TTree *TADCEventReader::getTree() const
 std::string TADCEventReader::getFilePath(){
 	return this->fileName;
 }
-
-
 
