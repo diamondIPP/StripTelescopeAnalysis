@@ -76,3 +76,25 @@ bool TTracking::LoadEvent(UInt_t eventNumber){
 	}
 	return false;
 }
+
+Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode){
+	if(myTrack==0)
+				return 0;
+			return myTrack->getStripXPositionOfCluster(plane,xCluster,yPred,mode);
+}
+Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
+	if(myTrack==0)
+				return 0;
+			return myTrack->getStripXPosition(plane,yPred,mode);
+
+}
+Float_t  TTracking::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode){
+	if(myTrack==0)
+				return 0;
+			return myTrack->getPositionOfCluster(cor,plane,xCluster,yCluster,mode);
+}
+Float_t  TTracking::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
+	if(myTrack==0)
+		return 0;
+	return myTrack->getPosition(cor,plane,mode);
+}

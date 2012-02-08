@@ -21,7 +21,7 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 19;};
+	static UInt_t TCLUSTER_REVISION() {return 20;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3};
     TCluster()
@@ -93,30 +93,30 @@ private:
     //deque<pair<int,Float_t> > cluster; //ch,signal
     deque <UInt_t> clusterChannel;
     deque <Float_t> clusterSignal;
-//        deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
-        deque<UShort_t> clusterADC;
-        deque<Float_t> clusterSignalInSigma;
-        deque<bool> clusterChannelScreened;
-        UInt_t numberOfSeeds;
-        UInt_t numberOfHits;
-        UInt_t numberOfNoHits;
-        int seedSigma;
-        int hitSigma;
-        bool isSaturated;
-        bool isGoldenGate;
-        bool isLumpy;
-        bool isChecked;
-        bool hasBadChannel;
-        calculationMode_t mode;
-        int verbosity;
-        Float_t charge;
-        Float_t maximumSignal;
-        int maxChannel;
-        int revisionNumber;
-        UInt_t nChannels;
-        UChar_t det;
-        UInt_t eventNumber;
-    ClassDef(TCluster,19);
+    //        deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
+    deque<UShort_t> clusterADC;
+    deque<Float_t> clusterSignalInSigma;
+    deque<bool> clusterChannelScreened;
+    UInt_t numberOfSeeds;
+    UInt_t numberOfHits;
+    UInt_t numberOfNoHits;
+    int seedSigma;
+    int hitSigma;
+    bool isSaturated;
+    bool isGoldenGate;
+    bool isLumpy;
+    bool isChecked;
+    bool hasBadChannel;
+    calculationMode_t mode;
+    int verbosity;
+    Float_t charge;
+    Float_t maximumSignal;
+    int maxChannel;
+    int revisionNumber;
+    UInt_t nChannels;
+    UChar_t det;
+    UInt_t eventNumber;
+    ClassDef(TCluster,TCLUSTER_REVISION());
 };
 
 #endif /* TCLUSTER_HH_ */

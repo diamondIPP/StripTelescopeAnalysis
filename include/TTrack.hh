@@ -56,7 +56,9 @@ public:
 	UInt_t getNClusters(int det);
 //	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
 	void setEvent(TEvent *newEvent){this->event = newEvent;};
-	Float_t getStripXPosition(UInt_t plane,Float_t yPred);
+	Float_t getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode);
+	Float_t getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getXPosition(UInt_t plane);
 	Float_t getYPosition(UInt_t plane);

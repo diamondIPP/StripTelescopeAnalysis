@@ -63,26 +63,27 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::ca
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
+	TCluster xCluster,yCluster;
+	xCluster=event->getPlane(plane).getXCluster(0);
+	yCluster=event->getPlane(plane).getYCluster(0);
+	return getPositionOfCluster(cor,plane,xCluster,yCluster,mode);
+}
+
+
+Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode){
+	if(xCluster.size()<=0||yCluster.size()<=0)
+		return N_INVALID;
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiYOffset(plane);
-	Float_t xMeasured,yMeasured;
-	if(event->getPlane(plane).getDetectorType()==TPlaneProperties::kDiamond){
-		xMeasured = event->getPlane(plane).getXPosition(0,TCluster::chargeWeighted);//-xOffset;
-		yMeasured = event->getPlane(plane).getYPosition(0,TCluster::chargeWeighted);//-yOffset;
-	}
-	else{
-		xMeasured = event->getPlane(plane).getXPosition(0);//-xOffset;
-		yMeasured = event->getPlane(plane).getYPosition(0);//-yOffset;
-	}
-	
+	Float_t xMeasured = xCluster.getPosition(mode);
+	Float_t yMeasured = yCluster.getPosition(mode);
 	// apply offsets
 	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) + (yMeasured) * TMath::Sin(phiYOffset);
 	Float_t yPosition = (xMeasured) * TMath::Sin(-phiXOffset) + (yMeasured) * TMath::Cos(phiYOffset);
 	xPosition += xOffset;
 	yPosition += yOffset;
-
 	switch(cor){
 		case TPlane::X_COR: return xPosition;break;
 		case TPlane::Y_COR: return yPosition;break;
@@ -90,7 +91,6 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::ca
 		default: return N_INVALID;
 	}
 }
-
 
 /**
  * Calculation of Hitposition of event using the measured Offsets
@@ -100,14 +100,31 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::ca
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred){
+Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
 	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
+	TCluster xCluster = event->getPlane(plane).getXCluster(0);
+	return getStripXPositionOfCluster(plane,xCluster,yPred,mode);
+}
+
+/**
+ * todo anpassen!!!
+ * Calculation of Hitposition of event using the measured Offsets
+ * in this transformation it transform the measured hitPosition in the
+ * plane space into the space of the first plane
+ * @param cor enum of Coordinate from which you want to have the result
+ * @param plane number of plane for which you are calculating the hitposition
+ * @return calculated hit position
+ */
+Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode){
+	if(xCluster.size()<=0)
+		return N_INVALID;
+	// get offsets
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
-	Float_t xMeasured = event->getPlane(plane).getXPosition(0);//-xOffset;
+	Float_t xMeasured = xCluster.getPosition(mode);//-xOffset;
 
 	// apply offsets
 	Float_t xPosition = (xMeasured) / TMath::Cos(phiXOffset) + (yPred) * TMath::Tan(phiXOffset);
@@ -116,8 +133,6 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred){
 
 	return xPosition;
 }
-
-
 /**
  * gives the xPosition of "event" in the telescope space
  * this function uses getPosition(X_COR,plane)
@@ -285,6 +300,7 @@ UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
 Float_t TTrack::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
 {
 	// TODO: write getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)!!!
+	return 0;
 }
 
 UInt_t TTrack::getVerbosity() const

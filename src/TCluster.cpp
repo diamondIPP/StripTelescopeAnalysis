@@ -56,7 +56,6 @@ TCluster::TCluster(const TCluster& rhs){
 	maximumSignal=0;
 	maxChannel=0;
 	charge=0;
-	UInt_t test = rhs.checkClusterForSize();
 	for(UInt_t i=0;i<rhs.checkClusterForSize();i++){
 		UInt_t ch =rhs.clusterChannel.at(i);
 		Float_t signal = rhs.clusterSignal.at(i);
