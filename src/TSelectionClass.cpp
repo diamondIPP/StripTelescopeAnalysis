@@ -89,9 +89,13 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
+		if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
 		resetVariables();
+		if(verbosity>10)cout<<"."<<flush;
 		setVariables();
+		if(verbosity>10)cout<<"."<<flush;
 		selectionTree->Fill();
+		if(verbosity>10)cout<<"DONE"<<endl;
 	}
 }
 bool TSelectionClass::createSelectionTree(int nEvents)
@@ -168,15 +172,19 @@ void TSelectionClass::resetVariables(){
 }
 
 void TSelectionClass::setVariables(){
+	if(verbosity)cout<<"setVariables"<<endl;
 	for(UInt_t det=0;det<8;det++){
-//		cout<<(eventReader->getNClusters(det)==1);
+		if(verbosity>10)cout<<det<<endl;
+		if(verbosity>10)cout<<(eventReader->getNClusters(det)==1)<<" "<<flush;
 		hasValidSiliconTrack=hasValidSiliconTrack&&(eventReader->getNClusters(det)==1);
+		if(verbosity>10)cout<<"."<<flush;
 		isDetMasked+=checkDetMasked(det);
+		if(verbosity>10)cout<<"."<<flush;
 	}
-//	cout<<" "<<eventReader->getNClusters(8)<<":";
+	if(verbosity>10)cout<<" "<<eventReader->getNClusters(8)<<":"<<flush;
 	for(UInt_t cl=0;cl<eventReader->getNClusters(8);cl++){
 		isDiaMasked.push_back(checkDetMasked(8,cl));
-//		cout<<isDiaMasked[cl];
+		if(verbosity>10)cout<<isDiaMasked[cl]<<flush;
 	}
 	nDiamondHits=eventReader->getNClusters(8);
 	isInFiducialCut=true;
@@ -193,11 +201,11 @@ void TSelectionClass::setVariables(){
 		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_xhigh();
 		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_ylow();
 		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_yhigh();
-//		cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<":"<<isInFiducialCut<<endl;
+		if(verbosity>10)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<":"<<isInFiducialCut<<endl;
 	}
 	else
 		isInFiducialCut=false;
-//		UInt_t nDiamondHits; //number of clusters in diamond plane;
+//		UInt_t nDiamondHits; //number of  in diamond plane;
 //		bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
 }
 
@@ -213,11 +221,19 @@ bool TSelectionClass::checkDetMasked(UInt_t det){
 }
 
 bool TSelectionClass::checkDetMasked(UInt_t det,UInt_t cl){
+	if(verbosity>20)cout<<"check if det Masked"<<endl;
 	bool isMasked=false;
 
 	if(cl<eventReader->getNClusters(det)){
+		if(verbosity>20)cout<<"getCLuster"<<flush;
 		TCluster cluster = eventReader->getCluster(det,cl);
-		for(UInt_t ch = cluster.getMinChannelNumber(); ch<=cluster.getMaxChannelNumber();ch++){
+		if(verbosity>20)cout<<"."<<flush;
+		UInt_t min = cluster.getSmallestChannelNumber();
+		if(verbosity>20)cout<<"."<<min<<flush;
+		UInt_t max = cluster.getHighestChannelNumber();
+		if(verbosity>20)cout<<":"<<max<<flush;
+		for(UInt_t ch = max; ch<=max;ch++){
+			if(verbosity>20)cout<<"ch"<<ch<<" "<<flush;
 			isMasked=isMasked||settings->getDet_channel_screen(det).isScreened(ch);
 		}
 	}

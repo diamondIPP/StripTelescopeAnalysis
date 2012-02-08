@@ -114,11 +114,23 @@ string TPlane::getDetectortypeString(TPlaneProperties::enumDetectorType type){
 	}
 }
 
+TCluster TPlane::getXCluster(UInt_t cl){
+	if(cl<xClusters.size())
+		return xClusters.at(cl);
+	return TCluster();
+}
+
+TCluster TPlane::getYCluster(UInt_t cl){
+	if(cl<yClusters.size())
+		return yClusters.at(cl);
+	return TCluster();
+}
+
 TCluster TPlane::getCluster(enumCoordinate cor, UInt_t cl){
 	if(cor==X_COR)
-		return xClusters.at(cl);
+		return getXCluster(cl);
 	else
-		return yClusters.at(cl);
+		return getYCluster(cl);
 }
 
 void TPlane::Print(UInt_t level)

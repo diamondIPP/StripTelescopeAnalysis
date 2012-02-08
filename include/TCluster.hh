@@ -47,7 +47,7 @@ public:
     TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
     TCluster(const TCluster& a);
     virtual ~TCluster();
-    void addChannel(int channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
+    void addChannel(UInt_t channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
     Float_t getPosition(calculationMode_t mode=highest2Centroid);
     void clear();
     bool isLumpyCluster();
@@ -63,8 +63,8 @@ public:
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
     Float_t getSignalOfChannel(UInt_t channel);
-    UInt_t getMinChannelNumber();
-    UInt_t getMaxChannelNumber();
+    UInt_t getSmallestChannelNumber();
+    UInt_t getHighestChannelNumber();
     Float_t getHighestSignal();
     Float_t getSignal(UInt_t clusterPos);
     Float_t getSNR(UInt_t clusterPos);
@@ -89,8 +89,13 @@ public:
 private:
     void checkForGoldenGate();
     void checkForLumpyCluster();
-    deque<pair<int,Float_t> > cluster; //ch,signal
-        deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
+    UInt_t checkClusterForSize() const;
+    //deque<pair<int,Float_t> > cluster; //ch,signal
+    deque <UInt_t> clusterChannel;
+    deque <Float_t> clusterSignal;
+//        deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
+        deque<UShort_t> clusterADC;
+        deque<Float_t> clusterSignalInSigma;
         deque<bool> clusterChannelScreened;
         UInt_t numberOfSeeds;
         UInt_t numberOfHits;

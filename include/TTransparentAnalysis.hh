@@ -56,6 +56,7 @@ public:
 	virtual ~TTransparentAnalysis();
 	void	doAnalysis(int nEvents=0);
 	void analyze(int nEvents, int startEvent);
+	void setSettings(TSettings* settings);
 	
 private:
 	void initHistograms();

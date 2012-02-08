@@ -41,6 +41,8 @@ public:
 	TPlane(const TPlane& rhs);
 	virtual ~TPlane();
 	TCluster getCluster(enumCoordinate cor, UInt_t cl);
+	TCluster getXCluster(UInt_t cl);
+	TCluster getYCluster(UInt_t cl);
 	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPosition(enumCoordinate cor, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);

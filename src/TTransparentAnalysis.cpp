@@ -15,7 +15,7 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber, TSettings settings) {
 	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-	setSettings(settings);
+	setSettings(&settings);
 	stringstream  runString;
 	runString.str("");
 	runString<<runNumber;
