@@ -300,7 +300,17 @@ UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
 Float_t TTrack::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
 {
 	// TODO: write getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)!!!
-	return 0;
+	Float_t positionInDetSystem = 0;
+	UInt_t plane = det/2;
+	// x plane
+	if (det%2 == 0) {
+		positionInDetSystem = (xPred-this->getXOffset(plane))/TMath::Cos(this->getPhiXOffset(plane)) - (yPred+(xPred-this->getXOffset(plane))*TMath::Tan(this->getPhiXOffset(plane)))*TMath::Sin(this->getPhiXOffset(plane));
+	}
+	// y plane
+	else {
+		positionInDetSystem = (yPred-this->getYOffset(plane))/TMath::Cos(this->getPhiYOffset(plane)) + (xPred-(yPred-this->getYOffset(plane))*TMath::Tan(this->getPhiYOffset(plane)))*TMath::Sin(this->getPhiYOffset(plane));
+	}
+	return positionInDetSystem;
 }
 
 UInt_t TTrack::getVerbosity() const
