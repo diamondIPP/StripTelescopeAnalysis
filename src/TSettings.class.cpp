@@ -526,7 +526,11 @@ void TSettings::ParseFloatArray(string value, vector<float> &vec) {
 	}
 }
 
-
+/**
+ * TODO Ueberarbeiten so dass beliebige werte fuer jeden detector eingetragen werden koennen
+ * @param det
+ * @return
+ */
 Float_t TSettings::getClusterSeedFactor(UInt_t det){
 	if(det==8)
 		return getDi_Cluster_Seed_Factor();

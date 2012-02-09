@@ -98,3 +98,8 @@ Float_t  TTracking::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster
 		return 0;
 	return myTrack->getPosition(cor,plane,mode);
 }
+Float_t TTracking::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred){
+	if(myTrack==0)
+		return 0;
+	return myTrack->getPositionInDetSystem(det,xPred,yPred);
+}

@@ -44,7 +44,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	this->seedDiaSigma=seedDiaSigma;
 	this->hitDiaSigma=hitDiaSigma;
 	this->runNumber=runNumber;
-	verbosity=0;
+	verbosity=20;
 	this->maxDetAdcValue=255;
 	this->maxDiaAdcValue=4095;
 	pVecvecCluster=&vecvecCluster;
@@ -110,42 +110,48 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 void TClustering::clusterEvent()
 {
 
-	//Cluster Silicon Planes
-	for(unsigned int det=0;det<9;det++){
+	//Cluster Planes
+	for(unsigned int det=0;det<TPlaneProperties::getNDetectors();det++){
 		//clear vecCluster
 		vecCluster[det].clear();
 
 		//cluster Plane
-		clusterPlane(det);
+		clusterDetector(det);
 		//fill clusters in vecvecCluster
-		if(verbosity>10)cout<<"fill "<<det<<" vecvecCluster "<<flush;
-		if(det<vecvecCluster.size()){
-			if(verbosity>10)cout<<vecvecCluster.size()<<"."<<flush;
-			vecvecCluster.at(det).clear();
-			if(verbosity>10)cout<<","<<vecCluster[det].size()<<flush;
-			for(unsigned int cl=0;cl<vecCluster[det].size();cl++){
-				if(verbosity>10)cout<<"."<<cl<<flush;
-				TCluster cluster=vecCluster[det].at(cl);
-				if(verbosity>10)cout<<"."<<cl<<flush;
-				vecvecCluster.at(det).push_back(cluster);
-			}
-		}
-		else
-			cout<<"Something is going wrong vecvecCluster is to small....."<<endl;
-		//hNumberOfSeeds[det]->Fill(numberOfSeeds);
-		if(verbosity>10)cout<<"Done with detector "<<det<<endl;
+//		if(verbosity>10)cout<<"fill "<<det<<" vecvecCluster "<<flush;
+//		if(det<vecvecCluster.size()){
+//			if(verbosity>10)cout<<vecvecCluster.size()<<"."<<flush;
+//			vecvecCluster.at(det).clear();
+//			if(verbosity>10)cout<<","<<vecCluster[det].size()<<flush;
+//			for(unsigned int cl=0;cl<vecCluster[det].size();cl++){
+//				if(verbosity>10)cout<<"."<<cl<<flush;
+//				TCluster cluster=vecCluster[det].at(cl);
+//				if(verbosity>10)cout<<"."<<cl<<flush;
+//				vecvecCluster.at(det).push_back(cluster);
+//			}
+//		}
+//		else
+//			cout<<"Something is going wrong vecvecCluster is to small....."<<endl;
+//		//hNumberOfSeeds[det]->Fill(numberOfSeeds);
+//		if(verbosity>10)cout<<"Done with detector "<<det<<endl;
 	}
+
+	//Save Planes to Event
 	if(pEvent!=NULL) {delete pEvent;pEvent=NULL;}
 	pEvent = new TEvent(nEvent);
 	if(verbosity>10)cout<<"."<<flush;
-	for(UInt_t nplane=0;nplane<4;nplane++){
+
+	//siliconPlanes
+	for(UInt_t nplane=0;nplane<TPlaneProperties::getNSiliconPlanes();nplane++){
 		TPlane plane(vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
 		pEvent->addPlane(plane,nplane);
 		if(verbosity>10)cout<<nplane<<"."<<flush;
 	}
-	TPlane plane(vecCluster[8],TPlaneProperties::kDiamond);
+
+	//diamondPlanes
+	TPlane plane(vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
 	if(verbosity>10)cout<<4<<"."<<flush;
-	pEvent->addPlane(plane,4);
+	pEvent->addPlane(plane,TPlaneProperties::getDiamondPlane());
 	if(true){pEvent->isValidSiliconEvent();}
 	if(verbosity>8){
 		cout<<"\n"<<nEvent<<" "<<pEvent->getEventNumber()<<" "<<pEvent->isValidSiliconEvent()<<" ";
@@ -157,16 +163,21 @@ void TClustering::clusterEvent()
 
 }
 
-void TClustering::clusterPlane(int det){
-
+void TClustering::clusterDetector(int det){
+	if(det>=TPlaneProperties::getNDetectors()){
+		cerr<<"det is bigger than NDetectors... EXIT"<<endl;
+		exit;
+	}
 	nClusters[det]=0;
 	int maxChannels= TPlaneProperties::getNChannels(det);
 	if(verbosity>10)cout<<"ClusterDetector"<<det<<" "<<maxChannels<<endl;
 	for(int ch=0;ch<maxChannels;ch++){
-		if(verbosity>11&&nEvent==0&&det==8&&ch<128)cout<<nEvent<<flush;
+		//if(verbosity>30&&nEvent==0&&det==8&&ch<128)cout<<nEvent<<flush;
+
 		Float_t sigma=eventReader->getPedestalSigma(det,ch);
 		Float_t signal = eventReader->getSignal(det,ch);
-		if(verbosity>9&&nEvent==0&&det==8&&ch<128)cout<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
+
+		//if(verbosity>9&&nEvent==0&&det==8&&ch<128)cout<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
 		//if(det==8)cout<<nEvent<<" # "<<det<<" # "<<ch<<" "<<signal<<" "<<sigma<<" "<<endl;
 		if(sigma==0){
 			if(verbosity>1)cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
@@ -174,21 +185,17 @@ void TClustering::clusterPlane(int det){
 		}
 		Float_t SNR=eventReader->getSignalInSigma(det,ch);
 		if(SNR!=eventReader->getSignalInSigma(det,ch))cout<<"in the SNR there is something wrong...";
-		if(verbosity>2&&nEvent==0&&det==8&&ch<TPlaneProperties::getNChannels(det))cout<<SNR<<flush;
+		//if(verbosity>2&&nEvent==0&&det==8&&ch<TPlaneProperties::getNChannels(det))cout<<SNR<<flush;
 
-		if(det<8 && SNR>this->seedDetSigma){
-			if(verbosity>3)cout<<"Found a Seed "<<nEvent<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
-			ch=combineCluster(det,ch,this->maxDetAdcValue);
+
+		if( SNR>settings->getClusterSeedFactor(det)){
+			if(verbosity>3)cout<<"Found a Seed "<<nEvent<<" "<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
+			ch=combineCluster(det,ch,TPlaneProperties::getMaxSignalHeight(det));
 			if(verbosity>3)cout<<"new channel no.:"<<ch<<flush;
 		}
-		if(det==8 && SNR>this->seedDiaSigma){
-			if(verbosity>2)cout<<"Found a DiaSeed "<<flush;
-			if(verbosity>2)cout<<nEvent<<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<eventReader->getCurrent_event()<<flush;
-			ch=combineCluster(det,ch,this->maxDiaAdcValue);
-			if(verbosity>2)cout<<"new channel no.:"<<ch<<flush;
-		}
-		if(verbosity>11)cout<<" "<<ch<<endl;
 	}
+	if(verbosity>3)cout<<endl;
+
 }
 
 /**
@@ -212,24 +219,16 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"combine Cluster...start:"<<ch<<" ";
 
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
-	Float_t signal = (Float_t)eventReader->getAdcValue(det,ch)-eventReader->getPedestalMean(det,ch);
-	Float_t adcValueInSigma=signal/sigma;
-	UShort_t adcValue;
+	Float_t signal =eventReader->getSignal(det,ch);
+	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch);
+	UShort_t adcValue=(UShort_t)eventReader->getAdcValue(det,ch);
 
 	//create Cluster
-	int seedSigma;
-	int hitSigma;
+	int seedSigma=settings->getClusterSeedFactor(det);
+	int hitSigma=settings->getClusterHitFactor(det);
 	bool isScreened;
-	int maxChannel=256;
-	if (det==8){
-		hitSigma=this->hitDiaSigma;
-		seedSigma=this->seedDiaSigma;
-		maxChannel=128;
-	}
-	else{
-		hitSigma=this->hitDetSigma;
-		seedSigma=this->seedDetSigma;
-	}
+	int maxChannel=TPlaneProperties::getNChannels(det);
+
 	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel);
 
 	//look for hit channels smaller than or equal  to the seed channel
@@ -241,7 +240,7 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";
 		signal =eventReader->getSignal(det,currentCh);
 		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
-		isScreened=this->settings->isDet_channel_screened(det,currentCh);
+		isScreened=this->settings->isDet_channel_screened(det,currentCh)||adcValue==maxAdcValue;
 		if(sigma!=0&&adcValueInSigma>hitSigma){
 			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 		}

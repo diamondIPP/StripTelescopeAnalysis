@@ -45,7 +45,7 @@ public:
 	void setSettings(TSettings* settings);
 private:
 	void clusterEvent();
-	void clusterPlane(int det);
+	void clusterDetector(int det);
 	int combineCluster(int det,int ch,int maxAdcValue=255);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
