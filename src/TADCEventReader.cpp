@@ -513,6 +513,11 @@ TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 	return this->pEvent->getCluster(det,cl);
 }
 
+UInt_t TADCEventReader::getClusterSize(UInt_t det,UInt_t cl)
+{
+	return pEvent->getClusterSize(det,cl);
+}
+
 void TADCEventReader::checkADC(){
 	this->LoadEvent(100);
 	for(int ch=0;ch<256;ch++)

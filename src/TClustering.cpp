@@ -44,7 +44,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	this->seedDiaSigma=seedDiaSigma;
 	this->hitDiaSigma=hitDiaSigma;
 	this->runNumber=runNumber;
-	verbosity=20;
+	verbosity=0;
 	this->maxDetAdcValue=255;
 	this->maxDiaAdcValue=4095;
 	pVecvecCluster=&vecvecCluster;
@@ -143,13 +143,14 @@ void TClustering::clusterEvent()
 
 	//siliconPlanes
 	for(UInt_t nplane=0;nplane<TPlaneProperties::getNSiliconPlanes();nplane++){
-		TPlane plane(vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
+		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
+		if(verbosity>10)plane.Print(1);
 		pEvent->addPlane(plane,nplane);
 		if(verbosity>10)cout<<nplane<<"."<<flush;
 	}
 
 	//diamondPlanes
-	TPlane plane(vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
+	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
 	if(verbosity>10)cout<<4<<"."<<flush;
 	pEvent->addPlane(plane,TPlaneProperties::getDiamondPlane());
 	if(true){pEvent->isValidSiliconEvent();}
@@ -191,7 +192,7 @@ void TClustering::clusterDetector(int det){
 		if( SNR>settings->getClusterSeedFactor(det)){
 			if(verbosity>3)cout<<"Found a Seed "<<nEvent<<" "<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
 			ch=combineCluster(det,ch,TPlaneProperties::getMaxSignalHeight(det));
-			if(verbosity>3)cout<<"new channel no.:"<<ch<<flush;
+			if(verbosity>20)cout<<"new channel no.:"<<ch<<flush;
 		}
 	}
 	if(verbosity>3)cout<<endl;

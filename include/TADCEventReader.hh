@@ -56,8 +56,8 @@ public:
     std::string getFilePath();
     Float_t getPedestalMean(UInt_t det, UInt_t ch);
     Float_t getPedestalSigma(UInt_t det, UInt_t ch);
-    TCluster::vecvecTCluster* getCluster() const;
     TCluster getCluster(UInt_t det,UInt_t cl);
+    UInt_t getClusterSize(UInt_t det,UInt_t cl);
     UInt_t getNClusters(UInt_t det);
     bool isSaturated(UInt_t det,UInt_t ch);
     void checkADC();

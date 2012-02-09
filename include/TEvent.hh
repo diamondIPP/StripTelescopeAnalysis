@@ -39,6 +39,9 @@ public:
 	UInt_t getNClusters(UInt_t det);
 	TCluster getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
 	TCluster getCluster(UInt_t det, UInt_t cl);
+	UInt_t getClusterSize(UInt_t det,UInt_t cl);
+	UInt_t getClusterSize(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
+
 	UInt_t getNPlanes();
 	bool  isValidSiliconEvent();
 	bool isMasked();
@@ -48,6 +51,7 @@ private:
 	
 	vector<TPlane> planes;
 	UInt_t eventNumber;
+	UInt_t verbosity;
 
     ClassDef(TEvent,4);
 public:

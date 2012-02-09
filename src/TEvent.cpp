@@ -12,6 +12,7 @@ ClassImp(TEvent);
 TEvent::TEvent(UInt_t nEvent){
 	eventNumber=nEvent;
 	planes.clear();
+	verbosity=0;
 }
 
 TEvent::~TEvent(){
@@ -19,6 +20,7 @@ TEvent::~TEvent(){
 }
 
 TEvent::TEvent(const TEvent& rhs){
+	verbosity=rhs.verbosity;
 	eventNumber = rhs.eventNumber;
 	for(UInt_t pl=0;pl<rhs.planes.size();pl++)
 		this->planes.push_back(rhs.planes.at(pl));
@@ -85,7 +87,15 @@ TCluster TEvent::getCluster(UInt_t det,UInt_t cl){
 	return this->getCluster(plane,cor,cl);
 }
 
+UInt_t TEvent::getClusterSize(UInt_t det, UInt_t cl){
+	TCluster cluster = getCluster(det,cl);
+	if(verbosity>20)cluster.Print();
+	return cluster.size();
+}
 
+UInt_t TEvent::getClusterSize(UInt_t plane,TPlane::enumCoordinate cor,UInt_t cl){
+	return getCluster(plane,cor,cl).size();
+}
 
 void TEvent::Print(UInt_t level){
 	cout<<TCluster::Intent(level)<<"EventNo"<<getEventNumber()<<" with "<<getNPlanes()<< "Planes:"<<endl;

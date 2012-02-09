@@ -398,7 +398,7 @@ void TAnalysisOfClustering::analyseCluster()
 	for(int det=0;det<9;det++){
 		hNumberOfClusters[det]->Fill(eventReader->getNClusters(det));
 		for(int cl=0;cl<eventReader->getNClusters(det);cl++){
-			hClusterSize[det]->Fill(eventReader->getCluster(det,cl).size());
+			hClusterSize[det]->Fill(eventReader->getClusterSize(det,cl));
 		}
 	}
 

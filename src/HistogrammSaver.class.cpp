@@ -44,8 +44,8 @@ HistogrammSaver::~HistogrammSaver() {
 //	TString string1 = sys->GetFromPipe(".! mkdir root-Files");
 //	cout<<string1<<endl;
 	stringstream test;
-	test<< "mv -fv "<<plots_path<<"/*.root "<<plots_path<<"/root/";
-	cout<<"\""<<test.str()<<"\""<<endl;
+	test<< "mv -f "<<plots_path<<"/*.root "<<plots_path<<"/root/";
+	//cout<<"\""<<test.str()<<"\""<<endl;
 	system(test.str().c_str());//t.str();//<<"\""<<endl;
 //	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
 //	cout<<string1<<endl;

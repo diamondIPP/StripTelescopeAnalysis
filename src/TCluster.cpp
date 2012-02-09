@@ -33,7 +33,6 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	this->det=det;
 	this->eventNumber=nEvent;
 	mode=highest2Centroid;
-	verbosity=0;
 	this->nChannels=nChannels;
 }
 
@@ -44,7 +43,8 @@ TCluster::~TCluster() {
 
 TCluster::TCluster(const TCluster& rhs){
 	//TODO WIe gehe ich vor mit den ganzen TObject kram???
-	//cout<<"copy TClsuter"<<endl;
+	verbosity=rhs.verbosity;
+	if(verbosity)cout<<"copy TCluster for det  "<<(int)rhs.det<<" "<<rhs.checkClusterForSize()<<endl;
 	clusterChannel.clear();
 	clusterSignal.clear();
 	clusterADC.clear();

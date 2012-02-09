@@ -8,27 +8,38 @@
 
 #include "../include/TPlane.hh"
 ClassImp(TPlane);
-TPlane::TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
+TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
 	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
 		this->xClusters.push_back(xClusters.at(xCl));
 	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
 		this->yClusters.push_back(yClusters.at(yCl));
 	this->type=type;
+	this->planeNo=planeNo;
+	verbosity=0;
 }
 
-TPlane::TPlane(vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
+TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
 	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
 		this->xClusters.push_back(xClusters.at(xCl));
 	yClusters.clear();
 	this->type=type;
+	this->planeNo=planeNo;
+	verbosity=0;
 }
 
 TPlane::TPlane(const TPlane& rhs){
-	for(UInt_t xCl=0;xCl<rhs.xClusters.size();xCl++)
-		this->xClusters.push_back(rhs.xClusters.at(xCl));
-	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
-		this->yClusters.push_back(rhs.yClusters.at(yCl));
+	this->verbosity=rhs.verbosity;
+	if(verbosity>10)cout<<"Copy constructor of TPlane:"<<rhs.xClusters.size()<<" "<<rhs.yClusters.size()<<endl;
+	for(UInt_t xCl=0;xCl<rhs.xClusters.size();xCl++){
+		TCluster xCluster=rhs.xClusters.at(xCl);
+		this->xClusters.push_back(xCluster);
+	}
+	for(UInt_t yCl=0;yCl<rhs.yClusters.size();yCl++){
+		TCluster yCluster = rhs.yClusters.at(yCl);
+		this->yClusters.push_back(yCluster);
+	}
 	this->type=rhs.type;
+	this->planeNo=rhs.planeNo;
 }
 
 TPlane::~TPlane() {

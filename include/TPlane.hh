@@ -34,10 +34,10 @@
 class TPlane:public TObject {
 public:
 
-	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();};
+	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();planeNo=0;verbosity=0;};
 	enum enumCoordinate{ X_COR =1, Y_COR=2, Z_COR =3, XY_COR=4,};
-	TPlane(vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
-	TPlane(vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
+	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
+	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
 	TPlane(const TPlane& rhs);
 	virtual ~TPlane();
 	TCluster getCluster(enumCoordinate cor, UInt_t cl);
@@ -56,7 +56,8 @@ public:
     void Print(UInt_t level=0);
 private:
     TPlaneProperties::enumDetectorType type;
-	
+	UInt_t planeNo;
+	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
     ClassDef(TPlane,3);
 };
