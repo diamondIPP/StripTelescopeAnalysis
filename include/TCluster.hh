@@ -85,6 +85,7 @@ public:
     Float_t getHighest2Centroid();
     void Print(UInt_t level=0);
     static string Intent(UInt_t level);
+	Float_t getEta();
 
 private:
     void checkForGoldenGate();

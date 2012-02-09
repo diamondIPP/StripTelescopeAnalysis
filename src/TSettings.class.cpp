@@ -979,6 +979,13 @@ Float_t TSettings::getPulse_height_si_max() const
 	return pulse_height_si_max;
 }
 
+Float_t TSettings::getPulse_height_max(UInt_t det) const
+{
+	if (det < 8) return this->getPulse_height_si_max();
+	if (det == 8) return this->getPulse_height_di_max();
+	return -1;
+}
+
 Int_t TSettings::getSaveAllFilesSwitch() const
 {
 	return SaveAllFilesSwitch;

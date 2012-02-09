@@ -495,6 +495,16 @@ UShort_t TCluster::getAdcValue(UInt_t clusterPos)
 	else return 0;
 }
 
+Float_t TCluster::getEta()
+{
+	// TODO: write getEta() function
+	if (checkClusterForSize() < 3) return -1;
+	getHighestSignalChannel();
+	getHighestHitClusterPosition();
+	UInt_t leftChannel = 0;
+	UInt_t rightChannel = 0;
+}
+
 /**
  * todo: return value 5000 check if that makes sense
  * @param clusterPos

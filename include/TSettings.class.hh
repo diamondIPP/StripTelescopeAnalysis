@@ -52,6 +52,7 @@ public:
 	Float_t getPulse_height_di_max() const;
 	Int_t getPulse_height_num_bins() const;
 	Float_t getPulse_height_si_max() const;
+	Float_t getPulse_height_max(UInt_t det) const;
 	Int_t getSaveAllFilesSwitch() const;
 	Float_t getSnr_distribution_di_max() const;
 	Float_t getSnr_distribution_si_max() const;

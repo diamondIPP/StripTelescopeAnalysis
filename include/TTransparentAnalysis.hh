@@ -62,19 +62,18 @@ private:
 	void initHistograms();
 	void fillHistograms();
 	void saveHistograms();
+	void deleteHistograms();
 	void fitTrack();
 	void analyzeTrack(TTrack track);
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	
-	TTracking* tracking;
 	UInt_t subjectDetector;
 	vector<UInt_t> refPlanes;
-	UInt_t transparentMaxClusterSize;
-	TPositionPrediction* positionPrediction;
-    TSettings* settings;
-	vector<TCluster> transparentClusters;
+	static UInt_t transparentMaxClusterSize;
 	
+	TPositionPrediction* positionPrediction;
+	vector<TCluster> transparentClusters;
 	Float_t predXPosition, predYPosition;
 	Float_t positionInDetSystem;
 	
@@ -82,6 +81,8 @@ private:
     TSystem* sys;
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
+    TSettings* settings;
+	TTracking* tracking;
 	
 	// cut flow
 	UInt_t nAnalyzedEvents;
@@ -92,6 +93,16 @@ private:
 	
 	
 	// histograms
+	vector<TH1F*> hLaundau;
+	vector<TH1F*> hEta;
+	vector<TH1F*> hResidual;
+	
+	vector<TH1F*> hLaundau2Hightest;
+	vector<TH1F*> hEta2Hightest;
+	vector<TH1F*> hResidual2Hightest;
+	
+	
+	
 	TH1F* histo_transparentclustering_landau[10];
     TH1F* histo_transparentclustering_landau_mean;
     TH1F* histo_transparentclustering_eta;

@@ -42,6 +42,16 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber, TSettings settings) {
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
 	sys->cd("..");
+	
+	
+	// TODO: move these setting to the proper place
+	subjectDetector = 8;
+	for (int i = 0; i < 8; i++) {
+		refPlanes.push_back(i);
+	}
+	transparentMaxClusterSize = 10;
+	
+	
 	initHistograms();
 //	this->seedSigma=seedSigma;
 //	this->hitSigma=hitSigma;
@@ -60,23 +70,11 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 	cout<<"\n\n******************************************\n";
 	cout<<    "******Start Transparent Analysis...*******\n";
 	cout<<"******************************************\n\n"<<endl;
-	
-	
-	// TODO: move these setting to the proper place
-	subjectDetector = 8;
-	for (int i = 0; i < 8; i++) {
-		refPlanes.push_back(i);
-	}
-	transparentMaxClusterSize = 10;
-	
-	
-	
 	nAnalyzedEvents = 0;
 	regionNotOnPlane = 0;
 	saturatedChannel = 0;
 	screenedChannel = 0;
 	noValidTrack = 0;
-	
 	for (int nEvent = startEvent; nEvent < nEvents; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
 		tracking->LoadEvent(nEvent);
@@ -89,7 +87,7 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 		this->predXPosition = positionPrediction->getPositionX();
 		this->predYPosition = positionPrediction->getPositionY();
 		// TODO: position in det system
-//		this->positionInDetSystem = getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
+		this->positionInDetSystem = tracking->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
 		if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystem, transparentMaxClusterSize) == false) continue;
 		for (UInt_t clusterSize = 1; clusterSize < transparentMaxClusterSize+1; clusterSize++) {
 			transparentClusters.push_back(this->makeTransparentCluster(subjectDetector, this->positionInDetSystem, clusterSize));
@@ -152,9 +150,25 @@ void TTransparentAnalysis::setSettings(TSettings* settings){
 }
 
 void TTransparentAnalysis::initHistograms() {
-	
+	for (UInt_t clusterSize = 0; clusterSize < transparentMaxClusterSize; clusterSize++) {
+		// TODO: take care of histogram names and bins!!
+		hLaundau.push_back(new TH1F("","",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+		hEta.push_back(new TH1F("","",bins,0,1));
+		hResidual.push_back(new TH1F("","",bins,min,max));
+	}
 }
 
 void TTransparentAnalysis::fillHistograms() {
-	
+	for (UInt_t clusterSize = 0; clusterSize < transparentMaxClusterSize; clusterSize++) {
+		hLaundau[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge());
+	}
+}
+
+// TODO: call TTransparentAnalysis::deleteHistograms
+void TTransparentAnalysis::deleteHistograms() {
+	for (UInt_t clusterSize = 0; clusterSize < transparentMaxClusterSize; clusterSize++) {
+		delete hLaundau[clusterSize];
+		delete hEta[clusterSize];
+		delete hResidual[clusterSize];
+	}
 }
