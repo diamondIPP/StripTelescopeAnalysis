@@ -230,6 +230,19 @@ UInt_t TCluster::getHighestSignalChannel()
 	return maxChannel;
 }
 
+UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo)
+{
+	return getChannel(getHighestSignalNeighbourClusterPosition(getClusterPosition(channelNo)));
+}
+
+UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos)
+{
+	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;
+	if (getSignal(clPos-1) < getSignal(clPos+1)) return clPos+1;
+	if (getSignal(clPos-1) > 0) return clPos-1;
+	return 9999;
+}
+
 Float_t TCluster::getChargeWeightedMean(bool useNonHits){
 	Float_t sum=0;
 	Float_t charged=0;
@@ -497,12 +510,20 @@ UShort_t TCluster::getAdcValue(UInt_t clusterPos)
 
 Float_t TCluster::getEta()
 {
-	// TODO: write getEta() function
 	if (checkClusterForSize() < 3) return -1;
-	getHighestSignalChannel();
-	getHighestHitClusterPosition();
-	UInt_t leftChannel = 0;
-	UInt_t rightChannel = 0;
+	UInt_t clPosHighest = getHighestHitClusterPosition();
+	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
+	UInt_t leftClPos = 0;
+	UInt_t rightClPos = 0;
+	if (clPosHighest < clPos2ndHighest) {
+		leftClPos = clPosHighest;
+		rightClPos = clPos2ndHighest;
+	}
+	else {
+		leftClPos = clPos2ndHighest;
+		rightClPos = clPosHighest;
+	}
+	return getSignal(rightClPos) / (getSignal(leftClPos)+getSignal(rightClPos));
 }
 
 /**

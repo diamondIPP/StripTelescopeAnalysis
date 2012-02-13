@@ -58,6 +58,8 @@ public:
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
     UInt_t getHighestSignalChannel();
+	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo);
+	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos);
     Float_t getChargeWeightedMean(bool useNonHits=false);
     void checkCluster();
     bool isSeed(UInt_t cl);
