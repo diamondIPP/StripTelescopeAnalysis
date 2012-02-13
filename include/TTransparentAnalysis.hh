@@ -70,7 +70,6 @@ private:
 	
 	UInt_t subjectDetector;
 	vector<UInt_t> refPlanes;
-	static UInt_t transparentMaxClusterSize;
 	
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;

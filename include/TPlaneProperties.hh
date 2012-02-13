@@ -27,6 +27,7 @@ public:
 	static UInt_t getDetDiamond(){return 8;};
 	static UInt_t getDiamondPlane(){return 4;};
 	static UInt_t getNDetectors(){return 9;};
+	static UInt_t getMaxTransparentClusterSize(UInt_t det){return 10;};
 	// TODO: getPlaneCoordinate(UInt_t plane);
 
 };
