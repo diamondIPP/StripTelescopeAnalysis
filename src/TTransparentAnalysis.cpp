@@ -49,6 +49,7 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber, TSettings settings) {
 	for (int i = 0; i < 8; i++) {
 		refPlanes.push_back(i);
 	}
+	clusterCalcMode = TCluster::highest2Centroid;
 	
 	
 	initHistograms();
@@ -85,6 +86,14 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 		positionPrediction = tracking->predictPosition(subjectDetector,refPlanes);
 		this->predXPosition = positionPrediction->getPositionX();
 		this->predYPosition = positionPrediction->getPositionY();
+		if (subjectDetector%2 == 0) {
+			this->predPerpPosition = this->predYPosition;
+			this->predPosition = this->predXPosition;
+		}
+		else {
+			this->predPerpPosition = this->predXPosition;
+			this->predPosition = this->predYPosition;
+		}
 		// TODO: position in det system
 		this->positionInDetSystem = tracking->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
 		if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystem, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)) == false) continue;
@@ -152,14 +161,17 @@ void TTransparentAnalysis::initHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		// TODO: take care of histogram names and bins!!
 		hLaundau.push_back(new TH1F("","",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
-//		hEta.push_back(new TH1F("","",bins,0,1));
-//		hResidual.push_back(new TH1F("","",bins,min,max));
+		hEta.push_back(new TH1F("","",50,0,1));
+		hResidual.push_back(new TH1F("","",100,-5.,5.));
 	}
 }
 
 void TTransparentAnalysis::fillHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		hLaundau[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge());
+		hEta[clusterSize]->Fill(this->transparentClusters[clusterSize].getEta());
+		Float_t clusterLabPos = tracking->getPositionOfCluster(subjectDetector, this->transparentClusters[clusterSize], this->predPerpPosition, this->clusterCalcMode);
+		hResidual[clusterSize]->Fill(clusterLabPos-this->predPosition);
 	}
 }
 

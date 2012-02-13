@@ -70,11 +70,12 @@ private:
 	
 	UInt_t subjectDetector;
 	vector<UInt_t> refPlanes;
+	TCluster::calculationMode_t clusterCalcMode;
 	
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;
 	Float_t predXPosition, predYPosition;
-	Float_t positionInDetSystem;
+	Float_t positionInDetSystem, predPerpPosition, predPosition;
 	
 	
     TSystem* sys;
