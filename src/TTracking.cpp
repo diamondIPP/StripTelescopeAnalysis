@@ -93,6 +93,11 @@ Float_t  TTracking::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane
 				return 0;
 			return myTrack->getPositionOfCluster(cor,plane,xCluster,yCluster,mode);
 }
+Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode){
+	if(myTrack==0)
+		return 0;
+	return myTrack->getPositionOfCluster(det,cluster,predictedPerpPosition,mode);
+}
 Float_t  TTracking::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
 	if(myTrack==0)
 		return 0;

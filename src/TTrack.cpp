@@ -92,6 +92,25 @@ Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCl
 	}
 }
 
+Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode) {
+	if (cluster.size()<=0) return N_INVALID;
+	UInt_t plane = det/2;
+	Float_t measuredPos = cluster.getPosition(mode);
+	Float_t xOffset = this->getXOffset(plane);
+	Float_t yOffset = this->getYOffset(plane);
+	Float_t phiXOffset = this->getPhiXOffset(plane);
+	Float_t phiYOffset = this->getPhiYOffset(plane);
+	// TODO: is this calculation correct??
+	Float_t xPosition = (measuredPos) * TMath::Cos(phiXOffset) + (predictedPerpPosition) * TMath::Sin(phiYOffset);
+	Float_t yPosition = (predictedPerpPosition) * TMath::Sin(-phiXOffset) + (measuredPos) * TMath::Cos(phiYOffset);
+	if (det%2 == 0) {
+		return xPosition;
+	}
+	else {
+		return yPosition;
+	}
+}
+
 /**
  * Calculation of Hitposition of event using the measured Offsets
  * in this transformation it transform the measured hitPosition in the
