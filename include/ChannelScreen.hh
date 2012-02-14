@@ -7,11 +7,12 @@
 #define CHANNELSCREEN_H
 #include <iostream>
 #include "TMath.h"
+#include "TObject.h"
 #include <vector>
 
 typedef unsigned int uint;
 
-class ChannelScreen:public TObject {
+class ChannelScreen :public TObject {
 
    public:
       ChannelScreen();

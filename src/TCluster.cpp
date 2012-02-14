@@ -532,6 +532,16 @@ UInt_t TCluster::getChannel(UInt_t clusterPos)
 	else return 5000;
 }
 
+
+UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo){
+	//TODO IMPLEMENT
+	return 0;
+}
+UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos){
+	//TODO IMPLEMENT
+	return 0;
+}
+
 /**
  * small function to Intend cout-output;
  * @input level level of intention
