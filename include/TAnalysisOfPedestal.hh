@@ -41,7 +41,7 @@ class TAnalysisOfPedestal {
 public:
 	TAnalysisOfPedestal(TSettings* settings);
 	virtual ~TAnalysisOfPedestal();
-	void	doAnalysis(int nEvents=0);
+	void	doAnalysis(UInt_t nEvents=0);
 private:
 	void saveHistos();
 	void checkForDeadChannels();

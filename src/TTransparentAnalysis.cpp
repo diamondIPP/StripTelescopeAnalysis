@@ -113,7 +113,7 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
 		direction = -1;
 	}
 	int currentChannel = centerChannel;
-	for (int iChannel = 0; iChannel < clusterSize; iChannel++) {
+	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
 		currentChannel += direction * iChannel;
 		if (currentChannel < 0) {
@@ -158,11 +158,14 @@ void TTransparentAnalysis::setSettings(TSettings* settings){
 }
 
 void TTransparentAnalysis::initHistograms() {
-	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+	UInt_t bins=512;
+	for (UInt_t clusterSize = 0; clusterSize < transparentMaxClusterSize; clusterSize++) {
 		// TODO: take care of histogram names and bins!!
-		hLaundau.push_back(new TH1F("","",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
-		hEta.push_back(new TH1F("","",50,0,1));
-		hResidual.push_back(new TH1F("","",100,-5.,5.));
+		stringstream histname;
+		histname<<"bla"<<clusterSize<<endl
+		hLaundau.push_back(new TH1F(histName.strr().c_str(),histName.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+		hEta.push_back(new TH1F(histName.strr().c_str(),histName.str().c_str(),bins,0,1));
+		hResidual.push_back(new TH1F("","",bins,min,max));
 	}
 }
 

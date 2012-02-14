@@ -25,6 +25,7 @@
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
+#include "TSettings.class.hh"
 
 #include "TADCEventReader.hh"
 
@@ -37,6 +38,7 @@ public:
 	TAnalysisOfClustering(int runnumber,int seedSigma=10,int hitSigma=7);
 	virtual ~TAnalysisOfClustering();
 	void	doAnalysis(int nEvents=0);
+	void setSettings(TSettings* settings);
 private:
 	void saveHistos();
 
@@ -60,6 +62,7 @@ private:
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
+    TSettings* settings;
     int nEvent;
     int seedSigma;
     int hitSigma;
@@ -82,7 +85,7 @@ private:
 	TH1F *h2ndBiggestHitPosition[9];
 	TH1F *hLeftHitOverLeftAndRight[9];
 	TH1F *hDeltaLeftRightHitOverLeftAndRight[9];
-	TH1F *hHighestTo2ndHighestSignalRatio[9];
+	TH1F *hSignal2ndHighestOverSignalHighestRatio[9];
 };
 
 #endif /* TDEADCHANNELS_HH_ */

@@ -8,6 +8,15 @@
 #include "TSettings.class.hh"
 using namespace std;
 
+TSettings::TSettings(UInt_t runNumber){
+	verbosity=1;
+	if(verbosity)
+		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
+	DefaultLoadDefaultSettings();
+	SetFileName("");
+	this->runNumber=runNumber;
+}
+
 TSettings::TSettings(string fileName,UInt_t runNumber){
 	verbosity=1;
 	if(verbosity)
@@ -47,7 +56,7 @@ void TSettings::LoadSettings(){
 		string line;
 		getline(file,line);
 
-		//check if comment or empty line
+		//check if comment or empty line: comments: ";","#","/"
 		if ((line.substr(0, 1) == ";") || (line.substr(0, 1) == "#") || (line.substr(0, 1) == "/") || line.empty()) {
 			continue;
 		}
@@ -399,6 +408,14 @@ void TSettings::LoadSettings(){
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	         maxNoise2D = (float)strtod(value.c_str(),0);
 	      }
+	      if(key=="clusterHitFactors") {
+	    	  cout<<key<< " = "<< value.c_str() <<endl;
+	    	 ParseFloatArray(value,clusterHitFactors);
+	      }
+	      if(key=="clusterSeedFactors") {
+	    	  cout<<key<< " = "<< value.c_str() <<endl;
+	    	  ParseFloatArray(value,clusterSeedFactors);
+	      }
 	}
 
 	file.close();
@@ -409,6 +426,10 @@ void TSettings::LoadSettings(){
 		cout<<"Detector "<<det<<" screened channels: ";
 		this->getDet_channel_screen(det).PrintScreenedChannels();
 		cout<<endl;
+	}
+
+	for(int det=0;det<9;det++){
+		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det)<<"/"<<getClusterHitFactor(det)<<endl;
 	}
 
 	cout<<endl<<"TSettings::Finished importing settings from "<<fileName<<endl<<endl;
@@ -532,12 +553,18 @@ void TSettings::ParseFloatArray(string value, vector<float> &vec) {
  * @return
  */
 Float_t TSettings::getClusterSeedFactor(UInt_t det){
+//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
+	if(det<clusterSeedFactors.size())
+		return clusterSeedFactors.at(det);
 	if(det==8)
 		return getDi_Cluster_Seed_Factor();
 	return getSi_Cluster_Seed_Factor();
 }
 
 Float_t TSettings::getClusterHitFactor(UInt_t det){
+
+	if(clusterHitFactors.size()>det)
+		return clusterHitFactors.at(det);
 	if(det==8)
 		return getDi_Cluster_Hit_Factor();
 	return getSi_Cluster_Hit_Factor();

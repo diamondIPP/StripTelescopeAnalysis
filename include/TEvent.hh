@@ -34,8 +34,8 @@ public:
 	virtual ~TEvent();
 	TPlane getPlane(int plane){return planes[plane];};
 	void addPlane(TPlane plane,Int_t pos=-1);
-	UInt_t getNXClusters(UInt_t plane){if(planes.size()>plane)return planes.at(plane).getNXClusters();else return 0;}
-	UInt_t getNYClusters(UInt_t plane){if(planes.size()>plane)return planes.at(plane).getNXClusters();else return 0;}
+	UInt_t getNXClusters(UInt_t plane);//
+	UInt_t getNYClusters(UInt_t plane);//{if(plane<planes.size())return planes.at(plane).getNYClusters();else return 0;}
 	UInt_t getNClusters(UInt_t det);
 	TCluster getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
 	TCluster getCluster(UInt_t det, UInt_t cl);
@@ -46,6 +46,7 @@ public:
 	bool  isValidSiliconEvent();
 	bool isMasked();
 	UInt_t getEventNumber(){return eventNumber;};
+	void setVerbosity(UInt_t verbosity);
 	void Print(UInt_t level);
 private:
 	
@@ -53,7 +54,7 @@ private:
 	UInt_t eventNumber;
 	UInt_t verbosity;
 
-    ClassDef(TEvent,4);
+    ClassDef(TEvent,6);
 public:
 	
 };

@@ -49,7 +49,12 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 			verbosity=0;
 
 	createdTree=false;
-
+	cout<<"X: "<<settings->getSi_avg_fidcut_xlow()<<"/"<<settings->getSi_avg_fidcut_xhigh()<<endl;
+	cout<<"Y: "<<settings->getSi_avg_fidcut_ylow()<<"/"<<settings->getSi_avg_fidcut_yhigh()<<endl;
+	cout<<" use "<<settings->getAlignment_training_track_fraction()<<endl;
+	nUseForAlignment=0;
+	nUseForAnalysis=0;
+	nUseForSiliconAlignment=0;
 }
 
 TSelectionClass::~TSelectionClass() {
@@ -67,6 +72,9 @@ TSelectionClass::~TSelectionClass() {
 		cout<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
 		selectionTree->Write();
 	}
+	printf("Selection Result: \n\tfor Silicon Alignment: %4.1f %%  %6d\n",(nUseForSiliconAlignment*100./(Float_t)nEvents),nUseForSiliconAlignment);
+	printf("\tfor Diamond Alignment: %4.1f %%  %6d\n",nUseForAlignment*100./(Float_t)nEvents,nUseForAlignment);
+	printf("\tfor Diamond  Analysis: %4.1f %%  %6d\n",nUseForAnalysis*100./(Float_t)nEvents,nUseForAnalysis);
 	selectionFile->Close();
 	delete eventReader;
 	delete histSaver;
@@ -82,6 +90,13 @@ void TSelectionClass::MakeSelection()
 
 void TSelectionClass::MakeSelection(UInt_t nEvents)
 {
+	if(nEvents==0)
+		this->nEvents=eventReader->GetEntries();
+	else if(nEvents>eventReader->GetEntries()){
+		cerr<<"nEvents is bigger than entries in eventReader tree: \""<<eventReader->getTree()->GetName()<<"\""<<endl;
+	}
+	else
+		this->nEvents=nEvents;
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
 	this->setBranchAdressess();
@@ -100,6 +115,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 }
 bool TSelectionClass::createSelectionTree(int nEvents)
 {
+
 	cout<<"TSelectionClass::checkTree"<<endl;
 	bool createdNewFile=false;
 	bool createdNewTree=false;
@@ -142,6 +158,7 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 	}
 
 	if(selectionTree==NULL){
+		this->nEvents=nEvents;
 		cout<<"selectionTree does not exists, close file"<<endl;
 		delete selectionFile;
 		cout<<"."<<endl;
@@ -169,11 +186,15 @@ void TSelectionClass::resetVariables(){
 	isDiaMasked.clear();
 	nDiamondHits=0;
 	hasValidSiliconTrack=true;; //One and only one cluster in each silicon plane;
+	useForAnalysis=false;
+	useForAlignment=false;
+	useForSiliconAlignment=false;
 }
 
 void TSelectionClass::setVariables(){
-	if(verbosity)cout<<"setVariables"<<endl;
-	for(UInt_t det=0;det<8;det++){
+	if(verbosity>1)cout<<"setVariables"<<endl;
+
+	for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
 		if(verbosity>10)cout<<det<<endl;
 		if(verbosity>10)cout<<(eventReader->getNClusters(det)==1)<<" "<<flush;
 		hasValidSiliconTrack=hasValidSiliconTrack&&(eventReader->getNClusters(det)==1);
@@ -181,30 +202,51 @@ void TSelectionClass::setVariables(){
 		isDetMasked+=checkDetMasked(det);
 		if(verbosity>10)cout<<"."<<flush;
 	}
-	if(verbosity>10)cout<<" "<<eventReader->getNClusters(8)<<":"<<flush;
 	for(UInt_t cl=0;cl<eventReader->getNClusters(8);cl++){
 		isDiaMasked.push_back(checkDetMasked(8,cl));
 		if(verbosity>10)cout<<isDiaMasked[cl]<<flush;
 	}
-	nDiamondHits=eventReader->getNClusters(8);
+	nDiamondHits=eventReader->getNClusters(TPlaneProperties::getDetDiamond());
 	isInFiducialCut=true;
+	Float_t fiducialValueX=0;
+	Float_t fiducialValueY=0;
 	if(hasValidSiliconTrack){
-		Float_t fiducialValueX=0;
-		Float_t fiducialValueY=0;
 		for(UInt_t plane=0;plane<4;plane++){
-			fiducialValueX+=eventReader->getCluster(plane*2,0).getPosition();
-			fiducialValueY+=eventReader->getCluster(plane*2+1,0).getPosition();
+			fiducialValueX+=eventReader->getCluster(plane,TPlane::X_COR,0).getPosition();
+			fiducialValueY+=eventReader->getCluster(plane,TPlane::Y_COR,0).getPosition();
 		}
 		fiducialValueX/=4.;
 		fiducialValueY/=4.;
 		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_xlow();
 		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_xhigh();
-		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_ylow();
-		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_yhigh();
+		isInFiducialCut=isInFiducialCut&&fiducialValueY>settings->getSi_avg_fidcut_ylow();
+		isInFiducialCut=isInFiducialCut&&fiducialValueY<settings->getSi_avg_fidcut_yhigh();
 		if(verbosity>10)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<":"<<isInFiducialCut<<endl;
 	}
 	else
 		isInFiducialCut=false;
+	useForSiliconAlignment=isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
+	useForAlignment=useForSiliconAlignment&&nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
+//	useForAlignment=isInFiducialCut&&hasValidSiliconTrack&&nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
+	useForAnalysis=useForAlignment;
+	if(hasValidSiliconTrack&&isInFiducialCut){
+		if(verbosity)cout<<nEvent<<":\t"<<flush;
+		if(verbosity)printf("%5.1f %5.1f\t",fiducialValueX,fiducialValueY);
+		//if(verbosity)cout<<<<" "<<<<" "<<isInFiducialCut<<"\t"<<flush;
+		if(verbosity)cout<<isDetMasked<<" "<<eventReader->getNClusters(8)<<" "<<checkDetMasked(8)<<" "<<nDiamondHits<<endl;
+	}
+	if(useForSiliconAlignment){
+		nUseForSiliconAlignment++;
+	}
+	useForAnalysis=(Float_t)nEvent/(Float_t)nEvents>settings->getAlignment_training_track_fraction()&&useForAlignment;
+	if(useForAnalysis){
+		nUseForAnalysis++;
+	}
+	useForAlignment=useForAlignment&&!useForAnalysis;
+	if(useForAlignment){
+		nUseForAlignment++;
+	}
+	//else cout<<nEvent<<"\tuseNOTforAlignemnt..."<<endl;
 //		UInt_t nDiamondHits; //number of  in diamond plane;
 //		bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
 }
@@ -250,4 +292,7 @@ void TSelectionClass::setBranchAdressess(){
 	selectionTree->Branch("isDetMasked",&isDetMasked,"isDetMasked/O");
 	selectionTree->Branch("hasValidSiliconTrack",&hasValidSiliconTrack,"hasValidSiliconTrack/O");
 	selectionTree->Branch("isDiaMasked",&this->isDiaMasked,"isDiaMasked");
+	selectionTree->Branch("useForSiliconAlignment",&this->useForSiliconAlignment,"useForSiliconAlignment/O");
+	selectionTree->Branch("useForAlignment",&this->useForAlignment,"useForAlignment/O");
+	selectionTree->Branch("useForAnalysis",&this->useForAnalysis,"useForAnalysis/O");
 }

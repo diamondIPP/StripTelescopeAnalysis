@@ -57,6 +57,7 @@ public:
     Float_t getPedestalMean(UInt_t det, UInt_t ch);
     Float_t getPedestalSigma(UInt_t det, UInt_t ch);
     TCluster getCluster(UInt_t det,UInt_t cl);
+    TCluster getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
     UInt_t getClusterSize(UInt_t det,UInt_t cl);
     UInt_t getNClusters(UInt_t det);
     bool isSaturated(UInt_t det,UInt_t ch);
@@ -66,6 +67,10 @@ public:
     bool isDiaClusterMasked(UInt_t cl);
     bool isDetMasked();
     TEvent* getEvent();
+    void setVerbosity(UInt_t verbosity);
+    bool useForAlignment(){return this->bUseForAlignment;};
+    bool useForSiliconAlignment(){return this->bUseForSiliconAlignment;};
+    bool useForAnalysis(){return this->bUseForAnalysis;};
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
@@ -94,6 +99,9 @@ private:
 	UInt_t nDiamondClusters;
 	bool bIsInFiducialCut;
 	vector<bool> maskedDiaClusters;
+	bool bUseForAlignment;
+	bool bUseForAnalysis;
+	bool bUseForSiliconAlignment;
 private:
 //is that needed?
 	TFile *file;

@@ -91,8 +91,11 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 	cout<<"\n\n******************************************\n";
 	cout<<    "**************Start Clustering...*********\n";
 	cout<<"******************************************\n\n"<<endl;
-	cout<< "\tSNRs for silicon: "<<seedDetSigma<<"/"<<hitDetSigma<<endl;
-	cout<< "\tSNRs for diamond: "<<seedDiaSigma<<"/"<<hitDiaSigma<<endl;
+	for(UInt_t det=0;det< TPlaneProperties::getNSiliconDetectors();det++)
+		cout<< "\tSNRs for silicon plane "<<det<<": "<<settings->getClusterSeedFactor(det)<<"/"<<settings->getClusterHitFactor(det)<<endl;
+	cout<<endl;
+	for(UInt_t det=TPlaneProperties::getDetDiamond();det< TPlaneProperties::getNDetectors();det++)
+			cout<< "\tSNRs for diamond plane "<<det<<": "<<settings->getClusterSeedFactor(det)<<"/"<<settings->getClusterHitFactor(det)<<endl;
 	UInt_t validEvents=0;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 

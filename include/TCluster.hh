@@ -21,7 +21,7 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 20;};
+	static UInt_t TCLUSTER_REVISION() {return 21;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3};
     TCluster()
@@ -88,15 +88,15 @@ public:
     void Print(UInt_t level=0);
     static string Intent(UInt_t level);
 	Float_t getEta();
+	UInt_t getClusterSize();
+	void setVerbosity(UInt_t verbosity){this->verbosity=verbosity;};
 
 private:
     void checkForGoldenGate();
     void checkForLumpyCluster();
     UInt_t checkClusterForSize() const;
-    //deque<pair<int,Float_t> > cluster; //ch,signal
     deque <UInt_t> clusterChannel;
     deque <Float_t> clusterSignal;
-    //        deque<pair<UShort_t,Float_t> > cluster2; //adc,SNR
     deque<UShort_t> clusterADC;
     deque<Float_t> clusterSignalInSigma;
     deque<bool> clusterChannelScreened;

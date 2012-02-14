@@ -11,7 +11,7 @@
 
 typedef unsigned int uint;
 
-class ChannelScreen {
+class ChannelScreen:public TObject {
 
    public:
       ChannelScreen();

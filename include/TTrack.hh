@@ -61,12 +61,12 @@ public:
 	Float_t getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	Float_t getXPosition(UInt_t plane);
-	Float_t getYPosition(UInt_t plane);
-	Float_t getZPosition(UInt_t plane);
-	Float_t getXMeasured(UInt_t plane);
-	Float_t getYMeasured(UInt_t plane);
-	Float_t getMeasured(TPlane::enumCoordinate cor,UInt_t plane);
+	Float_t getXPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getYPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getZPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getXMeasured(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getYMeasured(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getMeasured(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPrint=false);
 	vector<Float_t> getSiXPositions();
 	vector<Float_t> getSiYPositions();

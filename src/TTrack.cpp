@@ -50,26 +50,17 @@ UInt_t TTrack::getNClusters(int det) {
 	}
 }
 
+
 /**
- * Calculation of Hitposition of event using the measured Offsets
- * in this transformation it transform the measured hitPosition in the
- * plane space into the space of the first plane
- * @param cor enum of Coordinate from which you want to have the result
- * @param plane number of plane for which you are calculating the hitposition
- * @return calculated hit position
+ * calculate Position in absoltue space of two cluster Hits in X/Y with calculation mode mode
+ *
+ * @param cor coordinate in which the calculation is made
+ * @param plane which plane no is used
+ * @param xCluster
+ * @param yCluster
+ * @param mode
+ * @return value of calculated position
  */
-Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
-	if(event==NULL)return N_INVALID;
-	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
-		return N_INVALID;
-	// get offsets
-	TCluster xCluster,yCluster;
-	xCluster=event->getPlane(plane).getXCluster(0);
-	yCluster=event->getPlane(plane).getYCluster(0);
-	return getPositionOfCluster(cor,plane,xCluster,yCluster,mode);
-}
-
-
 Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode){
 	if(xCluster.size()<=0||yCluster.size()<=0)
 		return N_INVALID;
@@ -121,10 +112,14 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
  */
 Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
 	if(event==NULL)return N_INVALID;
-	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
+	if(event->getNXClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
-	TCluster xCluster = event->getPlane(plane).getXCluster(0);
+	TCluster xCluster = event->getCluster(plane,TPlane::X_COR,0);
+	if(xCluster.size()<=0) {
+		cerr<<"This cluster is too small!!!!"<<endl;
+		xCluster.Print();
+	}
 	return getStripXPositionOfCluster(plane,xCluster,yPred,mode);
 }
 
@@ -158,8 +153,8 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
  * @param plane planeNumber to use correct offsets
  * @return calculated xPosition
  */
-Float_t TTrack::getXPosition(UInt_t plane) {
-	return getPosition(TPlane::X_COR,plane);
+Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode) {
+	return getPosition(TPlane::X_COR,plane,mode);
 }
 
 /**
@@ -168,11 +163,11 @@ Float_t TTrack::getXPosition(UInt_t plane) {
  * @param plane planeNumber to use correct offsets
  * @return calculated yPosition
  */
-Float_t TTrack::getYPosition(UInt_t plane) {
-	return getPosition(TPlane::Y_COR,plane);
+Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode) {
+	return getPosition(TPlane::Y_COR,plane,mode);
 }
 
-Float_t TTrack::getZPosition(UInt_t plane){
+Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
 	return alignment->GetZOffset(plane);
 }
 
@@ -198,7 +193,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		return prediction;
 	}
 	vector<Double_t> zPosVec;//todo add xsigma ysigma
-	if(bPrint)cout<<"Prediction of Track in Plane "<<subjectPlane<<"with "<<vecRefPlanes.size()<<" Planes:"<<endl;
+	if(bPrint)cout<<"Prediction of Track in Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes:"<<endl;
 	for(UInt_t pl=0;pl<vecRefPlanes.size();pl++){
 		UInt_t plane=vecRefPlanes.at(pl);
 		zPosVec.clear();
@@ -230,7 +225,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t ySigma = (zPos*sigma_my)*(zPos*sigma_my)+(my*zSigma)*(my*zSigma)+(sigma_by*sigma_by);
 	ySigma = TMath::Sqrt(ySigma);
 	TPositionPrediction* prediction=new TPositionPrediction(xPos,xSigma,xChi2,yPos,ySigma,yChi2);
-	if(verbosity>3||bPrint)	cout<<"\n  Predition of Plane "<<subjectPlane<<" with "<<"Planes: ZPosition: "<<zPos<<endl;
+	if(verbosity>3||bPrint)	cout<<"\n  Predition of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<"Planes: ZPosition: "<<zPos<<endl;
 	if(verbosity>3||bPrint)	cout<<"\tX: "<<xPos<<" +/- "<<xSigma<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
 	if(verbosity>3||bPrint)	cout<<"\tY: "<<yPos<<" +/- "<<ySigma<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
 	return prediction;
@@ -262,27 +257,51 @@ void TTrack::setDetectorAlignment(TDetectorAlignment *alignment)
 	this->alignment=alignment;
 }
 
-Float_t TTrack::getXMeasured(UInt_t plane)
+Float_t TTrack::getXMeasured(UInt_t plane,TCluster::calculationMode_t mode)
 {
-	return getMeasured(TPlane::X_COR,plane);
+	return getMeasured(TPlane::X_COR,plane,mode);
 }
 
-Float_t TTrack::getYMeasured(UInt_t plane)
+Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode)
 {
-	return getMeasured(TPlane::Y_COR,plane);
+	return getMeasured(TPlane::Y_COR,plane,mode);
 }
-
-Float_t TTrack::getMeasured(TPlane::enumCoordinate cor, UInt_t plane)
-{
+/**
+ * Calculation of Hitposition of event using the measured Offsets
+ * in this transformation it transform the measured hitPosition in the
+ * plane space into the space of the first plane
+ * @param cor enum of Coordinate from which you want to have the result
+ * @param plane number of plane for which you are calculating the hitposition
+ * @return calculated hit position
+ */
+Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
 	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
+		return N_INVALID;
+	// get offsets
+	TCluster xCluster,yCluster;
+	xCluster=event->getPlane(plane).getXCluster(0);
+	yCluster=event->getPlane(plane).getYCluster(0);
+	return getPositionOfCluster(cor,plane,xCluster,yCluster,mode);
+}
+
+
+Float_t TTrack::getMeasured(TPlane::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
+{
+	if(event==NULL)return N_INVALID;
+	if(cor==TPlane::XY_COR&&(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1))
 	return N_INVALID;
-// get offsets
-	switch(cor){
-	case TPlane::X_COR:return event->getPlane(plane).getXPosition(0);break;
-	case TPlane::Y_COR:return event->getPlane(plane).getYPosition(0);break;
-	default: return N_INVALID;
-	}
+	if(cor==TPlane::X_COR&&event->getNXClusters(plane)==1)
+		return event->getPlane(plane).getXPosition(0,mode);
+	if(cor==TPlane::Y_COR&&event->getNYClusters(plane)==1)
+		return event->getPlane(plane).getYPosition(0,mode);
+	return N_INVALID;
+//// get offsets
+//	switch(cor){
+//	case TPlane::X_COR:break;
+//	case TPlane::Y_COR:break;
+//	default: return N_INVALID;
+//	}
 }
 
 // returns the raw channel number for a x,y position in lab system

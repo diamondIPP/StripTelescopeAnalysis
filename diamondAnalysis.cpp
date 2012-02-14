@@ -188,13 +188,13 @@ int main(int argc, char ** argv) {
 			pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 			delete pedestalCalculation;
 
-
+		if(VERBOSITY){
 			TAnalysisOfPedestal *analysisOfPedestal;
 			analysisOfPedestal = new TAnalysisOfPedestal(settings);
 			analysisOfPedestal->doAnalysis(NEVENTS);
 			delete analysisOfPedestal;
-//
-//
+		}
+
 //		process_mem_usage(vm2, rss2);
 //		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
@@ -210,6 +210,7 @@ int main(int argc, char ** argv) {
 		sys->cd(currentDir.c_str());
 		TAnalysisOfClustering* analysisClustering;
 		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
+		analysisClustering->setSettings(settings);
 		analysisClustering->doAnalysis(NEVENTS);
 		delete analysisClustering;
 	}

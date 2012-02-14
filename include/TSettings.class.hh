@@ -18,10 +18,12 @@
 
 
 #include "ChannelScreen.hh"
+#include "TObject.h"
 
 
-class TSettings {
+class TSettings:public TObject {
 public:
+	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	virtual ~TSettings();
 
@@ -256,6 +258,8 @@ private:
 
     Float_t maxNoise2D; //highest noise value plotted in 2D noise histogram
     UInt_t runNumber;
+    std::vector<Float_t>clusterHitFactors;
+    std::vector<Float_t>clusterSeedFactors;
 private:
     //Filter tracks not in good fiducial region w/o bad strips
     Int_t align_sil_fid_xlow;

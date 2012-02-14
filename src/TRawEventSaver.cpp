@@ -117,17 +117,17 @@ bool TRawEventSaver::treeExists(int nEvents){
 }
 
 void TRawEventSaver::showStatusBar(int nEvent,int nEvents,int updateIntervall,bool show){
-	if(nEvent!=nEvents)nEvent++;
+	if(nEvent+1>=nEvents)nEvent++;
 	cout.precision(3);
 	int percentageLength=50;
-	if(nEvent%(int)updateIntervall==0||nEvent==nEvents-1||show){
-		double percentage = (double)(nEvent+1)/(double)nEvents*(double)100;
-		cout<<"\rfinished with "<<setw(8)<<nEvent+1<<" of "<<setw(10)<<nEvents<<": "<<setw(6)<<std::setprecision(2)<<fixed<<percentage<<"%\t\tSTATUS:\t\t";
+	if(nEvent%(int)updateIntervall==0||nEvent>=nEvents-1||show){
+		double percentage = (double)(nEvent)/(double)nEvents*(double)100;
+		cout<<"\rfinished with "<<setw(8)<<nEvent<<" of "<<setw(10)<<nEvents<<": "<<setw(6)<<std::setprecision(2)<<fixed<<percentage<<"%\t\tSTATUS:\t\t";
 		for(int i=0;i<percentageLength;i++)
 			if (i*10<percentage*(double)percentageLength/(double)10)cout<<"%";
 			else cout<<"_";
 		cout<<" "<<flush;
 	}
-	if(nEvent+1==nEvent)cout<<endl;
+	if(nEvent+1>=nEvents)cout<<endl;
 }
 

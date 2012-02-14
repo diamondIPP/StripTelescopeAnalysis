@@ -53,6 +53,13 @@ private:
 	bool hasValidSiliconTrack; //One and only one cluster in each silicon plane;
 	bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
 	bool createdTree;
+	bool useForAlignment;
+	bool useForAnalysis;
+	bool useForSiliconAlignment;
+	UInt_t nUseForAlignment;
+	UInt_t nUseForSiliconAlignment;
+	UInt_t nUseForAnalysis;
+	UInt_t nEvents;
 };
 
 #endif /* TSELECTIONCLASS_HH_ */

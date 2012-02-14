@@ -30,11 +30,11 @@ void TEvent::addPlane(TPlane plane, Int_t pos){
 	if(pos==-1)
 		this->planes.push_back(plane);
 	else{
-		if (planes.size()<pos){
+		if ((int)planes.size()<pos){
 			planes.resize(pos+1);
 			planes.at(pos)=plane;
 		}
-		else if(planes.size()==pos)
+		else if((int)planes.size()==pos)
 			planes.push_back(plane);
 		else{
 			planes.at(pos)=plane;
@@ -55,6 +55,11 @@ bool TEvent::isValidSiliconEvent(){
 	return validTrack;
 }
 
+void TEvent::setVerbosity(UInt_t verbosity)
+{
+	this->verbosity=verbosity;
+}
+
 bool TEvent::isMasked(){
 	//todo
 	return false;
@@ -65,17 +70,39 @@ UInt_t TEvent::getNPlanes(){
 }
 UInt_t TEvent::getNClusters(UInt_t det){
 	TPlane::enumCoordinate cor;
+	if(det%2==0)
+		cor=TPlane::X_COR;
+	else
+		cor=TPlane::Y_COR;
 	UInt_t plane=det/2;
+	if(verbosity)cout<<"TEvent::getNclusters of det "<<det<<" <=> plane: "<<plane<<" "<<TPlane::getCoordinateString(cor)<<endl;
 	if(det%2==0)
 		return getNXClusters(plane);
 	else return getNYClusters(plane);
 
 }
+UInt_t TEvent::getNXClusters(UInt_t plane){
+	if(verbosity>2)
+		cout<<"TEvent::getNXClusters of plane "<<plane<<endl;
+	if(plane<planes.size())
+		return planes.at(plane).getNXClusters();
+	else
+		return 0;
+}
+
+UInt_t TEvent::getNYClusters(UInt_t plane){
+	if(verbosity>2)
+		cout<<"TEvent::getNYClusters of plane "<<plane<<endl;
+	if(plane<planes.size())
+		return planes.at(plane).getNYClusters();
+	else
+		return 0;
+}
 
 TCluster TEvent::getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl){
 	if (plane<planes.size())
 		return planes.at(plane).getCluster(cor,cl);
-	else
+	cerr<< "Plane does not exist: "<<plane<<" "<<planes.size()<<endl;
 		return TCluster();
 }
 

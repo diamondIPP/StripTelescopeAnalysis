@@ -35,7 +35,7 @@ class TPlane:public TObject {
 public:
 
 	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();planeNo=0;verbosity=0;};
-	enum enumCoordinate{ X_COR =1, Y_COR=2, Z_COR =3, XY_COR=4,};
+	enum enumCoordinate{ X_COR =0, Y_COR=1, Z_COR =2, XY_COR=3,};
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
 	TPlane(const TPlane& rhs);
@@ -59,7 +59,7 @@ private:
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-    ClassDef(TPlane,3);
+    ClassDef(TPlane,4);
 };
 
 #endif // TPlane_hh

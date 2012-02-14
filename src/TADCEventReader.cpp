@@ -315,6 +315,19 @@ void TADCEventReader::SetBranchAddresses(){
 	}
 	else
 		if(verbosity)cout<<" \"event\" not found..."<<endl;
+	if(tree->FindBranch("useForAlignment")){
+		tree->SetBranchAddress("useForAlignment",&this->bUseForAlignment);
+		if(verbosity)cout<<"Set Branch \"useForAlignment\""<<endl;
+	}
+	if(tree->FindBranch("useForAnalysis")){
+		tree->SetBranchAddress("useForAnalysis",&this->bUseForAnalysis);
+		if(verbosity)cout<<"Set Branch \"useForAnalysis\""<<endl;
+	}
+	if(tree->FindBranch("useForAlignment")){
+		tree->SetBranchAddress("useForSiliconAlignment",&this->bUseForAlignment);
+		if(verbosity)cout<<"Set Branch \"useForSiliconAlignment\""<<endl;
+	}
+
 //	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
 //	UInt_t nDiamondHits; //number of clusters in diamond plane;
 	cout<<"DONE"<<endl;
@@ -505,12 +518,15 @@ Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch)
 	if(getPedestalSigma(det,ch)==0)
 		return 0;
 	else
-		return (((Float_t)this->getAdcValue(det,ch)-this->getPedestalMean(det,ch))/this->getPedestalSigma(det,ch));
+		return (this->getSignal(det,ch)/this->getPedestalSigma(det,ch));
 }
 
 TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 {
 	return this->pEvent->getCluster(det,cl);
+}
+TCluster TADCEventReader::getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl){
+	return this->pEvent->getCluster(plane,cor,cl);
 }
 
 UInt_t TADCEventReader::getClusterSize(UInt_t det,UInt_t cl)
@@ -545,8 +561,15 @@ Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch)
 
 UInt_t TADCEventReader::getNClusters(UInt_t det)
 {
-	if(det<9)
-		return this->pEvent->getNClusters(det);
+	if(det<9){
+
+		UInt_t nClusters = this->pEvent->getNClusters(det);
+		if(verbosity>1){
+			cout<<"TADCEventReader::getNClusters of det "<<det<<": "<<nClusters<<endl;
+			pEvent->setVerbosity(verbosity);
+		}
+		return nClusters;
+	}
 	return 0;
 }
 
@@ -580,6 +603,11 @@ bool TADCEventReader::isDetMasked()
 TEvent* TADCEventReader::getEvent()
 {
 	return this->pEvent;
+}
+
+void TADCEventReader::setVerbosity(UInt_t verbosity)
+{
+	this->verbosity=verbosity;
 }
 
 TObject* TADCEventReader::getTreeName(){

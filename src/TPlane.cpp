@@ -9,22 +9,26 @@
 #include "../include/TPlane.hh"
 ClassImp(TPlane);
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
+	verbosity=0;
+	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<"\tyClusters:"<<yClusters.size()<<endl;
 	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
 		this->xClusters.push_back(xClusters.at(xCl));
 	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
 		this->yClusters.push_back(yClusters.at(yCl));
 	this->type=type;
 	this->planeNo=planeNo;
-	verbosity=0;
+
 }
 
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
+	verbosity=0;
+	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
 	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
 		this->xClusters.push_back(xClusters.at(xCl));
 	yClusters.clear();
 	this->type=type;
 	this->planeNo=planeNo;
-	verbosity=0;
+
 }
 
 TPlane::TPlane(const TPlane& rhs){
@@ -128,12 +132,14 @@ string TPlane::getDetectortypeString(TPlaneProperties::enumDetectorType type){
 TCluster TPlane::getXCluster(UInt_t cl){
 	if(cl<xClusters.size())
 		return xClusters.at(cl);
+	cerr<<"Xcluster does not exist....:"<<cl<<" "<<xClusters.size()<<endl;
 	return TCluster();
 }
 
 TCluster TPlane::getYCluster(UInt_t cl){
 	if(cl<yClusters.size())
 		return yClusters.at(cl);
+	cerr<<"Ycluster does not exist....:"<<cl<<" "<<yClusters.size()<<endl;
 	return TCluster();
 }
 

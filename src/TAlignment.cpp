@@ -107,7 +107,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
 			falseClusterSizeDia++;
 			continue;
 		}
-		if(rand.Rndm()<alignmentPercentage){;
+		if(eventReader->useForAlignment()){
 			nCandidates++;
 			this->events.push_back(*eventReader->getEvent());
 		}
@@ -456,17 +456,17 @@ void TAlignment::AlignDiamondPlane(){
 	resDia=CheckStripDetectorAlignment(TPlane::X_COR,diaPlane,vecRefPlanes,true,true,resDia);
 }
 
-TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot,TResidual resOld){
+TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot,TResidual resOld,TCluster::calculationMode_t mode){
 	vector<UInt_t>vecRefPlanes;
 	vecRefPlanes.push_back(refPlane1);
 	if(refPlane1!=refPlane2)
 		vecRefPlanes.push_back(refPlane2);
-	return getResidual(cor,subjectPlane,vecRefPlanes,bPlot,resOld);
+	return getResidual(cor,subjectPlane,vecRefPlanes,bPlot,resOld,mode);
 }
 
 
 
-TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld)
+TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld,TCluster::calculationMode_t mode)
 {
 	stringstream  refPlaneString;
 	for(UInt_t i=0;i<vecRefPlanes.size();i++)
@@ -495,16 +495,16 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 	{
 		TRawEventSaver::showStatusBar(nEvent,events.size());
 		myTrack->setEvent(&events.at(nEvent));
-		xPositionObserved  = myTrack->getPosition(TPlane::X_COR,subjectPlane);
-		yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane);
-		predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes);
+		xPositionObserved  = myTrack->getPosition(TPlane::X_COR,subjectPlane,mode);
+		yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane,mode);
+		predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes,false);
 		deltaX = xPositionObserved-predictedPostion->getPositionX();//X_OBS-X_Pred
 		deltaY = yPositionObserved-predictedPostion->getPositionY();//Y_OBS-Y_Pred
 		resxtest= TMath::Abs(deltaX-resOld.getXMean())/resOld.getXSigma();
 		resytest= TMath::Abs(deltaY-resOld.getYMean())/resOld.getYSigma();
 		if(verbosity>3)cout<<nEvent<<endl;
 		//if(verbosity>3)	predictedPostion->Print();
-		if(verbosity>3)	cout<<"Measured: "<<myTrack->getXMeasured(subjectPlane)<<"/"<<myTrack->getYMeasured(subjectPlane)<<endl;
+		if(verbosity>3)	cout<<"Measured: "<<myTrack->getXMeasured(subjectPlane,mode)<<"/"<<myTrack->getYMeasured(subjectPlane,mode)<<endl;
 		if(verbosity>3)	cout<<"Observed: "<<xPositionObserved<<" / "<<yPositionObserved<<endl;
 		if(verbosity>3)	cout<<"Predicted: "<<predictedPostion->getPositionX()<<" / "<<predictedPostion->getPositionY()<<endl;
 		if(verbosity>3)	cout<<"Delta:    "<<deltaX<<" / "<<yPositionObserved<<endl;
@@ -541,7 +541,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 }
 
 
-TResidual TAlignment::getStripResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, TResidual resOld){
+TResidual TAlignment::getStripResidual(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, TResidual resOld,TCluster::calculationMode_t mode){
 
 	stringstream  refPlaneString;
 		for(UInt_t i=0;i<vecRefPlanes.size();i++)
@@ -570,9 +570,9 @@ TResidual TAlignment::getStripResidual(TPlane::enumCoordinate cor, UInt_t subjec
 		{
 			TRawEventSaver::showStatusBar(nEvent,events.size());
 			myTrack->setEvent(&events.at(nEvent));
-			predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes);
-			xPositionObserved  = myTrack->getStripXPosition(subjectPlane,predictedPostion->getPositionY());
-			yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane);
+			predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes,verbosity>1);
+			xPositionObserved  = myTrack->getStripXPosition(subjectPlane,predictedPostion->getPositionY(),TCluster::maxValue);
+			yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane,TCluster::maxValue);
 			deltaX = xPositionObserved-predictedPostion->getPositionX();//X_OBS-X_Pred
 			deltaY = yPositionObserved-predictedPostion->getPositionY();//Y_OBS-Y_Pred
 			resxtest= TMath::Abs(deltaX-resOld.getXMean())/resOld.getXSigma();
@@ -666,7 +666,7 @@ TResidual TAlignment::CheckDetectorAlignment(TPlane::enumCoordinate cor, UInt_t 
 
 TResidual TAlignment::CheckStripDetectorAlignment(TPlane::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, TResidual resOld){
 	int verb=verbosity;
-	verbosity=0;
+	verbosity=4;
 	TResidual res = getStripResidual(cor,subjectPlane,vecRefPlanes,false,false,resOld);
 	if(verbosity)cout<<endl;
 	res.SetTestResidual(false);

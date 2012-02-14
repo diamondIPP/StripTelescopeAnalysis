@@ -39,6 +39,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(int runNumber,int seedSigma,int hit
 	this->seedSigma=seedSigma;
 	this->hitSigma=hitSigma;
 	cout<<"end initialise"<<endl;
+	settings=0;
 }
 
 TAnalysisOfClustering::~TAnalysisOfClustering() {
@@ -48,12 +49,15 @@ TAnalysisOfClustering::~TAnalysisOfClustering() {
 	sys->cd("..");
 }
 
+void TAnalysisOfClustering::setSettings(TSettings* settings){
+	this->settings=settings;
+}
 
 void TAnalysisOfClustering::doAnalysis(int nEvents)
 {
 	cout<<"analyis clusterin results..."<<endl;
 //	eventReader->checkADC();
-	if(nEvents!=0) nEvents=eventReader->GetEntries();
+	if(nEvents==0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
@@ -77,22 +81,21 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 
 void TAnalysisOfClustering::checkForDeadChannels()
 {
-	for(int det=0;det<9;det++){
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		int numberOfSeeds=0;
-		deque< pair<int, Float_t> > seedQueue;
-		for(int ch=0;ch<N_DET_CHANNELS;ch++){
+		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
 			Float_t sigma=eventReader->getPedestalSigma(det,ch);
-			Float_t signal = (Float_t)eventReader->getDet_ADC(det,ch)-eventReader->getPedestalMean(det,ch);
+			Float_t signal = eventReader->getSignal(det,ch);
 			if(sigma==0){
 				//cout<<nEvent<<" "<<det<<" "<<ch<<" sigma==0"<<endl;
 				continue;
 			};
-			Float_t adcValueInSigma=signal/sigma;
-			if(adcValueInSigma>10){
+			Float_t signalInSigma=eventReader->getSignalInSigma(det,ch);
+
+			if(signalInSigma>settings->getClusterSeedFactor(det)){
 				hSeedMap[det]->Fill(ch);
 				//cout<<"Found a Seed "<<det<<" "<<ch<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<endl;
 				numberOfSeeds++;
-				seedQueue.push_back(make_pair(ch,signal));
 			}
 		}
 		hNumberOfSeeds[det]->Fill(numberOfSeeds);
@@ -100,7 +103,7 @@ void TAnalysisOfClustering::checkForDeadChannels()
 
 }
 void TAnalysisOfClustering::analyseForSeeds(){
-	for(int det=0;det<9;det++){
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 			int nClusters = eventReader->getNClusters(det);
 			if(nClusters==1)
 				hSeedMap2[det]->Fill(eventReader->getCluster(det,0).getHighestSignalChannel());
@@ -109,15 +112,10 @@ void TAnalysisOfClustering::analyseForSeeds(){
 
 void TAnalysisOfClustering::checkForSaturatedChannels()
 {
-	for(int det=0;det<8;det++)
-	for(int ch=0;ch<N_DET_CHANNELS;ch++){
-		if(eventReader->getAdcValue(det,ch)>=254){
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+	for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+		if(eventReader->getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det)){
 			hSaturatedChannels[det]->Fill(ch);
-		}
-	}
-	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
-		if(eventReader->getAdcValue(8,ch)>=1024){
-			hSaturatedChannels[8]->Fill(ch);
 		}
 	}
 }
@@ -268,8 +266,8 @@ void TAnalysisOfClustering::initialiseHistos()
     	hDeltaLeftRightHitOverLeftAndRight[det]->GetXaxis()->SetTitle("(Q_L-Q_R)/(Q_R +Q_L)");
     	histName.str("");
     	histName<<"hSignal2ndHighestOverSignalHighest_"<<TADCEventReader::getStringForPlane(det);
-    	hHighestTo2ndHighestSignalRatio[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),512,0,1);
-    	hHighestTo2ndHighestSignalRatio[det]->GetXaxis()->SetTitle("Q_{2ndHighest}/Q_{Highest}");
+    	hSignal2ndHighestOverSignalHighestRatio[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),512,0,1);
+    	hSignal2ndHighestOverSignalHighestRatio[det]->GetXaxis()->SetTitle("Q_{2ndHighest}/Q_{Highest}");
     }
     cout<<"12"<<endl;
 }
@@ -297,7 +295,7 @@ void TAnalysisOfClustering::saveHistos(){
     	histSaver->SaveHistogram(h2ndBiggestHitPosition[det]);
     	histSaver->SaveHistogram(hLeftHitOverLeftAndRight[det]);
     	histSaver->SaveHistogram(hDeltaLeftRightHitOverLeftAndRight[det]);
-    	histSaver->SaveHistogram(hHighestTo2ndHighestSignalRatio[det]);
+    	histSaver->SaveHistogram(hSignal2ndHighestOverSignalHighestRatio[det]);
     }
 
 	for (int det=0;det<9;det++){
@@ -406,9 +404,21 @@ void TAnalysisOfClustering::analyseCluster()
 
 
 void TAnalysisOfClustering::analyse2ndHighestHit(){
-	for(int det=0;det<9;det++){
-		for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
+	for(int det=0;det<TPlaneProperties::getNDetectors();det++){
+//		if(nEvent==20){
+//			cout<<nEvent<<":"<<endl;
+//			eventReader->setVerbosity(10);
+//		}
+//		else eventReader->setVerbosity(0);
+		Float_t nClusters=eventReader->getNClusters(det);
+
+		for(UInt_t cl=0;cl<nClusters;cl++){
 			TCluster cluster=eventReader->getCluster(det,cl);
+			if(cluster.size()==0){
+				cout<<nEvent<<" "<<cl<<" "<<eventReader->getNClusters(det)<<" "<<cluster.size()<<endl;
+				cluster.Print();
+				continue;//why can this happen???
+			}
 			Float_t signalLeft = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()-1);
 			Float_t signalRight = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()+1);
 			if(signalLeft<0)
@@ -423,16 +433,41 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 			else
 				signal2ndHighest=signalLeft;
 			Float_t sumSignals = signalLeft+signalRight;
+			if(signalLeft==0&&signalRight==0)continue;
+			if(sumSignals==0)continue;
 			Float_t allCharge=cluster.getCharge(true);
 			Float_t signalRatio=signal2ndHighest/signalHighest;
-			hHighestTo2ndHighestSignalRatio[det]->Fill(signalRatio);
+			if(signalRatio>1){
+				cout<<"Ratio>1:"<<signal2ndHighest<<" "<<signalHighest<<endl;
+				cluster.Print();
+			}
+			else
+			hSignal2ndHighestOverSignalHighestRatio[det]->Fill(signalRatio);
+			Float_t ratio;
 			if(signalLeft>signalRight){
+				ratio=signalLeft/allCharge;
+				if(ratio>=0.5||allCharge==0||ratio!=ratio){
+					cout<<"2ndBiggestHitOverCharge>0.5: left "<<signalLeft<<" "<<allCharge<<endl;
+					cluster.Print();
+				}
+				else{
+//					cout<<nEvent<<" "<<cl<<" "<<ratio<<endl;
+					h2ndBiggestHitOverCharge[det]->Fill(ratio);
+				}
 				h2ndBiggestHitSignal[det]->Fill(signalLeft);
-				h2ndBiggestHitOverCharge[det]->Fill(signalLeft/allCharge);
 			}
 			else{
+				ratio=signalRight/allCharge;
+				if(ratio>=0.5||allCharge==0||ratio!=ratio){
+					cout<<"2ndBiggestHitOverCharge>0.5: right"<<signalRight<<" "<<allCharge<<endl;
+					cluster.Print();
+				}
+				else{
+//					cout<<nEvent<<" "<<cl<<" "<<ratio<<endl;
+					h2ndBiggestHitOverCharge[det]->Fill(ratio);
+				}
+
 				h2ndBiggestHitSignal[det]->Fill(signalRight);
-				h2ndBiggestHitOverCharge[det]->Fill(signalRight/allCharge);
 			}
 			if(signalLeft>signalRight){
 				h2ndBiggestHitPosition[det]->Fill(-1);
@@ -441,9 +476,17 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 				h2ndBiggestHitPosition[det]->Fill(+1);
 			else
 				h2ndBiggestHitPosition[det]->Fill(0);
-			if (TMath::Abs(deltaSignals/sumSignals)!=1)
-				hDeltaLeftRightHitOverLeftAndRight[det]->Fill((deltaSignals)/(sumSignals));
-			if(signalLeft!=0)hLeftHitOverLeftAndRight[det]->Fill((signalLeft)/(sumSignals));
+			ratio = (deltaSignals)/(sumSignals);
+			if (ratio<1&&ratio>-1&&sumSignals!=0)
+				hDeltaLeftRightHitOverLeftAndRight[det]->Fill(ratio);
+			else {
+				if(TMath::Abs(ratio)>1){
+					cout<<"hDeltaLeftRightHitOverLeftAndRight "<<det<<" "<<cl<<" "<<deltaSignals<<" "<<sumSignals<<endl;
+					cluster.Print();
+				}
+			}
+			ratio = signalLeft/sumSignals;
+			if(signalLeft>0&&sumSignals>0&&ratio<1&&ratio>0)hLeftHitOverLeftAndRight[det]->Fill((signalLeft)/(sumSignals));
 		}
 	}
 }

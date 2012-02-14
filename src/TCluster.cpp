@@ -230,17 +230,8 @@ UInt_t TCluster::getHighestSignalChannel()
 	return maxChannel;
 }
 
-UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo)
-{
-	return getChannel(getHighestSignalNeighbourClusterPosition(getClusterPosition(channelNo)));
-}
-
-UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos)
-{
-	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;
-	if (getSignal(clPos-1) < getSignal(clPos+1)) return clPos+1;
-	if (getSignal(clPos-1) > 0) return clPos-1;
-	return 9999;
+UInt_t TCluster::getClusterSize(){
+	return this->checkClusterForSize();
 }
 
 Float_t TCluster::getChargeWeightedMean(bool useNonHits){
@@ -276,7 +267,7 @@ void TCluster::checkForGoldenGate(){
 	int previousSeed=-1;
 	for(UInt_t i=0;i<this->checkClusterForSize()&&!isGoldenGate;i++){
 		if(clusterSignalInSigma.at(i)>seedSigma){
-			if( previousSeed!=-1 && previousSeed+1!=clusterChannel.at(i) )
+			if( previousSeed!=-1 && previousSeed+1!=(int)clusterChannel.at(i) )
 				isGoldenGate=true;
 
 			previousSeed=clusterChannel.at(i);
@@ -338,6 +329,7 @@ UInt_t TCluster::getHighestHitClusterPosition()
 
 Float_t TCluster::getHighest2Centroid()
 {
+	if(getClusterSize()==0)return 0;
 	UInt_t maxCh = this->getHighestSignalChannel();
 	UInt_t clPos;
 	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
@@ -449,7 +441,7 @@ Float_t TCluster::getSignal(UInt_t clusterPos)
 		 else return signal;
 	}
 	else {
-		if(verbosity)cout<<"clusterPos bigger than clusterSize"<<endl;
+		if(verbosity)cout<<"clusterPos "<<clusterPos<<" bigger than clusterSize"<<checkClusterForSize()<<endl;
 		return 0;
 	}
 }
@@ -469,10 +461,12 @@ Float_t TCluster::getSignalOfChannel(UInt_t channel)
 	if(channel<this->getSmallestChannelNumber()&&channel>this->getHighestSignalChannel()) return 0;
 	UInt_t clPos;
 	for(clPos=0;clPos<checkClusterForSize()&&getChannel(clPos)!=channel;clPos++){};
-	Float_t signal = getSignal(clPos);
-	if (signal<0)
-		return 0;
-	return signal;
+	if(clPos<getClusterSize()){//TODO
+		Float_t signal = getSignal(clPos);
+		if (signal>0)
+		return signal;
+	}
+	return 0;
 }
 
 
