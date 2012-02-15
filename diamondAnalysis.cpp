@@ -20,6 +20,7 @@
 #include "TSystem.h"
 #include "TAlignment.hh"
 #include "TSettings.class.hh"
+#include "TTransparentAnalysis.hh"
 
 using namespace std;
 /*** USAGE ***/
@@ -238,6 +239,10 @@ int main(int argc, char ** argv) {
 			alignment->Align(NEVENTS);
 			delete alignment;
 		}
+		
+//		TTransparentAnalysis *transpAna;
+//		transpAna = new TTransparentAnalysis(RUNNUMBER, *settings);
+//		transpAna->analyze(NEVENTS,INITIAL_EVENT);
 
 
 		process_mem_usage(vm2, rss2);
