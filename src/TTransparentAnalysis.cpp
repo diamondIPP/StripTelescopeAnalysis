@@ -159,13 +159,13 @@ void TTransparentAnalysis::setSettings(TSettings* settings){
 
 void TTransparentAnalysis::initHistograms() {
 	UInt_t bins=512;
-	for (UInt_t clusterSize = 0; clusterSize < transparentMaxClusterSize; clusterSize++) {
+	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		// TODO: take care of histogram names and bins!!
-		stringstream histname;
-		histname<<"bla"<<clusterSize<<endl
-		hLaundau.push_back(new TH1F(histName.strr().c_str(),histName.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
-		hEta.push_back(new TH1F(histName.strr().c_str(),histName.str().c_str(),bins,0,1));
-		hResidual.push_back(new TH1F("","",bins,min,max));
+		stringstream histName;
+		histName<<"bla"<<clusterSize<<endl;
+		hLaundau.push_back(new TH1F(histName.str().c_str(),histName.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+		hEta.push_back(new TH1F(histName.str().c_str(),histName.str().c_str(),bins,0,1));
+		hResidual.push_back(new TH1F("","",bins,-5.,5.));
 	}
 }
 

@@ -533,13 +533,17 @@ UInt_t TCluster::getChannel(UInt_t clusterPos)
 }
 
 
-UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo){
-	//TODO IMPLEMENT
-	return 0;
+UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo)
+{
+	return getChannel(getHighestSignalNeighbourClusterPosition(getClusterPosition(channelNo)));
 }
-UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos){
-	//TODO IMPLEMENT
-	return 0;
+
+UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos)
+{
+	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;
+	if (getSignal(clPos-1) < getSignal(clPos+1)) return clPos+1;
+	if (getSignal(clPos-1) > 0) return clPos-1;
+	return 9999;
 }
 
 /**
