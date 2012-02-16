@@ -62,7 +62,6 @@ TAlignment::~TAlignment() {
 	// TODO Auto-generated destructor stub
 	cout<<"TAlignment deconstructor"<<endl;
 
-
 	if(myTrack)delete myTrack;
 	if(histSaver)delete histSaver;
 	//todo this is not correct but otherwise it stops working
@@ -371,6 +370,7 @@ int TAlignment::Align(UInt_t nEvents,UInt_t startEvent)
 //		doDetAlignmentStep();
 //		doDiaAlignmentStep();
 //	}
+	this->saveAlignment();
 
 	return 1;
 }
