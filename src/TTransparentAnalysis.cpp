@@ -103,6 +103,7 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 		nAnalyzedEvents++;
 		this->fillHistograms();
 	}
+	this->saveHistograms();
 }
 
 bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
