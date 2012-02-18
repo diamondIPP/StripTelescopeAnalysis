@@ -82,6 +82,10 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 			noValidTrack++;
 			continue;
 		}
+		if (tracking->isInFiducialCut() == 0) {
+			noFidCutRegion++;
+			continue;
+		}
 		transparentClusters.clear();
 		positionPrediction = tracking->predictPosition(subjectDetector,refPlanes);
 		this->predXPosition = positionPrediction->getPositionX();
@@ -207,4 +211,5 @@ void TTransparentAnalysis::printCutFlow() {
 	cout << "saturated channel\t" << saturatedChannel << endl;
 	cout << "screened channel\t" << screenedChannel << endl;
 	cout << "track not valid\t" << noValidTrack << endl;
+	cout << "track not in fidutial cut region\t" << noFidCutRegion << endl;
 }

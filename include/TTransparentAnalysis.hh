@@ -91,6 +91,7 @@ private:
 	UInt_t saturatedChannel;
 	UInt_t screenedChannel;
 	UInt_t noValidTrack;
+	UInt_t noFidCutRegion;
 	
 	
 	// histograms
