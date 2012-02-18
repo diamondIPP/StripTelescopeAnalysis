@@ -104,6 +104,7 @@ void TTransparentAnalysis::analyze(int nEvents, int startEvent) {
 		this->fillHistograms();
 	}
 	this->saveHistograms();
+	this->printCutFlow();
 }
 
 bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
@@ -197,4 +198,13 @@ void TTransparentAnalysis::deleteHistograms() {
 		delete hEta[clusterSize];
 		delete hResidual[clusterSize];
 	}
+}
+
+void TTransparentAnalysis::printCutFlow() {
+	cout << "\n\n\n";
+	cout << "TTransparentAnalysis has analyzed " << nAnalyzedEvents << " events." << endl;
+	cout << "region not on plane\t" << regionNotOnPlane << endl;
+	cout << "saturated channel\t" << saturatedChannel << endl;
+	cout << "screened channel\t" << screenedChannel << endl;
+	cout << "track not valid\t" << noValidTrack << endl;
 }

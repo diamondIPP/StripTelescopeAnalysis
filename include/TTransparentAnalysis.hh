@@ -63,6 +63,7 @@ private:
 	void fillHistograms();
 	void saveHistograms();
 	void deleteHistograms();
+	void printCutFlow();
 	void fitTrack();
 	void analyzeTrack(TTrack track);
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
