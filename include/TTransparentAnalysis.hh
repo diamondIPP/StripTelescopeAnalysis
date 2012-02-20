@@ -55,7 +55,7 @@ public:
 	TTransparentAnalysis(int runNumber, TSettings settings);
 	virtual ~TTransparentAnalysis();
 	void	doAnalysis(int nEvents=0);
-	void analyze(int nEvents, int startEvent);
+	void analyze(UInt_t nEvents, UInt_t startEvent);
 	void setSettings(TSettings* settings);
 	
 private:
@@ -68,10 +68,15 @@ private:
 	void analyzeTrack(TTrack track);
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
+	void printEvent();
+	Float_t getResidual(TCluster cluster);
 	
-	UInt_t subjectDetector;
+	UInt_t subjectDetector, subjectPlane;
+	TPlane::enumCoordinate subjectDetectorCoordinate;
 	vector<UInt_t> refPlanes;
 	TCluster::calculationMode_t clusterCalcMode;
+	UInt_t verbosity;
+	UInt_t nEvent;
 	
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;

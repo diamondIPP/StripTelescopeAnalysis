@@ -83,6 +83,15 @@ Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCl
 	}
 }
 
+/**
+ * calculate Position in lab system of a cluster
+ *
+ * @param det detector in which the cluster is
+ * @param cluster
+ * @param predictedPerpPosition predicted position of the track in the perpendicular det of the same plane (in lab system)
+ * @param mode
+ * @return value of calculated position
+ */
 Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode) {
 	if (cluster.size()<=0) return N_INVALID;
 	UInt_t plane = det/2;
@@ -91,9 +100,8 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiYOffset(plane);
-	// TODO: is this calculation correct??
-	Float_t xPosition = (measuredPos) * TMath::Cos(phiXOffset) + (predictedPerpPosition) * TMath::Sin(phiYOffset);
-	Float_t yPosition = (predictedPerpPosition) * TMath::Sin(-phiXOffset) + (measuredPos) * TMath::Cos(phiYOffset);
+	Float_t xPosition = (measuredPos) / TMath::Cos(phiXOffset) + (predictedPerpPosition) * TMath::Tan(phiXOffset);
+	Float_t yPosition = (measuredPos) / TMath::Cos(phiYOffset) - (predictedPerpPosition) * TMath::Tan(phiYOffset);
 	xPosition += xOffset;
 	yPosition += yOffset;
 	if (det%2 == 0) {

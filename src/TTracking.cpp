@@ -49,6 +49,13 @@ Float_t TTracking::getZPosition(UInt_t plane)
 		return myTrack->getZPosition(plane);
 }
 
+Float_t TTracking::getMeasured(TPlane::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
+{
+	if (myTrack == 0)
+		return 0;
+	return myTrack->getMeasured(cor,plane,mode);
+}
+
 bool TTracking::setAlignment(std::string alignmentName){
 	if(this->alignmentFile!=NULL) alignmentFile->Delete();
 	alignmentFile=NULL;
