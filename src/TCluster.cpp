@@ -504,7 +504,7 @@ UShort_t TCluster::getAdcValue(UInt_t clusterPos)
 
 Float_t TCluster::getEta()
 {
-	if (checkClusterForSize() < 3) return -1;
+	if (checkClusterForSize() < 2) return -1;
 	UInt_t clPosHighest = getHighestHitClusterPosition();
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
 	UInt_t leftClPos = 0;

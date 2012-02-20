@@ -57,7 +57,7 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber, TSettings settings) {
 		refPlanes.push_back(i);
 	}
 	clusterCalcMode = TCluster::highest2Centroid;
-	verbosity = 6;
+	verbosity = 0;
 	
 	
 	initHistograms();
