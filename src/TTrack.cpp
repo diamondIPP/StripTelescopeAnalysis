@@ -94,6 +94,8 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
 	// TODO: is this calculation correct??
 	Float_t xPosition = (measuredPos) * TMath::Cos(phiXOffset) + (predictedPerpPosition) * TMath::Sin(phiYOffset);
 	Float_t yPosition = (predictedPerpPosition) * TMath::Sin(-phiXOffset) + (measuredPos) * TMath::Cos(phiYOffset);
+	xPosition += xOffset;
+	yPosition += yOffset;
 	if (det%2 == 0) {
 		return xPosition;
 	}
