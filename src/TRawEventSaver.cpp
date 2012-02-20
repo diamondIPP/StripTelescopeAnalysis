@@ -9,6 +9,7 @@
 
 TRawEventSaver::TRawEventSaver(unsigned int RunNumber, std::string RunDescription){
 	// TODO Auto-generated constructor stub
+	settings=0;
 	this->runNumber=RunNumber;
 	rawEventReader = new TRawEventReader(this->runNumber);
 	sys = gSystem;
@@ -55,6 +56,10 @@ TRawEventSaver::~TRawEventSaver() {
 
 
 void TRawEventSaver::saveEvents(int nEvents){
+	if(settings==0){
+		cerr<<"SETTINGS Not initialized...";
+		settings = new TSettings();
+	}
 	if (treeExists(nEvents)){
 		cout<<"Tree has enough entries..."<<endl;
 		return;
@@ -101,8 +106,15 @@ void TRawEventSaver::loadEvent(){
 			//if(det==8)cout<<Det_ADC[det][ch]<<"\t"<<flush;
 		}
 	}
-	for(int ch=0;ch<128;ch++){
-		Dia_ADC[ch]=(UShort_t)rawEventReader->getPlane(8).ADC_values[ch];
+	for(UInt_t ch=0;ch<TPlaneProperties::getNChannelsDiamond();ch++){
+		Dia_ADC[ch]=0;
+	}
+	for(UInt_t vaChNo=0;vaChNo<TPlaneProperties::getNChannelsDiamond();vaChNo++){
+		//cout<<"Load diamond: "<<ch<<" -> "<<settings->getDetChannelNo(ch)<<endl;
+		UInt_t detChNo= settings->getDetChannelNo(vaChNo);
+		UShort_t value=(UShort_t)rawEventReader->getPlane(TPlaneProperties::getDetDiamond()).ADC_values[vaChNo];
+		if(detChNo<TPlaneProperties::getNChannelsDiamond())
+			Dia_ADC[detChNo]=value;
 		//if(ch==0)cout<<Dia_ADC[ch]<<" ";
 	}
 }

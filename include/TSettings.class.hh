@@ -18,8 +18,9 @@
 
 
 #include "ChannelScreen.hh"
+#include "TChannelMapping.hh"
 #include "TObject.h"
-
+#include "TPlaneProperties.hh"
 
 class TSettings:public TObject {
 public:
@@ -171,6 +172,8 @@ public:
     enumAlignmentTrainingMethod getTrainingMethod() const;
     void setTrainingMethod(enumAlignmentTrainingMethod trainingMethod);
     void Print();
+    UInt_t getDetChannelNo(UInt_t vaCh);
+    UInt_t getVaChannelNo(UInt_t detChNo);
 protected:
     float store_threshold;
 private:
@@ -260,6 +263,7 @@ private:
     UInt_t runNumber;
     std::vector<Float_t>clusterHitFactors;
     std::vector<Float_t>clusterSeedFactors;
+    TChannelMapping *diamondMapping;
 private:
     //Filter tracks not in good fiducial region w/o bad strips
     Int_t align_sil_fid_xlow;
@@ -268,5 +272,7 @@ private:
     Int_t align_sil_fid_yhi;
 private:
     int verbosity;
+
+//    ClassDef(TSettings,1);
 };
 #endif

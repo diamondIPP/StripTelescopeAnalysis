@@ -26,6 +26,7 @@
 //#include "TCanvas.h"
 //#include "TH1F.h"
 #include "TROOT.h"
+#include "TDatime.h"
 #include "TNamed.h"
 //#include "TApplication.h"
 //#include "TSystem.h"
@@ -68,17 +69,17 @@ class TDetectorAlignment:public TNamed{
       std::vector<Double_t> GetPhiXOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetPhiXOffset[plane];std::vector<Double_t> a;return a;};
       std::vector<Double_t> GetPhiYOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetPhiYOffset[plane];std::vector<Double_t> a;return a;};
 
-      void PrintXOffset(UInt_t plane,UInt_t level);
-      void PrintYOffset(UInt_t plane,UInt_t level);
-      void PrintZOffset(UInt_t plane,UInt_t level);
+      std::string PrintXOffset(UInt_t plane,UInt_t level);
+      std::string PrintYOffset(UInt_t plane,UInt_t level);
+      std::string PrintZOffset(UInt_t plane,UInt_t level);
 
-      void PrintPhiXOffset(UInt_t plane,UInt_t level);
-      void PrintPhiYOffset(UInt_t plane,UInt_t level);
+      std::string PrintPhiXOffset(UInt_t plane,UInt_t level);
+      std::string PrintPhiYOffset(UInt_t plane,UInt_t level);
 
-      void PrintResolution(UInt_t plane,UInt_t level);
+      std::string PrintResolution(UInt_t plane,UInt_t level);
 
 
-      void PrintResults(UInt_t level=0);
+      std::string PrintResults(UInt_t level=0);
 
       int getVerbosity() const;
       void setVerbosity(int verbosity);
@@ -88,8 +89,17 @@ class TDetectorAlignment:public TNamed{
       Double_t getYResolution(UInt_t plane);
       void setYResolution(Double_t yRes,UInt_t plane);
 
+      UInt_t getNUsedEvents() const {return this->nUsedEvents;};
+      void setNUsedEvents(UInt_t usedEvents){this->nUsedEvents=usedEvents;};
 
-   public:
+      void addEventIntervall(UInt_t first,UInt_t last);
+      void setAlignmentTrainingTrackFraction(Float_t fraction){alignmentTrainingTrackFraction=fraction;};
+      void setDiamondDate(){diaTime=TDatime();};
+      void setSiliconDate(){silTime=TDatime();};
+      void setRunNumber(UInt_t rn){this->runNumber=rn;};
+      void setDiaChi2(Float_t chi2){this->diaChi2=chi2;};
+      void setNDiamondAlignmentEvents(UInt_t nEvents){this->nDiamondAlignmentEvents=nEvents;};
+   private:
     Double_t xResolution[6];
     Double_t yResolution[6];
     //store global offsets here
@@ -104,8 +114,18 @@ class TDetectorAlignment:public TNamed{
     std::vector<Double_t> vecDetPhiXOffset[6];
     std::vector<Double_t> vecDetPhiYOffset[6];
     UInt_t nDetectors;
-public:
+   private:
+    UInt_t runNumber;
+    TDatime diaTime,silTime;
+    UInt_t nUsedEvents;
+    Float_t alignmentTrainingTrackFraction;
+    Float_t diaChi2;
+    std::vector< UInt_t> intervallBeginEventNo;
+    std::vector<UInt_t > intervallEndEventNo;
+    UInt_t nDiamondAlignmentEvents;
+    UInt_t nEvents;
+private:
     int verbosity;
-    ClassDef(TDetectorAlignment,1);
+    ClassDef(TDetectorAlignment,2);
 };
 #endif /* TDETECTORALIGNMENT_HH_ */

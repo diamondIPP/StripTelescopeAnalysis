@@ -22,12 +22,14 @@
 #include "TRawEventReader.hh"
 #include "TFile.h"
 #include "TTree.h"
+#include "TSettings.class.hh"
 using namespace std;
 
 class TRawEventSaver {
 public:
 	TRawEventSaver(unsigned int RunNumber, std::string RunDescription = "");
 	virtual ~TRawEventSaver();
+	void setSettings(TSettings* set){settings=set;}
 	void saveEvents(int nEvents);
 	static void showStatusBar(int nEvent,int nEvents,int updateIntervall=100,bool show=false);
 private:
@@ -49,6 +51,7 @@ private:
     UChar_t Det_ADC[8][256];
     UShort_t Dia_ADC[128];
     UInt_t eventNumber;
+    TSettings *settings;
 };
 
 #endif /* TRAWEVENTSAVER_HH_ */

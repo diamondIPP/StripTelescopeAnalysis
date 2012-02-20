@@ -15,6 +15,7 @@
 #include "TAnalysisOfClustering.hh"
 #include "TClustering.hh"
 #include "TSelectionClass.hh"
+#include "THTMLGenerator.hh"
 #include "diamondAnalysis.h"
 #include "time.h"
 #include "TSystem.h"
@@ -173,6 +174,7 @@ int main(int argc, char ** argv) {
 		settings=new TSettings(settingsFileName.str(),RUNNUMBER);
 		TRawEventSaver *eventSaver;
 		eventSaver = new TRawEventSaver(RUNNUMBER);
+		eventSaver->setSettings(settings);
 		eventSaver->saveEvents(NEVENTS);
 		delete eventSaver;
 
@@ -247,6 +249,10 @@ int main(int argc, char ** argv) {
 
 		process_mem_usage(vm2, rss2);
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+
+		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
+		htmlGen->generateHTMLFile();
+		delete htmlGen;
 
 
 		if (settings!=NULL)delete settings;

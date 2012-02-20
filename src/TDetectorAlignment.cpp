@@ -36,23 +36,22 @@ TDetectorAlignment::TDetectorAlignment(){
       xResolution[i]=0.3;
       yResolution[i]=0.3;
    }
+   nUsedEvents=0;
+   alignmentTrainingTrackFraction=0;
+   intervallBeginEventNo.clear();
+   intervallEndEventNo.clear();
+   nEvents=0;
+   diaTime=TDatime(1995,0,0,0,0,0);
+   silTime=TDatime(1995,0,0,0,0,0);
 }
 
-//TODO: where to we put get SiResolution...
-//Double_t TDetectorAlignment::GetSiResolution() {
-//   Int_t deta[] = {1,0,0,0}, detb[] = {0,1,2,3}, detc[] = {3,3,3,2};
-//   Double_t zab, zbc, ref_residual_width, numerator=0, denominator=0;
-//   for(int det=0; det<8; det++) {
-//      if(det%2) ref_residual_width = det_y_resolution[det/2];
-//      else ref_residual_width = det_x_resolution[det/2];
-//      zab = TMath::Abs(track_storage[0].GetD(deta[det/2]).GetZ() - track_storage[0].GetD(detb[det/2]).GetZ());
-//      zbc = TMath::Abs(track_storage[0].GetD(detb[det/2]).GetZ() - track_storage[0].GetD(detc[det/2]).GetZ());
-//      numerator += ref_residual_width*ref_residual_width * (1 + (zab*zab + zbc*zbc)/(zab+zbc)/(zab+zbc));
-//      denominator += (1 + (zab*zab + zbc*zbc)/(zab+zbc)/(zab+zbc)) * (1 + (zab*zab + zbc*zbc)/(zab+zbc)/(zab+zbc));
-//   }
-//
-//   return TMath::Sqrt(numerator/denominator);
-//}
+void TDetectorAlignment::addEventIntervall(UInt_t first, UInt_t last){
+	if(first>last)
+		return;
+	intervallBeginEventNo.push_back(first);
+	intervallEndEventNo.push_back(last);
+	nEvents+=(last-first);
+}
 
 
 int TDetectorAlignment::getVerbosity() const
@@ -107,75 +106,104 @@ void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
 	}
 }
 
-void TDetectorAlignment::PrintXOffset(UInt_t plane,UInt_t level)
+std::string TDetectorAlignment::PrintXOffset(UInt_t plane,UInt_t level)
 {
-	cout<<TCluster::Intent(level)<<"X-Offset:" <<det_x_offset[plane]<<"\t";
+	stringstream output;
+	output<<TCluster::Intent(level)<<"X-Offset:" <<det_x_offset[plane]<<"\t";
 	vector<Double_t> vecHis = this->GetXOffsetHistory(plane);
 	for(UInt_t i=0;i<vecHis.size();i++)
-		cout<<" "<<vecHis.at(i);
-	cout<<endl;
+		output<<" "<<vecHis.at(i);
+	output<<endl;
+	return output.str();
 }
 
-void TDetectorAlignment::PrintYOffset(UInt_t plane,UInt_t level)
+std::string TDetectorAlignment::PrintYOffset(UInt_t plane,UInt_t level)
 {
-	cout<<TCluster::Intent(level)<<"Y-Offset:" <<det_y_offset[plane]<<"\t";
+	stringstream output;
+	output<<TCluster::Intent(level)<<"Y-Offset:" <<det_y_offset[plane]<<"\t";
 	vector<Double_t> vecHis = this->GetYOffsetHistory(plane);
 	for(UInt_t i=0;i<vecHis.size();i++)
-		cout<<" "<<vecHis.at(i);
-	cout<<endl;
+		output<<" "<<vecHis.at(i);
+	output<<endl;
+	return output.str();
 }
 
-void TDetectorAlignment::PrintZOffset(UInt_t plane,UInt_t level)
+std::string TDetectorAlignment::PrintZOffset(UInt_t plane,UInt_t level)
 {
-	cout<<TCluster::Intent(level)<<"Z-Offset:" <<det_z_offset[plane]<<"\t";
+	stringstream output;
+	output<<TCluster::Intent(level)<<"Z-Offset:" <<det_z_offset[plane]<<"\t";
 	vector<Double_t> vecHis = this->GetZOffsetHistory(plane);
 	for(UInt_t i=0;i<vecHis.size();i++)
-		cout<<" "<<vecHis.at(i);
-	cout<<endl;
+		output<<" "<<vecHis.at(i);
+	output<<endl;
+	return output.str();
 }
 
-void TDetectorAlignment::PrintPhiXOffset(UInt_t plane, UInt_t level)
+std::string TDetectorAlignment::PrintPhiXOffset(UInt_t plane, UInt_t level)
 {
-	cout<<TCluster::Intent(level)<<"PhiX-Offset:" <<det_phix_offset[plane]<<"\t";
+	stringstream output;
+	output<<TCluster::Intent(level)<<"PhiX-Offset:" <<det_phix_offset[plane]<<"\t";
 	vector<Double_t> vecHis = this->GetPhiXOffsetHistory(plane);
 	for(UInt_t i=0;i<vecHis.size();i++)
-		cout<<" "<<vecHis.at(i);
-	cout<<endl;
+		output<<" "<<vecHis.at(i);
+	output<<endl;
+	return output.str();
 }
 
-void TDetectorAlignment::PrintPhiYOffset(UInt_t plane, UInt_t level)
+std::string TDetectorAlignment::PrintPhiYOffset(UInt_t plane, UInt_t level)
 {
-	cout<<TCluster::Intent(level)<<"PhiY-Offset:" <<det_phiy_offset[plane]<<"\t";
+	stringstream output;
+	output<<TCluster::Intent(level)<<"PhiY-Offset:" <<det_phiy_offset[plane]<<"\t";
 	vector<Double_t> vecHis = this->GetPhiYOffsetHistory(plane);
 	for(UInt_t i=0;i<vecHis.size();i++)
-		cout<<" "<<vecHis.at(i);
-	cout<<endl;
+		output<<" "<<vecHis.at(i);
+	output<<endl;
+	return output.str();
 }
 
-void  TDetectorAlignment::PrintResolution(UInt_t plane, UInt_t level){
-	cout<<TCluster::Intent(level)<<"Resolution of "<<plane<<" Plane in X: "<<this->getXResolution(plane)<<" and Y:"<<this->getYResolution(plane)<<endl;
+std::string  TDetectorAlignment::PrintResolution(UInt_t plane, UInt_t level){
+	stringstream output;
+	output<<TCluster::Intent(level)<<"Resolution of "<<plane<<" Plane in X: "<<this->getXResolution(plane)<<" and Y:"<<this->getYResolution(plane)<<endl;
+	return output.str();
 }
 
-void TDetectorAlignment::PrintResults(UInt_t level)
+std::string TDetectorAlignment::PrintResults(UInt_t level)
 {
-	cout<<"Alignment Results"<<endl;
-	for(UInt_t plane=0;plane<this->nDetectors;plane++){
-		cout<<TCluster::Intent(level+1)<<" Plane "<< plane<<endl;
-		PrintXOffset(plane,level+2);
-		PrintYOffset(plane,level+2);
-		PrintZOffset(plane,level+2);
-//		cout<<endl;
-		PrintPhiXOffset(plane,level+2);
-		PrintPhiYOffset(plane,level+2);
-		PrintResolution(plane,level+2);
-		cout<<endl;
+	stringstream output;
+	output<<"\n"<<TCluster::Intent(level)<<"Alignment of Run "<<runNumber<<"\n";
+	output<<TCluster::Intent(level+1)<<"Silicon alignment made on "<<silTime.AsString()<<"\n";
+	output<<TCluster::Intent(level+1)<<"Diamond alignment made on "<<diaTime.AsString()<<"\n";
+	output<<TCluster::Intent(level+1)<<"used "<<nUsedEvents<<" from "<<nEvents<<" with a training Fraction of "<<setw(5)<<this->alignmentTrainingTrackFraction*100<<"% (";
+	output<<(Float_t)nUsedEvents/alignmentTrainingTrackFraction/nEvents*100<<"%)"<<"\n";
+	output<<TCluster::Intent(level+1)<<"used "<<this->nDiamondAlignmentEvents<<" from "<<nUsedEvents;
+	output<<"for diamond Alignment ("<<(Float_t)nDiamondAlignmentEvents/(Float_t)nUsedEvents*100<<"%) at a max Chi2 cut at "<<setw(4)<<this->diaChi2<<"\n";
+	for(UInt_t i=0;i<this->intervallBeginEventNo.size()&&i<intervallEndEventNo.size();i++){
+		output<<TCluster::Intent(level+2)<<"Intervall "<<i<<" of "<<intervallBeginEventNo.size()<<": [ ";
+		output<<intervallBeginEventNo.at(i)<<" , "<<intervallEndEventNo.at(i)<<" ]"<<"\n";
 	}
+
+	output<<"\nAlignment Results"<<"\n";
+
+	for(UInt_t plane=0;plane<this->nDetectors;plane++){
+		output<<TCluster::Intent(level+1)<<" Plane "<< plane<<endl;
+		output<<PrintXOffset(plane,level+2);
+		output<<PrintYOffset(plane,level+2);
+		output<<PrintZOffset(plane,level+2);
+//		cout<<endl;
+		output<<PrintPhiXOffset(plane,level+2);
+		output<<PrintPhiYOffset(plane,level+2);
+		output<<PrintResolution(plane,level+2);
+		output<<endl;
+	}
+	cout<<output.str()<<flush;
+	return output.str();
 }
 
 Double_t TDetectorAlignment::getXResolution(UInt_t plane)
 {
 	if(plane<6)
     return xResolution[plane];
+	return -9999;
 }
 
 void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
@@ -189,6 +217,7 @@ Double_t TDetectorAlignment::getYResolution(UInt_t plane)
 {
 	if(plane<6)
     return yResolution[plane];
+	return -9999;
 }
 
 void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)

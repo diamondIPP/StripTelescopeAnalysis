@@ -2,6 +2,7 @@
 #include <deque>
 #include <pair>
 #include <vector>
+#include <map>
 
 #pragma link off all globals;
 #pragma link off all classes;
@@ -9,6 +10,8 @@
 #pragma link C++ class deque<bool>+;
 #pragma link C++ class vector<bool>+;
 #pragma link C++ class vector<Double_t>+;
+#pragma link C++ class pair<UInt_t,UInt_t>+;
+#pragma link C++ class map<UInt_t,UInt_t>+;
 #pragma link C++ class pair< unsigned short, float>+;
 #pragma link C++ class pair< UShort_t, Float_t>+;
 #pragma link C++ class pair< int, Float_t>+;
@@ -22,5 +25,7 @@
 #pragma link C++ class TPlane+;
 #pragma link C++ class vector<TPlane>+;
 #pragma link C++ class TEvent+;
+//#pragma link C++ class ChannelScreen+;
+//#pragma linl C++ class TChannelMapping+;
 #pragma link C++ class TDetectorAlignment+;
 #endif

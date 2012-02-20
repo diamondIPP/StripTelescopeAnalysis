@@ -6,13 +6,16 @@
  */
 
 #include "TSettings.class.hh"
+//ClassImp(TSettings);
 using namespace std;
 
 TSettings::TSettings(UInt_t runNumber){
 	verbosity=1;
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
+	diamondMapping=0;
 	DefaultLoadDefaultSettings();
+//	diamondMapping.PrintMapping();
 	SetFileName("");
 	this->runNumber=runNumber;
 }
@@ -21,6 +24,7 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	verbosity=1;
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
+	diamondMapping=0;
 	DefaultLoadDefaultSettings();
 	SetFileName(fileName);
 	this->runNumber=runNumber;
@@ -416,6 +420,17 @@ void TSettings::LoadSettings(){
 	    	  cout<<key<< " = "<< value.c_str() <<endl;
 	    	  ParseFloatArray(value,clusterSeedFactors);
 	      }
+	      if(key=="diamondMapping") {
+	    	  cout<<key<<" = "<<value.c_str()<<endl;
+	    	  std::vector<int>vecDiaMapping;
+	    	  ParseIntArray(value,vecDiaMapping);
+	    	  if(diamondMapping==0)
+	    		  delete diamondMapping;
+	    	  diamondMapping=new TChannelMapping(vecDiaMapping);
+	    	  diamondMapping->PrintMapping();
+	    	  cout<<diamondMapping<<endl;
+	    		getDetChannelNo(0);
+	      }
 	}
 
 	file.close();
@@ -454,6 +469,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CMN_corr_high=7;
 	CMN_corr_low=3;
 
+	alignment_chi2=1.0;
 	alignment_training_track_fraction=0.25;
 	alignment_training_track_number=10000;
 	trainingMethod=enumFraction;
@@ -524,6 +540,12 @@ void TSettings::DefaultLoadDefaultSettings(){
 	   //default settings
 	single_channel_analysis_eventwindow=5000; // Number of events to put in each histogram
 	plottedChannel=256; //256 = enter channel on run. also, set to 256 and type 256 to turn off buffer noise plots
+	UInt_t nDiaChannels=128;
+	diamondMapping=new TChannelMapping(nDiaChannels);
+	getDetChannelNo(0);
+	cout<<"Print DefaultMapping:"<<endl;
+//	diamondMapping.PrintMapping();
+	cout<<"DONE"<<endl;
 }
 
 void TSettings::ParseFloatArray(string value, vector<float> &vec) {
@@ -766,6 +788,21 @@ TSettings::enumAlignmentTrainingMethod TSettings::getTrainingMethod() const
 void TSettings::setTrainingMethod(enumAlignmentTrainingMethod trainingMethod)
 {
     this->trainingMethod = trainingMethod;
+}
+
+UInt_t TSettings::getDetChannelNo(UInt_t vaCh)
+{
+	UInt_t detCh;
+	detCh = this->diamondMapping->getDetChannelNo(vaCh);
+	return detCh;
+}
+
+UInt_t TSettings::getVaChannelNo(UInt_t detChNo)
+{
+
+	UInt_t vaCh;
+	vaCh = this->diamondMapping->getVAChannelNo(detChNo);
+	return vaCh;
 }
 
 void TSettings::ParseIntArray(string value, vector<int> &vec) {
