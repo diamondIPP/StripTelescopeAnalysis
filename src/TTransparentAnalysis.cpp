@@ -9,13 +9,14 @@
 
 #include "../include/TTransparentAnalysis.hh"
 
-TTransparentAnalysis::TTransparentAnalysis(int runNumber, TSettings settings) {
+TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"********TTransparentAnalysis::TTransparentAnalysis********"<<endl;
 	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-	setSettings(&settings);
+	setSettings(settings);
+	UInt_t runNumber =settings->getRunNumber();
 	stringstream  runString;
 	runString.str("");
 	runString<<runNumber;
@@ -30,7 +31,7 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber, TSettings settings) {
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<filepath.str()<<endl;
 	
-	tracking = new TTracking(filepath.str(),alignmentFileName.str());
+	tracking = new TTracking(filepath.str(),alignmentFileName.str(),runNumber);
 	
 	// TODO: load settings!!!
 	
@@ -40,7 +41,7 @@ TTransparentAnalysis::TTransparentAnalysis(int runNumber, TSettings settings) {
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
-	histSaver->SetRunNumber(runNumber);
+	histSaver->SetRunNumber(settings->getRunNumber());
 	sys->cd("..");
 	
 	

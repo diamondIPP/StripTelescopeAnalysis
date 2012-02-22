@@ -124,6 +124,13 @@ UInt_t TEvent::getClusterSize(UInt_t plane,TPlane::enumCoordinate cor,UInt_t cl)
 	return getCluster(plane,cor,cl).size();
 }
 
+Float_t TEvent::getPosition(UInt_t det, UInt_t cl,TCluster::calculationMode_t mode,TH1F *histo)
+{
+	TCluster cluster = getCluster(det,cl);
+	return cluster.getPosition(mode,histo);
+}
+
+
 void TEvent::Print(UInt_t level){
 	cout<<TCluster::Intent(level)<<"EventNo"<<getEventNumber()<<" with "<<getNPlanes()<< "Planes:"<<endl;
 	for(UInt_t plane=0;plane<getNPlanes();plane++)

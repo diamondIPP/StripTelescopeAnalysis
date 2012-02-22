@@ -7,7 +7,7 @@
 
 #include "../include/TTracking.hh"
 
-TTracking::TTracking(std::string pathName, std::string alignmentName):TADCEventReader(pathName){
+TTracking::TTracking(std::string pathName, std::string alignmentName,UInt_t runNumber):TADCEventReader(pathName,runNumber){
 	// TODO Auto-generated constructor stub
 	alignmentFile=NULL;
 	setAlignment(alignmentName);

@@ -26,7 +26,7 @@ TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
 	rawfilepath<<"rawData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<rawfilepath.str()<<endl;
-	eventReader=new TADCEventReader(rawfilepath.str());
+	eventReader=new TADCEventReader(rawfilepath.str(),runNumber);
 	cout<<eventReader->GetEntries()<<endl;
 	createPedestalTree(nEvents);
 	MAXSDETSIGMA=7;

@@ -26,7 +26,7 @@
 #include "TEvent.hh"
 class TADCEventReader {
 public:
-	TADCEventReader(std::string fileName);
+	TADCEventReader(std::string fileName,UInt_t runNumber);
 	virtual ~TADCEventReader();
 	bool GetNextEvent();
 	virtual bool LoadEvent(UInt_t EventNumber);
@@ -71,12 +71,14 @@ public:
     bool useForAlignment(){return this->bUseForAlignment;};
     bool useForSiliconAlignment(){return this->bUseForSiliconAlignment;};
     bool useForAnalysis(){return this->bUseForAnalysis;};
+    TH1F* getEtaIntegral(UInt_t det);
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
 	void initialiseTree();
 	int hasTree();
 	TObject* getTreeName();
+	void LoadEtaDistributions(UInt_t runNumber);
 private:
 	std::string fileName;
 	UInt_t run_number;
@@ -102,6 +104,9 @@ private:
 	bool bUseForAlignment;
 	bool bUseForAnalysis;
 	bool bUseForSiliconAlignment;
+private:
+	TH1F *hEtaIntegral[9];
+	bool bEtaIntegrals;
 private:
 //is that needed?
 	TFile *file;

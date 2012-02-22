@@ -68,26 +68,26 @@ void TPlane::setDetectorType(TPlaneProperties::enumDetectorType type)
 }
 
 
-Float_t TPlane::getXPosition(UInt_t cl,TCluster::calculationMode_t mode){
+Float_t TPlane::getXPosition(UInt_t cl,TCluster::calculationMode_t mode,TH1F* histo){
 	if(xClusters.size()>cl)
-		return this->xClusters.at(cl).getPosition(mode);
+		return this->xClusters.at(cl).getPosition(mode,histo);
 	else
 		return N_INVALID;
 }
 
-Float_t TPlane::getYPosition(UInt_t cl,TCluster::calculationMode_t mode){
+Float_t TPlane::getYPosition(UInt_t cl,TCluster::calculationMode_t mode,TH1F* histo){
 	if(yClusters.size()>cl)
-		return this->yClusters.at(cl).getPosition(mode);
+		return this->yClusters.at(cl).getPosition(mode,histo);
 	else
 			return N_INVALID;
 }
 
-Float_t TPlane::getPosition(enumCoordinate cor, UInt_t cl, TCluster::calculationMode_t mode)
+Float_t TPlane::getPosition(enumCoordinate cor, UInt_t cl, TCluster::calculationMode_t mode,TH1F* histo)
 {
 	if(cor== X_COR)
-		return getXPosition(cl,mode);
+		return getXPosition(cl,mode,histo);
 	else if(cor== Y_COR)
-		return getYPosition(cl,mode);
+		return getYPosition(cl,mode,histo);
 	else
 		return N_INVALID;
 }

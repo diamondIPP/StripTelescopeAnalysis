@@ -34,7 +34,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<"\""<<clusterfilepath.str()<<"\""<<endl;
 	cout<<"OPEN TADCEventReader"<<flush;
-	eventReader=new TADCEventReader(clusterfilepath.str());
+	eventReader=new TADCEventReader(clusterfilepath.str(),settings->getRunNumber());
 	cout<<" DONE"<<endl;
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("selections");

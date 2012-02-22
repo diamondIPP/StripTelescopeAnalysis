@@ -9,15 +9,14 @@
 
 #include "../include/TClustering.hh"
 
-TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
+TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*************TClustering::TClustering*********************"<<endl;
 	cout<<"**********************************************************"<<endl;
-	cout<<runNumber<<endl;
-	cout<<seedDetSigma<<"/"<<hitDetSigma<<endl;
-	cout<<seedDiaSigma<<"/"<<hitDiaSigma<<endl;
 
 	// TODO Auto-generated constructor stub
+	setSettings(settings);
+	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
 	stringstream  runString;
 	runString.str("");
@@ -30,7 +29,7 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	filepath<<"pedestalData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str());
+	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("clustering");
 	sys->cd("clustering");
@@ -51,6 +50,11 @@ TClustering::TClustering(int runNumber,int seedDetSigma,int hitDetSigma,int seed
 	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
+	for(UInt_t det=0;det<9;det++){
+		stringstream histName;
+		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
+		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
+	}
 }
 
 TClustering::~TClustering() {
@@ -64,6 +68,7 @@ TClustering::~TClustering() {
 		clusterTree->AddFriend("rawTree",rawFilePath.str().c_str());
 		cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 		clusterTree->Write();
+		saveEtaCorrections();
 	}
 	//clusterTree->Delete();
 	delete clusterFile;
@@ -91,6 +96,12 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 	cout<<"\n\n******************************************\n";
 	cout<<    "**************Start Clustering...*********\n";
 	cout<<"******************************************\n\n"<<endl;
+	for(UInt_t det=0;det<9;det++){
+		if(hEtaDistribution[det]!=0)delete hEtaDistribution[det];
+		stringstream histName;
+		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
+		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),nEvents/50,0,1);
+	}
 	for(UInt_t det=0;det< TPlaneProperties::getNSiliconDetectors();det++)
 		cout<< "\tSNRs for silicon plane "<<det<<": "<<settings->getClusterSeedFactor(det)<<"/"<<settings->getClusterHitFactor(det)<<endl;
 	cout<<endl;
@@ -102,7 +113,9 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
 		clusterEvent();
+		addToEtaDistributions();
 		clusterTree->Fill();
+
 		if(pEvent->isValidSiliconEvent())
 			validEvents++;
 	}
@@ -342,6 +355,43 @@ bool TClustering::createClusterTree(int nEvents)
 	}
 
 	return createdNewTree;
+}
+
+void TClustering::addToEtaDistributions()
+{
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+		for(UInt_t cl=0;cl<pEvent->getNClusters(det);cl++){
+			Float_t eta = pEvent->getCluster(det,cl).getEta();
+			if(eta>=0&&eta<=1)
+				hEtaDistribution[det]->Fill(eta);
+		}
+}
+
+void TClustering::saveEtaCorrections(){
+	stringstream etaCorFileName;
+	etaCorFileName<<"etaCorrection."<<settings->getRunNumber()<<".root";
+	TFile* file = new TFile(etaCorFileName.str().c_str(),"RECREATE");
+	file->cd();
+	for(UInt_t det=0;det<9;det++){
+		stringstream histName;
+		histName<<"hEtaIntegral_"<<det;
+		UInt_t nBins = hEtaDistribution[det]->GetNbinsX();
+		TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),nBins,0,1);
+		Int_t entries = hEtaDistribution[det]->GetEntries();
+		entries -=  hEtaDistribution[det]->GetBinContent(0);
+		entries -=  hEtaDistribution[det]->GetBinContent(nBins+1);
+		Int_t sum =0;
+		for(UInt_t bin=1;bin<nBins+1;bin++){
+			Int_t binContent = hEtaDistribution[det]->GetBinContent(bin);
+			sum +=binContent;
+			Float_t pos =  hEtaDistribution[det]->GetBinCenter(bin);
+			histo->Fill(pos, (Float_t)sum/(Float_t)entries);
+		}
+		file->cd();
+		histo->Write();
+		hEtaDistribution[det]->Write();
+	}
+	file->Close();
 }
 
 void TClustering::setBranchAdresses(){

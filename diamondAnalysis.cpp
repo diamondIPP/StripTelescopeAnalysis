@@ -203,8 +203,7 @@ int main(int argc, char ** argv) {
 
 			sys->cd(currentDir.c_str());
 		TClustering* clustering;
-		clustering=new TClustering(RUNNUMBER);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
-		clustering->setSettings(settings);
+		clustering=new TClustering(settings);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
@@ -212,8 +211,7 @@ int main(int argc, char ** argv) {
 	if (DO_SLIDINGPEDESTAL){
 		sys->cd(currentDir.c_str());
 		TAnalysisOfClustering* analysisClustering;
-		analysisClustering= new TAnalysisOfClustering(RUNNUMBER);
-		analysisClustering->setSettings(settings);
+		analysisClustering= new TAnalysisOfClustering(settings);
 		analysisClustering->doAnalysis(NEVENTS);
 		delete analysisClustering;
 	}

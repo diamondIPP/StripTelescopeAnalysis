@@ -8,7 +8,7 @@
 #include "TADCEventReader.hh"
 using namespace std;
 
-TADCEventReader::TADCEventReader(string FileName) {
+TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	verbosity=1;
 	current_event = 0;
 	store_threshold = 2;
@@ -26,6 +26,7 @@ TADCEventReader::TADCEventReader(string FileName) {
 	if (verbosity) cout<<"tree Entries():"<<tree->GetEntries()<<endl;
 	this->LoadEvent(0);
 	this->fileName=FileName;
+	LoadEtaDistributions(runNumber);
 //	pVecvecCluster=NULL;
 	pEvent=NULL;
 }
@@ -642,3 +643,34 @@ std::string TADCEventReader::getFilePath(){
 	return this->fileName;
 }
 
+TH1F *TADCEventReader::getEtaIntegral(UInt_t det)
+{
+	if(!bEtaIntegrals||det>8)
+		return 0;
+	return hEtaIntegral[det];
+}
+
+void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
+	bEtaIntegrals=true;
+	stringstream etaFileName;
+	etaFileName<<"etaCorrection."<<runNumber<<".root";
+	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
+	if(fEtaDis==0){
+		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
+		bEtaIntegrals=false;
+		return;
+	}
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+		stringstream objectName;
+		objectName<<"hEtaIntegral_"<<det;
+		TH1F *histo = 0;
+		fEtaDis->GetObject(objectName.str().c_str(),histo);
+		file->cd();
+		bEtaIntegrals=bEtaIntegrals&&(histo!=0);
+		if(histo)
+			hEtaIntegral[det]=(TH1F*)histo->Clone();
+		else
+			cerr<<"Object \""<<objectName.str()<<"\" does not exist"<<endl;
+	}
+
+}

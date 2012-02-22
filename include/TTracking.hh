@@ -16,7 +16,7 @@
 
 class TTracking: public TADCEventReader{
 public:
-	TTracking(std::string pathName, std::string alignmentName);
+	TTracking(std::string pathName, std::string alignmentName,UInt_t runNumber);
 	TPositionPrediction* predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bPrint=false);
 	Float_t getXPosition(UInt_t plane);
 	Float_t getYPosition(UInt_t plane);

@@ -39,11 +39,13 @@ using namespace std;
 class TClustering {
 
 public:
-	TClustering(int runNumber,int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
+	TClustering(TSettings *settings);//int runNumber,int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 	virtual ~TClustering();
 	void ClusterEvents(UInt_t nEvents);
 	void setSettings(TSettings* settings);
 private:
+	void addToEtaDistributions();
+	void saveEtaCorrections();
 	void clusterEvent();
 	void clusterDetector(int det);
 	int combineCluster(int det,int ch,int maxAdcValue=255);
@@ -73,6 +75,7 @@ private:
     UShort_t maxDetAdcValue;
     UShort_t maxDiaAdcValue;
     TEvent *pEvent;
+    TH1F* hEtaDistribution[9];
 
 };
 

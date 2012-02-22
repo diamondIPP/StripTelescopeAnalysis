@@ -17,13 +17,14 @@
 #include "TSystem.h"
 #include "TObject.h"
 #include "TROOT.h"
+#include "TH1F.h"
 //#define TCLUSTER_REVISION 12;
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 21;};
+	static UInt_t TCLUSTER_REVISION() {return 22;};
     typedef vector<vector<TCluster> > vecvecTCluster;
-    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3};
+    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
     TCluster()
     {
         numberOfSeeds = 0;
@@ -48,7 +49,7 @@ public:
     TCluster(const TCluster& a);
     virtual ~TCluster();
     void addChannel(UInt_t channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
-    Float_t getPosition(calculationMode_t mode=highest2Centroid);
+    Float_t getPosition(calculationMode_t mode=highest2Centroid,TH1F *histo=0);
     void clear();
     bool isLumpyCluster();
     bool isGoldenGateCluster();
@@ -61,6 +62,8 @@ public:
 	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo);
 	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos);
     Float_t getChargeWeightedMean(bool useNonHits=false);
+    Float_t getEtaPostion();
+    Float_t getPositionCorEta(TH1F* histo);
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
@@ -90,6 +93,7 @@ public:
 	Float_t getEta();
 	UInt_t getClusterSize();
 	void setVerbosity(UInt_t verbosity){this->verbosity=verbosity;};
+	static Float_t getValueOfHisto(Float_t x, TH1F* histo);
 
 private:
     void checkForGoldenGate();

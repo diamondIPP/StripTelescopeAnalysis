@@ -23,6 +23,7 @@
 //ROOT Class Headers
 #include "TROOT.h" // for adding your own classes to ROOT's library
 #include "TObject.h"
+#include "TH1F.h"
 
 //own classes
 #include "TCluster.hh"
@@ -43,9 +44,9 @@ public:
 	TCluster getCluster(enumCoordinate cor, UInt_t cl);
 	TCluster getXCluster(UInt_t cl);
 	TCluster getYCluster(UInt_t cl);
-	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	Float_t getPosition(enumCoordinate cor, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getPosition(enumCoordinate cor, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	UInt_t getNXClusters();
 	UInt_t getNYClusters();
 	bool isValidPlane();

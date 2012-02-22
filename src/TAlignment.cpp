@@ -28,7 +28,7 @@ TAlignment::TAlignment(TSettings* settings) {
 	filepath<<sys->pwd();
 	filepath<<"/selectionData."<<runNumber<<".root";
 	cout<<"OPEN eventReader with file \""<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str());
+	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
 	//eventReader->checkADC();
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("alignment");

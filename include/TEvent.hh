@@ -23,6 +23,7 @@
 //ROOT Class Headers
 #include "TROOT.h" // for adding your own classes to ROOT's library
 #include "TObject.h"
+#include "TH1F.h"
 
 #include "TPlaneProperties.hh"
 #include "TPlane.hh"
@@ -41,6 +42,7 @@ public:
 	TCluster getCluster(UInt_t det, UInt_t cl);
 	UInt_t getClusterSize(UInt_t det,UInt_t cl);
 	UInt_t getClusterSize(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
+	Float_t getPosition(UInt_t det, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 
 	UInt_t getNPlanes();
 	bool  isValidSiliconEvent();
@@ -54,7 +56,7 @@ private:
 	UInt_t eventNumber;
 	UInt_t verbosity;
 
-    ClassDef(TEvent,6);
+    ClassDef(TEvent,7);
 public:
 	
 };

@@ -29,7 +29,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	filepath<<"pedestalData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str());
+	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("pedestalAnalysis");
 	sys->cd("pedestalAnalysis");

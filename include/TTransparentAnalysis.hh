@@ -52,7 +52,7 @@ using namespace std;
 
 class TTransparentAnalysis {
 public:
-	TTransparentAnalysis(int runNumber, TSettings settings);
+	TTransparentAnalysis(TSettings* settings);
 	virtual ~TTransparentAnalysis();
 	void	doAnalysis(int nEvents=0);
 	void analyze(UInt_t nEvents, UInt_t startEvent);

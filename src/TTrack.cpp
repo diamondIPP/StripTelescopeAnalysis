@@ -61,15 +61,15 @@ UInt_t TTrack::getNClusters(int det) {
  * @param mode
  * @return value of calculated position
  */
-Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode){
+Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0||yCluster.size()<=0)
 		return N_INVALID;
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiYOffset(plane);
-	Float_t xMeasured = xCluster.getPosition(mode);
-	Float_t yMeasured = yCluster.getPosition(mode);
+	Float_t xMeasured = xCluster.getPosition(mode,histo);
+	Float_t yMeasured = yCluster.getPosition(mode,histo);
 	// apply offsets
 	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) + (yMeasured) * TMath::Sin(phiYOffset);
 	Float_t yPosition = (xMeasured) * TMath::Sin(-phiXOffset) + (yMeasured) * TMath::Cos(phiYOffset);
@@ -92,10 +92,10 @@ Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCl
  * @param mode
  * @return value of calculated position
  */
-Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode) {
+Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode,TH1F* histo) {
 	if (cluster.size()<=0) return N_INVALID;
 	UInt_t plane = det/2;
-	Float_t measuredPos = cluster.getPosition(mode);
+	Float_t measuredPos = cluster.getPosition(mode,histo);
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
@@ -120,7 +120,7 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
+Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1)
 		return N_INVALID;
@@ -130,7 +130,7 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
 		cerr<<"This cluster is too small!!!!"<<endl;
 		xCluster.Print();
 	}
-	return getStripXPositionOfCluster(plane,xCluster,yPred,mode);
+	return getStripXPositionOfCluster(plane,xCluster,yPred,mode,histo);
 }
 
 /**
@@ -142,13 +142,13 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode){
+Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0)
 		return N_INVALID;
 	// get offsets
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
-	Float_t xMeasured = xCluster.getPosition(mode);//-xOffset;
+	Float_t xMeasured = xCluster.getPosition(mode,histo);//-xOffset;
 
 	// apply offsets
 	Float_t xPosition = (xMeasured) / TMath::Cos(phiXOffset) + (yPred) * TMath::Tan(phiXOffset);
@@ -163,8 +163,8 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
  * @param plane planeNumber to use correct offsets
  * @return calculated xPosition
  */
-Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode) {
-	return getPosition(TPlane::X_COR,plane,mode);
+Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
+	return getPosition(TPlane::X_COR,plane,mode,histo);
 }
 
 /**
@@ -173,8 +173,8 @@ Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode) {
  * @param plane planeNumber to use correct offsets
  * @return calculated yPosition
  */
-Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode) {
-	return getPosition(TPlane::Y_COR,plane,mode);
+Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
+	return getPosition(TPlane::Y_COR,plane,mode,histo);
 }
 
 Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
@@ -284,7 +284,7 @@ Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode)
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
+Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo){
 	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
@@ -292,7 +292,7 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::ca
 	TCluster xCluster,yCluster;
 	xCluster=event->getPlane(plane).getXCluster(0);
 	yCluster=event->getPlane(plane).getYCluster(0);
-	return getPositionOfCluster(cor,plane,xCluster,yCluster,mode);
+	return getPositionOfCluster(cor,plane,xCluster,yCluster,mode,histo);
 }
 
 

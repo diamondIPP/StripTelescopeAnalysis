@@ -35,7 +35,7 @@ using namespace std;
 
 class TAnalysisOfClustering {
 public:
-	TAnalysisOfClustering(int runnumber,int seedSigma=10,int hitSigma=7);
+	TAnalysisOfClustering(TSettings *settings);
 	virtual ~TAnalysisOfClustering();
 	void	doAnalysis(int nEvents=0);
 	void setSettings(TSettings* settings);
@@ -47,6 +47,7 @@ private:
 	void compareCentroid_ChargeWeightedMean();
 	void analyseForSeeds();
 	void analyse2ndHighestHit();
+	void analyseClusterPosition();
 	void checkForSaturatedChannels();
 	void analyseCluster();
 	TH1F *hSaturatedChannels[9];
@@ -63,6 +64,7 @@ private:
 	HistogrammSaver* histSaver;
     TSystem* sys;
     TSettings* settings;
+    UInt_t verbosity;
     int nEvent;
     int seedSigma;
     int hitSigma;
@@ -86,6 +88,11 @@ private:
 	TH1F *hLeftHitOverLeftAndRight[9];
 	TH1F *hDeltaLeftRightHitOverLeftAndRight[9];
 	TH1F *hSignal2ndHighestOverSignalHighestRatio[9];
+	TH2F *hRelativeClusterPositionCWM[9];
+	TH2F *hRelativeClusterPositionCorEta[9];
+	TH2F *hRelativeClusterPositionEta[9];
+	TH1F *hClusterPosition[9];
+	TH1F *hEtaDistribution[9];
 };
 
 #endif /* TDEADCHANNELS_HH_ */
