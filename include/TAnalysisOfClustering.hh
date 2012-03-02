@@ -93,6 +93,11 @@ private:
 	TH2F *hRelativeClusterPositionEta[9];
 	TH1F *hClusterPosition[9];
 	TH1F *hEtaDistribution[9];
+	TH1F *hEtaDistribution5Percent[9];
+	TH2F *hEtaDistributionVsSignalRight[9];
+	TH2F *hEtaDistributionVsSignalLeft[9];
+	TH2F *hEtaDistributionVsSignalSum[9];
+	TH2F *hSignalLeftVsSignalRight[9];
 };
 
 #endif /* TDEADCHANNELS_HH_ */

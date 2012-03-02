@@ -100,9 +100,10 @@ void TRawEventSaver::setBranches(){
 }
 
 void TRawEventSaver::loadEvent(){
+	UInt_t diaInput=(UInt_t)settings->getDia_input();
 	for(Int_t det=0;det<8;det++){
 		for(Int_t ch=0; ch<256; ch++){
-			Det_ADC[det][ch]=(UChar_t)rawEventReader->getPlane(det).ADC_values[ch];
+			Det_ADC[det][ch]=(UChar_t)rawEventReader->getPlane(det,diaInput).ADC_values[ch];
 			//if(det==8)cout<<Det_ADC[det][ch]<<"\t"<<flush;
 		}
 	}
@@ -112,7 +113,7 @@ void TRawEventSaver::loadEvent(){
 	for(UInt_t vaChNo=0;vaChNo<TPlaneProperties::getNChannelsDiamond();vaChNo++){
 		//cout<<"Load diamond: "<<ch<<" -> "<<settings->getDetChannelNo(ch)<<endl;
 		UInt_t detChNo= settings->getDetChannelNo(vaChNo);
-		UShort_t value=(UShort_t)rawEventReader->getPlane(TPlaneProperties::getDetDiamond()).ADC_values[vaChNo];
+		UShort_t value=(UShort_t)rawEventReader->getPlane(TPlaneProperties::getDetDiamond(),diaInput).ADC_values[vaChNo];
 		if(detChNo<TPlaneProperties::getNChannelsDiamond())
 			Dia_ADC[detChNo]=value;
 		//if(ch==0)cout<<Dia_ADC[ch]<<" ";

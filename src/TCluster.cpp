@@ -593,6 +593,11 @@ UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo)
 	return getChannel(getHighestSignalNeighbourClusterPosition(getClusterPosition(channelNo)));
 }
 
+/**
+ * gets the clusterposition of the highest signal neigboured to a given clusterposition
+ * @param clPos position where should be looked next to
+ * @return clusterPosition in cluster
+ */
 UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos)
 {
 	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;

@@ -158,7 +158,26 @@ void TAnalysisOfClustering::initialiseHistos()
 		histName.clear();
 		histName<<"hEtaDistribution_"<<TADCEventReader::getStringForPlane(det);
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
-
+		histName.str("");
+		histName.clear();
+		histName<<"hEtaDistribution5Percent_"<<TADCEventReader::getStringForPlane(det);
+		hEtaDistribution5Percent[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
+		histName.str("");
+		histName.clear();
+		histName<<"hEtaDistributionVsSignalLeft_"<<TADCEventReader::getStringForPlane(det);
+		hEtaDistributionVsSignalLeft[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
+		histName.str("");
+		histName.clear();
+		histName<<"hEtaDistributionVsSignalRight_"<<TADCEventReader::getStringForPlane(det);
+		hEtaDistributionVsSignalRight[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
+		histName.str("");
+		histName.clear();
+		histName<<"hEtaDistributionVsSignalSum_"<<TADCEventReader::getStringForPlane(det);
+		hEtaDistributionVsSignalSum[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)*2);
+		histName.str("");
+		histName.clear();
+		histName<<"hSignalLeftVsSignalRight"<<TADCEventReader::getStringForPlane(det);
+		hSignalLeftVsSignalRight[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
 	}
 	cout<<"2"<<endl;
 	for (int det=0;det<9;det++){
@@ -397,6 +416,13 @@ void TAnalysisOfClustering::saveHistos(){
 		histSaver->SaveHistogram(histo);
 		delete histo;
 		histSaver->SaveHistogram(this->hEtaDistribution[det]);
+		histSaver->SaveHistogram(this->hEtaDistribution5Percent[det]);
+		histSaver->SaveHistogram(this->hEtaDistributionVsSignalLeft[det]);
+		histSaver->SaveHistogram(this->hEtaDistributionVsSignalRight[det]);
+		histSaver->SaveHistogram(this->hEtaDistributionVsSignalSum[det]);
+		hSignalLeftVsSignalRight[det]->GetXaxis()->SetTitle("signalRight");
+		hSignalLeftVsSignalRight[det]->GetYaxis()->SetTitle("signalLeft");
+		histSaver->SaveHistogram(this->hSignalLeftVsSignalRight[det]);
 		delete hEtaDistribution[det];
 	}
     
@@ -463,7 +489,54 @@ void TAnalysisOfClustering::analyseClusterPosition()
 			Float_t relPos = posCWM - chNo;
 			hClusterPosition[det]->Fill(posCWM);
 			hRelativeClusterPositionCWM[det]->Fill(chNo+0.5,relPos);
-			hEtaDistribution[det]->Fill(eventReader->getCluster(det,cl).getEta());
+//			Float_t eta =
+			UInt_t highestClPos=eventReader->getCluster(det,cl).getHighestHitClusterPosition();
+			UInt_t nextHighestClPos=eventReader->getCluster(det,cl).getHighestSignalNeighbourClusterPosition(highestClPos);
+			if(nextHighestClPos==9999){
+				//cout<<"\nnext highest=9999: "<<highestClPos<<" "<<eventReader->getCluster(det,cl).getClusterSize()<<endl;;
+				//eventReader->getCluster(det,cl).Print(1);
+				continue;
+			}
+
+			Float_t signalLeft,signalRight,adcRight,adcLeft,pedRight,pedLeft;
+			UInt_t leftClPos,rightClPos;
+			if(highestClPos>nextHighestClPos) {
+				leftClPos=nextHighestClPos;
+				rightClPos=highestClPos;
+			}
+			else{
+				rightClPos=nextHighestClPos;
+				leftClPos=highestClPos;
+			}
+			signalLeft= eventReader->getCluster(det,cl).getSignal(leftClPos);
+			signalRight=eventReader->getCluster(det,cl).getSignal(rightClPos);
+			adcLeft=eventReader->getCluster(det,cl).getAdcValue(leftClPos);
+			adcRight=eventReader->getCluster(det,cl).getAdcValue(rightClPos);
+			pedLeft=eventReader->getCluster(det,cl).getPedestalMean(leftClPos);
+			pedRight=eventReader->getCluster(det,cl).getPedestalMean(rightClPos);
+			Float_t a= 0.03;
+//			Float_t b= 0;
+			Float_t adcLeftReal=adcLeft/(1-a);
+			Float_t adcRightReal=(-a*(1-a)*adcLeft+(1-a)*adcRight)/(1-a)/(1-a);
+			Float_t signalAdcLeft = adcLeftReal-pedLeft;
+			Float_t signalAdcRight= adcRightReal-pedRight;
+//			cout<<nEvent<<"  "<<adcLeft<<"|"<<adcRight<<"   "<<adcLeftReal<<"|"<<adcRightReal<<endl;
+
+			Float_t signalLeftReal  = signalLeft/(1-a);//((1-a)*signalLeft-a*signalRight)/(1-a-b);
+			Float_t signalRightReal = (-(a-a*a)*signalLeft+(1-a)*signalRight)/(1-a)/(1-a);//((1-b)*signalRight-b*signalLeft)/(1-a-b);
+			Float_t eta2=(signalAdcRight)/(signalAdcLeft+signalAdcRight);
+			Float_t eta1 = adcRight/(adcLeft+adcRight);
+			Float_t eta= eventReader->getCluster(det,cl).getEta();
+			Float_t eta3= signalRightReal/(signalLeftReal+signalRightReal);
+//			cout<<nEvent<<" "<<eta<<" "<<eta1<<" "<<eta2<<" "<<eta3<<endl;
+			hEtaDistribution[det]->Fill(eta);
+			hEtaDistribution5Percent[det]->Fill(eta2);
+			hSignalLeftVsSignalRight[det]->Fill(signalRight,signalLeft);
+
+//			cout<<nextHighestClPos<<"<"<<highestClPos<<"\t"<<signalLeft<<" < "<<signalRight<<"\t"<<eta<<endl;
+			hEtaDistributionVsSignalLeft[det]->Fill(eta,signalLeft);
+			hEtaDistributionVsSignalRight[det]->Fill(eta,signalRight);
+			hEtaDistributionVsSignalSum[det]->Fill(eta,signalLeft+signalRight);
 			TH1F *hEtaIntegral=eventReader->getEtaIntegral(det);
 			Float_t posCorEta=  eventReader->getEvent()->getPosition(det,cl,TCluster::corEta,hEtaIntegral);
 			chNo = (UInt_t)(posCorEta+0.5);

@@ -382,7 +382,7 @@ UInt_t TADCEventReader::getCurrent_event() const
 
 UChar_t TADCEventReader::getDet_ADC(UInt_t det , UInt_t ch) const
 {
-	if(det<9&& TPlaneProperties::getNChannels(det)>ch)
+	if(det<TPlaneProperties::getNDetectors()&& TPlaneProperties::getNChannels(det)>ch)
     return Det_ADC[det][ch];
 	return -1;
 }

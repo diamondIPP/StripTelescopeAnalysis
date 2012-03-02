@@ -52,7 +52,7 @@ public:
 	TRawEventReader(Int_t runNumber);
 	virtual ~TRawEventReader();
 	int ReadRawEvent(int EventNumber, bool verbose = 0);
-	TDetector_Data getPlane(int det);
+	TDetector_Data getPlane(int det,UInt_t diaInput);
     TDetector_Data getD0X() const;
     void setD0X(TDetector_Data d0X);
     TDetector_Data getD0Y() const;
@@ -64,6 +64,7 @@ public:
     TDetector_Data getD3Y() const;
     TDetector_Data getDia0() const;
     TDetector_Data getDia1() const;
+    TDetector_Data getDia(UInt_t diaInput) const;
     void setD0Y(TDetector_Data d0Y);
     void setD1X(TDetector_Data d1X);
     void setD1Y(TDetector_Data d1Y);

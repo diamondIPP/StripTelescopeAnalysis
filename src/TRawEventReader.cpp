@@ -238,7 +238,7 @@ void TRawEventReader::setDia0(TDetector_Data dia0)
     Dia0 = dia0;
 }
 
-TDetector_Data TRawEventReader::getPlane(int det)
+TDetector_Data TRawEventReader::getPlane(int det,UInt_t diaInput)
 {
 	{
 		switch(det){
@@ -250,9 +250,18 @@ TDetector_Data TRawEventReader::getPlane(int det)
 			case 5: return D2Y;break;
 			case 6: return D3X;break;
 			case 7: return D3Y;break;
-			case 8: return Dia1;break;
+			case 8: if(diaInput==1)return Dia1;
+					else return Dia0; break;
 		}
 	}
+}
+
+TDetector_Data TRawEventReader::getDia(UInt_t diaInput) const
+{
+	if(diaInput==0)
+		return getDia0();
+	else
+		getDia1();
 }
 
 void TRawEventReader::setDia1(TDetector_Data dia1)
