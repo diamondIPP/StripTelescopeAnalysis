@@ -207,6 +207,8 @@ int TAlignment::Align(UInt_t nEvents,UInt_t startEvent)
 		cout<<"TAlignment::Align::create new TTrack"<<endl;
 		myTrack = new TTrack(align);
 		cout<<"TAlignment::Align::created new TTrack"<<endl;
+		for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+			myTrack->setEtaIntergral(det,eventReader->getEtaIntegral(det));
 	}
 	AlignSiliconPlanes();
 	AlignDiamondPlane();
@@ -525,7 +527,7 @@ TResidual TAlignment::getResidual(TPlane::enumCoordinate cor, UInt_t subjectPlan
 		myTrack->setEvent(&events.at(nEvent));
 		xPositionObserved  = myTrack->getPosition(TPlane::X_COR,subjectPlane,mode);
 		yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane,mode);
-		predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes,false);
+		predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,false);
 		deltaX = xPositionObserved-predictedPostion->getPositionX();//X_OBS-X_Pred
 		deltaY = yPositionObserved-predictedPostion->getPositionY();//Y_OBS-Y_Pred
 		resxtest= TMath::Abs(deltaX-resOld.getXMean())/resOld.getXSigma();
@@ -598,7 +600,7 @@ TResidual TAlignment::getStripResidual(TPlane::enumCoordinate cor, UInt_t subjec
 		{
 			TRawEventSaver::showStatusBar(nEvent,events.size());
 			myTrack->setEvent(&events.at(nEvent));
-			predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes,verbosity>1);
+			predictedPostion  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,verbosity>1);
 			xPositionObserved  = myTrack->getStripXPosition(subjectPlane,predictedPostion->getPositionY(),TCluster::maxValue);
 			yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane,TCluster::maxValue);
 			deltaX = xPositionObserved-predictedPostion->getPositionX();//X_OBS-X_Pred
@@ -680,7 +682,7 @@ TResidual TAlignment::getStripResidualChi2(TPlane::enumCoordinate cor, UInt_t su
 		{
 			TRawEventSaver::showStatusBar(nEvent,events.size());
 			myTrack->setEvent(&events.at(nEvent));
-			predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,nEvent<1);
+			predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,nEvent<1);
 			chi2x=predictedPosition->getChi2X();
 			chi2y=predictedPosition->getChi2Y();
 			xPositionObserved  = myTrack->getStripXPosition(subjectPlane,predictedPosition->getPositionY(),TCluster::maxValue);
@@ -857,14 +859,14 @@ void TAlignment::getChi2Distribution(Float_t maxChi2)
 		Float_t chi2X=0;
 		Float_t chi2Y=0;
 		UInt_t subjectPlane=0;
-		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,false);
+		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,false);
 		chi2X=predictedPosition->getChi2X();
 		chi2Y= predictedPosition->getChi2Y();
 		if(predictedPosition->getChi2X()<maxChi2&&predictedPosition->getChi2Y()<maxChi2){
 			for(subjectPlane=0;subjectPlane<4;subjectPlane++){
 				if(subjectPlane!=0){
 					predictedPosition->Delete();
-					predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,false);
+					predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,false);
 				}
 				Float_t deltaX=myTrack->getXPosition(subjectPlane);;
 				Float_t deltaY=myTrack->getYPosition(subjectPlane);;
@@ -1308,12 +1310,12 @@ TResidual TAlignment::calculateResidualWithChi2(TPlane::enumCoordinate cor, UInt
 	{
 		TRawEventSaver::showStatusBar(nEvent,events.size());
 		myTrack->setEvent(&events.at(nEvent));
-		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,nEvent<1);
+		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,nEvent<1);
 		chi2x=predictedPosition->getChi2X();
 		chi2y=predictedPosition->getChi2Y();
 		xPositionObserved  = myTrack->getPosition(TPlane::X_COR,subjectPlane);
 		yPositionObserved  = myTrack->getPosition(TPlane::Y_COR,subjectPlane);
-		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes);
+		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta);
 		if(verbosity>3)	predictedPosition->Print();
 		if(verbosity>3)	cout<<xPositionObserved<<" / "<<yPositionObserved<<endl;
 		deltaX = xPositionObserved-predictedPosition->getPositionX();//X_OBS-X_Pred

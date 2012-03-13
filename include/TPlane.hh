@@ -60,7 +60,7 @@ private:
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-    ClassDef(TPlane,4);
+    ClassDef(TPlane,6);
 };
 
 #endif // TPlane_hh

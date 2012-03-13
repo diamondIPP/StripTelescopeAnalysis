@@ -100,7 +100,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
 	this->setBranchAdressess();
-	cout<<"start selection with "<<nEvents<<" Events, training fraction: "<<settings->getAlignment_training_track_fraction()*100.<<endl;
+	cout<<"start selection with "<<nEvents<<" Events, training fraction: "<<settings->getAlignment_training_track_fraction()*100.<<"%"<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);

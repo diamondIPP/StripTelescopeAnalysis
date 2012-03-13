@@ -155,8 +155,11 @@ Float_t TCluster::getPosition(calculationMode_t mode,TH1F *histo){
 		return this->getHighest2Centroid();
 	else if(mode==eta)
 		return this->getEtaPostion();
-	else if(mode == corEta&&histo==0)
+	else if(mode == corEta&&histo==0){
+		cerr<<"mode = cor Eta, but histo =0, "<<endl;
+		this->Print();
 		return this->getEtaPostion();
+	}
 	else if(mode == corEta&&histo!=0)
 		return this->getPositionCorEta(histo);
 

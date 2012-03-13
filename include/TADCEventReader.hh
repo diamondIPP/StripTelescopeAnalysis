@@ -64,7 +64,6 @@ public:
     void checkADC();
     UInt_t getNDiamondClusters();
     bool isInFiducialCut();
-    bool isDiaClusterMasked(UInt_t cl);
     bool isDetMasked();
     TEvent* getEvent();
     void setVerbosity(UInt_t verbosity);
@@ -100,7 +99,7 @@ private:
 	bool hasValidSiliconTrack;
 	UInt_t nDiamondClusters;
 	bool bIsInFiducialCut;
-	vector<bool> maskedDiaClusters;
+	//vector<bool> maskedDiaClusters;
 	bool bUseForAlignment;
 	bool bUseForAnalysis;
 	bool bUseForSiliconAlignment;

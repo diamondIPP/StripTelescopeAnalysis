@@ -46,7 +46,7 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	verbosity=0;
 	this->maxDetAdcValue=255;
 	this->maxDiaAdcValue=4095;
-	pVecvecCluster=&vecvecCluster;
+//	pVecvecCluster=&vecvecCluster;
 	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
@@ -89,7 +89,7 @@ void TClustering::setSettings(TSettings* settings){
 void TClustering::ClusterEvents(UInt_t nEvents)
 {
 	if(settings==NULL) settings=new TSettings("");//todo anpassen
-	vecvecCluster.resize(9);
+//	vecvecCluster.resize(9);
 	createdTree=createClusterTree(nEvents);
 	if(!createdTree) return;
 	setBranchAdresses();
@@ -172,9 +172,9 @@ void TClustering::clusterEvent()
 	if(true){pEvent->isValidSiliconEvent();}
 	if(verbosity>8){
 		cout<<"\n"<<nEvent<<" "<<pEvent->getEventNumber()<<" "<<pEvent->isValidSiliconEvent()<<" ";
-		for (UInt_t det=0;det<vecvecCluster.size();det++){
-			cout<<vecvecCluster.at(det).size()<<" ";
-		}
+//		for (UInt_t det=0;det<vecvecCluster.size();det++){
+//			cout<<vecvecCluster.at(det).size()<<" ";
+//		}
 		cout<<endl;
 	}
 
@@ -409,7 +409,7 @@ void TClustering::setBranchAdresses(){
 	cout<<"Branch clusters"<<endl;
 	//clusterTree->Branch("vecvecChannel",&vecvecChannel[0])
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
-	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
+//	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
 	cout<<"Branch event"<<endl;
 	pEvent=0;
 	clusterTree->Branch("event","TEvent",&pEvent);

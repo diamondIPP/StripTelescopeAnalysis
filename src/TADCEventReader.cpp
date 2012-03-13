@@ -27,8 +27,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	this->LoadEvent(0);
 	this->fileName=FileName;
 	LoadEtaDistributions(runNumber);
-//	pVecvecCluster=NULL;
-	pEvent=NULL;
+	pEvent=NULL;//new TEvent();
 }
 
 TADCEventReader::~TADCEventReader() {
@@ -306,10 +305,10 @@ void TADCEventReader::SetBranchAddresses(){
 		tree->SetBranchAddress("isInFiducialCut",&bIsInFiducialCut);
 		if(verbosity)cout<<"Set Branch \"isInFiducialCut\""<<endl;
 	}
-	if(tree->FindBranch("isDiaMasked")){
-		tree->SetBranchAddress("isDiaMasked",&this->maskedDiaClusters);
-		if(verbosity)cout<<"Set Branch \"isDiaMasked\""<<endl;
-	}
+//	if(tree->FindBranch("isDiaMasked")){
+//		tree->SetBranchAddress("isDiaMasked",&this->maskedDiaClusters);
+//		if(verbosity)cout<<"Set Branch \"isDiaMasked\""<<endl;
+//	}
 	if(tree->FindBranch("event")){
 		tree->SetBranchAddress("event",&pEvent);
 		if(verbosity)cout<<"Set Branch \"event\""<<endl;
@@ -337,8 +336,7 @@ void TADCEventReader::SetBranchAddresses(){
 
 void TADCEventReader::initialiseTree(){
 	cout<<"initialise tree with "<<tree->GetEntries()<<" Entires."<<endl;
-	current_event = 0;
-	cout<<tree->IsZombie()<<endl;
+	current_event = 1;
 	tree->GetEvent(current_event);
 	cout<< "Loaded first event in Tree: "<<event_number<<endl;
 	cout<< "RunNumber is: "<<run_number<<endl;
@@ -524,14 +522,17 @@ Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch)
 
 TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 {
-	return this->pEvent->getCluster(det,cl);
+	if(pEvent!=NULL)
+		return this->pEvent->getCluster(det,cl);
 }
 TCluster TADCEventReader::getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl){
+	if(pEvent!=NULL)
 	return this->pEvent->getCluster(plane,cor,cl);
 }
 
 UInt_t TADCEventReader::getClusterSize(UInt_t det,UInt_t cl)
 {
+	if(pEvent!=NULL)
 	return pEvent->getClusterSize(det,cl);
 }
 
@@ -562,7 +563,7 @@ Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch)
 
 UInt_t TADCEventReader::getNClusters(UInt_t det)
 {
-	if(det<9){
+	if(det<TPlaneProperties::getNDetectors()){
 
 		UInt_t nClusters = this->pEvent->getNClusters(det);
 		if(verbosity>1){
@@ -589,12 +590,6 @@ bool TADCEventReader::isInFiducialCut()
 	return this->bIsInFiducialCut;
 }
 
-bool TADCEventReader::isDiaClusterMasked(UInt_t cl)
-{
-	if(this->maskedDiaClusters.size()>cl)
-		return maskedDiaClusters.at(cl);
-	return true;
-}
 
 bool TADCEventReader::isDetMasked()
 {

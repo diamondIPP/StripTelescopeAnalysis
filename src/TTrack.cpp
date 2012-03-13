@@ -68,8 +68,8 @@ Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCl
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiYOffset(plane);
-	Float_t xMeasured = xCluster.getPosition(mode,histo);
-	Float_t yMeasured = yCluster.getPosition(mode,histo);
+	Float_t xMeasured = xCluster.getPosition(mode,getEtaIntergral(plane*2));
+	Float_t yMeasured = yCluster.getPosition(mode,getEtaIntergral(plane*2+1));
 	// apply offsets
 	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) + (yMeasured) * TMath::Sin(phiYOffset);
 	Float_t yPosition = (xMeasured) * TMath::Sin(-phiXOffset) + (yMeasured) * TMath::Cos(phiYOffset);
@@ -95,6 +95,8 @@ Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCl
 Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode,TH1F* histo) {
 	if (cluster.size()<=0) return N_INVALID;
 	UInt_t plane = det/2;
+	if(histo==0)
+		histo = (TH1F*)getEtaIntergral(plane*2+1);
 	Float_t measuredPos = cluster.getPosition(mode,histo);
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t yOffset = this->getYOffset(plane);
@@ -130,6 +132,8 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
 		cerr<<"This cluster is too small!!!!"<<endl;
 		xCluster.Print();
 	}
+	if(histo==NULL)
+		histo = getEtaIntergral(plane*2);
 	return getStripXPositionOfCluster(plane,xCluster,yPred,mode,histo);
 }
 
@@ -148,6 +152,9 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
 	// get offsets
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
+	if(histo==NULL)
+		histo = getEtaIntergral(plane*2);
+
 	Float_t xMeasured = xCluster.getPosition(mode,histo);//-xOffset;
 
 	// apply offsets
@@ -164,6 +171,8 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
  * @return calculated xPosition
  */
 Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
+	if(histo==0)
+		histo = getEtaIntergral(plane*2);
 	return getPosition(TPlane::X_COR,plane,mode,histo);
 }
 
@@ -174,6 +183,8 @@ Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F*
  * @return calculated yPosition
  */
 Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
+	if(histo==0)
+			histo = getEtaIntergral(plane*2);
 	return getPosition(TPlane::Y_COR,plane,mode,histo);
 }
 
@@ -183,23 +194,23 @@ Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
 
 
 
-TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bPrint)
+TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,TCluster::calculationMode_t mode,bool bPrint)
 {
 	linFitX->ClearPoints();
 	linFitY->ClearPoints();
 	if(event==NULL){
-		cerr<<"TTrack:predictPosition no ReferencePlanes are defined..."<<endl;
+		cerr<<"TTrack:predictPosition no ReferencePlanes are defined...event =NULL"<<endl;
 		TPositionPrediction* prediction=0;
 		return prediction;
 	}
 	if(vecRefPlanes.size()==0){
-		cerr<<"TTrack:predictPosition no ReferencePlanes are defined..."<<endl;
+		cerr<<"TTrack:predictPosition no ReferencePlanes are defined...vecRefSize=0"<<endl;
 		TPositionPrediction *prediction=0;
 		return prediction;
 	}
 	if(vecRefPlanes.size()==1){
 		if(verbosity>3)	cout<<"TTrack::predictPosition with 1 refPlane"<<endl;
-		TPositionPrediction *prediction=new TPositionPrediction(getXPosition(vecRefPlanes.at(0)), 0.,0.,getYPosition(vecRefPlanes.at(0)),0.,0.);
+		TPositionPrediction *prediction=new TPositionPrediction(getXPosition(vecRefPlanes.at(0),mode), 0.,0.,getYPosition(vecRefPlanes.at(0),mode),0.,0.);
 		return prediction;
 	}
 	vector<Double_t> zPosVec;//todo add xsigma ysigma
@@ -208,9 +219,9 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		UInt_t plane=vecRefPlanes.at(pl);
 		zPosVec.clear();
 		zPosVec.push_back(alignment->GetZOffset(plane));
-		linFitX->AddPoint(&zPosVec.at(0),(Double_t)getXPosition(plane),this->alignment->getXResolution(plane));//todo anpassen des SIGMA
-		linFitY->AddPoint(&zPosVec.at(0),(Double_t)getYPosition(plane),this->alignment->getYResolution(plane));//todo anpassen des sigma 0.001
-		if(verbosity>3||bPrint)	cout<<"\tAdd in Plane "<<plane<<"  "<<getXPosition(plane)<<"+/-"<<alignment->getXResolution(plane)<<"/"<<getYPosition(plane)<<"+/-"<<alignment->getYResolution(plane)<<"/"<<getZPosition(plane)<<endl;
+		linFitX->AddPoint(&zPosVec.at(0),(Double_t)getXPosition(plane,mode),this->alignment->getXResolution(plane));//todo anpassen des SIGMA
+		linFitY->AddPoint(&zPosVec.at(0),(Double_t)getYPosition(plane,mode),this->alignment->getYResolution(plane));//todo anpassen des sigma 0.001
+		if(verbosity>3||bPrint)	cout<<"\tAdd in Plane "<<plane<<"  "<<getXPosition(plane,mode)<<"+/-"<<alignment->getXResolution(plane)<<"/"<<getYPosition(plane,mode)<<"+/-"<<alignment->getYResolution(plane)<<"/"<<getZPosition(plane)<<endl;
 	}
 	linFitX->Eval();
 	linFitY->Eval();
@@ -289,6 +300,8 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::ca
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
+	if(histo==0)
+			histo = getEtaIntergral(plane*2);
 	TCluster xCluster,yCluster;
 	xCluster=event->getPlane(plane).getXCluster(0);
 	yCluster=event->getPlane(plane).getYCluster(0);
@@ -372,6 +385,27 @@ UInt_t TTrack::getVerbosity() const
 {
     return verbosity;
 }
+
+void TTrack::setEtaIntergral(UInt_t det, TH1F *histo)
+{
+	cout<<"TTRack set Eta Integral of histoMap of detector "<<det<<endl;
+	histoMap[det]=(TH1F*)histo->Clone();
+}
+
+TH1F *TTrack::getEtaIntergral(UInt_t det)
+{
+//	cout<<"get etaIntegral of det "<<det<<" in " <<histoMap.size()<<" histos:"<<flush;
+	if(histoMap.find(det)!=histoMap.end() ){
+//		cout<<" found histo "<<histoMap[det]->GetTitle()<<endl;
+		return histoMap[det];
+	}
+	else
+		return 0;
+}
+
+
+
+
 
 
 

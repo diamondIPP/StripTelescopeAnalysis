@@ -55,8 +55,8 @@ private:
     TSettings *settings;
     vector<TCluster> vecCluster[9];
     UInt_t clusterRev;
-    TCluster::vecvecTCluster vecvecCluster;
-    TCluster::vecvecTCluster* pVecvecCluster;
+//    TCluster::vecvecTCluster vecvecCluster;
+//    TCluster::vecvecTCluster* pVecvecCluster;
     UInt_t nEvent;
     int seedDetSigma;
     int hitDetSigma;

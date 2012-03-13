@@ -15,6 +15,15 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,UInt_t runN
 		myTrack=new TTrack(myAlignment);
 	else
 		myTrack=NULL;
+	if(myTrack!=NULL)
+		for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+		{
+
+			cout<<"Set EtaIntegral of detector "<<det<<flush;
+			TH1F* etaIntegral=(TH1F*)this->getEtaIntegral(det)->Clone();
+			myTrack->setEtaIntergral(det,etaIntegral);
+			cout<<" successful"<<endl;
+		}
 }
 
 TTracking::~TTracking() {
@@ -25,7 +34,7 @@ TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt
 {
 	if(myTrack==0)
 		return 0;
-	return myTrack->predictPosition(subjectPlane,vecRefPlanes,bPrint);
+	return myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,bPrint);
 }
 
 Float_t TTracking::getXPosition(UInt_t plane)
@@ -84,15 +93,18 @@ bool TTracking::LoadEvent(UInt_t eventNumber){
 	return false;
 }
 
-Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode){
+Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(myTrack==0)
 				return 0;
-			return myTrack->getStripXPositionOfCluster(plane,xCluster,yPred,mode);
+	if (histo==0)
+		histo=getEtaIntegral(plane*2);
+	return myTrack->getStripXPositionOfCluster(plane,xCluster,yPred,mode,histo);
 }
 Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
 	if(myTrack==0)
 				return 0;
-			return myTrack->getStripXPosition(plane,yPred,mode);
+	TH1F* histo=getEtaIntegral(plane*2);
+	return myTrack->getStripXPosition(plane,yPred,mode,histo);
 
 }
 Float_t  TTracking::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode){

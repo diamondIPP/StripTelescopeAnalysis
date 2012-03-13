@@ -22,6 +22,7 @@
 #include "TAlignment.hh"
 #include "TSettings.class.hh"
 #include "TTransparentAnalysis.hh"
+#include "TAnalysisOfAlignment.hh"
 
 using namespace std;
 /*** USAGE ***/
@@ -240,9 +241,14 @@ int main(int argc, char ** argv) {
 			delete alignment;
 		}
 		
+		TAnalysisOfAlignment *anaAlignment;
+		anaAlignment=new TAnalysisOfAlignment(settings);
+		anaAlignment->doAnalysis(NEVENTS);
+		delete anaAlignment;
 //		TTransparentAnalysis *transpAna;
 //		transpAna = new TTransparentAnalysis(RUNNUMBER, *settings);
 //		transpAna->analyze(NEVENTS,INITIAL_EVENT);
+
 
 
 		process_mem_usage(vm2, rss2);

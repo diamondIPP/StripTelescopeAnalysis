@@ -8,6 +8,7 @@
 
 #include "../include/TPlane.hh"
 ClassImp(TPlane);
+
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
 	verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<"\tyClusters:"<<yClusters.size()<<endl;

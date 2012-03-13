@@ -67,7 +67,7 @@ public:
 	Float_t getXMeasured(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getYMeasured(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getMeasured(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPrint=false);
+	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,TCluster::calculationMode_t mode=TCluster::highest2Centroid,bool bPrint=false);
 	vector<Float_t> getSiXPositions();
 	vector<Float_t> getSiYPositions();
 	TEvent* getEvent(){return event;}
@@ -78,9 +78,12 @@ public:
 	Float_t getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
 	Float_t getXPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
 	Float_t getYPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
+	void setEtaIntergral(UInt_t det,TH1F* histo);
+	TH1F* getEtaIntergral(UInt_t det);
 
     ;
 private:
+    map<UInt_t , TH1F*> histoMap;
     //	void setPositions(TEvent event);
     Float_t getXOffset(int plane)
     {
