@@ -109,6 +109,7 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	gStyle->SetOptStat(stat);
 }
 
+
 void HistogrammSaver::UpdatePaveText(){
 	pt->Clear();
 	pt->SetTextSize(0.0250);
@@ -536,6 +537,18 @@ TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Floa
 	return hGraph;
 }
 
+TGraphErrors HistogrammSaver::CreateErrorGraph(std::string name, std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey)
+{
+	if(x.size()!=y.size()||x.size()!=ex.size()||ex.size()!=ey.size()||x.size()==0) {
+		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<x.size()<<" "<<y.size()<<endl;
+		return TGraphErrors();
+	}
+
+	cout<<"HistogrammSaver::CREATE CreateErrorGraph:\""<<name<<"\" with "<<x.size()<<" Entries"<<endl;
+	TGraphErrors hGraph = TGraphErrors(x.size(),&x.at(0),&y.at(0),&ex.at(0),&ey.at(0));
+	hGraph.SetTitle(name.c_str());
+	return hGraph;
+}
 TH2F HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos, UInt_t nBins)
 {
 	TH2F histo = CreateScatterHisto(name,pos,Delta,nBins);
@@ -612,3 +625,4 @@ TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Floa
 	}
 	return histo;
 }
+

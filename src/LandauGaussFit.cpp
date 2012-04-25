@@ -75,7 +75,7 @@ Double_t langaufun(Double_t *x, Double_t *par) {
 
 TF1 *LandauGaussFit::langaufit(TH1F *his, Double_t *fitrange, Double_t *startvalues,
 		Double_t *parlimitslo, Double_t *parlimitshi, Double_t *fitparams,
-		Double_t *fiterrors, Double_t *ChiSqr, Int_t *NDF) {
+		Double_t *fiterrors, Double_t *ChiSqr, Int_t *NDF,bool verbose) {
 	// Once again, here are the Landau * Gaussian parameters:
 	//   par[0]=Width (scale) parameter of Landau density
 	//   par[1]=Most Probable (MP, location) parameter of Landau density
@@ -110,7 +110,10 @@ TF1 *LandauGaussFit::langaufit(TH1F *his, Double_t *fitrange, Double_t *startval
 		ffit->SetParLimits(i, parlimitslo[i], parlimitshi[i]);
 	}
 	ffit->SetLineColor(kBlue);
-	his->Fit(FunName, "RB+"); // fit within specified range, use ParLimits, do not plot
+	if(verbose)
+		his->Fit(FunName, "RB+");
+	else
+	his->Fit(FunName, "RQB+"); // fit within specified range, use ParLimits, do not plot
 
 	ffit->GetParameters(fitparams); // obtain fit parameters
 	for (i = 0; i < 4; i++) {
@@ -219,7 +222,7 @@ Int_t LandauGaussFit::langaupro(Double_t *params, Double_t &maxx, Double_t &FWHM
 	return (0);
 }
 
-TF1* LandauGaussFit::doLandauGaussFit(TH1F* inputHisto) {
+TF1* LandauGaussFit::doLandauGaussFit(TH1F* inputHisto,bool verbose) {
 	if (inputHisto == 0)
 		return 0;
 	cout << "DO Landau Gauss Fit for " << inputHisto->GetName() << endl;
@@ -232,26 +235,26 @@ TF1* LandauGaussFit::doLandauGaussFit(TH1F* inputHisto) {
 	Double_t fr[2];
 	Double_t sv[4], pllo[4], plhi[4], fp[4], fpe[4];
 	//set range
-	fr[0] = 0.3 * inputHisto->GetMean();
+	fr[0] = 0.5 * inputHisto->GetMean();
 	fr[1] = 3.0 * inputHisto->GetMean();
 	//low end
 	pllo[0] = 0.1*landau->GetParameter(2);
-	pllo[1] = 0.1*landau->GetParameter(1);
-	pllo[2] = 0.2* inputHisto->Integral();
+	pllo[1] = 0.4*landau->GetParameter(1);
+	pllo[2] = 0.1* inputHisto->Integral();
 	pllo[3] = 0.5;
 	//High end
 	plhi[0] = 5.0*landau->GetParameter(2);
 	plhi[1] = 10*landau->GetParameter(1);
-	plhi[2] = 10* inputHisto->Integral();
-	plhi[3] = 100;
+	plhi[2] = 1000* inputHisto->Integral();
+	plhi[3] = 1000;
 	//startValue
 	sv[0] = landau->GetParameter(2);
-	sv[1] =  landau->GetParameter(1);
+	sv[1] = inputHisto->GetBinCenter(inputHisto->GetMaximumBin());
 	sv[2] = inputHisto->Integral();
 	sv[3] = 5.0;
 	Double_t chisqr;
 	Int_t ndf;
-	TF1 *fitsnr = langaufit(inputHisto, fr, sv, pllo, plhi, fp, fpe, &chisqr,&ndf);
+	TF1 *fitsnr = langaufit(inputHisto, fr, sv, pllo, plhi, fp, fpe, &chisqr,&ndf,verbose);
 
 	Double_t SNRPeak, SNRFWHM;
 	langaupro(fp, SNRPeak, SNRFWHM);

@@ -436,45 +436,7 @@ void TAnalysisOfClustering::saveHistos(){
 		histSaver->SaveHistogram(this->hSignalLeftVsSignalRight[det]);
 		delete hEtaDistribution[det];
 	}
-    for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
-    	histSaver->SaveHistogram(hPHDistribution[det]);
-    	for(UInt_t nClusters=0;nClusters<10;nClusters++){
-    		stringstream histName;
-    		histName<<hPHDistribution[det]->GetTitle();
-    		if(nClusters==0)
-    			histName<<"allClusterSizes";
-    		else
-    			histName<<"nClusters"<<nClusters;
-    		TH1F *htemp;
-//    		if (nClusters==0)
-//    			htemp= (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str());
-//    		else
-    		htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
-    		TF1 *fit=0;
-    		htemp->SetTitle(htemp->GetName());
-    		htemp->GetXaxis()->SetTitle("Charge in ADC units");
-    		htemp->GetYaxis()->SetTitle("number of entries#");
-    		LandauGaussFit landauGauss;
-    		if(nClusters<4||det==TPlaneProperties::getDetDiamond())
-    			fit = landauGauss.doLandauGaussFit(htemp);
-    		if(fit!=0){
-    			cout<<"Width(scale): "<<fit->GetParameter(0)<<endl;
-    			cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
-    			cout<<"Area:         "<<fit->GetParameter(2)<<endl;
-    			cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
-//    			Float_t min = htemp->GetMean()*0.2;
-//    			Float_t max = htemp->GetMean()*5;
-//    			TF1* fit1= new TF1("landauFit","landau",min,max);
-//    			fit1->SetLineColor(kRed);
-//    			htemp->Fit(fit1,"Q+");
-    			histSaver->SaveHistogramWithFit(htemp,fit);
-    		}
-    		else
-    			histSaver->SaveHistogram(htemp);
-    		delete htemp;
-    	}
-    	delete hPHDistribution[det];
-    }
+	savePHHistos();
 //    for (int det = 0; det < 9; det++) {
 //		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
 //        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
@@ -702,6 +664,71 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 
 
 
+
+void TAnalysisOfClustering::savePHHistos()
+{
+	vector<Float_t> vecClusterSize,vecMVP,vecClusterSizeError,vecWidth;
+
+    for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+    	histSaver->SaveHistogram(hPHDistribution[det]);
+		vecClusterSize.clear();
+		vecMVP.clear();
+		vecClusterSizeError.clear();
+		vecWidth.clear();
+    	for(UInt_t nClusters=0;nClusters<10;nClusters++){
+    		stringstream histName;
+    		histName<<hPHDistribution[det]->GetTitle();
+    		if(nClusters==0)
+    			histName<<"allClusterSizes";
+    		else
+    			histName<<"nClusters"<<nClusters;
+    		TH1F *htemp;
+    		//CREATE HTEMP and ReBin it if necessary
+    		htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
+    		//adjust binning if necessary
+    		UInt_t entries = htemp->GetEntries();
+    		UInt_t maximumEntries = htemp->GetMaximum();
+    		UInt_t nSteps =4;
+    		UInt_t nStep = 0;
+    		while((maximumEntries<50&&maximumEntries<entries*0.8)&&nStep<nSteps){
+    			htemp->Rebin(2);
+    			entries = htemp->GetEntries();
+    			maximumEntries = htemp->GetMaximum();
+    			nStep++;
+    		}
+    		TF1 *fit=0;
+    		htemp->SetTitle(htemp->GetName());
+    		htemp->GetXaxis()->SetTitle("Charge in ADC units");
+    		htemp->GetYaxis()->SetTitle("number of entries#");
+    		LandauGaussFit landauGauss;
+    		if(nClusters<4||det==TPlaneProperties::getDetDiamond())
+    			fit = landauGauss.doLandauGaussFit(htemp,nClusters==1&&det==TPlaneProperties::getDetDiamond());
+    		if(fit!=0){
+    			cout<<"Width(scale): "<<fit->GetParameter(0)<<endl;
+    			cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
+    			cout<<"Area:         "<<fit->GetParameter(2)<<endl;
+    			cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
+    			vecClusterSize.push_back(nClusters);
+    			vecMVP.push_back(fit->GetParameter(1));
+    			vecClusterSizeError.push_back(0.5);
+    			vecWidth.push_back(fit->GetParameter(0));
+    			histSaver->SaveHistogramWithFit(htemp,fit);
+    		}
+    		else
+    			histSaver->SaveHistogram(htemp);
+    		delete htemp;
+    	}
+    	if(det==TPlaneProperties::getDetDiamond()){
+    		stringstream histTitle;
+    		histTitle<<"gChargeOfClusterVsClusterSize_"<<det;
+    		TGraphErrors graph = histSaver->CreateErrorGraph(histTitle.str(),vecClusterSize,vecMVP,vecClusterSizeError,vecWidth);
+    		graph.GetXaxis()->SetTitle("Cluster Size");
+    		graph.GetYaxis()->SetTitle("Charge of Cluster");
+    		histSaver->SaveGraph(&graph,histTitle.str());
+    	}
+    	delete hPHDistribution[det];
+    }
+}
 
 void TAnalysisOfClustering::createPHDistribution(){
 	bool isValid=true;

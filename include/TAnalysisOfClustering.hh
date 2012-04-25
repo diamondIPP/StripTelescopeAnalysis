@@ -42,6 +42,7 @@ public:
 	void setSettings(TSettings* settings);
 private:
 	void saveHistos();
+	void savePHHistos();
 
 	void initialiseHistos();
 	void checkForDeadChannels();
@@ -52,6 +53,7 @@ private:
 	void checkForSaturatedChannels();
 	void analyseCluster();
 	void createPHDistribution();
+
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
