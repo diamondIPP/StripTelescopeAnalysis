@@ -61,7 +61,7 @@ UInt_t TTrack::getNClusters(int det) {
  * @param mode
  * @return value of calculated position
  */
-Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TTrack::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0||yCluster.size()<=0)
 		return N_INVALID;
 	Float_t xOffset = this->getXOffset(plane);
@@ -76,9 +76,9 @@ Float_t TTrack::getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCl
 	xPosition += xOffset;
 	yPosition += yOffset;
 	switch(cor){
-		case TPlane::X_COR: return xPosition;break;
-		case TPlane::Y_COR: return yPosition;break;
-		case TPlane::Z_COR: return getZPosition(plane);break;
+		case TPlaneProperties::X_COR: return xPosition;break;
+		case TPlaneProperties::Y_COR: return yPosition;break;
+		case TPlaneProperties::Z_COR: return getZPosition(plane);break;
 		default: return N_INVALID;
 	}
 }
@@ -127,7 +127,7 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
 	if(event->getNXClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
-	TCluster xCluster = event->getCluster(plane,TPlane::X_COR,0);
+	TCluster xCluster = event->getCluster(plane,TPlaneProperties::X_COR,0);
 	if(xCluster.size()<=0) {
 		cerr<<"This cluster is too small!!!!"<<endl;
 		xCluster.Print();
@@ -173,7 +173,7 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
 Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
 		histo = getEtaIntergral(plane*2);
-	return getPosition(TPlane::X_COR,plane,mode,histo);
+	return getPosition(TPlaneProperties::X_COR,plane,mode,histo);
 }
 
 /**
@@ -185,7 +185,7 @@ Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F*
 Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
 			histo = getEtaIntergral(plane*2);
-	return getPosition(TPlane::Y_COR,plane,mode,histo);
+	return getPosition(TPlaneProperties::Y_COR,plane,mode,histo);
 }
 
 Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
@@ -280,12 +280,12 @@ void TTrack::setDetectorAlignment(TDetectorAlignment *alignment)
 
 Float_t TTrack::getXMeasured(UInt_t plane,TCluster::calculationMode_t mode)
 {
-	return getMeasured(TPlane::X_COR,plane,mode);
+	return getMeasured(TPlaneProperties::X_COR,plane,mode);
 }
 
 Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode)
 {
-	return getMeasured(TPlane::Y_COR,plane,mode);
+	return getMeasured(TPlaneProperties::Y_COR,plane,mode);
 }
 /**
  * Calculation of Hitposition of event using the measured Offsets
@@ -295,7 +295,7 @@ Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode)
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TTrack::getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo){
 	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
@@ -309,20 +309,20 @@ Float_t TTrack::getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::ca
 }
 
 
-Float_t TTrack::getMeasured(TPlane::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
+Float_t TTrack::getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
 {
 	if(event==NULL)return N_INVALID;
-	if(cor==TPlane::XY_COR&&(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1))
+	if(cor==TPlaneProperties::XY_COR&&(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1))
 	return N_INVALID;
-	if(cor==TPlane::X_COR&&event->getNXClusters(plane)==1)
+	if(cor==TPlaneProperties::X_COR&&event->getNXClusters(plane)==1)
 		return event->getPlane(plane).getXPosition(0,mode);
-	if(cor==TPlane::Y_COR&&event->getNYClusters(plane)==1)
+	if(cor==TPlaneProperties::Y_COR&&event->getNYClusters(plane)==1)
 		return event->getPlane(plane).getYPosition(0,mode);
 	return N_INVALID;
 //// get offsets
 //	switch(cor){
-//	case TPlane::X_COR:break;
-//	case TPlane::Y_COR:break;
+//	case TPlaneProperties::X_COR:break;
+//	case TPlaneProperties::Y_COR:break;
 //	default: return N_INVALID;
 //	}
 }
@@ -388,7 +388,7 @@ UInt_t TTrack::getVerbosity() const
 
 void TTrack::setEtaIntergral(UInt_t det, TH1F *histo)
 {
-	cout<<"TTRack set Eta Integral of histoMap of detector "<<det<<endl;
+//	cout<<"TTRack set Eta Integral of histoMap of detector "<<det<<endl;
 	histoMap[det]=(TH1F*)histo->Clone();
 }
 

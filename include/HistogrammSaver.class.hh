@@ -27,6 +27,8 @@
 #include "TMath.h"
 #include "TSystem.h"
 #include "TF1.h"
+#include "TLegend.h"
+#include "TGaxis.h"
 #include <sys/dir.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,7 +43,12 @@ public:
 	};
 	HistogrammSaver(int verbosity=0);
 	virtual ~HistogrammSaver();
+	void SaveCanvas(TCanvas* canvas);
+	void SaveCanvasROOT(TCanvas* canvas);
+	void SaveCanvasPNG(TCanvas* canvas);
+	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2);
     void SaveHistogram(TH1F* histo, bool fitGauss = 0);
+    void SaveHistogramWithFit(TH1F* histo,TF1* fit);
     void SaveHistogram(TH2F* histo);
     void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
     void SaveHistogramPNG(TH1F* histo);
@@ -69,6 +76,7 @@ public:
     static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
     static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
     static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
+
 private:
     unsigned int verbosity;
     TPaveText *pt;

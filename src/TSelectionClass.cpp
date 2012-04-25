@@ -212,8 +212,8 @@ void TSelectionClass::setVariables(){
 	Float_t fiducialValueY=0;
 	if(hasValidSiliconTrack){
 		for(UInt_t plane=0;plane<4;plane++){
-			fiducialValueX+=eventReader->getCluster(plane,TPlane::X_COR,0).getPosition();
-			fiducialValueY+=eventReader->getCluster(plane,TPlane::Y_COR,0).getPosition();
+			fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
+			fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
 		}
 		fiducialValueX/=4.;
 		fiducialValueY/=4.;

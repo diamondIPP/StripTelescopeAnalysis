@@ -39,29 +39,29 @@ void TPositionPrediction::setxSigma(Float_t sigma)
 }
 
 
-Float_t TPositionPrediction::getPosition(TPlane::enumCoordinate cor)
+Float_t TPositionPrediction::getPosition(TPlaneProperties::enumCoordinate cor)
 {
 	switch (cor){
-	case TPlane::X_COR: return this->getPositionX();break;
-	case TPlane::Y_COR: return this->getPositionY();break;
+	case TPlaneProperties::X_COR: return this->getPositionX();break;
+	case TPlaneProperties::Y_COR: return this->getPositionY();break;
 	default: return N_INVALID;
 	}
 }
 
-Float_t TPositionPrediction::getSigma(TPlane::enumCoordinate cor)
+Float_t TPositionPrediction::getSigma(TPlaneProperties::enumCoordinate cor)
 {
 	switch (cor){
-	case TPlane::X_COR: return this->getSigmaX();break;
-	case TPlane::Y_COR: return this->getSigmaY();break;
+	case TPlaneProperties::X_COR: return this->getSigmaX();break;
+	case TPlaneProperties::Y_COR: return this->getSigmaY();break;
 	default: return N_INVALID;
 	}
 }
 
-Float_t TPositionPrediction::getChi2(TPlane::enumCoordinate cor)
+Float_t TPositionPrediction::getChi2(TPlaneProperties::enumCoordinate cor)
 {
 	switch (cor){
-	case TPlane::X_COR: return this->getChi2X();break;
-	case TPlane::Y_COR: return this->getChi2Y();break;
+	case TPlaneProperties::X_COR: return this->getChi2X();break;
+	case TPlaneProperties::Y_COR: return this->getChi2Y();break;
 	default: return N_INVALID;
 	}
 }

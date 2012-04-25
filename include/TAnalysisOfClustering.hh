@@ -26,6 +26,7 @@
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
 #include "TSettings.class.hh"
+#include "LandauGaussFit.hh"
 
 #include "TADCEventReader.hh"
 
@@ -50,6 +51,7 @@ private:
 	void analyseClusterPosition();
 	void checkForSaturatedChannels();
 	void analyseCluster();
+	void createPHDistribution();
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
@@ -98,6 +100,7 @@ private:
 	TH2F *hEtaDistributionVsSignalLeft[9];
 	TH2F *hEtaDistributionVsSignalSum[9];
 	TH2F *hSignalLeftVsSignalRight[9];
+	TH2F *hPHDistribution[9];
 };
 
 #endif /* TDEADCHANNELS_HH_ */

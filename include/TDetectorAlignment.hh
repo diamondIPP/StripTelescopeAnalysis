@@ -63,6 +63,9 @@ class TDetectorAlignment:public TNamed{
       void AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset);
       void AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset);
 
+      Double_t GetLastXOffset(UInt_t plane)  {if (plane<nDetectors)return vecDetXOffset[plane].back();return -9999;};
+      Double_t GetLastYOffset(UInt_t plane)  {if (plane<nDetectors)return vecDetYOffset[plane].back();return -9999;};
+
       std::vector<Double_t> GetXOffsetHistory(UInt_t plane) {if (plane<nDetectors)return vecDetXOffset[plane];std::vector<Double_t> a;return a;};
       std::vector<Double_t> GetYOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetYOffset[plane];std::vector<Double_t> a;return a;};
       std::vector<Double_t> GetZOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetZOffset[plane];std::vector<Double_t> a;return a;};
@@ -100,6 +103,7 @@ class TDetectorAlignment:public TNamed{
       void setDiaChi2(Float_t chi2){this->diaChi2=chi2;};
       void setNDiamondAlignmentEvents(UInt_t nEvents){this->nDiamondAlignmentEvents=nEvents;};
    private:
+      void UpdateTime(UInt_t plane){if(plane<4)setSiliconDate();else setDiamondDate();};
     Double_t xResolution[6];
     Double_t yResolution[6];
     //store global offsets here

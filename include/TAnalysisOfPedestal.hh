@@ -28,6 +28,7 @@
 #include "TH1F.h"
 #include "TH1.h"
 #include "TF1.h"
+#include "TGraphErrors.h"
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
@@ -43,6 +44,8 @@ public:
 	virtual ~TAnalysisOfPedestal();
 	void	doAnalysis(UInt_t nEvents=0);
 private:
+	void updateMeanCalulation();
+	void createPedestalMeanHistos();
 	void saveHistos();
 	void checkForDeadChannels();
 	void analyseForSeeds();
@@ -77,6 +80,11 @@ private:
 	TH1F *histo_pulseheight_left_sigma_second[9];
 	TH1F *histo_pulseheight_right_sigma[9];
 	TH1F *histo_pulseheight_right_sigma_second[9];
+	TH1F *hAllAdcNoise[9];
+private:
+	std::vector< std::vector<Float_t> > pedestalMeanValue,pedestalSigmaValue;
+	std::vector< std::vector<UInt_t> > nPedestalHits;
+	std::vector< std::vector<UInt_t> > diaRawADCvalues; //vector of vector of adc Value (ch, eventNo)
 };
 
 #endif /* TANALYSISOFPEDESTAL_HH_ */

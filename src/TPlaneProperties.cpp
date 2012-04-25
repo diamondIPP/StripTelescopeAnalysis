@@ -28,3 +28,28 @@ TPlaneProperties::~TPlaneProperties() {
 	default: return getMaxSignalHeightSilicon();
 	}
 }
+
+std::string TPlaneProperties::getCoordinateString(enumCoordinate cor){
+	switch (cor){
+	case X_COR: return "X";break;
+	case Y_COR: return "Y";break;
+	case Z_COR: return "Z";break;
+	case XY_COR:return "X&Y"; break;
+	default: return "UNDEFINDED";
+	}
+}
+
+std::string TPlaneProperties::getDetectortypeString(TPlaneProperties::enumDetectorType type){
+	switch (type){
+	case TPlaneProperties::kSilicon: 	return "Silicon";
+	case TPlaneProperties::kDiamond:	return "Diamond";
+	default:		return "UNDEFINED";
+	}
+}
+
+
+std::string TPlaneProperties::getDetectorNameString(UInt_t det){
+	std::stringstream output;
+	output<<"Det"<<det;
+	return output.str();
+}

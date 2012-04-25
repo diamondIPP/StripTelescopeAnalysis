@@ -55,6 +55,60 @@ HistogrammSaver::~HistogrammSaver() {
 }
 
 
+void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2)
+{
+	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
+	c1->cd();
+	Float_t min1 = histo1->GetMinimum();
+	Float_t min2 = histo2->GetMinimum();
+	Float_t min = TMath::Min(min1,min2);
+	Float_t max1 = histo1->GetMaximum();
+	Float_t max2 = histo2->GetMaximum();
+//	Float_t range1 = max1-min1;
+//	Float_t range2 = max2-min2;
+	Float_t max = TMath::Max(max1,max2);
+	Float_t range = max - min;
+	Float_t middle = (max+min)/2.;
+	if(min>=0&&(middle - range/2.*1.1)<0)
+		min =0;
+	else
+		min = middle - range/2.*1.1;
+	max = middle + range/2.*1.4;
+	int stat = gStyle->GetOptStat();
+	gStyle->SetOptStat("");
+	if(histo1->GetMaximum()>histo2->GetMaximum()){
+		histo1->Draw("");
+		histo1->GetYaxis()->SetRangeUser(min,max);
+		histo2->Draw("same");
+		histo2->GetYaxis()->SetRangeUser(min,max);
+	}
+	else{
+		histo2->Draw("");
+		histo2->GetYaxis()->SetRangeUser(min,max);
+		histo1->Draw("same");
+		histo1->GetYaxis()->SetRangeUser(min,max);
+	}
+	c1->Update();
+	TVirtualPad *pad =c1->GetPad(0);
+	TGaxis *axis = new TGaxis(pad->GetUxmax(),pad->GetUymin(),pad->GetUxmax(), pad->GetUymax(),min,max,510,"+L");
+	axis->SetLineColor(histo2->GetLineColor());
+	axis->SetLabelColor(histo2->GetLineColor());
+	axis->SetTextColor(histo2->GetLineColor());
+	axis->SetTitle(histo2->GetYaxis()->GetTitle());
+	axis->Draw();
+	c1->Update();
+	TLegend *leg =new TLegend(0.1,0.75,0.48,0.9);
+	leg->SetFillColor(kWhite);
+	leg->SetHeader("Legend");
+	leg->AddEntry(histo1,histo1->GetName());
+	leg->AddEntry(histo2,histo2->GetName());
+	leg->Draw();
+	pt->Draw();
+	SaveCanvas(c1);
+	delete c1;
+	gStyle->SetOptStat(stat);
+}
+
 void HistogrammSaver::UpdatePaveText(){
 	pt->Clear();
 	pt->SetTextSize(0.0250);
@@ -126,13 +180,45 @@ void HistogrammSaver::SaveHistogram(TH1F* histo, bool fitGauss) {
 	else SaveHistogramPNG(histo);
 	SaveHistogramROOT(histo);
 }
-
+void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit){
+	if(histo==0)return;
+	if(histo->GetEntries()==0)return;
+	if(fit==0) SaveHistogram(histo);
+	cout<<"Save Histogram With Fit:"<<histo->GetTitle()<<endl;
+	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	plots_canvas.cd();
+	histo->Draw();
+	fit->SetLineColor(kRed);
+	fit->Draw("same");
+	pt->Draw();
+	ostringstream plot_filename;
+	ostringstream histo_filename;
+	//	histo_filename << plots_path << histo->GetName() << "_histo.root";
+	histo_filename << plots_path << "histograms.root";
+	plot_filename << plots_path << histo->GetName() << ".root";
+	plots_canvas.Print(plot_filename.str().c_str());
+	TFile f(histo_filename.str().c_str(),"UPDATE");
+	f.cd();
+	((TH1F*)histo->Clone())->Write();
+	((TF1*)fit->Clone())->Write();
+	plot_filename.clear();
+	plot_filename.str("");
+	plot_filename.clear();
+	plot_filename << plots_path << histo->GetName() << ".png";
+	plots_canvas.Print(plot_filename.str().c_str());
+	f.Close();
+}
 void HistogrammSaver::SaveHistogram(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
    SaveHistogramPNG(histo);
    SaveHistogramROOT(histo);
 }
 
+void HistogrammSaver::SaveCanvas(TCanvas *canvas)
+{
+	SaveCanvasPNG(canvas);
+	SaveCanvasROOT(canvas);
+}
 void HistogrammSaver::SaveGraph(TGraph* graph,std::string name,std::string option){
 	if(graph->GetN()==0)return;
 	SaveGraphPNG(graph,name,option);
@@ -187,6 +273,23 @@ void HistogrammSaver::SaveHistogramPNG(TH1F* histo) {
    plots_canvas.Print(plot_filename.str().c_str());
 }
 
+void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
+{
+	ostringstream plot_filename;
+	plot_filename << plots_path << canvas->GetName()<<".root";
+	canvas->cd();
+	TFile f(plot_filename.str().c_str(),"UPDATE");
+	canvas->Write();
+}
+
+void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
+{
+
+	ostringstream plot_filename;
+	plot_filename << plots_path << canvas->GetName()<<".png";
+	canvas->Print(plot_filename.str().c_str());
+}
+
 void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
 		if(graph->GetN()==0)return;
 	   TCanvas plots_canvas("plots_canvas","plots_canvas");
@@ -199,7 +302,7 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
 }
 void HistogrammSaver::SaveHistogramFitGaussPNG(TH1F* histo) {
 	if(histo->GetEntries()==0)return;
-	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
+//	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
 	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
 	//TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);
 	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());

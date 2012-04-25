@@ -41,6 +41,17 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	initialiseHistos();
 	this->settings=settings;
 	cout<<"end initialise"<<endl;
+
+	pedestalMeanValue.resize(TPlaneProperties::getNDetectors());
+	pedestalSigmaValue.resize(TPlaneProperties::getNDetectors());
+	nPedestalHits.resize(TPlaneProperties::getNDetectors());
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+		pedestalMeanValue.at(det).resize(TPlaneProperties::getNChannels(det),0);
+		pedestalSigmaValue.at(det).resize(TPlaneProperties::getNChannels(det),0);
+		nPedestalHits.at(det).resize(TPlaneProperties::getNChannels(det),0);
+	}
+	this->diaRawADCvalues.resize(TPlaneProperties::getNChannelsDiamond(),std::vector<UInt_t>());
+
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
@@ -71,7 +82,9 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 //		analyseForSeeds();
 //		analyseCluster();
 		analyseBiggestHit();
+		updateMeanCalulation();
 	}
+	createPedestalMeanHistos();
 	saveHistos();
 }
 
@@ -142,6 +155,9 @@ void TAnalysisOfPedestal::getBiggestHit(){
 	
 }
 
+/**
+ * pedestalMeanValue,pedestalSigmaValue
+ */
 void TAnalysisOfPedestal::analyseBiggestHit() {
     for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++) {//todo change to 9
 		Float_t biggestSignal =eventReader->getSignal(det,0);
@@ -206,6 +222,20 @@ void TAnalysisOfPedestal::analyseBiggestHit() {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
+	for (UInt_t det =0;det<9;det++){
+		stringstream histoName,histoTitle,xTitle,yTitle;
+		histoName<<"hMeanSignalOfAllNonHitChannels_"<<TADCEventReader::getStringForPlane(det);
+		histoTitle<<"signal (adc-pedestal) of all non hit channels in Plane"<<TADCEventReader::getStringForPlane(det);
+		xTitle<<"non hit Noise in ADC counts";
+		yTitle<<"Number of Entries #";
+		Float_t width = 8;
+		UInt_t nBins =512;
+		if (det==TPlaneProperties::getDetDiamond())
+			width = 20;
+		hAllAdcNoise[det]= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
+		hAllAdcNoise[det]->GetXaxis()->SetTitle(xTitle.str().c_str());
+		hAllAdcNoise[det]->GetYaxis()->SetTitle(yTitle.str().c_str());
+	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"hSaturatedChannels_"<<TADCEventReader::getStringForPlane(det)<<"";
@@ -246,7 +276,7 @@ void TAnalysisOfPedestal::initialiseHistos()
 		hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels);
 	}
     
-    for (int det = 0; det < 9; det++) {
+    for (UInt_t det = 0; det < 9; det++) {
 		int nbins = 256;
 		Float_t min = 0.;
 		Float_t max = 64.;
@@ -368,10 +398,85 @@ void TAnalysisOfPedestal::saveHistos(){
 		delete histo_pulseheight_left_sigma_second[det];
 		delete histo_pulseheight_right_sigma[det];
 		delete histo_pulseheight_right_sigma_second[det];
+		histSaver->SaveHistogram(hAllAdcNoise[det],true);
+		delete hAllAdcNoise[det];
     }
 }
 
+/**
+ *
+ */
+void TAnalysisOfPedestal::createPedestalMeanHistos()
+{
+	for(UInt_t det = 0; det<TPlaneProperties::getNDetectors();det++){
+		stringstream nameMean,titleMean,titleSigma,nameSigma,canvasTitle,graphTitle;
+		nameMean<<"hMeanPedestal_Value_OfChannel_"<<TADCEventReader::getStringForPlane(det);
+		nameSigma<<"hMeanPedestal_Width_OfChannel_"<<TADCEventReader::getStringForPlane(det);
+		titleMean<<"mean of pedestalValue for each channel of "<<TADCEventReader::getStringForPlane(det);
+		titleSigma<<"mean of pedestalWidth for each channel of "<<TADCEventReader::getStringForPlane(det);
+		UInt_t nBins = pedestalMeanValue.at(det).size();
+		TH1F *histoMean = new TH1F(nameMean.str().c_str(),titleMean.str().c_str(),nBins,-.5,nBins-.5);
+		TH1F *histoSigma = new TH1F(nameSigma.str().c_str(),titleSigma.str().c_str(),nBins,-.5,nBins-.5);
+		histoMean->GetXaxis()->SetTitle("channel No");
+		histoMean->GetYaxis()->SetTitle("mean pedestal value");
+		histoSigma->GetXaxis()->SetTitle("channel No");
+		histoSigma->GetYaxis()->SetTitle("mean pedestal sigma");
+		vector<Float_t> vecChNo,vecChError;
+		for(UInt_t ch = 0; ch<TPlaneProperties::getNChannels(det);ch++){
+			this->pedestalMeanValue.at(det).at(ch)/=nPedestalHits.at(det).at(ch);
+			this->pedestalSigmaValue.at(det).at(ch)/=nPedestalHits.at(det).at(ch);
+			histoMean->Fill(ch,pedestalMeanValue.at(det).at(ch));
+			histoSigma->Fill(ch,pedestalSigmaValue.at(det).at(ch));
+			vecChNo.push_back(ch+.1);
+			vecChError.push_back(0);
+		}
+		Float_t max = histoMean->GetMaximum()*1.1;
+		histoSigma->SetLineColor(kRed);
+		histSaver->SaveHistogram(histoMean);
+		histSaver->SaveHistogram(histoSigma);
+		canvasTitle<<"cPedestalOfChannels_"<<TADCEventReader::getStringForPlane(det);
+		histSaver->SaveTwoHistos(canvasTitle.str(),histoMean,histoSigma);
+		TGraphErrors *graph = new TGraphErrors(nBins,&vecChNo.at(0),&pedestalMeanValue.at(det).at(0),&vecChError.at(0),&pedestalSigmaValue.at(det).at(0));
+		graph->Draw("APLgoff");
+		graph->GetXaxis()->SetTitle("channel No.");
+		graph->GetYaxis()->SetTitle("pedestalValue in ADC counts");
+		graph->GetYaxis()->SetRangeUser(0,max);
+		graph->GetXaxis()->SetRangeUser(0,nBins-1);
+		graphTitle<<"gMeanPedestalValueOfChannelWithSigmaAsError_"<<TADCEventReader::getStringForPlane(det);
+		graph->SetTitle(graphTitle.str().c_str());
+		histSaver->SaveGraph(graph,graphTitle.str(),"AP");
+		delete histoMean;
+	}
 
 
+}
+
+void TAnalysisOfPedestal::updateMeanCalulation(){
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+			Float_t snr = eventReader->getSignalInSigma(det,ch);
+			Float_t pedestal = eventReader->getPedestalMean(det,ch);
+			Float_t sigma = eventReader->getPedestalSigma(det,ch);
+			UInt_t adc = eventReader->getAdcValue(det,ch);
+			Float_t noise = adc-pedestal;
+			if(snr<settings->getClusterHitFactor(det)){
+//				cout<<"\n1 "<<det<<"/"<<ch<<" "<<pedestalMeanValue.size()<<"-"<<pedestalMeanValue.at(det).size()<<flush;
+				pedestalMeanValue.at(det).at(ch) +=pedestal;
+//				cout<<"\n2 "<<det<<"/"<<ch<<" "<<pedestalSigmaValue.size()<<"-"<<pedestalSigmaValue.at(det).size()<<flush;
+				pedestalSigmaValue.at(det).at(ch) +=sigma;
+//				cout<<"\n3 "<<det<<"/"<<ch<<" "<<nPedestalHits.size()<<"-"<<nPedestalHits.at(det).size()<<flush;
+				nPedestalHits.at(det).at(ch)++;
+//				cout<<noise<<endl;
+				hAllAdcNoise[det]->Fill(noise);
+//				cout<<"$"<<flush;
+			}
+			if(TPlaneProperties::getDetDiamond()==det){
+//				cout<<"*"<<flush;
+				diaRawADCvalues.at(ch).push_back(adc);
+			}
+
+		}
+
+}
 
 

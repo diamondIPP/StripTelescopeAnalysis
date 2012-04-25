@@ -8,10 +8,16 @@
 #ifndef TPLANEPROPERTIES_HH_
 #define TPLANEPROPERTIES_HH_
 
+#include <string>
 #include "TROOT.h"
+#include <fstream>
+#include <iostream>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 class TPlaneProperties {
 public:
-
+	enum enumCoordinate{ X_COR =0, Y_COR=1, Z_COR =2, XY_COR=3,};
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
 	TPlaneProperties();
 	virtual ~TPlaneProperties();
@@ -28,6 +34,9 @@ public:
 	static UInt_t getDiamondPlane(){return 4;};
 	static UInt_t getNDetectors(){return 9;};
 	static UInt_t getMaxTransparentClusterSize(UInt_t det){return 10;};
+    static std::string getCoordinateString(enumCoordinate cor);
+    static std::string getDetectortypeString(enumDetectorType type);//todo verschieben
+    static std::string getDetectorNameString(UInt_t det);
 	// TODO: getPlaneCoordinate(UInt_t plane);
 
 };

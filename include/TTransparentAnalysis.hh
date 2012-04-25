@@ -72,7 +72,7 @@ private:
 	Float_t getResidual(TCluster cluster);
 	
 	UInt_t subjectDetector, subjectPlane;
-	TPlane::enumCoordinate subjectDetectorCoordinate;
+	TPlaneProperties::enumCoordinate subjectDetectorCoordinate;
 	vector<UInt_t> refPlanes;
 	TCluster::calculationMode_t clusterCalcMode;
 	UInt_t verbosity;

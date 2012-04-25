@@ -25,18 +25,18 @@ public:
 	bool LoadEvent(UInt_t eventNumber);
 	Float_t getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=NULL);
 	Float_t getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	Float_t getPositionOfCluster(TPlane::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	Float_t getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
-	Float_t getMeasured(TPlane::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-//	Float_t getPosition(TPlane::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid){return myTrack->getPosition(cor,plane, mode);};
+	Float_t getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+//	Float_t getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid){return myTrack->getPosition(cor,plane, mode);};
 //	Float_t getXPosition(UInt_t plane);
 //	Float_t getYPosition(UInt_t plane);
 //	Float_t getZPosition(UInt_t plane);
 //	Float_t getXMeasured(UInt_t plane);
 //	Float_t getYMeasured(UInt_t plane);
-//	Float_t getMeasured(TPlane::enumCoordinate cor,UInt_t plane);
+//	Float_t getMeasured(TPlaneProperties::enumCoordinate cor,UInt_t plane);
 //	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPrint=false);
 private:
 	bool setAlignment(std::string alignmentName);

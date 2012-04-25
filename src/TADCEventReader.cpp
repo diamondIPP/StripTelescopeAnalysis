@@ -525,7 +525,7 @@ TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 	if(pEvent!=NULL)
 		return this->pEvent->getCluster(det,cl);
 }
-TCluster TADCEventReader::getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl){
+TCluster TADCEventReader::getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl){
 	if(pEvent!=NULL)
 	return this->pEvent->getCluster(plane,cor,cl);
 }

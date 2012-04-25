@@ -33,8 +33,8 @@ TDetectorAlignment::TDetectorAlignment(){
       det_z_offset[i] = 0;
       det_phix_offset[i] = 0;
       det_phiy_offset[i] = 0;
-      xResolution[i]=0.3;
-      yResolution[i]=0.3;
+      xResolution[i]=1;
+      yResolution[i]=1;
    }
    nUsedEvents=0;
    alignmentTrainingTrackFraction=0;
@@ -67,6 +67,7 @@ void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
 		det_phix_offset[plane]+=addPhiXOffset;
 	}
 	if(verbosity)cout<<det_phix_offset[plane]<<endl;
+	UpdateTime(plane);
 }
 void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 {
@@ -76,6 +77,7 @@ void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 		det_phiy_offset[plane]+=addPhiYOffset;
 	}
 	if(verbosity)cout<<det_phiy_offset[plane]<<endl;
+	UpdateTime(plane);
 }
 
 void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
@@ -84,8 +86,10 @@ void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 	if(plane<6){
 		vecDetXOffset[plane].push_back(addXOffset);
 		det_x_offset[plane]+=addXOffset;
+		cout<<"add XOffset of plane "<<plane<<": "<<addXOffset<<endl;
 	}
 	if(verbosity)cout<<det_x_offset[plane]<<endl;
+	UpdateTime(plane);
 }
 
 void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
@@ -94,8 +98,10 @@ void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 	if(plane<6){
 		vecDetYOffset[plane].push_back(addYOffset);
 		det_y_offset[plane]+=addYOffset;
+		cout<<"add YOffset of plane "<<plane<<": "<<addYOffset<<endl;
 	}
 	if(verbosity)cout<<det_y_offset[plane]<<endl;
+	UpdateTime(plane);
 }
 
 void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
@@ -104,6 +110,7 @@ void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
 		vecDetZOffset[plane].push_back(addZOffset);
 		det_z_offset[plane]+=addZOffset;
 	}
+	UpdateTime(plane);
 }
 
 std::string TDetectorAlignment::PrintXOffset(UInt_t plane,UInt_t level)
@@ -203,7 +210,7 @@ Double_t TDetectorAlignment::getXResolution(UInt_t plane)
 {
 	if(plane<6)
     return xResolution[plane];
-	return -9999;
+	return 2;
 }
 
 void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
@@ -211,6 +218,7 @@ void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
 	printf("Set X-Resolution of Plane %d to %2.6f\n",plane,xres);
 	if(plane<6)
 		xResolution[plane] = xres;
+	UpdateTime(plane);
 }
 
 Double_t TDetectorAlignment::getYResolution(UInt_t plane)
@@ -225,6 +233,7 @@ void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)
 	printf("Set Y-Resolution of Plane %d to %2.6f\n",plane,resolution);
 	if(plane<6)
 		yResolution[plane] = resolution;
+	UpdateTime(plane);
 }
 
 void TDetectorAlignment::setVerbosity(int verbosity)

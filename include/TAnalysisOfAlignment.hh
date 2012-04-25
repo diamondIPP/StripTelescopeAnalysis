@@ -36,6 +36,7 @@ public:
 	void doAnalysis(UInt_t nEvents=0);
 private:
 	UInt_t nEvent;
+	void DoEtaCorrection(UInt_t correctionStep);
 	void initialiseHistos();
 	TTracking* eventReader;
 	HistogrammSaver* histSaver;

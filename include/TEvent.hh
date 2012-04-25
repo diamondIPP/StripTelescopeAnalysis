@@ -38,10 +38,10 @@ public:
 	UInt_t getNXClusters(UInt_t plane);//
 	UInt_t getNYClusters(UInt_t plane);//{if(plane<planes.size())return planes.at(plane).getNYClusters();else return 0;}
 	UInt_t getNClusters(UInt_t det);
-	TCluster getCluster(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
+	TCluster getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	TCluster getCluster(UInt_t det, UInt_t cl);
 	UInt_t getClusterSize(UInt_t det,UInt_t cl);
-	UInt_t getClusterSize(UInt_t plane,TPlane::enumCoordinate cor, UInt_t cl);
+	UInt_t getClusterSize(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	Float_t getPosition(UInt_t det, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 
 	UInt_t getNPlanes();

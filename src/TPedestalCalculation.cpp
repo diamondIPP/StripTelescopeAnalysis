@@ -67,19 +67,15 @@ void TPedestalCalculation::calculatePedestals(int nEvents){
 	 */
 	for(int event=0;event<nEvents;event++){
 		eventReader->LoadEvent(event);
-		for(int det=0;det <8;det++){
-			for(int ch=0;ch<256;ch++){
-				meanValues[det][ch]+=(int)eventReader->getDet_ADC(det,ch);
-				meanSquared[det][ch]+=(int)eventReader->getDet_ADC(det,ch)*(int)eventReader->getDet_ADC(det,ch);
+		for(int det=0;det <TPlaneProperties::getNDetectors();det++){
+			for(int ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+				meanValues[det][ch]+=(int)eventReader->getAdcValue(det,ch);
+				meanSquared[det][ch]+=(int)eventReader->getAdcValue(det,ch)*(int)eventReader->getAdcValue(det,ch);
 			}
-		}
-		for(int ch=0;ch<N_DIA_CHANNELS;ch++){
-			meanValues[8][ch]+=(int)eventReader->getDia_ADC(ch);
-			meanSquared[8][ch]+=(int)eventReader->getDia_ADC(ch)*(int)eventReader->getDia_ADC(ch);
 		}
 	}
 	for(int det=0;det<9;det++)
-		for(int ch=0;ch<N_DET_CHANNELS;ch++){
+		for(int ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
 			meanValues[det][ch]=meanValues[det][ch]/(double)nEvents;
 			meanSquared[det][ch]=meanSquared[det][ch]/(double)nEvents;
 			sigmaValues[det][ch]=meanSquared[det][ch]-meanValues[det][ch]*meanValues[det][ch];
@@ -272,6 +268,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxS
 		this->detEventsInSum[det][ch]--;
 	}
 	//now the sum is calculated from events 1-slidingLength-1
+	//todo make it readable
 	if((float)detAdcValues[det][ch].back()<=mean+max(sigma*maxSigma,(float)1.)&&(float)detAdcValues[det][ch].back()>=mean-max(sigma*maxSigma,(float)1.)){
 //		if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<"new pedestalEvent "<<(int)detAdcValues[det][ch].back()<<" "<<flush;
 		this->detSUM[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back();

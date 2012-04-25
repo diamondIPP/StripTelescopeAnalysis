@@ -76,6 +76,7 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 		compareCentroid_ChargeWeightedMean();
 		analyse2ndHighestHit();
 		analyseClusterPosition();
+		createPHDistribution();
 //		analyseBiggestHit(); // moved to TAnalysisOfPedestal.cpp
 	}
 	saveHistos();
@@ -318,6 +319,16 @@ void TAnalysisOfClustering::initialiseHistos()
     	hSignal2ndHighestOverSignalHighestRatio[det]->GetXaxis()->SetTitle("Q_{2ndHighest}/Q_{Highest}");
     }
     cout<<"12"<<endl;
+    for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+			stringstream histName;
+			histName<<"hPulseHeightDistribution_"<<TPlaneProperties::getDetectorNameString(det);
+			float max=0;
+			if(det==TPlaneProperties::getDetDiamond())
+				max = 4098;
+			else max = 512;
+			hPHDistribution[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),512,0,max,10,-.5,9.5);
+
+    }
 }
 
 
@@ -425,7 +436,45 @@ void TAnalysisOfClustering::saveHistos(){
 		histSaver->SaveHistogram(this->hSignalLeftVsSignalRight[det]);
 		delete hEtaDistribution[det];
 	}
-    
+    for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+    	histSaver->SaveHistogram(hPHDistribution[det]);
+    	for(UInt_t nClusters=0;nClusters<10;nClusters++){
+    		stringstream histName;
+    		histName<<hPHDistribution[det]->GetTitle();
+    		if(nClusters==0)
+    			histName<<"allClusterSizes";
+    		else
+    			histName<<"nClusters"<<nClusters;
+    		TH1F *htemp;
+//    		if (nClusters==0)
+//    			htemp= (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str());
+//    		else
+    		htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
+    		TF1 *fit=0;
+    		htemp->SetTitle(htemp->GetName());
+    		htemp->GetXaxis()->SetTitle("Charge in ADC units");
+    		htemp->GetYaxis()->SetTitle("number of entries#");
+    		LandauGaussFit landauGauss;
+    		if(nClusters<4||det==TPlaneProperties::getDetDiamond())
+    			fit = landauGauss.doLandauGaussFit(htemp);
+    		if(fit!=0){
+    			cout<<"Width(scale): "<<fit->GetParameter(0)<<endl;
+    			cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
+    			cout<<"Area:         "<<fit->GetParameter(2)<<endl;
+    			cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
+//    			Float_t min = htemp->GetMean()*0.2;
+//    			Float_t max = htemp->GetMean()*5;
+//    			TF1* fit1= new TF1("landauFit","landau",min,max);
+//    			fit1->SetLineColor(kRed);
+//    			htemp->Fit(fit1,"Q+");
+    			histSaver->SaveHistogramWithFit(htemp,fit);
+    		}
+    		else
+    			histSaver->SaveHistogram(htemp);
+    		delete htemp;
+    	}
+    	delete hPHDistribution[det];
+    }
 //    for (int det = 0; det < 9; det++) {
 //		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
 //        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
@@ -651,6 +700,24 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 	}
 }
 
+
+
+
+void TAnalysisOfClustering::createPHDistribution(){
+	bool isValid=true;
+	for(UInt_t det =0;det<TPlaneProperties::getNDetectors();det++)
+		isValid = (eventReader->getNClusters(det)==1)&&isValid;
+	for(UInt_t det =0;det<TPlaneProperties::getNDetectors();det++){
+		if(!isValid)
+			continue;
+		UInt_t nClusterSize = eventReader->getClusterSize(det,0);
+		Float_t charge = eventReader->getCluster(det,0).getCharge(true);
+
+		hPHDistribution[det]->Fill(charge,0);
+		hPHDistribution[det]->Fill(charge,nClusterSize);
+//		cout<<"Fill PH histo with "<<charge<<" and Clustersize "<<nClusterSize<<endl;
+	}
+}
 
 
 

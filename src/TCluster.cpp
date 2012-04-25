@@ -177,12 +177,15 @@ void TCluster::clear(){
 	//cluster.clear();
 }
 bool TCluster::isLumpyCluster(){
-	return isLumpy;//todo
+	if (!isChecked)
+			checkCluster();
+	return isLumpy;
 }
+
 bool TCluster::isGoldenGateCluster(){
 	if (!isChecked)
 		checkCluster();
-	return this->isGoldenGate; //todo
+	return this->isGoldenGate;
 }
 
 bool TCluster::hasSaturatedChannels(){

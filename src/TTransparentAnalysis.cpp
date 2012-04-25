@@ -49,10 +49,10 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	subjectDetector = 8;
 	subjectPlane = subjectDetector/2;
 	if (subjectDetector%2 == 0) {
-		subjectDetectorCoordinate = TPlane::X_COR;
+		subjectDetectorCoordinate = TPlaneProperties::X_COR;
 	}
 	else {
-		subjectDetectorCoordinate = TPlane::Y_COR;
+		subjectDetectorCoordinate = TPlaneProperties::Y_COR;
 	}
 	for (int i = 0; i < 4; i++) {
 		refPlanes.push_back(i);
