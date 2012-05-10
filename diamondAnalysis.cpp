@@ -16,6 +16,7 @@
 #include "TClustering.hh"
 #include "TSelectionClass.hh"
 #include "THTMLGenerator.hh"
+#include "THTMLCluster.hh"
 #include "diamondAnalysis.h"
 #include "time.h"
 #include "TSystem.h"
@@ -199,6 +200,21 @@ int main(int argc, char ** argv) {
 			delete analysisOfPedestal;
 		}
 
+		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
+		htmlGen->setPathName((string)(currentDir+"/16202/"));
+		htmlGen->setFileName("index.html");
+		std::stringstream test;
+		test<<"bla1bla2bla3";
+		htmlGen->addSection("test",test.str());
+		htmlGen->addSection("test1",test.str());
+		htmlGen->addSection("test2",test.str());
+		htmlGen->addSection("test3",test.str());
+		htmlGen->addSection("Pedestal","<a href=\"pedestal.html\">PEDESTAL</a>");
+		htmlGen->addSection("Clustering","<a href=\"clustering.html\">PEDESTAL</a>");
+		htmlGen->generateHTMLFile();
+		delete htmlGen;
+
+
 //		process_mem_usage(vm2, rss2);
 //		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
@@ -208,6 +224,15 @@ int main(int argc, char ** argv) {
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
+		THTMLCluster *htmlClus= new THTMLCluster(settings);
+		htmlClus->setPathName((string)(currentDir+"/16202/"));
+		htmlClus->setFileName("clustering.html");
+		htmlClus->addSection("test",test.str());
+		htmlClus->addSection("test1",test.str());
+		htmlClus->addSection("test2",test.str());
+		htmlClus->addSection("test3",test.str());
+		htmlClus->generateHTMLFile();
+		delete htmlClus;
 
 	if (DO_SLIDINGPEDESTAL){
 		sys->cd(currentDir.c_str());
@@ -253,10 +278,6 @@ int main(int argc, char ** argv) {
 
 		process_mem_usage(vm2, rss2);
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-
-		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
-		htmlGen->generateHTMLFile();
-		delete htmlGen;
 
 
 		if (settings!=NULL)delete settings;

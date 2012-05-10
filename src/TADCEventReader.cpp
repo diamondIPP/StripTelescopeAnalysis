@@ -458,7 +458,7 @@ int TADCEventReader::hasTree(){
 	  return hasATree;
 }
 
-std::string TADCEventReader::getStringForPlane(int i)
+std::string TADCEventReader::getStringForDetector(int i)
 {
 	switch(i){
 	case 0: return "D0X";

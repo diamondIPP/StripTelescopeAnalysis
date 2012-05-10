@@ -1353,13 +1353,13 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep)
 	cout<<"create Histos..."<<endl;
 	for(UInt_t det=0; det<TPlaneProperties::getNSiliconDetectors();det++){
 		stringstream histoTitle;
-		histoTitle<<"hPredictedStripPosition"<<"_step"<<correctionStep<<"_"<<TADCEventReader::getStringForPlane(det);
+		histoTitle<<"hPredictedStripPosition"<<"_step"<<correctionStep<<"_"<<TADCEventReader::getStringForDetector(det);
 		histoStripDistribution.push_back(new TH1F(histoTitle.str().c_str(),histoTitle.str().c_str(),128,-0.501,0.501));
 		histoTitle<<"_flattend";
 		histoStripDistributionFlattned.push_back(new TH1F(histoTitle.str().c_str(),histoTitle.str().c_str(),128,-0.501,0.501));
 		histoTitle.str("");
 		histoTitle.clear();
-		histoTitle<<"hCorrectedEtaDistribution"<<"_step"<<correctionStep<<"_"<<TADCEventReader::getStringForPlane(det);
+		histoTitle<<"hCorrectedEtaDistribution"<<"_step"<<correctionStep<<"_"<<TADCEventReader::getStringForDetector(det);
 		vecHEta.push_back(new TH1F(histoTitle.str().c_str(),histoTitle.str().c_str(),128,0,1));
 	}
 
@@ -1455,7 +1455,7 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep)
 		}
 
 			stringstream histName;
-			histName<<"hEtaIntegral"<<"_step"<<correctionStep<<"_"<<TADCEventReader::getStringForPlane(det);;
+			histName<<"hEtaIntegral"<<"_step"<<correctionStep<<"_"<<TADCEventReader::getStringForDetector(det);;
 			UInt_t nBins = vecHEta.at(det)->GetNbinsX();
 			TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),nBins,0,1);
 			Int_t entries = vecHEta.at(det)->GetEntries();

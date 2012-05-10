@@ -32,6 +32,7 @@
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
+#include "THTMLPedestal.hh"
 
 #include "TADCEventReader.hh"
 #include "TSettings.class.hh"
@@ -85,6 +86,7 @@ private:
 	std::vector< std::vector<Float_t> > pedestalMeanValue,pedestalSigmaValue;
 	std::vector< std::vector<UInt_t> > nPedestalHits;
 	std::vector< std::vector<UInt_t> > diaRawADCvalues; //vector of vector of adc Value (ch, eventNo)
+	THTMLPedestal *htmlPedestal;
 };
 
 #endif /* TANALYSISOFPEDESTAL_HH_ */

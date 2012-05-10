@@ -47,7 +47,7 @@ public:
 	void SaveCanvas(TCanvas* canvas);
 	void SaveCanvasROOT(TCanvas* canvas);
 	void SaveCanvasPNG(TCanvas* canvas);
-	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2);
+	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1);
     void SaveHistogram(TH1F* histo, bool fitGauss = 0);
     void SaveHistogramWithFit(TH1F* histo,TF1* fit);
     void SaveHistogram(TH2F* histo);

@@ -55,7 +55,7 @@ HistogrammSaver::~HistogrammSaver() {
 }
 
 
-void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2)
+void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond)
 {
 	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
 	c1->cd();
@@ -76,20 +76,27 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	max = middle + range/2.*1.4;
 	int stat = gStyle->GetOptStat();
 	gStyle->SetOptStat("");
+	histo2->Scale(refactorSecond);
 	if(histo1->GetMaximum()>histo2->GetMaximum()){
 		histo1->Draw("");
 		histo1->GetYaxis()->SetRangeUser(min,max);
+
 		histo2->Draw("same");
-		histo2->GetYaxis()->SetRangeUser(min,max);
+//		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
 		histo2->Draw("");
 		histo2->GetYaxis()->SetRangeUser(min,max);
 		histo1->Draw("same");
-		histo1->GetYaxis()->SetRangeUser(min,max);
+//		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
 	TVirtualPad *pad =c1->GetPad(0);
+	cout<<"MIN: "<<min<<"-->";
+	min=(double)(min/refactorSecond);
+	cout<<min<<"\t\tMAX: "<<max<<"--->";
+	max = (double)(max/refactorSecond);
+	cout<<max<<endl;
 	TGaxis *axis = new TGaxis(pad->GetUxmax(),pad->GetUymin(),pad->GetUxmax(), pad->GetUymax(),min,max,510,"+L");
 	axis->SetLineColor(histo2->GetLineColor());
 	axis->SetLabelColor(histo2->GetLineColor());
@@ -279,13 +286,15 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
 	ostringstream plot_filename;
 	plot_filename << plots_path << canvas->GetName()<<".root";
 	canvas->cd();
+	pt->Draw();
 	TFile f(plot_filename.str().c_str(),"UPDATE");
 	canvas->Write();
 }
 
 void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
 {
-
+	canvas->cd();
+	pt->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << canvas->GetName()<<".png";
 	canvas->Print(plot_filename.str().c_str());
