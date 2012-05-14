@@ -48,6 +48,7 @@ private:
 	void updateMeanCalulation();
 	void createPedestalMeanHistos();
 	void saveHistos();
+	void savePHinSigmaHistos();
 	void checkForDeadChannels();
 	void analyseForSeeds();
 	void getBiggestHit();

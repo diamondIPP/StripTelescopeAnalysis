@@ -11,8 +11,8 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 	// TODO Auto-generated constructor stub
 
 	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
-	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
-	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
+//	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
+//	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
 	settings=newSettings;
 	if (settings==0)
 		cerr<<"settings does not exist"<<endl;
@@ -20,7 +20,7 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 	sys= new TSystem();
 	title = "Summary";
 	setFileName("index.html");
-	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<fileName<<endl;
+//	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<fileName<<endl;
 }
 
 THTMLGenerator::~THTMLGenerator() {
@@ -61,17 +61,19 @@ void THTMLGenerator::generatorHTMLHeader()
 
 		if (verbosity>2)cout<<"Clustering::GenerateHTML():start summary"<<endl;
 		html_summary << "<b>"<<title<<"</b>||"
-				<< "<a href=\"index.html\">Summary</a>||"
-				<< "<a href=\"pedestalAnalysis/pedestal.html\">Pedestal</a>||"
-				<< "<a href=\"d8.html\">Diamond</a>||"
-				<< "<a href=\"d0.html\">D0X</a>||"
-				<< "<a href=\"d1.html\">D0Y</a>||"
-				<< "<a href=\"d2.html\">D1X</a>||"
-				<< "<a href=\"d3.html\">D1Y</a>||"
-				<< "<a href=\"d4.html\">D2X</a>||"
-				<< "<a href=\"d5.html\">D2Y</a>||"
-				<< "<a href=\"d6.html\">D3X</a>||"
-				<< "<a href=\"d7.html\">D3Y</a><p>"
+				<< "<a href=\""<<this->mainPath<<"/index.html\">Summary</a>||"
+				<< "<a href=\""<<this->mainPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
+				<< "<a href=\""<<this->mainPath<<"/clustering/clustering.html\">Clustering</a>||"
+//				<< "<a href=\"d8.html\">Diamond</a>||"
+//				<< "<a href=\"d0.html\">D0X</a>||"
+//				<< "<a href=\"d1.html\">D0Y</a>||"
+//				<< "<a href=\"d2.html\">D1X</a>||"
+//				<< "<a href=\"d3.html\">D1Y</a>||"
+//				<< "<a href=\"d4.html\">D2X</a>||"
+//				<< "<a href=\"d5.html\">D2Y</a>||"
+//				<< "<a href=\"d6.html\">D3X</a>||"
+//				<< "<a href=\"d7.html\">D3Y</a>"
+				<<"<p>"
 				<<endl;
 		html_summary << "<center><font color=\"#000000\"><h1>Run "<<settings->getRunNumber()<<" analysis results - Summary</h1></font></center>"<<endl;
 		html_summary << "<hr size=\"10\" Color=\"#ffff33\">" << endl;
@@ -93,13 +95,13 @@ void THTMLGenerator::setFileName(string Name)
 
 void THTMLGenerator::addSection(string sectionName, string secContent)
 {
-	cout<<"ADD SECTINO NO"<<tableOfContent.size()+1<<":"<<endl;
+	cout<<"ADD SECTION NO"<<tableOfContent.size()<<":"<<endl;
 	stringstream output;
-	output<<"\t<h1><a name=\"C"<<this->content.size()<<"\">"<<sectionName<<"</a></h1>\n";
+	output<<"\t<h1 id=\"C"<<this->content.size()<<"\"><a name=\"C"<<this->content.size()<<"\">"<<sectionName<<"</a></h1>\n";
 	output<<"\t<p>";
 	output<<"\t"<<secContent;
 	output<<"\t</p>";
-	cout<<output.str()<<endl;
+//	cout<<output.str()<<endl;
 	tableOfContent.push_back(sectionName);
 	this->content.push_back(output.str());
 }
@@ -110,13 +112,13 @@ void THTMLGenerator::generateTableOfContent(){
 	stringstream output;
 	output<<"\t<p>\n";
 	for(UInt_t nSection=0;nSection<this->content.size();nSection++)
-		output<<"\t<a href=\"#C"<<nSection+1<<"\">See also "<<tableOfContent.at(nSection)<<".</a><br />\n";
+		output<<"\t<a href=\"#C"<<nSection<<"\">See also "<<tableOfContent.at(nSection)<<".</a><br />\n";
 	output<<"\t</p>";
 	if(verbosity>2)cout<<output.str()<<endl;
 	html_summary<<output.str();
 }
 void THTMLGenerator::fillContent(){
-	if (verbosity>2)cout <<"FILL CONTEN"<<endl;
+	if (verbosity>2)cout <<"FILL CONTENT"<<endl;
 	for(UInt_t nSec=0;nSec<content.size();nSec++){
 		html_summary<<content.at(nSec);
 	}
@@ -128,15 +130,30 @@ void THTMLGenerator::generateHTMLTail(){
 	html_summary << "<hr size=\"5\">" << endl;
 
 	html_summary << "</font>"<<endl;
-	html_summary<<"This Page was created on " << dateandtime.GetMonth() << "/ " << dateandtime.GetDay() << "/" << dateandtime.GetYear() << " at " << dateandtime.GetHour() << ":" << dateandtime.GetMinute() << ":" << dateandtime.GetSecond() << " with SVN Version No. "<<SVN_REV<<"<p>" <<
-
+	html_summary<<"This Page was created on " << dateandtime.GetMonth() << "/ "
+											  << dateandtime.GetDay() << "/"
+											  << dateandtime.GetYear()
+									<< " at " << dateandtime.GetHour() << ":"
+										 	  << dateandtime.GetMinute() << ":"
+										 	  << dateandtime.GetSecond()
+				  << " with SVN Version No. " << SVN_REV<<"<p>";
 	html_summary<<"</body>"<<endl;
 	html_summary << "</HTML>" << endl;
 
 }
 
-void THTMLGenerator::setPathName(string pathName){
+void THTMLGenerator::setPathName(std::string pathName){
 	this->path = pathName;
+	cout<<"new Path: \""<<path<<"\""<<endl;
+}
+
+void THTMLGenerator::setMainPath(std::string mainPathName){
+	this->mainPath=mainPathName;
+}
+
+void THTMLGenerator::setSubdirPath(std::string subdirPathName){
+	this->subdirPath=subdirPathName;
+	setPathName(mainPath+"/"+subdirPath+"/");
 }
 
 std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > content)
@@ -147,12 +164,13 @@ std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > c
 		if(content.at(row).size()>nCols)nCols=content.at(row).size();
 	cout<<"creating a Table with "<<nRows<<" Rows and "<<nCols<<" Columns!"<<endl;
 	stringstream output;
-	output<<"<p><table border=\"1\">\n";
+	output<<"<p><table frame=\"void\" border=\"1\" rules=\"all\">\n";
 	for(UInt_t row=0;row<nRows;row++){
-		output<<"<tr>\n";
+		output<<"<tr>   ";
 		for(UInt_t col=0;col<content.at(row).size();col++){
 			//todo "Umlaute anpassen"
-			output<<"<th>"<<content.at(row).at(col)<<"</th>\n";
+			if(row==0||col==0)	output<<"<th>"<<content.at(row).at(col)<<"</th>\t";
+			else 		output<<"<td>"<<content.at(row).at(col)<<"</td>\t";
 		}
 		output<<"</tr>\n";
 	}
@@ -179,7 +197,7 @@ std::string THTMLGenerator::putLink(std::string link,std::string content){
 std::string THTMLGenerator::floatToString(Float_t value)
 {
 	std::ostringstream out;
-	out << value;
+	out <<" "<< value<<" ";
 	return (out.str());
 }
 

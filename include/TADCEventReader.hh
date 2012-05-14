@@ -59,6 +59,7 @@ public:
     TCluster getCluster(UInt_t det,UInt_t cl);
     TCluster getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
     UInt_t getClusterSize(UInt_t det,UInt_t cl);
+    UInt_t getClusterSeedSize(UInt_t det, UInt_t cl);
     UInt_t getNClusters(UInt_t det);
     bool isSaturated(UInt_t det,UInt_t ch);
     void checkADC();

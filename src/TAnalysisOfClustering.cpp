@@ -14,15 +14,20 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"**********************************************************\n\n\n"<<endl;
 	// TODO Auto-generated constructor stub
+	if(settings==0)
+		settings=new TSettings();
 	setSettings(settings);
 	UInt_t runNumber=settings->getRunNumber();
 	sys = gSystem;
 	stringstream  runString;
 	runString.str("");
 	runString<<runNumber;
+	htmlClus= new THTMLCluster(settings);
 	sys->MakeDirectory(runString.str().c_str());
-
 	sys->cd(runString.str().c_str());
+	htmlClus->setMainPath((string)sys->pwd());
+	htmlClus->setSubdirPath("/clustering/");
+	htmlClus->setFileName("clustering.html");
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<"clusterData."<<runNumber<<".root";
@@ -47,6 +52,11 @@ TAnalysisOfClustering::~TAnalysisOfClustering() {
 	// TODO Auto-generated destructor stub
 	delete eventReader;
 	delete histSaver;
+	htmlClus->createClusterSize(vecClusterSizes,vecClusterSeedSizes,vecNumberOfClusters);
+	htmlClus->createPulseHeigthPlots(this->vecPHMeans);
+	htmlClus->createContent();
+	htmlClus->generateHTMLFile();
+	delete htmlClus;
 	sys->cd("..");
 }
 
@@ -228,14 +238,20 @@ void TAnalysisOfClustering::initialiseHistos()
 		histoName<<"Channel_"<<TADCEventReader::getStringForDetector(det)<<"_BiggestHit";
 		hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 	}
-	cout<<"9"<<endl;
 	for(int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hClusterSize_"<<TADCEventReader::getStringForDetector(det)<<"_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det);
+		histoName<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
 		hClusterSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
-		hClusterSize[det]->GetXaxis()->SetTitle("Size Of Cluster in Channels");
+		hClusterSize[det]->GetXaxis()->SetTitle("Number of Seeds and Hits in Cluster");
 		hClusterSize[det]->GetYaxis()->SetTitle("Entries #");
 		histoName.str("");
+		histoName.clear();
+		histoName<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
+		hClusterSeedSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
+		hClusterSeedSize[det]->GetXaxis()->SetTitle("Number of Seeds in Cluster");
+		hClusterSeedSize[det]->GetYaxis()->SetTitle("Entries #");
+		histoName.str("");
+		histoName.clear();
 		histoName<<"NumberOfClusters_"<<TADCEventReader::getStringForDetector(det);
 		hNumberOfClusters[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 	}
@@ -391,8 +407,14 @@ void TAnalysisOfClustering::saveHistos(){
 	}
 	for(int det=0;det<9;det++){
 		histSaver->SaveHistogram(this->hClusterSize[det]);
+		cout<<"save: "<<hClusterSeedSize[det]->GetName()<<endl;
+		histSaver->SaveHistogram(this->hClusterSeedSize[det]);
 		histSaver->SaveHistogram(this->hNumberOfClusters[det]);
+		vecClusterSizes.push_back(hClusterSize[det]->GetMean());
+		vecClusterSeedSizes.push_back(hClusterSeedSize[det]->GetMean());
+		vecNumberOfClusters.push_back(hNumberOfClusters[det]->GetMean());
 		delete hClusterSize[det];
+		delete hClusterSeedSize[det];
 		delete hNumberOfClusters[det];
 	}
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
@@ -568,6 +590,7 @@ void TAnalysisOfClustering::analyseCluster()
 		hNumberOfClusters[det]->Fill(eventReader->getNClusters(det));
 		for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
 			hClusterSize[det]->Fill(eventReader->getClusterSize(det,cl));
+			hClusterSeedSize[det]->Fill(eventReader->getClusterSeedSize(det,cl));
 		}
 	}
 
@@ -677,11 +700,14 @@ void TAnalysisOfClustering::savePHHistos()
 		vecWidth.clear();
     	for(UInt_t nClusters=0;nClusters<10;nClusters++){
     		stringstream histName;
-    		histName<<hPHDistribution[det]->GetTitle();
+//    		string name = (string)hPHDistribution[det]->GetTitle();
+//    		name = name.substr(0,histName.str().size()-6);
+    		histName<<"hPulseHeightDistribution_";
     		if(nClusters==0)
     			histName<<"allClusterSizes";
     		else
     			histName<<"nClusters"<<nClusters;
+    		histName<<"_"<<TADCEventReader::getStringForDetector(det);
     		TH1F *htemp;
     		//CREATE HTEMP and ReBin it if necessary
     		htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
@@ -708,6 +734,8 @@ void TAnalysisOfClustering::savePHHistos()
     			cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
     			cout<<"Area:         "<<fit->GetParameter(2)<<endl;
     			cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
+    			if(nClusters==0)
+    				vecPHMeans.push_back(fit->GetParameter(1));
     			vecClusterSize.push_back(nClusters);
     			vecMVP.push_back(fit->GetParameter(1));
     			vecClusterSizeError.push_back(0.5);

@@ -17,8 +17,13 @@ public:
 	THTMLPedestal(TSettings* settings);
 	virtual ~THTMLPedestal();
 public:
+	void createPageContent();
 	void createTableOfCuts();
 	void createPedestalDistribution();
+	void createBiggestHitMaps();
+	void createNoiseDistribution();
+	void createHitOrderSection();
+	void createSaturatedChannels();
 };
 
 #endif /* THTMLPEDESTAL_HH_ */

@@ -535,6 +535,11 @@ UInt_t TADCEventReader::getClusterSize(UInt_t det,UInt_t cl)
 	if(pEvent!=NULL)
 	return pEvent->getClusterSize(det,cl);
 }
+UInt_t TADCEventReader::getClusterSeedSize(UInt_t det,UInt_t cl)
+{
+	if(pEvent!=NULL)
+	return pEvent->getClusterSeedSize(det,cl);
+}
 
 void TADCEventReader::checkADC(){
 	this->LoadEvent(100);

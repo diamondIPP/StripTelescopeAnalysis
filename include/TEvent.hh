@@ -41,6 +41,7 @@ public:
 	TCluster getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	TCluster getCluster(UInt_t det, UInt_t cl);
 	UInt_t getClusterSize(UInt_t det,UInt_t cl);
+	UInt_t getClusterSeedSize(UInt_t det,UInt_t cl);
 	UInt_t getClusterSize(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	Float_t getPosition(UInt_t det, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 
@@ -56,7 +57,7 @@ private:
 	UInt_t eventNumber;
 	UInt_t verbosity;
 
-    ClassDef(TEvent,9);
+    ClassDef(TEvent,10);
 public:
 	
 };

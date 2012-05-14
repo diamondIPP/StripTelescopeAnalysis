@@ -120,6 +120,12 @@ UInt_t TEvent::getClusterSize(UInt_t det, UInt_t cl){
 	return cluster.size();
 }
 
+UInt_t TEvent::getClusterSeedSize(UInt_t det, UInt_t cl){
+	TCluster cluster = getCluster(det,cl);
+	if(verbosity>20)cluster.Print();
+	return cluster.seedSize();
+}
+
 UInt_t TEvent::getClusterSize(UInt_t plane,TPlaneProperties::enumCoordinate cor,UInt_t cl){
 	return getCluster(plane,cor,cl).size();
 }

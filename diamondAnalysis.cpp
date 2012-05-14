@@ -202,15 +202,11 @@ int main(int argc, char ** argv) {
 
 		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
 		htmlGen->setPathName((string)(currentDir+"/16202/"));
+		htmlGen->setMainPath((string)(currentDir+"/16202/"));
+		htmlGen->setSubdirPath("");
 		htmlGen->setFileName("index.html");
-		std::stringstream test;
-		test<<"bla1bla2bla3";
-		htmlGen->addSection("test",test.str());
-		htmlGen->addSection("test1",test.str());
-		htmlGen->addSection("test2",test.str());
-		htmlGen->addSection("test3",test.str());
-		htmlGen->addSection("Pedestal","<a href=\"pedestal.html\">PEDESTAL</a>");
-		htmlGen->addSection("Clustering","<a href=\"clustering.html\">PEDESTAL</a>");
+		htmlGen->addSection("Pedestal","<a href=\"pedestalAnalysis/pedestal.html\">PEDESTAL</a>");
+		htmlGen->addSection("Clustering","<a href=\"clustering/clustering.html\">CLUSTERING</a>");
 		htmlGen->generateHTMLFile();
 		delete htmlGen;
 
@@ -224,15 +220,7 @@ int main(int argc, char ** argv) {
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
-		THTMLCluster *htmlClus= new THTMLCluster(settings);
-		htmlClus->setPathName((string)(currentDir+"/16202/"));
-		htmlClus->setFileName("clustering.html");
-		htmlClus->addSection("test",test.str());
-		htmlClus->addSection("test1",test.str());
-		htmlClus->addSection("test2",test.str());
-		htmlClus->addSection("test3",test.str());
-		htmlClus->generateHTMLFile();
-		delete htmlClus;
+
 
 	if (DO_SLIDINGPEDESTAL){
 		sys->cd(currentDir.c_str());
@@ -266,10 +254,10 @@ int main(int argc, char ** argv) {
 			delete alignment;
 		}
 		
-		TAnalysisOfAlignment *anaAlignment;
-		anaAlignment=new TAnalysisOfAlignment(settings);
-		anaAlignment->doAnalysis(NEVENTS);
-		delete anaAlignment;
+//		TAnalysisOfAlignment *anaAlignment;
+//		anaAlignment=new TAnalysisOfAlignment(settings);
+//		anaAlignment->doAnalysis(NEVENTS);
+//		delete anaAlignment;
 //		TTransparentAnalysis *transpAna;
 //		transpAna = new TTransparentAnalysis(RUNNUMBER, *settings);
 //		transpAna->analyze(NEVENTS,INITIAL_EVENT);

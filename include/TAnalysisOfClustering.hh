@@ -29,6 +29,7 @@
 #include "LandauGaussFit.hh"
 
 #include "TADCEventReader.hh"
+#include "THTMLCluster.hh"
 
 #define N_DET_CHANNELS 256
 #define N_DIA_CHANNELS 128
@@ -64,6 +65,8 @@ private:
 	TH1F* hPulsHeightNextBiggestHit[9];
 	TH1F* hNumberOfClusters[9];
 	TH1F* hClusterSize[9];
+	TH1F* hClusterSeedSize[9];
+	vector <double>vecClusterSizes,vecClusterSeedSizes,vecNumberOfClusters;
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
@@ -72,6 +75,7 @@ private:
     int nEvent;
     int seedSigma;
     int hitSigma;
+    vector<double>vecPHMeans;
     TH1F *histo_pulseheight_sigma[8];
 	TH1F *histo_pulseheight_sigma_second[8];
 	TH1F *histo_pulseheight_sigma125[8];
@@ -86,6 +90,7 @@ private:
 	TH1F *histo_H2C_biggestHit;
 	TH2F *histo_CWM_biggestHit;
 private:
+	THTMLCluster *htmlClus;
 	TH1F *h2ndBiggestHitSignal[9];
 	TH1F *h2ndBiggestHitOverCharge[9];
 	TH1F *h2ndBiggestHitPosition[9];

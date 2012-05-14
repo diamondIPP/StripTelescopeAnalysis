@@ -25,6 +25,8 @@ public:
 	void generateHTMLFile();
 	void setFileName(string Name);
 	void setPathName(string pathName);
+	void setMainPath(std::string mainPathName);
+	void setSubdirPath(std::string subDirPath);
 	void addSection(string sectionName, string content);
 	void setTitle(string title){this->title=title;};
 protected:
@@ -43,6 +45,8 @@ protected:
     TDatime dateandtime;
     std::string fileName;
     std::string path;
+    std::string mainPath;
+    std::string subdirPath;
     std::vector<std::string> content;
     std::vector<std::string> tableOfContent;
     std::string title;

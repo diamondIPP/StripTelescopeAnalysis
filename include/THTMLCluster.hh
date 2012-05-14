@@ -16,7 +16,11 @@ public:
 	THTMLCluster(TSettings *settings);
 	virtual ~THTMLCluster();
 public:
+	void createContent();
+	void createEtaDistributions();
+	void createPulseHeigthPlots(vector<double> meanPulseHeigths);
 	void createTableOfCuts();
+	void createClusterSize(std::vector<double> clusterSizes,std::vector<double> clusterSeedSize,std::vector<double> numberOfClusters);
 };
 
 #endif /* THTMLCLUSTER_HH_ */

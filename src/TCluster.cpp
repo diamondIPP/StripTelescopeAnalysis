@@ -171,6 +171,9 @@ UInt_t TCluster::size()
 	return numberOfSeeds+numberOfHits;
 }
 
+UInt_t TCluster::seedSize(){
+	return numberOfSeeds;
+}
 void TCluster::clear(){
 	numberOfSeeds=0;
 	numberOfHits=0;

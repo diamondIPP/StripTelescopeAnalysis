@@ -57,6 +57,7 @@ HistogrammSaver::~HistogrammSaver() {
 
 void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond)
 {
+	cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
 	c1->cd();
 	Float_t min1 = histo1->GetMinimum();
@@ -76,17 +77,25 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	max = middle + range/2.*1.4;
 	int stat = gStyle->GetOptStat();
 	gStyle->SetOptStat("");
-	histo2->Scale(refactorSecond);
+	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
+		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
+	if(refactorSecond!=1)histo2->Scale(refactorSecond);
+	cout<<"min: "<<min<<" max: "<<max;
+	cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<histo1->GetMaximum()<<"\thisto2:"<<histo2->GetMaximum()<<flush;
+	cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
 	if(histo1->GetMaximum()>histo2->GetMaximum()){
+		cout<<"\tdraw1-"<<flush;
 		histo1->Draw("");
 		histo1->GetYaxis()->SetRangeUser(min,max);
-
+		cout<<"draw2 "<<flush;
 		histo2->Draw("same");
 //		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
+		cout<<"\tdraw2-"<<flush;
 		histo2->Draw("");
 		histo2->GetYaxis()->SetRangeUser(min,max);
+		cout<<"draw1 "<<flush;
 		histo1->Draw("same");
 //		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
@@ -102,15 +111,16 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	axis->SetLabelColor(histo2->GetLineColor());
 	axis->SetTextColor(histo2->GetLineColor());
 	axis->SetTitle(histo2->GetYaxis()->GetTitle());
-	axis->Draw();
+	axis->Draw("same");
 	c1->Update();
 	TLegend *leg =new TLegend(0.1,0.75,0.48,0.9);
 	leg->SetFillColor(kWhite);
 	leg->SetHeader("Legend");
 	leg->AddEntry(histo1,histo1->GetName());
 	leg->AddEntry(histo2,histo2->GetName());
-	leg->Draw();
-	pt->Draw();
+	leg->Draw("same");
+	pt->Draw("same");
+	c1->Update();
 	SaveCanvas(c1);
 	delete c1;
 	gStyle->SetOptStat(stat);

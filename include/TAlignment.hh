@@ -40,6 +40,8 @@
 #include "TPlane.hh"
 #include "TResidual.hh"
 
+#include "THTMLAlignment.hh"
+
 
 /**
  * @brief alignment of all subdetectors
@@ -122,6 +124,7 @@ private:
     Int_t nDiaAlignSteps;
     TCluster::calculationMode_t diaCalcMode;
     TCluster::calculationMode_t silCalcMode;
+    THTMLAlignment *htmlAlign;
 private:
 	std::vector<TResidual> vecRes103;
 	vector<Float_t> vecXPred;

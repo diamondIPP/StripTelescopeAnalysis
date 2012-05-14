@@ -23,6 +23,9 @@ TAlignment::TAlignment(TSettings* settings) {
 
 	sys->MakeDirectory(runString.str().c_str());
 	sys->cd(runString.str().c_str());
+	htmlAlign = new THTMLAlignment(settings);
+	htmlAlign->setMainPath((string)sys->pwd());
+	htmlAlign->setSubdirPath("/alignment/");
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<sys->pwd();
@@ -65,7 +68,7 @@ TAlignment::TAlignment(TSettings* settings) {
 TAlignment::~TAlignment() {
 	// TODO Auto-generated destructor stub
 	cout<<"TAlignment deconstructor"<<endl;
-
+	htmlAlign->generateHTMLFile();
 	if(myTrack)delete myTrack;
 	if(histSaver)delete histSaver;
 	//todo this is not correct but otherwise it stops working

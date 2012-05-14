@@ -22,7 +22,7 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 23;};
+	static UInt_t TCLUSTER_REVISION() {return 24;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
     TCluster()
@@ -58,6 +58,7 @@ public:
     Float_t getCharge(UInt_t clusters,bool useSmallSignals=false);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
+    UInt_t seedSize();
     UInt_t getHighestSignalChannel();
 	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo);
 	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos);

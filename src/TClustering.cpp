@@ -13,8 +13,9 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	cout<<"**********************************************************"<<endl;
 	cout<<"*************TClustering::TClustering*********************"<<endl;
 	cout<<"**********************************************************"<<endl;
-
 	// TODO Auto-generated constructor stub
+	if(settings==0)
+		settings=new TSettings();
 	setSettings(settings);
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
@@ -55,6 +56,7 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 	}
+//	htmlClus->setPathName((string)(currentDir+"/16202/"));
 }
 
 TClustering::~TClustering() {

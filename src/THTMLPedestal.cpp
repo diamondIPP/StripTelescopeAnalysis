@@ -94,3 +94,80 @@ void THTMLPedestal::createPedestalDistribution(){
 
 }
 
+void THTMLPedestal::createPageContent()
+{
+	createTableOfCuts();
+	createPedestalDistribution();
+	createBiggestHitMaps();
+	createNoiseDistribution();
+	createHitOrderSection();
+	createSaturatedChannels();
+}
+
+void THTMLPedestal::createBiggestHitMaps()
+{
+
+	stringstream sectionContent;
+	sectionContent<<"<h2> Biggest Hit Maps</h2>\n";
+	sectionContent<<"<p>\n";
+	sectionContent<<"Channel position of Biggest Hit in detector of each event.\n";
+	sectionContent<<"</p>\n";
+	stringstream path;
+	path<<this->path<<"/";
+	sectionContent<<putImagesOfAllDetectors(path.str(),"hBiggestHitMap");
+	this->addSection("Biggest Hit Maps",sectionContent.str());
+}
+
+void THTMLPedestal::createNoiseDistribution()
+{
+	stringstream sectionContent;
+	sectionContent<<"<h2> Noise Distribution of each detector</h2>\n";
+	sectionContent<<"<p>\n";
+	sectionContent<<"Distribution of (ADC-Pedestal) for all events and all channels\n";
+	sectionContent<< " This Distribution tells you what is the mean noise of each Detector\n";
+//	sectionContent>>"";
+	sectionContent<<"</p>\n";
+	stringstream path;
+	path<<this->path<<"/";
+	sectionContent<<putImagesOfAllDetectors(path.str(),"hNosiseDistributionOfAllNonHitChannels_");
+	this->addSection("Non-Hit Noise Distribution",sectionContent.str());
+}
+
+void THTMLPedestal::createHitOrderSection()
+{
+	stringstream sectionContent;
+	sectionContent<<"<h2>Hit Order of each Detector Plane</h2>\n";
+	sectionContent<<"<p>\n";
+	sectionContent<<"Order of highest signal to next adjacent highest signal. \n";
+	sectionContent<< "this plot helps to figure out if there was any problem with \n";
+	sectionContent<< "the Readout. A strong imbalance shows a dependency of readout direction.";
+	sectionContent<<"</p>\n";
+	stringstream path;
+	path<<this->path<<"/";
+	sectionContent<<putImagesOfAllDetectors(path.str(),"hSecondBiggestHitMinusBiggestHitPosition_");
+	this->addSection("Hit Order",sectionContent.str());
+}
+
+void THTMLPedestal::createSaturatedChannels()
+{
+
+	stringstream sectionContent;
+	sectionContent<<"<h2>Saturated Channels</h2>\n";
+	sectionContent<<"<p>\n";
+	sectionContent<<"Histogramm of all Channels to see how often each channel got saturated\n";
+//	sectionContent>>"";
+	sectionContent<<"</p>\n";
+	stringstream path;
+	path<<this->path<<"/";
+	sectionContent<<putImagesOfAllDetectors(path.str(),"hSaturatedChannels_");
+	this->addSection("Saturated Channels",sectionContent.str());
+}
+
+
+
+
+
+
+
+
+
