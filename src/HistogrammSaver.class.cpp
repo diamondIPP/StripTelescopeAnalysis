@@ -127,6 +127,19 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 }
 
 
+void HistogrammSaver::SaveStringToFile(string name, string data)
+{
+	std::ofstream file;
+	stringstream outputFileName;
+	cout<<"FILE: "<<name<<endl;
+	//cout<<"PATH: "<<sys->pwd()<<endl;
+	outputFileName<<this->GetPlotsPath()<<"/"<<name;
+	cout<<"create String to file: \""<<outputFileName.str()<<"\""<<endl;
+	file.open(outputFileName.str().c_str());
+	file<<data;
+	file.close();
+}
+
 void HistogrammSaver::UpdatePaveText(){
 	pt->Clear();
 	pt->SetTextSize(0.0250);

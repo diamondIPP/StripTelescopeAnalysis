@@ -9,6 +9,7 @@
 #define TSELECTIONCLASS_HH_
 #include "TSystem.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TH1.h"
 #include "TF1.h"
 #include "TStopwatch.h"
@@ -28,10 +29,13 @@ public:
 private:
 	void setBranchAdressess();
 	bool createSelectionTree(int nEvents);
+	void createCutFlowDiagramm();
 	void resetVariables();
 	void setVariables();
 	bool checkDetMasked(UInt_t det);
 	bool checkDetMasked(UInt_t det,UInt_t cl);
+	void initialiseHistos();
+	void saveHistos();
 	TSettings *settings;
 	TSystem *sys;
 	TADCEventReader *eventReader;
@@ -56,10 +60,19 @@ private:
 	bool useForAlignment;
 	bool useForAnalysis;
 	bool useForSiliconAlignment;
+	UInt_t nValidButMoreThanOneDiaCluster;
+	UInt_t nValidSiliconNoDiamondHit;
 	UInt_t nUseForAlignment;
 	UInt_t nUseForSiliconAlignment;
 	UInt_t nUseForAnalysis;
+	UInt_t nNoValidSiliconTrack;
+	UInt_t nValidSiliconAndDiamondCluster;
+	UInt_t nValidDiamondTrack;
+	UInt_t nValidSiliconTrack;
 	UInt_t nEvents;
+
+private:
+	TH2F *hFiducialCutSilicon;
 };
 
 #endif /* TSELECTIONCLASS_HH_ */

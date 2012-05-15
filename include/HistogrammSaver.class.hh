@@ -68,6 +68,7 @@ public:
     std::string GetPlotsPath(){return plots_path;}
     void SetStyle(TStyle newStyle);
     void SetDuckStyle();
+    void SaveStringToFile(std::string name,std::string data);
     void SetRange(Float_t min,Float_t max);
 
     static TH2F CreateScatterHisto(std::string name,std::vector<Float_t> posX, std::vector<Float_t> posY,UInt_t nBins=4096);
