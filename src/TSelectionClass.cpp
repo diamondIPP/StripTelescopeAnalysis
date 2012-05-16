@@ -81,9 +81,7 @@ TSelectionClass::~TSelectionClass() {
 		selectionTree->AddFriend("rawTree",rawfilepath.str().c_str());
 		cout<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
 		selectionTree->Write();
-		createCutFlowDiagramm();
 	}
-
 	selectionFile->Close();
 	delete eventReader;
 	delete histSaver;
@@ -106,7 +104,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	}
 	else
 		this->nEvents=nEvents;
-	histSaver->SetNumberOfEvents(this->nEvents)
+	histSaver->SetNumberOfEvents(this->nEvents);
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
 	this->setBranchAdressess();
@@ -132,6 +130,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 		selectionTree->Fill();
 		if(verbosity>10)cout<<"DONE"<<endl;
 	}
+	createCutFlowDiagramm();
 }
 bool TSelectionClass::createSelectionTree(int nEvents)
 {
