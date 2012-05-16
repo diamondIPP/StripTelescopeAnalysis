@@ -61,6 +61,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	nNoValidSiliconTrack=0;
 	nValidSiliconAndDiamondCluster=0;
 	nValidSiliconTrack=0;
+	nSiliconTrackNotFiducialCut=0;
 	nValidDiamondTrack=0;
 	initialiseHistos();
 }
@@ -105,6 +106,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	}
 	else
 		this->nEvents=nEvents;
+	histSaver->SetNumberOfEvents(this->nEvents)
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
 	this->setBranchAdressess();
@@ -117,6 +119,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	nValidSiliconTrack=0;
 	nValidSiliconAndDiamondCluster=0;
 	nValidDiamondTrack=0;
+	nSiliconTrackNotFiducialCut=0;
 	cout<<"start selection with "<<nEvents<<" Events, training fraction: "<<settings->getAlignment_training_track_fraction()*100.<<"%"<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
@@ -248,6 +251,7 @@ void TSelectionClass::setVariables(){
 	}
 	else
 		isInFiducialCut=false;
+	bool isSiliconTrackNotFiducialCut= !isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
 	bool isValidSiliconTrack = isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
 	bool isValidDiamondEvent = nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
 	bool validMoreThanOneClusterDiamondevent = nDiamondHits>=1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
@@ -270,6 +274,10 @@ void TSelectionClass::setVariables(){
 	useForAlignment = isValidDiamondEvent && isValidSiliconTrack//one and only one hit in all detectors (also diamond)
 					  && relativeEventNumber<fraction;			//and reltative event Number smaller than fraction
 	useForAnalysis=isValidDiamondEvent && isValidSiliconTrack&& relativeEventNumber>fraction;
+	if(isValidDiamondEvent&&isValidSiliconTrack)
+		hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
+	if(isSiliconTrackNotFiducialCut)
+		nSiliconTrackNotFiducialCut++;
 	if(useForAnalysis){
 		nUseForAnalysis++;
 		nValidSiliconAndDiamondCluster++;
@@ -348,6 +356,14 @@ void TSelectionClass::initialiseHistos()
 {
 	std::string name = "hFidCutSilicon_OneAndOnlyOneCluster";
 	hFiducialCutSilicon = new TH2F(name.c_str(),name.c_str(),512,0,256,512,0,256);
+	hFiducialCutSilicon->GetYaxis()->SetTitle("yCoordinate in Channels");
+	hFiducialCutSilicon->GetYaxis()->SetTitle("xCoordinate in Channels");
+
+	std::string name2 = "hFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster";
+	hFiducialCutSiliconDiamondHit = new TH2F(name2.c_str(),name2.c_str(),512,0,256,512,0,256);
+
+	hFiducialCutSiliconDiamondHit->GetYaxis()->SetTitle("yCoordinate in Channels");
+	hFiducialCutSiliconDiamondHit->GetYaxis()->SetTitle("xCoordinate in Channels");
 }
 
 
@@ -361,7 +377,9 @@ void TSelectionClass::createCutFlowDiagramm()
 	n+=sprintf(&output[n],"\tfor Diamond Alignment: %4.1f %%  %6d\n",(float)nUseForAlignment*100./(Float_t)nEvents,nUseForAlignment);
 	n+=sprintf(&output[n],"\tfor Diamond  Analysis: %4.1f %%  %6d\n",(float)nUseForAnalysis*100./(Float_t)nEvents,nUseForAnalysis);
 	n+=sprintf(&output[n],"\nCUT-FLOW:\n");
-	n+=sprintf(&output[n],"AllEvents: %6d ------>%6d (%4.1f%%) no valid Silicon Track\n",nEvents,nNoValidSiliconTrack,(float)nNoValidSiliconTrack*100./(float)nEvents);
+	n+=sprintf(&output[n],"AllEvents: %6d ------>%6d (%4.1f%%) no only one and only one Silicon Hit\n",nEvents,(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut),(float)(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut)*100./(float)nEvents);
+	n+=sprintf(&output[n],"                    |\n");
+	n+=sprintf(&output[n],"                    L--->%6d (%4.1f%%) one and only one silicon hit, not in Fiducial Cut\n",nSiliconTrackNotFiducialCut,(float)nSiliconTrackNotFiducialCut*100./(float)nEvents);
 	n+=sprintf(&output[n],"                    |\n");
 	n+=sprintf(&output[n],"                    L--->%6d (%4.1f%%) valid Silicon Track\n",nValidSiliconTrack,(float)nValidSiliconTrack*100./(float)nEvents);
 	n+=sprintf(&output[n],"                              |\n");
@@ -378,13 +396,86 @@ void TSelectionClass::createCutFlowDiagramm()
 	n+=sprintf(&output[n],"                                                  L--->%6d (%4.1f%%) Analysis (absolute: %4.1f%%)\n",nUseForAnalysis,(float)nUseForAnalysis*100./(float)nValidDiamondTrack,(float)nUseForAnalysis*100./(float)nEvents);
 	cout<<output<<endl;
 	histSaver->SaveStringToFile("cutFlow.txt",output);
+	Double_t values [] = {(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut),nSiliconTrackNotFiducialCut,nValidSiliconNoDiamondHit+nValidButMoreThanOneDiaCluster,nUseForAlignment,nUseForAnalysis};
+	Int_t colors[] = {2,3,4,5,6};
+	Int_t nvals = sizeof(values)/sizeof(values[0]);
+	TCanvas *cpieMain = new TCanvas("cMainCutFlow","Main Cut Flow",700,700);
+	cpieMain->cd();
+	TPie *pie4 = new TPie("pieCutFlow","cutFlow Silicon",nvals,values,colors);
+	pie4->SetEntryLabel(0,"noSilTrack");
+	pie4->SetEntryLabel(1,"notInFidCut");
+	pie4->SetEntryLabel(2,"notExactlyOneDiamondCluster");
+	pie4->SetEntryLabel(3,"useForAlignment");
+	pie4->SetEntryLabel(4,"useForAnalysis");
+	pie4->SetRadius(.3);
+	pie4->SetLabelsOffset(.02);
+	pie4->SetTextSize(pie4->GetTextSize()*0.4);
+	pie4->SetLabelFormat("#splitline{%val (%perc)}{%txt}");
+	pie4->SetValueFormat("%d");
+	pie4->Draw("nol ");
+	TLegend* legend = pie4->MakeLegend(0.7,0.7,0.99,0.95,"Silicon CutFlow");
+	legend->SetFillColor(kWhite);
+	legend ->Draw();
+	histSaver->SaveCanvas(cpieMain);
+
+	Double_t  valuesSilTracks[] = {nValidSiliconNoDiamondHit,nValidButMoreThanOneDiaCluster,nUseForAlignment,nUseForAnalysis};
+	Int_t colorsSilTracks[] = {2,3,4,5};
+	Int_t nvalsSilTracks = sizeof(valuesSilTracks)/sizeof(valuesSilTracks[0]);
+	TCanvas *cPieValidSilicontTrack = new TCanvas("cPieValidSilicontTrack","CutFlow Valid Silicon Track",700,700);
+	cPieValidSilicontTrack->cd();
+	TPie *pieValidSilicontTrack = new TPie("pieValidSilicontTrack","CutFlow Valid Silicon Track",nvalsSilTracks,valuesSilTracks,colorsSilTracks);
+	pieValidSilicontTrack->SetEntryLabel(0,"noDiamondHit");
+	pieValidSilicontTrack->SetEntryLabel(1,"moreThanOneDiamondHit");
+	pieValidSilicontTrack->SetEntryLabel(2,"useForAlignment");
+	pieValidSilicontTrack->SetEntryLabel(3,"useForAnalysis");
+	pieValidSilicontTrack->SetRadius(.25);
+	pieValidSilicontTrack->SetLabelsOffset(.03);
+	pieValidSilicontTrack->SetTextSize(pieValidSilicontTrack->GetTextSize()*0.35);
+	pieValidSilicontTrack->SetLabelFormat("%val (%perc) - %txt ");
+	pieValidSilicontTrack->SetValueFormat("%.0f");
+	pieValidSilicontTrack->SetX(0.4);
+	pieValidSilicontTrack->Draw("nol");
+	TLegend* legendSilTrack = pieValidSilicontTrack->MakeLegend(0.76,0.65,0.99,0.97,"Diamond CutFlow");
+	legendSilTrack->SetFillColor(kWhite);
+
+	legendSilTrack ->Draw();
+	histSaver->SaveCanvas(cPieValidSilicontTrack);
 }
 
 void TSelectionClass::saveHistos()
 {
 	cout<<"save Histo: "<<hFiducialCutSilicon->GetTitle()<<endl;
-	histSaver->SaveHistogram(hFiducialCutSilicon);
+	std::string name = "c";
+	name.append(hFiducialCutSilicon->GetName());
+	TCanvas *c1=new TCanvas(name.c_str(),hFiducialCutSilicon->GetTitle());
+	c1->cd();
+	hFiducialCutSilicon->Draw("colz");
+	double xLow = settings->getSi_avg_fidcut_xlow();
+	double xHigh = settings->getSi_avg_fidcut_xhigh();
+	double yLow = settings->getSi_avg_fidcut_ylow();
+	double yHigh = settings->getSi_avg_fidcut_yhigh();
+	TLine* lXlower = new TLine(xLow,yLow,xLow,yHigh);
+	TLine* lXhigher = new TLine(xHigh,yLow,xHigh,yHigh);
+	TLine* lYlower = new TLine(xLow,yLow,xHigh,yLow);
+	TLine* lYhigher = new TLine(xLow,yHigh,xHigh,yHigh);
+	lXlower->Draw();
+	lXhigher->Draw();
+	lYlower->Draw();
+	lYhigher->Draw();
+	histSaver->SaveCanvas(c1);
+	std::string name2 = "c";
+	name2.append(hFiducialCutSiliconDiamondHit->GetName());
+	TCanvas *c2=new TCanvas(name2.c_str(),hFiducialCutSiliconDiamondHit->GetTitle());
+	c2->cd();
+	hFiducialCutSiliconDiamondHit->Draw("colz");
+	lXlower->Draw();
+	lXhigher->Draw();
+	lYlower->Draw();
+	lYhigher->Draw();
+	histSaver->SaveCanvas(c2);
+//	histSaver->SaveHistogram(hFiducialCutSilicon);
 	delete hFiducialCutSilicon;
+	delete hFiducialCutSiliconDiamondHit;
 }
 
 

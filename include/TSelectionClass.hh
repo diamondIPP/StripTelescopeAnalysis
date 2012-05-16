@@ -12,6 +12,7 @@
 #include "TH2F.h"
 #include "TH1.h"
 #include "TF1.h"
+#include "TPie.h"
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
@@ -69,10 +70,12 @@ private:
 	UInt_t nValidSiliconAndDiamondCluster;
 	UInt_t nValidDiamondTrack;
 	UInt_t nValidSiliconTrack;
+	UInt_t nSiliconTrackNotFiducialCut;
 	UInt_t nEvents;
 
 private:
 	TH2F *hFiducialCutSilicon;
+	TH2F *hFiducialCutSiliconDiamondHit;
 };
 
 #endif /* TSELECTIONCLASS_HH_ */
