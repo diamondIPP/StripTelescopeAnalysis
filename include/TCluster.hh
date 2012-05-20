@@ -22,7 +22,7 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 24;};
+	static UInt_t TCLUSTER_REVISION() {return 25;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
     TCluster()
@@ -46,8 +46,9 @@ public:
 
     };
     TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
-    TCluster(const TCluster& a);
+    TCluster(const TCluster& a);//COPY Constructor
     virtual ~TCluster();
+    TCluster &operator=(const TCluster &src); //class assignment function
     void addChannel(UInt_t channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
     Float_t getPosition(calculationMode_t mode=highest2Centroid,TH1F *histo=0);
     void clear();

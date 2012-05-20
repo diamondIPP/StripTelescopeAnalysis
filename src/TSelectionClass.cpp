@@ -34,6 +34,9 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<"\""<<clusterfilepath.str()<<"\""<<endl;
 	cout<<"OPEN TADCEventReader"<<flush;
+	htmlSelection = new THTMLSelection(settings);
+	htmlSelection->setMainPath(sys->pwd());
+	htmlSelection->updatePath();
 	eventReader=new TADCEventReader(clusterfilepath.str(),settings->getRunNumber());
 	cout<<" DONE"<<endl;
 	histSaver=new HistogrammSaver();
@@ -64,6 +67,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	nSiliconTrackNotFiducialCut=0;
 	nValidDiamondTrack=0;
 	initialiseHistos();
+	htmlSelection->createFiducialCuts();
 }
 
 TSelectionClass::~TSelectionClass() {
@@ -81,10 +85,12 @@ TSelectionClass::~TSelectionClass() {
 		selectionTree->AddFriend("rawTree",rawfilepath.str().c_str());
 		cout<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
 		selectionTree->Write();
+		htmlSelection->generateHTMLFile();
 	}
 	selectionFile->Close();
 	delete eventReader;
 	delete histSaver;
+	delete htmlSelection;
 	sys->cd("..");
 }
 
@@ -395,8 +401,14 @@ void TSelectionClass::createCutFlowDiagramm()
 	n+=sprintf(&output[n],"                                                  L--->%6d (%4.1f%%) Analysis (absolute: %4.1f%%)\n",nUseForAnalysis,(float)nUseForAnalysis*100./(float)nValidDiamondTrack,(float)nUseForAnalysis*100./(float)nEvents);
 	cout<<output<<endl;
 	histSaver->SaveStringToFile("cutFlow.txt",output);
+	string cutFlow;
+	cutFlow = output;
+	htmlSelection->createCutFlowGraph(cutFlow);
+
+
+
 	Double_t values [] = {(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut),nSiliconTrackNotFiducialCut,nValidSiliconNoDiamondHit+nValidButMoreThanOneDiaCluster,nUseForAlignment,nUseForAnalysis};
-	Int_t colors[] = {2,3,4,5,6};
+	Int_t colors[] = {kRed,kRed+1,kBlue,kYellow,kGreen};
 	Int_t nvals = sizeof(values)/sizeof(values[0]);
 	TCanvas *cpieMain = new TCanvas("cMainCutFlow","Main Cut Flow",700,700);
 	cpieMain->cd();
@@ -418,9 +430,9 @@ void TSelectionClass::createCutFlowDiagramm()
 	histSaver->SaveCanvas(cpieMain);
 
 	Double_t  valuesSilTracks[] = {nValidSiliconNoDiamondHit,nValidButMoreThanOneDiaCluster,nUseForAlignment,nUseForAnalysis};
-	Int_t colorsSilTracks[] = {2,3,4,5};
+	Int_t colorsSilTracks[] = {kBlue+1,kBlue+2,kYellow,kGreen};
 	Int_t nvalsSilTracks = sizeof(valuesSilTracks)/sizeof(valuesSilTracks[0]);
-	TCanvas *cPieValidSilicontTrack = new TCanvas("cPieValidSilicontTrack","CutFlow Valid Silicon Track",700,700);
+	TCanvas *cPieValidSilicontTrack = new TCanvas("cPieValidSiliconTrack","CutFlow Valid Silicon Track",700,700);
 	cPieValidSilicontTrack->cd();
 	TPie *pieValidSilicontTrack = new TPie("pieValidSilicontTrack","CutFlow Valid Silicon Track",nvalsSilTracks,valuesSilTracks,colorsSilTracks);
 	pieValidSilicontTrack->SetEntryLabel(0,"noDiamondHit");

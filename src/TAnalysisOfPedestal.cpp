@@ -97,7 +97,7 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 		analyseBiggestHit();
 		updateMeanCalulation();
 	}
-	createPedestalMeanHistos();
+//	createPedestalMeanHistos();
 	saveHistos();
 }
 
@@ -376,7 +376,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 
 
 void TAnalysisOfPedestal::saveHistos(){
-	
+	createPedestalMeanHistos();
 	for (int det=0;det<9;det++){
 		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
 		histSaver->SaveHistogramPNG(hSaturatedChannels[det]);

@@ -27,6 +27,7 @@ public:
 	void setPathName(string pathName);
 	void setMainPath(std::string mainPathName);
 	void setSubdirPath(std::string subDirPath);
+	void updatePath();
 	void addSection(string sectionName, string content);
 	void setTitle(string title){this->title=title;};
 protected:

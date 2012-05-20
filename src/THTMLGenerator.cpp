@@ -9,6 +9,9 @@
 using namespace std;
 THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 	// TODO Auto-generated constructor stub
+	this->subdirPath="";
+	this->mainPath="";
+	this->path="";
 
 	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
 //	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
@@ -64,6 +67,8 @@ void THTMLGenerator::generatorHTMLHeader()
 				<< "<a href=\""<<this->mainPath<<"/index.html\">Summary</a>||"
 				<< "<a href=\""<<this->mainPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
 				<< "<a href=\""<<this->mainPath<<"/clustering/clustering.html\">Clustering</a>||"
+				<< "<a href=\""<<this->mainPath<<"/selections/selection.html\">Selection</a>||"
+				<< "<a href=\""<<this->mainPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
 //				<< "<a href=\"d8.html\">Diamond</a>||"
 //				<< "<a href=\"d0.html\">D0X</a>||"
 //				<< "<a href=\"d1.html\">D0Y</a>||"
@@ -149,12 +154,14 @@ void THTMLGenerator::setPathName(std::string pathName){
 
 void THTMLGenerator::setMainPath(std::string mainPathName){
 	this->mainPath=mainPathName;
+	updatePath();
 }
 
 void THTMLGenerator::setSubdirPath(std::string subdirPathName){
 	this->subdirPath=subdirPathName;
-	setPathName(mainPath+"/"+subdirPath+"/");
+	updatePath();
 }
+
 
 std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > content)
 {
@@ -192,6 +199,12 @@ std::string THTMLGenerator::putLink(std::string link,std::string content){
 	stringstream output;
 	output<<"<a href=\""<<link<<"\">"<<content<<"</a>";
 	return (output.str());
+}
+
+void THTMLGenerator::updatePath()
+{
+	setPathName(mainPath+subdirPath+"/");
+
 }
 
 std::string THTMLGenerator::floatToString(Float_t value)

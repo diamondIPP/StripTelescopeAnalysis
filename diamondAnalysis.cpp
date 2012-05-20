@@ -13,6 +13,7 @@
 #include "TPedestalCalculation.hh"
 #include "TAnalysisOfPedestal.hh"
 #include "TAnalysisOfClustering.hh"
+#include "TAnalysisOfSelection.hh"
 #include "TClustering.hh"
 #include "TSelectionClass.hh"
 #include "THTMLGenerator.hh"
@@ -207,6 +208,8 @@ int main(int argc, char ** argv) {
 		htmlGen->setFileName("index.html");
 		htmlGen->addSection("Pedestal","<a href=\"pedestalAnalysis/pedestal.html\">PEDESTAL</a>");
 		htmlGen->addSection("Clustering","<a href=\"clustering/clustering.html\">CLUSTERING</a>");
+		htmlGen->addSection("Selection","<a href=\"selections/selections.html\">SELECTION</a>");
+		htmlGen->addSection("Landau","<a href=\"selectionAnalysis/landaus.html\">LANDAU-DISTRIBUTIONS</a>");
 		htmlGen->generateHTMLFile();
 		delete htmlGen;
 
@@ -221,14 +224,13 @@ int main(int argc, char ** argv) {
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
 
-
-	if (DO_SLIDINGPEDESTAL){
-		sys->cd(currentDir.c_str());
-		TAnalysisOfClustering* analysisClustering;
-		analysisClustering= new TAnalysisOfClustering(settings);
-		analysisClustering->doAnalysis(NEVENTS);
-		delete analysisClustering;
-	}
+		if (DO_SLIDINGPEDESTAL){
+			sys->cd(currentDir.c_str());
+			TAnalysisOfClustering* analysisClustering;
+			analysisClustering= new TAnalysisOfClustering(settings);
+			analysisClustering->doAnalysis(NEVENTS);
+			delete analysisClustering;
+		}
 
 //		process_mem_usage(vm2, rss2);
 //		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
@@ -237,6 +239,17 @@ int main(int argc, char ** argv) {
 		selectionClass=new TSelectionClass(settings);
 		selectionClass->MakeSelection(NEVENTS);
 		delete selectionClass;
+
+		if (DO_SLIDINGPEDESTAL){
+			sys->cd(currentDir.c_str());
+//			TAnalysisOfClustering* analysisClustering;
+//			analysisClustering= new TAnalysisOfClustering(settings);
+//			analysisClustering->doAnalysis(NEVENTS);
+//			delete analysisClustering;
+			TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
+			analysisSelection->doAnalysis(NEVENTS);
+			delete analysisSelection;
+		}
 
 		if (DO_ALIGNMENT){
 			sys->cd(currentDir.c_str());

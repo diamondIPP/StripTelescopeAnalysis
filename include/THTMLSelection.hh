@@ -14,7 +14,9 @@ class THTMLSelection: public THTMLGenerator {
 public:
 	THTMLSelection(TSettings *settings);
 	virtual ~THTMLSelection();
+	void createFiducialCuts();
 	void createCutFlowTable(std::vector<int> vecCutFlow);
+	void createCutFlowGraph(std::string content);
 };
 
 #endif /* THTMLSELECTION_HH_ */

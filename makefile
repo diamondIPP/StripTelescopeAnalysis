@@ -10,7 +10,8 @@ ROOTGLIBS   	:= $(shell root-config --glibs) -lMinuit
 ROOTCINT		:= $(ROOTSYS)/bin/rootcint
 SVNDEV 			:= -D'SVN_REV="$(shell svnversion -n .)"'
 
-CC 				:= g++
+CC 				:= g++ 
+#-std=gnu++0x
 SRCDIR          := src
 INCLUDEDIR      := include
 OBJDIR			:= obj
@@ -39,10 +40,10 @@ LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o SlidingPedestal.class.o PSDetector.c
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o TADCEventReader.o
 LIBFILES		+=	TRawEventReader.o  TRawEventSaver.o TPedestalCalculation.o
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTracking.o 
-LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o
+LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.o
 #LIBFILES		+=  TTransparentClustering.o TTransparentAnalysis.o AlignmentClass.o Clustering.class.o 
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o  
-LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o
+LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES 		+=  TChannelMapping.o TSettings.class.o ChannelScreen.o LandauGaussFit.o
 LIBFILES		+=	libTEvent.so

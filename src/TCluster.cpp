@@ -90,6 +90,49 @@ TCluster::TCluster(const TCluster& rhs){
 
 }
 
+/**
+ * the class assignment Function
+ * @param src
+ * @return
+ */
+TCluster & TCluster::operator =(const TCluster & src)
+{
+	hitSigma = src.hitSigma;
+	seedSigma= src.seedSigma;
+	isSaturated= src.isSaturated;
+	isLumpy=src.isLumpy;
+	isGoldenGate=src.isGoldenGate;
+	isChecked=src.isChecked;
+	hasBadChannel=src.hasBadChannel;
+	mode=src.mode;
+	numberOfHits=src.numberOfHits;
+	numberOfNoHits=src.numberOfNoHits;
+	numberOfSeeds=src.numberOfSeeds;
+	verbosity=src.verbosity;
+	charge=src.charge;
+	maxChannel=src.maxChannel;
+	maximumSignal=src.maximumSignal;
+	revisionNumber=src.revisionNumber;
+	nChannels=src.nChannels;
+	det=src.det;
+	eventNumber=src.eventNumber;
+	for(UInt_t i=0;i<src.clusterChannel.size();i++)
+		clusterChannel.push_back(src.clusterChannel.at(i));
+	for(UInt_t i=0;i<src.clusterSignal.size();i++)
+		clusterSignal.push_back(src.clusterSignal.at(i));
+	for(UInt_t i=0;i<src.clusterADC.size();i++)
+		clusterADC.push_back(src.clusterADC.at(i));
+	for(UInt_t i=0;i<src.clusterSignalInSigma.size();i++)
+		clusterSignalInSigma.push_back(src.clusterSignalInSigma.at(i));
+	for(UInt_t i=0;i<src.clusterChannelScreened.size();i++)
+		clusterChannelScreened.push_back(src.clusterChannelScreened.at(i));
+	return *this;
+}
+
+/**
+ *
+ * @return
+ */
 UInt_t TCluster::checkClusterForSize() const{
 	UInt_t nSignal=(clusterSignal.size());
 	UInt_t nChannel=clusterChannel.size();
@@ -630,6 +673,11 @@ string TCluster::Intent(UInt_t level){
 	return output.str();
 }
 Float_t TCluster::getValueOfHisto(Float_t x, TH1F* histo){
+	if(histo==0){
+		cerr<<"Histo pointer = 0!"<<endl;
+		return -999;
+	}
+
 	if(histo->IsZombie()){
 		cerr<<"Histo is Zombie!"<<endl;
 		return -999;

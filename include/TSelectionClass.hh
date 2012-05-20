@@ -13,6 +13,7 @@
 #include "TH1.h"
 #include "TF1.h"
 #include "TPie.h"
+#include "THTMLSelection.hh"
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
@@ -51,6 +52,7 @@ private:
 	HistogrammSaver *histSaver;
 	UInt_t verbosity;
 private:
+	THTMLSelection *htmlSelection;
 	UInt_t nEvent;
 	bool isDetMasked;//one of the Silicon Planes contains a Cluster with a masked channel
 	deque<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
