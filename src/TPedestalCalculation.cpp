@@ -6,42 +6,71 @@
  */
 
 #include "../include/TPedestalCalculation.hh"
+//
+//TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
+//	// TODO Auto-generated constructor stub
+//	slidingLength=1000;
+//	eventReader=NULL;
+//	pedestalTree=NULL;
+//	pedestalFile=NULL;
+//	this->runNumber=runNumber;
+//	sys = gSystem;
+//	stringstream  runString;
+//	runString.str("");
+//	runString<<runNumber;
+//	sys->MakeDirectory(runString.str().c_str());
+//
+//	sys->cd(runString.str().c_str());
+//
+//	rawfilepath.str("");
+//	rawfilepath<<"rawData."<<runNumber<<".root";
+//	cout<<"currentPath: "<<sys->pwd()<<endl;
+//	cout<<rawfilepath.str()<<endl;
+//	eventReader=new TADCEventReader(rawfilepath.str(),runNumber);
+//	cout<<eventReader->GetEntries()<<endl;
+//	createPedestalTree(nEvents);
+//	MAXSDETSIGMA=7;
+//	MAXDIASIGMA=7;
+//}
 
-TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
-	// TODO Auto-generated constructor stub
-	slidingLength=1000;
-	eventReader=NULL;
-	pedestalTree=NULL;
-	pedestalFile=NULL;
-	this->runNumber=runNumber;
-	sys = gSystem;
-	stringstream  runString;
-	runString.str("");
-	runString<<runNumber;
-	sys->MakeDirectory(runString.str().c_str());
+TPedestalCalculation::TPedestalCalculation(TSettings *settings){
+	if(settings==0)exit(0);
+	this->settings=settings;
+		slidingLength=settings->getPedestalSildingLength();//1000;//settings->getSl
+		eventReader=NULL;
+		pedestalTree=NULL;
+		pedestalFile=NULL;
+		this->runNumber=settings->getRunNumber();
+		sys = gSystem;
+		stringstream  runString;
+		runString.str("");
+		runString<<runNumber;
+		sys->MakeDirectory(runString.str().c_str());
 
-	sys->cd(runString.str().c_str());
+		sys->cd(runString.str().c_str());
 
-	rawfilepath.str("");
-	rawfilepath<<"rawData."<<runNumber<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<rawfilepath.str()<<endl;
-	eventReader=new TADCEventReader(rawfilepath.str(),runNumber);
-	cout<<eventReader->GetEntries()<<endl;
-	createPedestalTree(nEvents);
-	MAXSDETSIGMA=7;
-	MAXDIASIGMA=7;
+		rawfilepath.str("");
+		rawfilepath<<"rawData."<<runNumber<<".root";
+		cout<<"currentPath: "<<sys->pwd()<<endl;
+		cout<<rawfilepath.str()<<endl;
+		eventReader=new TADCEventReader(rawfilepath.str(),runNumber);
+		cout<<eventReader->GetEntries()<<endl;
+		MAXSDETSIGMA=settings->getSi_Pedestal_Hit_Factor();
+		MAXDIASIGMA=settings->getDi_Pedestal_Hit_Factor();
+		cout<<"Pedestal Hit Factor Silicon: "<<MAXSDETSIGMA<<"\nPedestal Hit Factor Diamond: "<<MAXDIASIGMA<<endl;
 }
-
 TPedestalCalculation::~TPedestalCalculation() {
 	// TODO Auto-generated destructor stub
+	if(createdNewTree){
+		pedestalFile->cd();
+		pedestalTree->AddFriend(eventReader->getTree()->GetName(),rawfilepath.str().c_str());
+		cout<<pedestalTree->GetListOfFriends()->GetEntries()<<endl;
+		pedestalFile->cd();
+		pedestalTree->Write();
+		pedestalTree->Delete();
+	}
 
-	pedestalTree->AddFriend(eventReader->getTree()->GetName(),rawfilepath.str().c_str());
-	cout<<pedestalTree->GetListOfFriends()->GetEntries()<<endl;
 	delete eventReader;
-	pedestalFile->cd();
-	pedestalTree->Write();
-	pedestalTree->Delete();
 	pedestalFile->Close();
 	sys->cd("..");
 	cout<<"Closing TPedestalCalculation\n\n\n"<<endl;
@@ -49,6 +78,8 @@ TPedestalCalculation::~TPedestalCalculation() {
 
 
 void TPedestalCalculation::calculatePedestals(int nEvents){
+//	nEvents = eventReader->GetEntries();
+	createPedestalTree(nEvents);
 	if(pedestalTree->GetEntries()>=nEvents){
 		cout<<"NO Sliding Pedestal Calculation needed, calculations already done."<<endl;
 		return;
@@ -165,6 +196,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		//calculateCurrentPedestals(detAdcValues,diaAdcValues);
 		pedestalTree->Fill();
 	}//end for
+
 	watch.Stop();
 	cout<<"\nStopWatch:"<<endl;
 	watch.Print();
@@ -182,7 +214,7 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 		for(int ch=0;ch<N_DET_CHANNELS;ch++){
 			TRawEventSaver::showStatusBar(256*det+ch,256*8,10);
 			pair<float,float> values;
-			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,MAXDIASIGMA);//7 iteration for first pedestal
+			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,MAXSDETSIGMA);//7 iteration for first pedestal
 			pedestalMean[det][ch]=values.first;
 			pedestalSigma[det][ch]=values.second;
 //			pedestalMean.at(det).at(ch)=values.first;
@@ -336,7 +368,7 @@ bool TPedestalCalculation::createPedestalTree(int nEvents)
 	treeDescription<<"Pedestal Data of run "<<runNumber;
 	pedestalFile->GetObject("pedestalTree",pedestalTree);
 	if(pedestalTree!=NULL){
-		cout<<"File and Tree Exists... \t"<<flush;
+		cout<<"File and Tree Exists... \t"<<pedestalTree->GetEntries()<<" of "<< nEvents<<flush;
 		if(pedestalTree->GetEntries()>=nEvents){
 			createdNewTree=false;
 			setBranchAdresses();
@@ -351,6 +383,7 @@ bool TPedestalCalculation::createPedestalTree(int nEvents)
 	if(pedestalTree==NULL){
 		pedestalFile->Close();
 		pedestalFile=new TFile(pedestalfilepath.str().c_str(),"RECREATE");
+		pedestalFile->cd();
 		this->pedestalTree=new TTree("pedestalTree",treeDescription.str().c_str());
 		createdNewTree=true;
 		cout<<"there exists no tree:\'pedestalTree\"\tcreate new one."<<pedestalTree<<endl;

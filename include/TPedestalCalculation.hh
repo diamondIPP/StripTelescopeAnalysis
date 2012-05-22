@@ -34,7 +34,8 @@ using namespace std;
 #define N_DIA_CHANNELS 128
 class TPedestalCalculation {
 public:
-	TPedestalCalculation(int runNumber, int nEvents);
+	TPedestalCalculation(TSettings *settings);
+//	TPedestalCalculation(int runNumber, int nEvents);
 	virtual ~TPedestalCalculation();
 	void calculatePedestals(int nEvents);
 	void calculateSlidingPedestals(UInt_t nEvents);
@@ -50,8 +51,10 @@ private:
 	TFile* pedestalFile;
 	TTree* pedestalTree;
 	bool createdNewTree;
+	UInt_t nEvents;
 	bool createdNewFile;
     TSystem* sys;
+    TSettings *settings;
 	UInt_t runNumber;
 	Float_t pedestalMean[9][N_DET_CHANNELS];
 	Float_t diaPedestalMean[N_DIA_CHANNELS];

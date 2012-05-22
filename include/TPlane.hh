@@ -40,7 +40,8 @@ public:
 
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
-	TPlane(const TPlane& rhs);
+	TPlane(const TPlane& rhs);//COPY Constructor
+	TPlane &operator=(const TPlane &src); //class assignment function
 	virtual ~TPlane();
 	TCluster getCluster(TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	TCluster getXCluster(UInt_t cl);
@@ -61,7 +62,7 @@ private:
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-    ClassDef(TPlane,6);
+    ClassDef(TPlane,7);
 };
 
 #endif // TPlane_hh

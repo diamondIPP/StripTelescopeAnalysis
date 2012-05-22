@@ -72,19 +72,22 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 
 TSelectionClass::~TSelectionClass() {
 	// TODO Auto-generated destructor stub
-	saveHistos();
 	cout<<"\n\nClosing TSelectionClass"<<endl;
 	selectionFile->cd();
 	if(selectionTree!=NULL&&this->createdTree){
+		saveHistos();
 		cout<<"CLOSING TREE"<<endl;
-		cout<<eventReader->getTree()->GetName()<<" "<<clusterfilepath.str().c_str()<<endl;
+		cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<clusterfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend(eventReader->getTree()->GetName(),clusterfilepath.str().c_str());
-		cout<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
+		cout<<"\t"<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend("pedestalTree",pedestalfilepath.str().c_str());
-		cout<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
+		cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend("rawTree",rawfilepath.str().c_str());
-		cout<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
-		selectionTree->Write();
+		cout<<"\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
+		selectionFile->cd();
+		cout<<"\t"<<"WRITE TREE: "<<flush;
+		int retVal = selectionTree->Write();
+		cout<<retVal<<endl;
 		htmlSelection->generateHTMLFile();
 	}
 	selectionFile->Close();
@@ -189,14 +192,13 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 		cout<<"."<<endl;
 		cout<<selectionfilepath.str().c_str()<<endl;
 		selectionFile=new TFile(selectionfilepath.str().c_str(),"RECREATE");
+		selectionFile->cd();
 		cout<<"."<<endl;
 		this->selectionTree=new TTree("selectionTree",treeDescription.str().c_str());
 		cout<<"."<<endl;
 		createdNewTree=true;
-		cout<<"\n\n\n***************************************************************\n";
-		cout<<"***************************************************************\n";
+		cout<<"\n***************************************************************\n";
 		cout<<"there exists no tree:\'selectionTree\"\tcreate new one."<<selectionTree<<"\n";
-		cout<<"***************************************************************\n";
 		cout<<"***************************************************************\n"<<endl;
 	}
 

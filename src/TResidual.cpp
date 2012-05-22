@@ -20,7 +20,7 @@ TResidual::TResidual(bool bTest){
  * up to now it is making nothig
  */
 TResidual::~TResidual() {
-	// TODO Auto-generated destructor stub
+
 }
 
 void TResidual::resetResidual(){
@@ -87,28 +87,28 @@ void TResidual::addDataPoint(Float_t deltaX, Float_t predX, Float_t deltaY, Floa
  */
 Float_t TResidual::getXSigma()
 {
-	if(bTestResidual) return 100000;
+	if(bTestResidual) return (100000);
 	if (nUsedTracks!=0)
-		return TMath::Sqrt(this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean());
-	return N_INVALID;
+		return (TMath::Sqrt(this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean()));
+	return ( N_INVALID);
 }
 
 
 
 Float_t TResidual::getYSigma()
 {
-	if(bTestResidual) return 100000;
+	if(bTestResidual) return (100000);
 	if (nUsedTracks!=0)
-		return TMath::Sqrt(this->resYSigma / (Double_t)this->nUsedTracks - getYMean()*getYMean());
-	return N_INVALID;
+		return (TMath::Sqrt(this->resYSigma / (Double_t)this->nUsedTracks - getYMean()*getYMean()));
+	return (N_INVALID);
 }
 
 Float_t TResidual::getXOffset()
 {
 	Float_t variableDif= (nUsedTracks * sumV2x - sumVx * sumVx);
 	if (variableDif!=0)
-		return -(sumRx * sumV2x - sumVRx * sumVx) / variableDif;
-	return N_INVALID;
+		return (-(sumRx * sumV2x - sumVRx * sumVx) / variableDif);
+	return (N_INVALID);
 }
 
 
@@ -117,16 +117,16 @@ Float_t TResidual::getYOffset()
 {
 	Float_t variableDif= (nUsedTracks * sumV2y - sumVy * sumVy);
 	if (variableDif!=0)
-		return -(sumRy * sumV2y - sumVRy * sumVy) / variableDif;
-	return N_INVALID;
+		return (-(sumRy * sumV2y - sumVRy * sumVy) / variableDif);
+	return (N_INVALID);
 }
 
 Float_t TResidual::getPhiXOffset()
 {
 	Float_t variableDif=(nUsedTracks * sumV2y - sumVy * sumVy);
 	if(variableDif!=0)
-		return TMath::ATan((nUsedTracks* sumVRy - sumRy * sumVy) / variableDif);
-	return N_INVALID;
+		return (TMath::ATan((nUsedTracks* sumVRy - sumRy * sumVy) / variableDif));
+	return (N_INVALID);
 }
 
 
@@ -134,26 +134,26 @@ Float_t TResidual::getPhiYOffset()
 {
 	Float_t variableDif = (nUsedTracks * sumV2x - sumVx * sumVx);
 	if(variableDif!=0)
-		return TMath::ATan(-(nUsedTracks * sumVRx - sumRx * sumVx) / variableDif);
-	return N_INVALID;
+		return (TMath::ATan(-(nUsedTracks * sumVRx - sumRx * sumVx) / variableDif));
+	return (N_INVALID);
 }
 
 Float_t TResidual::getXMean()
 {
 	if(bTestResidual)
-		return 0;
+		return (0);
 	if(nUsedTracks!=0)
 		return  (this->resXMean/(Double_t)this->nUsedTracks);
-	return N_INVALID;
+	return (N_INVALID);
 }
 
 Float_t TResidual::getYMean()
 {
 	if(bTestResidual)
-		return 0;
+		return (0);
 	if(nUsedTracks!=0)
 		return  (this->resYMean/(Double_t)this->nUsedTracks);
-	return N_INVALID;
+	return (N_INVALID);
 }
 
 
@@ -161,14 +161,14 @@ Float_t TResidual::getDeltaXMean()
 {
 	if(nUsedTracks!=0)
 		return  (this->sumRx/(Double_t)this->nUsedTracks);
-	return N_INVALID;
+	return (N_INVALID);
 }
 
 Float_t TResidual::getDeltaYMean()
 {
 	if(nUsedTracks!=0)
 		return  (this->sumRy/(Double_t)this->nUsedTracks);
-	return N_INVALID;
+	return (N_INVALID);
 }
 
 
@@ -176,14 +176,14 @@ Float_t TResidual::getPredXMean()
 {
 	if(nUsedTracks!=0)
 		return  (this->sumVy/(Double_t)this->nUsedTracks);
-	return N_INVALID;
+	return (N_INVALID);
 }
 
 Float_t TResidual::getPredYMean()
 {
 	if(nUsedTracks!=0)
 		return  (this->sumVx/(Double_t)this->nUsedTracks);
-	return N_INVALID;
+	return (N_INVALID);
 }
 
 

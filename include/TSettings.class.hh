@@ -36,9 +36,10 @@ public:
 	void setAlignment_chi2(Float_t alignment_chi2);
 	float getFix_dia_noise() const;
 	Int_t getIter_Size() const;
+	Int_t getPedestalSildingLength(){return getIter_Size();};
 	Int_t getTaylor_speed_throttle() const;
-	Float_t getDi_Pedestal_Hit_Factor() const;
 	Int_t getDia_input() const;
+	Float_t getDi_Pedestal_Hit_Factor() const;
 	Float_t getSi_Pedestal_Hit_Factor() const;
 	Int_t getDO_CMC() const;
 	Int_t getCMN_cut() const;

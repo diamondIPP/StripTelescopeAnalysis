@@ -10,8 +10,10 @@
 ClassImp(TPlane);
 
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
-	verbosity=0;
+	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<"\tyClusters:"<<yClusters.size()<<endl;
+	this->xClusters.clear();
+	this->yClusters.clear();
 	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
 		this->xClusters.push_back(xClusters.at(xCl));
 	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
@@ -22,18 +24,25 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 }
 
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
-	verbosity=0;
+	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
+	this->xClusters.clear();
 	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
 		this->xClusters.push_back(xClusters.at(xCl));
-	yClusters.clear();
+	this->yClusters.clear();
 	this->type=type;
 	this->planeNo=planeNo;
 
 }
 
+/**
+ * Copy Constructor for TPlane class
+ * @param rhs
+ */
 TPlane::TPlane(const TPlane& rhs){
 	this->verbosity=rhs.verbosity;
+	this->xClusters.clear();
+	this->yClusters.clear();
 	if(verbosity>10)cout<<"Copy constructor of TPlane:"<<rhs.xClusters.size()<<" "<<rhs.yClusters.size()<<endl;
 	for(UInt_t xCl=0;xCl<rhs.xClusters.size();xCl++){
 		TCluster xCluster=rhs.xClusters.at(xCl);
@@ -49,6 +58,23 @@ TPlane::TPlane(const TPlane& rhs){
 
 TPlane::~TPlane() {
 	
+}
+
+/**
+ * Class Assignment function
+ */
+TPlane::TPlane& TPlane::operator =(const TPlane &src){
+
+    type=src.type;
+	planeNo=src.planeNo;
+	verbosity=src.verbosity;
+	xClusters.clear();
+	for(UInt_t i=0;i<src.xClusters.size();i++)
+		xClusters.push_back(src.xClusters.at(i));
+	yClusters.clear();
+	for(UInt_t i=0;i<src.yClusters.size();i++)
+		yClusters.push_back(src.yClusters.at(i));
+	return *this;
 }
 
 enum TPlaneProperties::enumDetectorType TPlane::getDetectorType() const

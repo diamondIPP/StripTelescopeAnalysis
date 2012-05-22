@@ -22,6 +22,7 @@
 #include "TH1.h"
 #include "TF1.h"
 #include "TGraphErrors.h"
+#include "TMultiGraph.h"
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"

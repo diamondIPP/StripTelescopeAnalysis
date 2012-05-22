@@ -56,12 +56,14 @@ TAlignment::TAlignment(TSettings* settings) {
 	align=NULL;
 	myTrack=NULL;
 	nAlignmentStep=-1;
-	nAlignSteps=5;
+	nAlignSteps=7;
 	nDiaAlignmentStep=-1;
 	nDiaAlignSteps=5;
 
 	diaCalcMode = TCluster::corEta;
 	silCalcMode = TCluster::maxValue;
+
+	plotAll=true;
 
 }
 
@@ -131,8 +133,12 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
 			nCandidates++;
 			this->events.push_back(*eventReader->getEvent());
 		}
+		if(eventReader->useForAnalysis()){
+			cout<<"\nFound first Event for Analyis ->BREAK"<<endl;
+			break;
+		}
 	}
-	align->addEventIntervall(startEvent,startEvent+nEvents);
+	align->addEventIntervall(startEvent,nEvent);
 	align->setNUsedEvents(events.size());
 	align->setAlignmentTrainingTrackFraction(settings->getAlignment_training_track_fraction());
 	align->setRunNumber(settings->getRunNumber());
@@ -140,64 +146,6 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent){
 }
 
 
-
-/**
- * @brief main function of TAlignment, creates eventVector and makes alignemnt
- *
- * @param nEvents	number of Events form which the alignment events are taken
- * @param startEvent first event number
- * @return 1 if everything worked else return 0
- *
- * @todo work on return values
- */
-/**
- *
- * @param subjectPlane
- * @param refPlane1
- * @param refPlane2
- */
-void TAlignment::AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
-{
-	AlignDetector(TPlaneProperties::XY_COR,subjectPlane,refPlane1,refPlane2);
-}
-
-
-/**
- *
- * @param subjectPlane
- * @param refPlane1
- * @param refPlane2
- */
-void TAlignment::AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
-{
-	AlignDetector(TPlaneProperties::X_COR,subjectPlane,refPlane1,refPlane2);
-}
-
-
-/**
- *
- * @param subjectPlane
- * @param refPlane1
- * @param refPlane2
- */
-void TAlignment::AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2)
-{
-	AlignDetector(TPlaneProperties::Y_COR,subjectPlane,refPlane1,refPlane2);
-}
-
-
-void TAlignment::PrintEvents(UInt_t maxEvent,UInt_t startEvent){
-	if(maxEvent==0)maxEvent=eventReader->GetEntries();
-	if(maxEvent>eventReader->GetEntries())maxEvent=eventReader->GetEntries();
-	cout<<"\n\n\n\n\n\nPrintEVENTS"<<maxEvent<<"\n\n\n"<<flush;
-	for(UInt_t event=startEvent;event<maxEvent;event++){
-		eventReader->LoadEvent(event);
-		cout<<event<<":\t"<<flush;
-		eventReader->getEvent()->Print(1);
-	}
-	cout<<"\n\n\n\n\n\n"<<flush;
-
-}
 
 int TAlignment::Align(UInt_t nEvents,UInt_t startEvent)
 {
@@ -226,172 +174,46 @@ int TAlignment::Align(UInt_t nEvents,UInt_t startEvent)
 	return 1;
 }
 
-TResidual TAlignment::AlignStripDetector(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPlot,TResidual resOld){
-	if(verbosity){
-		cout<<"TAlignment::AlignStripDetector::\taligning Plane "<<subjectPlane<<TPlaneProperties::getCoordinateString(cor)<<" with "<<vecRefPlanes.size()<< " Planes: ";
-
-		for(UInt_t i=0;i<vecRefPlanes.size();i++)
-			cout<<vecRefPlanes.at(i)<<" ";
-		cout<<"\t";
-		if(bPlot)cout<<" plots are created\t";
-		if(resOld.isTestResidual())
-			cout<<"resOld is a testResidual"<<endl;
-		else{
-			cout<<endl;
-			resOld.Print(2);
-		}
-		for(UInt_t i=0;i<vecRefPlanes.size();i++)
-			if(vecRefPlanes.at(i)==subjectPlane)cerr<<"Plane "<<subjectPlane<<" is used as a reference Plane and as a subject Plane"<<endl;
-	}
-	//get residual
-	TResidual res = this->getStripResidual(cor,subjectPlane,vecRefPlanes,false,bPlot,resOld);
-	Float_t x_offset = res.getXOffset();
-	Float_t phix_offset = res.getPhiYOffset();
-	Float_t y_offset = res.getYOffset();
-	Float_t phiy_offset = res.getPhiXOffset();
-
-	if(verbosity)printf("Correction Values: X: %2.6f,  PhiX: %2.6f,   Y: %2.6f,  PhiY: %2.6f\n",x_offset,phix_offset,y_offset,phiy_offset);
-	//save corrections to alignment
-	if(vecRefPlanes.size()==1){
-		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor)
-			align->AddToXOffset(subjectPlane,x_offset);
-		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor)
-			align->AddToYOffset(subjectPlane,y_offset);
-	}
-	else{
-		if(subjectPlane==4&&nDiaAlignmentStep==0){
-			align->AddToXOffset(subjectPlane,x_offset);
-			return res;
-		}
-		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor){
-			align->AddToXOffset(subjectPlane,x_offset);
-			align->AddToPhiXOffset(subjectPlane,phix_offset);
-		}
-		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor){
-			align->AddToYOffset(subjectPlane,y_offset);
-			align->AddToPhiYOffset(subjectPlane,phiy_offset);
-		}
-	}
-	return res;
-}
-
+/**
+ * @brief main function of TAlignment, creates eventVector and makes alignemnt
+ *
+ * @param nEvents	number of Events form which the alignment events are taken
+ * @param startEvent first event number
+ * @return 1 if everything worked else return 0
+ *
+ * @todo work on return values
+ */
 /**
  *
- * @param cor
  * @param subjectPlane
  * @param refPlane1
  * @param refPlane2
- * @param bPlot
- * @todo upschreiben dass die andere funktion aufgreufen wird...
  */
-TResidual TAlignment::AlignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot,TResidual resOld)
-{
-	//cout<<"\n\nTAlignment::AlignDetector\n\t align "<<TPlaneProperties::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
-	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
-		return resOld;
-	}
+void TAlignment::AlignSiliconPlanes(){
+//	verbosity=0;
+	nAlignmentStep=-1;
+	//getChi2Distribution(10000);
+	cout<<"Check Detector Alignment"<<endl;
+	CheckDetectorAlignment(TPlaneProperties::XY_COR,1,0,3,true);
+	CheckDetectorAlignment(TPlaneProperties::XY_COR,2,0,3,true);
+	CheckDetectorAlignment(TPlaneProperties::XY_COR,3,1,2,true);
+	cout<<"ALign Detector with Plane 0"<<endl;
+	AlignDetector(TPlaneProperties::XY_COR,1,0,0,false);
+	AlignDetector(TPlaneProperties::XY_COR,2,0,0,false);
+	AlignDetector(TPlaneProperties::XY_COR,3,0,0,false);
 
-	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot,resOld);
-	if(refPlane1==refPlane2){//todo ersetzen durch "echtes alignment?"
-		if(cor==TPlaneProperties::XY_COR||cor==TPlaneProperties::X_COR)
-			align->AddToXOffset(subjectPlane,res.getXMean());
-		if(cor==TPlaneProperties::XY_COR||cor==TPlaneProperties::Y_COR)
-			align->AddToYOffset(subjectPlane,res.getYMean());
-		return res;
+	if(verbosity)cout<<endl;
+	cout<<"STart with Alignment Steps"<<endl;
+	bool bAlignmentGood=true;
+	for(nAlignmentStep=0;nAlignmentStep<nAlignSteps;nAlignmentStep++){//||(nAlignmentStep<10&&!bAlignmentGood);nAlignmentStep++){
+		bAlignmentGood=true;
+		bAlignmentGood=SiliconAlignmentStep(false);
 	}
-	else{
-		Float_t x_offset = res.getXOffset();
-		Float_t phix_offset = res.getPhiXOffset();
-		if(cor==TPlaneProperties::XY_COR||cor==TPlaneProperties::X_COR){
-			align->AddToXOffset(subjectPlane,x_offset);
-			align->AddToPhiXOffset(subjectPlane,phix_offset);
-			if(verbosity)
-				printf("\tUpdate  Plane %d, X: %2.6f, PhiX: %2.6f\n",subjectPlane,x_offset,phix_offset);
-		}
-//		if(resOld.isTestResidual())
-//			res=getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot,resOld);
-//		else{
-//			resOld = checkDetectorAlignment(TPlaneProperties::XY_COR,subjectPlane,refPlane1)
-//			res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot,res);
-//		}
-		Float_t y_offset = res.getYOffset();
-		Float_t phiy_offset = res.getPhiYOffset();
-		if(cor==TPlaneProperties::XY_COR||cor==TPlaneProperties::Y_COR){
-			align->AddToYOffset(subjectPlane,y_offset);
-			align->AddToPhiYOffset(subjectPlane,phiy_offset);
-			if(verbosity)
-				printf("\tUpdate Plane %d, Y: %2.6f, PhiY: %2.6f\n",subjectPlane,y_offset,phiy_offset);
-		}
-		//
-
-	}
-	return res;
-}
-
-
-/**
- * @brief creates element TResidual to adjust the alignment
- *
- * creates a vector of pedicted X positions, predicted Y positions, delta X and delta Y
- * and use the function calculateResidual to get the residual with this vectors
- * @param	cor coordindate for which the residual is calculated
- * @param	subjectPlane plane for which the residual should be calculated
- * @param	refPlane1 first reference plane
- * @param	refPlane2 second reference plane
- * @param	bPlot	variable to create plots or not
- *
- * @return
- */
-TResidual TAlignment::AlignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld)
-{
-	if(verbosity)cout<<"TAlignment::AlignDetector::\taligning Plane "<<subjectPlane<<TPlaneProperties::getCoordinateString(cor)<<" with "<<vecRefPlanes.size()<< " Planes: ";
-	for(UInt_t i=0;i<vecRefPlanes.size();i++)
-		if(verbosity)cout<<vecRefPlanes.at(i)<<" ";
-	if(verbosity)cout<<"\t";
-	if(bPlot)if(verbosity)cout<<" plots are created\t";
-	if(resOld.isTestResidual())
-		if(verbosity)cout<<"resOld is a testResidual"<<endl;
-	else{
-		if(verbosity)cout<<endl;
-		if(verbosity)resOld.Print(2);
-	}
-	for(UInt_t i=0;i<vecRefPlanes.size();i++)
-		if(vecRefPlanes.at(i)==subjectPlane)cerr<<"Plane "<<subjectPlane<<" is used as a reference Plane and as a subject Plane"<<endl;
-
-	//get residual
-	TResidual res = this->getResidual(cor,subjectPlane,vecRefPlanes,bPlot,resOld);
-	Float_t x_offset = res.getXOffset();
-	Float_t phix_offset = res.getPhiXOffset();
-	Float_t y_offset = res.getYOffset();
-	Float_t phiy_offset = res.getPhiYOffset();
-
-	printf("Correction Values: X: %2.6f,  PhiX: %2.6f,   Y: %2.6f,  PhiY: %2.6f\n",x_offset,phix_offset,y_offset,phiy_offset);
-	//save corrections to alignment
-	if(vecRefPlanes.size()==1){
-		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor)
-			align->AddToXOffset(subjectPlane,x_offset);
-		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor)
-			align->AddToYOffset(subjectPlane,y_offset);
-	}
-	else{
-		if(subjectPlane==4&&nDiaAlignmentStep==0){
-			align->AddToXOffset(subjectPlane,x_offset);
-			return res;
-		}
-		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor){
-			align->AddToXOffset(subjectPlane,x_offset);
-			align->AddToPhiYOffset(subjectPlane,phiy_offset);
-		}
-		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor){
-			align->AddToYOffset(subjectPlane,y_offset);
-			align->AddToPhiXOffset(subjectPlane,phix_offset);
-		}
-	}
-	return res;
+	getFinalSiliconAlignmentResuluts();
 }
 
 bool TAlignment::SiliconAlignmentStep(bool bPlot){
-
+	TPlaneProperties::enumCoordinate coordinates = ((nAlignmentStep<2)? TPlaneProperties::XY_COR : TPlaneProperties::Y_COR);
 
 	cout<<"\n\n\nALIGNMENT STEP:\t"<<nAlignmentStep+1<<" of "<<nAlignSteps<<"\n\n"<<endl;
 	bool isAlignmentDone=true;
@@ -401,57 +223,48 @@ bool TAlignment::SiliconAlignmentStep(bool bPlot){
 			for(UInt_t refPlane=0;refPlane<TPlaneProperties::getNSiliconPlanes();refPlane++)
 				if(refPlane!=plane)vecRefPlanes.push_back(refPlane);
 			TResidual res=CheckDetectorAlignment(TPlaneProperties::XY_COR,plane,vecRefPlanes,false);
-			res=CheckDetectorAlignment(TPlaneProperties::XY_COR,plane,vecRefPlanes,false,res);
+			res=CheckDetectorAlignment(coordinates,plane,vecRefPlanes,false,res);
 			align->setXResolution(res.getXSigma(),plane);
 			align->setYResolution(res.getYSigma(),plane);
 		}
 		cout<<endl;
 	}
-//	for(UInt_t subjectPlane=1;subjectPlane<TPlaneProperties::getNSiliconPlanes()-1;subjectPlane++){
-//		vector<UInt_t>vecRefPlanes;
-//		cout<<"\nAlign Plane "<<subjectPlane<<" with Plane "<<flush;
-//		for(UInt_t refPlane=0;refPlane<TPlaneProperties::getNSiliconPlanes();refPlane++)
-//			if(refPlane!=subjectPlane){
-//				vecRefPlanes.push_back(refPlane);
-//				cout<<" "<<refPlane<<flush;
-//			}
-//		cout<<endl;
-//		TResidual res=CheckDetectorAlignment(TPlaneProperties::XY_COR,subjectPlane,vecRefPlanes,false);
-//		res = AlignDetector(TPlaneProperties::XY_COR,subjectPlane,vecRefPlanes,false,res);
-//		res.getXSigma();
-//		align->setXResolution(res.getXSigma(),subjectPlane);
-//		align->setYResolution(res.getYSigma(),subjectPlane);
-//		Float_t xOff= align->GetLastXOffset(subjectPlane);
-//			Float_t yOff= align->GetLastYOffset(subjectPlane);
-//			cout<<"addXoffset: "<<xOff<<"/"<<align->GetLastXOffset(subjectPlane)<<"\taddYoffset:"<<yOff<<"/"<<align->GetLastYOffset(subjectPlane)<<endl;
-//			if(xOff>0.01||yOff>0.01)
-//				isAlignmentDone= false;
-//	}
 
-
-	TResidual res103=CheckDetectorAlignment(TPlaneProperties::XY_COR,1,0,3,false);
-	if(verbosity)printf("\n1 with 0 and 3:%d,%1.2f+/-%1.2f\n",res103.isTestResidual(),res103.getXMean(),res103.getXSigma());
-	AlignDetector(TPlaneProperties::XY_COR,1,0,3,bPlot,res103);
+	UInt_t subjectPlane1 = 1;
+	UInt_t refPlane1_1 =0,refPlane1_2=3;
+	cout<<"\nAlign Plane "<<subjectPlane1<<" with Plane "<<refPlane1_1<<" and "<<refPlane1_2<<endl;
+	TResidual resPlane1=CheckDetectorAlignment(TPlaneProperties::XY_COR,subjectPlane1,refPlane1_1,refPlane1_2,false);
+	if(verbosity)printf("\nnCheckAlignmentPlane1:%d,%1.2f+/-%1.2f\n",resPlane1.isTestResidual(),resPlane1.getXMean(),resPlane1.getXSigma());
+	AlignDetector(coordinates,subjectPlane1,refPlane1_1,refPlane1_2,bPlot||plotAll,resPlane1);
 	Float_t xOff= align->GetLastXOffset(1);
 	Float_t yOff= align->GetLastYOffset(1);
 	if(xOff>0.01||yOff>0.01)
 		isAlignmentDone= false;
 
-	cout<<"\nAlign Plane 2 with Plane 0 and 3"<<endl;
-	TResidual res203=CheckDetectorAlignment(TPlaneProperties::XY_COR,2,0,3,false);
-	if(verbosity)printf("\n2 with 0 and 3:%d,%1.2f+/-%1.2f\n",res203.isTestResidual(),res203.getXMean(),res203.getXSigma());
-	AlignDetector(TPlaneProperties::XY_COR,2,0,3,bPlot,res203);
+
+	UInt_t subjectPlane2 = 2;
+	UInt_t refPlane2_1 =1,refPlane2_2=3;
+	cout<<"\nAlign Plane "<<subjectPlane2<<" with Plane "<<refPlane2_1<<" and "<<refPlane2_2<<endl;
+	TResidual resPlane2=CheckDetectorAlignment(TPlaneProperties::XY_COR,subjectPlane2,refPlane2_1,refPlane2_2,false);
+	if(verbosity)printf("\nCheckAlignmentPlane2:%d,%1.2f+/-%1.2f\n",resPlane2.isTestResidual(),resPlane2.getXMean(),resPlane2.getXSigma());
+	AlignDetector(coordinates,subjectPlane2,refPlane2_1,refPlane2_2,bPlot||plotAll,resPlane2);
 	xOff= align->GetLastXOffset(2);
 	yOff= align->GetLastYOffset(2);
 	if(xOff>0.01||yOff>0.01)
 		isAlignmentDone= false;
 
 
-	if(nAlignmentStep<nAlignSteps-2){
-	cout<<"\nAlign Plane 3 with Plane 1 and 2"<<endl;
-	TResidual res312=CheckDetectorAlignment(TPlaneProperties::XY_COR,3,1,2,false);
-	if(verbosity)printf("\n3 with 1 and 2:%d,%1.2f+/-%1.2f\n",res312.isTestResidual(),res312.getXMean(),res312.getXSigma());
-	res312=AlignDetector(TPlaneProperties::XY_COR,3,1,2,bPlot,res312);
+	if(true||nAlignmentStep<nAlignSteps-2){
+		UInt_t subjectPlane3 = 3;
+		UInt_t refPlane3_1 =0,refPlane3_2=2;
+		cout<<"\nAlign Plane "<<subjectPlane3<<" with Plane "<<refPlane3_1<<" and "<<refPlane3_2<<endl;
+		vector<UInt_t>vecRefPlanes;
+		vecRefPlanes.push_back(refPlane3_1);
+		vecRefPlanes.push_back(refPlane3_2);
+//		vecRefPlanes.push_back(2);
+	TResidual resPlane3=CheckDetectorAlignment(TPlaneProperties::XY_COR,3,vecRefPlanes,false);
+	if(verbosity)printf("\nnCheckAlignmentPlane3:%d,%1.2f+/-%1.2f\n",resPlane3.isTestResidual(),resPlane3.getXMean(),resPlane3.getXSigma());
+	resPlane3=AlignDetector(coordinates,3,vecRefPlanes,bPlot||plotAll,resPlane3);
 	xOff= align->GetLastXOffset(3);
 	yOff= align->GetLastYOffset(3);
 	if(xOff>0.01||yOff>0.01)
@@ -465,56 +278,6 @@ bool TAlignment::SiliconAlignmentStep(bool bPlot){
 			cout<<"AlignmentStep was NOT the finally alignment step"<<endl;
 	cout<<endl;
 	return isAlignmentDone;
-}
-
-void TAlignment::AlignSiliconPlanes(){
-	verbosity=0;
-	nAlignmentStep=-1;
-	//getChi2Distribution(10000);
-	CheckDetectorAlignment(TPlaneProperties::XY_COR,1,0,3,true);
-	CheckDetectorAlignment(TPlaneProperties::XY_COR,2,0,3,true);
-	CheckDetectorAlignment(TPlaneProperties::XY_COR,3,1,2,true);
-	AlignDetector(TPlaneProperties::XY_COR,1,0,0,false);
-	AlignDetector(TPlaneProperties::XY_COR,2,0,0,false);
-	AlignDetector(TPlaneProperties::XY_COR,3,0,0,false);
-
-//	TResidual res103;//=CheckDetectorAlignment(TPlaneProperties::XY_COR,1,0,3,false);
-//	TResidual res203;//=CheckDetectorAlignment(TPlaneProperties::XY_COR,2,0,3,false);
-//	TResidual res312;//=CheckDetectorAlignment(TPlaneProperties::XY_COR,3,1,2,false);
-//	res103=CheckDetectorAlignment(TPlaneProperties::XY_COR,1,0,3,false);//test
-//	AlignDetector(TPlaneProperties::XY_COR,1,0,3,false,res103);//test
-
-	if(verbosity)cout<<endl;
-
-	bool bAlignmentGood=true;
-	for(nAlignmentStep=0;nAlignmentStep<nAlignSteps;nAlignmentStep++){//||(nAlignmentStep<10&&!bAlignmentGood);nAlignmentStep++){
-		bAlignmentGood=true;
-		bAlignmentGood=SiliconAlignmentStep(false);
-	}
-//	cout<<"\n\n***************************"<<endl;
-//	cout<<"DO Eta Corrections Step 1"<<endl;
-//	cout<<"***************************"<<endl;
-//	DoEtaCorrectionSilicon(1);
-//	cout<<"DO new alignment steps"<<endl;
-//	bAlignmentGood=true;
-//	UInt_t nAlignStep=nAlignmentStep;
-//	for(nAlignmentStep;nAlignmentStep<nAlignStep+2;nAligmentStep++){
-//		bAlignmentGood=SiliconAlignmentStep(nAlignmentStep==nAlignStep+1);
-//	}
-//	cout<<"DO Eta Corrections Step 2"<<endl;
-//	DoEtaCorrectionSilicon(2);
-//	align->PrintResults();
-//
-////	res103=this->CheckDetectorAlignment(TPlaneProperties::XY_COR,1,0,3,false,res);
-////	res203=this->CheckDetectorAlignment(TPlaneProperties::XY_COR,2,0,3,false);
-//////	res312=this->CheckDetectorAlignment(TPlaneProperties::XY_COR,3,1,2,false);
-////////
-////////
-////	res103=this->CheckDetectorAlignment(TPlaneProperties::XY_COR,1,0,3,true,res103);
-////	res203=this->CheckDetectorAlignment(TPlaneProperties::XY_COR,2,0,3,true,res203);
-////	res312=this->CheckDetectorAlignment(TPlaneProperties::XY_COR,3,1,2,true,res312);
-////	verbosity=0;
-	getFinalSiliconAlignmentResuluts();
 }
 
 void TAlignment::AlignDiamondPlane(){
@@ -548,6 +311,123 @@ void TAlignment::AlignDiamondPlane(){
 	align->setDiamondDate();
 }
 
+
+TResidual TAlignment::AlignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot,TResidual resOld)
+{
+	vector<UInt_t>vecRefPlanes;
+	vecRefPlanes.push_back(refPlane1);
+	if(refPlane1!=refPlane2)
+		vecRefPlanes.push_back(refPlane2);
+	return AlignDetector( cor, subjectPlane,vecRefPlanes, bPlot, resOld);
+
+}
+
+
+TResidual TAlignment::AlignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld)
+{
+
+	if (true){//some outputs
+		if(verbosity)cout<<"TAlignment::AlignDetector::\taligning Plane "<<subjectPlane<<TPlaneProperties::getCoordinateString(cor)<<" with "<<vecRefPlanes.size()<< " Planes: ";
+		for(UInt_t i=0;i<vecRefPlanes.size();i++)
+			if(verbosity)cout<<vecRefPlanes.at(i)<<" ";
+		if(verbosity)cout<<"\t";
+		if(bPlot)if(verbosity)cout<<" plots are created\t";
+		if(resOld.isTestResidual())
+			if(verbosity)cout<<"resOld is a testResidual"<<endl;
+			else{
+				if(verbosity)cout<<endl;
+				if(verbosity)resOld.Print(2);
+			}
+		for(UInt_t i=0;i<vecRefPlanes.size();i++)
+			if(vecRefPlanes.at(i)==subjectPlane)cerr<<"Plane "<<subjectPlane<<" is used as a reference Plane and as a subject Plane"<<endl;
+	}
+
+	//get Residual
+	TResidual res = this->getResidual(cor,subjectPlane,vecRefPlanes,bPlot,resOld);
+	Float_t x_offset = res.getXOffset();
+	Float_t phix_offset = res.getPhiXOffset();
+	Float_t y_offset = res.getYOffset();
+	Float_t phiy_offset = res.getPhiYOffset();
+	if(subjectPlane==3){
+		cout<<"Xoff: "<<x_offset<<"\tPhiXoff: "<<phix_offset<<"\tYoff: "<<y_offset<<"\tphiY:"<<phiy_offset<<endl;
+	}
+	printf("Correction Values: X: %2.6f,  PhiX: %2.6f,   Y: %2.6f,  PhiY: %2.6f\n",x_offset,phix_offset,y_offset,phiy_offset);
+
+	//save corrections to alignment
+	if(vecRefPlanes.size()==1){
+		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor)
+			align->AddToXOffset(subjectPlane,x_offset);
+		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor)
+			align->AddToYOffset(subjectPlane,y_offset);
+	}
+	else{
+		if(subjectPlane==4&&nDiaAlignmentStep==0){
+			align->AddToXOffset(subjectPlane,x_offset);
+			return res;
+		}
+		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor){
+			if(x_offset!=N_INVALID)align->AddToXOffset(subjectPlane,x_offset);
+			if(phiy_offset!=N_INVALID)align->AddToPhiYOffset(subjectPlane,phiy_offset);
+		}
+		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor){
+			if(y_offset!=N_INVALID)align->AddToYOffset(subjectPlane,y_offset);
+			if(phix_offset!=N_INVALID)align->AddToPhiXOffset(subjectPlane,phix_offset);
+		}
+	}
+	this->myTrack->setDetectorAlignment(align);
+	return res;
+}
+
+TResidual TAlignment::AlignStripDetector(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPlot,TResidual resOld){
+	if(verbosity){
+		cout<<"TAlignment::AlignStripDetector::\taligning Plane "<<subjectPlane<<TPlaneProperties::getCoordinateString(cor)<<" with "<<vecRefPlanes.size()<< " Planes: ";
+
+		for(UInt_t i=0;i<vecRefPlanes.size();i++)
+			cout<<vecRefPlanes.at(i)<<" ";
+		cout<<"\t";
+		if(bPlot)cout<<" plots are created\t";
+		if(resOld.isTestResidual())
+			cout<<"resOld is a testResidual"<<endl;
+		else{
+			cout<<endl;
+			resOld.Print(2);
+		}
+		for(UInt_t i=0;i<vecRefPlanes.size();i++)
+			if(vecRefPlanes.at(i)==subjectPlane)cerr<<"Plane "<<subjectPlane<<" is used as a reference Plane and as a subject Plane"<<endl;
+	}
+	//get residual
+	TResidual res = this->getStripResidual(cor,subjectPlane,vecRefPlanes,false,bPlot,resOld);
+	Float_t x_offset = res.getXOffset();
+	Float_t phix_offset = res.getPhiYOffset();
+	Float_t y_offset = res.getYOffset();
+	Float_t phiy_offset = res.getPhiXOffset();
+
+	if(verbosity)printf("Correction Values: X: %2.6f,  PhiX: %2.6f,   Y: %2.6f,  PhiY: %2.6f\n",x_offset,phix_offset,y_offset,phiy_offset);
+	//save corrections to alignment
+//	if(vecRefPlanes.size()==1){
+//		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor)
+//			align->AddToXOffset(subjectPlane,x_offset);
+//		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor)
+//			align->AddToYOffset(subjectPlane,y_offset);
+//	}
+//	else
+	{
+		if(subjectPlane==4&&nDiaAlignmentStep==0){
+			align->AddToXOffset(subjectPlane,x_offset);
+			return res;
+		}
+		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor){
+			align->AddToXOffset(subjectPlane,x_offset);
+			align->AddToPhiXOffset(subjectPlane,phix_offset);
+		}
+		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor){
+			align->AddToYOffset(subjectPlane,y_offset);
+			align->AddToPhiYOffset(subjectPlane,phiy_offset);
+		}
+	}
+	return res;
+}
+
 TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot,TResidual resOld,TCluster::calculationMode_t mode){
 	vector<UInt_t>vecRefPlanes;
 	vecRefPlanes.push_back(refPlane1);
@@ -569,15 +449,7 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 		else
 			refPlaneString<<"_and_"<<vecRefPlanes.at(i);
 	if(verbosity)cout<<"TAlignment::getResidual of Plane "<<subjectPlane<<TPlaneProperties::getCoordinateString(cor)<<" with "<<refPlaneString.str()<<", plotting: "<<bPlot<<"  with "<<alignmentPercentage<<"\t"<<resOld.isTestResidual()<<endl;
-	vecXPred.clear();
-	vecYPred.clear();
-	vecXObs.clear();
-	vecYObs.clear();
-	vecDeltaX.clear();
-	vecDeltaY.clear();
-	vecXChi2.clear();
-	vecYChi2.clear();
-
+	clearEventVectors();
 	Float_t deltaX, deltaY;
 	Float_t xPositionObserved;
 	Float_t yPositionObserved;
@@ -622,17 +494,34 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 	TResidual res = calculateResidual(cor,&vecXPred,&vecDeltaX,&vecYPred,&vecDeltaY,resOld);
 	this->CreatePlots(cor, subjectPlane,refPlaneString.str(),bPlot);
 
-	vecXObs.clear();
-	vecYObs.clear();
-	vecDeltaX.clear();
-	vecDeltaY.clear();
-	vecXPred.clear();
-	vecYPred.clear();
+	clearEventVectors();
 	return res;
 
 }
 
 
+/**
+ *
+ * @param cor
+ * @param subjectPlane
+ * @param refPlane1
+ * @param refPlane2
+ * @param bPlot
+ * @todo upschreiben dass die andere funktion aufgreufen wird...
+ */
+/**
+ * @brief creates element TResidual to adjust the alignment
+ *
+ * creates a vector of pedicted X positions, predicted Y positions, delta X and delta Y
+ * and use the function calculateResidual to get the residual with this vectors
+ * @param	cor coordindate for which the residual is calculated
+ * @param	subjectPlane plane for which the residual should be calculated
+ * @param	refPlane1 first reference plane
+ * @param	refPlane2 second reference plane
+ * @param	bPlot	variable to create plots or not
+ *
+ * @return
+ */
 TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, TResidual resOld,TCluster::calculationMode_t mode){
 
 	stringstream  refPlaneString;
@@ -644,14 +533,7 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 			else
 				refPlaneString<<"_and_"<<vecRefPlanes.at(i);
 		if(verbosity)cout<<"TAlignment::getStripResidual of Plane "<<subjectPlane<<TPlaneProperties::getCoordinateString(cor)<<" with "<<refPlaneString.str()<<", plotting: "<<bPlot<<"  with "<<alignmentPercentage<<"\t"<<resOld.isTestResidual()<<endl;
-		vecXPred.clear();
-		vecYPred.clear();
-		vecXObs.clear();
-		vecYObs.clear();
-		vecDeltaX.clear();
-		vecDeltaY.clear();
-		vecXChi2.clear();
-		vecYChi2.clear();
+		clearEventVectors();
 
 		Float_t deltaX, deltaY;
 		Float_t xPositionObserved;
@@ -698,13 +580,7 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 		//first estimate residuals widths
 		TResidual res = calculateResidual(cor,&vecXPred,&vecDeltaX,&vecYPred,&vecDeltaY,resOld);
 		this->CreatePlots(cor, subjectPlane,refPlaneString.str(),bPlot,bAlign);
-
-		vecXObs.clear();
-		vecYObs.clear();
-		vecDeltaX.clear();
-		vecDeltaY.clear();
-		vecXPred.clear();
-		vecYPred.clear();
+		clearEventVectors();
 		return res;
 
 }
@@ -722,16 +598,7 @@ TResidual TAlignment::getStripResidualChi2(TPlaneProperties::enumCoordinate cor,
 			else
 				refPlaneString<<"_and_"<<vecRefPlanes.at(i);
 		if(verbosity)cout<<"TAlignment::getStripResidual of Plane "<<subjectPlane<<TPlaneProperties::getCoordinateString(cor)<<" with "<<refPlaneString.str()<<", plotting: "<<bPlot<<"  with "<<alignmentPercentage<<"\t"<<resOld.isTestResidual()<<endl;
-		vecXPred.clear();
-		vecYPred.clear();
-		vecXObs.clear();
-		vecYObs.clear();
-		vecDeltaX.clear();
-		vecDeltaY.clear();
-		vecXChi2.clear();
-		vecYChi2.clear();
-		vecMeasuredX.clear();
-		vecMeasuredY.clear();
+		clearEventVectors();
 
 		Float_t deltaX, deltaY;
 		Float_t xPositionObserved;
@@ -796,12 +663,7 @@ TResidual TAlignment::getStripResidualChi2(TPlaneProperties::enumCoordinate cor,
 		TResidual res = calculateResidual(cor,&vecXPred,&vecDeltaX,&vecYPred,&vecDeltaY);
 		this->CreatePlots(cor, subjectPlane,refPlaneString.str(),bPlot,bAlign);
 
-		vecXObs.clear();
-		vecYObs.clear();
-		vecDeltaX.clear();
-		vecDeltaY.clear();
-		vecXPred.clear();
-		vecYPred.clear();
+		clearEventVectors();
 		return res;
 }
 /**
@@ -809,28 +671,8 @@ TResidual TAlignment::getStripResidualChi2(TPlaneProperties::enumCoordinate cor,
  * this funcition opens the other calculateResidual function but uses a TResidual res
  * which is using all items...
  */
-TResidual TAlignment::calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY){
-	TResidual res;
-	res.SetTestResidual();
-	if(verbosity>2)cout<<"\t"<<deltaX->size()<<" "<<deltaY->size()<<" "<< xPred->size()<<" "<<yPred->size()<<endl;
-	return calculateResidual(cor,xPred,deltaX,yPred,deltaY,res);
-}
-
 TResidual TAlignment::CheckDetectorAlignment(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2, bool bPlot,TResidual resOld)
 {
-//	if(verbosity)cout<<"\n\nTAlignment::checkDetectorAlignment\n\t check "<<TPlaneProperties::getCoordinateString(cor)<<" coordinate of Plane "<<subjectPlane<<" with Plane "<<refPlane1<<" and "<<refPlane2<<endl;
-//	if(refPlane1==subjectPlane || refPlane2==subjectPlane){
-//		return TResidual(true);
-//	}
-//	int verb=verbosity;
-//	verbosity=0;
-//	TResidual res = getResidual(cor,subjectPlane,refPlane1,refPlane2,false,resOld);
-//	if(verbosity)cout<<endl;
-//	res.SetTestResidual(false);
-//	res = getResidual(cor,subjectPlane,refPlane1,refPlane2,bPlot,res);
-//	verbosity=verb;
-//	if(verbosity)res.Print();
-//	return res;
 	vector<UInt_t>vecRefPlanes;
 	vecRefPlanes.push_back(refPlane1);
 	vecRefPlanes.push_back(refPlane2);
@@ -1006,6 +848,13 @@ void TAlignment::getChi2Distribution(Float_t maxChi2)
 	histSaver->SaveGraph(&graph1,histName.str(),"AP");
 }
 
+TResidual TAlignment::calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY){
+	TResidual res;
+	res.SetTestResidual();
+	if(verbosity>2)cout<<"\t"<<deltaX->size()<<" "<<deltaY->size()<<" "<< xPred->size()<<" "<<yPred->size()<<endl;
+	return calculateResidual(cor,xPred,deltaX,yPred,deltaY,res);
+}
+
 /**
  * calculating residual:
  * uses the input TResidual res to use only events with
@@ -1022,6 +871,69 @@ void TAlignment::getChi2Distribution(Float_t maxChi2)
  * @return calculated Residual
  * @TODO POINTER UEBERGEBEN
  */
+TResidual TAlignment::calculateResidualWithChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,Float_t maxChi2, bool bAlign,bool bPlot)
+{
+	if(verbosity)cout<<"\n\nTAlignment::calculateResidualWithChi2"<<endl;
+	clearEventVectors();
+	stringstream  refPlaneString;
+	for(UInt_t i=0;i<vecRefPlanes.size();i++){
+		if(i==0)
+			refPlaneString<<vecRefPlanes.at(i);
+		else if(i+1<vecRefPlanes.size())
+			refPlaneString<<"_"<<vecRefPlanes.at(i);
+		else
+			refPlaneString<<"_and_"<<vecRefPlanes.at(i);
+	}
+	refPlaneString<<"with_Chi2_cut_on_"<<maxChi2;
+
+	//	Float_t xPositionObserved,yPositionObserved,deltaX,deltaY,resxtest,resytest;
+	TPositionPrediction* predictedPosition=0;
+
+	//	UInt_t oldVerbosity=myTrack->getVerbosity();
+	//	myTrack->setVerbosity(4);
+	Float_t chi2x,chi2y,xPositionObserved,yPositionObserved,deltaX,deltaY;;//_
+	for(UInt_t nEvent=0; nEvent<events.size(); nEvent++)
+	{
+		TRawEventSaver::showStatusBar(nEvent,events.size());
+		myTrack->setEvent(&events.at(nEvent));
+		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,false);
+		chi2x=predictedPosition->getChi2X();
+		chi2y=predictedPosition->getChi2Y();
+		xPositionObserved  = myTrack->getPosition(TPlaneProperties::X_COR,subjectPlane);
+		yPositionObserved  = myTrack->getPosition(TPlaneProperties::Y_COR,subjectPlane);
+		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta);
+		if(verbosity>3)	predictedPosition->Print();
+		if(verbosity>3)	cout<<xPositionObserved<<" / "<<yPositionObserved<<endl;
+		deltaX = xPositionObserved-predictedPosition->getPositionX();//X_OBS-X_Pred
+		deltaY = yPositionObserved-predictedPosition->getPositionY();//Y_OBS-Y_Pred
+
+		if(chi2x<maxChi2&&chi2y<maxChi2){
+			vecXObs.push_back(xPositionObserved);
+			vecYObs.push_back(yPositionObserved);
+			vecDeltaX.push_back(deltaX);
+			vecDeltaY.push_back(deltaY);
+			vecXPred.push_back(predictedPosition->getPositionX());
+			vecYPred.push_back(predictedPosition->getPositionY());
+			vecXChi2.push_back(predictedPosition->getChi2X());
+			vecYChi2.push_back(predictedPosition->getChi2Y());
+		}
+
+		predictedPosition->Delete();
+	}
+	cout<< "use "<<vecDeltaX.size()<<" of "<<events.size()<< " Events ( "<<(Float_t)vecDeltaX.size()/(Float_t)events.size()*100.<<" %)"<<endl;
+
+	TResidual res = this->calculateResidual(cor,&vecXPred,&vecDeltaX,&vecYPred,&vecDeltaY);
+	res.SetTestResidual(false);
+	this->CreatePlots(cor,subjectPlane,refPlaneString.str(),bPlot,bAlign);
+
+	clearEventVectors();
+
+	if(verbosity)res.Print(1);
+	return res;
+}
+
+
+
 TResidual TAlignment::calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>*yPred,vector<Float_t>* deltaY,TResidual resOld)
 {
 	if(verbosity)cout<<"\n\tTAlignment::calculateResidual with "<<resOld.getXMean()<<"+/-"<<resOld.getXSigma()<<"\t"<<resOld.getYMean()<<"+/-"<<resOld.getYSigma();
@@ -1126,7 +1038,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		else preName<<nAlignmentStep<<"Step";
 	}
 	stringstream histName;
-	cout<<"\nCreatePlots with "<<preName.str()<<flush;
+	cout<<"\nCreatePlots with "<<preName.str()<<" "<<nAlignmentStep<<flush;
 	if(bUpdateAlignment)cout<<"\twith Alignment Resolution Update\n"<<endl;
 	else cout<<endl;
 
@@ -1482,81 +1394,30 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep)
 	correctedEtaFile->Close();
 }
 
-TResidual TAlignment::calculateResidualWithChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,Float_t maxChi2, bool bAlign,bool bPlot)
-{
-	if(verbosity)cout<<"\n\nTAlignment::calculateResidualWithChi2"<<endl;
-	vecXObs.clear();
-	vecYObs.clear();
-	vecDeltaX.clear();
-	vecDeltaY.clear();
-	vecXPred.clear();
-	vecYPred.clear();
-	vecXChi2.clear();
-	vecYChi2.clear();
-	stringstream  refPlaneString;
-	for(UInt_t i=0;i<vecRefPlanes.size();i++){
-		if(i==0)
-			refPlaneString<<vecRefPlanes.at(i);
-		else if(i+1<vecRefPlanes.size())
-			refPlaneString<<"_"<<vecRefPlanes.at(i);
-		else
-			refPlaneString<<"_and_"<<vecRefPlanes.at(i);
+void TAlignment::PrintEvents(UInt_t maxEvent,UInt_t startEvent){
+	if(maxEvent==0)maxEvent=eventReader->GetEntries();
+	if(maxEvent>eventReader->GetEntries())maxEvent=eventReader->GetEntries();
+	cout<<"\n\n\n\n\n\nPrintEVENTS"<<maxEvent<<"\n\n\n"<<flush;
+	for(UInt_t event=startEvent;event<maxEvent;event++){
+		eventReader->LoadEvent(event);
+		cout<<event<<":\t"<<flush;
+		eventReader->getEvent()->Print(1);
 	}
-	refPlaneString<<"with_Chi2_cut_on_"<<maxChi2;
+	cout<<"\n\n\n\n\n\n"<<flush;
 
-	//	Float_t xPositionObserved,yPositionObserved,deltaX,deltaY,resxtest,resytest;
-	TPositionPrediction* predictedPosition=0;
-
-	//	UInt_t oldVerbosity=myTrack->getVerbosity();
-	//	myTrack->setVerbosity(4);
-	Float_t chi2x,chi2y,xPositionObserved,yPositionObserved,deltaX,deltaY;;//_
-	for(UInt_t nEvent=0; nEvent<events.size(); nEvent++)
-	{
-		TRawEventSaver::showStatusBar(nEvent,events.size());
-		myTrack->setEvent(&events.at(nEvent));
-		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,false);
-		chi2x=predictedPosition->getChi2X();
-		chi2y=predictedPosition->getChi2Y();
-		xPositionObserved  = myTrack->getPosition(TPlaneProperties::X_COR,subjectPlane);
-		yPositionObserved  = myTrack->getPosition(TPlaneProperties::Y_COR,subjectPlane);
-		predictedPosition  = myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta);
-		if(verbosity>3)	predictedPosition->Print();
-		if(verbosity>3)	cout<<xPositionObserved<<" / "<<yPositionObserved<<endl;
-		deltaX = xPositionObserved-predictedPosition->getPositionX();//X_OBS-X_Pred
-		deltaY = yPositionObserved-predictedPosition->getPositionY();//Y_OBS-Y_Pred
-
-		if(chi2x<maxChi2&&chi2y<maxChi2){
-			vecXObs.push_back(xPositionObserved);
-			vecYObs.push_back(yPositionObserved);
-			vecDeltaX.push_back(deltaX);
-			vecDeltaY.push_back(deltaY);
-			vecXPred.push_back(predictedPosition->getPositionX());
-			vecYPred.push_back(predictedPosition->getPositionY());
-			vecXChi2.push_back(predictedPosition->getChi2X());
-			vecYChi2.push_back(predictedPosition->getChi2Y());
-		}
-
-		predictedPosition->Delete();
-	}
-	cout<< "use "<<vecDeltaX.size()<<" of "<<events.size()<< " Events ( "<<(Float_t)vecDeltaX.size()/(Float_t)events.size()*100.<<" %)"<<endl;
-
-	TResidual res = this->calculateResidual(cor,&vecXPred,&vecDeltaX,&vecYPred,&vecDeltaY);
-	res.SetTestResidual(false);
-	this->CreatePlots(cor,subjectPlane,refPlaneString.str(),bPlot,bAlign);
-
-
-	vecXObs.clear();
-	vecYObs.clear();
-	vecDeltaX.clear();
-	vecDeltaY.clear();
-	vecXPred.clear();
-	vecYPred.clear();
-	vecXChi2.clear();
-	vecYChi2.clear();
-	if(verbosity)res.Print(1);
-	return res;
 }
 
+void TAlignment::clearEventVectors(){
+	vecXPred.clear();
+	vecYPred.clear();
+	vecXObs.clear();
+	vecYObs.clear();
+	vecDeltaX.clear();
+	vecDeltaY.clear();
+	vecXChi2.clear();
+	vecYChi2.clear();
+	vecMeasuredX.clear();
+	vecMeasuredY.clear();
 
-
+}
 

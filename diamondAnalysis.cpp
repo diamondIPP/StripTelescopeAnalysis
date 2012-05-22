@@ -189,7 +189,8 @@ int main(int argc, char ** argv) {
 			//Calculate Pedestal
 
 			TPedestalCalculation* pedestalCalculation;
-			pedestalCalculation = new TPedestalCalculation(RUNNUMBER,NEVENTS);
+//			pedestalCalculation = new TPedestalCalculation(RUNNUMBER,NEVENTS);
+			pedestalCalculation = new TPedestalCalculation(settings);
 			pedestalCalculation->calculatePedestals(NEVENTS);
 			pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 			delete pedestalCalculation;
@@ -202,13 +203,15 @@ int main(int argc, char ** argv) {
 		}
 
 		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
-		htmlGen->setPathName((string)(currentDir+"/16202/"));
-		htmlGen->setMainPath((string)(currentDir+"/16202/"));
+		stringstream path;
+		path<<currentDir<<"/"<<settings->getRunNumber()<<"/";
+		htmlGen->setPathName(path.str());//(string)(currentDir+"/16202/"));
+		htmlGen->setMainPath(path.str());//(string)(currentDir+"/16202/"));
 		htmlGen->setSubdirPath("");
 		htmlGen->setFileName("index.html");
 		htmlGen->addSection("Pedestal","<a href=\"pedestalAnalysis/pedestal.html\">PEDESTAL</a>");
 		htmlGen->addSection("Clustering","<a href=\"clustering/clustering.html\">CLUSTERING</a>");
-		htmlGen->addSection("Selection","<a href=\"selections/selections.html\">SELECTION</a>");
+		htmlGen->addSection("Selection","<a href=\"selections/selection.html\">SELECTION</a>");
 		htmlGen->addSection("Landau","<a href=\"selectionAnalysis/landaus.html\">LANDAU-DISTRIBUTIONS</a>");
 		htmlGen->generateHTMLFile();
 		delete htmlGen;
@@ -217,20 +220,14 @@ int main(int argc, char ** argv) {
 //		process_mem_usage(vm2, rss2);
 //		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
-			sys->cd(currentDir.c_str());
+		sys->cd(currentDir.c_str());
 		TClustering* clustering;
 		clustering=new TClustering(settings);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(NEVENTS);
 		delete clustering;
 
-		if (DO_SLIDINGPEDESTAL){
-			sys->cd(currentDir.c_str());
-			TAnalysisOfClustering* analysisClustering;
-			analysisClustering= new TAnalysisOfClustering(settings);
-			analysisClustering->doAnalysis(NEVENTS);
-			delete analysisClustering;
-		}
+
 
 //		process_mem_usage(vm2, rss2);
 //		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
@@ -242,10 +239,10 @@ int main(int argc, char ** argv) {
 
 		if (DO_SLIDINGPEDESTAL){
 			sys->cd(currentDir.c_str());
-//			TAnalysisOfClustering* analysisClustering;
-//			analysisClustering= new TAnalysisOfClustering(settings);
-//			analysisClustering->doAnalysis(NEVENTS);
-//			delete analysisClustering;
+			TAnalysisOfClustering* analysisClustering;
+			analysisClustering= new TAnalysisOfClustering(settings);
+			analysisClustering->doAnalysis(NEVENTS);
+			delete analysisClustering;
 			TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
 			analysisSelection->doAnalysis(NEVENTS);
 			delete analysisSelection;
@@ -263,6 +260,7 @@ int main(int argc, char ** argv) {
 			//alignment->createEventVectors(1000);
 			process_mem_usage(vm2, rss2);
 			cout << "\nMemory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
+			alignment->setVerbosity(2);
 			alignment->Align(NEVENTS);
 			delete alignment;
 		}

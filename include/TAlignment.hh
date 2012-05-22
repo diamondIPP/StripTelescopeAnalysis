@@ -65,16 +65,18 @@ public:
 	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
+	void setVerbosity(UInt_t verb){verbosity=verb;};
 private:
+	void clearEventVectors();
 	void initialiseDetectorAlignment();
 	void AlignSiliconPlanes();
 	bool SiliconAlignmentStep(bool bPrint=false);
 	void AlignDiamondPlane();
 	void saveAlignment();
 	void getChi2Distribution(Float_t maxChi2=1000);
-	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
-	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
-	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2);
+	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){AlignDetector(TPlaneProperties::XY_COR,subjectPlane,refPlane1,refPlane2);};
+	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){AlignDetector(TPlaneProperties::X_COR,subjectPlane,refPlane1,refPlane2);};
+	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){AlignDetector(TPlaneProperties::Y_COR,subjectPlane,refPlane1,refPlane2);};
 	void DoEtaCorrectionSilicon(UInt_t correctionStep=0);
 	void getFinalSiliconAlignmentResuluts();
 	void setSiliconDetectorResolution(Float_t maxChi2);
@@ -125,6 +127,7 @@ private:
     TCluster::calculationMode_t diaCalcMode;
     TCluster::calculationMode_t silCalcMode;
     THTMLAlignment *htmlAlign;
+    bool plotAll;
 private:
 	std::vector<TResidual> vecRes103;
 	vector<Float_t> vecXPred;

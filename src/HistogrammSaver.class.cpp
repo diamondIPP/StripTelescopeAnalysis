@@ -317,7 +317,7 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
 void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
 {
 	canvas->cd();
-	pt->Draw();
+	pt->Clone()->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << canvas->GetName()<<".png";
 	canvas->Print(plot_filename.str().c_str());
@@ -328,7 +328,7 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
 	   TCanvas plots_canvas("plots_canvas","plots_canvas");
 	   plots_canvas.cd();
 	   graph->Draw(option.c_str());
-	   pt->Draw();
+	   pt->Clone()->Draw();
 	   ostringstream plot_filename;
 	   plot_filename << plots_path << name << ".png";
 	   plots_canvas.Print(plot_filename.str().c_str());

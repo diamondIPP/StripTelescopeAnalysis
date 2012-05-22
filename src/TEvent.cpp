@@ -26,6 +26,21 @@ TEvent::TEvent(const TEvent& rhs){
 		this->planes.push_back(rhs.planes.at(pl));
 }
 
+/**
+ * class assignment function for TEvent Class
+ * @param src
+ * @return pointer to this TEvent
+ */
+TEvent::TEvent &TEvent::operator=(const TEvent::TEvent &src){
+	planes.clear();
+	for(UInt_t i=0;i<src.planes.size();i++)
+		planes.push_back(src.planes.at(i));
+	eventNumber=src.eventNumber;
+	verbosity=src.verbosity;
+
+	return (*this);
+}
+
 void TEvent::addPlane(TPlane plane, Int_t pos){
 	if(pos==-1)
 		this->planes.push_back(plane);
