@@ -61,6 +61,7 @@ int TDetectorAlignment::getVerbosity() const
 
 void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
 {
+	if(addPhiXOffset==N_INVALID)return;
 	if(verbosity)cout<<"TDetectorAlignment::addPhiXOffset of Plane "<<plane<<": "<<addPhiXOffset<<", new Value: "<<flush;
 	if(plane<6){
 		vecDetPhiXOffset[plane].push_back(addPhiXOffset);
@@ -71,6 +72,7 @@ void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
 }
 void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 {
+	if(addPhiYOffset==N_INVALID)return;
 	if(verbosity)cout<<"TDetectorAlignment::addPhiYOffset of Plane "<<plane<<": "<<addPhiYOffset<<", new Value: "<<flush;
 	if(plane<6){
 		vecDetPhiYOffset[plane].push_back(addPhiYOffset);
@@ -83,6 +85,7 @@ void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 {
 	if(verbosity)cout<<"TDetectorAlignment::AddToXOffset of Plane "<<plane<<": "<<addXOffset<<", new Value: "<<flush;
+	if(addXOffset==N_INVALID)return;
 	if(plane<6){
 		vecDetXOffset[plane].push_back(addXOffset);
 		det_x_offset[plane]+=addXOffset;
@@ -94,6 +97,7 @@ void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 
 void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 {
+	if(addYOffset==N_INVALID)return;
 	if(verbosity)cout<<"TDetectorAlignment::AddToYOffset of Plane "<<plane<<": "<<addYOffset<<", new Value: "<<flush;
 	if(plane<6){
 		vecDetYOffset[plane].push_back(addYOffset);
@@ -106,6 +110,7 @@ void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 
 void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
 {
+	if(addZOffset==N_INVALID)return;
 	if(plane<6){
 		vecDetZOffset[plane].push_back(addZOffset);
 		det_z_offset[plane]+=addZOffset;

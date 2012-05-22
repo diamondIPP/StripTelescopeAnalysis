@@ -18,6 +18,7 @@
 #include <ctime> // seed the random number generator
 #include <cstdlib> // random number generator
 #include <sstream>
+#include "TPlane.hh"
 //
 //#include "TRandom3.h"
 //#include "TMath.h"

@@ -95,8 +95,8 @@ private:
 	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue);
 	TResidual getStripResidualChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,Float_t maxChi2=1000,TCluster::calculationMode_t mode=TCluster::maxValue);
 
-	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY);
-	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
+//	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY) {return calculateResidual(cor,xPred,deltaX,yPred,deltaY,TResidual(true));};
+//	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
 
 	TResidual calculateResidualWithChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool bAlign=false,bool plot=false);
 	TADCEventReader* eventReader;
@@ -134,10 +134,10 @@ private:
 	vector<Float_t> vecYPred;
 	vector<Float_t> vecXObs;
 	vector<Float_t> vecYObs;
-	vector<Float_t> vecDeltaX;
-	vector<Float_t> vecDeltaY;
-	vector<Float_t> vecMeasuredX;
-	vector<Float_t> vecMeasuredY;
+	vector<Float_t> vecXDelta;
+	vector<Float_t> vecYDelta;
+	vector<Float_t> vecXMeasured;
+	vector<Float_t> vecYMeasured;
 	vector<Float_t> vecXChi2;
 	vector<Float_t> vecYChi2;
 	vector<Float_t> vecClusterSize;

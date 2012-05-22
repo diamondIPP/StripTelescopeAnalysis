@@ -23,6 +23,7 @@
 #include <ctime> // seed the random number generator
 #include <cstdlib> // random number generator
 #include <sstream>
+#include "TMath.h"
 /** Residual Calculation Class
  *
  * This class is used to calculated the values to correct the current Alignment
@@ -36,6 +37,7 @@
 class TResidual {
 public:
 	TResidual(bool bTest=false);
+	void calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res=TResidual(false));
 	virtual ~TResidual();
 	void Print(UInt_t level=0);
 	void addDataPoint(Float_t deltaX,Float_t predX,Float_t deltaY,Float_t predY);
@@ -67,7 +69,8 @@ public:
 	Float_t getPhiYOffset();
 	void SetTestResidual(bool value=true){bTestResidual=value;}
 	bool isTestResidual(){return bTestResidual;}
-
+	void setResKeepFactor(Float_t resKeepFactor){res_keep_factor=resKeepFactor;};
+	void clear();
 private:
 	Float_t resXMean, resXSigma,resYMean,resYSigma;
 	Float_t sumRx;
@@ -79,6 +82,7 @@ private:
 	Float_t sumVRx;
 	Float_t sumVRy;
 	UInt_t nUsedTracks;
+	Float_t res_keep_factor;
 	bool bTestResidual;
 };
 

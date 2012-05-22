@@ -130,6 +130,38 @@ Float_t TResidual::getPhiXOffset()
 }
 
 
+void TResidual::calculateResidual(TPlaneProperties::enumCoordinate cor, vector<Float_t> *xPred, vector<Float_t> *deltaX, vector<Float_t> *yPred, vector<Float_t> *deltaY, TResidual resOld)
+{
+	this->clear();
+	Float_t resxtest;
+	Float_t resytest;
+//	if(verbosity>2)cout<<"\tcalculate Residual "<<res_keep_factor<<endl;
+//	if(verbosity>2)cout<<"\t"<<deltaX->size()<<" "<<deltaY->size()<<" "<< xPred->size()<<" "<<yPred->size()<<endl;
+	for(UInt_t i=0;i<deltaX->size();i++){
+		resxtest= TMath::Abs(deltaX->at(i)-resOld.getXMean())/resOld.getXSigma();
+		resytest= TMath::Abs(deltaY->at(i)-resOld.getYMean())/resOld.getYSigma();
+
+		//only add if restest is smaller than res_keep_factor
+		if((cor==TPlaneProperties::X_COR)&&resxtest<res_keep_factor){
+			this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
+		}//end if
+		else if((cor==TPlaneProperties::X_COR)&&resytest<res_keep_factor){
+			this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
+		}//end else if
+		else if((cor==TPlaneProperties::XY_COR)&&resxtest<res_keep_factor&&resytest<res_keep_factor){
+			this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
+		}//end else if
+
+	}//end for loop
+//	if(verbosity)cout<<"\n";
+//	if(!resOld.isTestResidual()&&verbosity)printf("\tresidual with x:%1.2f+/-%1.2f and y:%1.2f+/-%1.2f\n",resOld.getXMean(),resOld.getXSigma(),resOld.getYMean(),resOld.getYSigma());
+//	if(verbosity>0)	cout<<"\tused "<<residual.getUsedTracks()<<" Tracks"<<endl;
+//	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<residual.getXMean()<<"+/-"<<residual.getXSigma()<<endl;
+//	if(verbosity>0)	cout<<"\tY: "<<residual.getYMean()<<"+/-"<<residual.getYSigma()<<"\n"<<endl;
+	//set values
+	this->SetTestResidual(false);
+}
+
 Float_t TResidual::getPhiYOffset()
 {
 	Float_t variableDif = (nUsedTracks * sumV2x - sumVx * sumVx);
@@ -185,6 +217,16 @@ Float_t TResidual::getPredYMean()
 		return  (this->sumVx/(Double_t)this->nUsedTracks);
 	return (N_INVALID);
 }
+
+void TResidual::clear()
+{
+	this->bTestResidual=0;
+	resXMean= resXSigma=resYMean=resYSigma=0;
+	sumRx=sumRy=sumVx=sumVy=sumV2x=sumV2y=sumVRx=sumVRy=0;
+	nUsedTracks=0;
+}
+
+
 
 
 

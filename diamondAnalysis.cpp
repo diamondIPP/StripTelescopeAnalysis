@@ -260,7 +260,7 @@ int main(int argc, char ** argv) {
 			//alignment->createEventVectors(1000);
 			process_mem_usage(vm2, rss2);
 			cout << "\nMemory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-			alignment->setVerbosity(2);
+//			alignment->setVerbosity(2);
 			alignment->Align(NEVENTS);
 			delete alignment;
 		}
