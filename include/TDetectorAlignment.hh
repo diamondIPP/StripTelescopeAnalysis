@@ -93,7 +93,7 @@ class TDetectorAlignment:public TNamed{
       Double_t getYResolution(UInt_t plane);
       void setYResolution(Double_t yRes,UInt_t plane);
 
-      UInt_t getNUsedEvents() const {return this->nUsedEvents;};
+      UInt_t getNUsedEvents() const {return (this->nUsedEvents);};
       void setNUsedEvents(UInt_t usedEvents){this->nUsedEvents=usedEvents;};
 
       void addEventIntervall(UInt_t first,UInt_t last);

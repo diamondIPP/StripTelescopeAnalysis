@@ -27,6 +27,7 @@
 #include "HistogrammSaver.class.hh"
 #include "TSettings.class.hh"
 #include "LandauGaussFit.hh"
+#include "TProfile.h"
 
 #include "TADCEventReader.hh"
 #include "THTMLCluster.hh"
@@ -66,6 +67,7 @@ private:
 	TH1F* hNumberOfClusters[9];
 	TH1F* hClusterSize[9];
 	TH1F* hClusterSeedSize[9];
+	TH2F* hBiggestHitVsClusterSize[9];
 	vector <double>vecClusterSizes,vecClusterSeedSizes,vecNumberOfClusters;
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;

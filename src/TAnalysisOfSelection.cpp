@@ -81,10 +81,34 @@ void TAnalysisOfSelection::saveHistos()
 	vector <Float_t> vecClusSize;
 	vector <Float_t> vecWidth;
 	vector <Float_t> vecXError;
+	vector <Float_t> vecHistoMax;
+	vector <Float_t> vecHistoMean;
+	vector <Float_t> vecHistoMeanGaus;
+	vector <Float_t> vecHistoMeanLandau;
 	TH1F* histoClusSize = (TH1F*)histoLandauDistribution->ProjectionY("ClusterSizeDiamond",0,4096);
 	TH1F *histo = (TH1F*)histoLandauDistribution->ProjectionX("hPulseHeightDiamondAll",0,8);
 	histo->GetYaxis()->SetTitle("number of Entries #");
-	TF1* fit = landauGauss.doLandauGaussFit(histo);
+	Float_t histoMean,histoMax,histoRMS,histoMeanGausFit;
+	Double_t xmin,xmax;
+	TF1* fit=0;
+	TF1* gausFit=0;
+	histoMean = histo->GetMean();
+	histoMax = histo->GetBinCenter(histo->GetMaximumBin());
+	histoRMS = histo->GetRMS();
+	xmin=histoMax-histoRMS;
+	xmax=histoMax+histoRMS;
+	gausFit = new TF1("gausFit","gaus",xmin,xmax);
+//	cout<<"gausFit: "<<gausFit<<endl;
+	histo->Fit(gausFit,"","same+",xmin,xmax);
+	fit = landauGauss.doLandauGaussFit(histo);
+//	cout <<"gausFit:"<<gausFit->GetTitle()<<" is a:"<< gausFit->ClassName()<<" "<<gausFit->GetNpar()<<endl;
+	histoMeanGausFit = gausFit->GetParameter(1);
+	vecWidth.push_back(fit->GetParameter(0));
+	vecHistoMax.push_back(histoMax);
+	vecHistoMean.push_back(histoMean);
+	vecHistoMeanGaus.push_back(histoMeanGausFit);
+	vecHistoMeanLandau.push_back(fit->GetParameter(1));
+
 	histSaver->SaveHistogram(histo);
 	Float_t width=fit->GetParameter(0);
 	Float_t MP = fit->GetParameter(1);
@@ -98,15 +122,32 @@ void TAnalysisOfSelection::saveHistos()
 		stringstream name;
 		name<< "hPulseHeigthDiamond_"<<clusSize<<"_ClusterSize";
 		TH1F* histo = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),clusSize,clusSize);
+
 		histo->SetTitle(name.str().c_str());
 		histo->GetYaxis()->SetTitle("number of Entries #");
-		TF1* fit;
+		TF1* fitCS=0;
 		if(clusSize<5){
-			fit = landauGauss.doLandauGaussFit(histo);
-			vecMP.push_back(fit->GetParameter(1));
+		  int nTries=0;
+		  while(histo->GetMaximum()<histo->GetEntries()*0.1&&nTries<5)
+		    histo->Rebin(),nTries++;
+		  histoMean = histo->GetMean();
+		  histoMax = histo->GetBinCenter(histo->GetMaximumBin());
+		  histoRMS = histo->GetRMS();
+		  xmin=histoMax-histoRMS, xmax=histoMax+histoRMS;
+		  if(gausFit!=0)delete gausFit;
+		  gausFit = new TF1("gausFit","gaus",xmin,xmax);
+		  histo->Fit(gausFit,"","sames+",xmin,xmax);
+		  histoMeanGausFit = gausFit->GetParameter(1);
+		  if(fitCS!=0)delete fitCS;
+			fitCS = landauGauss.doLandauGaussFit(histo);
+			vecMP.push_back(fitCS->GetParameter(1));
 			vecClusSize.push_back(clusSize);
 			vecXError.push_back(.5);
-			vecWidth.push_back(fit->GetParameter(0));
+			vecWidth.push_back(fitCS->GetParameter(0));
+			vecHistoMax.push_back(histoMax);
+			vecHistoMean.push_back(histoMean);
+			vecHistoMeanGaus.push_back(histoMeanGausFit);
+			vecHistoMeanLandau.push_back(fitCS->GetParameter(1));
 		}
 		histSaver->SaveHistogram(histo);
 		delete histo;
@@ -159,11 +200,16 @@ void TAnalysisOfSelection::saveHistos()
 //	TLine *lMVPminus = new TLine(graph->GetXaxis()->GetXmin(),MP-width,graph->GetXaxis()->GetXmax(),MP-width);
 	histSaver->SaveGraph(graph,name.str(),"APLE1");
 	htmlLandau->addLandauDiamond(width,MP,area,gWidth);
+	htmlLandau->addLandauDiamondTable(vecHistoMean,vecHistoMax,vecHistoMeanGaus,vecHistoMeanLandau);
+
+
 	histoClusSize->SetTitle("ClusterSize Diamond");
 	histoClusSize->GetXaxis()->SetTitle("ClusterSize");
 	histoClusSize->GetYaxis()->SetTitle("Number of Entries #");
 	histSaver->SaveHistogram(histoClusSize);
+
 	htmlLandau->addSection("ClusterSize Diamond",htmlLandau->putImageOfPath("ClusterSizeDiamond","png",50));
+	if(fit!=0)delete fit;
 	delete histo;
 	delete histoClusSize;
 	delete histoLandauDistribution;

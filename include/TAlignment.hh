@@ -25,6 +25,7 @@
 #include "TF1.h"
 #include "TStopwatch.h"
 #include "TRandom.h"
+#include "TROOT.h"
 
 
 #include "TRawEventSaver.hh"
@@ -69,21 +70,21 @@ public:
 private:
 	void clearEventVectors();
 	void initialiseDetectorAlignment();
-	void AlignSiliconPlanes();
-	bool SiliconAlignmentStep(bool bPrint=false);
+	void alignSiliconPlanes();
+	bool siliconAlignmentStep(bool bPrint=false);
 	void AlignDiamondPlane();
 	void saveAlignment();
 	void getChi2Distribution(Float_t maxChi2=1000);
-	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){AlignDetector(TPlaneProperties::XY_COR,subjectPlane,refPlane1,refPlane2);};
-	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){AlignDetector(TPlaneProperties::X_COR,subjectPlane,refPlane1,refPlane2);};
-	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){AlignDetector(TPlaneProperties::Y_COR,subjectPlane,refPlane1,refPlane2);};
+	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::XY_COR,subjectPlane,refPlane1,refPlane2);};
+	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::X_COR,subjectPlane,refPlane1,refPlane2);};
+	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::Y_COR,subjectPlane,refPlane1,refPlane2);};
 	void DoEtaCorrectionSilicon(UInt_t correctionStep=0);
 	void getFinalSiliconAlignmentResuluts();
 	void setSiliconDetectorResolution(Float_t maxChi2);
 	void CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,string refPlaneString,bool bPlot=true, bool bUpdateAlignment=false,bool bChi2=false);
-	TResidual AlignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t>vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
-	TResidual AlignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false,TResidual res=TResidual(true));
-	TResidual AlignStripDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t>vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
+	TResidual alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t>vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
+	TResidual alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false,TResidual res=TResidual(true));
+	TResidual alignStripDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t>vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));
 
 	TResidual CheckDetectorAlignment(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=true,TResidual  res=TResidual(true));
 	TResidual CheckDetectorAlignment(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));

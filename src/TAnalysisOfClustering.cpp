@@ -345,6 +345,14 @@ void TAnalysisOfClustering::initialiseHistos()
 			hPHDistribution[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),512,0,max,10,-.5,9.5);
 
     }
+
+    for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+      stringstream name;
+      name<<"hBiggestHitSizeVsClusterSize_"<<TADCEventReader::getStringForDetector(det);
+      hBiggestHitVsClusterSize[det] = new TH2F(name.str().c_str(),name.str().c_str(),1024,0,TPlaneProperties::getMaxSignalHeight(det)*2,8,0.5,8.5);
+      hBiggestHitVsClusterSize[det]->GetXaxis()->SetTitle("Signal of Biggest Hit in Cluster [adc counts]");
+      hBiggestHitVsClusterSize[det]->GetYaxis()->SetTitle("ClusterSize");
+    }
 }
 
 
@@ -589,8 +597,12 @@ void TAnalysisOfClustering::analyseCluster()
 	for(int det=0;det<9;det++){
 		hNumberOfClusters[det]->Fill(eventReader->getNClusters(det));
 		for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
-			hClusterSize[det]->Fill(eventReader->getClusterSize(det,cl));
+		  UInt_t clSize = eventReader->getClusterSize(det,cl);
+			hClusterSize[det]->Fill(clSize);
 			hClusterSeedSize[det]->Fill(eventReader->getClusterSeedSize(det,cl));
+			Float_t biggestSignal = eventReader->getCluster(det,cl).getHighestSignal();
+			clSize=clSize>8?8:clSize;
+			hBiggestHitVsClusterSize[det]->Fill(biggestSignal,clSize);
 		}
 	}
 
@@ -755,6 +767,17 @@ void TAnalysisOfClustering::savePHHistos()
     		histSaver->SaveGraph(&graph,histTitle.str());
     	}
     	delete hPHDistribution[det];
+    }
+    for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+      histSaver->SaveHistogram(hBiggestHitVsClusterSize[det]);
+      TProfile *profY = hBiggestHitVsClusterSize[det]->ProfileY();
+      profY->GetXaxis()->SetTitle("ClusterSize");
+      profY->GetYaxis()->SetTitle("mean of Biggest signal in Cl");
+      string name = "mean of Biggest signal in Cluster vs. ClusterSize";
+      name.append(TADCEventReader::getStringForDetector(det).c_str());
+      profY->SetTitle(name.c_str());
+      histSaver->SaveHistogram(profY);
+
     }
 }
 

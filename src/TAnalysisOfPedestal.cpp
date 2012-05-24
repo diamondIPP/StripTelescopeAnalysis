@@ -340,6 +340,8 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
     for (int det = 0; det < 9; det++) {
     	double cut = settings->getClusterSeedFactor(det);
 		cout << "saving histogram " << this->histo_pulseheight_sigma[det]->GetName() << ".. with CUT on " <<cut<< endl;
+		this->histo_pulseheight_sigma[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
+		this->histo_pulseheight_sigma[det]->GetXaxis()->SetTitle("number of entries #");
     	TCanvas *c1 = new TCanvas(this->histo_pulseheight_sigma[det]->GetTitle(),this->histo_pulseheight_sigma[det]->GetTitle());
     	c1->cd();
     	this->histo_pulseheight_sigma[det]->Draw();
@@ -363,6 +365,8 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
     	this->histo_pulseheight_sigma_second[det]->Draw();
     	double xCor[] = {cut,cut};
     	double yCor[] = {0,this->histo_pulseheight_sigma_second[det]->GetMaximum()*2};
+    	this->histo_pulseheight_sigma_second[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
+    	this->histo_pulseheight_sigma_second[det]->GetXaxis()->SetTitle("number of entries #");
     	TGraph* lineGraph = new TGraph(2,xCor,yCor);
     	lineGraph->SetLineColor(kRed);
     	lineGraph->SetLineWidth(2);

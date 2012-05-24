@@ -23,18 +23,20 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: Set Style"<<endl;
 	currentStyle= new TStyle("HistSaverStyle","HistSaverStyle");
 	currentStyle->SetPalette(1);
-	gROOT->SetStyle("Plain"); //General style (see TStyle)
-	gStyle->SetOptStat(111110); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
-	gStyle->SetOptFit(1111);  //Fit options to be displayed
-	gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
-	gStyle->SetPadRightMargin(0.15);
-	gStyle->SetPadTopMargin(0.15);
-	//gStyle->SetTitleColor(19,"");
-	gStyle->SetStatH(0.12); //Sets Height of Stats Box
-	gStyle->SetStatW(0.15); //Sets Width of Stats Box
-	gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+	if(gStyle!=0)
+	  if(!gStyle->IsZombie()){
+	    gROOT->SetStyle("Plain"); //General style (see TStyle)
+	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
+	    gStyle->SetOptFit(1111);  //Fit options to be displayed
+	    gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
+	    gStyle->SetPadRightMargin(0.15);
+	    gStyle->SetPadTopMargin(0.15);
+	    //gStyle->SetTitleColor(19,"");
+	    gStyle->SetStatH(0.12); //Sets Height of Stats Box
+	    gStyle->SetStatW(0.15); //Sets Width of Stats Box
+	    gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+	  }
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
-
 	gErrorIgnoreLevel=1001;
 
 }
@@ -205,7 +207,7 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
  * *********************************************************
  * *********************************************************
  */
-void HistogrammSaver::SaveHistogram(TH1F* histo, bool fitGauss) {
+void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss) {
 	if(histo->GetEntries()==0)return;
 	if (fitGauss) SaveHistogramFitGaussPNG(histo);
 	else SaveHistogramPNG(histo);
@@ -289,7 +291,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 	//pt->SetTextSize(runNumber0.1);
 }
 
-void HistogrammSaver::SaveHistogramPNG(TH1F* histo) {
+void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
 	if(histo->GetEntries()==0){
 		cout<<"Histogram has no entries..."<<endl;
 		 return;
@@ -333,7 +335,7 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
 	   plot_filename << plots_path << name << ".png";
 	   plots_canvas.Print(plot_filename.str().c_str());
 }
-void HistogrammSaver::SaveHistogramFitGaussPNG(TH1F* histo) {
+void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* histo) {
 	if(histo->GetEntries()==0)return;
 //	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
 	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
@@ -354,7 +356,7 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1F* histo) {
 	plots_canvas.Print(plot_filename.str().c_str());
 }
 
-void HistogrammSaver::SaveHistogramROOT(TH1F* histo) {
+void HistogrammSaver::SaveHistogramROOT(TH1* histo) {
 	if(histo->GetEntries()==0)return;
    TCanvas plots_canvas("plots_canvas","plots_canvas");
    plots_canvas.cd();
