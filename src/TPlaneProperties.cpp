@@ -6,7 +6,7 @@
  */
 
 #include "../include/TPlaneProperties.hh"
-
+ClassImp(TPlaneProperties);
 TPlaneProperties::TPlaneProperties() {
 	// TODO Auto-generated constructor stub
 

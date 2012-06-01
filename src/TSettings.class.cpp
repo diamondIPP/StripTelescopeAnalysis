@@ -6,7 +6,7 @@
  */
 
 #include "TSettings.class.hh"
-//ClassImp(TSettings);
+ClassImp(TSettings);
 using namespace std;
 
 TSettings::TSettings(UInt_t runNumber){
@@ -16,8 +16,11 @@ TSettings::TSettings(UInt_t runNumber){
 	diamondMapping=0;
 	DefaultLoadDefaultSettings();
 //	diamondMapping.PrintMapping();
-	SetFileName("");
+	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
+  sys = gSystem;
+	path = sys->pwd();
+	createSettingsRootFile();
 }
 
 TSettings::TSettings(string fileName,UInt_t runNumber){
@@ -26,12 +29,17 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
 	DefaultLoadDefaultSettings();
-	SetFileName(fileName);
 	this->runNumber=runNumber;
+	sys = gSystem;
+	path = sys->pwd();
+  SetFileName(fileName);
+	createSettingsRootFile();
 }
 
 TSettings::~TSettings(){
 
+  saveSettings();
+  settingsFile->Close();
 }
 
 void TSettings::SetFileName(string newFileName){
@@ -803,6 +811,50 @@ UInt_t TSettings::getVaChannelNo(UInt_t detChNo)
 	UInt_t vaCh;
 	vaCh = this->diamondMapping->getVAChannelNo(detChNo);
 	return vaCh;
+}
+
+//todo
+void TSettings::saveSettings()
+{
+  cout<<"SAVE SETTINGS TO ROOT FILE"<<endl;
+  settingsFile->cd();
+  this->Write();
+
+}
+
+
+//todo
+void TSettings::compareSettings()
+{
+  cout<<"compareSettings"<<endl;
+}
+
+//todo
+void TSettings::createSettingsRootFile()
+{
+  stringstream name;
+  name << path<< "/"<<this->runNumber<<"/Settings."<<this->runNumber<<".root";
+//  settingsFile = TFile::Open(name.str().c_str());
+  cout<<"Open settings from root file: "<<endl;
+  settingsFile = new TFile(name.str().c_str(),"Update");
+  if(settingsFile->IsZombie()){
+    cout<<"file does not exist create new one!"<<endl;
+    delete settingsFile;
+    settingsFile = new TFile(name.str().c_str(),"RECREATE");
+  }
+  else{
+    compareSettings();
+  }
+
+
+}
+
+void TSettings::Print()
+{
+}
+
+void TSettings::loadSettingsFromRootFile()
+{
 }
 
 void TSettings::ParseIntArray(string value, vector<int> &vec) {

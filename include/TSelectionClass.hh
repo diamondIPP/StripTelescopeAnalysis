@@ -34,6 +34,7 @@ private:
 	void createCutFlowDiagramm();
 	void resetVariables();
 	void setVariables();
+	bool isSaturated(UInt_t det,UInt_t cl=0);
 	bool checkDetMasked(UInt_t det);
 	bool checkDetMasked(UInt_t det,UInt_t cl);
 	void initialiseHistos();
@@ -45,6 +46,7 @@ private:
 	TTree* selectionTree;
 	bool createdNewTree;
 	bool createdNewFile;
+	bool isDiaSaturated;
 	stringstream runString;
 	stringstream rawfilepath;
 	stringstream pedestalfilepath;
@@ -63,6 +65,8 @@ private:
 	bool useForAlignment;
 	bool useForAnalysis;
 	bool useForSiliconAlignment;
+	Int_t nDiaClusterSize;
+	UInt_t nToBigDiamondCluster;
 	UInt_t nValidButMoreThanOneDiaCluster;
 	UInt_t nValidSiliconNoDiamondHit;
 	UInt_t nUseForAlignment;

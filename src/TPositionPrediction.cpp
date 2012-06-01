@@ -7,7 +7,7 @@
 
 #include "../include/TPositionPrediction.hh"
 
-TPositionPrediction::TPositionPrediction(Float_t xPos,Float_t xSigma,Float_t xChi2, Float_t yPos, Float_t ySigma, Float_t yChi2) {
+TPositionPrediction::TPositionPrediction(Float_t xPos,Float_t xSigma,Float_t xChi2, Float_t yPos, Float_t ySigma, Float_t yChi2,Float_t xPhi,Float_t yPhi) {
 	// TODO Auto-generated constructor stub
 	this->xPos=xPos;
 	this->yPos=yPos;
@@ -15,8 +15,9 @@ TPositionPrediction::TPositionPrediction(Float_t xPos,Float_t xSigma,Float_t xCh
 	this->ySigma=ySigma;
 	this->xChi2=xChi2;
 	this->yChi2=yChi2;
+	this->xPhi=xPhi;
+	this->yPhi=yPhi;
 	bValid=true;
-
 }
 
 TPositionPrediction::~TPositionPrediction() {
@@ -64,6 +65,13 @@ Float_t TPositionPrediction::getChi2(TPlaneProperties::enumCoordinate cor)
 	case TPlaneProperties::Y_COR: return this->getChi2Y();break;
 	default: return N_INVALID;
 	}
+}
+Float_t TPositionPrediction::getPhi(TPlaneProperties::enumCoordinate cor){
+  switch (cor){
+    case TPlaneProperties::X_COR: return this->getPhiX();break;
+    case TPlaneProperties::Y_COR: return this->getPhiY();break;
+    default: return N_INVALID;
+  }
 }
 
 void TPositionPrediction::setyChi2(Float_t chi2)

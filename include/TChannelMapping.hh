@@ -13,11 +13,10 @@
 #include <iomanip>
 #include <vector>
 #include <map>
-#include <stdexcept>
 #include "TPlaneProperties.hh"
 #include "TObject.h"
 
-class TChannelMapping {
+class TChannelMapping:public TObject {
 public:
 	typedef std::map<UInt_t,UInt_t> channelContainer;
 	TChannelMapping(UInt_t nChannels=TPlaneProperties::getNChannelsDiamond());
@@ -36,7 +35,7 @@ private:
 	channelContainer mapVaToDet;
 	std::vector<UInt_t> vecVAChNo;
 	std::vector<UInt_t> vecdetChNo;
-//    ClassDef(TChannelMapping,1);
+  ClassDef(TChannelMapping,1);
 
 
 };

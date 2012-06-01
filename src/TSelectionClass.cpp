@@ -127,6 +127,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	nValidSiliconAndDiamondCluster=0;
 	nValidDiamondTrack=0;
 	nSiliconTrackNotFiducialCut=0;
+	nToBigDiamondCluster=0;
 	cout<<"start selection with "<<nEvents<<" Events, training fraction: "<<settings->getAlignment_training_track_fraction()*100.<<"%"<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
@@ -242,6 +243,14 @@ void TSelectionClass::setVariables(){
 	isInFiducialCut=true;
 	Float_t fiducialValueX=0;
 	Float_t fiducialValueY=0;
+	bool isSilSaturated=false;
+	if(hasValidSiliconTrack){
+	  for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++)
+	    isSilSaturated = isSilSaturated ||isSaturated(det);
+	}
+//	if(isSilSaturated&&hasValidSiliconTrack){
+//	  hasValidSiliconTrack==false;
+//	}
 	if(hasValidSiliconTrack){
 		for(UInt_t plane=0;plane<4;plane++){
 			fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
@@ -260,21 +269,26 @@ void TSelectionClass::setVariables(){
 		isInFiducialCut=false;
 	bool isSiliconTrackNotFiducialCut= !isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
 	bool isValidSiliconTrack = isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
-	bool isValidDiamondEvent = nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
+	isDiaSaturated=this->isSaturated(TPlaneProperties::getDetDiamond());
+	bool isValidDiamondEvent = nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond())&&!isDiaSaturated;
+	bool isDiaOneHitButToBigCluster = false;
 	bool validMoreThanOneClusterDiamondevent = nDiamondHits>=1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
 	useForSiliconAlignment= isValidSiliconTrack;
+
+	if(nDiamondHits==1){
+	  nDiaClusterSize =eventReader->getClusterSize(TPlaneProperties::getDetDiamond(),0);
+	  if(nDiaClusterSize>=3){
+	    isValidDiamondEvent=false;
+	    isDiaOneHitButToBigCluster=true;
+	  }
+	}
+	else nDiaClusterSize = -1;
+
 	useForAlignment=useForSiliconAlignment&&isValidDiamondEvent;
 	float relativeEventNumber = (float)nEvent/(float)nEvents;
-
-//	useForAlignment=isInFiducialCut&&hasValidSiliconTrack&&nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
+	isDiaOneHitButToBigCluster = isDiaOneHitButToBigCluster&&useForSiliconAlignment;
 	useForAnalysis=useForAlignment;
 
-//	if(hasValidSiliconTrack&&isInFiducialCut){
-//		if(verbosity)cout<<nEvent<<":\t"<<flush;
-//		if(verbosity)printf("%5.1f %5.1f\t",fiducialValueX,fiducialValueY);
-//		//if(verbosity)cout<<<<" "<<<<" "<<isInFiducialCut<<"\t"<<flush;
-//		if(verbosity)cout<<isDetMasked<<" "<<eventReader->getNClusters(8)<<" "<<checkDetMasked(8)<<" "<<nDiamondHits<<endl;
-//	}
 
 	double fraction =settings->getAlignment_training_track_fraction();
 	useForSiliconAlignment = isValidSiliconTrack&& !isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
@@ -303,6 +317,8 @@ void TSelectionClass::setVariables(){
 		nValidSiliconNoDiamondHit++;
 	if(isValidSiliconTrack&&isValidDiamondEvent)
 		nValidDiamondTrack++;
+	if(isDiaOneHitButToBigCluster)
+	  nToBigDiamondCluster++;
 
 	if(!isValidSiliconTrack)
 		nNoValidSiliconTrack++;
@@ -311,6 +327,7 @@ void TSelectionClass::setVariables(){
 	//else cout<<nEvent<<"\tuseNOTforAlignemnt..."<<endl;
 //		UInt_t nDiamondHits; //number of  in diamond plane;
 //		bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
+//	)
 }
 
 
@@ -357,6 +374,8 @@ void TSelectionClass::setBranchAdressess(){
 	selectionTree->Branch("useForSiliconAlignment",&this->useForSiliconAlignment,"useForSiliconAlignment/O");
 	selectionTree->Branch("useForAlignment",&this->useForAlignment,"useForAlignment/O");
 	selectionTree->Branch("useForAnalysis",&this->useForAnalysis,"useForAnalysis/O");
+	selectionTree->Branch("diaClusterSize",&this->nDiaClusterSize,"diaClusterSize/I");
+	selectionTree->Branch("isDiaSaturated",&this->isDiaSaturated,"isDiaSaturated/O");
 }
 
 void TSelectionClass::initialiseHistos()
@@ -396,7 +415,10 @@ void TSelectionClass::createCutFlowDiagramm()
 	n+=sprintf(&output[n],"                                        |\n");
 	n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) more than one Diamond Hit\n",nValidButMoreThanOneDiaCluster,(float)nValidButMoreThanOneDiaCluster*100./(float)nValidSiliconAndDiamondCluster);
 	n+=sprintf(&output[n],"                                        |\n");
+	n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) toBigClusters (absolute: %4.1f%%)\n",nToBigDiamondCluster,(float)nToBigDiamondCluster*100./(float)nValidSiliconAndDiamondCluster,(float)nToBigDiamondCluster*100./(float)nEvents);
+	n+=sprintf(&output[n],"                                        |\n");
 	n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) exactly one Diamond Hit\n",nValidDiamondTrack,(float)nValidDiamondTrack*100./(float)nValidSiliconAndDiamondCluster);
+
 	n+=sprintf(&output[n],"                                                  |\n");
 	n+=sprintf(&output[n],"                                                  L--->%6d (%4.1f%%) Alignment (absolute: %4.1f%%)\n",nUseForAlignment,(float)nUseForAlignment*100./(float)nValidDiamondTrack,(float)nUseForAlignment*100./(float)nEvents);
 	n+=sprintf(&output[n],"                                                  |\n");
@@ -453,6 +475,20 @@ void TSelectionClass::createCutFlowDiagramm()
 
 	legendSilTrack ->Draw();
 	histSaver->SaveCanvas(cPieValidSilicontTrack);
+}
+
+bool TSelectionClass::isSaturated(UInt_t det,UInt_t cl)
+{
+  if(eventReader->getNClusters(det)<=cl)
+    return true;
+  TCluster cluster = eventReader->getCluster(det,cl);
+//  if(cluster.hasSaturatedChannels())cout<<nEvent<<" hasSaturatedChannel"<<flush;
+  for(UInt_t clPos=0;clPos<cluster.size();clPos++)
+    if(cluster.getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det)){
+//      cout<<"\t"<<this->nEvent<<" confirmed"<<endl;
+      return true;
+    }
+  return false;
 }
 
 void TSelectionClass::saveHistos()

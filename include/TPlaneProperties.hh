@@ -15,7 +15,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-class TPlaneProperties {
+class TPlaneProperties:public TObject {
 public:
 	enum enumCoordinate{ X_COR =0, Y_COR=1, Z_COR =2, XY_COR=3,};
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
@@ -38,6 +38,8 @@ public:
     static std::string getDetectortypeString(enumDetectorType type);//todo verschieben
     static std::string getDetectorNameString(UInt_t det);
 	// TODO: getPlaneCoordinate(UInt_t plane);
+
+    ClassDef(TPlaneProperties,1);
 
 };
 

@@ -25,6 +25,7 @@
 #include "TSettings.class.hh"
 #include "TTransparentAnalysis.hh"
 #include "TAnalysisOfAlignment.hh"
+#include "TResults.hh"
 
 using namespace std;
 /*** USAGE ***/
@@ -175,6 +176,12 @@ int main(int argc, char ** argv) {
 		settingsFileName<<"settings."<<RUNNUMBER<<".ini";
 		TSettings *settings=NULL;
 		settings=new TSettings(settingsFileName.str(),RUNNUMBER);
+//
+//		TResults *results=NULL;
+//		results =  new TResults(settings);
+//		results->saveResults();
+//		if(results) delete results;
+
 		TRawEventSaver *eventSaver;
 		eventSaver = new TRawEventSaver(RUNNUMBER);
 		eventSaver->setSettings(settings);

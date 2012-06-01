@@ -68,7 +68,7 @@ public:
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 	void setVerbosity(UInt_t verb){verbosity=verb;};
 private:
-	void clearEventVectors();
+	void clearMeasuredVectors();
 	void initialiseDetectorAlignment();
 	void alignSiliconPlanes();
 	bool siliconAlignmentStep(bool bPrint=false);
@@ -141,6 +141,8 @@ private:
 	vector<Float_t> vecYMeasured;
 	vector<Float_t> vecXChi2;
 	vector<Float_t> vecYChi2;
+	vector<Float_t> vecXPhi;
+	vector<Float_t> vecYPhi;
 	vector<Float_t> vecClusterSize;
 
 };

@@ -27,7 +27,7 @@ class ChannelScreen :public TObject {
    private:
       Int_t channel_switch[256];
 
-//      ClassDef(ChannelScreen,1);
+      ClassDef(ChannelScreen,1);
 };
 #endif/*CHANNELSCREEN_H*/
 

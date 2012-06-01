@@ -7,7 +7,7 @@
 
 #include "../include/TChannelMapping.hh"
 
-//ClassImp(TChannelMapping);
+ClassImp(TChannelMapping);
 using namespace std;
 TChannelMapping::TChannelMapping(UInt_t nChannels)
 {

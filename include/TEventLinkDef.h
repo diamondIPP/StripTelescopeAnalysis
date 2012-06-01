@@ -17,6 +17,7 @@
 #pragma link C++ class pair< int, Float_t>+;
 #pragma link C++ class deque< pair<int,Float_t> >+;
 #pragma link C++ class deque< pair< UShort_t, Float_t> >+;
+#pragma link C++ class TResults+;
 #pragma link C++ class TCluster;
 #pragma link C++ class vector<TCluster>;
 #pragma link C++ class vector< vector<TCluster> >;
@@ -25,7 +26,10 @@
 #pragma link C++ class TPlane+;
 #pragma link C++ class vector<TPlane>+;
 #pragma link C++ class TEvent+;
-//#pragma link C++ class ChannelScreen+;
-//#pragma linl C++ class TChannelMapping+;
+#pragma link C++ class TPlaneProperties+;
+#pragma link C++ class TChannelMapping+;
+#pragma link C++ class ChannelScreen+;
+#pragma link C++ class TSettings+;
+
 #pragma link C++ class TDetectorAlignment+;
 #endif

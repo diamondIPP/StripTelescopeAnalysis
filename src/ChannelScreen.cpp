@@ -7,7 +7,7 @@
 
 #include "ChannelScreen.hh"
 
-//ClassImp(ChannelScreen);
+ClassImp(ChannelScreen);
 ChannelScreen::ChannelScreen()
 {
    for(Int_t i=0; i<256; i++)

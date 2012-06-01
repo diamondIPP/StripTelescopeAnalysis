@@ -159,7 +159,7 @@ UInt_t TCluster::checkClusterForSize() const{
  */
 void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
-	this->isSaturated=bSaturated;
+	this->isSaturated=this->isSaturated||bSaturated;
 	if(signalInSigma>seedSigma)
 		numberOfSeeds++;
 	else if(signalInSigma>hitSigma)
@@ -235,6 +235,10 @@ bool TCluster::isGoldenGateCluster(){
 }
 
 bool TCluster::hasSaturatedChannels(){
+  for(UInt_t cl=0;cl<this->clusterADC.size();cl++){
+    if (clusterADC.at(cl)>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
+  }
+  return false;
 	return isSaturated;//todo
 }
 Float_t TCluster::getCharge(bool useSmallSignals){

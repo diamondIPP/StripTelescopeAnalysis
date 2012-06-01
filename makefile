@@ -45,13 +45,17 @@ LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o  
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
-LIBFILES 		+=  TChannelMapping.o TSettings.class.o ChannelScreen.o LandauGaussFit.o
+LIBFILES 		+=   TSettings.class.o  LandauGaussFit.o 
 LIBFILES		+=	libTEvent.so
 
 
-ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o
+ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o TPlaneProperties.o
+ROOTLIBFILES	+=	TResults.o TChannelMapping.o ChannelScreen.o TSettings.class.o
 PROGS			:= diamondAnalysis
 
+ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh 
+ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh
+ROOTHFILES		+= TEventLinkDef.h 
 
 all: rootclean diamondAnalysis
 
@@ -90,7 +94,7 @@ TEventDict.cpp: $(INCLUDEDIR)/TEvent.hh $(INCLUDEDIR)/TEventLinkDef.h
 		# compiling $@
 		#
 		#echo $(ROOTCINT) -v $(CFLAGS) -f TClusterDict.cpp -c $(INCLUDEDIR)/TCluster.hh $(INCLUDEDIR)/LinkDef.h
-		$(ROOTCINT) -v  -f TEventDict.cpp  -c -p -I$(INCLUDEDIR) TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TEventLinkDef.h
+		$(ROOTCINT) -v  -f TEventDict.cpp  -c -p -I$(INCLUDEDIR) $(ROOTHFILES)
 
 TEventDict.o: TEventDict.cpp
 		#

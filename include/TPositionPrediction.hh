@@ -13,24 +13,28 @@
 #include "TCluster.hh"
 class TPositionPrediction:public TObject {
 public:
-	TPositionPrediction(){xPos=0;yPos=0;xSigma=0;ySigma=0;xChi2=0;yChi2=0;bValid=false;};
-	TPositionPrediction(Float_t xPos,Float_t xSigma,Float_t xChi2, Float_t yPos, Float_t ySigma, Float_t yChi2);
+	TPositionPrediction(){xPos=0;yPos=0;xSigma=0;ySigma=0;xChi2=0;yChi2=0;bValid=false;xPhi=0;yPhi=0;};
+	TPositionPrediction(Float_t xPos,Float_t xSigma,Float_t xChi2, Float_t yPos, Float_t ySigma, Float_t yChi2,Float_t xPhi,Float_t yPhi);
+
 	virtual ~TPositionPrediction();
 	Float_t getPosition(TPlaneProperties::enumCoordinate cor);
 	Float_t getSigma(TPlaneProperties::enumCoordinate cor);
 	Float_t getChi2(TPlaneProperties::enumCoordinate cor);
-    void setxPos(Float_t pos);
-    void setxSigma(Float_t sigma);
-    void setxChi2(Float_t chi2);
-    void setyPos(Float_t pos);
-    void setySigma(Float_t sigma);
-    void setyChi2(Float_t chi2);
-    Float_t getPositionX(){return xPos;};
+	Float_t getPhi(TPlaneProperties::enumCoordinate cor);
+	void setxPos(Float_t pos);
+	void setxSigma(Float_t sigma);
+	void setxChi2(Float_t chi2);
+	void setyPos(Float_t pos);
+	void setySigma(Float_t sigma);
+	void setyChi2(Float_t chi2);
+	Float_t getPositionX(){return xPos;};
 	Float_t getSigmaX(){return xSigma;};
 	Float_t getChi2X(){return xChi2;};
 	Float_t getPositionY(){return yPos;};
 	Float_t getSigmaY(){return ySigma;};
 	Float_t getChi2Y(){return yChi2;};
+	Float_t getPhiX(){return xPhi;};
+	Float_t getPhiY(){return yPhi;};;
 	bool isValid(){return bValid;};
 	void setValid(bool bValid){this->bValid=bValid;};
 	void Print(UInt_t level=0);
@@ -41,6 +45,7 @@ private:
 	Float_t ySigma;
 	Float_t xChi2;
 	Float_t yChi2;
+	Float_t xPhi,yPhi;
 	bool bValid;
 };
 

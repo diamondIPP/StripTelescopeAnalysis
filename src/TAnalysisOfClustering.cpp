@@ -773,11 +773,10 @@ void TAnalysisOfClustering::savePHHistos()
       TProfile *profY = hBiggestHitVsClusterSize[det]->ProfileY();
       profY->GetXaxis()->SetTitle("ClusterSize");
       profY->GetYaxis()->SetTitle("mean of Biggest signal in Cl");
-      string name = "mean of Biggest signal in Cluster vs. ClusterSize";
-      name.append(TADCEventReader::getStringForDetector(det).c_str());
-      profY->SetTitle(name.c_str());
+      string histoTitle = "mean of Biggest signal in Cluster vs. ClusterSize";
+      histoTitle.append(TADCEventReader::getStringForDetector(det).c_str());
+      profY->SetTitle(histoTitle.c_str());
       histSaver->SaveHistogram(profY);
-
     }
 }
 

@@ -21,12 +21,20 @@
 #include "TChannelMapping.hh"
 #include "TObject.h"
 #include "TPlaneProperties.hh"
+//#include "TSettings.class.hh"
+#include "TSystem.h"
+#include "TFile.h"
 
 class TSettings:public TObject {
 public:
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	virtual ~TSettings();
+
+	void saveSettings();
+	void loadSettingsFromRootFile();
+	void compareSettings();
+	void createSettingsRootFile();
 
 	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
 
@@ -184,7 +192,10 @@ private:
     void ParseFloatArray(std::string value, std::vector<float> & vec);
     void ParseIntArray(std::string value, std::vector<int> & vec);
 private:
+    std::string path;
     std::string fileName;
+    TSystem *sys;
+    TFile *settingsFile;
 private:
     Int_t SaveAllFilesSwitch;
     Int_t ClosePlotsOnSave;
@@ -274,6 +285,6 @@ private:
 private:
     int verbosity;
 
-//    ClassDef(TSettings,1);
+    ClassDef(TSettings,1);
 };
 #endif

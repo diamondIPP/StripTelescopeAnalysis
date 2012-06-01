@@ -18,11 +18,12 @@
 #include "TObject.h"
 #include "TROOT.h"
 #include "TH1F.h"
+#include "TPlaneProperties.hh"
 //#define TCLUSTER_REVISION 12;
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 25;};
+	static UInt_t TCLUSTER_REVISION() {return 26;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
     TCluster()
