@@ -152,6 +152,7 @@ int main(int argc, char ** argv) {
 		cout << "CUTFAKETRACKS: " << CUTFAKETRACKS << endl;
 		cout << endl << endl << endl;
 		
+
 		time_t rawtime;
 		tm *timestamp;
 		
@@ -176,11 +177,9 @@ int main(int argc, char ** argv) {
 		settingsFileName<<"settings."<<RUNNUMBER<<".ini";
 		TSettings *settings=NULL;
 		settings=new TSettings(settingsFileName.str(),RUNNUMBER);
-//
-//		TResults *results=NULL;
-//		results =  new TResults(settings);
-//		results->saveResults();
-//		if(results) delete results;
+
+    TResults *currentResults =new TResults(settings);
+    currentResults->Print();
 
 		TRawEventSaver *eventSaver;
 		eventSaver = new TRawEventSaver(RUNNUMBER);
@@ -205,6 +204,7 @@ int main(int argc, char ** argv) {
 		if(VERBOSITY){
 			TAnalysisOfPedestal *analysisOfPedestal;
 			analysisOfPedestal = new TAnalysisOfPedestal(settings);
+			analysisOfPedestal->setResults(currentResults);
 			analysisOfPedestal->doAnalysis(NEVENTS);
 			delete analysisOfPedestal;
 		}
@@ -271,15 +271,19 @@ int main(int argc, char ** argv) {
 			alignment->Align(NEVENTS);
 			delete alignment;
 		}
-		
-//		TAnalysisOfAlignment *anaAlignment;
-//		anaAlignment=new TAnalysisOfAlignment(settings);
-//		anaAlignment->doAnalysis(NEVENTS);
-//		delete anaAlignment;
+
+
+		TAnalysisOfAlignment *anaAlignment;
+		anaAlignment=new TAnalysisOfAlignment(settings);
+		anaAlignment->doAnalysis(NEVENTS);
+		delete anaAlignment;
 //		TTransparentAnalysis *transpAna;
 //		transpAna = new TTransparentAnalysis(RUNNUMBER, *settings);
 //		transpAna->analyze(NEVENTS,INITIAL_EVENT);
 
+		currentResults->Print();
+    currentResults->saveResults();
+    delete currentResults;
 
 
 		process_mem_usage(vm2, rss2);

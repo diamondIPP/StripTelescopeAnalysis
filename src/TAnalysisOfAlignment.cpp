@@ -58,6 +58,7 @@ void TAnalysisOfAlignment::doAnalysis(UInt_t nEvents){
 		nEvents=eventReader->GetEntries();
 	cout<<"Do Analysis After Alignment...."<<endl;
 	DoEtaCorrection(1);
+
 //	TH1F *histo = new TH1F("hPredictedStripPositionDet2","hPredictedStripPositionDet2",128,-0.501,0.501);
 //	for(nEvent=0;nEvent<nEvents;nEvent++){
 //		eventReader->LoadEvent(nEvent);
@@ -125,6 +126,22 @@ void TAnalysisOfAlignment::setSettings(TSettings *settings)
 
 void TAnalysisOfAlignment::initialiseHistos()
 {
+  this->hChi2DistributionX=new TH1F("hChi2X","#chi^{2}_{X}-Distribution valid SiliconTrack",512,0,5);
+  this->hChi2DistributionX->GetXaxis()->SetTitle("chi^{2}_{X}");
+  this->hChi2DistributionX->GetYaxis()->SetTitle("Number of Entries #");
+  this->hChi2DistributionY=new TH1F("hChi2Y","#chi^{2}_{Y}-Distribution valid SiliconTrack",512,0,5);
+  this->hChi2DistributionY->GetXaxis()->SetTitle("chi^{2}_{Y}");
+  this->hChi2DistributionY->GetYaxis()->SetTitle("Number of Entries #");
+  this->hChi2DistributionXY=new TH1F("hChi2XY","#chi^{2}_{X}+#chi^{2}_{Y}-Distribution valid SiliconTrack",512,0,5);
+  this->hChi2DistributionXY->GetXaxis()->SetTitle("#chi^{2}_{X}+#chi^{2}_{Y}");
+  this->hChi2DistributionXY->GetYaxis()->SetTitle("Number of Entries #");
+  this->hChi2DistributionXY2D=new TH2F("hChi2XY2D","#chi^{2}_{X}+#chi^{2}_{Y}-Distribution valid SiliconTrack",512,0,5,512,0,5);
+  this->hChi2DistributionXY2D->GetXaxis()->SetTitle("#chi^{2}_{X}");
+  this->hChi2DistributionXY2D->GetYaxis()->SetTitle("#chi^{2}_{Y}");
+  this->hChi2DistributionXY->GetZaxis()->SetTitle("number of entries");
+  this->hAngleDistribution=new TH2F("hAngularDistribution","hAngularDistribution",256,-5,5,256,-5,5);
+  this->hAngleDistribution->GetXaxis()->SetTitle("#Phi_{X}");
+  this->hAngleDistribution->GetYaxis()->SetTitle("#Phi_{Y}");
 }
 
 
@@ -152,7 +169,7 @@ cout<<"****************************************"<<endl;
 
 	cout<<"fill first strip hit histo"<<eventReader->GetEntries()<<endl;
 
-	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
+  for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
 		eventReader->LoadEvent(nEvent);
 		if(!eventReader->useForAnalysis()&&!eventReader->useForAlignment())
@@ -173,8 +190,10 @@ cout<<"****************************************"<<endl;
 //			cout<<nEvent<<": "<<subjectPlane<<"Fill "<<deltaX<<" "<<deltaY<<endl;
 			histoStripDistribution.at(subjectPlane*2)->Fill(deltaX);
 			histoStripDistribution.at(subjectPlane*2+1)->Fill(deltaY);
+			chi2Distribution();
 		}
 	}
+  saveHistos();
 	vector<UInt_t> vecMinEntries;
 	cout<<"Minimal Entries in a bin of historgram:"<<endl;
 	for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
@@ -266,5 +285,55 @@ cout<<"****************************************"<<endl;
 			correctedEtaFile->Add(histo->Clone());
 	}
 	correctedEtaFile->Write();
-	correctedEtaFile->Close();
+	cout<<"Closing "<<correctedEtaFile->GetName()<<endl;
+	for(UInt_t i =0;i<histoStripDistribution.size(),i++;)
+	  cout<<histoStripDistribution.at(i)<<" "<<flush;
+	cout<<endl;
+	for(UInt_t i =0;i<histoStripDistribution.size(),i++;)
+	    cout<<histoStripDistributionFlattned.at(i)<<" "<<flush;
+	cout<<endl;
+	for(UInt_t i =0;i<histoStripDistribution.size(),i++;)
+	  cout<<vecHEta.at(i)<<" "<<flush;
+
+
+//	correctedEtaFile->Close();
 }
+
+void TAnalysisOfAlignment::chi2Distribution()
+{
+  vector<UInt_t> vecRefPlanes;
+  for(UInt_t i=0;i<TPlaneProperties::getNSiliconPlanes();i++)vecRefPlanes.push_back(i);
+  TPositionPrediction *prediction = eventReader->predictPosition(TPlaneProperties::getDiamondPlane(),vecRefPlanes,false);
+
+  Float_t phiX  = prediction->getPhiX();
+  Float_t phiY  = prediction->getPhiY();
+  Float_t chi2X = prediction->getChi2X();
+  Float_t chi2Y = prediction->getChi2Y();
+//  cout<<nEvent<<"\t"<<chi2X<<" "<<chi2Y<<endl;
+  this->hAngleDistribution->Fill(phiX,phiY);
+  this->hChi2DistributionX->Fill(chi2X);
+  this->hChi2DistributionY->Fill(chi2Y);
+  this->hChi2DistributionXY->Fill(chi2X+chi2Y);
+  this->hChi2DistributionXY2D->Fill(chi2X,chi2Y);
+}
+
+void TAnalysisOfAlignment::saveHistos()
+{
+  cout<<"Save Histos"<<endl;
+  histSaver->SaveHistogram(hAngleDistribution);
+  if(hAngleDistribution!=0)delete hAngleDistribution;
+  histSaver->SaveHistogram(hChi2DistributionX);
+  if(hChi2DistributionX!=0)delete hChi2DistributionX;
+  histSaver->SaveHistogram(hChi2DistributionY);
+  if(hChi2DistributionY!=0)delete hChi2DistributionY;
+  histSaver->SaveHistogram(hChi2DistributionXY);
+  if(hChi2DistributionXY!=0)delete hChi2DistributionXY;
+  histSaver->SaveHistogram(hChi2DistributionXY2D);
+  if(hChi2DistributionXY2D!=0)delete hChi2DistributionXY2D;
+
+  cout<<"DONE"<<endl;
+}
+
+
+
+

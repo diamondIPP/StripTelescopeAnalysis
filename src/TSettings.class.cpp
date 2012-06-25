@@ -3,6 +3,9 @@
  *
  *  Created on: 02.08.2011
  *      Author: Felix Bachmair
+ *
+ *
+ *      todo: Write copy constructor
  */
 
 #include "TSettings.class.hh"
@@ -818,8 +821,7 @@ void TSettings::saveSettings()
 {
   cout<<"SAVE SETTINGS TO ROOT FILE"<<endl;
   settingsFile->cd();
-  this->Write();
-
+//  this->Write();
 }
 
 

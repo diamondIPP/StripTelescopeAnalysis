@@ -38,11 +38,19 @@ private:
 	UInt_t nEvent;
 	void DoEtaCorrection(UInt_t correctionStep);
 	void initialiseHistos();
+	void chi2Distribution();
+	void saveHistos();
 	TTracking* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
     TSettings* settings;
     UInt_t verbosity;
+    TH1F *hChi2DistributionX;
+    TH1F *hChi2DistributionY;
+    TH1F *hChi2DistributionXY;
+    TH2F *hChi2DistributionXY2D;
+    TH2F *hAngleDistribution;
+    TFile* correctedEtaFile;
 };
 
 #endif /* TANALYSISOFALIGNMENT_HH_ */

@@ -16,7 +16,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	// TODO Auto-generated constructor stub
 	if(settings==0)
 		exit(0);
-
+	res=0;
 	htmlPedestal= new THTMLPedestal(settings);
 	sys = gSystem;
 	stringstream  runString;
@@ -445,7 +445,13 @@ void TAnalysisOfPedestal::saveHistos(){
 		delete histo_pulseheight_left_sigma_second[det];
 		delete histo_pulseheight_right_sigma[det];
 		delete histo_pulseheight_right_sigma_second[det];
+
+	  TF1 histofitx("histofitx","gaus",hAllAdcNoise[det]->GetMean()-2*hAllAdcNoise[det]->GetRMS(),hAllAdcNoise[det]->GetMean()+2*hAllAdcNoise[det]->GetRMS());
+	  histofitx.SetLineColor(kBlue);
+	  hAllAdcNoise[det]->Fit(&histofitx,"rq");
+	  if(res!=0)res->SetNoise(det,histofitx.GetParameter(2));
 		histSaver->SaveHistogram(hAllAdcNoise[det],true);
+
 		delete hAllAdcNoise[det];
     }
 }

@@ -36,6 +36,7 @@
 
 #include "TADCEventReader.hh"
 #include "TSettings.class.hh"
+#include "TResults.hh"
 
 using namespace std;
 
@@ -43,8 +44,10 @@ class TAnalysisOfPedestal {
 public:
 	TAnalysisOfPedestal(TSettings* settings);
 	virtual ~TAnalysisOfPedestal();
+	void setResults(TResults* results){this->res=results;};
 	void	doAnalysis(UInt_t nEvents=0);
 private:
+	TResults *res;
 	void updateMeanCalulation();
 	void createPedestalMeanHistos();
 	void saveHistos();

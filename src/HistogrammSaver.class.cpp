@@ -298,8 +298,9 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
 	}
    TCanvas plots_canvas("plots_canvas","plots_canvas");
    plots_canvas.cd();
-	histo->SetMinimum(0.);
-   histo->Draw();
+   TH1* htemp=(TH1*)histo->Clone();
+   htemp->SetMinimum(0.);
+   htemp->Draw();
    pt->Draw();
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".png";
@@ -335,7 +336,8 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
 	   plot_filename << plots_path << name << ".png";
 	   plots_canvas.Print(plot_filename.str().c_str());
 }
-void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* histo) {
+void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
+  TH1* histo = (TH1*)htemp->Clone();
 	if(histo->GetEntries()==0)return;
 //	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
 	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
@@ -354,9 +356,11 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* histo) {
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas.Print(plot_filename.str().c_str());
+	if (histo!=0) delete histo;
 }
 
-void HistogrammSaver::SaveHistogramROOT(TH1* histo) {
+void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
+  TH1* histo = (TH1*)htemp->Clone();
 	if(histo->GetEntries()==0)return;
    TCanvas plots_canvas("plots_canvas","plots_canvas");
    plots_canvas.cd();
@@ -370,6 +374,8 @@ void HistogrammSaver::SaveHistogramROOT(TH1* histo) {
    plots_canvas.Print(plot_filename.str().c_str());
 	TFile f(histo_filename.str().c_str(),"UPDATE");
 	histo->Write();
+	f.Close();
+	if (histo!=0) delete histo;
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
