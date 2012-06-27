@@ -119,13 +119,12 @@ int main(int argc, char ** argv) {
 	readInputs(argc,argv);
 	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
 	cout << "starting main loop.." << endl;
-	initVariables();
 	RunListOK = ReadRunList();
 	TSystem* sys = gSystem;
 	std::string currentDir = sys->pwd();
 	cout << "Runnumbers ";
 	for (unsigned int i = 0; i < RunParameters.size(); i++) {
-		cout << RunParameters[i].RunNumber;
+		cout << RunParameters[i].getRunNumber();
 		if (i+1 < RunParameters.size()) cout << ", ";
 	}
 	cout << " will be analysed.." << endl;
@@ -135,7 +134,16 @@ int main(int argc, char ** argv) {
 	/**Start with Analyising, read RunParameteres of the Run and start analysis with that parameters
 	*/
 	for (unsigned int i = 0; i < RunParameters.size(); i++) {
-		RunParameters[i].GetParameters();
+		UInt_t RUNNUMBER = RunParameters[i].getRunNumber();
+		UInt_t VERBOSITY = RunParameters[i].getVerbosity();
+		std::string RUNDESCRIPTION = RunParameters[i].getRunDescription();
+    UInt_t NEVENTS = RunParameters[i].getEvents();
+    UInt_t START_EVENT = RunParameters[i].getStartEvent();
+		bool DO_PEDESTALANALYSIS = RunParameters[i].doPedestalAnalysis();
+		bool DO_CLUSTERANALYSIS  = RunParameters[i].doClusterAnalysis();
+		bool DO_SELECTIONANALYSIS = RunParameters[i].doSelectionAnalysis();
+		bool DO_ALIGNMENT = RunParameters[i].doAlignment();
+		bool DO_ALIGNMENTANALYSIS = RunParameters[i].doAlignmentAnalysis();
 		cout << endl << endl << endl << endl;
 		cout << "====================================" << endl;
 		cout << "==> Starting analysis.." << endl;
@@ -144,12 +152,12 @@ int main(int argc, char ** argv) {
 		cout << "NEVENTS: " << NEVENTS << endl;
 		cout << "RUNDESCRIPTION: " << RUNDESCRIPTION << endl;
 		cout << "VERBOSITY: " << VERBOSITY << endl;
-		cout << "INITIAL_EVENT: " << INITIAL_EVENT << endl;
-		cout << "HIT_OCCUPANCY: " << HIT_OCCUPANCY << endl;
-		cout << "ALTCLUSTERING: " << ALTCLUSTERING << endl;
+		cout << "INITIAL_EVENT: " << START_EVENT << endl;
+		cout << "DO_PEDESTALANALYSIS: "<<DO_PEDESTALANALYSIS<<endl;
+		cout << "DO_CLUSTERANALYSIS: "<<DO_CLUSTERANALYSIS<<endl;
+		cout << "DO_SELECTIONANALYSIS: "<<DO_SELECTIONANALYSIS<<endl;
 		cout << "DO_ALIGNMENT: " << DO_ALIGNMENT << endl;
-		cout << "DO_SLIDINGPEDESTAL: " << DO_SLIDINGPEDESTAL << endl;
-		cout << "CUTFAKETRACKS: " << CUTFAKETRACKS << endl;
+    cout << "DO_ALIGNMENTANALYSIS: "<<DO_ALIGNMENTANALYSIS<<endl;
 		cout << endl << endl << endl;
 		
 
@@ -245,12 +253,15 @@ int main(int argc, char ** argv) {
 		selectionClass->MakeSelection(NEVENTS);
 		delete selectionClass;
 
-		if (DO_SLIDINGPEDESTAL){
+		if (DO_CLUSTERANALYSIS){
 			sys->cd(currentDir.c_str());
 			TAnalysisOfClustering* analysisClustering;
 			analysisClustering= new TAnalysisOfClustering(settings);
 			analysisClustering->doAnalysis(NEVENTS);
 			delete analysisClustering;
+		}
+		if(DO_SELECTIONANALYSIS){
+		  sys->cd(currentDir.c_str());
 			TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
 			analysisSelection->doAnalysis(NEVENTS);
 			delete analysisSelection;
@@ -273,11 +284,13 @@ int main(int argc, char ** argv) {
 			delete alignment;
 		}
 
-
-		TAnalysisOfAlignment *anaAlignment;
-		anaAlignment=new TAnalysisOfAlignment(settings);
-		anaAlignment->doAnalysis(NEVENTS);
-		delete anaAlignment;
+		if(DO_ALIGNMENTANALYSIS){
+      sys->cd(currentDir.c_str());
+      TAnalysisOfAlignment *anaAlignment;
+      anaAlignment=new TAnalysisOfAlignment(settings);
+      anaAlignment->doAnalysis(NEVENTS);
+      delete anaAlignment;
+		}
 //		TTransparentAnalysis *transpAna;
 //		transpAna = new TTransparentAnalysis(RUNNUMBER, *settings);
 //		transpAna->analyze(NEVENTS,INITIAL_EVENT);
@@ -338,21 +351,9 @@ int main(int argc, char ** argv) {
 	return 0;
 }
 
-void initVariables() {
-	RUNDESCRIPTION = "";
-	NEVENTS = 10000;
-	INITIAL_EVENT = 1000;
-	HIT_OCCUPANCY = 0;
-	PLOTS = 1;
-	ALTCLUSTERING = 0;
-    VERBOSITY=0;
-
-}
 
 int ReadRunList() {
 	RunInfo run;
-	char RunDescription[200];
-	int NEvents, Initial_Event;
 	RunParameters.clear();
 	cout << endl << "reading runlist.." << endl;
 	ifstream file(runListPath.c_str());//"RunList.ini");
@@ -361,9 +362,23 @@ int ReadRunList() {
 		return 0;
 	}
 	else cout << "RunList.ini" << " successfully opened." << endl << endl;
-	
+
+  UInt_t RunNumber;
+  UInt_t Verbosity;
+  UInt_t NEvents;
+  UInt_t nStartEvent;
+  std::string RunDescription;
+  bool bPedestalAnalysis;
+  bool bClusterAnalysis;
+  bool bSelectionAnalysis;
+  bool bAlignment;
+  bool bAlignmentAnalysis;
+
 	while (!file.eof()) {
-		initVariables();
+	  RunDescription = "";
+	  NEvents = 10000;
+	  nStartEvent = 1000;
+	  Verbosity=0;
 		
 		//get next line
 		string line;
@@ -374,13 +389,10 @@ int ReadRunList() {
 			continue;
 		}
 		
-		
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d", &RUNNUMBER, RunDescription, &VERBOSITY, &NEvents, &Initial_Event, &CUTFAKETRACKS, &DO_SLIDINGPEDESTAL, &DO_ALIGNMENT/*, &ALTCLUSTERING*/);
-		if (NEvents != 0) NEVENTS = NEvents;
-		if (Initial_Event != 0) INITIAL_EVENT = Initial_Event;
+		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d", &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis);
 		cout << "RunDescription Char: " << RunDescription[0] << endl;
-		if (RunDescription[0] != '0') RUNDESCRIPTION = RunDescription;
-		run.SetParameters();
+
+		run.setParameters(RunNumber,RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis);
 		RunParameters.push_back(run);
 	}
 	return 1;
