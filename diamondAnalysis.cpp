@@ -122,7 +122,6 @@ int main(int argc, char ** argv) {
 	RunListOK = ReadRunList();
 	TSystem* sys = gSystem;
 	std::string currentDir = sys->pwd();
-	cout << "Runnumbers ";
 	for (unsigned int i = 0; i < RunParameters.size(); i++) {
 		cout << RunParameters[i].getRunNumber();
 		if (i+1 < RunParameters.size()) cout << ", ";
@@ -209,7 +208,7 @@ int main(int argc, char ** argv) {
 			pedestalCalculation->calculateSlidingPedestals(NEVENTS);
 			delete pedestalCalculation;
 
-		if(VERBOSITY){
+		if(DO_PEDESTALANALYSIS){
 			TAnalysisOfPedestal *analysisOfPedestal;
 			analysisOfPedestal = new TAnalysisOfPedestal(settings);
 			analysisOfPedestal->setResults(currentResults);
@@ -363,36 +362,41 @@ int ReadRunList() {
 	}
 	else cout << "RunList.ini" << " successfully opened." << endl << endl;
 
-  UInt_t RunNumber;
-  UInt_t Verbosity;
-  UInt_t NEvents;
+  int RunNumber;
+  int Verbosity;
+  int NEvents;
   UInt_t nStartEvent;
-  std::string RunDescription;
-  bool bPedestalAnalysis;
-  bool bClusterAnalysis;
-  bool bSelectionAnalysis;
-  bool bAlignment;
-  bool bAlignmentAnalysis;
-
+  char RunDescription[200];
+  int bPedestalAnalysis;
+  int bClusterAnalysis;
+  int bSelectionAnalysis;
+  int bAlignment;
+  int bAlignmentAnalysis;
+//  cout<<"start file loop"<<flush;
 	while (!file.eof()) {
-	  RunDescription = "";
+//	  RunDescription = "";
 	  NEvents = 10000;
 	  nStartEvent = 1000;
 	  Verbosity=0;
 		
 		//get next line
 		string line;
+//		cout<<"getLine"<<endl;
 		getline(file,line);
 		
 		//check if comment or empty line
 		if ((line.substr(0, 1) == ";") || (line.substr(0, 1) == "#") || (line.substr(0, 1) == "/") || line.empty()) {
+//		  cout<<"continue"<<endl;
 			continue;
 		}
-		
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d", &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis);
-		cout << "RunDescription Char: " << RunDescription[0] << endl;
-
-		run.setParameters(RunNumber,RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis);
+//		cout<<"Read Line"<<endl;
+		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d", &RunNumber, &RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis);
+//		cout << "RunDescription Char: " << RunDescription[0] << endl;
+		cout<<RunNumber<<endl;
+		cout<<NEvents<<endl;
+		cout<<nStartEvent<<":"<<bPedestalAnalysis<<bClusterAnalysis<<bSelectionAnalysis<<bAlignment<<bAlignmentAnalysis<<endl;
+		run.setParameters(RunNumber,(string)RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis);
+//		cout<<"Got new Parameters: "<<RunNumber<<endl;
 		RunParameters.push_back(run);
 	}
 	return 1;
