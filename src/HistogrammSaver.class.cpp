@@ -26,8 +26,9 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	if(gStyle!=0)
 	  if(!gStyle->IsZombie()){
 	    gROOT->SetStyle("Plain"); //General style (see TStyle)
-	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
-	    gStyle->SetOptStat("nemrKSiou");
+//	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
+	    if(gStyle->GetOptStat()!=221111111)
+	      gStyle->SetOptStat("nemrKSiou");
 	    gStyle->SetOptFit(1111);  //Fit options to be displayed
 	    gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
 	    gStyle->SetPadRightMargin(0.15);
@@ -79,7 +80,6 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 		min = middle - range/2.*1.1;
 	max = middle + range/2.*1.4;
 	int stat = gStyle->GetOptStat();
-	gStyle->SetOptStat("");
 	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
 		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
 	if(refactorSecond!=1)histo2->Scale(refactorSecond);
@@ -126,7 +126,6 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	c1->Update();
 	SaveCanvas(c1);
 	delete c1;
-	gStyle->SetOptStat(stat);
 }
 
 
@@ -476,7 +475,6 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, string location, string fil
 
 void HistogrammSaver::SetDuckStyle() {
 	TStyle* DuckStyle = new TStyle("DuckStyle", "Famous Duck Style");
-	DuckStyle->SetOptStat(1110); //Stat options to be displayed
 	//	DuckStyle->SetOptFit(1111);  //Fit options to be displayed
 	DuckStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
 	DuckStyle->SetPadRightMargin(0.15);

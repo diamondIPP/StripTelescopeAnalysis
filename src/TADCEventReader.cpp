@@ -10,11 +10,13 @@ using namespace std;
 
 TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	verbosity=1;
+  pEvent=NULL;//new TEvent();
 	current_event = 0;
 	store_threshold = 2;
 	tree =NULL;
 	file=NULL;
 	sys = gSystem;
+
 	/*run_number=RunNumber;
 	event_number=EventNumber;*/
 	SetTree(FileName);//tree);
@@ -26,6 +28,8 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	if (verbosity) cout<<"tree Entries():"<<tree->GetEntries()<<endl;
 	this->LoadEvent(0);
 	this->fileName=FileName;
+
+  for(UInt_t det=0;det<9;det++)hEtaIntegral[det]=0;
 	LoadEtaDistributions(runNumber);
 	pEvent=NULL;//new TEvent();
 }
@@ -33,7 +37,8 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 TADCEventReader::~TADCEventReader() {
 	cout<< "deleting instance of TADCEventReader"<<endl;
 	//delete tree;
-	if(file!=0)file->Close();
+	if(file!=0)delete file;
+//	gSystem->Clear();
 //	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
 //	  if(hEtaIntegral[det]!=0)delete hEtaIntegral[det];
 //
@@ -41,6 +46,7 @@ TADCEventReader::~TADCEventReader() {
 }
 
 bool TADCEventReader::SetTree(string fileName){//TTree *tree){
+  pEvent=NULL;
 	if(tree!=NULL) {tree->Delete();tree=NULL;}
 	if(file!=NULL) {file->Delete();file=NULL;}
 	tree=NULL;
@@ -50,7 +56,7 @@ bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 //	stringstream fileString;
 //	fileString<<sys->pwd()<<"/"<<fileName;
 //	std::cout<<"Open "<<fileString.str()<<endl;
-	file = new TFile(fileName.c_str());
+	file = (TFile*)TFile::Open(fileName.c_str());
 	file->GetObject("tree",tree);
 	if(tree==NULL)
 	{
@@ -75,6 +81,7 @@ bool TADCEventReader::isOK(){
 }
 
 void TADCEventReader::SetBranchAddresses(){
+  pEvent=0;
 	//Event Header Branches
 	if(tree->FindBranch("RunNumber")){
 		tree->SetBranchAddress("RunNumber",&run_number);

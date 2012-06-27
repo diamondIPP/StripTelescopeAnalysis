@@ -35,8 +35,8 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	this->runNumber=runNumber;
 	sys = gSystem;
 	path = sys->pwd();
-  SetFileName(fileName);
-	createSettingsRootFile();
+//  SetFileName(fileName);
+//	createSettingsRootFile();
 }
 
 TSettings::~TSettings(){
@@ -820,7 +820,7 @@ UInt_t TSettings::getVaChannelNo(UInt_t detChNo)
 void TSettings::saveSettings()
 {
   cout<<"SAVE SETTINGS TO ROOT FILE"<<endl;
-  settingsFile->cd();
+//  settingsFile->cd();
 //  this->Write();
 }
 
