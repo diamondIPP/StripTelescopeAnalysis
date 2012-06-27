@@ -33,11 +33,11 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 TADCEventReader::~TADCEventReader() {
 	cout<< "deleting instance of TADCEventReader"<<endl;
 	//delete tree;
-
-	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
-	  if(hEtaIntegral[det]!=0)delete hEtaIntegral[det];
-	if(tree!=0) delete tree;
 	if(file!=0)file->Close();
+//	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+//	  if(hEtaIntegral[det]!=0)delete hEtaIntegral[det];
+//
+//	if(tree!=0) delete tree;
 }
 
 bool TADCEventReader::SetTree(string fileName){//TTree *tree){
