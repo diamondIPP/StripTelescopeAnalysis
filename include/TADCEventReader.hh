@@ -108,11 +108,11 @@ private:
 	TH1F *hEtaIntegral[9];
 	bool bEtaIntegrals;
 private:
-//is that needed?
+	//is that needed?
 	TFile *file;
-    TTree *tree;
-    UInt_t current_event;
-    TSystem* sys;
+	TTree *tree;
+	UInt_t current_event;
+	TSystem* sys;
 
 private:
 	UInt_t verbosity;

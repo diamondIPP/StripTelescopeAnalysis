@@ -13,6 +13,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<"************TSelectionClass::TSelectionClass**************"<<endl;
 	cout<<"**********************************************************"<<endl;
 	this->settings=settings;
+	this->results=0;
 	cout<<settings->getRunNumber()<<endl;
 
 	// TODO Auto-generated constructor stub
@@ -396,6 +397,19 @@ void TSelectionClass::initialiseHistos()
 
 void TSelectionClass::createCutFlowDiagramm()
 {
+  if(results!=0){
+    if(!results->IsZombie()){
+      results->setAllEvents(nEvents);
+      results->setNoSiliconHit(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut);
+      results->setOneAndOnlyOneSiliconNotFiducialCut(nSiliconTrackNotFiducialCut);
+      results->setValidSiliconTrack(nValidSiliconTrack);
+      results->setNoDiamondHit(nValidSiliconNoDiamondHit);
+      results->setMoreThanOneDiamondHit(nValidButMoreThanOneDiaCluster);
+      results->setExactlyOneDiamondHit(nValidDiamondTrack);
+      results->setUseForAlignment(nUseForAlignment);
+      results->setUseForAnalysis(nUseForAnalysis);
+    }
+  }
 	char output[4000];
 	int n=0;
 	n+=sprintf(&output[n],"Finished with Selection with alignment training fraction of %f%%\n",settings->getAlignment_training_track_fraction()*100.);

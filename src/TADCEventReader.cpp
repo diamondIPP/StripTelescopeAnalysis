@@ -14,7 +14,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	store_threshold = 2;
 	tree =NULL;
 	file=NULL;
-	sys=new TSystem();
+	sys = gSys;
 	/*run_number=RunNumber;
 	event_number=EventNumber;*/
 	SetTree(FileName);//tree);
@@ -33,12 +33,16 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 TADCEventReader::~TADCEventReader() {
 	cout<< "deleting instance of TADCEventReader"<<endl;
 	//delete tree;
-	file->Delete();
+
+	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+	  if(hEtaIntegral[det]!=0)delete hEtaIntegral[det];
+	if(tree!=0) delete tree;
+	if(file!=0)file->Close();
 }
 
 bool TADCEventReader::SetTree(string fileName){//TTree *tree){
-	if(tree!=NULL) tree->Delete();
-	if(file!=NULL) file->Delete();
+	if(tree!=NULL) {tree->Delete();tree=NULL;}
+	if(file!=NULL) {file->Delete();file=NULL;}
 	tree=NULL;
 	file=NULL;
 //	cout<<"TADCEventReader-PATH: "<<sys->pwd()<<endl;

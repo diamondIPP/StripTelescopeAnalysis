@@ -19,7 +19,7 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	pt = new TPaveText(0.07,0,0.22,0.10,"NDC");
 	UpdatePaveText();
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: get new TSystem"<<endl;
-	sys=new TSystem();
+	sys=gSystem;//new TSystem();
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: Set Style"<<endl;
 	currentStyle= new TStyle("HistSaverStyle","HistSaverStyle");
 	currentStyle->SetPalette(1);
@@ -27,6 +27,7 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	  if(!gStyle->IsZombie()){
 	    gROOT->SetStyle("Plain"); //General style (see TStyle)
 	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
+	    gStyle->SetOptStat("nemrKSiou");
 	    gStyle->SetOptFit(1111);  //Fit options to be displayed
 	    gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
 	    gStyle->SetPadRightMargin(0.15);

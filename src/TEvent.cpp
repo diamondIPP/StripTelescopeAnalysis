@@ -19,6 +19,10 @@ TEvent::~TEvent(){
 
 }
 
+/**
+ * COPY constructor
+ * @param rhs right hand side of equal sign
+ */
 TEvent::TEvent(const TEvent& rhs){
 	verbosity=rhs.verbosity;
 	eventNumber = rhs.eventNumber;

@@ -17,11 +17,6 @@ TAlignment::TAlignment(TSettings* settings) {
   runNumber = settings->getRunNumber();
   cout << runNumber << endl;
   stringstream runString;
-////  gStyle->SetOptStat("KSiouRMen");
-  if(gStyle!=0)
-    if(!gStyle->IsZombie())
-      gStyle->SetOptStat("nemrKSiou");
-//  gStyle->SetOptFit(1111111);
   runString.str("");
   runString << settings->getRunNumber();
 

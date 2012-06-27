@@ -23,13 +23,20 @@ TResults::TResults(TSettings *settings) {
   cout<<"New TResults with settings "<<settings<<"\t run: "<<settings->getRunNumber()<<endl;
   openResults(settings);
 //  this->settings=settings;
-
 }
 
 TResults::~TResults() {
   // TODO Auto-generated destructor stub
 }
 
+TResults::TResults(const   TResults& rhs){//copy constructor
+  initialiseResults();
+  inheritOldResults(rhs);
+}
+
+TResults::TResults &operator=(const   TResults &src){ //class assignment function
+
+}
 
 void TResults::inheritOldResults(const TResults & rhs)
 {
@@ -40,10 +47,6 @@ void TResults::inheritOldResults(const TResults & rhs)
   for(UInt_t det=0;det<rhs.hitSigma.size();det++)this->hitSigma.push_back(rhs.hitSigma[det]);
   this->noise.clear();
   for(UInt_t det=0;det<rhs.noise.size();det++)this->noise.push_back(rhs.noise[det]);
-}
-
-TResults::TResults(const TResults &rhs){
-  inheritOldResults(rhs);
 }
 
 void TResults::initialiseResults(){
@@ -92,8 +95,6 @@ void TResults::openResults(TSettings *settings){
 
   }
   Print();
-  char character;
-  cin>>character;
 
 }
 
@@ -113,9 +114,9 @@ void TResults::saveResults(){
 void TResults::Print(){
   getLastUpdateDate().Print();
   cout<<getLastUpdateDate().AsString()<<endl;
-  cout<<"det\tseed hit"<<endl;
+  cout<<"det\tseed hit  noise"<<endl;
   for(UInt_t det=0; det<TPlaneProperties::getNDetectors();det++){
-    cout<<det<<"\t"<<this->seedSigma[det]<<" "<<this->hitSigma[det]<<" "<<this->noise[det]<<endl;
+    cout<<det<<"\t"<<std::setw(4)<<this->seedSigma[det]<<" "<<std::setw(4)<<this->hitSigma[det]<<" "<<std::setw(4)<<this->noise[det]<<endl;
   }
 //  settings->Print();
 }
@@ -127,4 +128,11 @@ void TResults::SetNoise(UInt_t det,Float_t detNoise){
     noise.resize(det+1,0);
   noise[det]=detNoise;
   cout<<"Set Results: Noise of det "<<det<<": "<<detNoise<<endl;
+}
+
+
+
+void TResults::setAlignment(TDetectorAlignment newAlignment)
+{
+  alignment= newAlignment;
 }

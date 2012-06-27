@@ -74,7 +74,7 @@ $(PROGS):
         # linking $@
         #
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
-		@echo  "\n\nPlease do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib"
+		@echo  "\n\nPlease do: export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:~/lib"
 
 
 libTEvent.so: $(ROOTLIBFILES)	

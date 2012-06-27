@@ -241,6 +241,7 @@ int main(int argc, char ** argv) {
 		sys->cd(currentDir.c_str());
 		TSelectionClass* selectionClass;
 		selectionClass=new TSelectionClass(settings);
+		selectionClass->SetResults(currentResults);
 		selectionClass->MakeSelection(NEVENTS);
 		delete selectionClass;
 

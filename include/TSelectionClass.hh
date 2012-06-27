@@ -21,6 +21,7 @@
 #include "TADCEventReader.hh"
 #include "TCluster.hh"
 #include "TSettings.class.hh"
+#include "TResults.hh"
 
 class TSelectionClass {
 public:
@@ -28,7 +29,9 @@ public:
 	virtual ~TSelectionClass();
 	void MakeSelection();
 	void MakeSelection(UInt_t nEvents);
+	void SetResults(TResults *results){this->results=results;};
 private:
+	TResults *results;
 	void setBranchAdressess();
 	bool createSelectionTree(int nEvents);
 	void createCutFlowDiagramm();
