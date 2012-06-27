@@ -18,6 +18,7 @@
 #include <vector>
 #include "TPlaneProperties.hh"
 #include "TSettings.class.hh"
+#include "TDetectorAlignment.hh"
 #include <TDatime.h>
 
 class TResults: public TNamed {
@@ -25,9 +26,8 @@ public:
   TResults(UInt_t runnumber=0);
   TResults(TSettings *settings);
   TResults(const   TResults& rhs);//copy constructor
-  TResults &operator=(const   TResults &src); //class assignment function
+//  TResults &operator=(const   TResults &src); //class assignment function
   virtual ~TResults();
-  TResults(const TResults& rhs);
   void saveResults();
   void openResults(TSettings *Settings);
   void Print();

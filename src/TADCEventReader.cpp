@@ -14,7 +14,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	store_threshold = 2;
 	tree =NULL;
 	file=NULL;
-	sys = gSys;
+	sys = gSystem;
 	/*run_number=RunNumber;
 	event_number=EventNumber;*/
 	SetTree(FileName);//tree);

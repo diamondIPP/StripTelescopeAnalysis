@@ -33,10 +33,10 @@ TResults::TResults(const   TResults& rhs){//copy constructor
   initialiseResults();
   inheritOldResults(rhs);
 }
-
-TResults::TResults &operator=(const   TResults &src){ //class assignment function
-
-}
+//
+//TResults::TResults &operator=(const   TResults &src){ //class assignment function
+//
+//}
 
 void TResults::inheritOldResults(const TResults & rhs)
 {
