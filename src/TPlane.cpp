@@ -138,23 +138,6 @@ bool TPlane::isValidPlane(){
 		return (getNXClusters()==1);
 }
 
-string TPlane::getCoordinateString(TPlaneProperties::enumCoordinate cor){
-	switch (cor){
-	case TPlaneProperties::X_COR: return "X";break;
-	case TPlaneProperties::Y_COR: return "Y";break;
-	case TPlaneProperties::Z_COR: return "Z";break;
-	case TPlaneProperties::XY_COR:return "X&Y"; break;
-	default: return "UNDEFINDED";
-	}
-}
-
-string TPlane::getDetectortypeString(TPlaneProperties::enumDetectorType type){
-	switch (type){
-	case TPlaneProperties::kSilicon: 	return "Silicon";
-	case TPlaneProperties::kDiamond:	return "Diamond";
-	default:		return "UNDEFINED";
-	}
-}
 
 TCluster TPlane::getXCluster(UInt_t cl){
 	if(cl<xClusters.size())
@@ -183,7 +166,7 @@ TCluster TPlane::getCluster(TPlaneProperties::enumCoordinate cor, UInt_t cl){
 
 void TPlane::Print(UInt_t level)
 {
-	cout<< TCluster::Intent(level)<<getDetectortypeString(this->getDetectorType())<<"-Plane with "<<getNXClusters()<<"/"<<getNYClusters()<<endl;
+	cout<< TCluster::Intent(level)<<TPlaneProperties::getDetectortypeString(this->getDetectorType())<<"-Plane with "<<getNXClusters()<<"/"<<getNYClusters()<<endl;
 	cout<<"X:";
 	for(UInt_t i=0;i<getNXClusters();i++){
 		this->xClusters.at(i).Print(level+1);

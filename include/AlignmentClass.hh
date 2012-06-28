@@ -95,7 +95,7 @@ private:/**needed variables*/
 	TH1F* histo_transparentclustering_chi2X;
 	TH1F* histo_transparentclustering_chi2Y;
 	
-	Float_t dianoise_sigma[2];	//TODO: get from clustering tree!!
+	Float_t dianoise_sigma[2];
 
 private: /* not used at the moment*/
 	std::vector<Float_t> dia_offset;

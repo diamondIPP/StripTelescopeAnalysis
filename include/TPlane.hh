@@ -54,8 +54,6 @@ public:
 	bool isValidPlane();
     enum TPlaneProperties::enumDetectorType getDetectorType() const;
     void setDetectorType(TPlaneProperties::enumDetectorType type);
-    static string getCoordinateString(TPlaneProperties::enumCoordinate cor);
-    static string getDetectortypeString(TPlaneProperties::enumDetectorType type);//todo verschieben
     void Print(UInt_t level=0);
 private:
     TPlaneProperties::enumDetectorType type;

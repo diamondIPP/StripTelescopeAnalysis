@@ -34,10 +34,10 @@ public:
 	static UInt_t getDiamondPlane(){return 4;};
 	static UInt_t getNDetectors(){return 9;};
 	static UInt_t getMaxTransparentClusterSize(UInt_t det){return 10;};
-    static std::string getCoordinateString(enumCoordinate cor);
-    static std::string getDetectortypeString(enumDetectorType type);//todo verschieben
-    static std::string getDetectorNameString(UInt_t det);
-	// TODO: getPlaneCoordinate(UInt_t plane);
+	static std::string getCoordinateString(enumCoordinate cor);
+	static std::string getDetectortypeString(enumDetectorType type);
+	static std::string getDetectorNameString(UInt_t det);
+	static std::string getStringForDetector(int i);
 
     ClassDef(TPlaneProperties,1);
 

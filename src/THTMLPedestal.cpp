@@ -31,12 +31,12 @@ void THTMLPedestal::createTableOfCuts()
 	tablecontent2.at(1).push_back("Seed");
 	tablecontent2.at(2).push_back("Hit");
 	for(UInt_t det =0;det <TPlaneProperties::getNDetectors();det+=2){
-		tablecontent.at(0).push_back(TADCEventReader::getStringForDetector(det));
+		tablecontent.at(0).push_back(TPlaneProperties::getStringForDetector(det));
 		tablecontent.at(1).push_back(floatToString(settings->getClusterSeedFactor(det)));
 		tablecontent.at(2).push_back(floatToString(settings->getClusterHitFactor(det)));
 	}
 	for(UInt_t det =1;det <TPlaneProperties::getNDetectors();det+=2){
-		tablecontent2.at(0).push_back(TADCEventReader::getStringForDetector(det));
+		tablecontent2.at(0).push_back(TPlaneProperties::getStringForDetector(det));
 		tablecontent2.at(1).push_back(floatToString(settings->getClusterSeedFactor(det)));
 		tablecontent2.at(2).push_back(floatToString(settings->getClusterHitFactor(det)));
 	}

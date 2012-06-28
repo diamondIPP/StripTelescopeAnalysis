@@ -382,10 +382,6 @@ int ReadRunList() {
 			continue;
 		}
 //		cout<<"Read Line"<<endl;
-		/*TODO: change sscanf to fgets?
-		 * http://stackoverflow.com/questions/2439726/using-an-ampersand-in-scanf
-		 * http://www.cplusplus.com/reference/clibrary/cstdio/fgets/
-		 */
 		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d", &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis);
 //		cout << "RunDescription Char: " << RunDescription[0] << endl;
 		cout<<RunNumber<<endl;

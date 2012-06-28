@@ -25,9 +25,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	htmlClus= new THTMLCluster(settings);
 	sys->MakeDirectory(runString.str().c_str());
 	sys->cd(runString.str().c_str());
-	htmlClus->setMainPath((string)sys->pwd());
-	htmlClus->setSubdirPath("/clustering/");
-	htmlClus->setFileName("clustering.html");
+	htmlClus->setMainPath("../");
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<"clusterData."<<runNumber<<".root";
@@ -37,6 +35,8 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("clustering");
 	sys->cd("clustering");
+  htmlClus->setSubdirPath("clustering/");
+  htmlClus->setFileName("clustering.html");
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
@@ -147,67 +147,67 @@ void TAnalysisOfClustering::initialiseHistos()
 	}
 	for(UInt_t det=0;det<9;det++){
 		stringstream histName;
-		histName<<"hClusterPositionRelativeToNextIntegerCWM_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hClusterPositionRelativeToNextIntegerCWM_"<<TPlaneProperties::getStringForDetector(det);
 		cout<<histName.str()<<endl;
 		hRelativeClusterPositionCWM[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,1024,-.5,.5);
 		histName.str("");
 		histName.clear();
-		histName<<"hClusterPositionRelativeToNextIntegerCorEta_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hClusterPositionRelativeToNextIntegerCorEta_"<<TPlaneProperties::getStringForDetector(det);
 		cout<<histName.str()<<endl;
 		hRelativeClusterPositionCorEta[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,512,-.5,.5);
 		histName.str("");
 		histName.clear();
-		histName<<"hClusterPositionRelativeToNextIntegerEta_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hClusterPositionRelativeToNextIntegerEta_"<<TPlaneProperties::getStringForDetector(det);
 		cout<<histName.str()<<endl;
 		hRelativeClusterPositionEta[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,512,-.5,.5);
 		histName.str("");
 		histName.clear();
-		histName<<"hAbsoluteClusterPostion_"<<TADCEventReader::getStringForDetector(det);;
+		histName<<"hAbsoluteClusterPostion_"<<TPlaneProperties::getStringForDetector(det);;
 		cout<<histName.str()<<endl;
 		hClusterPosition[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),4096,0,TPlaneProperties::getNChannels(det)-1);
 		histName.str("");
 		histName.clear();
-		histName<<"hEtaDistribution_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hEtaDistribution_"<<TPlaneProperties::getStringForDetector(det);
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 		histName.str("");
 		histName.clear();
-		histName<<"hEtaDistribution5Percent_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hEtaDistribution5Percent_"<<TPlaneProperties::getStringForDetector(det);
 		hEtaDistribution5Percent[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 		histName.str("");
 		histName.clear();
-		histName<<"hEtaDistributionVsSignalLeft_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hEtaDistributionVsSignalLeft_"<<TPlaneProperties::getStringForDetector(det);
 		hEtaDistributionVsSignalLeft[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
 		histName.str("");
 		histName.clear();
-		histName<<"hEtaDistributionVsSignalRight_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hEtaDistributionVsSignalRight_"<<TPlaneProperties::getStringForDetector(det);
 		hEtaDistributionVsSignalRight[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
 		histName.str("");
 		histName.clear();
-		histName<<"hEtaDistributionVsSignalSum_"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hEtaDistributionVsSignalSum_"<<TPlaneProperties::getStringForDetector(det);
 		hEtaDistributionVsSignalSum[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)*2);
 		histName.str("");
 		histName.clear();
-		histName<<"hSignalLeftVsSignalRight"<<TADCEventReader::getStringForDetector(det);
+		histName<<"hSignalLeftVsSignalRight"<<TPlaneProperties::getStringForDetector(det);
 		hSignalLeftVsSignalRight[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
 	}
 	cout<<"2"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"SaturatedChannels_"<<TADCEventReader::getStringForDetector(det)<<"";
+		histoName<<"SaturatedChannels_"<<TPlaneProperties::getStringForDetector(det)<<"";
 		hSaturatedChannels[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 		if(det==8)hSaturatedChannels[det]->GetXaxis()->SetRangeUser(0,128);
 	}
 	cout<<"3"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hPositionOfallSeeds_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hPositionOfallSeeds_"<<TPlaneProperties::getStringForDetector(det);
 		hSeedMap[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 		if(det==8)hSeedMap[det]->GetXaxis()->SetRangeUser(0,128);
 	}
 	cout<<"4"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hPositionOfHighestSeed_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hPositionOfHighestSeed_"<<TPlaneProperties::getStringForDetector(det);
 		hSeedMap2[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 		hSeedMap2[det]->GetXaxis()->SetTitle("Position of Highest Seed of a Cluster");
 		if(det==8)hSeedMap2[det]->GetXaxis()->SetRangeUser(0,128);
@@ -215,7 +215,7 @@ void TAnalysisOfClustering::initialiseHistos()
 	cout<<"5"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hNumberOfSeeds_in_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hNumberOfSeeds_in_"<<TPlaneProperties::getStringForDetector(det);
 		hNumberOfSeeds[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),31,0,30);
 		hNumberOfSeeds[det]->GetXaxis()->SetTitle("Number Of Seeds in Cluster");
 		hNumberOfSeeds[det]->GetYaxis()->SetTitle("Entries #");
@@ -223,36 +223,36 @@ void TAnalysisOfClustering::initialiseHistos()
 	cout<<"6"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"PulseHeight_"<<TADCEventReader::getStringForDetector(det)<<"_BiggestHitChannelInSigma";
+		histoName<<"PulseHeight_"<<TPlaneProperties::getStringForDetector(det)<<"_BiggestHitChannelInSigma";
 		hPulsHeightBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
 	cout<<"7"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"PulseHeight_"<<TADCEventReader::getStringForDetector(det)<<"_BiggestHitNextToBiggestHit_ChannelInSigma";
+		histoName<<"PulseHeight_"<<TPlaneProperties::getStringForDetector(det)<<"_BiggestHitNextToBiggestHit_ChannelInSigma";
 		hPulsHeightNextBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
 	cout<<"8"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"Channel_"<<TADCEventReader::getStringForDetector(det)<<"_BiggestHit";
+		histoName<<"Channel_"<<TPlaneProperties::getStringForDetector(det)<<"_BiggestHit";
 		hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 	}
 	for(int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		hClusterSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 		hClusterSize[det]->GetXaxis()->SetTitle("Number of Seeds and Hits in Cluster");
 		hClusterSize[det]->GetYaxis()->SetTitle("Entries #");
 		histoName.str("");
 		histoName.clear();
-		histoName<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		hClusterSeedSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 		hClusterSeedSize[det]->GetXaxis()->SetTitle("Number of Seeds in Cluster");
 		hClusterSeedSize[det]->GetYaxis()->SetTitle("Entries #");
 		histoName.str("");
 		histoName.clear();
-		histoName<<"NumberOfClusters_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"NumberOfClusters_"<<TPlaneProperties::getStringForDetector(det);
 		hNumberOfClusters[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 	}
 	cout<<"10"<<endl;
@@ -262,49 +262,49 @@ void TAnalysisOfClustering::initialiseHistos()
 		Float_t max = 250.;
 		
         stringstream histoName;
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "BiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "BiggestHitChannelInSigma";
         histo_pulseheight_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "SecondBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "SecondBiggestHitChannelInSigma";
         histo_pulseheight_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << TADCEventReader::getStringForDetector(det) << "SecondBiggestHitMinusBiggestHitPosition";
+        histoName << TPlaneProperties::getStringForDetector(det) << "SecondBiggestHitMinusBiggestHitPosition";
         histo_second_biggest_hit_direction[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),2,-2.,2.);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "SecondBiggestHitChannelInSigmaLeft";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "SecondBiggestHitChannelInSigmaLeft";
         histo_pulseheight_sigma_second_left[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "SecondBiggestHitChannelInSigmaRight";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "SecondBiggestHitChannelInSigmaRight";
         histo_pulseheight_sigma_second_right[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << TADCEventReader::getStringForDetector(det) << "BiggestHitMap";
+        histoName << TPlaneProperties::getStringForDetector(det) << "BiggestHitMap";
         histo_biggest_hit_map[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0.,255.);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "LeftChipBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "LeftChipBiggestHitChannelInSigma";
         histo_pulseheight_left_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "RightChipBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "RightChipBiggestHitChannelInSigma";
         histo_pulseheight_right_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "LeftChipSecondBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "LeftChipSecondBiggestHitChannelInSigma";
         histo_pulseheight_left_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "RightChipSecondBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "RightChipSecondBiggestHitChannelInSigma";
         histo_pulseheight_right_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
     }
     cout<<"11"<<endl;
     for(int det=0;det<9;det++){//analayse2ndHighestHit
     	stringstream histName;
-    	histName<<"h2ndBiggestHitSignal_"<<TADCEventReader::getStringForDetector(det);
+    	histName<<"h2ndBiggestHitSignal_"<<TPlaneProperties::getStringForDetector(det);
     	if(det<8)
     		h2ndBiggestHitSignal[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),512,0,200);
     	else
@@ -312,32 +312,32 @@ void TAnalysisOfClustering::initialiseHistos()
     	h2ndBiggestHitSignal[det]->GetXaxis()->SetTitle("Signal of 2nd Biggest Hit of Cluster");
     	h2ndBiggestHitSignal[det]->GetYaxis()->SetTitle("Entries #");
     	histName.str("");
-    	histName<<"h2ndBiggestHitOverCharge_"<<TADCEventReader::getStringForDetector(det);
+    	histName<<"h2ndBiggestHitOverCharge_"<<TPlaneProperties::getStringForDetector(det);
     	h2ndBiggestHitOverCharge[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),512,0,0.5);
     	h2ndBiggestHitOverCharge[det]->GetXaxis()->SetTitle("Signal of 2nd Biggest Hit of Cluster over Sum of all signals of cluster");
     	h2ndBiggestHitOverCharge[det]->GetYaxis()->SetTitle("Entries #");
     	histName.str("");
-    	histName<<"h2ndBiggestHitPosition_"<<TADCEventReader::getStringForDetector(det);
+    	histName<<"h2ndBiggestHitPosition_"<<TPlaneProperties::getStringForDetector(det);
     	h2ndBiggestHitPosition[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),3,-1.5,1.5);
     	h2ndBiggestHitPosition[det]->GetXaxis()->SetTitle("position of snd biggest hit in respect to biggest Hit");
     	h2ndBiggestHitPosition[det]->GetYaxis()->SetTitle("Entries #");
     	histName.str("");
-    	histName<<"hLeftHitOverLeftAndRight_"<<TADCEventReader::getStringForDetector(det);
+    	histName<<"hLeftHitOverLeftAndRight_"<<TPlaneProperties::getStringForDetector(det);
     	hLeftHitOverLeftAndRight[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),512,0,1);
     	hLeftHitOverLeftAndRight[det]->GetXaxis()->SetTitle("Q_L/(Q_R +Q_L)");
     	histName.str("");
-    	histName<<"hDeltaLeftRightHitOverLeftAndRight_"<<TADCEventReader::getStringForDetector(det);
+    	histName<<"hDeltaLeftRightHitOverLeftAndRight_"<<TPlaneProperties::getStringForDetector(det);
     	hDeltaLeftRightHitOverLeftAndRight[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,-1,1);
     	hDeltaLeftRightHitOverLeftAndRight[det]->GetXaxis()->SetTitle("(Q_L-Q_R)/(Q_R +Q_L)");
     	histName.str("");
-    	histName<<"hSignal2ndHighestOverSignalHighest_"<<TADCEventReader::getStringForDetector(det);
+    	histName<<"hSignal2ndHighestOverSignalHighest_"<<TPlaneProperties::getStringForDetector(det);
     	hSignal2ndHighestOverSignalHighestRatio[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),512,0,1);
     	hSignal2ndHighestOverSignalHighestRatio[det]->GetXaxis()->SetTitle("Q_{2ndHighest}/Q_{Highest}");
     }
     cout<<"12"<<endl;
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 			stringstream histName;
-			histName<<"hPulseHeightDistribution_"<<TADCEventReader::getStringForDetector(det);
+			histName<<"hPulseHeightDistribution_"<<TPlaneProperties::getStringForDetector(det);
 			float max=0;
 			if(det==TPlaneProperties::getDetDiamond())
 				max = 4098;
@@ -348,7 +348,7 @@ void TAnalysisOfClustering::initialiseHistos()
 
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
       stringstream name;
-      name<<"hBiggestHitSizeVsClusterSize_"<<TADCEventReader::getStringForDetector(det);
+      name<<"hBiggestHitSizeVsClusterSize_"<<TPlaneProperties::getStringForDetector(det);
       hBiggestHitVsClusterSize[det] = new TH2F(name.str().c_str(),name.str().c_str(),1024,0,TPlaneProperties::getMaxSignalHeight(det)*2,8,0.5,8.5);
       hBiggestHitVsClusterSize[det]->GetXaxis()->SetTitle("Signal of Biggest Hit in Cluster [adc counts]");
       hBiggestHitVsClusterSize[det]->GetYaxis()->SetTitle("ClusterSize");
@@ -367,10 +367,10 @@ void TAnalysisOfClustering::saveHistos(){
 	histSaver->SaveHistogram(histo_H2C_biggestHit);
 	histo_H2C_biggestHit->Delete();
     for(int det=0;det<9;det++){//analyse 2nd biggest Hit
-    	cout<<"plot histo "<<det<<"  h2ndBiggestHitSignal_"<<TADCEventReader::getStringForDetector(det);
+    	cout<<"plot histo "<<det<<"  h2ndBiggestHitSignal_"<<TPlaneProperties::getStringForDetector(det);
     	histSaver->SaveHistogram(h2ndBiggestHitSignal[det]);
     	delete h2ndBiggestHitSignal[det];
-    	cout<<"plot histo "<<det<<"  h2ndBiggestHitOverCharge_"<<TADCEventReader::getStringForDetector(det);
+    	cout<<"plot histo "<<det<<"  h2ndBiggestHitOverCharge_"<<TPlaneProperties::getStringForDetector(det);
     	histSaver->SaveHistogram(h2ndBiggestHitOverCharge[det]);
     	delete h2ndBiggestHitOverCharge[det];
     	cout<<"plot histo "<<h2ndBiggestHitPosition[det]->GetName()<<endl;
@@ -441,7 +441,7 @@ void TAnalysisOfClustering::saveHistos(){
 
 	for(UInt_t det=0;det<9;det++){
 		stringstream histName;
-		histName<<"hEtaIntegral_"<<TADCEventReader::getStringForDetector(det);;
+		histName<<"hEtaIntegral_"<<TPlaneProperties::getStringForDetector(det);;
 		TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 		UInt_t nBins = hEtaDistribution[det]->GetNbinsX();
 		Int_t entries = hEtaDistribution[det]->GetEntries();
@@ -719,7 +719,7 @@ void TAnalysisOfClustering::savePHHistos()
     			histName<<"allClusterSizes";
     		else
     			histName<<"nClusters"<<nClusters;
-    		histName<<"_"<<TADCEventReader::getStringForDetector(det);
+    		histName<<"_"<<TPlaneProperties::getStringForDetector(det);
     		TH1F *htemp;
     		//CREATE HTEMP and ReBin it if necessary
     		htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
@@ -774,7 +774,7 @@ void TAnalysisOfClustering::savePHHistos()
       profY->GetXaxis()->SetTitle("ClusterSize");
       profY->GetYaxis()->SetTitle("mean of Biggest signal in Cl");
       string histoTitle = "mean of Biggest signal in Cluster vs. ClusterSize";
-      histoTitle.append(TADCEventReader::getStringForDetector(det).c_str());
+      histoTitle.append(TPlaneProperties::getStringForDetector(det).c_str());
       profY->SetTitle(histoTitle.c_str());
       histSaver->SaveHistogram(profY);
     }

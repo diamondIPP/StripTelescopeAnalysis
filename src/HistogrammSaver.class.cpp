@@ -41,11 +41,16 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 //	    gStyle->SetPadRightMargin(0.15);
 	    if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
 	    //gStyle->SetTitleColor(19,"");
+      gStyle->SetPalette(1); //
 	    gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
 	    currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
+	    currentStyle->SetPalette(1);
 	    currentStyle->cd();
+
 	  }
 	  }
+
+  gStyle->SetPalette(1); //
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
 	gErrorIgnoreLevel=1001;
 

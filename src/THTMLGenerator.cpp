@@ -220,18 +220,18 @@ std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string
 	output<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name2;
-		name2<<name<<TADCEventReader::getStringForDetector(det);
+		name2<<name<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path,name2.str());
 	}
 	output<<"\n<br\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name2;
-		name2<<name<<TADCEventReader::getStringForDetector(det);
+		name2<<name<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path,name2.str());
 	}
 	output<<"\n<br>\n\t";
 	stringstream name2;
-	name2<<name<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name2<<name<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
 	output<<putImage(path,name2.str());
 	return (output.str());
 }

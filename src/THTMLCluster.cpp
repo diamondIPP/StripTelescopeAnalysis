@@ -28,7 +28,7 @@ void THTMLCluster::createTableOfCuts()
 	tablecontent.at(1).push_back("Seed");
 	tablecontent.at(2).push_back("Hit");
 	for(UInt_t det =0;det <TPlaneProperties::getNDetectors();det++){
-		tablecontent.at(0).push_back(TADCEventReader::getStringForDetector(det));
+		tablecontent.at(0).push_back(TPlaneProperties::getStringForDetector(det));
 		tablecontent.at(1).push_back(floatToString(settings->getClusterSeedFactor(det)));
 		tablecontent.at(2).push_back(floatToString(settings->getClusterHitFactor(det)));
 	}
@@ -37,7 +37,7 @@ void THTMLCluster::createTableOfCuts()
 	path<<this->path<<"/clustering/";
 	for(UInt_t det = 0; det< TPlaneProperties::getNDetectors();det++){
 		stringstream name;
-		name<<"h2ndBiggestHitOverCharge_"<<TADCEventReader::getStringForDetector(det);
+		name<<"h2ndBiggestHitOverCharge_"<<TPlaneProperties::getStringForDetector(det);
 		sectionContent<<putImage(path.str(),name.str());
 	}
 	this->addSection("Cluster Cuts",sectionContent.str());
@@ -74,7 +74,7 @@ void THTMLCluster::createPulseHeigthPlots(vector<double> meanPulseHeigths)
 	vecTable.at(0).push_back("");
 	vecTable.at(1).push_back("mean PulseHeigth");
 	for(UInt_t det=0;det <TPlaneProperties::getNDetectors();det++){
-		vecTable.at(0).push_back(TADCEventReader::getStringForDetector(det));
+		vecTable.at(0).push_back(TPlaneProperties::getStringForDetector(det));
 		vecTable.at(1).push_back(this->floatToString(meanPulseHeigths.at(det)));
 	}
 	sectionContent<<createTable(vecTable);
@@ -96,7 +96,7 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	if(clusterSeedSizes.size()<TPlaneProperties::getNDetectors()) clusterSeedSizes.resize(TPlaneProperties::getNDetectors());
 	if(numberOfClusters.size()<TPlaneProperties::getNDetectors()) numberOfClusters.resize(TPlaneProperties::getNDetectors());
 	for(UInt_t det=0;det <TPlaneProperties::getNDetectors();det++){
-		vecTable.at(0).push_back(TADCEventReader::getStringForDetector(det));
+		vecTable.at(0).push_back(TPlaneProperties::getStringForDetector(det));
 		vecTable.at(1).push_back(this->floatToString(clusterSizes.at(det)));
 		vecTable.at(2).push_back(this->floatToString(clusterSeedSizes.at(det)));
 		vecTable.at(3).push_back(this->floatToString(numberOfClusters.at(det)));
@@ -117,24 +117,24 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	output2<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
+		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
+		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output2<<putImage(path.str(),name2.str());
 	}
 	output<<"\n<br\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
+		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TADCEventReader::getStringForDetector(det);
+		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output2<<putImage(path.str(),name2.str());
 	}
 	output<<"\n<br>\n\t";
 	output2<<"\n<br>\n\t";
 	stringstream name,name2;
-	name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond())<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond())<<"_"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
-	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond())<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond())<<"_"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond())<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond())<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond())<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond())<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
 	output<<putImage(path.str(),name.str());
 	output2<<putImage(path.str(),name2.str());
 	sectionContent<<output.str()<<"\n<br>\n";

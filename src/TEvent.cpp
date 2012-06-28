@@ -94,7 +94,7 @@ UInt_t TEvent::getNClusters(UInt_t det){
 	else
 		cor=TPlaneProperties::Y_COR;
 	UInt_t plane=det/2;
-	if(verbosity)cout<<"TEvent::getNclusters of det "<<det<<" <=> plane: "<<plane<<" "<<TPlane::getCoordinateString(cor)<<endl;
+	if(verbosity)cout<<"TEvent::getNclusters of det "<<det<<" <=> plane: "<<plane<<" "<<TPlaneProperties::getCoordinateString(cor)<<endl;
 	if(det%2==0)
 		return getNXClusters(plane);
 	else return getNYClusters(plane);

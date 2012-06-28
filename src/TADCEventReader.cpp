@@ -470,22 +470,6 @@ int TADCEventReader::hasTree(){
 	  return hasATree;
 }
 
-std::string TADCEventReader::getStringForDetector(int i)
-{
-	switch(i){
-	case 0: return "D0X";
-	case 1: return "D0Y";
-	case 2: return "D1X";
-	case 3: return "D1Y";
-	case 4: return "D2X";
-	case 5: return "D2Y";
-	case 6: return "D3X";
-	case 7: return "D3Y";
-	case 8: return "Dia";
-	default: return "Invalid";
-	}
-	return "Invalid";
-}
 
 TFile *TADCEventReader::getFile() const
 {

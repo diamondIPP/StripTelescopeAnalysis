@@ -247,7 +247,6 @@ Float_t TCluster::getCharge(bool useSmallSignals){
 }
 
 /**
- * @todo
  * @param nClusterEntries
  * @param useSmallSignals
  * @return

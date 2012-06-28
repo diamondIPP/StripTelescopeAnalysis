@@ -51,7 +51,6 @@ public:
     UInt_t getVerbosity() const;
     bool getZeroDivisorEvent_flag() const;
     TTree *getTree() const;
-    static std::string getStringForDetector(int i);
     TFile* getFile() const;
     std::string getFilePath();
     Float_t getPedestalMean(UInt_t det, UInt_t ch);

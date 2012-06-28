@@ -30,7 +30,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	filepath.str("");
 	filepath<<"pedestalData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
-	htmlPedestal->setMainPath((string)(sys->pwd()));
+	htmlPedestal->setMainPath("../");
 	cout<<filepath.str()<<endl;
 	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
@@ -234,8 +234,8 @@ void TAnalysisOfPedestal::initialiseHistos()
 {
 	for (UInt_t det =0;det<9;det++){
 		stringstream histoName,histoTitle,xTitle,yTitle;
-		histoName<<"hNosiseDistributionOfAllNonHitChannels_"<<TADCEventReader::getStringForDetector(det);
-		histoTitle<<"Noise Distribution  of all non hit channels in Plane"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hNosiseDistributionOfAllNonHitChannels_"<<TPlaneProperties::getStringForDetector(det);
+		histoTitle<<"Noise Distribution  of all non hit channels in Plane"<<TPlaneProperties::getStringForDetector(det);
 		xTitle<<"non hit Noise (Adc-Ped.) in ADC counts";
 		yTitle<<"Number of Entries #";
 		Float_t width = 8;
@@ -250,40 +250,40 @@ void TAnalysisOfPedestal::initialiseHistos()
 	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hSaturatedChannels_"<<TADCEventReader::getStringForDetector(det)<<"";
+		histoName<<"hSaturatedChannels_"<<TPlaneProperties::getStringForDetector(det)<<"";
 		UInt_t nChannels=TPlaneProperties::getNChannels(det);
 		hSaturatedChannels[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels-1);
 	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hSeedPosAllSeeds_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hSeedPosAllSeeds_"<<TPlaneProperties::getStringForDetector(det);
 		UInt_t nChannels=TPlaneProperties::getNChannels(det);
 		hSeedMap[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels-1);
 	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hMaxSeedPos_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hMaxSeedPos_"<<TPlaneProperties::getStringForDetector(det);
 		UInt_t nChannels=TPlaneProperties::getNChannels(det);
 		hSeedMap2[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels-1);
 	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hNumberOfSeeds_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hNumberOfSeeds_"<<TPlaneProperties::getStringForDetector(det);
 		hNumberOfSeeds[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),31,0,30);
 	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hPulseHeight__BiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hPulseHeight__BiggestHitChannelInSigma_"<<TPlaneProperties::getStringForDetector(det);
 		hPulsHeightBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
 	for (int det=0;det<9;det++){//todo why such a big histo?so big?
 		stringstream histoName;
-		histoName<<"hPulseHeight_BiggestHitNextToBiggestHit_ChannelInSigma"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hPulseHeight_BiggestHitNextToBiggestHit_ChannelInSigma"<<TPlaneProperties::getStringForDetector(det);
 		hPulsHeightNextBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
 	for (int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hChannel_BiggestHit_"<<TADCEventReader::getStringForDetector(det);
+		histoName<<"hChannel_BiggestHit_"<<TPlaneProperties::getStringForDetector(det);
 		UInt_t nChannels=TPlaneProperties::getNChannels(det);
 		hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),nChannels,0,nChannels);
 	}
@@ -295,44 +295,44 @@ void TAnalysisOfPedestal::initialiseHistos()
 		if(det==TPlaneProperties::getDetDiamond()){max=256;nbins=1024;}
 		
         stringstream histoName;
-        histoName << "hPulseHeight_BiggestHitChannelInSigma" << TADCEventReader::getStringForDetector(det) ;
+        histoName << "hPulseHeight_BiggestHitChannelInSigma" << TPlaneProperties::getStringForDetector(det) ;
         histo_pulseheight_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
 
         histoName.str("");
-        histoName << "hPulseHeight_SecondBiggestHitChannelInSigma_" << TADCEventReader::getStringForDetector(det);
+        histoName << "hPulseHeight_SecondBiggestHitChannelInSigma_" << TPlaneProperties::getStringForDetector(det);
         histo_pulseheight_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "hSecondBiggestHitMinusBiggestHitPosition_" << TADCEventReader::getStringForDetector(det);
+        histoName << "hSecondBiggestHitMinusBiggestHitPosition_" << TPlaneProperties::getStringForDetector(det);
         histo_second_biggest_hit_direction[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),3,-1.5,1.5);
         
         histoName.str("");
-        histoName << "hPulseHeightSecondBiggestHitChannelInSigmaLeft" << TADCEventReader::getStringForDetector(det);
+        histoName << "hPulseHeightSecondBiggestHitChannelInSigmaLeft" << TPlaneProperties::getStringForDetector(det);
         histo_pulseheight_sigma_second_left[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "hPulseHeightSecondBiggestHitChannelInSigmaRight" << TADCEventReader::getStringForDetector(det) ;
+        histoName << "hPulseHeightSecondBiggestHitChannelInSigmaRight" << TPlaneProperties::getStringForDetector(det) ;
         histo_pulseheight_sigma_second_right[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "hBiggestHitMap"<< TADCEventReader::getStringForDetector(det);
+        histoName << "hBiggestHitMap"<< TPlaneProperties::getStringForDetector(det);
         histo_biggest_hit_map[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),TPlaneProperties::getNChannels(det),0.,TPlaneProperties::getNChannels(det)-1);
         
         histoName.str("");
-        histoName << "hPulseHeightLeftChipBiggestHitChannelInSigma" << TADCEventReader::getStringForDetector(det);
+        histoName << "hPulseHeightLeftChipBiggestHitChannelInSigma" << TPlaneProperties::getStringForDetector(det);
         histo_pulseheight_left_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "RightChipBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "RightChipBiggestHitChannelInSigma";
         histo_pulseheight_right_sigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "LeftChipSecondBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "LeftChipSecondBiggestHitChannelInSigma";
         histo_pulseheight_left_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
         
         histoName.str("");
-        histoName << "PulseHeight" << TADCEventReader::getStringForDetector(det) << "RightChipSecondBiggestHitChannelInSigma";
+        histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "RightChipSecondBiggestHitChannelInSigma";
         histo_pulseheight_right_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
     }
 	
@@ -465,10 +465,10 @@ void TAnalysisOfPedestal::createPedestalMeanHistos()
 {
 	for(UInt_t det = 0; det<TPlaneProperties::getNDetectors();det++){
 		stringstream nameMean,titleMean,titleSigma,nameSigma,canvasTitle,graphTitle;
-		nameMean<<"hMeanPedestal_Value_OfChannel_"<<TADCEventReader::getStringForDetector(det);
-		nameSigma<<"hMeanPedestal_Width_OfChannel_"<<TADCEventReader::getStringForDetector(det);
-		titleMean<<"mean of pedestalValue for each channel of "<<TADCEventReader::getStringForDetector(det);
-		titleSigma<<"mean of pedestalWidth for each channel of "<<TADCEventReader::getStringForDetector(det);
+		nameMean<<"hMeanPedestal_Value_OfChannel_"<<TPlaneProperties::getStringForDetector(det);
+		nameSigma<<"hMeanPedestal_Width_OfChannel_"<<TPlaneProperties::getStringForDetector(det);
+		titleMean<<"mean of pedestalValue for each channel of "<<TPlaneProperties::getStringForDetector(det);
+		titleSigma<<"mean of pedestalWidth for each channel of "<<TPlaneProperties::getStringForDetector(det);
 		UInt_t nBins = pedestalMeanValue.at(det).size();
 		TH1F *histoMean = new TH1F(nameMean.str().c_str(),titleMean.str().c_str(),nBins,-.5,nBins-.5);
 		TH1F *histoSigma = new TH1F(nameSigma.str().c_str(),titleSigma.str().c_str(),nBins,-.5,nBins-.5);
@@ -500,7 +500,7 @@ void TAnalysisOfPedestal::createPedestalMeanHistos()
 		histoSigma->SetLineColor(kRed);
 		histSaver->SaveHistogram(histoMean);
 		histSaver->SaveHistogram(histoSigma);
-		canvasTitle<<"cPedestalOfChannels_"<<TADCEventReader::getStringForDetector(det);
+		canvasTitle<<"cPedestalOfChannels_"<<TPlaneProperties::getStringForDetector(det);
 		histSaver->SaveTwoHistos(canvasTitle.str(),histoMean,histoSigma,10);
 		TGraphErrors *graph = new TGraphErrors(nBins,&vecChNo.at(0),&pedestalMeanValue.at(det).at(0),&vecChError.at(0),&pedestalSigmaValue.at(det).at(0));
 		graph->Draw("APLgoff");
@@ -508,7 +508,7 @@ void TAnalysisOfPedestal::createPedestalMeanHistos()
 		graph->GetYaxis()->SetTitle("pedestalValue in ADC counts");
 		graph->GetYaxis()->SetRangeUser(0,max);
 		graph->GetXaxis()->SetRangeUser(0,nBins-1);
-		graphTitle<<"gMeanPedestalValueOfChannelWithSigmaAsError_"<<TADCEventReader::getStringForDetector(det);
+		graphTitle<<"gMeanPedestalValueOfChannelWithSigmaAsError_"<<TPlaneProperties::getStringForDetector(det);
 		graph->SetTitle(graphTitle.str().c_str());
 		histSaver->SaveGraph(graph,graphTitle.str(),"AP");
 		delete histoMean;

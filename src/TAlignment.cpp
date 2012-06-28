@@ -23,8 +23,8 @@ TAlignment::TAlignment(TSettings* settings) {
   sys->MakeDirectory(runString.str().c_str());
   sys->cd(runString.str().c_str());
   htmlAlign = new THTMLAlignment(settings);
-  htmlAlign->setMainPath((string) sys->pwd());
-  htmlAlign->setSubdirPath("/alignment/");
+  htmlAlign->setMainPath("../");
+  htmlAlign->setSubdirPath("alignment/");
   stringstream filepath;
   filepath.str("");
   filepath << sys->pwd();
@@ -377,29 +377,21 @@ TResidual TAlignment::alignStripDetector(TPlaneProperties::enumCoordinate cor, U
   Float_t y_offset = res.getYOffset();
   Float_t phiy_offset = res.getPhiXOffset();
 
-  if (verbosity) cout << "Correction Values: X:" << x_offset << ",  PhiX: " << phix_offset << ",   Y: " << y_offset << ",  PhiY: " << phiy_offset << "\n" << endl;
-  //save corrections to alignment
-  //	if(vecRefPlanes.size()==1){
-  //		if(TPlaneProperties::X_COR==cor||TPlaneProperties::XY_COR==cor)
-  //			align->AddToXOffset(subjectPlane,x_offset);
-  //		if(TPlaneProperties::Y_COR==cor||TPlaneProperties::XY_COR==cor)
-  //			align->AddToYOffset(subjectPlane,y_offset);
-  //	}
-  //	else
-  {
-    if (subjectPlane == 4 && nDiaAlignmentStep == 0) {
-      align->AddToXOffset(subjectPlane, x_offset);
-      return (res);
-    }
-    if (TPlaneProperties::X_COR == cor || TPlaneProperties::XY_COR == cor) {
-      align->AddToXOffset(subjectPlane, x_offset);
-      align->AddToPhiXOffset(subjectPlane, phix_offset);
-    }
-    if (TPlaneProperties::Y_COR == cor || TPlaneProperties::XY_COR == cor) {
-      align->AddToYOffset(subjectPlane, y_offset);
-      align->AddToPhiYOffset(subjectPlane, phiy_offset);
-    }
+  if (verbosity||true) cout << "Correction Values: X:" << x_offset << ",  PhiX: " << phix_offset << ",   Y: " << y_offset << ",  PhiY: " << phiy_offset << "\n" << endl;
+
+  if (subjectPlane == 4 && nDiaAlignmentStep == 0) {
+    align->AddToXOffset(subjectPlane, x_offset);
+    return (res);
   }
+  if (TPlaneProperties::X_COR == cor || TPlaneProperties::XY_COR == cor) {
+    align->AddToXOffset(subjectPlane, x_offset);
+    align->AddToPhiXOffset(subjectPlane, phix_offset);
+  }
+  if (TPlaneProperties::Y_COR == cor || TPlaneProperties::XY_COR == cor) {
+    align->AddToYOffset(subjectPlane, y_offset);
+    align->AddToPhiYOffset(subjectPlane, phiy_offset);
+  }
+
   return res;
 }
 
@@ -1216,13 +1208,13 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
   cout << "create Histos..." << endl;
   for (UInt_t det = 0; det < TPlaneProperties::getNSiliconDetectors(); det++) {
     stringstream histoTitle;
-    histoTitle << "hPredictedStripPosition" << "_step" << correctionStep << "_" << TADCEventReader::getStringForDetector(det);
+    histoTitle << "hPredictedStripPosition" << "_step" << correctionStep << "_" << TPlaneProperties::getStringForDetector(det);
     histoStripDistribution.push_back(new TH1F(histoTitle.str().c_str(), histoTitle.str().c_str(), 128, -0.501, 0.501));
     histoTitle << "_flattend";
     histoStripDistributionFlattned.push_back(new TH1F(histoTitle.str().c_str(), histoTitle.str().c_str(), 128, -0.501, 0.501));
     histoTitle.str("");
     histoTitle.clear();
-    histoTitle << "hCorrectedEtaDistribution" << "_step" << correctionStep << "_" << TADCEventReader::getStringForDetector(det);
+    histoTitle << "hCorrectedEtaDistribution" << "_step" << correctionStep << "_" << TPlaneProperties::getStringForDetector(det);
     vecHEta.push_back(new TH1F(histoTitle.str().c_str(), histoTitle.str().c_str(), 128, 0, 1));
   }
 
@@ -1317,7 +1309,7 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
     }
 
     stringstream histName;
-    histName << "hEtaIntegral" << "_step" << correctionStep << "_" << TADCEventReader::getStringForDetector(det);
+    histName << "hEtaIntegral" << "_step" << correctionStep << "_" << TPlaneProperties::getStringForDetector(det);
     ;
     UInt_t nBins = vecHEta.at(det)->GetNbinsX();
     TH1F *histo = new TH1F(histName.str().c_str(), histName.str().c_str(), nBins, 0, 1);

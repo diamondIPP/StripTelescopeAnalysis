@@ -53,3 +53,19 @@ std::string TPlaneProperties::getDetectorNameString(UInt_t det){
 	output<<"Det"<<det;
 	return output.str();
 }
+
+std::string TPlaneProperties::getStringForDetector(int det){
+    switch(det){
+    case 0: return "D0X";
+    case 1: return "D0Y";
+    case 2: return "D1X";
+    case 3: return "D1Y";
+    case 4: return "D2X";
+    case 5: return "D2Y";
+    case 6: return "D3X";
+    case 7: return "D3Y";
+    case 8: return "Dia";
+    default: return "Invalid";
+    }
+    return "Invalid";
+}
