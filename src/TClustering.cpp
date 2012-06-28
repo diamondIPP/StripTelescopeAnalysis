@@ -9,7 +9,7 @@
 
 #include "../include/TClustering.hh"
 
-TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
+TClustering::TClustering(TSettings* settings){
 	cout<<"**********************************************************"<<endl;
 	cout<<"*************TClustering::TClustering*********************"<<endl;
 	cout<<"**********************************************************"<<endl;
@@ -39,10 +39,6 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
 	sys->cd("..");
-	this->seedDetSigma=seedDetSigma;
-	this->hitDetSigma=hitDetSigma;
-	this->seedDiaSigma=seedDiaSigma;
-	this->hitDiaSigma=hitDiaSigma;
 	this->runNumber=runNumber;
 	verbosity=0;
 	this->maxDetAdcValue=255;
@@ -81,16 +77,11 @@ TClustering::~TClustering() {
 
 void TClustering::setSettings(TSettings* settings){
 	this->settings = settings;
-	seedDiaSigma = settings->getDi_Cluster_Seed_Factor();
-	hitDiaSigma  = settings->getDi_Cluster_Hit_Factor();
-
-	seedDetSigma = settings->getSi_Cluster_Seed_Factor();
-	hitDetSigma  = settings->getSi_Cluster_Hit_Factor();
 }
 
-void TClustering::ClusterEvents(UInt_t nEvents)
-{
+void TClustering::ClusterEvents(UInt_t nEvents){
 	if(settings==NULL) settings=new TSettings("");//todo anpassen
+
 //	vecvecCluster.resize(9);
 	createdTree=createClusterTree(nEvents);
 	if(!createdTree) return;

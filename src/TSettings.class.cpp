@@ -35,7 +35,7 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	this->runNumber=runNumber;
 	sys = gSystem;
 	path = sys->pwd();
-//  SetFileName(fileName);
+  SetFileName(fileName);
 //	createSettingsRootFile();
 }
 
