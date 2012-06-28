@@ -8,8 +8,6 @@
 #include "../include/THTMLLandaus.hh"
 
 THTMLLandaus::THTMLLandaus(TSettings* settings):THTMLGenerator(settings) {
-	// TODO Auto-generated constructor stub
-
 	this->setFileName("landaus.html");
 	this->setSubdirPath("/selectionAnalysis/");
 	this->setTitle("Landau Distributions");
@@ -17,7 +15,6 @@ THTMLLandaus::THTMLLandaus(TSettings* settings):THTMLGenerator(settings) {
 }
 
 THTMLLandaus::~THTMLLandaus() {
-	// TODO Auto-generated destructor stub
 }
 
 

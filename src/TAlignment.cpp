@@ -403,6 +403,12 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 }
 
 TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot, TResidual resOld, TCluster::calculationMode_t mode) {
+  for(UInt_t refPlane1=0;refPlane1<vecRefPlanes.size()-1;refPlane1++){
+    for(UInt_t refPlane2=refPlane1+1;refPlane2<vecRefPlanes.size();refPlane2++){
+        if(vecRefPlanes.at(refPlane1)==vecRefPlanes.at(refPlane2))
+          vecRefPlanes.erase(vecRefPlanes.begin()+refPlane1);
+    }
+  }
   stringstream refPlaneString;
   for (UInt_t i = 0; i < vecRefPlanes.size(); i++)
     if (i == 0)
@@ -693,7 +699,7 @@ TResidual TAlignment::CheckStripDetectorAlignmentChi2(TPlaneProperties::enumCoor
 void TAlignment::saveAlignment() {
   stringstream fileName;
   fileName << "alignment." << settings->getRunNumber() << ".root";
-  TFile *alignmentFile = new TFile(fileName.str().c_str(), "RECREATE");    //todo anpassen runnumber
+  TFile *alignmentFile = new TFile(fileName.str().c_str(), "RECREATE");
   cout << "TAlignment:saveAlignment(): path: \"" << sys->pwd() << "\", file Name:\"" << fileName.str() << "\"" << endl;
   alignmentFile->cd();
   align->SetName("alignment");
@@ -1173,7 +1179,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histSaver->SaveGraph((TGraph*)graph.Clone(),histName.str());
 
   }
-  //TODO!!!!!!
   if (bPlot && subjectPlane == 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR)) {    //DeltaX vs ClusterSize
     histName.str("");
     histName << preName.str();

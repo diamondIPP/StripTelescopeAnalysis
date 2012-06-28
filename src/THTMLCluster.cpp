@@ -8,14 +8,11 @@
 #include "../include/THTMLCluster.hh"
 
 THTMLCluster::THTMLCluster(TSettings *settings):THTMLGenerator(settings) {
-	// TODO Auto-generated constructor stub
-
 	setTitle("Clustering");
 
 }
 
 THTMLCluster::~THTMLCluster() {
-	// TODO Auto-generated destructor stub
 }
 
 void THTMLCluster::createTableOfCuts()

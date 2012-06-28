@@ -9,13 +9,11 @@
 
 using namespace std;
 LandauGaussFit::LandauGaussFit() {
-	// TODO Auto-generated constructor stub
 	Int_t error=0;
 	gROOT->LoadMacro("$(HOME)/sdvlp/diamondStripAnalyiss/src/landaugaus.c",&error,true);
 }
 
 LandauGaussFit::~LandauGaussFit() {
-	// TODO Auto-generated destructor stub
 }
 
 

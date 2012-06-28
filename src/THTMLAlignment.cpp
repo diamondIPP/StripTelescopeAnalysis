@@ -8,7 +8,11 @@
 #include "THTMLAlignment.hh"
 
 THTMLAlignment::THTMLAlignment(TSettings *settings):THTMLGenerator(settings) {
-	// TODO Auto-generated constructor stub
+
+  this->setFileName("alignment.html");
+  this->setSubdirPath("/alignment/");
+  this->setTitle("Alignment");
+
 
 }
 

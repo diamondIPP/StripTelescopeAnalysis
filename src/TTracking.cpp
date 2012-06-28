@@ -8,7 +8,6 @@
 #include "../include/TTracking.hh"
 
 TTracking::TTracking(std::string pathName, std::string alignmentName,UInt_t runNumber):TADCEventReader(pathName,runNumber){
-	// TODO Auto-generated constructor stub
 	alignmentFile=NULL;
 	setAlignment(alignmentName);
 	if(myAlignment!=NULL)
@@ -27,7 +26,9 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,UInt_t runN
 }
 
 TTracking::~TTracking() {
-	// TODO Auto-generated destructor stub
+  delete myTrack;
+  delete myAlignment;
+  delete alignmentFile;
 }
 
 TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPrint)

@@ -34,7 +34,6 @@
 #include "Cluster.class.hh"
 #include "TADCEventReader.hh"
 #include "TDiamondTrack.hh"
-#include "AlignmentClass.hh"
 #include "TSettings.class.hh"
 #include "TDetectorAlignment.hh"
 #include "TTrack.hh"

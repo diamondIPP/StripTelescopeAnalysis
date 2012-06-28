@@ -13,7 +13,6 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	cout<<"*********TAnalysisOfClustering::TAnalysisOfClustering*****"<<endl;
 	cout<<"**********************************************************"<<endl;
 	cout<<"**********************************************************\n\n\n"<<endl;
-	// TODO Auto-generated constructor stub
 	if(settings==0)
 		settings=new TSettings();
 	setSettings(settings);

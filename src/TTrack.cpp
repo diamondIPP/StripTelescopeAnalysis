@@ -13,7 +13,6 @@
  * @param alignment pointer on current alignment
  */
 TTrack::TTrack(TDetectorAlignment *alignment) {
-	// TODO: check if event has the one & only one cluster flag
 	verbosity=0;
 	this->alignment = alignment;
 	event=NULL;
@@ -138,7 +137,6 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
 }
 
 /**
- * todo anpassen!!!
  * Calculation of Hitposition of event using the measured Offsets
  * in this transformation it transform the measured hitPosition in the
  * plane space into the space of the first plane
@@ -210,6 +208,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	}
 	if(vecRefPlanes.size()==1){
 		if(verbosity>3)	cout<<"TTrack::predictPosition with 1 refPlane"<<endl;
+		//todo anpassen so dass sigmas da drin reinkommen...
 		TPositionPrediction *prediction=new TPositionPrediction(getXPosition(vecRefPlanes.at(0),mode), 0.,0.,getYPosition(vecRefPlanes.at(0),mode),0.,0.,0,0);
 		return prediction;
 	}

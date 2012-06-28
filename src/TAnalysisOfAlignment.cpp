@@ -8,13 +8,11 @@
 #include "../include/TAnalysisOfAlignment.hh"
 
 TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
-	// TODO Auto-generated constructor stub
 	cout<<"\n\n\n\n**********************************************************"<<endl;
 		cout<<"**********************************************************"<<endl;
 		cout<<"*********TAnalysisOfClustering::TAnalysisOfAlignment*****"<<endl;
 		cout<<"**********************************************************"<<endl;
 		cout<<"**********************************************************\n\n\n"<<endl;
-		// TODO Auto-generated constructor stub
 		setSettings(settings);
 		UInt_t runNumber=settings->getRunNumber();
 		sys = gSystem;
@@ -47,7 +45,6 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 }
 
 TAnalysisOfAlignment::~TAnalysisOfAlignment() {
-	// TODO Auto-generated destructor stub
 	delete eventReader;
 	delete histSaver;
 	sys->cd("..");

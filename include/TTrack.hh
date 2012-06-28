@@ -86,23 +86,10 @@ public:
 private:
     map<UInt_t , TH1F*> histoMap;
     //	void setPositions(TEvent event);
-    Float_t getXOffset(int plane)
-    {
-        return this->alignment->GetXOffset(plane);
-    }
-    Float_t getYOffset(int plane)
-    {
-        return this->alignment->GetYOffset(plane);
-    }
-
-    Float_t getPhiXOffset(int plane)
-    {
-        return this->alignment->GetPhiXOffset(plane);
-    }
-    Float_t getPhiYOffset(int plane)
-    {
-        return this->alignment->GetPhiYOffset(plane);
-    }
+    Float_t getXOffset(int plane){return this->alignment->GetXOffset(plane);}
+    Float_t getYOffset(int plane){return this->alignment->GetYOffset(plane);}
+    Float_t getPhiXOffset(int plane){return this->alignment->GetPhiXOffset(plane);}
+    Float_t getPhiYOffset(int plane){return this->alignment->GetPhiYOffset(plane);}
     TEvent *event;
     TDetectorAlignment *alignment;
     TPositionPrediction* predictedPosition;

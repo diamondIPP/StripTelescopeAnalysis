@@ -8,12 +8,10 @@
 #include "../include/THTMLPedestal.hh"
 
 THTMLPedestal::THTMLPedestal(TSettings *settings):THTMLGenerator(settings) {
-	// TODO Auto-generated constructor stub
 	setTitle("Pedestals");
 }
 
 THTMLPedestal::~THTMLPedestal() {
-	// TODO Auto-generated destructor stub
 }
 
 void THTMLPedestal::createTableOfCuts()

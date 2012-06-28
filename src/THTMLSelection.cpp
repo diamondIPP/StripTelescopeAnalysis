@@ -8,7 +8,6 @@
 #include "../include/THTMLSelection.hh"
 
 THTMLSelection::THTMLSelection(TSettings *settings):THTMLGenerator(settings) {
-	// TODO Auto-generated constructor stub
 	this->setFileName("selection.html");
 	this->setSubdirPath("/selections/");
 	this->setTitle("Selection - Cut Flow");

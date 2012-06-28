@@ -9,7 +9,6 @@
 ClassImp(TCluster);
 
 TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels) {
-	// TODO Auto-generated constructor stub
 	clusterChannel.clear();
 	clusterSignal.clear();
 	clusterADC.clear();
@@ -37,7 +36,6 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 }
 
 TCluster::~TCluster() {
-	// TODO Auto-generated destructor stub
 }
 
 

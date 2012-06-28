@@ -16,6 +16,8 @@ public:
 	virtual ~THTMLAlignment();
 public:
 	void createContent();
+private:
+
 };
 
 #endif /* THTMLALIGNMENT_H_ */

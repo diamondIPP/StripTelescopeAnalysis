@@ -17,7 +17,6 @@ TDetector_Data::TDetector_Data()
 }
 
 TDetector_Data::~TDetector_Data() {
-	// TODO Auto-generated destructor stub
 }
 
 

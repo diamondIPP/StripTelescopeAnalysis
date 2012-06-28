@@ -13,7 +13,6 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*********TAnalysisOfPedestal::TAnalysisOfPedestal*****"<<endl;
 	cout<<"**********************************************************"<<endl;
-	// TODO Auto-generated constructor stub
 	if(settings==0)
 		exit(0);
 	res=0;
@@ -61,9 +60,6 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
-	// TODO Auto-generated destructor stub
-
-
 	htmlPedestal->setTitle("Pedestals");
 	htmlPedestal->createPageContent();
 //	htmlPedestal->createPedestalDistribution();

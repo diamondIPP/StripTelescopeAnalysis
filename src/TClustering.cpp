@@ -13,7 +13,6 @@ TClustering::TClustering(TSettings* settings){
 	cout<<"**********************************************************"<<endl;
 	cout<<"*************TClustering::TClustering*********************"<<endl;
 	cout<<"**********************************************************"<<endl;
-	// TODO Auto-generated constructor stub
 	if(settings==0)
 		settings=new TSettings();
 	setSettings(settings);
@@ -52,11 +51,9 @@ TClustering::TClustering(TSettings* settings){
 		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 	}
-//	htmlClus->setPathName((string)(currentDir+"/16202/"));
 }
 
 TClustering::~TClustering() {
-	// TODO Auto-generated destructor stub
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
 		cout<<"CLOSING TREE"<<endl;
@@ -80,8 +77,7 @@ void TClustering::setSettings(TSettings* settings){
 }
 
 void TClustering::ClusterEvents(UInt_t nEvents){
-	if(settings==NULL) settings=new TSettings("");//todo anpassen
-
+	if(settings==NULL) settings=new TSettings("");
 //	vecvecCluster.resize(9);
 	createdTree=createClusterTree(nEvents);
 	if(!createdTree) return;

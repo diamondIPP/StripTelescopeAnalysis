@@ -8,7 +8,6 @@
 #include "../include/TAnalysisOfSelection.hh"
 
 TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
-	// TODO Auto-generated constructor stub
 	if(settings!=0)
 		this->settings=settings;
 	else exit(0);
@@ -44,7 +43,6 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 }
 
 TAnalysisOfSelection::~TAnalysisOfSelection() {
-	// TODO Auto-generated destructor stub
 	htmlLandau->generateHTMLFile();
 	delete eventReader;
 	delete histSaver;

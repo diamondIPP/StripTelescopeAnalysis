@@ -8,25 +8,20 @@
 #include "../include/THTMLGenerator.hh"
 using namespace std;
 THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
-	// TODO Auto-generated constructor stub
 	this->subdirPath="";
 	this->mainPath="";
 	this->path="";
 
 	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
-//	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
-//	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
 	settings=newSettings;
 	if (settings==0)
 		cerr<<"settings does not exist"<<endl;
 	verbosity=3;
 	title = "Summary";
 	setFileName("index.html");
-//	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<fileName<<endl;
 }
 
 THTMLGenerator::~THTMLGenerator() {
-	// TODO Auto-generated destructor stub
   cout<<"delete HTML GEN"<<endl;
 }
 

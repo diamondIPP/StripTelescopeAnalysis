@@ -16,7 +16,6 @@ TPed_and_RMS::TPed_and_RMS()
 }
 
 TPed_and_RMS::~TPed_and_RMS() {
-	// TODO Auto-generated destructor stub
 }
 
 
