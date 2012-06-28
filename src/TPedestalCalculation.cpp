@@ -6,32 +6,7 @@
  */
 
 #include "../include/TPedestalCalculation.hh"
-//
-//TPedestalCalculation::TPedestalCalculation(int runNumber,int nEvents) {
-//	// TODO Auto-generated constructor stub
-//	slidingLength=1000;
-//	eventReader=NULL;
-//	pedestalTree=NULL;
-//	pedestalFile=NULL;
-//	this->runNumber=runNumber;
-//	sys = gSystem;
-//	stringstream  runString;
-//	runString.str("");
-//	runString<<runNumber;
-//	sys->MakeDirectory(runString.str().c_str());
-//
-//	sys->cd(runString.str().c_str());
-//
-//	rawfilepath.str("");
-//	rawfilepath<<"rawData."<<runNumber<<".root";
-//	cout<<"currentPath: "<<sys->pwd()<<endl;
-//	cout<<rawfilepath.str()<<endl;
-//	eventReader=new TADCEventReader(rawfilepath.str(),runNumber);
-//	cout<<eventReader->GetEntries()<<endl;
-//	createPedestalTree(nEvents);
-//	MAXSDETSIGMA=7;
-//	MAXDIASIGMA=7;
-//}
+
 
 TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 	if(settings==0)exit(0);

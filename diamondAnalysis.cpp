@@ -21,6 +21,7 @@
 #include "diamondAnalysis.h"
 #include "time.h"
 #include "TSystem.h"
+#include "TStopwatch.h"
 #include "TAlignment.hh"
 #include "TSettings.class.hh"
 #include "TTransparentAnalysis.hh"
@@ -116,26 +117,29 @@ void process_mem_usage(double& vm_usage, double& resident_set)
 
 
 int main(int argc, char ** argv) {
+
+  TStopwatch comulativeWatch;
+  comulativeWatch.Start(true);
 	readInputs(argc,argv);
 	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
 	cout << "starting main loop.." << endl;
 	RunListOK = ReadRunList();
 	TSystem* sys = gSystem;
-  if(gStyle!=0)
-    if(!gStyle->IsZombie()){
-      gROOT->SetStyle("Plain"); //General style (see TStyle)
-//      gStyle->SetOptStat(221111111); //Stat options to be displayed     without under- and overflow use gStyle->SetOptStat(1110);
-      if(gStyle->GetOptStat()!=221111111)
-        gStyle->SetOptStat("nemrKSiou");
-      gStyle->SetOptFit(1111);  //Fit options to be displayed
-      gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
-      gStyle->SetPadRightMargin(0.15);
-      gStyle->SetPadTopMargin(0.15);
-      //gStyle->SetTitleColor(19,"");
-      gStyle->SetStatH(0.12); //Sets Height of Stats Box
-      gStyle->SetStatW(0.15); //Sets Width of Stats Box
-      gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
-    }
+//  if(gStyle!=0)
+//    if(!gStyle->IsZombie()){
+//      gROOT->SetStyle("Plain"); //General style (see TStyle)
+////      gStyle->SetOptStat(221111111); //Stat options to be displayed     without under- and overflow use gStyle->SetOptStat(1110);
+//      if(gStyle->GetOptStat()!=221111111)
+//        gStyle->SetOptStat("nemrKSiou");
+//      gStyle->SetOptFit(1111);  //Fit options to be displayed
+//      gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
+//      gStyle->SetPadRightMargin(0.15);
+//      gStyle->SetPadTopMargin(0.15);
+//      //gStyle->SetTitleColor(19,"");
+//      gStyle->SetStatH(0.12); //Sets Height of Stats Box
+//      gStyle->SetStatW(0.15); //Sets Width of Stats Box
+//      gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+//    }
 	std::string currentDir = sys->pwd();
 	for (unsigned int i = 0; i < RunParameters.size(); i++) {
 		cout << RunParameters[i].getRunNumber();
@@ -148,6 +152,9 @@ int main(int argc, char ** argv) {
 	/**Start with Analyising, read RunParameteres of the Run and start analysis with that parameters
 	*/
 	for (unsigned int i = 0; i < RunParameters.size(); i++) {
+
+	  TStopwatch runWatch;
+	  runWatch.Start(true);
 		UInt_t RUNNUMBER = RunParameters[i].getRunNumber();
 		UInt_t VERBOSITY = RunParameters[i].getVerbosity();
 		std::string RUNDESCRIPTION = RunParameters[i].getRunDescription();
@@ -318,12 +325,18 @@ int main(int argc, char ** argv) {
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
 
+    runWatch.Stop();
+    cout<<"needed Time for Run "<<RUNNUMBER<<":"<<endl;
+    runWatch.Print();
 		if (settings!=NULL){
 		  cout<<"delete Settings..."<<endl;
 		  delete settings;
 		  cout<<"DONE_SETTINGS"<<endl;
 		}
 	}
+	cout<<"DONE with Analysis of all Runs "<<RunParameters.size()<<"from RunList.ini"<<endl;
+	cout<<"time for all analysis:"<<endl;
+	comulativeWatch.Print();
 	cout<<"DONE_ALL"<<endl;
 
 	return 0;
