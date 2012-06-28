@@ -27,6 +27,7 @@ TResults::TResults(TSettings *settings) {
 
 TResults::~TResults() {
   // TODO Auto-generated destructor stub
+  cout<<"delete Results..."<<endl;
 }
 
 TResults::TResults(const   TResults& rhs){//copy constructor

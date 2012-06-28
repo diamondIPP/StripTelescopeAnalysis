@@ -19,24 +19,32 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	pt = new TPaveText(0.07,0,0.22,0.10,"NDC");
 	UpdatePaveText();
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: get new TSystem"<<endl;
-	sys=new TSystem();
+//	sys=new TSystem();
+	sys=gSystem;
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: Set Style"<<endl;
-	currentStyle= new TStyle("HistSaverStyle","HistSaverStyle");
-	currentStyle->SetPalette(1);
-	if(gStyle!=0)
+	currentStyle=gROOT->GetStyle("Plain_RD42");
+	if(currentStyle!=0)
+	  currentStyle->cd();
+	else if(gStyle!=0)
 	  if(!gStyle->IsZombie()){
+	  if((string)gStyle->GetName()!="Plain_RD42"){
 	    gROOT->SetStyle("Plain"); //General style (see TStyle)
 //	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
 	    if(gStyle->GetOptStat()!=221111111)
 	      gStyle->SetOptStat("nemrKSiou");
-	    gStyle->SetOptFit(1111);  //Fit options to be displayed
-	    gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
-	    gStyle->SetPadRightMargin(0.15);
-	    gStyle->SetPadTopMargin(0.15);
+	    if(gStyle->GetOptFit()!=1111){
+	      gStyle->SetOptFit(1111);  //Fit options to be displayed
+	      gStyle->SetStatH(0.12); //Sets Height of Stats Box
+	      gStyle->SetStatW(0.15); //Sets Width of Stats Box
+	    }
+	    if(gStyle->GetPadBottomMargin()!=0.15) gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
+//	    gStyle->SetPadRightMargin(0.15);
+	    if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
 	    //gStyle->SetTitleColor(19,"");
-	    gStyle->SetStatH(0.12); //Sets Height of Stats Box
-	    gStyle->SetStatW(0.15); //Sets Width of Stats Box
 	    gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+	    currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
+	    currentStyle->cd();
+	  }
 	  }
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
 	gErrorIgnoreLevel=1001;
@@ -54,8 +62,6 @@ HistogrammSaver::~HistogrammSaver() {
 //	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
 //	cout<<string1<<endl;
 	this->pt->Delete();
-	currentStyle->Delete();
-	sys->Delete();
 }
 
 

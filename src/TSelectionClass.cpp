@@ -296,7 +296,7 @@ void TSelectionClass::setVariables(){
 	useForAlignment = isValidDiamondEvent && isValidSiliconTrack//one and only one hit in all detectors (also diamond)
 					  && relativeEventNumber<fraction;			//and reltative event Number smaller than fraction
 	useForAnalysis=isValidDiamondEvent && isValidSiliconTrack&& relativeEventNumber>fraction;
-	if(isValidDiamondEvent&&isValidSiliconTrack)
+	if(isValidSiliconTrack&&nDiamondHits>0)
 		hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(isSiliconTrackNotFiducialCut)
 		nSiliconTrackNotFiducialCut++;

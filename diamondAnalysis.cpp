@@ -318,49 +318,13 @@ int main(int argc, char ** argv) {
 		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
 
-		if (settings!=NULL)delete settings;
-//		if (DO_SLIDINGPEDESTAL) {
-//			cout << endl;
-//			cout << "==> Starting SlidingPedestal.." << endl;
-//			cout << "SlidingPedestal sl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\");" << endl;
-//			SlidingPedestal sl(RUNNUMBER,RUNDESCRIPTION);
-//			cout << "sl.Slide(" << NEVENTS << "," << INITIAL_EVENT << "," << HIT_OCCUPANCY << ");" << endl;
-//			sl.Slide(NEVENTS,INITIAL_EVENT,HIT_OCCUPANCY);
-//		}
-//		cout << endl;
-//		cout << "==> Starting Clustering.." << endl;
-//		cout << "Clustering cl(" << RUNNUMBER << ",\"" << RUNDESCRIPTION << "\")" << endl;
-//		Clustering cl(RUNNUMBER,RUNDESCRIPTION);
-//		cl.verbosity = VERBOSITY;
-//		vector<FidCutRegion> FidCutRegions;
-//		if (cl.getUseAutoFidCut()) {
-//			cout << endl;
-//			cout << "==> Starting AutoFidCut.." << endl;
-//			cout << "cl.AutoFidCut()" << endl;
-//			cl.AutoFidCut();
-//			if (FidCutRegions.size() == 0) cl.setUseAutoFidCut(false);
-//		}
-//		if (FidCutRegions.size() > 0 && cl.getUseAutoFidCut()) {
-//			for (int reg = 0; reg < FidCutRegions.size(); reg++) {
-//				cl.SetRunParameters(reg,FidCutRegions[reg],FidCutRegions.size()-1);
-//				// TODO: set different paths for the plots
-//				cout << "cl.ClusterRun(" << PLOTS << ");" << endl;
-//				cl.ClusterRun(PLOTS);
-//			}
-//		}
-//		else {
-//			cl.setAlternativeClustering(ALTCLUSTERING);
-//			if (DO_ALIGNMENT) {
-//				cout << "cl.Align(" << PLOTS << "," << CUTFAKETRACKS << ");" << endl;
-//				cl.Alignment(PLOTS, CUTFAKETRACKS);
-//			}
-//			else {
-//				cout << "cl.ClusterRun(" << PLOTS << ");" << endl;
-//				cl.ClusterRun(PLOTS);
-//			}
-//		}
-//	    fclose(log);	
+		if (settings!=NULL){
+		  cout<<"delete Settings..."<<endl;
+		  delete settings;
+		  cout<<"DONE_SETTINGS"<<endl;
+		}
 	}
+	cout<<"DONE_ALL"<<endl;
 
 	return 0;
 }
@@ -405,7 +369,11 @@ int ReadRunList() {
 			continue;
 		}
 //		cout<<"Read Line"<<endl;
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d", &RunNumber, &RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis);
+		/*TODO: change sscanf to fgets?
+		 * http://stackoverflow.com/questions/2439726/using-an-ampersand-in-scanf
+		 * http://www.cplusplus.com/reference/clibrary/cstdio/fgets/
+		 */
+		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d", &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis);
 //		cout << "RunDescription Char: " << RunDescription[0] << endl;
 		cout<<RunNumber<<endl;
 		cout<<NEvents<<endl;

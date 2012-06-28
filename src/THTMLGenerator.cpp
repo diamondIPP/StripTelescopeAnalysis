@@ -20,7 +20,6 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 	if (settings==0)
 		cerr<<"settings does not exist"<<endl;
 	verbosity=3;
-	sys= new TSystem();
 	title = "Summary";
 	setFileName("index.html");
 //	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<fileName<<endl;
@@ -28,6 +27,7 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 
 THTMLGenerator::~THTMLGenerator() {
 	// TODO Auto-generated destructor stub
+  cout<<"delete HTML GEN"<<endl;
 }
 
 
@@ -35,16 +35,14 @@ void THTMLGenerator::generateHTMLFile(){
 	if (this->verbosity)cout<<"generateHTMLFile"<<endl;
 	stringstream htmlOutputFileName;
 	cout<<"FILE: "<<fileName<<endl;
-	//cout<<"PATH: "<<sys->pwd()<<endl;
-	htmlOutputFileName<<path<<"/"<<//sys->pwd()<<
-			//"/"<<
-			fileName;
+	htmlOutputFileName<<path<<"/"<<	fileName;
 	cout<<"create HTML file: \""<<htmlOutputFileName.str()<<"\""<<endl;
 	html_summary.open(htmlOutputFileName.str().c_str());
 	generatorHTMLHeader();
 	generateHTMLTail();
-	if (verbosity>2)cout<<"::GenerateHTML()::close html_summary"<<endl;
+	if (verbosity>2)cout<<"::GenerateHTML()::close html_summary"<<flush;
 	html_summary.close();
+	cout<<"...DONE"<<endl;
 }
 
 void THTMLGenerator::generatorHTMLHeader()

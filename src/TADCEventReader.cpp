@@ -35,9 +35,10 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 }
 
 TADCEventReader::~TADCEventReader() {
-	cout<< "deleting instance of TADCEventReader"<<endl;
+	cout<< "deleting instance of TADCEventReader"<<flush;
 	//delete tree;
 	if(file!=0)delete file;
+	cout<< "DONE"<<flush;
 //	gSystem->Clear();
 //	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
 //	  if(hEtaIntegral[det]!=0)delete hEtaIntegral[det];

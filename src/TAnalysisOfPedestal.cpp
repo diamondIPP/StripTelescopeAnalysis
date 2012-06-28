@@ -68,10 +68,12 @@ TAnalysisOfPedestal::~TAnalysisOfPedestal() {
 	htmlPedestal->createPageContent();
 //	htmlPedestal->createPedestalDistribution();
 	htmlPedestal->generateHTMLFile();
+	cout<<"Del htmlPed: "<<flush;
 	delete htmlPedestal;
+	cout<<"Del eventReader: "<<flush;
 	delete eventReader;
+	cout<<"Del histSaver: "<<flush;
 	delete histSaver;
-	sys->cd("..");
 }
 
 

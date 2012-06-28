@@ -41,8 +41,9 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 
 TSettings::~TSettings(){
 
-  saveSettings();
-  settingsFile->Close();
+//  saveSettings();
+//  settingsFile->Close();
+  cout<<"delete Settings"<<endl;
 }
 
 void TSettings::SetFileName(string newFileName){
@@ -819,7 +820,7 @@ UInt_t TSettings::getVaChannelNo(UInt_t detChNo)
 //todo
 void TSettings::saveSettings()
 {
-  cout<<"SAVE SETTINGS TO ROOT FILE"<<endl;
+//  cout<<"SAVE SETTINGS TO ROOT FILE"<<endl;
 //  settingsFile->cd();
 //  this->Write();
 }
@@ -834,19 +835,19 @@ void TSettings::compareSettings()
 //todo
 void TSettings::createSettingsRootFile()
 {
-  stringstream name;
-  name << path<< "/"<<this->runNumber<<"/Settings."<<this->runNumber<<".root";
-//  settingsFile = TFile::Open(name.str().c_str());
-  cout<<"Open settings from root file: "<<endl;
-  settingsFile = new TFile(name.str().c_str(),"Update");
-  if(settingsFile->IsZombie()){
-    cout<<"file does not exist create new one!"<<endl;
-    delete settingsFile;
-    settingsFile = new TFile(name.str().c_str(),"RECREATE");
-  }
-  else{
-    compareSettings();
-  }
+//  stringstream name;
+//  name << path<< "/"<<this->runNumber<<"/Settings."<<this->runNumber<<".root";
+////  settingsFile = TFile::Open(name.str().c_str());
+//  cout<<"Open settings from root file: "<<endl;
+//  settingsFile = new TFile(name.str().c_str(),"Update");
+//  if(settingsFile->IsZombie()){
+//    cout<<"file does not exist create new one!"<<endl;
+//    delete settingsFile;
+//    settingsFile = new TFile(name.str().c_str(),"RECREATE");
+//  }
+//  else{
+//    compareSettings();
+//  }
 
 
 }
