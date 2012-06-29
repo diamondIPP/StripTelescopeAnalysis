@@ -33,7 +33,7 @@ public:
   void Print();
 
 public:
-  void setAlignment(TDetectorAlignment newAlignment);
+  void setAlignment(TDetectorAlignment* newAlignment);
   TDatime getLastUpdateDate(){return lastUpdate;};
   void SetNoise(UInt_t det, Float_t detNoise);
   UInt_t getAllEvents() const{return nAllEvents;}

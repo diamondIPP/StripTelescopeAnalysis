@@ -14,9 +14,12 @@ class THTMLAlignment: public THTMLGenerator {
 public:
 	THTMLAlignment(TSettings* settings);
 	virtual ~THTMLAlignment();
+	void setAlignment(TDetectorAlignment *alignment);
 public:
 	void createContent();
+
 private:
+	TDetectorAlignment* alignment;
 
 };
 

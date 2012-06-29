@@ -9,12 +9,12 @@
 using namespace std;
 ClassImp(TDetectorAlignment);
 /*
- *   XY		 YX					   XY		YX
+ *   XY		   YX					     XY       YX
  *   ||      ||				       ||       ||
- *   01   	 23					   45	    67
- *   0		  1						2 		3
- *   D0Z	D1Z
- *   0
+ *   01   	 23					     45 	    67
+ *   0		    1						    2 		  3
+ *                D0Z	D1Z
+ *                 0
  *
  *   |||||
  *   -----
@@ -43,6 +43,42 @@ TDetectorAlignment::TDetectorAlignment(){
    nEvents=0;
    diaTime=TDatime(1995,0,0,0,0,0);
    silTime=TDatime(1995,0,0,0,0,0);
+}
+/**
+ * class assignment function for TDetectorAlignment Class
+ * @param src
+ * @return pointer to this TDetectorAlignment
+ */
+TDetectorAlignment::TDetectorAlignment &TDetectorAlignment::operator=(const TDetectorAlignment::TDetectorAlignment &src){
+ for(UInt_t plane=0;plane<<6;plane++){
+   xResolution[plane]=src.xResolution[plane];
+   yResolution[plane]=src.yResolution[plane];
+
+   det_x_offset[plane]=src.det_x_offset[plane];
+   det_x_offset[plane]=src.det_x_offset[plane];
+   det_x_offset[plane]=src.det_x_offset[plane];
+   for(UInt_t step=0;step<src.vecDetXOffset[plane].size();step++)vecDetXOffset[plane].push_back(src.vecDetXOffset[plane].at(step));
+   for(UInt_t step=0;step<src.vecDetYOffset[plane].size();step++)vecDetYOffset[plane].push_back(src.vecDetYOffset[plane].at(step));
+   for(UInt_t step=0;step<src.vecDetZOffset[plane].size();step++)vecDetZOffset[plane].push_back(src.vecDetZOffset[plane].at(step));
+
+   det_phix_offset[plane]=src.det_phix_offset[plane];
+   det_phiy_offset[plane]=src.det_phiy_offset[plane];
+   for(UInt_t step=0;step<src.vecDetPhiXOffset[plane].size();step++)vecDetPhiXOffset[plane].push_back(src.vecDetPhiXOffset[plane].at(step));
+   for(UInt_t step=0;step<src.vecDetPhiYOffset[plane].size();step++)vecDetPhiYOffset[plane].push_back(src.vecDetPhiYOffset[plane].at(step));
+ }
+   nDetectors=src.nDetectors;
+   runNumber=src.runNumber;
+   diaTime=src.diaTime;
+   silTime=src.silTime;
+   nUsedEvents=src.nUsedEvents;
+   alignmentTrainingTrackFraction=src.alignmentTrainingTrackFraction;
+   diaChi2=src.diaChi2;
+   nEvents=src.nEvents;
+   nDiamondAlignmentEvents=src.nDiamondAlignmentEvents;
+   verbosity=src.verbosity;
+   for(UInt_t i=0;i<src.intervallBeginEventNo.size();i++)intervallBeginEventNo.push_back(src.intervallBeginEventNo.at(i));
+   for(UInt_t i=0;i<src.intervallEndEventNo.size();i++)intervallEndEventNo.push_back(src.intervallEndEventNo.at(i));
+  std::vector<UInt_t > intervallEndEventNo;
 }
 
 void TDetectorAlignment::addEventIntervall(UInt_t first, UInt_t last){

@@ -38,6 +38,7 @@
 #include "TDetectorAlignment.hh"
 #include "TTrack.hh"
 #include "TPlane.hh"
+#include "TResults.hh"
 #include "TResidual.hh"
 
 #include "THTMLAlignment.hh"
@@ -66,6 +67,7 @@ public:
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 	void setVerbosity(UInt_t verb){verbosity=verb;};
+	void setResults(TResults *res){results=res;}
 private:
 	void clearMeasuredVectors();
 	void initialiseDetectorAlignment();
@@ -129,6 +131,7 @@ private:
     THTMLAlignment *htmlAlign;
     bool plotAll;
 private:
+    TResults* results;
 	std::vector<TResidual> vecRes103;
 	vector<Float_t> vecXPred;
 	vector<Float_t> vecYPred;

@@ -63,12 +63,14 @@ TAlignment::TAlignment(TSettings* settings) {
   silCalcMode = TCluster::corEta;    //todo
 
   plotAll = true;
+  results=0;
 
 }
 
 TAlignment::~TAlignment() {
   cout << "TAlignment deconstructor" << endl;
   htmlAlign->generateHTMLFile();
+  if (results!=0)results->setAlignment(this->align);
   if (myTrack) delete myTrack;
   if (histSaver) delete histSaver;
   //	if(eventReader)delete eventReader;

@@ -119,6 +119,7 @@ void TResults::Print(){
   for(UInt_t det=0; det<TPlaneProperties::getNDetectors();det++){
     cout<<det<<"\t"<<std::setw(4)<<this->seedSigma[det]<<" "<<std::setw(4)<<this->hitSigma[det]<<" "<<std::setw(4)<<this->noise[det]<<endl;
   }
+  alignment.Print();
 //  settings->Print();
 }
 
@@ -133,7 +134,7 @@ void TResults::SetNoise(UInt_t det,Float_t detNoise){
 
 
 
-void TResults::setAlignment(TDetectorAlignment newAlignment)
+void TResults::setAlignment(TDetectorAlignment* newAlignment)
 {
-  alignment= newAlignment;
+  this->alignment= *newAlignment;
 }
