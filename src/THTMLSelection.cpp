@@ -11,6 +11,8 @@ THTMLSelection::THTMLSelection(TSettings *settings):THTMLGenerator(settings) {
 	this->setFileName("selection.html");
 	this->setSubdirPath("/selections/");
 	this->setTitle("Selection - Cut Flow");
+	this->setMainPath("../");
+	this->updatePath();
 }
 
 THTMLSelection::~THTMLSelection() {
@@ -30,7 +32,7 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<"The Fiducial cut is applied to the mean of the position of the cluster in each plane.\n ";
 	sectionContent<<"To find good values for the fiducial cut. The mean position of all silicon planes is calculated\n ";
 	sectionContent<<"and plotted in the next plot. To be able to calculate this mean position one and only one Cluster\n";
-	sectionContent<<"in each detector is required.\n";
+	sectionContent<<"in each detector is required.<br>\n";
 	sectionContent<<putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster","png",50);
 	sectionContent<<"</p>\n";
 	sectionContent<<"<br>\n";

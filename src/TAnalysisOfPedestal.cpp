@@ -29,7 +29,6 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	filepath.str("");
 	filepath<<"pedestalData."<<runNumber<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
-	htmlPedestal->setMainPath("../");
 	cout<<filepath.str()<<endl;
 	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
@@ -37,7 +36,6 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	sys->cd("pedestalAnalysis");
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
-	htmlPedestal->setSubdirPath("pedestalAnalysis");
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
 	sys->cd("..");
@@ -55,12 +53,9 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	}
 	this->diaRawADCvalues.resize(TPlaneProperties::getNChannelsDiamond(),std::vector<UInt_t>());
 
-	htmlPedestal->setPathName(plotsPath.str());
-	htmlPedestal->setFileName("pedestal.html");
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
-	htmlPedestal->setTitle("Pedestals");
 	htmlPedestal->createPageContent();
 //	htmlPedestal->createPedestalDistribution();
 	htmlPedestal->generateHTMLFile();

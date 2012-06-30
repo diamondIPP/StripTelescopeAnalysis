@@ -36,8 +36,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<"\""<<clusterfilepath.str()<<"\""<<endl;
 	cout<<"OPEN TADCEventReader"<<flush;
 	htmlSelection = new THTMLSelection(settings);
-	htmlSelection->setMainPath(sys->pwd());
-	htmlSelection->updatePath();
+
 	eventReader=new TADCEventReader(clusterfilepath.str(),settings->getRunNumber());
 	cout<<" DONE"<<endl;
 	histSaver=new HistogrammSaver();
@@ -296,7 +295,7 @@ void TSelectionClass::setVariables(){
 	useForAlignment = isValidDiamondEvent && isValidSiliconTrack//one and only one hit in all detectors (also diamond)
 					  && relativeEventNumber<fraction;			//and reltative event Number smaller than fraction
 	useForAnalysis=isValidDiamondEvent && isValidSiliconTrack&& relativeEventNumber>fraction;
-	if(isValidSiliconTrack&&nDiamondHits>0)
+	if((isValidSiliconTrack||isSiliconTrackNotFiducialCut)&&nDiamondHits>0)
 		hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(isSiliconTrackNotFiducialCut)
 		nSiliconTrackNotFiducialCut++;

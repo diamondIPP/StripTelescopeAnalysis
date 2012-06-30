@@ -14,11 +14,16 @@ class THTMLAlignment: public THTMLGenerator {
 public:
 	THTMLAlignment(TSettings* settings);
 	virtual ~THTMLAlignment();
-	void setAlignment(TDetectorAlignment *alignment);
+	void setAlignment(TDetectorAlignment *alignment){this->alignment=alignment;};
 public:
 	void createContent();
 
 private:
+	void createOverviewTable();
+	void createPostSiliconOverview();
+	void createPostDiamondOverview();
+	void createPreSiliconOverview();
+	void createPreDiamondOverview();
 	TDetectorAlignment* alignment;
 
 };

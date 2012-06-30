@@ -20,7 +20,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	sys->MakeDirectory(runString.str().c_str());
 	htmlLandau=new THTMLLandaus(settings);
 	sys->cd(runString.str().c_str());
-	htmlLandau->setMainPath(sys->pwd());
+
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<"selectionData."<<runNumber<<".root";

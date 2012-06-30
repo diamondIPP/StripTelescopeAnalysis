@@ -24,7 +24,6 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	htmlClus= new THTMLCluster(settings);
 	sys->MakeDirectory(runString.str().c_str());
 	sys->cd(runString.str().c_str());
-	htmlClus->setMainPath("../");
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<"clusterData."<<runNumber<<".root";
@@ -34,8 +33,6 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	histSaver=new HistogrammSaver();
 	sys->MakeDirectory("clustering");
 	sys->cd("clustering");
-  htmlClus->setSubdirPath("clustering/");
-  htmlClus->setFileName("clustering.html");
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
