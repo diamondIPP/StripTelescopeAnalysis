@@ -26,10 +26,11 @@ public:
 	void setFileName(string Name);
 	void setPathName(string pathName);
 	void setMainPath(std::string mainPathName);
+	void setFileGeneratingPath(string newFileGenPath){if(verbosity)cout<<"FileGeneration at:"<<newFileGenPath<<endl;fileGenPath=newFileGenPath;};
 	void setSubdirPath(std::string subDirPath);
 	void updatePath();
 	void addSection(string sectionName, string content);
-	void setTitle(string title){this->title=title;};
+	void setTitle(string newTitle){if(verbosity)cout<<"HTML:SetTitle:"<<newTitle<<endl;this->title.assign(newTitle);};
 protected:
 	void generatorHTMLHeader();
 	void generateHTMLTail();
@@ -40,6 +41,7 @@ protected:
 public:
 	std::string putImageOfPath(std::string name, std::string type="png",int sizeInPercentage=20){return putImage(path,name,type,sizeInPercentage);};
 protected:
+	std::string fileGenPath;
 	std::string putImagesOfAllDetectors(std::string path,std::string name, std::string type="png", int percentage =20);
 	std::string putLink(std::string link,std::string content);
 	TSettings* settings;

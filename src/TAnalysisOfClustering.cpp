@@ -37,6 +37,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
+	htmlClus->setFileGeneratingPath(sys->pwd());
 	sys->cd("..");
 	initialiseHistos();
 	cout<<"end initialise"<<endl;
@@ -716,9 +717,14 @@ void TAnalysisOfClustering::savePHHistos()
     		else
     			histName<<"nClusters"<<nClusters;
     		histName<<"_"<<TPlaneProperties::getStringForDetector(det);
-    		TH1F *htemp;
+    		TObject *htemp2 = (TObject*)gROOT->FindObject(histName.str().c_str());
+    		if(htemp2!=0)delete htemp2;
+
     		//CREATE HTEMP and ReBin it if necessary
+    		TH1F *htemp;
     		htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
+    		if(htemp==0) continue;
+
     		//adjust binning if necessary
     		UInt_t entries = htemp->GetEntries();
     		UInt_t maximumEntries = htemp->GetMaximum();

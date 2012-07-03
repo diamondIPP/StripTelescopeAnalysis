@@ -36,6 +36,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 //	htmlPedestal->setSubdirPath("selectionAnalysis");
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
+	htmlLandau->setFileGeneratingPath(plotsPath.str());
 	sys->cd("..");
 	initialiseHistos();
 

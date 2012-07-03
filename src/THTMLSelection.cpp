@@ -9,14 +9,16 @@
 
 THTMLSelection::THTMLSelection(TSettings *settings):THTMLGenerator(settings) {
 	this->setFileName("selection.html");
-	this->setSubdirPath("/selections/");
-	this->setTitle("Selection - Cut Flow");
 	this->setMainPath("../");
+	this->setSubdirPath("selections/");
+	this->setTitle("Selection - Cut Flow");
+
 	this->updatePath();
 }
 
 THTMLSelection::~THTMLSelection() {
 	// TODO Auto-generated destructor stub
+  cout<<"Delete HTMLSelection"<<endl;
 }
 
 void THTMLSelection::createCutFlowTable(std::vector<int> vecCutFlow	)

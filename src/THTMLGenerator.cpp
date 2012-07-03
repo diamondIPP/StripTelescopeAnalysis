@@ -12,12 +12,12 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 	this->mainPath="";
 	this->path="";
 
-	cout<<"GENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
+	cout<<"\nGENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
 	settings=newSettings;
 	if (settings==0)
 		cerr<<"settings does not exist"<<endl;
 	verbosity=3;
-	title = "Summary";
+	setTitle("Summary");
 	setFileName("index.html");
 }
 
@@ -30,7 +30,7 @@ void THTMLGenerator::generateHTMLFile(){
 	if (this->verbosity)cout<<"generateHTMLFile"<<endl;
 	stringstream htmlOutputFileName;
 	cout<<"FILE: "<<fileName<<endl;
-	htmlOutputFileName<<path<<"/"<<	fileName;
+	htmlOutputFileName<<fileGenPath<<"/"<<	fileName;
 	cout<<"create HTML file: \""<<htmlOutputFileName.str()<<"\""<<endl;
 	html_summary.open(htmlOutputFileName.str().c_str());
 	generatorHTMLHeader();

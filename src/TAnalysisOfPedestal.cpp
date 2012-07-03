@@ -38,6 +38,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
+  htmlPedestal->setFileGeneratingPath(sys->pwd());
 	sys->cd("..");
 	initialiseHistos();
 	this->settings=settings;
@@ -52,7 +53,6 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 		nPedestalHits.at(det).resize(TPlaneProperties::getNChannels(det),0);
 	}
 	this->diaRawADCvalues.resize(TPlaneProperties::getNChannelsDiamond(),std::vector<UInt_t>());
-
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {

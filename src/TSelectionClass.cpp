@@ -46,9 +46,9 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(settings->getRunNumber());
+  htmlSelection->setFileGeneratingPath(sys->pwd());
 	sys->cd("..");
 	cout<<"HISTSAVER:"<<sys->pwd()<<endl;
-
 			verbosity=1;
 
 	createdTree=false;
