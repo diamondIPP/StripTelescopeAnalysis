@@ -47,6 +47,7 @@
 #include "TTracking.hh"
 #include "TRawEventSaver.hh"
 #include "TCluster.hh"
+#include "THTMLTransparentAnalysis.hh"
 
 using namespace std;
 
@@ -89,6 +90,7 @@ private:
 	HistogrammSaver* histSaver;
     TSettings* settings;
 	TTracking* tracking;
+	THTMLTransparentAnalysis* htmlTransAna;
 	
 	// cut flow
 	UInt_t nAnalyzedEvents;

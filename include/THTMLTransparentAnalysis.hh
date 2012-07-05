@@ -15,6 +15,7 @@ class THTMLTransparentAnalysis: public THTMLGenerator {
 public:
   THTMLTransparentAnalysis(TSettings *settings) ;
   virtual ~THTMLTransparentAnalysis();
+  void createContent();
 
 private:
 

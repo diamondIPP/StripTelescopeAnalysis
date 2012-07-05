@@ -26,7 +26,7 @@
 #include "TTracking.hh"
 #include "HistogrammSaver.class.hh"
 #include "TSettings.class.hh"
-
+#include"THTMLAlignment.hh"
 #include "TADCEventReader.hh"
 class TAnalysisOfAlignment {
 public:
@@ -42,6 +42,7 @@ private:
 	void saveHistos();
 	TTracking* eventReader;
 	HistogrammSaver* histSaver;
+	THTMLAlignment *htmlAlignment;
     TSystem* sys;
     TSettings* settings;
     UInt_t verbosity;

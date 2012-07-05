@@ -32,6 +32,8 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 		eventReader=new TTracking(filepath.str(),alignFile.str(),runNumber);
 		histSaver=new HistogrammSaver();
 		sys->MakeDirectory("anaAlignmnet");
+		htmlAlignment=new THTMLAlignment(settings);
+		htmlAlignment->setFileGeneratingPath(((string)sys->pwd()).append("/alignment/"));
 		sys->cd("anaAlignmnet");
 		stringstream plotsPath;
 		plotsPath<<sys->pwd()<<"/";

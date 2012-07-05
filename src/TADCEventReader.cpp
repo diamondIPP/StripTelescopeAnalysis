@@ -552,11 +552,16 @@ bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 	return true;
 }
 
+Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch){
+  if(det>=9)return -9999999;
+  return getAdcValue(det,ch)-getPedestalMean(det,ch);
+}
+
 Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch)
 {
 	if(det>=9) return -9999999;
 
-	Float_t signal =getAdcValue(det,ch)-getPedestalMean(det,ch);
+	Float_t signal =getRawSignal(det,ch);
 	if(signal<0)return 0;
 
 	return signal;

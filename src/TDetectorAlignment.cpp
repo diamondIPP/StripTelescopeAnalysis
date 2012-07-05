@@ -277,6 +277,35 @@ void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)
 	UpdateTime(plane);
 }
 
+Double_t TDetectorAlignment::getXMean(UInt_t plane)
+{
+
+  if(plane<6) return xMean[plane];
+  return -9999;
+}
+
+void TDetectorAlignment::setXMean(Double_t mean, UInt_t plane)
+{
+  printf("Set X-Mean of Plane %d to %2.6f\n",plane,mean);
+  if(plane<6)
+    xMean[plane] = mean;
+  UpdateTime(plane);
+}
+
+Double_t TDetectorAlignment::getYMean(UInt_t plane)
+{
+  if(plane<6) return yMean[plane];
+  return -9999;
+}
+
+void TDetectorAlignment::setYMean(Double_t mean, UInt_t plane)
+{
+  printf("Set Y-Mean of Plane %d to %2.6f\n",plane,mean);
+  if(plane<6)
+    yMean[plane] = mean;
+  UpdateTime(plane);
+}
+
 void TDetectorAlignment::setVerbosity(int verbosity)
 {
 	if(verbosity!=this->verbosity){

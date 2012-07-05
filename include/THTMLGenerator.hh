@@ -18,6 +18,7 @@
 #include "TADCEventReader.hh"
 #include "TDetectorAlignment.hh"
 
+
 class THTMLGenerator {
 public:
 	THTMLGenerator(TSettings *settings);
@@ -31,6 +32,24 @@ public:
 	void updatePath();
 	void addSection(string sectionName, string content);
 	void setTitle(string newTitle){if(verbosity)cout<<"HTML:SetTitle:"<<newTitle<<endl;this->title.assign(newTitle);};
+	virtual void createContent(){};
+public:
+//	template <typename T1, typename T2>
+//	string combineToString(T1 a, T2 b){
+//	    stringstream output;
+//	    output<<a<<b;
+//	    return output.str();
+//	  }
+string combineToString(string a,UInt_t b){
+  stringstream output;
+  output<<a<<b;
+  return output.str();
+}
+string combineToString(string a,Double_t b){
+  stringstream output;
+  output<<a<<b;
+  return output.str();
+}
 protected:
 	void generatorHTMLHeader();
 	void generateHTMLTail();

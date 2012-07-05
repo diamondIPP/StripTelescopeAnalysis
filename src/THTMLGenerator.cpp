@@ -26,6 +26,7 @@ THTMLGenerator::~THTMLGenerator() {
 }
 
 
+
 void THTMLGenerator::generateHTMLFile(){
 	if (this->verbosity)cout<<"generateHTMLFile"<<endl;
 	stringstream htmlOutputFileName;
@@ -155,7 +156,11 @@ void THTMLGenerator::setSubdirPath(std::string subdirPathName){
 	updatePath();
 }
 
-
+/**
+ * create a string for a html table
+ * @param content, outer vector: row,inner vector columm
+ * @return html code for the table
+ */
 std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > content)
 {
 	UInt_t nRows=content.size();

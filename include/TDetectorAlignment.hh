@@ -89,10 +89,14 @@ public:
   void setVerbosity(int verbosity);
   Double_t getXResolution(UInt_t plane);
   void setXResolution(Double_t xRes,UInt_t plane);
+  Double_t getXMean(UInt_t plane);
+  void setXMean(Double_t xMean,UInt_t plane);
 
   Double_t getYResolution(UInt_t plane);
   void setYResolution(Double_t yRes,UInt_t plane);
 
+  Double_t getYMean(UInt_t plane);
+  void setYMean(Double_t yMean,UInt_t plane);
   UInt_t getNUsedEvents() const {return (this->nUsedEvents);};
   void setNUsedEvents(UInt_t usedEvents){this->nUsedEvents=usedEvents;};
 
@@ -107,6 +111,8 @@ private:
   void UpdateTime(UInt_t plane){if(plane<4)setSiliconDate();else setDiamondDate();};
   Double_t xResolution[6];//Planes
   Double_t yResolution[6];
+  Double_t xMean[6];//Planes
+    Double_t yMean[6];
   //store global offsets here
   Double_t det_x_offset[6];
   Double_t det_y_offset[6];

@@ -6,7 +6,7 @@
  */
 
 #ifndef THTMLALLIGNMENT_H_
-#define THTMLALIGNMENT_H_
+#define THTMLALLIGNMENT_H_
 
 #include "THTMLGenerator.hh"
 
@@ -28,4 +28,4 @@ private:
 
 };
 
-#endif /* THTMLALIGNMENT_H_ */
+#endif /* THTMLALLIGNMENT_H_ */

@@ -42,6 +42,8 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(settings->getRunNumber());
+	htmlTransAna= new THTMLTransparentAnalysis(settings);
+	htmlTransAna->setFileGeneratingPath(sys->pwd());
 	sys->cd("..");
 	
 	
@@ -73,6 +75,15 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 
 TTransparentAnalysis::~TTransparentAnalysis() {
 	// TODO Auto-generated destructor stub
+  cout<<"\n\nClosing TTransparentAnalysis"<<endl;
+  saveHistograms();
+  deleteHistograms();
+  htmlTransAna->generateHTMLFile();
+  if(eventReader!=0)delete eventReader;
+  if(histSaver!=0)delete histSaver;
+  if(htmlTransAna)delete htmlTransAna;
+  if(tracking!=0) delete tracking;
+  sys->cd("..");
 }
 
 void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
@@ -124,7 +135,6 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		this->fillHistograms();
 		if (verbosity > 4) printEvent();
 	}
-	this->saveHistograms();
 	this->printCutFlow();
 }
 

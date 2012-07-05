@@ -21,3 +21,6 @@ THTMLTransparentAnalysis::~THTMLTransparentAnalysis() {
   // TODO Auto-generated destructor stub
 }
 
+void THTMLTransparentAnalysis::createContent(){
+
+}

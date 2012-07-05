@@ -23,8 +23,6 @@ TAlignment::TAlignment(TSettings* settings) {
   sys->MakeDirectory(runString.str().c_str());
   sys->cd(runString.str().c_str());
   htmlAlign = new THTMLAlignment(settings);
-  htmlAlign->setMainPath("../");
-  htmlAlign->setSubdirPath("alignment/");
   stringstream filepath;
   filepath.str("");
   filepath << sys->pwd();
@@ -40,6 +38,7 @@ TAlignment::TAlignment(TSettings* settings) {
   histSaver->SetPlotsPath(plotsPath.str().c_str());
   histSaver->SetRunNumber(runNumber);
   histSaver->SetNumberOfEvents(eventReader->GetEntries());
+  htmlAlign->setFileGeneratingPath(sys->pwd());
   sys->cd("..");
   cout << "end initialise" << endl;
   alignmentPercentage = settings->getAlignment_training_track_fraction();
@@ -69,7 +68,9 @@ TAlignment::TAlignment(TSettings* settings) {
 
 TAlignment::~TAlignment() {
   cout << "TAlignment deconstructor" << endl;
+  htmlAlign->createContent();
   htmlAlign->generateHTMLFile();
+  if(htmlAlign!=0)delete htmlAlign;
   if (results!=0)results->setAlignment(this->align);
   if (myTrack) delete myTrack;
   if (histSaver) delete histSaver;
@@ -87,6 +88,7 @@ void TAlignment::setSettings(TSettings* settings) {
 void TAlignment::initialiseDetectorAlignment() {
   if (align == NULL) {
     align = new TDetectorAlignment();
+    htmlAlign->setAlignment(align);
     cout << "TAlignment::Align::Detectoralignment did not exist, so created new DetectorAlignment" << endl;
     align->SetZOffset(0, detectorD0Z);
     align->SetZOffset(1, detectorD1Z);
