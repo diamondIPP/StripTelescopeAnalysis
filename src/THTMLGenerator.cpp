@@ -169,7 +169,7 @@ std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > c
 		if(content.at(row).size()>nCols)nCols=content.at(row).size();
 	cout<<"creating a Table with "<<nRows<<" Rows and "<<nCols<<" Columns!"<<endl;
 	stringstream output;
-	output<<"<p><table frame=\"void\" border=\"1\" rules=\"all\">\n";
+	output<<"<p><table frame=\"void\" border=\"1\" rules=\"all\ align=\"center\"">\n";
 	for(UInt_t row=0;row<nRows;row++){
 		output<<"<tr>   ";
 		for(UInt_t col=0;col<content.at(row).size();col++){
@@ -204,6 +204,15 @@ void THTMLGenerator::updatePath()
 {
 	setPathName(mainPath+subdirPath+"/");
 
+}
+string THTMLGenerator::putIntoCommand(string command, string input){
+  stringstream output;
+  output<<"<"<<command<<">"<<input<<"</"<<command<<">";
+  return output.str();
+}
+string THTMLGenerator::center(string input)
+{
+  return putIntoCommand("center",input);
 }
 
 std::string THTMLGenerator::floatToString(Float_t value)

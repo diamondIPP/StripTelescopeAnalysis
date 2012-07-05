@@ -45,12 +45,14 @@ string combineToString(string a,UInt_t b){
   output<<a<<b;
   return output.str();
 }
-string combineToString(string a,Double_t b){
+string combineToString(string a,Double_t b,UInt_t precision=3){
   stringstream output;
-  output<<a<<b;
+  output<<a<<std::setprecision(precision)<<b;
   return output.str();
 }
 protected:
+ string putIntoCommand(string command, string input);
+  string center(string input);
 	void generatorHTMLHeader();
 	void generateHTMLTail();
 	void generateTableOfContent();

@@ -21,6 +21,7 @@ public:
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
 	TPlaneProperties();
 	virtual ~TPlaneProperties();
+	static Double_t getStripDistance(){return 50.;};//strip distance in mum
 	static UInt_t getNChannelsSilicon(){return 256;};
 	static UInt_t getNChannelsDiamond(){return 128;};
 	static UInt_t getNChannels(UInt_t det);

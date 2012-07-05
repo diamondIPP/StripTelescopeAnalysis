@@ -557,6 +557,10 @@ Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch){
   return getAdcValue(det,ch)-getPedestalMean(det,ch);
 }
 
+Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch){
+  if(det>=9||(getPedestalSigma(det,ch)<=0))return -99999999;
+  return (getRawSignal(det,ch)/getPedestalSigma(det,ch));
+}
 Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch)
 {
 	if(det>=9) return -9999999;

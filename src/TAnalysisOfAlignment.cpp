@@ -33,7 +33,11 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 		histSaver=new HistogrammSaver();
 		sys->MakeDirectory("anaAlignmnet");
 		htmlAlignment=new THTMLAlignment(settings);
+		htmlAlignment->setAlignment(eventReader->getAlignment());
 		htmlAlignment->setFileGeneratingPath(((string)sys->pwd()).append("/alignment/"));
+		htmlAlignment->createContent();
+		htmlAlignment->generateHTMLFile();
+		delete htmlAlignment;
 		sys->cd("anaAlignmnet");
 		stringstream plotsPath;
 		plotsPath<<sys->pwd()<<"/";
