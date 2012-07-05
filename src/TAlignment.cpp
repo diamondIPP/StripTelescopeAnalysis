@@ -982,8 +982,9 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
      //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
     TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto(histName.str(), vecXDelta, 512, HistogrammSaver::threeSigma).Clone();
-    while (histo->GetBinContent(histo->GetMaximumBin())<0.05){//todo change hardcoding
-      histo->Rebin(2);
+    int ntries=0;
+    while (histo->GetBinContent(histo->GetMaximumBin())<0.05&&ntries<3){//todo change hardcoding
+      histo->Rebin();ntries++;
     }
     TF1* fitGausX = new TF1("fitGaus", "gaus", -1, 1);
     if (bUpdateAlignment) {
@@ -1013,6 +1014,12 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histo.Draw("goff");
     histo.GetXaxis()->SetTitle("Y Predicted");
     histo.GetYaxis()->SetTitle("Delta X");
+    TH1D* hProj=histo.ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo.GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin),hProj->GetBinLowEdge(binxMax));
     histSaver->SaveHistogram(&histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecYPred);
