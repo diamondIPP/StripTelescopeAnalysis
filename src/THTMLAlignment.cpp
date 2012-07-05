@@ -44,7 +44,14 @@ void THTMLAlignment::createPostSiliconOverview()
 void THTMLAlignment::createPostDiamondOverview()
 {
   stringstream sectionContent;
-//  sectionContent<<"<h1>Post Alignment: Diamond</h1>\n";
+  UInt_t nDiamondAlignmentEvents = alignment->getDiamondAlignmentEvents();
+  UInt_t nUsedEvents = alignment->getNUsedEvents();
+  Float_t percentage = (Float_t)nDiamondAlignmentEvents/(Float_t)nUsedEvents*100;
+  sectionContent<<"For the diamond Alignment "<<nDiamondAlignmentEvents<<" of "<<nUsedEvents <<" ("<<percentage<<"%) fullfill a  Chi2 cut at "<<alignment->getDiaChi2()<<"<br>\n";
+  sectionContent<<putImage(".","hDiamond_PostAlignment_DistributionPlot_DeltaX_-_Plane_4_with_0_1_2_and_3","png",40)<<"<br>\n";
+  sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_XMeasured_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",30)<<" ";
+  sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_XPred_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",30)<<" ";
+  sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_YPred_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",30)<<"<br>\n";
   this->addSection("Post Alignment Diamond",sectionContent.str());
 }
 
@@ -65,10 +72,10 @@ void THTMLAlignment::createOverviewTable()
   vector< vector< string> > table;
   table.resize(6);
   table.at(0).push_back("");
-  table.at(0).push_back("Res X [&#956m]");
-  table.at(0).push_back("Res Y [&#956m]");
-  table.at(0).push_back("Mean X [&#956m]");
-  table.at(0).push_back("Mean Y [&#956m]");
+  table.at(0).push_back(" Res X [&#956m] ");
+  table.at(0).push_back(" Res Y [&#956m] ");
+  table.at(0).push_back(" Mean X [&#956m] ");
+  table.at(0).push_back(" Mean Y [&#956m] ");
   if(alignment!=0){
     for(UInt_t plane=0;plane<TPlaneProperties::getNSiliconPlanes();plane++){
       table.at(plane+1).push_back(center(combineToString((string)"Plane ",plane)));
@@ -84,6 +91,10 @@ void THTMLAlignment::createOverviewTable()
     table.at(5).push_back(center("--"));
   }
 //  sectionContent<<"<h1>Alignment Overview</h1>\n";
+
+  sectionContent<<"<p> Alignent of RUN "<<settings->getRunNumber()<<"<br>\n> ";
+  sectionContent<<" Made on "<<alignment->getLastUpdateTimeAsString()<<"<br>\n";
+  sectionContent<<" Used "<<alignment->getNUsedEvents()<<"<br>\n";
   sectionContent<<this->createTable(table)<<endl;
   this->addSection("Alignment Overview",sectionContent.str());
 }

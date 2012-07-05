@@ -169,7 +169,7 @@ std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > c
 		if(content.at(row).size()>nCols)nCols=content.at(row).size();
 	cout<<"creating a Table with "<<nRows<<" Rows and "<<nCols<<" Columns!"<<endl;
 	stringstream output;
-	output<<"<p><table frame=\"void\" border=\"1\" rules=\"all\ align=\"center\"">\n";
+	output<<"<p><table frame=\"void\" border=\"1\" rules=\"all\" align=\"center\">\n";
 	for(UInt_t row=0;row<nRows;row++){
 		output<<"<tr>   ";
 		for(UInt_t col=0;col<content.at(row).size();col++){

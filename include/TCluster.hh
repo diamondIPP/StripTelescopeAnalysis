@@ -23,9 +23,19 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 26;};
+	static UInt_t TCLUSTER_REVISION() {return 27;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
+    static std::string getCalulationModeString(calculationMode_t mode){
+      switch(mode){
+        case maxValue:return "maxValue";
+        case chargeWeighted: return "chargeWeighted";
+        case highest2Centroid: return "highest2Centroid";
+        case eta: return "eta";
+        case corEta: return "correctedEta";
+        default: return "unknownMode";
+      }
+    }
     TCluster()
     {
         numberOfSeeds = 0;

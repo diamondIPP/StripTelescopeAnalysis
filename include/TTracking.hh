@@ -37,7 +37,7 @@ public:
 //	Float_t getXMeasured(UInt_t plane);
 //	Float_t getYMeasured(UInt_t plane);
 //	Float_t getMeasured(TPlaneProperties::enumCoordinate cor,UInt_t plane);
-//	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool bPrint=false);
+//	TPositionPrediction* predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bPrint=false);
 	TDetectorAlignment* getAlignment(){return myAlignment;};
 private:
 	bool setAlignment(std::string alignmentName);

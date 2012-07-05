@@ -106,7 +106,14 @@ public:
   void setSiliconDate(){silTime=TDatime();};
   void setRunNumber(UInt_t rn){this->runNumber=rn;};
   void setDiaChi2(Float_t chi2){this->diaChi2=chi2;};
+  Float_t getDiaChi2(){return diaChi2;};
   void setNDiamondAlignmentEvents(UInt_t nEvents){this->nDiamondAlignmentEvents=nEvents;};
+  UInt_t getDiamondAlignmentEvents(){return nDiamondAlignmentEvents;};
+  string getLastUpdateTimeAsString(){
+    if(diaTime>silTime)return diaTime.AsString();
+    else return silTime.AsString();
+
+  }
 private:
   void UpdateTime(UInt_t plane){if(plane<4)setSiliconDate();else setDiamondDate();};
   Double_t xResolution[6];//Planes

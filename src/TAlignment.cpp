@@ -300,6 +300,17 @@ void TAlignment::AlignDiamondPlane() {
   align->setDiamondDate();
 }
 
+
+/**
+ *
+ * @param cor
+ * @param subjectPlane
+ * @param refPlane1
+ * @param refPlane2
+ * @param bPlot
+ * @param resOld
+ * @return
+ */
 TResidual TAlignment::alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2, bool bPlot, TResidual resOld) {
   vector<UInt_t> vecRefPlanes;
   vecRefPlanes.push_back(refPlane1);
@@ -969,8 +980,11 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << preName.str();
     histName << "_DistributionPlot_DeltaX";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
-    ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
+     //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
     TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto(histName.str(), vecXDelta, 512, HistogrammSaver::threeSigma).Clone();
+    while (histo->GetBinContent(histo->GetMaximumBin())<0.05){//todo change hardcoding
+      histo->Rebin(2);
+    }
     TF1* fitGausX = new TF1("fitGaus", "gaus", -1, 1);
     if (bUpdateAlignment) {
       cout << "Alignment for plane" << subjectPlane << endl;
