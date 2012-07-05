@@ -1014,12 +1014,14 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histo.Draw("goff");
     histo.GetXaxis()->SetTitle("Y Predicted");
     histo.GetYaxis()->SetTitle("Delta X");
+
     TH1D* hProj=histo.ProjectionX();
     int binxMin=0;
     for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
     int binxMax;
     for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
     histo.GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin),hProj->GetBinLowEdge(binxMax));
+    delete hProj;
     histSaver->SaveHistogram(&histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecYPred);
