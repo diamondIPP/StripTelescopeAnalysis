@@ -70,7 +70,7 @@ private:
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	void printEvent();
-	Float_t getResidual(TCluster cluster);
+	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode);
 	
 	UInt_t subjectDetector, subjectPlane;
 	TPlaneProperties::enumCoordinate subjectDetectorCoordinate;
@@ -104,11 +104,11 @@ private:
 	// histograms
 	vector<TH1F*> hLaundau;
 	vector<TH1F*> hEta;
-	vector<TH1F*> hResidual;
+	vector<TH1F*> hResidualChargeWeighted;
 	
-	vector<TH1F*> hLaundau2Hightest;
-	vector<TH1F*> hEta2Hightest;
-	vector<TH1F*> hResidual2Hightest;
+	vector<TH1F*> hLaundau2Highest;
+//	vector<TH1F*> hEta2Hightest;
+	vector<TH1F*> hResidualHighest2Centroid;
 	
 	
 	

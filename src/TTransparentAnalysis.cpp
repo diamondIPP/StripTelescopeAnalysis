@@ -185,7 +185,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
 		currentChannel += direction * iChannel;
-		transparentCluster.addChannel(currentChannel, tracking->getSignal(det,currentChannel), tracking->getSignalInSigma(det,currentChannel), tracking->getAdcValue(det,currentChannel), tracking->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
+		transparentCluster.addChannel(currentChannel, tracking->getRawSignal(det,currentChannel), tracking->getRawSignalInSigma(det,currentChannel), tracking->getAdcValue(det,currentChannel), tracking->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
 	return transparentCluster;
 }
@@ -198,30 +198,38 @@ void TTransparentAnalysis::initHistograms() {
 	UInt_t bins=100;
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		// TODO: take care of histogram names and bins!!
-		stringstream histNameLaundau, histNameEta, histNameResidual;
+		stringstream histNameLaundau, histNameLaundau2Highest, histNameEta, histNameResidualChargeWeighted, histNameResidualHighest2Centroid;
 		// TODO: histogram naming!!
 		histNameLaundau << "hDiaTranspAnaPulseHightOf" << clusterSize+1 << "Strips";
+		histNameLaundau2Highest << "hDiaTranspAnaPulseHightOf2HighestIn" << clusterSize+1 << "Strips";
 		histNameEta << "hDiaTranspAnaEta2HighestIn" << clusterSize+1 << "Strips";
-		histNameResidual << "hDiaTranspAnaResidual2HighestIn" << clusterSize+1 << "StripsMinusPred";
+		histNameResidualChargeWeighted << "hDiaTranspAnaResidualChargeWeightedIn" << clusterSize+1 << "StripsMinusPred";
+		histNameResidualHighest2Centroid << "hDiaTranspAnaResidualHighest2CentroidIn" << clusterSize+1 << "StripsMinusPred";
 		hLaundau.push_back(new TH1F(histNameLaundau.str().c_str(),histNameLaundau.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+		hLaundau2Highest.push_back(new TH1F(histNameLaundau2Highest.str().c_str(),histNameLaundau2Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
 		hEta.push_back(new TH1F(histNameEta.str().c_str(),histNameEta.str().c_str(),bins,0,1));
-		hResidual.push_back(new TH1F(histNameResidual.str().c_str(),histNameResidual.str().c_str(),bins,-5.,5.));
+		hResidualChargeWeighted.push_back(new TH1F(histNameResidualChargeWeighted.str().c_str(),histNameResidualChargeWeighted.str().c_str(),bins,-5.,5.));
+		hResidualHighest2Centroid.push_back(new TH1F(histNameResidualHighest2Centroid.str().c_str(),histNameResidualHighest2Centroid.str().c_str(),bins,-5.,5.));
 	}
 }
 
 void TTransparentAnalysis::fillHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		hLaundau[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge());
+		hLaundau2Highest[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge(2,false));
 		hEta[clusterSize]->Fill(this->transparentClusters[clusterSize].getEta());
-		hResidual[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize]));
+		hResidualChargeWeighted[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::chargeWeighted));
+		hResidualHighest2Centroid[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::highest2Centroid));
 	}
 }
 
 void TTransparentAnalysis::saveHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		histSaver->SaveHistogram(hLaundau[clusterSize],0);
+		histSaver->SaveHistogram(hLaundau2Highest[clusterSize],0);
 		histSaver->SaveHistogram(hEta[clusterSize],0);
-		histSaver->SaveHistogram(hResidual[clusterSize],1);
+		histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize],1);
+		histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize],1);
 	}
 }
 
@@ -229,8 +237,10 @@ void TTransparentAnalysis::saveHistograms() {
 void TTransparentAnalysis::deleteHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		delete hLaundau[clusterSize];
+		delete hLaundau2Highest[clusterSize];
 		delete hEta[clusterSize];
-		delete hResidual[clusterSize];
+		delete hResidualChargeWeighted[clusterSize];
+		delete hResidualHighest2Centroid[clusterSize];
 	}
 }
 
@@ -262,14 +272,14 @@ void TTransparentAnalysis::printEvent() {
 		cout << "transparent cluster of size " << clusterSize+1 << ":" << endl;
 		cout << "\tpulse height:\t" << this->transparentClusters[clusterSize].getCharge() << endl;
 		cout << "\teta:\t" << this->transparentClusters[clusterSize].getEta() << endl;
-		cout << "\tresidual:\t" << this->getResidual(this->transparentClusters[clusterSize]) << endl;
+		cout << "\tresidual:\t" << this->getResidual(this->transparentClusters[clusterSize],this->clusterCalcMode) << endl;
 		cout << "\tcluster pos in det system:\t" << this->transparentClusters[clusterSize].getPosition(this->clusterCalcMode) << endl;
 		cout << "\tcluster pos in lab system:\t" << tracking->getPositionOfCluster(subjectDetector, this->transparentClusters[clusterSize], this->predPerpPosition, this->clusterCalcMode) << endl;
 	}
 	return;
 }
 
-Float_t TTransparentAnalysis::getResidual(TCluster cluster) {
-	return tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,this->clusterCalcMode)-this->predPosition;
+Float_t TTransparentAnalysis::getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode) {
+	return tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,clusterCalculationMode)-this->predPosition;
 }
 
