@@ -314,8 +314,8 @@ int main(int argc, char ** argv) {
       delete anaAlignment;
 		}
 //		TTransparentAnalysis *transpAna;
-//		transpAna = new TTransparentAnalysis(RUNNUMBER, *settings);
-//		transpAna->analyze(NEVENTS,INITIAL_EVENT);
+//		transpAna = new TTransparentAnalysis(settings);
+//		transpAna->analyze(NEVENTS,START_EVENT);
 
 		currentResults->Print();
     currentResults->saveResults();
