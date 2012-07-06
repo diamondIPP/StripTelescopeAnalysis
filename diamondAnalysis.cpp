@@ -308,23 +308,23 @@ int main(int argc, char ** argv) {
 		}
 
 		if(DO_ALIGNMENTANALYSIS){
-      sys->cd(currentDir.c_str());
-      TAnalysisOfAlignment *anaAlignment;
-      anaAlignment=new TAnalysisOfAlignment(settings);
-      anaAlignment->doAnalysis(NEVENTS);
-      delete anaAlignment;
+			sys->cd(currentDir.c_str());
+			TAnalysisOfAlignment *anaAlignment;
+			anaAlignment=new TAnalysisOfAlignment(settings);
+			anaAlignment->doAnalysis(NEVENTS);
+			delete anaAlignment;
 		}
-
-		if(DO_TRANSPARENT_ANALYSIS){
-//		TTransparentAnalysis *transpAna;
-//		transpAna = new TTransparentAnalysis(settings);
-//		transpAna->analyze(NEVENTS,START_EVENT);
-
-		  //delete?
+        
+		if (DO_TRANSPARENT_ANALYSIS) {
+			TTransparentAnalysis *transpAna;
+			transpAna = new TTransparentAnalysis(settings);
+			transpAna->analyze(NEVENTS,START_EVENT);
+			delete transpAna;
 		}
+		
 		currentResults->Print();
-    currentResults->saveResults();
-    delete currentResults;
+		currentResults->saveResults();
+		delete currentResults;
 
 
 		process_mem_usage(vm2, rss2);
