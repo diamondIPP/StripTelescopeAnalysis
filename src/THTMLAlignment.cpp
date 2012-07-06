@@ -47,8 +47,8 @@ void THTMLAlignment::createPostDiamondOverview()
   UInt_t nDiamondAlignmentEvents = alignment->getDiamondAlignmentEvents();
   UInt_t nUsedEvents = alignment->getNUsedEvents();
   Float_t percentage = (Float_t)nDiamondAlignmentEvents/(Float_t)nUsedEvents*100;
-  sectionContent<<"For the diamond Alignment "<<nDiamondAlignmentEvents<<" of "<<nUsedEvents <<" ("<<percentage<<"%) fullfill a  Chi2 cut at "<<alignment->getDiaChi2()<<"<br>\n";
-  sectionContent<<putImage(".","hDiamond_PostAlignment_DistributionPlot_DeltaX_-_Plane_4_with_0_1_2_and_3","png",40)<<"<br>\n";
+  sectionContent<<"For the diamond Alignment "<<nDiamondAlignmentEvents<<" of "<<nUsedEvents <<" ("<<percentage<<"%) fullfill a  Chi2 cut at "<<alignment->getDiaChi2()<<"<br><br>\n";
+  sectionContent<<center(putImage(".","hDiamond_PostAlignment_DistributionPlot_DeltaX_-_Plane_4_with_0_1_2_and_3","png",40))<<"<br>\n";
   sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_XMeasured_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",30)<<" ";
   sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_XPred_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",30)<<" ";
   sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_YPred_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",30)<<"<br>\n";

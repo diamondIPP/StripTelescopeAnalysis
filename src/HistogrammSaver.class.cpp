@@ -544,12 +544,12 @@ void HistogrammSaver::SetDuckStyle() {
 
 
 
-TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins)
+TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(posX.size()!=posY.size()||posX.size()==0) {
 		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
-		return TH2F();
+		return new TH2F();
 	}
 	Float_t maxX = posX.at(0);
 	Float_t maxY = posY.at(0);
@@ -564,11 +564,11 @@ TH2F HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> 
 	//cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
 	Float_t deltaX=maxX-minX;
 	Float_t deltaY=maxY-minY;
-	TH2F histo = TH2F(name.c_str(),name.c_str(),nBins,minX-factor*deltaX,maxX+factor*deltaX,nBins,minY-factor*deltaY,maxY+factor*deltaY);
+	TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBins,minX-factor*deltaX,maxX+factor*deltaX,nBins,minY-factor*deltaY,maxY+factor*deltaY);
 	for(UInt_t i=0;i<posX.size();i++)
-		histo.Fill(posX.at(i),posY.at(i));
-	histo.GetXaxis()->SetTitle("X-Position");
-	histo.GetYaxis()->SetTitle("Y-Position");
+		histo->Fill(posX.at(i),posY.at(i));
+	histo->GetXaxis()->SetTitle("X-Position");
+	histo->GetYaxis()->SetTitle("Y-Position");
 	return histo;
 }
 
@@ -599,11 +599,11 @@ TGraphErrors HistogrammSaver::CreateErrorGraph(std::string name, std::vector<Flo
 	hGraph.SetTitle(name.c_str());
 	return hGraph;
 }
-TH2F HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos, UInt_t nBins)
+TH2F* HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos, UInt_t nBins)
 {
-	TH2F histo = CreateScatterHisto(name,pos,Delta,nBins);
-	histo.GetXaxis()->SetTitle("Position");
-	histo.GetXaxis()->SetTitle("Difference");
+	TH2F *histo = CreateScatterHisto(name,pos,Delta,nBins);
+	histo->GetXaxis()->SetTitle("Position");
+	histo->GetYaxis()->SetTitle("Difference");
 	return histo;
 }
 

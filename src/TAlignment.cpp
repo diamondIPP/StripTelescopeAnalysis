@@ -819,10 +819,10 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
     histName << "h_" << nAlignmentStep << "_Step";
   histName << "_Chi2X_vs_SumDeltaX";
   cout << "CREATE: " << histName.str() << endl;
-  TH2F histo = histSaver->CreateScatterHisto(histName.str(), vecSumDeltaX, vecXChi2);
-  histo.GetYaxis()->SetTitle("Sum of Delta X");
-  histo.GetXaxis()->SetTitle("Chi2 in X");
-  histSaver->SaveHistogram(&histo);
+  TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecSumDeltaX, vecXChi2);
+  histo->GetYaxis()->SetTitle("Sum of Delta X");
+  histo->GetYaxis()->SetTitle("Chi2 in X");
+  histSaver->SaveHistogram(histo);
 
   histName.str("");
   if (nAlignmentStep == -1)
@@ -833,16 +833,16 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
     histName << "h_" << nAlignmentStep << "_Step";
   histName << "_Chi2Y_vs_SumDeltaY";
   cout << "CREATE PLOT: \"" << histName.str() << "\"" << endl;
-  TH2F histo1 = histSaver->CreateScatterHisto(histName.str(), vecSumDeltaY, vecYChi2);
+  TH2F *histo1 = histSaver->CreateScatterHisto(histName.str(), vecSumDeltaY, vecYChi2);
   histName << "_graph";
   TGraph graph1 = histSaver->CreateDipendencyGraph(histName.str(), vecSumDeltaY, vecYChi2);
   graph1.Draw("AP");
   graph1.GetYaxis()->SetTitle("Sum of Delta Y");
   graph1.GetXaxis()->SetTitle("Chi2 in Y");
 
-  histo1.GetYaxis()->SetTitle("Sum of Delta Y");
-  histo1.GetXaxis()->SetTitle("Chi2 in Y");
-  histSaver->SaveHistogram(&histo1);
+  histo1->GetYaxis()->SetTitle("Sum of Delta Y");
+  histo1->GetXaxis()->SetTitle("Chi2 in Y");
+  histSaver->SaveHistogram(histo1);
   histSaver->SaveGraph(&graph1, histName.str(), "AP");
 }
 
@@ -983,7 +983,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
      //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
     TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto(histName.str(), vecXDelta, 512, HistogrammSaver::threeSigma).Clone();
     int ntries=0;
-    while (histo->GetBinContent(histo->GetMaximumBin())<0.05&&ntries<3){//todo change hardcoding
+    while ((histo->GetBinContent(histo->GetMaximumBin())/histo->GetEntries())<0.05&&ntries<3){//todo change hardcoding
       histo->Rebin();ntries++;
     }
     TF1* fitGausX = new TF1("fitGaus", "gaus", -1, 1);
@@ -1010,25 +1010,26 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_YPred_vs_DeltaX";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateDipendencyHisto(histName.str(), vecYPred, vecXDelta, 256);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("Y Predicted");
-    histo.GetYaxis()->SetTitle("Delta X");
+    TH2F *histo = histSaver->CreateDipendencyHisto(histName.str(), vecYPred, vecXDelta, 256);
+//    histo.Draw("goff");
+    histo->GetXaxis()->SetTitle("Y Predicted");
+    histo->GetYaxis()->SetTitle("Delta X");
 
-    TH1D* hProj=histo.ProjectionX();
+    TH1D* hProj=histo->ProjectionX();
     int binxMin=0;
     for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
     int binxMax;
     for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo.GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin),hProj->GetBinLowEdge(binxMax));
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
     delete hProj;
-    histSaver->SaveHistogram(&histo);
+    histSaver->SaveHistogram(histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecYPred);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("predicted Y position in ChannelNo.");
     graph.GetYaxis()->SetTitle("delta X in Channel No.");
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
 
   if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) && subjectPlane == TPlaneProperties::getDiamondPlane()) {    //DistributionPlot DeltaX vs Xpred
@@ -1038,17 +1039,24 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_XPred_vs_DeltaX";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateDipendencyHisto(histName.str(), vecXPred, vecXDelta, 256);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("X Predicted");
-    histo.GetYaxis()->SetTitle("Delta X");
-    histSaver->SaveHistogram(&histo);
+    TH2F *histo = histSaver->CreateDipendencyHisto(histName.str(), vecXPred, vecXDelta, 256);
+    histo->GetXaxis()->SetTitle("X Predicted");
+    histo->GetYaxis()->SetTitle("Delta X");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    histSaver->SaveHistogram(histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXPred);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("predicted X position in ChannelNo.");
     graph.GetYaxis()->SetTitle("delta X in Channel No.");
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
 
   if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) && subjectPlane == TPlaneProperties::getDiamondPlane()) {    //DistributionPlot DeltaX vs Xpred
@@ -1058,17 +1066,25 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_XMeasured_vs_DeltaX";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateDipendencyHisto(histName.str(), vecXMeasured, vecXDelta, 256);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("X Measured");
-    histo.GetYaxis()->SetTitle("Delta X");
-    histSaver->SaveHistogram(&histo);
+    TH2F* histo = histSaver->CreateDipendencyHisto(histName.str(), vecXMeasured, vecXDelta, 256);
+//    histo->Draw("goff");
+    histo->GetXaxis()->SetTitle("X Measured");
+    histo->GetYaxis()->SetTitle("Delta X");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    histSaver->SaveHistogram(histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXMeasured);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("measured X position in ChannelNo.");
     graph.GetYaxis()->SetTitle("delta X in Channel No.");
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
 
   if (subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //DistributionPlot DeltaY
@@ -1106,11 +1122,18 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_XPred_vs_DeltaY";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateDipendencyHisto(histName.str(), vecXPred, vecYDelta, 256);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("X Predicted");
-    histo.GetYaxis()->SetTitle("Delta Y");
-    histSaver->SaveHistogram((TH2F*) histo.Clone());
+    TH2F *histo = histSaver->CreateDipendencyHisto(histName.str(), vecXPred, vecYDelta, 256);
+//    histo->Draw("goff");
+    histo->GetXaxis()->SetTitle("X Predicted");
+    histo->GetYaxis()->SetTitle("Delta Y");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecYDelta, vecXPred);
     graph.Draw("APL");
@@ -1118,6 +1141,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     graph.GetYaxis()->SetTitle("Delta Y in channel no");
 
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
 
   if (bPlot && subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //ScatterHisto XObs vs YObs
@@ -1127,10 +1151,18 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_YPred_vs_YObs";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateScatterHisto(histName.str(), vecXObs, vecYObs);
-    histo.GetXaxis()->SetTitle("XObs");
-    histo.GetYaxis()->SetTitle("YObs");
-    histSaver->SaveHistogram((TH2F*) histo.Clone());    //,histName.str());
+    TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecXObs, vecYObs);
+    histo->GetXaxis()->SetTitle("XObs");
+    histo->GetYaxis()->SetTitle("YObs");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    histSaver->SaveHistogram((TH2F*) histo->Clone());    //,histName.str());
+    delete histo;
   }
 
   if (bPlot && nAlignmentStep > -1 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //ScatterHisto DeltaX vs Chi2X
@@ -1140,17 +1172,25 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_DeltaX_vs_Chi2X";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateScatterHisto(histName.str(), vecXDelta, vecXChi2, 256);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("Delta X");
-    histo.GetYaxis()->SetTitle("Chi2 X");
-    histSaver->SaveHistogram((TH2F*) histo.Clone());
+    TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecXDelta, vecXChi2, 256);
+//    histo->Draw("goff");
+    histo->GetXaxis()->SetTitle("Delta X");
+    histo->GetYaxis()->SetTitle("Chi2 X");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXChi2);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("Chi^2 per NDF");
     graph.GetYaxis()->SetTitle("Delta X in channel no");
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
   if (bPlot && nAlignmentStep > -1 && subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //ScatterHisto DeltaY vs Chi2Y
     histName.str("");
@@ -1158,17 +1198,25 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_DeltaX_vs_Chi2X";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateScatterHisto(histName.str(), vecYDelta, vecYChi2, 256);
-    histo.Draw("goff");
-    histo.GetYaxis()->SetTitle("Delta Y");
-    histo.GetXaxis()->SetTitle("Chi2 Y");
-    histSaver->SaveHistogram((TH2F*) histo.Clone());
+    TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecYDelta, vecYChi2, 256);
+//    histo->Draw("goff");
+    histo->GetYaxis()->SetTitle("Delta Y");
+    histo->GetXaxis()->SetTitle("Chi2 Y");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecYDelta, vecYChi2);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("Chi^2 per NDF");
     graph.GetYaxis()->SetTitle("Delta Y in channel no");
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
   if (bPlot && subjectPlane == 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR)) {    //predX vs deltaX
     histName.str("");
@@ -1176,11 +1224,18 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_XPred_vs_DeltaX";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateDipendencyHisto(histName.str(), vecXPred, vecXDelta, 512);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("X Predicted");
-    histo.GetYaxis()->SetTitle("Delta X");
-    histSaver->SaveHistogram((TH2F*) histo.Clone());
+    TH2F *histo = histSaver->CreateDipendencyHisto(histName.str(), vecXPred, vecXDelta, 512);
+//    histo->Draw("goff");
+    histo->GetXaxis()->SetTitle("X Predicted");
+    histo->GetYaxis()->SetTitle("Delta X");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXPred);
     graph.Draw("APL");
@@ -1188,23 +1243,39 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     graph.GetYaxis()->SetTitle("Delta X in channel no");
 
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
 
   if (bPlot && subjectPlane ==4){
     histName.str("");histName.clear();
     histName<<"hAngularDistribution";
-    TH2F histo = histSaver->CreateScatterHisto(histName.str(),vecXPhi,vecYPhi,512);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("Phi X in Degree");
-    histo.GetYaxis()->SetTitle("Phi Y in Degree");
-    histSaver->SaveHistogram((TH2F*) histo.Clone());
+    TH2F *histo = histSaver->CreateScatterHisto(histName.str(),vecXPhi,vecYPhi,512);
+//    histo->Draw("goff");
+    histo->GetXaxis()->SetTitle("Phi X in Degree");
+    histo->GetYaxis()->SetTitle("Phi Y in Degree");
+    TH1D* hProj=histo->ProjectionX();
+    int binxMin=0;
+    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+    delete hProj;
+    hProj=histo->ProjectionY();
+    int binyMin=0;
+    for(binyMin=0;binyMin<hProj->GetNbinsX();binyMin++)if(hProj->GetBinContent(binyMin))break;
+    int binyMax;
+    for(binyMax=hProj->GetNbinsX();binyMax>0;binyMax--)if(hProj->GetBinContent(binyMax))break;
+
+    histo->GetYaxis()->SetRangeUser(hProj->GetBinLowEdge(binyMin-1),hProj->GetBinLowEdge(binyMax+1));
+    delete hProj;
+    histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecClusterSize);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("Phi Y in Degree");
     graph.GetYaxis()->SetTitle("Phi Y in Degree");
     histSaver->SaveGraph((TGraph*)graph.Clone(),histName.str());
-
+    delete histo;
   }
   if (bPlot && subjectPlane == 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR)) {    //DeltaX vs ClusterSize
     histName.str("");
@@ -1212,11 +1283,11 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_ClusterSize_vs_DeltaX";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F histo = histSaver->CreateDipendencyHisto(histName.str(), vecClusterSize, vecXDelta, 512);
-    histo.Draw("goff");
-    histo.GetXaxis()->SetTitle("Cluster Size");
-    histo.GetYaxis()->SetTitle("Delta X");
-    histSaver->SaveHistogram((TH2F*) histo.Clone());
+    TH2F *histo = histSaver->CreateDipendencyHisto(histName.str(), vecClusterSize, vecXDelta, 512);
+    histo->Draw("goff");
+    histo->GetXaxis()->SetTitle("Cluster Size");
+    histo->GetYaxis()->SetTitle("Delta X");
+    histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecClusterSize);
     graph.Draw("APL");
@@ -1224,6 +1295,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     graph.GetYaxis()->SetTitle("Delta X in channel no");
 
     histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+    delete histo;
   }
 
 }
