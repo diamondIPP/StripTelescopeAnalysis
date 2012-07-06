@@ -165,6 +165,7 @@ int main(int argc, char ** argv) {
 		bool DO_SELECTIONANALYSIS = RunParameters[i].doSelectionAnalysis();
 		bool DO_ALIGNMENT = RunParameters[i].doAlignment();
 		bool DO_ALIGNMENTANALYSIS = RunParameters[i].doAlignmentAnalysis();
+		bool DO_TRANSPARENT_ANALYSIS = RunParameters[i].doTransparentAnalysis();
 		cout << endl << endl << endl << endl;
 		cout << "====================================" << endl;
 		cout << "==> Starting analysis.." << endl;
@@ -313,10 +314,14 @@ int main(int argc, char ** argv) {
       anaAlignment->doAnalysis(NEVENTS);
       delete anaAlignment;
 		}
+
+		if(DO_TRANSPARENT_ANALYSIS){
 //		TTransparentAnalysis *transpAna;
 //		transpAna = new TTransparentAnalysis(settings);
 //		transpAna->analyze(NEVENTS,START_EVENT);
 
+		  //delete?
+		}
 		currentResults->Print();
     currentResults->saveResults();
     delete currentResults;
@@ -365,6 +370,7 @@ int ReadRunList() {
   int bSelectionAnalysis;
   int bAlignment;
   int bAlignmentAnalysis;
+  int bTransAna;
 //  cout<<"start file loop"<<flush;
 	while (!file.eof()) {
 //	  RunDescription = "";
@@ -383,12 +389,12 @@ int ReadRunList() {
 			continue;
 		}
 //		cout<<"Read Line"<<endl;
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d", &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis);
+		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d %d", &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis, &bTransAna);
 //		cout << "RunDescription Char: " << RunDescription[0] << endl;
 		cout<<RunNumber<<endl;
 		cout<<NEvents<<endl;
 		cout<<nStartEvent<<":"<<bPedestalAnalysis<<bClusterAnalysis<<bSelectionAnalysis<<bAlignment<<bAlignmentAnalysis<<endl;
-		run.setParameters(RunNumber,(string)RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis);
+		run.setParameters(RunNumber,(string)RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis,bTransAna);
 //		cout<<"Got new Parameters: "<<RunNumber<<endl;
 		RunParameters.push_back(run);
 	}

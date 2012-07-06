@@ -22,8 +22,9 @@ private:
     bool bSelectionAnalysis;
     bool bAlignment;
     bool bAlignmentAnalysis;
+    bool bTransparentAnalysis;
 public:
-    void setParameters(UInt_t nRunNo,std::string sRunDes,UInt_t nVeb,UInt_t NEvents,UInt_t nStartEvent,bool bPedAna,bool bClusAna,bool bSelAna,bool bAlign,bool bAlignAna){
+    void setParameters(UInt_t nRunNo,std::string sRunDes,UInt_t nVeb,UInt_t NEvents,UInt_t nStartEvent,bool bPedAna,bool bClusAna,bool bSelAna,bool bAlign,bool bAlignAna,bool bTransAna){
       setRunNumber(nRunNo);
       setRunDescription(sRunDes);
       setVerbosity(nVeb);
@@ -34,7 +35,9 @@ public:
       setSelectionAnalysis(bSelAna);
       setAlignment(bAlign);
       setAlignmentAnalysis(bAlignAna);
+      setTransparentAnalysis(bTransAna);
     }
+    void setTransparentAnalysis(bool bTransAna){bTransparentAnalysis=bTransAna;}
     void setRunDescription(std::string rundescribtion){RunDescription=rundescribtion;}
     void setAlignment(bool alignment){ bAlignment = alignment;}
     void setAlignmentAnalysis(bool alignmentAnalysis){ bAlignmentAnalysis = alignmentAnalysis;}
@@ -56,5 +59,6 @@ public:
     bool doClusterAnalysis() const{return bClusterAnalysis;}
     bool doPedestalAnalysis() const{return bPedestalAnalysis;}
     bool doSelectionAnalysis() const{return bSelectionAnalysis;}
+    bool doTransparentAnalysis() const{return bTransparentAnalysis;}
 };
 std::vector<RunInfo> RunParameters;
