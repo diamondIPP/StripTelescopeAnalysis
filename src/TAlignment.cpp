@@ -790,11 +790,11 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
   else
     histName << "h_" << nAlignmentStep << "_Step";
   histName << "_Chi2X_Distribution";
-  TH1F histoChi2X = histSaver->CreateDistributionHisto(histName.str(), vecXChi2, 4096, HistogrammSaver::positiveSigma);
-  histoChi2X.GetXaxis()->SetTitle("Chi^2/NDF of X plane");
-  histoChi2X.GetYaxis()->SetTitle("number of entries");
+  TH1F *histoChi2X = histSaver->CreateDistributionHisto(histName.str(), vecXChi2, 4096, HistogrammSaver::positiveSigma);
+  histoChi2X->GetXaxis()->SetTitle("Chi^2/NDF of X plane");
+  histoChi2X->GetYaxis()->SetTitle("number of entries");
 
-  histSaver->SaveHistogram(&histoChi2X);
+  histSaver->SaveHistogram(histoChi2X);
 
   //Chi2Y Distribution
   histName.str("");
@@ -805,10 +805,10 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
   else
     histName << "h_" << nAlignmentStep << "_Step";
   histName << "_Chi2Y_Distribution";
-  TH1F histoChi2Y = histSaver->CreateDistributionHisto(histName.str(), vecYChi2, 4096, HistogrammSaver::positiveSigma);
-  histoChi2Y.GetXaxis()->SetTitle("Chi^2/NDF of Y plane");
-  histoChi2Y.GetYaxis()->SetTitle("number of entries");
-  histSaver->SaveHistogram(&histoChi2Y);
+  TH1F *histoChi2Y = histSaver->CreateDistributionHisto(histName.str(), vecYChi2, 4096, HistogrammSaver::positiveSigma);
+  histoChi2Y->GetXaxis()->SetTitle("Chi^2/NDF of Y plane");
+  histoChi2Y->GetYaxis()->SetTitle("number of entries");
+  histSaver->SaveHistogram(histoChi2Y);
 
   histName.str("");
   if (nAlignmentStep == -1)
@@ -936,6 +936,8 @@ void TAlignment::setSiliconDetectorResolution(Float_t maxChi2) {
     res = CheckDetectorAlignment(TPlaneProperties::XY_COR, plane, vecRefPlanes, false, res);
     align->setXResolution(res.getXSigma(), plane);
     align->setYResolution(res.getYSigma(), plane);
+    align->setXMean(res.getDeltaXMean(),plane);
+    align->setYMean(res.getDeltaYMean(),plane);
   }
 
   for (UInt_t plane = 0; plane < 4; plane++) {
@@ -981,11 +983,8 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_DistributionPlot_DeltaX";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
      //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto(histName.str(), vecXDelta, 512, HistogrammSaver::threeSigma).Clone();
+    TH1F* histo = histSaver->CreateDistributionHisto(histName.str(), vecXDelta, 512, HistogrammSaver::threeSigma);
     int ntries=0;
-    while ((histo->GetBinContent(histo->GetMaximumBin())/histo->GetEntries())<0.05&&ntries<3){//todo change hardcoding
-      histo->Rebin();ntries++;
-    }
     TF1* fitGausX = new TF1("fitGaus", "gaus", -1, 1);
     if (bUpdateAlignment) {
       cout << "Alignment for plane" << subjectPlane << endl;
@@ -1015,13 +1014,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histo->GetXaxis()->SetTitle("Y Predicted");
     histo->GetYaxis()->SetTitle("Delta X");
 
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
     histSaver->SaveHistogram(histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecYPred);
@@ -1042,13 +1034,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     TH2F *histo = histSaver->CreateDipendencyHisto(histName.str(), vecXPred, vecXDelta, 256);
     histo->GetXaxis()->SetTitle("X Predicted");
     histo->GetYaxis()->SetTitle("Delta X");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
     histSaver->SaveHistogram(histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXPred);
@@ -1070,13 +1055,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 //    histo->Draw("goff");
     histo->GetXaxis()->SetTitle("X Measured");
     histo->GetYaxis()->SetTitle("Delta X");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
     histSaver->SaveHistogram(histo);
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXMeasured);
@@ -1093,7 +1071,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << preName.str();
     histName << "_DistributionPlot_DeltaY";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto(histName.str(), vecYDelta, 512, HistogrammSaver::threeSigma).Clone();
+    TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto(histName.str(), vecYDelta, 512, HistogrammSaver::threeSigma);
 
     histo->Draw("goff");
     Float_t sigma = histo->GetRMS();
@@ -1126,13 +1104,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 //    histo->Draw("goff");
     histo->GetXaxis()->SetTitle("X Predicted");
     histo->GetYaxis()->SetTitle("Delta Y");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
     histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecYDelta, vecXPred);
@@ -1154,13 +1125,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecXObs, vecYObs);
     histo->GetXaxis()->SetTitle("XObs");
     histo->GetYaxis()->SetTitle("YObs");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
     histSaver->SaveHistogram((TH2F*) histo->Clone());    //,histName.str());
     delete histo;
   }
@@ -1176,13 +1140,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 //    histo->Draw("goff");
     histo->GetXaxis()->SetTitle("Delta X");
     histo->GetYaxis()->SetTitle("Chi2 X");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
     histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXChi2);
@@ -1202,13 +1159,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 //    histo->Draw("goff");
     histo->GetYaxis()->SetTitle("Delta Y");
     histo->GetXaxis()->SetTitle("Chi2 Y");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
+
     histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecYDelta, vecYChi2);
@@ -1228,13 +1179,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 //    histo->Draw("goff");
     histo->GetXaxis()->SetTitle("X Predicted");
     histo->GetYaxis()->SetTitle("Delta X");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
+
     histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXPred);
@@ -1253,21 +1198,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 //    histo->Draw("goff");
     histo->GetXaxis()->SetTitle("Phi X in Degree");
     histo->GetYaxis()->SetTitle("Phi Y in Degree");
-    TH1D* hProj=histo->ProjectionX();
-    int binxMin=0;
-    for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-    delete hProj;
-    hProj=histo->ProjectionY();
-    int binyMin=0;
-    for(binyMin=0;binyMin<hProj->GetNbinsX();binyMin++)if(hProj->GetBinContent(binyMin))break;
-    int binyMax;
-    for(binyMax=hProj->GetNbinsX();binyMax>0;binyMax--)if(hProj->GetBinContent(binyMax))break;
 
-    histo->GetYaxis()->SetRangeUser(hProj->GetBinLowEdge(binyMin-1),hProj->GetBinLowEdge(binyMax+1));
-    delete hProj;
     histSaver->SaveHistogram((TH2F*) histo->Clone());
     histName << "_graph";
     TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecClusterSize);

@@ -569,6 +569,26 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 		histo->Fill(posX.at(i),posY.at(i));
 	histo->GetXaxis()->SetTitle("X-Position");
 	histo->GetYaxis()->SetTitle("Y-Position");
+
+	//set xrange
+  TH1D* hProj=histo->ProjectionX();
+  int binxMin=0;
+  for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+  int binxMax;
+  for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+  histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+  delete hProj;
+
+  //set yRange
+  hProj=histo->ProjectionY();
+  int binyMin=0;
+  for(binyMin=0;binyMin<hProj->GetNbinsX();binyMin++)if(hProj->GetBinContent(binyMin))break;
+  int binyMax;
+  for(binyMax=hProj->GetNbinsX();binyMax>0;binyMax--)if(hProj->GetBinContent(binyMax))break;
+
+  histo->GetYaxis()->SetRangeUser(hProj->GetBinLowEdge(binyMin-1),hProj->GetBinLowEdge(binyMax+1));
+  delete hProj;
+
 	return histo;
 }
 
@@ -611,11 +631,11 @@ void HistogrammSaver::SetRange(Float_t min,Float_t max){
 
 }
 
-TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
+TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(vec.size()==0)
-		return TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
+		return new TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
 	Float_t max = vec.at(0);
 	Float_t min = vec.at(0);
 	if (range==maxWidth){
@@ -669,10 +689,14 @@ TH1F HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Floa
 	}
 
 
-	TH1F histo = TH1F(name.c_str(),name.c_str(),nBins,min,max);
+	TH1F* histo = new TH1F(name.c_str(),name.c_str(),nBins,min,max);
 	for(UInt_t i=0;i<vec.size();i++){
-		histo.Fill(vec.at(i));
+		histo->Fill(vec.at(i));
 	}
+  int ntries=0;
+  while ((histo->GetBinContent(histo->GetMaximumBin())/histo->GetEntries())<0.05&&ntries<3){//todo change hardcoding
+    histo->Rebin();ntries++;
+  }
 	return histo;
 }
 
