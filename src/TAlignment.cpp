@@ -984,7 +984,6 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
      //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
     TH1F* histo = histSaver->CreateDistributionHisto(histName.str(), vecXDelta, 512, HistogrammSaver::threeSigma);
-    int ntries=0;
     TF1* fitGausX = new TF1("fitGaus", "gaus", -1, 1);
     if (bUpdateAlignment) {
       cout << "Alignment for plane" << subjectPlane << endl;
@@ -993,6 +992,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
       Float_t xRes = fitGausX->GetParameter(2);
       cout << "set Resolution via Gaus-Fit: " << xRes << " with " << vecXDelta.size() << " Events" << endl;
       align->setXResolution(xRes, subjectPlane);
+      align->setXMean(fitGausX->GetParameter(1),subjectPlane);
       histo->GetXaxis()->SetRangeUser(-5 * xRes, +5 * xRes);
     }
     histo->GetXaxis()->SetTitle("Delta X in Channels");
@@ -1084,6 +1084,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     cout<<"\nSKEWNESS of "<<histName.str()<<": "<<skewness<<endl;
     if (bUpdateAlignment) {
       align->setYResolution(yRes, subjectPlane);
+      align->setYMean(fitGausY->GetParameter(1),subjectPlane);
       histo->GetXaxis()->SetRangeUser(-5 * yRes, +5 * yRes);
     }
     histo->GetXaxis()->SetTitle("Delta Y in Channels");
@@ -1119,7 +1120,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName.str("");
     histName.clear();
     histName << preName.str();
-    histName << "_ScatterPlot_YPred_vs_YObs";
+    histName << "_ScatterPlot_XObs_vs_YObs";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
     TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecXObs, vecYObs);

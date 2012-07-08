@@ -20,6 +20,7 @@ public:
 
 private:
 	void createOverviewTable();
+	void createChi2Overview();
 	void createPostSiliconOverview();
 	void createPostDiamondOverview();
 	void createPreSiliconOverview();
