@@ -63,7 +63,7 @@ void THTMLCluster::createEtaDistributions()
 	this->addSection("Eta Integrals",sectionContent.str());
 }
 
-void THTMLCluster::createPulseHeigthPlots(vector<double> meanPulseHeigths)
+void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
 {
 	stringstream sectionContent;
 	sectionContent<<"<p>\n"<<

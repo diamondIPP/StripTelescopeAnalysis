@@ -18,7 +18,7 @@ public:
 public:
 	void createContent();
 	void createEtaDistributions();
-	void createPulseHeigthPlots(vector<double> meanPulseHeigths);
+	void createPulseHeightPlots(vector<double> meanPulseHeigths);
 	void createTableOfCuts();
 	void createClusterSize(std::vector<double> clusterSizes,std::vector<double> clusterSeedSize,std::vector<double> numberOfClusters);
 };

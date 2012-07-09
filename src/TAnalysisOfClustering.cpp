@@ -50,7 +50,7 @@ TAnalysisOfClustering::~TAnalysisOfClustering() {
 	delete eventReader;
 	delete histSaver;
 	htmlClus->createClusterSize(vecClusterSizes,vecClusterSeedSizes,vecNumberOfClusters);
-	htmlClus->createPulseHeigthPlots(this->vecPHMeans);
+	htmlClus->createPulseHeightPlots(this->vecPHMeans);
 	htmlClus->createContent();
 	htmlClus->generateHTMLFile();
 	delete htmlClus;
