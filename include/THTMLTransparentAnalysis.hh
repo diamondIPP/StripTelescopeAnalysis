@@ -13,12 +13,16 @@
 
 class THTMLTransparentAnalysis: public THTMLGenerator {
 public:
-  THTMLTransparentAnalysis(TSettings *settings) ;
-  virtual ~THTMLTransparentAnalysis();
-  void createContent();
+	
+	THTMLTransparentAnalysis(TSettings *settings) ;
+	virtual ~THTMLTransparentAnalysis();
+	void createContent();
+	void createPulseHeightPlots(vector<pair <UInt_t,Float_t> > meanPulseHeigths);
+	void createResolutionPlots();
+	void createEtaPlots();
 
 private:
-
+	UInt_t subjectDetector, subjectPlane;
 };
 
 #endif /* THTMLTRANSPARENTANALYSIS_H_ */

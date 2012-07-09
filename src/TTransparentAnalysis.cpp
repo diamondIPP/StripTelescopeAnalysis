@@ -75,15 +75,27 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 
 TTransparentAnalysis::~TTransparentAnalysis() {
 	// TODO Auto-generated destructor stub
-  cout<<"\n\nClosing TTransparentAnalysis"<<endl;
-  saveHistograms();
-  deleteHistograms();
-  htmlTransAna->generateHTMLFile();
-  if(eventReader!=0)delete eventReader;
-  if(histSaver!=0)delete histSaver;
-  if(htmlTransAna)delete htmlTransAna;
-  if(tracking!=0) delete tracking;
-  sys->cd("..");
+	cout<<"\n\nClosing TTransparentAnalysis"<<endl;
+	saveHistograms();
+	deleteHistograms();
+	
+	// TODO: replace this!
+	vector<pair <UInt_t,Float_t> > meanPulseHeights;
+	for (UInt_t clusterSize; clusterSize < 10; clusterSize++) {
+		pair <UInt_t,Float_t> meanPulseHeight;
+		meanPulseHeight.first = clusterSize+1;
+		meanPulseHeight.second = 100.*clusterSize;
+		meanPulseHeights.push_back(meanPulseHeight);
+	}
+	
+	
+	htmlTransAna->createPulseHeightPlots(meanPulseHeights);
+	htmlTransAna->generateHTMLFile();
+	if(eventReader!=0)delete eventReader;
+	if(histSaver!=0)delete histSaver;
+	if(htmlTransAna)delete htmlTransAna;
+	if(tracking!=0) delete tracking;
+	sys->cd("..");
 }
 
 void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
