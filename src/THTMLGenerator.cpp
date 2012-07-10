@@ -18,7 +18,7 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 		cerr<<"settings does not exist"<<endl;
 	verbosity=3;
 	setTitle("Summary");
-	setFileName("index.html");
+	setFileName("overview.html");
 }
 
 THTMLGenerator::~THTMLGenerator() {
@@ -57,12 +57,18 @@ void THTMLGenerator::generatorHTMLHeader()
 		html_summary << "<a name=\"top\"></a>" << endl;
 
 		if (verbosity>2)cout<<"Clustering::GenerateHTML():start summary"<<endl;
+		string correctionPath;
+		if(this->subdirPath!="")
+		  correctionPath="../";
+		else correctionPath="";
+
 		html_summary << "<b>"<<title<<"</b>||"
-				<< "<a href=\""<<this->mainPath<<"/index.html\">Summary</a>||"
-				<< "<a href=\""<<this->mainPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
-				<< "<a href=\""<<this->mainPath<<"/clustering/clustering.html\">Clustering</a>||"
-				<< "<a href=\""<<this->mainPath<<"/selections/selection.html\">Selection</a>||"
-				<< "<a href=\""<<this->mainPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
+				<< "<a href=\""<<this->mainPath<<correctionPath<<"/overview.html\">Summary</a>||"
+				<< "<a href=\""<<this->mainPath<<correctionPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
+				<< "<a href=\""<<this->mainPath<<correctionPath<<"/clustering/clustering.html\">Clustering</a>||"
+				<< "<a href=\""<<this->mainPath<<correctionPath<<"/selections/selection.html\">Selection</a>||"
+				<< "<a href=\""<<this->mainPath<<correctionPath<<"/alignment/alignment.html\">Alignment</a>||"
+				<< "<a href=\""<<this->mainPath<<correctionPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
 //				<< "<a href=\"d8.html\">Diamond</a>||"
 //				<< "<a href=\"d0.html\">D0X</a>||"
 //				<< "<a href=\"d1.html\">D0Y</a>||"

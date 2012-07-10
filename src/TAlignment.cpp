@@ -61,7 +61,7 @@ TAlignment::TAlignment(TSettings* settings) {
   diaCalcMode = TCluster::maxValue;    //todo
   silCalcMode = TCluster::corEta;    //todo
 
-  plotAll = true;
+  plotAll = false;
   results=0;
 
 }

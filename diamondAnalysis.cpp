@@ -245,12 +245,14 @@ int main(int argc, char ** argv) {
 		htmlGen->setMainPath("./");//(string)(currentDir+"/16202/"));
 		htmlGen->setSubdirPath("");
 
-		htmlGen->setFileName("overview.html");
 		htmlGen->setFileGeneratingPath(path.str());
-		htmlGen->addSection("Pedestal","<a href=\"pedestalAnalysis/pedestal.html\">PEDESTAL</a>");
-		htmlGen->addSection("Clustering","<a href=\"clustering/clustering.html\">CLUSTERING</a>");
-		htmlGen->addSection("Selection","<a href=\"selections/selection.html\">SELECTION</a>");
-		htmlGen->addSection("Landau","<a href=\"selectionAnalysis/landaus.html\">LANDAU-DISTRIBUTIONS</a>");
+
+    htmlGen->setFileName("overview.html");
+		htmlGen->addSection("Pedestal","<a href=\"./pedestalAnalysis/pedestal.html\">PEDESTAL</a>");
+		htmlGen->addSection("Clustering","<a href=\"./clustering/clustering.html\">CLUSTERING</a>");
+		htmlGen->addSection("Selection","<a href=\"./selections/selection.html\">SELECTION</a>");
+		htmlGen->addSection("Alignment","<a href=\"./alignment/alignment.html\">ALIGNMENT</a>");
+		htmlGen->addSection("Landau","<a href=\"./selectionAnalysis/landaus.html\">LANDAU-DISTRIBUTIONS</a>");
 		htmlGen->generateHTMLFile();
 		delete htmlGen;
 
