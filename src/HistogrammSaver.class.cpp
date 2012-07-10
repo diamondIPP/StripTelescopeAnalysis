@@ -595,7 +595,7 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos)
 {
 	if(Delta.size()!=pos.size()||pos.size()==0) {
-		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<Delta.size()<<" "<<pos.size()<<endl;
+		cerr<<"ERROR HistogrammSaver::CreateDipendencyGraph vectors have different size "<<Delta.size()<<" "<<pos.size()<<endl;
 		return TGraph();
 	}
 
@@ -610,7 +610,7 @@ TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Floa
 TGraphErrors HistogrammSaver::CreateErrorGraph(std::string name, std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey)
 {
 	if(x.size()!=y.size()||x.size()!=ex.size()||ex.size()!=ey.size()||x.size()==0) {
-		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<x.size()<<" "<<y.size()<<endl;
+		cerr<<"ERROR HistogrammSaver::CreateErrorGraph vectors have different size "<<x.size()<<" "<<y.size()<<endl;
 		return TGraphErrors();
 	}
 

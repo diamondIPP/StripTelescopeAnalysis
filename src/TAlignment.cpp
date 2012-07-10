@@ -17,11 +17,8 @@ TAlignment::TAlignment(TSettings* settings) {
   runNumber = settings->getRunNumber();
   cout << runNumber << endl;
   stringstream runString;
-  runString.str("");
-  runString << settings->getRunNumber();
-
-  sys->MakeDirectory(runString.str().c_str());
-  sys->cd(runString.str().c_str());
+  sys->MakeDirectory(settings->getRelativePath().c_str());;
+  sys->cd(settings->getRelativePath().c_str());
   htmlAlign = new THTMLAlignment(settings);
   stringstream filepath;
   filepath.str("");

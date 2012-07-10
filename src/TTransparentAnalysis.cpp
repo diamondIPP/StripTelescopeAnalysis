@@ -17,12 +17,8 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	sys = gSystem;
 	setSettings(settings);
 	UInt_t runNumber =settings->getRunNumber();
-	stringstream  runString;
-	runString.str("");
-	runString<<runNumber;
-	sys->MakeDirectory(runString.str().c_str());
-	
-	sys->cd(runString.str().c_str());
+  sys->MakeDirectory(settings->getRelativePath().c_str());;
+  sys->cd(settings->getRelativePath().c_str());
 	stringstream  filepath, alignmentFileName;
 	filepath.str("");
 	alignmentFileName.str("");

@@ -18,16 +18,15 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-	runString.str("");
-	runString<<settings->getRunNumber();
-	sys->MakeDirectory(runString.str().c_str());
+
+  sys->MakeDirectory(settings->getRelativePath().c_str());
+  sys->cd(settings->getRelativePath().c_str());
 
 	createdNewTree=false;
 	createdNewFile=false;
 	selectionTree=NULL;
 	selectionFile=NULL;
 
-	sys->cd(runString.str().c_str());
 	rawfilepath<<"rawData."<<settings->getRunNumber()<<".root";
 	pedestalfilepath.str("");
 	pedestalfilepath<<"pedestalData."<<settings->getRunNumber()<<".root";

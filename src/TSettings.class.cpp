@@ -24,6 +24,7 @@ TSettings::TSettings(UInt_t runNumber){
   sys = gSystem;
 	path = sys->pwd();
 	createSettingsRootFile();
+	runDescription="";
 }
 
 TSettings::TSettings(string fileName,UInt_t runNumber){
@@ -35,6 +36,7 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	this->runNumber=runNumber;
 	sys = gSystem;
 	path = sys->pwd();
+	runDescription="";
   SetFileName(fileName);
 //	createSettingsRootFile();
 }
@@ -46,6 +48,20 @@ TSettings::~TSettings(){
   cout<<"delete Settings"<<endl;
 }
 
+
+void TSettings::setRunDescription(std::string runDescription)
+{
+    this->runDescription = runDescription;
+}
+
+std::string TSettings::getRelativePath(){
+  stringstream output;
+  output<<runNumber;
+  if(runDescription.at(0)!='0'){
+    output<<"-"<<runDescription;
+  }
+  return output.str();
+}
 void TSettings::SetFileName(string newFileName){
 	if(verbosity)
 		cout<<"TSettings::SetFileName:\""<<newFileName<<"\""<<endl;
@@ -466,6 +482,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	if(verbosity)
 		cout<<"TSettings::LoadDefaultSettings"<<endl;
 	//default general settings
+	runDescription="";
 	SaveAllFilesSwitch = 1; //1 for save files, 0 for don't
 	ClosePlotsOnSave = 1;
 	IndexProduceSwitch = 1;

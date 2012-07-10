@@ -18,12 +18,12 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	setSettings(settings);
 	UInt_t runNumber=settings->getRunNumber();
 	sys = gSystem;
-	stringstream  runString;
-	runString.str("");
-	runString<<runNumber;
+
 	htmlClus= new THTMLCluster(settings);
-	sys->MakeDirectory(runString.str().c_str());
-	sys->cd(runString.str().c_str());
+
+  sys->MakeDirectory(settings->getRelativePath().c_str());
+  sys->cd(settings->getRelativePath().c_str());
+
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<"clusterData."<<runNumber<<".root";

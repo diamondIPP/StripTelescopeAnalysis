@@ -24,20 +24,24 @@
 //#include "TSettings.class.hh"
 #include "TSystem.h"
 #include "TFile.h"
+#include <string>
 
 class TSettings:public TObject {
+private:
+  std::string runDescription;
 public:
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
+	std::string getRelativePath();
 	virtual ~TSettings();
 
 	void saveSettings();
 	void loadSettingsFromRootFile();
 	void compareSettings();
 	void createSettingsRootFile();
-
+	void setRunDescription(std::string runDescription);
 	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
-
+	std::string getRunDescription() const {return runDescription;};
 	Float_t getClusterSeedFactor(UInt_t det);
 	Float_t getClusterHitFactor(UInt_t det);
 	Float_t getAlignment_chi2() const;
@@ -285,6 +289,6 @@ private:
 private:
     int verbosity;
 
-    ClassDef(TSettings,1);
+    ClassDef(TSettings,2);;
 };
 #endif

@@ -204,16 +204,19 @@ int main(int argc, char ** argv) {
 
 
 		stringstream settingsFileName;
-		settingsFileName<<"settings."<<RUNNUMBER<<".ini";
+		settingsFileName<<"settings."<<RUNNUMBER;
+		if(RUNDESCRIPTION.at(0)!='0')
+		  settingsFileName<<"-"<<RUNDESCRIPTION;
+		settingsFileName<<".ini";
 		TSettings *settings=NULL;
 		settings=new TSettings(settingsFileName.str(),RUNNUMBER);
+		settings->setRunDescription(RUNDESCRIPTION);
 
     TResults *currentResults =new TResults(settings);
     currentResults->Print();
 
 		TRawEventSaver *eventSaver;
-		eventSaver = new TRawEventSaver(RUNNUMBER);
-		eventSaver->setSettings(settings);
+		eventSaver = new TRawEventSaver(settings);
 		eventSaver->saveEvents(NEVENTS);
 		delete eventSaver;
 
@@ -241,7 +244,7 @@ int main(int argc, char ** argv) {
 
 		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
 		stringstream path;
-		path<<currentDir<<"/"<<settings->getRunNumber()<<"/";
+		path<<currentDir<<"/"<<settings->getRelativePath()<<"/";
 		htmlGen->setMainPath("./");//(string)(currentDir+"/16202/"));
 		htmlGen->setSubdirPath("");
 

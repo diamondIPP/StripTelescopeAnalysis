@@ -18,13 +18,9 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	res=0;
 	htmlPedestal= new THTMLPedestal(settings);
 	sys = gSystem;
-	stringstream  runString;
 	UInt_t runNumber=settings->getRunNumber();
-	runString.str("");
-	runString<<runNumber;
-	sys->MakeDirectory(runString.str().c_str());
-	
-	sys->cd(runString.str().c_str());
+  sys->MakeDirectory(settings->getRelativePath().c_str());
+  sys->cd(settings->getRelativePath().c_str());
 	stringstream  filepath;
 	filepath.str("");
 	filepath<<"pedestalData."<<runNumber<<".root";

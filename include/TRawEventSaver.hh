@@ -27,7 +27,7 @@ using namespace std;
 
 class TRawEventSaver {
 public:
-	TRawEventSaver(unsigned int RunNumber, std::string RunDescription = "");
+	TRawEventSaver(TSettings *settings);//unsigned int RunNumber, std::string RunDescription = "");
 	virtual ~TRawEventSaver();
 	void setSettings(TSettings* set){settings=set;}
 	void saveEvents(int nEvents);

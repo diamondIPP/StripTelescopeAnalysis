@@ -7,17 +7,14 @@
 
 #include "../include/TRawEventSaver.hh"
 
-TRawEventSaver::TRawEventSaver(unsigned int RunNumber, std::string RunDescription){
+TRawEventSaver::TRawEventSaver(TSettings *settings){//unsigned int RunNumber, std::string RunDescription){
 	// TODO Auto-generated constructor stub
-	settings=0;
-	this->runNumber=RunNumber;
+	this->settings=settings;
+	this->runNumber=settings->getRunNumber();
 	rawEventReader = new TRawEventReader(this->runNumber);
 	sys = gSystem;
-	stringstream  runString;
-	runString.str("");
-	runString<<RunNumber;
-	sys->MakeDirectory(runString.str().c_str());
-	sys->cd(runString.str().c_str());
+	sys->MakeDirectory(settings->getRelativePath().c_str());;
+	sys->cd(settings->getRelativePath().c_str());
 
 	rawfilepath.str("");
 	rawfilepath<<sys->pwd();

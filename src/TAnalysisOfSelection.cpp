@@ -13,13 +13,11 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	else exit(0);
 
 	sys = gSystem;
-	stringstream  runString;
 	UInt_t runNumber=settings->getRunNumber();
-	runString.str("");
-	runString<<runNumber;
-	sys->MakeDirectory(runString.str().c_str());
+
+  sys->MakeDirectory(settings->getRelativePath().c_str());
 	htmlLandau=new THTMLLandaus(settings);
-	sys->cd(runString.str().c_str());
+  sys->cd(settings->getRelativePath().c_str());
 
 	stringstream  filepath;
 	filepath.str("");
