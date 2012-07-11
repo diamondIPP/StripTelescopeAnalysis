@@ -17,7 +17,7 @@ public:
 	THTMLTransparentAnalysis(TSettings *settings) ;
 	virtual ~THTMLTransparentAnalysis();
 	void createContent();
-	void createPulseHeightPlots(vector<vector <double> > meanPulseHeigths);
+	void createPulseHeightPlots(vector<vector <Float_t> > meanPulseHeigths);
 	void createResolutionPlots(vector<vector <pair <Float_t,Float_t> > > resolutions);
 	void createEtaPlots();
 

@@ -77,6 +77,7 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	
 	// TODO: replace this!
 	vector<vector <double> > meanPulseHeights;
+	vector<vector <Float_t> > mpPulseHeights;
 	vector<vector <pair <Float_t,Float_t> > > resolutions;
 	meanPulseHeights.resize(2);
 	resolutions.resize(2);
@@ -90,8 +91,10 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 		resolutions.at(1).push_back(resolution);
 	}
 	
+	mpPulseHeights.push_back(vecMPLandau);
+	mpPulseHeights.push_back(vecMPLandau2Highest);
 	
-	htmlTransAna->createPulseHeightPlots(meanPulseHeights);
+	htmlTransAna->createPulseHeightPlots(mpPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
 	htmlTransAna->generateHTMLFile();
 	if(eventReader!=0)delete eventReader;
@@ -238,10 +241,26 @@ void TTransparentAnalysis::fillHistograms() {
 	}
 }
 
+void TTransparentAnalysis::fitHistograms() {
+//	LandauGaussFit landauGauss;
+//	TF1 *fit=0;
+//	fit = landauGauss.doLandauGaussFit(hLaundau[3]);
+//	cout<<"Width(scale): "<<fit->GetParameter(0)<<endl;
+//	cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
+//	cout<<"Area:         "<<fit->GetParameter(2)<<endl;
+//	cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
+//	histSaver->SaveHistogramWithFit(hLaundau[3],fit);
+}
+
 void TTransparentAnalysis::saveHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-		histSaver->SaveHistogram(hLaundau[clusterSize],0);
-		histSaver->SaveHistogram(hLaundau2Highest[clusterSize],0);
+		TF1 *fitLandau=0, *fitLandau2Highest=0;
+		fitLandau = landauGauss->doLandauGaussFit(hLaundau[clusterSize]);
+		fitLandau2Highest = landauGauss->doLandauGaussFit(hLaundau2Highest[clusterSize]);
+		vecMPLandau.push_back(fitLandau->GetParameter(1));
+		vecMPLandau2Highest.push_back(fitLandau2Highest->GetParameter(1));
+		histSaver->SaveHistogramWithFit(hLaundau[clusterSize],fitLandau);
+		histSaver->SaveHistogramWithFit(hLaundau2Highest[clusterSize],fitLandau2Highest);
 		histSaver->SaveHistogram(hEta[clusterSize],0);
 		histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize],1);
 		histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize],1);

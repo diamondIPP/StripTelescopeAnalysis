@@ -25,7 +25,7 @@ void THTMLTransparentAnalysis::createContent() {
 	
 }
 
-void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <double> > meanPulseHeigths) {
+void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > meanPulseHeigths) {
 	// TODO: change this:
 	subjectDetector = 8;
 	

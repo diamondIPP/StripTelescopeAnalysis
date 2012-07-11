@@ -48,6 +48,7 @@
 #include "TRawEventSaver.hh"
 #include "TCluster.hh"
 #include "THTMLTransparentAnalysis.hh"
+#include "LandauGaussFit.hh"
 
 using namespace std;
 
@@ -62,6 +63,7 @@ public:
 private:
 	void initHistograms();
 	void fillHistograms();
+	void fitHistograms();
 	void saveHistograms();
 	void deleteHistograms();
 	void printCutFlow();
@@ -91,6 +93,7 @@ private:
     TSettings* settings;
 	TTracking* tracking;
 	THTMLTransparentAnalysis* htmlTransAna;
+	LandauGaussFit* landauGauss;
 	
 	// cut flow
 	UInt_t nAnalyzedEvents;
@@ -112,23 +115,25 @@ private:
 	
 	
 	
-	TH1F* histo_transparentclustering_landau[10];
-    TH1F* histo_transparentclustering_landau_mean;
-    TH1F* histo_transparentclustering_eta;
-   	TH1F* histo_transparentclustering_hitdiff;
-   	TH2F* histo_transparentclustering_hitdiff_scatter;
-   	TH1F* histo_transparentclustering_2Channel_PulseHeight;
-   	TH1F* histo_transparentclustering_residuals[10];	// index: 0 distance to center of hit channel, 1 distance to charge weighted mean of closest two channels, 2 distance to charge weighted mean of closest three channels, ..
-   	TH2F* histo_transparentclustering_residuals_scatter[10];	// index: 0 distance to center of hit channel, 1 distance to charge weighted mean of closest two channels, 2 distance to charge weighted mean of closest three channels, ..
-   	TH1F* histo_transparentclustering_residuals_largest_hit[10];
-   	TH2F* histo_transparentclustering_residuals_largest_hit_scatter[10];
-   	TH1F* histo_transparentclustering_residuals_2largest_hits;
-   	TH2F* histo_transparentclustering_residuals_2largest_hits_scatter;
-   	TH1F* histo_transparentclustering_SNR_vs_channel;
-   	TH1F* histo_transparentclustering_chi2X;
-   	TH1F* histo_transparentclustering_chi2Y;
+//	TH1F* histo_transparentclustering_landau[10];
+//    TH1F* histo_transparentclustering_landau_mean;
+//    TH1F* histo_transparentclustering_eta;
+//   	TH1F* histo_transparentclustering_hitdiff;
+//   	TH2F* histo_transparentclustering_hitdiff_scatter;
+//   	TH1F* histo_transparentclustering_2Channel_PulseHeight;
+//   	TH1F* histo_transparentclustering_residuals[10];	// index: 0 distance to center of hit channel, 1 distance to charge weighted mean of closest two channels, 2 distance to charge weighted mean of closest three channels, ..
+//   	TH2F* histo_transparentclustering_residuals_scatter[10];	// index: 0 distance to center of hit channel, 1 distance to charge weighted mean of closest two channels, 2 distance to charge weighted mean of closest three channels, ..
+//   	TH1F* histo_transparentclustering_residuals_largest_hit[10];
+//   	TH2F* histo_transparentclustering_residuals_largest_hit_scatter[10];
+//   	TH1F* histo_transparentclustering_residuals_2largest_hits;
+//   	TH2F* histo_transparentclustering_residuals_2largest_hits_scatter;
+//   	TH1F* histo_transparentclustering_SNR_vs_channel;
+//   	TH1F* histo_transparentclustering_chi2X;
+//   	TH1F* histo_transparentclustering_chi2Y;
 	
-	
+	// results
+	vector<Float_t> vecMPLandau;
+	vector<Float_t> vecMPLandau2Highest;
 	
 
 };
