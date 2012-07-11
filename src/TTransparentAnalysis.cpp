@@ -76,16 +76,23 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	deleteHistograms();
 	
 	// TODO: replace this!
-	vector<pair <UInt_t,Float_t> > meanPulseHeights;
-	for (UInt_t clusterSize; clusterSize < 10; clusterSize++) {
-		pair <UInt_t,Float_t> meanPulseHeight;
-		meanPulseHeight.first = clusterSize+1;
-		meanPulseHeight.second = 100.*clusterSize;
-		meanPulseHeights.push_back(meanPulseHeight);
+	vector<vector <double> > meanPulseHeights;
+	vector<vector <pair <Float_t,Float_t> > > resolutions;
+	meanPulseHeights.resize(2);
+	resolutions.resize(2);
+	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		meanPulseHeights.at(0).push_back(100.*clusterSize);
+		meanPulseHeights.at(1).push_back(200.*clusterSize);
+		pair <Float_t,Float_t> resolution;
+		resolution.first = 0.;
+		resolution.second = 50. * 0.1381;
+		resolutions.at(0).push_back(resolution);
+		resolutions.at(1).push_back(resolution);
 	}
 	
 	
 	htmlTransAna->createPulseHeightPlots(meanPulseHeights);
+	htmlTransAna->createResolutionPlots(resolutions);
 	htmlTransAna->generateHTMLFile();
 	if(eventReader!=0)delete eventReader;
 	if(histSaver!=0)delete histSaver;
