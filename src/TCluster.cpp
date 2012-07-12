@@ -256,22 +256,22 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries,bool useSmallSignals){
 	for(UInt_t nCl=1;nCl<nClusterEntries&&nCl<this->checkClusterForSize();nCl++){
 		if(b2ndHighestStripIsBigger){
 			if(nCl%2==1){
-				if (useSmallSignals||isHit(getHighestSignalChannel()+(nCl/2)+1))
+				if (useSmallSignals||isHit(getClusterPosition(getHighestSignalChannel()+(nCl/2)+1)))
 					clusterCharge=clusterCharge + this->getSignalOfChannel(getHighestSignalChannel()+(nCl/2)+1);
 			}
 			else{
-				if (useSmallSignals||isHit(getHighestSignalChannel()+(nCl/2)-1))
+				if (useSmallSignals||isHit(getClusterPosition(getHighestSignalChannel()-(nCl/2))))
 					clusterCharge=clusterCharge + this->getSignalOfChannel(getHighestSignalChannel()-(nCl/2));
 			}
 		}
 		else{
 			if(nCl%2==1){
 
-				if (useSmallSignals||isHit(getHighestSignalChannel()+(nCl/2)+1))
+				if (useSmallSignals||isHit(getClusterPosition(getHighestSignalChannel()-(nCl/2)-1)))
 					clusterCharge+=this->getSignalOfChannel(getHighestSignalChannel()-(nCl/2)-1);
 			}
 			else{
-				if (useSmallSignals||isHit(getHighestSignalChannel()+(nCl/2)+1))
+				if (useSmallSignals||isHit(getClusterPosition(getHighestSignalChannel()+(nCl/2))))
 					clusterCharge+=this->getSignalOfChannel(getHighestSignalChannel()+(nCl/2));
 			}
 		}
