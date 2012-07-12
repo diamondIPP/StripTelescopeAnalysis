@@ -26,10 +26,10 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	createdNewFile=false;
 	selectionTree=NULL;
 	selectionFile=NULL;
-
-	rawfilepath<<"rawData."<<settings->getRunNumber()<<".root";
-	pedestalfilepath.str("");
-	pedestalfilepath<<"pedestalData."<<settings->getRunNumber()<<".root";
+//
+//	rawfilepath<<"rawData."<<settings->getRunNumber()<<".root";
+//	pedestalfilepath.str("");
+//	pedestalfilepath<<"pedestalData."<<settings->getRunNumber()<<".root";
 	clusterfilepath<<sys->pwd()<<"/clusterData."<<settings->getRunNumber()<<".root";
 	cout<<"currentPath: "<<sys->pwd()<<endl;
 	cout<<"\""<<clusterfilepath.str()<<"\""<<endl;
@@ -534,9 +534,80 @@ void TSelectionClass::saveHistos()
 	lYlower->Draw();
 	lYhigher->Draw();
 	histSaver->SaveCanvas(c2);
+	findFiducialCut(hFiducialCutSiliconDiamondHit);
+	cout<<"Saved"<<endl;
 //	histSaver->SaveHistogram(hFiducialCutSilicon);
 	delete hFiducialCutSilicon;
 	delete hFiducialCutSiliconDiamondHit;
 }
 
+void TSelectionClass::findFiducialCut(TH2F* hFidCut){
+  TH1D* hProjX = hFiducialCutSiliconDiamondHit->ProjectionX("hFiducialCutOneDiamondHitProjX");
+  hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
+  hProjX->GetYaxis()->SetTitle("Number Of Entries #");
+  TH1D* hProjY = hFiducialCutSiliconDiamondHit->ProjectionY("hFiducialCutOneDiamondHitProjY");
+  hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
+  hProjY->GetYaxis()->SetTitle("Number Of Entries #");
 
+  hProjX->SetName("hProjX");
+  hProjY->SetName("hProjY");
+  if(hProjX==0||hProjY==0)
+    return;
+  if(hProjX->IsZombie()||hProjY->IsZombie())
+    return;
+   findFiducialCutIntervall( hProjX);
+  cout<<"HERE"<<endl;
+//  TLegend *leg = new TLegend();
+
+  histSaver->SaveHistogram(hProjX);
+  cout<<"%"<<endl;
+  histSaver->SaveHistogram(hProjY);
+  cout<<"SAVED"<<endl;
+}
+
+std::vector< Float_t > TSelectionClass::findFiducialCutIntervall(TH1D* hProj){
+
+  Float_t mean = hProj->Integral()/hProj->GetNbinsX();
+  Int_t n=0;
+  Int_t n2=0;
+  int nbins = hProj->GetNbinsX();
+  Float_t value = mean*settings->getAutoFidCutPercentage();
+  cout<<value<<endl;
+  std::vector< Float_t > intervals;
+  while(n<nbins-1){
+    cout<<"Next Search"<<endl;
+    n=n2+1;
+    bool foundLeft=false;
+    bool foundRight=false;
+    while(n<nbins-1&&hProj->GetBinContent(n)<value){
+      cout<<n<<":"<<hProj->GetBinContent(n)<<" "<<flush;
+      n++;
+    }
+    cout<<"# "<<endl;
+    n2=n;
+    foundLeft = (hProj->GetBinContent(n)>value&&n<nbins);
+    if(foundLeft){
+      cout<<endl<<endl<<"foundLeft "<<n<<endl<<endl;
+      while(n2<nbins&&hProj->GetBinContent(n2)>value){
+        n2++;
+        cout<<n2<<":"<<hProj->GetBinContent(n2)<<" "<<flush;
+      }
+      cout<<"$ "<<endl;
+      foundRight=hProj->GetBinContent(n2)<value&&n2<nbins-1;
+      if(foundRight) cout<<endl<<endl<<"foundRight "<<n2<<endl<<endl;
+    }
+
+    if(foundLeft&&foundRight){
+      Float_t x1=hProj->GetBinLowEdge(n+1);
+      Float_t x2=hProj->GetBinLowEdge(n2-1);
+      if(x1<x2){
+        cout<<"Found first intervall: ["<<n<<","<<n2<<"]\t= ["<<x1<<","<<x2<<"]"<<endl;
+        intervals.push_back( x1);
+        intervals.push_back( x2);
+      }
+    }
+    n=n2;
+  }
+  cout<<"DONE"<<endl;
+  return intervals;
+}

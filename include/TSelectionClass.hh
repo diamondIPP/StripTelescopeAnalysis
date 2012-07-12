@@ -9,6 +9,7 @@
 #define TSELECTIONCLASS_HH_
 #include "TSystem.h"
 #include "TH1F.h"
+#include "TH1D.h"
 #include "TH2F.h"
 #include "TH1.h"
 #include "TF1.h"
@@ -57,6 +58,8 @@ private:
 	HistogrammSaver *histSaver;
 	UInt_t verbosity;
 private:
+	void findFiducialCut(TH2F* hFidCut);
+	std::vector<Float_t >findFiducialCutIntervall(TH1D* hProj);
 	THTMLSelection *htmlSelection;
 	UInt_t nEvent;
 	bool isDetMasked;//one of the Silicon Planes contains a Cluster with a masked channel

@@ -89,6 +89,7 @@ public:
 	std::vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
+	Float_t getAutoFidCutPercentage() const{return 0.4;};//todo in settingsfile adden
 	std::string getFileName() const;
 	bool getSingle_channel_analysis_enable();
 	Int_t getSingle_channel_analysis_eventwindow();
