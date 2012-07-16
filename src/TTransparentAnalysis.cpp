@@ -80,21 +80,23 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	vector<vector <Float_t> > mpPulseHeights;
 	vector<vector <pair <Float_t,Float_t> > > resolutions;
 //	meanPulseHeights.resize(2);
-	resolutions.resize(2);
+//	resolutions.resize(2);
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 //		meanPulseHeights.at(0).push_back(100.*clusterSize);
 //		meanPulseHeights.at(1).push_back(200.*clusterSize);
-		pair <Float_t,Float_t> resolution;
-		resolution.first = 0.;
-		resolution.second = 50. * 0.1381;
-		resolutions.at(0).push_back(resolution);
-		resolutions.at(1).push_back(resolution);
+//		pair <Float_t,Float_t> resolution;
+//		resolution.first = 0.;
+//		resolution.second = 50. * 0.1381;
+//		resolutions.at(0).push_back(resolution);
+//		resolutions.at(1).push_back(resolution);
 	}
 	
 	mpPulseHeights.push_back(vecMPLandau);
 	mpPulseHeights.push_back(vecMPLandau2Highest);
 	meanPulseHeights.push_back(vecMeanLandau);
 	meanPulseHeights.push_back(vecMeanLandau2Highest);
+	resolutions.push_back(vecResidualChargeWeighted);
+	resolutions.push_back(vecResidualHighest2Centroid);
 	
 	htmlTransAna->createPulseHeightPlots(meanPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
@@ -254,17 +256,11 @@ TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
 	TF1* histofitx = new TF1("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
 	histofitx->SetLineColor(kBlue);
 	histo->Fit(histofitx,"rq");
-//	histo->Draw();
-	
-//	TCanvas plots_canvas("plots_canvas","plots_canvas");
-//	plots_canvas.cd();
-//	histo->Draw();
-//	pt->Draw();
-//	ostringstream plot_filename;
-//	plot_filename << plots_path << histo->GetName() << ".png";
-//	plots_canvas.Print(plot_filename.str().c_str());
-//	if (histo!=0) delete histo;
 	return histofitx;
+}
+
+void TTransparentAnalysis::fitHistograms() {
+	
 }
 
 void TTransparentAnalysis::saveHistograms() {
@@ -278,6 +274,13 @@ void TTransparentAnalysis::saveHistograms() {
 		vecMPLandau2Highest.push_back(fitLandau2Highest->GetParameter(1));
 		vecMeanLandau.push_back(hLaundau[clusterSize]->GetMean());
 		vecMeanLandau2Highest.push_back(hLaundau2Highest[clusterSize]->GetMean());
+		pair <Float_t,Float_t> tempPair;
+		tempPair.first = fitResidualChargeWeighted->GetParameter(1);
+		tempPair.second = fitResidualChargeWeighted->GetParameter(2);
+		vecResidualChargeWeighted.push_back(tempPair);
+		tempPair.first = fitResidualHighest2Centroid->GetParameter(1);
+		tempPair.second = fitResidualHighest2Centroid->GetParameter(2);
+		vecResidualHighest2Centroid.push_back(tempPair);
 		histSaver->SaveHistogramWithFit(hLaundau[clusterSize],fitLandau);
 		histSaver->SaveHistogramWithFit(hLaundau2Highest[clusterSize],fitLandau2Highest);
 		histSaver->SaveHistogram(hEta[clusterSize],0);

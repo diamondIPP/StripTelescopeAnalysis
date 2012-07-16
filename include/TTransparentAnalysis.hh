@@ -64,6 +64,7 @@ private:
 	void initHistograms();
 	void fillHistograms();
 	TF1* doGaussFit(TH1F *histo);
+	void fitHistograms();
 	void saveHistograms();
 	void deleteHistograms();
 	void printCutFlow();
@@ -137,6 +138,8 @@ private:
 	vector<Float_t> vecMPLandau2Highest;
 	vector<Float_t> vecMeanLandau;
 	vector<Float_t> vecMeanLandau2Highest;
+	vector< pair <Float_t,Float_t> > vecResidualChargeWeighted;
+	vector< pair <Float_t,Float_t> > vecResidualHighest2Centroid;
 	
 
 };

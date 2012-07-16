@@ -63,7 +63,7 @@ void TAnalysisOfClustering::setSettings(TSettings* settings){
 
 void TAnalysisOfClustering::doAnalysis(int nEvents)
 {
-	cout<<"analyis clusterin results..."<<endl;
+	cout<<"analyze clustering results..."<<endl;
 //	eventReader->checkADC();
 	if(nEvents==0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
