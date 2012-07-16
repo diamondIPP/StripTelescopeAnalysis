@@ -13,7 +13,8 @@ TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt,s
   nFidCuts=xInt.size()*yInt.size();
   this->xInt=xInt;
   this->yInt=yInt;
-  cout<< "create Fid Cut Regions for a RUN with "<<nDiamonds<<" Diamonds. There are "<<nFidCuts<<" Fiducial Cut Areas";
+
+  cout<< "create Fid Cut Regions for a RUN with "<<nDiamonds<<" Diamonds. There are "<<nFidCuts<<" Fiducial Cut Areas"<<endl;
   createFidCuts();
 }
 
@@ -41,9 +42,11 @@ void TFidCutRegions::Print(int intend)
 
 
 void TFidCutRegions::createFidCuts(){
-  if(nDiamonds==nFidCuts){
-    cout<<"\ncreate FidCuts"<<endl;
-    for(UInt_t iY=0;iY<yInt.size();iY++)
+  if(nDiamonds!=nFidCuts){
+    cout<<"Fid Cut does not match with nDIamonds"<<endl;
+  }
+  cout<<"\ncreate FidCuts"<<endl;
+  for(UInt_t iY=0;iY<yInt.size();iY++)
     for(UInt_t iX=0;iX<xInt.size();iX++){
       cout<<"iX="<<iX<<"\t"<<"iY"<<iY<<" - "<<flush;
       int i = iY*xInt.size()+iX;
@@ -56,21 +59,25 @@ void TFidCutRegions::createFidCuts(){
       fidCut->Print();
       this->fidCuts.push_back(fidCut);
     }
-  }
 }
 
 TFiducialCut* TFidCutRegions::getFidCut(std::string describtion){
   if(fidCuts.size()==0){
     cout<<"fidCuts not yet defined..."<<endl;
-  }
-  if(describtion.at(0)=='0'){
     return 0;
   }
+  if(describtion.at(0)=='0'){
+    cout<<"return empty "<<endl;
+    return fidCuts.at(0);
+  }
   else if(describtion.find("left")!=string::npos||describtion.at(0)=='1'){
+      cout<<"FidCut return at 0"<<endl;
       return fidCuts.at(0);
   }
   else if(describtion.find("right")!=string::npos||describtion.at(0)=='0'){
+    if(fidCuts.size()>1)
     return fidCuts.at(1);
+    else return fidCuts.at(0);
   }
   return 0;
 
