@@ -89,6 +89,7 @@ private:
 	UInt_t nValidSiliconTrack;
 	UInt_t nSiliconTrackNotFiducialCut;
 	UInt_t nEvents;
+	TH1F * hAnalysisFraction;
 
 private:
 	TH2F *hFiducialCutSilicon;

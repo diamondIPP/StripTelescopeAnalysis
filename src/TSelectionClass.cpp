@@ -120,6 +120,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	  createFiducialCut();
 	hFiducialCutSilicon->Reset();
 	hFiducialCutSiliconDiamondHit->Reset();
+	hAnalysisFraction->Reset();
 	nUseForAlignment=0;
 	nUseForAnalysis=0;
 	nUseForSiliconAlignment=0;
@@ -327,6 +328,8 @@ void TSelectionClass::setVariables(){
 		nNoValidSiliconTrack++;
 	else
 		nValidSiliconTrack++;
+	if(useForAnalysis||useForAlignment)
+	  hAnalysisFraction->Fill(nEvent);
 	//else cout<<nEvent<<"\tuseNOTforAlignemnt..."<<endl;
 //		UInt_t nDiamondHits; //number of  in diamond plane;
 //		bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
@@ -386,13 +389,22 @@ void TSelectionClass::initialiseHistos()
 	std::string name = "hFidCutSilicon_OneAndOnlyOneCluster";
 	hFiducialCutSilicon = new TH2F(name.c_str(),name.c_str(),512,0,256,512,0,256);
 	hFiducialCutSilicon->GetYaxis()->SetTitle("yCoordinate in Channels");
-	hFiducialCutSilicon->GetYaxis()->SetTitle("xCoordinate in Channels");
+	hFiducialCutSilicon->GetXaxis()->SetTitle("xCoordinate in Channels");
 
 	std::string name2 = "hFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster";
 	hFiducialCutSiliconDiamondHit = new TH2F(name2.c_str(),name2.c_str(),512,0,256,512,0,256);
 
 	hFiducialCutSiliconDiamondHit->GetYaxis()->SetTitle("yCoordinate in Channels");
-	hFiducialCutSiliconDiamondHit->GetYaxis()->SetTitle("xCoordinate in Channels");
+	hFiducialCutSiliconDiamondHit->GetXaxis()->SetTitle("xCoordinate in Channels");
+	int nEvents= eventReader->GetEntries();
+
+	int i=nEvents/1000;
+	i++;
+	nEvents = (i)*1000;
+	hAnalysisFraction = new TH1F("hAnalysisFraction","hAnalysisFraction",i,0,nEvents);
+	hAnalysisFraction->SetTitle("Fraction of Events for Analysis");
+	hAnalysisFraction->GetXaxis()->SetTitle("event no");
+	hAnalysisFraction->GetYaxis()->SetTitle("fraction of daimond + silicon hit events (%)");
 }
 
 
@@ -542,6 +554,11 @@ void TSelectionClass::saveHistos()
 //	histSaver->SaveHistogram(hFiducialCutSilicon);
 	delete hFiducialCutSilicon;
 	delete hFiducialCutSiliconDiamondHit;
+	hAnalysisFraction->Scale(.1);
+	hAnalysisFraction->SetStats(false);
+	hAnalysisFraction->GetYaxis()->SetRangeUser(0,100);
+	histSaver->SaveHistogram(hAnalysisFraction);
+	delete hAnalysisFraction;
 }
 
 void TSelectionClass::findFiducialCut(TH2F* hFidCut){

@@ -35,7 +35,7 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<"To find good values for the fiducial cut. The mean position of all silicon planes is calculated\n ";
 	sectionContent<<"and plotted in the next plot. To be able to calculate this mean position one and only one Cluster\n";
 	sectionContent<<"in each detector is required.<br>\n";
-	sectionContent<<putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster","png",50);
+	sectionContent<<(putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster","png",49));
 	sectionContent<<"</p>\n";
 	sectionContent<<"<br>\n";
 	sectionContent<<"<h3>Fiducial Cut - valid Silicon Track && one Diamond Cluster</h3>\n";
@@ -43,7 +43,10 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<"The next plot shows the mean position of the clusters in each silicon plane with one and only one\n";
 	sectionContent<<"cluster in the diamond detector. With this condition you can see the needed fiducial cuts to calculate\n";
 	sectionContent<<"efficency in the diamond detector.<br>\n";
-	sectionContent<<putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster","png",50);
+	sectionContent<<(putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster","png",50))<<"<br>\n";
+
+	sectionContent<<putImage(this->path,"chProjX","png",49)<<" \n";
+	sectionContent<<putImage(this->path,"chProjY","png",49)<<" \n";
 	sectionContent<<"</p>\n";
 	this->addSection("Fiducial Cut",sectionContent.str());
 }
@@ -75,8 +78,11 @@ void THTMLSelection::createCutFlowGraph(std::string content)
 	sectionContent<<"the point notExactlyOneDiamondCluster from the chart above is divided into moreThanOneDiamondCluster and noDiamondCluster<br>\n";
 	sectionContent<<"with that pie chart you can see the efficency of the diamond <br>\n";
 	sectionContent<<putImage(this->path,"cPieValidSiliconTrack","png",50);
-	sectionContent<<"</p>\n";
-	this->addSection("CutFlow",sectionContent.str());
+	sectionContent<<"<br>\n";
+
+	sectionContent<<putImage(this->path,"hAnalysisFraction","png",70);
+  sectionContent<<"<br></p>";
+this->addSection("CutFlow",sectionContent.str());
 
 }
 
