@@ -17,8 +17,8 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	sys = gSystem;
 	setSettings(settings);
 	UInt_t runNumber =settings->getRunNumber();
-  sys->MakeDirectory(settings->getRelativePath().c_str());;
-  sys->cd(settings->getRelativePath().c_str());
+	sys->MakeDirectory(settings->getRelativePath().c_str());;
+	sys->cd(settings->getRelativePath().c_str());
 	stringstream  filepath, alignmentFileName;
 	filepath.str("");
 	alignmentFileName.str("");
@@ -76,14 +76,14 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	deleteHistograms();
 	
 	// TODO: replace this!
-	vector<vector <double> > meanPulseHeights;
+	vector<vector <Float_t> > meanPulseHeights;
 	vector<vector <Float_t> > mpPulseHeights;
 	vector<vector <pair <Float_t,Float_t> > > resolutions;
-	meanPulseHeights.resize(2);
+//	meanPulseHeights.resize(2);
 	resolutions.resize(2);
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-		meanPulseHeights.at(0).push_back(100.*clusterSize);
-		meanPulseHeights.at(1).push_back(200.*clusterSize);
+//		meanPulseHeights.at(0).push_back(100.*clusterSize);
+//		meanPulseHeights.at(1).push_back(200.*clusterSize);
 		pair <Float_t,Float_t> resolution;
 		resolution.first = 0.;
 		resolution.second = 50. * 0.1381;
@@ -93,8 +93,10 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	
 	mpPulseHeights.push_back(vecMPLandau);
 	mpPulseHeights.push_back(vecMPLandau2Highest);
+	meanPulseHeights.push_back(vecMeanLandau);
+	meanPulseHeights.push_back(vecMeanLandau2Highest);
 	
-	htmlTransAna->createPulseHeightPlots(mpPulseHeights);
+	htmlTransAna->createPulseHeightPlots(meanPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
 	htmlTransAna->generateHTMLFile();
 	if(eventReader!=0)delete eventReader;
@@ -198,7 +200,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
 	if (centerPosition-(int)centerPosition<0.5) {
 		direction = -1;
 	}
-	TCluster transparentCluster = TCluster(tracking->getEvent_number(), det, 0, 0, TPlaneProperties::getNChannels(det));
+	TCluster transparentCluster = TCluster(tracking->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det));
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
@@ -236,34 +238,51 @@ void TTransparentAnalysis::fillHistograms() {
 		hLaundau[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge());
 		hLaundau2Highest[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge(2,false));
 		hEta[clusterSize]->Fill(this->transparentClusters[clusterSize].getEta());
+//		if (clusterSize == 1 /*&& this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printEvent(this->transparentClusters[clusterSize]);
+		if (clusterSize+1 != transparentClusters[clusterSize].getClusterSize()) {
+			cout << "wrong cluster size!" << endl;
+			cout << "clusterSize+1 = " << clusterSize+1 << "\ttransparentClusters[clusterSize].getClusterSize() = " << transparentClusters[clusterSize].getClusterSize() << endl;
+		}
 		hResidualChargeWeighted[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::chargeWeighted));
 		hResidualHighest2Centroid[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::highest2Centroid));
 	}
 }
 
-void TTransparentAnalysis::fitHistograms() {
-//	LandauGaussFit landauGauss;
-//	TF1 *fit=0;
-//	fit = landauGauss.doLandauGaussFit(hLaundau[3]);
-//	cout<<"Width(scale): "<<fit->GetParameter(0)<<endl;
-//	cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
-//	cout<<"Area:         "<<fit->GetParameter(2)<<endl;
-//	cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
-//	histSaver->SaveHistogramWithFit(hLaundau[3],fit);
+TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
+//	TH1* histo = (TH1*)htemp->Clone();
+	if (histo->GetEntries()==0) return 0;
+	TF1* histofitx = new TF1("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
+	histofitx->SetLineColor(kBlue);
+	histo->Fit(histofitx,"rq");
+//	histo->Draw();
+	
+//	TCanvas plots_canvas("plots_canvas","plots_canvas");
+//	plots_canvas.cd();
+//	histo->Draw();
+//	pt->Draw();
+//	ostringstream plot_filename;
+//	plot_filename << plots_path << histo->GetName() << ".png";
+//	plots_canvas.Print(plot_filename.str().c_str());
+//	if (histo!=0) delete histo;
+	return histofitx;
 }
 
 void TTransparentAnalysis::saveHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-		TF1 *fitLandau=0, *fitLandau2Highest=0;
+		TF1 *fitLandau=0, *fitLandau2Highest=0, *fitResidualChargeWeighted=0, *fitResidualHighest2Centroid=0;
 		fitLandau = landauGauss->doLandauGaussFit(hLaundau[clusterSize]);
 		fitLandau2Highest = landauGauss->doLandauGaussFit(hLaundau2Highest[clusterSize]);
+		fitResidualChargeWeighted = doGaussFit(hResidualChargeWeighted[clusterSize]);
+		fitResidualHighest2Centroid = doGaussFit(hResidualHighest2Centroid[clusterSize]);
 		vecMPLandau.push_back(fitLandau->GetParameter(1));
 		vecMPLandau2Highest.push_back(fitLandau2Highest->GetParameter(1));
+		vecMeanLandau.push_back(hLaundau[clusterSize]->GetMean());
+		vecMeanLandau2Highest.push_back(hLaundau2Highest[clusterSize]->GetMean());
 		histSaver->SaveHistogramWithFit(hLaundau[clusterSize],fitLandau);
 		histSaver->SaveHistogramWithFit(hLaundau2Highest[clusterSize],fitLandau2Highest);
 		histSaver->SaveHistogram(hEta[clusterSize],0);
-		histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize],1);
-		histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize],1);
+		histSaver->SaveHistogramWithFit(hResidualChargeWeighted[clusterSize],fitResidualChargeWeighted);
+		histSaver->SaveHistogramWithFit(hResidualHighest2Centroid[clusterSize],fitResidualHighest2Centroid);
 	}
 }
 
@@ -311,6 +330,27 @@ void TTransparentAnalysis::printEvent() {
 		cout << "\tcluster pos in lab system:\t" << tracking->getPositionOfCluster(subjectDetector, this->transparentClusters[clusterSize], this->predPerpPosition, this->clusterCalcMode) << endl;
 	}
 	return;
+}
+
+void TTransparentAnalysis::printEvent(TCluster cluster) {
+	cout << "\n--- event " << nEvent;
+	cout << "\n\tcluster size: " << cluster.getClusterSize();
+	cout << "\n\tcharge: " << cluster.getCharge(false);
+	cout << "\n\tcharge of 2 highest centroid: " << cluster.getCharge(2,false);
+	cout << "\n\thighest channel: " << cluster.getHighestSignalChannel();
+	cout << "\n\tcluster position of highest channel: " << cluster.getClusterPosition(cluster.getHighestSignalChannel());
+	cout << "\n\thighest channel is seed? " << cluster.isSeed(cluster.getClusterPosition(cluster.getHighestSignalChannel()));
+	cout << "\n\thighest channel is hit? " << cluster.isHit(cluster.getClusterPosition(cluster.getHighestSignalChannel()));
+	cout << "\n\tseed sigma: " << cluster.getSeedSigma();
+	cout << "\n\thit sigma: " << cluster.getHitSigma();
+	cout << "\n\tpredicted channel: " << positionInDetSystem;
+	cout << "\n\tpredicted position: " << predPosition;
+	cout << "\n\tcharge weighted position: " << tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::chargeWeighted);
+	cout << "\n\thighest 2 centroid position: " << tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::highest2Centroid);
+	cout << "\n\tcharge weighted residual: " << getResidual(cluster,TCluster::chargeWeighted);
+	cout << "\n\thighest 2 centroid residual: " << getResidual(cluster,TCluster::highest2Centroid);
+	cout << endl;
+	cluster.Print();
 }
 
 Float_t TTransparentAnalysis::getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode) {

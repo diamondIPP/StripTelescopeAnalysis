@@ -63,7 +63,7 @@ public:
 private:
 	void initHistograms();
 	void fillHistograms();
-	void fitHistograms();
+	TF1* doGaussFit(TH1F *histo);
 	void saveHistograms();
 	void deleteHistograms();
 	void printCutFlow();
@@ -72,6 +72,7 @@ private:
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	void printEvent();
+	void printEvent(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode);
 	
 	UInt_t subjectDetector, subjectPlane;
@@ -134,6 +135,8 @@ private:
 	// results
 	vector<Float_t> vecMPLandau;
 	vector<Float_t> vecMPLandau2Highest;
+	vector<Float_t> vecMeanLandau;
+	vector<Float_t> vecMeanLandau2Highest;
 	
 
 };
