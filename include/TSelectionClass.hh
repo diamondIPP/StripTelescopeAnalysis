@@ -14,11 +14,13 @@
 #include "TH1.h"
 #include "TF1.h"
 #include "TPie.h"
+#include "TBox.h"
 #include "THTMLSelection.hh"
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
 
+#include "TFidCutRegions.hh"
 #include "TADCEventReader.hh"
 #include "TCluster.hh"
 #include "TSettings.class.hh"
@@ -58,8 +60,11 @@ private:
 	HistogrammSaver *histSaver;
 	UInt_t verbosity;
 private:
+	void createFiducialCut();
 	void findFiducialCut(TH2F* hFidCut);
-	std::vector<Float_t >findFiducialCutIntervall(TH1D* hProj);
+	std::vector<std::pair <Float_t, Float_t> >findFiducialCutIntervall(TH1D* hProj);
+	void chooseFidCut(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt);
+	void DrawFiduciaCuts(TH1D* hProj,vector< pair<Float_t,Float_t> > intervals);
 	THTMLSelection *htmlSelection;
 	UInt_t nEvent;
 	bool isDetMasked;//one of the Silicon Planes contains a Cluster with a masked channel

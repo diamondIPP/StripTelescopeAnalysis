@@ -370,6 +370,10 @@ void TSettings::LoadSettings(){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			UseAutoFidCut = (bool)strtod(value.c_str(),0);
 		}
+		if(key == "nDiamonds"){
+		  cout << key <<" = "<<value.c_str()<<endl;
+		  this->setNDiamonds((int)strtod(value.c_str(),0));
+		}
 		if (key == "AlternativeClustering") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			AlternativeClustering = (bool)strtod(value.c_str(),0);
@@ -527,6 +531,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	snr_distribution_si_max = 2500;
 	snr_distribution_di_max = 2500;
 	UseAutoFidCut = 0;
+	nDiamonds=1;
 	AlternativeClustering = 0;
 
 	//Hi/low eta slices
@@ -1050,6 +1055,14 @@ void TSettings::setSi_Cluster_Seed_Factor(Float_t Si_Cluster_Seed_Factor)
 	this->Si_Cluster_Seed_Factor = Si_Cluster_Seed_Factor;
 }
 
+
+void TSettings::setFidCut(TFiducialCut *fidCut){
+  if(fidCut==0) return;
+  setSi_avg_fidcut_xhigh(fidCut->GetXHigh());
+  setSi_avg_fidcut_yhigh(fidCut->GetYHigh());
+  setSi_avg_fidcut_xlow(fidCut->GetXLow());
+  setSi_avg_fidcut_ylow(fidCut->GetYLow());
+}
 void TSettings::setSi_avg_fidcut_xhigh(Float_t si_avg_fidcut_xhigh)
 {
 	this->si_avg_fidcut_xhigh = si_avg_fidcut_xhigh;
@@ -1334,6 +1347,10 @@ void TSettings::setAlternativeClustering(bool AlternativeClustering)
 void TSettings::setUseAutoFidCut(bool UseAutoFidCut)
 {
     this->UseAutoFidCut = UseAutoFidCut;
+}
+
+void TSettings::setNDiamonds(UInt_t nDia){
+  this->nDiamonds=nDia;
 }
 
 string TSettings::getFileName() const

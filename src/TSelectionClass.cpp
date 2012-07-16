@@ -116,6 +116,10 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
 	this->setBranchAdressess();
+	if(settings->getUseAutoFidCut())
+	  createFiducialCut();
+	hFiducialCutSilicon->Reset();
+	hFiducialCutSiliconDiamondHit->Reset();
 	nUseForAlignment=0;
 	nUseForAnalysis=0;
 	nUseForSiliconAlignment=0;
@@ -534,8 +538,7 @@ void TSelectionClass::saveHistos()
 	lYlower->Draw();
 	lYhigher->Draw();
 	histSaver->SaveCanvas(c2);
-	findFiducialCut(hFiducialCutSiliconDiamondHit);
-	cout<<"Saved"<<endl;
+
 //	histSaver->SaveHistogram(hFiducialCutSilicon);
 	delete hFiducialCutSilicon;
 	delete hFiducialCutSiliconDiamondHit;
@@ -555,59 +558,109 @@ void TSelectionClass::findFiducialCut(TH2F* hFidCut){
     return;
   if(hProjX->IsZombie()||hProjY->IsZombie())
     return;
-   findFiducialCutIntervall( hProjX);
-  cout<<"HERE"<<endl;
+
+
+  vector<pair <Float_t, Float_t> >xIntervals = findFiducialCutIntervall( hProjX);
+  vector<pair <Float_t, Float_t> >yIntervals = findFiducialCutIntervall( hProjY);
+  chooseFidCut(xIntervals,yIntervals);
+//  cout<<"HERE"<<endl;
 //  TLegend *leg = new TLegend();
 
   histSaver->SaveHistogram(hProjX);
   cout<<"%"<<endl;
   histSaver->SaveHistogram(hProjY);
-  cout<<"SAVED"<<endl;
+//  cout<<"SAVED"<<endl;
 }
 
-std::vector< Float_t > TSelectionClass::findFiducialCutIntervall(TH1D* hProj){
 
+void TSelectionClass::createFiducialCut(){
+  cout<<"Create AutoFidCut"<<endl;
+  UInt_t nEvents = settings->getAutoFidCutEvents();
+  if(nEvents>eventReader->GetEntries())nEvents=eventReader->GetEntries();
+  for(nEvent=0;nEvent<nEvents;nEvent++){
+      TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
+      eventReader->LoadEvent(nEvent);
+      if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
+      resetVariables();
+      if(verbosity>10)cout<<"."<<flush;
+      setVariables();
+  }
+  findFiducialCut(hFiducialCutSiliconDiamondHit);
+}
+
+std::vector< std::pair< Float_t,Float_t> > TSelectionClass::findFiducialCutIntervall(TH1D* hProj){
+  int minWidth = 20;//channels
   Float_t mean = hProj->Integral()/hProj->GetNbinsX();
-  Int_t n=0;
-  Int_t n2=0;
+  Int_t nLow=0;
+  Int_t nHigh=0;
   int nbins = hProj->GetNbinsX();
   Float_t value = mean*settings->getAutoFidCutPercentage();
   cout<<value<<endl;
-  std::vector< Float_t > intervals;
-  while(n<nbins-1){
-    cout<<"Next Search"<<endl;
-    n=n2+1;
+  std::vector< std::pair<Float_t,Float_t> > intervals;
+  while(nLow<nbins-1){
+    nLow=nHigh+1;
     bool foundLeft=false;
     bool foundRight=false;
-    while(n<nbins-1&&hProj->GetBinContent(n)<value){
-      cout<<n<<":"<<hProj->GetBinContent(n)<<" "<<flush;
-      n++;
+    while(nLow<nbins-1&&hProj->GetBinContent(nLow)<value){
+      nLow++;
     }
-    cout<<"# "<<endl;
-    n2=n;
-    foundLeft = (hProj->GetBinContent(n)>value&&n<nbins);
+    nHigh=nLow;
+    foundLeft = (hProj->GetBinContent(nLow)>value&&nLow<nbins);
     if(foundLeft){
-      cout<<endl<<endl<<"foundLeft "<<n<<endl<<endl;
-      while(n2<nbins&&hProj->GetBinContent(n2)>value){
-        n2++;
-        cout<<n2<<":"<<hProj->GetBinContent(n2)<<" "<<flush;
+      while(nHigh<nbins&&hProj->GetBinContent(nHigh)>value){
+        nHigh++;
       }
-      cout<<"$ "<<endl;
-      foundRight=hProj->GetBinContent(n2)<value&&n2<nbins-1;
-      if(foundRight) cout<<endl<<endl<<"foundRight "<<n2<<endl<<endl;
+      foundRight=hProj->GetBinContent(nHigh)<value&&nHigh<nbins-1;
     }
 
     if(foundLeft&&foundRight){
-      Float_t x1=hProj->GetBinLowEdge(n+1);
-      Float_t x2=hProj->GetBinLowEdge(n2-1);
-      if(x1<x2){
-        cout<<"Found first intervall: ["<<n<<","<<n2<<"]\t= ["<<x1<<","<<x2<<"]"<<endl;
-        intervals.push_back( x1);
-        intervals.push_back( x2);
+      Float_t x1=hProj->GetBinLowEdge(nLow+1)+1;
+      Float_t x2=hProj->GetBinLowEdge(nHigh-1)-1;
+      if(x1<x2&&nHigh-nLow>minWidth){
+        cout<<"Found first intervall: ["<<nLow<<","<<nHigh<<"]\t= ["<<x1<<","<<x2<<"]"<<endl;
+        intervals.push_back( std::make_pair(x1,x2));
       }
     }
-    n=n2;
+    nLow=nHigh;
   }
-  cout<<"DONE"<<endl;
+  DrawFiduciaCuts(hProj,intervals);
+//  cout<<"DONE"<<endl;
   return intervals;
+}
+void TSelectionClass::chooseFidCut(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt){
+  cout<<"Found "<<xInt.size()<<" Intervals in x direction."<<endl;
+  cout<<"Found "<<yInt.size()<<" Intervals in y direction."<<endl;
+  cout<<"The RunDescription is \""<<settings->getRunDescription()<<"\""<<endl;
+  cout<<"Finding Areas for "<<settings->getNDiamonds()<<" Diamonds"<<endl;
+  TFidCutRegions fiducialCuts(xInt,yInt,settings->getNDiamonds());
+  TFiducialCut *fidCut = fiducialCuts.getFidCut(settings->getRunDescription());
+  fidCut->Print();
+  cout<<"old Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
+  settings->setFidCut(fidCut);
+  cout<<"new Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
+}
+
+void TSelectionClass::DrawFiduciaCuts(TH1D* hProj,vector< pair<Float_t,Float_t> > intervals){
+  if(hProj==0)
+    return;
+  if(hProj->IsZombie())
+    return;
+  stringstream canvasName;
+  canvasName<<"c"<<hProj->GetName();
+  TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
+  c1->cd();
+  hProj->Draw();
+  vector<TBox* > boxes;
+  for(UInt_t i=0;i<intervals.size();i++){
+    TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
+    box->SetFillColor(kRed+i);
+    box->SetFillStyle(3013);
+    box->AddText("");
+    box->AddText("");
+    box->AddText(Form("Area\n\n%i",i));
+    boxes.push_back(box);
+    box->Draw("same");
+  }
+  histSaver->SaveCanvas(c1);
+
 }

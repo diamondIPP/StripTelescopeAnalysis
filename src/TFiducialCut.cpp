@@ -4,13 +4,21 @@
  *  Created on: 30.07.2011
  *      Author: Felix Bachmair
  */
-#include "FidCutRegion.hh"
+#include "TFiducialCut.hh"
 
-FidCutRegion::FidCutRegion(int i) {
+
+TFiducialCut::TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh){
+  index=i;
+  SetXLow(xLow);
+  SetXHigh(xHigh);
+  SetYLow(yLow);
+  SetYHigh(yHigh);
+}
+TFiducialCut::TFiducialCut(int i) {
 	index = i;
 }
 
-void FidCutRegion::SetAllValuesZero() {
+void TFiducialCut::SetAllValuesZero() {
 	active = 0;
 	x_low = 0;
 	x_high = 0;
@@ -18,6 +26,6 @@ void FidCutRegion::SetAllValuesZero() {
 	y_high = 0;
 }
 
-void FidCutRegion::GetAllValues () {
+void TFiducialCut::Print () {
 	std::cout << "FidCutRegion #:\t" << index << "\t XLow:\t" << x_low << "\t XHigh:\t" << x_high << "\t YLow:\t" << y_low << "\t YHigh:\t" << y_high << "\n"<<std::flush;
 }

@@ -24,6 +24,7 @@
 //#include "TSettings.class.hh"
 #include "TSystem.h"
 #include "TFile.h"
+#include "TFiducialCut.hh"
 #include <string>
 
 class TSettings:public TObject {
@@ -34,7 +35,7 @@ public:
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	std::string getRelativePath();
 	virtual ~TSettings();
-
+	void setFidCut(TFiducialCut* fidcut);
 	void saveSettings();
 	void loadSettingsFromRootFile();
 	void compareSettings();
@@ -90,6 +91,8 @@ public:
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
 	Float_t getAutoFidCutPercentage() const{return 0.4;};//todo in settingsfile adden
+	UInt_t getAutoFidCutEvents()const {return 10000;};
+	UInt_t getNDiamonds()const{return nDiamonds;};
 	std::string getFileName() const;
 	bool getSingle_channel_analysis_enable();
 	Int_t getSingle_channel_analysis_eventwindow();
@@ -144,6 +147,7 @@ public:
 	void setCMN_corr_low(Int_t CMN_corr_low);
 	void setCMN_corr_high(Int_t CMN_corr_high);
 	void setStore_threshold(float storeThreshold);
+	void setNDiamonds(UInt_t nDia);
     Int_t getPlotChannelOn() const;
     void setPlotChannelOn(Int_t plotChannelOn);
     Int_t getMakeBufferPlots() const;
@@ -202,6 +206,7 @@ private:
     TSystem *sys;
     TFile *settingsFile;
 private:
+    Int_t nDiamonds;
     Int_t SaveAllFilesSwitch;
     Int_t ClosePlotsOnSave;
     Int_t IndexProduceSwitch;

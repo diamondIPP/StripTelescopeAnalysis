@@ -118,7 +118,7 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
 
 	//Initialize FidCutRegions
 	for(int i=0;i<4;i++) {
-		FCR[i] = new FidCutRegion(i);
+		FCR[i] = new TFiducialCut(i);
 		FCR[i]->SetAllValuesZero();
 	}
 
@@ -2965,12 +2965,12 @@ void Clustering::AutoFidCut() {
 
 	HistCleaner(1, histo_afc_scatter_firstfidcut);
 
-	FCR[0]->GetAllValues();
+	FCR[0]->Print();
 
 	FCR[3]->SetAllValuesZero();
 	FCR[3]->SetValueXLow(1);
 	FCR[3]->SetValueYHigh(2);
-	FCR[3]->GetAllValues();
+	FCR[3]->Print();
 
 	histSaver->SaveHistogramPDF(histo_afc_x);
 	histSaver->SaveHistogramPDF(histo_afc_y);
@@ -3015,7 +3015,7 @@ void Clustering::Alignment(bool plots, bool CutFakeTracksOn){
 	}
 }
 
-void Clustering::SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions) {
+void Clustering::SetRunParameters(int reg, TFiducialCut current_region, bool MultiRegions) {
 	/**TODO: Felix:
 	 * 				Do not understand this routine. The settings are loaded from a file, why can you
 	 * 				change the settings?

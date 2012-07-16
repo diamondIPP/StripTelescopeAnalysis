@@ -66,7 +66,7 @@ class Clustering {
       void AutoFidCut();
 //	void LinTrackFit(std::vector<Float_t> x_positions, std::vector<Float_t> y_positions, std::vector<Float_t> &par);
 	void EventMonitor(int CurrentEvent = 0);
-	void SetRunParameters(int reg, FidCutRegion current_region, bool MultiRegions = false);
+	void SetRunParameters(int reg, TFiducialCut current_region, bool MultiRegions = false);
    public://See if needded
 	bool getUseAutoFidCut(){return settings->getUseAutoFidCut();};
 	void setAlternativeClustering(bool value){settings->setAlternativeClustering(value);}
@@ -165,7 +165,7 @@ class Clustering {
 
 	TH2F* histo_scatter_autofidcut;
 
-	  FidCutRegion* FCR[4];
+	  TFiducialCut* FCR[4];
 
       //added for handling of overall verbosity
       int verbosity;

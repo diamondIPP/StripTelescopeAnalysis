@@ -44,7 +44,8 @@ LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o  
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
-LIBFILES 		+=   TSettings.class.o  LandauGaussFit.o 
+LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 
+LIBFILES		+=	TFidCutRegions.o TFiducialCut.o
 LIBFILES		+=	libTEvent.so
 
 

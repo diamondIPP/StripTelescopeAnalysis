@@ -36,7 +36,7 @@
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TPaveText.h"
-#include "FidCutRegion.hh"
+//#include "FidCutRegion.hh"
 
 #include "TSettings.class.hh"
 #include "TDiamondTrack.hh"
