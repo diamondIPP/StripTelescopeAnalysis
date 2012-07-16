@@ -496,8 +496,10 @@ Float_t TCluster::getSignal(UInt_t clusterPos)
 {
 	if(clusterPos<checkClusterForSize()){
 		 Float_t signal = this->clusterSignal.at(clusterPos);
-		 if(signal<0)return 0;
-		 else return signal;
+//		 if(signal<0)
+//			 return 0;
+//		 else
+			 return signal;
 	}
 	else {
 		if(verbosity)cout<<"clusterPos "<<clusterPos<<" bigger than clusterSize"<<checkClusterForSize()<<endl;
@@ -522,9 +524,10 @@ Float_t TCluster::getSignalOfChannel(UInt_t channel)
 	for(clPos=0;clPos<checkClusterForSize()&&getChannel(clPos)!=channel;clPos++){};
 	if(clPos<getClusterSize()){//TODO
 		Float_t signal = getSignal(clPos);
-		if (signal>0)
+//		if (signal>0)
 		return signal;
 	}
+//	cout << "TCluster::getSignalOfChannel: clPos>=getClusterSize()\treturn 0" << endl;
 	return 0;
 }
 
