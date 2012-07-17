@@ -93,7 +93,7 @@ void TSettings::setRunDescription(std::string runDescription)
 
 std::string TSettings::getRelativeOuputPath(){
   stringstream output;
-  output<<this->getOutputDir()<<endl;
+  output<<this->getOutputDir();
   output<<"/"<<runNumber;
   if(runDescription.at(0)!='0'){
     output<<"-"<<runDescription;

@@ -25,7 +25,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 		rawfilepath.str("");
 		rawfilepath<<"rawData."<<runNumber<<".root";
 		cout<<"currentPath: "<<sys->pwd()<<endl;
-		cout<<rawfilepath.str()<<endl;
+		cout<<sys->pwd()<<"/"<<rawfilepath.str()<<endl;
 		eventReader=new TADCEventReader(rawfilepath.str(),runNumber);
 		cout<<eventReader->GetEntries()<<endl;
 		MAXSDETSIGMA=settings->getSi_Pedestal_Hit_Factor();
