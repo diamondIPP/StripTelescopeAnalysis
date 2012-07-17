@@ -12,18 +12,52 @@
 ClassImp(TSettings);
 using namespace std;
 
+
+
+TSettings::TSettings(TRunInfo *runInfo)
+{
+  cout<<"TSettings TRunInfo"<<endl;
+  verbosity=runInfo->getVerbosity();
+  diamondMapping=0;
+  DefaultLoadDefaultSettings();
+  this->runNumber=runInfo->getRunNumber();
+  sys = gSystem;
+  path ="";// sys->pwd();
+  runDescription=runInfo->getRunDescription();
+  stringstream fileNameStr;
+  fileNameStr<<path<<"/"<<runInfo->getRunSettingsDir()<<"/settings."<<runInfo->getRunNumber();
+  if (runInfo->getRunDescription().at(0)!='0')
+    fileNameStr<<"-"<<runInfo->getRunDescription();
+  fileNameStr<<".ini";
+  cout<<"get Settingsfile: fileName =\""<<fileNameStr.str()<<"\""<<endl;
+  struct stat sta;
+  int fileExist = stat(fileNameStr.str().c_str(),&sta);
+  cout<< "File Exists: "<<fileExist<<endl;
+  cout<<endl;
+  if(fileExist < 0){
+    cout<<"Settingsfile: "<<fileNameStr.str()<<" does not exists"<<endl;
+    char t;
+    cin >>t;
+    exit(-1);
+  }
+
+  if(verbosity)
+    cout<<"TSettings:Create TSettings-member with file:\""<<fileNameStr.str()<<"\""<<endl;
+  cout<<"go on press char:"<<flush;
+
+  SetFileName(fileNameStr.str());
+}
+
 TSettings::TSettings(UInt_t runNumber){
 	verbosity=1;
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
 	DefaultLoadDefaultSettings();
-//	diamondMapping.PrintMapping();
 	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
   sys = gSystem;
 	path = sys->pwd();
-//	createSettingsRootFile();
 	runDescription="";
 }
 

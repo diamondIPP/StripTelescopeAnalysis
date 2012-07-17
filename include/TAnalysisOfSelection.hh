@@ -49,6 +49,7 @@ private:
 	TSystem *sys;
 	UInt_t nEvent;
 	TH2F* histoLandauDistribution;
+	TH1F* hClusterPosition;
 	TH2F* hFidCut;
 	THTMLLandaus *htmlLandau;
 };

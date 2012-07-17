@@ -25,12 +25,15 @@
 #include "TSystem.h"
 #include "TFile.h"
 #include "TFiducialCut.hh"
+#include "TRunInfo.hh"
 #include <string>
+#include <sys/stat.h>
 
 class TSettings:public TObject {
 private:
   std::string runDescription;
 public:
+  TSettings(TRunInfo* runInfo);
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	std::string getRelativePath();

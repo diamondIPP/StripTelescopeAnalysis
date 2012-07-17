@@ -44,7 +44,6 @@ void printHelp( void )
 }
 bool checkDir(string dir){
   struct stat st;
-
   if(stat(dir.c_str(),&st) == 0){
           printf(" %s is present\n",dir.c_str());
           return true;
@@ -138,7 +137,6 @@ void process_mem_usage(double& vm_usage, double& resident_set)
 
 
 int main(int argc, char ** argv) {
-
   TStopwatch comulativeWatch;
   comulativeWatch.Start(true);
 	readInputs(argc,argv);
@@ -159,7 +157,6 @@ int main(int argc, char ** argv) {
 	/**Start with Analyising, read RunParameteres of the Run and start analysis with that parameters
 	*/
 	for (unsigned int i = 0; i < RunParameters.size(); i++) {
-
 	  TStopwatch runWatch;
 	  runWatch.Start(true);
 	  RunParameters[i].Print();
@@ -174,18 +171,20 @@ int main(int argc, char ** argv) {
 		
 		ostringstream logfilename;
 		logfilename << "analyse_log_" << RunParameters[i].getRunNumber() << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
-		
-		FILE *log;
-		log = freopen(logfilename.str().c_str(), "w", stdout);
-
-
+//
+//		FILE *log;
+//		log = freopen(logfilename.str().c_str(), "w", stdout);
 
 		stringstream settingsFileName;
 		settingsFileName<<runSettingsDir<<"settings."<<RunParameters[i].getRunNumber();
 		if(RunParameters[i].getRunDescription().at(0)!='0')
 		  settingsFileName<<"-"<<RunParameters[i].getRunDescription();
 		settingsFileName<<".ini";
-		TSettings *settings= new TSettings(settingsFileName.str(),RunParameters[i].getRunNumber());
+		TSettings *settings=0;
+		cout<<"settings"<<endl;
+		settings = new TSettings((TRunInfo*)&RunParameters[i]);
+		cout<<"check"<<endl;
+//		settings = new TSettings(settingsFileName.str(),RunParameters[i].getRunNumber());
 		settings->setRunDescription(RunParameters[i].getRunDescription());
 
     TResults *currentResults =new TResults(settings);
@@ -352,7 +351,8 @@ int ReadRunList() {
 		cout<<NEvents<<endl;
 		cout<<nStartEvent<<":"<<bPedestalAnalysis<<bClusterAnalysis<<bSelectionAnalysis<<bAlignment<<bAlignmentAnalysis<<endl;
 		run.setParameters(RunNumber,(string)RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis,bTransAna);
-//		cout<<"Got new Parameters: "<<RunNumber<<endl;
+		run.setRunSettingsDir(runSettingsDir);
+		//		cout<<"Got new Parameters: "<<RunNumber<<endl;
 		RunParameters.push_back(run);
 	}
 	return 1;

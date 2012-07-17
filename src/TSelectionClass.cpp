@@ -272,7 +272,7 @@ void TSelectionClass::setVariables(){
 	else
 		isInFiducialCut=false;
 	bool isSiliconTrackNotFiducialCut= !isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
-	bool isValidSiliconTrack = isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
+	isValidSiliconTrack = isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
 	isDiaSaturated=this->isSaturated(TPlaneProperties::getDetDiamond());
 	bool isValidDiamondEvent = nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond())&&!isDiaSaturated;
 	bool isDiaOneHitButToBigCluster = false;
@@ -375,7 +375,7 @@ void TSelectionClass::setBranchAdressess(){
 	selectionTree->Branch("nDiamondHits",&nDiamondHits,"nDiamondHits/i");
 	selectionTree->Branch("isInFiducialCut",&isInFiducialCut,"isInFiducialCut/O");
 	selectionTree->Branch("isDetMasked",&isDetMasked,"isDetMasked/O");
-	selectionTree->Branch("hasValidSiliconTrack",&hasValidSiliconTrack,"hasValidSiliconTrack/O");
+	selectionTree->Branch("hasValidSiliconTrack",&isValidSiliconTrack,"hasValidSiliconTrack/O");
 	selectionTree->Branch("isDiaMasked",&this->isDiaMasked,"isDiaMasked");
 	selectionTree->Branch("useForSiliconAlignment",&this->useForSiliconAlignment,"useForSiliconAlignment/O");
 	selectionTree->Branch("useForAlignment",&this->useForAlignment,"useForAlignment/O");

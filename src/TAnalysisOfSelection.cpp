@@ -71,6 +71,9 @@ void TAnalysisOfSelection::initialiseHistos()
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
+	hClusterPosition=new TH1F("hClusterPositionDia","hClusterPositionDia",128,0,127);
+	hClusterPosition->GetXaxis()->SetTitle("highes Cluster Channel Position");
+	hClusterPosition->GetYaxis()->SetTitle("number of Events #");
 }
 
 void TAnalysisOfSelection::saveHistos()
@@ -217,6 +220,9 @@ void TAnalysisOfSelection::saveHistos()
 	delete c1;
 
 	histSaver->SaveHistogram(hFidCut);
+	delete hFidCut;
+	histSaver->SaveHistogram(hClusterPosition);
+	delete hClusterPosition;
 }
 
 void TAnalysisOfSelection::analyseEvent()
@@ -232,10 +238,12 @@ void TAnalysisOfSelection::analyseEvent()
     fiducialValueX/=4.;
     fiducialValueY/=4.;
     hFidCut->Fill(fiducialValueX,fiducialValueY);
+    if(eventReader->getClusterSize(TPlaneProperties::getDetDiamond(),0)<=0)
+      return;
 		TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
 		Float_t charge = cluster.getCharge(false);
 		UInt_t clustSize = cluster.size();
-		if(clustSize>8)clustSize=8;
+		if(clustSize>8) clustSize=8;
 //		cout<<nEvent<<":\t"<<charge<<endl;
 		histoLandauDistribution->Fill(charge,clustSize);
 	}

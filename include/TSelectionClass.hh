@@ -75,6 +75,7 @@ private:
 	bool createdTree;
 	bool useForAlignment;
 	bool useForAnalysis;
+	bool isValidSiliconTrack;
 	bool useForSiliconAlignment;
 	Int_t nDiaClusterSize;
 	UInt_t nToBigDiamondCluster;

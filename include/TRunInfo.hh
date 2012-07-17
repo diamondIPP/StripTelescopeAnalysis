@@ -27,6 +27,7 @@ private:
   bool bAlignment;
   bool bAlignmentAnalysis;
   bool bTransparentAnalysis;
+  std::string runSettingsDir;
 public:
   void setParameters(UInt_t nRunNo,std::string sRunDes,UInt_t nVeb,UInt_t NEvents,UInt_t nStartEvent,bool bPedAna,bool bClusAna,bool bSelAna,bool bAlign,bool bAlignAna,bool bTransAna){
     setRunNumber(nRunNo);
@@ -41,6 +42,8 @@ public:
     setAlignmentAnalysis(bAlignAna);
     setTransparentAnalysis(bTransAna);
   }
+  void setRunSettingsDir(string settingsDir){runSettingsDir=settingsDir;};
+  std::string getRunSettingsDir(){return runSettingsDir;};
   void setTransparentAnalysis(bool bTransAna){bTransparentAnalysis=bTransAna;}
   void setRunDescription(std::string rundescribtion){RunDescription=rundescribtion;}
   void setAlignment(bool alignment){ bAlignment = alignment;}
