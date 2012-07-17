@@ -306,7 +306,7 @@ void TADCEventReader::SetBranchAddresses(){
 		if(verbosity)cout<<"Set Branch \"isDetMasked\""<<endl;
 		}
 	if(tree->FindBranch("hasValidSiliconTrack")){
-		tree->SetBranchAddress("hasValidSiliconTrack",&hasValidSiliconTrack);
+		tree->SetBranchAddress("hasValidSiliconTrack",&bValidSiliconTrack);
 		if(verbosity)cout<<"Set Branch \"hasValidSiliconTrack\""<<endl;
 		}
 	if(tree->FindBranch("nDiamondHits")){
@@ -587,7 +587,7 @@ UInt_t TADCEventReader::getNClusters(UInt_t det)
 
 bool TADCEventReader::isValidTrack()
 {
-	return this->hasValidSiliconTrack; // one & only one hit in silicone planes
+	return this->bValidSiliconTrack; // one & only one hit in silicone planes
 }
 
 UInt_t TADCEventReader::getNDiamondClusters()

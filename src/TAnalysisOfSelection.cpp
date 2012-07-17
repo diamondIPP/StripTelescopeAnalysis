@@ -68,6 +68,9 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution= new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
 	histoLandauDistribution->GetXaxis()->SetTitle("Charge in ADC counts");
 	histoLandauDistribution->GetYaxis()->SetTitle("ClusterSize");
+	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
+	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
+	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
 }
 
 void TAnalysisOfSelection::saveHistos()
@@ -212,11 +215,23 @@ void TAnalysisOfSelection::saveHistos()
 	delete histoLandauDistribution;
 	delete mg;
 	delete c1;
+
+	histSaver->SaveHistogram(hFidCut);
 }
 
 void TAnalysisOfSelection::analyseEvent()
 {
-	if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
+  Float_t fiducialValueX=0;
+  Float_t fiducialValueY=0;
+
+	if(eventReader->isValidTrack()){//eventReader->useForAnalysis()||eventReader->useForAlignment()){
+    for(UInt_t plane=0;plane<4;plane++){
+      fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
+      fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
+    }
+    fiducialValueX/=4.;
+    fiducialValueY/=4.;
+    hFidCut->Fill(fiducialValueX,fiducialValueY);
 		TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
 		Float_t charge = cluster.getCharge(false);
 		UInt_t clustSize = cluster.size();

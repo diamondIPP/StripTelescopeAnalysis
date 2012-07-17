@@ -98,7 +98,7 @@ private:
 	//TCluster::vecvecTCluster* pVecvecCluster;
 	TEvent *pEvent;
 	bool bIsDetMasked;
-	bool hasValidSiliconTrack;
+	bool bValidSiliconTrack;
 	UInt_t nDiamondClusters;
 	bool bIsInFiducialCut;
 	//vector<bool> maskedDiaClusters;
