@@ -54,6 +54,7 @@ TRawEventSaver::~TRawEventSaver() {
 
 
 void TRawEventSaver::saveEvents(int nEvents){
+  cout<<"TRawEventSaver::saveEvents"<<endl;
 	if(settings==0){
 		cerr<<"SETTINGS Not initialized...";
 		settings = new TSettings();

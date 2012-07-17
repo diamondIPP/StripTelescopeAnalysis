@@ -10,6 +10,10 @@
 #include <fstream>
 #include <iostream>
 #include "TROOT.h"
+
+#include <limits.h>
+#include <stdlib.h>
+#include <stdio.h>
 using namespace std;
 class TRunInfo {
 public:
@@ -48,7 +52,7 @@ public:
     setAlignmentAnalysis(bAlignAna);
     setTransparentAnalysis(bTransAna);
   }
-  void setRunSettingsDir(string settingsDir){runSettingsDir=settingsDir;};
+  void setRunSettingsDir(string settingsDir);
   std::string getRunSettingsDir(){return runSettingsDir;};
   void setTransparentAnalysis(bool bTransAna){bTransparentAnalysis=bTransAna;}
   void setRunDescription(std::string rundescribtion){RunDescription=rundescribtion;}

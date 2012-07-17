@@ -66,7 +66,7 @@ TAnalysisOfPedestal::~TAnalysisOfPedestal() {
 
 void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 {
-	cout<<"analyze pedestal data..."<<endl;
+	cout<<"TAnalysisOfPedestal::doAnalysis\nanalyze pedestal data..."<<endl;
 //	eventReader->checkADC();
 	if(nEvents<=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);

@@ -9,6 +9,7 @@
 
 
 TPedestalCalculation::TPedestalCalculation(TSettings *settings){
+  cout<<"pedestal Calculation"<<endl;
 	if(settings==0)exit(0);
 	this->settings=settings;
 		slidingLength=settings->getPedestalSildingLength();//1000;//settings->getSl
