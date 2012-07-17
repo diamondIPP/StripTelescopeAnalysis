@@ -28,8 +28,6 @@ HEAD    		:=
 
 
 
-
-
 LD              := g++
 
 LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
@@ -41,7 +39,7 @@ LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o TADCEventReader.
 LIBFILES		+=	TRawEventReader.o  TRawEventSaver.o TPedestalCalculation.o
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTracking.o 
 LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.o
-LIBFILES		+=  TSelectionClass.o TPositionPrediction.o  
+LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 

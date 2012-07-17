@@ -27,6 +27,7 @@
 #include "TTransparentAnalysis.hh"
 #include "TAnalysisOfAlignment.hh"
 #include "TResults.hh"
+#include "TRunInfo.hh"
 
 using namespace std;
 /*** USAGE ***/
@@ -42,6 +43,19 @@ void printHelp( void )
 
 }
 bool checkDir(string dir){
+  struct stat st;
+
+  if(stat(dir.c_str(),&st) == 0){
+          printf(" %s is present\n",dir.c_str());
+          return true;
+  }
+  cout<<dir << "seeems not to be present. What to do?Exit? [y/n]"<<endl;
+  char t;
+  cin >>t;
+  if (t=='y')
+    exit(-1);
+  else return false;
+
 	return true;
 }
 
@@ -66,7 +80,7 @@ bool readInputs(int argc,char ** argv){
 			i++;
 			outputDir=string(argv[i]);
 			outputDirSet=checkDir(outputDir);
-			cout<<"found inputDir: \""<<outputDir<<"\""<<endl;
+			cout<<"found outputDir: \""<<outputDir<<"\""<<endl;
 		}
 		if((string(argv[i]) == "-r"||string(argv[i])=="-R")&&i+1<argc){
 			i++;
@@ -131,22 +145,8 @@ int main(int argc, char ** argv) {
 	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
 	cout << "starting main loop.." << endl;
 	RunListOK = ReadRunList();
+	if(!RunListOK)exit(-1);
 	TSystem* sys = gSystem;
-//  if(gStyle!=0)
-//    if(!gStyle->IsZombie()){
-//      gROOT->SetStyle("Plain"); //General style (see TStyle)
-////      gStyle->SetOptStat(221111111); //Stat options to be displayed     without under- and overflow use gStyle->SetOptStat(1110);
-//      if(gStyle->GetOptStat()!=221111111)
-//        gStyle->SetOptStat("nemrKSiou");
-//      gStyle->SetOptFit(1111);  //Fit options to be displayed
-//      gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
-//      gStyle->SetPadRightMargin(0.15);
-//      gStyle->SetPadTopMargin(0.15);
-//      //gStyle->SetTitleColor(19,"");
-//      gStyle->SetStatH(0.12); //Sets Height of Stats Box
-//      gStyle->SetStatW(0.15); //Sets Width of Stats Box
-//      gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
-//    }
 	std::string currentDir = sys->pwd();
 	for (unsigned int i = 0; i < RunParameters.size(); i++) {
 		cout << RunParameters[i].getRunNumber();
@@ -162,88 +162,55 @@ int main(int argc, char ** argv) {
 
 	  TStopwatch runWatch;
 	  runWatch.Start(true);
-		UInt_t RUNNUMBER = RunParameters[i].getRunNumber();
-		UInt_t VERBOSITY = RunParameters[i].getVerbosity();
-		std::string RUNDESCRIPTION = RunParameters[i].getRunDescription();
-    UInt_t NEVENTS = RunParameters[i].getEvents();
-    UInt_t START_EVENT = RunParameters[i].getStartEvent();
-		bool DO_PEDESTALANALYSIS = RunParameters[i].doPedestalAnalysis();
-		bool DO_CLUSTERANALYSIS  = RunParameters[i].doClusterAnalysis();
-		bool DO_SELECTIONANALYSIS = RunParameters[i].doSelectionAnalysis();
+	  RunParameters[i].Print();
 		bool DO_ALIGNMENT = RunParameters[i].doAlignment();
 		bool DO_ALIGNMENTANALYSIS = RunParameters[i].doAlignmentAnalysis();
 		bool DO_TRANSPARENT_ANALYSIS = RunParameters[i].doTransparentAnalysis();
-		cout << endl << endl << endl << endl;
-		cout << "====================================" << endl;
-		cout << "==> Starting analysis.." << endl;
-		cout << "====================================" << endl << endl;
-		cout << "RUNNUMBER: " << RUNNUMBER << endl;
-		cout << "NEVENTS: " << NEVENTS << endl;
-		cout << "RUNDESCRIPTION: " << RUNDESCRIPTION << endl;
-		cout << "VERBOSITY: " << VERBOSITY << endl;
-		cout << "INITIAL_EVENT: " << START_EVENT << endl;
-		cout << "DO_PEDESTALANALYSIS: "<<DO_PEDESTALANALYSIS<<endl;
-		cout << "DO_CLUSTERANALYSIS: "<<DO_CLUSTERANALYSIS<<endl;
-		cout << "DO_SELECTIONANALYSIS: "<<DO_SELECTIONANALYSIS<<endl;
-		cout << "DO_ALIGNMENT: " << DO_ALIGNMENT << endl;
-    cout << "DO_ALIGNMENTANALYSIS: "<<DO_ALIGNMENTANALYSIS<<endl;
-		cout << endl << endl << endl;
-		
 
 		time_t rawtime;
 		tm *timestamp;
-		
 		time (&rawtime);
-		
 		timestamp = gmtime(&rawtime);
 		
 		ostringstream logfilename;
-		logfilename << "analyse_log_" << RUNNUMBER << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
+		logfilename << "analyse_log_" << RunParameters[i].getRunNumber() << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
 		
-		//FILE *log;
-		
-//		log = freopen(logfilename.str().c_str(), "w", stdout);
+		FILE *log;
+		log = freopen(logfilename.str().c_str(), "w", stdout);
 
-		//Save Events to RUNNUMBER/rawDATA.RUNNUMBER.root
-		double vm2, rss2;
-		process_mem_usage(vm2, rss2);
-		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 
 
 		stringstream settingsFileName;
-		settingsFileName<<runSettingsDir<<"settings."<<RUNNUMBER;
-		if(RUNDESCRIPTION.at(0)!='0')
-		  settingsFileName<<"-"<<RUNDESCRIPTION;
+		settingsFileName<<runSettingsDir<<"settings."<<RunParameters[i].getRunNumber();
+		if(RunParameters[i].getRunDescription().at(0)!='0')
+		  settingsFileName<<"-"<<RunParameters[i].getRunDescription();
 		settingsFileName<<".ini";
-		TSettings *settings= new TSettings(settingsFileName.str(),RUNNUMBER);
-		settings->setRunDescription(RUNDESCRIPTION);
+		TSettings *settings= new TSettings(settingsFileName.str(),RunParameters[i].getRunNumber());
+		settings->setRunDescription(RunParameters[i].getRunDescription());
+
     TResults *currentResults =new TResults(settings);
     currentResults->Print();
 
+    sys->cd(currentDir.c_str());
 		TRawEventSaver *eventSaver;
 		eventSaver = new TRawEventSaver(settings);
-		eventSaver->saveEvents(NEVENTS);
+		eventSaver->saveEvents(RunParameters[i].getEvents());
 		delete eventSaver;
 
-		process_mem_usage(vm2, rss2);
-		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-
+		//Calculate Pedestal
 		sys->cd(currentDir.c_str());
+		TPedestalCalculation* pedestalCalculation;
+		pedestalCalculation = new TPedestalCalculation(settings);
+		pedestalCalculation->calculatePedestals(RunParameters[i].getEvents());
+		pedestalCalculation->calculateSlidingPedestals(RunParameters[i].getEvents());
+		delete pedestalCalculation;
 
-			//Calculate Pedestal
-
-			TPedestalCalculation* pedestalCalculation;
-//			pedestalCalculation = new TPedestalCalculation(RUNNUMBER,NEVENTS);
-			pedestalCalculation = new TPedestalCalculation(settings);
-			pedestalCalculation->calculatePedestals(NEVENTS);
-			pedestalCalculation->calculateSlidingPedestals(NEVENTS);
-			delete pedestalCalculation;
-
-		if(DO_PEDESTALANALYSIS){
+		if(RunParameters[i].doPedestalAnalysis()){
+	    sys->cd(currentDir.c_str());
 			TAnalysisOfPedestal *analysisOfPedestal;
 			analysisOfPedestal = new TAnalysisOfPedestal(settings);
 			analysisOfPedestal->setResults(currentResults);
-			analysisOfPedestal->doAnalysis(NEVENTS);
+			analysisOfPedestal->doAnalysis(RunParameters[i].getEvents());
 			delete analysisOfPedestal;
 		}
 
@@ -252,9 +219,7 @@ int main(int argc, char ** argv) {
 		path<<currentDir<<"/"<<settings->getRelativePath()<<"/";
 		htmlGen->setMainPath("./");//(string)(currentDir+"/16202/"));
 		htmlGen->setSubdirPath("");
-
 		htmlGen->setFileGeneratingPath(path.str());
-
     htmlGen->setFileName("overview.html");
 		htmlGen->addSection("Pedestal","<a href=\"./pedestalAnalysis/pedestal.html\">PEDESTAL</a>");
 		htmlGen->addSection("Clustering","<a href=\"./clustering/clustering.html\">CLUSTERING</a>");
@@ -264,40 +229,33 @@ int main(int argc, char ** argv) {
 		htmlGen->generateHTMLFile();
 		delete htmlGen;
 
-
-//		process_mem_usage(vm2, rss2);
-//		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-
 		sys->cd(currentDir.c_str());
 		TClustering* clustering;
 		clustering=new TClustering(settings);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
 		std::cout<<"cluster"<<endl;
-		clustering->ClusterEvents(NEVENTS);
+		clustering->ClusterEvents(RunParameters[i].getEvents());
 		delete clustering;
 
-
-
-//		process_mem_usage(vm2, rss2);
-//		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
 		sys->cd(currentDir.c_str());
 		TSelectionClass* selectionClass;
 		selectionClass=new TSelectionClass(settings);
 		selectionClass->SetResults(currentResults);
-		selectionClass->MakeSelection(NEVENTS);
+		selectionClass->MakeSelection(RunParameters[i].getEvents());
 		delete selectionClass;
 
-		if (DO_CLUSTERANALYSIS){
-			sys->cd(currentDir.c_str());
-			TAnalysisOfClustering* analysisClustering;
-			analysisClustering= new TAnalysisOfClustering(settings);
-			analysisClustering->doAnalysis(NEVENTS);
-			delete analysisClustering;
-		}
-		if(DO_SELECTIONANALYSIS){
+		if(RunParameters[i].doClusterAnalysis()){
 		  sys->cd(currentDir.c_str());
-			TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
-			analysisSelection->doAnalysis(NEVENTS);
-			delete analysisSelection;
+		  TAnalysisOfClustering* analysisClustering;
+		  analysisClustering= new TAnalysisOfClustering(settings);
+		  analysisClustering->doAnalysis(RunParameters[i].getEvents());
+		  delete analysisClustering;
+		}
+
+		if(RunParameters[i].doSelectionAnalysis()){
+		  sys->cd(currentDir.c_str());
+		  TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
+		  analysisSelection->doAnalysis(RunParameters[i].getEvents());
+		  delete analysisSelection;
 		}
 
 		if (DO_ALIGNMENT){
@@ -306,14 +264,7 @@ int main(int argc, char ** argv) {
 			alignment= new TAlignment(settings);
 			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
-			process_mem_usage(vm2, rss2);
-			cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-
-			//alignment->createEventVectors(1000);
-			process_mem_usage(vm2, rss2);
-			cout << "\nMemory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-//			alignment->setVerbosity(2);
-			alignment->Align(NEVENTS);
+			alignment->Align(RunParameters[i].getEvents());
 			delete alignment;
 		}
 
@@ -321,14 +272,14 @@ int main(int argc, char ** argv) {
 			sys->cd(currentDir.c_str());
 			TAnalysisOfAlignment *anaAlignment;
 			anaAlignment=new TAnalysisOfAlignment(settings);
-			anaAlignment->doAnalysis(NEVENTS);
+			anaAlignment->doAnalysis(RunParameters[i].getEvents());
 			delete anaAlignment;
 		}
         
 		if (DO_TRANSPARENT_ANALYSIS) {
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings);
-			transpAna->analyze(NEVENTS,START_EVENT);
+			transpAna->analyze(RunParameters[i].getEvents(),RunParameters[i].getEvents());
 			delete transpAna;
 		}
 		
@@ -337,12 +288,8 @@ int main(int argc, char ** argv) {
 		delete currentResults;
 
 
-		process_mem_usage(vm2, rss2);
-		cout << "Memory usage: VM: " << vm2 << "; RSS: " << rss2 << endl;
-
-
     runWatch.Stop();
-    cout<<"needed Time for Run "<<RUNNUMBER<<":"<<endl;
+    cout<<"needed Time for Run "<<RunParameters[i].getRunNumber()<<":"<<endl;
     runWatch.Print();
 		if (settings!=NULL){
 		  cout<<"delete Settings..."<<endl;
@@ -360,7 +307,7 @@ int main(int argc, char ** argv) {
 
 
 int ReadRunList() {
-	RunInfo run;
+	TRunInfo run;
 	RunParameters.clear();
 	cout << endl << "reading runlist.." << endl;
 	ifstream file(runListPath.c_str());//"RunList.ini");
