@@ -34,8 +34,6 @@ void TRunInfo::setInputDir(std::string inputDir)
       realpath(inputDir.c_str(), resolved_path);
   printf("\nINPUTDIR: \"%s\"\t\n",resolved_path);
   char t;
-  cin>>t;
-  this->inputDir = resolved_path;
 }
 
 void TRunInfo::setOutputDir(std::string outputDir)
@@ -43,8 +41,6 @@ void TRunInfo::setOutputDir(std::string outputDir)
   char resolved_path[300];
   realpath(outputDir.c_str(), resolved_path);
   printf("\nOUTPUTDIR: \"%s\"\n",resolved_path);
-  char t;
-  cin>>t;
 
   this->outputDir = resolved_path;
 }
@@ -56,8 +52,6 @@ void TRunInfo::setRunSettingsDir(string settingsDir)
   realpath(settingsDir.c_str(), resolved_path);
 
   printf("\nsettingsDir: \"%s\"\n",resolved_path);
-  char t;
-  cin>>t;
   this->runSettingsDir = resolved_path;
 }
 

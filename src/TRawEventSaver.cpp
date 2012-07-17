@@ -54,7 +54,7 @@ TRawEventSaver::~TRawEventSaver() {
 
 
 void TRawEventSaver::saveEvents(int nEvents){
-  cout<<"TRawEventSaver::saveEvents"<<endl;
+	cout<<"TRawEventSaver::saveEvents:"<<nEvents<<endl;
 	if(settings==0){
 		cerr<<"SETTINGS Not initialized...";
 		settings = new TSettings();
@@ -73,7 +73,7 @@ void TRawEventSaver::saveEvents(int nEvents){
 		cout<<endl;
 		for (int i=0;i<nEvents;i++){
 			showStatusBar(i,nEvents,100);
-			int  suceed = rawEventReader->ReadRawEvent(i,true);
+			int  suceed = rawEventReader->ReadRawEvent(i,false);//true);
 			if(suceed<0){
 			  cout<<"could not open file break"<<endl;
 			  exit(-1);

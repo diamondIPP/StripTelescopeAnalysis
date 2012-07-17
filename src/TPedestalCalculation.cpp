@@ -52,6 +52,7 @@ TPedestalCalculation::~TPedestalCalculation() {
 
 
 void TPedestalCalculation::calculatePedestals(int nEvents){
+	cout<<"TPedestalCalculation::calculatePedestals:"<<nEvents<<endl;
 //	nEvents = eventReader->GetEntries();
 	createPedestalTree(nEvents);
 	if(pedestalTree->GetEntries()>=nEvents){
