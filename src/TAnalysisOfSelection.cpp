@@ -230,7 +230,9 @@ void TAnalysisOfSelection::analyseEvent()
   Float_t fiducialValueX=0;
   Float_t fiducialValueY=0;
 
-	if(eventReader->isValidTrack()){//eventReader->useForAnalysis()||eventReader->useForAlignment()){
+	//if(eventReader->isValidTrack()){//
+	if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
+
     for(UInt_t plane=0;plane<4;plane++){
       fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
       fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
