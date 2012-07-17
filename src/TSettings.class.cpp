@@ -23,7 +23,7 @@ TSettings::TSettings(UInt_t runNumber){
 	this->runNumber=runNumber;
   sys = gSystem;
 	path = sys->pwd();
-	createSettingsRootFile();
+//	createSettingsRootFile();
 	runDescription="";
 }
 

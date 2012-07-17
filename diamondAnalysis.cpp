@@ -35,7 +35,9 @@ void printHelp( void )
 	cout<<"*******************************************************"<<endl;
 	cout<<"diamondAnalysis: A Tool for anaylsis of RD42 test beams"<<endl;
 	cout<<"USEAGE:\n"<<endl;
-	cout<<"diamondAnalysis -i INPUTDIR -o OUTPUTDIR"<<endl;
+	cout<<"diamondAnalysis "<<endl;
+	cout<<" Options:"<<endl;
+	cout<<"\t-i INPUTDIR \n\t-o OUTPUTDIR\n\t-s RunSettingsDIR"<<endl;
 	cout<<"*******************************************************"<<endl;
 
 }
@@ -72,6 +74,11 @@ bool readInputs(int argc,char ** argv){
 			cout<<"runListpath is set to:\""<<runListPath<<"\""<<endl;
 		}
 
+		if((string(argv[i]) == "-s"||string(argv[i])== "-S")&& i+1<argc){
+		  i++;
+		  runSettingsDir=string(argv[i]);
+		  cout<<"settingDirPath is set to: \""<<runSettingsDir<<"\""<<endl;
+		}
 	}
 	return true;
 }
@@ -204,14 +211,12 @@ int main(int argc, char ** argv) {
 
 
 		stringstream settingsFileName;
-		settingsFileName<<"settings."<<RUNNUMBER;
+		settingsFileName<<runSettingsDir<<"settings."<<RUNNUMBER;
 		if(RUNDESCRIPTION.at(0)!='0')
 		  settingsFileName<<"-"<<RUNDESCRIPTION;
 		settingsFileName<<".ini";
-		TSettings *settings=NULL;
-		settings=new TSettings(settingsFileName.str(),RUNNUMBER);
+		TSettings *settings= new TSettings(settingsFileName.str(),RUNNUMBER);
 		settings->setRunDescription(RUNDESCRIPTION);
-
     TResults *currentResults =new TResults(settings);
     currentResults->Print();
 
