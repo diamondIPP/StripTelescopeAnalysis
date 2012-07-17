@@ -18,9 +18,9 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 		this->runNumber=settings->getRunNumber();
 		sys = gSystem;
 
-		sys->MakeDirectory(settings->getRelativePath().c_str());
+		sys->MakeDirectory(settings->getRelativeOuputPath().c_str());
 
-		sys->cd(settings->getRelativePath().c_str());
+		sys->cd(settings->getRelativeOuputPath().c_str());
 
 		rawfilepath.str("");
 		rawfilepath<<"rawData."<<runNumber<<".root";

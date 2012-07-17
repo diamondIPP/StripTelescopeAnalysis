@@ -8,12 +8,13 @@
 #include "../include/TRawEventReader.hh"
 
 
-TRawEventReader::TRawEventReader(Int_t runNumber) {
+TRawEventReader::TRawEventReader(TSettings *settings){//Int_t runNumber) {
 	// TODO Auto-generated constructor stub
 	verbosity=0;
 	 EventsPerFile = 10000;
-	 this->run_number=runNumber;
+	 this->run_number=settings->getRunNumber();
 	 current_rz_filename="";
+	 this->settings=settings;
 }
 
 TRawEventReader::~TRawEventReader() {
@@ -31,7 +32,8 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 
 	   //Filename to lookup event
 	   std::ostringstream filename;
-	   filename << "RUN_" << run_number << "_" << EventNumber/EventsPerFile << ".rz";
+	   TSystem *sys =gSystem;
+	   filename << settings->getAbsoluteInputPath()<<"RUN_" << run_number << "_" << EventNumber/EventsPerFile << ".rz";
 
 	   //Open the desired rz file if not open already
 	   if(current_rz_filename!=filename.str()) {
@@ -44,6 +46,7 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 	      }
 	      current_rz_file.open(filename.str().c_str(),std::ios::in | std::ios::binary);  //The .c_str() must be added for ifstream to be able to read in the file name string.
 	      if (!current_rz_file) {
+	        std::cout<<settings->getAbsoluteInputPath()<<std::endl;
 	         std::cout << "File open error: " << filename.str() << " not found" << std::endl;
 	         return -1; //returning -1 signals Slide() to abort the pedestal calculation
 	      }

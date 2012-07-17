@@ -44,12 +44,13 @@ using namespace TMath;
 
 #include "RZEvent.struct.hh" //the header file that is connected to the Diamond/telescope data
 #include "TDetector_Data.hh"
-
+#include "TSettings.class.hh"
+#include "TSystem.h"
 using namespace std;
 
 class TRawEventReader {
 public:
-	TRawEventReader(Int_t runNumber);
+	TRawEventReader(TSettings* settings);
 	virtual ~TRawEventReader();
 	int ReadRawEvent(int EventNumber, bool verbose = 0);
 	TDetector_Data getPlane(int det,UInt_t diaInput);
@@ -75,6 +76,7 @@ public:
     void setDia0(TDetector_Data dia0);
     void setDia1(TDetector_Data dia1);
 private:
+    TSettings *settings;
     Int_t EventsPerFile;
     std::string current_rz_filename;
     ifstream current_rz_file;

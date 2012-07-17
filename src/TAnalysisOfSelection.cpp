@@ -15,9 +15,9 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	sys = gSystem;
 	UInt_t runNumber=settings->getRunNumber();
 
-  sys->MakeDirectory(settings->getRelativePath().c_str());
+  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());
 	htmlLandau=new THTMLLandaus(settings);
-  sys->cd(settings->getRelativePath().c_str());
+  sys->cd(settings->getRelativeOuputPath().c_str());
 
 	stringstream  filepath;
 	filepath.str("");

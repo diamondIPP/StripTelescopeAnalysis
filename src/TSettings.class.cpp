@@ -13,6 +13,11 @@ ClassImp(TSettings);
 using namespace std;
 
 
+bool TSettings::existsDirectory(std::string dir){
+  struct stat sta;
+  int retVal = stat(dir.c_str(),&sta);
+  return (retVal>=0);
+}
 
 TSettings::TSettings(TRunInfo *runInfo)
 {
@@ -23,28 +28,26 @@ TSettings::TSettings(TRunInfo *runInfo)
   this->runNumber=runInfo->getRunNumber();
   sys = gSystem;
   path ="";// sys->pwd();
-  runDescription=runInfo->getRunDescription();
+  setRunDescription(runInfo->getRunDescription());
   stringstream fileNameStr;
   fileNameStr<<path<<"/"<<runInfo->getRunSettingsDir()<<"/settings."<<runInfo->getRunNumber();
   if (runInfo->getRunDescription().at(0)!='0')
     fileNameStr<<"-"<<runInfo->getRunDescription();
   fileNameStr<<".ini";
   cout<<"get Settingsfile: fileName =\""<<fileNameStr.str()<<"\""<<endl;
-  struct stat sta;
-  int fileExist = stat(fileNameStr.str().c_str(),&sta);
+  int fileExist = existsDirectory(fileNameStr.str());
   cout<< "File Exists: "<<fileExist<<endl;
   cout<<endl;
-  if(fileExist < 0){
+  if(!fileExist){
     cout<<"Settingsfile: "<<fileNameStr.str()<<" does not exists"<<endl;
-    char t;
-    cin >>t;
+    cout<<"finish on press char:"<<flush;
     exit(-1);
   }
 
   if(verbosity)
     cout<<"TSettings:Create TSettings-member with file:\""<<fileNameStr.str()<<"\""<<endl;
-  cout<<"go on press char:"<<flush;
-
+  outputDir=runInfo->outputDir;//TODO:getOutputDir();
+  inputDir = runInfo->inputDir;
   SetFileName(fileNameStr.str());
 }
 
@@ -88,9 +91,10 @@ void TSettings::setRunDescription(std::string runDescription)
     this->runDescription = runDescription;
 }
 
-std::string TSettings::getRelativePath(){
+std::string TSettings::getRelativeOuputPath(){
   stringstream output;
-  output<<runNumber;
+  output<<this->getOutputDir()<<endl;
+  output<<"/"<<runNumber;
   if(runDescription.at(0)!='0'){
     output<<"-"<<runDescription;
   }

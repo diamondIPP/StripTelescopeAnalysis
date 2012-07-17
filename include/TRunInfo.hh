@@ -15,7 +15,11 @@ class TRunInfo {
 public:
   TRunInfo();
   virtual ~TRunInfo();
-private:
+    std::string getInputDir();
+    std::string getOutputDir();
+    void setInputDir(std::string inputDir);
+    void setOutputDir(std::string outputDir);
+public:
   UInt_t nRunNumber;
   UInt_t nVerbosity;
   UInt_t nEvents;
@@ -28,6 +32,8 @@ private:
   bool bAlignmentAnalysis;
   bool bTransparentAnalysis;
   std::string runSettingsDir;
+  std::string outputDir;
+  std::string inputDir;
 public:
   void setParameters(UInt_t nRunNo,std::string sRunDes,UInt_t nVeb,UInt_t NEvents,UInt_t nStartEvent,bool bPedAna,bool bClusAna,bool bSelAna,bool bAlign,bool bAlignAna,bool bTransAna){
     setRunNumber(nRunNo);

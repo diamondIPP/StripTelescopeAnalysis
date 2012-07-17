@@ -32,11 +32,15 @@
 class TSettings:public TObject {
 private:
   std::string runDescription;
+  std::string outputDir;
+  std::string inputDir;
 public:
+  static bool existsDirectory(std::string dir);
   TSettings(TRunInfo* runInfo);
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
-	std::string getRelativePath();
+	std::string getRelativeOuputPath();
+	std::string getAbsoluteInputPath(){return inputDir+"/";};//todo
 	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);
 	void saveSettings();
@@ -44,6 +48,8 @@ public:
 	void compareSettings();
 	void createSettingsRootFile();
 	void setRunDescription(std::string runDescription);
+	void setOutputDir(std::string ouputDir){this->outputDir=outputDir;}
+	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
 	std::string getRunDescription() const {return runDescription;};
 	Float_t getClusterSeedFactor(UInt_t det);

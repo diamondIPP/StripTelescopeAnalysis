@@ -11,16 +11,17 @@ TRawEventSaver::TRawEventSaver(TSettings *settings){//unsigned int RunNumber, st
 	// TODO Auto-generated constructor stub
 	this->settings=settings;
 	this->runNumber=settings->getRunNumber();
-	rawEventReader = new TRawEventReader(this->runNumber);
+	rawEventReader = new TRawEventReader(settings);//this->runNumber);
 	sys = gSystem;
-	sys->MakeDirectory(settings->getRelativePath().c_str());;
-	sys->cd(settings->getRelativePath().c_str());
+	if(!settings->existsDirectory(settings->getRelativeOuputPath()))
+	  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());;
+	sys->cd(settings->getRelativeOuputPath().c_str());
 
 	rawfilepath.str("");
-	rawfilepath<<sys->pwd();
-	rawfilepath<<"/rawData."<<runNumber<<".root";
+//	rawfilepath<<settings->getRelativeOuputPath().c_str();
+	rawfilepath<<"rawData."<<runNumber<<".root";
+	cout<<sys->pwd()<<endl;
 	cout<<rawfilepath.str()<<endl;
-
 	this->rawFile=TFile::Open(rawfilepath.str().c_str());
 	cout<<"rawFile"<<rawFile<<"\t"<<flush;
 	if(rawFile==0){
@@ -71,7 +72,11 @@ void TRawEventSaver::saveEvents(int nEvents){
 		cout<<endl;
 		for (int i=0;i<nEvents;i++){
 			showStatusBar(i,nEvents,100);
-			rawEventReader->ReadRawEvent(i,false);
+			int  suceed = rawEventReader->ReadRawEvent(i,true);
+			if(suceed<0){
+			  cout<<"could not open file break"<<endl;
+			  exit(-1);
+			}
 			loadEvent();
 			eventNumber=i;
 			//if(i%1000==0)		cout<<"Event:"<<i<<" \t\t"<<(int)Dia_ADC[1]<<endl;

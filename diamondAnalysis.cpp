@@ -40,8 +40,8 @@ void printHelp( void )
 	cout<<" Options:"<<endl;
 	cout<<"\t-i INPUTDIR \n\t-o OUTPUTDIR\n\t-s RunSettingsDIR"<<endl;
 	cout<<"*******************************************************"<<endl;
-
 }
+
 bool checkDir(string dir){
   struct stat st;
   if(stat(dir.c_str(),&st) == 0){
@@ -175,17 +175,10 @@ int main(int argc, char ** argv) {
 //		FILE *log;
 //		log = freopen(logfilename.str().c_str(), "w", stdout);
 
-		stringstream settingsFileName;
-		settingsFileName<<runSettingsDir<<"settings."<<RunParameters[i].getRunNumber();
-		if(RunParameters[i].getRunDescription().at(0)!='0')
-		  settingsFileName<<"-"<<RunParameters[i].getRunDescription();
-		settingsFileName<<".ini";
+
 		TSettings *settings=0;
 		cout<<"settings"<<endl;
 		settings = new TSettings((TRunInfo*)&RunParameters[i]);
-		cout<<"check"<<endl;
-//		settings = new TSettings(settingsFileName.str(),RunParameters[i].getRunNumber());
-		settings->setRunDescription(RunParameters[i].getRunDescription());
 
     TResults *currentResults =new TResults(settings);
     currentResults->Print();
@@ -215,7 +208,7 @@ int main(int argc, char ** argv) {
 
 		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
 		stringstream path;
-		path<<currentDir<<"/"<<settings->getRelativePath()<<"/";
+		path<<currentDir<<"/"<<settings->getRelativeOuputPath()<<"/";
 		htmlGen->setMainPath("./");//(string)(currentDir+"/16202/"));
 		htmlGen->setSubdirPath("");
 		htmlGen->setFileGeneratingPath(path.str());
@@ -352,7 +345,10 @@ int ReadRunList() {
 		cout<<nStartEvent<<":"<<bPedestalAnalysis<<bClusterAnalysis<<bSelectionAnalysis<<bAlignment<<bAlignmentAnalysis<<endl;
 		run.setParameters(RunNumber,(string)RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis,bTransAna);
 		run.setRunSettingsDir(runSettingsDir);
-		//		cout<<"Got new Parameters: "<<RunNumber<<endl;
+		run.setOutputDir(outputDir);
+		run.setInputDir(inputDir);
+		cout<<"output dir: "<<run.getOutputDir()<<endl;
+    cout<<"input dir: "<<run.getInputDir()<<endl;
 		RunParameters.push_back(run);
 	}
 	return 1;

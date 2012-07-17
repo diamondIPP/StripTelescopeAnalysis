@@ -19,8 +19,8 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
 
-  sys->MakeDirectory(settings->getRelativePath().c_str());
-  sys->cd(settings->getRelativePath().c_str());
+  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());
+  sys->cd(settings->getRelativeOuputPath().c_str());
 
 	createdNewTree=false;
 	createdNewFile=false;
