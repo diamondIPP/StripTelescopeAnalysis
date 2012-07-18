@@ -227,16 +227,23 @@ void TAnalysisOfSelection::saveHistos()
 	delete hFidCut;
 	histSaver->SaveHistogram(hClusterPosition,0,1);
 	delete hClusterPosition;
+	cout<<"Save histos "<<endl;
+	cout<<h3dDiamond->GetEntries()<<endl;
 	histSaver->SaveHistogram(h3dDiamond,0,1);
+	cout<<hNoDiamond->GetEntries()<<endl;
 	histSaver->SaveHistogram(hNoDiamond,0,1);
+	cout<<h3dDiamond_hit->GetEntries()<<endl;
   histSaver->SaveHistogram(h3dDiamond_hit,0,1);
+  cout<<hNoDiamond_hit->GetEntries()<<endl;
   histSaver->SaveHistogram(hNoDiamond_hit,0,1);
+  cout<<"Save canvas"<<endl;
   TCanvas *c2= new TCanvas("c1","c1",1024,800);
   c2->cd();
   h3dDiamond_hit->Draw();
   hNoDiamond_hit->SetLineColor(kBlue);
   hNoDiamond_hit->Draw("same");
   histSaver->SaveCanvas(c2);
+  delete c2;
 	delete h3dDiamond;
 	delete hNoDiamond;
 }
