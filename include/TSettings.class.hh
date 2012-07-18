@@ -40,7 +40,7 @@ public:
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	std::string getRelativeOuputPath();
-	std::string getAbsoluteInputPath(){return inputDir+"/";};//todo
+	std::string getAbsoluteInputPath(){return inputDir;};//todo
 	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);
 	void saveSettings();
@@ -49,6 +49,8 @@ public:
 	void createSettingsRootFile();
 	void setRunDescription(std::string runDescription);
 	void setOutputDir(std::string ouputDir){this->outputDir=outputDir;}
+	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
+	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
 	std::string getRunDescription() const {return runDescription;};

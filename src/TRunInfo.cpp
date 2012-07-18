@@ -29,11 +29,9 @@ std::string TRunInfo::getOutputDir()
 void TRunInfo::setInputDir(std::string inputDir)
 {
   char resolved_path[300];
-  char realPathOutput[300];
-//  realPathOutput=
       realpath(inputDir.c_str(), resolved_path);
   printf("\nINPUTDIR: \"%s\"\t\n",resolved_path);
-  char t;
+  this->inputDir=resolved_path;
 }
 
 void TRunInfo::setOutputDir(std::string outputDir)
@@ -48,9 +46,7 @@ void TRunInfo::setOutputDir(std::string outputDir)
 void TRunInfo::setRunSettingsDir(string settingsDir)
 {
   char resolved_path[300];
-  //  realPathOutput=
   realpath(settingsDir.c_str(), resolved_path);
-
   printf("\nsettingsDir: \"%s\"\n",resolved_path);
   this->runSettingsDir = resolved_path;
 }

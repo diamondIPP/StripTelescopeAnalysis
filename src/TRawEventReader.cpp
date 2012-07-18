@@ -32,8 +32,13 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 
 	   //Filename to lookup event
 	   std::ostringstream filename;
-	   TSystem *sys =gSystem;
-	   filename << settings->getAbsoluteInputPath()<<"RUN_" << run_number << "_" << EventNumber/EventsPerFile << ".rz";
+	   //TSystem *sys =gSystem;
+	   //cout<<settings->getInputDir()<<endl;
+	   //cout<<settings->getAbsoluteInputPath()<<endl;
+	   filename << settings->getAbsoluteInputPath()<<"/RUN_" << run_number << "_" << EventNumber/EventsPerFile << ".rz";
+
+//	   cout<<filename.str()<<endl;	
+
 
 	   //Open the desired rz file if not open already
 	   if(current_rz_filename!=filename.str()) {

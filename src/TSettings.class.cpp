@@ -47,7 +47,8 @@ TSettings::TSettings(TRunInfo *runInfo)
   if(verbosity)
     cout<<"TSettings:Create TSettings-member with file:\""<<fileNameStr.str()<<"\""<<endl;
   outputDir=runInfo->outputDir;//TODO:getOutputDir();
-  inputDir = runInfo->inputDir;
+  cout<<runInfo->getInputDir()<<endl;
+  setInputDir(runInfo->getInputDir());
   SetFileName(fileNameStr.str());
 }
 
