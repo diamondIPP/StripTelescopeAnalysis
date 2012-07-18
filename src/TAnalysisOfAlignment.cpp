@@ -16,8 +16,8 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 		setSettings(settings);
 		UInt_t runNumber=settings->getRunNumber();
 		sys = gSystem;
-	  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());;
-	  sys->cd(settings->getRelativeOuputPath().c_str());
+	  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());;
+	  sys->cd(settings->getAbsoluteOuputPath().c_str());
 		stringstream  filepath;
 		filepath.str("");
 		filepath<<"selectionData."<<runNumber<<".root";

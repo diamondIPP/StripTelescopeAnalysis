@@ -19,8 +19,9 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
 
-  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());
-  sys->cd(settings->getRelativeOuputPath().c_str());
+  sys->MakeDirectory(settings->getAbsoluteOuputPath(true).c_str());
+  cout<<sys->pwd()<<" \npress a key"<<endl;
+  sys->cd(settings->getAbsoluteOuputPath(true).c_str());
 
 	createdNewTree=false;
 	createdNewFile=false;

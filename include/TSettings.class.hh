@@ -39,7 +39,7 @@ public:
   TSettings(TRunInfo* runInfo);
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
-	std::string getRelativeOuputPath();
+	std::string getAbsoluteOuputPath(bool withRunDescribtion=0);
 	std::string getAbsoluteInputPath(){return inputDir;};//todo
 	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);

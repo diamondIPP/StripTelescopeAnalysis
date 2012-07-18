@@ -218,8 +218,15 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
  * *********************************************************
  * *********************************************************
  */
-void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss) {
+void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) {
 	if(histo->GetEntries()==0)return;
+	if(adjustRange){
+    int binxMin=0;
+    for(binxMin=0;binxMin<histo->GetNbinsX();binxMin++)if(histo->GetBinContent(binxMin))break;
+    int binxMax;
+    for(binxMax=histo->GetNbinsX();binxMax>0;binxMax--)if(histo->GetBinContent(binxMax))break;
+    histo->GetXaxis()->SetRangeUser(histo->GetBinLowEdge(binxMin),histo->GetBinLowEdge(binxMax+1));
+	}
 	if (fitGauss) SaveHistogramFitGaussPNG(histo);
 	else SaveHistogramPNG(histo);
 	SaveHistogramROOT(histo);
@@ -273,6 +280,15 @@ void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
 	if(histo->GetEntries()==0)return;
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
+  UInt_t maxBinX =histo->GetNbinsX();
+  for(UInt_t i=histo->GetNbinsX();i>0;i--)
+    if(histo->GetBinContent(i)==0)maxBinX=i;
+  UInt_t minBinX =0;
+  for(UInt_t i=0;i<histo->GetNbinsX();i++)
+    if(histo->GetBinContent(i)==0)minBinX=i;
+  Float_t xmin = histo->GetXaxis()->GetBinLowEdge(minBinX);
+  Float_t xmax = histo->GetXaxis()->GetBinLowEdge(maxBinX+1);
+  histo->GetXaxis()->SetRangeUser(xmin,xmax);
 	histo->Draw();
 	pt->Draw();
 	ostringstream plot_filename;
@@ -350,6 +366,7 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
 void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
   TH1* histo = (TH1*)htemp->Clone();
 	if(histo->GetEntries()==0)return;
+
 //	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
 	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
 	//TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);

@@ -15,9 +15,9 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	sys = gSystem;
 	UInt_t runNumber=settings->getRunNumber();
 
-  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());
+  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());
 	htmlLandau=new THTMLLandaus(settings);
-  sys->cd(settings->getRelativeOuputPath().c_str());
+  sys->cd(settings->getAbsoluteOuputPath().c_str());
 
 	stringstream  filepath;
 	filepath.str("");
@@ -71,9 +71,13 @@ void TAnalysisOfSelection::initialiseHistos()
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
-	hClusterPosition=new TH1F("hClusterPositionDia","hClusterPositionDia",128,0,127);
+	hClusterPosition=new TH1F("hClusterPositionDia","Events which have a valid Silicon Track",128,0,127);
 	hClusterPosition->GetXaxis()->SetTitle("highes Cluster Channel Position");
 	hClusterPosition->GetYaxis()->SetTitle("number of Events #");
+	h3dDiamond = new TH1F("h3dDiamond","Sum of Charge for all 18 3d-channels",4096,0,4095);
+	h3dDiamond_hit = new TH1F("h3dDiamond_hit","Sum of Charge for all 18 3d-channels with a Hit",4096,0,4095);
+	hNoDiamond = new TH1F("hNoDiamond","Sum of Charge for all 18 no-channels",4096,0,4095);
+	hNoDiamond_hit = new TH1F("hNoDiamond_hit","Sum of Charge for all 18 no-channels with a Hit",4096,0,4095);
 }
 
 void TAnalysisOfSelection::saveHistos()
@@ -221,8 +225,14 @@ void TAnalysisOfSelection::saveHistos()
 
 	histSaver->SaveHistogram(hFidCut);
 	delete hFidCut;
-	histSaver->SaveHistogram(hClusterPosition);
+	histSaver->SaveHistogram(hClusterPosition,0,1);
 	delete hClusterPosition;
+	histSaver->SaveHistogram(h3dDiamond,0,1);
+	histSaver->SaveHistogram(hNoDiamond,0,1);
+  histSaver->SaveHistogram(h3dDiamond_hit,0,1);
+  histSaver->SaveHistogram(hNoDiamond_hit,0,1);
+	delete h3dDiamond;
+	delete hNoDiamond;
 }
 
 void TAnalysisOfSelection::analyseEvent()
@@ -230,8 +240,8 @@ void TAnalysisOfSelection::analyseEvent()
   Float_t fiducialValueX=0;
   Float_t fiducialValueY=0;
 
-	//if(eventReader->isValidTrack()){//
-	if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
+	if(eventReader->isValidTrack()){//
+	//if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
 
     for(UInt_t plane=0;plane<4;plane++){
       fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
@@ -239,15 +249,30 @@ void TAnalysisOfSelection::analyseEvent()
     }
     fiducialValueX/=4.;
     fiducialValueY/=4.;
+    Float_t charge3d=0;
+    for(UInt_t ch=0;ch<18;ch++){
+      charge3d+=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+    }
+    h3dDiamond->Fill(charge3d);
+    Float_t chargeNo=0;
+    for(UInt_t ch=36;ch<54;ch++){
+      chargeNo+=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+    }
+    hNoDiamond->Fill(chargeNo);
+    if(eventReader->getNClusters(TPlaneProperties::getDetDiamond())<=0)
+        return;
+    hNoDiamond_hit->Fill(chargeNo);
+    h3dDiamond_hit->Fill(charge3d);
+
     hFidCut->Fill(fiducialValueX,fiducialValueY);
-    if(eventReader->getClusterSize(TPlaneProperties::getDetDiamond(),0)<=0)
-      return;
 		TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
 		Float_t charge = cluster.getCharge(false);
 		UInt_t clustSize = cluster.size();
 		if(clustSize>8) clustSize=8;
 //		cout<<nEvent<<":\t"<<charge<<endl;
 		histoLandauDistribution->Fill(charge,clustSize);
+		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
+		hClusterPosition->Fill(pos);
 	}
 }
 

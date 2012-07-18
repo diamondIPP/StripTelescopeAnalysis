@@ -19,10 +19,10 @@ class TRunInfo {
 public:
   TRunInfo();
   virtual ~TRunInfo();
-    std::string getInputDir();
-    std::string getOutputDir();
-    void setInputDir(std::string inputDir);
-    void setOutputDir(std::string outputDir);
+  std::string getInputDir()const{return this->inputDir;};
+  std::string getOutputDir();
+  void setInputDir(std::string inputDir);
+  void setOutputDir(std::string outputDir);
 public:
   UInt_t nRunNumber;
   UInt_t nVerbosity;

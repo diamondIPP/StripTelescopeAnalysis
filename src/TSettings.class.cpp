@@ -8,7 +8,7 @@
  *      todo: Write copy constructor
  */
 
-#include "TSettings.class.hh"
+#include "../include/TSettings.class.hh"
 ClassImp(TSettings);
 using namespace std;
 
@@ -92,11 +92,11 @@ void TSettings::setRunDescription(std::string runDescription)
     this->runDescription = runDescription;
 }
 
-std::string TSettings::getRelativeOuputPath(){
+std::string TSettings::getAbsoluteOuputPath(bool withRunDescribtion){
   stringstream output;
   output<<this->getOutputDir();
   output<<"/"<<runNumber;
-  if(runDescription.at(0)!='0'){
+  if(withRunDescribtion&&runDescription.at(0)!='0'){
     output<<"-"<<runDescription;
   }
   return output.str();

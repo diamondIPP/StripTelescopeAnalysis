@@ -21,8 +21,8 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 
 	htmlClus= new THTMLCluster(settings);
 
-  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());
-  sys->cd(settings->getRelativeOuputPath().c_str());
+  sys->MakeDirectory(settings->getAbsoluteOuputPath(true).c_str());
+  sys->cd(settings->getAbsoluteOuputPath().c_str());
 
 	stringstream  filepath;
 	filepath.str("");

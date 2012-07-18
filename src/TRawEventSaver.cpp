@@ -9,19 +9,20 @@
 
 TRawEventSaver::TRawEventSaver(TSettings *settings){//unsigned int RunNumber, std::string RunDescription){
 	// TODO Auto-generated constructor stub
+  cout<<"Raw event Saver"<<endl;
 	this->settings=settings;
 	this->runNumber=settings->getRunNumber();
 	rawEventReader = new TRawEventReader(settings);//this->runNumber);
 	sys = gSystem;
-	if(!settings->existsDirectory(settings->getRelativeOuputPath()))
-	  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());;
-	sys->cd(settings->getRelativeOuputPath().c_str());
+	if(!settings->existsDirectory(settings->getAbsoluteOuputPath()))
+	  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());;
+	sys->cd(settings->getAbsoluteOuputPath().c_str());
 
 	rawfilepath.str("");
 //	rawfilepath<<settings->getRelativeOuputPath().c_str();
-	rawfilepath<<"rawData."<<runNumber<<".root";
-	cout<<sys->pwd()<<endl;
-	cout<<rawfilepath.str()<<endl;
+	rawfilepath<<settings->getAbsoluteOuputPath()<<"/rawData."<<runNumber<<".root";
+	cout<<"current Path: "<<sys->pwd()<<endl;
+	cout<<"raw File Path: "<<rawfilepath.str()<<endl;
 	this->rawFile=TFile::Open(rawfilepath.str().c_str());
 	cout<<"rawFile"<<rawFile<<"\t"<<flush;
 	if(rawFile==0){

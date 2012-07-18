@@ -19,8 +19,8 @@ TClustering::TClustering(TSettings* settings){
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
 
-  sys->MakeDirectory(settings->getRelativeOuputPath().c_str());
-  sys->cd(settings->getRelativeOuputPath().c_str());
+  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());
+  sys->cd(settings->getAbsoluteOuputPath().c_str());
 
 	rawFilePath<<"rawData."<<runNumber<<".root";
 	filepath.str("");

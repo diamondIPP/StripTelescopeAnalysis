@@ -208,7 +208,7 @@ int main(int argc, char ** argv) {
 
 		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
 		stringstream path;
-		path<<currentDir<<"/"<<settings->getRelativeOuputPath()<<"/";
+		path<<currentDir<<"/"<<settings->getAbsoluteOuputPath(true)<<"/";
 		htmlGen->setMainPath("./");//(string)(currentDir+"/16202/"));
 		htmlGen->setSubdirPath("");
 		htmlGen->setFileGeneratingPath(path.str());
@@ -228,20 +228,19 @@ int main(int argc, char ** argv) {
 		clustering->ClusterEvents(RunParameters[i].getEvents());
 		delete clustering;
 
+    if(RunParameters[i].doClusterAnalysis()){
+      sys->cd(currentDir.c_str());
+      TAnalysisOfClustering* analysisClustering;
+      analysisClustering= new TAnalysisOfClustering(settings);
+      analysisClustering->doAnalysis(RunParameters[i].getEvents());
+      delete analysisClustering;
+    }
+
 		sys->cd(currentDir.c_str());
-		TSelectionClass* selectionClass;
-		selectionClass=new TSelectionClass(settings);
+		TSelectionClass* selectionClass = new TSelectionClass(settings);
 		selectionClass->SetResults(currentResults);
 		selectionClass->MakeSelection(RunParameters[i].getEvents());
 		delete selectionClass;
-
-		if(RunParameters[i].doClusterAnalysis()){
-		  sys->cd(currentDir.c_str());
-		  TAnalysisOfClustering* analysisClustering;
-		  analysisClustering= new TAnalysisOfClustering(settings);
-		  analysisClustering->doAnalysis(RunParameters[i].getEvents());
-		  delete analysisClustering;
-		}
 
 		if(RunParameters[i].doSelectionAnalysis()){
 		  sys->cd(currentDir.c_str());
@@ -252,9 +251,8 @@ int main(int argc, char ** argv) {
 
 		if (DO_ALIGNMENT){
 			sys->cd(currentDir.c_str());
-			TAlignment *alignment;
-			alignment= new TAlignment(settings);
-			alignment->setSettings(settings);
+			TAlignment *alignment = new TAlignment(settings);
+//			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
 			alignment->Align(RunParameters[i].getEvents());
 			delete alignment;

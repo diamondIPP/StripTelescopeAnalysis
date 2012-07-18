@@ -33,7 +33,7 @@ LD              := g++
 LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
-LIBFILES		+=  FidCutRegion.o Cluster.class.o ClusteredEvent.class.o TDetector_Data.o TTrigger_Event.o
+LIBFILES		+=  Cluster.class.o ClusteredEvent.class.o TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o  PSDetector.class.o PSEvent.class.o
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o Track.class.o TADCEventReader.o
 LIBFILES		+=	TRawEventReader.o  TRawEventSaver.o TPedestalCalculation.o

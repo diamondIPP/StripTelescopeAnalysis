@@ -50,6 +50,10 @@ private:
 	UInt_t nEvent;
 	TH2F* histoLandauDistribution;
 	TH1F* hClusterPosition;
+	TH1F* h3dDiamond;
+	TH1F* hNoDiamond;
+	TH1F* h3dDiamond_hit;
+	TH1F* hNoDiamond_hit;
 	TH2F* hFidCut;
 	THTMLLandaus *htmlLandau;
 };
