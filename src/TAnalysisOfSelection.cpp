@@ -231,6 +231,12 @@ void TAnalysisOfSelection::saveHistos()
 	histSaver->SaveHistogram(hNoDiamond,0,1);
   histSaver->SaveHistogram(h3dDiamond_hit,0,1);
   histSaver->SaveHistogram(hNoDiamond_hit,0,1);
+  TCanvas *c2= new TCanvas("c1","c1",1024,800);
+  c2->cd();
+  h3dDiamond_hit->Draw();
+  hNoDiamond_hit->SetLineColor(kBlue);
+  hNoDiamond_hit->Draw("same");
+  histSaver->SaveCanvas(c2);
 	delete h3dDiamond;
 	delete hNoDiamond;
 }
