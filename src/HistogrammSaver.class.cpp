@@ -334,9 +334,9 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
   ostringstream plot_filename;
   plot_filename << plots_path << histo->GetName() << ".png";
   plots_canvas->Print(plot_filename.str().c_str());
-  if(plots_canvas!=0) delete plots_canvas;
+  /*if(plots_canvas!=0) delete plots_canvas;
   if(pt2!=0) delete pt2;
-  if(htemp!=0) delete htemp;
+  if(htemp!=0) delete htemp;*/
 }
 
 void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
@@ -401,7 +401,7 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 //	plot_filename << plots_path << histo->GetName() << ".root";
 	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
 
-  TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+  TCanvas *plots_canvas = new TCanvas("plots_canvas1","plots_canvas");
 	TH1* histo = (TH1*)htemp->Clone();
   TPaveText* pt2 = (TPaveText*)pt->Clone();
 
@@ -415,11 +415,13 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	f->Close();
 
 	if(plots_canvas!=0) plots_canvas->Close();
+//	if (histo!=0) delete histo;
+//	if(pt2!=0) delete pt2;
 
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
-	if(histo->GetEntries()==0)return;
+   if(histo->GetEntries()==0)return;
    TCanvas*  plots_canvas = new TCanvas("plots_canvas","plots_canvas");
    plots_canvas->cd();
    TH2F* htemp = (TH2F*)histo->Clone();
@@ -429,26 +431,21 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".png";
    plots_canvas->Print(plot_filename.str().c_str());
-   if(plots_canvas!=0) delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
-	if(histo->GetEntries()==0)return;
-   TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
-   plots_canvas->cd();
+   if(histo->GetEntries()==0)return;
    TH2F* htemp = (TH2F*)histo->Clone();
-   if(htemp==0)
-     return;
-   htemp->Draw();
-   htemp->Draw("colz");
+   if(htemp==0) return;
    TPaveText* pt2 = (TPaveText*)pt->Clone();
+   TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+   plots_canvas->cd();
+   htemp->Draw("colz");
    pt2->Draw();
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".root";
    plots_canvas->Print(plot_filename.str().c_str());
-   if(plots_canvas!=0) delete plots_canvas;
-   if(pt2!=0) delete pt2;
-   if(htemp!=0) delete htemp;
+//   if(plots_canvas!=0) plots_canvas->Close();
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
