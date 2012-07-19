@@ -161,12 +161,25 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 }
 
 bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
-	// TODO: cut flow!!
-	UInt_t centerChannel = (UInt_t)centerPosition;
-	int direction = 1;
+	// TODO: write a function for that!!!!
+	UInt_t centerChannel;
+	int direction;
 	if (centerPosition-(int)centerPosition<0.5) {
+		centerChannel = (UInt_t)centerPosition;
+		direction = 1;
+	}
+	else {
+		centerChannel = (UInt_t)centerPosition+1;
 		direction = -1;
 	}
+	
+	
+	// TODO: cut flow!!
+//	UInt_t centerChannel = (UInt_t)centerPosition;
+//	int direction = 1;
+//	if (centerPosition-(int)centerPosition<0.5) {
+//		direction = -1;
+//	}
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
@@ -197,11 +210,26 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
 
 // TODO: avoid wrong channel numbers (>128, <0)
 TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
-	UInt_t centerChannel = (UInt_t)centerPosition;
-	int direction = 1;
+	// TODO: write a function for that!!!!
+	UInt_t centerChannel;
+	int direction;
 	if (centerPosition-(int)centerPosition<0.5) {
+		centerChannel = (UInt_t)centerPosition;
+		direction = 1;
+	}
+	else {
+		centerChannel = (UInt_t)centerPosition+1;
 		direction = -1;
 	}
+	
+	
+	
+	
+//	UInt_t centerChannel = (UInt_t)centerPosition;
+//	int direction = 1;
+//	if (centerPosition-(int)centerPosition<0.5) {
+//		direction = -1;
+//	}
 	TCluster transparentCluster = TCluster(tracking->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det));
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
@@ -240,7 +268,7 @@ void TTransparentAnalysis::fillHistograms() {
 		hLaundau[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge());
 		hLaundau2Highest[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge(2,false));
 		hEta[clusterSize]->Fill(this->transparentClusters[clusterSize].getEta());
-//		if (clusterSize == 1 /*&& this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printEvent(this->transparentClusters[clusterSize]);
+//		if (clusterSize == 1/* && this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printCluster(this->transparentClusters[clusterSize]);
 		if (clusterSize+1 != transparentClusters[clusterSize].getClusterSize()) {
 			cout << "wrong cluster size!" << endl;
 			cout << "clusterSize+1 = " << clusterSize+1 << "\ttransparentClusters[clusterSize].getClusterSize() = " << transparentClusters[clusterSize].getClusterSize() << endl;
@@ -306,7 +334,6 @@ void TTransparentAnalysis::saveHistograms() {
 	}
 }
 
-// TODO: call TTransparentAnalysis::deleteHistograms
 void TTransparentAnalysis::deleteHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		delete hLaundau[clusterSize];
@@ -352,12 +379,13 @@ void TTransparentAnalysis::printEvent() {
 	return;
 }
 
-void TTransparentAnalysis::printEvent(TCluster cluster) {
+void TTransparentAnalysis::printCluster(TCluster cluster) {
 	cout << "\n--- event " << nEvent;
 	cout << "\n\tcluster size: " << cluster.getClusterSize();
 	cout << "\n\tcharge: " << cluster.getCharge(false);
 	cout << "\n\tcharge of 2 highest centroid: " << cluster.getCharge(2,false);
 	cout << "\n\thighest channel: " << cluster.getHighestSignalChannel();
+	cout << "\n\thighest 2 centroid: " << cluster.getHighest2Centroid();
 	cout << "\n\tcluster position of highest channel: " << cluster.getClusterPosition(cluster.getHighestSignalChannel());
 	cout << "\n\thighest channel is seed? " << cluster.isSeed(cluster.getClusterPosition(cluster.getHighestSignalChannel()));
 	cout << "\n\thighest channel is hit? " << cluster.isHit(cluster.getClusterPosition(cluster.getHighestSignalChannel()));

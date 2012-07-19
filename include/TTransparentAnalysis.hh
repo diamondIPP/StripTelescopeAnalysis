@@ -73,7 +73,7 @@ private:
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	void printEvent();
-	void printEvent(TCluster cluster);
+	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode);
 	
 	UInt_t subjectDetector, subjectPlane;
