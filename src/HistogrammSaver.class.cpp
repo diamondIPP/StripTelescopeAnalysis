@@ -393,22 +393,31 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
-  TH1* histo = (TH1*)htemp->Clone();
-	if(histo->GetEntries()==0)return;
-   TCanvas plots_canvas("plots_canvas","plots_canvas");
-   plots_canvas.cd();
-   histo->Draw();
-   pt->Draw();
-   ostringstream plot_filename;
-	ostringstream histo_filename;
-//	histo_filename << plots_path << histo->GetName() << "_histo.root";
+	if(htemp->GetEntries()==0)return;
+
+  ostringstream plot_filename;
+  ostringstream histo_filename;
 	histo_filename << plots_path << "histograms.root";
-   plot_filename << plots_path << histo->GetName() << ".root";
-   plots_canvas.Print(plot_filename.str().c_str());
-	TFile f(histo_filename.str().c_str(),"UPDATE");
-	histo->Write();
-	f.Close();
+//	plot_filename << plots_path << histo->GetName() << ".root";
+	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+
+  TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+	TH1* histo = (TH1*)htemp->Clone();
+  TPaveText* pt2 = (TPaveText*)pt->Clone();
+
+  plots_canvas->cd();
+  histo->Draw();
+  pt2->Draw();
+  plots_canvas->Draw();
+
+  f->cd();
+  plots_canvas->Write();
+	f->Close();
+
+	if(plots_canvas!=0) plots_canvas->Close();
 	if (histo!=0) delete histo;
+	if(pt2!=0) delete pt2;
+
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
@@ -416,7 +425,6 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
    TCanvas*  plots_canvas = new TCanvas("plots_canvas","plots_canvas");
    plots_canvas->cd();
    TH2F* htemp = (TH2F*)histo->Clone();
-   htemp->Draw();
    htemp->Draw("colz");
    TPaveText* pt2 = (TPaveText*)pt->Clone();
    pt2->Draw();
