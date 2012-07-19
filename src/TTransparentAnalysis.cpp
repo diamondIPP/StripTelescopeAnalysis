@@ -275,11 +275,28 @@ void TTransparentAnalysis::saveHistograms() {
 		vecMeanLandau.push_back(hLaundau[clusterSize]->GetMean());
 		vecMeanLandau2Highest.push_back(hLaundau2Highest[clusterSize]->GetMean());
 		pair <Float_t,Float_t> tempPair;
-		tempPair.first = fitResidualChargeWeighted->GetParameter(1);
-		tempPair.second = fitResidualChargeWeighted->GetParameter(2);
+		if(fitResidualChargeWeighted!=0){
+		  //todo: @ LUKAS BUG:
+		  //#5  0x00007fd6fcbef394 in TFormula::GetParameter(int) const () from /afs/cern.ch/sw/lcg/app/releases/ROOT/5.33.02/x86_64-slc5-gcc43-opt/root/lib/libHo
+      //#6  0x000000000048c108 in TTransparentAnalysis::saveHistograms (this=0x1f4d210) at src/TTransparentAnalysis.cpp:278
+		  //
+		  // edited by Felix: Just an idea to be sure that everything worked?
+		  tempPair.first = fitResidualChargeWeighted->GetParameter(1);
+		  tempPair.second = fitResidualChargeWeighted->GetParameter(2);
+		}
+		else{
+		  tempPair.first = 0;
+		  tempPair.second = 0;
+		}
 		vecResidualChargeWeighted.push_back(tempPair);
-		tempPair.first = fitResidualHighest2Centroid->GetParameter(1);
-		tempPair.second = fitResidualHighest2Centroid->GetParameter(2);
+		if(fitResidualHighest2Centroid!=0){
+		  tempPair.first = fitResidualHighest2Centroid->GetParameter(1);
+		  tempPair.second = fitResidualHighest2Centroid->GetParameter(2);
+		}
+		else{
+		  tempPair.first = 0;
+		  tempPair.second = 0;
+		}
 		vecResidualHighest2Centroid.push_back(tempPair);
 		histSaver->SaveHistogramWithFit(hLaundau[clusterSize],fitLandau);
 		histSaver->SaveHistogramWithFit(hLaundau2Highest[clusterSize],fitLandau2Highest);

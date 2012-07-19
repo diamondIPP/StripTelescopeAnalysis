@@ -415,8 +415,6 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	f->Close();
 
 	if(plots_canvas!=0) plots_canvas->Close();
-	if (histo!=0) delete histo;
-	if(pt2!=0) delete pt2;
 
 }
 
@@ -432,8 +430,6 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
    plot_filename << plots_path << histo->GetName() << ".png";
    plots_canvas->Print(plot_filename.str().c_str());
    if(plots_canvas!=0) delete plots_canvas;
-   if(pt2!=0) delete pt2;
-   if(htemp!=0) delete htemp;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
