@@ -600,6 +600,7 @@ void TSelectionClass::createFiducialCut(){
   cout<<"Create AutoFidCut"<<endl;
   UInt_t nEvents = settings->getAutoFidCutEvents();
   if(nEvents>eventReader->GetEntries())nEvents=eventReader->GetEntries();
+  cout<<" "<<nEvents<<endl;
   for(nEvent=0;nEvent<nEvents;nEvent++){
       TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
       eventReader->LoadEvent(nEvent);
@@ -612,7 +613,7 @@ void TSelectionClass::createFiducialCut(){
 }
 
 std::vector< std::pair< Float_t,Float_t> > TSelectionClass::findFiducialCutIntervall(TH1D* hProj){
-  int minWidth = 20;//channels
+  int minWidth = 03;//channels
   Float_t mean = hProj->Integral()/hProj->GetNbinsX();
   Int_t nLow=0;
   Int_t nHigh=0;

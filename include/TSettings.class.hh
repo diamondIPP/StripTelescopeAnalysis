@@ -102,7 +102,7 @@ public:
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
 	Float_t getAutoFidCutPercentage() const{return 0.4;};//todo in settingsfile adden
-	UInt_t getAutoFidCutEvents()const {return 10000;};
+	UInt_t getAutoFidCutEvents()const {return 40000;};
 	UInt_t getNDiamonds()const{return nDiamonds;};
 	std::string getFileName() const;
 	bool getSingle_channel_analysis_enable();

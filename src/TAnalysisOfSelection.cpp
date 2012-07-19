@@ -223,8 +223,8 @@ void TAnalysisOfSelection::saveHistos()
 	delete mg;
 	delete c1;
 
-//	histSaver->SaveHistogram(hFidCut);
-//	delete hFidCut;
+	histSaver->SaveHistogram(hFidCut);
+	delete hFidCut;
 	histSaver->SaveHistogram(hClusterPosition,0,1);
 	delete hClusterPosition;
 	cout<<"Save histos "<<endl;
