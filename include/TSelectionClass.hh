@@ -48,6 +48,7 @@ private:
 	TSettings *settings;
 	TSystem *sys;
 	TADCEventReader *eventReader;
+	TFidCutRegions *fiducialCuts;
 	TFile* selectionFile;
 	TTree* selectionTree;
 	bool createdNewTree;

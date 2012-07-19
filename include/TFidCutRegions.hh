@@ -22,12 +22,16 @@ public:
   Float_t getXHigh(UInt_t i);
   Float_t getYHigh(UInt_t i);
   void Print(int intend);
+  void setRunDescription(std::string runDes);
+  bool isInFiducialCut(Float_t xVal,Float_t yVal);
 private:
+  int index;
   void createFidCuts();
   std::vector<std::pair<Float_t,Float_t> > xInt,yInt;
   UInt_t nDiamonds;
   UInt_t nFidCuts;
   std::vector<TFiducialCut*> fidCuts;
+  std::string runDescription;
 };
 
 #endif /* TFIDCUTREGIONS_HH_ */

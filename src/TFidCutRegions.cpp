@@ -10,6 +10,7 @@
 using namespace std;
 TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt,UInt_t nDia) {
   this->nDiamonds=nDia;
+  index=0;
   nFidCuts=xInt.size()*yInt.size();
   this->xInt=xInt;
   this->yInt=yInt;
@@ -20,8 +21,9 @@ TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt,s
 
 TFidCutRegions::TFidCutRegions(TH1D* histo, int nDiamonds)
 {
+  index=0;
   this->nDiamonds=nDiamonds;
-//todo create a way that this function extract
+//todo create a way that this function extract the fidCuts out of the histo
 }
 
 
@@ -41,6 +43,49 @@ void TFidCutRegions::Print(int intend)
 }
 
 
+void TFidCutRegions::setRunDescription(std::string runDes)
+{
+  this->runDescription=runDes;
+  if(runDescription.size()==0) {
+    index=0;
+    return;
+  }
+  switch(runDescription.at(0)){
+    case '0': index=0;return;
+    case '1': index=1;return;
+    case '2': index=2;return;
+    case '3': index=3;return;
+    case '4': index=4;return;
+  }
+  if(runDescription.find("left")!=string::npos){
+    index = 1;
+    return;
+  }
+  if(runDescription.find("right")!=string::npos){
+    index = 2;
+    return;
+  }
+  return;
+}
+
+bool TFidCutRegions::isInFiducialCut(Float_t xVal, Float_t yVal)
+{
+//  cout<<"xVal = "<<xVal<<"\tyVal = "<<yVal<<"\tIndex = "<<index<<endl;
+  if(index>0){
+    if( index<this->fidCuts.size()+1){
+//      TFiducialCut fidCut = fidCuts.at(index-1);
+      return fidCuts.at(index-1)->isInFiducialCut(xVal,yVal);
+    }
+  }
+  if(index==0){
+    bool inFidCut=false;
+    for(UInt_t i=0;i<fidCuts.size();i++)
+      inFidCut = inFidCut || fidCuts.at(i)->isInFiducialCut(xVal,yVal);
+    return inFidCut;
+  }
+  return false;
+}
+
 void TFidCutRegions::createFidCuts(){
   if(nDiamonds!=nFidCuts){
     cout<<"Fid Cut does not match with nDIamonds"<<endl;
@@ -54,8 +99,7 @@ void TFidCutRegions::createFidCuts(){
       int xHigh=xInt.at(iX).second;
       int yLow = yInt.at(iY).first;
       int yHigh = yInt.at(iY).second;
-      TFiducialCut* fidCut = new TFiducialCut(i,xLow,xHigh,yLow,yHigh);//iY*xInt.size()+iX,xInt.at(iX).first,xInt.at(iX).second,yInt.at(iY).first,yInt.at(iY).second);
-      cout<<"$ "<<endl;
+      TFiducialCut* fidCut = new TFiducialCut(i,xLow,xHigh,yLow,yHigh);
       fidCut->Print();
       this->fidCuts.push_back(fidCut);
     }

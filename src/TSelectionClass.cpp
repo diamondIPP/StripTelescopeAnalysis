@@ -22,7 +22,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
   sys->MakeDirectory(settings->getAbsoluteOuputPath(true).c_str());
   cout<<sys->pwd()<<" \npress a key"<<endl;
   sys->cd(settings->getAbsoluteOuputPath(true).c_str());
-
+  fiducialCuts=0;
 	createdNewTree=false;
 	createdNewFile=false;
 	selectionTree=NULL;
@@ -117,7 +117,6 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
 	this->setBranchAdressess();
-	if(settings->getUseAutoFidCut())
 	  createFiducialCut();
 	hFiducialCutSilicon->Reset();
 	hFiducialCutSiliconDiamondHit->Reset();
@@ -263,10 +262,11 @@ void TSelectionClass::setVariables(){
 		}
 		fiducialValueX/=4.;
 		fiducialValueY/=4.;
-		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_xlow();
-		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_xhigh();
-		isInFiducialCut=isInFiducialCut&&fiducialValueY>settings->getSi_avg_fidcut_ylow();
-		isInFiducialCut=isInFiducialCut&&fiducialValueY<settings->getSi_avg_fidcut_yhigh();
+		isInFiducialCut = fiducialCuts->isInFiducialCut(fiducialValueX,fiducialValueY);
+//		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_xlow();
+//		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_xhigh();
+//		isInFiducialCut=isInFiducialCut&&fiducialValueY>settings->getSi_avg_fidcut_ylow();
+//		isInFiducialCut=isInFiducialCut&&fiducialValueY<settings->getSi_avg_fidcut_yhigh();
 		if(verbosity>10)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<": Fidcut:"<<isInFiducialCut<<endl;
 		hFiducialCutSilicon->Fill(fiducialValueX,fiducialValueY);
 	}
@@ -376,7 +376,7 @@ void TSelectionClass::setBranchAdressess(){
 	selectionTree->Branch("nDiamondHits",&nDiamondHits,"nDiamondHits/i");
 	selectionTree->Branch("isInFiducialCut",&isInFiducialCut,"isInFiducialCut/O");
 	selectionTree->Branch("isDetMasked",&isDetMasked,"isDetMasked/O");
-	selectionTree->Branch("hasValidSiliconTrack",&isValidSiliconTrack,"hasValidSiliconTrack/O");
+	selectionTree->Branch("hasValidSiliconTrack",&hasValidSiliconTrack,"hasValidSiliconTrack/O");
 	selectionTree->Branch("isDiaMasked",&this->isDiaMasked,"isDiaMasked");
 	selectionTree->Branch("useForSiliconAlignment",&this->useForSiliconAlignment,"useForSiliconAlignment/O");
 	selectionTree->Branch("useForAlignment",&this->useForAlignment,"useForAlignment/O");
@@ -592,6 +592,11 @@ void TSelectionClass::findFiducialCut(TH2F* hFidCut){
 
 
 void TSelectionClass::createFiducialCut(){
+
+  std::vector<std::pair<Float_t,Float_t> > xInt,yInt;
+  xInt.push_back( make_pair(settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh()));
+  yInt.push_back( make_pair(settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh()));
+  fiducialCuts = new TFidCutRegions(xInt,yInt,1);
   cout<<"Create AutoFidCut"<<endl;
   UInt_t nEvents = settings->getAutoFidCutEvents();
   if(nEvents>eventReader->GetEntries())nEvents=eventReader->GetEntries();
@@ -650,8 +655,10 @@ void TSelectionClass::chooseFidCut(std::vector<std::pair <Float_t, Float_t> > xI
   cout<<"Found "<<yInt.size()<<" Intervals in y direction."<<endl;
   cout<<"The RunDescription is \""<<settings->getRunDescription()<<"\""<<endl;
   cout<<"Finding Areas for "<<settings->getNDiamonds()<<" Diamonds"<<endl;
-  TFidCutRegions fiducialCuts(xInt,yInt,settings->getNDiamonds());
-  TFiducialCut *fidCut = fiducialCuts.getFidCut(settings->getRunDescription());
+  if(fiducialCuts!=0) delete fiducialCuts;
+  fiducialCuts= new TFidCutRegions(xInt,yInt,settings->getNDiamonds());
+  fiducialCuts->setRunDescription(settings->getRunDescription());
+  TFiducialCut *fidCut = fiducialCuts->getFidCut(settings->getRunDescription());
   fidCut->Print();
   cout<<"old Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
   settings->setFidCut(fidCut);

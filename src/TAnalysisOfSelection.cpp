@@ -223,8 +223,8 @@ void TAnalysisOfSelection::saveHistos()
 	delete mg;
 	delete c1;
 
-	histSaver->SaveHistogram(hFidCut);
-	delete hFidCut;
+//	histSaver->SaveHistogram(hFidCut);
+//	delete hFidCut;
 	histSaver->SaveHistogram(hClusterPosition,0,1);
 	delete hClusterPosition;
 	cout<<"Save histos "<<endl;
@@ -237,7 +237,7 @@ void TAnalysisOfSelection::saveHistos()
   cout<<hNoDiamond_hit->GetEntries()<<endl;
   histSaver->SaveHistogram(hNoDiamond_hit,0,1);
   cout<<"Save canvas"<<endl;
-  TCanvas *c2= new TCanvas("c1","c1",1024,800);
+  TCanvas *c2= new TCanvas("c2","c2",1024,800);
   c2->cd();
   h3dDiamond_hit->Draw();
   hNoDiamond_hit->SetLineColor(kBlue);
@@ -264,12 +264,14 @@ void TAnalysisOfSelection::analyseEvent()
     fiducialValueY/=4.;
     Float_t charge3d=0;
     for(UInt_t ch=0;ch<18;ch++){
-      charge3d+=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+      Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+      if(charge3d<rawSignal)charge3d=rawSignal;
     }
     h3dDiamond->Fill(charge3d);
     Float_t chargeNo=0;
     for(UInt_t ch=36;ch<54;ch++){
-      chargeNo+=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+      Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+      if(chargeNo<rawSignal)charge3d=rawSignal;
     }
     hNoDiamond->Fill(chargeNo);
     if(eventReader->getNClusters(TPlaneProperties::getDetDiamond())<=0)

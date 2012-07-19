@@ -14,6 +14,9 @@ class TFiducialCut {
 public:
 	TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh);
 	TFiducialCut(int i);
+	bool isInFiducialCut(Float_t xVal, Float_t yVal)const {
+	  return xVal<x_high&&xVal>x_low&&yVal>y_low&&yVal<y_high;
+	}
 	void SetAllValuesZero();
 	void SetXLow(int xl) {x_low = xl;};
 	void SetXHigh(int xh) {x_high = xh;};
