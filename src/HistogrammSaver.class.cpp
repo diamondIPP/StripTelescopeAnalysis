@@ -425,14 +425,22 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
-   TCanvas plots_canvas("plots_canvas","plots_canvas");
-   plots_canvas.cd();
-   histo->Draw();
-   histo->Draw("colz");
-   pt->Draw();
+   TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
+   plots_canvas->cd();
+   TH2F* htemp = (TH2F*)histo->Clone();
+   if(htemp==0)
+     return;
+   htemp->Draw();
+   htemp->Draw("colz");
+   TPaveText* pt2 = (TPaveText*)pt->Clone();
+   pt2->Draw();
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".root";
-   plots_canvas.Print(plot_filename.str().c_str());
+   plots_canvas->Print(plot_filename.str().c_str());
+   if(plots_canvas!=0)
+     delete plots_canvas;
+   if(pt2!=0) delete pt2;
+   if(htemp!=0) delete htemp;
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){

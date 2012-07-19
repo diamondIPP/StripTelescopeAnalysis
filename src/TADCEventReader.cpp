@@ -9,7 +9,7 @@
 using namespace std;
 
 TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
-	verbosity=1;
+	verbosity=0;
   pEvent=NULL;//new TEvent();
 	current_event = 0;
 	store_threshold = 2;
