@@ -459,9 +459,6 @@ void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string o
 	   ostringstream plot_filename;
 	   plot_filename << plots_path << name<< ".root";
 	   plots_canvas->Print(plot_filename.str().c_str());
-	   if(pt2!=0)delete pt2;
-	   if(gTemp!=0)delete gTemp;
-	   if(plots_canvas!=0)delete plots_canvas;
 }
 
 void HistogrammSaver::SetVerbosity(unsigned int i)
