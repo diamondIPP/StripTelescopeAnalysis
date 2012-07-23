@@ -67,6 +67,7 @@ private:
 	void fitHistograms();
 	void saveHistograms();
 	void deleteHistograms();
+	void deleteFits();
 	void printCutFlow();
 	void fitTrack();
 	void analyzeTrack(TTrack track);
@@ -120,10 +121,10 @@ private:
 	TH1F* hLaundau2HighestMP;
 	
 	// fits
-//	vector<TF1*> fitLandau;
-//	vector<TF1*> fitLandau2Highest;
-//	vector<TF1*> fitResidualChargeWeighted;
-//	vector<TF1*> fitResidualHighest2Centroid;
+	vector<TF1*> fitLandau;
+	vector<TF1*> fitLandau2Highest;
+	vector<TF1*> fitResidualChargeWeighted;
+	vector<TF1*> fitResidualHighest2Centroid;
 	
 	
 	
