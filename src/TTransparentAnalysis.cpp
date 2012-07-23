@@ -77,21 +77,9 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	deleteHistograms();
 	deleteFits();
 	
-	// TODO: replace this!
 	vector<vector <Float_t> > meanPulseHeights;
 	vector<vector <Float_t> > mpPulseHeights;
 	vector<vector <pair <Float_t,Float_t> > > resolutions;
-//	meanPulseHeights.resize(2);
-//	resolutions.resize(2);
-	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-//		meanPulseHeights.at(0).push_back(100.*clusterSize);
-//		meanPulseHeights.at(1).push_back(200.*clusterSize);
-//		pair <Float_t,Float_t> resolution;
-//		resolution.first = 0.;
-//		resolution.second = 50. * 0.1381;
-//		resolutions.at(0).push_back(resolution);
-//		resolutions.at(1).push_back(resolution);
-	}
 	
 	mpPulseHeights.push_back(vecMPLandau);
 	mpPulseHeights.push_back(vecMPLandau2Highest);
@@ -427,6 +415,7 @@ void TTransparentAnalysis::printCluster(TCluster cluster) {
 	cout << "\n\thighest 2 centroid position: " << tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::highest2Centroid);
 	cout << "\n\tcharge weighted residual: " << getResidual(cluster,TCluster::chargeWeighted);
 	cout << "\n\thighest 2 centroid residual: " << getResidual(cluster,TCluster::highest2Centroid);
+	cout << "\n\teta: " << cluster.getEta();
 	cout << endl;
 	cluster.Print();
 }
