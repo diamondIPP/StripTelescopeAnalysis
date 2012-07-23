@@ -110,10 +110,20 @@ private:
 	vector<TH1F*> hLaundau;
 	vector<TH1F*> hEta;
 	vector<TH1F*> hResidualChargeWeighted;
+	TH1F* hLaundauMean;
+	TH1F* hLaundauMP;
 	
 	vector<TH1F*> hLaundau2Highest;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
+	TH1F* hLaundau2HighestMean;
+	TH1F* hLaundau2HighestMP;
+	
+	// fits
+//	vector<TF1*> fitLandau;
+//	vector<TF1*> fitLandau2Highest;
+//	vector<TF1*> fitResidualChargeWeighted;
+//	vector<TF1*> fitResidualHighest2Centroid;
 	
 	
 	

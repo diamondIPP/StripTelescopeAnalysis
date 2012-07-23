@@ -250,8 +250,8 @@ void TTransparentAnalysis::initHistograms() {
 		// TODO: take care of histogram names and bins!!
 		stringstream histNameLaundau, histNameLaundau2Highest, histNameEta, histNameResidualChargeWeighted, histNameResidualHighest2Centroid;
 		// TODO: histogram naming!!
-		histNameLaundau << "hDiaTranspAnaPulseHightOf" << clusterSize+1 << "Strips";
-		histNameLaundau2Highest << "hDiaTranspAnaPulseHightOf2HighestIn" << clusterSize+1 << "Strips";
+		histNameLaundau << "hDiaTranspAnaPulseHeightOf" << clusterSize+1 << "Strips";
+		histNameLaundau2Highest << "hDiaTranspAnaPulseHeightOf2HighestIn" << clusterSize+1 << "Strips";
 		histNameEta << "hDiaTranspAnaEta2HighestIn" << clusterSize+1 << "Strips";
 		histNameResidualChargeWeighted << "hDiaTranspAnaResidualChargeWeightedIn" << clusterSize+1 << "StripsMinusPred";
 		histNameResidualHighest2Centroid << "hDiaTranspAnaResidualHighest2CentroidIn" << clusterSize+1 << "StripsMinusPred";
@@ -261,6 +261,10 @@ void TTransparentAnalysis::initHistograms() {
 		hResidualChargeWeighted.push_back(new TH1F(histNameResidualChargeWeighted.str().c_str(),histNameResidualChargeWeighted.str().c_str(),bins,-5.,5.));
 		hResidualHighest2Centroid.push_back(new TH1F(histNameResidualHighest2Centroid.str().c_str(),histNameResidualHighest2Centroid.str().c_str(),bins,-5.,5.));
 	}
+	hLaundauMean = new TH1F("hDiaTranspAnaPulseHeightMean","hDiaTranspAnaPulseHeightMean",10,0.5,10.5);
+	hLaundauMP = new TH1F("hDiaTranspAnaPulseHeightMP","hDiaTranspAnaPulseHeightMP",10,0.5,10.5);
+	hLaundau2HighestMean = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMean","hDiaTranspAnaPulseHeightOf2HighestMean",10,0.5,10.5);
+	hLaundau2HighestMP = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMP","hDiaTranspAnaPulseHeightOf2HighestMP",10,0.5,10.5);
 }
 
 void TTransparentAnalysis::fillHistograms() {
@@ -288,50 +292,70 @@ TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
 }
 
 void TTransparentAnalysis::fitHistograms() {
-	
+	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		// fit histograms
+//		fitLandau.push_back(landauGauss->doLandauGaussFit(hLaundau[clusterSize]));
+//		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLaundau2Highest[clusterSize]));
+//		fitResidualChargeWeighted.push_back(doGaussFit(hResidualChargeWeighted[clusterSize]));
+//		fitResidualHighest2Centroid.push_back(doGaussFit(hResidualHighest2Centroid[clusterSize]));
+	}
 }
 
 void TTransparentAnalysis::saveHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		// fit histograms
 		TF1 *fitLandau=0, *fitLandau2Highest=0, *fitResidualChargeWeighted=0, *fitResidualHighest2Centroid=0;
 		fitLandau = landauGauss->doLandauGaussFit(hLaundau[clusterSize]);
 		fitLandau2Highest = landauGauss->doLandauGaussFit(hLaundau2Highest[clusterSize]);
 		fitResidualChargeWeighted = doGaussFit(hResidualChargeWeighted[clusterSize]);
 		fitResidualHighest2Centroid = doGaussFit(hResidualHighest2Centroid[clusterSize]);
+		
+		// save fit parameters
 		vecMPLandau.push_back(fitLandau->GetParameter(1));
 		vecMPLandau2Highest.push_back(fitLandau2Highest->GetParameter(1));
+		hLaundauMP->SetBinContent(clusterSize+1,fitLandau->GetParameter(1));
+		hLaundau2HighestMP->SetBinContent(clusterSize+1,fitLandau2Highest->GetParameter(1));
 		vecMeanLandau.push_back(hLaundau[clusterSize]->GetMean());
 		vecMeanLandau2Highest.push_back(hLaundau2Highest[clusterSize]->GetMean());
+		hLaundauMean->SetBinContent(clusterSize+1,hLaundau[clusterSize]->GetMean());
+		hLaundau2HighestMean->SetBinContent(clusterSize+1,hLaundau2Highest[clusterSize]->GetMean());
 		pair <Float_t,Float_t> tempPair;
-		if(fitResidualChargeWeighted!=0){
-		  //todo: @ LUKAS BUG:
-		  //#5  0x00007fd6fcbef394 in TFormula::GetParameter(int) const () from /afs/cern.ch/sw/lcg/app/releases/ROOT/5.33.02/x86_64-slc5-gcc43-opt/root/lib/libHo
-      //#6  0x000000000048c108 in TTransparentAnalysis::saveHistograms (this=0x1f4d210) at src/TTransparentAnalysis.cpp:278
-		  //
-		  // edited by Felix: Just an idea to be sure that everything worked?
-		  tempPair.first = fitResidualChargeWeighted->GetParameter(1);
-		  tempPair.second = fitResidualChargeWeighted->GetParameter(2);
+		if (fitResidualChargeWeighted!=0) {
+			tempPair.first = fitResidualChargeWeighted->GetParameter(1);
+			tempPair.second = fitResidualChargeWeighted->GetParameter(2);
 		}
-		else{
-		  tempPair.first = 0;
-		  tempPair.second = 0;
+		else {
+			tempPair.first = 0;
+			tempPair.second = 0;
 		}
 		vecResidualChargeWeighted.push_back(tempPair);
-		if(fitResidualHighest2Centroid!=0){
-		  tempPair.first = fitResidualHighest2Centroid->GetParameter(1);
-		  tempPair.second = fitResidualHighest2Centroid->GetParameter(2);
+		if (fitResidualHighest2Centroid!=0) {
+			tempPair.first = fitResidualHighest2Centroid->GetParameter(1);
+			tempPair.second = fitResidualHighest2Centroid->GetParameter(2);
 		}
-		else{
-		  tempPair.first = 0;
-		  tempPair.second = 0;
+		else {
+			tempPair.first = 0;
+			tempPair.second = 0;
 		}
 		vecResidualHighest2Centroid.push_back(tempPair);
+		
+		// save histograms
 		histSaver->SaveHistogramWithFit(hLaundau[clusterSize],fitLandau);
 		histSaver->SaveHistogramWithFit(hLaundau2Highest[clusterSize],fitLandau2Highest);
 		histSaver->SaveHistogram(hEta[clusterSize],0);
 		histSaver->SaveHistogramWithFit(hResidualChargeWeighted[clusterSize],fitResidualChargeWeighted);
 		histSaver->SaveHistogramWithFit(hResidualHighest2Centroid[clusterSize],fitResidualHighest2Centroid);
+		
+		// delete fits
+		delete fitLandau;
+		delete fitLandau2Highest;
+		delete fitResidualChargeWeighted;
+		delete fitResidualHighest2Centroid;
 	}
+	histSaver->SaveHistogram(hLaundauMean);
+	histSaver->SaveHistogram(hLaundauMP);
+	histSaver->SaveHistogram(hLaundau2HighestMean);
+	histSaver->SaveHistogram(hLaundau2HighestMP);
 }
 
 void TTransparentAnalysis::deleteHistograms() {
@@ -342,6 +366,10 @@ void TTransparentAnalysis::deleteHistograms() {
 		delete hResidualChargeWeighted[clusterSize];
 		delete hResidualHighest2Centroid[clusterSize];
 	}
+	delete hLaundauMean;
+	delete hLaundauMP;
+	delete hLaundau2HighestMean;
+	delete hLaundau2HighestMP;
 }
 
 void TTransparentAnalysis::printCutFlow() {
