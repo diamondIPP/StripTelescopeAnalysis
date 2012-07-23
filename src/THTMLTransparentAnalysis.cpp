@@ -25,7 +25,7 @@ void THTMLTransparentAnalysis::createContent() {
 	
 }
 
-void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > meanPulseHeigths) {
+void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > vecMeanPulseHeigths, vector<vector <Float_t> > vecMPPulseHeigths) {
 	// TODO: change this:
 	subjectDetector = 8;
 	
@@ -34,15 +34,21 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	"Summary table"
 	<<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
-//	if(meanPulseHeigths.size()<TPlaneProperties::getNDetectors()) meanPulseHeigths.resize(TPlaneProperties::getNDetectors());
-	vecTable.resize(3);
+//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
+	vecTable.resize(7);
 	vecTable.at(0).push_back("number of used channels");
-	vecTable.at(1).push_back("mean PulseHeigth");
-	vecTable.at(2).push_back("mean PulseHeigth 2 highest channels");
+	vecTable.at(1).push_back("PulseHeigth");
+	vecTable.at(2).push_back("mean");
+	vecTable.at(3).push_back("most probable");
+	vecTable.at(4).push_back("PulseHeigth 2 highest channels");
+	vecTable.at(5).push_back("mean");
+	vecTable.at(6).push_back("most probable");
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		vecTable.at(0).push_back(floatToString(clusterSize+1));
-		vecTable.at(1).push_back(floatToString(meanPulseHeigths.at(0).at(clusterSize)));
-		vecTable.at(2).push_back(floatToString(meanPulseHeigths.at(1).at(clusterSize)));
+		vecTable.at(2).push_back(floatToString(vecMeanPulseHeigths.at(0).at(clusterSize)));
+		vecTable.at(3).push_back(floatToString(vecMPPulseHeigths.at(0).at(clusterSize)));
+		vecTable.at(5).push_back(floatToString(vecMeanPulseHeigths.at(1).at(clusterSize)));
+		vecTable.at(6).push_back(floatToString(vecMPPulseHeigths.at(1).at(clusterSize)));
 	}
 	sectionContent << createTable(vecTable);
 	sectionContent << "\n\n<br><br>\n\n";
@@ -69,7 +75,7 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 	"Summary table"
 	<<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
-	//	if(meanPulseHeigths.size()<TPlaneProperties::getNDetectors()) meanPulseHeigths.resize(TPlaneProperties::getNDetectors());
+	//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
 	vecTable.resize(5);
 	vecTable.at(0).push_back("number of used channels");
 	vecTable.at(1).push_back("mean & width using charge weighted position");

@@ -98,7 +98,7 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	resolutions.push_back(vecResidualChargeWeighted);
 	resolutions.push_back(vecResidualHighest2Centroid);
 	
-	htmlTransAna->createPulseHeightPlots(meanPulseHeights);
+	htmlTransAna->createPulseHeightPlots(meanPulseHeights, mpPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
 	htmlTransAna->generateHTMLFile();
 	if(eventReader!=0)delete eventReader;
