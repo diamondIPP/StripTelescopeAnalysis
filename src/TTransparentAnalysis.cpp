@@ -102,6 +102,7 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	
 	htmlTransAna->createPulseHeightPlots(meanPulseHeights, mpPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
+	htmlTransAna->createEtaPlots();
 	htmlTransAna->generateHTMLFile();
 	if(eventReader!=0)delete eventReader;
 	if(histSaver!=0)delete histSaver;

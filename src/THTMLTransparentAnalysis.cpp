@@ -110,7 +110,22 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 }
 
 void THTMLTransparentAnalysis::createEtaPlots() {
+	// TODO: change this:
+	subjectDetector = 8;
 	
+	stringstream sectionContent;
+//	sectionContent<<"<h2>\n"<<
+//	"Eta distri"
+//	<<"</h2>\n";
+	
+	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		stringstream histoname;
+		histoname << "hDiaTranspAnaEta2HighestIn"<<clusterSize+1<<"Strips";
+		sectionContent << putImage(".",histoname.str());
+	}
+	
+	
+	addSection("Eta Distributions",sectionContent.str());
 }
 
 
