@@ -9,6 +9,8 @@
 using namespace std;
 
 TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
+
+  cout<<"new TADCEventReader: \n\tpathName:"<<FileName<<"\n\tRunNumber: "<<runNumber<<endl;
 	verbosity=0;
   pEvent=NULL;//new TEvent();
 	current_event = 0;
@@ -60,7 +62,6 @@ bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 	file->GetObject("tree",tree);
 	if(tree==NULL)
 	{
-		cout<<"tree does not exist, looking for other TTree objects."<<endl;
 		tree=(TTree*)getTreeName();
 	}
 
@@ -76,7 +77,7 @@ bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 }
 
 bool TADCEventReader::isOK(){
-	cout<<"TADCEventReader::isOK \""<<tree<<"\""<<!tree->IsZombie()<<endl;
+//	cout<<"TADCEventReader::isOK \""<<tree<<"\""<<!tree->IsZombie()<<endl;
 	return (tree!=NULL&&!tree->IsZombie());
 }
 
@@ -670,8 +671,8 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		if(etaDistributionPath.size()!=0){char t; cin>>t;}
 		return;
 	}
-	cout<<etaFileName<<endl;
-	char t; cin>>t;
+	cout<<etaFileName.str()<<endl;
+//	char t; cin>>t;
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		stringstream objectName;
 		objectName<<"hEtaIntegral_"<<det;

@@ -27,6 +27,7 @@
 #include "HistogrammSaver.class.hh"
 #include "TSettings.class.hh"
 #include"THTMLAlignment.hh"
+#include "TClustering.hh"
 #include "TADCEventReader.hh"
 class TAnalysisOfAlignment {
 public:

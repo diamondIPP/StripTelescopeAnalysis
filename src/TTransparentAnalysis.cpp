@@ -17,8 +17,9 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	sys = gSystem;
 	setSettings(settings);
 	UInt_t runNumber =settings->getRunNumber();
-	
-  eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),runNumber);
+
+  settings->goToAlignmentRootDir();
+  eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),runNumber);
 	// TODO: load settings!!!
 	
 	histSaver=new HistogrammSaver();

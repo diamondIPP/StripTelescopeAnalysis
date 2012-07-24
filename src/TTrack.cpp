@@ -389,8 +389,12 @@ UInt_t TTrack::getVerbosity() const
 
 void TTrack::setEtaIntegral(UInt_t det, TH1F *histo)
 {
+
 //	cout<<"TTRack set Eta Integral of histoMap of detector "<<det<<endl;
-	histoMap[det]=(TH1F*)histo->Clone();
+	if(histo!=0)
+	  histoMap[det]=(TH1F*)histo->Clone();
+	else
+	  histoMap[det]=0;
 }
 
 TH1F *TTrack::getEtaIntegral(UInt_t det)

@@ -47,7 +47,7 @@ public:
 	std::string getAlignmentFilePath();
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
-	std::string getEtaDistributionPath();
+	std::string getEtaDistributionPath(Int_t step=-1);
 	void goToRawTreeDir();
   void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
   void goToSelectionTreeDir();

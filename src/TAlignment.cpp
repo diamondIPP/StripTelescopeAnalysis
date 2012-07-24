@@ -21,7 +21,6 @@ TAlignment::TAlignment(TSettings* settings) {
   htmlAlign = new THTMLAlignment(settings);
   eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(), settings->getRunNumber());
   eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
-  //eventReader->checkADC();
   histSaver = new HistogrammSaver();
   settings->goToAlignmentDir();
   histSaver->SetPlotsPath(settings->getAlignmentDir());
@@ -705,8 +704,8 @@ TResidual TAlignment::CheckStripDetectorAlignmentChi2(TPlaneProperties::enumCoor
  */
 void TAlignment::saveAlignment() {
   stringstream fileName;
-  fileName << "alignment." << settings->getRunNumber() << ".root";
-  TFile *alignmentFile = new TFile(fileName.str().c_str(), "RECREATE");
+  settings->goToAlignmentRootDir();
+  TFile *alignmentFile = new TFile(settings->getAlignmentFilePath().c_str(), "RECREATE");
   cout << "TAlignment:saveAlignment(): path: \"" << sys->pwd() << "\", file Name:\"" << fileName.str() << "\"" << endl;
   alignmentFile->cd();
   align->SetName("alignment");

@@ -17,7 +17,7 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 		UInt_t runNumber=settings->getRunNumber();
 		sys = gSystem;
 		settings->goToAlignmentRootDir();
-		eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),runNumber);
+		eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),runNumber);
 		histSaver=new HistogrammSaver();
 		settings->goToAlignmentAnalysisDir();
 		htmlAlignment=new THTMLAlignment(settings);
@@ -140,9 +140,9 @@ cout<<"****************************************"<<endl;
 	cout<<"****************************************"<<endl;
 	vector<TH1F*> histoStripDistribution,histoStripDistributionFlattned;
 	vector<TH1F *>vecHEta;
-	stringstream fileName;
-	fileName<<	"etaIntegral_Step"<<correctionStep<<"."<<settings->getRunNumber()<<".root";
-	TFile* correctedEtaFile = new TFile(fileName.str().c_str(),"RECREATE");
+//	stringstream fileName;
+//	fileName<<	"etaIntegral_Step"<<correctionStep<<"."<<settings->getRunNumber()<<".root";
+	TFile* correctedEtaFile = new TFile(settings->getEtaDistributionPath(correctionStep).c_str(),"RECREATE");
 	cout<<"create Histos..."<<endl;
 	for(UInt_t det=0; det<TPlaneProperties::getNSiliconDetectors();det++){
 		stringstream histoTitle;
@@ -255,23 +255,13 @@ cout<<"****************************************"<<endl;
 			stringstream histName;
 			histName<<"hEtaIntegral"<<"_step"<<correctionStep<<"_"<<TPlaneProperties::getStringForDetector(det);;
 			UInt_t nBins = vecHEta.at(det)->GetNbinsX();
-			TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),nBins,0,1);
-			Int_t entries = vecHEta.at(det)->GetEntries();
-			entries -= vecHEta.at(det)->GetBinContent(0);
-			entries -=  vecHEta.at(det)->GetBinContent(nBins+1);
-			Int_t sum =0;
-			for(UInt_t bin=1;bin<nBins+1;bin++){
-				Int_t binContent = vecHEta.at(det)->GetBinContent(bin);
-				sum +=binContent;
-				Float_t pos =  vecHEta.at(det)->GetBinCenter(bin);
-				histo->Fill(pos, (Float_t)sum/(Float_t)entries);
-			}
+			TH1F *histo= TClustering::createEtaIntegral(vecHEta.at(det),histName.str());
 			cout<<"save "<<vecHEta.at(det)->GetTitle()<<" "<<vecHEta.at(det)->GetEntries()<<endl;
 			histSaver->SaveHistogram(vecHEta.at(det));
 			correctedEtaFile->Add(vecHEta.at(det));
 			cout<<"save "<<histo->GetTitle()<<" "<<histo->GetEntries()<<endl;
 			histSaver->SaveHistogram(histo);
-			correctedEtaFile->Add(histo->Clone());
+			correctedEtaFile->Add((TH1F*)histo->Clone());
 	}
 	correctedEtaFile->Write();
 	cout<<"Closing "<<correctedEtaFile->GetName()<<endl;
@@ -284,8 +274,6 @@ cout<<"****************************************"<<endl;
 	for(UInt_t i =0;i<histoStripDistribution.size(),i++;)
 	  cout<<vecHEta.at(i)<<" "<<flush;
 
-
-//	correctedEtaFile->Close();
 }
 
 void TAnalysisOfAlignment::chi2Distribution()

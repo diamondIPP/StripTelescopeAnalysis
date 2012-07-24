@@ -352,7 +352,6 @@ void TClustering::saveEtaCorrections(){
 		stringstream histName;
 		histName<<"hEtaIntegral_"<<det;
 		TH1F* histo = createEtaIntegral(hEtaDistribution[det],histName.str());
-
 		etaCorrectionFile->cd();
 		histo->Write();
 		hEtaDistribution[det]->Write();

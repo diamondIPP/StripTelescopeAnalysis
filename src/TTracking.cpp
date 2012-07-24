@@ -7,9 +7,11 @@
 
 #include "../include/TTracking.hh"
 
-TTracking::TTracking(std::string pathName, std::string alignmentName,UInt_t runNumber):TADCEventReader(pathName,runNumber){
+TTracking::TTracking(std::string pathName, std::string alignmentName,std::string etaDistributionPath, UInt_t runNumber):TADCEventReader(pathName,runNumber){
 	alignmentFile=NULL;
+	cout<<"new TTracking: \n\tpathName:"<<pathName<<"\n\ta;ignmentName: "<<alignmentName<<"\n\tetaDistPath: "<<etaDistributionPath<<"\n\tRunNumber: "<<runNumber<<endl;
 	setAlignment(alignmentName);
+	this->setEtaDistributionPath(etaDistributionPath);
 	if(myAlignment!=NULL)
 		myTrack=new TTrack(myAlignment);
 	else
@@ -17,9 +19,8 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,UInt_t runN
 	if(myTrack!=NULL)
 		for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
 		{
-
-			cout<<"Set EtaIntegral of detector "<<det<<flush;
-			TH1F* etaIntegral=(TH1F*)this->getEtaIntegral(det)->Clone();
+      cout<<"Set EtaIntegral of detector "<<det<<flush;
+      TH1F* etaIntegral=(TH1F*)this->getEtaIntegral(det);
 			myTrack->setEtaIntegral(det,etaIntegral);
 			cout<<" successful"<<endl;
 		}

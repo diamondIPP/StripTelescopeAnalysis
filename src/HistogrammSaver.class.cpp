@@ -136,7 +136,6 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	pt->Draw("same");
 	c1->Update();
 	SaveCanvas(c1);
-	delete c1;
 }
 
 
@@ -336,7 +335,6 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
   ostringstream plot_filename;
   plot_filename << plots_path << histo->GetName() << ".png";
   plots_canvas->Print(plot_filename.str().c_str());
-//  if(plots_canvas!=0) delete plots_canvas;
 }
 
 void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
@@ -391,7 +389,6 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas.Print(plot_filename.str().c_str());
-	if (histo!=0) delete histo;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
@@ -416,8 +413,6 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
   plots_canvas->Write();
 	f->Close();
 
-	if(plots_canvas!=0) plots_canvas->Close();
-
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
@@ -431,7 +426,6 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".png";
    plots_canvas->Print(plot_filename.str().c_str());
-   if(plots_canvas!=0) delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
@@ -448,9 +442,6 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".root";
    plots_canvas->Print(plot_filename.str().c_str());
-   if(plots_canvas!=0) delete plots_canvas;
-   if(pt2!=0) delete pt2;
-   if(htemp!=0) delete htemp;
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
@@ -464,9 +455,6 @@ void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string o
 	   ostringstream plot_filename;
 	   plot_filename << plots_path << name<< ".root";
 	   plots_canvas->Print(plot_filename.str().c_str());
-	   if(pt2!=0)delete pt2;
-	   if(gTemp!=0)delete gTemp;
-	   if(plots_canvas!=0)delete plots_canvas;
 }
 
 void HistogrammSaver::SetVerbosity(unsigned int i)

@@ -121,9 +121,12 @@ std::string TSettings::getAlignmentFilePath()
   return path.str();
 }
 
-std::string TSettings::getEtaDistributionPath(){
+std::string TSettings::getEtaDistributionPath(Int_t step){
   stringstream output;
-  output<<this->getAbsoluteOuputPath(false)<<"/etaCorrection."<<runNumber<<".root";
+  output<<this->getAbsoluteOuputPath(false)<<"/etaCorrection";
+  if(step>=0)
+    output<<"_Step"<<step;
+  output<<"."<<runNumber<<".root";
   return output.str();
 }
 
