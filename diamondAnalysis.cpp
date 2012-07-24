@@ -267,7 +267,7 @@ int main(int argc, char ** argv) {
 		if (DO_TRANSPARENT_ANALYSIS) {
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings);
-			transpAna->analyze(RunParameters[i].getEvents(),RunParameters[i].getEvents());
+			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
 		}
 		

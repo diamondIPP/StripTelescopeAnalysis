@@ -23,12 +23,11 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	// TODO: load settings!!!
 	
 	histSaver=new HistogrammSaver();
-	settings->goToTransparentAnalysisDir();
+//	settings->goToTransparentAnalysisDir();
 	histSaver->SetPlotsPath(settings->getTransparentAnalysisDir());
 	histSaver->SetRunNumber(settings->getRunNumber());
 	htmlTransAna= new THTMLTransparentAnalysis(settings);
 	htmlTransAna->setFileGeneratingPath(settings->getTransparentAnalysisDir());
-	settings->goToAlignmentRootDir();
 	
 	
 	// TODO: move these setting to the proper place
@@ -44,9 +43,9 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 		refPlanes.push_back(i);
 	}
 	clusterCalcMode = TCluster::highest2Centroid;
-	verbosity = 0;
+	verbosity = 6;
 	
-	
+//  settings->goToAlignmentRootDir();
 	initHistograms();
 //	this->seedSigma=seedSigma;
 //	this->hitSigma=hitSigma;
@@ -93,9 +92,11 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	saturatedChannel = 0;
 	screenedChannel = 0;
 	noValidTrack = 0;
+	cout<<"Current Dir: "<<sys->pwd()<<endl;
+	if(nEvents+startEvent<eventReader->GetEntries()) nEvents= eventReader->GetEntries()-startEvent;
 	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
-//		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << endl;
+		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << endl;
 		tracking->LoadEvent(nEvent);
 //		if (tracking->isValidTrack() == 0) {
 		if (tracking->useForAnalysis() == 0) {

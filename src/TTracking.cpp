@@ -24,6 +24,7 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,std::string
 			myTrack->setEtaIntegral(det,etaIntegral);
 			cout<<" successful"<<endl;
 		}
+	cout<<"DONE WITH LOADING TTRACKING"<<endl;
 }
 
 TTracking::~TTracking() {
@@ -86,6 +87,10 @@ bool TTracking::setAlignment(std::string alignmentName){
 }
 
 bool TTracking::LoadEvent(UInt_t eventNumber){
+  if(eventNumber>GetEntries()){
+    cout<<"eventNUmber > entries: "<<eventNumber<<" "<<GetEntries()<<endl;
+    eventNumber=GetEntries()-1;
+  }
 	if(myTrack!=NULL){
 		bool retVal=TADCEventReader::LoadEvent(eventNumber);
 		if(retVal)

@@ -73,6 +73,7 @@ TSelectionClass::~TSelectionClass() {
 	if(selectionTree!=NULL&&this->createdTree){
 		saveHistos();
 		cout<<"CLOSING TREE"<<endl;
+		settings->goToAlignmentRootDir();
 		cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<settings->getClusterTreeFilePath()<<endl;
 		selectionTree->AddFriend("clusterTree",settings->getClusterTreeFilePath().c_str());
 
@@ -82,7 +83,7 @@ TSelectionClass::~TSelectionClass() {
 		cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 
-		cout<<"\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
+		cout<<"\n\n\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
 		selectionFile->cd();
 		cout<<"\t"<<"WRITE TREE: "<<flush;
 		int retVal = selectionTree->Write();
