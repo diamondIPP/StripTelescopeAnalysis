@@ -87,18 +87,32 @@ bool TTracking::setAlignment(std::string alignmentName){
 }
 
 bool TTracking::LoadEvent(UInt_t eventNumber){
-  if(eventNumber>GetEntries()){
-    cout<<"eventNUmber > entries: "<<eventNumber<<" "<<GetEntries()<<endl;
-    eventNumber=GetEntries()-1;
+  if(verbosity>3){
+    cout<<"Load Event: "<<eventNumber<<flush;
+    cout<<" "<<GetEntries()<<endl;
   }
-	if(myTrack!=NULL){
-		bool retVal=TADCEventReader::LoadEvent(eventNumber);
-		if(retVal)
-			myTrack->setEvent(this->getEvent());
-		return retVal;
-	}
-	return false;
-}
+
+  if(eventNumber>GetEntries()){
+    cout<<"eventNumber > entries: "<<eventNumber<<" "<<GetEntries()<<endl;
+    eventNumber=GetEntries()-1;
+    if(eventNumber<0)eventNumber=0;
+    cout<<"new eventNumber ==> "<<eventNumber;
+  }
+  if(myTrack!=NULL){
+    if(verbosity>3){cout<<"myTrack!=0"<<endl;};
+    bool retVal=TADCEventReader::LoadEvent(eventNumber);
+    if(retVal)
+      myTrack->setEvent(this->getEvent());
+    return retVal;
+    }
+    else{
+      cout<<"MYTRACK==0!!!!!! WHATS WRONG???????"<<endl;
+      char t;cin>>t;
+      exit(-1);
+    }
+
+    return false;
+  }
 
 Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(myTrack==0)

@@ -119,7 +119,7 @@ private:
 	UInt_t current_event;
 	TSystem* sys;
 
-private:
+protected:
 	UInt_t verbosity;
 };
 

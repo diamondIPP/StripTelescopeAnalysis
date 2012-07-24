@@ -43,7 +43,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 		refPlanes.push_back(i);
 	}
 	clusterCalcMode = TCluster::highest2Centroid;
-	verbosity = 6;
+	verbosity = 0;
 	
 //  settings->goToAlignmentRootDir();
 	initHistograms();
@@ -79,7 +79,6 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	if(eventReader!=0)delete eventReader;
 	if(histSaver!=0)delete histSaver;
 	if(htmlTransAna)delete htmlTransAna;
-	if(tracking!=0) delete tracking;
 	settings->goToOutputDir();
 }
 
@@ -96,20 +95,20 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	if(nEvents+startEvent<eventReader->GetEntries()) nEvents= eventReader->GetEntries()-startEvent;
 	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
-		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << endl;
-		tracking->LoadEvent(nEvent);
-//		if (tracking->isValidTrack() == 0) {
-		if (tracking->useForAnalysis() == 0) {
+		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
+		eventReader->LoadEvent(nEvent);
+//		if (eventReader->isValidTrack() == 0) {
+		if (eventReader->useForAnalysis() == 0) {
 			if (verbosity > 6) printEvent();
 			noValidTrack++;
 			continue;
 		}
-		if (tracking->isInFiducialCut() == 0) {
+		if (eventReader->isInFiducialCut() == 0) {
 			noFidCutRegion++;
 			continue;
 		}
 		transparentClusters.clear();
-		positionPrediction = tracking->predictPosition(subjectPlane,refPlanes,false);
+		positionPrediction = eventReader->predictPosition(subjectPlane,refPlanes,false);
 		this->predXPosition = positionPrediction->getPositionX();
 		this->predYPosition = positionPrediction->getPositionY();
 //		if (verbosity > 4) cout << "predicted x position:\t" << this->predXPosition << "\ty position:\t" << this->predYPosition << endl;
@@ -122,10 +121,10 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 			this->predPosition = this->predYPosition;
 		}
 		// TODO: position in det system
-		this->positionInDetSystem = tracking->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
+		this->positionInDetSystem = eventReader->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
 //		if (verbosity > 4) cout << "position in det system:\t" << this->positionInDetSystem << endl;
 //		if (verbosity > 4)
-//			cout << "clustered analysis strip position:\t" << tracking->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
+//			cout << "clustered analysis strip position:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
 		if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystem, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)) == false) continue;
 		for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 			transparentClusters.push_back(this->makeTransparentCluster(subjectDetector, this->positionInDetSystem, clusterSize));
@@ -176,7 +175,7 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
 			screenedChannel++;
 			return false;
 		}
-		if (tracking->isSaturated(det, currentChannel) == true) {
+		if (eventReader->isSaturated(det, currentChannel) == true) {
 			if (verbosity > 5) cout << "channel " << currentChannel << " has saturated.." << endl;
 			saturatedChannel++;
 			return false;
@@ -207,12 +206,12 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
 //	if (centerPosition-(int)centerPosition<0.5) {
 //		direction = -1;
 //	}
-	TCluster transparentCluster = TCluster(tracking->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det));
+	TCluster transparentCluster = TCluster(eventReader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det));
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
 		currentChannel += direction * iChannel;
-		transparentCluster.addChannel(currentChannel, tracking->getRawSignal(det,currentChannel), tracking->getRawSignalInSigma(det,currentChannel), tracking->getAdcValue(det,currentChannel), tracking->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
+		transparentCluster.addChannel(currentChannel, eventReader->getRawSignal(det,currentChannel), eventReader->getRawSignalInSigma(det,currentChannel), eventReader->getAdcValue(det,currentChannel), eventReader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
 	return transparentCluster;
 }
@@ -360,14 +359,14 @@ void TTransparentAnalysis::printCutFlow() {
 
 void TTransparentAnalysis::printEvent() {
 	cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << endl;
-	if (tracking->useForAnalysis() == 0) {
+	if (eventReader->useForAnalysis() == 0) {
 		cout << "this track is not used for the analysis.." << endl;
 		return;
 	}
 	cout << "predicted pos in lab system:\t" << this->predPosition << "\tpredicted perp position:\t" << this->predPerpPosition << endl;
 	cout << "predicted pos in det system:\t" << this->positionInDetSystem << endl;
-	cout << "clustered analysis position in lab system:\t" << tracking->getStripXPosition(subjectPlane,this->predPerpPosition,clusterCalcMode) << endl;
-	cout << "clustered analysis position in det system:\t" << tracking->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
+	cout << "clustered analysis position in lab system:\t" << eventReader->getStripXPosition(subjectPlane,this->predPerpPosition,clusterCalcMode) << endl;
+	cout << "clustered analysis position in det system:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
 	if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystem, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)) == false) {
 		cout << "this track did not pass the check.." << endl;
 		return;
@@ -378,7 +377,7 @@ void TTransparentAnalysis::printEvent() {
 		cout << "\teta:\t" << this->transparentClusters[clusterSize].getEta() << endl;
 		cout << "\tresidual:\t" << this->getResidual(this->transparentClusters[clusterSize],this->clusterCalcMode) << endl;
 		cout << "\tcluster pos in det system:\t" << this->transparentClusters[clusterSize].getPosition(this->clusterCalcMode) << endl;
-		cout << "\tcluster pos in lab system:\t" << tracking->getPositionOfCluster(subjectDetector, this->transparentClusters[clusterSize], this->predPerpPosition, this->clusterCalcMode) << endl;
+		cout << "\tcluster pos in lab system:\t" << eventReader->getPositionOfCluster(subjectDetector, this->transparentClusters[clusterSize], this->predPerpPosition, this->clusterCalcMode) << endl;
 	}
 	return;
 }
@@ -397,8 +396,8 @@ void TTransparentAnalysis::printCluster(TCluster cluster) {
 	cout << "\n\thit sigma: " << cluster.getHitSigma();
 	cout << "\n\tpredicted channel: " << positionInDetSystem;
 	cout << "\n\tpredicted position: " << predPosition;
-	cout << "\n\tcharge weighted position: " << tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::chargeWeighted);
-	cout << "\n\thighest 2 centroid position: " << tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::highest2Centroid);
+	cout << "\n\tcharge weighted position: " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::chargeWeighted);
+	cout << "\n\thighest 2 centroid position: " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::highest2Centroid);
 	cout << "\n\tcharge weighted residual: " << getResidual(cluster,TCluster::chargeWeighted);
 	cout << "\n\thighest 2 centroid residual: " << getResidual(cluster,TCluster::highest2Centroid);
 	cout << "\n\teta: " << cluster.getEta();
@@ -407,6 +406,6 @@ void TTransparentAnalysis::printCluster(TCluster cluster) {
 }
 
 Float_t TTransparentAnalysis::getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode) {
-	return tracking->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,clusterCalculationMode)-this->predPosition;
+	return eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,clusterCalculationMode)-this->predPosition;
 }
 

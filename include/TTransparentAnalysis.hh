@@ -91,10 +91,9 @@ private:
 	
 	
     TSystem* sys;
-	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSettings* settings;
-	TTracking* tracking;
+	TTracking* eventReader;
 	THTMLTransparentAnalysis* htmlTransAna;
 	LandauGaussFit* landauGauss;
 	
