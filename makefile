@@ -34,7 +34,7 @@ LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64 $
 
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
 LIBFILES		+=   TDetector_Data.o TTrigger_Event.o
-LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o  PSDetector.class.o PSEvent.class.o
+LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o 
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o TADCEventReader.o
 LIBFILES		+=	TRawEventReader.o  TRawEventSaver.o TPedestalCalculation.o
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTracking.o 
