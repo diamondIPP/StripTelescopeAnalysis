@@ -73,6 +73,7 @@ private:
 	void analyzeTrack(TTrack track);
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
+	int getSignedChannelNumber(Float_t position);
 	void printEvent();
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode);

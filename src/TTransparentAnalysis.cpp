@@ -17,16 +17,16 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	sys = gSystem;
 	setSettings(settings);
 	UInt_t runNumber =settings->getRunNumber();
-
-  settings->goToAlignmentRootDir();
-  eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),runNumber);
+	
+	settings->goToAlignmentRootDir();
+	eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),runNumber);
 	// TODO: load settings!!!
 	
-	histSaver=new HistogrammSaver();
+	histSaver = new HistogrammSaver();
 //	settings->goToTransparentAnalysisDir();
 	histSaver->SetPlotsPath(settings->getTransparentAnalysisDir());
 	histSaver->SetRunNumber(settings->getRunNumber());
-	htmlTransAna= new THTMLTransparentAnalysis(settings);
+	htmlTransAna = new THTMLTransparentAnalysis(settings);
 	htmlTransAna->setFileGeneratingPath(settings->getTransparentAnalysisDir());
 	
 	
@@ -92,10 +92,13 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	screenedChannel = 0;
 	noValidTrack = 0;
 	cout<<"Current Dir: "<<sys->pwd()<<endl;
-	if(nEvents+startEvent<eventReader->GetEntries()) nEvents= eventReader->GetEntries()-startEvent;
+	if (nEvents+startEvent >= eventReader->GetEntries()) {
+		cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
+		nEvents = eventReader->GetEntries()-startEvent;
+	}
 	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
-		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
+//		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
 		eventReader->LoadEvent(nEvent);
 //		if (eventReader->isValidTrack() == 0) {
 		if (eventReader->useForAnalysis() == 0) {
@@ -137,25 +140,14 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 }
 
 bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
-	// TODO: write a function for that!!!!
+	// get channel and direction for clustering
 	UInt_t centerChannel;
 	int direction;
-	if (centerPosition-(int)centerPosition<0.5) {
-		centerChannel = (UInt_t)centerPosition;
-		direction = 1;
-	}
-	else {
-		centerChannel = (UInt_t)centerPosition+1;
-		direction = -1;
-	}
+	direction = getSignedChannelNumber(centerPosition);
+	centerChannel = TMath::Abs(direction);
+	direction = direction / TMath::Abs(direction);
 	
-	
-	// TODO: cut flow!!
-//	UInt_t centerChannel = (UInt_t)centerPosition;
-//	int direction = 1;
-//	if (centerPosition-(int)centerPosition<0.5) {
-//		direction = -1;
-//	}
+	// check predicted cluster channels
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
@@ -186,26 +178,15 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
 
 // TODO: avoid wrong channel numbers (>128, <0)
 TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
-	// TODO: write a function for that!!!!
+	// get channel and direction for clustering
 	UInt_t centerChannel;
 	int direction;
-	if (centerPosition-(int)centerPosition<0.5) {
-		centerChannel = (UInt_t)centerPosition;
-		direction = 1;
-	}
-	else {
-		centerChannel = (UInt_t)centerPosition+1;
-		direction = -1;
-	}
+	direction = getSignedChannelNumber(centerPosition);
+	cout << "centerPosition: " << centerPosition << "\tdirection: " << direction << endl;
+	centerChannel = TMath::Abs(direction);
+	direction = direction / TMath::Abs(direction);
 	
-	
-	
-	
-//	UInt_t centerChannel = (UInt_t)centerPosition;
-//	int direction = 1;
-//	if (centerPosition-(int)centerPosition<0.5) {
-//		direction = -1;
-//	}
+	// make cluster
 	TCluster transparentCluster = TCluster(eventReader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det));
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
@@ -216,7 +197,22 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
 	return transparentCluster;
 }
 
-void TTransparentAnalysis::setSettings(TSettings* settings){
+int TTransparentAnalysis::getSignedChannelNumber(Float_t position) {
+	if (position < 0) return -9999;
+	UInt_t channel = 0;
+	int direction;
+	if (position-(int)position < 0.5) {
+		channel = (UInt_t)position;
+		direction = 1;
+	}
+	else {
+		channel = (UInt_t)position+1;
+		direction = -1;
+	}
+	return direction * channel;
+}
+
+void TTransparentAnalysis::setSettings(TSettings* settings) {
 	this->settings=settings;
 }
 
