@@ -58,6 +58,7 @@ public:
 	virtual ~TTransparentAnalysis();
 	void	doAnalysis(int nEvents=0);
 	void analyze(UInt_t nEvents, UInt_t startEvent);
+	void doEtaCorrectedResiduals();
 	void setSettings(TSettings* settings);
 	
 private:
@@ -71,6 +72,7 @@ private:
 	void printCutFlow();
 	void fitTrack();
 	void analyzeTrack(TTrack track);
+	void predictPositions();
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	int getSignedChannelNumber(Float_t position);
@@ -78,6 +80,7 @@ private:
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode);
 	
+	// run variables
 	UInt_t subjectDetector, subjectPlane;
 	TPlaneProperties::enumCoordinate subjectDetectorCoordinate;
 	vector<UInt_t> refPlanes;
@@ -85,12 +88,13 @@ private:
 	UInt_t verbosity;
 	UInt_t nEvent;
 	
+	// event variables
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;
 	Float_t predXPosition, predYPosition;
 	Float_t positionInDetSystem, predPerpPosition, predPosition;
 	
-	
+	// sys variables
     TSystem* sys;
 	HistogrammSaver* histSaver;
     TSettings* settings;
@@ -105,7 +109,6 @@ private:
 	UInt_t screenedChannel;
 	UInt_t noValidTrack;
 	UInt_t noFidCutRegion;
-	
 	
 	// histograms
 	vector<TH1F*> hLaundau;
@@ -145,6 +148,8 @@ private:
 //   	TH1F* histo_transparentclustering_chi2Y;
 	
 	// results
+	vector<UInt_t> eventNumbers;
+	vector< vector<TCluster> > vecTransparentClusters;
 	vector<Float_t> vecMPLandau;
 	vector<Float_t> vecMPLandau2Highest;
 	vector<Float_t> vecMeanLandau;

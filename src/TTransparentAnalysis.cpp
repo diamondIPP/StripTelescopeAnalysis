@@ -111,6 +111,11 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 			continue;
 		}
 		transparentClusters.clear();
+		
+		this->predictPositions();
+		
+		
+		/*
 		positionPrediction = eventReader->predictPosition(subjectPlane,refPlanes,false);
 		this->predXPosition = positionPrediction->getPositionX();
 		this->predYPosition = positionPrediction->getPositionY();
@@ -128,6 +133,9 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 //		if (verbosity > 4) cout << "position in det system:\t" << this->positionInDetSystem << endl;
 //		if (verbosity > 4)
 //			cout << "clustered analysis strip position:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
+		*/
+		
+		
 		if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystem, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)) == false) continue;
 		for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 			transparentClusters.push_back(this->makeTransparentCluster(subjectDetector, this->positionInDetSystem, clusterSize));
@@ -135,8 +143,45 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		nAnalyzedEvents++;
 		this->fillHistograms();
 		if (verbosity > 4) printEvent();
+		
+		// save clusters for eta corrected analysis
+		vecTransparentClusters.push_back(transparentClusters);
+		eventNumbers.push_back(nEvent);
 	}
 	this->printCutFlow();
+}
+
+void TTransparentAnalysis::doEtaCorrectedResiduals() {
+	if (eventNumbers.size() != vecTransparentClusters.size()) {
+		cout << "size of eventNumbers and transparentClusters do not match!" << endl;
+		return;
+	}
+	for (UInt_t iEvent = 0; iEvent < eventNumbers.size(); iEvent++) {
+		nEvent = eventNumbers.at(iEvent);
+		eventReader->LoadEvent(nEvent);
+		this->predictPositions();
+		
+	}
+}
+
+void TTransparentAnalysis::predictPositions() {
+	positionPrediction = eventReader->predictPosition(subjectPlane,refPlanes,false);
+	this->predXPosition = positionPrediction->getPositionX();
+	this->predYPosition = positionPrediction->getPositionY();
+	//		if (verbosity > 4) cout << "predicted x position:\t" << this->predXPosition << "\ty position:\t" << this->predYPosition << endl;
+	if (subjectDetector%2 == 0) {
+		this->predPerpPosition = this->predYPosition;
+		this->predPosition = this->predXPosition;
+	}
+	else {
+		this->predPerpPosition = this->predXPosition;
+		this->predPosition = this->predYPosition;
+	}
+	// TODO: position in det system
+	this->positionInDetSystem = eventReader->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
+	//		if (verbosity > 4) cout << "position in det system:\t" << this->positionInDetSystem << endl;
+	//		if (verbosity > 4)
+	//			cout << "clustered analysis strip position:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
 }
 
 bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
