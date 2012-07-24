@@ -16,30 +16,20 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 		setSettings(settings);
 		UInt_t runNumber=settings->getRunNumber();
 		sys = gSystem;
-	  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());;
-	  sys->cd(settings->getAbsoluteOuputPath().c_str());
-		stringstream  filepath;
-		filepath.str("");
-		filepath<<"selectionData."<<runNumber<<".root";
-		cout<<"currentPath: "<<sys->pwd()<<endl;
-		cout<<filepath.str()<<endl;
-		stringstream alignFile;
-		alignFile<<"alignment."<<runNumber<<".root";
-		eventReader=new TTracking(filepath.str(),alignFile.str(),runNumber);
+		settings->goToAlignmentRootDir();
+		eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),runNumber);
 		histSaver=new HistogrammSaver();
-		sys->MakeDirectory("anaAlignmnet");
+		settings->goToAlignmentAnalysisDir();
 		htmlAlignment=new THTMLAlignment(settings);
 		htmlAlignment->setAlignment(eventReader->getAlignment());
-		htmlAlignment->setFileGeneratingPath(((string)sys->pwd()).append("/alignment/"));
+		htmlAlignment->setFileGeneratingPath(settings->getAlignmentAnalysisFilePath());
 		htmlAlignment->createContent();
 		htmlAlignment->generateHTMLFile();
-		delete htmlAlignment;
+    settings->goToAlignmentAnalysisDir();
 		sys->cd("anaAlignmnet");
-		stringstream plotsPath;
-		plotsPath<<sys->pwd()<<"/";
-		histSaver->SetPlotsPath(plotsPath.str().c_str());
+		histSaver->SetPlotsPath(settings->getAlignmentAnalysisFilePath());
 		histSaver->SetRunNumber(runNumber);
-		sys->cd("..");
+		settings->goToAlignmentRootDir();
 		initialiseHistos();
 		cout<<"end initialise"<<endl;
 		settings=0;
@@ -49,7 +39,7 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 TAnalysisOfAlignment::~TAnalysisOfAlignment() {
 	delete eventReader;
 	delete histSaver;
-	sys->cd("..");
+	settings->goToOutputDir();
 }
 
 void TAnalysisOfAlignment::doAnalysis(UInt_t nEvents){

@@ -267,6 +267,8 @@ void HistogrammSaver::SaveHistogram(TH2F* histo) {
 
 void HistogrammSaver::SaveCanvas(TCanvas *canvas)
 {
+  if(canvas==0)
+    return;
 	SaveCanvasPNG(canvas);
 	SaveCanvasROOT(canvas);
 }
@@ -334,9 +336,7 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
   ostringstream plot_filename;
   plot_filename << plots_path << histo->GetName() << ".png";
   plots_canvas->Print(plot_filename.str().c_str());
-  /*if(plots_canvas!=0) delete plots_canvas;
-  if(pt2!=0) delete pt2;
-  if(htemp!=0) delete htemp;*/
+//  if(plots_canvas!=0) delete plots_canvas;
 }
 
 void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
@@ -351,6 +351,8 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
 
 void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
 {
+  if(canvas==0)
+    return;
 	canvas->cd();
 	pt->Clone()->Draw();
 	ostringstream plot_filename;
@@ -401,7 +403,7 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 //	plot_filename << plots_path << histo->GetName() << ".root";
 	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
 
-  TCanvas *plots_canvas = new TCanvas("plots_canvas1","plots_canvas");
+  TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
 	TH1* histo = (TH1*)htemp->Clone();
   TPaveText* pt2 = (TPaveText*)pt->Clone();
 
@@ -415,13 +417,11 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	f->Close();
 
 	if(plots_canvas!=0) plots_canvas->Close();
-//	if (histo!=0) delete histo;
-//	if(pt2!=0) delete pt2;
 
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
-   if(histo->GetEntries()==0)return;
+	if(histo->GetEntries()==0)return;
    TCanvas*  plots_canvas = new TCanvas("plots_canvas","plots_canvas");
    plots_canvas->cd();
    TH2F* htemp = (TH2F*)histo->Clone();
@@ -431,21 +431,26 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".png";
    plots_canvas->Print(plot_filename.str().c_str());
+   if(plots_canvas!=0) delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
-   if(histo->GetEntries()==0)return;
-   TH2F* htemp = (TH2F*)histo->Clone();
-   if(htemp==0) return;
-   TPaveText* pt2 = (TPaveText*)pt->Clone();
-   TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+	if(histo->GetEntries()==0)return;
+   TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
    plots_canvas->cd();
+   TH2F* htemp = (TH2F*)histo->Clone();
+   if(htemp==0)
+     return;
+   htemp->Draw();
    htemp->Draw("colz");
+   TPaveText* pt2 = (TPaveText*)pt->Clone();
    pt2->Draw();
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".root";
    plots_canvas->Print(plot_filename.str().c_str());
-//   if(plots_canvas!=0) plots_canvas->Close();
+   if(plots_canvas!=0) delete plots_canvas;
+   if(pt2!=0) delete pt2;
+   if(htemp!=0) delete htemp;
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
@@ -459,6 +464,9 @@ void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string o
 	   ostringstream plot_filename;
 	   plot_filename << plots_path << name<< ".root";
 	   plots_canvas->Print(plot_filename.str().c_str());
+	   if(pt2!=0)delete pt2;
+	   if(gTemp!=0)delete gTemp;
+	   if(plots_canvas!=0)delete plots_canvas;
 }
 
 void HistogrammSaver::SetVerbosity(unsigned int i)
@@ -470,6 +478,8 @@ void HistogrammSaver::SetVerbosity(unsigned int i)
 
 void HistogrammSaver::SaveCanvasRoot(TCanvas *canvas, string location, string file_name)
 {
+  if(canvas==0)
+    return;
     char loc[500];
     memcpy(loc,location.c_str(),strlen(location.c_str())+1);
     char rt[] = ".root";
@@ -489,6 +499,7 @@ void HistogrammSaver::SaveCanvasRoot(TCanvas *canvas, string location, string fi
 //void SaveCanvasC(TCanvas *canvas, char* location, char* file_name);
 void SaveCanvasC(TCanvas *canvas, string location, string file_name)
 {
+  if(canvas==0 )return;
    char loc[500];
    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
    char cmac[] = ".C";
@@ -504,6 +515,7 @@ void SaveCanvasC(TCanvas *canvas, string location, string file_name)
 
 void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, string location, string file_name)
 {
+  if(canvas==0)return;
    char loc[500];
    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
    char png[] = ".png";

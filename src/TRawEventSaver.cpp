@@ -7,23 +7,25 @@
 
 #include "../include/TRawEventSaver.hh"
 
-TRawEventSaver::TRawEventSaver(TSettings *settings){//unsigned int RunNumber, std::string RunDescription){
-	// TODO Auto-generated constructor stub
+TRawEventSaver::TRawEventSaver(TSettings *settings){
+  // TODO Auto-generated constructor stub
   cout<<"Raw event Saver"<<endl;
 	this->settings=settings;
 	this->runNumber=settings->getRunNumber();
 	rawEventReader = new TRawEventReader(settings);//this->runNumber);
 	sys = gSystem;
-	if(!settings->existsDirectory(settings->getAbsoluteOuputPath()))
-	  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());;
-	sys->cd(settings->getAbsoluteOuputPath().c_str());
-
-	rawfilepath.str("");
+//	if(!settings->existsDirectory(settings->getAbsoluteOuputPath(false)))
+//	  sys->MakeDirectory(settings->getAbsoluteOuputPath(false).c_str());;
+//	sys->cd(settings->getAbsoluteOuputPath(false).c_str());
+//	cout<<"current SYS: "<<sys->pwd()<<endl;
+//	rawfilepath.str("");
+	settings->goToRawTreeDir();
 //	rawfilepath<<settings->getRelativeOuputPath().c_str();
-	rawfilepath<<settings->getAbsoluteOuputPath()<<"/rawData."<<runNumber<<".root";
-	cout<<"current Path: "<<sys->pwd()<<endl;
-	cout<<"raw File Path: "<<rawfilepath.str()<<endl;
-	this->rawFile=TFile::Open(rawfilepath.str().c_str());
+	rawfilepath<<settings->getRawTreeFilePath();
+//	cout<<"current Path: "<<sys->pwd()<<endl;
+//	cout<<"raw File Path:  "<<rawfilepath.str()<<endl;
+	cout<<"raw File Path2: "<<settings->getRawTreeFilePath()<<endl;
+	this->rawFile=TFile::Open(settings->getRawTreeFilePath().c_str());
 	cout<<"rawFile"<<rawFile<<"\t"<<flush;
 	if(rawFile==0){
 		createdNewFile=true;
@@ -48,9 +50,9 @@ TRawEventSaver::TRawEventSaver(TSettings *settings){//unsigned int RunNumber, st
 TRawEventSaver::~TRawEventSaver() {
 	// TODO Auto-generated destructor stub
 	cout<<"closing Files...,"<<endl;
-	rawTree->Write("rawTree");
+	if(createdNewTree)rawTree->Write("rawTree");
 	rawFile->Close();
-	sys->cd("..");
+	settings->goToOutputDir();
 }
 
 
@@ -68,6 +70,8 @@ void TRawEventSaver::saveEvents(int nEvents){
 		rawFile->Close();
 		this->rawFile= new TFile(rawfilepath.str().c_str(),"recreate");
 		this->rawTree=new TTree("rawTree",treeDescription.str().c_str());
+		createdNewTree=true;
+		createdNewFile=true;
 		cout<<"Save Events to tree"<<endl;
 		rawTree->Reset();
 		this->setBranches();

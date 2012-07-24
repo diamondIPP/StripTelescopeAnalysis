@@ -79,8 +79,8 @@ public:
 	Float_t getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
 	Float_t getXPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
 	Float_t getYPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
-	void setEtaIntergral(UInt_t det,TH1F* histo);
-	TH1F* getEtaIntergral(UInt_t det);
+	void setEtaIntegral(UInt_t det,TH1F* histo);
+	TH1F* getEtaIntegral(UInt_t det);
 
     ;
 private:

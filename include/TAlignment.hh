@@ -30,8 +30,7 @@
 
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
-#include "Track.class.hh"
-#include "Cluster.class.hh"
+#include "TCluster.hh"
 #include "TADCEventReader.hh"
 #include "TDiamondTrack.hh"
 #include "TSettings.class.hh"

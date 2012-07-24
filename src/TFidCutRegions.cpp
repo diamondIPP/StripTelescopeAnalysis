@@ -8,6 +8,7 @@
 #include "../include/TFidCutRegions.hh"
 
 using namespace std;
+
 TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt,UInt_t nDia) {
   this->nDiamonds=nDia;
   index=0;
@@ -19,10 +20,36 @@ TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt,s
   createFidCuts();
 }
 
-TFidCutRegions::TFidCutRegions(TH1D* histo, int nDiamonds)
+TFidCutRegions::TFidCutRegions(TH2F* histo,int nDiamonds,Float_t fidCutPercentage)
 {
+  cout<<"Create FiducialCutRegions for histogram "<<histo->GetTitle()<<" with "<<nDiamonds<<" Diamonds."<<endl;
   index=0;
   this->nDiamonds=nDiamonds;
+  if (histo==0) {
+    cerr<<"Histo is not defined"<<endl;
+    nFidCuts=0;
+    return;
+  }
+  hEventScatterPlot=histo;
+  TH1D* hProjX = hEventScatterPlot->ProjectionX("hFiducialCutOneDiamondHitProjX");
+  hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
+  hProjX->GetYaxis()->SetTitle("Number Of Entries #");
+  TH1D* hProjY = hEventScatterPlot->ProjectionY("hFiducialCutOneDiamondHitProjY");
+  hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
+  hProjY->GetYaxis()->SetTitle("Number Of Entries #");
+
+  hProjX->SetName("hProjX");
+  hProjY->SetName("hProjY");
+  if(hProjX==0||hProjY==0)
+    return;
+  if(hProjX->IsZombie()||hProjY->IsZombie())
+    return;
+
+  vector<pair <Float_t, Float_t> >xIntervals = findFiducialCutIntervall( hProjX,fidCutPercentage);
+  vector<pair <Float_t, Float_t> >yIntervals = findFiducialCutIntervall( hProjY,fidCutPercentage);
+  xInt = xIntervals;
+  yInt = yIntervals;
+  createFidCuts();
 //todo create a way that this function extract the fidCuts out of the histo
 }
 
@@ -86,6 +113,37 @@ bool TFidCutRegions::isInFiducialCut(Float_t xVal, Float_t yVal)
   return false;
 }
 
+TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter)
+{
+  if(hScatter==0) hScatter= hEventScatterPlot;
+  if(hScatter==0)  return 0;
+  TCanvas *c1 = new TCanvas("cFiducialCuts","cFiducialCuts",1024,800);
+  c1->cd();
+  string hName = hScatter->GetName();
+  hName.append("_clone");
+  TH2F* htemp = (TH2F*)hScatter->Clone(hName.c_str());
+  htemp->Draw("colz");
+  for(UInt_t i=0;i<fidCuts.size();i++)
+    getFiducialAreaPaveText(i)->Draw("same");
+  return c1;
+}
+
+TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
+{
+  if (nFidCut>=fidCuts.size())
+    return 0;
+  Float_t xLow = fidCuts.at(nFidCut)->GetXLow();
+  Float_t xHigh = fidCuts.at(nFidCut)->GetXHigh();
+  Float_t yLow = fidCuts.at(nFidCut)->GetYLow();
+  Float_t yHigh = fidCuts.at(nFidCut)->GetYHigh();
+  TPaveText * pt = new TPaveText(xLow,yLow,xHigh,yHigh);
+  if(index == nFidCut + 1||index == 0){
+    pt->SetFillColor(kRed);
+    pt->SetFillStyle(3013);
+  }
+  return pt;
+}
+
 void TFidCutRegions::createFidCuts(){
   if(nDiamonds!=nFidCuts){
     cout<<"Fid Cut does not match with nDIamonds"<<endl;
@@ -103,6 +161,7 @@ void TFidCutRegions::createFidCuts(){
       fidCut->Print();
       this->fidCuts.push_back(fidCut);
     }
+  cout<<"DONE with creating FidCuts"<<endl;
 }
 
 TFiducialCut* TFidCutRegions::getFidCut(std::string describtion){
@@ -124,6 +183,94 @@ TFiducialCut* TFidCutRegions::getFidCut(std::string describtion){
     else return fidCuts.at(0);
   }
   return 0;
+}
 
+
+std::vector< std::pair< Float_t,Float_t> > TFidCutRegions::findFiducialCutIntervall(TH1D* hProj,Float_t fidCutPercentage){
+  int minWidth = 03;//channels
+  Float_t mean = hProj->Integral()/hProj->GetNbinsX();
+  Int_t nLow=0;
+  Int_t nHigh=0;
+  int nbins = hProj->GetNbinsX();
+  Float_t value = mean*fidCutPercentage;
+  cout<<value<<endl;
+  std::vector< std::pair<Float_t,Float_t> > intervals;
+  while(nLow<nbins-1){
+    nLow=nHigh+1;
+    bool foundLeft=false;
+    bool foundRight=false;
+    while(nLow<nbins-1&&hProj->GetBinContent(nLow)<value){
+      nLow++;
+    }
+    nHigh=nLow;
+    foundLeft = (hProj->GetBinContent(nLow)>value&&nLow<nbins);
+    if(foundLeft){
+      while(nHigh<nbins&&hProj->GetBinContent(nHigh)>value){
+        nHigh++;
+      }
+      foundRight=hProj->GetBinContent(nHigh)<value&&nHigh<nbins-1;
+    }
+
+    if(foundLeft&&foundRight){
+      Float_t x1=hProj->GetBinLowEdge(nLow+1)+1;
+      Float_t x2=hProj->GetBinLowEdge(nHigh-1)-1;
+      if(x1<x2&&nHigh-nLow>minWidth){
+        cout<<"Found first intervall: ["<<nLow<<","<<nHigh<<"]\t= ["<<x1<<","<<x2<<"]"<<endl;
+        intervals.push_back( std::make_pair(x1,x2));
+      }
+    }
+    nLow=nHigh;
+  }
+//  DrawFiduciaCuts(hProj,intervals);
+//  cout<<"DONE"<<endl;
+  return intervals;
+}
+
+
+TCanvas *TFidCutRegions::getFiducialCutCanvas(TPlaneProperties::enumCoordinate cor){
+  if(hEventScatterPlot==0) {
+    cout<<"hEventScatterPlot is Zero!!!!!"<<endl;
+    char t; cin>>t;
+    return 0;
+  }
+  if(hEventScatterPlot->IsZombie())return 0;
+  if(cor == TPlaneProperties::X_COR){
+   TH1D *hProjX =  hEventScatterPlot->ProjectionX("hFiducialCutOneDiamondHitProjX");
+   hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
+   hProjX->GetYaxis()->SetTitle("Number Of Entries #");
+   return getFiducialCutProjectionCanvas(hProjX,xInt);
+  }
+  else if(cor == TPlaneProperties::Y_COR){
+    TH1D *hProjY = hEventScatterPlot->ProjectionY("hFiducialCutOneDiamondHitProjY");
+    hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
+    hProjY->GetYaxis()->SetTitle("Number Of Entries #");
+   return getFiducialCutProjectionCanvas(hProjY,yInt);
+  }
+  else if(cor == TPlaneProperties::XY_COR){
+    return getAllFiducialCutsCanvas();
+  }
+  return 0;
+}
+
+TCanvas *TFidCutRegions::getFiducialCutProjectionCanvas(TH1D* hProj,std::vector< std::pair<Float_t,Float_t> > intervals){
+  if (hProj==0)
+    return 0;
+  std::stringstream canvasName;
+  canvasName<<"c"<<hProj->GetName();
+  TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
+  c1->cd();
+  hProj->Draw();
+  vector<TBox* > boxes;
+  for(UInt_t i=0;i<intervals.size();i++){
+    TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
+    box->SetFillColor(kRed+i);
+    box->SetFillStyle(3013);
+    box->AddText("");
+    box->AddText("");
+    box->AddText(Form("Area\n\n%i",i));
+    boxes.push_back(box);
+    box->Draw("same");
+  }
+  return c1;
 
 }

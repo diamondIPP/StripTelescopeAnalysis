@@ -183,7 +183,7 @@ int main(int argc, char ** argv) {
     TResults *currentResults =new TResults(settings);
     currentResults->Print();
 
-    sys->cd(currentDir.c_str());
+
 		TRawEventSaver *eventSaver;
 		eventSaver = new TRawEventSaver(settings);
 		eventSaver->saveEvents(RunParameters[i].getEvents());
@@ -207,11 +207,9 @@ int main(int argc, char ** argv) {
 		}
 
 		THTMLGenerator *htmlGen = new THTMLGenerator(settings);
-		stringstream path;
-		path<<currentDir<<"/"<<settings->getAbsoluteOuputPath(true)<<"/";
-		htmlGen->setMainPath("./");//(string)(currentDir+"/16202/"));
+		htmlGen->setFileGeneratingPath(settings->getAbsoluteOuputPath(true));
+		htmlGen->setMainPath("./");
 		htmlGen->setSubdirPath("");
-		htmlGen->setFileGeneratingPath(path.str());
     htmlGen->setFileName("overview.html");
 		htmlGen->addSection("Pedestal","<a href=\"./pedestalAnalysis/pedestal.html\">PEDESTAL</a>");
 		htmlGen->addSection("Clustering","<a href=\"./clustering/clustering.html\">CLUSTERING</a>");

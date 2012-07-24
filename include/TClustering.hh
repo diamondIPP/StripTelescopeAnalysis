@@ -43,6 +43,7 @@ public:
 	virtual ~TClustering();
 	void ClusterEvents(UInt_t nEvents);
 	void setSettings(TSettings* settings);
+	static TH1F* createEtaIntegral(TH1F* histo, std::string histName);
 private:
 	void addToEtaDistributions();
 	void saveEtaCorrections();

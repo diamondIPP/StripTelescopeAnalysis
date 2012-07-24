@@ -27,7 +27,6 @@ TSettings::TSettings(TRunInfo *runInfo)
   DefaultLoadDefaultSettings();
   this->runNumber=runInfo->getRunNumber();
   sys = gSystem;
-  path ="";// sys->pwd();
   setRunDescription(runInfo->getRunDescription());
   stringstream fileNameStr;
   fileNameStr<<path<<"/"<<runInfo->getRunSettingsDir()<<"/settings."<<runInfo->getRunNumber();
@@ -86,19 +85,101 @@ TSettings::~TSettings(){
   cout<<"delete Settings"<<endl;
 }
 
+std::string TSettings::getRawTreeFilePath()
+{
+  stringstream path;
+  path<<getAbsoluteOuputPath(false);
+  path<<"rawData."<<getRunNumber()<<".root";
+  return path.str();
+}
 
+std::string TSettings::getPedestalTreeFilePath()
+{
+  stringstream path;
+  path<<getAbsoluteOuputPath(false);
+  path<<"pedestalData."<<getRunNumber()<<".root";
+  return path.str();
+}
+
+std::string TSettings::getClusterTreeFilePath()
+{
+  stringstream path;
+  path<<getAbsoluteOuputPath(false);
+  path<<"clusterData."<<getRunNumber()<<".root";
+  return path.str();
+}
+
+std::string TSettings::getAlignmentFilePath()
+{
+
+  stringstream path;
+  path<<getAbsoluteOuputPath(false);
+  path<<"alignment."<<getRunNumber();
+  if(this->isSpecialAnalysis())
+    path<<"-"<<getRunDescription();
+  path<<".root";
+  return path.str();
+}
+
+std::string TSettings::getEtaDistributionPath(){
+  stringstream output;
+  output<<this->getAbsoluteOuputPath(false)<<"/etaCorrection."<<runNumber<<".root";
+  return output.str();
+}
+
+std::string TSettings::getSelectionTreeFilePath()
+{
+  stringstream path;
+  path<<getAbsoluteOuputPath(false);
+  path<<"selectionData."<<getRunNumber();
+  if(this->isSpecialAnalysis())
+    path<<"-"<<getRunDescription();
+  path<<".root";
+  return path.str();
+}
+
+void TSettings::goToDir(std::string dir){
+  cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
+  cout<<"goTo Dir: "<<dir<<endl;
+  if(!existsDirectory(dir))
+    sys->mkdir( dir.c_str(),true);
+  sys->cd(dir.c_str());
+  cout<<"new Dir: "<<sys->pwd()<<endl;
+}
+void TSettings::goToRawTreeDir(){
+    goToDir(this->getAbsoluteOuputPath(false));
+}
+
+void TSettings::goToSelectionTreeDir(){
+  goToDir(this->getAbsoluteOuputPath(false));
+}
+
+void TSettings::goToOutputDir(){
+  goToDir(this->getOutputDir());
+}
+
+void TSettings::goToPedestalAnalysisDir(){
+  goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/pedestalAnalysis/"));
+}
+
+void TSettings::goToClusterAnalysisDir(){
+  goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/clustering/"));
+}
 void TSettings::setRunDescription(std::string runDescription)
 {
     this->runDescription = runDescription;
 }
 
 std::string TSettings::getAbsoluteOuputPath(bool withRunDescribtion){
+  cout<<"Absolute PATH:"<<withRunDescribtion<<" "<<(int)(runDescription.at(0)!='0')<<endl;
   stringstream output;
   output<<this->getOutputDir();
-  output<<"/"<<runNumber;
+  output<<"/"<<runNumber<<"/";
   if(withRunDescribtion&&runDescription.at(0)!='0'){
-    output<<"-"<<runDescription;
+    output<<runDescription<<"/";
+    sys->MakeDirectory(output.str().c_str());
   }
+  cout<<"OUTPUT: "<<output.str()<<endl;
   return output.str();
 }
 void TSettings::SetFileName(string newFileName){

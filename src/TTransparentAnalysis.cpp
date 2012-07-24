@@ -17,30 +17,17 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	sys = gSystem;
 	setSettings(settings);
 	UInt_t runNumber =settings->getRunNumber();
-	sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());;
-	sys->cd(settings->getAbsoluteOuputPath().c_str());
-	stringstream  filepath, alignmentFileName;
-	filepath.str("");
-	alignmentFileName.str("");
-	filepath<<"selectionData."<<runNumber<<".root";
-	alignmentFileName << "alignment." << runNumber << ".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<filepath.str()<<endl;
 	
-	tracking = new TTracking(filepath.str(),alignmentFileName.str(),runNumber);
-	
+  eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),runNumber);
 	// TODO: load settings!!!
 	
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("transparentAnalysis");
-	sys->cd("transparentAnalysis");
-	stringstream plotsPath;
-	plotsPath<<sys->pwd()<<"/";
-	histSaver->SetPlotsPath(plotsPath.str().c_str());
+	settings->goToTransparentAnalysisDir();
+	histSaver->SetPlotsPath(settings->getTransparentAnalysisDir());
 	histSaver->SetRunNumber(settings->getRunNumber());
 	htmlTransAna= new THTMLTransparentAnalysis(settings);
-	htmlTransAna->setFileGeneratingPath(sys->pwd());
-	sys->cd("..");
+	htmlTransAna->setFileGeneratingPath(settings->getTransparentAnalysisDir());
+	settings->goToAlignmentRootDir();
 	
 	
 	// TODO: move these setting to the proper place
@@ -63,9 +50,6 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 //	this->seedSigma=seedSigma;
 //	this->hitSigma=hitSigma;
 	cout<<"end initialise"<<endl;
-	
-	
-	
 	
 }
 
@@ -96,7 +80,7 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	if(histSaver!=0)delete histSaver;
 	if(htmlTransAna)delete htmlTransAna;
 	if(tracking!=0) delete tracking;
-	sys->cd("..");
+	settings->goToOutputDir();
 }
 
 void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {

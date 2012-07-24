@@ -9,7 +9,10 @@
 
 
 TPedestalCalculation::TPedestalCalculation(TSettings *settings){
-  cout<<"pedestal Calculation"<<endl;
+
+  cout<<"**********************************************************"<<endl;
+  cout<<"*****TPedestalCalculation::TPedestalCalculation***********"<<endl;
+  cout<<"**********************************************************"<<endl;
 	if(settings==0)exit(0);
 	this->settings=settings;
 		slidingLength=settings->getPedestalSildingLength();//1000;//settings->getSl
@@ -18,16 +21,8 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 		pedestalFile=NULL;
 		this->runNumber=settings->getRunNumber();
 		sys = gSystem;
-
-		sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());
-
-		sys->cd(settings->getAbsoluteOuputPath().c_str());
-
-		rawfilepath.str("");
-		rawfilepath<<"rawData."<<runNumber<<".root";
-		cout<<"currentPath: "<<sys->pwd()<<endl;
-		cout<<sys->pwd()<<"/"<<rawfilepath.str()<<endl;
-		eventReader=new TADCEventReader(rawfilepath.str(),runNumber);
+		settings->goToPedestalTreeDir();
+		eventReader=new TADCEventReader(settings->getRawTreeFilePath(),runNumber);
 		cout<<eventReader->GetEntries()<<endl;
 		MAXSDETSIGMA=settings->getSi_Pedestal_Hit_Factor();
 		MAXDIASIGMA=settings->getDi_Pedestal_Hit_Factor();
@@ -37,7 +32,7 @@ TPedestalCalculation::~TPedestalCalculation() {
 	// TODO Auto-generated destructor stub
 	if(createdNewTree){
 		pedestalFile->cd();
-		pedestalTree->AddFriend(eventReader->getTree()->GetName(),rawfilepath.str().c_str());
+		pedestalTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 		cout<<pedestalTree->GetListOfFriends()->GetEntries()<<endl;
 		pedestalFile->cd();
 		pedestalTree->Write();
@@ -46,7 +41,7 @@ TPedestalCalculation::~TPedestalCalculation() {
 
 	delete eventReader;
 	pedestalFile->Close();
-	sys->cd("..");
+	settings->goToOutputDir();
 	cout<<"Closing TPedestalCalculation\n\n\n"<<endl;
 }
 

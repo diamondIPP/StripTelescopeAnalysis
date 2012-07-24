@@ -20,7 +20,7 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,UInt_t runN
 
 			cout<<"Set EtaIntegral of detector "<<det<<flush;
 			TH1F* etaIntegral=(TH1F*)this->getEtaIntegral(det)->Clone();
-			myTrack->setEtaIntergral(det,etaIntegral);
+			myTrack->setEtaIntegral(det,etaIntegral);
 			cout<<" successful"<<endl;
 		}
 }

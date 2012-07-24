@@ -16,9 +16,8 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	tree =NULL;
 	file=NULL;
 	sys = gSystem;
-
-	/*run_number=RunNumber;
-	event_number=EventNumber;*/
+	cout<<"SYS: "<<sys->pwd()<<endl;
+	cout<<"OPEN: "<<FileName<<endl;
 	SetTree(FileName);//tree);
 	initialiseTree();
 	if(!this->isOK()){
@@ -658,13 +657,21 @@ TH1F *TADCEventReader::getEtaIntegral(UInt_t det)
 void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 	bEtaIntegrals=true;
 	stringstream etaFileName;
-	etaFileName<<"etaCorrection."<<runNumber<<".root";
+
+  if(!TSettings::existsDirectory(etaDistributionPath))
+    etaFileName<<"etaCorrection."<<runNumber<<".root";
+  else
+    etaFileName<<etaDistributionPath;
+
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
 		bEtaIntegrals=false;
+		if(etaDistributionPath.size()!=0){char t; cin>>t;}
 		return;
 	}
+	cout<<etaFileName<<endl;
+	char t; cin>>t;
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		stringstream objectName;
 		objectName<<"hEtaIntegral_"<<det;
@@ -679,3 +686,10 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 	}
 
 }
+
+void TADCEventReader::setEtaDistributionPath(std::string path)
+{
+  etaDistributionPath=path;
+}
+
+

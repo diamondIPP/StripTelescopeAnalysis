@@ -17,26 +17,18 @@ TAlignment::TAlignment(TSettings* settings) {
   runNumber = settings->getRunNumber();
   cout << runNumber << endl;
   stringstream runString;
-  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());;
-  sys->cd(settings->getAbsoluteOuputPath().c_str());
+  settings->goToSelectionTreeDir();
   htmlAlign = new THTMLAlignment(settings);
-  stringstream filepath;
-  filepath.str("");
-  filepath << sys->pwd();
-  filepath << "/selectionData." << runNumber << ".root";
-  cout << "OPEN eventReader with file \"" << filepath.str() << endl;
-  eventReader = new TADCEventReader(filepath.str(), settings->getRunNumber());
+  eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(), settings->getRunNumber());
+  eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
   //eventReader->checkADC();
   histSaver = new HistogrammSaver();
-  sys->MakeDirectory("alignment");
-  sys->cd("alignment");
-  stringstream plotsPath;
-  plotsPath << sys->pwd() << "/";
-  histSaver->SetPlotsPath(plotsPath.str().c_str());
+  settings->goToAlignmentDir();
+  histSaver->SetPlotsPath(settings->getAlignmentDir());
   histSaver->SetRunNumber(runNumber);
   histSaver->SetNumberOfEvents(eventReader->GetEntries());
-  htmlAlign->setFileGeneratingPath(sys->pwd());
-  sys->cd("..");
+  htmlAlign->setFileGeneratingPath(settings->getAlignmentDir());
+  settings->goToAlignmentRootDir();
   cout << "end initialise" << endl;
   alignmentPercentage = settings->getAlignment_training_track_fraction();
   Float_t stripSize = 1.;    // 50./10000.;//mu m
@@ -72,7 +64,7 @@ TAlignment::~TAlignment() {
   if (myTrack) delete myTrack;
   if (histSaver) delete histSaver;
   //	if(eventReader)delete eventReader;
-  sys->cd("..");
+  settings->goToOutputDir();
 }
 
 void TAlignment::setSettings(TSettings* settings) {
@@ -163,8 +155,11 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent) {
     cout << "TAlignment::Align::create new TTrack" << endl;
     myTrack = new TTrack(align);
     cout << "TAlignment::Align::created new TTrack" << endl;
-    for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++)
-      myTrack->setEtaIntergral(det, eventReader->getEtaIntegral(det));
+    for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++){
+      TH1F* etaInt = eventReader->getEtaIntegral(det);
+      if(etaInt==0){char t;cout<<"eta Int ==0"<<det<<endl;cin >>t;}
+      myTrack->setEtaIntegral(det,etaInt );
+    }
   }
   alignSiliconPlanes();
   AlignDiamondPlane();

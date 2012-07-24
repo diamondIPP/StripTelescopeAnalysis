@@ -18,24 +18,15 @@ TClustering::TClustering(TSettings* settings){
 	setSettings(settings);
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
-
-  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());
-  sys->cd(settings->getAbsoluteOuputPath().c_str());
-
-	rawFilePath<<"rawData."<<runNumber<<".root";
-	filepath.str("");
-	filepath<<"pedestalData."<<runNumber<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
+	settings->goToPedestalTreeDir();
+	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("clustering");
-	sys->cd("clustering");
+	settings->goToClusterAnalysisDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
-	sys->cd("..");
+  settings->goToPedestalTreeDir();
 	this->runNumber=runNumber;
 	verbosity=0;
 	this->maxDetAdcValue=255;
@@ -55,19 +46,18 @@ TClustering::~TClustering() {
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
 		cout<<"CLOSING TREE"<<endl;
-		cout<<eventReader->getTree()->GetName()<<" "<<filepath.str().c_str()<<endl;
-		clusterTree->AddFriend(eventReader->getTree()->GetName(),filepath.str().c_str());
+		cout<<"pedestalTree"<<" "<<filepath.str().c_str()<<endl;
+		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
 		cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
-		clusterTree->AddFriend("rawTree",rawFilePath.str().c_str());
+		clusterTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 		cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 		clusterTree->Write();
 		saveEtaCorrections();
 	}
-	//clusterTree->Delete();
 	delete clusterFile;
 	delete eventReader;
 	delete histSaver;
-	sys->cd("..");
+	settings->goToOutputDir();
 }
 
 void TClustering::setSettings(TSettings* settings){
@@ -355,30 +345,36 @@ void TClustering::addToEtaDistributions()
 }
 
 void TClustering::saveEtaCorrections(){
-	stringstream etaCorFileName;
-	etaCorFileName<<"etaCorrection."<<settings->getRunNumber()<<".root";
-	TFile* file = new TFile(etaCorFileName.str().c_str(),"RECREATE");
-	file->cd();
+	TFile* etaCorrectionFile = new TFile(settings->getEtaDistributionPath().c_str(),"RECREATE");
+	etaCorrectionFile->cd();
 	for(UInt_t det=0;det<9;det++){
+
 		stringstream histName;
 		histName<<"hEtaIntegral_"<<det;
-		UInt_t nBins = hEtaDistribution[det]->GetNbinsX();
-		TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),nBins,0,1);
-		Int_t entries = hEtaDistribution[det]->GetEntries();
-		entries -=  hEtaDistribution[det]->GetBinContent(0);
-		entries -=  hEtaDistribution[det]->GetBinContent(nBins+1);
-		Int_t sum =0;
-		for(UInt_t bin=1;bin<nBins+1;bin++){
-			Int_t binContent = hEtaDistribution[det]->GetBinContent(bin);
-			sum +=binContent;
-			Float_t pos =  hEtaDistribution[det]->GetBinCenter(bin);
-			histo->Fill(pos, (Float_t)sum/(Float_t)entries);
-		}
-		file->cd();
+		TH1F* histo = createEtaIntegral(hEtaDistribution[det],histName.str());
+
+		etaCorrectionFile->cd();
 		histo->Write();
 		hEtaDistribution[det]->Write();
 	}
-	file->Close();
+	etaCorrectionFile->Close();
+}
+
+TH1F *TClustering::createEtaIntegral(TH1F *histo, std::string histName)
+{
+  UInt_t nBins = histo->GetNbinsX();
+  TH1F *hIntegral=new TH1F(histName.c_str(),histName.c_str(),nBins,0,1);
+  Int_t entries = histo->GetEntries();
+  entries -=  histo->GetBinContent(0);
+  entries -=  histo->GetBinContent(nBins+1);
+  Int_t sum =0;
+  for(UInt_t bin=1;bin<nBins+1;bin++){
+    Int_t binContent = histo->GetBinContent(bin);
+    sum +=binContent;
+    Float_t pos =  histo->GetBinCenter(bin);
+    hIntegral->Fill(pos, (Float_t)sum/(Float_t)entries);
+  }
+  return hIntegral;
 }
 
 void TClustering::setBranchAdresses(){

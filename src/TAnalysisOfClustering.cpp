@@ -18,27 +18,20 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	setSettings(settings);
 	UInt_t runNumber=settings->getRunNumber();
 	sys = gSystem;
-
 	htmlClus= new THTMLCluster(settings);
 
-  sys->MakeDirectory(settings->getAbsoluteOuputPath(true).c_str());
-  sys->cd(settings->getAbsoluteOuputPath().c_str());
-
-	stringstream  filepath;
-	filepath.str("");
-	filepath<<"clusterData."<<runNumber<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str(),runNumber);
+	settings->goToClusterTreeDir();
+	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),runNumber);
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("clustering");
-	sys->cd("clustering");
+
+
+  settings->goToClusterAnalysisDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
 	htmlClus->setFileGeneratingPath(sys->pwd());
-	sys->cd("..");
+	settings->goToClusterTreeDir();
 	initialiseHistos();
 	cout<<"end initialise"<<endl;
 	settings=0;
@@ -54,7 +47,7 @@ TAnalysisOfClustering::~TAnalysisOfClustering() {
 	htmlClus->createContent();
 	htmlClus->generateHTMLFile();
 	delete htmlClus;
-	sys->cd("..");
+	settings->goToOutputDir();
 }
 
 void TAnalysisOfClustering::setSettings(TSettings* settings){

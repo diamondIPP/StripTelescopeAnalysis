@@ -21,21 +21,22 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	UInt_t runNumber=settings->getRunNumber();
   sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());
   sys->cd(settings->getAbsoluteOuputPath().c_str());
-	stringstream  filepath;
-	filepath.str("");
-	filepath<<"pedestalData."<<runNumber<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
+//	stringstream  filepath;
+//	filepath.str("");
+//	filepath<<"pedestalData."<<runNumber<<".root";
+//	cout<<"currentPath: "<<sys->pwd()<<endl;
+//	cout<<filepath.str()<<endl;
+	settings->goToPedestalTreeDir();
+
+	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("pedestalAnalysis");
-	sys->cd("pedestalAnalysis");
+	settings->goToPedestalAnalysisDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
   htmlPedestal->setFileGeneratingPath(sys->pwd());
-	sys->cd("..");
+  settings->goToPedestalTreeDir();
 	initialiseHistos();
 	this->settings=settings;
 	cout<<"end initialise"<<endl;
@@ -61,6 +62,7 @@ TAnalysisOfPedestal::~TAnalysisOfPedestal() {
 	delete eventReader;
 	cout<<"Del histSaver: "<<flush;
 	delete histSaver;
+	settings->goToOutputDir();
 }
 
 
@@ -152,6 +154,40 @@ void TAnalysisOfPedestal::getBiggestHit(){
 	
 }
 
+void TAnalysisOfPedestal::findPlotRangeForPHHisto(TH1F *histo, Float_t hitCut)
+{
+
+  // find a good Xaxis Range
+
+  //first step find number of events which are smaller than hit factor
+  UInt_t nBinsX=histo->GetXaxis()->GetNbins();
+  UInt_t binx=0;
+  UInt_t nEventsSmallerThanHitCut=0;
+  for(binx=0;histo->GetBinCenter(binx)<hitCut&&binx<nBinsX;binx++)
+    nEventsSmallerThanHitCut+= histo->GetBinContent(binx);
+
+  //choose range of axis in such a way that the upper 20% are not included in the drawing
+  UInt_t nMaxEvents = histo->GetEntries() - nEventsSmallerThanHitCut;
+  nMaxEvents *= (1 - settings->getPHinSigmaPlotFactor());
+
+  UInt_t nEventsfromBinX=0;
+  for(binx= nBinsX;binx>0&&nEventsfromBinX<nMaxEvents;binx--)
+    nEventsfromBinX+= histo->GetBinContent(binx);
+
+  Float_t xHigh = histo->GetXaxis()->GetBinCenter(binx);
+  histo->GetXaxis()->SetRangeUser(0,xHigh);
+
+  Float_t max = 0;
+
+  for(UInt_t binX= histo->FindBin(hitCut);binX<histo->GetNbinsX();binX++)
+    if(max<histo->GetBinContent(binX))max=histo->GetBinContent(binX);
+
+  histo->GetYaxis()->SetRange(0,max*1.1);
+
+
+
+}
+
 /**
  * pedestalMeanValue,pedestalSigmaValue
  */
@@ -182,7 +218,7 @@ void TAnalysisOfPedestal::analyseBiggestHit() {
 		Float_t biggestSignalSigma = eventReader->getSignalInSigma(det,biggest_hit_channel);
 		Float_t secondbiggestSignalSigma =  eventReader->getSignalInSigma(det,second_biggest_hit_channel);
 		
-		if (biggest_hit_channel > 0 && biggest_hit_channel < TPlaneProperties::getNChannels(det) && biggestSignalSigma > settings->getClusterHitFactor(det)) {
+		if (biggest_hit_channel > 0 && biggest_hit_channel < TPlaneProperties::getNChannels(det)) {
 			// -- look for second biggest hit next to biggest hit
 			Float_t leftHitSignal= eventReader->getSignal(det,biggest_hit_channel-1);
 			Float_t rightHitSignal = eventReader->getSignal(det,biggest_hit_channel+1);
@@ -279,7 +315,7 @@ void TAnalysisOfPedestal::initialiseHistos()
 		int nbins = 256;
 		Float_t min = 0.;
 		Float_t max = 64.;
-		if(det==TPlaneProperties::getDetDiamond()){max=256;nbins=1024;}
+		if(det==TPlaneProperties::getDetDiamond()){max=128;nbins=512;}
 		
         stringstream histoName;
         histoName << "hPulseHeight_BiggestHitChannelInSigma" << TPlaneProperties::getStringForDetector(det) ;
@@ -326,45 +362,51 @@ void TAnalysisOfPedestal::initialiseHistos()
 }
 
 void TAnalysisOfPedestal::savePHinSigmaHistos(){
-    for (int det = 0; det < 9; det++) {
-    	double cut = settings->getClusterSeedFactor(det);
-		cout << "saving histogram " << this->histo_pulseheight_sigma[det]->GetName() << ".. with CUT on " <<cut<< endl;
-		this->histo_pulseheight_sigma[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
-		this->histo_pulseheight_sigma[det]->GetXaxis()->SetTitle("number of entries #");
-    	TCanvas *c1 = new TCanvas(this->histo_pulseheight_sigma[det]->GetTitle(),this->histo_pulseheight_sigma[det]->GetTitle());
-    	c1->cd();
-    	this->histo_pulseheight_sigma[det]->Draw();
-    	double xCor[] = {cut,cut};
-    	double yCor[] = {0,this->histo_pulseheight_sigma[det]->GetMaximum()*2};
-    	TGraph* lineGraph = new TGraph(2,xCor,yCor);
-    	lineGraph->SetLineColor(kRed);
-    	lineGraph->SetLineWidth(2);
-    	lineGraph->Draw("Lsame");
-    	histSaver->SaveCanvas(c1);;
-//        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
-        delete histo_pulseheight_sigma[det];
-        delete lineGraph;
-        delete c1;
-    }
-    for(UInt_t det = 0; det< TPlaneProperties::getNDetectors();det++){
-    	double cut = settings->getClusterHitFactor(det);
-//		cout << "saving histogram " << this->histo_pulseheight_sigma_second[det]->GetName() << ".. with CUT on " <<cut<< endl;
-    	TCanvas *c1 = new TCanvas(this->histo_pulseheight_sigma_second[det]->GetTitle(),this->histo_pulseheight_sigma_second[det]->GetTitle());
-    	c1->cd();
-    	this->histo_pulseheight_sigma_second[det]->Draw();
-    	double xCor[] = {cut,cut};
-    	double yCor[] = {0,this->histo_pulseheight_sigma_second[det]->GetMaximum()*2};
-    	this->histo_pulseheight_sigma_second[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
-    	this->histo_pulseheight_sigma_second[det]->GetXaxis()->SetTitle("number of entries #");
-    	TGraph* lineGraph = new TGraph(2,xCor,yCor);
-    	lineGraph->SetLineColor(kRed);
-    	lineGraph->SetLineWidth(2);
-    	lineGraph->Draw("Lsame");
-    	histSaver->SaveCanvas(c1);;
-        delete histo_pulseheight_sigma_second[det];
-        delete lineGraph;
-        delete c1;
-    }
+  for (int det = 0; det < 9; det++) {
+    double cut = settings->getClusterSeedFactor(det);
+    cout << "saving histogram " << this->histo_pulseheight_sigma[det]->GetName() << ".. with CUT on " <<cut<< endl;
+
+    //set Axis Titiles
+    this->histo_pulseheight_sigma[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
+    this->histo_pulseheight_sigma[det]->GetYaxis()->SetTitle("number of entries #");
+    \
+    findPlotRangeForPHHisto(histo_pulseheight_sigma[det],settings->getClusterHitFactor(det));
+
+    TCanvas *c1 = new TCanvas(this->histo_pulseheight_sigma[det]->GetTitle(),this->histo_pulseheight_sigma[det]->GetTitle());
+    c1->cd();
+    this->histo_pulseheight_sigma[det]->Draw();
+    double xCor[] = {cut,cut};
+    double yCor[] = {0,this->histo_pulseheight_sigma[det]->GetMaximum()*2};
+    TGraph* lineGraph = new TGraph(2,xCor,yCor);
+    lineGraph->SetLineColor(kRed);
+    lineGraph->SetLineWidth(2);
+    lineGraph->Draw("Lsame");
+    histSaver->SaveCanvas(c1);;
+    //        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
+    delete histo_pulseheight_sigma[det];
+    delete lineGraph;
+    delete c1;
+  }
+  for(UInt_t det = 0; det< TPlaneProperties::getNDetectors();det++){
+    double cut = settings->getClusterHitFactor(det);
+    //		cout << "saving histogram " << this->histo_pulseheight_sigma_second[det]->GetName() << ".. with CUT on " <<cut<< endl;
+    TCanvas *c1 = new TCanvas(this->histo_pulseheight_sigma_second[det]->GetTitle(),this->histo_pulseheight_sigma_second[det]->GetTitle());
+    c1->cd();
+    this->histo_pulseheight_sigma_second[det]->Draw();
+    double xCor[] = {cut,cut};
+    double yCor[] = {0,this->histo_pulseheight_sigma_second[det]->GetMaximum()*2};
+    this->histo_pulseheight_sigma_second[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
+    this->histo_pulseheight_sigma_second[det]->GetXaxis()->SetTitle("number of entries #");
+    findPlotRangeForPHHisto(histo_pulseheight_sigma_second[det],settings->getClusterHitFactor(det));
+    TGraph* lineGraph = new TGraph(2,xCor,yCor);
+    lineGraph->SetLineColor(kRed);
+    lineGraph->SetLineWidth(2);
+    lineGraph->Draw("Lsame");
+    histSaver->SaveCanvas(c1);;
+    delete histo_pulseheight_sigma_second[det];
+    delete lineGraph;
+    delete c1;
+  }
 }
 
 

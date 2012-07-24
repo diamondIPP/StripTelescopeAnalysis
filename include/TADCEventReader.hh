@@ -24,6 +24,7 @@
 #include "TPlaneProperties.hh"
 //#include "TPlane.hh"
 #include "TEvent.hh"
+#include "TSettings.class.hh"
 class TADCEventReader {
 public:
 	TADCEventReader(std::string fileName,UInt_t runNumber);
@@ -80,7 +81,10 @@ private:
 	int hasTree();
 	TObject* getTreeName();
 	void LoadEtaDistributions(UInt_t runNumber);
+public:
+	void setEtaDistributionPath(std::string path);
 private:
+	std::string etaDistributionPath;
 	std::string fileName;
 	UInt_t run_number;
 	UInt_t event_number;

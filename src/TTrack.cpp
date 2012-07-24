@@ -67,8 +67,8 @@ Float_t TTrack::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t
 	Float_t yOffset = this->getYOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	Float_t phiYOffset = this->getPhiYOffset(plane);
-	Float_t xMeasured = xCluster.getPosition(mode,getEtaIntergral(plane*2));
-	Float_t yMeasured = yCluster.getPosition(mode,getEtaIntergral(plane*2+1));
+	Float_t xMeasured = xCluster.getPosition(mode,getEtaIntegral(plane*2));
+	Float_t yMeasured = yCluster.getPosition(mode,getEtaIntegral(plane*2+1));
 	// apply offsets
 	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) + (yMeasured) * TMath::Sin(phiYOffset);
 	Float_t yPosition = (xMeasured) * TMath::Sin(-phiXOffset) + (yMeasured) * TMath::Cos(phiYOffset);
@@ -95,7 +95,7 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
 	if (cluster.size()<=0) return N_INVALID;
 	UInt_t plane = det/2;
 	if(histo==0)
-		histo = (TH1F*)getEtaIntergral(plane*2+1);
+		histo = (TH1F*)getEtaIntegral(plane*2+1);
 	Float_t measuredPos = cluster.getPosition(mode,histo);
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t yOffset = this->getYOffset(plane);
@@ -132,7 +132,7 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
 		xCluster.Print();
 	}
 	if(histo==NULL)
-		histo = getEtaIntergral(plane*2);
+		histo = getEtaIntegral(plane*2);
 	return getStripXPositionOfCluster(plane,xCluster,yPred,mode,histo);
 }
 
@@ -151,7 +151,7 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	if(histo==NULL)
-		histo = getEtaIntergral(plane*2);
+		histo = getEtaIntegral(plane*2);
 
 	Float_t xMeasured = xCluster.getPosition(mode,histo);//-xOffset;
 
@@ -170,7 +170,7 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
  */
 Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
-		histo = getEtaIntergral(plane*2);
+		histo = getEtaIntegral(plane*2);
 	return getPosition(TPlaneProperties::X_COR,plane,mode,histo);
 }
 
@@ -182,7 +182,7 @@ Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F*
  */
 Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
-			histo = getEtaIntergral(plane*2);
+			histo = getEtaIntegral(plane*2);
 	return getPosition(TPlaneProperties::Y_COR,plane,mode,histo);
 }
 
@@ -302,7 +302,7 @@ Float_t TTrack::getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TC
 		return N_INVALID;
 	// get offsets
 	if(histo==0)
-			histo = getEtaIntergral(plane*2);
+			histo = getEtaIntegral(plane*2);
 	TCluster xCluster,yCluster;
 	xCluster=event->getPlane(plane).getXCluster(0);
 	yCluster=event->getPlane(plane).getYCluster(0);
@@ -387,13 +387,13 @@ UInt_t TTrack::getVerbosity() const
     return verbosity;
 }
 
-void TTrack::setEtaIntergral(UInt_t det, TH1F *histo)
+void TTrack::setEtaIntegral(UInt_t det, TH1F *histo)
 {
 //	cout<<"TTRack set Eta Integral of histoMap of detector "<<det<<endl;
 	histoMap[det]=(TH1F*)histo->Clone();
 }
 
-TH1F *TTrack::getEtaIntergral(UInt_t det)
+TH1F *TTrack::getEtaIntegral(UInt_t det)
 {
 //	cout<<"get etaIntegral of det "<<det<<" in " <<histoMap.size()<<" histos:"<<flush;
 	if(histoMap.find(det)!=histoMap.end() ){

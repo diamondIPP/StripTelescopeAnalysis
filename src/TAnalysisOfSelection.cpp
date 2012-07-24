@@ -15,27 +15,19 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	sys = gSystem;
 	UInt_t runNumber=settings->getRunNumber();
 
-  sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());
 	htmlLandau=new THTMLLandaus(settings);
-  sys->cd(settings->getAbsoluteOuputPath().c_str());
 
-	stringstream  filepath;
-	filepath.str("");
-	filepath<<"selectionData."<<runNumber<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-//	htmlPedestal->setMainPath((string)(sys->pwd()));
-	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
+	settings->goToSelectionTreeDir();
+	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("selectionAnalysis");
-	sys->cd("selectionAnalysis");
+	settings->goToSelectionAnalysisDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 //	htmlPedestal->setSubdirPath("selectionAnalysis");
-	histSaver->SetPlotsPath(plotsPath.str().c_str());
+	histSaver->SetPlotsPath(settings->getSelectionAnalysisPath());
 	histSaver->SetRunNumber(runNumber);
-	htmlLandau->setFileGeneratingPath(plotsPath.str());
-	sys->cd("..");
+	htmlLandau->setFileGeneratingPath(settings->getSelectionAnalysisPath());
+	settings->goToSelectionTreeDir();
 	initialiseHistos();
 
 	cout<<"end initialise"<<endl;
@@ -43,10 +35,10 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 
 TAnalysisOfSelection::~TAnalysisOfSelection() {
 	htmlLandau->generateHTMLFile();
-	delete eventReader;
-	delete histSaver;
-	delete htmlLandau;
-	sys->cd("..");
+	if(eventReader!=0) delete eventReader;
+	if(histSaver!=0)   delete histSaver;
+	if(htmlLandau!=0)  delete htmlLandau;
+	settings->goToOutputDir();
 }
 
 void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)

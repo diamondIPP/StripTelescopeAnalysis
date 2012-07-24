@@ -12,42 +12,38 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<"\n\n\n**********************************************************"<<endl;
 	cout<<"************TSelectionClass::TSelectionClass**************"<<endl;
 	cout<<"**********************************************************"<<endl;
+	if(settings==0)exit(-1);
 	this->settings=settings;
 	this->results=0;
 	cout<<settings->getRunNumber()<<endl;
 
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-
-  sys->MakeDirectory(settings->getAbsoluteOuputPath(true).c_str());
-  cout<<sys->pwd()<<" \npress a key"<<endl;
-  sys->cd(settings->getAbsoluteOuputPath(true).c_str());
+	cout<<"goToClusterTree"<<endl;
+  settings->goToClusterTreeDir();
   fiducialCuts=0;
 	createdNewTree=false;
 	createdNewFile=false;
 	selectionTree=NULL;
 	selectionFile=NULL;
-//
-//	rawfilepath<<"rawData."<<settings->getRunNumber()<<".root";
-//	pedestalfilepath.str("");
-//	pedestalfilepath<<"pedestalData."<<settings->getRunNumber()<<".root";
-	clusterfilepath<<sys->pwd()<<"/clusterData."<<settings->getRunNumber()<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<"\""<<clusterfilepath.str()<<"\""<<endl;
-	cout<<"OPEN TADCEventReader"<<flush;
 	htmlSelection = new THTMLSelection(settings);
-
-	eventReader=new TADCEventReader(clusterfilepath.str(),settings->getRunNumber());
+  cout<<"OPEN TADCEventReader"<<flush;
+  cout<<"\ngoToSelectionTreeDir"<<endl;
+  settings->goToSelectionTreeDir();
+  cout<<"open Tree:"<<endl;
+	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings->getRunNumber());
 	cout<<" DONE"<<endl;
+
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("selections");
-	sys->cd("selections");
+	cout<<"goToSelectionDir"<<endl;
+  settings->goToSelectionDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(settings->getRunNumber());
   htmlSelection->setFileGeneratingPath(sys->pwd());
-	sys->cd("..");
+  cout<<"goToSelectionTREEDir"<<endl;
+  settings->goToSelectionTreeDir();
 	cout<<"HISTSAVER:"<<sys->pwd()<<endl;
 			verbosity=1;
 
@@ -77,12 +73,15 @@ TSelectionClass::~TSelectionClass() {
 	if(selectionTree!=NULL&&this->createdTree){
 		saveHistos();
 		cout<<"CLOSING TREE"<<endl;
-		cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<clusterfilepath.str().c_str()<<endl;
-		selectionTree->AddFriend(eventReader->getTree()->GetName(),clusterfilepath.str().c_str());
+		cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<settings->getClusterTreeFilePath()<<endl;
+		selectionTree->AddFriend("clusterTree",settings->getClusterTreeFilePath().c_str());
+
 		cout<<"\t"<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
-		selectionTree->AddFriend("pedestalTree",pedestalfilepath.str().c_str());
+		selectionTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
+
 		cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
-		selectionTree->AddFriend("rawTree",rawfilepath.str().c_str());
+		selectionTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
+
 		cout<<"\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
 		selectionFile->cd();
 		cout<<"\t"<<"WRITE TREE: "<<flush;
@@ -94,7 +93,8 @@ TSelectionClass::~TSelectionClass() {
 	delete eventReader;
 	delete histSaver;
 	delete htmlSelection;
-	sys->cd("..");
+	cout<<"goToOutputDir"<<endl;
+	settings->goToOutputDir();
 }
 
 void TSelectionClass::MakeSelection()
@@ -105,7 +105,7 @@ void TSelectionClass::MakeSelection()
 
 
 void TSelectionClass::MakeSelection(UInt_t nEvents)
-{
+{cout<<"Make Selection"<<endl;
 	if(nEvents==0)
 		this->nEvents=eventReader->GetEntries();
 	else if(nEvents>eventReader->GetEntries()){
@@ -113,6 +113,8 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	}
 	else
 		this->nEvents=nEvents;
+	cout<<"goToSelectionTreeDir"<<endl;
+	settings->goToSelectionTreeDir();
 	histSaver->SetNumberOfEvents(this->nEvents);
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
@@ -152,16 +154,13 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 	cout<<"TSelectionClass::checkTree"<<endl;
 	bool createdNewFile=false;
 	bool createdNewTree=false;
-	stringstream selectionfilepath;
-	sys->cd(	runString.str().c_str());
-	selectionfilepath<<sys->pwd();
-	selectionfilepath<<"/selectionData."<<settings->getRunNumber()<<".root";
-	cout<<"Try to open \""<<selectionfilepath.str()<<"\""<<endl;
-	selectionFile=new TFile(selectionfilepath.str().c_str(),"READ");
+	cout<<"goToSelection Tree:"<<endl;
+	settings->goToSelectionTreeDir();
+	selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"READ");
 	if(selectionFile->IsZombie()){
 		cout<<"selectionfile does not exist, create new one..."<<endl;
 		createdNewFile =true;
-		selectionFile= new TFile(selectionfilepath.str().c_str(),"CREATE");
+		selectionFile= new TFile(settings->getSelectionTreeFilePath().c_str(),"CREATE");
 		cout<<"DONE"<<flush;
 		selectionFile->cd();
 	}
@@ -176,6 +175,7 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 	cout<<"get Tree2"<<endl;
 	selectionFile->GetObject("selectionTree",selectionTree);
 	cout<<"check Selection Tree:"<<selectionTree<<endl;
+	cout<<sys->pwd()<<endl;
 	if(selectionTree!=NULL){
 		cout<<"File and Tree Exists... \t"<<flush;
 		if(selectionTree->GetEntries()>=nEvents){
@@ -195,8 +195,7 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 		cout<<"selectionTree does not exists, close file"<<endl;
 		delete selectionFile;
 		cout<<"."<<endl;
-		cout<<selectionfilepath.str().c_str()<<endl;
-		selectionFile=new TFile(selectionfilepath.str().c_str(),"RECREATE");
+		selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"RECREATE");
 		selectionFile->cd();
 		cout<<"."<<endl;
 		this->selectionTree=new TTree("selectionTree",treeDescription.str().c_str());
@@ -525,7 +524,8 @@ void TSelectionClass::saveHistos()
 	cout<<"save Histo: "<<hFiducialCutSilicon->GetTitle()<<endl;
 	std::string name = "c";
 	name.append(hFiducialCutSilicon->GetName());
-	TCanvas *c1=new TCanvas(name.c_str(),hFiducialCutSilicon->GetTitle());
+	TCanvas *c1= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSilicon);
+	    /*new TCanvas(name.c_str(),hFiducialCutSilicon->GetTitle());
 	c1->cd();
 	hFiducialCutSilicon->Draw("colz");
 	double xLow = settings->getSi_avg_fidcut_xlow();
@@ -539,17 +539,18 @@ void TSelectionClass::saveHistos()
 	lXlower->Draw();
 	lXhigher->Draw();
 	lYlower->Draw();
-	lYhigher->Draw();
+	lYhigher->Draw();*/
 	histSaver->SaveCanvas(c1);
 	std::string name2 = "c";
 	name2.append(hFiducialCutSiliconDiamondHit->GetName());
-	TCanvas *c2=new TCanvas(name2.c_str(),hFiducialCutSiliconDiamondHit->GetTitle());
-	c2->cd();
+	TCanvas *c2= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit);
+	 //   new TCanvas(name2.c_str(),hFiducialCutSiliconDiamondHit->GetTitle());
+	/*c2->cd();
 	hFiducialCutSiliconDiamondHit->Draw("colz");
 	lXlower->Draw();
 	lXhigher->Draw();
 	lYlower->Draw();
-	lYhigher->Draw();
+	lYhigher->Draw();*/
 	histSaver->SaveCanvas(c2);
 
 //	histSaver->SaveHistogram(hFiducialCutSilicon);
@@ -561,35 +562,6 @@ void TSelectionClass::saveHistos()
 	histSaver->SaveHistogram(hAnalysisFraction);
 	delete hAnalysisFraction;
 }
-
-void TSelectionClass::findFiducialCut(TH2F* hFidCut){
-  TH1D* hProjX = hFiducialCutSiliconDiamondHit->ProjectionX("hFiducialCutOneDiamondHitProjX");
-  hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
-  hProjX->GetYaxis()->SetTitle("Number Of Entries #");
-  TH1D* hProjY = hFiducialCutSiliconDiamondHit->ProjectionY("hFiducialCutOneDiamondHitProjY");
-  hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
-  hProjY->GetYaxis()->SetTitle("Number Of Entries #");
-
-  hProjX->SetName("hProjX");
-  hProjY->SetName("hProjY");
-  if(hProjX==0||hProjY==0)
-    return;
-  if(hProjX->IsZombie()||hProjY->IsZombie())
-    return;
-
-
-  vector<pair <Float_t, Float_t> >xIntervals = findFiducialCutIntervall( hProjX);
-  vector<pair <Float_t, Float_t> >yIntervals = findFiducialCutIntervall( hProjY);
-  chooseFidCut(xIntervals,yIntervals);
-//  cout<<"HERE"<<endl;
-//  TLegend *leg = new TLegend();
-
-  histSaver->SaveHistogram(hProjX);
-  cout<<"%"<<endl;
-  histSaver->SaveHistogram(hProjY);
-//  cout<<"SAVED"<<endl;
-}
-
 
 void TSelectionClass::createFiducialCut(){
 
@@ -609,84 +581,82 @@ void TSelectionClass::createFiducialCut(){
       if(verbosity>10)cout<<"."<<flush;
       setVariables();
   }
-  findFiducialCut(hFiducialCutSiliconDiamondHit);
+//  findFiducialCut(hFiducialCutSiliconDiamondHit);
+  delete fiducialCuts;
+  fiducialCuts = new TFidCutRegions(hFiducialCutSiliconDiamondHit,settings->getNDiamonds(),settings->getAutoFidCutPercentage());
+
+  histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
+  histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));
+  histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR));
+  //  fiducialCuts->getFiducialCutCanvas();
 }
 
-std::vector< std::pair< Float_t,Float_t> > TSelectionClass::findFiducialCutIntervall(TH1D* hProj){
-  int minWidth = 03;//channels
-  Float_t mean = hProj->Integral()/hProj->GetNbinsX();
-  Int_t nLow=0;
-  Int_t nHigh=0;
-  int nbins = hProj->GetNbinsX();
-  Float_t value = mean*settings->getAutoFidCutPercentage();
-  cout<<value<<endl;
-  std::vector< std::pair<Float_t,Float_t> > intervals;
-  while(nLow<nbins-1){
-    nLow=nHigh+1;
-    bool foundLeft=false;
-    bool foundRight=false;
-    while(nLow<nbins-1&&hProj->GetBinContent(nLow)<value){
-      nLow++;
-    }
-    nHigh=nLow;
-    foundLeft = (hProj->GetBinContent(nLow)>value&&nLow<nbins);
-    if(foundLeft){
-      while(nHigh<nbins&&hProj->GetBinContent(nHigh)>value){
-        nHigh++;
-      }
-      foundRight=hProj->GetBinContent(nHigh)<value&&nHigh<nbins-1;
-    }
-
-    if(foundLeft&&foundRight){
-      Float_t x1=hProj->GetBinLowEdge(nLow+1)+1;
-      Float_t x2=hProj->GetBinLowEdge(nHigh-1)-1;
-      if(x1<x2&&nHigh-nLow>minWidth){
-        cout<<"Found first intervall: ["<<nLow<<","<<nHigh<<"]\t= ["<<x1<<","<<x2<<"]"<<endl;
-        intervals.push_back( std::make_pair(x1,x2));
-      }
-    }
-    nLow=nHigh;
-  }
-  DrawFiduciaCuts(hProj,intervals);
-//  cout<<"DONE"<<endl;
-  return intervals;
-}
-void TSelectionClass::chooseFidCut(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt){
-  cout<<"Found "<<xInt.size()<<" Intervals in x direction."<<endl;
-  cout<<"Found "<<yInt.size()<<" Intervals in y direction."<<endl;
-  cout<<"The RunDescription is \""<<settings->getRunDescription()<<"\""<<endl;
-  cout<<"Finding Areas for "<<settings->getNDiamonds()<<" Diamonds"<<endl;
-  if(fiducialCuts!=0) delete fiducialCuts;
-  fiducialCuts= new TFidCutRegions(xInt,yInt,settings->getNDiamonds());
-  fiducialCuts->setRunDescription(settings->getRunDescription());
-  TFiducialCut *fidCut = fiducialCuts->getFidCut(settings->getRunDescription());
-  fidCut->Print();
-  cout<<"old Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
-  settings->setFidCut(fidCut);
-  cout<<"new Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
-}
-
-void TSelectionClass::DrawFiduciaCuts(TH1D* hProj,vector< pair<Float_t,Float_t> > intervals){
-  if(hProj==0)
-    return;
-  if(hProj->IsZombie())
-    return;
-  stringstream canvasName;
-  canvasName<<"c"<<hProj->GetName();
-  TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
-  c1->cd();
-  hProj->Draw();
-  vector<TBox* > boxes;
-  for(UInt_t i=0;i<intervals.size();i++){
-    TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
-    box->SetFillColor(kRed+i);
-    box->SetFillStyle(3013);
-    box->AddText("");
-    box->AddText("");
-    box->AddText(Form("Area\n\n%i",i));
-    boxes.push_back(box);
-    box->Draw("same");
-  }
-  histSaver->SaveCanvas(c1);
-
-}
+//void TSelectionClass::findFiducialCut(TH2F* hFidCut){
+//
+//  TH1D* hProjX = hFiducialCutSiliconDiamondHit->ProjectionX("hFiducialCutOneDiamondHitProjX");
+//  hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
+//  hProjX->GetYaxis()->SetTitle("Number Of Entries #");
+//  TH1D* hProjY = hFiducialCutSiliconDiamondHit->ProjectionY("hFiducialCutOneDiamondHitProjY");
+//  hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
+//  hProjY->GetYaxis()->SetTitle("Number Of Entries #");
+//
+//  hProjX->SetName("hProjX");
+//  hProjY->SetName("hProjY");
+//  if(hProjX==0||hProjY==0)
+//    return;
+//  if(hProjX->IsZombie()||hProjY->IsZombie())
+//    return;
+//
+////
+////  vector<pair <Float_t, Float_t> >xIntervals = findFiducialCutIntervall( hProjX);
+////  vector<pair <Float_t, Float_t> >yIntervals = findFiducialCutIntervall( hProjY);
+////  chooseFidCut(xIntervals,yIntervals);
+////  cout<<"HERE"<<endl;
+////  TLegend *leg = new TLegend();
+//
+//  histSaver->SaveHistogram(hProjX);
+//  cout<<"%"<<endl;
+//  histSaver->SaveHistogram(hProjY);
+////  cout<<"SAVED"<<endl;
+//}
+//
+//
+//void TSelectionClass::chooseFidCut(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt){
+//  cout<<"Found "<<xInt.size()<<" Intervals in x direction."<<endl;
+//  cout<<"Found "<<yInt.size()<<" Intervals in y direction."<<endl;
+//  cout<<"The RunDescription is \""<<settings->getRunDescription()<<"\""<<endl;
+//  cout<<"Finding Areas for "<<settings->getNDiamonds()<<" Diamonds"<<endl;
+//  if(fiducialCuts!=0) delete fiducialCuts;
+//  fiducialCuts= new TFidCutRegions(xInt,yInt,settings->getNDiamonds());
+//  fiducialCuts->setRunDescription(settings->getRunDescription());
+//  TFiducialCut *fidCut = fiducialCuts->getFidCut(settings->getRunDescription());
+//  fidCut->Print();
+//  cout<<"old Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
+//  settings->setFidCut(fidCut);
+//  cout<<"new Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
+//}
+//
+//void TSelectionClass::DrawFiduciaCuts(TH1D* hProj,vector< pair<Float_t,Float_t> > intervals){
+//  if(hProj==0)
+//    return;
+//  if(hProj->IsZombie())
+//    return;
+//  stringstream canvasName;
+//  canvasName<<"c"<<hProj->GetName();
+//  TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
+//  c1->cd();
+//  hProj->Draw();
+//  vector<TBox* > boxes;
+//  for(UInt_t i=0;i<intervals.size();i++){
+//    TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
+//    box->SetFillColor(kRed+i);
+//    box->SetFillStyle(3013);
+//    box->AddText("");
+//    box->AddText("");
+//    box->AddText(Form("Area\n\n%i",i));
+//    boxes.push_back(box);
+//    box->Draw("same");
+//  }
+//  histSaver->SaveCanvas(c1);
+//
+//}

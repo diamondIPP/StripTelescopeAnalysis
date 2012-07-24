@@ -41,6 +41,34 @@ public:
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	std::string getAbsoluteOuputPath(bool withRunDescribtion=0);
 	std::string getAbsoluteInputPath(){return inputDir;};//todo
+	std::string getRawTreeFilePath();
+	std::string getPedestalTreeFilePath();
+	std::string getClusterTreeFilePath();
+	std::string getAlignmentFilePath();
+	std::string getSelectionTreeFilePath();
+	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
+	std::string getEtaDistributionPath();
+	void goToRawTreeDir();
+  void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
+  void goToSelectionTreeDir();
+	void goToOutputDir();
+  void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
+  void goToAlignmentRootDir(){goToDir(this->getAbsoluteOuputPath(false));}
+
+	void goToPedestalAnalysisDir();
+	void goToClusterAnalysisDir();
+	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
+	void goToSelectionAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selectionAnalysis/"));}
+	void goToAlignmentDir(){goToDir(this->getAbsoluteOuputPath(true).append("/alignment/"));}
+	void goToAlignmentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/anaAlignmnet/"));}
+	void goToTransparentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/transparentAnalysis/"));}
+	std::string getTransparentAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/transparentAnalysis/");}
+	std::string getAlignmentDir(){return this->getAbsoluteOuputPath(true).append("/alignment/");};
+	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
+	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
+private:
+	void goToDir(std::string dir);
+public:
 	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);
 	void saveSettings();
@@ -54,6 +82,7 @@ public:
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
 	std::string getRunDescription() const {return runDescription;};
+	Float_t getPHinSigmaPlotFactor() const{return 0.8;}
 	Float_t getClusterSeedFactor(UInt_t det);
 	Float_t getClusterHitFactor(UInt_t det);
 	Float_t getAlignment_chi2() const;
