@@ -78,7 +78,7 @@ private:
 	int getSignedChannelNumber(Float_t position);
 	void printEvent();
 	void printCluster(TCluster cluster);
-	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode);
+	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
 	
 	// run variables
 	UInt_t subjectDetector, subjectPlane;
@@ -120,6 +120,7 @@ private:
 	vector<TH1F*> hLaundau2Highest;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
+	vector<TH1F*> hResidualEtaCorrected;
 	TH1F* hLaundau2HighestMean;
 	TH1F* hLaundau2HighestMP;
 	
@@ -128,6 +129,7 @@ private:
 	vector<TF1*> fitLandau2Highest;
 	vector<TF1*> fitResidualChargeWeighted;
 	vector<TF1*> fitResidualHighest2Centroid;
+	vector<TF1*> fitResidualEtaCorrected;
 	
 	
 	
