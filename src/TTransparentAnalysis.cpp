@@ -146,13 +146,13 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		this->fillHistograms();
 		if (verbosity > 4) printEvent();
 		
-		createEtaIntegrals();
 		
 		// save clusters for eta corrected analysis
 		vecTransparentClusters.push_back(transparentClusters);
 		eventNumbers.push_back(nEvent);
 	}
 	this->printCutFlow();
+	createEtaIntegrals();
 }
 
 void TTransparentAnalysis::calcEtaCorrectedResiduals() {
@@ -168,8 +168,8 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		eventReader->LoadEvent(nEvent);
 		this->predictPositions();
 		for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-			// TODO: TCluster::corEta or TCluster::eta, add histo!!!
-			hResidualEtaCorrected[clusterSize]->Fill(getResidual(vecTransparentClusters.at(iEvent).at(clusterSize),TCluster::corEta,0));
+			// TODO: TCluster::corEta or TCluster::eta???
+			hResidualEtaCorrected[clusterSize]->Fill(getResidual(vecTransparentClusters.at(iEvent).at(clusterSize),TCluster::corEta,hEtaIntegrals[clusterSize]));
 		}
 	}
 }
