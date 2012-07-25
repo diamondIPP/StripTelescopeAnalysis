@@ -49,6 +49,7 @@
 #include "TCluster.hh"
 #include "THTMLTransparentAnalysis.hh"
 #include "LandauGaussFit.hh"
+#include "TClustering.hh"
 
 using namespace std;
 
@@ -56,22 +57,23 @@ class TTransparentAnalysis {
 public:
 	TTransparentAnalysis(TSettings* settings);
 	virtual ~TTransparentAnalysis();
-	void	doAnalysis(int nEvents=0);
+//	void	doAnalysis(int nEvents=0);
 	void analyze(UInt_t nEvents, UInt_t startEvent);
-	void doEtaCorrectedResiduals();
+	void calcEtaCorrectedResiduals();
 	void setSettings(TSettings* settings);
 	
 private:
 	void initHistograms();
 	void fillHistograms();
 	TF1* doGaussFit(TH1F *histo);
+	void createEtaIntegrals();
 	void fitHistograms();
 	void saveHistograms();
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();
 	void fitTrack();
-	void analyzeTrack(TTrack track);
+//	void analyzeTrack(TTrack track);
 	void predictPositions();
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
@@ -101,6 +103,7 @@ private:
 	TTracking* eventReader;
 	THTMLTransparentAnalysis* htmlTransAna;
 	LandauGaussFit* landauGauss;
+	TClustering* clustering;
 	
 	// cut flow
 	UInt_t nAnalyzedEvents;
@@ -123,6 +126,7 @@ private:
 	vector<TH1F*> hResidualEtaCorrected;
 	TH1F* hLaundau2HighestMean;
 	TH1F* hLaundau2HighestMP;
+	vector<TH1F*> hEtaIntegrals;
 	
 	// fits
 	vector<TF1*> fitLandau;

@@ -28,6 +28,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	histSaver->SetRunNumber(settings->getRunNumber());
 	htmlTransAna = new THTMLTransparentAnalysis(settings);
 	htmlTransAna->setFileGeneratingPath(settings->getTransparentAnalysisDir());
+	clustering = new TClustering(settings);
 	
 	
 	// TODO: move these setting to the proper place
@@ -76,9 +77,10 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	htmlTransAna->createResolutionPlots(resolutions);
 	htmlTransAna->createEtaPlots();
 	htmlTransAna->generateHTMLFile();
-	if(eventReader!=0)delete eventReader;
-	if(histSaver!=0)delete histSaver;
-	if(htmlTransAna)delete htmlTransAna;
+	if (eventReader!=0) delete eventReader;
+	if (histSaver!=0) delete histSaver;
+	if (htmlTransAna!=0) delete htmlTransAna;
+	if (clustering!=0) delete clustering;
 	settings->goToOutputDir();
 }
 
@@ -144,6 +146,8 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		this->fillHistograms();
 		if (verbosity > 4) printEvent();
 		
+		createEtaIntegrals();
+		
 		// save clusters for eta corrected analysis
 		vecTransparentClusters.push_back(transparentClusters);
 		eventNumbers.push_back(nEvent);
@@ -151,10 +155,13 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	this->printCutFlow();
 }
 
-void TTransparentAnalysis::doEtaCorrectedResiduals() {
+void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 	if (eventNumbers.size() != vecTransparentClusters.size()) {
-		cout << "size of eventNumbers and transparentClusters do not match!" << endl;
+		cout << "now we are in deep trouble!! size of eventNumbers and transparentClusters do not match!" << endl;
 		return;
+	}
+	if (vecTransparentClusters.size()==0 || eventNumbers.size()==0) {
+		cout << "oh boy.. you didn't run the analysis!" << endl;
 	}
 	for (UInt_t iEvent = 0; iEvent < eventNumbers.size(); iEvent++) {
 		nEvent = eventNumbers.at(iEvent);
@@ -315,6 +322,14 @@ TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
 	return histofitx;
 }
 
+void TTransparentAnalysis::createEtaIntegrals() {
+	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		stringstream histName;
+		histName << "hDiaTranspAnaEtaIntegral2HighestIn"<<clusterSize+1<<"Strips";
+		hEtaIntegrals.push_back(clustering->createEtaIntegral(hEta[clusterSize], histName.str()));
+	}
+}
+
 void TTransparentAnalysis::fitHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		// fit histograms
@@ -367,6 +382,7 @@ void TTransparentAnalysis::saveHistograms() {
 		histSaver->SaveHistogramWithFit(hResidualChargeWeighted[clusterSize],fitResidualChargeWeighted[clusterSize]);
 		histSaver->SaveHistogramWithFit(hResidualHighest2Centroid[clusterSize],fitResidualHighest2Centroid[clusterSize]);
 		histSaver->SaveHistogramWithFit(hResidualEtaCorrected[clusterSize],fitResidualEtaCorrected[clusterSize]);
+		histSaver->SaveHistogram(hEtaIntegrals[clusterSize],0);
 	}
 	histSaver->SaveHistogram(hLaundauMean);
 	histSaver->SaveHistogram(hLaundauMP);
