@@ -101,6 +101,7 @@ bool TFidCutRegions::isInFiducialCut(Float_t xVal, Float_t yVal)
   if(index>0){
     if( index<this->fidCuts.size()+1){
 //      TFiducialCut fidCut = fidCuts.at(index-1);
+//      cout<<xVal<<"/"<<yVal<<"\t"<<index<<" "<<fidCuts.at(index-1)->isInFiducialCut(xVal,yVal)<<endl;
       return fidCuts.at(index-1)->isInFiducialCut(xVal,yVal);
     }
   }
@@ -141,7 +142,20 @@ TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
     pt->SetFillColor(kRed);
     pt->SetFillStyle(3013);
   }
+  else{
+    pt->SetFillColor(kOrange);
+    pt->SetFillStyle(3013);
+  }
   return pt;
+}
+
+int TFidCutRegions::getFidCutRegion(Float_t xVal, Float_t yVal)
+{
+  int i=0;
+  for(i=0;i<fidCuts.size();i++){
+    if(fidCuts.at(i)->isInFiducialCut(xVal,yVal)) return i;
+  }
+  return -1;
 }
 
 void TFidCutRegions::createFidCuts(){
@@ -238,13 +252,17 @@ TCanvas *TFidCutRegions::getFiducialCutCanvas(TPlaneProperties::enumCoordinate c
    TH1D *hProjX =  hEventScatterPlot->ProjectionX("hFiducialCutOneDiamondHitProjX");
    hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
    hProjX->GetYaxis()->SetTitle("Number Of Entries #");
-   return getFiducialCutProjectionCanvas(hProjX,xInt);
+   TCanvas *c1 = getFiducialCutProjectionCanvas(hProjX,xInt);
+   c1->SetName("chProjX");
+   return c1;
   }
   else if(cor == TPlaneProperties::Y_COR){
     TH1D *hProjY = hEventScatterPlot->ProjectionY("hFiducialCutOneDiamondHitProjY");
     hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
     hProjY->GetYaxis()->SetTitle("Number Of Entries #");
-   return getFiducialCutProjectionCanvas(hProjY,yInt);
+    TCanvas *c1 = getFiducialCutProjectionCanvas(hProjY,yInt);
+       c1->SetName("chProjY");
+       return c1;
   }
   else if(cor == TPlaneProperties::XY_COR){
     return getAllFiducialCutsCanvas();

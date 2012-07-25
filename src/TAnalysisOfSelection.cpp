@@ -121,7 +121,10 @@ void TAnalysisOfSelection::saveHistos()
 		stringstream name;
 		name<< "hPulseHeigthDiamond_"<<clusSize<<"_ClusterSize";
 		TH1F* histo = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),clusSize,clusSize);
-
+		if(histo==0) {
+		  cout<<"TAnalysisOfSelection:: saverHistos ==> oooh Boy, something went terribly wrong, Lukas you better fix it! NOW!"<<endl;
+		  return;
+		}
 		histo->SetTitle(name.str().c_str());
 		histo->GetYaxis()->SetTitle("number of Entries #");
 		TF1* fitCS=0;

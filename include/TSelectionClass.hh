@@ -96,6 +96,7 @@ private:
 private:
 	TH2F *hFiducialCutSilicon;
 	TH2F *hFiducialCutSiliconDiamondHit;
+	TH2F *hSelectedEvents;
 };
 
 #endif /* TSELECTIONCLASS_HH_ */

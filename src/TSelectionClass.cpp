@@ -124,6 +124,8 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	hFiducialCutSilicon->Reset();
 	hFiducialCutSiliconDiamondHit->Reset();
 	hAnalysisFraction->Reset();
+	hSelectedEvents->Reset();
+//	hSelectedEvents->Clear();
 	nUseForAlignment=0;
 	nUseForAnalysis=0;
 	nUseForSiliconAlignment=0;
@@ -329,8 +331,11 @@ void TSelectionClass::setVariables(){
 		nNoValidSiliconTrack++;
 	else
 		nValidSiliconTrack++;
-	if(useForAnalysis||useForAlignment)
+	if(useForAnalysis||useForAlignment){
 	  hAnalysisFraction->Fill(nEvent);
+	  hSelectedEvents->Fill(fiducialValueX,fiducialValueY);
+//    cout<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
+	}
 	//else cout<<nEvent<<"\tuseNOTforAlignemnt..."<<endl;
 //		UInt_t nDiamondHits; //number of  in diamond plane;
 //		bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
@@ -394,11 +399,16 @@ void TSelectionClass::initialiseHistos()
 
 	std::string name2 = "hFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster";
 	hFiducialCutSiliconDiamondHit = new TH2F(name2.c_str(),name2.c_str(),512,0,256,512,0,256);
-
 	hFiducialCutSiliconDiamondHit->GetYaxis()->SetTitle("yCoordinate in Channels");
 	hFiducialCutSiliconDiamondHit->GetXaxis()->SetTitle("xCoordinate in Channels");
-	int nEvents= eventReader->GetEntries();
 
+
+  std::string name3 = "hSelectedEventsValidSiliconTrackInFidCutAndOneDiamondHit";
+  hSelectedEvents = new TH2F("hSelectedEvents",name3.c_str(),512,0,256,512,0,256);
+  hSelectedEvents->GetYaxis()->SetTitle("yCoordinate in Channels");
+  hSelectedEvents->GetXaxis()->SetTitle("xCoordinate in Channels");
+
+	int nEvents= eventReader->GetEntries();
 	int i=nEvents/1000;
 	i++;
 	nEvents = (i)*1000;
@@ -526,6 +536,7 @@ void TSelectionClass::saveHistos()
 	std::string name = "c";
 	name.append(hFiducialCutSilicon->GetName());
 	TCanvas *c1= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSilicon);
+	c1->SetName(name.c_str());
 	    /*new TCanvas(name.c_str(),hFiducialCutSilicon->GetTitle());
 	c1->cd();
 	hFiducialCutSilicon->Draw("colz");
@@ -545,6 +556,15 @@ void TSelectionClass::saveHistos()
 	std::string name2 = "c";
 	name2.append(hFiducialCutSiliconDiamondHit->GetName());
 	TCanvas *c2= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit);
+	c2->SetName(name2.c_str());
+  histSaver->SaveCanvas(c2);
+
+  std::string name3 = "c";
+  name3.append(hSelectedEvents->GetName());
+  TCanvas *c3= fiducialCuts->getAllFiducialCutsCanvas(hSelectedEvents);
+  c3->SetName(name3.c_str());
+  histSaver->SaveCanvas(c3);
+
 	 //   new TCanvas(name2.c_str(),hFiducialCutSiliconDiamondHit->GetTitle());
 	/*c2->cd();
 	hFiducialCutSiliconDiamondHit->Draw("colz");
@@ -552,14 +572,14 @@ void TSelectionClass::saveHistos()
 	lXhigher->Draw();
 	lYlower->Draw();
 	lYhigher->Draw();*/
-	histSaver->SaveCanvas(c2);
 
 //	histSaver->SaveHistogram(hFiducialCutSilicon);
 	delete hFiducialCutSilicon;
 	delete hFiducialCutSiliconDiamondHit;
+	delete hSelectedEvents;
 	hAnalysisFraction->Scale(.1);
 	hAnalysisFraction->SetStats(false);
-	hAnalysisFraction->GetYaxis()->SetRangeUser(0,100);
+//	hAnalysisFraction->GetYaxis()->SetRangeUser(0,100);
 	histSaver->SaveHistogram(hAnalysisFraction);
 	delete hAnalysisFraction;
 }
@@ -585,10 +605,14 @@ void TSelectionClass::createFiducialCut(){
 //  findFiducialCut(hFiducialCutSiliconDiamondHit);
   delete fiducialCuts;
   fiducialCuts = new TFidCutRegions(hFiducialCutSiliconDiamondHit,settings->getNDiamonds(),settings->getAutoFidCutPercentage());
-
+  fiducialCuts->setRunDescription(settings->getRunDescription());
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));
-  histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR));
+  TCanvas *c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR);
+  c1->SetTitle(Form("Fiducial Cut of Run %i with \"%s\"",settings->getRunNumber(),settings->getRunDescription().c_str()));
+  c1->SetName("cFidCutCanvasXY");
+  histSaver->SaveCanvas(c1);
+
   //  fiducialCuts->getFiducialCutCanvas();
 }
 
