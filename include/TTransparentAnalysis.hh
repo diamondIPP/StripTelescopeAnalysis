@@ -162,6 +162,7 @@ private:
 	vector<Float_t> vecMeanLandau2Highest;
 	vector< pair <Float_t,Float_t> > vecResidualChargeWeighted;
 	vector< pair <Float_t,Float_t> > vecResidualHighest2Centroid;
+	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected;
 	
 
 };

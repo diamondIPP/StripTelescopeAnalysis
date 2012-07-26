@@ -80,32 +80,40 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 	<<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
 	//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
-	vecTable.resize(5);
+	vecTable.resize(7);
 	vecTable.at(0).push_back("number of used channels");
 	vecTable.at(1).push_back("mean & width using charge weighted position");
 	vecTable.at(2).push_back("resolution [&#956m]");
 	vecTable.at(3).push_back("mean & width using 2 highest channels");
 	vecTable.at(4).push_back("resolution [&#956m]");
+	vecTable.at(5).push_back("mean & width using 2 highest channels eta corrected");
+	vecTable.at(6).push_back("resolution [&#956m]");
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		vecTable.at(0).push_back(floatToString(clusterSize+1));
 		vecTable.at(1).push_back(floatToString(resolutions.at(0).at(clusterSize).first)+"|"+floatToString(resolutions.at(0).at(clusterSize).second));
 		vecTable.at(2).push_back(floatToString(50.*resolutions.at(0).at(clusterSize).second));
 		vecTable.at(3).push_back(floatToString(resolutions.at(1).at(clusterSize).first)+"|"+floatToString(resolutions.at(1).at(clusterSize).second));
 		vecTable.at(4).push_back(floatToString(50.*resolutions.at(1).at(clusterSize).second));
+		vecTable.at(5).push_back(floatToString(resolutions.at(2).at(clusterSize).first)+"|"+floatToString(resolutions.at(2).at(clusterSize).second));
+		vecTable.at(6).push_back(floatToString(50.*resolutions.at(2).at(clusterSize).second));
 	}
 	sectionContent << createTable(vecTable);
 	sectionContent << "\n\n<br><br>\n\n";
-	stringstream plots1, plots2;
+	stringstream plots1, plots2, plots3;
 	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
-		stringstream histoname1, histoname2;
+		stringstream histoname1, histoname2, histoname3;
 		histoname1 << "hDiaTranspAnaResidualChargeWeightedIn"<<clusterSize<<"StripsMinusPred";
 		histoname2 << "hDiaTranspAnaResidualHighest2CentroidIn"<<clusterSize<<"StripsMinusPred";
+		histoname3 << "hDiaTranspAnaResidualEtaCorrectedIn"<<clusterSize<<"StripsMinusPred";
 		plots1 << putImage(".",histoname1.str()) << " \n";
 		plots2 << putImage(".",histoname2.str()) << " \n";
+		plots3 << putImage(".",histoname3.str()) << " \n";
 	}
 	sectionContent << "<h2>Charge weighted position of N strips</h2><br>" << plots1.str();
 	sectionContent << "\n\n<br><br>\n\n";
 	sectionContent << "<h2>Position of 2 hightest channels in N strips</h2><br>" << plots2.str();
+	sectionContent << "\n\n<br><br>\n\n";
+	sectionContent << "<h2>Position of eta corrected 2 hightest channels in N strips</h2><br>" << plots3.str();
 	addSection("Resolution Plots",sectionContent.str());
 }
 

@@ -72,6 +72,7 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	meanPulseHeights.push_back(vecMeanLandau2Highest);
 	resolutions.push_back(vecResidualChargeWeighted);
 	resolutions.push_back(vecResidualHighest2Centroid);
+	resolutions.push_back(vecResidualEtaCorrected);
 	
 	htmlTransAna->createPulseHeightPlots(meanPulseHeights, mpPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
@@ -153,6 +154,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	}
 	this->printCutFlow();
 	createEtaIntegrals();
+	calcEtaCorrectedResiduals();
 }
 
 void TTransparentAnalysis::calcEtaCorrectedResiduals() {
@@ -238,7 +240,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
 	UInt_t centerChannel;
 	int direction;
 	direction = getSignedChannelNumber(centerPosition);
-	cout << "centerPosition: " << centerPosition << "\tdirection: " << direction << endl;
+//	cout << "centerPosition: " << centerPosition << "\tdirection: " << direction << endl;
 	centerChannel = TMath::Abs(direction);
 	if (direction < 0) direction = -1;
 	else direction = 1;
@@ -367,6 +369,15 @@ void TTransparentAnalysis::fitHistograms() {
 			tempPair.second = 0;
 		}
 		vecResidualHighest2Centroid.push_back(tempPair);
+		if (fitResidualEtaCorrected[clusterSize]!=0) {
+			tempPair.first = fitResidualEtaCorrected[clusterSize]->GetParameter(1);
+			tempPair.second = fitResidualEtaCorrected[clusterSize]->GetParameter(2);
+		}
+		else {
+			tempPair.first = 0;
+			tempPair.second = 0;
+		}
+		vecResidualEtaCorrected.push_back(tempPair);
 	}
 	hLaundauMean->Scale(1./hLaundauMean->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
 	hLaundauMP->Scale(1./hLaundauMP->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
