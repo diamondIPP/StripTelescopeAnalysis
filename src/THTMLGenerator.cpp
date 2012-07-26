@@ -221,10 +221,10 @@ string THTMLGenerator::center(string input)
   return putIntoCommand("center",input);
 }
 
-std::string THTMLGenerator::floatToString(Float_t value)
+std::string THTMLGenerator::floatToString(Float_t value, UInt_t precision)
 {
 	std::ostringstream out;
-	out <<" "<< value<<" ";
+	out <<" "<<std::setprecision(precision)<<value<<" ";
 	return (out.str());
 }
 

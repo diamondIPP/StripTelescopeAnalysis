@@ -78,7 +78,7 @@ protected:
     std::vector<std::string> tableOfContent;
     std::string title;
 public:
-    static std::string floatToString(Float_t value);
+    static std::string floatToString(Float_t value, UInt_t precision=4);
 };
 
 #endif /* THTMLGENERATOR_HH_ */
