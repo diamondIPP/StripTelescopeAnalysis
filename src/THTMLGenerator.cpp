@@ -60,15 +60,16 @@ void THTMLGenerator::generatorHTMLHeader()
 		string correctionPath;
 		if(this->subdirPath!="")
 		  correctionPath="../";
-		else correctionPath="";
+		else correctionPath="./";
 
 		html_summary << "<b>"<<title<<"</b>||"
-				<< "<a href=\""<<this->mainPath<<correctionPath<<"/overview.html\">Summary</a>||"
-				<< "<a href=\""<<this->mainPath<<correctionPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
-				<< "<a href=\""<<this->mainPath<<correctionPath<<"/clustering/clustering.html\">Clustering</a>||"
-				<< "<a href=\""<<this->mainPath<<correctionPath<<"/selections/selection.html\">Selection</a>||"
-				<< "<a href=\""<<this->mainPath<<correctionPath<<"/alignment/alignment.html\">Alignment</a>||"
-				<< "<a href=\""<<this->mainPath<<correctionPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
+				<< "<a href=\""<<correctionPath<<"/overview.html\">Summary</a>||"
+				<< "<a href=\""<<correctionPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
+				<< "<a href=\""<<correctionPath<<"/clustering/clustering.html\">Clustering</a>||"
+				<< "<a href=\""<<correctionPath<<"/selections/selection.html\">Selection</a>||"
+				<< "<a href=\""<<correctionPath<<"/alignment/alignment.html\">Alignment</a>||"
+				<< "<a href=\""<<correctionPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
+				<< "<a href=\""<<correctionPath<<"/transparentAnalysis/transparentAnalysis.html\">TransparentAnalysis</a>||"
 //				<< "<a href=\"d8.html\">Diamond</a>||"
 //				<< "<a href=\"d0.html\">D0X</a>||"
 //				<< "<a href=\"d1.html\">D0Y</a>||"

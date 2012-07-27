@@ -63,6 +63,7 @@ all: rootclean diamondAnalysis
 	
 	
 diamondAnalysis: $(LIBFILES)
+#		@echo "TEST\n\n" 
 		#
 		# Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
         #
@@ -114,4 +115,4 @@ clean:
 	
 rootclean:
 	rm -fv *Dict.* && rm -fv *.so
-
+	echo $(LD_LIBRARY_PATH) $(PATH) TEST

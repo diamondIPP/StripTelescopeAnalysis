@@ -48,6 +48,7 @@ public:
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
 	std::string getEtaDistributionPath(Int_t step=-1);
+	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
   void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
   void goToSelectionTreeDir();

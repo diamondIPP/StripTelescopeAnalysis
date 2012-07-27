@@ -160,7 +160,7 @@ void TClustering::clusterEvent()
 void TClustering::clusterDetector(int det){
 	if(det>=TPlaneProperties::getNDetectors()){
 		cerr<<"det is bigger than NDetectors... EXIT"<<endl;
-		exit;
+		exit(-1);
 	}
 	nClusters[det]=0;
 	int maxChannels= TPlaneProperties::getNChannels(det);

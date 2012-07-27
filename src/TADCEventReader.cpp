@@ -340,6 +340,15 @@ void TADCEventReader::SetBranchAddresses(){
 		if(verbosity)cout<<"Set Branch \"useForSiliconAlignment\""<<endl;
 	}
 
+	if(tree->FindBranch("cmnCorrection")){
+	  tree->SetBranchAddress("cmnCorrection",&this->bCMNoiseCorrected);
+	  cout<<"Set Branch \n isCMNCOrrected\""<<endl;
+	}
+	if(tree->FindBranch("commonModeNoise")){
+	  tree->SetBranchAddress("commonModeNoise",&this->cmNoise);
+	  cout<<"SET BRANCH ADDRESS: \"CMN Noise\""<<endl;
+	}
+
 //	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
 //	UInt_t nDiamondHits; //number of clusters in diamond plane;
 	cout<<"DONE"<<endl;
@@ -347,6 +356,7 @@ void TADCEventReader::SetBranchAddresses(){
 }
 
 void TADCEventReader::initialiseTree(){
+  bCMNoiseCorrected=false;
 	cout<<"initialise tree with "<<tree->GetEntries()<<" Entires."<<endl;
 	current_event = 1;
 	tree->GetEvent(current_event);
@@ -421,9 +431,11 @@ Float_t TADCEventReader::getDet_PedWidth(UInt_t i, UInt_t j) const
     return Det_PedWidth[i][j];
 }
 
-UShort_t TADCEventReader::getDia_ADC(UInt_t ch) const
-{
-    return Dia_ADC[ch];
+Float_t TADCEventReader::getDia_ADC(UInt_t ch) {
+  Float_t adcValue = (Float_t)Dia_ADC[ch];
+  if(bCMNoiseCorrected)
+    adcValue -=cmNoise;
+  return adcValue;
 }
 
 UInt_t TADCEventReader::getEvent_number() const
@@ -497,13 +509,13 @@ Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch)
 //	return this->pVecvecCluster;
 //}
 
-UInt_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)
+Float_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)
 {
 	if(det<9 &&ch<TPlaneProperties::getNChannels(det)){
 		if (det==8)
-		return (UInt_t)this->getDia_ADC(ch);
+		return (Float_t)this->getDia_ADC(ch);
 	else
-		return (UInt_t)this->getDet_ADC(det,ch);
+		return (Float_t)this->getDet_ADC(det,ch);
 	}
 	return -1;
 }

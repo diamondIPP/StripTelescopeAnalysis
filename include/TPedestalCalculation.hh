@@ -27,6 +27,7 @@
 #include "TStopwatch.h"
 #include "TADCEventReader.hh"
 #include "TRawEventSaver.hh"
+#include "HistogrammSaver.class.hh"
 
 using namespace std;
 
@@ -40,31 +41,41 @@ public:
 	void calculatePedestals(int nEvents);
 	void calculateSlidingPedestals(UInt_t nEvents);
 private:
-	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<UShort_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
+	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<Float_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
 	pair <float,float> calculateFirstPedestalDet(int det,int ch, deque<UChar_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=7);
-	pair <float,float> calculateFirstPedestalDia(int ch, deque<UShort_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
+	pair <float,float> calculateFirstPedestalDia(int ch, deque<Float_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
+  pair <float,float> calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
 	pair <float,float> checkPedestalDet(int det, int ch,int maxSigma=7);
 	pair <float,float> checkPedestalDia(int ch,int maxSigma=7);
 	bool createPedestalTree(int nEvents);
 	void setBranchAdresses();
+	void doCmNoiseCalculation();
+	void fillFirstEventsAndMakeDiaDeque();
+	void initialiseDeques();
+	void updateDiamondPedestals();
+	void updateSiliconPedestals();
 	TADCEventReader* eventReader;
 	TFile* pedestalFile;
 	TTree* pedestalTree;
 	bool createdNewTree;
 	UInt_t nEvents;
 	bool createdNewFile;
+	bool doCMNCorrection;
     TSystem* sys;
     TSettings *settings;
 	UInt_t runNumber;
 	Float_t pedestalMean[9][N_DET_CHANNELS];
 	Float_t diaPedestalMean[N_DIA_CHANNELS];
+	Float_t diaPedestalMeanStartValues[N_DIA_CHANNELS];
 	Float_t  pedestalSigma[9][N_DET_CHANNELS];
 	Float_t diaPedestalSigma[N_DIA_CHANNELS];
+	Float_t diaPedestalSigmaStartValues[N_DIA_CHANNELS];
 	double sigmaValues[9][N_DET_CHANNELS];
 	double meanValues[9][N_DET_CHANNELS];
 	UInt_t slidingLength;
 	deque<UChar_t> detAdcValues[8][N_DET_CHANNELS];
-	deque<UShort_t> diaAdcValues[N_DIA_CHANNELS];
+	deque<Float_t> diaAdcValues[N_DIA_CHANNELS];
+	deque<Short_t> diaAdcValues2[N_DIA_CHANNELS];
 	deque<bool> detEventUsed[8][N_DET_CHANNELS];
 	deque<bool> diaEventUsed[N_DIA_CHANNELS];
 
@@ -73,11 +84,26 @@ private:
 	ULong_t detSUM2[8][N_DET_CHANNELS];
 	ULong_t diaSUM[N_DIA_CHANNELS];
 	ULong_t diaSUM2[N_DIA_CHANNELS];
+
+
 	int detEventsInSum[8][N_DET_CHANNELS];
 	int diaEventsInSum[N_DIA_CHANNELS];
-	stringstream rawfilepath;
+	int diaEventsInSumCMN[N_DIA_CHANNELS];
+
+
+  Float_t diaPedestalMeanCMN[N_DIA_CHANNELS];
+  Float_t diaPedestalSigmaCMN[N_DIA_CHANNELS];
+  deque<Float_t> diaAdcValuesCMN[N_DIA_CHANNELS];
+  deque<bool> diaEventUsedCMN[N_DIA_CHANNELS];
+  Double_t diaSUMCmn[N_DIA_CHANNELS];
+  Double_t diaSUM2Cmn[N_DIA_CHANNELS];
+  Float_t cmNoise;
+
+//	stringstream rawfilepath;
 	int MAXSDETSIGMA;
 	int MAXDIASIGMA;
+	HistogrammSaver *histSaver;
+	TH1F* hCommonModeNoise;
 };
 
 #endif /* PEDESTALCALCULATION_HH_ */

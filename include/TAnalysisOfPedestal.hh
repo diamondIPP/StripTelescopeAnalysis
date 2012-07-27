@@ -68,6 +68,7 @@ private:
 	TH1F* hChannelBiggestHit[9];
 	TH1F* hPulsHeightBiggestHit[9];
 	TH1F* hPulsHeightNextBiggestHit[9];
+	TH1F* hCMNoiseDistribution;
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;

@@ -75,6 +75,13 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
+		if(nEvent==1){
+		  string xName = hAllAdcNoise[8]->GetXaxis()->GetTitle();
+		  if(eventReader->isCMNoiseCorrected()||settings->doCommonModeNoiseCorrection())
+		    xName.append(" CMN corrected");
+		  cout<<xName<<endl;char t; cin>>t;
+		  hAllAdcNoise[8]->GetXaxis()->SetTitle(xName.c_str());
+		}
 		/*cout<<nEvent;
 		 for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
 		 for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
@@ -255,9 +262,12 @@ void TAnalysisOfPedestal::analyseBiggestHit() {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
-	for (UInt_t det =0;det<9;det++){
+  hCMNoiseDistribution= new TH1F("hCMNoiseDistribution","hCMNoiseDistribution",512,-20,20);
+  hCMNoiseDistribution->GetXaxis()->SetTitle("Common Mode Noise [ADC]");
+  hCMNoiseDistribution->GetYaxis()->SetTitle("number of entries [#]");
+  for (UInt_t det =0;det<9;det++){
 		stringstream histoName,histoTitle,xTitle,yTitle;
-		histoName<<"hNosiseDistributionOfAllNonHitChannels_"<<TPlaneProperties::getStringForDetector(det);
+		histoName<<"hNoiseDistributionOfAllNonHitChannels_"<<TPlaneProperties::getStringForDetector(det);
 		histoTitle<<"Noise Distribution  of all non hit channels in Plane"<<TPlaneProperties::getStringForDetector(det);
 		xTitle<<"non hit Noise (Adc-Ped.) in ADC counts";
 		yTitle<<"Number of Entries #";
