@@ -297,6 +297,22 @@ void TADCEventReader::SetBranchAddresses(){
 		tree->SetBranchAddress("PedestalSigma",&pedestalSigma);
 		if(verbosity)cout<<"Set Branch \"PedestalSigma\""<<endl;
 		}
+	if(tree->FindBranch("diaPedestalMean")){
+	    tree->SetBranchAddress("diaPedestalMean",&diaPedestalMean);
+	    if(verbosity)cout<<"Set Branch \"diaPedestalMean\""<<endl;
+	    }
+	  if(tree->FindBranch("diaPedestalSigma")){
+	    tree->SetBranchAddress("diaPedestalSigma",&diaPedestalSigma);
+	    if(verbosity)cout<<"Set Branch \"diaPedestalSigma\""<<endl;
+	    }
+	  if(tree->FindBranch("diaPedestalMeanCMN")){
+	    tree->SetBranchAddress("diaPedestalMeanCMN",&diaPedestalMeanCMN);
+	    if(verbosity)cout<<"Set Branch \"diaPedestalMeanCMN\""<<endl;
+	  }
+	  if(tree->FindBranch("diaPedestalSigmaCMN")){
+	    tree->SetBranchAddress("diaPedestalSigmaCMN",&diaPedestalSigmaCMN);
+	    if(verbosity)cout<<"Set Branch \"diaPedestalSigmaCMN\""<<endl;
+	  }
 //	if(tree->FindBranch("clusters")){
 //		//tree->SetBranchAddress("clusters",&pVecvecCluster);
 //		if(verbosity)cout<<"Set Branch \"clusters\""<<endl;
@@ -431,11 +447,10 @@ Float_t TADCEventReader::getDet_PedWidth(UInt_t i, UInt_t j) const
     return Det_PedWidth[i][j];
 }
 
-Float_t TADCEventReader::getDia_ADC(UInt_t ch) {
-  Float_t adcValue = (Float_t)Dia_ADC[ch];
-  if(bCMNoiseCorrected)
-    adcValue -=cmNoise;
-  return adcValue;
+Float_t TADCEventReader::getDia_ADC(UInt_t ch, bool cmnCorrected) {
+  if(ch<TPlaneProperties::getNChannelsDiamond())
+    return (Float_t)Dia_ADC[ch];
+  return -999999;
 }
 
 UInt_t TADCEventReader::getEvent_number() const
@@ -488,44 +503,66 @@ TFile *TADCEventReader::getFile() const
 	return this->file;
 }
 
-Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch)
+Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
-	if(det<9&&ch<TPlaneProperties::getNChannels(det))
+	if(det<8&&ch<TPlaneProperties::getNChannels(det))
 		return this->pedestalMean[det][ch];
+	if(det==TPlaneProperties::getDetDiamond())
+	  return getDiaPedestalMean(ch,cmnCorrected);
 	return -99999;
 }
 
-Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch)
+Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
-	if(det<9&&ch<TPlaneProperties::getNChannels(det))
+	if(det<8&&ch<TPlaneProperties::getNChannels(det))
 		if(this->pedestalSigma[det][ch]>=0)
 			return this->pedestalSigma[det][ch];
+	if(det==TPlaneProperties::getDetDiamond())
+	  return getDiaPedestalSigma(ch,cmnCorrected);
 	return 0;
 }
 
+Float_t TADCEventReader::getDiaPedestalMean(UInt_t ch, bool cmnCorrected){
+  if(ch<TPlaneProperties::getNChannelsDiamond()){
+    if(cmnCorrected)
+      return this->diaPedestalMeanCMN[ch] + cmNoise;
+    else
+      return this->diaPedestalMean[ch];
+  }
+  return -99999;
+}
+
+Float_t TADCEventReader::getDiaPedestalSigma(UInt_t ch, bool cmnCorrected){
+  if(ch<TPlaneProperties::getNChannelsDiamond()){
+    if(cmnCorrected)
+      return this->diaPedestalSigmaCMN[ch];
+    else
+      return this->diaPedestalSigma[ch];
+  }
+  return 0;
+}
 //TCluster::vecvecTCluster* TADCEventReader::getCluster() const
 //{
 //	//std::cout<<pVecvecCluster->size()<<std::endl;
 //	return this->pVecvecCluster;
 //}
 
-Float_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)
+Float_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)//,bool cmnCorrected)
 {
-	if(det<9 &&ch<TPlaneProperties::getNChannels(det)){
-		if (det==8)
-		return (Float_t)this->getDia_ADC(ch);
-	else
+	if(det<8 &&ch<TPlaneProperties::getNChannels(det)){
 		return (Float_t)this->getDet_ADC(det,ch);
 	}
+	if (det==8)
+	    return (Float_t)this->getDia_ADC(ch);//,cmnCorrected);
 	return -1;
 }
 
-Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch)
+Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch, bool cmnCorrected)
 {
-	if(getPedestalSigma(det,ch)==0)
+	if(getPedestalSigma(det,ch,cmnCorrected)==0)
 		return 0;
 	else
-		return (this->getSignal(det,ch)/this->getPedestalSigma(det,ch));
+		return (this->getSignal(det,ch,cmnCorrected)/this->getPedestalSigma(det,ch,cmnCorrected));
 }
 
 TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
@@ -559,25 +596,24 @@ bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 {
 	if(det<9)
 		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det);
-	else if(det==8)
-		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det);
 	return true;
 }
 
-Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch){
+Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
   if(det>=9)return -9999999;
-  return getAdcValue(det,ch)-getPedestalMean(det,ch);
+    return getAdcValue(det,ch)-getPedestalMean(det,ch,cmnCorrected);
 }
 
-Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch){
+Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch,bool cmnCorrected){
   if(det>=9||(getPedestalSigma(det,ch)<=0))return -99999999;
-  return (getRawSignal(det,ch)/getPedestalSigma(det,ch));
+  return (getRawSignal(det,ch,cmnCorrected)/getPedestalSigma(det,ch,cmnCorrected));
 }
-Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch)
+
+Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
 	if(det>=9) return -9999999;
 
-	Float_t signal =getRawSignal(det,ch);
+	Float_t signal =getRawSignal(det,ch,cmnCorrected);
 	if(signal<0)return 0;
 
 	return signal;

@@ -228,7 +228,7 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>10)cout<<cluster.size()<<" ";
 	UInt_t currentCh;
-	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0;currentCh--){
+	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0&&ch<TPlaneProperties::getNChannelsDiamond();currentCh--){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
 		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";

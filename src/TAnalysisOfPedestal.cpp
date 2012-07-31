@@ -75,11 +75,15 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
+		UInt_t ch=30;
+		cout<<nEvent<<"  "<<eventReader->getPedestalMean(8,ch,false)<<" "<<eventReader->getPedestalMean(8,ch,true)<<"\t";
+		cout<<eventReader->getPedestalSigma(8,ch,false)<<" "<<eventReader->getPedestalSigma(8,ch,true)<<"\t"<<eventReader->getCMNoise()<<"\t\t";
+		cout<<eventReader->getRawSignal(8,ch,false)<<" "<<eventReader->getRawSignal(8,ch,true)<<endl;
 		if(nEvent==1){
 		  string xName = hAllAdcNoise[8]->GetXaxis()->GetTitle();
 		  if(eventReader->isCMNoiseCorrected()||settings->doCommonModeNoiseCorrection())
 		    xName.append(" CMN corrected");
-		  cout<<xName<<endl;char t; cin>>t;
+//		  cout<<xName<<endl;char t; cin>>t;
 		  hAllAdcNoise[8]->GetXaxis()->SetTitle(xName.c_str());
 		}
 		/*cout<<nEvent;
@@ -186,7 +190,7 @@ void TAnalysisOfPedestal::findPlotRangeForPHHisto(TH1F *histo, Float_t hitCut)
 
   Float_t max = 0;
 
-  for(UInt_t binX= histo->FindBin(hitCut);binX<histo->GetNbinsX();binX++)
+  for(Int_t binX= histo->FindBin(hitCut);binX<histo->GetNbinsX();binX++)
     if(max<histo->GetBinContent(binX))max=histo->GetBinContent(binX);
 
   histo->GetYaxis()->SetRange(0,max*1.1);

@@ -28,6 +28,8 @@
 #include "TADCEventReader.hh"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
+#include <math.h>
+#include "TMath.h"
 
 using namespace std;
 
@@ -40,6 +42,7 @@ public:
 	virtual ~TPedestalCalculation();
 	void calculatePedestals(int nEvents);
 	void calculateSlidingPedestals(UInt_t nEvents);
+	static Float_t RoundFloat(Float_t value,UInt_t prec=2){return (Float_t)((Long_t)(value*TMath::Power((Double_t)10,(Double_t)prec)+0.5))/TMath::Power((Double_t)10,(Double_t)prec);}
 private:
 	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<Float_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
 	pair <float,float> calculateFirstPedestalDet(int det,int ch, deque<UChar_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=7);
@@ -65,17 +68,20 @@ private:
     TSettings *settings;
 	UInt_t runNumber;
 	Float_t pedestalMean[9][N_DET_CHANNELS];
-	Float_t diaPedestalMean[N_DIA_CHANNELS];
-	Float_t diaPedestalMeanStartValues[N_DIA_CHANNELS];
 	Float_t  pedestalSigma[9][N_DET_CHANNELS];
+
+	Float_t diaPedestalMean[N_DIA_CHANNELS];
 	Float_t diaPedestalSigma[N_DIA_CHANNELS];
+
+	Float_t diaPedestalMeanStartValues[N_DIA_CHANNELS];
 	Float_t diaPedestalSigmaStartValues[N_DIA_CHANNELS];
+
 	double sigmaValues[9][N_DET_CHANNELS];
 	double meanValues[9][N_DET_CHANNELS];
+
 	UInt_t slidingLength;
 	deque<UChar_t> detAdcValues[8][N_DET_CHANNELS];
 	deque<Float_t> diaAdcValues[N_DIA_CHANNELS];
-	deque<Short_t> diaAdcValues2[N_DIA_CHANNELS];
 	deque<bool> detEventUsed[8][N_DET_CHANNELS];
 	deque<bool> diaEventUsed[N_DIA_CHANNELS];
 

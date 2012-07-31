@@ -35,11 +35,15 @@ public:
 	bool isOK();
 //    bool getCMNEvent_flag() const;
 	bool isValidTrack();
-	Float_t getAdcValue(UInt_t det,UInt_t ch);
-	Float_t getSignalInSigma(UInt_t det,UInt_t ch);
-	Float_t getSignal(UInt_t det,UInt_t ch);
-	Float_t getRawSignal(UInt_t det,UInt_t ch);
-	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch);
+  Float_t getAdcValue(UInt_t det,UInt_t ch);
+	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected);
+	Float_t getSignalInSigma(UInt_t det,UInt_t ch){return getSignalInSigma(det,ch,bCMNoiseCorrected);};
+	Float_t getSignal(UInt_t det,UInt_t ch){return getSignal(det,ch,bCMNoiseCorrected);}
+	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected);
+	Float_t getRawSignal(UInt_t det,UInt_t ch) {return getRawSignal(det,ch,bCMNoiseCorrected);};
+  Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected);
+  Float_t getRawSignalInSigma(UInt_t det,UInt_t ch){return getRawSignalInSigma(det,ch,bCMNoiseCorrected);}
+	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected);
 	Float_t getCMNoise() const {return cmNoise;};
 	bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
 	UInt_t getCurrent_event() const;
@@ -48,7 +52,8 @@ public:
 	UInt_t getDet_NChannels(UInt_t i) const;
 	Float_t getDet_PedMean(UInt_t i, UInt_t j) const;
 	Float_t getDet_PedWidth(UInt_t i, UInt_t j) const;
-	Float_t getDia_ADC(UInt_t i);
+	Float_t getDia_ADC(UInt_t ch) {return getDia_ADC(ch,bCMNoiseCorrected);};
+	Float_t getDia_ADC(UInt_t ch, bool cmnCorrected);
 	UInt_t getEvent_number() const;
 	TTree *getPedTree() const;
 	UInt_t getRun_number() const;
@@ -58,8 +63,10 @@ public:
 	TTree *getTree() const;
 	TFile* getFile() const;
 	std::string getFilePath();
-	Float_t getPedestalMean(UInt_t det, UInt_t ch);
-	Float_t getPedestalSigma(UInt_t det, UInt_t ch);
+	Float_t getPedestalMean(UInt_t det, UInt_t ch, bool cmnCorrected=true);
+	Float_t getPedestalSigma(UInt_t det, UInt_t ch, bool cmnCorrected=true);
+	Float_t getDiaPedestalMean(UInt_t ch,bool cmnCorrected=true);
+	Float_t getDiaPedestalSigma(UInt_t ch,bool cmnCorrected=true);
 	TCluster getCluster(UInt_t det,UInt_t cl);
 	TCluster getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	UInt_t getClusterSize(UInt_t det,UInt_t cl);
@@ -99,8 +106,12 @@ private:
 	UShort_t Dia_ADC[128];
 	Float_t Det_PedMean[9][256];
 	Float_t Det_PedWidth[9][256];
-	Float_t pedestalMean[9][256];
-	Float_t pedestalSigma[9][256];
+	Float_t pedestalMean[8][256];
+	Float_t pedestalSigma[8][256];
+  Float_t diaPedestalMean[128];
+  Float_t diaPedestalSigma[128];
+  Float_t diaPedestalMeanCMN[128];
+  Float_t diaPedestalSigmaCMN[128];
 	Float_t cmNoise;
 	bool bCMNoiseCorrected;
 	//TCluster::vecvecTCluster* pVecvecCluster;

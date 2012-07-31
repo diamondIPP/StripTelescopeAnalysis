@@ -154,16 +154,16 @@ void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8]
 			TRawEventSaver::showStatusBar(256*det+ch,256*8,10);
 			pair<float,float> values;
 			values=this->calculateFirstPedestalDet(det,ch,DetAdcQueue[det][ch],meanValues[det][ch],sigmaValues[det][ch],7,MAXSDETSIGMA);//7 iteration for first pedestal
-			pedestalMean[det][ch]=values.first;
-			pedestalSigma[det][ch]=values.second;
+			pedestalMean[det][ch]=RoundFloat(values.first);
+			pedestalSigma[det][ch]=RoundFloat(values.second);
 		}
 	}
 
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<float,float> values;
 		values=this->calculateFirstPedestalDia(ch,DiaAdcQueue[ch],meanValues[8][ch],sigmaValues[8][ch],7,MAXDIASIGMA);//7 iterations for first pedestal
-		diaPedestalMeanStartValues[ch]=values.first;
-		diaPedestalSigmaStartValues[ch]=values.second;
+		diaPedestalMeanStartValues[ch]=RoundFloat(values.first);
+		diaPedestalSigmaStartValues[ch]=RoundFloat(values.second);
 	}
 	cout<<"\tDONE!"<<endl;
 }
@@ -211,13 +211,9 @@ pair <float,float> TPedestalCalculation::calculateFirstPedestalDia(int ch,deque<
 	}//end for nEvent
 	float mean=(float)diaSUM[ch]/(float)diaEventsInSum[ch];
 	float sigma=TMath::Sqrt( ((float)diaSUM2[ch]/(float)diaEventsInSum[ch])-mean*mean);
-//	if(ch==7)//&&iterations==0)
-//	      cout<<"calcFirstPedDia: "<<iterations<<" "<<ch<<" "<< mean <<" "<<sigma<< " "<<diaEventsInSum[ch]<<endl;
 
-  if(!doCMNCorrection){
-    pedestalMean[8][ch]=mean;
-    pedestalSigma[8][ch]=sigma;
-  }
+    diaPedestalMean[ch]=RoundFloat(mean);
+    diaPedestalSigma[ch]=RoundFloat(sigma);
 	pair<float,float> output = make_pair(mean,sigma);
 	if(iterations==0)return output;
 	else return this->calculateFirstPedestalDia(ch,adcQueue,mean,sigma,iterations-1,maxSigma);
@@ -243,15 +239,11 @@ pair<float, float> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, de
   meanCMN=(float)diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];
 //  if(ch==7)cout<<diaSUMCmn[ch]<<" "<<diaSUM2Cmn[ch]<<" "<<diaEventsInSumCMN[ch]<<" "<<meanCMN<<endl;
   sigmaCMN=TMath::Sqrt( ((float)diaSUM2Cmn[ch]/(float)diaEventsInSumCMN[ch])-meanCMN*meanCMN);
-//  if(ch==7){
-//        cout<<"calcFirstPedDiaCMN:"<<ch<<" "<< meanCMN <<" "<<sigmaCMN<< " "<<diaEventsInSumCMN[ch]<<" "<<adcQueue.size()<<endl;
-//        if(iterations==0){for(UInt_t i=0;i<<adcQueue.size();i++)cout<<adcQueue.at(i)<<" ";}
-//        cout<<endl;
-//  }
-  if(doCMNCorrection){
-    pedestalMean[8][ch]=meanCMN;
-    pedestalSigma[8][ch]=sigmaCMN;
-  }
+
+
+    diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
+    diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
+
   pair<float,float> output = make_pair(meanCMN,sigmaCMN);
   if(iterations==0)return output;
   else return this->calculateFirstPedestalDiaCMN(ch,adcQueue,meanCMN,sigmaCMN,iterations-1,maxSigma);
@@ -336,10 +328,10 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	meanCMN = diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];
 	sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);
 	sigmaCMN=TMath::Sqrt(this->diaSUM2Cmn[ch]/(float)this->diaEventsInSumCMN[ch]-meanCMN*meanCMN);
-	diaPedestalMeanCMN[ch]=meanCMN;
-	diaPedestalSigmaCMN[ch]=sigmaCMN;
-  diaPedestalMean[ch]=mean;
-  diaPedestalSigma[ch]=sigma;
+	diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
+	diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
+  diaPedestalMean[ch]=RoundFloat(mean);
+  diaPedestalSigma[ch]=RoundFloat(sigma);
 //  if(diaPedestalSigma[ch]<diaPedestalSigmaCMN[ch])
 //    cout<<std::setw(5)<<nEvent<<" "<<std::setw(3)<<ch<<" "<<setw(6)<<diaPedestalSigma[ch]<<" "<<setw(6)<<diaPedestalSigmaCMN[ch]<<endl;
 //	if(ch==7) cout<<cmNoise<<" mean: "<<mean<<"/"<<meanCMN<<"\tsigma:"<<sigma<<"/"<<sigmaCMN<<"\t"<<diaEventsInSum[ch]<<"/"<<diaEventsInSumCMN[ch]<<endl;
@@ -395,14 +387,6 @@ bool TPedestalCalculation::createPedestalTree(int nEvents)
 	return true;
 }
 
-void TPedestalCalculation::setBranchAdresses(){
-	pedestalTree->Branch("PedestalMean",&pedestalMean,"PedestalMean[9][256]/F");
-	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestaSigma[9][256]/F");
-	pedestalTree->Branch("eventNumber",&nEvent,"eventNumber/i");
-	pedestalTree->Branch("runNumber",&runNumber,"runNumber/i");
-	pedestalTree->Branch("commonModeNoise",&cmNoise,"commonModeNoise/F");
-	pedestalTree->Branch("cmnCorrection",&doCMNCorrection,"cmnCorrection/O");
-}
 
 void TPedestalCalculation::doCmNoiseCalculation()
 {
@@ -442,25 +426,18 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
       diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
       adc -=cmNoise;
       diaAdcValuesCMN[ch].push_back(adc);
-      Float_t mean = diaPedestalMeanStartValues[ch];
-      Float_t sigma=diaPedestalSigmaStartValues[ch];
+      Float_t mean = RoundFloat(diaPedestalMeanStartValues[ch]);
+      Float_t sigma= RoundFloat(diaPedestalSigmaStartValues[ch]);
 
-      if(doCMNCorrection) mean-=cmNoise;
+      diaPedestalMean[ch]= RoundFloat(mean);
+      diaPedestalSigma[ch]= RoundFloat(sigma);
+      mean-=cmNoise;
 //      if(ch==7)cout<<nEvent<<" deque "<<adc<<" "<<diaAdcValues[ch].size()<<endl;
-      pedestalMean[TPlaneProperties::getDetDiamond()][ch]= mean;
-      pedestalSigma[TPlaneProperties::getDetDiamond()][ch]=sigma;
+      diaPedestalMeanCMN[ch]= RoundFloat(mean);;
+      diaPedestalSigmaCMN[ch]=RoundFloat(sigma);
 //      if(doCMNCorrection) pedestalMean[TPlaneProperties::getDetDiamond()][ch]-=cmNoise;
     }
     pedestalTree->Fill();
-//    cout<<nEvent<<"\t"<<cmNoise<<"\n";
-//    stringstream s1,s2,s3;
-//    for(UInt_t ch=7;ch<8;ch++){
-//      s1<<"\t"<<diaPedestalMeanStartValues[ch];
-//      s2<<"\t"<<pedestalMean[TPlaneProperties::getDetDiamond()][ch];
-////      s3<<"\t"<<diaPedestalMeanCMN[TPlaneProperties::getDetDiamond()][ch]<<"\n";
-//      s3<<"\t"<<pedestalMean[TPlaneProperties::getDetDiamond()][ch]+cmNoise;
-//    }
-//    cout<<s1.str()<<"\n"<<s2.str()<<"\n"<<s3.str()<<endl;
   }
   cout<<"update first Pedestal Calculation"<<endl;
   for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
@@ -502,8 +479,8 @@ void TPedestalCalculation::updateSiliconPedestals(){
         detAdcValues[det][ch].push_back(eventReader->getDet_ADC(det,ch));
         pair<float,float> values;
         values= checkPedestalDet(det,ch,MAXSDETSIGMA);
-        pedestalMean[det][ch]=values.first;
-        pedestalSigma[det][ch]=values.second;
+        pedestalMean[det][ch]=RoundFloat(values.first);
+        pedestalSigma[det][ch]=RoundFloat(values.second);
 
         if(detEventUsed[det][ch].size()>0)detEventUsed[det][ch].pop_front();
         if(detAdcValues[det][ch].size())  detAdcValues[det][ch].pop_front();
@@ -520,8 +497,8 @@ void TPedestalCalculation::updateDiamondPedestals(){
 
         pair<float,float> values;
         values = checkPedestalDia(ch,MAXDIASIGMA);
-        pedestalMean[8][ch]=doCMNCorrection?diaPedestalMeanCMN[ch]:diaPedestalMean[ch];
-        pedestalSigma[8][ch]=doCMNCorrection?diaPedestalSigmaCMN[ch]:diaPedestalSigma[ch];
+//        diaPedestalMean[ch]=doCMNCorrection?diaPedestalMeanCMN[ch]:diaPedestalMean[ch];
+//        diaPedestalSigma[ch]=doCMNCorrection?diaPedestalSigmaCMN[ch]:diaPedestalSigma[ch];
 //        if(ch==7&&nEvent%10==0)
 //          cout<<nEvent<<": "<<ch<<" "<<pedestalMean[8][ch]<<" "<<pedestalSigma[8][ch]<<" "<<cmNoise<<"\t"<<diaAdcValues[ch].size()<<" "<<diaEventUsed[ch].size()<<" "<<diaEventsInSum[ch]<<endl;
 
@@ -534,6 +511,21 @@ void TPedestalCalculation::updateDiamondPedestals(){
       }
 }
 
+void TPedestalCalculation::setBranchAdresses(){
+  pedestalTree->Branch("PedestalMean",&pedestalMean,"PedestalMean[8][256]/F");
+  pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestaSigma[8][256]/F");
+
+  pedestalTree->Branch("diaPedestalMean",&diaPedestalMean,"diaPedestalMean[128]/F");
+  pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestaSigma[128]/F");
+
+  pedestalTree->Branch("diaPedestalMeanCMN",&diaPedestalMeanCMN,"diaPedestalMeanCMN[128]/F");
+  pedestalTree->Branch("diaPedestalSigmaCMN",&diaPedestalSigmaCMN,"diaPedestaSigmaCMN[128]/F");
+  pedestalTree->Branch("commonModeNoise",&cmNoise,"commonModeNoise/F");
+
+  pedestalTree->Branch("eventNumber",&nEvent,"eventNumber/i");
+  pedestalTree->Branch("runNumber",&runNumber,"runNumber/i");
+  pedestalTree->Branch("cmnCorrection",&doCMNCorrection,"cmnCorrection/O");
+}
 
 
 
