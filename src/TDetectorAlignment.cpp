@@ -66,7 +66,7 @@ TDetectorAlignment::TDetectorAlignment &TDetectorAlignment::operator=(const TDet
    for(UInt_t step=0;step<src.vecDetPhiXOffset[plane].size();step++)vecDetPhiXOffset[plane].push_back(src.vecDetPhiXOffset[plane].at(step));
    for(UInt_t step=0;step<src.vecDetPhiYOffset[plane].size();step++)vecDetPhiYOffset[plane].push_back(src.vecDetPhiYOffset[plane].at(step));
  }
-   nDetectors=src.nDetectors;
+   nDetectors=src.nDetectors<6?nDetectors:6;
    runNumber=src.runNumber;
    diaTime=src.diaTime;
    silTime=src.silTime;

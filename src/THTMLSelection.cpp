@@ -35,7 +35,7 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<"To find good values for the fiducial cut. The mean position of all silicon planes is calculated\n ";
 	sectionContent<<"and plotted in the next plot. To be able to calculate this mean position one and only one Cluster\n";
 	sectionContent<<"in each detector is required.<br>\n";
-	sectionContent<<(putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster","png",49));
+	sectionContent<<(putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster","png",50));
 	sectionContent<<"</p>\n";
 	sectionContent<<"<br>\n";
 	sectionContent<<"<h3>Fiducial Cut - valid Silicon Track && one Diamond Cluster</h3>\n";
@@ -46,7 +46,9 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<(putImage(this->path,"chFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster","png",50))<<"<br>\n";
 
 	sectionContent<<putImage(this->path,"chProjX","png",49)<<" \n";
-	sectionContent<<putImage(this->path,"chProjY","png",49)<<" \n";
+  sectionContent<<putImage(this->path,"chProjY","png",49)<<"<br>\n";
+  sectionContent<<putImage(this->path,"chSelectedEvents","png",50)<<" \n";
+
 	sectionContent<<"</p>\n";
 	this->addSection("Fiducial Cut",sectionContent.str());
 }
