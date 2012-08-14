@@ -28,8 +28,6 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	histSaver->SetRunNumber(settings->getRunNumber());
 	htmlTransAna = new THTMLTransparentAnalysis(settings);
 	htmlTransAna->setFileGeneratingPath(settings->getTransparentAnalysisDir());
-	clustering = new TClustering(settings);
-	
 	
 	// TODO: move these setting to the proper place
 	subjectDetector = 8;
@@ -82,7 +80,6 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	if (eventReader!=0) delete eventReader;
 	if (histSaver!=0) delete histSaver;
 	if (htmlTransAna!=0) delete htmlTransAna;
-	if (clustering!=0) delete clustering;
 	settings->goToOutputDir();
 }
 
@@ -344,7 +341,7 @@ void TTransparentAnalysis::createEtaIntegrals() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		stringstream histName;
 		histName << "hDiaTranspAnaEtaIntegral2HighestIn"<<clusterSize+1<<"Strips";
-		hEtaIntegrals.push_back(clustering->createEtaIntegral(hEta[clusterSize], histName.str()));
+		hEtaIntegrals.push_back(TClustering::createEtaIntegral(hEta[clusterSize], histName.str()));
 	}
 }
 

@@ -103,7 +103,6 @@ private:
 	TTracking* eventReader;
 	THTMLTransparentAnalysis* htmlTransAna;
 	LandauGaussFit* landauGauss;
-	TClustering* clustering;
 	
 	// cut flow
 	UInt_t nAnalyzedEvents;
