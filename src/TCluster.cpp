@@ -156,6 +156,10 @@ UInt_t TCluster::checkClusterForSize() const{
  * @todo: bbSaturated not yet used....
  */
 void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
+  if(signal!=signal||signalInSigma!=signalInSigma||adcValue!=adcValue){
+    cout<<"Added Channel is somhow broken: "<<ch<<" "<<signal<<" "<<signalInSigma<<" "<<adcValue<<endl;
+    return;//todo output
+  }
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
 	this->isSaturated=this->isSaturated||bSaturated;
 	if(signalInSigma>seedSigma)
@@ -171,6 +175,7 @@ void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort
 		maxChannel=ch;
 	}
 	if(signalInSigma>hitSigma) charge+=signal;
+
 	if(this->checkClusterForSize()>0&&ch<clusterChannel.front()){
 		clusterChannel.push_front(ch);
 		clusterSignal.push_front(signal);

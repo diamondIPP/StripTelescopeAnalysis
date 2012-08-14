@@ -642,7 +642,7 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 			Float_t ratio;
 			if(signalLeft>signalRight){
 				ratio=signalLeft/allCharge;
-				if(ratio>=0.5||allCharge==0||ratio!=ratio){
+				if(ratio>0.5||allCharge==0||ratio!=ratio){
 					cout<<"2ndBiggestHitOverCharge>0.5: left "<<signalLeft<<" "<<allCharge<<endl;
 					cluster.Print();
 				}
@@ -654,7 +654,7 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 			}
 			else{
 				ratio=signalRight/allCharge;
-				if(ratio>=0.5||allCharge==0||ratio!=ratio){
+				if(ratio>0.5||allCharge==0||ratio!=ratio){
 					cout<<"2ndBiggestHitOverCharge>0.5: right"<<signalRight<<" "<<allCharge<<endl;
 					cluster.Print();
 				}

@@ -235,7 +235,7 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 		signal =eventReader->getSignal(det,currentCh);
 		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
 		isScreened=this->settings->isDet_channel_screened(det,currentCh)||adcValue==maxAdcValue;
-		if(sigma!=0&&adcValueInSigma>hitSigma){
+		if(sigma!=0&&sigma==sigma&&adcValueInSigma==adcValueInSigma&&adcValueInSigma>hitSigma){
 			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 		}
 		else{
@@ -253,7 +253,7 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 		signal =eventReader->getSignal(det,currentCh);
 		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
 		isScreened=this->settings->isDet_channel_screened(det,currentCh);
-		if(sigma!=0&&adcValueInSigma>hitSigma&&sigma!=0){
+		if(sigma!=0&&sigma==sigma&&adcValueInSigma==adcValueInSigma&&adcValueInSigma>hitSigma&&sigma!=0){
 			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);
 		}
 		else{
@@ -261,7 +261,7 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 			break;
 		}
 	}
-	if(currentCh<TPlaneProperties::getNChannels(det)){
+	if(currentCh<TPlaneProperties::getNChannels(det)&&sigma==sigma&&adcValueInSigma==adcValueInSigma){
 		cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 	}
 	cluster.checkCluster();

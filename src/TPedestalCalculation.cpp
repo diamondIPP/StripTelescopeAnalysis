@@ -112,19 +112,6 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 	TStopwatch watch;
 	watch.Start(true);
 
-	//clear adcValues
-	for(int det=0;det <8;det++){
-		for(int ch=0;ch<N_DET_CHANNELS;ch++){
-			detAdcValues[det][ch].clear();
-		}
-	}
-	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
-		diaAdcValues[ch].clear();
-		diaAdcValuesCMN[ch].clear();
-	}
-
-//	int nEvents=eventReader->GetEntries();
-
 	//initialise detAdcValues, diaAdcValues with values from rawTree
 	initialiseDeques();
 
@@ -207,6 +194,7 @@ pair <float,float> TPedestalCalculation::calculateFirstPedestalDia(int ch,deque<
 	diaEventsInSum[ch]=0;
 	this->diaEventUsed[ch].clear();
 	for(UInt_t nEvent=0;nEvent<adcQueue.size();nEvent++){
+
 		if(   ((float)adcQueue.at(nEvent) >= (meanChannel-max(sigmaChannel*maxSigma,(float)1.)) )
 		   && ((float)adcQueue.at(nEvent) <= (meanChannel+max(sigmaChannel*maxSigma,(float)1.))) ){
 			diaEventUsed[ch].push_back(true);
@@ -244,14 +232,15 @@ pair<float, float> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, de
     else
       diaEventUsedCMN[ch].push_back(false);
   }//end for nEvent
+  if(diaEventsInSumCMN[ch]==0)
+    cout<<"events in sum=0: "<<nEvent<<" "<<ch<<" "<<diaEventsInSumCMN[ch]<<" "<<diaEventsInSum[ch]<<endl;
   meanCMN=(float)diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];
 //  if(ch==7)cout<<diaSUMCmn[ch]<<" "<<diaSUM2Cmn[ch]<<" "<<diaEventsInSumCMN[ch]<<" "<<meanCMN<<endl;
   sigmaCMN=TMath::Sqrt( ((float)diaSUM2Cmn[ch]/(float)diaEventsInSumCMN[ch])-meanCMN*meanCMN);
 
-
-    diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
-    diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
-
+  diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
+  cout<<meanCMN<<" "<<diaPedestalMeanCMN[ch];
+  diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
   pair<float,float> output = make_pair(meanCMN,sigmaCMN);
   if(iterations==0)return output;
   else return this->calculateFirstPedestalDiaCMN(ch,adcQueue,meanCMN,sigmaCMN,iterations-1,maxSigma);
@@ -297,12 +286,12 @@ pair<float,float> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxS
 
 
 pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
-	float mean =this->diaSUM[ch]/(float)this->diaEventsInSum[ch];
-	float meanCMN= this->diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];
-	float sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);
-	float sigmaCMN=TMath::Sqrt(this->diaSUM2Cmn[ch]/(float)diaEventsInSumCMN[ch]-meanCMN*meanCMN);
+	float mean =this->diaSUM[ch]/(float)this->diaEventsInSum[ch];//ok
+	float meanCMN= this->diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];//ok
+	float sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);//ok
+	float sigmaCMN=TMath::Sqrt(this->diaSUM2Cmn[ch]/(float)diaEventsInSumCMN[ch]-meanCMN*meanCMN);//ok
 	//cout<<mean<<" "<<sigma<<" "<<this->diaAdcValues[ch].front()<<" "<<this->diaAdcValues[ch].back()<<" "<<diaEventUsed[ch].front()<<" "<<(diaAdcValues[ch].back()<mean+sigma*maxSigma)<<endl;
-	//NORMAL CALCULATION WAY
+	//NORMAL CALCULATION WAY //ok
 	if(this->diaEventUsed[ch].front()){
 		this->diaSUM[ch]-=this->diaAdcValues[ch].front();
 		this->diaSUM2[ch]-=this->diaAdcValues[ch].front()*this->diaAdcValues[ch].front();
@@ -332,10 +321,10 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	else
 	  this->diaEventUsedCMN[ch].push_back(false);
 
-	mean =this->diaSUM[ch]/(float)this->diaEventsInSum[ch];
-	meanCMN = diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];
-	sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);
-	sigmaCMN=TMath::Sqrt(this->diaSUM2Cmn[ch]/(float)this->diaEventsInSumCMN[ch]-meanCMN*meanCMN);
+	mean =this->diaSUM[ch]/(float)this->diaEventsInSum[ch];//ok
+	meanCMN = diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];//ok
+	sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);//ok
+	sigmaCMN=TMath::Sqrt(this->diaSUM2Cmn[ch]/(float)this->diaEventsInSumCMN[ch]-meanCMN*meanCMN);//ok
 	diaPedestalMeanCMN[ch]=(meanCMN);
 	diaPedestalSigmaCMN[ch]=(sigmaCMN);
   diaPedestalMean[ch]=(mean);
@@ -471,6 +460,17 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 
 void TPedestalCalculation::initialiseDeques()
 {
+  //clear adcValues
+  for(int det=0;det <8;det++){
+    for(int ch=0;ch<N_DET_CHANNELS;ch++){
+      detAdcValues[det][ch].clear();
+    }
+  }
+  for(int ch=0;ch<N_DIA_CHANNELS;ch++){
+    diaAdcValues[ch].clear();
+    diaAdcValuesCMN[ch].clear();
+  }
+
   for(nEvent=0;nEvent<slidingLength;nEvent++){
   eventReader->LoadEvent(nEvent);
   for(int det=0;det <8;det++){
