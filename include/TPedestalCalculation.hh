@@ -50,6 +50,7 @@ private:
   pair <float,float> calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
 	pair <float,float> checkPedestalDet(int det, int ch,int maxSigma=7);
 	pair <float,float> checkPedestalDia(int ch,int maxSigma=7);
+	void printDiamond(UInt_t nChannel);
 	bool createPedestalTree(int nEvents);
 	void setBranchAdresses();
 	void doCmNoiseCalculation();
@@ -110,6 +111,7 @@ private:
 	int MAXDIASIGMA;
 	HistogrammSaver *histSaver;
 	TH1F* hCommonModeNoise;
+	int printChannel;
 };
 
 #endif /* PEDESTALCALCULATION_HH_ */
