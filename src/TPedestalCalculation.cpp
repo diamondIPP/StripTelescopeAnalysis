@@ -33,7 +33,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 		hCommonModeNoise = new TH1F("hCommonModeNoise","hCommonModeNoise",512,-32,32);
 		doCMNCorrection= settings->doCommonModeNoiseCorrection();
 		cout<<"DO Common Mode Noise Correction: ";
-		if(oCMNCorrection)
+		if(doCMNCorrection)
 			cout<<"TRUE "<<endl;
 		else cout<<"FALSE"<<endl;
 		char t; cin >>t;//test
