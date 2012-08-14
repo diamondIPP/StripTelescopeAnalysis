@@ -20,6 +20,7 @@ public:
 	void createPulseHeightPlots(vector<vector <Float_t> > vecMeanPulseHeigths, vector<vector <Float_t> > vecMPPulseHeigths);
 	void createResolutionPlots(vector<vector <pair <Float_t,Float_t> > > resolutions);
 	void createEtaPlots();
+	void createEtaIntegrals();
 
 private:
 	UInt_t subjectDetector, subjectPlane;

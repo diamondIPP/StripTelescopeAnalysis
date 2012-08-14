@@ -119,6 +119,7 @@ private:
 	vector<TH1F*> hResidualChargeWeighted;
 	TH1F* hLaundauMean;
 	TH1F* hLaundauMP;
+	TH1F* hPredictedPositionInStrip;
 	
 	vector<TH1F*> hLaundau2Highest;
 //	vector<TH1F*> hEta2Hightest;

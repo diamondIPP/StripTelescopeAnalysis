@@ -77,6 +77,7 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	htmlTransAna->createPulseHeightPlots(meanPulseHeights, mpPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
 	htmlTransAna->createEtaPlots();
+	htmlTransAna->createEtaIntegrals();
 	htmlTransAna->generateHTMLFile();
 	if (eventReader!=0) delete eventReader;
 	if (histSaver!=0) delete histSaver;
@@ -158,6 +159,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 }
 
 void TTransparentAnalysis::calcEtaCorrectedResiduals() {
+	cout << "\n\ncalculating eta corrected residuals..\n";
 	if (eventNumbers.size() != vecTransparentClusters.size()) {
 		cout << "now we are in deep trouble!! size of eventNumbers and transparentClusters do not match!" << endl;
 		return;
@@ -166,12 +168,14 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		cout << "oh boy.. you didn't run the analysis!" << endl;
 	}
 	for (UInt_t iEvent = 0; iEvent < eventNumbers.size(); iEvent++) {
+		TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
 		nEvent = eventNumbers.at(iEvent);
 		eventReader->LoadEvent(nEvent);
 		this->predictPositions();
-		for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 			// TODO: TCluster::corEta or TCluster::eta???
 			hResidualEtaCorrected[clusterSize]->Fill(getResidual(vecTransparentClusters.at(iEvent).at(clusterSize),TCluster::corEta,hEtaIntegrals[clusterSize]));
+//			if (clusterSize == 1) printCluster(vecTransparentClusters.at(iEvent).at(clusterSize));
 		}
 	}
 }
@@ -298,6 +302,7 @@ void TTransparentAnalysis::initHistograms() {
 	hLaundauMP = new TH1F("hDiaTranspAnaPulseHeightMP","hDiaTranspAnaPulseHeightMP",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
 	hLaundau2HighestMean = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMean","hDiaTranspAnaPulseHeightOf2HighestMean",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
 	hLaundau2HighestMP = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMP","hDiaTranspAnaPulseHeightOf2HighestMP",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
+	hPredictedPositionInStrip = new TH1F("hPredictedPositionInStrip","hPredictedPositionInStrip",2,-1.5,1.5);
 }
 
 void TTransparentAnalysis::fillHistograms() {
@@ -305,7 +310,17 @@ void TTransparentAnalysis::fillHistograms() {
 		hLaundau[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge());
 		hLaundau2Highest[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge(2,false));
 		hEta[clusterSize]->Fill(this->transparentClusters[clusterSize].getEta());
-//		if (clusterSize == 1/* && this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printCluster(this->transparentClusters[clusterSize]);
+//		if (clusterSize == 1 /* && this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printCluster(this->transparentClusters[clusterSize]);
+//		if (clusterSize > 0 && this->transparentClusters[clusterSize].getEta() < 0) printCluster(this->transparentClusters[clusterSize]);
+		// TODO: why is the eta distribution for 2 channel clusters more symmetric than for 3 and more channel clusters?
+//		if (clusterSize == 2 && this->transparentClusters[clusterSize-1].getEta() != this->transparentClusters[clusterSize].getEta()) {
+//			if (this->transparentClusters[clusterSize-1].getHighestSignalChannel()!=this->transparentClusters[clusterSize].getHighestSignalChannel()
+//				&&
+//				this->transparentClusters[clusterSize-1].getHighest2Centroid()!=this->transparentClusters[clusterSize].getHighest2Centroid()) {
+//			printCluster(this->transparentClusters[clusterSize-1]);
+//			printCluster(this->transparentClusters[clusterSize]);
+//			}
+//		}
 		if (clusterSize+1 != transparentClusters[clusterSize].getClusterSize()) {
 			cout << "wrong cluster size!" << endl;
 			cout << "clusterSize+1 = " << clusterSize+1 << "\ttransparentClusters[clusterSize].getClusterSize() = " << transparentClusters[clusterSize].getClusterSize() << endl;
@@ -313,6 +328,7 @@ void TTransparentAnalysis::fillHistograms() {
 		hResidualChargeWeighted[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::chargeWeighted));
 		hResidualHighest2Centroid[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::highest2Centroid));
 	}
+//	hPredictedPositionInStrip->Fill();
 }
 
 TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
@@ -473,12 +489,16 @@ void TTransparentAnalysis::printCluster(TCluster cluster) {
 	cout << "\n\thit sigma: " << cluster.getHitSigma();
 	cout << "\n\tpredicted channel: " << positionInDetSystem;
 	cout << "\n\tpredicted position: " << predPosition;
-	cout << "\n\tcharge weighted position: " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::chargeWeighted);
-	cout << "\n\thighest 2 centroid position: " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::highest2Centroid);
+	cout << "\n\tcharge weighted position (TCluster::chargeWeighted): " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::chargeWeighted);
+	cout << "\n\thighest 2 centroid position (TCluster::highest2Centroid): " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::highest2Centroid);
 	cout << "\n\tcharge weighted residual: " << getResidual(cluster,TCluster::chargeWeighted);
 	cout << "\n\thighest 2 centroid residual: " << getResidual(cluster,TCluster::highest2Centroid);
 	cout << "\n\teta: " << cluster.getEta();
-	cout << endl;
+	if (hEtaIntegrals.size() != 0) {
+		cout << "\n\teta corrected position (TCluster::corEta): " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::corEta,hEtaIntegrals[cluster.getClusterSize()]);
+		cout << "\n\teta corrected position (TCluster::eta): " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,TCluster::eta,hEtaIntegrals[cluster.getClusterSize()]);
+	}
+	cout << "\n\t";
 	cluster.Print();
 }
 

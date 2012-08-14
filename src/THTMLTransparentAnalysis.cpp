@@ -136,6 +136,25 @@ void THTMLTransparentAnalysis::createEtaPlots() {
 	addSection("Eta Distributions",sectionContent.str());
 }
 
+void THTMLTransparentAnalysis::createEtaIntegrals() {
+	// TODO: change this:
+	subjectDetector = 8;
+	
+	stringstream sectionContent;
+	//	sectionContent<<"<h2>\n"<<
+	//	"Eta distri"
+	//	<<"</h2>\n";
+	
+	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		stringstream histoname;
+		histoname << "hDiaTranspAnaEtaIntegral2HighestIn"<<clusterSize+1<<"Strips";
+		sectionContent << putImage(".",histoname.str());
+	}
+	
+	
+	addSection("Eta Integrals",sectionContent.str());
+}
+
 
 //std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string name, std::string type,int percentage){
 //	
