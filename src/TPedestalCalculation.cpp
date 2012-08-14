@@ -32,7 +32,10 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 		cout<<"Pedestal Hit Factor Silicon: "<<MAXSDETSIGMA<<"\nPedestal Hit Factor Diamond: "<<MAXDIASIGMA<<endl;
 		hCommonModeNoise = new TH1F("hCommonModeNoise","hCommonModeNoise",512,-32,32);
 		doCMNCorrection= settings->doCommonModeNoiseCorrection();
-		cout<<"DO Common Mode Noise Correction: "<<doCMNCorrection?"TRUE ":"FALSE"<<endl;
+		cout<<"DO Common Mode Noise Correction: ";
+		if(oCMNCorrection)
+			cout<<"TRUE "<<endl;
+		else cout<<"FALSE"<<endl;
 		char t; cin >>t;//test
 		//settings->doCommonModeNoiseCorrection();
 }
