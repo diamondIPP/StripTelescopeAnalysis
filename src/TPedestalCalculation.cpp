@@ -36,7 +36,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 		if(doCMNCorrection)
 			cout<<"TRUE "<<endl;
 		else cout<<"FALSE"<<endl;
-		char t; cin >>t;//test
+		//char t; cin >>t;//test
 		printChannel=1;
 		//settings->doCommonModeNoiseCorrection();
 }
@@ -131,6 +131,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 	calculateFirstPedestals(detAdcValues,diaAdcValues,MAXSDETSIGMA);
 	fillFirstEventsAndMakeDiaDeque();
 
+	//char t; cin>>t;
 	//calculate sliding Pedestal Values for rest of Events and save them
 
 	for(nEvent=slidingLength;nEvent<nEvents;nEvent++){
@@ -335,10 +336,10 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	meanCMN = diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];
 	sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);
 	sigmaCMN=TMath::Sqrt(this->diaSUM2Cmn[ch]/(float)this->diaEventsInSumCMN[ch]-meanCMN*meanCMN);
-	diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
-	diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
-  diaPedestalMean[ch]=RoundFloat(mean);
-  diaPedestalSigma[ch]=RoundFloat(sigma);
+	diaPedestalMeanCMN[ch]=(meanCMN);
+	diaPedestalSigmaCMN[ch]=(sigmaCMN);
+  diaPedestalMean[ch]=(mean);
+  diaPedestalSigma[ch]=(sigma);
 //  if(diaPedestalSigma[ch]<diaPedestalSigmaCMN[ch])
 //    cout<<std::setw(5)<<nEvent<<" "<<std::setw(3)<<ch<<" "<<setw(6)<<diaPedestalSigma[ch]<<" "<<setw(6)<<diaPedestalSigmaCMN[ch]<<endl;
 //	if(ch==7) cout<<cmNoise<<" mean: "<<mean<<"/"<<meanCMN<<"\tsigma:"<<sigma<<"/"<<sigmaCMN<<"\t"<<diaEventsInSum[ch]<<"/"<<diaEventsInSumCMN[ch]<<endl;
@@ -407,12 +408,16 @@ void TPedestalCalculation::doCmNoiseCalculation()
     Float_t sigma = (nEvent<slidingLength)?diaPedestalSigmaStartValues[ch]:diaPedestalSigmaCMN[ch];
     Float_t signal = adc-mean;
     Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);
-    if(snr<0||snr>settings->getDi_Pedestal_Hit_Factor()||adc>=maxVal)//settings->isDet_channel_screened(TPlaneProperties::getDetDiamond(),ch))
+    if(snr<0||snr>settings->getDi_Pedestal_Hit_Factor()||adc>=maxVal||adc<0||signal>maxVal)//settings->isDet_channel_screened(TPlaneProperties::getDetDiamond(),ch))
       continue;
+    if(snr!=snr||adc!=adc||signal!=signal)
+      continue;
+   // cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
     cmNoise+=signal;
     nCmNoiseEvents++;
   }
   cmNoise = cmNoise/(Float_t)nCmNoiseEvents;
+  //`cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<endl;
   hCommonModeNoise->Fill(cmNoise,true);
 }
 
@@ -439,10 +444,10 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
       diaPedestalMean[ch]= RoundFloat(mean);
       diaPedestalSigma[ch]= RoundFloat(sigma);
       mean-=cmNoise;
-//      if(ch==7)cout<<nEvent<<" deque "<<adc<<" "<<diaAdcValues[ch].size()<<endl;
+      //if(ch==7)cout<<nEvent<<" deque "<<adc<<" "<<diaAdcValues[ch].size()<<endl;
       diaPedestalMeanCMN[ch]= RoundFloat(mean);;
       diaPedestalSigmaCMN[ch]=RoundFloat(sigma);
-//      if(doCMNCorrection) pedestalMean[TPlaneProperties::getDetDiamond()][ch]-=cmNoise;
+	
     }
     printDiamond(30);
     pedestalTree->Fill();
@@ -538,8 +543,10 @@ void TPedestalCalculation::setBranchAdresses(){
 
 
 void TPedestalCalculation::printDiamond(UInt_t nChannel){
-  if (nChannel<TPlaneProperties::getNChannelsDiamond()&&printChannel!=0&&nEvent%printChannel==0)
-    cout<<nEvent<<"\t"<<diaPedestalMean[nChannel]<<" "<<diaPedestalMeanCMN[nChannel]<<"\t"<<diaPedestalSigma[nChannel]<<" "<<diaPedestalSigmaCMN[nChannel]<<endl;
+  if (nChannel<TPlaneProperties::getNChannelsDiamond()&&printChannel!=0&&nEvent%printChannel==0){
+    cout<<nEvent<<"\t"<<diaEventsInSum[nChannel]<<" "<<diaEventsInSumCMN[nChannel]<<flush;
+    cout<<" "<<diaPedestalMean[nChannel]<<" "<<diaPedestalMeanCMN[nChannel]<<"\t"<<diaPedestalSigma[nChannel]<<" "<<diaPedestalSigmaCMN[nChannel]<<endl;
+  }	
 }
 
 
