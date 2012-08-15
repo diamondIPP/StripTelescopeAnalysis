@@ -24,7 +24,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 		settings->goToPedestalTreeDir();
 		eventReader=new TADCEventReader(settings->getRawTreeFilePath(),runNumber);
 		histSaver = new HistogrammSaver();
-		histSaver->SetPlotsPath(settings->getAbsoluteOuputPath(true));
+		histSaver->SetPlotsPath(settings->getToPedestalAnalysisDir());
 		histSaver->SetRunNumber(settings->getRunNumber());
 		cout<<eventReader->GetEntries()<<endl;
 		MAXSDETSIGMA=settings->getSi_Pedestal_Hit_Factor();
@@ -132,7 +132,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		doCmNoiseCalculation();
 		//DIAMOND PLANE
 		updateDiamondPedestals();
-		printDiamond(30);
+//		printDiamond(30);
 		//calculateCurrentPedestals(detAdcValues,diaAdcValues);
 		pedestalTree->Fill();
 	}//end for

@@ -216,14 +216,17 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	Float_t signal =eventReader->getSignal(det,ch);
 	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch);
 	UShort_t adcValue=(UShort_t)eventReader->getAdcValue(det,ch);
+	Float_t cmNoise  = eventReader->getCMNoise();
 
 	//create Cluster
 	int seedSigma=settings->getClusterSeedFactor(det);
 	int hitSigma=settings->getClusterHitFactor(det);
 	bool isScreened;
 	int maxChannel=TPlaneProperties::getNChannels(det);
-
-	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel);
+	if(det!=TPlaneProperties::getDetDiamond()){
+	  cmNoise=0;
+	}
+	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel,cmNoise);
 
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>10)cout<<cluster.size()<<" ";

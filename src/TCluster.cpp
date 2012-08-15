@@ -8,7 +8,7 @@
 #include "../include/TCluster.hh"
 ClassImp(TCluster);
 
-TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels) {
+TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels,Float_t CMNoise) {
 	clusterChannel.clear();
 	clusterSignal.clear();
 	clusterADC.clear();
@@ -33,6 +33,7 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	this->eventNumber=nEvent;
 	mode=highest2Centroid;
 	this->nChannels=nChannels;
+	this->CMNoise=CMNoise;
 }
 
 TCluster::~TCluster() {
@@ -85,6 +86,7 @@ TCluster::TCluster(const TCluster& rhs){
 	nChannels=rhs.nChannels;
 	det=rhs.det;
 	eventNumber=rhs.eventNumber;
+	CMNoise=rhs.CMNoise;
 
 }
 
@@ -124,6 +126,7 @@ TCluster & TCluster::operator =(const TCluster & src)
 		clusterSignalInSigma.push_back(src.clusterSignalInSigma.at(i));
 	for(UInt_t i=0;i<src.clusterChannelScreened.size();i++)
 		clusterChannelScreened.push_back(src.clusterChannelScreened.at(i));
+	CMNoise=src.CMNoise;
 	return *this;
 }
 
@@ -704,7 +707,7 @@ Float_t TCluster::getValueOfHisto(Float_t x, TH1F* histo){
 
 void TCluster::Print(UInt_t level){
 	cout<<Intent(level)<<"Cluster of Event "<<flush;
-	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries"<<flush;
+	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries, cmNoise is "<<CMNoise<<" "<<flush;
 	for(UInt_t cl=0;cl<checkClusterForSize();cl++){
 		if(this->isSeed(cl))
 			cout<<"\t{"<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"}"<<flush;

@@ -54,9 +54,10 @@ public:
         hasBadChannel=false;
         numberOfNoHits=0;
         nChannels=256;
+        CMNoise=0;
 
     };
-    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
+    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256,Float_t CMNoise=0);
     TCluster(const TCluster& a);//COPY Constructor
     virtual ~TCluster();
     TCluster &operator=(const TCluster &src); //class assignment function
@@ -77,6 +78,7 @@ public:
     Float_t getChargeWeightedMean(bool useNonHits=false);
     Float_t getEtaPostion();
     Float_t getPositionCorEta(TH1F* histo);
+    Float_t getCMNoise(){return CMNoise;};
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
@@ -136,6 +138,7 @@ private:
     UInt_t nChannels;
     UChar_t det;
     UInt_t eventNumber;
+    Float_t CMNoise;
     ClassDef(TCluster,TCLUSTER_REVISION());
 };
 

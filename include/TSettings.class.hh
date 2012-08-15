@@ -56,6 +56,7 @@ public:
   void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
   void goToAlignmentRootDir(){goToDir(this->getAbsoluteOuputPath(false));}
 
+
 	void goToPedestalAnalysisDir();
 	void goToClusterAnalysisDir();
 	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
@@ -64,6 +65,7 @@ public:
 	void goToAlignmentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/anaAlignmnet/"));}
 	void goToTransparentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/transparentAnalysis/"));}
 	std::string getTransparentAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/transparentAnalysis/");}
+	std::string getToPedestalAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/pedestalAnalysis/");}
 	std::string getAlignmentDir(){return this->getAbsoluteOuputPath(true).append("/alignment/");};
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
