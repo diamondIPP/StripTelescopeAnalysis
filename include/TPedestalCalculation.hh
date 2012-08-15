@@ -42,7 +42,7 @@ public:
 	virtual ~TPedestalCalculation();
 	void calculatePedestals(int nEvents);
 	void calculateSlidingPedestals(UInt_t nEvents);
-	static Float_t RoundFloat(Float_t value,UInt_t prec=2){return (Float_t)((Long_t)(value*TMath::Power((Double_t)10,(Double_t)prec)+0.5))/TMath::Power((Double_t)10,(Double_t)prec);}
+	static Float_t RoundFloat(Float_t value,UInt_t prec=2){if(value!=value)value=0;return (Float_t)((Long_t)(value*TMath::Power((Double_t)10,(Double_t)prec)+0.5))/TMath::Power((Double_t)10,(Double_t)prec);}
 private:
 	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<Float_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
 	pair <float,float> calculateFirstPedestalDet(int det,int ch, deque<UChar_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=7);

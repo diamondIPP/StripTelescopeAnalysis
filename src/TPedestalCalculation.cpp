@@ -239,7 +239,7 @@ pair<float, float> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, de
   sigmaCMN=TMath::Sqrt( ((float)diaSUM2Cmn[ch]/(float)diaEventsInSumCMN[ch])-meanCMN*meanCMN);
 
   diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
-  cout<<meanCMN<<" "<<diaPedestalMeanCMN[ch];
+//  cout<<meanCMN<<" "<<diaPedestalMeanCMN[ch];
   diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
   pair<float,float> output = make_pair(meanCMN,sigmaCMN);
   if(iterations==0)return output;
@@ -325,10 +325,10 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	meanCMN = diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];//ok
 	sigma=TMath::Sqrt(this->diaSUM2[ch]/(float)this->diaEventsInSum[ch]-mean*mean);//ok
 	sigmaCMN=TMath::Sqrt(this->diaSUM2Cmn[ch]/(float)this->diaEventsInSumCMN[ch]-meanCMN*meanCMN);//ok
-	diaPedestalMeanCMN[ch]=(meanCMN);
-	diaPedestalSigmaCMN[ch]=(sigmaCMN);
-  diaPedestalMean[ch]=(mean);
-  diaPedestalSigma[ch]=(sigma);
+	diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
+	diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
+  diaPedestalMean[ch]=RoundFloat(mean);
+  diaPedestalSigma[ch]=RoundFloat(sigma);
 //  if(diaPedestalSigma[ch]<diaPedestalSigmaCMN[ch])
 //    cout<<std::setw(5)<<nEvent<<" "<<std::setw(3)<<ch<<" "<<setw(6)<<diaPedestalSigma[ch]<<" "<<setw(6)<<diaPedestalSigmaCMN[ch]<<endl;
 //	if(ch==7) cout<<cmNoise<<" mean: "<<mean<<"/"<<meanCMN<<"\tsigma:"<<sigma<<"/"<<sigmaCMN<<"\t"<<diaEventsInSum[ch]<<"/"<<diaEventsInSumCMN[ch]<<endl;
