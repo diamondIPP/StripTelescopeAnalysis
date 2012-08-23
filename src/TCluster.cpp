@@ -579,7 +579,7 @@ Float_t TCluster::getEta()
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
 	UInt_t leftClPos = 0;
 	UInt_t rightClPos = 0;
-    UFloat_T result = 0;
+    Float_T result = 0;
 	if (clPosHighest < clPos2ndHighest) {
 		leftClPos = clPosHighest;
 		rightClPos = clPos2ndHighest;
