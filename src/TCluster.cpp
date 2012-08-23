@@ -574,11 +574,12 @@ UShort_t TCluster::getAdcValue(UInt_t clusterPos)
 
 Float_t TCluster::getEta()
 {
-	if (checkClusterForSize() < 2) return -1;
+	if (checkClusterForSize() < 2) return -1; // eta is to be expected between 0 and 1. a cluster size smaller than 2 is not acceptable, thus the function returns -1.
 	UInt_t clPosHighest = getHighestHitClusterPosition();
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
 	UInt_t leftClPos = 0;
 	UInt_t rightClPos = 0;
+    UInt_T result = 0;
 	if (clPosHighest < clPos2ndHighest) {
 		leftClPos = clPosHighest;
 		rightClPos = clPos2ndHighest;
@@ -588,9 +589,11 @@ Float_t TCluster::getEta()
 		rightClPos = clPosHighest;
 	}
 	Float_t sumSignal = (getSignal(leftClPos)+getSignal(rightClPos));
-	if(sumSignal==0||getSignal(rightClPos)==0)
+	if(sumSignal == 0)
 		return -1;
-	return getSignal(rightClPos) / sumSignal;
+    result = getSignal(rightClPos)/sumSignal;
+    return result;
+//	return getSignal(rightClPos) / sumSignal;
 }
 
 Float_t TCluster::getEtaPostion(){
