@@ -618,7 +618,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	//default pedestal settings
 	fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
 	dia_input = 0; // 1 for 2006 and 0 for the rest
-	DO_CMC = 1;
+	DO_CMC = 0;
 	CMN_cut = 4;  //Should be less than or equal to CMN_coor_high
 	Iter_Size = 500; //buffer size
 	Taylor_speed_throttle = 1000; //# of events to recalculate RMS the old way; set to 1 to disable

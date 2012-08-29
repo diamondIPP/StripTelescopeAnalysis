@@ -152,7 +152,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	}
 	this->printCutFlow();
 	createEtaIntegrals();
-	calcEtaCorrectedResiduals();
+//	calcEtaCorrectedResiduals();
 }
 
 void TTransparentAnalysis::calcEtaCorrectedResiduals() {

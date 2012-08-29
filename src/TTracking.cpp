@@ -88,8 +88,8 @@ bool TTracking::setAlignment(std::string alignmentName){
 
 bool TTracking::LoadEvent(UInt_t eventNumber){
   if(verbosity>3){
-    cout<<"Load Event: "<<eventNumber<<flush;
-    cout<<" "<<GetEntries()<<endl;
+//    cout<<"Load Event: "<<eventNumber<<flush;
+//    cout<<" "<<GetEntries()<<endl;
   }
 
   if(eventNumber>GetEntries()){
