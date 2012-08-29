@@ -333,6 +333,7 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
   ostringstream plot_filename;
   plot_filename << plots_path << histo->GetName() << ".png";
   plots_canvas->Print(plot_filename.str().c_str());
+	delete plots_canvas;
 }
 
 void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
@@ -410,6 +411,7 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
   f->cd();
   plots_canvas->Write();
 	f->Close();
+	delete plots_canvas;
 
 }
 
@@ -424,6 +426,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".png";
    plots_canvas->Print(plot_filename.str().c_str());
+	delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
@@ -440,6 +443,7 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".root";
    plots_canvas->Print(plot_filename.str().c_str());
+	delete plots_canvas;
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
@@ -453,6 +457,7 @@ void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string o
 	   ostringstream plot_filename;
 	   plot_filename << plots_path << name<< ".root";
 	   plots_canvas->Print(plot_filename.str().c_str());
+	delete plots_canvas;
 }
 
 void HistogrammSaver::SetVerbosity(unsigned int i)
