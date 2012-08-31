@@ -503,6 +503,12 @@ TFile *TADCEventReader::getFile() const
 	return this->file;
 }
 
+/**
+ * give the pedestal value of det and ch
+ * if cmnCorrected and det == diamond detector
+ *   it will add CMN and pedestalValue
+ * @returns pedestal or pedestal+CMN
+ */
 Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
 	if(det<8&&ch<TPlaneProperties::getNChannels(det))
@@ -522,10 +528,11 @@ Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch,bool cmnCorrecte
 	return 0;
 }
 
+
 Float_t TADCEventReader::getDiaPedestalMean(UInt_t ch, bool cmnCorrected){
   if(ch<TPlaneProperties::getNChannelsDiamond()){
     if(cmnCorrected)
-      return this->diaPedestalMeanCMN[ch] + cmNoise;
+      return this->diaPedestalMeanCMN[ch];
     else
       return this->diaPedestalMean[ch];
   }
@@ -601,7 +608,27 @@ bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 
 Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
   if(det>=9)return -9999999;
-    return getAdcValue(det,ch)-getPedestalMean(det,ch,cmnCorrected);
+  float cmn = getCMNoise();
+  float adc = getAdcValue(det,ch);
+  float ped = getPedestalMean(det,ch,false);
+  float pedCMN = getPedestalMean(det,ch,true);
+  float pedReal= getPedestalMean(det,ch,cmnCorrected);
+  float retVal;
+  if (!cmnCorrected)
+    cmn=0;
+  if (TPlaneProperties::isDiamondDetector(det)){
+//    cout<<getEvent_number(  )<<" "<<det<<" "<<ch<<" "<<cmnCorrected<<endl;
+//    cout<<"raw signal det:"<<det<<" ch:"<<ch<<": "<<adc<<"-"<<ped<<"="<<adc-ped<<endl;
+//    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedCMN<<"-"<<cmn<<"="<<adc-pedCMN-cmn<<endl;
+    if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))
+       cmn=0;
+    retVal = adc-pedReal-cmn;
+//    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedReal<<"+"<<cmn<<"="<<retVal<<endl;
+  }
+  else
+    cmn=0;
+  retVal = adc-pedReal-cmn;
+  return retVal;
 }
 
 Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch,bool cmnCorrected){

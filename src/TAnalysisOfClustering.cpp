@@ -63,11 +63,11 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
-		/*cout<<nEvent;
-		for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
-			for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
-			cout<<" "<<eventReader->getCluster()->at(det).at(cl).getChargeWeightedMean()<<flush;
-		cout<<endl;//*/
+//		cout<<nEvent;
+//		for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
+//			for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
+//			cout<<" "<<eventReader->getCluster()->at(det).at(cl).getChargeWeightedMean()<<flush;
+//		cout<<endl;//*/
 		checkForDeadChannels();
 		checkForSaturatedChannels();
 //		getBiggestHit();//not working

@@ -39,6 +39,8 @@ public:
 	static std::string getDetectortypeString(enumDetectorType type);
 	static std::string getDetectorNameString(UInt_t det);
 	static std::string getStringForDetector(int i);
+	static bool isSiliconDetector(UInt_t det){return (det<getNSiliconDetectors());}
+	static bool isDiamondDetector(UInt_t det){return (det==getDetDiamond());}
 
     ClassDef(TPlaneProperties,1);
 

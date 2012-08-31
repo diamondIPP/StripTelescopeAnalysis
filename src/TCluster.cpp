@@ -8,7 +8,7 @@
 #include "../include/TCluster.hh"
 ClassImp(TCluster);
 
-TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels,Float_t CMNoise) {
+TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels,Float_t CMNoise,bool doCMN) {
 	clusterChannel.clear();
 	clusterSignal.clear();
 	clusterADC.clear();
@@ -34,6 +34,7 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	mode=highest2Centroid;
 	this->nChannels=nChannels;
 	this->CMNoise=CMNoise;
+	this->bCMN=doCMN;
 }
 
 TCluster::~TCluster() {
@@ -87,7 +88,7 @@ TCluster::TCluster(const TCluster& rhs){
 	det=rhs.det;
 	eventNumber=rhs.eventNumber;
 	CMNoise=rhs.CMNoise;
-
+	bCMN=rhs.bCMN;
 }
 
 /**
@@ -127,6 +128,7 @@ TCluster & TCluster::operator =(const TCluster & src)
 	for(UInt_t i=0;i<src.clusterChannelScreened.size();i++)
 		clusterChannelScreened.push_back(src.clusterChannelScreened.at(i));
 	CMNoise=src.CMNoise;
+	bCMN=src.bCMN;
 	return *this;
 }
 

@@ -705,25 +705,52 @@ void TSettings::DefaultLoadDefaultSettings(){
 	cout<<"DONE"<<endl;
 }
 
+
+/**
+ * function which parses an string of the format  '{XX,XX,XX,XX,XX}' to an
+ * vector of strings
+ */
+void TSettings::ParseStringArray(string value, vector<string> &vec){
+
+  int index=0;
+  if(value.find('{')==string::npos||value.find('}')==string::npos){
+    cerr<<"the string \'"<<value<<"\' cannot be parsed as a float array since bracket is missing"<<endl;
+    exit(-1);
+  }
+  string::size_type beginning = value.find_first_of('{')+1;
+  string::size_type ending = value.find_last_of('}');
+  string::size_type offset1 = value.find_first_of('{')+1;
+  string::size_type offset2 = value.find_first_of(',');
+  string::size_type iter = beginning;
+  string analyseString = value.substr(beginning,ending-beginning);
+//  cout<<"analyze: \'"<<analyseString<<"\'"<<endl;
+  int i;
+  while((i=analyseString.find(','))!=string::npos){
+    string data = analyseString.substr(0,i);
+    vec.push_back(data);
+    analyseString = analyseString.substr(i+1);
+//    cout<<"analyseString: \'"<<analyseString<<"\'"<<endl;
+  }
+  string data = analyseString.substr(0,i);
+  vec.push_back(data);
+}
+
 void TSettings::ParseFloatArray(string value, vector<float> &vec) {
-	int index=0;
-	string::size_type offset1 = value.find_first_of('{')+1;
-	string::size_type offset2 = value.find_first_of(',');
+  std::vector <std::string> stringArray;
+  ParseStringArray(value,stringArray);
+  vec.clear();
+//  cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
+  for(UInt_t i=0;i<stringArray.size();i++)
+    vec.push_back((float)strtod(stringArray.at(i).c_str(),0));
+}
 
-	vec.push_back((float)strtod(value.substr(offset1,offset2-offset1).c_str(),0));
-
-	//cout<<"vec["<<index<<"]="<<vec[index]<<"\tvalue.length()="<<value.length()<<"\tvalue.substr(offset1,offset2-offset1)="<<value.substr(offset1,offset2-offset1)<<"\tstrtod(value.substr(offset1,offset2-offset1),0)="<<strtod(value.substr(offset1,offset2-offset1).c_str(),0)<<endl;//check
-
-	value = value.substr(offset2+1,value.length()-(offset2+1));
-
-	while(value.length()>2) {
-		offset2 = TMath::Min(value.find_first_of(','),value.find_first_of('}'));
-		vec.push_back((float)strtod(value.substr(0,offset2).c_str(),0));
-		index++;
-		//cout<<"vec["<<index<<"]="<<vec[index]<<"\tvalue.length()="<<value.length()<<"\tvalue.substr(0,offset2)="<<value.substr(0,offset2)<<"\tstrtod(value.substr(0,offset2),0)="<<strtod(value.substr(0,offset2).c_str(),0)<<endl;//check
-		if(value.find_first_of(';')<2) break;
-		value = value.substr(offset2+1,value.length()-(offset2+1));
-	}
+void TSettings::ParseIntArray(string value, vector<int> &vec) {
+  std::vector <std::string> stringArray;
+    ParseStringArray(value,stringArray);
+    vec.clear();
+//    cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
+    for(UInt_t i=0;i<stringArray.size();i++)
+      vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
 }
 
 /**
@@ -932,7 +959,7 @@ void TSettings::setZoomDiamondPlots(Int_t zoomDiamondPlots)
 bool TSettings::isDet_channel_screened(UInt_t det, UInt_t ch)
 {
 	if(det<9&&ch<256)
-		return this->Det_channel_screen[det].CheckChannel(ch);
+		return this->Det_channel_screen[det].isScreened(ch);
 	else
 		return true;
 }
@@ -1005,27 +1032,6 @@ void TSettings::loadSettingsFromRootFile()
 {
 }
 
-void TSettings::ParseIntArray(string value, vector<int> &vec) {
-
-	int index=0;
-	string::size_type offset1 = value.find_first_of('{')+1;
-	string::size_type offset2 = value.find_first_of(',');
-
-	vec.push_back((int)strtod(value.substr(offset1,offset2-offset1).c_str(),0));
-
-	//cout<<"vec["<<index<<"]="<<vec[index]<<"\tvalue.length()="<<value.length()<<"\tvalue.substr(offset1,offset2-offset1)="<<value.substr(offset1,offset2-offset1)<<"\tstrtod(value.substr(offset1,offset2-offset1),0)="<<strtod(value.substr(offset1,offset2-offset1).c_str(),0)<<endl;//check
-
-	value = value.substr(offset2+1,value.length()-(offset2+1));
-
-	while(value.length()>2) {
-		offset2 = TMath::Min(value.find_first_of(','),value.find_first_of('}'));
-		vec.push_back((int)strtod(value.substr(0,offset2).c_str(),0));
-		index++;
-		//cout<<"vec["<<index<<"]="<<vec[index]<<"\tvalue.length()="<<value.length()<<"\tvalue.substr(0,offset2)="<<value.substr(0,offset2)<<"\tstrtod(value.substr(0,offset2),0)="<<strtod(value.substr(0,offset2).c_str(),0)<<endl;//check
-		if(value.find_first_of(';')<2) break;
-		value = value.substr(offset2+1,value.length()-(offset2+1));
-	}
-}
 
 
 Float_t TSettings::getAlignment_chi2() const

@@ -241,6 +241,7 @@ private:
     void SetFileName(std::string fileName);
     void LoadSettings();
     void DefaultLoadDefaultSettings();
+    void ParseStringArray(std::string value, std::vector<std::string> &vec);
     void ParseFloatArray(std::string value, std::vector<float> & vec);
     void ParseIntArray(std::string value, std::vector<int> & vec);
 private:

@@ -58,7 +58,7 @@ private:
 	void getBiggestHit();
 	void initialiseHistos();
 	void checkForSaturatedChannels();
-	void analyseCluster();
+//	void analyseCluster();
     void analyseBiggestHit();
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
@@ -88,9 +88,19 @@ private:
 	TH1F *histo_pulseheight_right_sigma[9];
 	TH1F *histo_pulseheight_right_sigma_second[9];
 	TH1F *hAllAdcNoise[9];
+	TH1F *hDiaAllAdcNoise;
+	TH1F *hDiaAllAdcNoiseCMN;
+
 private:
 	std::vector< std::vector<Float_t> > pedestalMeanValue,pedestalSigmaValue;
 	std::vector< std::vector<UInt_t> > nPedestalHits;
+	std::vector< Float_t > vecAvrgPed;
+	std::vector< Float_t > vecAvrgPedCMN;
+  std::vector< Float_t > vecAvrgSigma;
+  std::vector< Float_t > vecAvrgSigmaCMN;
+	std::vector< Float_t > vecCMNoise;
+	std::vector< Float_t > vecEventNo;
+
 	std::vector< std::vector<UInt_t> > diaRawADCvalues; //vector of vector of adc Value (ch, eventNo)
 	THTMLPedestal *htmlPedestal;
 };

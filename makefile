@@ -7,7 +7,7 @@ ROOTLIBS    	:= $(shell root-config --libs) -lMinuit
 ROOTGLIBS   	:= $(shell root-config --glibs) -lMinuit
 # -L$(ROOTSYS)/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lfreetype -lGui -pthread -Wl,-rpath,$(ROOTSYS)/lib -lm -ldl
 
-ROOTCINT		:= $(ROOTSYS)/bin/rootcint
+ROOTCINT		:= rootcint
 SVNDEV 			:= -D'SVN_REV="$(shell svnversion -n .)"'
 
 CC 				:= g++ 

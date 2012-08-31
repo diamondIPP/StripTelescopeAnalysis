@@ -75,17 +75,10 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
-		UInt_t ch=30;
+//		UInt_t ch=30;
 //		cout<<nEvent<<"  "<<eventReader->getPedestalMean(8,ch,false)<<" "<<eventReader->getPedestalMean(8,ch,true)<<"\t";
 //		cout<<eventReader->getPedestalSigma(8,ch,false)<<" "<<eventReader->getPedestalSigma(8,ch,true)<<"\t"<<eventReader->getCMNoise()<<"\t\t";
 //		cout<<eventReader->getRawSignal(8,ch,false)<<" "<<eventReader->getRawSignal(8,ch,true)<<endl;
-		if(nEvent==1){
-		  string xName = hAllAdcNoise[8]->GetXaxis()->GetTitle();
-		  if(eventReader->isCMNoiseCorrected()||settings->doCommonModeNoiseCorrection())
-		    xName.append(" CMN corrected");
-//		  cout<<xName<<endl;char t; cin>>t;
-		  hAllAdcNoise[8]->GetXaxis()->SetTitle(xName.c_str());
-		}
 		/*cout<<nEvent;
 		 for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
 		 for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
@@ -108,6 +101,8 @@ void TAnalysisOfPedestal::checkForDeadChannels()
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		int numberOfSeeds=0;
 		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+		  if(settings->isDet_channel_screened(det,ch))
+		    continue;
 			Float_t sigma=eventReader->getPedestalSigma(det,ch);
 			Float_t signalInSigma = eventReader->getSignalInSigma(det,ch);
 			if(sigma==0){
@@ -135,6 +130,8 @@ void TAnalysisOfPedestal::checkForSaturatedChannels()
 {
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
 	for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+	  if(settings->isDet_channel_screened(det,ch))
+	    continue;
 		if(eventReader->getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det)){
 			hSaturatedChannels[det]->Fill(ch);
 		}
@@ -146,23 +143,28 @@ void TAnalysisOfPedestal::getBiggestHit(){
 		int biggestHit=0;
 		Float_t biggestHitInSigma=0;
 		int chBiggestHit;
-		for(UInt_t ch=0;ch<TPlaneProperties::getNChannelsDiamond();ch++){//todo warum 70 bis 200
-			UInt_t adcValue=eventReader->getAdcValue(det,ch);
-			if (adcValue<TPlaneProperties::getMaxSignalHeight(det))
-				if(adcValue>biggestHit){
-					biggestHit=eventReader->getAdcValue(det,ch);
-					biggestHitInSigma=eventReader->getSignalInSigma(det,ch);
-					chBiggestHit=ch;
-				}
+		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){//todo warum 70 bis 200
+		  if(settings->isDet_channel_screened(det,ch))
+		    continue;
+		  UInt_t adcValue=eventReader->getAdcValue(det,ch);
+		  if (adcValue<TPlaneProperties::getMaxSignalHeight(det))
+		    if(adcValue>biggestHit){
+		      biggestHit=eventReader->getAdcValue(det,ch);
+		      biggestHitInSigma=eventReader->getSignalInSigma(det,ch);
+		      chBiggestHit=ch;
+		    }
 		}
-		hPulsHeightBiggestHit[det]->Fill(biggestHitInSigma);
-		hChannelBiggestHit[det]->Fill(chBiggestHit);
-		if(eventReader->getAdcValue(det,chBiggestHit-1)<eventReader->getAdcValue(det,chBiggestHit+1))
-			hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit+1));
-		else
-			hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit-1));
+		if(biggestHitInSigma>4){//removing all events where biggest hit is  <4 sigma, since probability of haveing one channel
+		  //higher than 3 sigma is approx 50% (1-0.997^128)
+		  hPulsHeightBiggestHit[det]->Fill(biggestHitInSigma);
+		  hChannelBiggestHit[det]->Fill(chBiggestHit);
+		  if(eventReader->getAdcValue(det,chBiggestHit-1)<eventReader->getAdcValue(det,chBiggestHit+1))
+		    hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit+1));
+		  else
+		    hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit-1));
+		}
 	}
-	
+
 }
 
 void TAnalysisOfPedestal::findPlotRangeForPHHisto(TH1F *histo, Float_t hitCut)
@@ -208,43 +210,47 @@ void TAnalysisOfPedestal::analyseBiggestHit() {
 		Float_t secondbiggestSignal =eventReader->getSignal(det,0);
 		UInt_t biggest_hit_channel = 0;
 		UInt_t second_biggest_hit_channel = 0;
-        for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++) {
-			Float_t signal = eventReader->getSignal(det,ch);
-//			cout << "event: " << nEvent << "\tdet: " << det << "\tchannel: " << i << "\tadc: " << adcValue << "\tPedMean: " << PedMean << "\tPedSigma: " << PedSigma << "\tsignal: " << signal << endl;
-			if (/*i > 70 && i < 170 &&*/ !eventReader->isSaturated(det,ch)){
-				if (signal > biggestSignal) {
-					second_biggest_hit_channel = biggest_hit_channel;
-					biggest_hit_channel = ch;
-					secondbiggestSignal = biggestSignal;
-					biggestSignal = signal;
-				}
-				else
-					if (signal > secondbiggestSignal) {
-						second_biggest_hit_channel = ch;
-						secondbiggestSignal = signal;
-					}
-			}//end if fidcut region
-        }//end loop over channels
-		
+		for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++) {
+		  if(settings->isDet_channel_screened(det,ch))
+		    continue;
+		  Float_t signal = eventReader->getSignal(det,ch);
+		  //			cout << "event: " << nEvent << "\tdet: " << det << "\tchannel: " << i << "\tadc: " << adcValue << "\tPedMean: " << PedMean << "\tPedSigma: " << PedSigma << "\tsignal: " << signal << endl;
+		  if (/*i > 70 && i < 170 &&*/ !eventReader->isSaturated(det,ch)){
+		    if (signal > biggestSignal) {
+		      second_biggest_hit_channel = biggest_hit_channel;
+		      biggest_hit_channel = ch;
+		      secondbiggestSignal = biggestSignal;
+		      biggestSignal = signal;
+		    }
+		    else
+		      if (signal > secondbiggestSignal) {
+		        second_biggest_hit_channel = ch;
+		        secondbiggestSignal = signal;
+		      }
+		  }//end if fidcut region
+		}//end loop over channels
+
 		Float_t biggestSignalSigma = eventReader->getSignalInSigma(det,biggest_hit_channel);
 		Float_t secondbiggestSignalSigma =  eventReader->getSignalInSigma(det,second_biggest_hit_channel);
-		
+
 		if (biggest_hit_channel > 0 && biggest_hit_channel < TPlaneProperties::getNChannels(det)) {
-			// -- look for second biggest hit next to biggest hit
-			Float_t leftHitSignal= eventReader->getSignal(det,biggest_hit_channel-1);
-			Float_t rightHitSignal = eventReader->getSignal(det,biggest_hit_channel+1);
-			if (leftHitSignal < rightHitSignal) {
-				second_biggest_hit_channel = biggest_hit_channel + 1;
-				histo_second_biggest_hit_direction[det]->Fill(1.);
-			}
-			else {
-				second_biggest_hit_channel = biggest_hit_channel - 1;
-				histo_second_biggest_hit_direction[det]->Fill(-1.);
-			}
+		  // -- look for second biggest hit next to biggest hit
+		  Float_t leftHitSignal= eventReader->getSignal(det,biggest_hit_channel-1);
+		  Float_t rightHitSignal = eventReader->getSignal(det,biggest_hit_channel+1);
+		  if (leftHitSignal < rightHitSignal) {
+		    second_biggest_hit_channel = biggest_hit_channel + 1;
+		    histo_second_biggest_hit_direction[det]->Fill(1.);
+		  }
+		  else {
+		    second_biggest_hit_channel = biggest_hit_channel - 1;
+		    histo_second_biggest_hit_direction[det]->Fill(-1.);
+		  }
 			secondbiggestSignal = eventReader->getSignal(det,second_biggest_hit_channel);
 			secondbiggestSignalSigma = eventReader->getSignalInSigma(det,second_biggest_hit_channel);
 			
 			// -- start filling the histograms
+			if(biggestSignalSigma<4)
+			  continue;
 			histo_pulseheight_sigma[det]->Fill(biggestSignalSigma);
 			histo_pulseheight_sigma_second[det]->Fill(secondbiggestSignalSigma);
 			
@@ -281,10 +287,24 @@ void TAnalysisOfPedestal::initialiseHistos()
 			width = 32;
 			nBins=128;
 		}
+		if(TPlaneProperties::isSiliconDetector(det)){
 		hAllAdcNoise[det]= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
 		hAllAdcNoise[det]->GetXaxis()->SetTitle(xTitle.str().c_str());
 		hAllAdcNoise[det]->GetYaxis()->SetTitle(yTitle.str().c_str());
+		}
+		else{
+		  hDiaAllAdcNoise= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
+		  hDiaAllAdcNoise->GetXaxis()->SetTitle(xTitle.str().c_str());
+		  hDiaAllAdcNoise->GetYaxis()->SetTitle(yTitle.str().c_str());
+		  histoName<<"_CMNcorrected";
+		  histoTitle<<" - CMN corrected";
+		  hDiaAllAdcNoiseCMN = new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
+		  xTitle<<" -  CMN corrected";
+		  hDiaAllAdcNoiseCMN->GetXaxis()->SetTitle(xTitle.str().c_str());
+		  hDiaAllAdcNoiseCMN->GetYaxis()->SetTitle(yTitle.str().c_str());
+		}
 	}
+
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"hSaturatedChannels_"<<TPlaneProperties::getStringForDetector(det)<<"";
@@ -451,6 +471,79 @@ void TAnalysisOfPedestal::saveHistos(){
 		histSaver->SaveHistogram(hPulsHeightBiggestHit[det]);
 		hPulsHeightBiggestHit[det]->Delete();
 	}
+
+	/**********************************************************************************
+	 *
+	 **********************************************************************************/
+	TGraph *gAvrgPedCMN,*gAvrgPed,*gCMNoise,*gAvrgNoise,*gAvrgNoiseCMN;
+	if(vecEventNo.size()==vecAvrgPed.size()&&vecEventNo.size()>0){
+	  cout<<"Creating gAvrgPed with "<<vecEventNo.size()<<" Entries!"<<endl;
+	  gAvrgPed = new TGraph(vecEventNo.size(),&vecEventNo.at(0),&vecAvrgPed.at(0));
+	  gAvrgPed->SetTitle("Averg Pedestal of Diamond vs. eventNo");
+	  gAvrgPed->SetName("gAvrgPed");
+	  gAvrgPed->Draw("AL");
+	  gAvrgPed->GetXaxis()->SetTitle("EventNo.");
+	  gAvrgPed->GetYaxis()->SetTitle("Avrg. Ped Value [ADC counts]");
+	  histSaver->SaveGraph(gAvrgPed,"gAvrgPed","AL");
+	}
+	else{
+	  cout<<"Size for creatign gAvrgPed are wrong: "<<vecEventNo.size()<<"/"<<vecAvrgPed.size()<<endl;
+	}
+	if(vecEventNo.size()==vecAvrgPedCMN.size()){
+	  cout<<"Creating gAvrgPedCMN with "<<vecEventNo.size()<<" Entries!"<<endl;
+	  gAvrgPedCMN = new TGraph(vecEventNo.size(),&vecEventNo.at(0),&vecAvrgPedCMN.at(0));
+	  gAvrgPedCMN->SetTitle("Averg CMN corrected Pedestal of Diamond vs. eventNo");
+	  gAvrgPedCMN->SetName("gAvrgPedCMN");
+	  gAvrgPedCMN->Draw("AL");
+	  gAvrgPedCMN->GetXaxis()->SetTitle("EventNo.");
+	  gAvrgPedCMN->GetYaxis()->SetTitle("Avrg. CMN corrected Ped Value [ADC counts]");
+	  histSaver->SaveGraph(gAvrgPedCMN,"gAvrgPedCMN","AL");
+	}
+	else{
+	  cout<<"Size for creatign gAvrgPedCMN are wrong: "<<vecEventNo.size()<<"/"<<vecAvrgPedCMN.size()<<endl;
+	}
+	if(vecEventNo.size()==vecAvrgSigma.size()){
+	  cout<<"Creating gAvrgNoise with "<<vecEventNo.size()<<" Entries!"<<endl;
+	  gAvrgNoise = new TGraph(vecEventNo.size(),&vecEventNo.at(0),&vecAvrgSigma.at(0));
+	  gAvrgNoise->SetTitle("Avrg. Noise of Diamond vs. eventNo");
+	  gAvrgNoise->SetName("gAvrgNoise");
+	  gAvrgNoise->Draw("AL");
+	  gAvrgNoise->GetXaxis()->SetTitle("EventNo.");
+	  gAvrgNoise->GetYaxis()->SetTitle("Avrg Noise of diamond [ADC counts]");
+	  histSaver->SaveGraph(gAvrgNoise,"gAvrgNoise","AL");
+	}
+	else{
+	  cout<<"Size for creatign gAvrgNoise are wrong: "<<vecEventNo.size()<<"/"<<vecCMNoise.size()<<endl;
+	}
+  if(vecEventNo.size()==vecAvrgSigmaCMN.size()){
+    cout<<"Creating gAvrgNoiseCMN with "<<vecEventNo.size()<<" Entries!"<<endl;
+    gAvrgNoiseCMN = new TGraph(vecEventNo.size(),&vecEventNo.at(0),&vecAvrgSigmaCMN.at(0));
+    gAvrgNoiseCMN->SetTitle("Avrg. CMN correctedNoise of Diamond vs. eventNo");
+    gAvrgNoiseCMN->SetName("gAvrgNoiseCMN");
+    gAvrgNoiseCMN->Draw("AL");
+    gAvrgNoiseCMN->GetXaxis()->SetTitle("EventNo.");
+    gAvrgNoiseCMN->GetYaxis()->SetTitle("Avrg CMN corrected Noise of diamond [ADC counts]");
+    histSaver->SaveGraph(gAvrgNoiseCMN,"gAvrgNoiseCMN","AL");
+  }
+  else{
+    cout<<"Size for creatign gAvrgNoiseCMN are wrong: "<<vecEventNo.size()<<"/"<<vecCMNoise.size()<<endl;
+  }
+	if(vecEventNo.size()==vecAvrgPedCMN.size()){
+	  cout<<"Creating gAvrgPedCMN with "<<vecEventNo.size()<<" Entries!"<<endl;
+	  gCMNoise = new TGraph(vecEventNo.size(),&vecEventNo.at(0),&vecCMNoise.at(0));
+	  gCMNoise->SetTitle("Common Mode Noise vs. eventNo");
+	  gCMNoise->SetName("gCMNoise");
+	  gCMNoise->Draw("AL");
+	  gCMNoise->GetXaxis()->SetTitle("EventNo.");
+	  gCMNoise->GetYaxis()->SetTitle("Common Mode Noise[ADC counts]");
+	  histSaver->SaveGraph(gCMNoise,"gCMNoise","AL");
+	}
+	else{
+	  cout<<"Size for creatign gCMNoise are wrong: "<<vecEventNo.size()<<"/"<<vecCMNoise.size()<<endl;
+	}
+//	if(gAvrgNoise!=0&&gAvrgPed!=0){
+//	  TMultiGraph* mg = new TMultiGraph('mgAvrgPedestal','Avrg Pedestal and Noise for diamond');
+//	}
 //	for(int det=0;det<9;det++){
 //		histSaver->SaveHistogramPNG(hPulsHeightNextBiggestHit[det]);
 //		hPulsHeightNextBiggestHit[det]->Delete();
@@ -491,14 +584,30 @@ void TAnalysisOfPedestal::saveHistos(){
 		delete histo_pulseheight_right_sigma[det];
 		delete histo_pulseheight_right_sigma_second[det];
 
-	  TF1 histofitx("histofitx","gaus",hAllAdcNoise[det]->GetMean()-2*hAllAdcNoise[det]->GetRMS(),hAllAdcNoise[det]->GetMean()+2*hAllAdcNoise[det]->GetRMS());
-	  histofitx.SetLineColor(kBlue);
-	  hAllAdcNoise[det]->Fit(&histofitx,"rq");
-	  if(res!=0)res->SetNoise(det,histofitx.GetParameter(2));
-		histSaver->SaveHistogram(hAllAdcNoise[det],true);
+		if(TPlaneProperties::isSiliconDetector(det)){
+		  TF1 histofitx("histofitx","gaus",hAllAdcNoise[det]->GetMean()-2*hAllAdcNoise[det]->GetRMS(),hAllAdcNoise[det]->GetMean()+2*hAllAdcNoise[det]->GetRMS());
+		  histofitx.SetLineColor(kBlue);
+		  hAllAdcNoise[det]->Fit(&histofitx,"rq");
+		  if(res!=0)res->SetNoise(det,histofitx.GetParameter(2));
+		  histSaver->SaveHistogram(hAllAdcNoise[det],true);
 
-		delete hAllAdcNoise[det];
+		  delete hAllAdcNoise[det];
+		}
     }
+    cout<<"hFitX:"<<hDiaAllAdcNoise<<endl;
+    cout<<hDiaAllAdcNoise->GetMean()<<endl;
+    cout<<hDiaAllAdcNoise->GetRMS()<<endl;
+
+    TF1 histofitx("histofitx","gaus",hDiaAllAdcNoise->GetMean()-2*hDiaAllAdcNoise->GetRMS(),hDiaAllAdcNoise->GetMean()+2*hDiaAllAdcNoise->GetRMS());
+    histofitx.SetLineColor(kBlue);
+    hDiaAllAdcNoise->Fit(&histofitx,"rq");
+    if(res!=0)res->SetNoise(TPlaneProperties::getDetDiamond(),histofitx.GetParameter(2));
+    histSaver->SaveHistogram(hDiaAllAdcNoise,true);
+    TF1 histofitAllNoiseCMN("histofitx","gaus",hDiaAllAdcNoiseCMN->GetMean()-2*hDiaAllAdcNoiseCMN->GetRMS(),hDiaAllAdcNoiseCMN->GetMean()+2*hDiaAllAdcNoiseCMN->GetRMS());
+    histofitAllNoiseCMN.SetLineColor(kBlue);
+    hDiaAllAdcNoiseCMN->Fit(&histofitAllNoiseCMN,"rq");
+//    if(res!=0)res->SetNoise(TPlaneProperties::getDetDiamond(),histofitx.GetParameter(2));
+    histSaver->SaveHistogram(hDiaAllAdcNoiseCMN,true);
 }
 
 /**
@@ -561,31 +670,58 @@ void TAnalysisOfPedestal::createPedestalMeanHistos()
 }
 
 void TAnalysisOfPedestal::updateMeanCalulation(){
+  Float_t sumPed =0;
+  Float_t sumPedCMN=0;
+  Float_t sumNoise=0;
+  Float_t sumNoiseCMN=0;
+  int nSumPed =0;
+  int nSumPedCMN=0;
+  int nSumNoiseCMN=0;
+  int nSumNoise=0;
+  Float_t cmNoise = eventReader->getCMNoise();
+  vecCMNoise.push_back(cmNoise);
+  vecEventNo.push_back(nEvent);
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
 		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+		  if(settings->isDet_channel_screened(det,ch))
+		    continue;
 			Float_t snr = eventReader->getSignalInSigma(det,ch);
-			Float_t pedestal = eventReader->getPedestalMean(det,ch);
-			Float_t sigma = eventReader->getPedestalSigma(det,ch);
+			Float_t pedestal = eventReader->getPedestalMean(det,ch,false);
+			Float_t sigma = eventReader->getPedestalSigma(det,ch,false);
 			UInt_t adc = eventReader->getAdcValue(det,ch);
 			Float_t noise = adc-pedestal;
+      Float_t pedestalCMN = eventReader->getPedestalMean(det,ch,true);
+      Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
+      Float_t noiseCMN = adc-pedestalCMN;
+      pedestalCMN-=cmNoise;
 			if(snr<settings->getClusterHitFactor(det)){
-//				cout<<"\n1 "<<det<<"/"<<ch<<" "<<pedestalMeanValue.size()<<"-"<<pedestalMeanValue.at(det).size()<<flush;
 				pedestalMeanValue.at(det).at(ch) +=pedestal;
-//				cout<<"\n2 "<<det<<"/"<<ch<<" "<<pedestalSigmaValue.size()<<"-"<<pedestalSigmaValue.at(det).size()<<flush;
 				pedestalSigmaValue.at(det).at(ch) +=sigma;
-//				cout<<"\n3 "<<det<<"/"<<ch<<" "<<nPedestalHits.size()<<"-"<<nPedestalHits.at(det).size()<<flush;
 				nPedestalHits.at(det).at(ch)++;
-//				cout<<noise<<endl;
-				hAllAdcNoise[det]->Fill(noise);
-//				cout<<"$"<<flush;
+				if(TPlaneProperties::isSiliconDetector(det))
+				  hAllAdcNoise[det]->Fill(noise);
+				else if(TPlaneProperties::isDiamondDetector(det)){
+				  hDiaAllAdcNoise->Fill(noise);
+				  hDiaAllAdcNoiseCMN->Fill(noiseCMN);
+				  sumPed += pedestal;
+				  sumPedCMN+=pedestalCMN;
+				  nSumPed++;
+				  nSumPedCMN++;
+				  nSumNoise++;
+				  nSumNoiseCMN++;
+				  sumNoise+=noise;
+				  sumNoiseCMN+=noiseCMN;
+				}
 			}
 			if(TPlaneProperties::getDetDiamond()==det){
-//				cout<<"*"<<flush;
 				diaRawADCvalues.at(ch).push_back(adc);
 			}
 
 		}
-
+	vecAvrgPed.push_back(sumPed/(float)nSumPed);
+	vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
+	vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);
+	vecAvrgSigmaCMN.push_back(sumNoiseCMN/(float)nSumNoiseCMN);
 }
 
 
