@@ -142,7 +142,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 	watch.Print();
 }
 
-void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<Float_t> DiaAdcQueue[N_DIA_CHANNELS], int maxSigma){
+void TPedestalCalculation::calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<Int_t> DiaAdcQueue[N_DIA_CHANNELS], int maxSigma){
 	cout<<"calculate Pedestal for the first "<<slidingLength<<" Entries..."<<endl;
 	for(int det=0;det <8;det++){
 		for(int ch=0;ch<N_DET_CHANNELS;ch++){
@@ -188,7 +188,7 @@ pair <float,float> TPedestalCalculation::calculateFirstPedestalDet(int det,int c
 	else return this->calculateFirstPedestalDet(det,ch,adcQueue,mean,sigma,iterations-1,maxSigma);
 }
 
-pair <float,float> TPedestalCalculation::calculateFirstPedestalDia(int ch,deque<Float_t> adcQueue, float meanChannel, float sigmaChannel,int iterations,float maxSigma){
+pair <float,float> TPedestalCalculation::calculateFirstPedestalDia(int ch,deque<Int_t> adcQueue, float meanChannel, float sigmaChannel,int iterations,float maxSigma){
 	diaSUM[ch]=0;
 	diaSUM2[ch]=0;
 	diaEventsInSum[ch]=0;

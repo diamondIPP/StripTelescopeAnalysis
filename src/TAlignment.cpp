@@ -448,7 +448,7 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
     resytest = TMath::Abs(yDelta - resOld.getYMean()) / resOld.getYSigma();
     if (verbosity > 3) cout << nEvent << endl;
     //if(verbosity>3)	predictedPostion->Print();
-    if (verbosity > 3) cout << "Measured: " << myTrack->getXMeasured(subjectPlane, mode) << "/" << myTrack->getYMeasured(subjectPlane, mode) << endl;
+    if (verbosity > 3) cout << "Measured: " << myTrack->getXMeasured(subjectPlane, mode) << " / " << myTrack->getYMeasured(subjectPlane, mode) << endl;
     if (verbosity > 3) cout << "Observed: " << xPositionObserved << " / " << yPositionObserved << endl;
     if (verbosity > 3) cout << "Predicted: " << predictedPostion->getPositionX() << " / " << predictedPostion->getPositionY() << endl;
     if (verbosity > 3) cout << "Delta:    " << xDelta << " / " << yPositionObserved << endl;
