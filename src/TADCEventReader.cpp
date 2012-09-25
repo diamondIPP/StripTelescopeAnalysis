@@ -418,8 +418,8 @@ UInt_t TADCEventReader::getCurrent_event() const
 
 UChar_t TADCEventReader::getDet_ADC(UInt_t det , UInt_t ch) const
 {
-	if(det<TPlaneProperties::getNDetectors()&& TPlaneProperties::getNChannels(det)>ch)
-    return Det_ADC[det][ch];
+	if(det<TPlaneProperties::getNSiliconDetectors()&& TPlaneProperties::getNChannels(det)>ch)
+		return Det_ADC[det][ch];
 	return -1;
 }
 
@@ -447,10 +447,10 @@ Float_t TADCEventReader::getDet_PedWidth(UInt_t i, UInt_t j) const
     return Det_PedWidth[i][j];
 }
 
-Float_t TADCEventReader::getDia_ADC(UInt_t ch, bool cmnCorrected) {
+Int_t TADCEventReader::getDia_ADC(UInt_t ch) {
   if(ch<TPlaneProperties::getNChannelsDiamond())
-    return (Float_t)Dia_ADC[ch];
-  return -999999;
+    return (Int_t)Dia_ADC[ch];
+  return -1;
 }
 
 UInt_t TADCEventReader::getEvent_number() const
@@ -511,19 +511,19 @@ TFile *TADCEventReader::getFile() const
  */
 Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
-	if(det<8&&ch<TPlaneProperties::getNChannels(det))
+	if(TPlaneProperties::isSiliconDetector(det)&&ch<TPlaneProperties::getNChannels(det))
 		return this->pedestalMean[det][ch];
-	if(det==TPlaneProperties::getDetDiamond())
+	if(TPlaneProperties::isDiamondDetector(det))
 	  return getDiaPedestalMean(ch,cmnCorrected);
 	return -99999;
 }
 
 Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
-	if(det<8&&ch<TPlaneProperties::getNChannels(det))
+	if(TPlaneProperties::isSiliconDetector(det)&&ch<TPlaneProperties::getNChannels(det))
 		if(this->pedestalSigma[det][ch]>=0)
 			return this->pedestalSigma[det][ch];
-	if(det==TPlaneProperties::getDetDiamond())
+	if(TPlaneProperties::isDiamondDetector(det))
 	  return getDiaPedestalSigma(ch,cmnCorrected);
 	return 0;
 }
@@ -548,19 +548,12 @@ Float_t TADCEventReader::getDiaPedestalSigma(UInt_t ch, bool cmnCorrected){
   }
   return 0;
 }
-//TCluster::vecvecTCluster* TADCEventReader::getCluster() const
-//{
-//	//std::cout<<pVecvecCluster->size()<<std::endl;
-//	return this->pVecvecCluster;
-//}
 
-Float_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch)//,bool cmnCorrected)
-{
-	if(det<8 &&ch<TPlaneProperties::getNChannels(det)){
-		return (Float_t)this->getDet_ADC(det,ch);
-	}
-	if (det==8)
-	    return (Float_t)this->getDia_ADC(ch);//,cmnCorrected);
+Int_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch){
+	if(TPlaneProperties::isSiliconDetector(det))
+		return (Int_t)this->getDet_ADC(det,ch);
+	if (TPlaneProperties::isDiamondDetector(det))
+	    return (Int_t)this->getDia_ADC(ch);
 	return -1;
 }
 
@@ -601,7 +594,7 @@ void TADCEventReader::checkADC(){
 
 bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 {
-	if(det<9)
+	if(det<TPlaneProperties::getNDetectors())
 		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det);
 	return true;
 }
@@ -614,25 +607,25 @@ Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
   float pedCMN = getPedestalMean(det,ch,true);
   float pedReal= getPedestalMean(det,ch,cmnCorrected);
   float retVal;
-  if (!cmnCorrected)
-    cmn=0;
-  if (TPlaneProperties::isDiamondDetector(det)){
-//    cout<<getEvent_number(  )<<" "<<det<<" "<<ch<<" "<<cmnCorrected<<endl;
-//    cout<<"raw signal det:"<<det<<" ch:"<<ch<<": "<<adc<<"-"<<ped<<"="<<adc-ped<<endl;
-//    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedCMN<<"-"<<cmn<<"="<<adc-pedCMN-cmn<<endl;
-    if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))
-       cmn=0;
-    retVal = adc-pedReal-cmn;
-//    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedReal<<"+"<<cmn<<"="<<retVal<<endl;
-  }
-  else
-    cmn=0;
+  if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))
+         cmn=0;
+//  if (TPlaneProperties::isDiamondDetector(det)){
+////    cout<<getEvent_number(  )<<" "<<det<<" "<<ch<<" "<<cmnCorrected<<endl;
+////    cout<<"raw signal det:"<<det<<" ch:"<<ch<<": "<<adc<<"-"<<ped<<"="<<adc-ped<<endl;
+////    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedCMN<<"-"<<cmn<<"="<<adc-pedCMN-cmn<<endl;
+//
+//    retVal = adc-pedReal-cmn;
+////    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedReal<<"+"<<cmn<<"="<<retVal<<endl;
+//  }
+//  else
+//    cmn=0;
   retVal = adc-pedReal-cmn;
   return retVal;
 }
 
 Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch,bool cmnCorrected){
-  if(det>=9||(getPedestalSigma(det,ch)<=0))return -99999999;
+  if(det>=TPlaneProperties::getNDetectors()||(getPedestalSigma(det,ch,cmnCorrected)<=0))
+	  return -99999999;
   return (getRawSignal(det,ch,cmnCorrected)/getPedestalSigma(det,ch,cmnCorrected));
 }
 

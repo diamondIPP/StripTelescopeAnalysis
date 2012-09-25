@@ -8,7 +8,7 @@
 #include "../include/TCluster.hh"
 ClassImp(TCluster);
 
-TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels,Float_t CMNoise,bool doCMN) {
+TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels) {
 	clusterChannel.clear();
 	clusterSignal.clear();
 	clusterADC.clear();
@@ -33,8 +33,6 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	this->eventNumber=nEvent;
 	mode=highest2Centroid;
 	this->nChannels=nChannels;
-	this->CMNoise=CMNoise;
-	this->bCMN=doCMN;
 }
 
 TCluster::~TCluster() {
@@ -87,8 +85,7 @@ TCluster::TCluster(const TCluster& rhs){
 	nChannels=rhs.nChannels;
 	det=rhs.det;
 	eventNumber=rhs.eventNumber;
-	CMNoise=rhs.CMNoise;
-	bCMN=rhs.bCMN;
+
 }
 
 /**
@@ -127,8 +124,6 @@ TCluster & TCluster::operator =(const TCluster & src)
 		clusterSignalInSigma.push_back(src.clusterSignalInSigma.at(i));
 	for(UInt_t i=0;i<src.clusterChannelScreened.size();i++)
 		clusterChannelScreened.push_back(src.clusterChannelScreened.at(i));
-	CMNoise=src.CMNoise;
-	bCMN=src.bCMN;
 	return *this;
 }
 
@@ -161,10 +156,6 @@ UInt_t TCluster::checkClusterForSize() const{
  * @todo: bbSaturated not yet used....
  */
 void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
-  if(signal!=signal||signalInSigma!=signalInSigma||adcValue!=adcValue){
-    cout<<"Added Channel is somhow broken: "<<ch<<" "<<signal<<" "<<signalInSigma<<" "<<adcValue<<endl;
-    return;//todo output
-  }
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
 	this->isSaturated=this->isSaturated||bSaturated;
 	if(signalInSigma>seedSigma)
@@ -180,7 +171,6 @@ void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort
 		maxChannel=ch;
 	}
 	if(signalInSigma>hitSigma) charge+=signal;
-
 	if(this->checkClusterForSize()>0&&ch<clusterChannel.front()){
 		clusterChannel.push_front(ch);
 		clusterSignal.push_front(signal);
@@ -576,12 +566,11 @@ UShort_t TCluster::getAdcValue(UInt_t clusterPos)
 
 Float_t TCluster::getEta()
 {
-	if (checkClusterForSize() < 2) return -1; // eta is to be expected between 0 and 1. a cluster size smaller than 2 is not acceptable, thus the function returns -1.
+	if (checkClusterForSize() < 2) return -1;
 	UInt_t clPosHighest = getHighestHitClusterPosition();
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
 	UInt_t leftClPos = 0;
 	UInt_t rightClPos = 0;
-    Float_t result = 0;
 	if (clPosHighest < clPos2ndHighest) {
 		leftClPos = clPosHighest;
 		rightClPos = clPos2ndHighest;
@@ -591,10 +580,9 @@ Float_t TCluster::getEta()
 		rightClPos = clPosHighest;
 	}
 	Float_t sumSignal = (getSignal(leftClPos)+getSignal(rightClPos));
-	if(sumSignal == 0)
+	if(sumSignal==0||getSignal(rightClPos)==0)
 		return -1;
-    result = getSignal(rightClPos)/sumSignal;
-    return result;
+	return getSignal(rightClPos) / sumSignal;
 }
 
 Float_t TCluster::getEtaPostion(){
@@ -711,7 +699,7 @@ Float_t TCluster::getValueOfHisto(Float_t x, TH1F* histo){
 
 void TCluster::Print(UInt_t level){
 	cout<<Intent(level)<<"Cluster of Event "<<flush;
-	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries, cmNoise is "<<CMNoise<<" "<<flush;
+	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries"<<flush;
 	for(UInt_t cl=0;cl<checkClusterForSize();cl++){
 		if(this->isSeed(cl))
 			cout<<"\t{"<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"}"<<flush;

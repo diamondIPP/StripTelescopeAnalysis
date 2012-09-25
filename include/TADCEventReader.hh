@@ -35,7 +35,7 @@ public:
 	bool isOK();
 //    bool getCMNEvent_flag() const;
 	bool isValidTrack();
-  Float_t getAdcValue(UInt_t det,UInt_t ch);
+  Int_t getAdcValue(UInt_t det,UInt_t ch);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch){return getSignalInSigma(det,ch,bCMNoiseCorrected);};
 	Float_t getSignal(UInt_t det,UInt_t ch){return getSignal(det,ch,bCMNoiseCorrected);}
@@ -52,8 +52,7 @@ public:
 	UInt_t getDet_NChannels(UInt_t i) const;
 	Float_t getDet_PedMean(UInt_t i, UInt_t j) const;
 	Float_t getDet_PedWidth(UInt_t i, UInt_t j) const;
-	Float_t getDia_ADC(UInt_t ch) {return getDia_ADC(ch,bCMNoiseCorrected);};
-	Float_t getDia_ADC(UInt_t ch, bool cmnCorrected);
+	Int_t getDia_ADC(UInt_t ch);
 	UInt_t getEvent_number() const;
 	TTree *getPedTree() const;
 	UInt_t getRun_number() const;
@@ -63,10 +62,10 @@ public:
 	TTree *getTree() const;
 	TFile* getFile() const;
 	std::string getFilePath();
-	Float_t getPedestalMean(UInt_t det, UInt_t ch, bool cmnCorrected=true);
-	Float_t getPedestalSigma(UInt_t det, UInt_t ch, bool cmnCorrected=true);
-	Float_t getDiaPedestalMean(UInt_t ch,bool cmnCorrected=true);
-	Float_t getDiaPedestalSigma(UInt_t ch,bool cmnCorrected=true);
+	Float_t getPedestalMean(UInt_t det, UInt_t ch, bool cmnCorrected=false);
+	Float_t getPedestalSigma(UInt_t det, UInt_t ch, bool cmnCorrected=false);
+	Float_t getDiaPedestalMean(UInt_t ch,bool cmnCorrected=false);
+	Float_t getDiaPedestalSigma(UInt_t ch,bool cmnCorrected=false);
 	TCluster getCluster(UInt_t det,UInt_t cl);
 	TCluster getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	UInt_t getClusterSize(UInt_t det,UInt_t cl);

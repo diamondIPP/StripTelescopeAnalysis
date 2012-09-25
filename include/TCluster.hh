@@ -17,25 +17,15 @@
 #include "TSystem.h"
 #include "TObject.h"
 #include "TROOT.h"
-#include "TH1F.h"
 #include "TPlaneProperties.hh"
+#include "TH1F.h"
 //#define TCLUSTER_REVISION 12;
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 27;};
+	static UInt_t TCLUSTER_REVISION() {return 25;};
     typedef vector<vector<TCluster> > vecvecTCluster;
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
-    static std::string getCalulationModeString(calculationMode_t mode){
-      switch(mode){
-        case maxValue:return "maxValue";
-        case chargeWeighted: return "chargeWeighted";
-        case highest2Centroid: return "highest2Centroid";
-        case eta: return "eta";
-        case corEta: return "correctedEta";
-        default: return "unknownMode";
-      }
-    }
     TCluster()
     {
         numberOfSeeds = 0;
@@ -54,10 +44,9 @@ public:
         hasBadChannel=false;
         numberOfNoHits=0;
         nChannels=256;
-        CMNoise=0;
-        bCMN=false;
+
     };
-    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256,Float_t CMNoise=0,bool doCMN=false);
+    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
     TCluster(const TCluster& a);//COPY Constructor
     virtual ~TCluster();
     TCluster &operator=(const TCluster &src); //class assignment function
@@ -78,7 +67,6 @@ public:
     Float_t getChargeWeightedMean(bool useNonHits=false);
     Float_t getEtaPostion();
     Float_t getPositionCorEta(TH1F* histo);
-    Float_t getCMNoise(){return CMNoise;};
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
@@ -138,8 +126,6 @@ private:
     UInt_t nChannels;
     UChar_t det;
     UInt_t eventNumber;
-    Float_t CMNoise;
-    bool bCMN;
     ClassDef(TCluster,TCLUSTER_REVISION());
 };
 
