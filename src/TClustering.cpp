@@ -216,7 +216,8 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
 	Float_t signal =eventReader->getSignal(det,ch);
 	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch);
-	UShort_t adcValue=(UShort_t)eventReader->getAdcValue(det,ch);
+	Int_t adcValue= eventReader->getAdcValue(det,ch);
+	Float_t cmNoise = eventReader->getCMNoise();
 
 	//create Cluster
 	int seedSigma=settings->getClusterSeedFactor(det);
@@ -224,7 +225,7 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	bool isScreened;
 	int maxChannel=TPlaneProperties::getNChannels(det);
 
-	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel);
+	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel,cmNoise);
 
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>10)cout<<cluster.size()<<" ";

@@ -8,7 +8,7 @@
 #include "../include/TCluster.hh"
 ClassImp(TCluster);
 
-TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels) {
+TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nChannels,Float_t cmNoise) {
 	clusterChannel.clear();
 	clusterSignal.clear();
 	clusterADC.clear();

@@ -45,7 +45,7 @@ public:
         nChannels=256;
 
     };
-    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256);
+    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256, float cmNoise=0);
     TCluster(const TCluster& a);//COPY Constructor
     virtual ~TCluster();
     TCluster &operator=(const TCluster &src); //class assignment function

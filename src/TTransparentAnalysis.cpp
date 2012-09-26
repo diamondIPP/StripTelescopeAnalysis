@@ -245,10 +245,10 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
 	centerChannel = TMath::Abs(direction);
 	if (direction < 0) direction = -1;
 	else direction = 1;
-//	Float_t cmNoise = eventReader->getCMNoise();
+	Float_t cmNoise = eventReader->getCMNoise();
 	
 	// make cluster
-	TCluster transparentCluster = TCluster(eventReader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det));//,cmNoise);
+	TCluster transparentCluster = TCluster(eventReader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
