@@ -155,7 +155,11 @@ UInt_t TCluster::checkClusterForSize() const{
  * @param screened
  * @todo: bbSaturated not yet used....
  */
-void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
+
+void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t pedMeanCMN, Float_t pedSigmaCMN, Int_t adcValue, bool bSaturated,bool isScreened){
+//void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
+	Float_t signal = adcValue - pedMean;
+	Float_t signalInSigma= signal/pedSigma;
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
 	this->isSaturated=this->isSaturated||bSaturated;
 	if(signalInSigma>seedSigma)
@@ -176,14 +180,14 @@ void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort
 		clusterSignal.push_front(signal);
 		clusterSignalInSigma.push_front(signalInSigma);
 		clusterADC.push_front(adcValue);
-		this->clusterChannelScreened.push_front(screened);
+		this->clusterChannelScreened.push_front(isScreened);
 	}
 	else{
 		clusterChannel.push_back(ch);
 		clusterSignal.push_back(signal);
 		clusterSignalInSigma.push_back(signalInSigma);
 		clusterADC.push_back(adcValue);
-		this->clusterChannelScreened.push_back(screened);
+		this->clusterChannelScreened.push_back(isScreened);
 	}
 
 }

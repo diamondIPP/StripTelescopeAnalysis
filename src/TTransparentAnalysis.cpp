@@ -253,7 +253,14 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		direction *= -1;
 		currentChannel += direction * iChannel;
-		transparentCluster.addChannel(currentChannel, eventReader->getRawSignal(det,currentChannel), eventReader->getRawSignalInSigma(det,currentChannel), eventReader->getAdcValue(det,currentChannel), eventReader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
+		Int_t adcValue=eventReader->getAdcValue(det,currentChannel);
+		Float_t pedMean = eventReader->getPedestalMean(det,currentChannel,false);
+		Float_t pedMeanCMN = eventReader->getPedestalMean(det,currentChannel,true);
+		Float_t pedSigma = eventReader->getPedestalSigma(det,currentChannel,false);
+		Float_t pedSigmaCMN = eventReader->getPedestalSigma(det,currentChannel,true);
+		bool isScreened =settings->isDet_channel_screened(det,currentChannel);
+		transparentCluster.addChannel(currentChannel,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
+//		transparentCluster.addChannel(currentChannel, eventReader->getRawSignal(det,currentChannel), eventReader->getRawSignalInSigma(det,currentChannel), eventReader->getAdcValue(det,currentChannel), eventReader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
 	return transparentCluster;
 }

@@ -41,6 +41,7 @@ public:
 	static std::string getStringForDetector(int i);
 	static bool isSiliconDetector(UInt_t det){return (det<getNSiliconDetectors());}
 	static bool isDiamondDetector(UInt_t det){return (det==getDetDiamond());}
+	static bool isSaturated(UInt_t det, Int_t adcValue){return (adcValue>=getMaxSignalHeight(det));}
 
     ClassDef(TPlaneProperties,1);
 

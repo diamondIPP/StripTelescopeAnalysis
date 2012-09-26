@@ -237,15 +237,25 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
 		isScreened=this->settings->isDet_channel_screened(det,currentCh)||adcValue==maxAdcValue;
 		if(sigma!=0&&adcValueInSigma>hitSigma){
-			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
+			float pedMean = eventReader->getPedestalMean(det,currentCh,false);
+			float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
+			float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
+			float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
+			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
+//			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 		}
 		else{
 			if((verbosity>10&&det==8)||verbosity>11)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<sigma<<"/"<<adcValueInSigma<<"] ";
 			break;
 		}
 	}
-	if(currentCh>=0)
-		cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
+	if(currentCh>=0){
+		float pedMean = eventReader->getPedestalMean(det,currentCh,false);
+		float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
+		float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
+		float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
+		cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
+	}
 	if((verbosity>10&&det==8)||verbosity>11)cout<<" ."<<cluster.size()<<". ";
 	for(currentCh=ch+1;currentCh<TPlaneProperties::getNChannels(det);currentCh++){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
@@ -255,7 +265,11 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
 		isScreened=this->settings->isDet_channel_screened(det,currentCh);
 		if(sigma!=0&&adcValueInSigma>hitSigma&&sigma!=0){
-			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);
+			float pedMean = eventReader->getPedestalMean(det,currentCh,false);
+			float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
+			float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
+			float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
+			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
 		}
 		else{
 			if((verbosity>10&&det==8)||verbosity>11)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<adcValueInSigma<<"] ";
@@ -263,7 +277,11 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 		}
 	}
 	if(currentCh<TPlaneProperties::getNChannels(det)){
-		cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
+		float pedMean = eventReader->getPedestalMean(det,currentCh,false);
+		float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
+		float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
+		float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
+		cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
 	}
 	cluster.checkCluster();
 	vecCluster[det].push_back(cluster);
