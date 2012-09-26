@@ -19,35 +19,19 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	setSettings(settings);
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
-	stringstream  runString;
-	runString.str("");
-	runString<<runNumber;
-	sys->MakeDirectory(runString.str().c_str());
-
-	sys->cd(runString.str().c_str());
-	rawFilePath<<"rawData."<<runNumber<<".root";
-	filepath.str("");
-	filepath<<"pedestalData."<<runNumber<<".root";
-	cout<<"currentPath: "<<sys->pwd()<<endl;
-	cout<<filepath.str()<<endl;
-	eventReader=new TADCEventReader(filepath.str(),settings->getRunNumber());
+	settings->goToPedestalTreeDir();
+	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
-	sys->MakeDirectory("clustering");
-	sys->cd("clustering");
+	settings->goToClusterAnalysisDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(runNumber);
-	sys->cd("..");
-	this->seedDetSigma=seedDetSigma;
-	this->hitDetSigma=hitDetSigma;
-	this->seedDiaSigma=seedDiaSigma;
-	this->hitDiaSigma=hitDiaSigma;
+	settings->goToPedestalTreeDir();
 	this->runNumber=runNumber;
 	verbosity=0;
 	this->maxDetAdcValue=255;
 	this->maxDiaAdcValue=4095;
-//	pVecvecCluster=&vecvecCluster;
 	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
@@ -56,36 +40,28 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 	}
-//	htmlClus->setPathName((string)(currentDir+"/16202/"));
 }
 
 TClustering::~TClustering() {
-	// TODO Auto-generated destructor stub
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
 		cout<<"CLOSING TREE"<<endl;
-		cout<<eventReader->getTree()->GetName()<<" "<<filepath.str().c_str()<<endl;
-		clusterTree->AddFriend(eventReader->getTree()->GetName(),filepath.str().c_str());
+		cout<<"pedestalTree"<<" "<<filepath.str().c_str()<<endl;
+		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
 		cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
-		clusterTree->AddFriend("rawTree",rawFilePath.str().c_str());
+		clusterTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 		cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 		clusterTree->Write();
 		saveEtaCorrections();
 	}
-	//clusterTree->Delete();
 	delete clusterFile;
 	delete eventReader;
 	delete histSaver;
-	sys->cd("..");
+	settings->goToOutputDir();
 }
 
 void TClustering::setSettings(TSettings* settings){
 	this->settings = settings;
-	seedDiaSigma = settings->getDi_Cluster_Seed_Factor();
-	hitDiaSigma  = settings->getDi_Cluster_Hit_Factor();
-
-	seedDetSigma = settings->getSi_Cluster_Seed_Factor();
-	hitDetSigma  = settings->getSi_Cluster_Hit_Factor();
 }
 
 void TClustering::ClusterEvents(UInt_t nEvents)
@@ -182,10 +158,10 @@ void TClustering::clusterEvent()
 
 }
 
-void TClustering::clusterDetector(int det){
+void TClustering::clusterDetector(UInt_t det){
 	if(det>=TPlaneProperties::getNDetectors()){
 		cerr<<"det is bigger than NDetectors... EXIT"<<endl;
-		exit;
+		exit(-1);
 	}
 	nClusters[det]=0;
 	int maxChannels= TPlaneProperties::getNChannels(det);

@@ -36,14 +36,14 @@ public:
 //    bool getCMNEvent_flag() const;
 	bool isValidTrack();
   Int_t getAdcValue(UInt_t det,UInt_t ch);
-	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected);
-	Float_t getSignalInSigma(UInt_t det,UInt_t ch){return getSignalInSigma(det,ch,bCMNoiseCorrected);};
-	Float_t getSignal(UInt_t det,UInt_t ch){return getSignal(det,ch,bCMNoiseCorrected);}
-	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected);
-	Float_t getRawSignal(UInt_t det,UInt_t ch) {return getRawSignal(det,ch,bCMNoiseCorrected);};
-  Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected);
-  Float_t getRawSignalInSigma(UInt_t det,UInt_t ch){return getRawSignalInSigma(det,ch,bCMNoiseCorrected);}
-	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected);
+	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected=false);
+//	Float_t getSignalInSigma(UInt_t det,UInt_t ch){return getSignalInSigma(det,ch,bCMNoiseCorrected);};
+//	Float_t getSignal(UInt_t det,UInt_t ch){return getSignal(det,ch,bCMNoiseCorrected);}
+	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);
+//	Float_t getRawSignal(UInt_t det,UInt_t ch) {return getRawSignal(det,ch,bCMNoiseCorrected);};
+	Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected=false);
+//  Float_t getRawSignalInSigma(UInt_t det,UInt_t ch){return getRawSignalInSigma(det,ch,bCMNoiseCorrected);}
+	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected=false);
 	Float_t getCMNoise() const {return cmNoise;};
 	bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
 	UInt_t getCurrent_event() const;
@@ -113,7 +113,6 @@ private:
   Float_t diaPedestalSigmaCMN[128];
 	Float_t cmNoise;
 	bool bCMNoiseCorrected;
-	//TCluster::vecvecTCluster* pVecvecCluster;
 	TEvent *pEvent;
 	bool bIsDetMasked;
 	bool bValidSiliconTrack;

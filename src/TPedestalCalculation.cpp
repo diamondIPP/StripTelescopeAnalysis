@@ -221,7 +221,7 @@ pair<float, float> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, de
   diaEventsInSumCMN[ch]=0;
 //  if(ch==7)cout<<"calcFirstPedCMN:"<<ch<<" "<<meanCMN<<" "<<sigmaCMN<<" "<<diaEventsInSumCMN[ch]<<endl;
   this->diaEventUsedCMN[ch].clear();
-  for(UInt_t nEvent=0;nEvent<adcQueue.size();nEvent++){
+  for(nEvent=0;nEvent<adcQueue.size();nEvent++){
     if(   ((float)adcQueue.at(nEvent) >= (meanCMN-max(sigmaCMN*maxSigma,(float)1.)) )
        && ((float)adcQueue.at(nEvent) <= (meanCMN+max(sigmaCMN*maxSigma,(float)1.))) ){
       diaEventUsedCMN[ch].push_back(true);
@@ -232,6 +232,8 @@ pair<float, float> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, de
     else
       diaEventUsedCMN[ch].push_back(false);
   }//end for nEvent
+  //TODO!!! FIX!!! PROBLEM!!!!!!!!
+  ///WORK HERE!!!!!!!
   if(diaEventsInSumCMN[ch]==0)
     cout<<"events in sum=0: "<<nEvent<<" "<<ch<<" "<<diaEventsInSumCMN[ch]<<" "<<diaEventsInSum[ch]<<endl;
   meanCMN=(float)diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];

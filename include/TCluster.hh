@@ -19,12 +19,11 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-//#define TCLUSTER_REVISION 12;
+#define TCLUSTER_REV  30
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return 25;};
-    typedef vector<vector<TCluster> > vecvecTCluster;
+	static UInt_t TCLUSTER_REVISION() {return TCLUSTER_REV;};
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
     TCluster()
     {
@@ -126,7 +125,6 @@ private:
     UInt_t nChannels;
     UChar_t det;
     UInt_t eventNumber;
-    ClassDef(TCluster,TCLUSTER_REVISION());
+    ClassDef(TCluster,TCLUSTER_REV);
 };
-
 #endif /* TCLUSTER_HH_ */

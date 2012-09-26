@@ -146,7 +146,7 @@ void TAnalysisOfPedestal::getBiggestHit(){
 		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){//todo warum 70 bis 200
 		  if(settings->isDet_channel_screened(det,ch))
 		    continue;
-		  UInt_t adcValue=eventReader->getAdcValue(det,ch);
+		  Int_t adcValue=eventReader->getAdcValue(det,ch);
 		  if (adcValue<TPlaneProperties::getMaxSignalHeight(det))
 		    if(adcValue>biggestHit){
 		      biggestHit=eventReader->getAdcValue(det,ch);
@@ -681,26 +681,26 @@ void TAnalysisOfPedestal::updateMeanCalulation(){
   Float_t cmNoise = eventReader->getCMNoise();
   vecCMNoise.push_back(cmNoise);
   vecEventNo.push_back(nEvent);
-	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
-		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+  for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
+	  for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
 		  if(settings->isDet_channel_screened(det,ch))
-		    continue;
-			Float_t snr = eventReader->getSignalInSigma(det,ch);
-			Float_t pedestal = eventReader->getPedestalMean(det,ch,false);
-			Float_t sigma = eventReader->getPedestalSigma(det,ch,false);
-			UInt_t adc = eventReader->getAdcValue(det,ch);
-			Float_t noise = adc-pedestal;
-      Float_t pedestalCMN = eventReader->getPedestalMean(det,ch,true);
-      Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
-      Float_t noiseCMN = adc-pedestalCMN;
-      pedestalCMN-=cmNoise;
-			if(snr<settings->getClusterHitFactor(det)){
-				pedestalMeanValue.at(det).at(ch) +=pedestal;
-				pedestalSigmaValue.at(det).at(ch) +=sigma;
-				nPedestalHits.at(det).at(ch)++;
-				if(TPlaneProperties::isSiliconDetector(det))
+			  continue;
+		  Float_t snr = eventReader->getSignalInSigma(det,ch);
+		  Float_t pedestal = eventReader->getPedestalMean(det,ch,false);
+		  Float_t sigma = eventReader->getPedestalSigma(det,ch,false);
+		  UInt_t adc = eventReader->getAdcValue(det,ch);
+		  Float_t noise = adc-pedestal;
+		  Float_t pedestalCMN = eventReader->getPedestalMean(det,ch,true);
+//		  Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
+		  Float_t noiseCMN = adc-pedestalCMN;
+		  pedestalCMN-=cmNoise;
+		  if(snr<settings->getClusterHitFactor(det)){
+			  pedestalMeanValue.at(det).at(ch) +=pedestal;
+			  pedestalSigmaValue.at(det).at(ch) +=sigma;
+			  nPedestalHits.at(det).at(ch)++;
+			  if(TPlaneProperties::isSiliconDetector(det))
 				  hAllAdcNoise[det]->Fill(noise);
-				else if(TPlaneProperties::isDiamondDetector(det)){
+			  else if(TPlaneProperties::isDiamondDetector(det)){
 				  hDiaAllAdcNoise->Fill(noise);
 				  hDiaAllAdcNoiseCMN->Fill(noiseCMN);
 				  sumPed += pedestal;
@@ -711,17 +711,17 @@ void TAnalysisOfPedestal::updateMeanCalulation(){
 				  nSumNoiseCMN++;
 				  sumNoise+=noise;
 				  sumNoiseCMN+=noiseCMN;
-				}
-			}
-			if(TPlaneProperties::getDetDiamond()==det){
-				diaRawADCvalues.at(ch).push_back(adc);
-			}
+			  }
+		  }
+		  if(TPlaneProperties::getDetDiamond()==det){
+			  diaRawADCvalues.at(ch).push_back(adc);
+		  }
 
-		}
-	vecAvrgPed.push_back(sumPed/(float)nSumPed);
-	vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
-	vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);
-	vecAvrgSigmaCMN.push_back(sumNoiseCMN/(float)nSumNoiseCMN);
+	  }
+  vecAvrgPed.push_back(sumPed/(float)nSumPed);
+  vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
+  vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);
+  vecAvrgSigmaCMN.push_back(sumNoiseCMN/(float)nSumNoiseCMN);
 }
 
 

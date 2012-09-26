@@ -88,7 +88,6 @@ void TAnalysisOfClustering::checkForDeadChannels()
 		int numberOfSeeds=0;
 		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
 			Float_t sigma=eventReader->getPedestalSigma(det,ch);
-			Float_t signal = eventReader->getSignal(det,ch);
 			if(sigma==0){
 				//cout<<nEvent<<" "<<det<<" "<<ch<<" sigma==0"<<endl;
 				continue;
@@ -553,12 +552,12 @@ void TAnalysisOfClustering::analyseClusterPosition()
 			Float_t signalAdcRight= adcRightReal-pedRight;
 //			cout<<nEvent<<"  "<<adcLeft<<"|"<<adcRight<<"   "<<adcLeftReal<<"|"<<adcRightReal<<endl;
 
-			Float_t signalLeftReal  = signalLeft/(1-a);//((1-a)*signalLeft-a*signalRight)/(1-a-b);
-			Float_t signalRightReal = (-(a-a*a)*signalLeft+(1-a)*signalRight)/(1-a)/(1-a);//((1-b)*signalRight-b*signalLeft)/(1-a-b);
+//			Float_t signalLeftReal  = signalLeft/(1-a);//((1-a)*signalLeft-a*signalRight)/(1-a-b);
+//			Float_t signalRightReal = (-(a-a*a)*signalLeft+(1-a)*signalRight)/(1-a)/(1-a);//((1-b)*signalRight-b*signalLeft)/(1-a-b);
 			Float_t eta2=(signalAdcRight)/(signalAdcLeft+signalAdcRight);
-			Float_t eta1 = adcRight/(adcLeft+adcRight);
+//			Float_t eta1 = adcRight/(adcLeft+adcRight);
 			Float_t eta= eventReader->getCluster(det,cl).getEta();
-			Float_t eta3= signalRightReal/(signalLeftReal+signalRightReal);
+//			Float_t eta3= signalRightReal/(signalLeftReal+signalRightReal);
 //			cout<<nEvent<<" "<<eta<<" "<<eta1<<" "<<eta2<<" "<<eta3<<endl;
 			hEtaDistribution[det]->Fill(eta);
 			hEtaDistribution5Percent[det]->Fill(eta2);
@@ -572,7 +571,7 @@ void TAnalysisOfClustering::analyseClusterPosition()
 			Float_t posCorEta=  eventReader->getEvent()->getPosition(det,cl,TCluster::corEta,hEtaIntegral);
 			chNo = (UInt_t)(posCorEta+0.5);
 			relPos = posCorEta - chNo;
-			if(verbosity) printf("%5d %3d %5.1d %5.1f\n",nEvent,chNo,posCWM,posCorEta);
+			if(verbosity) printf("%5d %3d %5.1f %5.1f\n",nEvent,chNo,posCWM,posCorEta);
 			hRelativeClusterPositionCorEta[det]->Fill(chNo+0.5,relPos);
 			Float_t posEta=  eventReader->getEvent()->getPosition(det,cl,TCluster::eta);
 			chNo = (UInt_t)(posEta+0.5);

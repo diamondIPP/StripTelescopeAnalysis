@@ -22,7 +22,7 @@ TPlaneProperties::~TPlaneProperties() {
 	default: return TPlaneProperties::getNChannelsSilicon();break;
 	}
 }
- UInt_t TPlaneProperties::getMaxSignalHeight(UInt_t det){
+ Int_t TPlaneProperties::getMaxSignalHeight(UInt_t det){
 	switch(det){
 	case 8: return getMaxSignalHeightDiamond();
 	default: return getMaxSignalHeightSilicon();

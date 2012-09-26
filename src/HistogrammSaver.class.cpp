@@ -90,7 +90,7 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	else
 		min = middle - range/2.*1.1;
 	max = middle + range/2.*1.4;
-	int stat = gStyle->GetOptStat();
+//	int stat = gStyle->GetOptStat();
 	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
 		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
 	if(refactorSecond!=1)histo2->Scale(refactorSecond);
@@ -283,7 +283,7 @@ void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
   for(UInt_t i=histo->GetNbinsX();i>0;i--)
     if(histo->GetBinContent(i)==0)maxBinX=i;
   UInt_t minBinX =0;
-  for(UInt_t i=0;i<histo->GetNbinsX();i++)
+  for(Int_t i=0;i<histo->GetNbinsX();i++)
     if(histo->GetBinContent(i)==0)minBinX=i;
   Float_t xmin = histo->GetXaxis()->GetBinLowEdge(minBinX);
   Float_t xmax = histo->GetXaxis()->GetBinLowEdge(maxBinX+1);

@@ -569,21 +569,25 @@ TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 {
 	if(pEvent!=NULL)
 		return this->pEvent->getCluster(det,cl);
+	return TCluster();
 }
 TCluster TADCEventReader::getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl){
 	if(pEvent!=NULL)
 	return this->pEvent->getCluster(plane,cor,cl);
+	return TCluster();
 }
 
 UInt_t TADCEventReader::getClusterSize(UInt_t det,UInt_t cl)
 {
 	if(pEvent!=NULL)
 	return pEvent->getClusterSize(det,cl);
+	return 0;
 }
 UInt_t TADCEventReader::getClusterSeedSize(UInt_t det,UInt_t cl)
 {
 	if(pEvent!=NULL)
 	return pEvent->getClusterSeedSize(det,cl);
+	return 0;
 }
 
 void TADCEventReader::checkADC(){
@@ -601,12 +605,11 @@ bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 
 Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
   if(det>=9)return -9999999;
-  float cmn = getCMNoise();
-  float adc = getAdcValue(det,ch);
-  float ped = getPedestalMean(det,ch,false);
-  float pedCMN = getPedestalMean(det,ch,true);
-  float pedReal= getPedestalMean(det,ch,cmnCorrected);
-  float retVal;
+  Float_t cmn = getCMNoise();
+  Int_t adc = getAdcValue(det,ch);
+//  float ped = getPedestalMean(det,ch,false);
+//  float pedCMN = getPedestalMean(det,ch,true);
+  Float_t pedReal= getPedestalMean(det,ch,cmnCorrected);
   if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))
          cmn=0;
 //  if (TPlaneProperties::isDiamondDetector(det)){
@@ -619,7 +622,7 @@ Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
 //  }
 //  else
 //    cmn=0;
-  retVal = adc-pedReal-cmn;
+ Float_t retVal = adc-pedReal-cmn;
   return retVal;
 }
 

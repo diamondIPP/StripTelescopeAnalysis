@@ -254,7 +254,7 @@ cout<<"****************************************"<<endl;
 
 			stringstream histName;
 			histName<<"hEtaIntegral"<<"_step"<<correctionStep<<"_"<<TPlaneProperties::getStringForDetector(det);;
-			UInt_t nBins = vecHEta.at(det)->GetNbinsX();
+//			UInt_t nBins = vecHEta.at(det)->GetNbinsX();
 			TH1F *histo= TClustering::createEtaIntegral(vecHEta.at(det),histName.str());
 			cout<<"save "<<vecHEta.at(det)->GetTitle()<<" "<<vecHEta.at(det)->GetEntries()<<endl;
 			histSaver->SaveHistogram(vecHEta.at(det));
@@ -265,13 +265,13 @@ cout<<"****************************************"<<endl;
 	}
 	correctedEtaFile->Write();
 	cout<<"Closing "<<correctedEtaFile->GetName()<<endl;
-	for(UInt_t i =0;i<histoStripDistribution.size(),i++;)
+	for(UInt_t i=0;i<histoStripDistribution.size();i++)
 	  cout<<histoStripDistribution.at(i)<<" "<<flush;
 	cout<<endl;
-	for(UInt_t i =0;i<histoStripDistribution.size(),i++;)
+	for(UInt_t i =0;i<histoStripDistribution.size();i++)
 	    cout<<histoStripDistributionFlattned.at(i)<<" "<<flush;
 	cout<<endl;
-	for(UInt_t i =0;i<histoStripDistribution.size(),i++;)
+	for(UInt_t i =0;i<histoStripDistribution.size();i++)
 	  cout<<vecHEta.at(i)<<" "<<flush;
 
 }

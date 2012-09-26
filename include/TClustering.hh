@@ -48,7 +48,7 @@ private:
 	void addToEtaDistributions();
 	void saveEtaCorrections();
 	void clusterEvent();
-	void clusterDetector(int det);
+	void clusterDetector(UInt_t det);
 	int combineCluster(int det,int ch,int maxAdcValue=255);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
@@ -56,13 +56,11 @@ private:
     TSettings *settings;
     vector<TCluster> vecCluster[9];
     UInt_t clusterRev;
-//    TCluster::vecvecTCluster vecvecCluster;
-//    TCluster::vecvecTCluster* pVecvecCluster;
     UInt_t nEvent;
-    int seedDetSigma;
-    int hitDetSigma;
-    int seedDiaSigma;
-    int hitDiaSigma;
+//    int seedDetSigma;
+//    int hitDetSigma;
+//    int seedDiaSigma;
+//    int hitDiaSigma;
     int verbosity;
     bool createdTree;
     bool createClusterTree(int nEvents);

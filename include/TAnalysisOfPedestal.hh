@@ -73,7 +73,7 @@ private:
 	HistogrammSaver* histSaver;
     TSystem* sys;
     TSettings *settings;
-    int nEvent;
+    UInt_t nEvent;
     int seedSigma;
     int hitSigma;
     TH1F *histo_pulseheight_sigma[9];

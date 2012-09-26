@@ -23,7 +23,7 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	this->seedSigma=seedSigma;
 	this->hitSigma=hitSigma;
 	verbosity=0;
-	revisionNumber=TCluster::TCLUSTER_REVISION();
+	revisionNumber=TCLUSTER_REVISION();
 	isChecked=false;
 	isSaturated=false;
 	isLumpy=false;
@@ -303,8 +303,9 @@ Float_t TCluster::getChargeWeightedMean(bool useNonHits){
 			charged+=clusterSignal.at(cl);//signal
 		}
 	}
-
-	return sum/charged;
+	if (charged>0)
+		return sum/charged;
+	return -1;
 }
 
 

@@ -248,20 +248,24 @@ void TRawEventReader::setDia0(TDetector_Data dia0)
 
 TDetector_Data TRawEventReader::getPlane(int det,UInt_t diaInput)
 {
-	{
-		switch(det){
-			case 0: return D0X;break;
-			case 1: return D0Y;break;
-			case 2: return D1X;break;
-			case 3: return D1Y;break;
-			case 4: return D2X;break;
-			case 5: return D2Y;break;
-			case 6: return D3X;break;
-			case 7: return D3Y;break;
-			case 8: if(diaInput==1)return Dia1;
-					else return Dia0; break;
-		}
+
+	switch(det){
+	case 0: return D0X;break;
+	case 1: return D0Y;break;
+	case 2: return D1X;break;
+	case 3: return D1Y;break;
+	case 4: return D2X;break;
+	case 5: return D2Y;break;
+	case 6: return D3X;break;
+	case 7: return D3Y;break;
+	case 8: if(diaInput==1)
+				return Dia1;
+			else
+				return Dia0;
+			break;
 	}
+	cerr<<" Trying to get data from detector "<<det<<", which does not exist!!!!!"<<endl;
+	return TDetector_Data();
 }
 
 TDetector_Data TRawEventReader::getDia(UInt_t diaInput) const
@@ -269,7 +273,7 @@ TDetector_Data TRawEventReader::getDia(UInt_t diaInput) const
 	if(diaInput==0)
 		return getDia0();
 	else
-		getDia1();
+		return getDia1();
 }
 
 void TRawEventReader::setDia1(TDetector_Data dia1)

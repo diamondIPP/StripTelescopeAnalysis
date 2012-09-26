@@ -27,7 +27,7 @@ public:
 	static UInt_t getNChannels(UInt_t det);
 	static UInt_t getMaxSignalHeightSilicon(){return 255;};
 	static UInt_t getMaxSignalHeightDiamond(){return 4095;};
-	static UInt_t getMaxSignalHeight(UInt_t det);
+	static Int_t getMaxSignalHeight(UInt_t det);
 	static UInt_t getPlaneNumber(UInt_t det){return det/2;};
 	static UInt_t getNSiliconPlanes(){return 4;};
 	static UInt_t getNSiliconDetectors(){return 8;};
