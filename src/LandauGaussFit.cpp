@@ -223,7 +223,7 @@ Int_t LandauGaussFit::langaupro(Double_t *params, Double_t &maxx, Double_t &FWHM
 TF1* LandauGaussFit::doLandauGaussFit(TH1F* inputHisto,bool verbose) {
 	if (inputHisto == 0)
 		return 0;
-	cout << "Do Landau Gauss Fit for " << inputHisto->GetName() << endl;
+	if (verbose) cout << "Do Landau Gauss Fit for " << inputHisto->GetName() << endl;
 	float min= inputHisto->GetXaxis()->GetXmin();
 	float max = inputHisto->GetXaxis()->GetXmax();
 	TF1* landau = new TF1("landau","landau",min, max);

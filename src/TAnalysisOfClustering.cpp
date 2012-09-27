@@ -736,10 +736,12 @@ void TAnalysisOfClustering::savePHHistos()
     		if(nClusters<4||det==TPlaneProperties::getDetDiamond())
     			fit = landauGauss.doLandauGaussFit(htemp,nClusters==1&&det==TPlaneProperties::getDetDiamond());
     		if(fit!=0){
-    			cout<<"Width(scale): "<<fit->GetParameter(0)<<endl;
-    			cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
-    			cout<<"Area:         "<<fit->GetParameter(2)<<endl;
-    			cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
+				if (verbosity > 2) {
+					cout<<"Width(scale): "<<fit->GetParameter(0)<<endl;
+					cout<<"MostProb:     "<<fit->GetParameter(1)<<endl;
+					cout<<"Area:         "<<fit->GetParameter(2)<<endl;
+					cout<<"Width(sigma): "<<fit->GetParameter(3)<<endl;
+				}
     			if(nClusters==0)
     				vecPHMeans.push_back(fit->GetParameter(1));
     			vecClusterSize.push_back(nClusters);
