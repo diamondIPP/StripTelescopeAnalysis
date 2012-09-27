@@ -73,6 +73,7 @@ private:
 	HistogrammSaver* histSaver;
     TSystem* sys;
     TSettings *settings;
+	UInt_t verbosity;
     UInt_t nEvent;
     int seedSigma;
     int hitSigma;

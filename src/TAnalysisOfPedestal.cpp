@@ -50,6 +50,8 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 		nPedestalHits.at(det).resize(TPlaneProperties::getNChannels(det),0);
 	}
 	this->diaRawADCvalues.resize(TPlaneProperties::getNChannelsDiamond(),std::vector<UInt_t>());
+	
+	verbosity = 0;
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
@@ -448,22 +450,22 @@ void TAnalysisOfPedestal::saveHistos(){
 	createPedestalMeanHistos();
 	savePHinSigmaHistos();
 	for (int det=0;det<9;det++){
-		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
 		histSaver->SaveHistogramPNG(hSaturatedChannels[det]);
 		hSaturatedChannels[det]->Delete();
 	}
 	for (int det=0;det<9;det++){
-		cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
 		histSaver->SaveHistogramPNG(hSeedMap[det]);
 		hSeedMap[det]->Delete();
 	}
 	for (int det=0;det<9;det++){
-		cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
 		histSaver->SaveHistogramPNG(hSeedMap2[det]);
 		hSeedMap2[det]->Delete();
 	}
 	for (int det=0;det<9;det++){
-		cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
 		histSaver->SaveHistogramPNG(hNumberOfSeeds[det]);
 		hNumberOfSeeds[det]->Delete();
 	}

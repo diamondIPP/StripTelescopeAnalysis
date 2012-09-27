@@ -70,9 +70,9 @@ HistogrammSaver::~HistogrammSaver() {
 }
 
 
-void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond)
+void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond, UInt_t verbosity)
 {
-	cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
+	if (verbosity>2) cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
 	c1->cd();
 	Float_t min1 = histo1->GetMinimum();
@@ -94,32 +94,32 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
 		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
 	if(refactorSecond!=1)histo2->Scale(refactorSecond);
-	cout<<"min: "<<min<<" max: "<<max;
-	cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<histo1->GetMaximum()<<"\thisto2:"<<histo2->GetMaximum()<<flush;
-	cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
+	if (verbosity>2) cout<<"min: "<<min<<" max: "<<max;
+	if (verbosity>2) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<histo1->GetMaximum()<<"\thisto2:"<<histo2->GetMaximum()<<flush;
+	if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
 	if(histo1->GetMaximum()>histo2->GetMaximum()){
-		cout<<"\tdraw1-"<<flush;
+		if (verbosity>2) cout<<"\tdraw1-"<<flush;
 		histo1->Draw("");
 		histo1->GetYaxis()->SetRangeUser(min,max);
-		cout<<"draw2 "<<flush;
+		if (verbosity>2) cout<<"draw2 "<<flush;
 		histo2->Draw("same");
 //		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
-		cout<<"\tdraw2-"<<flush;
+		if (verbosity>2) cout<<"\tdraw2-"<<flush;
 		histo2->Draw("");
 		histo2->GetYaxis()->SetRangeUser(min,max);
-		cout<<"draw1 "<<flush;
+		if (verbosity>2) cout<<"draw1 "<<flush;
 		histo1->Draw("same");
 //		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
 	TVirtualPad *pad =c1->GetPad(0);
-	cout<<"MIN: "<<min<<"-->";
+	if (verbosity>2) cout<<"MIN: "<<min<<"-->";
 	min=(double)(min/refactorSecond);
-	cout<<min<<"\t\tMAX: "<<max<<"--->";
+	if (verbosity>2) cout<<min<<"\t\tMAX: "<<max<<"--->";
 	max = (double)(max/refactorSecond);
-	cout<<max<<endl;
+	if (verbosity>2) cout<<max<<endl;
 	TGaxis *axis = new TGaxis(pad->GetUxmax(),pad->GetUymin(),pad->GetUxmax(), pad->GetUymax(),min,max,510,"+L");
 	axis->SetLineColor(histo2->GetLineColor());
 	axis->SetLabelColor(histo2->GetLineColor());
@@ -228,11 +228,11 @@ void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) 
 	else SaveHistogramPNG(histo);
 	SaveHistogramROOT(histo);
 }
-void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit){
+void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosity){
 	if(histo==0)return;
 	if(histo->GetEntries()==0)return;
 	if(fit==0) SaveHistogram(histo);
-	cout<<"Save Histogram With Fit:"<<histo->GetTitle()<<endl;
+	if (verbosity>0) cout<<"Save Histogram With Fit:"<<histo->GetTitle()<<endl;
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
 	histo->Draw();
@@ -319,7 +319,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 
 void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
 	if(histo->GetEntries()==0){
-		cout<<"Histogram has no entries..."<<endl;
+		cout<<"Histogram "<<histo->GetName()<<" has no entries..."<<endl;
 		 return;
 	}
   TH1* htemp=(TH1*)histo->Clone();

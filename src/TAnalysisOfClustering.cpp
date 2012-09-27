@@ -32,10 +32,10 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	histSaver->SetRunNumber(runNumber);
 	htmlClus->setFileGeneratingPath(sys->pwd());
 	settings->goToClusterTreeDir();
+	verbosity=0;
 	initialiseHistos();
 	cout<<"end initialise"<<endl;
 	settings=0;
-	verbosity=0;
 }
 
 TAnalysisOfClustering::~TAnalysisOfClustering() {
@@ -137,22 +137,22 @@ void TAnalysisOfClustering::initialiseHistos()
 	for(UInt_t det=0;det<9;det++){
 		stringstream histName;
 		histName<<"hClusterPositionRelativeToNextIntegerCWM_"<<TPlaneProperties::getStringForDetector(det);
-		cout<<histName.str()<<endl;
+		if (verbosity>2) cout<<histName.str()<<endl;
 		hRelativeClusterPositionCWM[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,1024,-.5,.5);
 		histName.str("");
 		histName.clear();
 		histName<<"hClusterPositionRelativeToNextIntegerCorEta_"<<TPlaneProperties::getStringForDetector(det);
-		cout<<histName.str()<<endl;
+		if (verbosity>2) cout<<histName.str()<<endl;
 		hRelativeClusterPositionCorEta[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,512,-.5,.5);
 		histName.str("");
 		histName.clear();
 		histName<<"hClusterPositionRelativeToNextIntegerEta_"<<TPlaneProperties::getStringForDetector(det);
-		cout<<histName.str()<<endl;
+		if (verbosity>2) cout<<histName.str()<<endl;
 		hRelativeClusterPositionEta[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,512,-.5,.5);
 		histName.str("");
 		histName.clear();
 		histName<<"hAbsoluteClusterPostion_"<<TPlaneProperties::getStringForDetector(det);;
-		cout<<histName.str()<<endl;
+		if (verbosity>2) cout<<histName.str()<<endl;
 		hClusterPosition[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),4096,0,TPlaneProperties::getNChannels(det)-1);
 		histName.str("");
 		histName.clear();
@@ -349,20 +349,20 @@ void TAnalysisOfClustering::initialiseHistos()
 
 
 void TAnalysisOfClustering::saveHistos(){
-	cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
+	if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
 	histSaver->SaveHistogram(histo_CWM_biggestHit);
 	histo_CWM_biggestHit->Delete();
-	cout<<"plot histo "<<histo_H2C_biggestHit->GetName();
+	if (verbosity>2) cout<<"plot histo "<<histo_H2C_biggestHit->GetName();
 	histSaver->SaveHistogram(histo_H2C_biggestHit);
 	histo_H2C_biggestHit->Delete();
     for(int det=0;det<9;det++){//analyse 2nd biggest Hit
-    	cout<<"plot histo "<<det<<"  h2ndBiggestHitSignal_"<<TPlaneProperties::getStringForDetector(det);
+    	if (verbosity>2) cout<<"plot histo "<<det<<"  h2ndBiggestHitSignal_"<<TPlaneProperties::getStringForDetector(det);
     	histSaver->SaveHistogram(h2ndBiggestHitSignal[det]);
     	delete h2ndBiggestHitSignal[det];
-    	cout<<"plot histo "<<det<<"  h2ndBiggestHitOverCharge_"<<TPlaneProperties::getStringForDetector(det);
+    	if (verbosity>2) cout<<"plot histo "<<det<<"  h2ndBiggestHitOverCharge_"<<TPlaneProperties::getStringForDetector(det);
     	histSaver->SaveHistogram(h2ndBiggestHitOverCharge[det]);
     	delete h2ndBiggestHitOverCharge[det];
-    	cout<<"plot histo "<<h2ndBiggestHitPosition[det]->GetName()<<endl;
+    	if (verbosity>2) cout<<"plot histo "<<h2ndBiggestHitPosition[det]->GetName()<<endl;
     	histSaver->SaveHistogram(h2ndBiggestHitPosition[det]);
     	histSaver->SaveHistogram(h2ndBiggestHitPosition[det]);
     	histSaver->SaveHistogram(hLeftHitOverLeftAndRight[det]);
@@ -371,22 +371,22 @@ void TAnalysisOfClustering::saveHistos(){
     }
 
 	for (int det=0;det<9;det++){
-		cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
 		histSaver->SaveHistogram(hSaturatedChannels[det]);
 		hSaturatedChannels[det]->Delete();
 	}
 	for (int det=0;det<9;det++){
-		cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
 		histSaver->SaveHistogram(hSeedMap[det]);
 		hSeedMap[det]->Delete();
 	}
 	for (int det=0;det<9;det++){
-			cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
+			if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
 			histSaver->SaveHistogram(hSeedMap2[det]);
 			hSeedMap2[det]->Delete();
 		}
 	for (int det=0;det<9;det++){
-		cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"plot histo"<<det<<" "<<hNumberOfSeeds[det]->GetName()<<endl;
 		histSaver->SaveHistogram(hNumberOfSeeds[det]);
 		hNumberOfSeeds[det]->Delete();
 	}
@@ -404,7 +404,7 @@ void TAnalysisOfClustering::saveHistos(){
 	}
 	for(int det=0;det<9;det++){
 		histSaver->SaveHistogram(this->hClusterSize[det]);
-		cout<<"save: "<<hClusterSeedSize[det]->GetName()<<endl;
+		if (verbosity>2) cout<<"save: "<<hClusterSeedSize[det]->GetName()<<endl;
 		histSaver->SaveHistogram(this->hClusterSeedSize[det]);
 		histSaver->SaveHistogram(this->hNumberOfClusters[det]);
 		vecClusterSizes.push_back(hClusterSize[det]->GetMean());
@@ -415,7 +415,7 @@ void TAnalysisOfClustering::saveHistos(){
 		delete hNumberOfClusters[det];
 	}
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
-		cout<<"Print : "<<hClusterPosition[det]->GetTitle()<< " "<<hClusterPosition[det]->GetEntries()<<endl;
+		if (verbosity>2) cout<<"Print : "<<hClusterPosition[det]->GetTitle()<< " "<<hClusterPosition[det]->GetEntries()<<endl;
 		histSaver->SaveHistogram(this->hClusterPosition[det]);
 		histSaver->SaveHistogram(this->hRelativeClusterPositionCWM[det]);
 		histSaver->SaveHistogram((TH1F*)this->hRelativeClusterPositionCWM[det]->ProjectionY());
@@ -616,9 +616,9 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 			}
 			Float_t signalLeft = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()-1);
 			Float_t signalRight = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()+1);
-			if(signalLeft<0)
+			if(signalLeft<0 && verbosity>2)
 				cout<<"signalLeft is smaller than 0"<<endl;
-			if(signalRight<0)
+			if(signalRight<0 && verbosity>2)
 				cout<<"signalLeft is smaller than 0"<<endl;
 			Float_t signalHighest = cluster.getHighestSignal();
 			Float_t signal2ndHighest;
@@ -676,8 +676,8 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 				hDeltaLeftRightHitOverLeftAndRight[det]->Fill(ratio);
 			else {
 				if(TMath::Abs(ratio)>1){
-					cout<<"hDeltaLeftRightHitOverLeftAndRight "<<det<<" "<<cl<<" "<<deltaSignals<<" "<<sumSignals<<endl;
-					cluster.Print();
+//					cout<<"hDeltaLeftRightHitOverLeftAndRight "<<det<<" "<<cl<<" "<<deltaSignals<<" "<<sumSignals<<endl;
+//					cluster.Print();
 				}
 			}
 			ratio = signalLeft/sumSignals;
