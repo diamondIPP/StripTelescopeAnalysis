@@ -63,6 +63,11 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
+		for (UInt_t det=0;det<TPlaneProperties::getNDetectors(); det++)
+			for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
+				cout<<nEvent<<" "<<det<<" "<<cl<<"\t"<<flush;
+				eventReader->getCluster(det,cl).Print();
+			}
 //		cout<<nEvent;
 //		for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
 //			for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)

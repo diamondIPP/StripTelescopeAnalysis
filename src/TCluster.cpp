@@ -14,6 +14,10 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	clusterADC.clear();
 	clusterSignalInSigma.clear();
 	clusterChannelScreened.clear();
+	clusterPedMean.clear();
+	clusterPedSigma.clear();
+	clusterPedMeanCMN.clear();
+	clusterPedSigmaCMN.clear();
 	numberOfSeeds=0;
 	numberOfHits=0;
 	numberOfNoHits=0;
@@ -33,6 +37,8 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 	this->eventNumber=nEvent;
 	mode=highest2Centroid;
 	this->nChannels=nChannels;
+	this->cmNoise = cmNoise;
+	if (verbosity>2) cout<<"new TCluster of event "<<nEvent<<" of detector "<<(int)det<<" Common mode Noise "<<cmNoise<<endl;
 }
 
 TCluster::~TCluster() {
@@ -48,21 +54,20 @@ TCluster::TCluster(const TCluster& rhs){
 	clusterADC.clear();
 	clusterSignalInSigma.clear();
 	clusterChannelScreened.clear();
-	numberOfSeeds=0;
-	numberOfHits=0;
-	numberOfNoHits=0;
-	maximumSignal=0;
-	maxChannel=0;
-	charge=0;
+	clusterPedMean.clear();
+	clusterPedSigma.clear();
+	clusterPedMeanCMN.clear();
+	clusterPedSigmaCMN.clear();
+	cmNoise=rhs.cmNoise;
 	for(UInt_t i=0;i<rhs.checkClusterForSize();i++){
-		UInt_t ch =rhs.clusterChannel.at(i);
-		Float_t signal = rhs.clusterSignal.at(i);
-		Float_t signalInSigma = rhs.clusterSignalInSigma.at(i);
-		UShort_t signalAdc = rhs.clusterADC.at(i);
-		clusterSignal.push_back(signal);
-		clusterChannel.push_back(ch);
-		clusterADC.push_back(signalAdc);
-		clusterSignalInSigma.push_back(signalInSigma);
+		clusterSignal.push_back(rhs.clusterSignal.at(i));
+		clusterChannel.push_back(rhs.clusterChannel.at(i));
+		clusterADC.push_back( rhs.clusterADC.at(i));
+		clusterSignalInSigma.push_back( rhs.clusterSignalInSigma.at(i));
+		clusterPedMean.push_back(rhs.clusterPedMean.at(i));
+		clusterPedSigma.push_back(rhs.clusterPedSigma.at(i));
+		clusterPedMeanCMN.push_back(rhs.clusterPedMeanCMN.at(i));
+		clusterPedSigmaCMN.push_back(rhs.clusterPedSigmaCMN.at(i));
 	}
 	for(UInt_t i=0;i<rhs.clusterChannelScreened.size();i++)
 		clusterChannelScreened.push_back(rhs.clusterChannelScreened.at(i));
@@ -114,6 +119,7 @@ TCluster & TCluster::operator =(const TCluster & src)
 	nChannels=src.nChannels;
 	det=src.det;
 	eventNumber=src.eventNumber;
+	cmNoise= src.cmNoise;
 	for(UInt_t i=0;i<src.clusterChannel.size();i++)
 		clusterChannel.push_back(src.clusterChannel.at(i));
 	for(UInt_t i=0;i<src.clusterSignal.size();i++)
@@ -122,25 +128,38 @@ TCluster & TCluster::operator =(const TCluster & src)
 		clusterADC.push_back(src.clusterADC.at(i));
 	for(UInt_t i=0;i<src.clusterSignalInSigma.size();i++)
 		clusterSignalInSigma.push_back(src.clusterSignalInSigma.at(i));
+	for(UInt_t i=0;i<src.clusterPedMean.size();i++)
+		clusterPedMean.push_back(src.clusterPedMean.at(i));
+	for(UInt_t i=0; i<src.clusterPedSigma.size();i++)
+		clusterPedSigma.push_back(src.clusterPedSigma.at(i));
+	for(UInt_t i=0;i<src.clusterPedMeanCMN.size();i++)
+		clusterPedMeanCMN.push_back(src.clusterPedMeanCMN.at(i));
+	for(UInt_t i=0; i<src.clusterPedSigmaCMN.size();i++)
+		clusterPedSigmaCMN.push_back(src.clusterPedSigmaCMN.at(i));
 	for(UInt_t i=0;i<src.clusterChannelScreened.size();i++)
 		clusterChannelScreened.push_back(src.clusterChannelScreened.at(i));
 	return *this;
 }
 
 /**
- *
- * @return
+ * checks if all deques with the data of the clsuter do have the same size
+ * @return the size of the cluster if all sizes are the same, else 0
  */
 UInt_t TCluster::checkClusterForSize() const{
-	UInt_t nSignal=(clusterSignal.size());
 	UInt_t nChannel=clusterChannel.size();
 	UInt_t nAdc = clusterADC.size();
-	UInt_t nSignalInSigma=clusterSignalInSigma.size();
-	bool retVal = nSignal==nChannel;
-	retVal = retVal && nChannel==nAdc;
-	retVal = retVal && nAdc==nSignalInSigma;
+	UInt_t nPedMean = clusterPedMean.size();
+	UInt_t nPedMeanCMN = clusterPedMeanCMN.size();
+	UInt_t nPedSigma = clusterPedSigma.size();
+	UInt_t nPedSigmaCMN = clusterPedSigmaCMN.size();
+
+	bool retVal = (nChannel==nAdc);
+	retVal = retVal && nAdc==nPedMean;
+	retVal = retVal && nPedMean==nPedMeanCMN;
+	retVal = retVal && nPedMeanCMN==nPedSigma;
+	retVal = retVal && nPedSigma==nPedSigmaCMN;
 	if(retVal==true)
-		return nSignal;
+		return nAdc;
 	else
 		return 0;
 }
@@ -160,6 +179,8 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
 //void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
 	Float_t signal = adcValue - pedMean;
 	Float_t signalInSigma= signal/pedSigma;
+	Float_t signalCMN = adcValue - pedMeanCMN - this->cmNoise;
+	Float_t signalInSigmaCMN= signal/pedSigma;
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
 	this->isSaturated=this->isSaturated||bSaturated;
 	if(signalInSigma>seedSigma)
@@ -179,16 +200,29 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
 		clusterChannel.push_front(ch);
 		clusterSignal.push_front(signal);
 		clusterSignalInSigma.push_front(signalInSigma);
+		clusterSignalCMN.push_back(signalCMN);
+		clusterSignalInSigmaCMN.push_back(signalInSigmaCMN);
 		clusterADC.push_front(adcValue);
 		this->clusterChannelScreened.push_front(isScreened);
+		clusterPedMean.push_front(pedMean);
+		clusterPedMeanCMN.push_front(pedMeanCMN);
+		clusterPedSigma.push_front(pedSigma);
+		clusterPedSigmaCMN.push_front(pedSigmaCMN);
 	}
 	else{
 		clusterChannel.push_back(ch);
 		clusterSignal.push_back(signal);
 		clusterSignalInSigma.push_back(signalInSigma);
+		clusterSignalCMN.push_back(signalCMN);
+		clusterSignalInSigmaCMN.push_back(signalInSigmaCMN);
 		clusterADC.push_back(adcValue);
+		clusterPedMean.push_back(pedMean);
+		clusterPedMeanCMN.push_back(pedMeanCMN);
+		clusterPedSigma.push_back(pedSigma);
+		clusterPedSigmaCMN.push_back(pedSigmaCMN);
 		this->clusterChannelScreened.push_back(isScreened);
 	}
+	if(verbosity>2)cout<<flush;
 
 }
 Float_t TCluster::getPosition(calculationMode_t mode,TH1F *histo){
@@ -238,7 +272,7 @@ bool TCluster::isGoldenGateCluster(){
 
 bool TCluster::hasSaturatedChannels(){
   for(UInt_t cl=0;cl<this->clusterADC.size();cl++){
-    if (clusterADC.at(cl)>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
+    if (getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
   }
   return false;
 	return isSaturated;//todo
@@ -303,8 +337,8 @@ Float_t TCluster::getChargeWeightedMean(bool useNonHits){
 	for(UInt_t cl=0;cl<this->checkClusterForSize();cl++){
 		if(useNonHits||isHit(cl)||checkClusterForSize()<4){//todo anpassen
 			//todo . take at least second biggest hit for =charge weighted mean
-			sum+=clusterChannel.at(cl)*clusterSignal.at(cl);//kanalnummer*signalNummer
-			charged+=clusterSignal.at(cl);//signal
+			sum+=getChannel(cl)*getSignal(cl);//kanalnummer*signalNummer
+			charged+=getSignal(cl);;//signal
 		}
 	}
 	if (charged>0)
@@ -325,16 +359,18 @@ void TCluster::checkCluster(){
 }
 
 void TCluster::checkForGoldenGate(){
+	if(verbosity>10)cout<< "check for golden gate cluster!: "<<endl;
 	this->isGoldenGate=false;
 	if(this->checkClusterForSize()<=2)
 		return;
+	if(verbosity>10)cout<<"clSize:"<<checkClusterForSize()<<" "<<clusterChannel.size()<<flush;
 	int previousSeed=-1;
 	for(UInt_t i=0;i<this->checkClusterForSize()&&!isGoldenGate;i++){
-		if(clusterSignalInSigma.at(i)>seedSigma){
-			if( previousSeed!=-1 && previousSeed+1!=(int)clusterChannel.at(i) )
+		if(getSNR(i)>seedSigma){
+			if( previousSeed!=-1 && previousSeed+1!=(int)getChannel(i) )
 				isGoldenGate=true;
 
-			previousSeed=clusterChannel.at(i);
+			previousSeed=(int)getChannel(i);
 		}
 	}
 
@@ -364,8 +400,9 @@ bool TCluster::isScreened()
 {
 	bool isOneChannelScreened=false;
 	for(UInt_t cl;cl<clusterChannelScreened.size();cl++)
-		isOneChannelScreened+=clusterChannelScreened.at(cl);
+		isOneChannelScreened+=isScreened(cl);
 	isOneChannelScreened+=((this->getSmallestChannelNumber()==0)||this->getHighestChannelNumber()==nChannels-1);
+	return isOneChannelScreened;
 }
 
 bool TCluster::isScreened(UInt_t cl)
@@ -423,22 +460,36 @@ Float_t TCluster::getHighest2Centroid()
  * todo: ueberpruefen
  */
 void TCluster::checkForLumpyCluster(){
+	if(verbosity>10)cout<<"check is lumpy:"<<endl;
 	this->isLumpy=false;
+	UInt_t clSize = checkClusterForSize();
 	if(this->checkClusterForSize()<=2)
 		return;//for lumpy cluster at least 3 hits are needed
 	bool isfalling;
 	Float_t lastSeed;
-	for(UInt_t i=0;i<this->checkClusterForSize()&&!isLumpy;i++){
+	if(verbosity>10)cout<<" Do Loop: "<<endl;
+	for(UInt_t i=0;i<clSize&&!isLumpy;i++){
+		float signal = getSignal(i);
+		float snr = getSNR(i);
+		if(verbosity>10)cout<<" "<<i<<flush;
 			if(getSNR(i)>seedSigma){
+				if(verbosity>10)cout<<" - found seed with SNR "<<getSNR(i)<<flush;
 				if(lastSeed<getSignal(i)&&!isfalling){
 					lastSeed=getSignal(i);
+					if(verbosity>10)cout<<", found new las seed with signal "<< getSignal(i)<<flush;
 				}
-				if(lastSeed<getSignal(i)&&isfalling)
+				if(lastSeed<getSignal(i)&&isfalling){
 					isLumpy=true;
-				else
+					if(verbosity>10)cout<<", is LUMPY"<<flush;
+				}
+				else{
 					isfalling=true;
+					if(verbosity>10)cout<<", is falling"<<flush;
+				}
 			}
+			if(verbosity>10)cout<<endl;
 	}
+	if(verbosity>10)cout<<"isLumpyCluster: "<<isLumpy<<endl;
 }
 
 bool TCluster::isSeed(UInt_t cl){
@@ -497,20 +548,6 @@ Float_t TCluster::getHighestSignal(){
 }
 
 
-Float_t TCluster::getSignal(UInt_t clusterPos)
-{
-	if(clusterPos<checkClusterForSize()){
-		 Float_t signal = this->clusterSignal.at(clusterPos);
-//		 if(signal<0)
-//			 return 0;
-//		 else
-			 return signal;
-	}
-	else {
-		if(verbosity)cout<<"clusterPos "<<clusterPos<<" bigger than clusterSize"<<checkClusterForSize()<<endl;
-		return 0;
-	}
-}
 
 UInt_t TCluster::getClusterPosition(UInt_t channelNo){
 	if(channelNo<this->getSmallestChannelNumber()&&channelNo>this->getHighestSignalChannel()){
@@ -537,32 +574,70 @@ Float_t TCluster::getSignalOfChannel(UInt_t channel)
 }
 
 
-Float_t TCluster::getSNR(UInt_t clusterPos)
+Float_t TCluster::getSignal(UInt_t clusterPos, bool cmnCorrected)
+{
+	if(clusterPos<checkClusterForSize()){
+		 Int_t adc = getAdcValue(clusterPos);
+		 Float_t pedMean = getPedestalMean(clusterPos,cmnCorrected);
+		 Float_t signal = (Float_t)adc - pedMean;
+		 if (cmnCorrected) signal -= getCMN();
+//		 if(!cmnCorrected && signal != getSignal(clusterPos))
+//			 cout<< "signal clalulated: "<<signal<<" other:"<<getSignal(clusterPos)<<endl;
+		 return signal;
+	}
+	else {
+		if(verbosity)cout<<"clusterPos "<<clusterPos<<" bigger than clusterSize"<<checkClusterForSize()<<endl;
+		return 0;
+	}
+}
+
+
+/**
+ * @todo
+ * TODO
+ */
+Float_t TCluster::getSNR(UInt_t clusterPos, bool cmnCorrected)
 {
 
-	if(clusterPos<checkClusterForSize())
-		return this->clusterSignalInSigma.at(clusterPos);
+	if(clusterPos<checkClusterForSize()){
+		Float_t signal= getSignal(clusterPos,cmnCorrected);
+		Float_t sigma = getPedestalSigma(clusterPos,cmnCorrected);
+		return signal/sigma;
+	}
 	else return -1;
 
 }
-Float_t TCluster::getPedestalMean(UInt_t clusterPos)
+/**
+ * @todo
+ * TODO
+ */
+Float_t TCluster::getPedestalMean(UInt_t clusterPos, bool cmnCorrected)
 {
 
 	if(clusterPos<checkClusterForSize())
-		return getAdcValue(clusterPos)-getSignal(clusterPos);
+		if( cmnCorrected)
+			return this->clusterPedMeanCMN.at(clusterPos);
+		else
+			return this->clusterPedMean.at(clusterPos);
+	else return -1;
+
+}
+/**
+ * @todo
+ * TODO
+ */
+Float_t TCluster::getPedestalSigma(UInt_t clusterPos,bool cmnCorrected)
+{
+	if(clusterPos<checkClusterForSize())
+		if( cmnCorrected)
+			return this->clusterPedSigmaCMN.at(clusterPos);
+		else
+			return this->clusterPedSigma.at(clusterPos);
 	else return -1;
 
 }
 
-Float_t TCluster::getPedestalSigma(UInt_t clusterPos)
-{
-	if(clusterPos<checkClusterForSize())
-		return getSignal(clusterPos)/getSNR(clusterPos);
-	else return -1;
-
-}
-
-UShort_t TCluster::getAdcValue(UInt_t clusterPos)
+Int_t TCluster::getAdcValue(UInt_t clusterPos)
 {
 	if(clusterPos<checkClusterForSize())
 		return this->clusterADC.at(clusterPos);
@@ -703,6 +778,8 @@ Float_t TCluster::getValueOfHisto(Float_t x, TH1F* histo){
 }
 
 void TCluster::Print(UInt_t level){
+	cout<<"sizes:"<<clusterADC.size()<<" "<<clusterPedMean.size()<<" "<<clusterPedSigma.size()<<clusterPedMeanCMN.size()<<" "<<clusterPedSigmaCMN.size()<<endl;
+
 	cout<<Intent(level)<<"Cluster of Event "<<flush;
 	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries"<<flush;
 	for(UInt_t cl=0;cl<checkClusterForSize();cl++){

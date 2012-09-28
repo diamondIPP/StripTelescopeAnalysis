@@ -75,14 +75,17 @@ public:
     UInt_t getSmallestChannelNumber();
     UInt_t getHighestChannelNumber();
     Float_t getHighestSignal();
-    Float_t getSignal(UInt_t clusterPos);
-    Float_t getSNR(UInt_t clusterPos);
-    UShort_t getAdcValue(UInt_t clusterPos);
+    Float_t getSignal(UInt_t clusterPos, bool cmnCorrected=false);
+    Float_t getSNR(UInt_t clusterPos, bool cmnCorrected=false);
+    Float_t getCMN(){return cmNoise;}
+    Float_t getPedestalMean(UInt_t clusterPos, bool cmnCorrected=false);
+    Float_t getPedestalSigma(UInt_t clusterPos, bool cmnCorrected=false);
+    Int_t getAdcValue(UInt_t clusterPos);
     UInt_t getHighestHitClusterPosition();
     UInt_t getClusterPosition(UInt_t channelNo);
     UInt_t getChannel(UInt_t clusterPos);
-    Float_t getPedestalSigma(UInt_t clusterPos);
-    Float_t getPedestalMean(UInt_t clusterPos);
+//    Float_t getPedestalSigma(UInt_t clusterPos);
+//    Float_t getPedestalMean(UInt_t clusterPos);
     int getHitSigma() const;
     int getSeedSigma() const;
     void setHitSigma(int hitSigma);
@@ -104,9 +107,16 @@ private:
     void checkForLumpyCluster();
     UInt_t checkClusterForSize() const;
     deque <UInt_t> clusterChannel;
+    deque <Float_t> clusterPedMean;
+    deque <Float_t> clusterPedMeanCMN;
+    deque <Float_t> clusterPedSigma;
+    deque <Float_t> clusterPedSigmaCMN;
+    deque<Int_t> clusterADC;
+
     deque <Float_t> clusterSignal;
-    deque<UShort_t> clusterADC;
+    deque <Float_t> clusterSignalCMN;
     deque<Float_t> clusterSignalInSigma;
+    deque<Float_t> clusterSignalInSigmaCMN;
     deque<bool> clusterChannelScreened;
     UInt_t numberOfSeeds;
     UInt_t numberOfHits;
@@ -127,6 +137,7 @@ private:
     UInt_t nChannels;
     UChar_t det;
     UInt_t eventNumber;
+    Float_t cmNoise;
     ClassDef(TCluster,TCLUSTER_REV);
 };
 #endif /* TCLUSTER_HH_ */
