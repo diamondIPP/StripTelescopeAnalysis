@@ -685,7 +685,7 @@ Float_t TCluster::getEtaPostion(){
 }
 
 Float_t TCluster::getPositionCorEta(TH1F* histo){
-	if (checkClusterForSize() < 3) return -1;
+	if (checkClusterForSize() < 3 && size() < 2) return -1;
 	if(histo==0) return -1;
 	UInt_t clPosHighest = getHighestHitClusterPosition();
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
