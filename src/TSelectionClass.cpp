@@ -643,16 +643,19 @@ void TSelectionClass::createFiducialCut(){
   if(nEvents>eventReader->GetEntries())nEvents=eventReader->GetEntries();
   cout<<" "<<nEvents<<endl;
   for(nEvent=0;nEvent<nEvents;nEvent++){
-      TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
-      eventReader->LoadEvent(nEvent);
-      if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
-      resetVariables();
-      if(verbosity>10)cout<<"."<<flush;
-      setVariables();
+	  TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
+	  eventReader->LoadEvent(nEvent);
+	  if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
+	  resetVariables();
+	  if(verbosity>10)cout<<"."<<flush;
+	  setVariables();
   }
-//  findFiducialCut(hFiducialCutSiliconDiamondHit);
-  delete fiducialCuts;
-  fiducialCuts = new TFidCutRegions(hFiducialCutSiliconDiamondHit,settings->getNDiamonds(),settings->getAutoFidCutPercentage());
+  //  findFiducialCut(hFiducialCutSiliconDiamondHit);
+
+  if(settings->getUseAutoFidCut()==true){
+	  delete fiducialCuts;
+	  fiducialCuts = new TFidCutRegions(hFiducialCutSiliconDiamondHit,settings->getNDiamonds(),settings->getAutoFidCutPercentage());
+  }
   fiducialCuts->setRunDescription(settings->getRunDescription());
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));
