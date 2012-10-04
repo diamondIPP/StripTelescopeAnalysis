@@ -83,7 +83,7 @@ public:
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
-	enum enumAlignmentTrainingMethod{enumFraction, enumEvents};
+	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
 	std::string getRunDescription() const {return runDescription;};
 	Float_t getPHinSigmaPlotFactor() const{return 0.8;}
 	Float_t getClusterSeedFactor(UInt_t det);
@@ -235,6 +235,12 @@ public:
     void Print();
     UInt_t getDetChannelNo(UInt_t vaCh);
     UInt_t getVaChannelNo(UInt_t detChNo);
+    Int_t getVerbosity(){return this->verbosity;}
+    bool useForAlignment(UInt_t eventNumber, UInt_t nEvents=0);
+	UInt_t getAlignmentTrainingTrackNumber() const {return alignment_training_track_number;}
+	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber) {alignment_training_track_number = alignmentTrainingTrackNumber;}
+
+	;
 protected:
     float store_threshold;
 private:
@@ -339,6 +345,6 @@ private:
 private:
     int verbosity;
 
-    ClassDef(TSettings,2);;
+ClassDef(TSettings,3);
 };
 #endif

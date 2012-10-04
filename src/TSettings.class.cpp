@@ -312,6 +312,22 @@ void TSettings::LoadSettings(){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			dia_input = (int)strtod(value.c_str(),0);
 		}
+		if(key=="alignment_training_track_fraction") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			alignment_training_track_fraction = (float)strtod(value.c_str(),0);
+		}
+		if(key == "alignment_training_track_number"){
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			alignment_training_track_number = (int)strtod(value.c_str(),0);
+		}
+		if(key =="alignment_training_method"){
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			int method = (int)strtod(value.c_str(),0);
+			if(method >=0&&method<=2 )
+				setTrainingMethod((enumAlignmentTrainingMethod)method);
+			else
+				cerr<<"Not a valid Input for alignment Training Method : "<<method<<endl;
+		}
 		if(key=="Si_Pedestal_Hit_Factor") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			Si_Pedestal_Hit_Factor = (float)strtod(value.c_str(),0);
@@ -371,10 +387,6 @@ void TSettings::LoadSettings(){
 		if(key=="alignment_z_offsets") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			ParseFloatArray(value,alignment_z_offsets);
-		}
-		if(key=="alignment_training_track_fraction") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			alignment_training_track_fraction = (float)strtod(value.c_str(),0);
 		}
 		if(key=="D0X_channel_screen_channels") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
@@ -628,7 +640,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	alignment_chi2=1.0;
 	alignment_training_track_fraction=0.25;
 	alignment_training_track_number=10000;
-	trainingMethod=enumFraction;
+	trainingMethod=enumEvents;
 
 	//default clustering settings
 	snr_plots_enable = 0;
@@ -1546,4 +1558,16 @@ Float_t TSettings::getRes_keep_factor(){
 
 void Print(){
 
+}
+
+
+
+bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
+	if(getTrainingMethod()==enumEvents)
+		return eventNumber<=getAlignmentTrainingTrackNumber();
+	else{
+		Float_t fraction = (Float_t)eventNumber/(Float_t)nEvents;
+		return fraction<=getAlignment_training_track_fraction();
+	}
+	return false;
 }
