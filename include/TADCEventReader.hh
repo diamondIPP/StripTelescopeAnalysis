@@ -27,7 +27,7 @@
 #include "TSettings.class.hh"
 class TADCEventReader {
 public:
-	TADCEventReader(std::string fileName,UInt_t runNumber);
+	TADCEventReader(std::string fileName,UInt_t runNumber,int verb=0);
 	virtual ~TADCEventReader();
 	bool GetNextEvent();
 	virtual bool LoadEvent(UInt_t EventNumber);

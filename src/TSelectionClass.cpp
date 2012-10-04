@@ -136,7 +136,11 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	nValidDiamondTrack=0;
 	nSiliconTrackNotFiducialCut=0;
 	nToBigDiamondCluster=0;
-	cout<<"start selection with "<<nEvents<<" Events, training fraction: "<<settings->getAlignment_training_track_fraction()*100.<<"%"<<endl;
+	cout<<"start selection in  "<<nEvents<<" Events."<<endl;
+	if(settings->getTrainingMethod()==TSettings::enumFraction)
+		cout<<"Use Fraction Training, with  fraction: "<<settings->getAlignment_training_track_fraction()*100.<<"%"<<endl;
+	else
+		cout<<"Use the first "<<settings->getAlignmentTrainingTrackNumber()<<" Events for Alignment!"
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
 		eventReader->LoadEvent(nEvent);
@@ -316,7 +320,7 @@ void TSelectionClass::setVariables(){
 
 	checkSiliconTrack();
 	checkDiamondTrack();
-	useForSiliconAlignment= isValidSiliconTrack;
+	useForSiliconAlignment= isValidSiliconTrack&&settings->useForAlignment(nEvent,nEvents);
 	useForAlignment=useForSiliconAlignment&&oneAndOnlyOneDiamondCluster;
 
 	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
@@ -656,6 +660,8 @@ void TSelectionClass::createFiducialCut(){
 	  delete fiducialCuts;
 	  fiducialCuts = new TFidCutRegions(hFiducialCutSiliconDiamondHit,settings->getNDiamonds(),settings->getAutoFidCutPercentage());
   }
+  else
+	  fiducialCuts->setHistogramm(hFiducialCutSiliconDiamondHit);
   fiducialCuts->setRunDescription(settings->getRunDescription());
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));

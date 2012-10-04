@@ -244,7 +244,7 @@ std::vector< std::pair< Float_t,Float_t> > TFidCutRegions::findFiducialCutInterv
 
 TCanvas *TFidCutRegions::getFiducialCutCanvas(TPlaneProperties::enumCoordinate cor){
   if(hEventScatterPlot==0) {
-    cout<<"hEventScatterPlot is Zero!!!!!"<<endl;
+    cout<<"hEventScatterPlot is Zero!!!!! Press any Key to Continue."<<endl;
     char t; cin>>t;
     return 0;
   }

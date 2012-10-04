@@ -222,7 +222,6 @@ int main(int argc, char ** argv) {
 		sys->cd(currentDir.c_str());
 		TClustering* clustering;
 		clustering=new TClustering(settings);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
-		std::cout<<"cluster"<<endl;
 		clustering->ClusterEvents(RunParameters[i].getEvents());
 		delete clustering;
 

@@ -27,10 +27,10 @@ public:
 	void setyPos(Float_t pos);
 	void setySigma(Float_t sigma);
 	void setyChi2(Float_t chi2);
-	Float_t getPositionX(){return xPos;};
+	Float_t getPositionX(){if(xPos>-1000&&xPos<1000)return xPos;else return -999;};
 	Float_t getSigmaX(){return xSigma;};
 	Float_t getChi2X(){return xChi2;};
-	Float_t getPositionY(){return yPos;};
+	Float_t getPositionY(){if(yPos>-1000&&yPos<1000)return yPos;else return -999;};
 	Float_t getSigmaY(){return ySigma;};
 	Float_t getChi2Y(){return yChi2;};
 	Float_t getPhiX(){return xPhi;};

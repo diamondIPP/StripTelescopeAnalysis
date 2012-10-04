@@ -22,7 +22,8 @@ bool TSettings::existsDirectory(std::string dir){
 TSettings::TSettings(TRunInfo *runInfo)
 {
   cout<<"TSettings TRunInfo"<<endl;
-  verbosity=runInfo->getVerbosity();
+//  verbosity=runInfo->getVerbosity();
+  setVerbosity(runInfo->getVerbosity());
   diamondMapping=0;
   DefaultLoadDefaultSettings();
   this->runNumber=runInfo->getRunNumber();
@@ -43,7 +44,7 @@ TSettings::TSettings(TRunInfo *runInfo)
     exit(-1);
   }
 
-  if(verbosity)
+  if(getVerbosity())
     cout<<"TSettings:Create TSettings-member with file:\""<<fileNameStr.str()<<"\""<<endl;
   outputDir=runInfo->outputDir;//TODO:getOutputDir();
   cout<<runInfo->getInputDir()<<endl;
@@ -52,7 +53,7 @@ TSettings::TSettings(TRunInfo *runInfo)
 }
 
 TSettings::TSettings(UInt_t runNumber){
-	verbosity=1;
+	setVerbosity(0);//standard is 0
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
@@ -65,7 +66,7 @@ TSettings::TSettings(UInt_t runNumber){
 }
 
 TSettings::TSettings(string fileName,UInt_t runNumber){
-	verbosity=1;
+	setVerbosity(0);//standard is 0
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
@@ -142,12 +143,12 @@ std::string TSettings::getSelectionTreeFilePath()
 }
 
 void TSettings::goToDir(std::string dir){
-  if(this->verbosity>3)cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
-  if(this->verbosity>3)cout<<"goTo Dir: "<<dir<<endl;
+  if(this->getVerbosity()>3)cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
+  if(this->getVerbosity()>3)cout<<"goTo Dir: "<<dir<<endl;
   if(!existsDirectory(dir))
     sys->mkdir( dir.c_str(),true);
   sys->cd(dir.c_str());
-  if(this->verbosity>3)cout<<"new Dir: "<<sys->pwd()<<endl;
+  if(this->getVerbosity()>3)cout<<"new Dir: "<<sys->pwd()<<endl;
 }
 void TSettings::goToRawTreeDir(){
     goToDir(this->getAbsoluteOuputPath(false));
@@ -174,7 +175,7 @@ void TSettings::setRunDescription(std::string runDescription)
 }
 
 std::string TSettings::getAbsoluteOuputPath(bool withRunDescribtion){
-  if(this->verbosity>3)cout<<"Absolute PATH:"<<withRunDescribtion<<" "<<(int)(runDescription.at(0)!='0')<<endl;
+  if(this->getVerbosity()>3)cout<<"Absolute PATH:"<<withRunDescribtion<<" "<<(int)(runDescription.at(0)!='0')<<endl;
   stringstream output;
   output<<this->getOutputDir();
   output<<"/"<<runNumber<<"/";
@@ -182,18 +183,18 @@ std::string TSettings::getAbsoluteOuputPath(bool withRunDescribtion){
     output<<runDescription<<"/";
     sys->MakeDirectory(output.str().c_str());
   }
-  if(this->verbosity>3)cout<<"OUTPUT: "<<output.str()<<endl;
+  if(this->getVerbosity()>3)cout<<"OUTPUT: "<<output.str()<<endl;
   return output.str();
 }
 void TSettings::SetFileName(string newFileName){
-	if(verbosity)
+	if(getVerbosity())
 		cout<<"TSettings::SetFileName:\""<<newFileName<<"\""<<endl;
 	fileName=newFileName;
 	LoadSettings();
 }
 
 void TSettings::LoadSettings(){
-	if (verbosity)
+	if (getVerbosity())
 		cout << endl << "TSettings::Overriding default settings with settings from \"" <<this->fileName<<"\""<< endl << endl;
 
 	ifstream file(fileName.c_str());
@@ -618,7 +619,7 @@ void TSettings::LoadSettings(){
 }
 
 void TSettings::DefaultLoadDefaultSettings(){
-	if(verbosity)
+	if(getVerbosity())
 		cout<<"TSettings::LoadDefaultSettings"<<endl;
 	//default general settings
 	runDescription="";
@@ -1454,6 +1455,7 @@ vector<int> TSettings::getDet_channel_screen_regions(int i) const
 void TSettings::setAlignment_training_track_fraction(Float_t alignment_training_track_fraction)
 {
 	this->alignment_training_track_fraction = alignment_training_track_fraction;
+	trainingMethod = enumFraction;
 }
 
 void TSettings::setDet_channel_screen(int i, ChannelScreen Det_channel_screen)
@@ -1560,6 +1562,10 @@ void Print(){
 
 }
 
+void TSettings::setAlignmentTrainingTrackNumber(){
+	alignment_training_track_number = alignmentTrainingTrackNumber;
+	trainingMethod =  enumEvents;
+}
 
 
 bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {

@@ -38,6 +38,7 @@ public:
   bool isInFiducialCut(Float_t xVal,Float_t yVal);
   int getFidCutRegion(Float_t xVal,Float_t yVal);
   TCanvas* getAllFiducialCutsCanvas(TH2F* hScatterPlot=0);
+  void setHistogramm(TH2F* hEventScatterPlot){this->hEventScatterPlot=hEventScatterPlot;}
 private:
   std::vector<std::pair<Float_t,Float_t> >findFiducialCutIntervall(TH1D* hProj,Float_t fidCutPercentage);
   TCanvas*  getFiducialCutProjectionCanvas(TH1D* hProj,std::vector< std::pair<Float_t,Float_t> > intervals);

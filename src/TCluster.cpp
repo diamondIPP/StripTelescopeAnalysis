@@ -177,6 +177,10 @@ UInt_t TCluster::checkClusterForSize() const{
 
 void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t pedMeanCMN, Float_t pedSigmaCMN, Int_t adcValue, bool bSaturated,bool isScreened){
 //void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
+	if(ch>TPlaneProperties::getNChannels((UInt_t)this->det)||ch!=ch||pedMean!=pedMean||pedSigma!=pedSigma||pedMeanCMN!=pedMeanCMN||pedSigmaCMN!=pedSigmaCMN||adcValue!=adcValue){
+		cerr<<"The channel which should be added is not VALID! you cannot add a channel "<<ch<<" at det "<<det<<endl;
+		return;
+	}
 	Float_t signal = adcValue - pedMean;
 	Float_t signalInSigma= signal/pedSigma;
 	Float_t signalCMN = adcValue - pedMeanCMN - this->cmNoise;

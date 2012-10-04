@@ -71,6 +71,7 @@ public:
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 private:
 	void goToDir(std::string dir);
+	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
 public:
 	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);
@@ -238,9 +239,7 @@ public:
     Int_t getVerbosity(){return this->verbosity;}
     bool useForAlignment(UInt_t eventNumber, UInt_t nEvents=0);
 	UInt_t getAlignmentTrainingTrackNumber() const {return alignment_training_track_number;}
-	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber) {alignment_training_track_number = alignmentTrainingTrackNumber;}
-
-	;
+	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 protected:
     float store_threshold;
 private:

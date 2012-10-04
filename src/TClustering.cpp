@@ -45,12 +45,12 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 TClustering::~TClustering() {
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
-		cout<<"CLOSING TREE"<<endl;
-		cout<<"pedestalTree"<<" "<<filepath.str().c_str()<<endl;
+		if(verbosity)cout<<"CLOSING TREE"<<endl;
+		if(verbosity)cout<<"pedestalTree"<<" "<<filepath.str().c_str()<<endl;
 		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
-		cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
+		if(verbosity)cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
 		clusterTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
-		cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
+		if(verbosity)cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 		clusterTree->Write();
 		saveEtaCorrections();
 	}
@@ -255,7 +255,8 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 		float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
 		float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
 		float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
-		cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
+		if(currentCh>=0&&currentCh<TPlaneProperties::getNChannels(det))
+			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
 	}
 	if((verbosity>10&&det==8)||verbosity>11)cout<<" ."<<cluster.size()<<". ";
 	for(currentCh=ch+1;currentCh<TPlaneProperties::getNChannels(det);currentCh++){
@@ -299,35 +300,35 @@ bool TClustering::createClusterTree(int nEvents)
 	stringstream clusterfilepath;
 	clusterfilepath<<sys->pwd();
 	clusterfilepath<<"/clusterData."<<runNumber<<".root";
-	cout<<"Try to open \""<<clusterfilepath.str()<<"\""<<endl;
+	if(verbosity)cout<<"Try to open \""<<clusterfilepath.str()<<"\""<<endl;
 	clusterFile=new TFile(clusterfilepath.str().c_str(),"READ");
 	if(clusterFile->IsZombie()){
 		delete clusterFile;
-		cout<<"clusterfile does not exist, create new one..."<<endl;
+		if(verbosity)cout<<"clusterfile does not exist, create new one..."<<endl;
 		createdNewFile =true;
 		clusterFile= new TFile(clusterfilepath.str().c_str(),"RECREATE");
 		clusterFile->cd();
 	}
 	else{
 		createdNewFile=false;
-		cout<<"File exists"<<endl;
+		if(verbosity)cout<<"File exists"<<endl;
 	}
 	clusterFile->cd();
 	stringstream treeDescription;
 	treeDescription<<"Cluster Data of run "<<runNumber;
 	clusterFile->GetObject("clusterTree",clusterTree);
 	if(clusterTree!=NULL){
-		cout<<"File and Tree Exists... \t"<<flush;
+		if(verbosity)cout<<"File and Tree Exists... \t"<<flush;
 		if(clusterTree->GetEntries()>=nEvents){
 			createdNewTree=false;
-			cout<<"tree has enough entries....check Rev"<<endl;
+			if(verbosity)cout<<"tree has enough entries....check Rev"<<endl;
 			clusterRev=-1;
-			cout<<"#";
+			if(verbosity)cout<<"#";
 			clusterTree->SetBranchAddress("clusterRev",&clusterRev);
-			cout<<"#";
+			if(verbosity)cout<<"#";
 			clusterTree->GetEvent(0);
-			cout<<"#";
-			cout<<"ClusterTree has revision: rev."<<clusterRev<<" current rev."<<TCluster::TCLUSTER_REVISION()<<endl;
+			if(verbosity)cout<<"#";
+			if(verbosity)cout<<"ClusterTree has revision: rev."<<clusterRev<<" current rev."<<TCluster::TCLUSTER_REVISION()<<endl;
 			if(clusterRev==TCluster::TCLUSTER_REVISION())
 				return false;
 			else{
@@ -346,9 +347,9 @@ bool TClustering::createClusterTree(int nEvents)
 		clusterFile=new TFile(clusterfilepath.str().c_str(),"RECREATE");
 		this->clusterTree=new TTree("clusterTree",treeDescription.str().c_str());
 		createdNewTree=true;
-		cout<<"\n\n***************************************************************\n";
-		cout<<"there exists no tree:\'clusterTree\"\tcreate new one."<<clusterTree<<"\n";
-		cout<<"***************************************************************\n"<<endl;
+		if(verbosity)cout<<"\n\n***************************************************************\n";
+		if(verbosity)cout<<"there exists no tree:\'clusterTree\"\tcreate new one."<<clusterTree<<"\n";
+		if(verbosity)cout<<"***************************************************************\n"<<endl;
 	}
 
 	return createdNewTree;
@@ -392,22 +393,22 @@ void TClustering::saveEtaCorrections(){
 }
 
 void TClustering::setBranchAdresses(){
-	cout<<"set Branch adresses..."<<endl;
+	if(verbosity)cout<<"set Branch adresses..."<<endl;
 
 	clusterRev=TCluster::TCLUSTER_REVISION();
-	cout<<"Branch eventNumber"<<endl;
+	if(verbosity)cout<<"Branch eventNumber"<<endl;
 	clusterTree->Branch("eventNumber",&nEvent,"eventNumber/i");
-	cout<<"Branch runNumber"<<endl;
+	if(verbosity)cout<<"Branch runNumber"<<endl;
 	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");
-	cout<<"Branch nClusters"<<endl;
+	if(verbosity)cout<<"Branch nClusters"<<endl;
 	clusterTree->Branch("nClusters",&nClusters,"nClusters/i[9]");
-	cout<<"Branch clusterRev"<<endl;
+	if(verbosity)cout<<"Branch clusterRev"<<endl;
 	clusterTree->Branch("clusterRev",&clusterRev,"clusterRev/i");
-	cout<<"Branch clusters"<<endl;
+	if(verbosity)cout<<"Branch clusters"<<endl;
 	//clusterTree->Branch("vecvecChannel",&vecvecChannel[0])
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
 //	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
-	cout<<"Branch event"<<endl;
+	if(verbosity)cout<<"Branch event"<<endl;
 	pEvent=0;
 	clusterTree->Branch("event","TEvent",&pEvent);
 }

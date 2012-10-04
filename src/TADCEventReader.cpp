@@ -8,11 +8,11 @@
 #include "TADCEventReader.hh"
 using namespace std;
 
-TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
+TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
+	verbosity=verb;
 
-  cout<<"new TADCEventReader: \n\tpathName:"<<FileName<<"\n\tRunNumber: "<<runNumber<<endl;
-	verbosity=0;
-  pEvent=NULL;//new TEvent();
+	if(verbosity)cout<<"new TADCEventReader: \n\tpathName:"<<FileName<<"\n\tRunNumber: "<<runNumber<<endl;
+	pEvent=NULL;//new TEvent();
 	current_event = 0;
 	store_threshold = 2;
 	tree =NULL;
@@ -23,7 +23,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	SetTree(FileName);//tree);
 	initialiseTree();
 	if(!this->isOK()){
-		cout<<"TADCEventReader::TADCEventReader is not correctly initialized.. EXIT PROGRAM"<<endl;
+		cerr<<"TADCEventReader::TADCEventReader is not correctly initialized.. EXIT PROGRAM"<<endl;
 		exit(-1);
 	}
 	if (verbosity) cout<<"tree Entries():"<<tree->GetEntries()<<endl;
@@ -36,10 +36,10 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 }
 
 TADCEventReader::~TADCEventReader() {
-	cout<< "deleting instance of TADCEventReader"<<flush;
+	if(verbosity)cout<< "deleting instance of TADCEventReader"<<flush;
 	//delete tree;
 	if(file!=0)delete file;
-	cout<< "DONE"<<flush;
+	if(verbosity)cout<< "DONE"<<flush;
 //	gSystem->Clear();
 //	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
 //	  if(hEtaIntegral[det]!=0)delete hEtaIntegral[det];
@@ -54,7 +54,7 @@ bool TADCEventReader::SetTree(string fileName){//TTree *tree){
 	tree=NULL;
 	file=NULL;
 //	cout<<"TADCEventReader-PATH: "<<sys->pwd()<<endl;
-	std::cout<<"load File: \""<<fileName<<"\""<<endl;
+	if(verbosity)std::cout<<"load File: \""<<fileName<<"\""<<endl;
 //	stringstream fileString;
 //	fileString<<sys->pwd()<<"/"<<fileName;
 //	std::cout<<"Open "<<fileString.str()<<endl;
@@ -86,25 +86,25 @@ void TADCEventReader::SetBranchAddresses(){
 	//Event Header Branches
 	if(tree->FindBranch("RunNumber")){
 		tree->SetBranchAddress("RunNumber",&run_number);
-		cout<<"Set Branch \"RunNumber\""<<endl;
+		if(verbosity)cout<<"Set Branch \"RunNumber\""<<endl;
 	}
 	else if(tree->FindBranch("runNumber")){
 			tree->SetBranchAddress("runNumber",&run_number);
-			cout<<"Set Branch \"runNumber\""<<endl;
+			if(verbosity)cout<<"Set Branch \"runNumber\""<<endl;
 	}
 	if(tree->FindBranch("EventNumber")){
 		tree->SetBranchAddress("EventNumber",&event_number);
-		cout<<"Set Branch \"EventNumber\""<<endl;
+		if(verbosity)cout<<"Set Branch \"EventNumber\""<<endl;
 	}
 	if(tree->FindBranch("StoreThreshold")){
 		tree->SetBranchAddress("StoreThreshold",&store_threshold);
-		cout<<"Set Branch \"StoreThreshold\""<<endl;
+		if(verbosity)cout<<"Set Branch \"StoreThreshold\""<<endl;
 	}
 //	tree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
 
 	if(tree->FindBranch("ZeroDivisorEvent_flag")){
 		tree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
-		cout<<"Set Branch \"ZeroDivisorEvent_flag\""<<endl;
+		if(verbosity)cout<<"Set Branch \"ZeroDivisorEvent_flag\""<<endl;
 	}//why do we have that????
 	//Telescope Data Branches
 	if(tree->FindBranch("D0X_NChannels")){
@@ -351,34 +351,34 @@ void TADCEventReader::SetBranchAddresses(){
 		tree->SetBranchAddress("useForAnalysis",&this->bUseForAnalysis);
 		if(verbosity)cout<<"Set Branch \"useForAnalysis\""<<endl;
 	}
-	if(tree->FindBranch("useForAlignment")){
-		tree->SetBranchAddress("useForSiliconAlignment",&this->bUseForAlignment);
+	if(tree->FindBranch("useForSiliconAlignment")){
+		tree->SetBranchAddress("useForSiliconAlignment",&this->bUseForSiliconAlignment);
 		if(verbosity)cout<<"Set Branch \"useForSiliconAlignment\""<<endl;
 	}
 
 	if(tree->FindBranch("cmnCorrection")){
 	  tree->SetBranchAddress("cmnCorrection",&this->bCMNoiseCorrected);
-	  cout<<"Set Branch \n isCMNCOrrected\""<<endl;
+	  if(verbosity)cout<<"Set Branch \n isCMNCOrrected\""<<endl;
 	}
 	if(tree->FindBranch("commonModeNoise")){
 	  tree->SetBranchAddress("commonModeNoise",&this->cmNoise);
-	  cout<<"SET BRANCH ADDRESS: \"CMN Noise\""<<endl;
+	  if(verbosity)cout<<"SET BRANCH ADDRESS: \"CMN Noise\""<<endl;
 	}
 
 //	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
 //	UInt_t nDiamondHits; //number of clusters in diamond plane;
-	cout<<"DONE"<<endl;
+	if(verbosity)cout<<"DONE"<<endl;
 
 }
 
 void TADCEventReader::initialiseTree(){
   bCMNoiseCorrected=false;
-	cout<<"initialise tree with "<<tree->GetEntries()<<" Entires."<<endl;
+  if(verbosity)cout<<"initialise tree with "<<tree->GetEntries()<<" Entires."<<endl;
 	current_event = 1;
 	tree->GetEvent(current_event);
-	cout<< "Loaded first event in Tree: "<<event_number<<endl;
-	cout<< "RunNumber is: "<<run_number<<endl;
-	cout<< "StoreThreshold is: "<<store_threshold<<endl;
+	if(verbosity)cout<< "Loaded first event in Tree: "<<event_number<<endl;
+	if(verbosity)cout<< "RunNumber is: "<<run_number<<endl;
+	if(verbosity)cout<< "StoreThreshold is: "<<store_threshold<<endl;
 }
 
 bool TADCEventReader::GetNextEvent(){
@@ -593,7 +593,7 @@ UInt_t TADCEventReader::getClusterSeedSize(UInt_t det,UInt_t cl)
 void TADCEventReader::checkADC(){
 	this->LoadEvent(100);
 	for(int ch=0;ch<256;ch++)
-		cout<<this->getAdcValue(0,ch)<<" "<<this->getAdcValue(1,ch)<<" "<<this->getAdcValue(8,ch)<<endl;
+		if(verbosity)cout<<this->getAdcValue(0,ch)<<" "<<this->getAdcValue(1,ch)<<" "<<this->getAdcValue(8,ch)<<endl;
 }
 
 bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
@@ -688,11 +688,11 @@ void TADCEventReader::setVerbosity(UInt_t verbosity)
 }
 
 TObject* TADCEventReader::getTreeName(){
-	cout<<"TADCEventReader::getTreeName:"<<endl;
+	if(verbosity)cout<<"TADCEventReader::getTreeName:"<<endl;
 	if(file==NULL) exit(-1);
 	TObject *obj=NULL;
 	int hastree=hasTree();
-		cout<< "File has "<<hastree<<" trees"<<endl;
+	if(verbosity)cout<< "File has "<<hastree<<" trees"<<endl;
 //	if(hastree!=1)
 //		return obj;
 	TIter nextkey(file->GetListOfKeys());
@@ -701,7 +701,7 @@ TObject* TADCEventReader::getTreeName(){
 	{
 		obj = key->ReadObj();
 		if ((obj->IsA()->InheritsFrom("TTree"))){
-			cout<<"name of it: "<<obj->GetName()<<endl;
+			if(verbosity)cout<<"name of it: "<<obj->GetName()<<endl;
 			return obj;
 		}
 		else
@@ -742,7 +742,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		if(etaDistributionPath.size()!=0){char t; cin>>t;}
 		return;
 	}
-	cout<<etaFileName.str()<<endl;
+	if(verbosity)cout<<etaFileName.str()<<endl;
 //	char t; cin>>t;
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		stringstream objectName;

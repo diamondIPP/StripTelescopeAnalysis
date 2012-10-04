@@ -19,38 +19,38 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	pt = new TPaveText(0.07,0,0.22,0.10,"NDC");
 	UpdatePaveText();
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: get new TSystem"<<endl;
-//	sys=new TSystem();
+	//	sys=new TSystem();
 	sys=gSystem;
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: Set Style"<<endl;
 	currentStyle=gROOT->GetStyle("Plain_RD42");
 	if(currentStyle!=0)
-	  currentStyle->cd();
+		currentStyle->cd();
 	else if(gStyle!=0)
-	  if(!gStyle->IsZombie()){
-	  if((string)gStyle->GetName()!="Plain_RD42"){
-	    gROOT->SetStyle("Plain"); //General style (see TStyle)
-//	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
-	    if(gStyle->GetOptStat()!=221111111)
-	      gStyle->SetOptStat("nemrKSiou");
-	    if(gStyle->GetOptFit()!=1111){
-	      gStyle->SetOptFit(1111);  //Fit options to be displayed
-	      gStyle->SetStatH(0.12); //Sets Height of Stats Box
-	      gStyle->SetStatW(0.15); //Sets Width of Stats Box
-	    }
-	    if(gStyle->GetPadBottomMargin()!=0.15) gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
-//	    gStyle->SetPadRightMargin(0.15);
-	    if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
-	    //gStyle->SetTitleColor(19,"");
-      gStyle->SetPalette(1); //
-	    gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
-	    currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
-	    currentStyle->SetPalette(1);
-	    currentStyle->cd();
+		if(!gStyle->IsZombie()){
+			if((string)gStyle->GetName()!="Plain_RD42"){
+				gROOT->SetStyle("Plain"); //General style (see TStyle)
+				//	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
+				if(gStyle->GetOptStat()!=221111111)
+					gStyle->SetOptStat("nemrKSiou");
+				if(gStyle->GetOptFit()!=1111){
+					gStyle->SetOptFit(1111);  //Fit options to be displayed
+					gStyle->SetStatH(0.12); //Sets Height of Stats Box
+					gStyle->SetStatW(0.15); //Sets Width of Stats Box
+				}
+				if(gStyle->GetPadBottomMargin()!=0.15) gStyle->SetPadBottomMargin(0.15); //Gives more space between histogram and edge of plot
+				//	    gStyle->SetPadRightMargin(0.15);
+				if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
+				//gStyle->SetTitleColor(19,"");
+				gStyle->SetPalette(1); //
+				gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+				currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
+				currentStyle->SetPalette(1);
+				currentStyle->cd();
 
-	  }
-	  }
+			}
+		}
 
-  gStyle->SetPalette(1); //
+	gStyle->SetPalette(1); //
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
 	gErrorIgnoreLevel=1001;
 
@@ -58,14 +58,14 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 
 HistogrammSaver::~HistogrammSaver() {
 
-//	TString string1 = sys->GetFromPipe(".! mkdir root-Files");
-//	cout<<string1<<endl;
+	//	TString string1 = sys->GetFromPipe(".! mkdir root-Files");
+	//	cout<<string1<<endl;
 	stringstream test;
 	test<< "mv -f "<<plots_path<<"/*.root "<<plots_path<<"/root/";
 	//cout<<"\""<<test.str()<<"\""<<endl;
 	system(test.str().c_str());//t.str();//<<"\""<<endl;
-//	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
-//	cout<<string1<<endl;
+	//	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
+	//	cout<<string1<<endl;
 	this->pt->Delete();
 }
 
@@ -80,8 +80,8 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	Float_t min = TMath::Min(min1,min2);
 	Float_t max1 = histo1->GetMaximum();
 	Float_t max2 = histo2->GetMaximum();
-//	Float_t range1 = max1-min1;
-//	Float_t range2 = max2-min2;
+	//	Float_t range1 = max1-min1;
+	//	Float_t range2 = max2-min2;
 	Float_t max = TMath::Max(max1,max2);
 	Float_t range = max - min;
 	Float_t middle = (max+min)/2.;
@@ -90,7 +90,7 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	else
 		min = middle - range/2.*1.1;
 	max = middle + range/2.*1.4;
-//	int stat = gStyle->GetOptStat();
+	//	int stat = gStyle->GetOptStat();
 	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
 		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
 	if(refactorSecond!=1)histo2->Scale(refactorSecond);
@@ -103,7 +103,7 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 		histo1->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw2 "<<flush;
 		histo2->Draw("same");
-//		histo2->GetYaxis()->SetRangeUser(min,max);
+		//		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
 		if (verbosity>2) cout<<"\tdraw2-"<<flush;
@@ -111,7 +111,7 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 		histo2->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw1 "<<flush;
 		histo1->Draw("same");
-//		histo1->GetYaxis()->SetRangeUser(min,max);
+		//		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
 	TVirtualPad *pad =c1->GetPad(0);
@@ -185,22 +185,22 @@ void HistogrammSaver::SetPlotsPath(string path){
 	if(verbosity)cout<<"HistogrammSaver::Set Plotspath: \""<<plots_path<<"\""<<endl;
 	int isNotCreated=sys->mkdir(plots_path.c_str(),true);
 	if (isNotCreated!=0){
-//		cout<<"***************************************************\n";
-//		cout<<"********** Directory not created ******************\n";
-//		cout<<"***************************************************\n";
+		//		cout<<"***************************************************\n";
+		//		cout<<"********** Directory not created ******************\n";
+		//		cout<<"***************************************************\n";
 		cout<<plots_path<<endl;
 	}
 	sys->mkdir(plots_path.c_str(),true);
 	int stat = mkdir(plots_path.c_str(),0777);//0777(S_IRWXO||S_IRWXG||S_IRWXU));// S_IRWXU|S_IRGRP|S_IXGRP||S_IRWXU||S_IRWXG||S_IRWXO);
-	if(!stat)cout<<"Verzeichnis angelegt"<<endl;
-	else cout<<"Verzeichnis konnte nicht angelegt werden..."<<endl;
+	if(!stat)cout<<"Verzeichnis angelegt: \""<<plots_path<<"\""<<endl;
+	//	else cout<<"Verzeichnis konnte nicht angelegt werden..."<<endl;
 
 	stringstream rootPath;
 	rootPath<<plots_path<<"/root";
 	sys->mkdir(rootPath.str().c_str(),true);
 	stat = mkdir(rootPath.str().c_str(),0777);//0777(S_IRWXO||S_IRWXG||S_IRWXU));// S_IRWXU|S_IRGRP|S_IXGRP||S_IRWXU||S_IRWXG||S_IRWXO);
-	if(!stat)cout<<"Verzeichnis angelegt"<<endl;
-	else cout<<"Verzeichnis konnte nicht angelegt werden..."<<endl;
+	if(!stat)cout<<"Verzeichnis angelegt: \""<<rootPath.str().c_str()<<"\""<<endl;
+	//	else cout<<"Verzeichnis konnte nicht angelegt werden..."<<endl;
 
 }
 
@@ -218,11 +218,11 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
 void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) {
 	if(histo->GetEntries()==0)return;
 	if(adjustRange){
-    int binxMin=0;
-    for(binxMin=0;binxMin<histo->GetNbinsX();binxMin++)if(histo->GetBinContent(binxMin))break;
-    int binxMax;
-    for(binxMax=histo->GetNbinsX();binxMax>0;binxMax--)if(histo->GetBinContent(binxMax))break;
-    histo->GetXaxis()->SetRangeUser(histo->GetBinLowEdge(binxMin),histo->GetBinLowEdge(binxMax+1));
+		int binxMin=0;
+		for(binxMin=0;binxMin<histo->GetNbinsX();binxMin++)if(histo->GetBinContent(binxMin))break;
+		int binxMax;
+		for(binxMax=histo->GetNbinsX();binxMax>0;binxMax--)if(histo->GetBinContent(binxMax))break;
+		histo->GetXaxis()->SetRangeUser(histo->GetBinLowEdge(binxMin),histo->GetBinLowEdge(binxMax+1));
 	}
 	if (fitGauss) SaveHistogramFitGaussPNG(histo);
 	else SaveHistogramPNG(histo);
@@ -258,14 +258,14 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
 }
 void HistogrammSaver::SaveHistogram(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
-   SaveHistogramPNG(histo);
-   SaveHistogramROOT(histo);
+	SaveHistogramPNG(histo);
+	SaveHistogramROOT(histo);
 }
 
 void HistogrammSaver::SaveCanvas(TCanvas *canvas)
 {
-  if(canvas==0)
-    return;
+	if(canvas==0)
+		return;
 	SaveCanvasPNG(canvas);
 	SaveCanvasROOT(canvas);
 }
@@ -279,15 +279,15 @@ void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
 	if(histo->GetEntries()==0)return;
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
-  UInt_t maxBinX =histo->GetNbinsX();
-  for(UInt_t i=histo->GetNbinsX();i>0;i--)
-    if(histo->GetBinContent(i)==0)maxBinX=i;
-  UInt_t minBinX =0;
-  for(Int_t i=0;i<histo->GetNbinsX();i++)
-    if(histo->GetBinContent(i)==0)minBinX=i;
-  Float_t xmin = histo->GetXaxis()->GetBinLowEdge(minBinX);
-  Float_t xmax = histo->GetXaxis()->GetBinLowEdge(maxBinX+1);
-  histo->GetXaxis()->SetRangeUser(xmin,xmax);
+	UInt_t maxBinX =histo->GetNbinsX();
+	for(UInt_t i=histo->GetNbinsX();i>0;i--)
+		if(histo->GetBinContent(i)==0)maxBinX=i;
+	UInt_t minBinX =0;
+	for(Int_t i=0;i<histo->GetNbinsX();i++)
+		if(histo->GetBinContent(i)==0)minBinX=i;
+	Float_t xmin = histo->GetXaxis()->GetBinLowEdge(minBinX);
+	Float_t xmax = histo->GetXaxis()->GetBinLowEdge(maxBinX+1);
+	histo->GetXaxis()->SetRangeUser(xmin,xmax);
 	histo->Draw();
 	pt->Draw();
 	ostringstream plot_filename;
@@ -299,7 +299,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	//plots_canvas.cd();
-//	SetDuckStyle();
+	//	SetDuckStyle();
 	plots_canvas.cd();
 	if(verbosity)cout << "Using SaveHistogrammPDF on TH2F histogram " << histo->GetName() << endl;
 	//histo->Draw();
@@ -320,19 +320,19 @@ void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
 	if(histo->GetEntries()==0){
 		cout<<"Histogram "<<histo->GetName()<<" has no entries..."<<endl;
-		 return;
+		return;
 	}
-  TH1* htemp=(TH1*)histo->Clone();
-  if(htemp==0)return;
-  TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
-  plots_canvas->cd();
-  htemp->SetMinimum(0.);
-  htemp->Draw();
-  TPaveText* pt2 = (TPaveText*)pt->Clone();
-  pt2->Draw();
-  ostringstream plot_filename;
-  plot_filename << plots_path << histo->GetName() << ".png";
-  plots_canvas->Print(plot_filename.str().c_str());
+	TH1* htemp=(TH1*)histo->Clone();
+	if(htemp==0)return;
+	TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+	plots_canvas->cd();
+	htemp->SetMinimum(0.);
+	htemp->Draw();
+	TPaveText* pt2 = (TPaveText*)pt->Clone();
+	pt2->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << histo->GetName() << ".png";
+	plots_canvas->Print(plot_filename.str().c_str());
 	delete plots_canvas;
 }
 
@@ -348,8 +348,8 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
 
 void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
 {
-  if(canvas==0)
-    return;
+	if(canvas==0)
+		return;
 	canvas->cd();
 	pt->Clone()->Draw();
 	ostringstream plot_filename;
@@ -358,20 +358,20 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
 }
 
 void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
-		if(graph->GetN()==0)return;
-	   TCanvas plots_canvas("plots_canvas","plots_canvas");
-	   plots_canvas.cd();
-	   graph->Draw(option.c_str());
-	   pt->Clone()->Draw();
-	   ostringstream plot_filename;
-	   plot_filename << plots_path << name << ".png";
-	   plots_canvas.Print(plot_filename.str().c_str());
+	if(graph->GetN()==0)return;
+	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	plots_canvas.cd();
+	graph->Draw(option.c_str());
+	pt->Clone()->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << name << ".png";
+	plots_canvas.Print(plot_filename.str().c_str());
 }
 void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
-  TH1* histo = (TH1*)htemp->Clone();
+	TH1* histo = (TH1*)htemp->Clone();
 	if(histo->GetEntries()==0)return;
 
-//	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
+	//	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
 	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
 	//TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);
 	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
@@ -380,7 +380,7 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 	histofitx.SetLineColor(kBlue);
 	histo->Fit(&histofitx,"rq");
 	histo->Draw();
-	
+
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
 	histo->Draw();
@@ -393,23 +393,23 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	if(htemp->GetEntries()==0)return;
 
-  ostringstream plot_filename;
-  ostringstream histo_filename;
+	ostringstream plot_filename;
+	ostringstream histo_filename;
 	histo_filename << plots_path << "histograms.root";
-//	plot_filename << plots_path << histo->GetName() << ".root";
+	//	plot_filename << plots_path << histo->GetName() << ".root";
 	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
 
-  TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+	TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
 	TH1* histo = (TH1*)htemp->Clone();
-  TPaveText* pt2 = (TPaveText*)pt->Clone();
+	TPaveText* pt2 = (TPaveText*)pt->Clone();
 
-  plots_canvas->cd();
-  histo->Draw();
-  pt2->Draw();
-  plots_canvas->Draw();
+	plots_canvas->cd();
+	histo->Draw();
+	pt2->Draw();
+	plots_canvas->Draw();
 
-  f->cd();
-  plots_canvas->Write();
+	f->cd();
+	plots_canvas->Write();
 	f->Close();
 	delete plots_canvas;
 
@@ -417,46 +417,46 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
-   TCanvas*  plots_canvas = new TCanvas("plots_canvas","plots_canvas");
-   plots_canvas->cd();
-   TH2F* htemp = (TH2F*)histo->Clone();
-   htemp->Draw("colz");
-   TPaveText* pt2 = (TPaveText*)pt->Clone();
-   pt2->Draw();
-   ostringstream plot_filename;
-   plot_filename << plots_path << histo->GetName() << ".png";
-   plots_canvas->Print(plot_filename.str().c_str());
+	TCanvas*  plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+	plots_canvas->cd();
+	TH2F* htemp = (TH2F*)histo->Clone();
+	htemp->Draw("colz");
+	TPaveText* pt2 = (TPaveText*)pt->Clone();
+	pt2->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << histo->GetName() << ".png";
+	plots_canvas->Print(plot_filename.str().c_str());
 	delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
-   TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
-   plots_canvas->cd();
-   TH2F* htemp = (TH2F*)histo->Clone();
-   if(htemp==0)
-     return;
-   htemp->Draw();
-   htemp->Draw("colz");
-   TPaveText* pt2 = (TPaveText*)pt->Clone();
-   pt2->Draw();
-   ostringstream plot_filename;
-   plot_filename << plots_path << histo->GetName() << ".root";
-   plots_canvas->Print(plot_filename.str().c_str());
+	TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
+	plots_canvas->cd();
+	TH2F* htemp = (TH2F*)histo->Clone();
+	if(htemp==0)
+		return;
+	htemp->Draw();
+	htemp->Draw("colz");
+	TPaveText* pt2 = (TPaveText*)pt->Clone();
+	pt2->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << histo->GetName() << ".root";
+	plots_canvas->Print(plot_filename.str().c_str());
 	delete plots_canvas;
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
 	if(graph->GetN()==0)return;
-	   TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
-	   plots_canvas->cd();
-	   TGraph* gTemp = (TGraph*)graph->Clone();
-	   gTemp->Draw(option.c_str());
-	   TPaveText* pt2=(TPaveText*)pt->Clone();
-	   pt2->Draw();
-	   ostringstream plot_filename;
-	   plot_filename << plots_path << name<< ".root";
-	   plots_canvas->Print(plot_filename.str().c_str());
+	TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
+	plots_canvas->cd();
+	TGraph* gTemp = (TGraph*)graph->Clone();
+	gTemp->Draw(option.c_str());
+	TPaveText* pt2=(TPaveText*)pt->Clone();
+	pt2->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << name<< ".root";
+	plots_canvas->Print(plot_filename.str().c_str());
 	delete plots_canvas;
 }
 
@@ -469,58 +469,58 @@ void HistogrammSaver::SetVerbosity(unsigned int i)
 
 void HistogrammSaver::SaveCanvasRoot(TCanvas *canvas, string location, string file_name)
 {
-  if(canvas==0)
-    return;
-    char loc[500];
-    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
-    char rt[] = ".root";
-    char *rtloc = loc;
-    //Saving .root file
-    strcat(rtloc,file_name.c_str());
-    strcat(rtloc,rt);
-    char const *rt_file = &rtloc[0];
-    TObjArray list(0);
-    list.Add(canvas);
-    TFile f(rt_file,"recreate");
-    list.Write();
-    f.Close();
-    cout << ".root file was created at: " << rt_file << endl;
+	if(canvas==0)
+		return;
+	char loc[500];
+	memcpy(loc,location.c_str(),strlen(location.c_str())+1);
+	char rt[] = ".root";
+	char *rtloc = loc;
+	//Saving .root file
+	strcat(rtloc,file_name.c_str());
+	strcat(rtloc,rt);
+	char const *rt_file = &rtloc[0];
+	TObjArray list(0);
+	list.Add(canvas);
+	TFile f(rt_file,"recreate");
+	list.Write();
+	f.Close();
+	cout << ".root file was created at: " << rt_file << endl;
 }
 
 //void SaveCanvasC(TCanvas *canvas, char* location, char* file_name);
 void SaveCanvasC(TCanvas *canvas, string location, string file_name)
 {
-  if(canvas==0 )return;
-   char loc[500];
-   memcpy(loc,location.c_str(),strlen(location.c_str())+1);
-   char cmac[] = ".C";
-   char *cmacloc = loc;
+	if(canvas==0 )return;
+	char loc[500];
+	memcpy(loc,location.c_str(),strlen(location.c_str())+1);
+	char cmac[] = ".C";
+	char *cmacloc = loc;
 
-   //Saving .C macro
-   strcat(cmacloc,file_name.c_str());
-   strcat(cmacloc,cmac);
-   char const *cmac_file = &cmacloc[0];
-   canvas->SaveSource(cmac_file);
-   cout << ".c macro was created at: " << cmac_file << endl;
+	//Saving .C macro
+	strcat(cmacloc,file_name.c_str());
+	strcat(cmacloc,cmac);
+	char const *cmac_file = &cmacloc[0];
+	canvas->SaveSource(cmac_file);
+	cout << ".c macro was created at: " << cmac_file << endl;
 }
 
 void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, string location, string file_name)
 {
-  if(canvas==0)return;
-   char loc[500];
-   memcpy(loc,location.c_str(),strlen(location.c_str())+1);
-   char png[] = ".png";
-   char *pngloc = loc;
+	if(canvas==0)return;
+	char loc[500];
+	memcpy(loc,location.c_str(),strlen(location.c_str())+1);
+	char png[] = ".png";
+	char *pngloc = loc;
 
-   //Save .png file
-   strcat(pngloc,file_name.c_str());
-   strcat(pngloc,png);
-   char const *png_file = &pngloc[0]; //assigns address of first element of the file string to the char_file pointer
-   TImage *img = TImage::Create();
-   img->FromPad(canvas);
-   img->WriteImage(png_file);
-   cout << ".png file was created at: " << png_file << endl;
-   delete img;
+	//Save .png file
+	strcat(pngloc,file_name.c_str());
+	strcat(pngloc,png);
+	char const *png_file = &pngloc[0]; //assigns address of first element of the file string to the char_file pointer
+	TImage *img = TImage::Create();
+	img->FromPad(canvas);
+	img->WriteImage(png_file);
+	cout << ".png file was created at: " << png_file << endl;
+	delete img;
 }
 
 void HistogrammSaver::SetDuckStyle() {
@@ -610,23 +610,23 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	histo->GetYaxis()->SetTitle("Y-Position");
 
 	//set xrange
-  TH1D* hProj=histo->ProjectionX();
-  int binxMin=0;
-  for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
-  int binxMax;
-  for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
-  histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
-  delete hProj;
+	TH1D* hProj=histo->ProjectionX();
+	int binxMin=0;
+	for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
+	int binxMax;
+	for(binxMax=hProj->GetNbinsX();binxMax>0;binxMax--)if(hProj->GetBinContent(binxMax))break;
+	histo->GetXaxis()->SetRangeUser(hProj->GetBinLowEdge(binxMin-1),hProj->GetBinLowEdge(binxMax+1));
+	delete hProj;
 
-  //set yRange
-  hProj=histo->ProjectionY();
-  int binyMin=0;
-  for(binyMin=0;binyMin<hProj->GetNbinsX();binyMin++)if(hProj->GetBinContent(binyMin))break;
-  int binyMax;
-  for(binyMax=hProj->GetNbinsX();binyMax>0;binyMax--)if(hProj->GetBinContent(binyMax))break;
+	//set yRange
+	hProj=histo->ProjectionY();
+	int binyMin=0;
+	for(binyMin=0;binyMin<hProj->GetNbinsX();binyMin++)if(hProj->GetBinContent(binyMin))break;
+	int binyMax;
+	for(binyMax=hProj->GetNbinsX();binyMax>0;binyMax--)if(hProj->GetBinContent(binyMax))break;
 
-  histo->GetYaxis()->SetRangeUser(hProj->GetBinLowEdge(binyMin-1),hProj->GetBinLowEdge(binyMax+1));
-  delete hProj;
+	histo->GetYaxis()->SetRangeUser(hProj->GetBinLowEdge(binyMin-1),hProj->GetBinLowEdge(binyMax+1));
+	delete hProj;
 
 	return histo;
 }
@@ -704,24 +704,24 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 	else if(range==positiveArea){
 		min=0;
 		for(UInt_t i=0;i<vec.size();i++)
-				if (max<vec.at(i))max=vec.at(i);
+			if (max<vec.at(i))max=vec.at(i);
 		max*=(1+factor);
 	}
 	else if(range==positiveSigma){
-			min=0;
-			Float_t mean=0;
-			Float_t sigma=0;
-			for(UInt_t i=0;i<vec.size();i++){
-				mean+=vec.at(i);
-				sigma+=vec.at(i)*vec.at(i);
-			}
-			mean/=(Float_t)vec.size();
-			sigma/=(Float_t)vec.size();
-			sigma = sigma -mean*mean;
-			sigma=TMath::Sqrt(sigma);
-			UInt_t nSigma = 3;
-			max=mean+nSigma*sigma;
+		min=0;
+		Float_t mean=0;
+		Float_t sigma=0;
+		for(UInt_t i=0;i<vec.size();i++){
+			mean+=vec.at(i);
+			sigma+=vec.at(i)*vec.at(i);
 		}
+		mean/=(Float_t)vec.size();
+		sigma/=(Float_t)vec.size();
+		sigma = sigma -mean*mean;
+		sigma=TMath::Sqrt(sigma);
+		UInt_t nSigma = 3;
+		max=mean+nSigma*sigma;
+	}
 	else if(range==manual){
 		max =xmax;
 		min=xmin;
@@ -732,10 +732,10 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 	for(UInt_t i=0;i<vec.size();i++){
 		histo->Fill(vec.at(i));
 	}
-  int ntries=0;
-  while ((histo->GetBinContent(histo->GetMaximumBin())/histo->GetEntries())<0.05&&ntries<3){//todo change hardcoding
-    histo->Rebin();ntries++;
-  }
+	int ntries=0;
+	while ((histo->GetBinContent(histo->GetMaximumBin())/histo->GetEntries())<0.05&&ntries<3){//todo change hardcoding
+		histo->Rebin();ntries++;
+	}
 	return histo;
 }
 
