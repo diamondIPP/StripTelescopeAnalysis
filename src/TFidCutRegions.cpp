@@ -72,40 +72,41 @@ void TFidCutRegions::Print(int intend)
 
 void TFidCutRegions::setRunDescription(std::string runDes)
 {
-  this->runDescription=runDes;
-  if(runDescription.size()==0) {
-    index=0;
-    return;
-  }
-  switch(runDescription.at(0)){
-    case '0': index=0;return;
-    case '1': index=1;return;
-    case '2': index=2;return;
-    case '3': index=3;return;
-    case '4': index=4;return;
-  }
-  if(runDescription.find("left")!=string::npos){
-    index = 1;
-    return;
-  }
-  if(runDescription.find("right")!=string::npos){
-    index = 2;
-    return;
-  }
-  return;
+	index=0;
+	this->runDescription=runDes;
+	if(runDescription.size()==0) {
+		index=0;
+		return;
+	}
+	switch(runDescription.at(0)){
+	case '0': index=0;return;
+	case '1': index=1;return;
+	case '2': index=2;return;
+	case '3': index=3;return;
+	case '4': index=4;return;
+	}
+	if(runDescription.find("left")!=string::npos){
+		index = 1;
+		return;
+	}
+	if(runDescription.find("right")!=string::npos){
+		index = 2;
+		return;
+	}
+	return;
 }
 
 bool TFidCutRegions::isInFiducialCut(Float_t xVal, Float_t yVal)
 {
 //  cout<<"xVal = "<<xVal<<"\tyVal = "<<yVal<<"\tIndex = "<<index<<endl;
-  if(index>0){
+  if(index>0){// one special diamond is choosen e.g. left/right
     if( index<this->fidCuts.size()+1){
 //      TFiducialCut fidCut = fidCuts.at(index-1);
 //      cout<<xVal<<"/"<<yVal<<"\t"<<index<<" "<<fidCuts.at(index-1)->isInFiducialCut(xVal,yVal)<<endl;
       return fidCuts.at(index-1)->isInFiducialCut(xVal,yVal);
     }
   }
-  if(index==0){
+  if(index==0){ //all diamonds will be analyesd
     bool inFidCut=false;
     for(UInt_t i=0;i<fidCuts.size();i++)
       inFidCut = inFidCut || fidCuts.at(i)->isInFiducialCut(xVal,yVal);

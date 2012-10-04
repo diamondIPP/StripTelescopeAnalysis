@@ -44,26 +44,26 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
   htmlSelection->setFileGeneratingPath(sys->pwd());
   cout<<"goToSelectionTREEDir"<<endl;
   settings->goToSelectionTreeDir();
-	cout<<"HISTSAVER:"<<sys->pwd()<<endl;
-			verbosity=1;
+  cout<<"HISTSAVER:"<<sys->pwd()<<endl;
+  verbosity=settings->getVerbosity();
 
-	createdTree=false;
-	cout<<"Fiducial Cut:\n\n\tAccept following Range in Silicon Planes: "<<endl;
-	cout<<"\t\tX: "<<settings->getSi_avg_fidcut_xlow()<<"/"<<settings->getSi_avg_fidcut_xhigh()<<endl;
-	cout<<"\t\tY: "<<settings->getSi_avg_fidcut_ylow()<<"/"<<settings->getSi_avg_fidcut_yhigh()<<endl;
-	cout<<" for Alignment use "<<settings->getAlignment_training_track_fraction()*100<<" % of the events." <<endl;
-	nUseForAlignment=0;
-	nUseForAnalysis=0;
-	nUseForSiliconAlignment=0;
-	nValidButMoreThanOneDiaCluster=0;
-	nValidSiliconNoDiamondHit=0;
-	nNoValidSiliconTrack=0;
-	nValidSiliconAndDiamondCluster=0;
-	nValidSiliconTrack=0;
-	nSiliconTrackNotFiducialCut=0;
-	nValidDiamondTrack=0;
-	initialiseHistos();
-	htmlSelection->createFiducialCuts();
+  createdTree=false;
+  cout<<"Fiducial Cut:\n\n\tAccept following Range in Silicon Planes: "<<endl;
+  cout<<"\t\tX: "<<settings->getSi_avg_fidcut_xlow()<<"/"<<settings->getSi_avg_fidcut_xhigh()<<endl;
+  cout<<"\t\tY: "<<settings->getSi_avg_fidcut_ylow()<<"/"<<settings->getSi_avg_fidcut_yhigh()<<endl;
+  cout<<" for Alignment use "<<settings->getAlignment_training_track_fraction()*100<<" % of the events." <<endl;
+  nUseForAlignment=0;
+  nUseForAnalysis=0;
+  nUseForSiliconAlignment=0;
+  nValidButMoreThanOneDiaCluster=0;
+  nValidSiliconNoDiamondHit=0;
+  nNoValidSiliconTrack=0;
+  nValidSiliconAndDiamondCluster=0;
+  nValidSiliconTrack=0;
+  nSiliconTrackNotFiducialCut=0;
+  nValidDiamondTrack=0;
+  initialiseHistos();
+  htmlSelection->createFiducialCuts();
 }
 
 TSelectionClass::~TSelectionClass() {
@@ -120,12 +120,11 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	createdTree=createSelectionTree(nEvents);
 	if(!createdTree) return;
 	this->setBranchAdressess();
-	  createFiducialCut();
+	createFiducialCut();
 	hFiducialCutSilicon->Reset();
 	hFiducialCutSiliconDiamondHit->Reset();
 	hAnalysisFraction->Reset();
 	hSelectedEvents->Reset();
-//	hSelectedEvents->Clear();
 	nUseForAlignment=0;
 	nUseForAnalysis=0;
 	nUseForSiliconAlignment=0;
@@ -218,92 +217,135 @@ void TSelectionClass::resetVariables(){
 
 	isDetMasked = false;//one of the Silicon Planes contains a Cluster with a masked channel
 	isDiaMasked.clear();
-	nDiamondHits=0;
-	hasValidSiliconTrack=true;; //One and only one cluster in each silicon plane;
+	nDiamondClusters=0;
+	oneAndOnlyOneSiliconCluster=true;; //One and only one cluster in each silicon plane;
 	useForAnalysis=false;
 	useForAlignment=false;
 	useForSiliconAlignment=false;
+	atLeastOneValidDiamondCluster=false;
+	oneAndOnlyOneDiamondCluster = false;
+	hasBigDiamondCluster=false;
 }
 
 
 /**
- * In this function all
+ * Checks if there is One and Only One Cluster in each Silicon Detector
+ * This includes a check if a channel is Masked or Saturated
  */
-void TSelectionClass::setVariables(){
-	if(verbosity>1)cout<<"setVariables\n"<<endl;
-
-	for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
+bool TSelectionClass::isOneAndOnlyOneClusterSiliconEvent(){
+	bool oneAndOnlyOneClusterInAllSilicon = true;
+	for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors()&&oneAndOnlyOneClusterInAllSilicon==true;det++){
 		bool oneAndOnlyOne = (eventReader->getNClusters(det)==1);
-		if(verbosity>10)cout<<"DET "<<det<<": "<<oneAndOnlyOne<<" "<<flush;
-		hasValidSiliconTrack=hasValidSiliconTrack&&oneAndOnlyOne;
-		if(verbosity>10)cout<<"."<<checkDetMasked(det)<<flush;
-		isDetMasked+=checkDetMasked(det);
-		if(verbosity>10)cout<<"."<<isDetMasked<<endl;
+		if(verbosity>10)cout<<"DET "<<det<<": "<<oneAndOnlyOne<<" "<<checkDetMasked(det)<<" "<<isSaturated(det)<<flush;
+		oneAndOnlyOne = oneAndOnlyOne && !checkDetMasked(det) && !isSaturated(det);
+		oneAndOnlyOneClusterInAllSilicon=oneAndOnlyOneClusterInAllSilicon&&oneAndOnlyOne;
 	}
+	return oneAndOnlyOneClusterInAllSilicon;
+}
+
+
+void TSelectionClass::checkSiliconTrackInFiducialCut(){
+	//if not one and only one cluster one cannot check the Silicon Track if is fullfills the fiducia cut
+	if (!oneAndOnlyOneSiliconCluster){
+		isInFiducialCut=false;
+		return;
+	}
+	isInFiducialCut=true;
+	//Calculate Fiducial Values
+	fiducialValueX=0;
+	fiducialValueY=0;
+	for(UInt_t plane=0;plane<4;plane++){
+		fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
+		fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
+	}
+	fiducialValueX/=4.;
+	fiducialValueY/=4.;
+	//check the fiducial Values
+	isInFiducialCut = fiducialCuts->isInFiducialCut(fiducialValueX,fiducialValueY);
+//	if(verbosity>4)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<": Fidcut:"<<isInFiducialCut<<endl;
+}
+
+
+void TSelectionClass::checkSiliconTrack(){
+
+	oneAndOnlyOneSiliconCluster = isOneAndOnlyOneClusterSiliconEvent();
+	checkSiliconTrackInFiducialCut();
+	if(verbosity>3)
+		cout<<"\t"<<fiducialValueX<<"/"<<fiducialValueY<<"\tSilicon: oneAndOnlyOne:"<<oneAndOnlyOneSiliconCluster<<"\tinFidCut:"<<isInFiducialCut<<endl;
+	//if isInFiducialCut it has one and Only One CLuster in each silicon detector
+	isValidSiliconTrack = isInFiducialCut;
+	isSiliconTrackNotFiducialCut = !isInFiducialCut&&oneAndOnlyOneSiliconCluster;
+}
+
+void TSelectionClass::checkDiamondTrack(){
+	//Do not look at tracks where is not at least one and only one cluster in each sil det
+	if(!oneAndOnlyOneSiliconCluster)
+		return;
+
 	for(UInt_t cl=0;cl<eventReader->getNClusters(TPlaneProperties::getDetDiamond());cl++){
 		isDiaMasked.push_back(checkDetMasked(8,cl));
 		if(verbosity>10)cout<<isDiaMasked[cl]<<endl;
 	}
-
-	nDiamondHits=eventReader->getNClusters(TPlaneProperties::getDetDiamond());
-	isInFiducialCut=true;
-	Float_t fiducialValueX=0;
-	Float_t fiducialValueY=0;
-	bool isSilSaturated=false;
-	if(hasValidSiliconTrack){
-	  for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++)
-	    isSilSaturated = isSilSaturated ||isSaturated(det);
-	}
-//	if(isSilSaturated&&hasValidSiliconTrack){
-//	  hasValidSiliconTrack==false;
-//	}
-	if(hasValidSiliconTrack){
-		for(UInt_t plane=0;plane<4;plane++){
-			fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
-			fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
-		}
-		fiducialValueX/=4.;
-		fiducialValueY/=4.;
-		isInFiducialCut = fiducialCuts->isInFiducialCut(fiducialValueX,fiducialValueY);
-//		isInFiducialCut=isInFiducialCut&&fiducialValueX>settings->getSi_avg_fidcut_xlow();
-//		isInFiducialCut=isInFiducialCut&&fiducialValueX<settings->getSi_avg_fidcut_xhigh();
-//		isInFiducialCut=isInFiducialCut&&fiducialValueY>settings->getSi_avg_fidcut_ylow();
-//		isInFiducialCut=isInFiducialCut&&fiducialValueY<settings->getSi_avg_fidcut_yhigh();
-		if(verbosity>10)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<": Fidcut:"<<isInFiducialCut<<endl;
-		hFiducialCutSilicon->Fill(fiducialValueX,fiducialValueY);
-	}
-	else
-		isInFiducialCut=false;
-	bool isSiliconTrackNotFiducialCut= !isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
-	isValidSiliconTrack = isInFiducialCut&&hasValidSiliconTrack&&!isDetMasked;
+	nDiamondClusters=eventReader->getNClusters(TPlaneProperties::getDetDiamond());
 	isDiaSaturated=this->isSaturated(TPlaneProperties::getDetDiamond());
-	bool isValidDiamondEvent = nDiamondHits==1&&!checkDetMasked(TPlaneProperties::getDetDiamond())&&!isDiaSaturated;
-	bool isDiaOneHitButToBigCluster = false;
-	bool validMoreThanOneClusterDiamondevent = nDiamondHits>=1&&!checkDetMasked(TPlaneProperties::getDetDiamond());
-	useForSiliconAlignment= isValidSiliconTrack;
-
-	if(nDiamondHits==1){
-	  nDiaClusterSize =eventReader->getClusterSize(TPlaneProperties::getDetDiamond(),0);
-	  if(nDiaClusterSize>=3){
-	    isValidDiamondEvent=false;
-	    isDiaOneHitButToBigCluster=true;
-	  }
+	if(verbosity>4&&nDiamondClusters>0&&!isInFiducialCut)
+		cout<<"\nThis event has diamond hit which is not in fid Cut"<<endl;
+	atLeastOneValidDiamondCluster = nDiamondClusters >0 && !checkDetMasked(TPlaneProperties::getDetDiamond()) && !isDiaSaturated;
+	oneAndOnlyOneDiamondCluster = atLeastOneValidDiamondCluster && nDiamondClusters==1;
+	hasBigDiamondCluster =false;
+	for(UInt_t cl=0;cl<nDiamondClusters;cl++){
+		nDiaClusterSize = eventReader->getClusterSize(TPlaneProperties::getDetDiamond(),cl);
+		if(nDiaClusterSize>=3){
+			hasBigDiamondCluster=true;
+			oneAndOnlyOneDiamondCluster=false;
+			atLeastOneValidDiamondCluster=false;
+		}
 	}
-	else nDiaClusterSize = -1;
+	if(verbosity>3){
+		cout<<"\tDiamond: nClusters:"<<nDiamondClusters<<"\tSaturated:"<<isDiaSaturated<<"\tmasked:"<<checkDetMasked(TPlaneProperties::getDetDiamond());
+		cout<<"\tatLeastOne:"<<atLeastOneValidDiamondCluster<<"\texactlyOne"<<oneAndOnlyOneDiamondCluster;
+		cout<<"\thasBigCluster: "<<hasBigDiamondCluster<<endl;
+	}
 
-	useForAlignment=useForSiliconAlignment&&isValidDiamondEvent;
-	float relativeEventNumber = (float)nEvent/(float)nEvents;
-	isDiaOneHitButToBigCluster = isDiaOneHitButToBigCluster&&useForSiliconAlignment;
-	useForAnalysis=useForAlignment;
+}
+/**
+ * In this function all
+ */
+void TSelectionClass::setVariables(){
+	if(verbosity>3)cout<<"\nsetVariables: "<<nEvent<<endl;
 
+	checkSiliconTrack();
+	checkDiamondTrack();
+	useForSiliconAlignment= isValidSiliconTrack;
+	useForAlignment=useForSiliconAlignment&&oneAndOnlyOneDiamondCluster;
 
-	double fraction =settings->getAlignment_training_track_fraction();
-	useForSiliconAlignment = isValidSiliconTrack&& !isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
-	useForAlignment = isValidDiamondEvent && isValidSiliconTrack//one and only one hit in all detectors (also diamond)
-					  && relativeEventNumber<fraction;			//and reltative event Number smaller than fraction
-	useForAnalysis=isValidDiamondEvent && isValidSiliconTrack&& relativeEventNumber>fraction;
-	if((isValidSiliconTrack||isSiliconTrackNotFiducialCut)&&nDiamondHits>0)
-		hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
+	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
+	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents);//one and only one hit in all detectors (also diamond)
+	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment;
+	validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster;
+	doEventCounting();
+	fillHitOccupancyPlots();
+}
+
+void TSelectionClass::fillHitOccupancyPlots(){
+	if(!oneAndOnlyOneSiliconCluster)
+		return;
+	hFiducialCutSilicon->Fill(fiducialValueX,fiducialValueY);
+//	if((isValidSiliconTrack||isSiliconTrackNotFiducialCut)&&nDiamondClusters>0)
+	if(!atLeastOneValidDiamondCluster)
+		return;
+	hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
+	if(!oneAndOnlyOneDiamondCluster)
+		return;
+	hAnalysisFraction->Fill(nEvent);
+	hSelectedEvents->Fill(fiducialValueX,fiducialValueY);
+//	if (verbosity>4)
+//		  cout<<nEvent<<" selected Event for ana or alignment @ "<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
+//	}
+//	else
+//		cout<<nEvent<<" not Use for ana or alignment @ "<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
+}
+void TSelectionClass::doEventCounting(){
 	if(isSiliconTrackNotFiducialCut)
 		nSiliconTrackNotFiducialCut++;
 	if(useForAnalysis){
@@ -320,55 +362,61 @@ void TSelectionClass::setVariables(){
 		nValidButMoreThanOneDiaCluster++;
 		nValidSiliconAndDiamondCluster++;
 	}
-	if(isValidSiliconTrack&&!validMoreThanOneClusterDiamondevent&&!isValidDiamondEvent)
+	if(isValidSiliconTrack&&!atLeastOneValidDiamondCluster)
 		nValidSiliconNoDiamondHit++;
-	if(isValidSiliconTrack&&isValidDiamondEvent)
+	if(isValidSiliconTrack&&oneAndOnlyOneDiamondCluster)
 		nValidDiamondTrack++;
-	if(isDiaOneHitButToBigCluster)
-	  nToBigDiamondCluster++;
-
+	if(hasBigDiamondCluster)
+		nToBigDiamondCluster++;
 	if(!isValidSiliconTrack)
 		nNoValidSiliconTrack++;
 	else
 		nValidSiliconTrack++;
-	if(useForAnalysis||useForAlignment){
-	  hAnalysisFraction->Fill(nEvent);
-	  hSelectedEvents->Fill(fiducialValueX,fiducialValueY);
-//    cout<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
-	}
-	//else cout<<nEvent<<"\tuseNOTforAlignemnt..."<<endl;
-//		UInt_t nDiamondHits; //number of  in diamond plane;
-//		bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
-//	)
 }
 
-
-
+/**
+ * checks if a detector has a masked cluster
+ * opens checkDetMasked(det,cl)
+ * gives verbosity output if verb>5 for diamond
+ * and verb>7 for silicon
+ */
 bool TSelectionClass::checkDetMasked(UInt_t det){
 	bool isMasked=false;
-
+	if((verbosity>5 && TPlaneProperties::isDiamondDetector(det))||verbosity>7)
+		cout<<"checkDetMasked("<<det<<"):\t";
 	for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
-		isMasked=isMasked||checkDetMasked(det,cl);
+		bool clusterMasked = checkDetMasked(det,cl);
+		isMasked=isMasked||clusterMasked;
+		if((verbosity>5 && TPlaneProperties::isDiamondDetector(det))||verbosity>7)
+			cout<<cl<<":"<<clusterMasked<<" ";
 	}
+	if((verbosity>5 && TPlaneProperties::isDiamondDetector(det))||verbosity>7)
+		cout<<endl;
 	return isMasked;
 }
 
+
+/**
+ * @todo: probably move to  Tevent?
+ */
 bool TSelectionClass::checkDetMasked(UInt_t det,UInt_t cl){
-	if(verbosity>20)cout<<"check if det Masked"<<endl;
+	if(verbosity>20)cout<<"masked of "<<det<<"-"<<cl<<":\t"<<flush;
 	bool isMasked=false;
 
 	if(cl<eventReader->getNClusters(det)){
-		if(verbosity>20)cout<<"getCLuster"<<flush;
+//		if(verbosity>20)cout<<"getCLuster"<<flush;
 		TCluster cluster = eventReader->getCluster(det,cl);
 		if(verbosity>20)cout<<"."<<flush;
 		UInt_t min = cluster.getSmallestChannelNumber();
 		if(verbosity>20)cout<<"."<<min<<flush;
 		UInt_t max = cluster.getHighestChannelNumber();
-		if(verbosity>20)cout<<":"<<max<<flush;
-		for(UInt_t ch = max; ch<=max;ch++){
-			if(verbosity>20)cout<<"ch"<<ch<<" "<<flush;
-			isMasked=isMasked||settings->getDet_channel_screen(det).isScreened(ch);
+		if(verbosity>20)cout<<":"<<max<<"\t"<<flush;
+		for(UInt_t ch = min; ch<=max;ch++){
+			bool channelScreened = settings->getDet_channel_screen(det).isScreened(ch);
+			isMasked=isMasked|| channelScreened;
+			if(verbosity>20)cout<<"ch"<<ch<<":"<<channelScreened<<"=>"<<isMasked<<" "<<flush;
 		}
+		if(verbosity>20)cout<<endl;
 	}
 	else
 		return true;
@@ -378,10 +426,10 @@ bool TSelectionClass::checkDetMasked(UInt_t det,UInt_t cl){
 }
 
 void TSelectionClass::setBranchAdressess(){
-	selectionTree->Branch("nDiamondHits",&nDiamondHits,"nDiamondHits/i");
+	selectionTree->Branch("nDiamondHits",&nDiamondClusters,"nDiamondHits/i");
 	selectionTree->Branch("isInFiducialCut",&isInFiducialCut,"isInFiducialCut/O");
 	selectionTree->Branch("isDetMasked",&isDetMasked,"isDetMasked/O");
-	selectionTree->Branch("hasValidSiliconTrack",&hasValidSiliconTrack,"hasValidSiliconTrack/O");
+	selectionTree->Branch("hasValidSiliconTrack",&oneAndOnlyOneSiliconCluster,"hasValidSiliconTrack/O");
 	selectionTree->Branch("isDiaMasked",&this->isDiaMasked,"isDiaMasked");
 	selectionTree->Branch("useForSiliconAlignment",&this->useForSiliconAlignment,"useForSiliconAlignment/O");
 	selectionTree->Branch("useForAlignment",&this->useForAlignment,"useForAlignment/O");
@@ -612,76 +660,4 @@ void TSelectionClass::createFiducialCut(){
   c1->SetTitle(Form("Fiducial Cut of Run %i with \"%s\"",settings->getRunNumber(),settings->getRunDescription().c_str()));
   c1->SetName("cFidCutCanvasXY");
   histSaver->SaveCanvas(c1);
-
-  //  fiducialCuts->getFiducialCutCanvas();
 }
-
-//void TSelectionClass::findFiducialCut(TH2F* hFidCut){
-//
-//  TH1D* hProjX = hFiducialCutSiliconDiamondHit->ProjectionX("hFiducialCutOneDiamondHitProjX");
-//  hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
-//  hProjX->GetYaxis()->SetTitle("Number Of Entries #");
-//  TH1D* hProjY = hFiducialCutSiliconDiamondHit->ProjectionY("hFiducialCutOneDiamondHitProjY");
-//  hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
-//  hProjY->GetYaxis()->SetTitle("Number Of Entries #");
-//
-//  hProjX->SetName("hProjX");
-//  hProjY->SetName("hProjY");
-//  if(hProjX==0||hProjY==0)
-//    return;
-//  if(hProjX->IsZombie()||hProjY->IsZombie())
-//    return;
-//
-////
-////  vector<pair <Float_t, Float_t> >xIntervals = findFiducialCutIntervall( hProjX);
-////  vector<pair <Float_t, Float_t> >yIntervals = findFiducialCutIntervall( hProjY);
-////  chooseFidCut(xIntervals,yIntervals);
-////  cout<<"HERE"<<endl;
-////  TLegend *leg = new TLegend();
-//
-//  histSaver->SaveHistogram(hProjX);
-//  cout<<"%"<<endl;
-//  histSaver->SaveHistogram(hProjY);
-////  cout<<"SAVED"<<endl;
-//}
-//
-//
-//void TSelectionClass::chooseFidCut(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt){
-//  cout<<"Found "<<xInt.size()<<" Intervals in x direction."<<endl;
-//  cout<<"Found "<<yInt.size()<<" Intervals in y direction."<<endl;
-//  cout<<"The RunDescription is \""<<settings->getRunDescription()<<"\""<<endl;
-//  cout<<"Finding Areas for "<<settings->getNDiamonds()<<" Diamonds"<<endl;
-//  if(fiducialCuts!=0) delete fiducialCuts;
-//  fiducialCuts= new TFidCutRegions(xInt,yInt,settings->getNDiamonds());
-//  fiducialCuts->setRunDescription(settings->getRunDescription());
-//  TFiducialCut *fidCut = fiducialCuts->getFidCut(settings->getRunDescription());
-//  fidCut->Print();
-//  cout<<"old Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
-//  settings->setFidCut(fidCut);
-//  cout<<"new Fiducial Cut is "<<settings->getSi_avg_fidcut_xlow()<<":"<<settings->getSi_avg_fidcut_xhigh()<<endl;
-//}
-//
-//void TSelectionClass::DrawFiduciaCuts(TH1D* hProj,vector< pair<Float_t,Float_t> > intervals){
-//  if(hProj==0)
-//    return;
-//  if(hProj->IsZombie())
-//    return;
-//  stringstream canvasName;
-//  canvasName<<"c"<<hProj->GetName();
-//  TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
-//  c1->cd();
-//  hProj->Draw();
-//  vector<TBox* > boxes;
-//  for(UInt_t i=0;i<intervals.size();i++){
-//    TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
-//    box->SetFillColor(kRed+i);
-//    box->SetFillStyle(3013);
-//    box->AddText("");
-//    box->AddText("");
-//    box->AddText(Form("Area\n\n%i",i));
-//    boxes.push_back(box);
-//    box->Draw("same");
-//  }
-//  histSaver->SaveCanvas(c1);
-//
-//}

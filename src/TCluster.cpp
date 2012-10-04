@@ -278,8 +278,9 @@ bool TCluster::hasSaturatedChannels(){
 	return isSaturated;//todo
 }
 Float_t TCluster::getCharge(bool useSmallSignals){
-	if(useSmallSignals)return getCharge(1000,useSmallSignals);
-	return charge;
+//	if(useSmallSignals)
+		return getCharge(1000,useSmallSignals);
+//	return charge;
 }
 
 /**
@@ -593,8 +594,6 @@ Float_t TCluster::getSignal(UInt_t clusterPos, bool cmnCorrected)
 
 
 /**
- * @todo
- * TODO
  */
 Float_t TCluster::getSNR(UInt_t clusterPos, bool cmnCorrected)
 {
@@ -608,8 +607,6 @@ Float_t TCluster::getSNR(UInt_t clusterPos, bool cmnCorrected)
 
 }
 /**
- * @todo
- * TODO
  */
 Float_t TCluster::getPedestalMean(UInt_t clusterPos, bool cmnCorrected)
 {
@@ -622,10 +619,8 @@ Float_t TCluster::getPedestalMean(UInt_t clusterPos, bool cmnCorrected)
 	else return -1;
 
 }
-/**
- * @todo
- * TODO
- */
+
+
 Float_t TCluster::getPedestalSigma(UInt_t clusterPos,bool cmnCorrected)
 {
 	if(clusterPos<checkClusterForSize())
@@ -778,10 +773,8 @@ Float_t TCluster::getValueOfHisto(Float_t x, TH1F* histo){
 }
 
 void TCluster::Print(UInt_t level){
-	cout<<"sizes:"<<clusterADC.size()<<" "<<clusterPedMean.size()<<" "<<clusterPedSigma.size()<<clusterPedMeanCMN.size()<<" "<<clusterPedSigmaCMN.size()<<endl;
-
 	cout<<Intent(level)<<"Cluster of Event "<<flush;
-	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<" Cluster entries"<<flush;
+	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<"/"<<checkClusterForSize()<<" Cluster entries"<<flush;
 	for(UInt_t cl=0;cl<checkClusterForSize();cl++){
 		if(this->isSeed(cl))
 			cout<<"\t{"<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"}"<<flush;

@@ -64,10 +64,10 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
 		for (UInt_t det=0;det<TPlaneProperties::getNDetectors(); det++)
-			for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
-				cout<<nEvent<<" "<<det<<" "<<cl<<"\t"<<flush;
-				eventReader->getCluster(det,cl).Print();
-			}
+//			for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
+//				cout<<nEvent<<" "<<det<<" "<<cl<<"\t"<<flush;
+//				eventReader->getCluster(det,cl).Print();
+//			}
 //		cout<<nEvent;
 //		for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
 //			for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
@@ -619,8 +619,9 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 				cluster.Print();
 				continue;//why can this happen???
 			}
-			Float_t signalLeft = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()-1);
-			Float_t signalRight = cluster.getSignalOfChannel(cluster.getHighestSignalChannel()+1);
+			UInt_t highestChannel = cluster.getHighestSignalChannel();
+			Float_t signalLeft = cluster.getSignalOfChannel(highestChannel-1);
+			Float_t signalRight = cluster.getSignalOfChannel(highestChannel+1);
 			if(signalLeft<0 && verbosity>2)
 				cout<<"signalLeft is smaller than 0"<<endl;
 			if(signalRight<0 && verbosity>2)
@@ -628,26 +629,29 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 			Float_t signalHighest = cluster.getHighestSignal();
 			Float_t signal2ndHighest;
 			Float_t deltaSignals = signalLeft-signalRight;
-			if(deltaSignals<0)
+			if(deltaSignals<0)// right channel higher left channel
 				signal2ndHighest=signalRight;
 			else
 				signal2ndHighest=signalLeft;
 			Float_t sumSignals = signalLeft+signalRight;
 			if(signalLeft==0&&signalRight==0)continue;
 			if(sumSignals==0)continue;
-			Float_t allCharge=cluster.getCharge(true);
+			Float_t allCharge=cluster.getCharge(false);
+//			Float_t charge = cluster.getCharge(false);
+//			if (cluster.isHit())
 			Float_t signalRatio=signal2ndHighest/signalHighest;
 			if(signalRatio>1){
 				cout<<"Ratio>1:"<<signal2ndHighest<<" "<<signalHighest<<endl;
 				cluster.Print();
 			}
 			else
-			hSignal2ndHighestOverSignalHighestRatio[det]->Fill(signalRatio);
+				hSignal2ndHighestOverSignalHighestRatio[det]->Fill(signalRatio);
 			Float_t ratio;
+			if(cluster.size()!=1){
 			if(signalLeft>signalRight){
 				ratio=signalLeft/allCharge;
 				if(ratio>0.5||allCharge==0||ratio!=ratio){
-					cout<<"2ndBiggestHitOverCharge>0.5: left "<<signalLeft<<" "<<allCharge<<endl;
+					cout<<"\n2ndBiggestHitOverCharge>0.5: left "<<signalLeft<<" "<<allCharge<<endl;
 					cluster.Print();
 				}
 				else{
@@ -659,7 +663,7 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 			else{
 				ratio=signalRight/allCharge;
 				if(ratio>0.5||allCharge==0||ratio!=ratio){
-					cout<<"2ndBiggestHitOverCharge>0.5: right"<<signalRight<<" "<<allCharge<<endl;
+					cout<<"\n2ndBiggestHitOverCharge>0.5: right"<<signalRight<<" "<<allCharge<<endl;
 					cluster.Print();
 				}
 				else{
@@ -668,6 +672,7 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
 				}
 
 				h2ndBiggestHitSignal[det]->Fill(signalRight);
+			}
 			}
 			if(signalLeft>signalRight){
 				h2ndBiggestHitPosition[det]->Fill(-1);
