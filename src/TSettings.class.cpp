@@ -142,12 +142,12 @@ std::string TSettings::getSelectionTreeFilePath()
 }
 
 void TSettings::goToDir(std::string dir){
-  cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
-  cout<<"goTo Dir: "<<dir<<endl;
+  if(this->verbosity>3)cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
+  if(this->verbosity>3)cout<<"goTo Dir: "<<dir<<endl;
   if(!existsDirectory(dir))
     sys->mkdir( dir.c_str(),true);
   sys->cd(dir.c_str());
-  cout<<"new Dir: "<<sys->pwd()<<endl;
+  if(this->verbosity>3)cout<<"new Dir: "<<sys->pwd()<<endl;
 }
 void TSettings::goToRawTreeDir(){
     goToDir(this->getAbsoluteOuputPath(false));
@@ -174,7 +174,7 @@ void TSettings::setRunDescription(std::string runDescription)
 }
 
 std::string TSettings::getAbsoluteOuputPath(bool withRunDescribtion){
-  cout<<"Absolute PATH:"<<withRunDescribtion<<" "<<(int)(runDescription.at(0)!='0')<<endl;
+  if(this->verbosity>3)cout<<"Absolute PATH:"<<withRunDescribtion<<" "<<(int)(runDescription.at(0)!='0')<<endl;
   stringstream output;
   output<<this->getOutputDir();
   output<<"/"<<runNumber<<"/";
@@ -182,7 +182,7 @@ std::string TSettings::getAbsoluteOuputPath(bool withRunDescribtion){
     output<<runDescription<<"/";
     sys->MakeDirectory(output.str().c_str());
   }
-  cout<<"OUTPUT: "<<output.str()<<endl;
+  if(this->verbosity>3)cout<<"OUTPUT: "<<output.str()<<endl;
   return output.str();
 }
 void TSettings::SetFileName(string newFileName){

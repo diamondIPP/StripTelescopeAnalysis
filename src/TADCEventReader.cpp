@@ -18,8 +18,8 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber) {
 	tree =NULL;
 	file=NULL;
 	sys = gSystem;
-	cout<<"SYS: "<<sys->pwd()<<endl;
-	cout<<"OPEN: "<<FileName<<endl;
+	if(verbosity>1)cout<<"SYS: "<<sys->pwd()<<endl;
+	if(verbosity>1)cout<<"OPEN: "<<FileName<<endl;
 	SetTree(FileName);//tree);
 	initialiseTree();
 	if(!this->isOK()){

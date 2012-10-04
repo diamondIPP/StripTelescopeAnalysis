@@ -16,7 +16,7 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 	settings=newSettings;
 	if (settings==0)
 		cerr<<"settings does not exist"<<endl;
-	verbosity=3;
+	verbosity=settings->getVerbosity();
 	setTitle("Summary");
 	setFileName("overview.html");
 }
@@ -30,7 +30,7 @@ THTMLGenerator::~THTMLGenerator() {
 void THTMLGenerator::generateHTMLFile(){
 	if (this->verbosity)cout<<"generateHTMLFile"<<endl;
 	stringstream htmlOutputFileName;
-	cout<<"FILE: "<<fileName<<endl;
+	if(verbosity>2)cout<<"FILE: "<<fileName<<endl;
 	htmlOutputFileName<<fileGenPath<<"/"<<	fileName;
 	cout<<"create HTML file: \""<<htmlOutputFileName.str()<<"\""<<endl;
 	html_summary.open(htmlOutputFileName.str().c_str());
@@ -38,7 +38,7 @@ void THTMLGenerator::generateHTMLFile(){
 	generateHTMLTail();
 	if (verbosity>2)cout<<"::GenerateHTML()::close html_summary"<<flush;
 	html_summary.close();
-	cout<<"...DONE"<<endl;
+	if(verbosity>2)cout<<"...DONE"<<endl;
 }
 
 void THTMLGenerator::generatorHTMLHeader()
@@ -101,7 +101,7 @@ void THTMLGenerator::setFileName(string Name)
 
 void THTMLGenerator::addSection(string sectionName, string secContent)
 {
-	cout<<"ADD SECTION NO"<<tableOfContent.size()<<":"<<endl;
+	if (verbosity>2)cout<<"ADD SECTION NO"<<tableOfContent.size()<<":"<<endl;
 	stringstream output;
 	output<<"\t<h1 id=\"C"<<this->content.size()<<"\"><a name=\"C"<<this->content.size()<<"\">"<<sectionName<<"</a></h1>\n";
 	output<<"\t<p>";
@@ -150,7 +150,7 @@ void THTMLGenerator::generateHTMLTail(){
 
 void THTMLGenerator::setPathName(std::string pathName){
 	this->path = pathName;
-	cout<<"new Path: \""<<path<<"\""<<endl;
+	if (verbosity>2)cout<<"new Path: \""<<path<<"\""<<endl;
 }
 
 void THTMLGenerator::setMainPath(std::string mainPathName){
@@ -174,7 +174,7 @@ std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > c
 	UInt_t nCols =0;
 	for(UInt_t row=0;row< nRows;row++)
 		if(content.at(row).size()>nCols)nCols=content.at(row).size();
-	cout<<"creating a Table with "<<nRows<<" Rows and "<<nCols<<" Columns!"<<endl;
+	if (verbosity>2)cout<<"creating a Table with "<<nRows<<" Rows and "<<nCols<<" Columns!"<<endl;
 	stringstream output;
 	output<<"<p><table frame=\"void\" border=\"1\" rules=\"all\" align=\"center\">\n";
 	for(UInt_t row=0;row<nRows;row++){
