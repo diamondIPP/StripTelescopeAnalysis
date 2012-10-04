@@ -239,7 +239,7 @@ public:
     Int_t getVerbosity(){return this->verbosity;}
     bool useForAlignment(UInt_t eventNumber, UInt_t nEvents=0);
 	UInt_t getAlignmentTrainingTrackNumber() const {return alignment_training_track_number;}
-	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
+//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 protected:
     float store_threshold;
 private:

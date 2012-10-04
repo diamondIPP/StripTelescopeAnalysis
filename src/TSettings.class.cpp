@@ -1561,11 +1561,11 @@ Float_t TSettings::getRes_keep_factor(){
 void Print(){
 
 }
-
-void TSettings::setAlignmentTrainingTrackNumber(){
-	alignment_training_track_number = alignmentTrainingTrackNumber;
-	trainingMethod =  enumEvents;
-}
+//
+//void TSettings::setAlignmentTrainingTrackNumber(){
+//	alignment_training_track_number = alignmentTrainingTrackNumber;
+//	trainingMethod =  enumEvents;
+//}
 
 
 bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {

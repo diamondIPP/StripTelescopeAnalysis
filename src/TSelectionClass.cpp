@@ -140,7 +140,7 @@ void TSelectionClass::MakeSelection(UInt_t nEvents)
 	if(settings->getTrainingMethod()==TSettings::enumFraction)
 		cout<<"Use Fraction Training, with  fraction: "<<settings->getAlignment_training_track_fraction()*100.<<"%"<<endl;
 	else
-		cout<<"Use the first "<<settings->getAlignmentTrainingTrackNumber()<<" Events for Alignment!"
+		cout<<"Use the first "<<settings->getAlignmentTrainingTrackNumber()<<" Events for Alignment!"<<endl;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
 		eventReader->LoadEvent(nEvent);
