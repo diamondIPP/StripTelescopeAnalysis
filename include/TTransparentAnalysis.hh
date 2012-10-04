@@ -105,12 +105,14 @@ private:
 	LandauGaussFit* landauGauss;
 	
 	// cut flow
+	UInt_t nEvents;
 	UInt_t nAnalyzedEvents;
 	UInt_t regionNotOnPlane;
 	UInt_t saturatedChannel;
 	UInt_t screenedChannel;
 	UInt_t noValidTrack;
 	UInt_t noFidCutRegion;
+	UInt_t usedForAlignment;
 	
 	// histograms
 	vector<TH1F*> hLaundau;
