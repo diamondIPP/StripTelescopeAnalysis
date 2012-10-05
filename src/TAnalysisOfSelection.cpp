@@ -23,7 +23,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	settings->goToSelectionAnalysisDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
-//	htmlPedestal->setSubdirPath("selectionAnalysis");
+	//	htmlPedestal->setSubdirPath("selectionAnalysis");
 	histSaver->SetPlotsPath(settings->getSelectionAnalysisPath());
 	histSaver->SetRunNumber(runNumber);
 	htmlLandau->setFileGeneratingPath(settings->getSelectionAnalysisPath());
@@ -97,10 +97,10 @@ void TAnalysisOfSelection::saveHistos()
 	xmin=histoMax-histoRMS;
 	xmax=histoMax+histoRMS;
 	gausFit = new TF1("gausFit","gaus",xmin,xmax);
-//	cout<<"gausFit: "<<gausFit<<endl;
+	//	cout<<"gausFit: "<<gausFit<<endl;
 	histo->Fit(gausFit,"","same+",xmin,xmax);
 	fit = landauGauss.doLandauGaussFit(histo);
-//	cout <<"gausFit:"<<gausFit->GetTitle()<<" is a:"<< gausFit->ClassName()<<" "<<gausFit->GetNpar()<<endl;
+	//	cout <<"gausFit:"<<gausFit->GetTitle()<<" is a:"<< gausFit->ClassName()<<" "<<gausFit->GetNpar()<<endl;
 	histoMeanGausFit = gausFit->GetParameter(1);
 	vecWidth.push_back(fit->GetParameter(0));
 	vecHistoMax.push_back(histoMax);
@@ -122,25 +122,25 @@ void TAnalysisOfSelection::saveHistos()
 		name<< "hPulseHeigthDiamond_"<<clusSize<<"_ClusterSize";
 		TH1F* histo = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),clusSize,clusSize);
 		if(histo==0) {
-		  cout<<"TAnalysisOfSelection:: saverHistos ==> oooh Boy, something went terribly wrong, Lukas you better fix it! NOW!"<<endl;
-		  return;
+			cout<<"TAnalysisOfSelection:: saverHistos ==> oooh Boy, something went terribly wrong, Lukas you better fix it! NOW!"<<endl;
+			return;
 		}
 		histo->SetTitle(name.str().c_str());
 		histo->GetYaxis()->SetTitle("number of Entries #");
 		TF1* fitCS=0;
 		if(clusSize<5){
-		  int nTries=0;
-		  while(histo->GetMaximum()<histo->GetEntries()*0.1&&nTries<5)
-		    histo->Rebin(),nTries++;
-		  histoMean = histo->GetMean();
-		  histoMax = histo->GetBinCenter(histo->GetMaximumBin());
-		  histoRMS = histo->GetRMS();
-		  xmin=histoMax-histoRMS, xmax=histoMax+histoRMS;
-		  if(gausFit!=0)delete gausFit;
-		  gausFit = new TF1("gausFit","gaus",xmin,xmax);
-		  histo->Fit(gausFit,"","sames+",xmin,xmax);
-		  histoMeanGausFit = gausFit->GetParameter(1);
-		  if(fitCS!=0)delete fitCS;
+			int nTries=0;
+			while(histo->GetMaximum()<histo->GetEntries()*0.1&&nTries<5)
+				histo->Rebin(),nTries++;
+			histoMean = histo->GetMean();
+			histoMax = histo->GetBinCenter(histo->GetMaximumBin());
+			histoRMS = histo->GetRMS();
+			xmin=histoMax-histoRMS, xmax=histoMax+histoRMS;
+			if(gausFit!=0)delete gausFit;
+			gausFit = new TF1("gausFit","gaus",xmin,xmax);
+			histo->Fit(gausFit,"","sames+",xmin,xmax);
+			histoMeanGausFit = gausFit->GetParameter(1);
+			if(fitCS!=0)delete fitCS;
 			fitCS = landauGauss.doLandauGaussFit(histo);
 			vecMP.push_back(fitCS->GetParameter(1));
 			vecClusSize.push_back(clusSize);
@@ -197,9 +197,9 @@ void TAnalysisOfSelection::saveHistos()
 	cout<<"Save Canvas"<<endl;
 	histSaver->SaveCanvas(c1);
 
-//	TLine *lMVP = new TLine(graph->GetXaxis()->GetXmin(),MP,graph->GetXaxis()->GetXmax(),MP);
-//	TLine *lMVPplus = new TLine(graph->GetXaxis()->GetXmin(),MP+width,graph->GetXaxis()->GetXmax(),MP+width);
-//	TLine *lMVPminus = new TLine(graph->GetXaxis()->GetXmin(),MP-width,graph->GetXaxis()->GetXmax(),MP-width);
+	//	TLine *lMVP = new TLine(graph->GetXaxis()->GetXmin(),MP,graph->GetXaxis()->GetXmax(),MP);
+	//	TLine *lMVPplus = new TLine(graph->GetXaxis()->GetXmin(),MP+width,graph->GetXaxis()->GetXmax(),MP+width);
+	//	TLine *lMVPminus = new TLine(graph->GetXaxis()->GetXmin(),MP-width,graph->GetXaxis()->GetXmax(),MP-width);
 	histSaver->SaveGraph(graph,name.str(),"APLE1");
 	htmlLandau->addLandauDiamond(width,MP,area,gWidth);
 	htmlLandau->addLandauDiamondTable(vecHistoMean,vecHistoMax,vecHistoMeanGaus,vecHistoMeanLandau);
@@ -228,58 +228,64 @@ void TAnalysisOfSelection::saveHistos()
 	cout<<hNoDiamond->GetEntries()<<endl;
 	histSaver->SaveHistogram(hNoDiamond,0,1);
 	cout<<h3dDiamond_hit->GetEntries()<<endl;
-  histSaver->SaveHistogram(h3dDiamond_hit,0,1);
-  cout<<hNoDiamond_hit->GetEntries()<<endl;
-  histSaver->SaveHistogram(hNoDiamond_hit,0,1);
-  cout<<"Save canvas"<<endl;
-  TCanvas *c2= new TCanvas("c2","c2",1024,800);
-  c2->cd();
-  h3dDiamond_hit->Draw();
-  hNoDiamond_hit->SetLineColor(kBlue);
-  hNoDiamond_hit->Draw("same");
-  histSaver->SaveCanvas(c2);
-  delete c2;
+	histSaver->SaveHistogram(h3dDiamond_hit,0,1);
+	cout<<hNoDiamond_hit->GetEntries()<<endl;
+	histSaver->SaveHistogram(hNoDiamond_hit,0,1);
+	cout<<"Save canvas"<<endl;
+	TCanvas *c2= new TCanvas("c2","c2",1024,800);
+	c2->cd();
+	h3dDiamond_hit->Draw();
+	hNoDiamond_hit->SetLineColor(kBlue);
+	hNoDiamond_hit->Draw("same");
+	histSaver->SaveCanvas(c2);
+	delete c2;
 	delete h3dDiamond;
 	delete hNoDiamond;
 }
 
 void TAnalysisOfSelection::analyseEvent()
 {
-  Float_t fiducialValueX=0;
-  Float_t fiducialValueY=0;
+	Float_t fiducialValueX=0;
+	Float_t fiducialValueY=0;
 
 	if(eventReader->isValidTrack()){//
-	//if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
+		//if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
 
-    for(UInt_t plane=0;plane<4;plane++){
-      fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
-      fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
-    }
-    fiducialValueX/=4.;
-    fiducialValueY/=4.;
-    Float_t charge3d=0;
-    for(UInt_t ch=0;ch<18;ch++){
-      Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
-      if(charge3d<rawSignal)charge3d=rawSignal;
-    }
-    h3dDiamond->Fill(charge3d);
-    Float_t chargeNo=0;
-    for(UInt_t ch=36;ch<54;ch++){
-      Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
-      if(chargeNo<rawSignal)charge3d=rawSignal;
-    }
-    hNoDiamond->Fill(chargeNo);
-    if(eventReader->getNClusters(TPlaneProperties::getDetDiamond())<=0)
-        return;
-    hNoDiamond_hit->Fill(chargeNo);
-    h3dDiamond_hit->Fill(charge3d);
+		for(UInt_t plane=0;plane<4;plane++){
+			fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
+			fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
+		}
+		fiducialValueX/=4.;
+		fiducialValueY/=4.;
+		Float_t charge3d=0;
+		for(UInt_t ch=0;ch<18;ch++){
+			Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+			if(charge3d<rawSignal)charge3d=rawSignal;
+		}
+		h3dDiamond->Fill(charge3d);
+		Float_t chargeNo=0;
+		for(UInt_t ch=36;ch<54;ch++){
+			Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
+			if(chargeNo<rawSignal)charge3d=rawSignal;
+		}
+		hNoDiamond->Fill(chargeNo);
+		if(eventReader->getNClusters(TPlaneProperties::getDetDiamond())<=0)
+			return;
+		hNoDiamond_hit->Fill(chargeNo);
+		h3dDiamond_hit->Fill(charge3d);
 
-    hFidCut->Fill(fiducialValueX,fiducialValueY);
+		if(!eventReader->isInFiducialCut())
+			return;
+		hFidCut->Fill(fiducialValueX,fiducialValueY);
 		TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
 		Float_t charge = cluster.getCharge(false);
 		UInt_t clustSize = cluster.size();
 		if(clustSize>8) clustSize=8;
-//		cout<<nEvent<<":\t"<<charge<<endl;
+		if(cluster.isSaturatedCluster())
+			return;
+		if (cluster.isScreened())
+			return;
+		//		cout<<nEvent<<":\t"<<charge<<endl;
 		histoLandauDistribution->Fill(charge,clustSize);
 		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
 		hClusterPosition->Fill(pos);
