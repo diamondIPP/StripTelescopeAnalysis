@@ -100,6 +100,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
   int falseClusterSizeDia = 0;
   int nCandidates = 0;
   int nScreened = 0;
+  int nNotInFidCut=0;
   cout << "CREATING VECTOR OF VALID EVENTS..." << endl;
 
   for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
@@ -113,6 +114,10 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
       nScreened++;
       continue;
     }
+    if(!eventReader->isInFiducialCut()){
+    	nNotInFidCut++;
+    	continue;
+    }
     if (eventReader->getNDiamondClusters() != 1) {
       falseClusterSizeDia++;
       continue;
@@ -122,9 +127,21 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
       this->events.push_back(*eventReader->getEvent());
     }
     if (eventReader->useForAnalysis()) {
-      cout << "\nFound first Event for Analyis ->BREAK" << endl;
+      cout << "\nFound first Event for Analysis ->BREAK" << endl;
       break;
     }
+  }
+  if(verbosity){
+	  cout<<"\nCreated Vector of Events with one and only one Hit in Silicon  + one diamond Cluster + in Fiducial Cut Area"<<endl;
+	  cout<<"first Event: "<<startEvent<<"\t last Event: "<<nEvent<<"\t total Events: "<<endl;//todo
+	  cout<<"Cut Flow:\n";
+	  cout<<"\tTotal Events looked at:     "<<setw(7)<<nEvent-startEvent<<"\n";
+	  cout<<"\tPlane with no Silicon Hit:   "<<setw(7)<<noHitDet<<"\n";
+	  cout<<"\tSil Track not in Fid Cut:    "<<setw(7)<<nNotInFidCut<<"\n";
+	  cout<<"\tNo of Diamond Clust. != 1:   "<<setw(7)<<falseClusterSizeDia<<"\n";
+	  cout<<"\t                             "<<"-------\n";
+	  cout<<"\t                             "<<setw(7)<<nCandidates<<" = "<<(Float_t)nCandidates/(Float_t)(nEvent-startEvent)*100.<<"%\n"<<endl;
+
   }
   align->addEventIntervall(startEvent, nEvent);
   align->setNUsedEvents((UInt_t) events.size());
