@@ -322,13 +322,17 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
 		cout<<"Histogram "<<histo->GetName()<<" has no entries..."<<endl;
 		return;
 	}
-	TH1* htemp=(TH1*)histo->Clone();
+	stringstream histoName;
+	histoName<<histo->GetName()<<"_Clone";
+	TH1* htemp=(TH1*)histo->Clone(histoName.str().c_str());
 	if(htemp==0)return;
 	TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
 	plots_canvas->cd();
 	htemp->SetMinimum(0.);
 	htemp->Draw();
-	TPaveText* pt2 = (TPaveText*)pt->Clone();
+	stringstream ptName;
+	ptName << "pt_"<<histo->GetName();
+	TPaveText* pt2 = (TPaveText*)pt->Clone(ptName.str().c_str());
 	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
