@@ -38,18 +38,18 @@ using namespace std;
 class TPedestalCalculation {
 public:
 	TPedestalCalculation(TSettings *settings);
-//	TPedestalCalculation(int runNumber, int nEvents);
+	//	TPedestalCalculation(int runNumber, int nEvents);
 	virtual ~TPedestalCalculation();
-	void calculatePedestals(int nEvents);
+	void calculateStartingPedestal(int nEvents);
 	void calculateSlidingPedestals(UInt_t nEvents);
 	static Float_t RoundFloat(Float_t value,UInt_t prec=2){if(value!=value)value=0;return (Float_t)((Long_t)(value*TMath::Power((Double_t)10,(Double_t)prec)+0.5))/TMath::Power((Double_t)10,(Double_t)prec);}
 private:
-	void calculateFirstPedestals(deque<UChar_t> DetAdcQueue[8][N_DET_CHANNELS], deque<Int_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
-	pair <float,float> calculateFirstPedestalDet(int det,int ch, deque<UChar_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=7);
-	pair <float,float> calculateFirstPedestalDia(int ch, deque<Int_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
-  pair <float,float> calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
-	pair <float,float> checkPedestalDet(int det, int ch,int maxSigma=7);
-	pair <float,float> checkPedestalDia(int ch,int maxSigma=7);
+	void calculateFirstPedestals(deque<Int_t> DetAdcQueue[8][N_DET_CHANNELS], deque<Int_t> DiaAdcQueue[N_DIA_CHANNELS],int maxSigma=7);
+	pair <Float_t,Float_t> calculateFirstPedestalDet(int det,int ch, deque<Int_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=7);
+	pair <Float_t,Float_t> calculateFirstPedestalDia(int ch, deque<Int_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
+	pair <Float_t,Float_t> calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
+	pair <Float_t,Float_t> checkPedestalDet(int det, int ch,int maxSigma=7);
+	pair <Float_t,Float_t> checkPedestalDia(int ch,int maxSigma=7);
 	void printDiamond(UInt_t nChannel);
 	bool createPedestalTree(int nEvents);
 	void setBranchAdresses();
@@ -65,8 +65,8 @@ private:
 	UInt_t nEvents;
 	bool createdNewFile;
 	bool doCMNCorrection;
-    TSystem* sys;
-    TSettings *settings;
+	TSystem* sys;
+	TSettings *settings;
 	UInt_t runNumber;
 	Float_t pedestalMean[9][N_DET_CHANNELS];
 	Float_t  pedestalSigma[9][N_DET_CHANNELS];
@@ -81,16 +81,19 @@ private:
 	double meanValues[9][N_DET_CHANNELS];
 
 	UInt_t slidingLength;
-	deque<UChar_t> detAdcValues[8][N_DET_CHANNELS];
+	deque<Int_t> detAdcValues[8][N_DET_CHANNELS];
 	deque<Int_t> diaAdcValues[N_DIA_CHANNELS];
 	deque<bool> detEventUsed[8][N_DET_CHANNELS];
 	deque<bool> diaEventUsed[N_DIA_CHANNELS];
 
 	UInt_t nEvent;
-	ULong_t	detSUM[8][N_DET_CHANNELS];
-	ULong_t detSUM2[8][N_DET_CHANNELS];
-	ULong_t diaSUM[N_DIA_CHANNELS];
-	ULong_t diaSUM2[N_DIA_CHANNELS];
+	Double_t detSUM[8][N_DET_CHANNELS];
+	Double_t detSUM2[8][N_DET_CHANNELS];
+
+	Double_t diaSUM[N_DIA_CHANNELS];
+	Double_t diaSUM2[N_DIA_CHANNELS];
+	Double_t diaSUMCmn[N_DIA_CHANNELS];
+	Double_t diaSUM2Cmn[N_DIA_CHANNELS];
 
 
 	int detEventsInSum[8][N_DET_CHANNELS];
@@ -98,20 +101,21 @@ private:
 	int diaEventsInSumCMN[N_DIA_CHANNELS];
 
 
-  Float_t diaPedestalMeanCMN[N_DIA_CHANNELS];
-  Float_t diaPedestalSigmaCMN[N_DIA_CHANNELS];
-  deque<Float_t> diaAdcValuesCMN[N_DIA_CHANNELS];
-  deque<bool> diaEventUsedCMN[N_DIA_CHANNELS];
-  Double_t diaSUMCmn[N_DIA_CHANNELS];
-  Double_t diaSUM2Cmn[N_DIA_CHANNELS];
-  Float_t cmNoise;
+	Float_t diaPedestalMeanCMN[N_DIA_CHANNELS];
+	Float_t diaPedestalSigmaCMN[N_DIA_CHANNELS];
+	deque<Float_t> diaAdcValuesCMN[N_DIA_CHANNELS];
+	deque<bool> diaEventUsedCMN[N_DIA_CHANNELS];
+	Float_t cmNoise;
 
-//	stringstream rawfilepath;
+	//	stringstream rawfilepath;
 	int MAXSDETSIGMA;
 	int MAXDIASIGMA;
 	HistogrammSaver *histSaver;
 	TH1F* hCommonModeNoise;
 	int printChannel;
+	int verbosity;
+	static Float_t getLowLimitPedestal(Float_t pedMean, Float_t pedSigma,Float_t maxSigma);
+	static Float_t getHighLimitPedestal(Float_t pedMean, Float_t pedSigma,Float_t maxSigma);
 };
 
 #endif /* PEDESTALCALCULATION_HH_ */

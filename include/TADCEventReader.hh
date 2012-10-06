@@ -78,10 +78,11 @@ public:
 	bool isDetMasked();
 	TEvent* getEvent();
 	void setVerbosity(UInt_t verbosity);
-	bool useForAlignment(){return this->bUseForAlignment;};
+	bool useForAlignment(){/*cout<<event_number<<" "<<bUseForAlignment<<endl;*/return this->bUseForAlignment;};
 	bool useForSiliconAlignment(){return this->bUseForSiliconAlignment;};
 	bool useForAnalysis(){return this->bUseForAnalysis;};
 	TH1F* getEtaIntegral(UInt_t det);
+	Float_t getCmnCreated(UInt_t det){if(det>=0&&det<9)return this->cmnCreated[det];return 0;}
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
@@ -112,6 +113,7 @@ private:
   Float_t diaPedestalMeanCMN[128];
   Float_t diaPedestalSigmaCMN[128];
 	Float_t cmNoise;
+	Float_t cmnCreated[9];
 	bool bCMNoiseCorrected;
 	TEvent *pEvent;
 	bool bIsDetMasked;

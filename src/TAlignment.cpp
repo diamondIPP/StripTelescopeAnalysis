@@ -19,7 +19,7 @@ TAlignment::TAlignment(TSettings* settings) {
   stringstream runString;
   settings->goToSelectionTreeDir();
   htmlAlign = new THTMLAlignment(settings);
-  eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(), settings->getRunNumber());
+  eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(), settings->getRunNumber(),settings->getVerbosity());
   eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
   histSaver = new HistogrammSaver();
   settings->goToAlignmentDir();
@@ -108,20 +108,34 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
     eventReader->LoadEvent(nEvent);
     if (!eventReader->isValidTrack()) {
       noHitDet++;
-      continue;
+//      continue;
     }
     if (eventReader->isDetMasked()) {
       nScreened++;
-      continue;
-    }
-    if(!eventReader->isInFiducialCut()){
-    	nNotInFidCut++;
-    	continue;
+//      continue;
     }
     if (eventReader->getNDiamondClusters() != 1) {
       falseClusterSizeDia++;
-      continue;
+//      continue;
     }
+    if(!eventReader->isInFiducialCut()){
+    	nNotInFidCut++;
+//    	float fiducialValueX=0;
+//    	float fiducialValueY=0;
+//    	for(UInt_t plane=0;plane<4;plane++){
+//    		fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
+//    		fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
+//    	}
+//    	fiducialValueX/=4.;
+//    	fiducialValueY/=4.;
+//    	cout<<nEvent<<" "<<eventReader->isInFiducialCut()<<" "<<fiducialValueX<<"/"<<fiducialValueY<<endl;
+//    	continue;
+    }
+    if(nEvent==startEvent&&verbosity>4)
+    	cout<<"\nEvent\tvalid\tnClus\tmasked\tFidCut\tAlign"<<endl;
+    if(verbosity>4)
+    	cout<<nEvent<<"\t"<<eventReader->isValidTrack()<<"\t"<<eventReader->getNDiamondClusters()
+    	<<"\t"<<eventReader->isDetMasked()<<"\t"<<eventReader->isInFiducialCut()<<"\t"<<eventReader->useForAlignment()<<endl;
     if (eventReader->useForAlignment()) {
       nCandidates++;
       this->events.push_back(*eventReader->getEvent());
@@ -167,6 +181,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent) {
 
   initialiseDetectorAlignment();
   if (events.size() == 0) createEventVectors(nEvents, startEvent);
+  if (events.size() == 0) {cout<<" Number of Events for Alignment is 0. Cannot Align. EXIT!"<<endl;exit(-1);}
   if (myTrack == NULL) {
     if(verbosity>2)cout << "TAlignment::Align::create new TTrack" << endl;
     myTrack = new TTrack(align);
@@ -211,6 +226,7 @@ void TAlignment::alignSiliconPlanes() {
 		bAlignmentGood = siliconAlignmentStep(false||plotAll);
 	}
 	cout<<"Alignment of Silicon Planes is done after "<<nAlignmentStep<<" steps. Now get final Silicon Alignment Results..."<<endl;
+	nAlignmentStep=nAlignSteps;
 	getFinalSiliconAlignmentResuluts();
 }
 

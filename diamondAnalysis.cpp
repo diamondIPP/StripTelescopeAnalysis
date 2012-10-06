@@ -193,7 +193,6 @@ int main(int argc, char ** argv) {
 		sys->cd(currentDir.c_str());
 		TPedestalCalculation* pedestalCalculation;
 		pedestalCalculation = new TPedestalCalculation(settings);
-		pedestalCalculation->calculatePedestals(RunParameters[i].getEvents());
 		pedestalCalculation->calculateSlidingPedestals(RunParameters[i].getEvents());
 		delete pedestalCalculation;
 
