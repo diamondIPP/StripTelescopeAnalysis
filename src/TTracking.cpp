@@ -12,6 +12,11 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,std::string
 	cout<<"new TTracking: \n\tpathName:"<<pathName<<"\n\ta;ignmentName: "<<alignmentName<<"\n\tetaDistPath: "<<etaDistributionPath<<"\n\tRunNumber: "<<runNumber<<endl;
 	setAlignment(alignmentName);
 	this->setEtaDistributionPath(etaDistributionPath);
+	if(myAlignment==0){
+		cerr<<"Not able to Read Alignment. EXIT!"<<endl;
+		exit(-1);
+	}
+
 	if(myAlignment!=NULL)
 		myTrack=new TTrack(myAlignment);
 	else

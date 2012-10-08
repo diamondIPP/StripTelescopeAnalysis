@@ -225,8 +225,11 @@ void TAlignment::alignSiliconPlanes() {
 		bAlignmentGood = true;
 		bAlignmentGood = siliconAlignmentStep(false||plotAll);
 	}
+	if(nAlignmentStep<nAlignSteps-1){
+		nAlignmentStep=nAlignSteps;
+		siliconAlignmentStep(false||plotAll);
+	}
 	cout<<"Alignment of Silicon Planes is done after "<<nAlignmentStep<<" steps. Now get final Silicon Alignment Results..."<<endl;
-	nAlignmentStep=nAlignSteps;
 	getFinalSiliconAlignmentResuluts();
 }
 

@@ -57,7 +57,8 @@ void THTMLLandaus::addLandauDiamond(Float_t width, Float_t MP, Float_t area, Flo
 	sectionContent<<putImage(this->path,"hLandauDiamond_OneCluster","png",50)<<"<br>\n";
 	sectionContent<<"<br>\nThe next plot shows the Projection of the two dimensional plot to the x axis.<br\n";
 	sectionContent<<"This is the Plot for all ClusterSizes. ";
-	sectionContent<<putImage(this->path,"hPulseHeightDiamondAll","png",50)<<"<br>\n";
+	sectionContent<<putImage(this->path,"hPulseHeightDiamondAll","png",49)<<" \n";
+	sectionContent<<putImage(this->path,"hPulseHeigthDiamond_1-2_ClusterSize","png",49)<<"<br>\n";
 	for(UInt_t i=1;i<8;i++){
 		stringstream name;
 		name <<"hPulseHeigthDiamond_"<<i<<"_ClusterSize";
