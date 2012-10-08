@@ -320,13 +320,11 @@ void TSelectionClass::setVariables(){
 
 	checkSiliconTrack();
 	checkDiamondTrack();
-	useForSiliconAlignment= isValidSiliconTrack&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;
-	useForAlignment=useForSiliconAlignment&&oneAndOnlyOneDiamondCluster&&isInFiducialCut;
 
-	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
-	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents);//one and only one hit in all detectors (also diamond)
-	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment;
-	validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster;
+	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster&&isInFiducialCut;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
+	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
+	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&isInFiducialCut;;
+	validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster&&isInFiducialCut;
 	doEventCounting();
 	fillHitOccupancyPlots();
 }

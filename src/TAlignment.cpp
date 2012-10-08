@@ -1145,7 +1145,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     histName << "_ScatterPlot_XObs_vs_YObs";
     histName << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString;
     ;    //<<"_with"<<refPlane1<<"_and_"<<refPlane2;
-    TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecXObs, vecYObs);
+    TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecYObs, vecXObs);
     histo->GetXaxis()->SetTitle("XObs");
     histo->GetYaxis()->SetTitle("YObs");
     histSaver->SaveHistogram((TH2F*) histo->Clone());    //,histName.str());
