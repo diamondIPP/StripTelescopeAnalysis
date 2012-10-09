@@ -94,6 +94,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	noValidTrack = 0;
 	noFidCutRegion = 0;
 	usedForAlignment = 0;
+//	usedForSiliconAlignment = 0;
 	cout<<"Current Dir: "<<sys->pwd()<<endl;
 	if (nEvents+startEvent >= eventReader->GetEntries()) {
 		cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
@@ -104,8 +105,8 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
 //		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
 		eventReader->LoadEvent(nEvent);
-//		if (eventReader->isValidTrack() == 0) {
-		if (eventReader->useForAnalysis() == 0) {
+		if (eventReader->isValidTrack() == 0) {
+//		if (eventReader->useForAnalysis() == 0) {
 			if (verbosity > 6) printEvent();
 			noValidTrack++;
 			continue;
@@ -114,6 +115,14 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 			noFidCutRegion++;
 			continue;
 		}
+		if (eventReader->useForAlignment() == true) {
+			usedForAlignment++;
+			continue;
+		}
+//		if (eventReader->useForSiliconAlignment() == true) {
+//			usedForSiliconAlignment++;
+//			continue;
+//		}
 		transparentClusters.clear();
 		
 		this->predictPositions();
@@ -455,12 +464,13 @@ void TTransparentAnalysis::printCutFlow() {
 	cout << "\n\n\n";
 	cout << "TTransparentAnalysis Cutflow" << endl;
 	cout << "number of events\t " << setw(8) << nEvents << endl;
-	cout << "region not on plane\t-" << setw(8) << regionNotOnPlane << endl;
-	cout << "saturated channel\t-" << setw(8) << saturatedChannel << endl;
-	cout << "screened channel\t-" << setw(8) << screenedChannel << endl;
 	cout << "no valid silicon track\t-" << setw(8) << noValidTrack << endl;
 	cout << "not in fid cut region\t-" << setw(8) << noFidCutRegion << endl;
 	cout << "used for alignment\t-" << setw(8) << usedForAlignment << endl;
+//	cout << "used for si alignment\t-" << setw(8) << usedForSiliconAlignment << endl;
+	cout << "region not on plane\t-" << setw(8) << regionNotOnPlane << endl;
+	cout << "screened channel\t-" << setw(8) << screenedChannel << endl;
+	cout << "saturated channel\t-" << setw(8) << saturatedChannel << endl;
 	cout << "\t\t\t---------" << endl;
 	cout << "total analyzed events\t " << setw(8) << nAnalyzedEvents << endl;
 }

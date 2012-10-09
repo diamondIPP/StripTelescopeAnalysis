@@ -113,6 +113,7 @@ private:
 	UInt_t noValidTrack;
 	UInt_t noFidCutRegion;
 	UInt_t usedForAlignment;
+//	UInt_t usedForSiliconAlignment;
 	
 	// histograms
 	vector<TH1F*> hLaundau;
