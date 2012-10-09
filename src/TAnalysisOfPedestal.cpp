@@ -695,7 +695,7 @@ void TAnalysisOfPedestal::updateMeanCalulation(){
 		  Float_t pedestalCMN = eventReader->getPedestalMean(det,ch,true);
 ////		  Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
 //		  pedestalCMN-=cmNoise;
-		  Float_t noiseCMN =  eventReader->getRawSignal(det,ch,true)
+		  Float_t noiseCMN =  eventReader->getRawSignal(det,ch,true);
 		  if(snr<settings->getClusterHitFactor(det)){
 			  pedestalMeanValue.at(det).at(ch) +=pedestal;
 			  pedestalSigmaValue.at(det).at(ch) +=sigma;
