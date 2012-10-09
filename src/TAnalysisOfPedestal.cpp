@@ -277,7 +277,7 @@ void TAnalysisOfPedestal::initialiseHistos()
   hCMNoiseDistribution= new TH1F("hCMNoiseDistribution","hCMNoiseDistribution",512,-20,20);
   hCMNoiseDistribution->GetXaxis()->SetTitle("Common Mode Noise [ADC]");
   hCMNoiseDistribution->GetYaxis()->SetTitle("number of entries [#]");
-  for (UInt_t det =0;det<9;det++){
+  for (UInt_t det =0;det<TPlaneProperties::getNDetectors();det++){
 		stringstream histoName,histoTitle,xTitle,yTitle;
 		histoName<<"hNoiseDistributionOfAllNonHitChannels_"<<TPlaneProperties::getStringForDetector(det);
 		histoTitle<<"Noise Distribution  of all non hit channels in Plane"<<TPlaneProperties::getStringForDetector(det);
@@ -290,9 +290,9 @@ void TAnalysisOfPedestal::initialiseHistos()
 			nBins=128;
 		}
 		if(TPlaneProperties::isSiliconDetector(det)){
-		hAllAdcNoise[det]= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
-		hAllAdcNoise[det]->GetXaxis()->SetTitle(xTitle.str().c_str());
-		hAllAdcNoise[det]->GetYaxis()->SetTitle(yTitle.str().c_str());
+			hAllAdcNoise[det]= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
+			hAllAdcNoise[det]->GetXaxis()->SetTitle(xTitle.str().c_str());
+			hAllAdcNoise[det]->GetYaxis()->SetTitle(yTitle.str().c_str());
 		}
 		else{
 		  hDiaAllAdcNoise= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
@@ -691,11 +691,11 @@ void TAnalysisOfPedestal::updateMeanCalulation(){
 		  Float_t pedestal = eventReader->getPedestalMean(det,ch,false);
 		  Float_t sigma = eventReader->getPedestalSigma(det,ch,false);
 		  UInt_t adc = eventReader->getAdcValue(det,ch);
-		  Float_t noise = adc-pedestal;
+		  Float_t noise = eventReader->getRawSignal(det,ch,false);//adc-pedestal;
 		  Float_t pedestalCMN = eventReader->getPedestalMean(det,ch,true);
-//		  Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
-		  Float_t noiseCMN = adc-pedestalCMN;
-		  pedestalCMN-=cmNoise;
+////		  Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
+//		  pedestalCMN-=cmNoise;
+		  Float_t noiseCMN =  eventReader->getRawSignal(det,ch,true)
 		  if(snr<settings->getClusterHitFactor(det)){
 			  pedestalMeanValue.at(det).at(ch) +=pedestal;
 			  pedestalSigmaValue.at(det).at(ch) +=sigma;
