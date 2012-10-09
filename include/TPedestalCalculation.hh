@@ -104,6 +104,7 @@ private:
 	Float_t diaPedestalMeanCMN[N_DIA_CHANNELS];
 	Float_t diaPedestalSigmaCMN[N_DIA_CHANNELS];
 	deque<Float_t> diaAdcValuesCMN[N_DIA_CHANNELS];
+	deque<Float_t> cmnValues;
 	deque<bool> diaEventUsedCMN[N_DIA_CHANNELS];
 	Float_t cmNoise;
 

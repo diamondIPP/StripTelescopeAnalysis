@@ -422,7 +422,12 @@ void TPedestalCalculation::doCmNoiseCalculation()
 	UInt_t nCmNoiseEvents=0;
 	Float_t maxVal = TPlaneProperties::getMaxSignalHeightDiamond();
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
-		Float_t adc = eventReader->getDia_ADC(ch);
+		if(nEvent>this->diaAdcValues[ch].size()&&nEvent<slidingLength){
+			cerr<<"diaADCValues["<<ch<<"].size() = "<<diaAdcValues[ch].size()<<" < "<<nEvent<<"  --> BREAK"<<endl;
+			exit(-1);
+		}
+
+		Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);
 		Float_t mean =  (nEvent<slidingLength)?diaPedestalMeanStartValues[ch]:diaPedestalMeanCMN[ch];
 		Float_t sigma = (nEvent<slidingLength)?diaPedestalSigmaStartValues[ch]:diaPedestalSigmaCMN[ch];
 		Float_t signal = adc-mean;
@@ -443,19 +448,18 @@ void TPedestalCalculation::doCmNoiseCalculation()
 void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 {
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
-		diaAdcValues[ch].clear();
+//		diaAdcValues[ch].clear();
 		diaAdcValuesCMN[ch].clear();
 	}
-	//save Sliding Pedestal Values for first slidingLength Events
+//	//save Sliding Pedestal Values for first slidingLength Events
 
 	for(nEvent=0;nEvent<slidingLength;nEvent++){
 		//Fill tree
-		eventReader->LoadEvent(nEvent);
+//		eventReader->LoadEvent(nEvent);
 		doCmNoiseCalculation();
+		cmnValues.push_back(cmNoise);
 		for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
-			Float_t adc = eventReader->getDia_ADC(ch);
-			diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
-			diaAdcValuesCMN[ch].push_back(adc);
+			Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);;
 			adc -=cmNoise;
 			diaAdcValuesCMN[ch].push_back(adc);
 			Float_t mean = RoundFloat(diaPedestalMeanStartValues[ch]);
@@ -469,23 +473,33 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 			diaPedestalSigmaCMN[ch]=RoundFloat(sigma);
 
 		}
-		printDiamond(30);
-		pedestalTree->Fill();
 	}
 	if(verbosity)cout<<"update first Pedestal Calculation"<<endl;
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalMeanStartValues[ch],7,MAXDIASIGMA);
-		calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],values.first,values.second,7,3);
-		//    if(ch==7){
-		////      cout<<"PEDESTAL: ch: "<<ch<<" "<<values.first<<" "<<values.second<<endl;
-		//      for(UInt_t i;i<diaAdcValues[ch].size()&&i<diaAdcValuesCMN[ch].size();i++){
-		//        cout<<" "<<setw(3)<<i<<"  "<<diaAdcValues[ch].at(i)<<" "<<diaEventUsed[ch].at(i)<<" "<<diaAdcValuesCMN[ch].at(i)<<" "<<diaEventUsedCMN[ch].at(i)<<" ";
-		//        cout<<std::setw(5)<<(diaAdcValues[ch].at(i)-diaAdcValuesCMN[ch].at(i))<<" "<<cmNoise<<" "<<diaEventsInSum[ch]<<" "<<diaEventsInSumCMN[ch]<<endl;
-		//      }
-		//      cout<<"DDSKLAS"<<endl;
-		//      char t; cin>>t;
-		//    }
-
+		values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalMeanStartValues[ch],7,3);
+		diaPedestalMeanCMN[ch] = values.first;
+		diaPedestalSigmaCMN[ch] = values.second;
+		if(ch==7&&verbosity>4){
+			//      cout<<"PEDESTAL: ch: "<<ch<<" "<<values.first<<" "<<values.second<<endl;
+			for(UInt_t i;i<diaAdcValues[ch].size()&&i<diaAdcValuesCMN[ch].size();i++){
+				cout<<" "<<setw(3)<<i<<"  "<<diaAdcValues[ch].at(i)<<" "<<diaEventUsed[ch].at(i)<<" "<<diaAdcValuesCMN[ch].at(i)<<" "<<diaEventUsedCMN[ch].at(i)<<" ";
+				cout<<std::setw(5)<<(diaAdcValues[ch].at(i)-diaAdcValuesCMN[ch].at(i))<<" "<<cmNoise<<" "<<diaEventsInSum[ch]<<" "<<diaEventsInSumCMN[ch]<<endl;
+			}
+			cout<<"DDSKLAS"<<endl;
+			char t; cin>>t;
+		}
+	}
+	for(nEvent = 0; nEvent<slidingLength;nEvent++){
+		cmNoise = cmnValues.at(nEvent);
+		for (UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
+			diaPedestalMean[ch]= RoundFloat(diaPedestalMean[ch]);
+			diaPedestalSigma[ch]= RoundFloat(diaPedestalSigma[ch]);
+			diaPedestalMeanCMN[ch] =  RoundFloat(diaPedestalMeanCMN[ch]);
+			diaPedestalSigmaCMN[ch] = RoundFloat(diaPedestalSigmaCMN[ch]);
+		}
+		printDiamond(30);
+		this->pedestalTree->Fill();
 	}
 }
 
