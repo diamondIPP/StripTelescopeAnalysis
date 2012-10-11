@@ -659,10 +659,11 @@ void TSelectionClass::createFiducialCut(){
   if(settings->getUseAutoFidCut()==true){
 	  delete fiducialCuts;
 	  fiducialCuts = new TFidCutRegions(hFiducialCutSiliconDiamondHit,settings->getNDiamonds(),settings->getAutoFidCutPercentage());
+	  fiducialCuts->setRunDescription(settings->getRunDescription());
   }
   else
 	  fiducialCuts->setHistogramm(hFiducialCutSiliconDiamondHit);
-  fiducialCuts->setRunDescription(settings->getRunDescription());
+
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
   histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));
   TCanvas *c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR);

@@ -32,16 +32,16 @@ TFidCutRegions::TFidCutRegions(TH2F* histo,int nDiamonds,Float_t fidCutPercentag
   }
   hEventScatterPlot=histo;
   TH1D* hProjX = hEventScatterPlot->ProjectionX("hFiducialCutOneDiamondHitProjX");
+  TH1D* hProjY = hEventScatterPlot->ProjectionY("hFiducialCutOneDiamondHitProjY");
+  if(hProjX==0||hProjY==0)
+    return;
   hProjX->GetXaxis()->SetTitle("Mean Silicon Value in X[strips]");
   hProjX->GetYaxis()->SetTitle("Number Of Entries #");
-  TH1D* hProjY = hEventScatterPlot->ProjectionY("hFiducialCutOneDiamondHitProjY");
   hProjY->GetXaxis()->SetTitle("Mean Silicon Value in Y[strips]");
   hProjY->GetYaxis()->SetTitle("Number Of Entries #");
 
   hProjX->SetName("hProjX");
   hProjY->SetName("hProjY");
-  if(hProjX==0||hProjY==0)
-    return;
   if(hProjX->IsZombie()||hProjY->IsZombie())
     return;
 
@@ -74,23 +74,49 @@ void TFidCutRegions::setRunDescription(std::string runDes)
 {
 	index=0;
 	this->runDescription=runDes;
+	cout<<"runDescription :"<<runDescription<<endl;
 	if(runDescription.size()==0) {
 		index=0;
 		return;
 	}
 	switch(runDescription.at(0)){
-	case '0': index=0;return;
-	case '1': index=1;return;
-	case '2': index=2;return;
-	case '3': index=3;return;
-	case '4': index=4;return;
+	case '0': index=0;break;//all
+	case '1': index=1;break;//left
+	case '2': index=2;break;//right
+	case '3': index=3;break;//XXX
+	case '4': index=4;break;//???
 	}
+
 	if(runDescription.find("left")!=string::npos){
 		index = 1;
-		return;
+		cout<<" runDescription is :"<<runDescription<<" ==> index: "<<index<<endl;
 	}
-	if(runDescription.find("right")!=string::npos){
+	else if(runDescription.find("right")!=string::npos){
 		index = 2;
+		cout<<" runDescription is :"<<runDescription<<" ==> index: "<<index<<endl;
+	}
+	else if(runDescription.find("middle")!=string::npos){
+		index = 3;
+		cout<<" runDescription is :"<<runDescription<<" ==> index: "<<index<<endl;
+	}
+
+	cout<<" runDescription is :"<<runDescription<<" ==> index: "<<index<<endl;
+	if(index!=0){
+		if(index>fidCuts.size()){
+			cerr<<"the set index ( "<<index<<") is not possible. There are only "<<fidCuts.size()<< " possible Fidcuts..."<<endl;
+			cerr<<"Please enter a valid index. Use a number between 0 [all],1(left) - "<<fidCuts.size()+1<<endl;
+			int newIndex=0;
+			while(!(cin>>newIndex)||newIndex>fidCuts.size())
+			{
+				cout<<"you didn't entered a vaild input."<<
+					  "Please try again. Use a number between 0 [all],1(left) - "<<fidCuts.size()<<endl;
+				cin.clear();
+				while(cin.get() != '\n'){};
+			}
+			index = newIndex;
+			cout<<" runDescription is :"<<runDescription<<" ==> index: "<<index<<endl;
+			return;
+		}
 		return;
 	}
 	return;

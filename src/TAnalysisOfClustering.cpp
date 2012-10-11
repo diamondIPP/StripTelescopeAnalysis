@@ -130,7 +130,7 @@ void TAnalysisOfClustering::checkForSaturatedChannels()
 void TAnalysisOfClustering::initialiseHistos()
 {
 
-	cout<<"1"<<endl;
+	if(verbosity>3)cout<<"1"<<endl;
 	{
 		stringstream histoName;
 		histoName<<"hDiamond_Delta_CWM_BiggestHit";
@@ -184,21 +184,21 @@ void TAnalysisOfClustering::initialiseHistos()
 		histName<<"hSignalLeftVsSignalRight"<<TPlaneProperties::getStringForDetector(det);
 		hSignalLeftVsSignalRight[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
 	}
-	cout<<"2"<<endl;
+	if(verbosity>3)cout<<"2"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"SaturatedChannels_"<<TPlaneProperties::getStringForDetector(det)<<"";
 		hSaturatedChannels[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 		if(det==8)hSaturatedChannels[det]->GetXaxis()->SetRangeUser(0,128);
 	}
-	cout<<"3"<<endl;
+	if(verbosity>3)cout<<"3"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"hPositionOfallSeeds_"<<TPlaneProperties::getStringForDetector(det);
 		hSeedMap[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
 		if(det==8)hSeedMap[det]->GetXaxis()->SetRangeUser(0,128);
 	}
-	cout<<"4"<<endl;
+	if(verbosity>3)cout<<"4"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"hPositionOfHighestSeed_"<<TPlaneProperties::getStringForDetector(det);
@@ -206,7 +206,7 @@ void TAnalysisOfClustering::initialiseHistos()
 		hSeedMap2[det]->GetXaxis()->SetTitle("Position of Highest Seed of a Cluster");
 		if(det==8)hSeedMap2[det]->GetXaxis()->SetRangeUser(0,128);
 	}
-	cout<<"5"<<endl;
+	if(verbosity>3)cout<<"5"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"hNumberOfSeeds_in_"<<TPlaneProperties::getStringForDetector(det);
@@ -214,19 +214,19 @@ void TAnalysisOfClustering::initialiseHistos()
 		hNumberOfSeeds[det]->GetXaxis()->SetTitle("Number Of Seeds in Cluster");
 		hNumberOfSeeds[det]->GetYaxis()->SetTitle("Entries #");
 	}
-	cout<<"6"<<endl;
+	if(verbosity>3)cout<<"6"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"PulseHeight_"<<TPlaneProperties::getStringForDetector(det)<<"_BiggestHitChannelInSigma";
 		hPulsHeightBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
-	cout<<"7"<<endl;
+	if(verbosity>3)cout<<"7"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"PulseHeight_"<<TPlaneProperties::getStringForDetector(det)<<"_BiggestHitNextToBiggestHit_ChannelInSigma";
 		hPulsHeightNextBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),4000,0,400);
 	}
-	cout<<"8"<<endl;
+	if(verbosity>3)cout<<"8"<<endl;
 	for (int det=0;det<9;det++){
 		stringstream histoName;
 		histoName<<"Channel_"<<TPlaneProperties::getStringForDetector(det)<<"_BiggestHit";
@@ -249,7 +249,7 @@ void TAnalysisOfClustering::initialiseHistos()
 		histoName<<"NumberOfClusters_"<<TPlaneProperties::getStringForDetector(det);
 		hNumberOfClusters[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 	}
-	cout<<"10"<<endl;
+	if(verbosity>3)cout<<"10"<<endl;
     for (int det = 0; det < 9; det++) {
 		int nbins = 250;
 		Float_t min = 0.;
@@ -295,7 +295,7 @@ void TAnalysisOfClustering::initialiseHistos()
         histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "RightChipSecondBiggestHitChannelInSigma";
         histo_pulseheight_right_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
     }
-    cout<<"11"<<endl;
+    if(verbosity>3)cout<<"11"<<endl;
     for(int det=0;det<9;det++){//analayse2ndHighestHit
     	stringstream histName;
     	histName<<"h2ndBiggestHitSignal_"<<TPlaneProperties::getStringForDetector(det);
@@ -328,7 +328,7 @@ void TAnalysisOfClustering::initialiseHistos()
     	hSignal2ndHighestOverSignalHighestRatio[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),512,0,1);
     	hSignal2ndHighestOverSignalHighestRatio[det]->GetXaxis()->SetTitle("Q_{2ndHighest}/Q_{Highest}");
     }
-    cout<<"12"<<endl;
+    if(verbosity>3)cout<<"12"<<endl;
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 			stringstream histName;
 			histName<<"hPulseHeightDistribution_"<<TPlaneProperties::getStringForDetector(det);

@@ -52,7 +52,7 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 
 	gStyle->SetPalette(1); //
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
-	gErrorIgnoreLevel=1001;
+	gErrorIgnoreLevel=3001;
 
 }
 
@@ -133,7 +133,8 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	leg->AddEntry(histo1,histo1->GetName());
 	leg->AddEntry(histo2,histo2->GetName());
 	leg->Draw("same");
-	pt->Draw("same");
+	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.c_str()));
+	pt2->Draw("same");
 	c1->Update();
 	SaveCanvas(c1);
 }
@@ -233,28 +234,34 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
 	if(histo->GetEntries()==0)return;
 	if(fit==0) SaveHistogram(histo);
 	if (verbosity>0) cout<<"Save Histogram With Fit:"<<histo->GetTitle()<<endl;
-	TCanvas plots_canvas("plots_canvas","plots_canvas");
-	plots_canvas.cd();
-	histo->Draw();
-	fit->SetLineColor(kRed);
-	fit->Draw("same");
-	pt->Draw();
+	TCanvas *plots_canvas =  new TCanvas( TString::Format("c_%s", histo->GetName() ) , TString::Format("c_%s", histo->GetName() ) );
+	plots_canvas->Clear();
+	plots_canvas->cd();
+	TH1F *htemp = (TH1F*)histo->Clone();
+	TF1* fittemp = (TF1*)fit->Clone();
+	TPaveText * pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+
+	htemp->Draw();
+	fittemp->SetLineColor(kRed);
+	fittemp->Draw("same");
+	pt2->Draw();
 	ostringstream plot_filename;
 	ostringstream histo_filename;
-	histo_filename << plots_path << histo->GetName() << "_histo.root";
-//	histo_filename << plots_path << "histograms.root";
+	histo_filename << plots_path << "histograms.root";
 	plot_filename << plots_path << histo->GetName() << ".root";
-	plots_canvas.Print(plot_filename.str().c_str());
+	plots_canvas->Print(plot_filename.str().c_str());
 	TFile f(histo_filename.str().c_str(),"UPDATE");
 	f.cd();
 	((TH1F*)histo->Clone())->Write();
 	((TF1*)fit->Clone())->Write();
+	plots_canvas->Write();
 	plot_filename.clear();
 	plot_filename.str("");
 	plot_filename.clear();
 	plot_filename << plots_path << histo->GetName() << ".png";
-	plots_canvas.Print(plot_filename.str().c_str());
+	plots_canvas->Print(plot_filename.str().c_str());
 	f.Close();
+//	if(plots_canvas)delete plots_canvas;
 }
 void HistogrammSaver::SaveHistogram(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
@@ -276,9 +283,13 @@ void HistogrammSaver::SaveGraph(TGraph* graph,std::string name,std::string optio
 }
 
 void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
+	if(!histo){
+		cerr<<"HistogrammSaver::SaveHistogramPDF(TH1F*) \t histo == 0"<<endl;
+		return;
+	}
 	if(histo->GetEntries()==0)return;
-	TCanvas plots_canvas("plots_canvas","plots_canvas");
-	plots_canvas.cd();
+	TCanvas *plots_canvas = new TCanvas(TString::Format("cPdf_%s",histo->GetName()),TString::Format("c_%s",histo->GetName()));
+	plots_canvas->cd();
 	UInt_t maxBinX =histo->GetNbinsX();
 	for(UInt_t i=histo->GetNbinsX();i>0;i--)
 		if(histo->GetBinContent(i)==0)maxBinX=i;
@@ -289,31 +300,35 @@ void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
 	Float_t xmax = histo->GetXaxis()->GetBinLowEdge(maxBinX+1);
 	histo->GetXaxis()->SetRangeUser(xmin,xmax);
 	histo->Draw();
-	pt->Draw();
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".pdf";
-	plots_canvas.Print(plot_filename.str().c_str());
+	plots_canvas->Print(plot_filename.str().c_str());
+//	if(plots_canvas)delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
-	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	TCanvas *plots_canvas = new TCanvas(TString::Format("cPdf_%s",histo->GetName()),TString::Format("c_%s",histo->GetName()));
+	plots_canvas->cd();
 	//plots_canvas.cd();
 	//	SetDuckStyle();
-	plots_canvas.cd();
 	if(verbosity)cout << "Using SaveHistogrammPDF on TH2F histogram " << histo->GetName() << endl;
 	//histo->Draw();
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
 	gStyle->SetTitleFont(42);
 	gStyle->SetMarkerSize(0);
-	pt->SetTextSize(0.0250);
-	pt->SetTextColor(kBlack);
+	pt2->SetTextSize(0.0250);
+	pt2->SetTextColor(kBlack);
 	histo->SetTitleFont(42);
 	histo->UseCurrentStyle();
 	histo->Draw("colz");
-	pt->Draw();
+	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".pdf";
-	plots_canvas.Print(plot_filename.str().c_str());
+	plots_canvas->Print(plot_filename.str().c_str());
+	if(plots_canvas)delete plots_canvas;
 	//pt->SetTextSize(runNumber0.1);
 }
 
@@ -323,36 +338,38 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
 		return;
 	}
 	if(histo->GetEntries()==0){
-		cout<<"Histogram "<<histo->GetName()<<" has no entries..."<<endl;
+		if(verbosity)cout<<"Histogram "<<histo->GetName()<<" has no entries..."<<endl;
 		return;
 	}
 	stringstream histoName;
 	histoName<<histo->GetName()<<"_Clone";
 	TH1* htemp=(TH1*)histo->Clone(histoName.str().c_str());
 	if(htemp==0)return;
-	TCanvas *plots_canvas = ((TCanvas *)(gROOT->GetListOfCanvases()->FindObject("plots_canvas")));
-	if (plots_canvas) plots_canvas->Clear();
-	else plots_canvas = new TCanvas("plots_canvas", "plots_canvas");
-//	TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+	TCanvas *plots_canvas = new TCanvas(TString::Format("cPng_%s",histo->GetName()),TString::Format("c_%s",histo->GetName()));
 	plots_canvas->cd();
+
 	htemp->SetMinimum(0.);
 	htemp->Draw();
-	stringstream ptName;
-	ptName << "pt_"<<histo->GetName();
-	TPaveText* pt2 = (TPaveText*)pt->Clone(ptName.str().c_str());
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
 	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas->Print(plot_filename.str().c_str());
-//	delete plots_canvas;
+//	if(plots_canvas)delete plots_canvas;
 }
 
 void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
 {
+	if(!canvas)
+		return;
 	ostringstream plot_filename;
 	plot_filename << plots_path << canvas->GetName()<<".root";
-	canvas->cd();
-	pt->Draw();
+	TCanvas* plots_canvas=(TCanvas*)canvas->Clone();
+	plots_canvas->cd();
+
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
+	pt2->Draw();
+
 	TFile f(plot_filename.str().c_str(),"UPDATE");
 	canvas->Write();
 }
@@ -362,31 +379,35 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
 	if(canvas==0)
 		return;
 	canvas->cd();
-	pt->Clone()->Draw();
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
+	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << canvas->GetName()<<".png";
 	canvas->Print(plot_filename.str().c_str());
 }
 
 void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
+	if(!graph)
+		return;
 	if(graph->GetN()==0)return;
-	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	TCanvas plots_canvas(TString::Format("c_%s",name.c_str()),TString::Format("c_%s",name.c_str()));
 	plots_canvas.cd();
 	graph->Draw(option.c_str());
-	pt->Clone()->Draw();
+
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",graph->GetName()));
+	pt2->Draw();
+
 	ostringstream plot_filename;
 	plot_filename << plots_path << name << ".png";
 	plots_canvas.Print(plot_filename.str().c_str());
 }
+
 void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
-	TH1* histo = (TH1*)htemp->Clone();
+	if(!htemp)
+		return;
+	TH1* histo = (TH1*)htemp->Clone(TString::Format("%s_Clone",htemp->GetName()));
 	if(histo->GetEntries()==0)return;
 
-	//	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
-	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
-	//TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);
-	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
-	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
 	TF1 histofitx("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
 	histofitx.SetLineColor(kBlue);
 	histo->Fit(&histofitx,"rq");
@@ -394,8 +415,10 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
-	histo->Draw();
-	pt->Draw();
+
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",htemp->GetName()));
+	pt2->Draw();
+
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas.Print(plot_filename.str().c_str());
@@ -405,79 +428,108 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	if(!htemp)return;
 	if(htemp->GetEntries()==0)return;
 
-	ostringstream plot_filename;
+	ostringstream plots_filename;
 	ostringstream histo_filename;
-//	histo_filename << plots_path << "histograms.root";
-	histo_filename << plots_path << htemp->GetName() << ".root";
+	plots_filename << plots_path << htemp->GetName() << ".root";
+	histo_filename << plots_path << "histograms.root";
 	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
-	TCanvas *plots_canvas = ((TCanvas *)(gROOT->GetListOfCanvases()->FindObject("plots_canvas")));
-	if (plots_canvas) plots_canvas->Clear();
-	else plots_canvas = new TCanvas("plots_canvas", "plots_canvas");
-//	TCanvas *plots_canvas = new TCanvas("plots_canvas","plots_canvas");
-	TH1* histo = (TH1*)htemp->Clone();
-	TPaveText* pt2 = (TPaveText*)pt->Clone();
 
+	TCanvas *plots_canvas =  new TCanvas(TString::Format("cRoot_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
+
+	TH1* histo = (TH1*)htemp->Clone();
+
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",htemp->GetName()));
+
+	plots_canvas->Clear();
 	plots_canvas->cd();
 	histo->Draw();
 	pt2->Draw();
 	plots_canvas->Draw();
 
+	//write to own root File
+	plots_canvas->Write(plots_filename.str().c_str());
+	//add to histograms.root
 	f->cd();
 	plots_canvas->Write();
 	f->Close();
-//	delete plots_canvas;
+//	if(plots_canvas)delete plots_canvas;
 
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
+	if(!histo){
+		cerr<<"HistogrammSaver::SaveHistogramPNG(TH2F*), histogram ==0"<<endl;
+				return;
+	}
 	if(histo->GetEntries()==0)return;
-	TCanvas*  plots_canvas = new TCanvas("plots_canvas","plots_canvas");
+	TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
+	plots_canvas->Clear();
 	plots_canvas->cd();
 	TH2F* htemp = (TH2F*)histo->Clone();
 	htemp->Draw("colz");
-	TPaveText* pt2 = (TPaveText*)pt->Clone();
+
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
 	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas->Print(plot_filename.str().c_str());
-	delete plots_canvas;
+//	if(plots_canvas)delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
-	if(histo->GetEntries()==0||!histo)return;
-	TCanvas *plots_canvas = ((TCanvas *)(gROOT->GetListOfCanvases()->FindObject("plots_canvas")));
-	if (plots_canvas) plots_canvas->Clear();
-	else plots_canvas = new TCanvas("plots_canvas", "plots_canvas");
-//	TCanvas *plots_canvas=new TCanvas("plots_canvas","plots_canvas");
+	if(!histo){
+		cerr<<"HistogrammSaver::SaveHistogramROOT(TH2F*) histogram == 0"<<endl;
+		return;
+	}
+	if(histo->GetEntries()==0)return;
+	TCanvas *plots_canvas =  new TCanvas(TString::Format("cRoot_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
+	plots_canvas->Clear();
+
 	plots_canvas->cd();
 	TH2F* htemp = (TH2F*)histo->Clone();
 	if(htemp==0)
 		return;
 	htemp->Draw();
 	htemp->Draw("colz");
-	TPaveText* pt2 = (TPaveText*)pt->Clone();
+
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
 	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".root";
 	plots_canvas->Print(plot_filename.str().c_str());
-	delete plots_canvas;
+
+	stringstream histo_filename;
+	histo_filename << plots_path << "histograms.root";
+	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+	f->cd();
+	plots_canvas->Write();
+	f->Close();
+//	if (plots_canvas) delete plots_canvas;
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
-	if(!graph) return;
+	if(!graph) {
+		cerr<<"HistogrammSaver::SaveGraphROOT(TGraph* ) graph == 0"<<endl;
+		return;
+	}
 	if(graph->GetN()==0)return;
-	TCanvas *plots_canvas = ((TCanvas *)(gROOT->GetListOfCanvases()->FindObject("plots_canvas")));
-	if (plots_canvas) plots_canvas->Clear();
-	else plots_canvas = new TCanvas("plots_canvas", "plots_canvas");
+//	TCanvas *plots_canvas = ((TCanvas *)(gROOT->GetListOfCanvases()->FindObject("plots_canvas")));
+//	if (plots_canvas) plots_canvas->Clear();
+//	else plots_canvas = new TCanvas("plots_canvas", "plots_canvas");
+
+	TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", name.c_str()), TString::Format("c_%s", name.c_str()));
+	plots_canvas->Clear();
+
 	plots_canvas->cd();
 	TGraph* gTemp = (TGraph*)graph->Clone();
 	gTemp->Draw(option.c_str());
-	TPaveText* pt2=(TPaveText*)pt->Clone();
+
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",graph->GetName()));
 	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << name<< ".root";
 	plots_canvas->Print(plot_filename.str().c_str());
-//	delete plots_canvas;
+//	if(plots_canvas)	delete plots_canvas;
 }
 
 void HistogrammSaver::SetVerbosity(unsigned int i)

@@ -96,7 +96,7 @@ void THTMLGenerator::setFileName(string Name)
 	if(found==string::npos)
 		output<<".html";
 	fileName=output.str();
-	cout<<"FileName set to \""<<fileName<<endl;
+	if(verbosity)cout<<"FileName set to \""<<fileName<<endl;
 }
 
 void THTMLGenerator::addSection(string sectionName, string secContent)

@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "TGraphErrors.h"
+#include "TString.h"
 
 //#include <sys/dirent.h>
 #include <sys/stat.h>
