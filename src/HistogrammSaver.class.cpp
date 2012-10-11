@@ -433,12 +433,11 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	plots_filename << plots_path << htemp->GetName() << ".root";
 	histo_filename << plots_path << "histograms.root";
 	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
-
+	f->cd();
 	TCanvas *plots_canvas =  new TCanvas(TString::Format("cRoot_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
-
 	TH1* histo = (TH1*)htemp->Clone();
 
-	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",htemp->GetName()));
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptRoot_%s",htemp->GetName()));
 
 	plots_canvas->Clear();
 	plots_canvas->cd();
@@ -462,13 +461,13 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 				return;
 	}
 	if(histo->GetEntries()==0)return;
-	TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
+	TCanvas *plots_canvas =  new TCanvas(TString::Format("cPng_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
 	plots_canvas->Clear();
 	plots_canvas->cd();
 	TH2F* htemp = (TH2F*)histo->Clone();
 	htemp->Draw("colz");
 
-	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));
 	pt2->Draw();
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
