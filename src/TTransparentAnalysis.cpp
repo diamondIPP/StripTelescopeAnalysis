@@ -423,11 +423,19 @@ void TTransparentAnalysis::fitHistograms() {
 
 void TTransparentAnalysis::saveHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-		histSaver->SaveHistogramWithFit(hLaundau[clusterSize],fitLandau[clusterSize]);
-		histSaver->SaveHistogramWithFit(hLaundau2Highest[clusterSize],fitLandau2Highest[clusterSize]);
 		histSaver->SaveHistogram(hEta[clusterSize],0);
-		histSaver->SaveHistogramWithFit(hResidualChargeWeighted[clusterSize],fitResidualChargeWeighted[clusterSize]);
-		histSaver->SaveHistogramWithFit(hResidualHighest2Centroid[clusterSize],fitResidualHighest2Centroid[clusterSize]);
+		if (clusterSize == 0) {
+			histSaver->SaveHistogram(hLaundau[clusterSize],0);
+			histSaver->SaveHistogram(hLaundau2Highest[clusterSize],0);
+			histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize],0);
+			histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize],0);
+		}
+		else {
+			histSaver->SaveHistogramWithFit(hLaundau[clusterSize],fitLandau[clusterSize]);
+			histSaver->SaveHistogramWithFit(hLaundau2Highest[clusterSize],fitLandau2Highest[clusterSize]);
+			histSaver->SaveHistogramWithFit(hResidualChargeWeighted[clusterSize],fitResidualChargeWeighted[clusterSize]);
+			histSaver->SaveHistogramWithFit(hResidualHighest2Centroid[clusterSize],fitResidualHighest2Centroid[clusterSize]);
+		}
 		histSaver->SaveHistogramWithFit(hResidualEtaCorrected[clusterSize],fitResidualEtaCorrected[clusterSize]);
 		histSaver->SaveHistogram(hEtaIntegrals[clusterSize],0);
 	}
