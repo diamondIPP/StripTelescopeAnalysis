@@ -420,7 +420,7 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 	pt2->Draw();
 
 	ostringstream plot_filename;
-	plot_filename << plots_path << histo->GetName() << ".png";
+	plot_filename << plots_path << htemp->GetName() << ".png";
 	plots_canvas.Print(plot_filename.str().c_str());
 }
 
@@ -432,8 +432,6 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	ostringstream histo_filename;
 	plots_filename << plots_path << htemp->GetName() << ".root";
 	histo_filename << plots_path << "histograms.root";
-	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
-	f->cd();
 	TCanvas *plots_canvas =  new TCanvas(TString::Format("cRoot_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
 	TH1* histo = (TH1*)htemp->Clone();
 
@@ -447,9 +445,11 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 
 	//write to own root File
 	plots_canvas->Write(plots_filename.str().c_str());
+	TCanvas *plots_canvas2 = (TCanvas*) plots_canvas->Clone(TString::Format("ccRoot_%s",htemp->GetName()));
 	//add to histograms.root
+	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
 	f->cd();
-	plots_canvas->Write();
+	plots_canvas2->Write();
 	f->Close();
 //	if(plots_canvas)delete plots_canvas;
 
