@@ -411,11 +411,11 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 	TF1 histofitx("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
 	histofitx.SetLineColor(kBlue);
 	histo->Fit(&histofitx,"rq");
-	histo->Draw();
 
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
-
+	histo->Draw();
+	histofitx.Draw();
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",htemp->GetName()));
 	pt2->Draw();
 
