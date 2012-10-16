@@ -415,7 +415,7 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 	TCanvas plots_canvas("plots_canvas","plots_canvas");
 	plots_canvas.cd();
 	histo->Draw();
-	histofitx.Draw();
+	histofitx.Draw("same");
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",htemp->GetName()));
 	pt2->Draw();
 
