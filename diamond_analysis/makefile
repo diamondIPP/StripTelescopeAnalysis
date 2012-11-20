@@ -17,7 +17,6 @@ INCLUDEDIR      := include
 OBJDIR			:= obj
 LIBDIR			:= ~/lib
 
-
 OPTIMAZATIONFLAG :=	-O0 -g3
 CFLAGS  		:= -g3 -Wall -I$(INCLUDEDIR) -D_REENTRANT 
 CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
@@ -26,20 +25,18 @@ CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
 OBJ 			:= diamondAnalysis.cpp
 HEAD    		:= 
 
-
-
 LD              := g++
 
 LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
-LIBFILES		+=   TDetector_Data.o TTrigger_Event.o
+LIBFILES		+=  TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o 
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o TADCEventReader.o
 LIBFILES		+=	TRawEventReader.o  TRawEventSaver.o TPedestalCalculation.o
 LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTracking.o 
-LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.o
-LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
+LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.o TAnalysisOf3dDiamonds.o
+LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o 
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 

@@ -12,7 +12,6 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 		this->settings=settings;
 	else exit(0);
 
-	sys = gSystem;
 	UInt_t runNumber=settings->getRunNumber();
 
 	htmlLandau=new THTMLLandaus(settings);
@@ -21,8 +20,6 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings->getRunNumber());
 	histSaver=new HistogrammSaver();
 	settings->goToSelectionAnalysisDir();
-	stringstream plotsPath;
-	plotsPath<<sys->pwd()<<"/";
 	//	htmlPedestal->setSubdirPath("selectionAnalysis");
 	histSaver->SetPlotsPath(settings->getSelectionAnalysisPath());
 	histSaver->SetRunNumber(runNumber);

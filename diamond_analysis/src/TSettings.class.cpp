@@ -142,6 +142,16 @@ std::string TSettings::getSelectionTreeFilePath()
 	return path.str();
 }
 
+std::string TSettings::get3dDiamondTreeFilePath(){
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"selectionData."<<getRunNumber();
+	if(this->isSpecialAnalysis())
+		path<<"-"<<getRunDescription();
+	path<<".root";
+	return path.str();
+}
+
 void TSettings::goToDir(std::string dir){
 	if(this->getVerbosity()>3)cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
 	if(this->getVerbosity()>3)cout<<"goTo Dir: "<<dir<<endl;
@@ -155,6 +165,10 @@ void TSettings::goToRawTreeDir(){
 }
 
 void TSettings::goToSelectionTreeDir(){
+	goToDir(this->getAbsoluteOuputPath(false));
+}
+
+void TSettings::goTo3dDiamondTreeDir(){
 	goToDir(this->getAbsoluteOuputPath(false));
 }
 
@@ -609,6 +623,10 @@ void TSettings::LoadSettings(){
 			bDoAllAlignmentPlots=(bool)strtod(value.c_str(),0);
 
 		}
+		if(key == "is3dDiamond"){
+			cout<<key<<" =" <<value.c_str()<<endl;
+			b3dDiamond = (bool)strtod(value.c_str(),0);
+		}
 		if(key=="diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -742,6 +760,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	getDetChannelNo(0);
 	cout<<"Print DefaultMapping:"<<endl;
 	//	diamondMapping.PrintMapping();
+	b3dDiamond =false;
 	cout<<"DONE"<<endl;
 }
 

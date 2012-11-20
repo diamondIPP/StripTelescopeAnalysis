@@ -14,6 +14,7 @@
 #include "TAnalysisOfPedestal.hh"
 #include "TAnalysisOfClustering.hh"
 #include "TAnalysisOfSelection.hh"
+#include "TAnalysisOf3dDiamonds.hh"
 #include "TClustering.hh"
 #include "TSelectionClass.hh"
 #include "THTMLGenerator.hh"
@@ -243,6 +244,12 @@ int main(int argc, char ** argv) {
 		  TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
 		  analysisSelection->doAnalysis(RunParameters[i].getEvents());
 		  delete analysisSelection;
+		}
+		bool b3dDiamond = 0;
+		if(b3dDiamond){
+			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+			delete analyse3dDiamond;
 		}
 
 		if (DO_ALIGNMENT){
