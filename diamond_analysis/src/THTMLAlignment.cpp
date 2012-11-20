@@ -12,6 +12,7 @@ THTMLAlignment::THTMLAlignment(TSettings *settings):THTMLGenerator(settings) {
   this->setFileName("alignment.html");
   this->setSubdirPath("alignment/");
   this->setTitle("Alignment");
+  alignment =0;
 
 
 }
@@ -38,17 +39,17 @@ void THTMLAlignment::createPostSiliconOverview()
   stringstream sectionContent;
 
   sectionContent<<"<h3>X Resolution</h3>\n";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaX_-_Plane_0_with_1_2_and_3with_Chi2_cut_on_1","png",24)<<"\n ";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaX_-_Plane_1_with_0_2_and_3with_Chi2_cut_on_1","png",24)<<"\n ";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaX_-_Plane_2_with_0_1_and_3with_Chi2_cut_on_1","png",24)<<"\n ";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaX_-_Plane_3_with_0_1_and_2with_Chi2_cut_on_1","png",24)<<"\n";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaX_-_Plane_0_with_1_2_and_3with_Chi2_cut_on_1","png",24)<<"\n ";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaX_-_Plane_1_with_0_2_and_3with_Chi2_cut_on_1","png",24)<<"\n ";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaX_-_Plane_2_with_0_1_and_3with_Chi2_cut_on_1","png",24)<<"\n ";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaX_-_Plane_3_with_0_1_and_2with_Chi2_cut_on_1","png",24)<<"\n";
   sectionContent<<"<br><br>\n";
 
   sectionContent<<"<h3>X Resolution</h3>\n";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaY_-_Plane_0_with_1_2_and_3with_Chi2_cut_on_1","png",24)<<"\n";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaY_-_Plane_1_with_0_2_and_3with_Chi2_cut_on_1","png",24)<<"\n";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaY_-_Plane_2_with_0_1_and_3with_Chi2_cut_on_1","png",24)<<"\n";
-  sectionContent<<putImage(".","hSilicon_PostAlignment_DistributionPlot_DeltaY_-_Plane_3_with_0_1_and_2with_Chi2_cut_on_1","png",24)<<"\n<br<br>\n";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaY_-_Plane_0_with_1_2_and_3with_Chi2_cut_on_1","png",24)<<"\n";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaY_-_Plane_1_with_0_2_and_3with_Chi2_cut_on_1","png",24)<<"\n";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaY_-_Plane_2_with_0_1_and_3with_Chi2_cut_on_1","png",24)<<"\n";
+  sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaY_-_Plane_3_with_0_1_and_2with_Chi2_cut_on_1","png",24)<<"\n<br<br>\n";
   sectionContent<<"<br><br>\n";
 
   sectionContent<<"<h3>X_Obs vs. Y_Obs</h3>\n";
@@ -87,7 +88,7 @@ void THTMLAlignment::createPostDiamondOverview()
   sectionContent<<(float)((alignment!=0)?alignment->getDiaChi2():-1.)<<".<br><br>\n";
   sectionContent<<"The diamond is aligned with a digital resoltuion convoluted with a gaus of "<<setprecision(4)<<(float)(alignment!=0?alignment->getXResolution(4)*TPlaneProperties::getStripDistance():-1)<<" &#956m";
   sectionContent<<" (pure digital resolution: "<<setprecision(4)<<1./TMath::Sqrt(12)*TPlaneProperties::getStripDistance()<<"&#956m)<br><br>\n\n";
-  sectionContent<<center(putImage(".","hDiamond_PostAlignment_DistributionPlot_DeltaX_-_Plane_4_with_0_1_2_and_3","png",40))<<"<br>\n";
+  sectionContent<<center(putImage(".","hDiamond_PostAlignment_Distribution_DeltaX_-_Plane_4_with_0_1_2_and_3","png",40))<<"<br>\n";
   sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_XMeasured_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",33)<<" ";
   sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_XPred_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",33)<<" ";
   sectionContent<<putImage(".","hDiamond_PostAlignment_ScatterPlot_YPred_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",33)<<"<br>\n";
@@ -100,14 +101,14 @@ void THTMLAlignment::createPreSiliconOverview()
 {//
   stringstream sectionContent;
   sectionContent<<"<h3>X Resolution</h3><br>\n";
-  sectionContent<<putImage(".","hSilicon_PreAlignment_DistributionPlot_DeltaX_-_Plane_1_with_0_and_3","png",33)<<" \n";
-  sectionContent<<putImage(".","hSilicon_PreAlignment_DistributionPlot_DeltaX_-_Plane_2_with_0_and_3","png",33)<<" \n";
-  sectionContent<<putImage(".","hSilicon_PreAlignment_DistributionPlot_DeltaX_-_Plane_3_with_1_and_2","png",33)<<" \n";
+  sectionContent<<putImage(".","hSilicon_PreAlignment_Distribution_DeltaX_-_Plane_1_with_0_and_3","png",33)<<" \n";
+  sectionContent<<putImage(".","hSilicon_PreAlignment_Distribution_DeltaX_-_Plane_2_with_0_and_3","png",33)<<" \n";
+  sectionContent<<putImage(".","hSilicon_PreAlignment_Distribution_DeltaX_-_Plane_3_with_1_and_2","png",33)<<" \n";
   sectionContent<<" <br<br>\n";
   sectionContent<<"<h3>Y Resolution</h3><br>\n";
-  sectionContent<<putImage(".","hSilicon_PreAlignment_DistributionPlot_DeltaY_-_Plane_1_with_0_and_3","png",33)<<" \n";
-  sectionContent<<putImage(".","hSilicon_PreAlignment_DistributionPlot_DeltaY_-_Plane_2_with_0_and_3","png",33)<<" \n";
-  sectionContent<<putImage(".","hSilicon_PreAlignment_DistributionPlot_DeltaY_-_Plane_3_with_1_and_2","png",33)<<" \n";
+  sectionContent<<putImage(".","hSilicon_PreAlignment_Distribution_DeltaY_-_Plane_1_with_0_and_3","png",33)<<" \n";
+  sectionContent<<putImage(".","hSilicon_PreAlignment_Distribution_DeltaY_-_Plane_2_with_0_and_3","png",33)<<" \n";
+  sectionContent<<putImage(".","hSilicon_PreAlignment_Distribution_DeltaY_-_Plane_3_with_1_and_2","png",33)<<" \n";
   sectionContent<<" <br<br>\n";
   sectionContent<<"<h3>XObs vs YObs Range</h3><br>\n";
   sectionContent<<putImage(".","hSilicon_PreAlignment_ScatterPlot_XObs_vs_YObs_-_Plane_1_with_0_and_3","png",33)<<" \n";

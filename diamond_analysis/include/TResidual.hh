@@ -71,6 +71,7 @@ public:
 	bool isTestResidual(){return bTestResidual;}
 	void setResKeepFactor(Float_t resKeepFactor){res_keep_factor=resKeepFactor;};
 	void clear();
+	void setVerbosity(Int_t verb){if(verb>=0)verbosity=verb;}
 private:
 	Float_t resXMean, resXSigma,resYMean,resYSigma;
 	Float_t sumRx;
@@ -83,6 +84,7 @@ private:
 	Float_t sumVRy;
 	UInt_t nUsedTracks;
 	Float_t res_keep_factor;
+	UInt_t verbosity;
 	bool bTestResidual;
 };
 

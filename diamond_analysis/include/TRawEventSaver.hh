@@ -31,7 +31,7 @@ public:
 	virtual ~TRawEventSaver();
 	void setSettings(TSettings* set){settings=set;}
 	void saveEvents(int nEvents);
-	static void showStatusBar(int nEvent,int nEvents,int updateIntervall=100,bool show=false);
+	static void showStatusBar(int nEvent,int nEvents,int updateIntervall=100,bool show=false,bool makeNewLine=true);
 private:
 	UInt_t runNumber;
 	string runDesciption;

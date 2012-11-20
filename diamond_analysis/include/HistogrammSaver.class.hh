@@ -39,7 +39,10 @@
 #include <sys/stat.h>
 
 class HistogrammSaver {
+private:
+	unsigned int verbosity;
 public:
+
 	enum EnumAxisRange{
 		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
 	};
@@ -72,9 +75,9 @@ public:
 	void SaveStringToFile(std::string name,std::string data);
 	void SetRange(Float_t min,Float_t max);
 
-	static TH2F* CreateScatterHisto(std::string name,std::vector<Float_t> posX, std::vector<Float_t> posY,UInt_t nBins=4096);
+	static TH2F* CreateScatterHisto(std::string name,std::vector<Float_t> posX, std::vector<Float_t> posY,UInt_t nBins=512);
 	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos);
-	static TH2F* CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=4096);
+	static TH2F* CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=512);
 	static TH1F* CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096,EnumAxisRange range=maxWidth,Float_t xmin=-1,Float_t xmax=1);
 	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
 	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
@@ -82,7 +85,7 @@ public:
 	static TGraphErrors CreateErrorGraph(std::string name,std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey);
 
 private:
-    unsigned int verbosity;
+
     TPaveText *pt;
     TDatime dateandtime;
     std::string plots_path;
