@@ -19,7 +19,7 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#define TCLUSTER_REV  32
+#define TCLUSTER_REV  33
 using namespace std;
 class TCluster :public TObject{
 public:
@@ -67,7 +67,7 @@ public:
 	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos);
     Float_t getChargeWeightedMean(bool useNonHits=false);
     Float_t getEtaPostion();
-    Float_t getPositionCorEta(TH1F* histo);
+    Float_t getPositionCorEta(TH1F* histo=0);
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);

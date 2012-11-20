@@ -111,25 +111,7 @@ void TClustering::clusterEvent()
 
 		//cluster Plane
 		clusterDetector(det);
-		//fill clusters in vecvecCluster
-//		if(verbosity>10)cout<<"fill "<<det<<" vecvecCluster "<<flush;
-//		if(det<vecvecCluster.size()){
-//			if(verbosity>10)cout<<vecvecCluster.size()<<"."<<flush;
-//			vecvecCluster.at(det).clear();
-//			if(verbosity>10)cout<<","<<vecCluster[det].size()<<flush;
-//			for(unsigned int cl=0;cl<vecCluster[det].size();cl++){
-//				if(verbosity>10)cout<<"."<<cl<<flush;
-//				TCluster cluster=vecCluster[det].at(cl);
-//				if(verbosity>10)cout<<"."<<cl<<flush;
-//				vecvecCluster.at(det).push_back(cluster);
-//			}
-//		}
-//		else
-//			cout<<"Something is going wrong vecvecCluster is to small....."<<endl;
-//		//hNumberOfSeeds[det]->Fill(numberOfSeeds);
-//		if(verbosity>10)cout<<"Done with detector "<<det<<endl;
-	}
-
+    }
 	//Save Planes to Event
 	if(pEvent!=NULL) {delete pEvent;pEvent=NULL;}
 	pEvent = new TEvent(nEvent);
@@ -412,9 +394,6 @@ void TClustering::setBranchAdresses(){
 	pEvent=0;
 	clusterTree->Branch("event","TEvent",&pEvent);
 }
-
-
-
 
 
 TH1F *TClustering::createEtaIntegral(TH1F *histo, std::string histName)

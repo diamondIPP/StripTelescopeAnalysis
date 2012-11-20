@@ -79,12 +79,13 @@ libTEvent.so: $(ROOTLIBFILES)
 		#
 		# Creating Shared ROOT Lib
 		#
-		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
+		# Please do: export LD_LIBRARY_PATH:=$$LD_LIBRARY_PATH:~/lib
 		#
 		$(LD) -m64 -shared $(LDFLAGS) -o $@ $^
+		mkdir -p $(LIBDIR)
 		cp -rfv libTEvent.so $(LIBDIR) 
  		#
- 		# Please do: export LD_LIBRARY_PATH+=$LD_LIBRARY_PATH:~/lib
+ 		# Please do: export LD_LIBRARY_PATH:=$$LD_LIBRARY_PATH:~/lib
  		#
  
 TEventDict.cpp: $(INCLUDEDIR)/TEvent.hh $(INCLUDEDIR)/TEventLinkDef.h

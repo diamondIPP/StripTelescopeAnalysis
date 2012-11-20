@@ -231,14 +231,20 @@ public:
     void setSingleTrack2DmaxClusterSize(Int_t singleTrack2DmaxClusterSize);
     void setZoomDiamondPlots(Int_t zoomDiamondPlots);
     Float_t getRes_keep_factor();
+    UInt_t GetSiliconAlignmentSteps(){return siliconAlignmentSteps;}
+    UInt_t GetDiamondAlignmentSteps(){return diamondAlignmentSteps;}
+    bool doAllAlignmentPlots(){return bDoAllAlignmentPlots;}
     enumAlignmentTrainingMethod getTrainingMethod() const;
     void setTrainingMethod(enumAlignmentTrainingMethod trainingMethod);
     void Print();
     UInt_t getDetChannelNo(UInt_t vaCh);
     UInt_t getVaChannelNo(UInt_t detChNo);
-    Int_t getVerbosity(){return this->verbosity;}
+    Int_t getVerbosity();
     bool useForAlignment(UInt_t eventNumber, UInt_t nEvents=0);
 	UInt_t getAlignmentTrainingTrackNumber() const {return alignment_training_track_number;}
+	Float_t getAlignmentPrecisionOffset()const{return alignmentPrecision_Offset;}
+	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
+	bool resetAlignment() const{return bResetAlignment;};
 //	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 protected:
     float store_threshold;
@@ -255,6 +261,12 @@ private:
     TSystem *sys;
     TFile *settingsFile;
 private:
+    bool bResetAlignment;
+    Float_t alignmentPrecision_Offset;
+    Float_t alignmentPrecision_Angle;
+    bool bDoAllAlignmentPlots;
+    UInt_t siliconAlignmentSteps;
+    UInt_t diamondAlignmentSteps;
     Int_t nDiamonds;
     Int_t SaveAllFilesSwitch;
     Int_t ClosePlotsOnSave;
