@@ -643,8 +643,19 @@ Int_t TCluster::getAdcValue(UInt_t clusterPos)
 	else return 0;
 }
 
-Float_t TCluster::getEta()
+
+Float_t TCluster::getEta(){
+	Int_t leftChannel=0;
+	return getEta(leftChannel);
+}
+/**
+ * @brief Calculation of Eta of the cluster
+ *
+ * @return eta or -1 if not a valid Cluster
+ */
+Float_t TCluster::getEta(Int_t &leftChannel)
 {
+	leftChannel = -1;
 	if (checkClusterForSize() < 2) return -1;
 	UInt_t clPosHighest = getHighestHitClusterPosition();
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
@@ -658,58 +669,32 @@ Float_t TCluster::getEta()
 		leftClPos = clPos2ndHighest;
 		rightClPos = clPosHighest;
 	}
-	Float_t sumSignal = (getSignal(leftClPos)+getSignal(rightClPos));
-	if(sumSignal==0||getSignal(rightClPos)==0)
+	leftChannel = this->getChannel(leftClPos);
+	Float_t signalLeft  = getSignal(leftClPos);
+	Float_t signalRight = getSignal(rightClPos);
+	Float_t sumSignal = (signalLeft+signalRight);
+	if(sumSignal==0)
 		return -1;
-	return getSignal(rightClPos) / sumSignal;
+	return signalRight / sumSignal;
 }
 
 Float_t TCluster::getEtaPostion(){
-	if (checkClusterForSize() < 3) return -1;
-	UInt_t clPosHighest = getHighestHitClusterPosition();
-	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
-	UInt_t leftClPos = 0;
-	UInt_t rightClPos = 0;
-	if (clPosHighest < clPos2ndHighest) {
-		leftClPos = clPosHighest;
-		rightClPos = clPos2ndHighest;
-	}
-	else {
-		leftClPos = clPos2ndHighest;
-		rightClPos = clPosHighest;
-	}
-	UInt_t leftChannel = this->getChannel(leftClPos);
-	Float_t eta = getEta();
-	if(eta==0)return -9999;
+	Int_t leftChannel;
+	Float_t eta = getEta(leftChannel);
+	if(eta==0||leftChannel==-1)return -9999;
 	return eta+leftChannel;
 }
 
 Float_t TCluster::getPositionCorEta(TH1F* histo){
-	if (checkClusterForSize() < 3) return -1;
-	if(histo==0) return this->getEtaPostion();
-	UInt_t clPosHighest = getHighestHitClusterPosition();
-	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
-	UInt_t leftClPos = 0;
-	UInt_t rightClPos = 0;
-
-	Float_t eta = getEta();
-	if(verbosity)cout<<"get Position Cor Eta: "<<eta<<" ";
-	if (clPosHighest < clPos2ndHighest) {
-		leftClPos = clPosHighest;
-		rightClPos = clPos2ndHighest;
-		if(verbosity)cout<<"leftHighest "<<flush;
-	}
-	else {
-		leftClPos = clPos2ndHighest;
-		rightClPos = clPosHighest;
-		if(verbosity)cout<<"rightHighest "<<flush;
-	}
+	Int_t leftChannel;
+	Float_t eta = getEta(leftChannel);
 	if(eta<=0)
 		return getEtaPostion();
 	Float_t corEta= getValueOfHisto(eta,histo);
-	UInt_t leftChannelNo= getChannel(leftClPos);
-	if(verbosity)	cout<<leftChannelNo<<" + "<<corEta<<" = "<<leftChannelNo+corEta;
-	return leftChannelNo+corEta;
+	if(verbosity)	cout<<leftChannel<<" + "<<corEta<<" = "<<leftChannel+corEta;
+	if(leftChannel==-1)
+		return -9999;
+	return leftChannel+corEta;
 }
 /**
  * todo: return value 5000 check if that makes sense
@@ -737,7 +722,12 @@ UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo)
 UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos)
 {
 	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;
-	if (getSignal(clPos-1) < getSignal(clPos+1)) return clPos+1;
+	if(checkClusterForSize()==2){
+		if(clPos==1) return clPos-1;
+		else if(clPos==0) return clPos+1;
+		else return 9999;
+	}
+	if (getSignal(clPos-1) < getSignal(clPos+1)&& getSignal(clPos+1)>0) return clPos+1;
 	if (getSignal(clPos-1) > 0) return clPos-1;
 	return 9999;
 }
