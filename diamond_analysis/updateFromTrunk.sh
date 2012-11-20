@@ -3,8 +3,8 @@ echo "Please enter your username:"
 read username
 echo "You are: $username" 
 
-status=$(svn st |wc -l)
 svn up
+status=$(svn st |wc -l)
 
 if [ $status -eq 0 ]
 then
