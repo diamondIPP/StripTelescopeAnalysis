@@ -6,6 +6,22 @@
  */
 
 #include "../include/TResidual.hh"
+/**
+ * calculating offset and Slope with
+ * with method of minimum least square
+ * see: - http://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate#Spezialfall_einer_einfachen_linearen_Ausgleichsgeraden
+ *      - http://mathworld.wolfram.com/LeastSquaresFitting.html
+ * you get the offset via b = <y> - m * <x>
+ * where <y> = 1/n*sum(y_i), <x> = 1/n * sum(x_i)
+ * and m  = (<x*y> - <x> * <y>)/(<x*x> - <x> * <x>)
+ *        = sum [ (x_i - <x>) * (y_i - <y>) ] / sum [ (x_i - <x>)**2 ]
+ * in our case the residual is our y and the predicted position is our x
+ * So we get the formula:
+ * m = (n * Vr - V * R)/(n * V2 - V * V)
+ * b = 1/n * R - m * 1/n* V
+ *   = (R * V2 - Vr * V )/(n * V2 - V * V)
+ */
+
 
 using namespace std;
 /** Constructor of TResidual
@@ -16,7 +32,7 @@ TResidual::TResidual(bool bTest){
 	this->SetTestResidual(bTest);
 }
 
-/** aut-generated destructor
+/** auto-generated destructor
  * up to now it is making nothig
  */
 TResidual::~TResidual() {
@@ -37,6 +53,7 @@ void TResidual::resetResidual(){
 	sumVRx=0;
 	sumVRy=0;
 	nUsedTracks=0;
+	verbosity=0;
 }
 
 /** Prints the results of the ResidualCalulation
@@ -45,7 +62,6 @@ void TResidual::resetResidual(){
  */
 void TResidual::Print(UInt_t level){
 
-	cout<<"\n\n";
 	if(isTestResidual()){cout<<TCluster::Intent(level)<<"residual is a testresidual"<<endl;}
 	else{
 		cout<<TCluster::Intent(level)<<"residual results of "<<nUsedTracks<<" used Tracks"<<endl;
@@ -54,7 +70,7 @@ void TResidual::Print(UInt_t level){
 		cout<<TCluster::Intent(level)<<"\t Xoff: "<<getXOffset()<<"\tPhiXoff: "<<getPhiXOffset()<<endl;
 		cout<<TCluster::Intent(level)<<"\t Yoff: "<<getYOffset()<<"\tPhiYoff: "<<getPhiYOffset()<<endl;
 	}
-	cout<<"\n\n\n"<<endl;
+	cout<<endl;
 }
 
 /**
@@ -66,6 +82,7 @@ void TResidual::Print(UInt_t level){
  */
 void TResidual::addDataPoint(Float_t deltaX, Float_t predX, Float_t deltaY, Float_t predY)
 {
+	if(verbosity>4)cout<<"Add DataPoint no "<<setw(4)<<nUsedTracks+1<<": "<<setprecision(2)<<deltaX<<" @ "<<setprecision(2)<<predX<<"\t"<<setprecision(2)<<deltaY<<" @ "<<setprecision(2)<<predY<<endl;
 	this->resYMean += deltaY;
 	this->resYSigma += deltaY*deltaY;
 	this->resXMean += deltaX;
@@ -74,8 +91,8 @@ void TResidual::addDataPoint(Float_t deltaX, Float_t predX, Float_t deltaY, Floa
 	this->sumRy+=deltaY;
 	this->sumVx+=predY;
 	this->sumVy+=predX;
-	this->sumV2x+=predY*predY;//todo check
-	this->sumV2y+=predX*predX;//todo check
+	this->sumV2x+=predY*predY;
+	this->sumV2y+=predX*predX;
 	this->sumVRx+=predY*deltaX;
 	this->sumVRy+=predX*deltaY;
 	this->nUsedTracks++;
@@ -103,6 +120,7 @@ Float_t TResidual::getYSigma()
 	return (N_INVALID);
 }
 
+
 Float_t TResidual::getXOffset()
 {
 	Float_t variableDif= (nUsedTracks * sumV2x - sumVx * sumVx);
@@ -123,52 +141,54 @@ Float_t TResidual::getYOffset()
 
 Float_t TResidual::getPhiXOffset()
 {
-	Float_t variableDif=(nUsedTracks * sumV2y - sumVy * sumVy);
+	Float_t variableDif=(nUsedTracks * sumV2x - sumVx * sumVx);
 	if(variableDif!=0)
-		return (TMath::ATan((nUsedTracks* sumVRy - sumRy * sumVy) / variableDif));
+		return (-TMath::ATan((nUsedTracks* sumVRx - sumRx * sumVx) / variableDif));
 	return (N_INVALID);
-}
-
-
-void TResidual::calculateResidual(TPlaneProperties::enumCoordinate cor, vector<Float_t> *xPred, vector<Float_t> *deltaX, vector<Float_t> *yPred, vector<Float_t> *deltaY, TResidual resOld)
-{
-	this->clear();
-	Float_t resxtest;
-	Float_t resytest;
-//	if(verbosity>2)cout<<"\tcalculate Residual "<<res_keep_factor<<endl;
-//	if(verbosity>2)cout<<"\t"<<deltaX->size()<<" "<<deltaY->size()<<" "<< xPred->size()<<" "<<yPred->size()<<endl;
-	for(UInt_t i=0;i<deltaX->size();i++){
-		resxtest= TMath::Abs(deltaX->at(i)-resOld.getXMean())/resOld.getXSigma();
-		resytest= TMath::Abs(deltaY->at(i)-resOld.getYMean())/resOld.getYSigma();
-
-		//only add if restest is smaller than res_keep_factor
-		if((cor==TPlaneProperties::X_COR)&&resxtest<res_keep_factor){
-			this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
-		}//end if
-		else if((cor==TPlaneProperties::X_COR)&&resytest<res_keep_factor){
-			this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
-		}//end else if
-		else if((cor==TPlaneProperties::XY_COR)&&resxtest<res_keep_factor&&resytest<res_keep_factor){
-			this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
-		}//end else if
-
-	}//end for loop
-//	if(verbosity)cout<<"\n";
-//	if(!resOld.isTestResidual()&&verbosity)printf("\tresidual with x:%1.2f+/-%1.2f and y:%1.2f+/-%1.2f\n",resOld.getXMean(),resOld.getXSigma(),resOld.getYMean(),resOld.getYSigma());
-//	if(verbosity>0)	cout<<"\tused "<<residual.getUsedTracks()<<" Tracks"<<endl;
-//	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<residual.getXMean()<<"+/-"<<residual.getXSigma()<<endl;
-//	if(verbosity>0)	cout<<"\tY: "<<residual.getYMean()<<"+/-"<<residual.getYSigma()<<"\n"<<endl;
-	//set values
-	this->SetTestResidual(false);
 }
 
 Float_t TResidual::getPhiYOffset()
 {
-	Float_t variableDif = (nUsedTracks * sumV2x - sumVx * sumVx);
+	Float_t variableDif = (nUsedTracks * sumV2y - sumVy * sumVy);
 	if(variableDif!=0)
-		return (TMath::ATan(-(nUsedTracks * sumVRx - sumRx * sumVx) / variableDif));
+		return (-TMath::ATan((nUsedTracks * sumVRy - sumRy * sumVy) / variableDif));
 	return (N_INVALID);
 }
+
+void TResidual::calculateResidual(TPlaneProperties::enumCoordinate cor, vector<Float_t> *xPred, vector<Float_t> *deltaX, vector<Float_t> *yPred, vector<Float_t> *deltaY, TResidual resOld)
+{
+	this->clear();
+	//Float_t resxtest, resytest;
+	Float_t oldXSigma = resOld.getXSigma();
+	Float_t oldYSigma = resOld.getYSigma();
+	Float_t oldXMean = resOld.getXMean();
+	Float_t oldYMean = resOld.getYMean();
+	if(verbosity>2)cout<<"\tcalculate Residual in "<<TPlaneProperties::getCoordinateString(cor)<<" with a res keep factor of "<<res_keep_factor<<"and X:"<<oldXMean<<"+/-"<<oldXSigma<<" , Y:"<<oldYMean<<"+/-"<<oldYSigma<<endl;
+	for(UInt_t i=0;i<deltaX->size();i++)
+		this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
+
+	if(verbosity>2)cout<<"\t"<<deltaX->size()<<" "<<deltaY->size()<<" "<< xPred->size()<<" "<<yPred->size()<<endl;
+
+	this->SetTestResidual(false);
+	//outputs
+	if(verbosity)cout<<"\n";
+	if((!resOld.isTestResidual())&&verbosity)
+		printf("\tresidual with x:%1.2f+/-%1.2f and y:%1.2f+/-%1.2f\n",resOld.getXMean(),resOld.getXSigma(),resOld.getYMean(),resOld.getYSigma());
+
+	if(verbosity>0)	cout<<"\tused "<<this->getUsedTracks()<<" Tracks"<<endl;
+	if(verbosity>0)	cout<<"\t rexXMean: "<<resXMean<<", resXSigma: "<<resYSigma<<",\tresYMean: "<<resYMean<<", resYSigma"<<resYSigma<<endl;
+	if(verbosity>0)	cout<<"\tX: "<<sumVx <<" "<< sumV2x  <<" "<<sumRx<<" "<<sumVRx<<endl;
+	if(verbosity>0)	cout<<"\tY: "<<sumVy <<" "<< sumV2y  <<" "<<sumRy<<" "<<sumVRy<<endl;
+	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<this->getXMean()<<"+/-"<<this->getXSigma()<<"\t\t"<<this->getXOffset()<<endl;
+	if(verbosity>0)	cout<<"\tY: "<<this->getYMean()<<"+/-"<<this->getYSigma()<<"\t\t"<<this->getYOffset()<<"\n"<<endl;
+//	if(verbosity>0){
+//		cout<<"press key"<<endl;
+//		char t;
+//		cin>>t;
+//	}
+	//set values
+}
+
 
 Float_t TResidual::getXMean()
 {

@@ -702,15 +702,14 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	return histo;
 }
 
-TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos)
+TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Float_t> vecY, std::vector<Float_t> vecX)
 {
-	if(Delta.size()!=pos.size()||pos.size()==0) {
-		cerr<<"ERROR HistogrammSaver::CreateDipendencyGraph vectors have different size "<<Delta.size()<<" "<<pos.size()<<endl;
+	if(vecY.size()!=vecX.size()||vecX.size()==0) {
+		cerr<<"ERROR HistogrammSaver::CreateDipendencyGraph vectors have different size "<<vecY.size()<<" "<<vecX.size()<<": "<<name<<endl;
 		return TGraph();
 	}
-
 	//cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
-	TGraph hGraph = TGraph(Delta.size(),&pos.at(0),&Delta.at(0));
+	TGraph hGraph = TGraph(vecY.size(),&vecX.at(0),&vecY.at(0));
 	hGraph.GetXaxis()->SetName("PredictedPosition");
 	hGraph.GetYaxis()->SetName("Delta");
 	hGraph.SetTitle(name.c_str());
@@ -748,6 +747,7 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		return new TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
 	Float_t max = vec.at(0);
 	Float_t min = vec.at(0);
+	cout<<"Create Histo: "<<range<<" "<<flush;
 	if (range==maxWidth){
 		for(UInt_t i=0;i<vec.size();i++){
 			if (max<vec.at(i))max=vec.at(i);
@@ -756,21 +756,36 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		Float_t delta = max-min;
 		min =min-delta*factor;
 		max=max+delta*factor;
+		cout<<" maxWidth "<<min <<"-"<<max<<endl;
 	}
 	else if(range==fiveSigma||range==threeSigma){
+		Float_t  mean2 =0;
+		Float_t sigma2 = 0;
+		for(UInt_t i=0;i<vec.size();i++){
+			mean2+=vec.at(i);
+			sigma2+=vec.at(i)*vec.at(i);
+		}
+		mean2/=(Float_t)vec.size();
+		sigma2/=(Float_t)vec.size();
+
 		Float_t mean=0;
 		Float_t sigma=0;
+		UInt_t nEvents=0;
 		for(UInt_t i=0;i<vec.size();i++){
+			if( (vec.at(i)-mean2)/sigma2<3.){
 			mean+=vec.at(i);
 			sigma+=vec.at(i)*vec.at(i);
+			nEvents++;
+			}
 		}
-		mean/=(Float_t)vec.size();
-		sigma/=(Float_t)vec.size();
+		mean/=(Float_t)nEvents;
+		sigma/=(Float_t)nEvents;
 		sigma = sigma -mean*mean;
 		sigma=TMath::Sqrt((Double_t)sigma);
 		UInt_t nSigma = (range==fiveSigma)? 5:3;
 		max=mean+nSigma*sigma;
 		min=mean-nSigma*sigma;
+		//cout<<" nSigma:"<<nSigma<<" "<<mean<<"+/-"<<sigma<<" ==> "<<min <<"-"<<max<<endl;
 	}
 	else if(range==positiveArea){
 		min=0;
@@ -798,7 +813,6 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		min=xmin;
 	}
 
-
 	TH1F* histo = new TH1F(name.c_str(),name.c_str(),nBins,min,max);
 	for(UInt_t i=0;i<vec.size();i++){
 		histo->Fill(vec.at(i));
@@ -807,6 +821,7 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 	while ((histo->GetBinContent(histo->GetMaximumBin())/histo->GetEntries())<0.05&&ntries<3){//todo change hardcoding
 		histo->Rebin();ntries++;
 	}
+	histo->GetXaxis()->SetRangeUser(min,max);
 	return histo;
 }
 

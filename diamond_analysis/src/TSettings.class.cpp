@@ -14,42 +14,42 @@ using namespace std;
 
 
 bool TSettings::existsDirectory(std::string dir){
-  struct stat sta;
-  int retVal = stat(dir.c_str(),&sta);
-  return (retVal>=0);
+	struct stat sta;
+	int retVal = stat(dir.c_str(),&sta);
+	return (retVal>=0);
 }
 
 TSettings::TSettings(TRunInfo *runInfo)
 {
-  cout<<"TSettings TRunInfo"<<endl;
-//  verbosity=runInfo->getVerbosity();
-  setVerbosity(runInfo->getVerbosity());
-  diamondMapping=0;
-  DefaultLoadDefaultSettings();
-  this->runNumber=runInfo->getRunNumber();
-  sys = gSystem;
-  setRunDescription(runInfo->getRunDescription());
-  stringstream fileNameStr;
-  fileNameStr<<path<<"/"<<runInfo->getRunSettingsDir()<<"/settings."<<runInfo->getRunNumber();
-  if (runInfo->getRunDescription().at(0)!='0')
-    fileNameStr<<"-"<<runInfo->getRunDescription();
-  fileNameStr<<".ini";
-  cout<<"get Settingsfile: fileName =\""<<fileNameStr.str()<<"\""<<endl;
-  int fileExist = existsDirectory(fileNameStr.str());
-  cout<< "File Exists: "<<fileExist<<endl;
-  cout<<endl;
-  if(!fileExist){
-    cout<<"Settingsfile: "<<fileNameStr.str()<<" does not exists"<<endl;
-    cout<<"finish on press char:"<<flush;
-    exit(-1);
-  }
+	cout<<"TSettings TRunInfo"<<endl;
+	//  verbosity=runInfo->getVerbosity();
+	setVerbosity(runInfo->getVerbosity());
+	diamondMapping=0;
+	DefaultLoadDefaultSettings();
+	this->runNumber=runInfo->getRunNumber();
+	sys = gSystem;
+	setRunDescription(runInfo->getRunDescription());
+	stringstream fileNameStr;
+	fileNameStr<<path<<"/"<<runInfo->getRunSettingsDir()<<"/settings."<<runInfo->getRunNumber();
+	if (runInfo->getRunDescription().at(0)!='0')
+		fileNameStr<<"-"<<runInfo->getRunDescription();
+	fileNameStr<<".ini";
+	cout<<"get Settingsfile: fileName =\""<<fileNameStr.str()<<"\""<<endl;
+	int fileExist = existsDirectory(fileNameStr.str());
+	cout<< "File Exists: "<<fileExist<<endl;
+	cout<<endl;
+	if(!fileExist){
+		cout<<"Settingsfile: "<<fileNameStr.str()<<" does not exists"<<endl;
+		cout<<"finish on press char:"<<flush;
+		exit(-1);
+	}
 
-  if(getVerbosity())
-    cout<<"TSettings:Create TSettings-member with file:\""<<fileNameStr.str()<<"\""<<endl;
-  outputDir=runInfo->outputDir;//TODO:getOutputDir();
-  cout<<runInfo->getInputDir()<<endl;
-  setInputDir(runInfo->getInputDir());
-  SetFileName(fileNameStr.str());
+	if(getVerbosity())
+		cout<<"TSettings:Create TSettings-member with file:\""<<fileNameStr.str()<<"\""<<endl;
+	outputDir=runInfo->outputDir;//TODO:getOutputDir();
+	cout<<runInfo->getInputDir()<<endl;
+	setInputDir(runInfo->getInputDir());
+	SetFileName(fileNameStr.str());
 }
 
 TSettings::TSettings(UInt_t runNumber){
@@ -60,7 +60,7 @@ TSettings::TSettings(UInt_t runNumber){
 	DefaultLoadDefaultSettings();
 	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
-  sys = gSystem;
+	sys = gSystem;
 	path = sys->pwd();
 	runDescription="";
 }
@@ -75,116 +75,116 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	sys = gSystem;
 	path = sys->pwd();
 	runDescription="";
-  SetFileName(fileName);
-//	createSettingsRootFile();
+	SetFileName(fileName);
+	//	createSettingsRootFile();
 }
 
 TSettings::~TSettings(){
 
-//  saveSettings();
-//  settingsFile->Close();
-  cout<<"delete Settings"<<endl;
+	//  saveSettings();
+	//  settingsFile->Close();
+	cout<<"delete Settings"<<endl;
 }
 
 std::string TSettings::getRawTreeFilePath()
 {
-  stringstream path;
-  path<<getAbsoluteOuputPath(false);
-  path<<"rawData."<<getRunNumber()<<".root";
-  return path.str();
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"rawData."<<getRunNumber()<<".root";
+	return path.str();
 }
 
 std::string TSettings::getPedestalTreeFilePath()
 {
-  stringstream path;
-  path<<getAbsoluteOuputPath(false);
-  path<<"pedestalData."<<getRunNumber()<<".root";
-  return path.str();
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"pedestalData."<<getRunNumber()<<".root";
+	return path.str();
 }
 
 std::string TSettings::getClusterTreeFilePath()
 {
-  stringstream path;
-  path<<getAbsoluteOuputPath(false);
-  path<<"clusterData."<<getRunNumber()<<".root";
-  return path.str();
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"clusterData."<<getRunNumber()<<".root";
+	return path.str();
 }
 
 std::string TSettings::getAlignmentFilePath()
 {
 
-  stringstream path;
-  path<<getAbsoluteOuputPath(false);
-  path<<"alignment."<<getRunNumber();
-  if(this->isSpecialAnalysis())
-    path<<"-"<<getRunDescription();
-  path<<".root";
-  return path.str();
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"alignment."<<getRunNumber();
+	if(this->isSpecialAnalysis())
+		path<<"-"<<getRunDescription();
+	path<<".root";
+	return path.str();
 }
 
 std::string TSettings::getEtaDistributionPath(Int_t step){
-  stringstream output;
-  output<<this->getAbsoluteOuputPath(false)<<"/etaCorrection";
-  if(step>=0)
-    output<<"_Step"<<step;
-  output<<"."<<runNumber<<".root";
-  return output.str();
+	stringstream output;
+	output<<this->getAbsoluteOuputPath(false)<<"/etaCorrection";
+	if(step>=0)
+		output<<"_Step"<<step;
+	output<<"."<<runNumber<<".root";
+	return output.str();
 }
 
 std::string TSettings::getSelectionTreeFilePath()
 {
-  stringstream path;
-  path<<getAbsoluteOuputPath(false);
-  path<<"selectionData."<<getRunNumber();
-  if(this->isSpecialAnalysis())
-    path<<"-"<<getRunDescription();
-  path<<".root";
-  return path.str();
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"selectionData."<<getRunNumber();
+	if(this->isSpecialAnalysis())
+		path<<"-"<<getRunDescription();
+	path<<".root";
+	return path.str();
 }
 
 void TSettings::goToDir(std::string dir){
-  if(this->getVerbosity()>3)cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
-  if(this->getVerbosity()>3)cout<<"goTo Dir: "<<dir<<endl;
-  if(!existsDirectory(dir))
-    sys->mkdir( dir.c_str(),true);
-  sys->cd(dir.c_str());
-  if(this->getVerbosity()>3)cout<<"new Dir: "<<sys->pwd()<<endl;
+	if(this->getVerbosity()>3)cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
+	if(this->getVerbosity()>3)cout<<"goTo Dir: "<<dir<<endl;
+	if(!existsDirectory(dir))
+		sys->mkdir( dir.c_str(),true);
+	sys->cd(dir.c_str());
+	if(this->getVerbosity()>3)cout<<"new Dir: "<<sys->pwd()<<endl;
 }
 void TSettings::goToRawTreeDir(){
-    goToDir(this->getAbsoluteOuputPath(false));
+	goToDir(this->getAbsoluteOuputPath(false));
 }
 
 void TSettings::goToSelectionTreeDir(){
-  goToDir(this->getAbsoluteOuputPath(false));
+	goToDir(this->getAbsoluteOuputPath(false));
 }
 
 void TSettings::goToOutputDir(){
-  goToDir(this->getOutputDir());
+	goToDir(this->getOutputDir());
 }
 
 void TSettings::goToPedestalAnalysisDir(){
-  goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/pedestalAnalysis/"));
+	goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/pedestalAnalysis/"));
 }
 
 void TSettings::goToClusterAnalysisDir(){
-  goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/clustering/"));
+	goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/clustering/"));
 }
 void TSettings::setRunDescription(std::string runDescription)
 {
-    this->runDescription = runDescription;
+	this->runDescription = runDescription;
 }
 
 std::string TSettings::getAbsoluteOuputPath(bool withRunDescribtion){
-  if(this->getVerbosity()>3)cout<<"Absolute PATH:"<<withRunDescribtion<<" "<<(int)(runDescription.at(0)!='0')<<endl;
-  stringstream output;
-  output<<this->getOutputDir();
-  output<<"/"<<runNumber<<"/";
-  if(withRunDescribtion&&runDescription.at(0)!='0'){
-    output<<runDescription<<"/";
-    sys->MakeDirectory(output.str().c_str());
-  }
-  if(this->getVerbosity()>3)cout<<"OUTPUT: "<<output.str()<<endl;
-  return output.str();
+	if(this->getVerbosity()>3)cout<<"Absolute PATH:"<<withRunDescribtion<<" "<<(int)(runDescription.at(0)!='0')<<endl;
+	stringstream output;
+	output<<this->getOutputDir();
+	output<<"/"<<runNumber<<"/";
+	if(withRunDescribtion&&runDescription.at(0)!='0'){
+		output<<runDescription<<"/";
+		sys->MakeDirectory(output.str().c_str());
+	}
+	if(this->getVerbosity()>3)cout<<"OUTPUT: "<<output.str()<<endl;
+	return output.str();
 }
 void TSettings::SetFileName(string newFileName){
 	if(getVerbosity())
@@ -249,6 +249,10 @@ void TSettings::LoadSettings(){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			SaveAllFilesSwitch = (int)strtod(value.c_str(),0);
 		}
+		if(key=="siliconAlignmentSteps"){
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			siliconAlignmentSteps = (int)strtod(value.c_str(),0);
+		}
 		if(key=="ClosePlotsOnSave") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			ClosePlotsOnSave = (int)strtod(value.c_str(),0);
@@ -265,33 +269,37 @@ void TSettings::LoadSettings(){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			fix_dia_noise = (int)strtod(value.c_str(),0);
 		}
-	    if(key=="single_channel_analysis_channels") {
-			 cout << key.c_str() << " = " << value.c_str() << endl;
-			 ParseIntArray(value,single_channel_analysis_channels);
-		  }
+		if(key=="single_channel_analysis_channels") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			ParseIntArray(value,single_channel_analysis_channels);
+		}
 		if(key=="single_channel_analysis_enable") {
-		         cout << key.c_str() << " = " << value.c_str() << endl;
-		         single_channel_analysis_enable = (int)strtod(value.c_str(),0);
-		      }
-		  if(key=="single_channel_analysis_eventwindow") {
-			 cout << key.c_str() << " = " << value.c_str() << endl;
-			 single_channel_analysis_eventwindow = (int)strtod(value.c_str(),0);
-		  }
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			single_channel_analysis_enable = (int)strtod(value.c_str(),0);
+		}
+		if(key=="single_channel_analysis_eventwindow") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			single_channel_analysis_eventwindow = (int)strtod(value.c_str(),0);
+		}
 		/*if(key=="store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
 	      }*/
-		  if(key=="CMN_corr_low") {
-		  		         cout << key.c_str() << " = " << value.c_str() << endl;
-		  		         CMN_corr_low = (int)strtod(value.c_str(),0);
-		  		      }
-		  if(key=="CMN_corr_high") {
-		         cout << key.c_str() << " = " << value.c_str() << endl;
-		         CMN_corr_high = (int)strtod(value.c_str(),0);
-		      }
+		if(key=="CMN_corr_low") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			CMN_corr_low = (int)strtod(value.c_str(),0);
+		}
+		if(key=="CMN_corr_high") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			CMN_corr_high = (int)strtod(value.c_str(),0);
+		}
+		if(key=="resetAlignment"){
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			bResetAlignment = (bool)strtod(value.c_str(),0);
+		}
 		if(key=="CMN_cut") {
-		    cout << key.c_str() << " = " << value.c_str() << endl;
-		    CMN_cut = (int)strtod(value.c_str(),0);
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			CMN_cut = (int)strtod(value.c_str(),0);
 		}
 		if(key=="DO_CMC") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
@@ -507,98 +515,111 @@ void TSettings::LoadSettings(){
 			UseAutoFidCut = (bool)strtod(value.c_str(),0);
 		}
 		if(key == "nDiamonds"){
-		  cout << key <<" = "<<value.c_str()<<endl;
-		  this->setNDiamonds((int)strtod(value.c_str(),0));
+			cout << key <<" = "<<value.c_str()<<endl;
+			this->setNDiamonds((int)strtod(value.c_str(),0));
 		}
 		if (key == "AlternativeClustering") {
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			AlternativeClustering = (bool)strtod(value.c_str(),0);
 		}
-		 if(key=="store_threshold") {
-			 cout << key.c_str() << " = " << value.c_str() << endl;
-			 store_threshold = (float)strtod(value.c_str(),0);
-		  }
-	      if(key=="plotChannel_on") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         plotChannel_on = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="SingleChannel2000plots") {
-	    	  cout << key.c_str() << " = " << value.c_str() << endl;
-	    	  SingleChannel2000plots = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="makeDiamondPlots") {
-	    	  cout << key.c_str() << " = " << value.c_str() << endl;
-	    	  makeDiamondPlots = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="makeHits2D") {
-	    	  cout << key.c_str() << " = " << value.c_str() << endl;
-	    	  makeHits2D = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="makeNoise2D") {
-	    	  cout << key.c_str() << " = " << value.c_str() << endl;
-	    	  makeNoise2D = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="makePullDist") {
-	    	  cout << key.c_str() << " = " << value.c_str() << endl;
-	    	  makePullDist = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="makePedRMSTree") {
-	    	  cout << key.c_str() << " = " << value.c_str() << endl;
-	    	  makePedRMSTree = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="eventPrintHex") {
-	    	  cout << key.c_str() << " = " << value.c_str() << endl;
-	    	  eventPrintHex = (int)strtod(value.c_str(),0);
-	      }
+		if(key=="store_threshold") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			store_threshold = (float)strtod(value.c_str(),0);
+		}
+		if(key=="plotChannel_on") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			plotChannel_on = (int)strtod(value.c_str(),0);
+		}
+		if(key=="SingleChannel2000plots") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			SingleChannel2000plots = (int)strtod(value.c_str(),0);
+		}
+		if(key=="makeDiamondPlots") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			makeDiamondPlots = (int)strtod(value.c_str(),0);
+		}
+		if(key=="alignmentPrecision_Offset"){
+			cout << key.c_str() << " = "<< value.c_str() << endl;
+			alignmentPrecision_Offset = (float)strtod(value.c_str(),0);
+		}
+		if(key=="alignmentPrecision_Angle"){
+			cout << key.c_str() << " = "<< value.c_str() << endl;
+			alignmentPrecision_Angle = (float)strtod(value.c_str(),0);
+		};
+		if(key=="makeHits2D") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			makeHits2D = (int)strtod(value.c_str(),0);
+		}
+		if(key=="makeNoise2D") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			makeNoise2D = (int)strtod(value.c_str(),0);
+		}
+		if(key=="makePullDist") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			makePullDist = (int)strtod(value.c_str(),0);
+		}
+		if(key=="makePedRMSTree") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			makePedRMSTree = (int)strtod(value.c_str(),0);
+		}
+		if(key=="eventPrintHex") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			eventPrintHex = (int)strtod(value.c_str(),0);
+		}
 
-	      if(key=="plottedChannel") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         //plottedChannel = (int)strtod(value.c_str(),0);
-	      }
+		if(key=="plottedChannel") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			//plottedChannel = (int)strtod(value.c_str(),0);
+		}
 
-	      if(key=="high_rms_cut") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         high_rms_cut = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="rms_cut") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         rms_cut = (float)strtod(value.c_str(),0);
-	      }
-	      if(key=="zoomDiamondPlots") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         zoomDiamondPlots = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="singleTrack2D") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         singleTrack2D = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="singleTrack2DmaxClusterSize") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         singleTrack2DmaxClusterSize = (int)strtod(value.c_str(),0);
-	      }
-	      if(key=="maxNoise2D") {
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	         maxNoise2D = (float)strtod(value.c_str(),0);
-	      }
-	      if(key=="clusterHitFactors") {
-	    	  cout<<key<< " = "<< value.c_str() <<endl;
-	    	 ParseFloatArray(value,clusterHitFactors);
-	      }
-	      if(key=="clusterSeedFactors") {
-	    	  cout<<key<< " = "<< value.c_str() <<endl;
-	    	  ParseFloatArray(value,clusterSeedFactors);
-	      }
-	      if(key=="diamondMapping") {
-	    	  cout<<key<<" = "<<value.c_str()<<endl;
-	    	  std::vector<int>vecDiaMapping;
-	    	  ParseIntArray(value,vecDiaMapping);
-	    	  if(diamondMapping==0)
-	    		  delete diamondMapping;
-	    	  diamondMapping=new TChannelMapping(vecDiaMapping);
-	    	  diamondMapping->PrintMapping();
-	    	  cout<<diamondMapping<<endl;
-	    		getDetChannelNo(0);
-	      }
+		if(key=="high_rms_cut") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			high_rms_cut = (int)strtod(value.c_str(),0);
+		}
+		if(key=="rms_cut") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			rms_cut = (float)strtod(value.c_str(),0);
+		}
+		if(key=="zoomDiamondPlots") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			zoomDiamondPlots = (int)strtod(value.c_str(),0);
+		}
+		if(key=="singleTrack2D") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			singleTrack2D = (int)strtod(value.c_str(),0);
+		}
+		if(key=="singleTrack2DmaxClusterSize") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			singleTrack2DmaxClusterSize = (int)strtod(value.c_str(),0);
+		}
+		if(key=="maxNoise2D") {
+			cout << key.c_str() << " = " << value.c_str() << endl;
+			maxNoise2D = (float)strtod(value.c_str(),0);
+		}
+		if(key=="clusterHitFactors") {
+			cout<<key<< " = "<< value.c_str() <<endl;
+			ParseFloatArray(value,clusterHitFactors);
+		}
+		if(key=="clusterSeedFactors") {
+			cout<<key<< " = "<< value.c_str() <<endl;
+			ParseFloatArray(value,clusterSeedFactors);
+		}
+		if(key=="doAllAlignmentPlots"){
+			cout<<key<< " = "<< value.c_str() <<endl;
+			bDoAllAlignmentPlots=(bool)strtod(value.c_str(),0);
+
+		}
+		if(key=="diamondMapping") {
+			cout<<key<<" = "<<value.c_str()<<endl;
+			std::vector<int>vecDiaMapping;
+			ParseIntArray(value,vecDiaMapping);
+			if(diamondMapping==0)
+				delete diamondMapping;
+			diamondMapping=new TChannelMapping(vecDiaMapping);
+			diamondMapping->PrintMapping();
+			cout<<diamondMapping<<endl;
+			getDetChannelNo(0);
+		}
 	}
 
 	file.close();
@@ -637,11 +658,17 @@ void TSettings::DefaultLoadDefaultSettings(){
 	Taylor_speed_throttle = 1000; //# of events to recalculate RMS the old way; set to 1 to disable
 	CMN_corr_high=7;
 	CMN_corr_low=3;
+	bDoAllAlignmentPlots = false;
 
+
+	res_keep_factor=2;
+	alignmentPrecision_Offset = 0.01;
+	alignmentPrecision_Angle = 0.001;
 	alignment_chi2=1.0;
 	alignment_training_track_fraction=0.25;
 	alignment_training_track_number=10000;
 	trainingMethod=enumEvents;
+	bResetAlignment=false;
 
 	//default clustering settings
 	snr_plots_enable = 0;
@@ -691,7 +718,6 @@ void TSettings::DefaultLoadDefaultSettings(){
 	makePedRMSTree = 0; //make .root file of pedestal and rms values
 	eventPrintHex = 10000; //print hex (should match .rz data)
 
-	res_keep_factor=2;
 
 	maxBufferPlots = 100;
 	rms_sigma_difference_cut = 0.3;
@@ -699,7 +725,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	high_rms_cut = 1; //cut on absolute rms value instead of comparing to Gaussian
 	rms_cut = 20.; //value to use if high_rms_cut
 
-
+	siliconAlignmentSteps=5;
+	diamondAlignmentSteps=5;
 	zoomDiamondPlots = 0; //zoom in on DC_Pedestal (100 event / window)
 
 	singleTrack2D = 1; //plot single tracks only in 2D hits histogram
@@ -707,14 +734,14 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	maxNoise2D = 20.; //highest noise value plotted in 2D noise histogram
 	single_channel_analysis_enable=false;
-	   //default settings
+	//default settings
 	single_channel_analysis_eventwindow=5000; // Number of events to put in each histogram
 	plottedChannel=256; //256 = enter channel on run. also, set to 256 and type 256 to turn off buffer noise plots
 	UInt_t nDiaChannels=128;
 	diamondMapping=new TChannelMapping(nDiaChannels);
 	getDetChannelNo(0);
 	cout<<"Print DefaultMapping:"<<endl;
-//	diamondMapping.PrintMapping();
+	//	diamondMapping.PrintMapping();
 	cout<<"DONE"<<endl;
 }
 
@@ -725,45 +752,45 @@ void TSettings::DefaultLoadDefaultSettings(){
  */
 void TSettings::ParseStringArray(string value, vector<string> &vec){
 
-  int index=0;
-  if(value.find('{')==string::npos||value.find('}')==string::npos){
-    cerr<<"the string \'"<<value<<"\' cannot be parsed as a float array since bracket is missing"<<endl;
-    exit(-1);
-  }
-  string::size_type beginning = value.find_first_of('{')+1;
-  string::size_type ending = value.find_last_of('}');
-  string::size_type offset1 = value.find_first_of('{')+1;
-  string::size_type offset2 = value.find_first_of(',');
-  string::size_type iter = beginning;
-  string analyseString = value.substr(beginning,ending-beginning);
-//  cout<<"analyze: \'"<<analyseString<<"\'"<<endl;
-  int i;
-  while((i=analyseString.find(','))!=string::npos){
-    string data = analyseString.substr(0,i);
-    vec.push_back(data);
-    analyseString = analyseString.substr(i+1);
-//    cout<<"analyseString: \'"<<analyseString<<"\'"<<endl;
-  }
-  string data = analyseString.substr(0,i);
-  vec.push_back(data);
+	int index=0;
+	if(value.find('{')==string::npos||value.find('}')==string::npos){
+		cerr<<"the string \'"<<value<<"\' cannot be parsed as a float array since bracket is missing"<<endl;
+		exit(-1);
+	}
+	string::size_type beginning = value.find_first_of('{')+1;
+	string::size_type ending = value.find_last_of('}');
+	string::size_type offset1 = value.find_first_of('{')+1;
+	string::size_type offset2 = value.find_first_of(',');
+	string::size_type iter = beginning;
+	string analyseString = value.substr(beginning,ending-beginning);
+	//  cout<<"analyze: \'"<<analyseString<<"\'"<<endl;
+	int i;
+	while((i=analyseString.find(','))!=string::npos){
+		string data = analyseString.substr(0,i);
+		vec.push_back(data);
+		analyseString = analyseString.substr(i+1);
+		//    cout<<"analyseString: \'"<<analyseString<<"\'"<<endl;
+	}
+	string data = analyseString.substr(0,i);
+	vec.push_back(data);
 }
 
 void TSettings::ParseFloatArray(string value, vector<float> &vec) {
-  std::vector <std::string> stringArray;
-  ParseStringArray(value,stringArray);
-  vec.clear();
-//  cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
-  for(UInt_t i=0;i<stringArray.size();i++)
-    vec.push_back((float)strtod(stringArray.at(i).c_str(),0));
+	std::vector <std::string> stringArray;
+	ParseStringArray(value,stringArray);
+	vec.clear();
+	//  cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
+	for(UInt_t i=0;i<stringArray.size();i++)
+		vec.push_back((float)strtod(stringArray.at(i).c_str(),0));
 }
 
 void TSettings::ParseIntArray(string value, vector<int> &vec) {
-  std::vector <std::string> stringArray;
-    ParseStringArray(value,stringArray);
-    vec.clear();
-//    cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
-    for(UInt_t i=0;i<stringArray.size();i++)
-      vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
+	std::vector <std::string> stringArray;
+	ParseStringArray(value,stringArray);
+	vec.clear();
+	//    cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
+	for(UInt_t i=0;i<stringArray.size();i++)
+		vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
 }
 
 /**
@@ -772,7 +799,7 @@ void TSettings::ParseIntArray(string value, vector<int> &vec) {
  * @return
  */
 Float_t TSettings::getClusterSeedFactor(UInt_t det){
-//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
+	//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
 	if(det<clusterSeedFactors.size())
 		return clusterSeedFactors.at(det);
 	if(det==8)
@@ -791,182 +818,182 @@ Float_t TSettings::getClusterHitFactor(UInt_t det){
 
 Int_t TSettings::getMakeBufferPlots() const
 {
-    return makeBufferPlots;
+	return makeBufferPlots;
 }
 
 Int_t TSettings::getPlotDiamond() const
 {
-    return plotDiamond;
+	return plotDiamond;
 }
 
 void TSettings::setMakeBufferPlots(Int_t makeBufferPlots)
 {
-    this->makeBufferPlots = makeBufferPlots;
+	this->makeBufferPlots = makeBufferPlots;
 }
 
 void TSettings::setPlotDiamond(Int_t plotDiamond)
 {
-    this->plotDiamond = plotDiamond;
+	this->plotDiamond = plotDiamond;
 }
 
 Int_t TSettings::getEventPrintHex() const
 {
-    return eventPrintHex;
+	return eventPrintHex;
 }
 
 Int_t TSettings::getMakeDiamondPlots() const
 {
-    return makeDiamondPlots;
+	return makeDiamondPlots;
 }
 
 Int_t TSettings::getMakeHits2D() const
 {
-    return makeHits2D;
+	return makeHits2D;
 }
 
 Int_t TSettings::getMakeNoise2D() const
 {
-    return makeNoise2D;
+	return makeNoise2D;
 }
 
 Int_t TSettings::getMakePedRmsTree() const
 {
-    return makePedRMSTree;
+	return makePedRMSTree;
 }
 
 Int_t TSettings::getMakePullDist() const
 {
-    return makePullDist;
+	return makePullDist;
 }
 
 Int_t TSettings::getSingleChannel2000plots() const
 {
-    return SingleChannel2000plots;
+	return SingleChannel2000plots;
 }
 
 void TSettings::setEventPrintHex(Int_t eventPrintHex)
 {
-    this->eventPrintHex = eventPrintHex;
+	this->eventPrintHex = eventPrintHex;
 }
 
 void TSettings::setMakeDiamondPlots(Int_t makeDiamondPlots)
 {
-    this->makeDiamondPlots = makeDiamondPlots;
+	this->makeDiamondPlots = makeDiamondPlots;
 }
 
 void TSettings::setMakeHits2D(Int_t makeHits2D)
 {
-    this->makeHits2D = makeHits2D;
+	this->makeHits2D = makeHits2D;
 }
 
 void TSettings::setMakeNoise2D(Int_t makeNoise2D)
 {
-    this->makeNoise2D = makeNoise2D;
+	this->makeNoise2D = makeNoise2D;
 }
 
 void TSettings::setMakePedRmsTree(Int_t makePedRmsTree)
 {
-    makePedRMSTree = makePedRmsTree;
+	makePedRMSTree = makePedRmsTree;
 }
 
 void TSettings::setMakePullDist(Int_t makePullDist)
 {
-    this->makePullDist = makePullDist;
+	this->makePullDist = makePullDist;
 }
 
 void TSettings::setSingleChannel2000plots(Int_t singleChannel2000plots)
 {
-    SingleChannel2000plots = singleChannel2000plots;
+	SingleChannel2000plots = singleChannel2000plots;
 }
 
 UInt_t TSettings::getPlottedChannel() const
 {
-    return plottedChannel;
+	return plottedChannel;
 }
 
 void TSettings::setPlottedChannel(UInt_t plottedChannel)
 {
-    this->plottedChannel = plottedChannel;
+	this->plottedChannel = plottedChannel;
 }
 
 Int_t TSettings::getMaxBufferPlots() const
 {
-    return maxBufferPlots;
+	return maxBufferPlots;
 }
 
 void TSettings::setMaxBufferPlots(Int_t maxBufferPlots)
 {
-    this->maxBufferPlots = maxBufferPlots;
+	this->maxBufferPlots = maxBufferPlots;
 }
 
 Float_t TSettings::getRmsSigmaDifferenceCut() const
 {
-    return rms_sigma_difference_cut;
+	return rms_sigma_difference_cut;
 }
 
 void TSettings::setRmsSigmaDifferenceCut(Float_t rmsSigmaDifferenceCut)
 {
-    rms_sigma_difference_cut = rmsSigmaDifferenceCut;
+	rms_sigma_difference_cut = rmsSigmaDifferenceCut;
 }
 
 Int_t TSettings::getHighRmsCut() const
 {
-    return high_rms_cut;
+	return high_rms_cut;
 }
 
 Float_t TSettings::getRmsCut() const
 {
-    return rms_cut;
+	return rms_cut;
 }
 
 void TSettings::setHighRmsCut(Int_t highRmsCut)
 {
-    high_rms_cut = highRmsCut;
+	high_rms_cut = highRmsCut;
 }
 
 void TSettings::setRmsCut(Float_t rmsCut)
 {
-    rms_cut = rmsCut;
+	rms_cut = rmsCut;
 }
 
 Float_t TSettings::getMaxNoise2D() const
 {
-    return maxNoise2D;
+	return maxNoise2D;
 }
 
 Int_t TSettings::getSingleTrack2D() const
 {
-    return singleTrack2D;
+	return singleTrack2D;
 }
 
 Int_t TSettings::getSingleTrack2DmaxClusterSize() const
 {
-    return singleTrack2DmaxClusterSize;
+	return singleTrack2DmaxClusterSize;
 }
 
 Int_t TSettings::getZoomDiamondPlots() const
 {
-    return zoomDiamondPlots;
+	return zoomDiamondPlots;
 }
 
 void TSettings::setMaxNoise2D(Float_t maxNoise2D)
 {
-    this->maxNoise2D = maxNoise2D;
+	this->maxNoise2D = maxNoise2D;
 }
 
 void TSettings::setSingleTrack2D(Int_t singleTrack2D)
 {
-    this->singleTrack2D = singleTrack2D;
+	this->singleTrack2D = singleTrack2D;
 }
 
 void TSettings::setSingleTrack2DmaxClusterSize(Int_t singleTrack2DmaxClusterSize)
 {
-    this->singleTrack2DmaxClusterSize = singleTrack2DmaxClusterSize;
+	this->singleTrack2DmaxClusterSize = singleTrack2DmaxClusterSize;
 }
 
 void TSettings::setZoomDiamondPlots(Int_t zoomDiamondPlots)
 {
-    this->zoomDiamondPlots = zoomDiamondPlots;
+	this->zoomDiamondPlots = zoomDiamondPlots;
 }
 
 bool TSettings::isDet_channel_screened(UInt_t det, UInt_t ch)
@@ -979,12 +1006,12 @@ bool TSettings::isDet_channel_screened(UInt_t det, UInt_t ch)
 
 TSettings::enumAlignmentTrainingMethod TSettings::getTrainingMethod() const
 {
-    return trainingMethod;
+	return trainingMethod;
 }
 
 void TSettings::setTrainingMethod(enumAlignmentTrainingMethod trainingMethod)
 {
-    this->trainingMethod = trainingMethod;
+	this->trainingMethod = trainingMethod;
 }
 
 UInt_t TSettings::getDetChannelNo(UInt_t vaCh)
@@ -1005,34 +1032,34 @@ UInt_t TSettings::getVaChannelNo(UInt_t detChNo)
 //todo
 void TSettings::saveSettings()
 {
-//  cout<<"SAVE SETTINGS TO ROOT FILE"<<endl;
-//  settingsFile->cd();
-//  this->Write();
+	//  cout<<"SAVE SETTINGS TO ROOT FILE"<<endl;
+	//  settingsFile->cd();
+	//  this->Write();
 }
 
 
 //todo
 void TSettings::compareSettings()
 {
-  cout<<"compareSettings"<<endl;
+	cout<<"compareSettings"<<endl;
 }
 
 //todo
 void TSettings::createSettingsRootFile()
 {
-//  stringstream name;
-//  name << path<< "/"<<this->runNumber<<"/Settings."<<this->runNumber<<".root";
-////  settingsFile = TFile::Open(name.str().c_str());
-//  cout<<"Open settings from root file: "<<endl;
-//  settingsFile = new TFile(name.str().c_str(),"Update");
-//  if(settingsFile->IsZombie()){
-//    cout<<"file does not exist create new one!"<<endl;
-//    delete settingsFile;
-//    settingsFile = new TFile(name.str().c_str(),"RECREATE");
-//  }
-//  else{
-//    compareSettings();
-//  }
+	//  stringstream name;
+	//  name << path<< "/"<<this->runNumber<<"/Settings."<<this->runNumber<<".root";
+	////  settingsFile = TFile::Open(name.str().c_str());
+	//  cout<<"Open settings from root file: "<<endl;
+	//  settingsFile = new TFile(name.str().c_str(),"Update");
+	//  if(settingsFile->IsZombie()){
+	//    cout<<"file does not exist create new one!"<<endl;
+	//    delete settingsFile;
+	//    settingsFile = new TFile(name.str().c_str(),"RECREATE");
+	//  }
+	//  else{
+	//    compareSettings();
+	//  }
 
 
 }
@@ -1199,11 +1226,11 @@ void TSettings::setSi_Cluster_Seed_Factor(Float_t Si_Cluster_Seed_Factor)
 
 
 void TSettings::setFidCut(TFiducialCut *fidCut){
-  if(fidCut==0) return;
-  setSi_avg_fidcut_xhigh(fidCut->GetXHigh());
-  setSi_avg_fidcut_yhigh(fidCut->GetYHigh());
-  setSi_avg_fidcut_xlow(fidCut->GetXLow());
-  setSi_avg_fidcut_ylow(fidCut->GetYLow());
+	if(fidCut==0) return;
+	setSi_avg_fidcut_xhigh(fidCut->GetXHigh());
+	setSi_avg_fidcut_yhigh(fidCut->GetYHigh());
+	setSi_avg_fidcut_xlow(fidCut->GetXLow());
+	setSi_avg_fidcut_ylow(fidCut->GetYLow());
 }
 void TSettings::setSi_avg_fidcut_xhigh(Float_t si_avg_fidcut_xhigh)
 {
@@ -1474,26 +1501,26 @@ void TSettings::setDet_channel_screen_regions(int i, vector<int> Det_channel_scr
 }
 bool TSettings::getAlternativeClustering() const
 {
-    return AlternativeClustering;
+	return AlternativeClustering;
 }
 
 bool TSettings::getUseAutoFidCut() const
 {
-    return UseAutoFidCut;
+	return UseAutoFidCut;
 }
 
 void TSettings::setAlternativeClustering(bool AlternativeClustering)
 {
-    this->AlternativeClustering = AlternativeClustering;
+	this->AlternativeClustering = AlternativeClustering;
 }
 
 void TSettings::setUseAutoFidCut(bool UseAutoFidCut)
 {
-    this->UseAutoFidCut = UseAutoFidCut;
+	this->UseAutoFidCut = UseAutoFidCut;
 }
 
 void TSettings::setNDiamonds(UInt_t nDia){
-  this->nDiamonds=nDia;
+	this->nDiamonds=nDia;
 }
 
 string TSettings::getFileName() const
@@ -1541,12 +1568,12 @@ void TSettings::setStore_threshold(float storeThreshold)
 }
 Int_t TSettings::getPlotChannelOn() const
 {
-    return plotChannel_on;
+	return plotChannel_on;
 }
 
 void TSettings::setPlotChannelOn(Int_t plotChannelOn)
 {
-    this->plotChannel_on = plotChannelOn;
+	this->plotChannel_on = plotChannelOn;
 }
 
 UInt_t TSettings::getRunNumber(){
@@ -1576,4 +1603,8 @@ bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
 		return fraction<=getAlignment_training_track_fraction();
 	}
 	return false;
+}
+
+Int_t TSettings::getVerbosity(){
+	return this->verbosity;
 }

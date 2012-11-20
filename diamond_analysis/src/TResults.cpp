@@ -136,5 +136,6 @@ void TResults::SetNoise(UInt_t det,Float_t detNoise){
 
 void TResults::setAlignment(TDetectorAlignment* newAlignment)
 {
-  this->alignment= *newAlignment;
+	this->alignment= *newAlignment;
+  cout<<"TResults:SetAlignment"<<endl;
 }

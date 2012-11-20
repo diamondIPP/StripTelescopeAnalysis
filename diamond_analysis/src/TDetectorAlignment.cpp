@@ -9,12 +9,12 @@
 using namespace std;
 ClassImp(TDetectorAlignment);
 /*
- *   XY		   YX					     XY       YX
- *   ||      ||				       ||       ||
- *   01   	 23					     45 	    67
- *   0		    1						    2 		  3
- *                D0Z	D1Z
- *                 0
+ *   XY		   YX					 XY       YX
+ *   ||      ||				       	 ||       ||
+ *   01   	 23					     45		  67
+ *   0		    1					 2 		  3
+ *                  D0Z	   D1Z
+ *                   0
  *
  *   |||||
  *   -----
@@ -50,6 +50,7 @@ TDetectorAlignment::TDetectorAlignment(){
  * @return pointer to this TDetectorAlignment
  */
 TDetectorAlignment::TDetectorAlignment &TDetectorAlignment::operator=(const TDetectorAlignment::TDetectorAlignment &src){
+	cout<<"COpy consturctor of TDetectorAlignment"<<endl;
  for(UInt_t plane=0;plane<<6;plane++){
    xResolution[plane]=src.xResolution[plane];
    yResolution[plane]=src.yResolution[plane];
@@ -78,7 +79,7 @@ TDetectorAlignment::TDetectorAlignment &TDetectorAlignment::operator=(const TDet
    verbosity=src.verbosity;
    for(UInt_t i=0;i<src.intervallBeginEventNo.size();i++)intervallBeginEventNo.push_back(src.intervallBeginEventNo.at(i));
    for(UInt_t i=0;i<src.intervallEndEventNo.size();i++)intervallEndEventNo.push_back(src.intervallEndEventNo.at(i));
-  std::vector<UInt_t > intervallEndEventNo;
+//  std::vector<UInt_t > intervallEndEventNo;
 }
 
 void TDetectorAlignment::addEventIntervall(UInt_t first, UInt_t last){
@@ -102,8 +103,14 @@ void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
 	if(plane<6){
 		vecDetPhiXOffset[plane].push_back(addPhiXOffset);
 		det_phix_offset[plane]+=addPhiXOffset;
+		cout<<"\tadd PhiX-Offset of plane "<<plane<<": "<<addPhiXOffset<<endl;//todo
 	}
 	if(verbosity)cout<<det_phix_offset[plane]<<endl;
+	if(verbosity>4){
+		char t;
+		cout<<"Press a key and enter"<<endl;
+		cin>>t;
+	}
 	UpdateTime(plane);
 }
 void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
@@ -113,8 +120,14 @@ void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 	if(plane<6){
 		vecDetPhiYOffset[plane].push_back(addPhiYOffset);
 		det_phiy_offset[plane]+=addPhiYOffset;
+		cout<<"\tadd PhiY-Offset of plane "<<plane<<": "<<addPhiYOffset<<endl;//todo
 	}
 	if(verbosity)cout<<det_phiy_offset[plane]<<endl;
+	if(verbosity>4){
+			char t;
+			cout<<"Press a key and enter"<<endl;
+			cin>>t;
+		}
 	UpdateTime(plane);
 }
 
@@ -125,9 +138,14 @@ void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 	if(plane<6){
 		vecDetXOffset[plane].push_back(addXOffset);
 		det_x_offset[plane]+=addXOffset;
-		cout<<"add XOffset of plane "<<plane<<": "<<addXOffset<<endl;
+		cout<<"\tadd XOffset of plane "<<plane<<": "<<addXOffset<<endl;
 	}
 	if(verbosity)cout<<det_x_offset[plane]<<endl;
+	if(verbosity>4){
+			char t;
+			cout<<"Press a key and enter"<<endl;
+			cin>>t;
+		}
 	UpdateTime(plane);
 }
 
@@ -138,9 +156,14 @@ void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 	if(plane<6){
 		vecDetYOffset[plane].push_back(addYOffset);
 		det_y_offset[plane]+=addYOffset;
-		cout<<"add YOffset of plane "<<plane<<": "<<addYOffset<<endl;
+		cout<<"\tadd YOffset of plane "<<plane<<": "<<addYOffset<<endl;
 	}
 	if(verbosity)cout<<det_y_offset[plane]<<endl;
+	if(verbosity>4){
+		char t;
+		cout<<"Press a key and enter"<<endl;
+		cin>>t;
+	}
 	UpdateTime(plane);
 }
 
@@ -150,6 +173,11 @@ void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
 	if(plane<6){
 		vecDetZOffset[plane].push_back(addZOffset);
 		det_z_offset[plane]+=addZOffset;
+	}
+	if(verbosity>4){
+		char t;
+		cout<<"Press a key and enter"<<endl;
+		cin>>t;
 	}
 	UpdateTime(plane);
 }
@@ -247,6 +275,19 @@ std::string TDetectorAlignment::PrintResults(UInt_t level)
 	return output.str();
 }
 
+void TDetectorAlignment::ResetAlignment(Int_t plane){
+	if(plane < 0 || plane > 5)return;
+	cout<<"Resetting Alignment of Plane "<<plane<<endl;
+	this->det_x_offset[plane]=0;
+	this->det_y_offset[plane]=0;
+	this->vecDetXOffset[plane].clear();
+	this->vecDetYOffset[plane].clear();
+	this->det_phix_offset[plane]=0;
+	this->det_phiy_offset[plane]=0;
+	this->vecDetPhiXOffset[plane].clear();
+	this->vecDetPhiYOffset[plane].clear();
+}
+
 Double_t TDetectorAlignment::getXResolution(UInt_t plane)
 {
 	if(plane<6)
@@ -314,4 +355,7 @@ void TDetectorAlignment::setVerbosity(int verbosity)
 	}
 }
 
+void TDetectorAlignment::Print(Option_t *opt){
+	cout<<this->PrintResults(0)<<endl;
+}
 

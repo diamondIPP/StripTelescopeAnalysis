@@ -46,6 +46,7 @@ public:
   TDetectorAlignment();
   ~TDetectorAlignment() {};
   TDetectorAlignment &operator=(const TDetectorAlignment &src);
+  void Print(Option_t *opt = "");
   Double_t GetXOffset(UInt_t plane) {return det_x_offset[plane];};
   Double_t GetYOffset(UInt_t plane) {return det_y_offset[plane];};
   Double_t GetZOffset(UInt_t plane) {return det_z_offset[plane];};
@@ -64,8 +65,10 @@ public:
   void AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset);
   void AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset);
 
-  Double_t GetLastXOffset(UInt_t plane)  {if (plane<nDetectors)return vecDetXOffset[plane].back();return -9999;};
-  Double_t GetLastYOffset(UInt_t plane)  {if (plane<nDetectors)return vecDetYOffset[plane].back();return -9999;};
+  Double_t GetLastXOffset(UInt_t plane)  {if (plane<nDetectors)return vecDetXOffset[plane].size()==0?0:vecDetXOffset[plane].back();return -9999;};
+  Double_t GetLastYOffset(UInt_t plane)  {if (plane<nDetectors)return vecDetYOffset[plane].size()==0?0:vecDetYOffset[plane].back();return -9999;};
+  Double_t GetLastPhiXOffset(UInt_t plane) {if (plane<nDetectors)return vecDetPhiXOffset[plane].size()==0?0:vecDetPhiXOffset[plane].back();return -9999;};
+  Double_t GetLastPhiYOffset(UInt_t plane) {if (plane<nDetectors)return vecDetPhiYOffset[plane].size()==0?0:vecDetPhiXOffset[plane].back();return -9999;};
 
   std::vector<Double_t> GetXOffsetHistory(UInt_t plane) {if (plane<nDetectors)return vecDetXOffset[plane];std::vector<Double_t> a;return a;};
   std::vector<Double_t> GetYOffsetHistory(UInt_t plane) {if (plane<nDetectors) return vecDetYOffset[plane];std::vector<Double_t> a;return a;};
@@ -84,7 +87,7 @@ public:
 
 
   std::string PrintResults(UInt_t level=0);
-
+  void ResetAlignment(Int_t plane =-1);
   int getVerbosity() const;
   void setVerbosity(int verbosity);
   Double_t getXResolution(UInt_t plane);
@@ -94,7 +97,7 @@ public:
 
   Double_t getYResolution(UInt_t plane);
   void setYResolution(Double_t yRes,UInt_t plane);
-
+  Double_t getResolution(UInt_t plane, TPlaneProperties::enumCoordinate cor){return cor==TPlaneProperties::X_COR?getXResolution(plane):getXResolution(plane);}
   Double_t getYMean(UInt_t plane);
   void setYMean(Double_t yMean,UInt_t plane);
   UInt_t getNUsedEvents() const {return (this->nUsedEvents);};

@@ -137,7 +137,7 @@ bool TRawEventSaver::treeExists(int nEvents){
 	return value;
 }
 
-void TRawEventSaver::showStatusBar(int nEvent,int nEvents,int updateIntervall,bool show){
+void TRawEventSaver::showStatusBar(int nEvent,int nEvents,int updateIntervall,bool show,bool makeNewLine){
 	if(nEvent+1>=nEvents)nEvent++;
 	cout.precision(3);
 	int percentageLength=50;
@@ -149,6 +149,6 @@ void TRawEventSaver::showStatusBar(int nEvent,int nEvents,int updateIntervall,bo
 			else cout<<"_";
 		cout<<" "<<flush;
 	}
-	if(nEvent+1>=nEvents)cout<<endl;
+	if(makeNewLine&&nEvent+1>=nEvents)cout<<endl;
 }
 
