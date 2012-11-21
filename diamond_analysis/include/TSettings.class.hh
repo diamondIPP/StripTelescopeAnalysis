@@ -72,11 +72,17 @@ public:
 	std::string getToPedestalAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/pedestalAnalysis/");}
 	std::string getAlignmentDir(){return this->getAbsoluteOuputPath(true).append("/alignment/");};
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
-	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
+	bool isSpecialAnalysis(){return getRunDescription()[0]!='0';};
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
 public:
+	Float_t convertChannelToMetricSpace(UInt_t det, Float_t chNo);
+	Float_t convertChannelToMetricSpaceDiamond(Float_t chNo);
+	Float_t convertChannelToMetricSpaceSilicon(Float_t chNo);
+	Float_t convertMetricToChannelSpace(UInt_t det,Float_t metricPosition);
+	Float_t convertMetricToChannelSpaceSilicon(Float_t metricPosition);
+	Float_t convertMetricToChannelSpaceDiamond(Float_t metricPosition);
 	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);
 	void saveSettings();
@@ -353,6 +359,11 @@ private:
 	std::vector<Float_t>clusterHitFactors;
 	std::vector<Float_t>clusterSeedFactors;
 	TChannelMapping *diamondMapping;
+	Float_t silPitchWidth;//in um
+	Float_t diaPitchWidth;//in um
+	Float_t diaOffsetMetricSpace;
+	UInt_t diaStartingChannel;
+
 private:
 	//Filter tracks not in good fiducial region w/o bad strips
 	Int_t align_sil_fid_xlow;

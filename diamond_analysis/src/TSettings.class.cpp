@@ -627,6 +627,24 @@ void TSettings::LoadSettings(){
 			cout<<key<<" =" <<value.c_str()<<endl;
 			b3dDiamond = (bool)strtod(value.c_str(),0);
 		}
+		if(key == "silPitchWidth"){
+			cout<<key<<" =" <<value.c_str()<<endl;
+			silPitchWidth = (Float_t)strtod(value.c_str(),0);
+		}
+		if(key == "diaPitchWidth"){
+			cout<<key<<" =" <<value.c_str()<<endl;
+			diaPitchWidth = (Float_t)strtod(value.c_str(),0);
+		}
+		if(key == "diaOffsetMetricSpace"){
+			cout<<key<<" =" <<value.c_str()<<endl;
+			diaOffsetMetricSpace = (Float_t)strtod(value.c_str(),0);
+		}
+		if(key == "diaStartingChannel"){
+			cout<<key<<" =" <<value.c_str()<<endl;
+			diaStartingChannel = (UInt_t)strtod(value.c_str(),0);
+		}
+
+
 		if(key=="diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -761,6 +779,10 @@ void TSettings::DefaultLoadDefaultSettings(){
 	cout<<"Print DefaultMapping:"<<endl;
 	//	diamondMapping.PrintMapping();
 	b3dDiamond =false;
+	silPitchWidth=50;//in um
+	diaPitchWidth=50;//in um
+	diaOffsetMetricSpace=0;
+	diaStartingChannel=0;
 	cout<<"DONE"<<endl;
 }
 
@@ -809,7 +831,7 @@ void TSettings::ParseIntArray(string value, vector<int> &vec) {
 	vec.clear();
 	//    cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
 	for(UInt_t i=0;i<stringArray.size();i++)
-		vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
+		vec.push_back((int)strtod(stringArray[i].c_str(),0));
 }
 
 /**
@@ -1626,4 +1648,38 @@ bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
 
 Int_t TSettings::getVerbosity(){
 	return this->verbosity;
+}
+
+Float_t TSettings::convertChannelToMetricSpace(UInt_t det, Float_t chNo){
+	if(det<0||det>TPlaneProperties::getNDetectors())
+		return -9999;
+	if(TPlaneProperties::isDiamondDetector(det))
+		return convertChannelToMetricSpaceDiamond(chNo);
+	else
+		return convertChannelToMetricSpaceSilicon(chNo);
+}
+
+Float_t TSettings::convertChannelToMetricSpaceDiamond(Float_t chNo){
+	return diaPitchWidth*(chNo-diaStartingChannel)+diaOffsetMetricSpace;
+}
+
+Float_t TSettings::convertChannelToMetricSpaceSilicon(Float_t chNo){
+	return silPitchWidth*chNo;
+}
+
+
+Float_t TSettings::convertMetricToChannelSpace(UInt_t det,Float_t metricPosition){
+	if(det<0||det>TPlaneProperties::getNDetectors())
+		return -9999;
+	if(TPlaneProperties::isDiamondDetector(det))
+		return convertMetricToChannelSpaceDiamond(metricPosition);
+	else
+		return convertMetricToChannelSpaceSilicon(metricPosition);
+}
+
+Float_t TSettings::convertMetricToChannelSpaceSilicon(Float_t metricPosition){
+	return metricPosition/silPitchWidth;
+}
+Float_t TSettings::convertMetricToChannelSpaceDiamond(Float_t metricPosition){
+	return ((metricPosition-diaOffsetMetricSpace)/diaPitchWidth+diaStartingChannel);
 }
