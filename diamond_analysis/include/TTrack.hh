@@ -56,11 +56,11 @@ public:
 	UInt_t getNClusters(int det);
 //	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
 	void setEvent(TEvent *newEvent){this->event = newEvent;};
-	Float_t getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getPositionInLabFrameStripDetector(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getPositionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getXPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getYPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getZPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);

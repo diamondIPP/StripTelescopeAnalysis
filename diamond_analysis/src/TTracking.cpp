@@ -124,7 +124,7 @@ Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, F
 				return 0;
 	if (histo==0)
 		histo=getEtaIntegral(plane*2);
-	return myTrack->getStripXPositionOfCluster(plane,xCluster,yPred,mode,histo);
+	return myTrack->getPositionInLabFrameStripDetector(plane,xCluster,yPred,mode,histo);
 }
 Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
 	if(myTrack==0)
@@ -136,7 +136,7 @@ Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calcu
 Float_t  TTracking::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode, TH1F* histo){
 	if(myTrack==0)
 		return 0;
-	return myTrack->getPositionOfCluster(cor,plane,xCluster,yCluster,mode,histo);
+	return myTrack->getPostionInLabFrame(cor,plane,xCluster,yCluster,mode,histo);
 }
 Float_t TTracking::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode, TH1F* histo){
 	if(myTrack==0)
@@ -146,7 +146,7 @@ Float_t TTracking::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t pr
 Float_t  TTracking::getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
 	if(myTrack==0)
 		return 0;
-	return myTrack->getPosition(cor,plane,mode);
+	return myTrack->getPositionInLabFrame(cor,plane,mode);
 }
 Float_t TTracking::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred){
 	if(myTrack==0)

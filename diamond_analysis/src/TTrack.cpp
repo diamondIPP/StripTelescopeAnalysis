@@ -51,7 +51,8 @@ UInt_t TTrack::getNClusters(int det) {
 
 
 /**
- * calculate Position in absoltue space of two cluster Hits in X/Y with calculation mode mode
+ * calculate Position of hit in the lab frame using the  X/Y detector cluster positions in channel numbers.
+ * The way to calculate the cluster position can be selected by the mode varibale.
  *
  * @param cor coordinate in which the calculation is made
  * @param plane which plane no is used
@@ -59,21 +60,53 @@ UInt_t TTrack::getNClusters(int det) {
  * @param yCluster
  * @param mode
  * @return value of calculated position
+ * @todo move from LAB frame in ADC channels to LAB frame in metric units
  */
-Float_t TTrack::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TTrack::getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0||yCluster.size()<=0)
 		return N_INVALID;
-	Float_t xOffset = this->getXOffset(plane);
-	Float_t yOffset = this->getYOffset(plane);
-	Float_t phiXOffset = this->getPhiXOffset(plane);
-	Float_t phiYOffset = this->getPhiYOffset(plane);
-	Float_t xMeasured = xCluster.getPosition(mode,getEtaIntegral(plane*2));
-	Float_t yMeasured = yCluster.getPosition(mode,getEtaIntegral(plane*2+1));
-	// apply offsets
-	Float_t xPosition = (xMeasured) * TMath::Cos(phiXOffset) + (yMeasured) * TMath::Sin(phiYOffset);
-	Float_t yPosition = (xMeasured) * TMath::Sin(-phiXOffset) + (yMeasured) * TMath::Cos(phiYOffset);
-	xPosition += xOffset;
-	yPosition += yOffset;
+	Float_t xOffMeas = this->getXOffset(plane);
+	Float_t yOffMeas = this->getYOffset(plane);
+	Float_t xPhiOff = this->getPhiXOffset(plane);
+	Float_t yPhiOff = this->getPhiYOffset(plane);
+	Float_t xMeas = xCluster.getPosition(mode,getEtaIntegral(plane*2));
+	Float_t yMeas = yCluster.getPosition(mode,getEtaIntegral(plane*2+1));
+
+	// get gradients of straight lines
+	Float_t m_x = xPhiOff==0?0:1./TMath::Tan(xPhiOff);//cotan
+	Float_t m_y = TMath::Tan(-1.*yPhiOff);//tan
+	//take Position in the detecor frame at y_det = 0 and convert it into the lab frame
+	Float_t x_x = xOffMeas + TMath::Cos(xPhiOff)*xMeas;
+	Float_t y_x = (-1.)*TMath::Sin(xPhiOff)*xMeas;
+	//take y Position in the dector frame at x_det = 0 and convert it into the lab frame
+	Float_t x_y = TMath::Sin(yPhiOff)*yMeas;
+	Float_t y_y = yOffMeas+TMath::Cos(yPhiOff)*yMeas;
+
+	//out of slope and position we can calculate the offset
+	Float_t b_x = xPhiOff==0?xOffMeas+xMeas:y_x-m_x*x_x;
+	Float_t b_y = y_y-m_y*x_y;
+	//find interception of both straight liness
+	Float_t x = (b_y-b_x)/(m_x-m_y);
+	if (xPhiOff==0) x = xOffMeas+xMeas;
+	Float_t xPosition = x;
+	Float_t yPosition = m_y*x+b_y;
+	if(m_y!=m_y){
+		cerr<<"There was a problem with m_y! Please have a look. yPhiOff: "<<yPhiOff<<endl;
+		exit(-1);
+	}
+	if(m_x!=m_x){
+		cerr<<"There was a problem with m_y! Please have a look. xPhiOff: "<<xPhiOff<<endl;
+		exit(-1);
+	}
+
+	if(verbosity&&(xPosition==-1||yPosition==-1)){
+		cout<<" Meas: "<<xMeas<<"/"<<yMeas<<"\toff: "<<xOffMeas<<"/"<<yOffMeas<<"\tphi"<<xPhiOff<<"/"<<yPhiOff<<endl;
+		cout<<"X:"<<mode<<" "<<xCluster.getPosition(mode,histo)<<endl;
+		xCluster.Print(2);
+		cout<<"Y: "<<endl;
+		yCluster.Print(2);
+	}
+
 	switch(cor){
 		case TPlaneProperties::X_COR: return xPosition;break;
 		case TPlaneProperties::Y_COR: return yPosition;break;
@@ -96,15 +129,21 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
 	UInt_t plane = det/2;
 	if(histo==0)
 		histo = (TH1F*)getEtaIntegral(plane*2+1);
-	Float_t measuredPos = cluster.getPosition(mode,histo);
-	Float_t xOffset = this->getXOffset(plane);
-	Float_t yOffset = this->getYOffset(plane);
-	Float_t phiXOffset = this->getPhiXOffset(plane);
-	Float_t phiYOffset = this->getPhiYOffset(plane);
-	Float_t xPosition = (measuredPos) / TMath::Cos(phiXOffset) + (predictedPerpPosition) * TMath::Tan(phiXOffset);
-	Float_t yPosition = (measuredPos) / TMath::Cos(phiYOffset) - (predictedPerpPosition) * TMath::Tan(phiYOffset);
-	xPosition += xOffset;
-	yPosition += yOffset;
+	Float_t meas = cluster.getPosition(mode,histo);
+	Float_t xOffMeas = this->getXOffset(plane);
+	Float_t yOffMeas = this->getYOffset(plane);
+	Float_t xPhiOff = this->getPhiXOffset(plane);
+	Float_t yPhiOff = this->getPhiYOffset(plane);
+	Float_t m_x = 1./TMath::Tan(xPhiOff);
+	Float_t m_y = (-1.)*TMath::Tan(yPhiOff);
+	Float_t x_x = xOffMeas + TMath::Cos(xPhiOff)*meas;
+	Float_t y_x = (-1.)*TMath::Sin(xPhiOff)*meas;
+	Float_t x_y = TMath::Sin(yPhiOff)*meas;
+	Float_t y_y = yOffMeas+TMath::Cos(yPhiOff)*meas;
+	Float_t b_x = y_x-m_x*x_x;
+	Float_t b_y = y_y-m_y*x_y;
+	Float_t xPosition = (predictedPerpPosition-b_x)/m_x;
+	Float_t yPosition = m_y*predictedPerpPosition+b_y;
 	if (det%2 == 0) {
 		return xPosition;
 	}
@@ -133,7 +172,7 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
 	}
 	if(histo==NULL)
 		histo = getEtaIntegral(plane*2);
-	return getStripXPositionOfCluster(plane,xCluster,yPred,mode,histo);
+	return getPositionInLabFrameStripDetector(plane,xCluster,yPred,mode,histo);
 }
 
 /**
@@ -144,7 +183,7 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TTrack::getPositionInLabFrameStripDetector(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0)
 		return N_INVALID;
 	// get offsets
@@ -171,7 +210,7 @@ Float_t TTrack::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float
 Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
 		histo = getEtaIntegral(plane*2);
-	return getPosition(TPlaneProperties::X_COR,plane,mode,histo);
+	return getPositionInLabFrame(TPlaneProperties::X_COR,plane,mode,histo);
 }
 
 /**
@@ -183,7 +222,7 @@ Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F*
 Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
 			histo = getEtaIntegral(plane*2);
-	return getPosition(TPlaneProperties::Y_COR,plane,mode,histo);
+	return getPositionInLabFrame(TPlaneProperties::Y_COR,plane,mode,histo);
 }
 
 Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
@@ -214,13 +253,25 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	}
 	vector<Double_t> zPosVec;//todo add xsigma ysigma
 	if(bPrint)cout<<"Prediction of Track in Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes:"<<endl;
+	bool lastPredictionValid=true;
 	for(UInt_t pl=0;pl<vecRefPlanes.size();pl++){
 		UInt_t plane=vecRefPlanes.at(pl);
 		zPosVec.clear();
 		zPosVec.push_back(alignment->GetZOffset(plane));
-		linFitX->AddPoint(&zPosVec.at(0),(Double_t)getXPosition(plane,mode),this->alignment->getXResolution(plane));//todo anpassen des SIGMA
-		linFitY->AddPoint(&zPosVec.at(0),(Double_t)getYPosition(plane,mode),this->alignment->getYResolution(plane));//todo anpassen des sigma 0.001
-		if(verbosity>3||bPrint)	cout<<"\tAdd in Plane "<<plane<<"  "<<getXPosition(plane,mode)<<"+/-"<<alignment->getXResolution(plane)<<"/"<<getYPosition(plane,mode)<<"+/-"<<alignment->getYResolution(plane)<<"/"<<getZPosition(plane)<<endl;
+		Float_t xPos = (Double_t)getXPosition(plane,mode);
+		Float_t yPos = (Double_t)getYPosition(plane,mode);
+		if((xPos==-1||yPos==-1)&&verbosity){
+			cout<<"Problem with Plane "<<plane<<" "<<xPos<<" "<<yPos<<endl;
+			event->Print(1);
+		}
+		Float_t xRes = this->alignment->getXResolution(plane);
+		Float_t yRes = this->alignment->getYResolution(plane);
+		linFitX->AddPoint(&zPosVec.at(0),xPos,xRes);//todo anpassen des SIGMA
+		linFitY->AddPoint(&zPosVec.at(0),yPos,yRes);//todo anpassen des sigma 0.001
+		if(xPos==-1||yPos==-1)
+			lastPredictionValid = false;
+		if(verbosity>3||bPrint)
+			cout<<"\tAdd in Plane "<<plane<<"  "<<xPos<<"+/-"<<alignment->getXResolution(plane)<<" / "<<yPos<<"+/-"<<alignment->getYResolution(plane)<<" / "<<getZPosition(plane)<<endl;
 	}
 	linFitX->Eval();
 	linFitY->Eval();
@@ -238,6 +289,12 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t sigma_by = linFitY->GetParError(0);
 	Float_t xChi2 = linFitX->GetChisquare()/linFitX->GetNumberFreeParameters();
 	Float_t yChi2 = linFitY->GetChisquare()/linFitY->GetNumberFreeParameters();
+	if(verbosity>4){
+			cout<<"\tParameters:\n\t mx: "<<mx<<" +/- "<<sigma_mx<<"\tbx: "<<bx<<" +/- "<<sigma_bx<<"\tzPos:"<<zPos<<endl;
+			cout<<"\t my: "<<my<<" +/- "<<sigma_my<<"\tby: "<<by<<" +/- "<<sigma_by<<"\tzPos:"<<zPos<<endl;
+			cout<<"\tNDFx: "<<linFitX->GetNumberFreeParameters()<<"\t"<<"\tNDFy: "<<linFitY->GetNumberFreeParameters()<<endl;
+			cout<<"\t chi2x:"<<xChi2<<"\tchi2y:"<<yChi2<<endl;
+		}
 	Float_t xPos = mx*zPos+bx;
 	Float_t yPos = my*zPos+by;
 	Float_t xSigma = (zPos*sigma_mx)*(zPos*sigma_mx)+(mx*zSigma)*(mx*zSigma)+(sigma_bx*sigma_bx);
@@ -247,9 +304,10 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t xPhi = TMath::ATan(mx);
 	Float_t yPhi = TMath::ATan(my);
 	TPositionPrediction* prediction=new TPositionPrediction(xPos,xSigma,xChi2,yPos,ySigma,yChi2,xPhi,yPhi);
-	if(verbosity>3||bPrint)	cout<<"\n  Predition of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<"Planes: ZPosition: "<<zPos<<endl;
-	if(verbosity>3||bPrint)	cout<<"\tX: "<<xPos<<" +/- "<<xSigma<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
-	if(verbosity>3||bPrint)	cout<<"\tY: "<<yPos<<" +/- "<<ySigma<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
+	if(!lastPredictionValid)prediction->setValid(false);
+	if(verbosity>3||bPrint)	cout<<"\tPrediction of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes for ZPosition: "<<zPos<<endl;
+	if(verbosity>3||bPrint)	cout<<"\t X: "<<xPos<<" +/- "<<xSigma<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
+	if(verbosity>3||bPrint)	cout<<"\t Y: "<<yPos<<" +/- "<<ySigma<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
 	return prediction;
 }
 
@@ -296,17 +354,15 @@ Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode)
  * @param plane number of plane for which you are calculating the hitposition
  * @return calculated hit position
  */
-Float_t TTrack::getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TTrack::getPositionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo){
 	if(event==NULL)return N_INVALID;
 	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
 		return N_INVALID;
 	// get offsets
-	if(histo==0)
-			histo = getEtaIntegral(plane*2);
 	TCluster xCluster,yCluster;
 	xCluster=event->getPlane(plane).getXCluster(0);
 	yCluster=event->getPlane(plane).getYCluster(0);
-	return getPositionOfCluster(cor,plane,xCluster,yCluster,mode,histo);
+	return getPostionInLabFrame(cor,plane,xCluster,yCluster,mode,histo);
 }
 
 
