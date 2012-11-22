@@ -1008,10 +1008,11 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 	else
 		histName << "h_" << nAlignmentStep << "_Step";
 	histName << "_Chi2X_Distribution";
-	TH1F *histoChi2X = histSaver->CreateDistributionHisto(histName.str(), vecXChi2, 4096, HistogrammSaver::positiveSigma);
+	histSaver->SetRange(0,20);
+	TH1F *histoChi2X = histSaver->CreateDistributionHisto(histName.str(), vecXChi2, 1024, HistogrammSaver::manual);
 	histoChi2X->GetXaxis()->SetTitle("Chi^2/NDF of X plane");
 	histoChi2X->GetYaxis()->SetTitle("number of entries");
-
+	histoChi2X->GetXaxis()->SetRangeUser(0,20);
 	histSaver->SaveHistogram(histoChi2X);
 
 	//Chi2Y Distribution
@@ -1023,9 +1024,11 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 	else
 		histName << "h_" << nAlignmentStep << "_Step";
 	histName << "_Chi2Y_Distribution";
-	TH1F *histoChi2Y = histSaver->CreateDistributionHisto(histName.str(), vecYChi2, 4096, HistogrammSaver::positiveSigma);
+	histSaver->SetRange(0,20);
+	TH1F *histoChi2Y = histSaver->CreateDistributionHisto(histName.str(), vecYChi2, 1024, HistogrammSaver::manual);
 	histoChi2Y->GetXaxis()->SetTitle("Chi^2/NDF of Y plane");
 	histoChi2Y->GetYaxis()->SetTitle("number of entries");
+	histoChi2Y->GetXaxis()->SetRangeUser(0,20);
 	histSaver->SaveHistogram(histoChi2Y);
 
 	histName.str("");
