@@ -135,7 +135,7 @@ private:
     TCluster::calculationMode_t diaCalcMode;
     TCluster::calculationMode_t silCalcMode;
     THTMLAlignment *htmlAlign;
-    bool plotAll;
+    bool bPlotAll;
 private:
     TResidual resPlane1,resPlane2,resPlane3;
     TResults* results;

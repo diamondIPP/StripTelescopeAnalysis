@@ -151,7 +151,7 @@ Float_t TResidual::getPhiYOffset()
 {
 	Float_t variableDif = (nUsedTracks * sumV2y - sumVy * sumVy);
 	if(variableDif!=0)
-		return (-TMath::ATan((nUsedTracks * sumVRy - sumRy * sumVy) / variableDif));
+		return (TMath::ATan((nUsedTracks * sumVRy - sumRy * sumVy) / variableDif));
 	return (N_INVALID);
 }
 

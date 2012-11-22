@@ -50,7 +50,7 @@ TAlignment::TAlignment(TSettings* inputSettings) {
 	diaCalcMode = TCluster::maxValue;    //todo
 	silCalcMode = TCluster::corEta;    //todo
 
-	plotAll = settings->doAllAlignmentPlots()||verbosity>6;
+	bPlotAll = settings->doAllAlignmentPlots()||verbosity>6;
 	results=0;
 
 }
@@ -300,43 +300,32 @@ int TAlignment::AlignDiamond(UInt_t nEvents,UInt_t startEvent){
 void TAlignment::AlignSiliconPlanes() {
 	cout<<"Alignment of Silicon Planes. max. Alignment Steps: "<<nAlignSteps<<endl;
 	nAlignmentStep = -1;
-	if(verbosity)cout << "Check Detector Alignment:" << endl;
+	if (verbosity)cout << "Check Detector Alignment:" << endl;
 	resPlane1 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 1, 0, 3, true);
 	resPlane2 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 2, 0, 3, true);
 	resPlane3 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 3, 1, 2, true);
-//	resPlane1 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 1, 0, 3, false,resPlane1);
-//	resPlane2 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 2, 0, 3, false,resPlane2);
-//	resPlane3 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 3, 0, 0, false,resPlane3);
-	//	if(verbosity>3)cout << "Align Detector with Plane 0" << endl;
 
-	if(verbosity)cout << "Start Pre-Alignment:" << endl;
+	if (verbosity)cout << "Start Pre-Alignment:" << endl;
 	nAlignmentStep=0;
-//	resPlane1 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 1, 0, 0, true);
-	//resPlane1 = alignDetector(TPlaneProperties::XY_COR, 1, 0, 0, true,resPlane1);
-	//resPlane2 = alignDetector(TPlaneProperties::XY_COR, 2, 0, 0, true,resPlane2);
 
 	resPlane3 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 3, 0, 0, true);
 	//todo do iterative until alignment gets small
 	resPlane3 = alignDetector(TPlaneProperties::XY_COR, 3, 0, 0, true,resPlane3);
 	resPlane3 = alignDetector(TPlaneProperties::XY_COR, 3, 0, 0, true,resPlane3);
 
-//	resPlane1 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 1, 0, 3, false);
-//	resPlane2 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 2, 0, 3, false);
-
 	if (verbosity) cout << endl;
-	if(verbosity)cout << "Start with Alignment Steps" << endl;
+	if (verbosity)cout << "Start with Alignment Steps" << endl;
 	bool bAlignmentGood = false;
-	for (nAlignmentStep = 0; nAlignmentStep < nAlignSteps&&bAlignmentGood!=true; nAlignmentStep++) {    //||(nAlignmentStep<10&&!bAlignmentGood);nAlignmentStep++){
-////		bAlignmentGood = true;
-		bAlignmentGood = siliconAlignmentStep(nAlignmentStep-1>=nAlignSteps||plotAll);
+	for (nAlignmentStep = 0; nAlignmentStep < nAlignSteps&&bAlignmentGood!=true; nAlignmentStep++) {
+		bAlignmentGood = siliconAlignmentStep(nAlignmentStep-1>=nAlignSteps||bPlotAll);
 	}
 	int neededAlignmentSteps = nAlignmentStep;
 	nAlignmentStep=nAlignSteps;
 	if(neededAlignmentSteps<nAlignSteps-1){
 		if(verbosity) cout<<"Creating Post Alignment Plots, since the alignment was good after "<< neededAlignmentSteps <<" Steps."<<endl;
-		siliconAlignmentStep(nAlignmentStep-1>=nAlignSteps||plotAll,false);
+		siliconAlignmentStep(nAlignmentStep-1>=nAlignSteps||bPlotAll,false);
 	}
-	cout<<"Alignmentstep: "<<neededAlignmentSteps<<endl;
+	cout<<"Alignment step: "<<neededAlignmentSteps<<endl;
 	cout<<"\n\n\n*******************";
 	cout<<"\nAlignment of Silicon Planes is done after "<<neededAlignmentSteps<<" steps. Now get final Silicon Alignment Results..."<<endl;
 	cout<<"*******************\n\n"<<endl;
@@ -359,7 +348,7 @@ bool TAlignment::siliconAlignmentStep(bool bPlot, bool bUpdateAlignment) {
 	resPlane1 = CheckDetectorAlignment(coordinates, subjectPlane1, refPlane1_1, refPlane1_2, false);
 	resPlane1 = CheckDetectorAlignment(coordinates, subjectPlane1, refPlane1_1, refPlane1_2, bUpdateAlignment==false && bPlot,resPlane1);
 	if(bUpdateAlignment)
-		alignDetector(TPlaneProperties::XY_COR, subjectPlane1, refPlane1_1, refPlane1_2, bPlot || plotAll,resPlane1);
+		alignDetector(TPlaneProperties::XY_COR, subjectPlane1, refPlane1_1, refPlane1_2, bPlot || bPlotAll,resPlane1);
 //	resPlane1 = CheckDetectorAlignment(coordinates, subjectPlane1, refPlane1_1, refPlane1_2, false,resPlane1);
 //	alignDetector(TPlaneProperties::Y_COR, subjectPlane1, refPlane1_1, refPlane1_2, bPlot || plotAll,resPlane1);
 
@@ -371,7 +360,7 @@ bool TAlignment::siliconAlignmentStep(bool bPlot, bool bUpdateAlignment) {
 	resPlane2 = CheckDetectorAlignment(coordinates, subjectPlane2, refPlane2_1, refPlane2_2, false);
 	resPlane2 = CheckDetectorAlignment(coordinates, subjectPlane2, refPlane2_1, refPlane2_2, bUpdateAlignment==false && bPlot,resPlane2);
 	if (bUpdateAlignment)
-		alignDetector(TPlaneProperties::XY_COR, subjectPlane2, refPlane2_1, refPlane2_2, bPlot || plotAll, resPlane2);
+		alignDetector(TPlaneProperties::XY_COR, subjectPlane2, refPlane2_1, refPlane2_2, bPlot || bPlotAll, resPlane2);
 //	resPlane2 = CheckDetectorAlignment(coordinates, subjectPlane2, refPlane2_1, refPlane2_2, false,resPlane2);
 //	alignDetector(TPlaneProperties::Y_COR, subjectPlane2, refPlane2_1, refPlane2_2, bPlot || plotAll, resPlane2);
 
@@ -431,7 +420,7 @@ void TAlignment::AlignDiamondPlane() {
 	for (nDiaAlignmentStep = 0; (nDiaAlignmentStep < nDiaAlignSteps) && (!diaAlignmentDone||nDiaAlignmentStep<2)	 ; nDiaAlignmentStep++) {
 		cout << "\n\n " << nDiaAlignmentStep << " of " << nDiaAlignSteps << " Steps..." << endl;
 		//do Alignment using the resDia Residual
-		alignStripDetector(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, false||plotAll, resDia);
+		alignStripDetector(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, false||bPlotAll, resDia);
 		//creating new Residual resDia
 		resDia = CheckStripDetectorAlignment(TPlaneProperties::X_COR, diaPlane, vecRefPlanes);
 
