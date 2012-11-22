@@ -245,12 +245,7 @@ int main(int argc, char ** argv) {
 		  analysisSelection->doAnalysis(RunParameters[i].getEvents());
 		  delete analysisSelection;
 		}
-		bool b3dDiamond = 0;
-		if(b3dDiamond){
-			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
-			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
-			delete analyse3dDiamond;
-		}
+
 
 		if (DO_ALIGNMENT){
 			sys->cd(currentDir.c_str());
@@ -259,6 +254,12 @@ int main(int argc, char ** argv) {
 			//alignment->PrintEvents(1511,1501);
 			alignment->Align(RunParameters[i].getEvents());
 			delete alignment;
+		}
+//		if(settings->is3dDiamond()){
+		if(true){
+			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+			delete analyse3dDiamond;
 		}
 
 		if(DO_ALIGNMENTANALYSIS){

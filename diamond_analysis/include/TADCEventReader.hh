@@ -66,7 +66,7 @@ public:
 	Float_t getPedestalSigma(UInt_t det, UInt_t ch, bool cmnCorrected=false);
 	Float_t getDiaPedestalMean(UInt_t ch,bool cmnCorrected=false);
 	Float_t getDiaPedestalSigma(UInt_t ch,bool cmnCorrected=false);
-	TCluster getCluster(UInt_t det,UInt_t cl);
+	TCluster getCluster(UInt_t det,UInt_t cl=0);
 	TCluster getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	UInt_t getClusterSize(UInt_t det,UInt_t cl);
 	UInt_t getClusterSeedSize(UInt_t det, UInt_t cl);

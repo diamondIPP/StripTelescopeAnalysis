@@ -28,9 +28,9 @@
 #include "HistogrammSaver.class.hh"
 #include "THTMLPedestal.hh"
 #include "LandauGaussFit.hh"
-#include "THTMLLandaus.hh"
 
 #include "TADCEventReader.hh"
+#include "TTracking.hh"
 #include "TSettings.class.hh"
 using namespace std;
 
@@ -46,8 +46,9 @@ private:
 private:
 	TSettings *settings;
 	HistogrammSaver *histSaver;
-	TADCEventReader* eventReader;
+	TTracking* eventReader;
 	UInt_t nEvent;
+	vector<Float_t> vecXPredicted,vecYPredicted,vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHit;
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */
