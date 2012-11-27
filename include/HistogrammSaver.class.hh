@@ -48,6 +48,10 @@ public:
 	};
 	HistogrammSaver(int verbosity=0);
 	virtual ~HistogrammSaver();
+	void SetOptStat(std::string optStat){gStyle->SetOptStat(optStat.c_str());}
+	void SetOptStat(Int_t stat){gStyle->SetOptStat(stat);}
+	void SetOptFit(Int_t fitOpt){gStyle->SetOptFit(fitOpt);}
+	//void SetOptFit(std::string fitOpt){gStyle->SetOptFit(fitOpt.c_str());}
 	void SaveCanvas(TCanvas* canvas);
 	void SaveCanvasROOT(TCanvas* canvas);
 	void SaveCanvasPNG(TCanvas* canvas);

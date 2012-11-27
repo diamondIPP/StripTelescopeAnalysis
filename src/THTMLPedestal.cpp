@@ -132,7 +132,11 @@ void THTMLPedestal::createNoiseDistribution()
 	stringstream path;
 	path<<this->path<<"/";
 	//hNoiseDistributionOfAllNonHitChannels_
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hNoiseDistributionOfAllNonHitChannels_");
+	sectionContent<<putImagesOfAllDetectors(path.str(),"hNoiseDistributionOfAllNonHitChannels_")<<"<br>\n\n";
+	sectionContent<<putImageOfPath("hNoiseDistributionOfAllNonHitChannels_Dia","png",30)<<" \n";
+	sectionContent<<putImageOfPath("hCMNoiseDistribution","png",30)<<"\n";
+	sectionContent<<putImageOfPath("hNoiseDistributionOfAllNonHitChannels_Dia_CMNcorrected","png",30)<<"\n";
+
 	this->addSection("Non-Hit Noise Distribution",sectionContent.str());
 }
 

@@ -605,21 +605,9 @@ Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
   if(det>=9)return -9999999;
   Float_t cmn = getCMNoise();
   Int_t adc = getAdcValue(det,ch);
-//  float ped = getPedestalMean(det,ch,false);
-//  float pedCMN = getPedestalMean(det,ch,true);
   Float_t pedReal= getPedestalMean(det,ch,cmnCorrected);
   if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))
          cmn=0;
-//  if (TPlaneProperties::isDiamondDetector(det)){
-////    cout<<getEvent_number(  )<<" "<<det<<" "<<ch<<" "<<cmnCorrected<<endl;
-////    cout<<"raw signal det:"<<det<<" ch:"<<ch<<": "<<adc<<"-"<<ped<<"="<<adc-ped<<endl;
-////    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedCMN<<"-"<<cmn<<"="<<adc-pedCMN-cmn<<endl;
-//
-//    retVal = adc-pedReal-cmn;
-////    cout<<"               "<<det<<" ch:"<<ch<<": "<<adc<<"-"<<pedReal<<"+"<<cmn<<"="<<retVal<<endl;
-//  }
-//  else
-//    cmn=0;
  Float_t retVal = adc-pedReal-cmn;
   return retVal;
 }
@@ -632,8 +620,8 @@ Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch,bool cmnCorre
 
 Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
-	if(det>=9) return -9999999;
-
+	if(det>=TPlaneProperties::getNDetectors()) return -9999999;
+	if(ch<0||ch>=TPlaneProperties::getNChannels(det)) return 0;
 	Float_t signal =getRawSignal(det,ch,cmnCorrected);
 	if(signal<0)return 0;
 

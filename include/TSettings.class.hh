@@ -246,6 +246,8 @@ public:
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
 	bool resetAlignment() const{return bResetAlignment;};
 //	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
+	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
+	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n){if(n<getNDiaDetectorAreas()&&n>=0)return vecDiaDetectorAreasInChannel[n]; return std::make_pair((Int_t)-1,(Int_t)-1);}
 protected:
     float store_threshold;
 private:
@@ -255,12 +257,15 @@ private:
     void ParseStringArray(std::string value, std::vector<std::string> &vec);
     void ParseFloatArray(std::string value, std::vector<float> & vec);
     void ParseIntArray(std::string value, std::vector<int> & vec);
+    void ParseRegionArray(std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
+    std::pair< std::string,std::string > ParseRegionString(string value);
 private:
     std::string path;
     std::string fileName;
     TSystem *sys;
     TFile *settingsFile;
 private:
+    std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
     bool bResetAlignment;
     Float_t alignmentPrecision_Offset;
     Float_t alignmentPrecision_Angle;

@@ -620,6 +620,21 @@ void TSettings::LoadSettings(){
 			cout<<diamondMapping<<endl;
 			getDetChannelNo(0);
 		}
+		if(key=="Dia_DetectorChannels") {
+			cout<<key<<" = "<<value.c_str()<<endl;
+			vector<string> vecDetectorChannelString;
+			ParseStringArray(value,vecDetectorChannelString);
+
+			ParseRegionArray(value,vecDiaDetectorAreasInChannel);
+			Int_t detChannel = -1;
+			for(UInt_t i=0;i<vecDiaDetectorAreasInChannel.size();i++){
+				cout<<i<<" "<<vecDiaDetectorAreasInChannel[i].first<<" "<<vecDiaDetectorAreasInChannel[i].second<<endl;
+				if (vecDiaDetectorAreasInChannel[i].second< detChannel){
+					cout<<"this Definition of DetectorChannels doesn't work, please update"<<endl;
+					exit(-1);
+				}
+			}
+		}
 	}
 
 	file.close();
@@ -793,6 +808,33 @@ void TSettings::ParseIntArray(string value, vector<int> &vec) {
 		vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
 }
 
+void TSettings::ParseRegionArray(string value, std::vector< std::pair<Int_t,Int_t> > &vec){
+	std::vector <std::string> stringArray;
+	ParseStringArray(value,stringArray);
+	vec.clear();
+	for(UInt_t i=0;i<stringArray.size();i++){
+		std::pair< std::string,std::string > region = ParseRegionString(stringArray[i]);
+		Int_t begin = (int)strtod(region.first.c_str(),0);
+		Int_t end = (int)strtod(region.second.c_str(),0);
+		if(begin<end)
+			vecDiaDetectorAreasInChannel.push_back(make_pair(begin,end));
+	}
+
+}
+
+std::pair< std::string,std::string > TSettings::ParseRegionString(string value){
+	int index = value.find_first_of(":-");
+	string beginString,endString;
+	if(index!=string::npos){
+		beginString = value.substr(0,index);
+		endString = value.substr(index+1);
+	}
+	else{
+		beginString = "";
+		endString = "";
+	}
+	return make_pair(beginString,endString);
+}
 /**
  * TODO Ueberarbeiten so dass beliebige werte fuer jeden detector eingetragen werden koennen
  * @param det
