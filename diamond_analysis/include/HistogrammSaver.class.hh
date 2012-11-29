@@ -89,6 +89,7 @@ public:
 	static TGraphErrors CreateErrorGraph(std::string name,std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey);
 
 private:
+	Float_t xRangeMin,xRangeMax;
 
     TPaveText *pt;
     TDatime dateandtime;

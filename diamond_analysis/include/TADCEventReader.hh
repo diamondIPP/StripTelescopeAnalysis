@@ -92,6 +92,7 @@ private:
 	void LoadEtaDistributions(UInt_t runNumber);
 public:
 	void setEtaDistributionPath(std::string path);
+	std::string getEtaDistributionPath() const {return etaDistributionPath;}
 private:
 	std::string etaDistributionPath;
 	std::string fileName;

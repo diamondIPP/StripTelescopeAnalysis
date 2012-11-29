@@ -78,8 +78,10 @@ private:
 	void initialiseDetectorAlignment();
 	void loadDetectorAlignment();
 	void AlignSiliconPlanes();
+	void doPreAlignment();
 	bool siliconAlignmentStep(bool bPrint=false,bool bUpdateAlignment = true);
 	void AlignDiamondPlane();
+
 	void saveAlignment();
 	void getChi2Distribution(Float_t maxChi2=1000);
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::XY_COR,subjectPlane,refPlane1,refPlane2);};
@@ -153,7 +155,7 @@ private:
 	vector<Float_t> vecXPhi;
 	vector<Float_t> vecYPhi;
 	vector<Float_t> vecClusterSize;
-
+	TCluster::calculationMode_t getClusterCalcMode(Int_t plane){return TPlaneProperties::isDiamondPlane(plane)?diaCalcMode:silCalcMode;}
 };
 
 #endif /* TALIGNMENT_HH_ */

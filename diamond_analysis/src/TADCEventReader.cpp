@@ -714,6 +714,7 @@ TH1F *TADCEventReader::getEtaIntegral(UInt_t det)
 }
 
 void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
+	cout<<"Load Eta Distributions of run "<<runNumber<<"\t"<<flush;
 	bEtaIntegrals=true;
 	stringstream etaFileName;
 
@@ -721,7 +722,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
     etaFileName<<"etaCorrection."<<runNumber<<".root";
   else
     etaFileName<<etaDistributionPath;
-
+  cout<<etaFileName<<endl;
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
@@ -738,8 +739,10 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		fEtaDis->GetObject(objectName.str().c_str(),histo);
 		file->cd();
 		bEtaIntegrals=bEtaIntegrals&&(histo!=0);
-		if(histo)
+		if(histo){
 			hEtaIntegral[det]=(TH1F*)histo->Clone();
+			cout<<"Loaded EtaIntegral of "<<det<<" Detector. "<<hEtaIntegral[det]<<endl;
+		}
 		else
 			cerr<<"Object \""<<objectName.str()<<"\" does not exist"<<endl;
 	}
@@ -748,7 +751,8 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 
 void TADCEventReader::setEtaDistributionPath(std::string path)
 {
-  etaDistributionPath=path;
+	cout<<"Set Eta DistributionPath: "<<path<<endl;
+	etaDistributionPath=path;
 }
 
 

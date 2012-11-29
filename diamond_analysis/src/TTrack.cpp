@@ -287,8 +287,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t sigma_my = linFitY->GetParError(1);
 	Float_t by = linFitY->GetParameter(0);
 	Float_t sigma_by = linFitY->GetParError(0);
-	Float_t xChi2 = linFitX->GetChisquare()/linFitX->GetNumberFreeParameters();
-	Float_t yChi2 = linFitY->GetChisquare()/linFitY->GetNumberFreeParameters();
+	Float_t xChi2 = linFitX->GetChisquare();///linFitX->GetNumberFreeParameters();
+	Float_t yChi2 = linFitY->GetChisquare();///linFitY->GetNumberFreeParameters();
 	if(verbosity>4){
 			cout<<"\tParameters:\n\t mx: "<<mx<<" +/- "<<sigma_mx<<"\tbx: "<<bx<<" +/- "<<sigma_bx<<"\tzPos:"<<zPos<<endl;
 			cout<<"\t my: "<<my<<" +/- "<<sigma_my<<"\tby: "<<by<<" +/- "<<sigma_by<<"\tzPos:"<<zPos<<endl;
@@ -337,14 +337,14 @@ void TTrack::setDetectorAlignment(TDetectorAlignment *alignment)
 	this->alignment=alignment;
 }
 
-Float_t TTrack::getXMeasured(UInt_t plane,TCluster::calculationMode_t mode)
+Float_t TTrack::getXMeasured(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
 {
-	return getMeasured(TPlaneProperties::X_COR,plane,mode);
+	return getMeasured(TPlaneProperties::X_COR,plane,mode,histo);
 }
 
-Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode)
+Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
 {
-	return getMeasured(TPlaneProperties::Y_COR,plane,mode);
+	return getMeasured(TPlaneProperties::Y_COR,plane,mode,histo);
 }
 /**
  * Calculation of Hitposition of event using the measured Offsets
@@ -366,15 +366,15 @@ Float_t TTrack::getPositionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_
 }
 
 
-Float_t TTrack::getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
+Float_t TTrack::getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
 {
 	if(event==NULL)return N_INVALID;
 	if(cor==TPlaneProperties::XY_COR&&(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1))
 	return N_INVALID;
 	if(cor==TPlaneProperties::X_COR&&event->getNXClusters(plane)==1)
-		return event->getPlane(plane).getXPosition(0,mode);
+		return event->getPlane(plane).getXPosition(0,mode,histo);
 	if(cor==TPlaneProperties::Y_COR&&event->getNYClusters(plane)==1)
-		return event->getPlane(plane).getYPosition(0,mode);
+		return event->getPlane(plane).getYPosition(0,mode,histo);
 	return N_INVALID;
 //// get offsets
 //	switch(cor){

@@ -653,7 +653,11 @@ void HistogrammSaver::SetDuckStyle() {
 }
 
 
-
+/**
+ * @brief creates a scatter histogram with posX_vs_posY as an input
+ *
+ * @return TH2F histogram
+ */
 TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
@@ -737,7 +741,10 @@ TH2F* HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float
 }
 
 void HistogrammSaver::SetRange(Float_t min,Float_t max){
-
+	if (min<max){
+		this->xRangeMin=min;
+		this->xRangeMax=max;
+	}
 }
 
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)

@@ -21,6 +21,7 @@ TAlignment::TAlignment(TSettings* inputSettings) {
 	htmlAlign = new THTMLAlignment(settings);
 	eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(), settings->getRunNumber(),settings->getVerbosity()<15?0:settings->getVerbosity()-15);
 	eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
+	cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
 	histSaver = new HistogrammSaver();
 	settings->goToAlignmentDir();
 	histSaver->SetPlotsPath(settings->getAlignmentDir());
@@ -153,7 +154,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 	cout << "CREATING VECTOR OF VALID EVENTS..." << endl;
 
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
-		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 100);
+		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
 		eventReader->LoadEvent(nEvent);
 		if (!eventReader->isValidTrack()) {
 			noHitDet++;
@@ -300,18 +301,13 @@ int TAlignment::AlignDiamond(UInt_t nEvents,UInt_t startEvent){
 void TAlignment::AlignSiliconPlanes() {
 	cout<<"Alignment of Silicon Planes. max. Alignment Steps: "<<nAlignSteps<<endl;
 	nAlignmentStep = -1;
-	if (verbosity)cout << "Check Detector Alignment:" << endl;
+	if (verbosity)cout << "\nCheck Detector Alignment:" << endl;
 	resPlane1 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 1, 0, 3, true);
 	resPlane2 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 2, 0, 3, true);
 	resPlane3 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 3, 1, 2, true);
 
-	if (verbosity)cout << "Start Pre-Alignment:" << endl;
-	nAlignmentStep=0;
 
-	resPlane3 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 3, 0, 0, true);
-	//todo do iterative until alignment gets small
-	resPlane3 = alignDetector(TPlaneProperties::XY_COR, 3, 0, 0, true,resPlane3);
-	resPlane3 = alignDetector(TPlaneProperties::XY_COR, 3, 0, 0, true,resPlane3);
+	doPreAlignment();
 
 	if (verbosity) cout << endl;
 	if (verbosity)cout << "Start with Alignment Steps" << endl;
@@ -325,6 +321,7 @@ void TAlignment::AlignSiliconPlanes() {
 		if(verbosity) cout<<"Creating Post Alignment Plots, since the alignment was good after "<< neededAlignmentSteps <<" Steps."<<endl;
 		siliconAlignmentStep(nAlignmentStep-1>=nAlignSteps||bPlotAll,false);
 	}
+	doPreAlignment();
 	cout<<"Alignment step: "<<neededAlignmentSteps<<endl;
 	cout<<"\n\n\n*******************";
 	cout<<"\nAlignment of Silicon Planes is done after "<<neededAlignmentSteps<<" steps. Now get final Silicon Alignment Results..."<<endl;
@@ -333,6 +330,28 @@ void TAlignment::AlignSiliconPlanes() {
 	getFinalSiliconAlignmentResuluts();
 	myTrack->setVerbosity(verbosity-4>0?verbosity-4:0);
 
+}
+
+void TAlignment::doPreAlignment(){
+	if (verbosity)cout << "\nStart Pre-Alignment:" << endl;
+	nAlignmentStep=0;
+	Float_t xOff3,yOff3,xPhiOff3,yPhiOff3;
+	bool xAlignment3,yAlignment3;
+	int nTry =0;
+	int nTries=4;
+	do{
+		if(verbosity) cout<< "\n\nPreAlignment Step "<<nTry<<endl;
+		resPlane3 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 3, 0, 0, true);
+		alignDetector(TPlaneProperties::XY_COR, 3, 0, 0, true,resPlane3);
+		xOff3 = TMath::Abs(align->GetLastXOffset(3));
+		yOff3 = TMath::Abs(align->GetLastYOffset(3));
+		xPhiOff3  = TMath::Abs(align->GetLastPhiXOffset(3));
+		xPhiOff3 = TMath::Abs(align->GetLastPhiYOffset(3));
+		xAlignment3 = xOff3<settings->getAlignmentPrecisionOffset() && xPhiOff3<settings->getAlignmentPrecisionAngle();
+		yAlignment3 = yOff3<settings->getAlignmentPrecisionOffset() && yPhiOff3<settings->getAlignmentPrecisionAngle();
+		nTry++;
+	}
+	while ((!xAlignment3||!yAlignment3)&&nTry<nTries);
 }
 
 bool TAlignment::siliconAlignmentStep(bool bPlot, bool bUpdateAlignment) {
@@ -491,7 +510,7 @@ TResidual TAlignment::alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t
 	}
 
 	//get Residual
-	TResidual res = this->getResidual(cor, subjectPlane, vecRefPlanes, bPlot, resOld);
+	TResidual res = this->getResidual(cor, subjectPlane, vecRefPlanes, bPlot, resOld,getClusterCalcMode(subjectPlane));
 	Float_t x_offset = res.getXOffset();
 	Float_t phix_offset = res.getPhiXOffset();
 	Float_t y_offset = res.getYOffset();
@@ -599,7 +618,7 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 	for(UInt_t refPlane1=0;refPlane1<vecRefPlanes.size()-1;refPlane1++){
 		for(UInt_t refPlane2=refPlane1+1;refPlane2<vecRefPlanes.size();refPlane2++){
 			if(vecRefPlanes.at(refPlane1)==vecRefPlanes.at(refPlane2)){
-				cout<<" Removing "<<refPlane1<<" "<<refPlane2<<":"<< vecRefPlanes.at(refPlane1)<<"t"<<vecRefPlanes.size()<<"-";
+				cout<<" Removing "<<refPlane1<<" "<<refPlane2<<":"<< vecRefPlanes.at(refPlane1)<<" from"<<vecRefPlanes.size()<<"-";
 				vecRefPlanes.erase(vecRefPlanes.begin()+refPlane1);
 				cout<<vecRefPlanes.size()<<endl;
 			}
@@ -627,8 +646,8 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 		TRawEventSaver::showStatusBar(nEvent, events.size(),100,false,false);
 		myTrack->setEvent(&events.at(nEvent));
 		if (verbosity > 5) cout << "Sil Alignment - Event No.:"<< nEvent << endl;
-		xLabMeas = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, mode);
-		yLabMeas = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, mode);
+		xLabMeas = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
+		yLabMeas = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
 		if (verbosity > 5) cout<<"Predict Position: "<<endl;
 		predictedPostion = myTrack->predictPosition(subjectPlane, vecRefPlanes, TCluster::corEta, verbosity>8);
 		if(verbosity>6)	predictedPostion->Print(1);
@@ -640,8 +659,8 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 		yDelta = yLabMeas - yLabPredicted;    //Y_OBS-Y_Pred
 		resxtest = TMath::Abs(xDelta - resOld.getXMean()) / TMath::Max((Double_t)resOld.getXSigma(),align->getResolution(subjectPlane,cor));
 		resytest = TMath::Abs(yDelta - resOld.getYMean()) / resOld.getYSigma();
-		xDetMeasured = myTrack->getXMeasured(subjectPlane, mode);
-		yDetMeasured = myTrack->getYMeasured(subjectPlane, mode);
+		xDetMeasured = myTrack->getXMeasured(subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
+		yDetMeasured = myTrack->getYMeasured(subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
 		chi2x = predictedPostion->getChi2X();
 		chi2y = predictedPostion->getChi2Y();
 		bool useEvent=false;
@@ -900,7 +919,7 @@ TResidual TAlignment::CheckDetectorAlignment(TPlaneProperties::enumCoordinate co
 			cout<<vecRefPlanes.at(i)<<" ";
 		cout<<endl;
 	}
-	TResidual res = getResidual(cor, subjectPlane, vecRefPlanes, bPlot, resOld);
+	TResidual res = getResidual(cor, subjectPlane, vecRefPlanes, bPlot, resOld,getClusterCalcMode(subjectPlane));
 	if (verbosity) res.Print();
 	return res;
 }
@@ -949,7 +968,7 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 	vecXPhi.clear();
 	vecYPhi.clear();
 	//	if(verbosity)
-	cout << "TAlignment::getChi2Distribution" << endl;
+	cout << "\nTAlignment::getChi2Distribution final" << endl;
 	//	Float_t xPositionObserved,yPositionObserved,deltaX,deltaY,resxtest,resytest;
 	TPositionPrediction* predictedPosition = 0;
 	vector<UInt_t> vecRefPlanes;
@@ -1009,7 +1028,7 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 		histName << "h_" << nAlignmentStep << "_Step";
 	histName << "_Chi2X_Distribution";
 	histSaver->SetRange(0,20);
-	TH1F *histoChi2X = histSaver->CreateDistributionHisto(histName.str(), vecXChi2, 1024, HistogrammSaver::manual);
+	TH1F *histoChi2X = histSaver->CreateDistributionHisto(histName.str(), vecXChi2, 1024, HistogrammSaver::manual,0,20);
 	histoChi2X->GetXaxis()->SetTitle("Chi^2/NDF of X plane");
 	histoChi2X->GetYaxis()->SetTitle("number of entries");
 	histoChi2X->GetXaxis()->SetRangeUser(0,20);
@@ -1025,7 +1044,7 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 		histName << "h_" << nAlignmentStep << "_Step";
 	histName << "_Chi2Y_Distribution";
 	histSaver->SetRange(0,20);
-	TH1F *histoChi2Y = histSaver->CreateDistributionHisto(histName.str(), vecYChi2, 1024, HistogrammSaver::manual);
+	TH1F *histoChi2Y = histSaver->CreateDistributionHisto(histName.str(), vecYChi2, 1024, HistogrammSaver::manual,0,20);
 	histoChi2Y->GetXaxis()->SetTitle("Chi^2/NDF of Y plane");
 	histoChi2Y->GetYaxis()->SetTitle("number of entries");
 	histoChi2Y->GetXaxis()->SetRangeUser(0,20);
@@ -1040,9 +1059,9 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 		histName << "h_" << nAlignmentStep << "_Step";
 	histName << "_Chi2X_vs_SumDeltaX";
 	cout << "CREATE: " << histName.str() << endl;
-	TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecSumDeltaX, vecXChi2);
-	histo->GetYaxis()->SetTitle("Sum of Delta X");
-	histo->GetYaxis()->SetTitle("Chi2 in X");
+	TH2F *histo = histSaver->CreateScatterHisto(histName.str(),vecSumDeltaX, vecXChi2 );
+	histo->GetYaxis()->SetTitle("Sum of |Delta X|");
+	histo->GetXaxis()->SetTitle("#Chi^2 of X fit");
 	histSaver->SaveHistogram(histo);
 
 	histName.str("");
@@ -1054,15 +1073,15 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 		histName << "h_" << nAlignmentStep << "_Step";
 	histName << "_Chi2Y_vs_SumDeltaY";
 	cout << "CREATE PLOT: \"" << histName.str() << "\"" << endl;
-	TH2F *histo1 = histSaver->CreateScatterHisto(histName.str(), vecSumDeltaY, vecYChi2);
+	TH2F *histo1 = histSaver->CreateScatterHisto(histName.str(), vecSumDeltaY,vecYChi2);
+	histo1->GetYaxis()->SetTitle("Sum of |Delta Y|");
+	histo1->GetXaxis()->SetTitle("#Chi^2 of Y fit");
 	histName << "_graph";
 	TGraph graph1 = histSaver->CreateDipendencyGraph(histName.str(), vecSumDeltaY, vecYChi2);
 	graph1.Draw("AP");
 	graph1.GetYaxis()->SetTitle("Sum of Delta Y");
 	graph1.GetXaxis()->SetTitle("Chi2 in Y");
 
-	histo1->GetYaxis()->SetTitle("Sum of Delta Y");
-	histo1->GetXaxis()->SetTitle("Chi2 in Y");
 	histSaver->SaveHistogram(histo1);
 	histSaver->SaveGraph(&graph1, histName.str(), "AP");
 
@@ -1087,16 +1106,6 @@ void TAlignment::getFinalSiliconAlignmentResuluts() {
 	//set Resolutions
 	//	setDetectorResolution(maxChi2);
 	setSiliconDetectorResolution(maxChi2);
-
-	//	vector<UInt_t>vecRefPlanes;
-	//	for(UInt_t plane=0;plane<4;plane++){
-	//		vecRefPlanes.clear();
-	//		for(UInt_t i=0;i<4;i++)
-	//			if(i!=plane)vecRefPlanes.push_back(i);
-	//			TResidual res0=calculateResidualWithChi2(TPlaneProperties::XY_COR,plane,vecRefPlanes,maxChi2,false,true);
-	//	}
-//	if(verbosity)
-//		align->Print();
 	getChi2Distribution(15);
 }
 
@@ -1120,7 +1129,7 @@ void TAlignment::setSiliconDetectorResolution(Float_t maxChi2) {
 		vector<UInt_t> vecRefPlanes;
 		for (UInt_t i = 0; i < 4; i++)
 			if (i != plane) vecRefPlanes.push_back(i);
-		TResidual res = getResidual(TPlaneProperties::XY_COR, plane, vecRefPlanes,true,TResidual(),TCluster::eta,chi2CalcMode,maxChi2);
+		TResidual res = getResidual(TPlaneProperties::XY_COR, plane, vecRefPlanes,true,TResidual(),getClusterCalcMode(plane),chi2CalcMode,maxChi2);
 	}
 }
 

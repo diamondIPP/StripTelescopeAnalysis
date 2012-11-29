@@ -45,7 +45,7 @@ void THTMLAlignment::createPostSiliconOverview()
   sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaX_-_Plane_3_with_0_1_and_2with_Chi2_cut_on_1","png",24)<<"\n";
   sectionContent<<"<br><br>\n";
 
-  sectionContent<<"<h3>X Resolution</h3>\n";
+  sectionContent<<"<h3>Y Resolution</h3>\n";
   sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaY_-_Plane_0_with_1_2_and_3with_Chi2_cut_on_1","png",24)<<"\n";
   sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaY_-_Plane_1_with_0_2_and_3with_Chi2_cut_on_1","png",24)<<"\n";
   sectionContent<<putImage(".","hSilicon_PostAlignment_Distribution_DeltaY_-_Plane_2_with_0_1_and_3with_Chi2_cut_on_1","png",24)<<"\n";
