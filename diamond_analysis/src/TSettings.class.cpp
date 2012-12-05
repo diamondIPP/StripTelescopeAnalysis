@@ -767,16 +767,12 @@ void TSettings::DefaultLoadDefaultSettings(){
  */
 void TSettings::ParseStringArray(string value, vector<string> &vec){
 
-	int index=0;
 	if(value.find('{')==string::npos||value.find('}')==string::npos){
 		cerr<<"the string \'"<<value<<"\' cannot be parsed as a float array since bracket is missing"<<endl;
 		exit(-1);
 	}
 	string::size_type beginning = value.find_first_of('{')+1;
 	string::size_type ending = value.find_last_of('}');
-	string::size_type offset1 = value.find_first_of('{')+1;
-	string::size_type offset2 = value.find_first_of(',');
-	string::size_type iter = beginning;
 	string analyseString = value.substr(beginning,ending-beginning);
 	//  cout<<"analyze: \'"<<analyseString<<"\'"<<endl;
 	int i;

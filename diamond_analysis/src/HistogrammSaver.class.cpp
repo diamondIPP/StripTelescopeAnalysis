@@ -747,6 +747,21 @@ void HistogrammSaver::SetRange(Float_t min,Float_t max){
 	}
 }
 
+
+Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
+	Float_t mean = 0;
+	Float_t mean2 = 0;
+	Float_t nEntries = vec.size();
+	for(UInt_t i=0;i<vec.size();i++){
+		mean+=vec.at(i);
+		mean2+=vec.at(i)*vec.at(i);
+	}
+	mean=mean/nEntries;
+	mean2=mean2/nEntries;
+	Float_t sigma = TMath::Sqrt(mean2-mean*mean);
+	cout<<"Mean: "<<mean*100<<" +/- " <<sigma*100<<"\t"<<vec.size() << mean<<"/"<<mean2<<endl;
+	return mean;
+}
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
@@ -763,6 +778,10 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		Float_t delta = max-min;
 		min =min-delta*factor;
 		max=max+delta*factor;
+		if(min-max==0){
+			min-=0.5*min;
+			max+=0.5*min;
+		}
 		cout<<" maxWidth "<<min <<"-"<<max<<endl;
 	}
 	else if(range==fiveSigma||range==threeSigma){
@@ -789,6 +808,8 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		sigma/=(Float_t)nEvents;
 		sigma = sigma -mean*mean;
 		sigma=TMath::Sqrt((Double_t)sigma);
+		if(sigma==0)
+			sigma = .5 *mean;
 		UInt_t nSigma = (range==fiveSigma)? 5:3;
 		max=mean+nSigma*sigma;
 		min=mean-nSigma*sigma;

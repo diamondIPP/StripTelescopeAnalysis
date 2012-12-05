@@ -102,8 +102,8 @@ private:
 
 	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
 	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
-	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue);
-	TResidual getStripResidualChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,Float_t maxChi2=1000,TCluster::calculationMode_t mode=TCluster::maxValue);
+	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
+//	TResidual getStripResidualChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,Float_t maxChi2=1000,TCluster::calculationMode_t mode=TCluster::maxValue);
 
 //	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY) {return calculateResidual(cor,xPred,deltaX,yPred,deltaY,TResidual(true));};
 //	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
@@ -154,6 +154,8 @@ private:
 	vector<Float_t> vecYChi2;
 	vector<Float_t> vecXPhi;
 	vector<Float_t> vecYPhi;
+	vector<Float_t> vecXResPrediction;
+	vector<Float_t> vecYResPrediction;
 	vector<Float_t> vecClusterSize;
 	TCluster::calculationMode_t getClusterCalcMode(Int_t plane){return TPlaneProperties::isDiamondPlane(plane)?diaCalcMode:silCalcMode;}
 };

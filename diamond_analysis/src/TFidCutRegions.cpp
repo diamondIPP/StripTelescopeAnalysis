@@ -105,7 +105,7 @@ void TFidCutRegions::setRunDescription(std::string runDes)
 		if(index>fidCuts.size()){
 			cerr<<"the set index ( "<<index<<") is not possible. There are only "<<fidCuts.size()<< " possible Fidcuts..."<<endl;
 			cerr<<"Please enter a valid index. Use a number between 0 [all],1(left) - "<<fidCuts.size()+1<<endl;
-			int newIndex=0;
+			unsigned int newIndex=0;
 			while(!(cin>>newIndex)||newIndex>fidCuts.size())
 			{
 				cout<<"you didn't entered a vaild input."<<
@@ -178,7 +178,7 @@ TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
 
 int TFidCutRegions::getFidCutRegion(Float_t xVal, Float_t yVal)
 {
-  int i=0;
+  unsigned int i=0;
   for(i=0;i<fidCuts.size();i++){
     if(fidCuts.at(i)->isInFiducialCut(xVal,yVal)) return i;
   }

@@ -102,7 +102,7 @@ public:
   void setYMean(Double_t yMean,UInt_t plane);
   UInt_t getNUsedEvents() const {return (this->nUsedEvents);};
   void setNUsedEvents(UInt_t usedEvents){this->nUsedEvents=usedEvents;};
-
+  bool isPreAligned(Float_t maxOffset=0.3,Int_t nAlignedDetectors=2);
   void addEventIntervall(UInt_t first,UInt_t last);
   void setAlignmentTrainingTrackFraction(Float_t fraction){alignmentTrainingTrackFraction=fraction;};
   void setDiamondDate(){diaTime=TDatime();};

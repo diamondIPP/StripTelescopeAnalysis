@@ -83,6 +83,7 @@ public:
 	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos);
 	static TH2F* CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=512);
 	static TH1F* CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096,EnumAxisRange range=maxWidth,Float_t xmin=-1,Float_t xmax=1);
+	static Float_t GetMean(std::vector<Float_t> vec);
 	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
 	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
 	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);

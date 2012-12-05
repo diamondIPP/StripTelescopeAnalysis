@@ -155,15 +155,10 @@ Float_t TResidual::getPhiYOffset()
 	return (N_INVALID);
 }
 
-void TResidual::calculateResidual(TPlaneProperties::enumCoordinate cor, vector<Float_t> *xPred, vector<Float_t> *deltaX, vector<Float_t> *yPred, vector<Float_t> *deltaY, TResidual resOld)
+void TResidual::calculateResidual(TPlaneProperties::enumCoordinate cor, vector<Float_t> *xPred, vector<Float_t> *deltaX, vector<Float_t> *yPred, vector<Float_t> *deltaY)
 {
 	this->clear();
-	//Float_t resxtest, resytest;
-	Float_t oldXSigma = resOld.getXSigma();
-	Float_t oldYSigma = resOld.getYSigma();
-	Float_t oldXMean = resOld.getXMean();
-	Float_t oldYMean = resOld.getYMean();
-	if(verbosity>2)cout<<"\tcalculate Residual in "<<TPlaneProperties::getCoordinateString(cor)<<" with a res keep factor of "<<res_keep_factor<<"and X:"<<oldXMean<<"+/-"<<oldXSigma<<" , Y:"<<oldYMean<<"+/-"<<oldYSigma<<endl;
+	if(verbosity>2)cout<<"\tcalculate Residual in "<<TPlaneProperties::getCoordinateString(cor)<<endl;
 	for(UInt_t i=0;i<deltaX->size();i++)
 		this->addDataPoint(deltaX->at(i),xPred->at(i),deltaY->at(i),yPred->at(i));
 
@@ -172,8 +167,6 @@ void TResidual::calculateResidual(TPlaneProperties::enumCoordinate cor, vector<F
 	this->SetTestResidual(false);
 	//outputs
 	if(verbosity)cout<<"\n";
-	if((!resOld.isTestResidual())&&verbosity)
-		printf("\tresidual with x:%1.2f+/-%1.2f and y:%1.2f+/-%1.2f\n",resOld.getXMean(),resOld.getXSigma(),resOld.getYMean(),resOld.getYSigma());
 
 	if(verbosity>0)	cout<<"\tused "<<this->getUsedTracks()<<" Tracks"<<endl;
 	if(verbosity>0)	cout<<"\t rexXMean: "<<resXMean<<", resXSigma: "<<resYSigma<<",\tresYMean: "<<resYMean<<", resYSigma"<<resYSigma<<endl;
@@ -181,12 +174,7 @@ void TResidual::calculateResidual(TPlaneProperties::enumCoordinate cor, vector<F
 	if(verbosity>0)	cout<<"\tY: "<<sumVy <<" "<< sumV2y  <<" "<<sumRy<<" "<<sumVRy<<endl;
 	if(verbosity>0)	cout<<"\tX: "<<std::setprecision(4)<<this->getXMean()<<"+/-"<<this->getXSigma()<<"\t\t"<<this->getXOffset()<<endl;
 	if(verbosity>0)	cout<<"\tY: "<<this->getYMean()<<"+/-"<<this->getYSigma()<<"\t\t"<<this->getYOffset()<<"\n"<<endl;
-//	if(verbosity>0){
-//		cout<<"press key"<<endl;
-//		char t;
-//		cin>>t;
-//	}
-	//set values
+
 }
 
 

@@ -66,7 +66,6 @@ Double_t langaufun(Double_t *x, Double_t *par) {
 		fland = TMath::Landau(xx, mpc, par[0]) / par[0];
 		sum += fland * TMath::Gaus(x[0], xx, par[3]);
 	}
-	int error=0;
 
 	return (par[2] * step * sum * invsq2pi / par[3]);
 }
