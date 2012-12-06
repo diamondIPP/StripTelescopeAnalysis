@@ -460,6 +460,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 			hBiggestSignalInSigma2DCMN->Fill(signal,channel);
 		}
 		findPlotRangeForPHHisto(hBiggestSignalInSigma[det],settings->getClusterHitFactor(det));
+		findPlotRangeForPHHisto(hBiggestSignalInSigmaCMN[det],settings->getClusterHitFactor(det));
 		hBiggestSignalInSigma2D->GetXaxis()->SetRangeUser(hBiggestSignalInSigma[det]->GetXaxis()->GetXmin(),hBiggestSignalInSigma[det]->GetXaxis()->GetXmax());
 		hBiggestSignalInSigma2DCMN->GetXaxis()->SetRangeUser(hBiggestSignalInSigma[det]->GetXaxis()->GetXmin(),hBiggestSignalInSigma[det]->GetXaxis()->GetXmax());
 		hBiggestSignalInSigmaCMN[det]->GetXaxis()->SetRangeUser(hBiggestSignalInSigma[det]->GetXaxis()->GetXmin(),hBiggestSignalInSigma[det]->GetXaxis()->GetXmax());
