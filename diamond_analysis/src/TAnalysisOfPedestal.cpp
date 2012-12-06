@@ -528,7 +528,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		if(TPlaneProperties::isDiamondDetector(det)){
 			double cut = settings->getClusterHitFactor(det);
 			//		cout << "saving histogram " << this->histo_pulseheight_sigma_second[det]->GetName() << ".. with CUT on " <<cut<< endl;
-			TCanvas *c2 = new TCanvas(this->hBiggestAdjacentSignalInSigmaCMN[det]->GetTitle(),this->hBiggestAdjacentSignalInSigma[det]->GetTitle());
+			TCanvas *c2 = new TCanvas(this->hBiggestAdjacentSignalInSigmaCMN[det]->GetTitle(),this->hBiggestAdjacentSignalInSigmaCMN[det]->GetTitle());
 			c2->cd();
 			this->hBiggestAdjacentSignalInSigmaCMN[det]->Draw();
 			double xCorCMN[] = {cut,cut};
