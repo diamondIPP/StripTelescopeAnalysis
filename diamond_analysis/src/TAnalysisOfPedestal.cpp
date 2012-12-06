@@ -492,7 +492,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					findPlotRangeForPHHisto(hBiggestSignalArea,settings->getClusterSeedFactor(det));
 					histSaver->SaveHistogram(hBiggestSignalArea);
 					delete hBiggestSignalArea;
-					TString name = histoName;
+					name = histoName;
 					name.Append(TString::Format("CMNcorrected_area%d_ch%d-ch%d",i,area.first,area.second));
 					cout<<"Create "<<name<<endl;
 					TH1F* hBiggestSignalAreaCMN = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,area.first,area.second);
