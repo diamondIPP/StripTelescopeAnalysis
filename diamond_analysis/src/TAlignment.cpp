@@ -1226,6 +1226,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 				fitWidth = 3*sigma;
 				fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",mean-fitWidth,mean+fitWidth);
 				fitX->FixParameter(3,0.5);//TODO
+				fitX->SetParLimits(1,0,sigma);
 				fitX->SetParNames("Integral","sigma of Gaus","position");
 				fitX->SetParameter(2,0);
 				fitX->SetParameter(1,0.1);
