@@ -83,6 +83,7 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 
 void TAnalysisOfPedestal::analyseEvent(){
 	analyseBiggestHit();
+	analyseBiggestHit(true);
 	checkForSaturatedChannels();
 	updateMeanCalulation();
 	//		UInt_t ch=30;
