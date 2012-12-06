@@ -471,10 +471,12 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		hBiggestSignalInSigmaCMN[det]->GetYaxis()->SetRangeUser(hBiggestSignalInSigma[det]->GetYaxis()->GetXmin(),hBiggestSignalInSigma[det]->GetYaxis()->GetXmax());
 		histSaver->SaveHistogram(hBiggestSignalInSigma2D);
 		cout<<"BiggestHitSNR:\t"<<det<<"\t"<<hBiggestSignalInSigmaCMN[det]<<"\t"<<hBiggestSignalInSigmaCMN[det]->GetEntries()<<"\t"<<hBiggestSignalInSigmaCMN[det]->GetName()<<endl;
+		cout<<"save "<<hBiggestSignalInSigmaCMN[det]->GetTitle()<<endl;
 		histSaver->SaveHistogram(hBiggestSignalInSigmaCMN[det]);
+		cout<<"save "<<hBiggestSignalInSigma2DCMN->GetTitle()<<endl;
 		histSaver->SaveHistogram(hBiggestSignalInSigma2DCMN);
 
-		TString canvasName = TString::Format("c_%",this->hBiggestSignalInSigma[det]->GetTitle());
+		TString canvasName = TString::Format("c_%s",this->hBiggestSignalInSigma[det]->GetTitle());
 		TCanvas *c1 = new TCanvas(canvasName,canvasName);
 		c1->cd();
 		this->hBiggestSignalInSigma[det]->Draw();
@@ -488,6 +490,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		lineGraph->SetLineColor(kRed);
 		lineGraph->SetLineWidth(2);
 		lineGraph->Draw("Lsame");
+		cout<<"save "<<c1->GetTitle()<<endl;
 		histSaver->SaveCanvas(c1);;
 		//        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
 		delete hBiggestSignalInSigma[det];
@@ -495,6 +498,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		delete c1;
 		if (TPlaneProperties::isDiamondDetector(det)){
 			for(Int_t i = 0;i < settings->getNDiaDetectorAreas();i++){
+				cout<<" save NDiaDetecotAreas "<<i<<endl;
 				std::pair<Int_t, Int_t> area = settings->getDiaDetectorArea(i);
 				if(area.first<area.second){
 					TString name = histoName;
