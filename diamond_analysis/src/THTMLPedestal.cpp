@@ -10,9 +10,11 @@
 THTMLPedestal::THTMLPedestal(TSettings *settings):THTMLGenerator(settings) {
 	setTitle("Pedestals");
 
-  this->setMainPath("../");
-  this->setSubdirPath("pedestalAnalysis/");
+  this->setMainPath("..//");
+  this->setSubdirPath("pedestalAnalysis");
   this->setFileName("pedestal.html");
+//  path = mainPath+subdirPath;
+  cout<<"path: "<<mainPath<<" + "<<subdirPath<<" = "<<path<<endl;
 }
 
 THTMLPedestal::~THTMLPedestal() {
@@ -44,39 +46,37 @@ void THTMLPedestal::createTableOfCuts()
 	}
 	sectionContent<<"<br><h4> X Coordinates</h4><br>"<<this->createTable(tablecontent)<<"<br><br>";
 	sectionContent<<"<br><h4> Y Coordinates</h4><br>"<<this->createTable(tablecontent2)<<"<br><br>";
-	stringstream path;
-	path<<this->path<<"/";//"./pedestalAnalysis/";
 	sectionContent<<"<h3>Seed-Cuts</h3>\n";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hPulseHeight_BiggestSignalInSigma");
+	sectionContent<<putImagesOfAllDetectors(path,"hPulseHeight_BiggestSignalInSigma");
 //	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 //		stringstream name;
 //		name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path.str(),name.str());
+//		sectionContent<<putImage(path,name.str());
 //	}
 //	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 //		stringstream name;
 //		name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path.str(),name.str());
+//		sectionContent<<putImage(path,name.str());
 //	}
 //	stringstream name;
 //	name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
-//	sectionContent<<putImage(path.str(),name.str());
+//	sectionContent<<putImage(path,name.str());
 	sectionContent<<"<h3>Hit-Cuts</h3>\n";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hPulseHeight_BiggestAdjacentInSNR");
+	sectionContent<<putImagesOfAllDetectors(path,"hPulseHeight_BiggestAdjacentInSNR");
 //	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 //		stringstream name;
 //		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path.str(),name.str());
+//		sectionContent<<putImage(path,name.str());
 //	}
 //	sectionContent<<"<br";
 //	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 //		stringstream name;
 //		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path.str(),name.str());
+//		sectionContent<<putImage(path,name.str());
 //	}
 //	name.str("");name.clear();name.str("");
 //	name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
-//	sectionContent<<putImage(path.str(),name.str());
+//	sectionContent<<putImage(path,name.str());
 	this->addSection("Cluster Cuts",sectionContent.str());
 }
 
@@ -88,9 +88,7 @@ void THTMLPedestal::createPedestalDistribution(){
 	sectionContent<<"Mean pedestal value of every channel calculated for all events in black.";
 	sectionContent<<"The mean pedestal sigma of every channel is plotted in red.\n";
 	sectionContent<<"</p>\n";
-	stringstream path;
-	path<<this->path<<"/";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"cPedestalOfChannels_");
+	sectionContent<<putImagesOfAllDetectors(path,"cPedestalOfChannels_");
 
 	this->addSection("mean Pedestal Values",sectionContent.str());
 
@@ -114,9 +112,7 @@ void THTMLPedestal::createBiggestHitMaps()
 	sectionContent<<"<p>\n";
 	sectionContent<<"Channel position of Biggest Hit in detector of each event.\n";
 	sectionContent<<"</p>\n";
-	stringstream path;
-	path<<this->path<<"/";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hBiggestHitMap");
+	sectionContent<<putImagesOfAllDetectors(path,"hBiggestHitMap");
 	this->addSection("Biggest Hit Maps",sectionContent.str());
 }
 
@@ -129,10 +125,8 @@ void THTMLPedestal::createNoiseDistribution()
 	sectionContent<< " This Distribution tells you what is the mean noise of each Detector\n";
 //	sectionContent>>"";
 	sectionContent<<"</p>\n";
-	stringstream path;
-	path<<this->path<<"/";
 	//hNoiseDistributionOfAllNonHitChannels_
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hNoiseDistributionOfAllNonHitChannels_")<<"<br>\n\n";
+	sectionContent<<putImagesOfAllDetectors(path,"hNoiseDistributionOfAllNonHitChannels_")<<"<br>\n\n";
 	sectionContent<<putImageOfPath("hNoiseDistributionOfAllNonHitChannels_Dia","png",30)<<" \n";
 	sectionContent<<putImageOfPath("hCMNoiseDistribution","png",30)<<"\n";
 	sectionContent<<putImageOfPath("hNoiseDistributionOfAllNonHitChannels_Dia_CMNcorrected","png",30)<<"\n";
@@ -150,24 +144,18 @@ void THTMLPedestal::createHitOrderSection()
 	sectionContent<< "the Readout. A strong imbalance shows a dependency of readout direction.";
 	sectionContent<< "if there is a entry at 0 it means that both adjacent signals were not valid or below zero.\n";
 	sectionContent<<"</p>\n";
-	stringstream path;
-	path<<this->path<<"/";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hSecondBiggestHitMinusBiggestHitPosition_");
+	sectionContent<<putImagesOfAllDetectors(path,"hSecondBiggestHitMinusBiggestHitPosition_");
 	this->addSection("Hit Order",sectionContent.str());
 }
 
 void THTMLPedestal::createSaturatedChannels()
 {
-
 	stringstream sectionContent;
 	sectionContent<<"<h2>Saturated Channels</h2>\n";
 	sectionContent<<"<p>\n";
 	sectionContent<<"Histogramm of all Channels to see how often each channel got saturated\n";
-//	sectionContent>>"";
 	sectionContent<<"</p>\n";
-	stringstream path;
-	path<<this->path<<"/";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hSaturatedChannels_");
+	sectionContent<<putImagesOfAllDetectors(path,"hSaturatedChannels_");
 	this->addSection("Saturated Channels",sectionContent.str());
 }
 

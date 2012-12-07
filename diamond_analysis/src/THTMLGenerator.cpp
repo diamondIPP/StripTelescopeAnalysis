@@ -231,7 +231,7 @@ std::string THTMLGenerator::floatToString(Float_t value, UInt_t precision)
 
 
 std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string name, std::string type,int percentage){
-
+	cout<<"add all images for "<<name<<" at path: "<<path<<endl;
 	stringstream output;
 	output<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
