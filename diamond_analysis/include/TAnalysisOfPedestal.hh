@@ -54,7 +54,7 @@ private:
 	void createPedestalMeanHistos();
 	void saveHistos();
 	void savePHinSigmaHistos();
-	void findPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
+	void findYPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
 	void checkForDeadChannels();
 	void analyseForSeeds();
 	void getBiggestHit();
@@ -67,9 +67,9 @@ private:
 	TH1F *hSeedMap2[9];
 	TH1F *hClusterMap[9];
 	TH1F* hNumberOfSeeds[9];
-	TH1F* hChannelBiggestHit[9];
-	TH1F* hPulsHeightBiggestHit[9];
-	TH1F* hPulsHeightNextBiggestHit[9];
+	TH1F* hChannelBiggestSignal[9];
+	TH1F* hSNR_BiggestSignal[9];
+	TH1F* hSNR_BiggestAdjacent[9];
 	TH1F* hCMNoiseDistribution;
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;

@@ -88,7 +88,7 @@ public:
 	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
 	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
 	static TGraphErrors CreateErrorGraph(std::string name,std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey);
-
+	static void CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto);
 private:
 	Float_t xRangeMin,xRangeMax;
 

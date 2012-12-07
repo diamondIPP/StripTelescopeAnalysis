@@ -720,6 +720,24 @@ TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Floa
 	return hGraph;
 }
 
+void HistogrammSaver::CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto){
+	if(axisInputHisto&&changingHisto){
+		changingHisto->Draw("goff");
+		axisInputHisto->Draw("goff");
+		Float_t xmin = axisInputHisto->GetXaxis()->GetXmin();
+		Float_t xmax = axisInputHisto->GetXaxis()->GetXmax();
+		Float_t ymin = axisInputHisto->GetYaxis()->GetXmin();
+		Float_t ymax = axisInputHisto->GetYaxis()->GetXmax();
+		if(ymax==1)
+			ymax= axisInputHisto->GetBinContent(axisInputHisto->GetMaximumBin());
+		changingHisto->GetXaxis()->SetRangeUser(xmin,xmax);
+		changingHisto->GetYaxis()->SetRangeUser(ymin,ymax);
+		cout<<"copyAxisRangeToHisto: x: "<<xmin<<"-"<<xmax<<"\ty:"<<ymin<<"-"<<ymax<<endl;
+	}
+	else
+		cerr<<"HistogrammSaver::CopyAxisRangesToHisto::\tOne of the histogram is a pointer to Null: "<<changingHisto<<" "<<axisInputHisto<<endl;
+}
+
 TGraphErrors HistogrammSaver::CreateErrorGraph(std::string name, std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey)
 {
 	if(x.size()!=y.size()||x.size()!=ex.size()||ex.size()!=ey.size()||x.size()==0) {
@@ -732,6 +750,7 @@ TGraphErrors HistogrammSaver::CreateErrorGraph(std::string name, std::vector<Flo
 	hGraph.SetTitle(name.c_str());
 	return hGraph;
 }
+
 TH2F* HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos, UInt_t nBins)
 {
 	TH2F *histo = CreateScatterHisto(name,pos,Delta,nBins);
