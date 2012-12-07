@@ -110,7 +110,9 @@ private:
 	std::vector<Float_t>vecSaturatedChannels[N_DETECTORS];
 
 	std::vector<Float_t>vecBiggestSignalInSigma[N_DETECTORS];
+	std::vector<Float_t>vecBiggestSignal[N_DETECTORS];
 	std::vector<Int_t> vecBiggestHitChannel[N_DETECTORS];
+	std::vector<Float_t>vecBiggestAdjacentSignalInSigma[N_DETECTORS];
 	std::vector<Float_t>vecBiggestAdjacentSignal[N_DETECTORS];
 	std::vector<Int_t> vecBiggestAdjacentHitChannel[N_DETECTORS];
 
