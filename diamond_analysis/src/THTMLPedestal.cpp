@@ -47,7 +47,7 @@ void THTMLPedestal::createTableOfCuts()
 	stringstream path;
 	path<<this->path<<"/";//"./pedestalAnalysis/";
 	sectionContent<<"<h3>Seed-Cuts</h3>\n";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hPulseHeight_BiggestHitChannelInSigma");
+	sectionContent<<putImagesOfAllDetectors(path.str(),"hPulseHeight_BiggestSignalInSigma");
 //	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 //		stringstream name;
 //		name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(det);
@@ -62,7 +62,7 @@ void THTMLPedestal::createTableOfCuts()
 //	name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
 //	sectionContent<<putImage(path.str(),name.str());
 	sectionContent<<"<h3>Hit-Cuts</h3>\n";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"hPulseHeight_SecondBiggestHitChannelInSigma_");
+	sectionContent<<putImagesOfAllDetectors(path.str(),"hPulseHeight_BiggestAdjacentInSNR");
 //	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 //		stringstream name;
 //		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
@@ -148,6 +148,7 @@ void THTMLPedestal::createHitOrderSection()
 	sectionContent<<"Order of highest signal to next adjacent highest signal. \n";
 	sectionContent<< "this plot helps to figure out if there was any problem with \n";
 	sectionContent<< "the Readout. A strong imbalance shows a dependency of readout direction.";
+	sectionContent<< "if there is a entry at 0 it means that both adjacent signals were not valid or below zero.\n";
 	sectionContent<<"</p>\n";
 	stringstream path;
 	path<<this->path<<"/";
