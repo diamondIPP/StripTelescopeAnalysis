@@ -545,17 +545,20 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					cout<<"Create "<<name<<endl;
 					TH1F* hBiggestPHinSigma_SubArea = (TH1F*) hBiggestSignalInSigma2D->ProjectionX(name,area.first,area.second);
 					hBiggestPHinSigma_SubArea->SetTitle(name);
-					findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
+					hBiggestPHinSigma_SubArea->SetName(name);
+					Float_t ymax = findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
 					name = TString::Format("hPulseHeight_BiggestSignalInSigma_area%d_ch%d-ch%d_CMNcorrected",i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
 					TH1F* hBiggestPHInSigma_SubArea_CMNcorrected = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,area.first,area.second);
+					hBiggestPHInSigma_SubArea_CMNcorrected->SetTitle(name);
+					findYPlotRangeForPHHisto(hBiggestPHInSigma_SubArea_CMNcorrected,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
 					histSaver->CopyAxisRangesToHisto(hBiggestPHInSigma_SubArea_CMNcorrected,hBiggestPHinSigma_SubArea);
 					histSaver->SaveHistogram(hBiggestPHinSigma_SubArea);
 					histSaver->SaveHistogram(hBiggestPHInSigma_SubArea_CMNcorrected);
 
 					//Draw Both histos
 					histSaver->CopyAxisRangesToHisto(hBiggestPHInSigma_SubArea_CMNcorrected,hBiggestPHinSigma_SubArea);
-					name = "c_"+histoName;
+					name = "c_PulseHeightInSigma_Compare";
 					name.Append(TString::Format("_area%d_ch%d-ch%d",i,area.first,area.second));
 					TCanvas *c1 = new TCanvas(name,name);
 					c1->cd();
