@@ -62,7 +62,7 @@ void THTMLPedestal::createTableOfCuts()
 //	name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
 //	sectionContent<<putImage(path,name.str());
 	sectionContent<<"<h3>Hit-Cuts</h3>\n";
-	sectionContent<<putImagesOfAllDetectors(path,"hPulseHeight_BiggestAdjacentInSNR");
+	sectionContent<<putImagesOfAllDetectors(path,"hPulseHeight_BiggestAdjacentInSigma_");
 //	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 //		stringstream name;
 //		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);

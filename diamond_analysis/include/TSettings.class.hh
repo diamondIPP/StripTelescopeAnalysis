@@ -248,6 +248,8 @@ public:
 //	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n){if(n<getNDiaDetectorAreas()&&n>=0)return vecDiaDetectorAreasInChannel[n]; return std::make_pair((Int_t)-1,(Int_t)-1);}
+	bool isInDiaDetectorArea(UInt_t ch,UInt_t area);
+	int getDiaDetectorAreaOfChannel(UInt_t ch);
 protected:
     float store_threshold;
 private:
@@ -351,6 +353,9 @@ private:
     UInt_t runNumber;
     std::vector<Float_t>clusterHitFactors;
     std::vector<Float_t>clusterSeedFactors;
+
+	vector<Float_t> vecClusterSeedFactorsDia;
+	vector<Float_t> vecClusterHitFactorsDia;
     TChannelMapping *diamondMapping;
 private:
     //Filter tracks not in good fiducial region w/o bad strips

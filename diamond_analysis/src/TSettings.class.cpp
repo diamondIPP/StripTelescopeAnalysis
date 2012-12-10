@@ -635,8 +635,35 @@ void TSettings::LoadSettings(){
 				}
 			}
 		}
+		if(key=="Dia_ClusterSeedFactors"){
+			ParseFloatArray(value,vecClusterSeedFactorsDia);
+			if(vecClusterSeedFactorsDia.size()!=getNDiaDetectorAreas()){
+				cerr<<"The number of defined ClusterSeedFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
+				cerr<<vecClusterSeedFactorsDia.size()<<" "<<getNDiaDetectorAreas()<<endl;
+				exit(-1);
+			}
+			cout<<key<<endl;
+			for(UInt_t i=0;i<vecClusterSeedFactorsDia.size();i++)
+				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterSeedFactorsDia.at(i)<<endl;
+		}
+		if(key=="Dia_ClusterHitFactors"){
+			ParseFloatArray(value,vecClusterHitFactorsDia);
+			if(vecClusterHitFactorsDia.size()!=getNDiaDetectorAreas()){
+				cerr<<"The number of defined ClusterHitFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
+				cerr<<vecClusterHitFactorsDia.size()<<" "<<getNDiaDetectorAreas()<<endl;
+				exit(-1);
+			}
+			cout<<key<<endl;
+			for(UInt_t i=0;i<vecClusterHitFactorsDia.size();i++)
+				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterHitFactorsDia.at(i)<<endl;
+		}
 	}
 
+//	for(UInt_t ch=0;ch<TPlaneProperties::getNChannelsDiamond();ch++)
+//		cout<<setw(3)<<ch<<":"<<setw(3)<<getDiaDetectorAreaOfChannel(ch)<<"\t"<<getClusterSeedFactor(TPlaneProperties::getDetDiamond(),ch)
+//			<<"--"<<getClusterHitFactor(TPlaneProperties::getDetDiamond(),ch)<<endl;
+//	char t;
+//	cin>>t;
 	file.close();
 
 	for(int det=0; det<9; det++) {
@@ -837,20 +864,38 @@ std::pair< std::string,std::string > TSettings::ParseRegionString(string value){
  * @return
  */
 Float_t TSettings::getClusterSeedFactor(UInt_t det,UInt_t ch){
-	//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
+//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
+	if(TPlaneProperties::isDiamondDetector(det)){
+		Int_t area = getDiaDetectorAreaOfChannel(ch);
+//		cout<<"Diamond: "<<det<<":"<<ch<<"--->"<<area<<endl;
+		if (vecClusterSeedFactorsDia.size()>area&&area>-1)
+					return vecClusterSeedFactorsDia.at(area);
+		else{
+			if(det<clusterSeedFactors.size())
+					return clusterSeedFactors.at(det);
+			return getDi_Cluster_Seed_Factor();
+		}
+	}
 	if(det<clusterSeedFactors.size())
-		return clusterSeedFactors.at(det);
-	if(det==8)
-		return getDi_Cluster_Seed_Factor();
+			return clusterSeedFactors.at(det);
 	return getSi_Cluster_Seed_Factor();
 }
 
 Float_t TSettings::getClusterHitFactor(UInt_t det,UInt_t ch){
 
+	if(TPlaneProperties::isDiamondDetector(det)){
+		Int_t area = getDiaDetectorAreaOfChannel(ch);
+//		cout<<det<<":"<<ch<<"--->"<<area<<endl;
+		if (vecClusterHitFactorsDia.size()>area&&area>-1)
+			return vecClusterHitFactorsDia.at(area);
+		else {
+			if(clusterHitFactors.size()>det)
+				return clusterHitFactors.at(det);
+			return getDi_Cluster_Hit_Factor();
+		}
+	}
 	if(clusterHitFactors.size()>det)
 		return clusterHitFactors.at(det);
-	if(det==8)
-		return getDi_Cluster_Hit_Factor();
 	return getSi_Cluster_Hit_Factor();
 }
 
@@ -1646,3 +1691,18 @@ bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
 Int_t TSettings::getVerbosity(){
 	return this->verbosity;
 }
+
+bool TSettings::isInDiaDetectorArea(UInt_t ch,UInt_t area){
+	if(area<getNDiaDetectorAreas())
+		return getDiaDetectorArea(area).first<=ch&&ch<=getDiaDetectorArea(area).second;
+	else return false;
+}
+
+int TSettings::getDiaDetectorAreaOfChannel(UInt_t ch){
+	for(UInt_t area =0;area< getNDiaDetectorAreas();area++)
+		if(isInDiaDetectorArea(ch,area))
+			return area;
+	return -1;
+}
+
+

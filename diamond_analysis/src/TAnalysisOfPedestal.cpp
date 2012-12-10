@@ -479,13 +479,19 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 			this->hBiggestSignalInSigmaCMN[det]->Fill(signal);
 			hBiggestSignalInSigma2DCMN->Fill(signal,channel);
 		}
-		Float_t yMax = findYPlotRangeForPHHisto(hBiggestSignalInSigma[det],settings->getClusterSeedFactor(det,0));
-		Float_t yMaxCdt = findYPlotRangeForPHHisto(hBiggestSignalInSigmaCMN[det],settings->getClusterSeedFactor(det,0));
+		Float_t yMaxNorm = findYPlotRangeForPHHisto(hBiggestSignalInSigma[det],settings->getClusterSeedFactor(det,0));
+		Float_t yMaxCMN = findYPlotRangeForPHHisto(hBiggestSignalInSigmaCMN[det],settings->getClusterSeedFactor(det,0));
+		Float_t yMax = TMath::Max(yMaxNorm,yMaxCMN);
 		//set X Axis Range to the same for all
 		Float_t xmin = hBiggestSignalInSigma[det]->GetXaxis()->GetXmin();
 		Float_t xmax = hBiggestSignalInSigma[det]->GetXaxis()->GetXmax();
+		hBiggestSignalInSigma2DCMN->Draw("colz");
+		hBiggestSignalInSigma2D->Draw("colz");
+		hBiggestSignalInSigma2D->GetZaxis()->SetRangeUser(0,yMax);
+		hBiggestSignalInSigma2DCMN->GetZaxis()->SetRangeUser(0,yMax);
 		hBiggestSignalInSigma2D->GetXaxis()->SetRangeUser(xmin,xmax);
 		hBiggestSignalInSigma2DCMN->GetXaxis()->SetRangeUser(xmin,xmax);
+
 		hBiggestSignalInSigmaCMN[det]->GetXaxis()->SetRangeUser(xmin,xmax);
 
 		cout<<"BiggestHitSNR:\t"<<det<<"\t"<<hBiggestSignalInSigmaCMN[det]<<"\t"<<hBiggestSignalInSigmaCMN[det]->GetEntries()<<"\t"<<hBiggestSignalInSigmaCMN[det]->GetName()<<endl;
@@ -498,7 +504,6 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		TString canvasName = TString::Format("%s",this->hBiggestSignalInSigma[det]->GetTitle());
 		TCanvas *c1 = new TCanvas(canvasName,canvasName);
 		c1->cd();
-		yMax = TMath::Max(yMax,yMaxCdt);
 		hBiggestSignalInSigma[det]->GetYaxis()->SetRangeUser(0,yMax);
 		this->hBiggestSignalInSigma[det]->Draw();
 
@@ -569,7 +574,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					hBiggestPHInSigma_SubArea_CMNcorrected->SetFillStyle(hBiggestPHinSigma_SubArea->GetFillStyle());
 					if(hBiggestPHinSigma_SubArea->GetFillColor()!=kWhite)
 						hBiggestPHInSigma_SubArea_CMNcorrected->SetFillColor(kGreen-8);
-					TLegend* leg1 = c1->BuildLegend(0.15,0.55,0.5,0.80);
+					TLegend* leg1 = c1->BuildLegend(0.15,0.55,0.4,0.80);
 					leg1->SetFillColor(kWhite);
 					histSaver->SaveCanvas(c1);
 					Float_t xMinBiggest = 0;
