@@ -648,7 +648,7 @@ void TSettings::LoadSettings(){
 	}
 
 	for(int det=0;det<9;det++){
-		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det)<<"/"<<getClusterHitFactor(det)<<endl;
+		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det,0)<<"/"<<getClusterHitFactor(det,0)<<endl;
 	}
 
 	cout<<endl<<"TSettings::Finished importing settings from "<<fileName<<endl<<endl;
@@ -836,7 +836,7 @@ std::pair< std::string,std::string > TSettings::ParseRegionString(string value){
  * @param det
  * @return
  */
-Float_t TSettings::getClusterSeedFactor(UInt_t det){
+Float_t TSettings::getClusterSeedFactor(UInt_t det,UInt_t ch){
 	//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
 	if(det<clusterSeedFactors.size())
 		return clusterSeedFactors.at(det);
@@ -845,7 +845,7 @@ Float_t TSettings::getClusterSeedFactor(UInt_t det){
 	return getSi_Cluster_Seed_Factor();
 }
 
-Float_t TSettings::getClusterHitFactor(UInt_t det){
+Float_t TSettings::getClusterHitFactor(UInt_t det,UInt_t ch){
 
 	if(clusterHitFactors.size()>det)
 		return clusterHitFactors.at(det);

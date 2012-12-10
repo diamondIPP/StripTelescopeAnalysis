@@ -116,7 +116,7 @@ void TAnalysisOfPedestal::checkForDeadChannels()
 				//cout<<nEvent<<" "<<det<<" "<<ch<<" sigma==0"<<endl;
 				continue;
 			};
-			if(signalInSigma>settings->getClusterSeedFactor(det)){
+			if(signalInSigma>settings->getClusterSeedFactor(det,ch)){
 				hSeedMap[det]->Fill(ch);
 				numberOfSeeds++;
 			}
@@ -167,9 +167,12 @@ void TAnalysisOfPedestal::getBiggestHit(){
 
 }
 
-void TAnalysisOfPedestal::findYPlotRangeForPHHisto(TH1F *histo, Float_t hitCut)
+/**
+ *
+ */
+Float_t TAnalysisOfPedestal::findYPlotRangeForPHHisto(TH1F *histo, Float_t hitCut)
 {
-
+	histo->Draw();
 	Float_t max = 0;
 	Int_t startBin = histo->FindBin(hitCut);
 	//looking in area ch 0-- startbin for higehestBin
@@ -195,6 +198,7 @@ void TAnalysisOfPedestal::findYPlotRangeForPHHisto(TH1F *histo, Float_t hitCut)
 
 	//set Range of y Axis
 	histo->GetYaxis()->SetRangeUser(0,max);
+	return max;
 }
 
 /**
@@ -370,7 +374,7 @@ void TAnalysisOfPedestal::initialiseHistos()
 
 
 		histoName.str("");
-		histoName << "hPulseHeight_BiggestAdjacentInSNR" << TPlaneProperties::getStringForDetector(det);
+		histoName << "hPulseHeight_BiggestAdjacentInSigma_" << TPlaneProperties::getStringForDetector(det);
 		hBiggestAdjacentSignalInSigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
 		histoName << "_CMNcorrected";
 		hBiggestAdjacentSignalInSigmaCMN[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
@@ -418,7 +422,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 	//hBiggestSignalInSigma
 	for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++) {
 		TString histoName =TString::Format("hPulseHeight_BiggestSignalInSigma%s",TPlaneProperties::getStringForDetector(det).c_str()) ;
-		double cut = settings->getClusterSeedFactor(det);
+		double cut = settings->getClusterSeedFactor(det,0);
 		cout << "saving histogram " << histoName<< ".. with CUT on " <<cut<< endl;
 		Float_t max=0;
 		Float_t mean=0;
@@ -449,18 +453,18 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		this->hBiggestSignalInSigma[det]->GetYaxis()->SetTitle("number of entries #");
 		this->hBiggestSignalInSigmaCMN[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
 		this->hBiggestSignalInSigmaCMN[det]->GetYaxis()->SetTitle("number of entries #");
-		histoName =TString::Format("hPulseHeight_BiggestHitChannelInSigma%s_2D",TPlaneProperties::getStringForDetector(det).c_str());
+		histoName =TString::Format("hPulseHeight_BiggestSignalChannelInSigma%s_2D",TPlaneProperties::getStringForDetector(det).c_str());
 		Int_t nChannels = TPlaneProperties::getNChannels(det);
 		TH2F* hBiggestSignalInSigma2D = new TH2F(histoName,histoName,1000,0,500,nChannels,0,nChannels-1);
 
-		histoName =TString::Format("hPulseHeight_BiggestHitChannelInSigma%s_CMNcorrected_2D",TPlaneProperties::getStringForDetector(det).c_str()) ;
+		histoName =TString::Format("hPulseHeight_BiggestSignalChannelInSigma%s_CMNcorrected_2D",TPlaneProperties::getStringForDetector(det).c_str()) ;
 		TH2F* hBiggestSignalInSigma2DCMN = new TH2F(histoName,histoName,1000,0,500,nChannels,0,nChannels-1);
 		//set Axis Titles
-		hBiggestSignalInSigma2D->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
+		hBiggestSignalInSigma2D->GetXaxis()->SetTitle("Biggest Signal PH in units of sigma");
 		hBiggestSignalInSigma2D->GetYaxis()->SetTitle("Channel No of Biggest Hit");
 		hBiggestSignalInSigma2D->GetZaxis()->SetTitle("number of entries #");
 
-		hBiggestSignalInSigma2DCMN->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
+		hBiggestSignalInSigma2DCMN->GetXaxis()->SetTitle("Biggest Signal PH in units of sigma");
 		hBiggestSignalInSigma2DCMN->GetYaxis()->SetTitle("Channel No of Biggest Hit");
 		hBiggestSignalInSigma2DCMN->GetZaxis()->SetTitle("number of entries #");
 		for(UInt_t i=0;i<vecBiggestSignalInSigma[det].size();i++){
@@ -475,8 +479,8 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 			this->hBiggestSignalInSigmaCMN[det]->Fill(signal);
 			hBiggestSignalInSigma2DCMN->Fill(signal,channel);
 		}
-		findYPlotRangeForPHHisto(hBiggestSignalInSigma[det],settings->getClusterSeedFactor(det));
-		findYPlotRangeForPHHisto(hBiggestSignalInSigmaCMN[det],settings->getClusterSeedFactor(det));
+		Float_t yMax = findYPlotRangeForPHHisto(hBiggestSignalInSigma[det],settings->getClusterSeedFactor(det,0));
+		Float_t yMaxCdt = findYPlotRangeForPHHisto(hBiggestSignalInSigmaCMN[det],settings->getClusterSeedFactor(det,0));
 		//set X Axis Range to the same for all
 		Float_t xmin = hBiggestSignalInSigma[det]->GetXaxis()->GetXmin();
 		Float_t xmax = hBiggestSignalInSigma[det]->GetXaxis()->GetXmax();
@@ -494,22 +498,40 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		TString canvasName = TString::Format("%s",this->hBiggestSignalInSigma[det]->GetTitle());
 		TCanvas *c1 = new TCanvas(canvasName,canvasName);
 		c1->cd();
+		yMax = TMath::Max(yMax,yMaxCdt);
+		hBiggestSignalInSigma[det]->GetYaxis()->SetRangeUser(0,yMax);
 		this->hBiggestSignalInSigma[det]->Draw();
-		if(TPlaneProperties::isDiamondDetector(det)){
-			this->hBiggestSignalInSigmaCMN[det]->SetLineColor(kBlue);
-			this->hBiggestSignalInSigmaCMN[det]->Draw("same");
-		//x1,y1,x2,y2
-			TLegend* leg = c1->BuildLegend(0.15,0.55,0.5,0.80);
-			leg->SetFillColor(kWhite);
-		}
+
 		double xCor[] = {cut,cut};
-		double yCor[] = {0,this->hBiggestSignalInSigma[det]->GetMaximum()*2};
+		double yCor[] = {0,this->hBiggestSignalInSigma[det]->GetBinContent(hBiggestSignalInSigma[det]->GetMaximumBin())*2};
 		TGraph* lineGraph = new TGraph(2,xCor,yCor);
 		lineGraph->SetLineColor(kRed);
 		lineGraph->SetLineWidth(2);
+		lineGraph->SetTitle("Seed Cut");
 		lineGraph->Draw("Lsame");
 		cout<<"save "<<c1->GetTitle()<<endl;
-		histSaver->SaveCanvas(c1);;
+		histSaver->SaveCanvas(c1);
+		if(TPlaneProperties::isDiamondDetector(det)){
+			TString canvasName1 = TString::Format("hPH_BiggestSignalInSigma_Compare_%s",TPlaneProperties::getStringForDetector(det).c_str());
+			TCanvas *c2 = new TCanvas(canvasName1,canvasName1);
+			c2->cd();
+			cout<<"\n\n*****\n1: "<<hBiggestSignalInSigma[det]<<"\t"<<hBiggestSignalInSigma[det]->GetTitle()<<endl;
+			this->hBiggestSignalInSigma[det]->Draw();
+			this->hBiggestSignalInSigmaCMN[det]->SetLineColor(kBlue);
+			hBiggestSignalInSigma[det]->GetYaxis()->SetRangeUser(0,yMax);
+			cout<<"2: "<<hBiggestSignalInSigmaCMN[det]<<"\t"<<hBiggestSignalInSigmaCMN[det]->GetTitle()<<endl;
+			this->hBiggestSignalInSigmaCMN[det]->Draw("same");
+			cout<<"3: "<<lineGraph<<"\t"<<lineGraph->GetTitle()<<endl;
+			lineGraph->Draw("Lsame");
+			//x1,y1,x2,y2
+			TLegend* leg = new TLegend(0.13,0.55,0.45,0.85);//c1->BuildLegend(0.13,0.55,0.45,0.85);
+			leg->AddEntry(hBiggestSignalInSigma[det],"normal");
+			leg->AddEntry(hBiggestSignalInSigmaCMN[det],"CMN corrected");
+			leg->SetFillColor(kWhite);
+			leg->Draw();
+			cout<<"save Canvas: "<<c2->GetTitle()<<endl;
+			histSaver->SaveCanvas(c2);
+		}
 		//        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
 		delete hBiggestSignalInSigma[det];
 		delete lineGraph;
@@ -519,12 +541,12 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 				cout<<" save NDiaDetecotAreas "<<i<<endl;
 				std::pair<Int_t, Int_t> area = settings->getDiaDetectorArea(i);
 				if(area.first<area.second){
-					TString name = TString::Format("hPulseHeight_BiggestHitInSigma_area_%d_ch%d-ch%d",i,area.first,area.second);
+					TString name = TString::Format("hPulseHeight_BiggestSignalInSigma%s_area_%d_ch%d-ch%d",TPlaneProperties::getStringForDetector(det).c_str(),i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
 					TH1F* hBiggestPHinSigma_SubArea = (TH1F*) hBiggestSignalInSigma2D->ProjectionX(name,area.first,area.second);
 					hBiggestPHinSigma_SubArea->SetTitle(name);
-					findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det));
-					name = TString::Format("hPulseHeight_BiggestHitInSigma_area%d_ch%d-ch%d_CMNcorrected",i,area.first,area.second);
+					findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
+					name = TString::Format("hPulseHeight_BiggestSignalInSigma_area%d_ch%d-ch%d_CMNcorrected",i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
 					TH1F* hBiggestPHInSigma_SubArea_CMNcorrected = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,area.first,area.second);
 					histSaver->CopyAxisRangesToHisto(hBiggestPHInSigma_SubArea_CMNcorrected,hBiggestPHinSigma_SubArea);
@@ -578,12 +600,34 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetXaxis()->SetTitle("Biggest Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetYaxis()->SetTitle("Biggest adjacent Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetZaxis()->SetTitle("number of entries #");
+					TH2F* hist = hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected;
+					Float_t zmax = 0;//hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetBinContent(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetMaximumBin());
+					for(Int_t i = 0; i<hist->GetXaxis()->GetNbins();i++)
+					for(Int_t j=0;j<hist->GetYaxis()->GetNbins();j++){
+						Float_t xPos = hist->GetXaxis()->GetBinCenter(i);
+						Float_t binContent = hist->GetBinContent(j,j);
+						if(xPos>5&&binContent>zmax)
+							zmax=binContent;
+					}
+					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetZaxis()->SetRangeUser(0,zmax*1.3);
 
 					hBiggestAndBiggestAdjacentSignal_in_SNR->GetXaxis()->SetTitle("Biggest Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR->GetYaxis()->SetTitle("Biggest adjacent Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR->GetZaxis()->SetTitle("number of entries #");
-					histSaver->SaveHistogram(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected);
-					histSaver->SaveHistogram(hBiggestAndBiggestAdjacentSignal_in_SNR);
+					zmax = hBiggestAndBiggestAdjacentSignal_in_SNR->GetBinContent(hBiggestAndBiggestAdjacentSignal_in_SNR->GetMaximumBin());
+					hist = hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected;
+					zmax = 0;//hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetBinContent(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetMaximumBin());
+					for(Int_t i = 0; i<hist->GetXaxis()->GetNbins();i++)
+						for(Int_t j=0;j<hist->GetYaxis()->GetNbins();j++){
+							Float_t xPos = hist->GetXaxis()->GetBinCenter(i);
+							Float_t binContent = hist->GetBinContent(j,j);
+							if(xPos>5&&binContent>zmax)
+								zmax=binContent;
+						}
+					hBiggestAndBiggestAdjacentSignal_in_SNR->GetZaxis()->SetRangeUser(0,zmax*1.3);
+
+					histSaver->SaveHistogramLogZ(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected);
+					histSaver->SaveHistogramLogZ(hBiggestAndBiggestAdjacentSignal_in_SNR);
 					delete hBiggestPHInSigma_SubArea_CMNcorrected;
 					delete hBiggestPHinSigma_SubArea;
 				}
@@ -596,7 +640,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 	//hBiggestAdjacentSignalInSigma
 	for(UInt_t det = 0; det< TPlaneProperties::getNDetectors();det++){
 
-		double cut = settings->getClusterHitFactor(det);
+		double cut = settings->getClusterHitFactor(det,0);
 		//		cout << "saving histogram " << this->histo_pulseheight_sigma_second[det]->GetName() << ".. with CUT on " <<cut<< endl;
 		TCanvas *c1 = new TCanvas(this->hBiggestAdjacentSignalInSigma[det]->GetTitle(),this->hBiggestAdjacentSignalInSigma[det]->GetTitle());
 		c1->cd();
@@ -605,7 +649,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		double yCor[] = {0,this->hBiggestAdjacentSignalInSigma[det]->GetMaximum()*2};
 		this->hBiggestAdjacentSignalInSigma[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
 		this->hBiggestAdjacentSignalInSigma[det]->GetYaxis()->SetTitle("number of entries #");
-		findYPlotRangeForPHHisto(hBiggestAdjacentSignalInSigma[det],settings->getClusterHitFactor(det));
+		findYPlotRangeForPHHisto(hBiggestAdjacentSignalInSigma[det],settings->getClusterHitFactor(det,0));
 		xMinAdjacent = 0;
 		xMaxAdjacent = hBiggestAdjacentSignalInSigma[det]->GetXaxis()->GetXmax();
 		yMaxAdjacent = hBiggestAdjacentSignalInSigma[det]->GetYaxis()->GetXmax();
@@ -615,7 +659,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		lineGraph->Draw("Lsame");
 		histSaver->SaveCanvas(c1);;
 		if(TPlaneProperties::isDiamondDetector(det)){
-			double cut = settings->getClusterHitFactor(det);
+			double cut = settings->getClusterHitFactor(det,0);
 			//		cout << "saving histogram " << this->histo_pulseheight_sigma_second[det]->GetName() << ".. with CUT on " <<cut<< endl;
 			TCanvas *c2 = new TCanvas(this->hBiggestAdjacentSignalInSigmaCMN[det]->GetTitle(),this->hBiggestAdjacentSignalInSigmaCMN[det]->GetTitle());
 			c2->cd();
@@ -929,7 +973,7 @@ void TAnalysisOfPedestal::updateMeanCalulation(){
 			////		  Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
 			//		  pedestalCMN-=cmNoise;
 			Float_t noiseCMN =  eventReader->getRawSignal(det,ch,true);
-			if(snr<settings->getClusterHitFactor(det)){
+			if(snr<settings->getClusterHitFactor(det,ch)){
 				pedestalMeanValue.at(det).at(ch) +=pedestal;
 				pedestalSigmaValue.at(det).at(ch) +=sigma;
 				nPedestalHits.at(det).at(ch)++;

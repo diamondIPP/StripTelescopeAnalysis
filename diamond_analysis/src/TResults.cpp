@@ -90,8 +90,8 @@ void TResults::openResults(TSettings *settings){
     cout<<"LAST UPDATE ON "<<oldResults->getLastUpdateDate().AsString()<<endl;
     this->inheritOldResults(*oldResults);
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
-      seedSigma.at(det)=settings->getClusterSeedFactor(det);
-      hitSigma.at(det)=settings->getClusterHitFactor(det);
+      seedSigma.at(det)=settings->getClusterSeedFactor(det,0);
+      hitSigma.at(det)=settings->getClusterHitFactor(det,0);
     }
 
   }

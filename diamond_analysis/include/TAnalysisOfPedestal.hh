@@ -54,7 +54,7 @@ private:
 	void createPedestalMeanHistos();
 	void saveHistos();
 	void savePHinSigmaHistos();
-	void findYPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
+	Float_t findYPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
 	void checkForDeadChannels();
 	void analyseForSeeds();
 	void getBiggestHit();

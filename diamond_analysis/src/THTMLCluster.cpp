@@ -29,8 +29,8 @@ void THTMLCluster::createTableOfCuts()
 	tablecontent.at(2).push_back("Hit");
 	for(UInt_t det =0;det <TPlaneProperties::getNDetectors();det++){
 		tablecontent.at(0).push_back(TPlaneProperties::getStringForDetector(det));
-		tablecontent.at(1).push_back(floatToString(settings->getClusterSeedFactor(det)));
-		tablecontent.at(2).push_back(floatToString(settings->getClusterHitFactor(det)));
+		tablecontent.at(1).push_back(floatToString(settings->getClusterSeedFactor(det,0)));
+		tablecontent.at(2).push_back(floatToString(settings->getClusterHitFactor(det,0)));
 	}
 	sectionContent<<"<br>"<<this->createTable(tablecontent)<<"<br><br>";
 	stringstream path;
@@ -117,24 +117,24 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	output2<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output2<<putImage(path.str(),name2.str());
 	}
 	output<<"\n<br\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output2<<putImage(path.str(),name2.str());
 	}
 	output<<"\n<br>\n\t";
 	output2<<"\n<br>\n\t";
 	stringstream name,name2;
-	name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond())<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond())<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
-	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond())<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond())<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
 	output<<putImage(path.str(),name.str());
 	output2<<putImage(path.str(),name2.str());
 	sectionContent<<output.str()<<"\n<br>\n";

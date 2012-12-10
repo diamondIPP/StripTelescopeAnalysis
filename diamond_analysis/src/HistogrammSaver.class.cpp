@@ -263,6 +263,20 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
 	f.Close();
 //	if(plots_canvas)delete plots_canvas;
 }
+
+void HistogrammSaver::SaveHistogramLogZ(TH2F* histo){
+	TString canvasName = "c_";
+	canvasName +=histo->GetName();
+	TCanvas *c1 = new TCanvas(canvasName,canvasName);
+	c1->cd();
+	c1->SetLogz();
+	TH2F* htemp = (TH2F*) histo->Clone();
+	htemp->Draw("colz");
+	this->SaveCanvas(c1);
+	delete htemp;
+	delete c1;
+}
+
 void HistogrammSaver::SaveHistogram(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
 	SaveHistogramPNG(histo);

@@ -87,8 +87,8 @@ public:
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
 	std::string getRunDescription() const {return runDescription;};
 	Float_t getPHinSigmaPlotFactor() const{return 0.8;}
-	Float_t getClusterSeedFactor(UInt_t det);
-	Float_t getClusterHitFactor(UInt_t det);
+	Float_t getClusterSeedFactor(UInt_t det,UInt_t ch);
+	Float_t getClusterHitFactor(UInt_t det,UInt_t ch);
 	Float_t getAlignment_chi2() const;
 	void setAlignment_chi2(Float_t alignment_chi2);
 	float getFix_dia_noise() const;

@@ -36,13 +36,13 @@ void THTMLPedestal::createTableOfCuts()
 	tablecontent2.at(2).push_back("Hit");
 	for(UInt_t det =0;det <TPlaneProperties::getNDetectors();det+=2){
 		tablecontent.at(0).push_back(TPlaneProperties::getStringForDetector(det));
-		tablecontent.at(1).push_back(floatToString(settings->getClusterSeedFactor(det)));
-		tablecontent.at(2).push_back(floatToString(settings->getClusterHitFactor(det)));
+		tablecontent.at(1).push_back(floatToString(settings->getClusterSeedFactor(det,0)));
+		tablecontent.at(2).push_back(floatToString(settings->getClusterHitFactor(det,0)));
 	}
 	for(UInt_t det =1;det <TPlaneProperties::getNDetectors();det+=2){
 		tablecontent2.at(0).push_back(TPlaneProperties::getStringForDetector(det));
-		tablecontent2.at(1).push_back(floatToString(settings->getClusterSeedFactor(det)));
-		tablecontent2.at(2).push_back(floatToString(settings->getClusterHitFactor(det)));
+		tablecontent2.at(1).push_back(floatToString(settings->getClusterSeedFactor(det,0)));
+		tablecontent2.at(2).push_back(floatToString(settings->getClusterHitFactor(det,0)));
 	}
 	sectionContent<<"<br><h4> X Coordinates</h4><br>"<<this->createTable(tablecontent)<<"<br><br>";
 	sectionContent<<"<br><h4> Y Coordinates</h4><br>"<<this->createTable(tablecontent2)<<"<br><br>";
