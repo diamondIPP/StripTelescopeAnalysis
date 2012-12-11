@@ -86,7 +86,7 @@ void TResults::openResults(TSettings *settings){
     }
     cout<<oldResults->IsZombie()<<endl;
 //    cout<<oldResults->IsA()->ClassName()<<endl;
-    oldResults->getLastUpdateDate().Print();
+    //oldResults->getLastUpdateDate().Print();
     cout<<"LAST UPDATE ON "<<oldResults->getLastUpdateDate().AsString()<<endl;
     this->inheritOldResults(*oldResults);
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
@@ -95,7 +95,7 @@ void TResults::openResults(TSettings *settings){
     }
 
   }
-  Print();
+//  Print();
 
 }
 
@@ -112,7 +112,7 @@ void TResults::saveResults(){
   file->Close();
 }
 
-void TResults::Print(){
+void TResults::	(){
   getLastUpdateDate().Print();
   cout<<getLastUpdateDate().AsString()<<endl;
   cout<<"det\tseed hit  noise"<<endl;

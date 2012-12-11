@@ -225,8 +225,10 @@ void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) 
 		for(binxMax=histo->GetNbinsX();binxMax>0;binxMax--)if(histo->GetBinContent(binxMax))break;
 		histo->GetXaxis()->SetRangeUser(histo->GetBinLowEdge(binxMin),histo->GetBinLowEdge(binxMax+1));
 	}
+	//create PNG
 	if (fitGauss) SaveHistogramFitGaussPNG(histo);
 	else SaveHistogramPNG(histo);
+	//create ROOT
 	SaveHistogramROOT(histo);
 }
 void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosity){
@@ -440,13 +442,14 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 
 void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	if(!htemp)return;
-	if(htemp->GetEntries()==0)return;
+//	if(htemp->GetEntries()==0)return;
 
 	ostringstream plots_filename;
 	ostringstream histo_filename;
-	plots_filename << plots_path << htemp->GetName() << ".root";
+	plots_filename << plots_path<<"/" << htemp->GetName() << ".root";
 	histo_filename << plots_path << "histograms.root";
-	TCanvas *plots_canvas =  new TCanvas(TString::Format("cRoot_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
+	TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
+	plots_canvas->cd();
 	TH1* histo = (TH1*)htemp->Clone();
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptRoot_%s",htemp->GetName()));
@@ -456,12 +459,14 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	histo->Draw();
 	pt2->Draw();
 	plots_canvas->Draw();
+	histo->Draw();
 
 	//write to own root File
 	plots_canvas->Write(plots_filename.str().c_str());
-	TCanvas *plots_canvas2 = (TCanvas*) plots_canvas->Clone(TString::Format("ccRoot_%s",htemp->GetName()));
-	//add to histograms.root
+	plots_canvas->Write(plots_filename.str().c_str());
 	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+	TCanvas *plots_canvas2 = (TCanvas*) plots_canvas->Clone(TString::Format("cc_%s",htemp->GetName()));
+	//add to histograms.root
 	f->cd();
 	plots_canvas2->Write();
 	f->Close();
