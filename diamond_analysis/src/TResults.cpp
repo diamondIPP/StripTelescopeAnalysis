@@ -112,7 +112,7 @@ void TResults::saveResults(){
   file->Close();
 }
 
-void TResults::	(){
+void TResults::Print(){
   getLastUpdateDate().Print();
   cout<<getLastUpdateDate().AsString()<<endl;
   cout<<"det\tseed hit  noise"<<endl;
