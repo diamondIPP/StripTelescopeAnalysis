@@ -191,6 +191,12 @@ std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > c
 }
 
 
+std::string THTMLGenerator::putImage(std::string path, TString name, std::string type,int percent)
+{
+	std::string stringname;
+	stringname.append(name);
+	return putImage(path,stringname,type,percent);
+}
 std::string THTMLGenerator::putImage(std::string path, std::string name, std::string type,int percent)
 {
 	stringstream imageLink;
