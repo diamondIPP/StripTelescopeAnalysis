@@ -310,6 +310,14 @@ Double_t TDetectorAlignment::getXResolution(UInt_t plane)
 	return 2;
 }
 
+Double_t TDetectorAlignment::getZResolution(UInt_t plane)
+{
+	if(plane<6)
+    return 0;//zResolution[plane];
+	return 2;
+}
+
+
 void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
 {
 	printf("Set X-Resolution of Plane %d to %2.6f\n",plane,xres);

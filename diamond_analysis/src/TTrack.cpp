@@ -233,6 +233,7 @@ Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
 
 TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,TCluster::calculationMode_t mode,bool bPrint)
 {
+	Float_t zPosSubjectPlane = getZPosition(subjectPlane);
 	linFitX->ClearPoints();
 	linFitY->ClearPoints();
 	if(event==NULL){
@@ -257,7 +258,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	for(UInt_t pl=0;pl<vecRefPlanes.size();pl++){
 		UInt_t plane=vecRefPlanes.at(pl);
 		zPosVec.clear();
-		zPosVec.push_back(alignment->GetZOffset(plane));
+		zPosVec.push_back(alignment->GetZOffset(plane)-zPosSubjectPlane);
 		Float_t xPos = (Double_t)getXPosition(plane,mode);
 		Float_t yPos = (Double_t)getYPosition(plane,mode);
 		if((xPos==-1||yPos==-1)&&verbosity){
@@ -277,8 +278,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	linFitY->Eval();
 	linFitX->Chisquare();
 	linFitY->Chisquare();
-	Float_t zPos = alignment->GetZOffset(subjectPlane);
-	Float_t zSigma = 0; //todo
+	Float_t zPos = zPosSubjectPlane;//alignment->GetZOffset(subjectPlane);
+	Float_t zSigma = alignment->getZResolution(subjectPlane); ; //todo
 	Float_t mx = linFitX->GetParameter(1);
 	Float_t sigma_mx = linFitX->GetParError(1);
 	Float_t bx = linFitX->GetParameter(0);
