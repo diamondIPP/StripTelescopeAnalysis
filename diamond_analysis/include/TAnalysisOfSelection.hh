@@ -49,6 +49,7 @@ private:
 	TSystem *sys;
 	UInt_t nEvent;
 	TH2F* histoLandauDistribution;
+	TH2F* histoLandauDistribution2D;
 	TH1F* hClusterPosition;
 	TH1F* h3dDiamond;
 	TH1F* hNoDiamond;
