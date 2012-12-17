@@ -350,9 +350,14 @@ void TAnalysisOfSelection::analyseEvent()
 		hClusterPosition->Fill(pos);
 		if(clustSize<=2){
 			histoLandauDistribution2D_unmasked->Fill(charge,pos);
-			if(!settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false)){
+			bool isMaskedCluster = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
+//			cout<<"-"<<nEvent<<" "<<pos<<" "<<isMaskedCluster<<endl;
+			if(!isMaskedCluster){
+//				cout<<nEvent<<" "<<pos<<" "<<isMaskedCluster<<endl;
 				histoLandauDistribution2D->Fill(charge,pos);
 			}
+			else
+				cout<<nEvent<<" "<<pos<<" "<<isMaskedCluster<<" TRASH"<<endl;
 		}
 	}
 }

@@ -1710,16 +1710,15 @@ bool TSettings::isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentC
 	for(UInt_t i=0;i<cluster.getClusterSize()&&!isMasked;i++){
 		int channelNo = cluster.getChannel(i);
 		bool isScreened = this->isDet_channel_screened(det,channelNo);
-	//	Float_t SNR = cluster.getSNR(i,false);
-	//	cout<<"\t"<<det<<" "<<cluster.getClusterSize()<<" "<<i<<" "<<channelNo<<":"<<isScreened<<" "<<SNR<<" ";
-		if (!checkAdjacentChannels&&!cluster.isHit(i)){
-//			cout<<" not used"<<endl;
-			continue;
-		}
-		else{
-//			cout<<endl;
+		bool isAdjacentToCluster = !cluster.isHit(i);
+		if(checkAdjacentChannels)
 			isMasked = isMasked || isScreened;
-		}
+		else if (isAdjacentToCluster){
+				continue;
+			}
+			else{
+				isMasked = isMasked || isScreened;
+			}
 	}
 //	cout<<"==>"<<isMasked<<endl;
 	return isMasked;
