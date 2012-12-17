@@ -64,6 +64,8 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution2D->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
+	histoLandauDistribution2D_unmasked = (TH1F*)histoLandauDistribution2D->Clone("histoLandauDistribution2D_Clustersize_1_unmasked");
+	histoLandauDistribution2D_unmasked->SetTitle(histoLandauDistribution2D_unmasked->GetName());
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
@@ -82,6 +84,7 @@ void TAnalysisOfSelection::saveHistos()
 	LandauGaussFit landauGauss;
 	histSaver->SaveHistogram(histoLandauDistribution);
 	histSaver->SaveHistogram(histoLandauDistribution2D);
+	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
 	for(UInt_t area=0;area<settings->getNDiaDetectorAreas();area++){
 		Int_t binLow = settings->getDiaDetectorArea(area).first;
 		Int_t binHigh =  settings->getDiaDetectorArea(area).second;
@@ -345,8 +348,12 @@ void TAnalysisOfSelection::analyseEvent()
 		histoLandauDistribution->Fill(charge,clustSize);
 		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
 		hClusterPosition->Fill(pos);
-		if(clustSize<=2)
-			histoLandauDistribution2D->Fill(charge,pos);
+		if(clustSize<=2){
+			histoLandauDistribution2D_unmasked->Fill(charge,pos);
+			if(settings->isMaskedCluster(TPlaneProperties::getDiamondPlane(),cluster)){
+				histoLandauDistribution2D->Fill(charge,pos);
+			}
+		}
 	}
 }
 

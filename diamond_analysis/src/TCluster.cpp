@@ -142,7 +142,7 @@ TCluster & TCluster::operator =(const TCluster & src)
 }
 
 /**
- * checks if all deques with the data of the clsuter do have the same size
+ * checks if all deques with the data of the cluster do have the same size
  * @return the size of the cluster if all sizes are the same, else 0
  */
 UInt_t TCluster::checkClusterForSize() const{
@@ -497,12 +497,22 @@ void TCluster::checkForLumpyCluster(){
 	if(verbosity>10)cout<<"isLumpyCluster: "<<isLumpy<<endl;
 }
 
+/**
+ * checks if an entry in the cluster is above the seed SNR
+ * @param cl
+ * @return
+ */
 bool TCluster::isSeed(UInt_t cl){
 	if(cl<checkClusterForSize())
 		return (getSNR(cl)>this->seedSigma);
 	return false;
 }
-
+/**
+ * checks if an entry in the cluster is above the hit SNR
+ * Could be either a hit or a seed
+ * @param cl
+ * @return
+ */
 bool TCluster::isHit(UInt_t cl){
 	if(cl<checkClusterForSize())
 		return (getSNR(cl)>this->hitSigma);

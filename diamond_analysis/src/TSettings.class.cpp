@@ -1692,17 +1692,27 @@ Int_t TSettings::getVerbosity(){
 	return this->verbosity;
 }
 
-bool TSettings::isInDiaDetectorArea(UInt_t ch,UInt_t area){
+bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
 	if(area<getNDiaDetectorAreas())
 		return getDiaDetectorArea(area).first<=ch&&ch<=getDiaDetectorArea(area).second;
 	else return false;
 }
 
-int TSettings::getDiaDetectorAreaOfChannel(UInt_t ch){
-	for(UInt_t area =0;area< getNDiaDetectorAreas();area++)
+int TSettings::getDiaDetectorAreaOfChannel(Int_t ch){
+	for(Int_t area =0;area< getNDiaDetectorAreas();area++)
 		if(isInDiaDetectorArea(ch,area))
 			return area;
 	return -1;
+}
+
+bool TSettings::isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels){
+	bool isMasked = false;
+	for(UInt_t i=0;i<cluster.getClusterSize()&&!isMasked;i++)
+		if (!checkAdjacentChannels&&cluster.isHit(i))
+			continue;
+		else
+			isMasked = isMasked || this->isDet_channel_screened(det,cluster.getChannel(i));
+	return isMasked;
 }
 
 

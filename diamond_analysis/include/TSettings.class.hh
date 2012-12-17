@@ -20,6 +20,7 @@
 #include "ChannelScreen.hh"
 #include "TChannelMapping.hh"
 #include "TObject.h"
+#include "TCluster.hh"
 #include "TPlaneProperties.hh"
 //#include "TSettings.class.hh"
 #include "TSystem.h"
@@ -248,8 +249,9 @@ public:
 //	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n){if(n<getNDiaDetectorAreas()&&n>=0)return vecDiaDetectorAreasInChannel[n]; return std::make_pair((Int_t)-1,(Int_t)-1);}
-	bool isInDiaDetectorArea(UInt_t ch,UInt_t area);
-	int getDiaDetectorAreaOfChannel(UInt_t ch);
+	bool isInDiaDetectorArea(Int_t ch,Int_t area);
+	int getDiaDetectorAreaOfChannel(Int_t ch);
+	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
 protected:
     float store_threshold;
 private:
