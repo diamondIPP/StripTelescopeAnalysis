@@ -64,9 +64,10 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution2D->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
-	histoLandauDistribution2D_unmasked = (TH2F*)histoLandauDistribution2D->Clone("histoLandauDistribution2D_Clustersize_1_unmasked");
-	histoLandauDistribution2D_unmasked->SetName("histoLandauDistribution2D_Clustersize_1_unmasked");
-	histoLandauDistribution2D_unmasked->SetTitle(histoLandauDistribution2D_unmasked->GetName());
+	histoLandauDistribution2D_unmasked = new TH2F("histoLandauDistribution2D_Clustersize_1-2_unmasked","histoLandauDistribution2D_Clustersize_1-2_unmasked",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2D_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
+	histoLandauDistribution2D_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
+	histoLandauDistribution2D_unmasked->GetZaxis()->SetTitle("number of entries");
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
@@ -84,9 +85,9 @@ void TAnalysisOfSelection::saveHistos()
 //	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
 	LandauGaussFit landauGauss;
 	histSaver->SaveHistogram(histoLandauDistribution);
+	cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
 	histSaver->SaveHistogram(histoLandauDistribution2D);
 	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
-	cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
 	for(Int_t area=0;area<settings->getNDiaDetectorAreas();area++){
 		Int_t binLow = settings->getDiaDetectorArea(area).first;
 		Int_t binHigh =  settings->getDiaDetectorArea(area).second;
@@ -276,6 +277,7 @@ void TAnalysisOfSelection::saveHistos()
 	delete histoClusSize;
 	delete histoLandauDistribution;
 	delete histoLandauDistribution2D;
+	delete histoLandauDistribution2D_unmasked;
 	delete mg;
 	delete c1;
 
