@@ -64,7 +64,7 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution2D->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
-	histoLandauDistribution2D_unmasked = (TH1F*)histoLandauDistribution2D->Clone("histoLandauDistribution2D_Clustersize_1_unmasked");
+	histoLandauDistribution2D_unmasked = (TH2F*)histoLandauDistribution2D->Clone("histoLandauDistribution2D_Clustersize_1_unmasked");
 	histoLandauDistribution2D_unmasked->SetTitle(histoLandauDistribution2D_unmasked->GetName());
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
@@ -350,8 +350,8 @@ void TAnalysisOfSelection::analyseEvent()
 		hClusterPosition->Fill(pos);
 		if(clustSize<=2){
 			histoLandauDistribution2D_unmasked->Fill(charge,pos);
-			if(settings->isMaskedCluster(TPlaneProperties::getDiamondPlane(),cluster)){
-				histoLandauDistribution2D->Fill(charge,pos);
+			if(!settings->isMaskedCluster(TPlaneProperties::getDiamondPlane(),cluster)){
+				histoLandauDistribution2D->Fill(charge,pos,false);
 			}
 		}
 	}

@@ -1081,7 +1081,7 @@ void TSettings::setZoomDiamondPlots(Int_t zoomDiamondPlots)
 
 bool TSettings::isDet_channel_screened(UInt_t det, UInt_t ch)
 {
-	if(det<9&&ch<256)
+	if(det<TPlaneProperties::getNDetectors()&&ch<TPlaneProperties::getNChannels(det))
 		return this->Det_channel_screen[det].isScreened(ch);
 	else
 		return true;
@@ -1707,11 +1707,12 @@ int TSettings::getDiaDetectorAreaOfChannel(Int_t ch){
 
 bool TSettings::isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels){
 	bool isMasked = false;
-	for(UInt_t i=0;i<cluster.getClusterSize()&&!isMasked;i++)
-		if (!checkAdjacentChannels&&cluster.isHit(i))
+	for(UInt_t i=0;i<cluster.getClusterSize()&&!isMasked;i++){
+		if (!checkAdjacentChannels&&!cluster.isHit(i))
 			continue;
 		else
 			isMasked = isMasked || this->isDet_channel_screened(det,cluster.getChannel(i));
+	}
 	return isMasked;
 }
 
