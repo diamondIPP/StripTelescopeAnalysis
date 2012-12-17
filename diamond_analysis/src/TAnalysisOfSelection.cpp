@@ -65,6 +65,7 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
 	histoLandauDistribution2D_unmasked = (TH2F*)histoLandauDistribution2D->Clone("histoLandauDistribution2D_Clustersize_1_unmasked");
+	histoLandauDistribution2D_unmasked->SetName("histoLandauDistribution2D_Clustersize_1_unmasked");
 	histoLandauDistribution2D_unmasked->SetTitle(histoLandauDistribution2D_unmasked->GetName());
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
@@ -85,7 +86,8 @@ void TAnalysisOfSelection::saveHistos()
 	histSaver->SaveHistogram(histoLandauDistribution);
 	histSaver->SaveHistogram(histoLandauDistribution2D);
 	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
-	for(UInt_t area=0;area<settings->getNDiaDetectorAreas();area++){
+	cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
+	for(Int_t area=0;area<settings->getNDiaDetectorAreas();area++){
 		Int_t binLow = settings->getDiaDetectorArea(area).first;
 		Int_t binHigh =  settings->getDiaDetectorArea(area).second;
 		TString name = TString::Format("hChargeOfCluster_ClusterSize_1-2_area_%d_ch_%d-%d",area,binLow,binHigh);
@@ -351,13 +353,9 @@ void TAnalysisOfSelection::analyseEvent()
 		if(clustSize<=2){
 			histoLandauDistribution2D_unmasked->Fill(charge,pos);
 			bool isMaskedCluster = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
-//			cout<<"-"<<nEvent<<" "<<pos<<" "<<isMaskedCluster<<endl;
 			if(!isMaskedCluster){
-//				cout<<nEvent<<" "<<pos<<" "<<isMaskedCluster<<endl;
 				histoLandauDistribution2D->Fill(charge,pos);
 			}
-			else
-				cout<<nEvent<<" "<<pos<<" "<<isMaskedCluster<<" TRASH"<<endl;
 		}
 	}
 }
