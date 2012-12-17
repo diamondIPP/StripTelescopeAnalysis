@@ -350,8 +350,8 @@ void TAnalysisOfSelection::analyseEvent()
 		hClusterPosition->Fill(pos);
 		if(clustSize<=2){
 			histoLandauDistribution2D_unmasked->Fill(charge,pos);
-			if(!settings->isMaskedCluster(TPlaneProperties::getDiamondPlane(),cluster)){
-				histoLandauDistribution2D->Fill(charge,pos,false);
+			if(!settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false)){
+				histoLandauDistribution2D->Fill(charge,pos);
 			}
 		}
 	}

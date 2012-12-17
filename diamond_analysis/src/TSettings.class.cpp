@@ -1708,11 +1708,20 @@ int TSettings::getDiaDetectorAreaOfChannel(Int_t ch){
 bool TSettings::isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels){
 	bool isMasked = false;
 	for(UInt_t i=0;i<cluster.getClusterSize()&&!isMasked;i++){
-		if (!checkAdjacentChannels&&!cluster.isHit(i))
+		int channelNo = cluster.getChannel(i);
+		bool isScreened = this->isDet_channel_screened(det,channelNo);
+	//	Float_t SNR = cluster.getSNR(i,false);
+	//	cout<<"\t"<<det<<" "<<cluster.getClusterSize()<<" "<<i<<" "<<channelNo<<":"<<isScreened<<" "<<SNR<<" ";
+		if (!checkAdjacentChannels&&!cluster.isHit(i)){
+//			cout<<" not used"<<endl;
 			continue;
-		else
-			isMasked = isMasked || this->isDet_channel_screened(det,cluster.getChannel(i));
+		}
+		else{
+//			cout<<endl;
+			isMasked = isMasked || isScreened;
+		}
 	}
+//	cout<<"==>"<<isMasked<<endl;
 	return isMasked;
 }
 
