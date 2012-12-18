@@ -79,7 +79,7 @@ public:
 	void SetDuckStyle();
 	void SaveStringToFile(std::string name,std::string data);
 	void SetRange(Float_t min,Float_t max);
-	static void OptimizeXRange(TH1F* histo);
+	static std::pair<Float_t, Float_t> OptimizeXRange(TH1F* histo);
 	static void OptimizeXRange(TH2F* histo);
 	static void OptimizeYRange(TH2F* histo);
 	static void OptimizeXYRange(TH2F* histo);

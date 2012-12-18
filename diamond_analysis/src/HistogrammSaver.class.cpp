@@ -893,7 +893,7 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 	return histo;
 }
 
-void HistogrammSaver::OptimizeXRange(TH1F* histo){
+std::pair<Float_t, Float_t> HistogrammSaver::OptimizeXRange(TH1F* histo){
 	histo->Draw();
 	Float_t xmax = histo->GetXaxis()->GetXmax();
 	Int_t maxBin = 0;
@@ -909,14 +909,15 @@ void HistogrammSaver::OptimizeXRange(TH1F* histo){
 	Float_t xmin = histo->GetXaxis()->GetBinCenter(minBin);
 	histo->GetXaxis()->SetRangeUser(xmin,xmax);
 	histo->Draw();
+	return std::make_pair(xmin,xmax);
 }
 
 void HistogrammSaver::OptimizeXRange(TH2F* histo){
 	histo->Draw();
 	TH1F* htemp = (TH1F*)histo->ProjectionX("htemp");
-	HistogrammSaver::OptimizeXRange(htemp);
-	Float_t xmin = htemp->GetXaxis()->GetXmin();
-	Float_t xmax = htemp->GetXaxis()->GetXmax();
+	std::pair<Float_t,Float_t> range = HistogrammSaver::OptimizeXRange(htemp);
+	Float_t xmin = range.first;
+	Float_t xmax = range.second;
 	delete htemp;
 	histo->GetXaxis()->SetRangeUser(xmin,xmax);
 }
@@ -925,9 +926,9 @@ void HistogrammSaver::OptimizeXRange(TH2F* histo){
 void HistogrammSaver::OptimizeYRange(TH2F* histo){
 	histo->Draw();
 	TH1F* htemp = (TH1F*)histo->ProjectionY("htemp");
-	HistogrammSaver::OptimizeXRange(htemp);
-	Float_t xmin = htemp->GetXaxis()->GetXmin();
-	Float_t xmax = htemp->GetXaxis()->GetXmax();
+	std::pair<Float_t,Float_t> range = HistogrammSaver::OptimizeXRange(htemp);
+	Float_t xmin = range.first;
+	Float_t xmax = range.second;
 	delete htemp;
 	histo->GetYaxis()->SetRangeUser(xmin,xmax);
 }
