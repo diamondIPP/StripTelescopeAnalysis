@@ -79,6 +79,11 @@ public:
 	void SetDuckStyle();
 	void SaveStringToFile(std::string name,std::string data);
 	void SetRange(Float_t min,Float_t max);
+	static void OptimizeXRange(TH1F* histo);
+	static void OptimizeXRange(TH2F* histo);
+	static void OptimizeYRange(TH2F* histo);
+	static void OptimizeXYRange(TH2F* histo);
+
 
 	static TH2F* CreateScatterHisto(std::string name,std::vector<Float_t> posX, std::vector<Float_t> posY,UInt_t nBins=512);
 	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos);

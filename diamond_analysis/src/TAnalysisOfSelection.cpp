@@ -84,6 +84,8 @@ void TAnalysisOfSelection::saveHistos()
 {
 //	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
 	LandauGaussFit landauGauss;
+	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
+	histSaver->OptimizeXYRange(histoLandauDistribution2D);
 	histSaver->SaveHistogram(histoLandauDistribution);
 	cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
 	histSaver->SaveHistogram(histoLandauDistribution2D);
