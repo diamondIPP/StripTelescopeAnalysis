@@ -898,11 +898,11 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 	Int_t i=0;
 	for( i=0;i<histo->GetNbinsX()&&histo->GetBinContent(i)==0;i++)
 		minBin=i;
-	for(true;i<histo->GetNbinsX();i++)
+	for(i=0;i<histo->GetNbinsX();i++)
 		if(histo->GetBinContent(i)>0)
 			maxBin = i;
-	if(xmax>histo->GetXaxis()->GetBinUpEdge(maxBin))
-		histo->GetXaxis()->SetRangeUser(histo->GetXaxis()->GetBinLowEdge(minBin),histo->GetXaxis()->GetBinUpEdge(maxBin));
+	if(xmax>histo->GetXaxis()->GetBinCenter(maxBin))
+		histo->GetXaxis()->SetRangeUser(histo->GetXaxis()->GetBinCenter(minBin),histo->GetXaxis()->GetBinCenter(maxBin));
 }
 
  void HistogrammSaver::OptimizeXRange(TH2F* histo){
