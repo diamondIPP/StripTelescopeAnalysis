@@ -484,6 +484,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	plots_canvas->Clear();
 	plots_canvas->cd();
 	TH2F* htemp = (TH2F*)histo->Clone();
+	HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));
@@ -508,6 +509,7 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 	if(htemp==0)
 		return;
 	htemp->Draw();
+	HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
@@ -910,7 +912,6 @@ void HistogrammSaver::OptimizeXRange(TH1F* histo){
 }
 
 void HistogrammSaver::OptimizeXRange(TH2F* histo){
-
 	histo->Draw();
 	TH1F* htemp = (TH1F*)histo->ProjectionX("htemp");
 	HistogrammSaver::OptimizeXRange(htemp);
