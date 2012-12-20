@@ -905,8 +905,8 @@ std::pair<Float_t, Float_t> HistogrammSaver::OptimizeXRange(TH1F* histo){
 		if(histo->GetBinContent(i)>0)
 			maxBin = i;
 	if(xmax>histo->GetXaxis()->GetBinCenter(maxBin))
-		xmax = histo->GetXaxis()->GetBinCenter(maxBin);
-	Float_t xmin = histo->GetXaxis()->GetBinCenter(minBin);
+		xmax = histo->GetXaxis()->GetBinCenter(maxBin+1);
+	Float_t xmin = histo->GetXaxis()->GetBinCenter(minBin-1);
 	histo->GetXaxis()->SetRangeUser(xmin,xmax);
 	histo->Draw();
 	return std::make_pair(xmin,xmax);
