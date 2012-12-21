@@ -97,8 +97,13 @@ void TAnalysisOfSelection::saveHistos()
 		TH2F* histoLandauDistribution2Darea = (TH2F*)histoLandauDistribution2D->Clone(name);
 		histoLandauDistribution2Darea->GetYaxis()->SetRangeUser(binLow-1,binHigh+1);
 		histSaver->SaveHistogram(histoLandauDistribution2Darea);
-		binLow = histoLandauDistribution2D->GetYaxis()->FindBin(binLow);
-		binHigh = histoLandauDistribution2D->GetYaxis()->FindBin(binHigh);
+		TString name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_unmasked_%d_ch_%d-%d",area,binLow,binHigh);
+		TH2F* histoLandauDistribution2DareaUnmasked = (TH2F*)histoLandauDistribution2D_unmasked->Clone(name);
+		histoLandauDistribution2DareaUnmasked->GetYaxis()->SetRangeUser(binLow-1,binHigh+1);
+		binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(binLow);
+		binHigh = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(binHigh);
+		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmasked);
+		delete histoLandauDistribution2DareaUnmasked;
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,binLow,binHigh);
 		TH1F* hProjection = (TH1F*)histoLandauDistribution2D->ProjectionX(name,binLow,binHigh);
 		hProjection->SetTitle(name);
