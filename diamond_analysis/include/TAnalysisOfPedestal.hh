@@ -40,6 +40,7 @@
 
 using namespace std;
 
+#define N_DETECTORS 9
 class TAnalysisOfPedestal {
 public:
 	TAnalysisOfPedestal(TSettings* settings);
@@ -47,6 +48,7 @@ public:
 	void setResults(TResults* results){this->res=results;};
 	void	doAnalysis(UInt_t nEvents=0);
 private:
+	void analyseEvent();
 	TResults *res;
 	void updateMeanCalulation();
 	void createPedestalMeanHistos();
@@ -77,13 +79,13 @@ private:
     UInt_t nEvent;
     int seedSigma;
     int hitSigma;
-    TH1F *histo_pulseheight_sigma[9];
-	TH1F *histo_pulseheight_sigma_second[9];
+    TH1F *hBiggestSignalInSigma[9];
+	TH1F *hBiggestAdjacentSignalInSigma[9];
 	TH1F *histo_pulseheight_sigma125[9];
-	TH1F *histo_second_biggest_hit_direction[9];
+	TH1F *hHitOrderMap[9];
 	TH1F *histo_pulseheight_sigma_second_left[9];
 	TH1F *histo_pulseheight_sigma_second_right[9];
-	TH1F *histo_biggest_hit_map[9];
+	TH1F *hBiggestHitChannelMap[9];
 	TH1F *histo_pulseheight_left_sigma[9];
 	TH1F *histo_pulseheight_left_sigma_second[9];
 	TH1F *histo_pulseheight_right_sigma[9];
@@ -97,11 +99,17 @@ private:
 	std::vector< std::vector<UInt_t> > nPedestalHits;
 	std::vector< Float_t > vecAvrgPed;
 	std::vector< Float_t > vecAvrgPedCMN;
-  std::vector< Float_t > vecAvrgSigma;
-  std::vector< Float_t > vecAvrgSigmaCMN;
+	std::vector< Float_t > vecAvrgSigma;
+	std::vector< Float_t > vecAvrgSigmaCMN;
 	std::vector< Float_t > vecCMNoise;
 	std::vector< Float_t > vecEventNo;
 
+	std::vector<Float_t>vecSaturatedChannels[N_DETECTORS];
+	std::vector<Float_t>vecBiggestSignalInSigma[N_DETECTORS];
+	std::vector<Int_t> vecBiggestHitChannel[N_DETECTORS];
+	std::vector<Float_t>vecBiggestAdjacentSignal[N_DETECTORS];
+	std::vector<Int_t> vecBiggestAdjacentHitChannel[N_DETECTORS];
+	std::vector<Int_t> vecHitOrder[N_DETECTORS];
 	std::vector< std::vector<UInt_t> > diaRawADCvalues; //vector of vector of adc Value (ch, eventNo)
 	THTMLPedestal *htmlPedestal;
 };

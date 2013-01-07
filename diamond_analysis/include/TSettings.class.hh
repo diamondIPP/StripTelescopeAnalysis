@@ -257,6 +257,8 @@ public:
 	bool resetAlignment() const{return bResetAlignment;};
 	bool is3dDiamond(){return b3dDiamond;};
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
+	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
+	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n){if(n<getNDiaDetectorAreas()&&n>=0)return vecDiaDetectorAreasInChannel[n]; return std::make_pair((Int_t)-1,(Int_t)-1);}
 protected:
 	float store_threshold;
 private:
@@ -266,12 +268,15 @@ private:
 	void ParseStringArray(std::string value, std::vector<std::string> &vec);
 	void ParseFloatArray(std::string value, std::vector<float> & vec);
 	void ParseIntArray(std::string value, std::vector<int> & vec);
+    void ParseRegionArray(std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
+    std::pair< std::string,std::string > ParseRegionString(string value);
 private:
 	std::string path;
 	std::string fileName;
 	TSystem *sys;
 	TFile *settingsFile;
 private:
+<<<<<<< .working
 	bool b3dDiamond;
 	bool bResetAlignment;
 	Float_t alignmentPrecision_Offset;
@@ -315,6 +320,51 @@ private:
 	Float_t eta_hiq_slice_hi;
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
+=======
+    std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
+    bool bResetAlignment;
+    Float_t alignmentPrecision_Offset;
+    Float_t alignmentPrecision_Angle;
+    bool bDoAllAlignmentPlots;
+    UInt_t siliconAlignmentSteps;
+    UInt_t diamondAlignmentSteps;
+    Int_t nDiamonds;
+    Int_t SaveAllFilesSwitch;
+    Int_t ClosePlotsOnSave;
+    Int_t IndexProduceSwitch;
+    float fix_dia_noise;
+    Int_t Iter_Size;
+    Int_t Taylor_speed_throttle;
+    Int_t dia_input;
+    Float_t Si_Pedestal_Hit_Factor;
+    Float_t Di_Pedestal_Hit_Factor;
+    bool single_channel_analysis_enable;
+    Int_t single_channel_analysis_eventwindow;
+    std::vector<int> single_channel_analysis_channels;
+    Int_t DO_CMC;
+    Int_t CMN_cut;
+    Int_t CMN_corr_low;
+    Int_t CMN_corr_high;
+    Float_t Si_Cluster_Seed_Factor;
+    Float_t Si_Cluster_Hit_Factor;
+    Float_t Di_Cluster_Seed_Factor;
+    Float_t Di_Cluster_Hit_Factor;
+    Float_t si_avg_fidcut_xlow;
+    Float_t si_avg_fidcut_xhigh;
+    Float_t si_avg_fidcut_ylow;
+    Float_t si_avg_fidcut_yhigh;
+    Int_t pulse_height_num_bins;
+    Float_t pulse_height_si_max;
+    Float_t pulse_height_di_max;
+    Float_t snr_distribution_si_max;
+    Float_t snr_distribution_di_max;
+    Float_t eta_lowq_slice_low;
+    Float_t eta_lowq_slice_hi;
+    Float_t eta_hiq_slice_low;
+    Float_t eta_hiq_slice_hi;
+    Int_t etavsq_n_landau_slices;
+    Int_t snr_plots_enable;
+>>>>>>> .merge-rechts.r468
 
 	std::vector<Float_t> alignment_x_offsets;
 	std::vector<Float_t> alignment_y_offsets;
