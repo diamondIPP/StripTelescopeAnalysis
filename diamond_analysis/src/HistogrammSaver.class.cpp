@@ -225,8 +225,10 @@ void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) 
 		for(binxMax=histo->GetNbinsX();binxMax>0;binxMax--)if(histo->GetBinContent(binxMax))break;
 		histo->GetXaxis()->SetRangeUser(histo->GetBinLowEdge(binxMin),histo->GetBinLowEdge(binxMax+1));
 	}
+	//create PNG
 	if (fitGauss) SaveHistogramFitGaussPNG(histo);
 	else SaveHistogramPNG(histo);
+	//create ROOT
 	SaveHistogramROOT(histo);
 }
 void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosity){
@@ -263,6 +265,20 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
 	f.Close();
 //	if(plots_canvas)delete plots_canvas;
 }
+
+void HistogrammSaver::SaveHistogramLogZ(TH2F* histo){
+	TString canvasName = "c_";
+	canvasName +=histo->GetName();
+	TCanvas *c1 = new TCanvas(canvasName,canvasName);
+	c1->cd();
+	c1->SetLogz();
+	TH2F* htemp = (TH2F*) histo->Clone();
+	htemp->Draw("colz");
+	this->SaveCanvas(c1);
+	delete htemp;
+	delete c1;
+}
+
 void HistogrammSaver::SaveHistogram(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
 	SaveHistogramPNG(histo);
@@ -426,13 +442,14 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
 
 void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	if(!htemp)return;
-	if(htemp->GetEntries()==0)return;
+//	if(htemp->GetEntries()==0)return;
 
 	ostringstream plots_filename;
 	ostringstream histo_filename;
-	plots_filename << plots_path << htemp->GetName() << ".root";
+	plots_filename << plots_path<<"/" << htemp->GetName() << ".root";
 	histo_filename << plots_path << "histograms.root";
-	TCanvas *plots_canvas =  new TCanvas(TString::Format("cRoot_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
+	TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
+	plots_canvas->cd();
 	TH1* histo = (TH1*)htemp->Clone();
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptRoot_%s",htemp->GetName()));
@@ -442,12 +459,14 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 	histo->Draw();
 	pt2->Draw();
 	plots_canvas->Draw();
+	histo->Draw();
 
 	//write to own root File
 	plots_canvas->Write(plots_filename.str().c_str());
-	TCanvas *plots_canvas2 = (TCanvas*) plots_canvas->Clone(TString::Format("ccRoot_%s",htemp->GetName()));
-	//add to histograms.root
+	plots_canvas->Write(plots_filename.str().c_str());
 	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+	TCanvas *plots_canvas2 = (TCanvas*) plots_canvas->Clone(TString::Format("cc_%s",htemp->GetName()));
+	//add to histograms.root
 	f->cd();
 	plots_canvas2->Write();
 	f->Close();
@@ -465,6 +484,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	plots_canvas->Clear();
 	plots_canvas->cd();
 	TH2F* htemp = (TH2F*)histo->Clone();
+	HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));
@@ -489,6 +509,7 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 	if(htemp==0)
 		return;
 	htemp->Draw();
+	HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
@@ -653,7 +674,11 @@ void HistogrammSaver::SetDuckStyle() {
 }
 
 
-
+/**
+ * @brief creates a scatter histogram with posX_vs_posY as an input
+ *
+ * @return TH2F histogram
+ */
 TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
@@ -716,6 +741,24 @@ TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Floa
 	return hGraph;
 }
 
+void HistogrammSaver::CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto){
+	if(axisInputHisto&&changingHisto){
+		changingHisto->Draw("goff");
+		axisInputHisto->Draw("goff");
+		Float_t xmin = axisInputHisto->GetXaxis()->GetXmin();
+		Float_t xmax = axisInputHisto->GetXaxis()->GetXmax();
+		Float_t ymin = axisInputHisto->GetYaxis()->GetXmin();
+		Float_t ymax = axisInputHisto->GetYaxis()->GetXmax();
+		if(ymax==1)
+			ymax= axisInputHisto->GetBinContent(axisInputHisto->GetMaximumBin());
+		changingHisto->GetXaxis()->SetRangeUser(xmin,xmax);
+		changingHisto->GetYaxis()->SetRangeUser(ymin,ymax);
+		cout<<"copyAxisRangeToHisto: x: "<<xmin<<"-"<<xmax<<"\ty:"<<ymin<<"-"<<ymax<<endl;
+	}
+	else
+		cerr<<"HistogrammSaver::CopyAxisRangesToHisto::\tOne of the histogram is a pointer to Null: "<<changingHisto<<" "<<axisInputHisto<<endl;
+}
+
 TGraphErrors HistogrammSaver::CreateErrorGraph(std::string name, std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey)
 {
 	if(x.size()!=y.size()||x.size()!=ex.size()||ex.size()!=ey.size()||x.size()==0) {
@@ -728,6 +771,7 @@ TGraphErrors HistogrammSaver::CreateErrorGraph(std::string name, std::vector<Flo
 	hGraph.SetTitle(name.c_str());
 	return hGraph;
 }
+
 TH2F* HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float_t> Delta, std::vector<Float_t> pos, UInt_t nBins)
 {
 	TH2F *histo = CreateScatterHisto(name,pos,Delta,nBins);
@@ -737,9 +781,27 @@ TH2F* HistogrammSaver::CreateDipendencyHisto(std::string name, std::vector<Float
 }
 
 void HistogrammSaver::SetRange(Float_t min,Float_t max){
-
+	if (min<max){
+		this->xRangeMin=min;
+		this->xRangeMax=max;
+	}
 }
 
+
+Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
+	Float_t mean = 0;
+	Float_t mean2 = 0;
+	Float_t nEntries = vec.size();
+	for(UInt_t i=0;i<vec.size();i++){
+		mean+=vec.at(i);
+		mean2+=vec.at(i)*vec.at(i);
+	}
+	mean=mean/nEntries;
+	mean2=mean2/nEntries;
+	Float_t sigma = TMath::Sqrt(mean2-mean*mean);
+	cout<<"Mean: "<<mean*100<<" +/- " <<sigma*100<<"\t"<<vec.size() << mean<<"/"<<mean2<<endl;
+	return mean;
+}
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
@@ -756,6 +818,10 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		Float_t delta = max-min;
 		min =min-delta*factor;
 		max=max+delta*factor;
+		if(min-max==0){
+			min-=0.5*min;
+			max+=0.5*min;
+		}
 		cout<<" maxWidth "<<min <<"-"<<max<<endl;
 	}
 	else if(range==fiveSigma||range==threeSigma){
@@ -782,6 +848,8 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		sigma/=(Float_t)nEvents;
 		sigma = sigma -mean*mean;
 		sigma=TMath::Sqrt((Double_t)sigma);
+		if(sigma==0)
+			sigma = .5 *mean;
 		UInt_t nSigma = (range==fiveSigma)? 5:3;
 		max=mean+nSigma*sigma;
 		min=mean-nSigma*sigma;
@@ -825,3 +893,47 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 	return histo;
 }
 
+std::pair<Float_t, Float_t> HistogrammSaver::OptimizeXRange(TH1F* histo){
+	histo->Draw();
+	Float_t xmax = histo->GetXaxis()->GetXmax();
+	Int_t maxBin = 0;
+	Int_t minBin = 0;
+	Int_t i=0;
+	for( i=0;i<histo->GetNbinsX()&&histo->GetBinContent(i)==0;i++)
+		minBin=i;
+	for(i=0;i<histo->GetNbinsX();i++)
+		if(histo->GetBinContent(i)>0)
+			maxBin = i;
+	if(xmax>histo->GetXaxis()->GetBinCenter(maxBin))
+		xmax = histo->GetXaxis()->GetBinCenter(maxBin+1);
+	Float_t xmin = histo->GetXaxis()->GetBinCenter(minBin-1);
+	histo->GetXaxis()->SetRangeUser(xmin,xmax);
+	histo->Draw();
+	return std::make_pair(xmin,xmax);
+}
+
+void HistogrammSaver::OptimizeXRange(TH2F* histo){
+	histo->Draw();
+	TH1F* htemp = (TH1F*)histo->ProjectionX("htemp");
+	std::pair<Float_t,Float_t> range = HistogrammSaver::OptimizeXRange(htemp);
+	Float_t xmin = range.first;
+	Float_t xmax = range.second;
+	delete htemp;
+	histo->GetXaxis()->SetRangeUser(xmin,xmax);
+}
+
+
+void HistogrammSaver::OptimizeYRange(TH2F* histo){
+	histo->Draw();
+	TH1F* htemp = (TH1F*)histo->ProjectionY("htemp");
+	std::pair<Float_t,Float_t> range = HistogrammSaver::OptimizeXRange(htemp);
+	Float_t xmin = range.first;
+	Float_t xmax = range.second;
+	delete htemp;
+	histo->GetYaxis()->SetRangeUser(xmin,xmax);
+}
+
+void HistogrammSaver::OptimizeXYRange(TH2F* histo){
+	HistogrammSaver::OptimizeXRange(histo);
+	HistogrammSaver::OptimizeYRange(histo);
+}

@@ -54,22 +54,22 @@ private:
 	void createPedestalMeanHistos();
 	void saveHistos();
 	void savePHinSigmaHistos();
-	void findPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
+	Float_t findYPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
 	void checkForDeadChannels();
 	void analyseForSeeds();
 	void getBiggestHit();
 	void initialiseHistos();
 	void checkForSaturatedChannels();
 //	void analyseCluster();
-    void analyseBiggestHit();
+    void analyseBiggestHit(bool CMN_corrected=false);
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
 	TH1F *hClusterMap[9];
 	TH1F* hNumberOfSeeds[9];
-	TH1F* hChannelBiggestHit[9];
-	TH1F* hPulsHeightBiggestHit[9];
-	TH1F* hPulsHeightNextBiggestHit[9];
+	TH1F* hChannelBiggestSignal[9];
+	TH1F* hSNR_BiggestSignal[9];
+	TH1F* hSNR_BiggestAdjacent[9];
 	TH1F* hCMNoiseDistribution;
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
@@ -80,12 +80,15 @@ private:
     int seedSigma;
     int hitSigma;
     TH1F *hBiggestSignalInSigma[9];
+    TH1F *hBiggestSignalInSigmaCMN[9];
 	TH1F *hBiggestAdjacentSignalInSigma[9];
+	TH1F *hBiggestAdjacentSignalInSigmaCMN[9];
 	TH1F *histo_pulseheight_sigma125[9];
 	TH1F *hHitOrderMap[9];
 	TH1F *histo_pulseheight_sigma_second_left[9];
 	TH1F *histo_pulseheight_sigma_second_right[9];
 	TH1F *hBiggestHitChannelMap[9];
+	TH1F *hBiggestHitChannelMapCMN[9];
 	TH1F *histo_pulseheight_left_sigma[9];
 	TH1F *histo_pulseheight_left_sigma_second[9];
 	TH1F *histo_pulseheight_right_sigma[9];
@@ -105,10 +108,19 @@ private:
 	std::vector< Float_t > vecEventNo;
 
 	std::vector<Float_t>vecSaturatedChannels[N_DETECTORS];
+
 	std::vector<Float_t>vecBiggestSignalInSigma[N_DETECTORS];
+	std::vector<Float_t>vecBiggestSignal[N_DETECTORS];
 	std::vector<Int_t> vecBiggestHitChannel[N_DETECTORS];
+	std::vector<Float_t>vecBiggestAdjacentSignalInSigma[N_DETECTORS];
 	std::vector<Float_t>vecBiggestAdjacentSignal[N_DETECTORS];
 	std::vector<Int_t> vecBiggestAdjacentHitChannel[N_DETECTORS];
+
+	std::vector<Float_t>vecBiggestSignalInSigmaCMN[N_DETECTORS];
+	std::vector<Int_t> vecBiggestHitChannelCMN[N_DETECTORS];
+	std::vector<Float_t>vecBiggestAdjacentSignalCMN[N_DETECTORS];
+	std::vector<Int_t> vecBiggestAdjacentHitChannelCMN[N_DETECTORS];
+
 	std::vector<Int_t> vecHitOrder[N_DETECTORS];
 	std::vector< std::vector<UInt_t> > diaRawADCvalues; //vector of vector of adc Value (ch, eventNo)
 	THTMLPedestal *htmlPedestal;

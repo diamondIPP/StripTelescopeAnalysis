@@ -13,10 +13,10 @@
 #include "TDetectorAlignment.hh"
 #include "TFile.h"
 #include "TPositionPrediction.hh"
-
+#include "TSettings.class.hh"
 class TTracking: public TADCEventReader{
 public:
-	TTracking(std::string pathName, std::string alignmentName,std::string etaDistributionPath, UInt_t runNumber);
+	TTracking(std::string pathName, std::string alignmentName,std::string etaDistributionPath, TSettings* settings);
 	TPositionPrediction* predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bPrint=false);
 	Float_t getXPosition(UInt_t plane);
 	Float_t getYPosition(UInt_t plane);
@@ -29,7 +29,7 @@ public:
 	Float_t getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode=TCluster::highest2Centroid, TH1F* histo=0);
 	Float_t getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
-	Float_t getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
+	Float_t getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 //	Float_t getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid){return myTrack->getPosition(cor,plane, mode);};
 //	Float_t getXPosition(UInt_t plane);
 //	Float_t getYPosition(UInt_t plane);
@@ -42,6 +42,7 @@ public:
 private:
 	bool setAlignment(std::string alignmentName);
 	TTrack *myTrack;
+	TSettings* settings;
 	TFile* alignmentFile;
 	TDetectorAlignment* myAlignment;
 };

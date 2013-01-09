@@ -54,17 +54,17 @@ void THTMLLandaus::addLandauDiamond(Float_t width, Float_t MP, Float_t area, Flo
 	sectionContent<<"<p>\n";
 	sectionContent<<"Two dimensional distribution of ClusterCharge vs. ClusterSize for all Events which are used\n";
 	sectionContent<<"for Alignment or Analysis, i.e. one and only one cluster in ALL detectors<br>\n";
-	sectionContent<<putImage(this->path,"hLandauDiamond_OneCluster","png",50)<<"<br>\n";
+	sectionContent<<putImage(this->path,(TString)"hLandauDiamond_OneCluster","png",50)<<"<br>\n";
 	sectionContent<<"<br>\nThe next plot shows the Projection of the two dimensional plot to the x axis.<br\n";
 	sectionContent<<"This is the Plot for all ClusterSizes. ";
-	sectionContent<<putImage(this->path,"hPulseHeightDiamondAll","png",49)<<" \n";
-	sectionContent<<putImage(this->path,"hPulseHeigthDiamond_1-2_ClusterSize","png",49)<<"<br>\n";
+	sectionContent<<putImage(this->path,(TString)"hPulseHeightDiamondAll","png",49)<<" \n";
+	sectionContent<<putImage(this->path,(TString)"hPulseHeigthDiamond_1-2_ClusterSize","png",49)<<"<br>\n";
 	for(UInt_t i=1;i<8;i++){
 		stringstream name;
 		name <<"hPulseHeigthDiamond_"<<i<<"_ClusterSize";
 		sectionContent<<putImage(this->path,name.str(),"png",24)<<"\n"<<(i%4==0?"<br>":"");
 	}
-	sectionContent<<putImage(this->path,"cMVP_Landau_vs_ClusterSize","png",50)<<"<br>\n";
+	sectionContent<<putImage(this->path,(TString)"cMVP_Landau_vs_ClusterSize","png",50)<<"<br>\n";
 //	sectionContent<<putImage(this->path,"hLandauDiamond_OneCluster","png",50)<<"<br>\n";
 	sectionContent<<"</p>";
 

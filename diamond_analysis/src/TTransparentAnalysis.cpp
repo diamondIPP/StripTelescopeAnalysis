@@ -19,7 +19,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	UInt_t runNumber =settings->getRunNumber();
 	
 	settings->goToAlignmentRootDir();
-	eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),runNumber);
+	eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);
 	// TODO: load settings!!!
 	
 	histSaver = new HistogrammSaver();
@@ -492,7 +492,7 @@ void TTransparentAnalysis::printEvent() {
 	cout << "predicted pos in lab system:\t" << this->predPosition << "\tpredicted perp position:\t" << this->predPerpPosition << endl;
 	cout << "predicted pos in det system:\t" << this->positionInDetSystem << endl;
 	cout << "clustered analysis position in lab system:\t" << eventReader->getStripXPosition(subjectPlane,this->predPerpPosition,clusterCalcMode) << endl;
-	cout << "clustered analysis position in det system:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
+	cout << "clustered analysis position in det system:\t" << eventReader->getMeasuredPositionMetricSpace(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
 	if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystem, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)) == false) {
 		cout << "this track did not pass the check.." << endl;
 		return;

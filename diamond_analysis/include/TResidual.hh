@@ -37,7 +37,7 @@
 class TResidual {
 public:
 	TResidual(bool bTest=false);
-	void calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res=TResidual(false));
+	void calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY);
 	virtual ~TResidual();
 	void Print(UInt_t level=0);
 	void addDataPoint(Float_t deltaX,Float_t predX,Float_t deltaY,Float_t predY);

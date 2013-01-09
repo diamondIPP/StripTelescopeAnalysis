@@ -17,7 +17,7 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 		UInt_t runNumber=settings->getRunNumber();
 		sys = gSystem;
 		settings->goToAlignmentRootDir();
-		eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),runNumber);
+		eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);
 		histSaver=new HistogrammSaver();
 		settings->goToAlignmentAnalysisDir();
 		htmlAlignment=new THTMLAlignment(settings);
@@ -25,7 +25,7 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 		htmlAlignment->setFileGeneratingPath(settings->getAlignmentAnalysisFilePath());
 		htmlAlignment->createContent();
 		htmlAlignment->generateHTMLFile();
-    settings->goToAlignmentAnalysisDir();
+		settings->goToAlignmentAnalysisDir();
 		sys->cd("anaAlignmnet");
 		histSaver->SetPlotsPath(settings->getAlignmentAnalysisFilePath());
 		histSaver->SetRunNumber(runNumber);

@@ -7,8 +7,10 @@
 
 #include "../include/TPositionPrediction.hh"
 
-TPositionPrediction::TPositionPrediction(Float_t xPos,Float_t xSigma,Float_t xChi2, Float_t yPos, Float_t ySigma, Float_t yChi2,Float_t xPhi,Float_t yPhi) {
+TPositionPrediction::TPositionPrediction(Float_t zPos,Float_t zSigma,Float_t xPos,Float_t xSigma,Float_t xChi2, Float_t yPos, Float_t ySigma, Float_t yChi2,Float_t xPhi,Float_t yPhi) {
 	// TODO Auto-generated constructor stub
+	this->zPos=zPos;
+	this->zSigma=zSigma;
 	this->xPos=xPos;
 	this->yPos=yPos;
 	this->xSigma=xSigma;
@@ -45,6 +47,7 @@ Float_t TPositionPrediction::getPosition(TPlaneProperties::enumCoordinate cor)
 	switch (cor){
 	case TPlaneProperties::X_COR: return this->getPositionX();break;
 	case TPlaneProperties::Y_COR: return this->getPositionY();break;
+	case TPlaneProperties::Z_COR: return this->getPositionZ();break;
 	default: return N_INVALID;
 	}
 }
@@ -54,6 +57,7 @@ Float_t TPositionPrediction::getSigma(TPlaneProperties::enumCoordinate cor)
 	switch (cor){
 	case TPlaneProperties::X_COR: return this->getSigmaX();break;
 	case TPlaneProperties::Y_COR: return this->getSigmaY();break;
+	case TPlaneProperties::Z_COR: return this->getSigmaZ();break;
 	default: return N_INVALID;
 	}
 }

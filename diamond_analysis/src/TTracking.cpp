@@ -7,9 +7,11 @@
 
 #include "../include/TTracking.hh"
 
-TTracking::TTracking(std::string pathName, std::string alignmentName,std::string etaDistributionPath, UInt_t runNumber):TADCEventReader(pathName,runNumber){
+TTracking::TTracking(std::string pathName, std::string alignmentName,std::string etaDistributionPath, TSettings*settings):TADCEventReader(pathName,settings){
+	this->settings= settings;
 	alignmentFile=NULL;
-	cout<<"new TTracking: \n\tpathName:"<<pathName<<"\n\ta;ignmentName: "<<alignmentName<<"\n\tetaDistPath: "<<etaDistributionPath<<"\n\tRunNumber: "<<runNumber<<endl;
+
+	cout<<"new TTracking: \n\tpathName:"<<pathName<<"\n\ta;ignmentName: "<<alignmentName<<"\n\tetaDistPath: "<<etaDistributionPath<<"\n\tRunNumber: "<<settings->getRunNumber()<<endl;
 	setAlignment(alignmentName);
 	this->setEtaDistributionPath(etaDistributionPath);
 	if(myAlignment==0){
@@ -18,7 +20,7 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,std::string
 	}
 
 	if(myAlignment!=NULL)
-		myTrack=new TTrack(myAlignment);
+		myTrack=new TTrack(myAlignment,this->settings);
 	else
 		myTrack=NULL;
 	if(myTrack!=NULL)
@@ -49,14 +51,14 @@ Float_t TTracking::getXPosition(UInt_t plane)
 {
 	if(myTrack==0)
 			return 0;
-		return myTrack->getXPosition(plane);
+		return myTrack->getXPositionMetric(plane);
 }
 
 Float_t TTracking::getYPosition(UInt_t plane)
 {
 	if(myTrack==0)
 			return 0;
-		return myTrack->getYPosition(plane);
+		return myTrack->getYPositionMetric(plane);
 }
 
 Float_t TTracking::getZPosition(UInt_t plane)
@@ -66,11 +68,11 @@ Float_t TTracking::getZPosition(UInt_t plane)
 		return myTrack->getZPosition(plane);
 }
 
-Float_t TTracking::getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
+Float_t TTracking::getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
 {
 	if (myTrack == 0)
 		return 0;
-	return myTrack->getMeasured(cor,plane,mode);
+	return myTrack->getMeasuredClusterPositionMetricSpace(cor,plane,mode);
 }
 
 bool TTracking::setAlignment(std::string alignmentName){
@@ -124,7 +126,7 @@ Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, F
 				return 0;
 	if (histo==0)
 		histo=getEtaIntegral(plane*2);
-	return myTrack->getStripXPositionOfCluster(plane,xCluster,yPred,mode,histo);
+	return myTrack->getXPositionInLabFrameStripDetector(plane,xCluster,yPred,mode,histo);
 }
 Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
 	if(myTrack==0)
@@ -136,7 +138,7 @@ Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calcu
 Float_t  TTracking::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode, TH1F* histo){
 	if(myTrack==0)
 		return 0;
-	return myTrack->getPositionOfCluster(cor,plane,xCluster,yCluster,mode,histo);
+	return myTrack->getPostionInLabFrame(cor,plane,xCluster,yCluster,mode,histo);
 }
 Float_t TTracking::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode, TH1F* histo){
 	if(myTrack==0)
@@ -146,7 +148,7 @@ Float_t TTracking::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t pr
 Float_t  TTracking::getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
 	if(myTrack==0)
 		return 0;
-	return myTrack->getPosition(cor,plane,mode);
+	return myTrack->getPositionInLabFrame(cor,plane,mode);
 }
 Float_t TTracking::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred){
 	if(myTrack==0)
