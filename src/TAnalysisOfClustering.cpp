@@ -99,7 +99,7 @@ void TAnalysisOfClustering::checkForDeadChannels()
 			};
 			Float_t signalInSigma=eventReader->getSignalInSigma(det,ch);
 
-			if(signalInSigma>settings->getClusterSeedFactor(det)){
+			if(signalInSigma>settings->getClusterSeedFactor(det,ch)){
 				hSeedMap[det]->Fill(ch);
 				//cout<<"Found a Seed "<<det<<" "<<ch<<" "<<adcValueInSigma<<" "<<eventReader->getCurrent_event()<<endl;
 				numberOfSeeds++;
@@ -234,13 +234,13 @@ void TAnalysisOfClustering::initialiseHistos()
 	}
 	for(int det=0;det<9;det++){
 		stringstream histoName;
-		histoName<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		histoName<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		hClusterSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 		hClusterSize[det]->GetXaxis()->SetTitle("Number of Seeds and Hits in Cluster");
 		hClusterSize[det]->GetYaxis()->SetTitle("Entries #");
 		histoName.str("");
 		histoName.clear();
-		histoName<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det)<<"-Hit"<<settings->getClusterHitFactor(det)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		histoName<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		hClusterSeedSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
 		hClusterSeedSize[det]->GetXaxis()->SetTitle("Number of Seeds in Cluster");
 		hClusterSeedSize[det]->GetYaxis()->SetTitle("Entries #");

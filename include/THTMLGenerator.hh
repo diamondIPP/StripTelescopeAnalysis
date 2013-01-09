@@ -58,6 +58,7 @@ protected:
 	void generateTableOfContent();
 	void fillContent();
 	std::string createTable(std::vector<std::vector<std::string> > content);
+	std::string putImage(std::string path, TString name, std::string type = "png",int sizeInPercentage=20);
 	std::string putImage(std::string path, std::string name, std::string type = "png",int sizeInPercentage=20);
 public:
 	std::string putImageOfPath(std::string name, std::string type="png",int sizeInPercentage=20){return putImage(path,name,type,sizeInPercentage);};

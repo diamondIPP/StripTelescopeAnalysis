@@ -21,6 +21,8 @@ bool TSettings::existsDirectory(std::string dir){
 
 TSettings::TSettings(TRunInfo *runInfo)
 {
+	//diamondPattern.loadStandardPitchWidthSettings();
+	//diamondPattern.Print();
 	cout<<"TSettings TRunInfo"<<endl;
 	//  verbosity=runInfo->getVerbosity();
 	setVerbosity(runInfo->getVerbosity());
@@ -245,91 +247,27 @@ void TSettings::LoadSettings(){
 		}
 
 		//cant switch on strings so use if statements
-		if(key=="SaveAllFilesSwitch") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			SaveAllFilesSwitch = (int)strtod(value.c_str(),0);
-		}
-		if(key=="siliconAlignmentSteps"){
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			siliconAlignmentSteps = (int)strtod(value.c_str(),0);
-		}
-		if(key=="ClosePlotsOnSave") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ClosePlotsOnSave = (int)strtod(value.c_str(),0);
-		}
-		if(key=="IndexProduceSwitch") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			IndexProduceSwitch = (int)strtod(value.c_str(),0);
-		}
-		if(key=="snr_plots_enable") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			snr_plots_enable = (int)strtod(value.c_str(),0);
-		}
-		if(key=="fix_dia_noise") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			fix_dia_noise = (int)strtod(value.c_str(),0);
-		}
-		if(key=="single_channel_analysis_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,single_channel_analysis_channels);
-		}
-		if(key=="single_channel_analysis_enable") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			single_channel_analysis_enable = (int)strtod(value.c_str(),0);
-		}
-		if(key=="single_channel_analysis_eventwindow") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			single_channel_analysis_eventwindow = (int)strtod(value.c_str(),0);
-		}
-		/*if(key=="store_threshold") {//TODO It's needed in settings reader
-	         cout << key.c_str() << " = " << value.c_str() << endl;
-	        store_threshold = (float)strtod(value.c_str(),0);
-	      }*/
-		if(key=="CMN_corr_low") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			CMN_corr_low = (int)strtod(value.c_str(),0);
-		}
-		if(key=="CMN_corr_high") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			CMN_corr_high = (int)strtod(value.c_str(),0);
-		}
-		if(key=="resetAlignment"){
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			bResetAlignment = (bool)strtod(value.c_str(),0);
-		}
-		if(key=="CMN_cut") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			CMN_cut = (int)strtod(value.c_str(),0);
-		}
-		if(key=="DO_CMC") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			DO_CMC = (int)strtod(value.c_str(),0);
-		}
-		if(key=="CMN_cut") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			CMN_cut = (int)strtod(value.c_str(),0);
-		}
-		if(key=="Iter_Size") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Iter_Size = (int)strtod(value.c_str(),0);
-		}
-		if(key=="Taylor_speed_throttle") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Taylor_speed_throttle = (int)strtod(value.c_str(),0);
-		}
-		if(key=="dia_input") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			dia_input = (int)strtod(value.c_str(),0);
-		}
-		if(key=="alignment_training_track_fraction") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			alignment_training_track_fraction = (float)strtod(value.c_str(),0);
-		}
-		if(key == "alignment_training_track_number"){
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			alignment_training_track_number = (int)strtod(value.c_str(),0);
-		}
-		if(key =="alignment_training_method"){
+		if(key == "SaveAllFilesSwitch") Parse(key,value,SaveAllFilesSwitch);
+		if(key == "siliconAlignmentSteps")Parse(key,value,siliconAlignmentSteps);
+		if(key == "ClosePlotsOnSave") Parse(key,value,ClosePlotsOnSave);
+		if(key == "IndexProduceSwitch")Parse(key,value,IndexProduceSwitch);
+		if(key == "snr_plots_enable") Parse(key,value,snr_plots_enable);
+		if(key == "fix_dia_noise") Parse(key,value,fix_dia_noise);
+		if(key == "single_channel_analysis_channels") Parse(key, value,single_channel_analysis_channels);
+		if(key == "single_channel_analysis_enable") Parse(key,value,single_channel_analysis_enable);
+		if(key == "single_channel_analysis_eventwindow") Parse(key,value,single_channel_analysis_eventwindow);
+		if(key == "CMN_corr_low") Parse(key,value,CMN_corr_low);
+		if(key == "CMN_corr_high")Parse(key,value,CMN_corr_high);
+		if(key == "resetAlignment")Parse(key,value,bResetAlignment);
+		if(key == "CMN_cut")Parse(key,value,CMN_cut);
+		if(key == "DO_CMC")Parse(key,value,DO_CMC);
+		if(key == "CMN_cut") Parse(key,value,CMN_cut);
+		if(key == "Iter_Size")Parse(key,value,Iter_Size);
+		if(key == "Taylor_speed_throttle") Parse(key,value,Taylor_speed_throttle);
+		if(key == "dia_input") Parse(key,value,dia_input);
+		if(key == "alignment_training_track_fraction") Parse(key,value,alignment_training_track_fraction);
+		if(key == "alignment_training_track_number") Parse(key,value,alignment_training_track_number);
+		if(key == "alignment_training_method"){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			int method = (int)strtod(value.c_str(),0);
 			if(method >=0&&method<=2 )
@@ -337,282 +275,79 @@ void TSettings::LoadSettings(){
 			else
 				cerr<<"Not a valid Input for alignment Training Method : "<<method<<endl;
 		}
-		if(key=="Si_Pedestal_Hit_Factor") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Si_Pedestal_Hit_Factor = (float)strtod(value.c_str(),0);
-		}
-		if(key=="Di_Pedestal_Hit_Factor") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Di_Pedestal_Hit_Factor = (float)strtod(value.c_str(),0);
-		}
-		if(key=="Si_Cluster_Seed_Factor") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Si_Cluster_Seed_Factor = (float)strtod(value.c_str(),0);
-		}
-		if(key=="Di_Cluster_Seed_Factor") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Di_Cluster_Seed_Factor = (float)strtod(value.c_str(),0);
-		}
-		if(key=="Si_Cluster_Hit_Factor") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Si_Cluster_Hit_Factor = (float)strtod(value.c_str(),0);
-		}
-		if(key=="Di_Cluster_Hit_Factor") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			Di_Cluster_Hit_Factor = (float)strtod(value.c_str(),0);
-		}
-		if(key=="eta_lowq_slice_low") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			eta_lowq_slice_low = (float)strtod(value.c_str(),0);
-		}
-		if(key=="eta_lowq_slice_hi") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			eta_lowq_slice_hi = (float)strtod(value.c_str(),0);
-		}
-		if(key=="eta_hiq_slice_low") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			eta_hiq_slice_low = (float)strtod(value.c_str(),0);
-		}
-		if(key=="eta_hiq_slice_hi") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			eta_hiq_slice_hi = (float)strtod(value.c_str(),0);
-		}
-		if(key=="etavsq_n_landau_slices") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			etavsq_n_landau_slices = (float)strtod(value.c_str(),0);
-		}
-		if(key=="alignment_x_offsets") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseFloatArray(value,alignment_x_offsets);
-		}
-		if(key=="alignment_y_offsets") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseFloatArray(value,alignment_y_offsets);
-		}
-		if(key=="alignment_phi_offsets") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseFloatArray(value,alignment_phi_offsets);
-		}
-		if(key=="alignment_z_offsets") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseFloatArray(value,alignment_z_offsets);
-		}
-		if(key=="D0X_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[0]);
-		}
-		if(key=="D0Y_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[1]);
-		}
-		if(key=="D1X_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[2]);
-		}
-		if(key=="D1Y_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[3]);
-		}
-		if(key=="D2X_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[4]);
-		}
-		if(key=="D2Y_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[5]);
-		}
-		if(key=="D3X_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[6]);
-		}
-		if(key=="D3Y_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_channels[7]);
-		}
-		if(key=="Dia_channel_screen_channels") {
-			cout << key.c_str() << " = " << value.c_str() << " size:";
-			ParseIntArray(value,Det_channel_screen_channels[8]);
-			cout<<Det_channel_screen_channels[8].size()<<endl;
-		}
-		if(key=="D0X_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[0]);
-		}
-		if(key=="D0Y_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[1]);
-		}
-		if(key=="D1X_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[2]);
-		}
-		if(key=="D1Y_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[3]);
-		}
-		if(key=="D2X_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[4]);
-		}
-		if(key=="D2Y_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[5]);
-		}
-		if(key=="D3X_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[6]);
-		}
-		if(key=="D3Y_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[7]);
-		}
-		if(key=="Dia_channel_screen_regions") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			ParseIntArray(value,Det_channel_screen_regions[8]);
-		}
-		if(key=="si_avg_fidcut_xlow") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			si_avg_fidcut_xlow = (int)strtod(value.c_str(),0);
-		}
-		if(key=="si_avg_fidcut_xhigh") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			si_avg_fidcut_xhigh = (int)strtod(value.c_str(),0);
-		}
-		if(key=="si_avg_fidcut_ylow") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			si_avg_fidcut_ylow = (int)strtod(value.c_str(),0);
-		}
-		if(key=="si_avg_fidcut_yhigh") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			si_avg_fidcut_yhigh = (int)strtod(value.c_str(),0);
-		}
-		if(key=="pulse_height_num_bins") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			pulse_height_num_bins = (int)strtod(value.c_str(),0);
-		}
-		if(key=="pulse_height_si_max") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			pulse_height_si_max = (int)strtod(value.c_str(),0);
-		}
-		if(key=="pulse_height_di_max") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			pulse_height_di_max = (int)strtod(value.c_str(),0);
-		}
-		if(key=="snr_distribution_si_max") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			snr_distribution_si_max = (int)strtod(value.c_str(),0);
-		}
-		if(key=="snr_distribution_di_max") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			snr_distribution_di_max = (int)strtod(value.c_str(),0);
-		}
-		if (key == "alignment_chi2") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			alignment_chi2 = (Float_t)strtod(value.c_str(),0);
-		}
-		if (key == "UseAutoFidCut") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			UseAutoFidCut = (bool)strtod(value.c_str(),0);
-		}
-		if(key == "nDiamonds"){
-			cout << key <<" = "<<value.c_str()<<endl;
-			this->setNDiamonds((int)strtod(value.c_str(),0));
-		}
-		if (key == "AlternativeClustering") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			AlternativeClustering = (bool)strtod(value.c_str(),0);
-		}
-		if(key=="store_threshold") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			store_threshold = (float)strtod(value.c_str(),0);
-		}
-		if(key=="plotChannel_on") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			plotChannel_on = (int)strtod(value.c_str(),0);
-		}
-		if(key=="SingleChannel2000plots") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			SingleChannel2000plots = (int)strtod(value.c_str(),0);
-		}
-		if(key=="makeDiamondPlots") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			makeDiamondPlots = (int)strtod(value.c_str(),0);
-		}
-		if(key=="alignmentPrecision_Offset"){
-			cout << key.c_str() << " = "<< value.c_str() << endl;
-			alignmentPrecision_Offset = (float)strtod(value.c_str(),0);
-		}
-		if(key=="alignmentPrecision_Angle"){
-			cout << key.c_str() << " = "<< value.c_str() << endl;
-			alignmentPrecision_Angle = (float)strtod(value.c_str(),0);
-		};
-		if(key=="makeHits2D") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			makeHits2D = (int)strtod(value.c_str(),0);
-		}
-		if(key=="makeNoise2D") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			makeNoise2D = (int)strtod(value.c_str(),0);
-		}
-		if(key=="makePullDist") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			makePullDist = (int)strtod(value.c_str(),0);
-		}
-		if(key=="makePedRMSTree") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			makePedRMSTree = (int)strtod(value.c_str(),0);
-		}
-		if(key=="eventPrintHex") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			eventPrintHex = (int)strtod(value.c_str(),0);
-		}
-
-		if(key=="plottedChannel") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			//plottedChannel = (int)strtod(value.c_str(),0);
-		}
-
-		if(key=="high_rms_cut") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			high_rms_cut = (int)strtod(value.c_str(),0);
-		}
-		if(key=="rms_cut") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			rms_cut = (float)strtod(value.c_str(),0);
-		}
-		if(key=="zoomDiamondPlots") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			zoomDiamondPlots = (int)strtod(value.c_str(),0);
-		}
-		if(key=="singleTrack2D") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			singleTrack2D = (int)strtod(value.c_str(),0);
-		}
-		if(key=="singleTrack2DmaxClusterSize") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			singleTrack2DmaxClusterSize = (int)strtod(value.c_str(),0);
-		}
-		if(key=="maxNoise2D") {
-			cout << key.c_str() << " = " << value.c_str() << endl;
-			maxNoise2D = (float)strtod(value.c_str(),0);
-		}
-		if(key=="clusterHitFactors") {
-			cout<<key<< " = "<< value.c_str() <<endl;
-			ParseFloatArray(value,clusterHitFactors);
-		}
-		if(key=="clusterSeedFactors") {
-			cout<<key<< " = "<< value.c_str() <<endl;
-			ParseFloatArray(value,clusterSeedFactors);
-		}
-		if(key=="doAllAlignmentPlots"){
-			cout<<key<< " = "<< value.c_str() <<endl;
-			bDoAllAlignmentPlots=(bool)strtod(value.c_str(),0);
-
-		}
-		if(key=="diamondMapping") {
+		if(key == "Si_Pedestal_Hit_Factor") ParseFloat(key,value,Si_Pedestal_Hit_Factor);
+		if(key == "Di_Pedestal_Hit_Factor") ParseFloat(key,value,Di_Pedestal_Hit_Factor);
+		if(key == "Si_Cluster_Seed_Factor") ParseFloat(key,value,Si_Cluster_Seed_Factor);
+		if(key == "Di_Cluster_Seed_Factor") ParseFloat(key,value,Di_Cluster_Seed_Factor);
+		if(key == "Si_Cluster_Hit_Factor") ParseFloat(key,value,Si_Cluster_Hit_Factor);
+		if(key == "Di_Cluster_Hit_Factor") ParseFloat(key,value,Di_Cluster_Hit_Factor);
+		if(key == "eta_lowq_slice_low") ParseFloat(key,value,eta_lowq_slice_low);
+		if(key == "eta_lowq_slice_hi") ParseFloat(key,value,eta_lowq_slice_hi);
+		if(key == "eta_hiq_slice_low") ParseFloat(key,value,eta_hiq_slice_low);
+		if(key == "eta_hiq_slice_hi") ParseFloat(key,value,eta_hiq_slice_hi);
+		if(key == "etavsq_n_landau_slices") ParseInt(key,value,etavsq_n_landau_slices);
+		if(key == "alignment_x_offsets") ParseFloatArray(key,value,alignment_x_offsets);
+		if(key == "alignment_y_offsets") ParseFloatArray(key, value,alignment_y_offsets);
+		if(key == "alignment_phi_offsets") ParseFloatArray(key,value,alignment_phi_offsets);
+		if(key == "alignment_z_offsets") ParseFloatArray(key,value,alignment_z_offsets);
+		if(key == "D0X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[0]);
+		if(key == "D0Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[1]);
+		if(key == "D1X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[2]);
+		if(key == "D1Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[3]);
+		if(key == "D2X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[4]);
+		if(key == "D2Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[5]);
+		if(key == "D3X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[6]);
+		if(key == "D3Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[7]);
+		if(key == "Dia_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[8]);
+		if(key == "D0X_channel_screen_regions")  ParseIntArray(key,value,Det_channel_screen_regions[0]);
+		if(key == "D0Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[1]);
+		if(key == "D1X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[2]);
+		if(key == "D1Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[3]);
+		if(key == "D2X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[4]);
+		if(key == "D2Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[5]);
+		if(key == "D3X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[6]);
+		if(key == "D3Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[7]);
+		if(key == "Dia_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[8]);
+		if(key == "si_avg_fidcut_xlow") ParseFloat(key,value,si_avg_fidcut_xlow);
+		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
+		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
+		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
+		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
+		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
+		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);
+		if(key == "snr_distribution_si_max")  Parse(key,value,snr_distribution_si_max);
+		if(key == "snr_distribution_di_max")  Parse(key,value,snr_distribution_di_max);
+		if (key == "alignment_chi2") Parse(key,value,alignment_chi2);
+		if (key == "UseAutoFidCut") Parse(key,value,UseAutoFidCut);
+		if(key == "nDiamonds")this->setNDiamonds(ParseInt(key,value));
+		if (key == "AlternativeClustering") Parse(key,value,AlternativeClustering);
+		if(key == "store_threshold") Parse(key,value,store_threshold);
+		if(key == "plotChannel_on") Parse(key,value,plotChannel_on);
+		if(key == "SingleChannel2000plots") Parse(key,value,SingleChannel2000plots);
+		if(key == "makeDiamondPlots")  Parse(key,value,makeDiamondPlots);
+		if(key == "alignmentPrecision_Offset") Parse(key,value,alignmentPrecision_Offset);
+		if(key == "alignmentPrecision_Angle") Parse(key,value,alignmentPrecision_Angle);
+		if(key == "makeHits2D")  Parse(key,value,makeHits2D);
+		if(key == "makeNoise2D")  Parse(key,value,makeNoise2D);
+		if(key == "makePullDist")  Parse(key,value,makePullDist);
+		if(key == "makePedRMSTree")  Parse(key,value,makePedRMSTree);
+		if(key == "eventPrintHex")  Parse(key,value,eventPrintHex);
+		if(key == "plottedChannel")  Parse(key,value,plottedChannel);
+		if(key == "high_rms_cut")  Parse(key,value,high_rms_cut);
+		if(key == "rms_cut")  Parse(key,value,rms_cut);
+		if(key == "zoomDiamondPlots")  Parse(key,value,zoomDiamondPlots);
+		if(key == "singleTrack2D")  Parse(key,value,singleTrack2D);
+		if(key == "singleTrack2DmaxClusterSize")  Parse(key,value,singleTrack2DmaxClusterSize);
+		if(key == "maxNoise2D")  Parse(key,value,maxNoise2D);
+		if(key == "clusterHitFactors") ParseFloatArray(key, value,clusterHitFactors);
+		if(key == "clusterSeedFactors") ParseFloatArray(key, value,clusterSeedFactors);
+		if(key == "doAllAlignmentPlots") Parse(key,value,bDoAllAlignmentPlots);
+		if(key == "pitchWidthDia") Parse(key,value,pitchWidthDia);
+		if(key == "pitchWidthSil") Parse(key,value,pitchWidthSil);
+		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
-			ParseIntArray(value,vecDiaMapping);
+			ParseIntArray(key, value,vecDiaMapping);
 			if(diamondMapping==0)
 				delete diamondMapping;
 			diamondMapping=new TChannelMapping(vecDiaMapping);
@@ -620,12 +355,12 @@ void TSettings::LoadSettings(){
 			cout<<diamondMapping<<endl;
 			getDetChannelNo(0);
 		}
-		if(key=="Dia_DetectorChannels") {
+		if(key == "Dia_DetectorChannels") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			vector<string> vecDetectorChannelString;
-			ParseStringArray(value,vecDetectorChannelString);
+			ParseStringArray(key, value,vecDetectorChannelString);
 
-			ParseRegionArray(value,vecDiaDetectorAreasInChannel);
+			ParseRegionArray(key, value,vecDiaDetectorAreasInChannel);
 			Int_t detChannel = -1;
 			for(UInt_t i=0;i<vecDiaDetectorAreasInChannel.size();i++){
 				cout<<i<<" "<<vecDiaDetectorAreasInChannel[i].first<<" "<<vecDiaDetectorAreasInChannel[i].second<<endl;
@@ -635,8 +370,39 @@ void TSettings::LoadSettings(){
 				}
 			}
 		}
+		if(key == "Dia_ClusterSeedFactors"){
+			ParseFloatArray(key, value,vecClusterSeedFactorsDia);
+			if(vecClusterSeedFactorsDia.size()!=getNDiaDetectorAreas()){
+				cerr<<"The number of defined ClusterSeedFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
+				cerr<<vecClusterSeedFactorsDia.size()<<" "<<getNDiaDetectorAreas()<<endl;
+				exit(-1);
+			}
+			cout<<key<<endl;
+			for(UInt_t i=0;i<vecClusterSeedFactorsDia.size();i++)
+				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterSeedFactorsDia.at(i)<<endl;
+		}
+		if(key == "Dia_ClusterHitFactors"){
+			ParseFloatArray(key, value,vecClusterHitFactorsDia);
+			if(vecClusterHitFactorsDia.size()!=getNDiaDetectorAreas()){
+				cerr<<"The number of defined ClusterHitFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
+				cerr<<vecClusterHitFactorsDia.size()<<" "<<getNDiaDetectorAreas()<<endl;
+				exit(-1);
+			}
+			cout<<key<<endl;
+			for(UInt_t i=0;i<vecClusterHitFactorsDia.size();i++)
+				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterHitFactorsDia.at(i)<<endl;
+		}
+		/*if(key == "store_threshold") {//TODO It's needed in settings reader
+	         cout << key.c_str() << " = " << value.c_str() << endl;
+	        store_threshold = (float)strtod(value.c_str(),0);
+	      }*/
 	}
 
+//	for(UInt_t ch=0;ch<TPlaneProperties::getNChannelsDiamond();ch++)
+//		cout<<setw(3)<<ch<<":"<<setw(3)<<getDiaDetectorAreaOfChannel(ch)<<"\t"<<getClusterSeedFactor(TPlaneProperties::getDetDiamond(),ch)
+//			<<"--"<<getClusterHitFactor(TPlaneProperties::getDetDiamond(),ch)<<endl;
+//	char t;
+//	cin>>t;
 	file.close();
 
 	for(int det=0; det<9; det++) {
@@ -648,7 +414,7 @@ void TSettings::LoadSettings(){
 	}
 
 	for(int det=0;det<9;det++){
-		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det)<<"/"<<getClusterHitFactor(det)<<endl;
+		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det,0)<<"/"<<getClusterHitFactor(det,0)<<endl;
 	}
 
 	cout<<endl<<"TSettings::Finished importing settings from "<<fileName<<endl<<endl;
@@ -743,6 +509,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	siliconAlignmentSteps=5;
 	diamondAlignmentSteps=5;
 	zoomDiamondPlots = 0; //zoom in on DC_Pedestal (100 event / window)
+	pitchWidthDia = 50; // in mum
+	pitchWidthSil = 50; // in mum
 
 	singleTrack2D = 1; //plot single tracks only in 2D hits histogram
 	singleTrack2DmaxClusterSize = 2; //max size of clusters in silicon track (cluster = Di_Hit_Factor hits; no check for seeds/shoulders)
@@ -765,18 +533,15 @@ void TSettings::DefaultLoadDefaultSettings(){
  * function which parses an string of the format  '{XX,XX,XX,XX,XX}' to an
  * vector of strings
  */
-void TSettings::ParseStringArray(string value, vector<string> &vec){
+void TSettings::ParseStringArray(string key, string value, vector<string> &vec){
+	cout << key.c_str() << " = " << value.c_str() << endl;
 
-	int index=0;
 	if(value.find('{')==string::npos||value.find('}')==string::npos){
 		cerr<<"the string \'"<<value<<"\' cannot be parsed as a float array since bracket is missing"<<endl;
 		exit(-1);
 	}
 	string::size_type beginning = value.find_first_of('{')+1;
 	string::size_type ending = value.find_last_of('}');
-	string::size_type offset1 = value.find_first_of('{')+1;
-	string::size_type offset2 = value.find_first_of(',');
-	string::size_type iter = beginning;
 	string analyseString = value.substr(beginning,ending-beginning);
 	//  cout<<"analyze: \'"<<analyseString<<"\'"<<endl;
 	int i;
@@ -790,30 +555,57 @@ void TSettings::ParseStringArray(string value, vector<string> &vec){
 	vec.push_back(data);
 }
 
-void TSettings::ParseFloatArray(string value, vector<float> &vec) {
+bool TSettings::ParseFloat(string key, string value, float &output){
+	cout << key.c_str() << " = " << value.c_str() << endl;
+	output = (float)strtod(value.c_str(),0);
+	return true;
+}
+
+bool TSettings::ParseInt(string key, string value, int &output){
+	cout << key.c_str() << " = " << value.c_str() << endl;
+	output = (int)strtod(value.c_str(),0);
+	return true;
+}
+
+bool TSettings::ParseInt(string key, string value, UInt_t &output){
+	cout << key.c_str() << " = " << value.c_str() << endl;
+	output = (UInt_t)strtod(value.c_str(),0);
+	return true;
+}
+
+bool TSettings::ParseBool(string key, string value, bool &output){
+	cout << key.c_str() << " = " << value.c_str() << endl;
+	output = (bool)strtod(value.c_str(),0);
+	return true;
+}
+
+void TSettings::ParseFloatArray(string key, string value, vector<float> &vec) {
+	cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
-	ParseStringArray(value,stringArray);
+	ParseStringArray(key, value,stringArray);
 	vec.clear();
 	//  cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
 	for(UInt_t i=0;i<stringArray.size();i++)
 		vec.push_back((float)strtod(stringArray.at(i).c_str(),0));
 }
 
-void TSettings::ParseIntArray(string value, vector<int> &vec) {
+void TSettings::ParseIntArray(string key, string value, vector<int> &vec) {
+	cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
-	ParseStringArray(value,stringArray);
+	ParseStringArray(key, value,stringArray);
 	vec.clear();
 	//    cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
 	for(UInt_t i=0;i<stringArray.size();i++)
 		vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
 }
 
-void TSettings::ParseRegionArray(string value, std::vector< std::pair<Int_t,Int_t> > &vec){
+void TSettings::ParseRegionArray(string key, string value, std::vector< std::pair<Int_t,Int_t> > &vec){
+	cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
-	ParseStringArray(value,stringArray);
+	ParseStringArray(key, value,stringArray);
 	vec.clear();
 	for(UInt_t i=0;i<stringArray.size();i++){
-		std::pair< std::string,std::string > region = ParseRegionString(stringArray[i]);
+		std::pair< std::string,std::string > region = ParseRegionString(key, stringArray[i]);
 		Int_t begin = (int)strtod(region.first.c_str(),0);
 		Int_t end = (int)strtod(region.second.c_str(),0);
 		if(begin<end)
@@ -822,7 +614,8 @@ void TSettings::ParseRegionArray(string value, std::vector< std::pair<Int_t,Int_
 
 }
 
-std::pair< std::string,std::string > TSettings::ParseRegionString(string value){
+std::pair< std::string,std::string > TSettings::ParseRegionString(string key, string value){
+	cout << key.c_str() << " = " << value.c_str() << endl;
 	int index = value.find_first_of(":-");
 	string beginString,endString;
 	if(index!=string::npos){
@@ -840,21 +633,39 @@ std::pair< std::string,std::string > TSettings::ParseRegionString(string value){
  * @param det
  * @return
  */
-Float_t TSettings::getClusterSeedFactor(UInt_t det){
-	//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
+Float_t TSettings::getClusterSeedFactor(UInt_t det,UInt_t ch){
+//	cout<<"get Cluster Seed Factor: "<<det<<" "<<clusterSeedFactors.size()<<endl;
+	if(TPlaneProperties::isDiamondDetector(det)){
+		Int_t area = getDiaDetectorAreaOfChannel(ch);
+//		cout<<"Diamond: "<<det<<":"<<ch<<"--->"<<area<<endl;
+		if (vecClusterSeedFactorsDia.size()>area&&area>-1)
+					return vecClusterSeedFactorsDia.at(area);
+		else{
+			if(det<clusterSeedFactors.size())
+					return clusterSeedFactors.at(det);
+			return getDi_Cluster_Seed_Factor();
+		}
+	}
 	if(det<clusterSeedFactors.size())
-		return clusterSeedFactors.at(det);
-	if(det==8)
-		return getDi_Cluster_Seed_Factor();
+			return clusterSeedFactors.at(det);
 	return getSi_Cluster_Seed_Factor();
 }
 
-Float_t TSettings::getClusterHitFactor(UInt_t det){
+Float_t TSettings::getClusterHitFactor(UInt_t det,UInt_t ch){
 
+	if(TPlaneProperties::isDiamondDetector(det)){
+		Int_t area = getDiaDetectorAreaOfChannel(ch);
+//		cout<<det<<":"<<ch<<"--->"<<area<<endl;
+		if (vecClusterHitFactorsDia.size()>area&&area>-1)
+			return vecClusterHitFactorsDia.at(area);
+		else {
+			if(clusterHitFactors.size()>det)
+				return clusterHitFactors.at(det);
+			return getDi_Cluster_Hit_Factor();
+		}
+	}
 	if(clusterHitFactors.size()>det)
 		return clusterHitFactors.at(det);
-	if(det==8)
-		return getDi_Cluster_Hit_Factor();
 	return getSi_Cluster_Hit_Factor();
 }
 
@@ -1040,7 +851,7 @@ void TSettings::setZoomDiamondPlots(Int_t zoomDiamondPlots)
 
 bool TSettings::isDet_channel_screened(UInt_t det, UInt_t ch)
 {
-	if(det<9&&ch<256)
+	if(det<TPlaneProperties::getNDetectors()&&ch<TPlaneProperties::getNChannels(det))
 		return this->Det_channel_screen[det].isScreened(ch);
 	else
 		return true;
@@ -1650,3 +1461,37 @@ bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
 Int_t TSettings::getVerbosity(){
 	return this->verbosity;
 }
+
+bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
+	if(area<getNDiaDetectorAreas())
+		return getDiaDetectorArea(area).first<=ch&&ch<=getDiaDetectorArea(area).second;
+	else return false;
+}
+
+int TSettings::getDiaDetectorAreaOfChannel(Int_t ch){
+	for(Int_t area =0;area< getNDiaDetectorAreas();area++)
+		if(isInDiaDetectorArea(ch,area))
+			return area;
+	return -1;
+}
+
+bool TSettings::isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels){
+	bool isMasked = false;
+	for(UInt_t i=0;i<cluster.getClusterSize()&&!isMasked;i++){
+		int channelNo = cluster.getChannel(i);
+		bool isScreened = this->isDet_channel_screened(det,channelNo);
+		bool isAdjacentToCluster = !cluster.isHit(i);
+		if(checkAdjacentChannels)
+			isMasked = isMasked || isScreened;
+		else if (isAdjacentToCluster){
+				continue;
+			}
+			else{
+				isMasked = isMasked || isScreened;
+			}
+	}
+//	cout<<"==>"<<isMasked<<endl;
+	return isMasked;
+}
+
+

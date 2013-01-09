@@ -30,8 +30,6 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	settings->goToPedestalTreeDir();
 	this->runNumber=runNumber;
 	verbosity=0;
-	this->maxDetAdcValue=255;
-	this->maxDiaAdcValue=4095;
 	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
@@ -81,10 +79,10 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),nEvents/50,0,1);
 	}
 	for(UInt_t det=0;det< TPlaneProperties::getNSiliconDetectors();det++)
-		cout<< "\tSNRs for silicon plane "<<det<<": "<<settings->getClusterSeedFactor(det)<<"/"<<settings->getClusterHitFactor(det)<<endl;
+		cout<< "\tSNRs for silicon plane "<<det<<": "<<settings->getClusterSeedFactor(det,0)<<"/"<<settings->getClusterHitFactor(det,0)<<endl;
 	cout<<endl;
 	for(UInt_t det=TPlaneProperties::getDetDiamond();det< TPlaneProperties::getNDetectors();det++)
-			cout<< "\tSNRs for diamond plane "<<det<<": "<<settings->getClusterSeedFactor(det)<<"/"<<settings->getClusterHitFactor(det)<<endl;
+			cout<< "\tSNRs for diamond plane "<<det<<": "<<settings->getClusterSeedFactor(det,0)<<"/"<<settings->getClusterHitFactor(det,0)<<endl;
 	UInt_t validEvents=0;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 
@@ -165,9 +163,9 @@ void TClustering::clusterDetector(UInt_t det){
 		//if(verbosity>2&&nEvent==0&&det==8&&ch<TPlaneProperties::getNChannels(det))cout<<SNR<<flush;
 
 
-		if( SNR>settings->getClusterSeedFactor(det)){
+		if( SNR>settings->getClusterSeedFactor(det,ch)){
 			if(verbosity>3)cout<<"Found a Seed "<<nEvent<<" "<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
-			ch=combineCluster(det,ch,TPlaneProperties::getMaxSignalHeight(det));
+			ch=combineCluster(det,ch);
 			if(verbosity>20)cout<<"new channel no.:"<<ch<<flush;
 		}
 	}
@@ -192,7 +190,8 @@ void TClustering::clusterDetector(UInt_t det){
  *
  * 			\return first channel which is not part of the cluster
  */
-int TClustering::combineCluster(int det, int ch,int maxAdcValue){
+int TClustering::combineCluster(int det, int ch){
+	int maxAdcValue = TPlaneProperties::getMaxSignalHeight(det);
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"combine Cluster...start:"<<ch<<" ";
 
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
@@ -202,8 +201,8 @@ int TClustering::combineCluster(int det, int ch,int maxAdcValue){
 	Float_t cmNoise = eventReader->getCMNoise();
 
 	//create Cluster
-	int seedSigma=settings->getClusterSeedFactor(det);
-	int hitSigma=settings->getClusterHitFactor(det);
+	int seedSigma=settings->getClusterSeedFactor(det,ch);
+	int hitSigma=settings->getClusterHitFactor(det,ch);
 	bool isScreened;
 	int maxChannel=TPlaneProperties::getNChannels(det);
 

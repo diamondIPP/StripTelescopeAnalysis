@@ -9,6 +9,15 @@
 using namespace std;
 
 TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
+	init(FileName,runNumber,verb);
+	this->settings = new TSettings();
+}
+TADCEventReader::TADCEventReader(string FileName,TSettings* settings) {
+	init(FileName,settings->getRunNumber(),settings->getVerbosity());
+	this->settings = settings;
+}
+
+void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 	verbosity=verb;
 
 	if(verbosity>3)cout<<"new TADCEventReader: \n\tpathName:"<<FileName<<"\n\tRunNumber: "<<runNumber<<endl;
@@ -36,6 +45,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
 	LoadEtaDistributions(runNumber);
 	pEvent=NULL;//new TEvent();
 }
+
 
 TADCEventReader::~TADCEventReader() {
 	if(verbosity>3)cout<< "deleting instance of TADCEventReader"<<flush;
@@ -714,6 +724,7 @@ TH1F *TADCEventReader::getEtaIntegral(UInt_t det)
 }
 
 void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
+	cout<<"Load Eta Distributions of run "<<runNumber<<"\t"<<flush;
 	bEtaIntegrals=true;
 	stringstream etaFileName;
 
@@ -721,7 +732,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
     etaFileName<<"etaCorrection."<<runNumber<<".root";
   else
     etaFileName<<etaDistributionPath;
-
+  cout<<etaFileName<<endl;
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
@@ -738,8 +749,10 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		fEtaDis->GetObject(objectName.str().c_str(),histo);
 		file->cd();
 		bEtaIntegrals=bEtaIntegrals&&(histo!=0);
-		if(histo)
+		if(histo){
 			hEtaIntegral[det]=(TH1F*)histo->Clone();
+			cout<<"Loaded EtaIntegral of "<<det<<" Detector. "<<hEtaIntegral[det]<<endl;
+		}
 		else
 			cerr<<"Object \""<<objectName.str()<<"\" does not exist"<<endl;
 	}
@@ -748,7 +761,8 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 
 void TADCEventReader::setEtaDistributionPath(std::string path)
 {
-  etaDistributionPath=path;
+	cout<<"Set Eta DistributionPath: "<<path<<endl;
+	etaDistributionPath=path;
 }
 
 

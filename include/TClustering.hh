@@ -49,7 +49,7 @@ private:
 	void saveEtaCorrections();
 	void clusterEvent();
 	void clusterDetector(UInt_t det);
-	int combineCluster(int det,int ch,int maxAdcValue=255);
+	int combineCluster(int det,int ch);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;

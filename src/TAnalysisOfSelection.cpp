@@ -60,6 +60,14 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution= new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
 	histoLandauDistribution->GetXaxis()->SetTitle("Charge in ADC counts");
 	histoLandauDistribution->GetYaxis()->SetTitle("ClusterSize");
+	histoLandauDistribution2D = new TH2F("histoLandauDistribution2D_Clustersize_1_2","histoLandauDistribution2D_Clustersize_1_2",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2D->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
+	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
+	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
+	histoLandauDistribution2D_unmasked = new TH2F("histoLandauDistribution2D_Clustersize_1_2_unmasked","histoLandauDistribution2D_Clustersize_1_2_unmasked",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2D_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
+	histoLandauDistribution2D_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
+	histoLandauDistribution2D_unmasked->GetZaxis()->SetTitle("number of entries");
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
@@ -76,7 +84,35 @@ void TAnalysisOfSelection::saveHistos()
 {
 //	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
 	LandauGaussFit landauGauss;
+	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
+	histSaver->OptimizeXYRange(histoLandauDistribution2D);
 	histSaver->SaveHistogram(histoLandauDistribution);
+	cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
+	histSaver->SaveHistogram(histoLandauDistribution2D);
+	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
+	for(Int_t area=0;area<settings->getNDiaDetectorAreas();area++){
+		Int_t binLow = settings->getDiaDetectorArea(area).first;
+		Int_t binHigh =  settings->getDiaDetectorArea(area).second;
+		TString name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d-%d",area,binLow,binHigh);
+		TH2F* histoLandauDistribution2Darea = (TH2F*)histoLandauDistribution2D->Clone(name);
+		histoLandauDistribution2Darea->GetYaxis()->SetRangeUser(binLow-1,binHigh+1);
+		histSaver->SaveHistogram(histoLandauDistribution2Darea);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_unmasked_%d_ch_%d-%d",area,binLow,binHigh);
+		TH2F* histoLandauDistribution2DareaUnmasked = (TH2F*)histoLandauDistribution2D_unmasked->Clone(name);
+		histoLandauDistribution2DareaUnmasked->GetYaxis()->SetRangeUser(binLow-1,binHigh+1);
+		binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(binLow);
+		binHigh = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(binHigh);
+		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmasked);
+		delete histoLandauDistribution2DareaUnmasked;
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,binLow,binHigh);
+		TH1F* hProjection = (TH1F*)histoLandauDistribution2D->ProjectionX(name,binLow,binHigh);
+		hProjection->SetTitle(name);
+		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+		hProjection->GetYaxis()->SetTitle("number of entries");
+		histSaver->SaveHistogram(hProjection);
+		delete hProjection;
+
+	}
 	vector <Float_t> vecMP;
 	vector <Float_t> vecClusSize;
 	vector <Float_t> vecWidth;
@@ -121,7 +157,7 @@ void TAnalysisOfSelection::saveHistos()
 	stringstream name;
 	name.str("");
 	name.clear();
-	name<< "hPulseHeigthDiamond_1-2_ClusterSize";
+	name<< "hPulseHeigthDiamond_1_2_ClusterSize";
 	TH1F* histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),1,2);
 //	cout<<"CREATED "<<histo12->GetName()<<endl;
 	if(histo12==0) {
@@ -148,7 +184,7 @@ void TAnalysisOfSelection::saveHistos()
 			fitCS12 = landauGauss.doLandauGaussFit(histo);
 		}
 		else{
-			cout<<"1-2 Cluster plot is empty....."<<endl;
+			cout<<"1_2 Cluster plot is empty....."<<endl;
 		}
 //		cout<<"Save HISTOGRAM: "<<histo12->GetName()<<endl;
 		histSaver->SaveHistogram(histo12);
@@ -253,6 +289,8 @@ void TAnalysisOfSelection::saveHistos()
 	delete histo;
 	delete histoClusSize;
 	delete histoLandauDistribution;
+	delete histoLandauDistribution2D;
+	delete histoLandauDistribution2D_unmasked;
 	delete mg;
 	delete c1;
 
@@ -327,6 +365,13 @@ void TAnalysisOfSelection::analyseEvent()
 		histoLandauDistribution->Fill(charge,clustSize);
 		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
 		hClusterPosition->Fill(pos);
+		if(clustSize<=2){
+			histoLandauDistribution2D_unmasked->Fill(charge,pos);
+			bool isMaskedCluster = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
+			if(!isMaskedCluster){
+				histoLandauDistribution2D->Fill(charge,pos);
+			}
+		}
 	}
 }
 

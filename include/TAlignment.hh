@@ -58,10 +58,16 @@
  *
  */
 class TAlignment {
+private:
+	enum resCalcMode  { normalCalcMode,chi2CalcMode};
+public:
+	enum enumDetectorsToAlign {diaAlignment,silAlignment,bothAlignment};
 public:
 	TAlignment(TSettings* settings);
 	virtual ~TAlignment();
-	int Align(UInt_t nEvents=0,UInt_t startEvent=0);
+	int Align(UInt_t nEvents=0,UInt_t startEvent=0,enumDetectorsToAlign detAlign=bothAlignment);
+	int AlignSilicon(UInt_t nEvents=0,UInt_t startEvent=0);
+	int AlignDiamond(UInt_t nEvents=0,UInt_t startEvent=0);
 	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
@@ -70,9 +76,12 @@ public:
 private:
 	void clearMeasuredVectors();
 	void initialiseDetectorAlignment();
-	void alignSiliconPlanes();
-	bool siliconAlignmentStep(bool bPrint=false);
+	void loadDetectorAlignment();
+	void AlignSiliconPlanes();
+	void doPreAlignment();
+	bool siliconAlignmentStep(bool bPrint=false,bool bUpdateAlignment = true);
 	void AlignDiamondPlane();
+
 	void saveAlignment();
 	void getChi2Distribution(Float_t maxChi2=1000);
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::XY_COR,subjectPlane,refPlane1,refPlane2);};
@@ -91,15 +100,15 @@ private:
 	TResidual CheckStripDetectorAlignment(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t> vecRefPlanes, bool bAlign=false,bool bPlot=false,TResidual res=TResidual(true));
 	TResidual CheckStripDetectorAlignmentChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, Float_t maxChi2);
 
-	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue);
-	TResidual getStripResidualChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,Float_t maxChi2=1000,TCluster::calculationMode_t mode=TCluster::maxValue);
+	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
+	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
+	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
+//	TResidual getStripResidualChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,Float_t maxChi2=1000,TCluster::calculationMode_t mode=TCluster::maxValue);
 
 //	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY) {return calculateResidual(cor,xPred,deltaX,yPred,deltaY,TResidual(true));};
 //	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
 
-	TResidual calculateResidualWithChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool bAlign=false,bool plot=false);
+//	TResidual calculateResidualWithChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool bAlign=false,bool plot=false);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
@@ -128,8 +137,9 @@ private:
     TCluster::calculationMode_t diaCalcMode;
     TCluster::calculationMode_t silCalcMode;
     THTMLAlignment *htmlAlign;
-    bool plotAll;
+    bool bPlotAll;
 private:
+    TResidual resPlane1,resPlane2,resPlane3;
     TResults* results;
 	std::vector<TResidual> vecRes103;
 	vector<Float_t> vecXPred;
@@ -144,8 +154,10 @@ private:
 	vector<Float_t> vecYChi2;
 	vector<Float_t> vecXPhi;
 	vector<Float_t> vecYPhi;
+	vector<Float_t> vecXResPrediction;
+	vector<Float_t> vecYResPrediction;
 	vector<Float_t> vecClusterSize;
-
+	TCluster::calculationMode_t getClusterCalcMode(Int_t plane){return TPlaneProperties::isDiamondPlane(plane)?diaCalcMode:silCalcMode;}
 };
 
 #endif /* TALIGNMENT_HH_ */

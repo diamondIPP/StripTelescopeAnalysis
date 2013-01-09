@@ -51,10 +51,10 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 		vecTable.at(6).push_back(floatToString(vecMPPulseHeigths.at(1).at(clusterSize)));
 	}
 	sectionContent << createTable(vecTable);
-	sectionContent	<< putImage(".","hDiaTranspAnaPulseHeightMean")
-					<< putImage(".","hDiaTranspAnaPulseHeightMP")
-					<< putImage(".","hDiaTranspAnaPulseHeightOf2HighestMean")
-					<< putImage(".","hDiaTranspAnaPulseHeightOf2HighestMP");
+	sectionContent	<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMean")
+					<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMP")
+					<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMean")
+					<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMP");
 	sectionContent << "\n\n<br><br>\n\n";
 	stringstream plots1, plots2;
 	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {

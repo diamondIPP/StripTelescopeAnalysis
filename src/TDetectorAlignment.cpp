@@ -90,6 +90,21 @@ void TDetectorAlignment::addEventIntervall(UInt_t first, UInt_t last){
 	nEvents+=(last-first);
 }
 
+bool TDetectorAlignment::isPreAligned(Float_t maxOffset,Int_t nAlignedDetectors) {
+	int nPreAligned =0;
+	bool preAligned = true;
+	for(UInt_t pl =0;pl<6;pl++){
+		if(this->GetXOffset(pl)!=0){
+			preAligned = preAligned && this->getXMean(pl)<maxOffset;
+			nPreAligned++;
+		}
+		if(this->GetYOffset(pl)!=0){
+			preAligned = preAligned && this->getYMean(pl)<maxOffset;
+			nPreAligned++;
+		}
+	}
+	return nPreAligned>nAlignedDetectors&&preAligned;
+}
 
 int TDetectorAlignment::getVerbosity() const
 {
@@ -294,6 +309,14 @@ Double_t TDetectorAlignment::getXResolution(UInt_t plane)
     return xResolution[plane];
 	return 2;
 }
+
+Double_t TDetectorAlignment::getZResolution(UInt_t plane)
+{
+	if(plane<6)
+    return 0;//zResolution[plane];
+	return 2;
+}
+
 
 void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
 {

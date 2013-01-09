@@ -58,6 +58,7 @@ public:
 	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, UInt_t verbosity=0);
+	void SaveHistogramLogZ(TH2F* histo);
 	void SaveHistogram(TH2F* histo);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPNG(TH1* histo);
@@ -78,17 +79,24 @@ public:
 	void SetDuckStyle();
 	void SaveStringToFile(std::string name,std::string data);
 	void SetRange(Float_t min,Float_t max);
+	static std::pair<Float_t, Float_t> OptimizeXRange(TH1F* histo);
+	static void OptimizeXRange(TH2F* histo);
+	static void OptimizeYRange(TH2F* histo);
+	static void OptimizeXYRange(TH2F* histo);
+
 
 	static TH2F* CreateScatterHisto(std::string name,std::vector<Float_t> posX, std::vector<Float_t> posY,UInt_t nBins=512);
 	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos);
 	static TH2F* CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=512);
 	static TH1F* CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096,EnumAxisRange range=maxWidth,Float_t xmin=-1,Float_t xmax=1);
+	static Float_t GetMean(std::vector<Float_t> vec);
 	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
 	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
 	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
 	static TGraphErrors CreateErrorGraph(std::string name,std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey);
-
+	static void CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto);
 private:
+	Float_t xRangeMin,xRangeMax;
 
     TPaveText *pt;
     TDatime dateandtime;
