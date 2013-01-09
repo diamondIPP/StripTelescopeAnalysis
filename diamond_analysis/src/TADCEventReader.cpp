@@ -9,6 +9,15 @@
 using namespace std;
 
 TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
+	init(FileName,runNumber,verb);
+	this->settings = new TSettings();
+}
+TADCEventReader::TADCEventReader(string FileName,TSettings* settings) {
+	init(FileName,settings->getRunNumber(),settings->getVerbosity());
+	this->settings = settings;
+}
+
+void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 	verbosity=verb;
 
 	if(verbosity>3)cout<<"new TADCEventReader: \n\tpathName:"<<FileName<<"\n\tRunNumber: "<<runNumber<<endl;
@@ -36,6 +45,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
 	LoadEtaDistributions(runNumber);
 	pEvent=NULL;//new TEvent();
 }
+
 
 TADCEventReader::~TADCEventReader() {
 	if(verbosity>3)cout<< "deleting instance of TADCEventReader"<<flush;

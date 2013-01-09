@@ -12,9 +12,10 @@
  * @brief cornsturcter of TTrack class
  * @param alignment pointer on current alignment
  */
-TTrack::TTrack(TDetectorAlignment *alignment) {
+TTrack::TTrack(TDetectorAlignment *alignment,TSettings* settings) {
 	verbosity=0;
 	this->alignment = alignment;
+	this->settings = settings;
 	event=NULL;
 
 	linFitX = new TLinearFitter(1,"pol1","D");
@@ -49,6 +50,34 @@ UInt_t TTrack::getNClusters(int det) {
 	}
 }
 
+Float_t TTrack::getXMeasuredClusterPositionMetricSpace(UInt_t plane, TCluster::calculationMode_t mode, TH1F* histo) {
+	return this->getMeasuredClusterPositionMetricSpace(plane*2,mode,histo);
+}
+
+Float_t TTrack::getYMeasuredClusterPositionMetricSpace(UInt_t plane, TCluster::calculationMode_t mode, TH1F* histo) {
+	return this->getMeasuredClusterPositionMetricSpace(plane*2+1,mode,histo);
+}
+
+Float_t TTrack::getMeasuredClusterPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane, TCluster::calculationMode_t mode, TH1F* histo) {
+	if (cor==TPlaneProperties::X_COR)
+		return getMeasuredClusterPositionMetricSpace(plane*2,mode,histo);
+	else if (cor==TPlaneProperties::Y_COR)
+		return getMeasuredClusterPositionMetricSpace(plane*2+1,mode,histo);
+	return N_INVALID;
+}
+
+Float_t TTrack::getMeasuredClusterPositionMetricSpace(UInt_t det, TCluster::calculationMode_t mode, TH1F* histo) {
+	return inMetricDetectorSpace(det,this->getMeasuredClusterPositionChannelSpace(det,mode,histo));
+}
+
+Float_t TTrack::inMetricDetectorSpace(UInt_t det, Float_t clusterPosition){
+	Float_t metricValue = 0;
+	if(TPlaneProperties::isSiliconDetector(det))
+		metricValue =  clusterPosition*settings->getSiliconPitchWidth();
+	else if(TPlaneProperties::isDiamondDetector(det))
+		metricValue =  clusterPosition*settings->getDiamondPitchWidth();
+	return metricValue;
+}
 
 /**
  * calculate Position of hit in the lab frame using the  X/Y detector cluster positions in channel numbers.
@@ -60,7 +89,6 @@ UInt_t TTrack::getNClusters(int det) {
  * @param yCluster
  * @param mode
  * @return value of calculated position
- * @todo move from LAB frame in ADC channels to LAB frame in metric units
  */
 Float_t TTrack::getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0||yCluster.size()<=0)
@@ -69,25 +97,27 @@ Float_t TTrack::getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t
 	Float_t yOffMeas = this->getYOffset(plane);
 	Float_t xPhiOff = this->getPhiXOffset(plane);
 	Float_t yPhiOff = this->getPhiYOffset(plane);
-	Float_t xMeas = xCluster.getPosition(mode,getEtaIntegral(plane*2));
-	Float_t yMeas = yCluster.getPosition(mode,getEtaIntegral(plane*2+1));
+	UInt_t detX = plane*2;
+	UInt_t detY = plane*2+1;
+	Float_t xMeasMetric = inMetricDetectorSpace(detX,xCluster.getPosition(mode,getEtaIntegral(detX)));
+	Float_t yMeasMetric = inMetricDetectorSpace(detY,yCluster.getPosition(mode,getEtaIntegral(detY)));
 
 	// get gradients of straight lines
 	Float_t m_x = xPhiOff==0?0:1./TMath::Tan(xPhiOff);//cotan
 	Float_t m_y = TMath::Tan(-1.*yPhiOff);//tan
 	//take Position in the detecor frame at y_det = 0 and convert it into the lab frame
-	Float_t x_x = xOffMeas + TMath::Cos(xPhiOff)*xMeas;
-	Float_t y_x = (-1.)*TMath::Sin(xPhiOff)*xMeas;
+	Float_t x_x = xOffMeas + TMath::Cos(xPhiOff)*xMeasMetric;
+	Float_t y_x = (-1.)*TMath::Sin(xPhiOff)*xMeasMetric;
 	//take y Position in the dector frame at x_det = 0 and convert it into the lab frame
-	Float_t x_y = TMath::Sin(yPhiOff)*yMeas;
-	Float_t y_y = yOffMeas+TMath::Cos(yPhiOff)*yMeas;
+	Float_t x_y = TMath::Sin(yPhiOff)*yMeasMetric;
+	Float_t y_y = yOffMeas+TMath::Cos(yPhiOff)*yMeasMetric;
 
 	//out of slope and position we can calculate the offset
-	Float_t b_x = xPhiOff==0?xOffMeas+xMeas:y_x-m_x*x_x;
+	Float_t b_x = xPhiOff==0?xOffMeas+xMeasMetric:y_x-m_x*x_x;
 	Float_t b_y = y_y-m_y*x_y;
 	//find interception of both straight liness
 	Float_t x = (b_y-b_x)/(m_x-m_y);
-	if (xPhiOff==0) x = xOffMeas+xMeas;
+	if (xPhiOff==0) x = xOffMeas+xMeasMetric;
 	Float_t xPosition = x;
 	Float_t yPosition = m_y*x+b_y;
 	if(m_y!=m_y){
@@ -100,7 +130,7 @@ Float_t TTrack::getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t
 	}
 
 	if(verbosity&&(xPosition==-1||yPosition==-1)){
-		cout<<" Meas: "<<xMeas<<"/"<<yMeas<<"\toff: "<<xOffMeas<<"/"<<yOffMeas<<"\tphi"<<xPhiOff<<"/"<<yPhiOff<<endl;
+		cout<<" Meas: "<<xMeasMetric<<"/"<<yMeasMetric<<"\toff: "<<xOffMeas<<"/"<<yOffMeas<<"\tphi"<<xPhiOff<<"/"<<yPhiOff<<endl;
 		cout<<"X:"<<mode<<" "<<xCluster.getPosition(mode,histo)<<endl;
 		xCluster.Print(2);
 		cout<<"Y: "<<endl;
@@ -116,7 +146,7 @@ Float_t TTrack::getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t
 }
 
 /**
- * calculate Position in lab system of a cluster
+ * calculate Position in lab system of a cluster when there is no perpendicular strip detector
  *
  * @param det detector in which the cluster is
  * @param cluster
@@ -129,7 +159,7 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
 	UInt_t plane = det/2;
 	if(histo==0)
 		histo = (TH1F*)getEtaIntegral(plane*2+1);
-	Float_t meas = cluster.getPosition(mode,histo);
+	Float_t meas = inMetricDetectorSpace(det,cluster.getPosition(mode,histo));
 	Float_t xOffMeas = this->getXOffset(plane);
 	Float_t yOffMeas = this->getYOffset(plane);
 	Float_t xPhiOff = this->getPhiXOffset(plane);
@@ -158,7 +188,7 @@ Float_t TTrack::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predi
  * plane space into the space of the first plane
  * @param cor enum of Coordinate from which you want to have the result
  * @param plane number of plane for which you are calculating the hitposition
- * @return calculated hit position
+ * @return calculated hit position in Metric Space
  */
 Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(event==NULL)return N_INVALID;
@@ -172,7 +202,7 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
 	}
 	if(histo==NULL)
 		histo = getEtaIntegral(plane*2);
-	return getPositionInLabFrameStripDetector(plane,xCluster,yPred,mode,histo);
+	return getXPositionInLabFrameStripDetector(plane,xCluster,yPred,mode,histo);
 }
 
 /**
@@ -181,33 +211,36 @@ Float_t TTrack::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculati
  * plane space into the space of the first plane
  * @param cor enum of Coordinate from which you want to have the result
  * @param plane number of plane for which you are calculating the hitposition
- * @return calculated hit position
+ * @param yPred prediction of Y Position in metric Space
+ * @return calculated hit position in Metric LAB Frame
  */
-Float_t TTrack::getPositionInLabFrameStripDetector(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TTrack::getXPositionInLabFrameStripDetector(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0)
 		return N_INVALID;
 	// get offsets
+	UInt_t det = plane * 2;
 	Float_t xOffset = this->getXOffset(plane);
 	Float_t phiXOffset = this->getPhiXOffset(plane);
 	if(histo==NULL)
-		histo = getEtaIntegral(plane*2);
+		histo = getEtaIntegral(det);
 
-	Float_t xMeasured = xCluster.getPosition(mode,histo);//-xOffset;
-
+	Float_t xMeasured = inMetricDetectorSpace(det,xCluster.getPosition(mode,histo));//-xOffset;
 	// apply offsets
+	//calculation checked. is correct
 	Float_t xPosition = (xMeasured) / TMath::Cos(phiXOffset) + (yPred) * TMath::Tan(phiXOffset);
 	xPosition += xOffset;
 	if(verbosity)cout<<"Xpos of"<<plane<<": with "<<phiXOffset<<" and  "<<xOffset<<" measured: "<<xMeasured<<", "<<xPosition<<"/"<<yPred<<endl;
 
 	return xPosition;
 }
+
 /**
  * gives the xPosition of "event" in the telescope space
  * this function uses getPosition(X_COR,plane)
  * @param plane planeNumber to use correct offsets
  * @return calculated xPosition
  */
-Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
+Float_t TTrack::getXPositionMetric(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
 		histo = getEtaIntegral(plane*2);
 	return getPositionInLabFrame(TPlaneProperties::X_COR,plane,mode,histo);
@@ -219,7 +252,7 @@ Float_t TTrack::getXPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F*
  * @param plane planeNumber to use correct offsets
  * @return calculated yPosition
  */
-Float_t TTrack::getYPosition(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
+Float_t TTrack::getYPositionMetric(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo) {
 	if(histo==0)
 			histo = getEtaIntegral(plane*2);
 	return getPositionInLabFrame(TPlaneProperties::Y_COR,plane,mode,histo);
@@ -263,7 +296,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	if(vecRefPlanes.size()==1){
 		if(verbosity>3)	cout<<"TTrack::predictPosition with 1 refPlane"<<endl;
 		//todo anpassen so dass sigmas da drin reinkommen...
-		TPositionPrediction *prediction=new TPositionPrediction(zPosSubjectPlane,zSigma,getXPosition(vecRefPlanes.at(0),mode), 0.,0.,getYPosition(vecRefPlanes.at(0),mode),0.,0.,0,0);
+		TPositionPrediction *prediction=new TPositionPrediction(zPosSubjectPlane,zSigma,getXPositionMetric(vecRefPlanes.at(0),mode), 0.,0.,getYPositionMetric(vecRefPlanes.at(0),mode),0.,0.,0,0);
 		return prediction;
 	}
 	vector<Double_t> zPosVec;//todo add xsigma ysigma
@@ -274,8 +307,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		zPosVec.clear();
 		Float_t zPos = alignment->GetZOffset(plane)-zPosSubjectPlane;
 		zPosVec.push_back(zPos);
-		Float_t xPos = (Double_t)getXPosition(plane,mode);
-		Float_t yPos = (Double_t)getYPosition(plane,mode);
+		Float_t xPos = (Double_t)getXPositionMetric(plane,mode);
+		Float_t yPos = (Double_t)getYPositionMetric(plane,mode);
 		if((xPos==-1||yPos==-1)&&verbosity){
 			cout<<"Problem with Plane "<<plane<<" "<<xPos<<" "<<yPos<<endl;
 			event->Print(1);
@@ -331,7 +364,7 @@ vector<Float_t> TTrack::getSiXPositions() {
 	vector<Float_t> xPositions;
 	if(event==NULL)return xPositions;
 	for (int plane = 0; plane < 4; plane++) {
-		xPositions.push_back(this->getXPosition(plane));
+		xPositions.push_back(this->getXPositionMetric(plane));
 	}
 	return xPositions;
 }
@@ -341,7 +374,7 @@ vector<Float_t> TTrack::getSiYPositions() {
 	vector<Float_t> yPositions;
 	if(event==NULL)return yPositions;
 	for (int plane; plane < 4; plane++) {
-		yPositions.push_back(this->getYPosition(plane));
+		yPositions.push_back(this->getYPositionMetric(plane));
 	}
 	return yPositions;
 }
@@ -353,14 +386,15 @@ void TTrack::setDetectorAlignment(TDetectorAlignment *alignment)
 	this->alignment=alignment;
 }
 
-Float_t TTrack::getXMeasured(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
+Float_t TTrack::getXMeasuredClusterPositionChannelSpace(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
 {
-	return getMeasured(TPlaneProperties::X_COR,plane,mode,histo);
+	return getMeasuredClusterPositionChannelSpace
+			(TPlaneProperties::X_COR,plane,mode,histo);
 }
 
-Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
+Float_t TTrack::getYMeasuredClusterPositionChannelSpace(UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
 {
-	return getMeasured(TPlaneProperties::Y_COR,plane,mode,histo);
+	return getMeasuredClusterPositionChannelSpace(TPlaneProperties::Y_COR,plane,mode,histo);
 }
 /**
  * Calculation of Hitposition of event using the measured Offsets
@@ -372,8 +406,10 @@ Float_t TTrack::getYMeasured(UInt_t plane,TCluster::calculationMode_t mode,TH1F*
  */
 Float_t TTrack::getPositionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo){
 	if(event==NULL)return N_INVALID;
-	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1)
+	if(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1){
+		if(verbosity>5) cout<<event->getEventNumber()<<" TTRack::getPositionInLabFrame: "<<event->getNXClusters(plane)<<" "<<event->getNYClusters(plane)<<" "<<endl;
 		return N_INVALID;
+	}
 	// get offsets
 	TCluster xCluster,yCluster;
 	xCluster=event->getPlane(plane).getXCluster(0);
@@ -382,11 +418,21 @@ Float_t TTrack::getPositionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_
 }
 
 
-Float_t TTrack::getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
+/**
+ * if there exist one and only one Cluster in the plane for a given coordinate it returns the
+ * channel position of the cluster calculate with a certain mode
+ * @param cor
+ * @param plane
+ * @param mode
+ * @param histo
+ * @return
+ */
+Float_t TTrack::getMeasuredClusterPositionChannelSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode,TH1F* histo)
 {
-	if(event==NULL)return N_INVALID;
+	if(event==NULL)
+		return N_INVALID;
 	if(cor==TPlaneProperties::XY_COR&&(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1))
-	return N_INVALID;
+		return N_INVALID;
 	if(cor==TPlaneProperties::X_COR&&event->getNXClusters(plane)==1)
 		return event->getPlane(plane).getXPosition(0,mode,histo);
 	if(cor==TPlaneProperties::Y_COR&&event->getNYClusters(plane)==1)
@@ -400,15 +446,42 @@ Float_t TTrack::getMeasured(TPlaneProperties::enumCoordinate cor, UInt_t plane,T
 //	}
 }
 
-// returns the raw channel number for a x,y position in lab system
+Float_t TTrack::getMeasuredClusterPositionChannelSpace(UInt_t det,TCluster::calculationMode_t mode,TH1F* histo)
+{
+	if (det%2==0)
+		return getMeasuredClusterPositionChannelSpace(TPlaneProperties::X_COR,det/2,mode,histo);
+	else
+		return getMeasuredClusterPositionChannelSpace(TPlaneProperties::Y_COR,det/2,mode,histo);
+	return N_INVALID;
+}
+
+/**
+ * from a given prediction xPred/yPred this function calculates the corresponding raw channel no in det Detector
+ * where the hit should have been
+ * @author Lukas Baeni
+ * @param det
+ * @param xPred
+ * @param yPred
+ * @return
+ * @todo Felix: I just calculated the things by my own but I'm not sure if there is an error:
+ * 			with
+ * 			 x_m: measured x pos (Detecotr frame)
+ * 			 y_i: detector frame y position (not measured)
+ * 			 x_off: offset x
+ * 			 phi: angle of lab frame to detector frame
+ * 			x_P/y_P = (x_off + cos phi * x_m + sin phi * y_i/ -sin phi x_m + cos phi * y_i)
+ * 			solve it to get x_m:
+ * 			x_m = cos phi * x(x
+ */
 UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
 {
 	UInt_t plane = det / 2;
 	int rawChannel = 9999;
+	Float_t metricDetectorPosition = N_INVALID;
 	// x planes:
 	if (det%2 == 0) {
 		//TODO
-		rawChannel = (int)((xPred-this->getXOffset(plane) - (yPred/*-this->getYOffset(plane)*/)*TMath::Tan(this->getPhiXOffset(plane))) * TMath::Cos(this->getPhiXOffset(plane)));
+		metricDetectorPosition = (int)((xPred-this->getXOffset(plane) - (yPred/*-this->getYOffset(plane)*/)*TMath::Tan(this->getPhiXOffset(plane))) * TMath::Cos(this->getPhiXOffset(plane)));
 	}
 	// y planes:
 	else {

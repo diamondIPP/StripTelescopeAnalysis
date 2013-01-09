@@ -144,17 +144,17 @@ void THTMLAlignment::createOverviewTable()
   if(alignment!=0){
     for(UInt_t plane=0;plane<TPlaneProperties::getNSiliconPlanes();plane++){
       table.at(plane+1).push_back(center(combineToString((string)"Plane ",plane)));
-      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getXResolution(plane)*TPlaneProperties::getStripDistance():0))));
-      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getYResolution(plane)*TPlaneProperties::getStripDistance():0))));
+      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getXResolution(plane):0))));
+      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getYResolution(plane):0))));
       table.at(plane+1).push_back("");
-      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getXMean(plane)*TPlaneProperties::getStripDistance():0))));
-      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getYMean(plane)*TPlaneProperties::getStripDistance():0))));
+      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getXMean(plane):0))));
+      table.at(plane+1).push_back(center(combineToString((string)" ",(float)(alignment!=0?alignment->getYMean(plane):0))));
     }
     table.at(5).push_back("Diamond");
-    table.at(5).push_back(center(combineToString((string)"",alignment!=0?alignment->getXResolution(4)*TPlaneProperties::getStripDistance():0)));
+    table.at(5).push_back(center(combineToString((string)"",alignment!=0?alignment->getXResolution(4):0)));
     table.at(5).push_back(center("--"));
     table.at(5).push_back("");
-    table.at(5).push_back(center(combineToString((string)"",alignment!=0?alignment->getXMean(4)*TPlaneProperties::getStripDistance():0)));
+    table.at(5).push_back(center(combineToString((string)"",alignment!=0?alignment->getXMean(4):0)));
     table.at(5).push_back(center("--"));
   }
 //  sectionContent<<"<h1>Alignment Overview</h1>\n";

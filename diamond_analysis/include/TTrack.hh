@@ -1,3 +1,7 @@
+/**
+ * TTrack.hh
+ *
+ */
 //
 //  TTrack.hh
 //  Diamond Analysis
@@ -51,22 +55,29 @@
 class TTrack {
 public:
 
-	TTrack(TDetectorAlignment *alignment);
+	TTrack(TDetectorAlignment *alignment, TSettings *settings);
 	virtual ~TTrack();
 	UInt_t getNClusters(int det);
 //	bool  isValidSiliconTrack(){event.isValidSiliconTrack();};
 	void setEvent(TEvent *newEvent){this->event = newEvent;};
-	Float_t getPositionInLabFrameStripDetector(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getXPositionInLabFrameStripDetector(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getPositionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getXPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getYPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getXPositionMetric(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getYPositionMetric(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	Float_t getZPosition(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
-	Float_t getXMeasured(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getYMeasured(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getMeasured(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+
+	Float_t getXMeasuredClusterPositionChannelSpace(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo= 0);
+	Float_t getYMeasuredClusterPositionChannelSpace(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo= 0);
+	Float_t getMeasuredClusterPositionChannelSpace(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getMeasuredClusterPositionChannelSpace(UInt_t det,TCluster::calculationMode_t mode = TCluster::highest2Centroid,TH1F* histo = 0);
+
+	Float_t getXMeasuredClusterPositionMetricSpace(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo = 0);
+	Float_t getYMeasuredClusterPositionMetricSpace(UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo = 0);
+	Float_t getMeasuredClusterPositionMetricSpace(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo =0);
+	Float_t getMeasuredClusterPositionMetricSpace(UInt_t det,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo =0);
 	UInt_t getClusterSize(UInt_t det, UInt_t cluster){return event->getClusterSize(det,cluster);};
 	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,TCluster::calculationMode_t mode=TCluster::highest2Centroid,bool bPrint=false);
 	vector<Float_t> getSiXPositions();
@@ -82,7 +93,8 @@ public:
 	void setEtaIntegral(UInt_t det,TH1F* histo);
 	TH1F* getEtaIntegral(UInt_t det);
 
-    ;
+    Float_t inMetricDetectorSpace(UInt_t det,Float_t clusterPosition);
+    Float_t inChannelDetectorSpace(UInt_t det,Float_t metricDetectorPosition);
 private:
     map<UInt_t , TH1F*> histoMap;
     //	void setPositions(TEvent event);
@@ -96,6 +108,7 @@ private:
     UInt_t verbosity;
     TLinearFitter *linFitX;
     TLinearFitter *linFitY;
+    TSettings *settings;
 };
 
 #endif

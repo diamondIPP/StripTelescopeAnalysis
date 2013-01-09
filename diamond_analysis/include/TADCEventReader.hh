@@ -27,7 +27,11 @@
 #include "TSettings.class.hh"
 class TADCEventReader {
 public:
+	TADCEventReader(std::string fileName,TSettings* settings);
 	TADCEventReader(std::string fileName,UInt_t runNumber,int verb=0);
+private:
+	void init(std::string fileName,UInt_t runNumber,int verb=0);
+public:
 	virtual ~TADCEventReader();
 	bool GetNextEvent();
 	virtual bool LoadEvent(UInt_t EventNumber);
@@ -136,6 +140,7 @@ private:
 	TSystem* sys;
 
 protected:
+	TSettings* settings;
 	UInt_t verbosity;
 };
 

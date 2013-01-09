@@ -22,6 +22,7 @@
 #include "TObject.h"
 #include "TCluster.hh"
 #include "TPlaneProperties.hh"
+#include "TDiamondPattern.hh"
 //#include "TSettings.class.hh"
 #include "TSystem.h"
 #include "TFile.h"
@@ -252,17 +253,33 @@ public:
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
 	int getDiaDetectorAreaOfChannel(Int_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
+	Float_t getSiliconPitchWidth(){return this->pitchWidthSil;}
+	Float_t getDiamondPitchWidth(){return this->pitchWidthDia;}
+
 protected:
     float store_threshold;
 private:
     void SetFileName(std::string fileName);
     void LoadSettings();
     void DefaultLoadDefaultSettings();
-    void ParseStringArray(std::string value, std::vector<std::string> &vec);
-    void ParseFloatArray(std::string value, std::vector<float> & vec);
-    void ParseIntArray(std::string value, std::vector<int> & vec);
-    void ParseRegionArray(std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
-    std::pair< std::string,std::string > ParseRegionString(string value);
+    void ParseStringArray(std::string key, std::string value, std::vector<std::string> &vec);
+    void ParseFloatArray(std::string key, std::string value, std::vector<float> & vec);
+    void ParseIntArray(std::string key, std::string value, std::vector<int> & vec);
+    void ParseRegionArray(std::string key, std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
+    std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
+    bool ParseFloat(std::string key, std::string value,float  &output);
+    Float_t ParseFloat(std::string key, std::string value){float output;ParseFloat(key,value,output);return output;}
+    Int_t ParseInt(std::string key, std::string value){Int_t output;ParseInt(key,value,output);return output;}
+    bool ParseInt(std::string key, std::string value, int &output);
+    bool ParseInt(std::string key, std::string value, UInt_t &output);
+    bool ParseBool(std::string key, std::string value, bool &output);
+    void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
+    void Parse(std::string key, std::string value, std::vector<int> & vec){ ParseIntArray(key,value,vec);}
+    bool Parse(std::string key, std::string value, bool &output){return ParseBool(key,value,output);}
+    bool Parse(std::string key, std::string value, int &output){return ParseInt(key,value,output);}
+    bool Parse(std::string key, std::string value, UInt_t &output){return ParseInt(key,value,output);}
+    bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
+
 private:
     std::string path;
     std::string fileName;
@@ -359,12 +376,15 @@ private:
 	vector<Float_t> vecClusterSeedFactorsDia;
 	vector<Float_t> vecClusterHitFactorsDia;
     TChannelMapping *diamondMapping;
+    Float_t pitchWidthSil;
+    Float_t pitchWidthDia;
 private:
     //Filter tracks not in good fiducial region w/o bad strips
     Int_t align_sil_fid_xlow;
     Int_t align_sil_fid_xhi;
     Int_t align_sil_fid_ylow;
     Int_t align_sil_fid_yhi;
+    TDiamondPattern diamondPattern;
 private:
     int verbosity;
 
