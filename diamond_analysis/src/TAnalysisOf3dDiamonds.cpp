@@ -17,7 +17,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 	//htmlLandau=new THTMLLandaus(settings);
 
 	settings->goTo3dDiamondTreeDir();
-	eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),runNumber);
+	eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);
 	histSaver=new HistogrammSaver();
 	settings->goTo3dDiamondAnalysisDir();
 

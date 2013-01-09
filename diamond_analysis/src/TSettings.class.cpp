@@ -13,12 +13,6 @@ ClassImp(TSettings);
 using namespace std;
 
 
-bool TSettings::existsDirectory(std::string dir){
-	struct stat sta;
-	int retVal = stat(dir.c_str(),&sta);
-	return (retVal>=0);
-}
-
 TSettings::TSettings(TRunInfo *runInfo)
 {
 	//diamondPattern.loadStandardPitchWidthSettings();
@@ -87,6 +81,31 @@ TSettings::~TSettings(){
 	//  settingsFile->Close();
 	cout<<"delete Settings"<<endl;
 }
+
+bool TSettings::existsDirectory(std::string dir){
+	struct stat sta;
+	int retVal = stat(dir.c_str(),&sta);
+	return (retVal>=0);
+}
+
+std::string TSettings::get3dDiamondTreeFilePath(){
+        stringstream path;
+        path<<getAbsoluteOuputPath(false);
+        path<<"selectionData."<<getRunNumber();
+        if(this->isSpecialAnalysis())
+            path<<"-"<<getRunDescription();
+        path<<".root";
+        return path.str();
+}
+void TSettings::goTo3dDiamondTreeDir(){
+ goToDir(this->getAbsoluteOuputPath(false));
+}
+
+void TSettings::goToOutputDir(){
+ goToDir(this->getOutputDir());
+}
+
+
 
 std::string TSettings::getRawTreeFilePath()
 {
@@ -160,9 +179,9 @@ void TSettings::goToSelectionTreeDir(){
 	goToDir(this->getAbsoluteOuputPath(false));
 }
 
-void TSettings::goToOutputDir(){
+/*void TSettings::goToOutputDir(){
 	goToDir(this->getOutputDir());
-}
+}*/
 
 void TSettings::goToPedestalAnalysisDir(){
 	goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/pedestalAnalysis/"));
@@ -392,6 +411,10 @@ void TSettings::LoadSettings(){
 			for(UInt_t i=0;i<vecClusterHitFactorsDia.size();i++)
 				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterHitFactorsDia.at(i)<<endl;
 		}
+        if(key == "is3dDiamond"){
+           cout<<key<<" =" <<value.c_str()<<endl;
+           b3dDiamond = (bool)strtod(value.c_str(),0);
+        }
 		/*if(key == "store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
@@ -523,6 +546,11 @@ void TSettings::DefaultLoadDefaultSettings(){
 	UInt_t nDiaChannels=128;
 	diamondMapping=new TChannelMapping(nDiaChannels);
 	getDetChannelNo(0);
+    b3dDiamond =false;
+    silPitchWidth=50;//in um
+    diaPitchWidth=50;//in um
+    diaOffsetMetricSpace=0;
+    diaStartingChannel=0;
 	cout<<"Print DefaultMapping:"<<endl;
 	//	diamondMapping.PrintMapping();
 	cout<<"DONE"<<endl;

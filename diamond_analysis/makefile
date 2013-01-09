@@ -45,11 +45,11 @@ LIBFILES		+=	libTEvent.so
 
 
 ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o TPlaneProperties.o
-ROOTLIBFILES	+=	TResults.o TChannelMapping.o ChannelScreen.o TSettings.class.o
+ROOTLIBFILES	+=	TResults.o TChannelMapping.o ChannelScreen.o TSettings.class.o TDiamondPattern.o
 PROGS			:= diamondAnalysis
 
 ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh 
-ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh
+ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh TDiamondPattern.hh
 ROOTHFILES		+= TEventLinkDef.h 
 
 all: rootclean diamondAnalysis

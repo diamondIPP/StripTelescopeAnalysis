@@ -50,6 +50,8 @@ public:
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
 	std::string getEtaDistributionPath(Int_t step=-1);
+    std::string get3dDiamondTreeFilePath();
+    std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
 	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
   void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
@@ -59,6 +61,8 @@ public:
   void goToAlignmentRootDir(){goToDir(this->getAbsoluteOuputPath(false));}
 
 
+    void goTo3dDiamondTreeDir();
+    void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
 	void goToPedestalAnalysisDir();
 	void goToClusterAnalysisDir();
 	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
@@ -84,6 +88,8 @@ public:
 	void setRunDescription(std::string runDescription);
 	void setOutputDir(std::string ouputDir){this->outputDir=outputDir;}
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
+    bool is3dDiamond(){return b3dDiamond;};
+    bool b3dDiamond;
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -387,6 +393,10 @@ private:
     TDiamondPattern diamondPattern;
 private:
     int verbosity;
+       Float_t silPitchWidth;
+       Float_t diaPitchWidth;
+       Float_t diaOffsetMetricSpace;
+       Float_t diaStartingChannel;
 
 ClassDef(TSettings,3);
 };
