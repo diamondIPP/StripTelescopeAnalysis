@@ -75,10 +75,20 @@ Float_t TTrack::inMetricDetectorSpace(UInt_t det, Float_t clusterPosition){
 	if(TPlaneProperties::isSiliconDetector(det))
 		metricValue =  clusterPosition*settings->getSiliconPitchWidth();
 	else if(TPlaneProperties::isDiamondDetector(det))
-		metricValue =  clusterPosition*settings->getDiamondPitchWidth();
+		metricValue = settings->diamondPattern.convertChannelToMetric(clusterPosition);
+//		metricValue =  clusterPosition*settings->getDiamondPitchWidth();
 	return metricValue;
 }
 
+
+Float_t TTrack::inChannelDetectorSpace(UInt_t det, Float_t metricPosition){
+	Float_t channelPosition  = N_INVALID;
+	if(TPlaneProperties::isSiliconDetector(det))
+		channelPosition =  channelPosition/settings->getSiliconPitchWidth();
+	else if(TPlaneProperties::isDiamondDetector(det))
+		channelPosition = settings->diamondPattern.convertMetricToChannel(metricPosition);
+	return channelPosition;
+}
 /**
  * calculate Position of hit in the lab frame using the  X/Y detector cluster positions in channel numbers.
  * The way to calculate the cluster position can be selected by the mode varibale.
@@ -484,10 +494,12 @@ UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
 		metricDetectorPosition = (int)((xPred-this->getXOffset(plane) - (yPred/*-this->getYOffset(plane)*/)*TMath::Tan(this->getPhiXOffset(plane))) * TMath::Cos(this->getPhiXOffset(plane)));
 	}
 	// y planes:
+	/// @todo einfuegen
 	else {
 		this->getYOffset(plane);
 		this->getPhiYOffset(plane);
 	}
+	rawChannel = inChannelDetectorSpace(det,metricDetectorPosition);
 	// telescope
 	if (det < 8) {
 		if (rawChannel > -1 && rawChannel < 256) {

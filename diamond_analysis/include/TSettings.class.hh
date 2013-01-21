@@ -252,7 +252,10 @@ public:
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n){if(n<getNDiaDetectorAreas()&&n>=0)return vecDiaDetectorAreasInChannel[n]; return std::make_pair((Int_t)-1,(Int_t)-1);}
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
 	int getDiaDetectorAreaOfChannel(Int_t ch);
+	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
+	bool hasBorderSeed(UInt_t det, TCluster cluster);
+	bool hasBorderHit(UInt_t det, TCluster cluster);
 	Float_t getSiliconPitchWidth(){return this->pitchWidthSil;}
 	Float_t getDiamondPitchWidth(){return this->pitchWidthDia;}
 
@@ -266,6 +269,7 @@ private:
     void ParseFloatArray(std::string key, std::string value, std::vector<float> & vec);
     void ParseIntArray(std::string key, std::string value, std::vector<int> & vec);
     void ParseRegionArray(std::string key, std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
+    void ParsePattern(std::string key, std::string value);
     std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
     bool ParseFloat(std::string key, std::string value,float  &output);
     Float_t ParseFloat(std::string key, std::string value){float output;ParseFloat(key,value,output);return output;}
@@ -384,6 +388,7 @@ private:
     Int_t align_sil_fid_xhi;
     Int_t align_sil_fid_ylow;
     Int_t align_sil_fid_yhi;
+public:
     TDiamondPattern diamondPattern;
 private:
     int verbosity;

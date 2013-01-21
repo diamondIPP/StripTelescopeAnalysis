@@ -30,7 +30,6 @@
 #include "TPlaneProperties.hh"
 
 
-#define N_INVALID -9999
 //class TCluster;
 
 class TPlane:public TObject {
