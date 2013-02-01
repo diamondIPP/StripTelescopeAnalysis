@@ -40,10 +40,7 @@ LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 
-<<<<<<< .working
 LIBFILES		+=	TFidCutRegions.o TFiducialCut.o
-=======
->>>>>>> .merge-rechts.r481
 LIBFILES		+=	libTEvent.so
 
 

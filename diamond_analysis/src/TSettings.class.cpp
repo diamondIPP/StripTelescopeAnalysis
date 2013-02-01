@@ -553,16 +553,13 @@ void TSettings::DefaultLoadDefaultSettings(){
 	UInt_t nDiaChannels=128;
 	diamondMapping=new TChannelMapping(nDiaChannels);
 	getDetChannelNo(0);
-<<<<<<< .working
     b3dDiamond =false;
     silPitchWidth=50;//in um
     diaPitchWidth=50;//in um
     diaOffsetMetricSpace=0;
     diaStartingChannel=0;
 	cout<<"Print DefaultMapping:"<<endl;
-=======
-//	cout<<"Print DefaultMapping:"<<endl;
->>>>>>> .merge-rechts.r481
+    //	cout<<"Print DefaultMapping:"<<endl;
 	//	diamondMapping.PrintMapping();
 	diamondPattern.loadStandardPitchWidthSettings();
 	cout<<"DONE"<<endl;
