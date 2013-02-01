@@ -50,7 +50,11 @@ private:
 	UInt_t nEvent;
 	TH2F* histoLandauDistribution;
 	TH2F* histoLandauDistribution2D;
+	TH2F* histoLandauDistribution2DNoBorderSeed;
+	TH2F* histoLandauDistribution2DNoBorderHit;
 	TH2F* histoLandauDistribution2D_unmasked;
+	TH2F* histoLandauDistribution2DNoBorderSeed_unmasked;
+	TH2F* histoLandauDistribution2DNoBorderHit_unmasked;
 	TH1F* hClusterPosition;
 	TH1F* h3dDiamond;
 	TH1F* hNoDiamond;

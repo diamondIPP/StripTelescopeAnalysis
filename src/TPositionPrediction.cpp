@@ -62,6 +62,14 @@ Float_t TPositionPrediction::getSigma(TPlaneProperties::enumCoordinate cor)
 	}
 }
 
+/** gives the highest chi2 of both coordinates
+ *
+ * @return
+ */
+Float_t TPositionPrediction::getChi2(){
+	return TMath::Max(yChi2,xChi2);
+}
+
 Float_t TPositionPrediction::getChi2(TPlaneProperties::enumCoordinate cor)
 {
 	switch (cor){

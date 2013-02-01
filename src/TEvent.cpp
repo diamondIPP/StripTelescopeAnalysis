@@ -94,14 +94,14 @@ UInt_t TEvent::getNClusters(UInt_t det){
 	else
 		cor=TPlaneProperties::Y_COR;
 	UInt_t plane=det/2;
-	if(verbosity)cout<<"TEvent::getNclusters of det "<<det<<" <=> plane: "<<plane<<" "<<TPlaneProperties::getCoordinateString(cor)<<endl;
+	if(verbosity>12)cout<<"TEvent::getNclusters of det "<<det<<" <=> plane: "<<plane<<" "<<TPlaneProperties::getCoordinateString(cor)<<endl;
 	if(det%2==0)
 		return getNXClusters(plane);
 	else return getNYClusters(plane);
 
 }
 UInt_t TEvent::getNXClusters(UInt_t plane){
-	if(verbosity>2)
+	if(verbosity>10)
 		cout<<"TEvent::getNXClusters of plane "<<plane<<endl;
 	if(plane<planes.size())
 		return planes.at(plane).getNXClusters();

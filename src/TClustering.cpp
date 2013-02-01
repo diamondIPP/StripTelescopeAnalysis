@@ -20,7 +20,7 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
 	settings->goToPedestalTreeDir();
-	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings->getRunNumber());
+	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings);//settings->getRunNumber());
 	histSaver=new HistogrammSaver();
 	settings->goToClusterAnalysisDir();
 	stringstream plotsPath;

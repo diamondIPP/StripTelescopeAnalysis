@@ -31,7 +31,8 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<"\ngoToSelectionTreeDir"<<endl;
 	settings->goToSelectionTreeDir();
 	cout<<"open Tree:"<<endl;
-	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings->getRunNumber());
+	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings);
+	//settings->getRunNumber());
 	cout<<" DONE"<<endl;
 
 	histSaver=new HistogrammSaver();
@@ -51,6 +52,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	cout<<"Fiducial Cut:\n\n\tAccept following Range in Silicon Planes: "<<endl;
 	cout<<"\t\tX: "<<settings->getSi_avg_fidcut_xlow()<<"/"<<settings->getSi_avg_fidcut_xhigh()<<endl;
 	cout<<"\t\tY: "<<settings->getSi_avg_fidcut_ylow()<<"/"<<settings->getSi_avg_fidcut_yhigh()<<endl;
+	cout<<"\t\t"<<settings->getSelectionFidCuts()<<endl;
 	cout<<" for Alignment use "<<settings->getAlignment_training_track_fraction()*100<<" % of the events." <<endl;
 	nUseForAlignment=0;
 	nUseForAnalysis=0;
@@ -160,11 +162,11 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 	cout<<"TSelectionClass::checkTree"<<endl;
 	bool createdNewFile=false;
 	bool createdNewTree=false;
-	cout<<"goToSelection Tree:"<<endl;
+	cout<<"\tgoToSelection Tree:"<<endl;
 	settings->goToSelectionTreeDir();
 	selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"READ");
 	if(selectionFile->IsZombie()){
-		cout<<"selectionfile does not exist, create new one..."<<endl;
+		cout<<"\tselectionfile does not exist, create new one..."<<endl;
 		createdNewFile =true;
 		selectionFile= new TFile(settings->getSelectionTreeFilePath().c_str(),"CREATE");
 		cout<<"DONE"<<flush;
@@ -172,25 +174,25 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 	}
 	else{
 		createdNewFile=false;
-		cout<<"File exists"<<endl;
+		cout<<"\tFile exists"<<endl;
 	}
 	selectionFile->cd();
-	cout<<"get Tree"<<endl;
+	cout<<"\tget Tree"<<endl;
 	stringstream treeDescription;
 	treeDescription<<"Selection Data of run "<<settings->getRunNumber();
-	cout<<"get Tree2"<<endl;
+	cout<<"\tget Tree2"<<endl;
 	selectionFile->GetObject("selectionTree",selectionTree);
-	cout<<"check Selection Tree:"<<selectionTree<<endl;
+	cout<<"\tcheck Selection Tree:"<<selectionTree<<endl;
 	cout<<sys->pwd()<<endl;
 	if(selectionTree!=NULL){
-		cout<<"File and Tree Exists... \t"<<flush;
+		cout<<"\tFile and Tree Exists... \t"<<selectionTree->GetEntries()<<" Events\t"<<flush;
 		if(selectionTree->GetEntries()>=nEvents){
 			createdNewTree=false;
 			selectionTree->GetEvent(0);
 			return false;
 		}
 		else{
-			cout<<"selectionTree.events !- nEvents"<<flush;
+			cout<<"\tselectionTree.events !- nEvents"<<flush;
 			selectionTree->Delete();
 			selectionTree=NULL;
 		}
@@ -638,11 +640,13 @@ void TSelectionClass::saveHistos()
 
 void TSelectionClass::createFiducialCut(){
 
-	std::vector<std::pair<Float_t,Float_t> > xInt,yInt;
-	xInt.push_back( make_pair(settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh()));
-	yInt.push_back( make_pair(settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh()));
-	fiducialCuts = new TFidCutRegions(xInt,yInt,1);
-	cout<<"Create AutoFidCut"<<endl;
+//	std::vector<std::pair<Float_t,Float_t> > xInt,yInt;
+//	xInt.push_back( make_pair(settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh()));
+//	yInt.push_back( make_pair(settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh()));
+//	fiducialCuts = new TFidCutRegions(xInt,yInt,1);
+	fiducialCuts = settings->getSelectionFidCuts();
+	cout<<"Create AutoFidCut with "<<endl;
+	fiducialCuts->Print(1);
 	UInt_t nEvents = settings->getAutoFidCutEvents();
 	if(nEvents>eventReader->GetEntries())nEvents=eventReader->GetEntries();
 	cout<<" "<<nEvents<<endl;
@@ -661,13 +665,20 @@ void TSelectionClass::createFiducialCut(){
 		fiducialCuts = new TFidCutRegions(hFiducialCutSiliconDiamondHit,settings->getNDiamonds(),settings->getAutoFidCutPercentage());
 		fiducialCuts->setRunDescription(settings->getRunDescription());
 	}
-	else
+	else{
 		fiducialCuts->setHistogramm(hFiducialCutSiliconDiamondHit);
-
+	}
 	histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
 	histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));
 	TCanvas *c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR);
 	c1->SetTitle(Form("Fiducial Cut of Run %i with \"%s\"",settings->getRunNumber(),settings->getRunDescription().c_str()));
 	c1->SetName("cFidCutCanvasXY");
 	histSaver->SaveCanvas(c1);
+	if(verbosity)
+		fiducialCuts->Print(1);
+	if (verbosity>3){
+		cout<<"Press a key and enter...<"<<flush;
+		char t;
+		cin >>t;
+	}
 }
