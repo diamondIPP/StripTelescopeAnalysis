@@ -30,7 +30,6 @@
 #include "TPlaneProperties.hh"
 
 
-#define N_INVALID -9999
 //class TCluster;
 
 class TPlane:public TObject {
@@ -60,7 +59,7 @@ private:
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-    ClassDef(TPlane,7);
+    ClassDef(TPlane,8);
 };
 
 #endif // TPlane_hh

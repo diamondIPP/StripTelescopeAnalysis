@@ -240,7 +240,7 @@ Float_t TCluster::getPosition(calculationMode_t mode,TH1F *histo){
 		return this->getEtaPostion();
 	else if(mode == corEta&&histo==0){
 		cerr<<"mode = cor Eta, but histo =0, "<<endl;
-		this->Print();
+//		this->Print();
 		return this->getEtaPostion();
 	}
 	else if(mode == corEta&&histo!=0)

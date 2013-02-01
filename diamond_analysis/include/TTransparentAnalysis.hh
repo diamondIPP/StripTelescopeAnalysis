@@ -74,7 +74,7 @@ private:
 	void printCutFlow();
 	void fitTrack();
 //	void analyzeTrack(TTrack track);
-	void predictPositions();
+	bool predictPositions();
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	int getSignedChannelNumber(Float_t position);
@@ -94,7 +94,7 @@ private:
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;
 	Float_t predXPosition, predYPosition;
-	Float_t positionInDetSystem, predPerpPosition, predPosition;
+	Float_t positionInDetSystemMetric,positionInDetSystemChannelSpace, predPerpPosition, predPosition;
 	
 	// sys variables
     TSystem* sys;
@@ -113,12 +113,17 @@ private:
 	UInt_t noValidTrack;
 	UInt_t noFidCutRegion;
 	UInt_t usedForAlignment;
-//	UInt_t usedForSiliconAlignment;
-	
+	UInt_t highChi2;
+	//	UInt_t usedForSiliconAlignment;
+	// data for Histos
+	vector< vector<Float_t> > vecvecResXChargeWeighted;
+	vector< vector<Float_t> > vecvecResXEtaCorrected;
+	vector< vector<Float_t> > vecvecResXHighest2Centroid;
+	vector< vector<Float_t> > vecvecRelPos;
 	// histograms
 	vector<TH1F*> hLaundau;
 	vector<TH1F*> hEta;
-	vector<TH1F*> hResidualChargeWeighted;
+	;
 	TH1F* hLaundauMean;
 	TH1F* hLaundauMP;
 	TH1F* hPredictedPositionInStrip;
@@ -127,6 +132,10 @@ private:
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
 	vector<TH1F*> hResidualEtaCorrected;
+	vector<TH1F*> hResidualChargeWeighted;
+	vector<TH2F*> hResidualVsHitPositionChargeWeighted;
+	vector<TH2F*> hResidualVsHitPositionHigehest2Centroid;
+	vector<TH2F*> hResidualVsHitPositionEtaCorrected;
 	TH1F* hLaundau2HighestMean;
 	TH1F* hLaundau2HighestMP;
 	vector<TH1F*> hEtaIntegrals;

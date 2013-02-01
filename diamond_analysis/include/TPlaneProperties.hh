@@ -15,6 +15,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#define N_INVALID -9999
 class TPlaneProperties:public TObject {
 public:
 	enum enumCoordinate{ X_COR =0, Y_COR=1, Z_COR =2, XY_COR=3,};

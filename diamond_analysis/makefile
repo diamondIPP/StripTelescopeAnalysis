@@ -40,16 +40,19 @@ LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 
+<<<<<<< .working
 LIBFILES		+=	TFidCutRegions.o TFiducialCut.o
+=======
+>>>>>>> .merge-rechts.r481
 LIBFILES		+=	libTEvent.so
 
 
-ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o TPlaneProperties.o
-ROOTLIBFILES	+=	TResults.o TChannelMapping.o ChannelScreen.o TSettings.class.o TDiamondPattern.o
+ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o TPlaneProperties.o TFiducialCut.o 
+ROOTLIBFILES	+=	TResults.o TChannelMapping.o ChannelScreen.o TSettings.class.o TDiamondPattern.o TFidCutRegions.o
 PROGS			:= diamondAnalysis
 
-ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh 
-ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh TDiamondPattern.hh
+ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh  TFidCutRegions.hh
+ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh TDiamondPattern.hh TFiducialCut.hh
 ROOTHFILES		+= TEventLinkDef.h 
 
 all: rootclean diamondAnalysis

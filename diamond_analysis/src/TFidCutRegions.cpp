@@ -8,8 +8,16 @@
 #include "../include/TFidCutRegions.hh"
 
 using namespace std;
+ClassImp(TFidCutRegions);
+TFidCutRegions::TFidCutRegions() {
+	cout<< "create empty Fid Cut Regions pattern... "<<endl;
+	index = 0;
+	xInt.clear();
+	yInt.clear();
+	nFidCuts = 0;
+}
 
-TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt,std::vector<std::pair <Float_t, Float_t> >yInt,UInt_t nDia) {
+TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt, std::vector<std::pair <Float_t, Float_t> > yInt,UInt_t nDia) {
   this->nDiamonds=nDia;
   index=0;
   nFidCuts=xInt.size()*yInt.size();
@@ -18,6 +26,14 @@ TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt,s
 
   cout<< "create Fid Cut Regions for a RUN with "<<nDiamonds<<" Diamonds. There are "<<nFidCuts<<" Fiducial Cut Areas"<<endl;
   createFidCuts();
+}
+
+TFidCutRegions::TFidCutRegions(Float_t xLow, Float_t xHigh, Float_t yLow, Float_t yHigh, UInt_t nDia){
+	  this->nDiamonds=nDia;
+	  index=0;
+	  xInt.clear();
+	  yInt.clear();
+	  this->addFiducialCut(xLow,xHigh,yLow,yHigh);
 }
 
 TFidCutRegions::TFidCutRegions(TH2F* histo,int nDiamonds,Float_t fidCutPercentage)
@@ -67,6 +83,9 @@ void TFidCutRegions::Print(int intend)
   for(UInt_t i=0;i<fidCuts.size();i++){
     fidCuts.at(i)->Print();
   }
+  cout<<"Done\nPress a key..."<<flush;
+  char t;
+  cin>>t;
 }
 
 
@@ -183,6 +202,28 @@ int TFidCutRegions::getFidCutRegion(Float_t xVal, Float_t yVal)
     if(fidCuts.at(i)->isInFiducialCut(xVal,yVal)) return i;
   }
   return -1;
+}
+
+/**
+ * adding a fiducial region
+ * @param xLow
+ * @param xHigh
+ * @param yLow
+ * @param yHigh
+ * @todo check if region overlaps with another fiducial cut
+ */
+void TFidCutRegions::addFiducialCut(Float_t xLow, Float_t xHigh, Float_t yLow, Float_t yHigh) {
+	if(xLow<=xHigh&&yLow<=yHigh){
+		xInt.push_back(make_pair(xLow,xHigh));
+		yInt.push_back(make_pair(yLow,yHigh));
+		nFidCuts++;
+
+		TFiducialCut* fidCut = new TFiducialCut(nFidCuts,xLow,xHigh,yLow,yHigh);
+		fidCuts.push_back(fidCut);
+		cout<<"Added another FiducialCut no. "<<nFidCuts<<"_"<<this->getNFidCuts()<<"_"<<fidCuts.size()<<": ["<<xLow<<"-"<<xHigh<<" , "<<yLow<<"-"<<yHigh<<"]"<<endl;
+	}
+	else
+		cerr<<"Could not add Fiducial Cut since "<<xLow<<">="<<xHigh<<" or "<<yLow<<" >= "<<yHigh<<endl;
 }
 
 void TFidCutRegions::createFidCuts(){
@@ -318,4 +359,33 @@ TCanvas *TFidCutRegions::getFiducialCutProjectionCanvas(TH1D* hProj,std::vector<
   }
   return c1;
 
+}
+
+
+Float_t TFidCutRegions::getXLow(UInt_t i) {
+	if(i <= getNFidCuts()&&i>0)
+		return xInt.at((i-1)%xInt.size()).first;
+	return 0;
+	return N_INVALID;
+}
+
+Float_t TFidCutRegions::getXHigh(UInt_t i) {
+	if(i <= getNFidCuts()&&i>0)
+		return xInt.at((i-1)%xInt.size()).second;
+	return TPlaneProperties::getNChannelsSilicon();
+	return N_INVALID;
+}
+
+Float_t TFidCutRegions::getYLow(UInt_t i) {
+	if(i <= getNFidCuts()&&i>0)
+		return xInt.at((i-1)/xInt.size()).first;
+	return TPlaneProperties::getNChannelsSilicon();
+
+return N_INVALID;
+}
+Float_t TFidCutRegions::getYHigh(UInt_t i) {
+	if(i <= getNFidCuts()&&i>0)
+		return xInt.at((i-1)/xInt.size()).second;
+	return TPlaneProperties::getNChannelsDiamond();
+	return N_INVALID;
 }

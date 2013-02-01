@@ -6,7 +6,7 @@
  */
 #include "TFiducialCut.hh"
 
-
+ClassImp(TFiducialCut);
 TFiducialCut::TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh){
 	SetAllValuesZero();
 	index=i;

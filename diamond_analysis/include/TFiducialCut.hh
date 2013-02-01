@@ -7,13 +7,14 @@
 #define TFIDUCIALCUT_HH
 #include <iostream>
 #include "TROOT.h"
-class TFiducialCut {
+#include "TObject.h"
+class TFiducialCut:public TObject {
 	int index;
 	bool active;
 	int x_low, x_high, y_low, y_high;
 public:
 	TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh);
-	TFiducialCut(int i);
+	TFiducialCut(int i = 0);
 	bool isInFiducialCut(Float_t xVal, Float_t yVal)const {
 	  return ((xVal<x_high)&&(xVal>x_low)&&(yVal>y_low)&&(yVal<y_high));
 	}
@@ -29,6 +30,9 @@ public:
 	int GetXHigh() {return x_high;};
 	int GetYLow() {return y_low;};
 	int GetYHigh() {return y_high;};
+
+	ClassDef(TFiducialCut,1);
+
 };
 #endif /*TFIDUCIALCUT_HH*/
 

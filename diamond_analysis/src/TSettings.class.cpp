@@ -15,12 +15,11 @@ using namespace std;
 
 TSettings::TSettings(TRunInfo *runInfo)
 {
-	//diamondPattern.loadStandardPitchWidthSettings();
-	//diamondPattern.Print();
 	cout<<"TSettings TRunInfo"<<endl;
 	//  verbosity=runInfo->getVerbosity();
 	setVerbosity(runInfo->getVerbosity());
 	diamondMapping=0;
+	fiducialCuts = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
@@ -53,6 +52,7 @@ TSettings::TSettings(UInt_t runNumber){
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
+	fiducialCuts = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
@@ -66,6 +66,7 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
+	fiducialCuts = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runNumber;
 	sys = gSystem;
@@ -212,6 +213,9 @@ void TSettings::SetFileName(string newFileName){
 		cout<<"TSettings::SetFileName:\""<<newFileName<<"\""<<endl;
 	fileName=newFileName;
 	LoadSettings();
+	if (fiducialCuts){
+		fiducialCuts->Print();
+	}
 }
 
 void TSettings::LoadSettings(){
@@ -331,6 +335,7 @@ void TSettings::LoadSettings(){
 		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
+		if(key == "selectionFidCut") {if (!fiducialCuts) fiducialCuts=new TFidCutRegions();ParseFidCut(key,value,fiducialCuts);}
 		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
 		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
 		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);
@@ -363,6 +368,7 @@ void TSettings::LoadSettings(){
 		if(key == "doAllAlignmentPlots") Parse(key,value,bDoAllAlignmentPlots);
 		if(key == "pitchWidthDia") Parse(key,value,pitchWidthDia);
 		if(key == "pitchWidthSil") Parse(key,value,pitchWidthSil);
+		if(key == "diamondPattern") ParsePattern(key,value);
 		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -376,9 +382,8 @@ void TSettings::LoadSettings(){
 		}
 		if(key == "Dia_DetectorChannels") {
 			cout<<key<<" = "<<value.c_str()<<endl;
-			vector<string> vecDetectorChannelString;
-			ParseStringArray(key, value,vecDetectorChannelString);
-
+//			vector<string> vecDetectorChannelString;
+//			ParseStringArray(key, value,vecDetectorChannelString);
 			ParseRegionArray(key, value,vecDiaDetectorAreasInChannel);
 			Int_t detChannel = -1;
 			for(UInt_t i=0;i<vecDiaDetectorAreasInChannel.size();i++){
@@ -439,7 +444,9 @@ void TSettings::LoadSettings(){
 	for(int det=0;det<9;det++){
 		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det,0)<<"/"<<getClusterHitFactor(det,0)<<endl;
 	}
-
+	if (fiducialCuts)
+		if (fiducialCuts->getNFidCuts()==0)
+			fiducialCuts->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
 	cout<<endl<<"TSettings::Finished importing settings from "<<fileName<<endl<<endl;
 }
 
@@ -452,7 +459,6 @@ void TSettings::DefaultLoadDefaultSettings(){
 	ClosePlotsOnSave = 1;
 	IndexProduceSwitch = 1;
 	store_threshold=2;
-
 	//default pedestal settings
 	fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
 	dia_input = 0; // 1 for 2006 and 0 for the rest
@@ -497,6 +503,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	snr_distribution_si_max = 2500;
 	snr_distribution_di_max = 2500;
+	transparentChi2 = 5;
 	UseAutoFidCut = 0;
 	nDiamonds=1;
 	AlternativeClustering = 0;
@@ -546,13 +553,18 @@ void TSettings::DefaultLoadDefaultSettings(){
 	UInt_t nDiaChannels=128;
 	diamondMapping=new TChannelMapping(nDiaChannels);
 	getDetChannelNo(0);
+<<<<<<< .working
     b3dDiamond =false;
     silPitchWidth=50;//in um
     diaPitchWidth=50;//in um
     diaOffsetMetricSpace=0;
     diaStartingChannel=0;
 	cout<<"Print DefaultMapping:"<<endl;
+=======
+//	cout<<"Print DefaultMapping:"<<endl;
+>>>>>>> .merge-rechts.r481
 	//	diamondMapping.PrintMapping();
+	diamondPattern.loadStandardPitchWidthSettings();
 	cout<<"DONE"<<endl;
 }
 
@@ -640,6 +652,65 @@ void TSettings::ParseRegionArray(string key, string value, std::vector< std::pai
 			vecDiaDetectorAreasInChannel.push_back(make_pair(begin,end));
 	}
 
+}
+
+
+void TSettings::ParsePattern(std::string key, std::string value){
+	cout<< "\nParse Pattern"<<endl;
+	vector<Float_t> vecEntries;
+	ParseFloatArray(key,value,vecEntries);
+	if(vecEntries.size()==4){
+		Float_t pos = vecEntries[0];
+		Float_t pitchWidth = vecEntries[1];
+		UInt_t firstCh = vecEntries[2];
+		UInt_t lastCh = vecEntries[3];
+		cout<<"Position: "<<pos<<"\tpw:"<<pitchWidth<<" first: "<<firstCh<<" last: lastCh"<<endl;
+		if(diamondPattern.isStandardPitchWidth())
+			diamondPattern.clear();
+		diamondPattern.addPattern(pitchWidth,pos,firstCh,lastCh);
+		vecDiaDetectorAreasInChannel.push_back(make_pair(firstCh,lastCh));
+		cout<<"new Area of Interest: no. "<<vecDiaDetectorAreasInChannel.size()-1<<" "<<vecDiaDetectorAreasInChannel.back().first<<"-"<<vecDiaDetectorAreasInChannel.back().second<<endl;
+		cout<< vecDiaDetectorAreasInChannel.size()<<endl;
+		PrintPatterns();
+	}
+	else
+		cout<<"vecEntries.size(): "<<vecEntries.size()<<endl;
+	if (verbosity){
+		cout<<"Prss a key and enter: "<<flush;
+		char t;
+		cin>>t;
+	}
+
+}
+
+void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions){
+	cout<< "\nParse FidCut: "<<value<<endl;
+
+	if (fidCutRegions==0){
+		cerr<<"TSettings::ParseFidCut: Couldn't Parse Since fidCutRegions ==0 "<<fidCutRegions<<endl;
+		return;
+	}
+	std::vector <std::string> stringArray;
+	ParseStringArray(key, value,stringArray);
+	if(stringArray.size()==2){
+		std::pair< std::string,std::string > region = ParseRegionString(key, stringArray[0]);
+		Float_t beginX = (int)strtod(region.first.c_str(),0);
+		Float_t endX = (int)strtod(region.second.c_str(),0);
+		region = ParseRegionString(key, stringArray[1]);
+		Float_t beginY = (int)strtod(region.first.c_str(),0);
+		Float_t endY = (int)strtod(region.second.c_str(),0);
+		if(beginX<endX&&beginY<endY)
+			fidCutRegions->addFiducialCut(beginX,endX,beginY,endY);
+		else
+			cerr<<"TSettings::ParseFidCut: Cannot Parse FidCut - entries are wrong, "<<beginX<<"-"<<endX<<", "<<beginY<<"-"<<endY<<endl;
+	}
+	else
+		cerr<<"TSettings::ParseFidCut: Cannot Parse FidCut - Size of vecEntries does not fit: "<<stringArray.size()<<endl;
+	if (verbosity){
+		cout<<"Prss a key and enter: "<<flush;
+		char t;
+		cin>>t;
+	}
 }
 
 std::pair< std::string,std::string > TSettings::ParseRegionString(string key, string value){
@@ -945,6 +1016,17 @@ void TSettings::createSettingsRootFile()
 
 }
 
+/**
+ * @todo
+ * @param k
+ */
+void TSettings::PrintPatterns(int k){
+
+}
+
+/**
+ * @todo
+ */
 void TSettings::Print()
 {
 }
@@ -1492,15 +1574,39 @@ Int_t TSettings::getVerbosity(){
 
 bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
 	if(area<getNDiaDetectorAreas())
-		return getDiaDetectorArea(area).first<=ch&&ch<=getDiaDetectorArea(area).second;
+		return getDiaDetectorArea(area).first <= ch && ch <= getDiaDetectorArea(area).second;
 	else return false;
+}
+std::pair< Int_t , Int_t > TSettings::getDiaDetectorArea(int n){
+	if(n < getNDiaDetectorAreas() && n >= 0)
+		return vecDiaDetectorAreasInChannel[n];
+	return std::make_pair((Int_t)-1, (Int_t)-1);
+
 }
 
 int TSettings::getDiaDetectorAreaOfChannel(Int_t ch){
-	for(Int_t area =0;area< getNDiaDetectorAreas();area++)
+	for(Int_t area = 0; area < getNDiaDetectorAreas(); area++)
 		if(isInDiaDetectorArea(ch,area))
 			return area;
 	return -1;
+}
+
+bool TSettings::isDiaDetectorAreaBorderChannel(UInt_t ch){
+//	if (verbosity)
+//		cout<<"check isDiaDetectorAreaBorderChannel "<<ch<<"\t"<<flush;
+	for(Int_t area =0;area< getNDiaDetectorAreas();area++){
+//		cout<<area<<":";
+		UInt_t leftBorder = getDiaDetectorArea(area).first;
+		UInt_t rightBorder = getDiaDetectorArea(area).second;
+//		cout<<(ch==leftBorder)<<(ch==rightBorder)<<"\t"<<flush;
+		if ( ch == leftBorder || ch == rightBorder ){
+//				cout<<"\tchannel "<<ch<<" is a boarder channel of Area "<<area<<endl;
+			return true;
+		}
+	}
+//	if (verbosity)
+//		cout<<"channel "<<ch<<" is NOT a boarder channel "<<endl;
+	return false;
 }
 
 bool TSettings::isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels){
@@ -1522,4 +1628,74 @@ bool TSettings::isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentC
 	return isMasked;
 }
 
+bool TSettings::hasBorderSeed(UInt_t det, TCluster cluster){
+	UInt_t clSize = cluster.getClusterSize();
+//	cout<<"\n\ncheck has Border seed "<<det<<"  -- "<<clSize<<endl;
+//	cluster.Print(1);
+	for (UInt_t clPos=0;clPos < clSize;clPos++){
+		UInt_t ch = cluster.getChannel(clPos);
+//		cout<<"\nCheck ClPos "<<clPos<<"/"<<clSize<<", channel "<<ch<<flush;
+		if (cluster.isSeed(clPos)){
+//			cout<<", isSeed, "<<flush;
+			if(TPlaneProperties::isSiliconDetector(det)){
+				if( ch == 0 || ch == TPlaneProperties::getNChannels(det)-1)
+					return true;
+			}
+			else if (TPlaneProperties::isDiamondDetector(det)){
+				if(isDiaDetectorAreaBorderChannel(ch))
+					return true;
+			}
+		}
+		else
+			cout<<flush;
+	}
+	return false;
+}
+bool TSettings::hasBorderHit(UInt_t det, TCluster cluster){
+	UInt_t clSize = cluster.getClusterSize();
+//	cout<<"\n\ncheck has Border seed "<<det<<"  -- "<<clSize<<endl;
+//	cluster.Print(1);
+	for (UInt_t clPos=0;clPos < clSize;clPos++){
+		UInt_t ch = cluster.getChannel(clPos);
+//		cout<<"\nCheck ClPos "<<clPos<<"/"<<clSize<<", channel "<<ch<<flush;
+		if (cluster.isHit(clPos)){
+//			cout<<", isSeed, "<<flush;
+			if(TPlaneProperties::isSiliconDetector(det)){
+				if( ch == 0 || ch == TPlaneProperties::getNChannels(det)-1)
+					return true;
+			}
+			else if (TPlaneProperties::isDiamondDetector(det)){
+				if(isDiaDetectorAreaBorderChannel(ch))
+					return true;
+			}
+		}
+		//for symmetry reasons do not accept Seeds which are next to a boarder channel
+		else if(cluster.isSeed(clPos)){
+			if(TPlaneProperties::isSiliconDetector(det)){
+				if( ch == 1|| ch == TPlaneProperties::getNChannels(det)-2)
+					return true;
+			}
+			else if (TPlaneProperties::isDiamondDetector(det)){
+				if(isDiaDetectorAreaBorderChannel(ch-1) || isDiaDetectorAreaBorderChannel(ch+1))
+					return true;
+			}
+		}
+		else
+			cout<<flush;
+	}
+	return false;
+}
 
+Float_t TSettings::convertChannelToMetric(UInt_t det, Float_t channel){
+	if (TPlaneProperties::isDiamondDetector(det))
+		return diamondPattern.convertChannelToMetric(channel);
+	return channel*getSiliconPitchWidth();
+}
+
+Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
+	Float_t channelPosition  = N_INVALID;
+	channelPosition =  metricValue/this->getSiliconPitchWidth();
+	if(TPlaneProperties::isDiamondDetector(det))
+			channelPosition = this->diamondPattern.convertMetricToChannel(metricValue);
+	return channelPosition;
+}

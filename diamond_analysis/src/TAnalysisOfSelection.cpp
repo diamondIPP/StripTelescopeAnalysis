@@ -11,13 +11,17 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	if(settings!=0)
 		this->settings=settings;
 	else exit(0);
+//	cout<<settings<<endl;
+//	settings->PrintPatterns();
+//	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
+//	char t;cin >>t;
 
 	UInt_t runNumber=settings->getRunNumber();
 
 	htmlLandau=new THTMLLandaus(settings);
 
 	settings->goToSelectionTreeDir();
-	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings->getRunNumber());
+	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
 	histSaver=new HistogrammSaver();
 	settings->goToSelectionAnalysisDir();
 	//	htmlPedestal->setSubdirPath("selectionAnalysis");
@@ -57,14 +61,36 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution= new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
 	histoLandauDistribution->GetXaxis()->SetTitle("Charge in ADC counts");
 	histoLandauDistribution->GetYaxis()->SetTitle("ClusterSize");
+
 	histoLandauDistribution2D = new TH2F("histoLandauDistribution2D_Clustersize_1_2","histoLandauDistribution2D_Clustersize_1_2",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2D->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
+
+	histoLandauDistribution2DNoBorderSeed = new TH2F("histoLandauDist2DNoBorderSeed","histoLandauDist2DNoBorderSeed",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderSeed->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
+	histoLandauDistribution2DNoBorderSeed->GetYaxis()->SetTitle("channel of highest Signal");
+	histoLandauDistribution2DNoBorderSeed->GetZaxis()->SetTitle("number of entries");
+
+	histoLandauDistribution2DNoBorderHit = new TH2F("histoLandauDist2D_Clustersize_1_2_noBorderHit","histoLandauDist2D_Clustersize_1_2_noBorderHit",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderHit->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
+	histoLandauDistribution2DNoBorderHit->GetYaxis()->SetTitle("channel of highest Signal");
+	histoLandauDistribution2DNoBorderHit->GetZaxis()->SetTitle("number of entries");
+
 	histoLandauDistribution2D_unmasked = new TH2F("histoLandauDistribution2D_Clustersize_1_2_unmasked","histoLandauDistribution2D_Clustersize_1_2_unmasked",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2D_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D_unmasked->GetZaxis()->SetTitle("number of entries");
+
+	histoLandauDistribution2DNoBorderSeed_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderSeed-unmasked","hLandauDist2D_Clustersize_1_2NoBorderSeed",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderSeed_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
+	histoLandauDistribution2DNoBorderSeed_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
+	histoLandauDistribution2DNoBorderSeed_unmasked->GetZaxis()->SetTitle("number of entries");
+
+	histoLandauDistribution2DNoBorderHit_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderHit-unmasked","hLandauDist2D_Clustersize_1_2NoBorderHit",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderHit_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
+	histoLandauDistribution2DNoBorderHit_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
+	histoLandauDistribution2DNoBorderHit_unmasked->GetZaxis()->SetTitle("number of entries");
 	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
@@ -79,7 +105,9 @@ void TAnalysisOfSelection::initialiseHistos()
 
 void TAnalysisOfSelection::saveHistos()
 {
-//	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
+	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
+	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
+	char t;cin >>t;
 	LandauGaussFit landauGauss;
 	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
 	histSaver->OptimizeXYRange(histoLandauDistribution2D);
@@ -88,27 +116,124 @@ void TAnalysisOfSelection::saveHistos()
 	histSaver->SaveHistogram(histoLandauDistribution2D);
 	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
 	for(Int_t area=0;area<settings->getNDiaDetectorAreas();area++){
-		Int_t binLow = settings->getDiaDetectorArea(area).first;
-		Int_t binHigh =  settings->getDiaDetectorArea(area).second;
-		TString name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d-%d",area,binLow,binHigh);
+		Int_t chLow = settings->getDiaDetectorArea(area).first;
+		Int_t chHigh =  settings->getDiaDetectorArea(area).second;
+
+		// 2d area clusterSize 1or 2 normal
+		TString name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
 		TH2F* histoLandauDistribution2Darea = (TH2F*)histoLandauDistribution2D->Clone(name);
-		histoLandauDistribution2Darea->GetYaxis()->SetRangeUser(binLow-1,binHigh+1);
+		histoLandauDistribution2Darea->SetTitle(name);
+		histoLandauDistribution2Darea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
 		histSaver->SaveHistogram(histoLandauDistribution2Darea);
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_unmasked_%d_ch_%d-%d",area,binLow,binHigh);
+		delete histoLandauDistribution2Darea;
+
+		// 2d area clusterSize 1or 2 noBorderSeeds
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		TH2F* histoLandauDistribution2DNoBorderSeedarea = (TH2F*)histoLandauDistribution2DNoBorderSeed->Clone(name);
+		histoLandauDistribution2DNoBorderSeedarea->SetTitle(name);
+		histoLandauDistribution2DNoBorderSeedarea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderSeedarea);
+		delete histoLandauDistribution2DNoBorderSeedarea;
+
+		// 2d area clusterSize 1or 2 noBorderHits
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		TH2F* histoLandauDistribution2DNoBorderHitarea = (TH2F*)histoLandauDistribution2DNoBorderHit->Clone(name);
+		histoLandauDistribution2DNoBorderHitarea->SetTitle(name);
+		histoLandauDistribution2DNoBorderHitarea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderHitarea);
+		delete histoLandauDistribution2DNoBorderSeedarea;
+
+		// 2d area clusterSize 1or 2 unmasked
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
 		TH2F* histoLandauDistribution2DareaUnmasked = (TH2F*)histoLandauDistribution2D_unmasked->Clone(name);
-		histoLandauDistribution2DareaUnmasked->GetYaxis()->SetRangeUser(binLow-1,binHigh+1);
-		binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(binLow);
-		binHigh = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(binHigh);
+		histoLandauDistribution2DareaUnmasked->SetTitle(name);
+		histoLandauDistribution2DareaUnmasked->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		UInt_t binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chLow);
+		UInt_t binHigh = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chHigh);
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmasked);
 		delete histoLandauDistribution2DareaUnmasked;
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,binLow,binHigh);
+
+		// 2d area clusterSize 1or 2 unmasked noBorderSeed
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		TH2F* histoLandauDistribution2DareaUnmaskedNoBorderSeed = (TH2F*)histoLandauDistribution2DNoBorderSeed_unmasked->Clone(name);
+		histoLandauDistribution2DareaUnmaskedNoBorderSeed->SetTitle(name);
+		histoLandauDistribution2DareaUnmaskedNoBorderSeed->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderSeed);
+		delete histoLandauDistribution2DareaUnmaskedNoBorderSeed;
+
+		// 2d area clusterSize 1or 2 unmasked noBorderSeed
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		TH2F* histoLandauDistribution2DareaUnmaskedNoBorderHit = (TH2F*)histoLandauDistribution2DNoBorderHit_unmasked->Clone(name);
+		histoLandauDistribution2DareaUnmaskedNoBorderHit->SetTitle(name);
+		histoLandauDistribution2DareaUnmaskedNoBorderHit->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderHit);
+		delete histoLandauDistribution2DareaUnmaskedNoBorderHit;
+
+		/******* PROJECTIONS ******/
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
 		TH1F* hProjection = (TH1F*)histoLandauDistribution2D->ProjectionX(name,binLow,binHigh);
 		hProjection->SetTitle(name);
 		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 		hProjection->GetYaxis()->SetTitle("number of entries");
 		histSaver->SaveHistogram(hProjection);
 		delete hProjection;
+		hProjection=0;
 
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeed_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		hProjection = (TH1F*)histoLandauDistribution2DNoBorderSeed->ProjectionX(name,binLow,binHigh);
+		hProjection->SetTitle(name);
+		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+		hProjection->GetYaxis()->SetTitle("number of entries");
+		histSaver->SaveHistogram(hProjection);
+		delete hProjection;
+		hProjection=0;
+
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHit_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		hProjection = (TH1F*)histoLandauDistribution2DNoBorderHit->ProjectionX(name,binLow,binHigh);
+		hProjection->SetTitle(name);
+		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+		hProjection->GetYaxis()->SetTitle("number of entries");
+		histSaver->SaveHistogram(hProjection);
+		delete hProjection;
+		hProjection=0;
+
+		//unmasked projections
+		name = TString::Format("hChargeOfCluster_ClusterSizeUnmasked_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		hProjection = (TH1F*)histoLandauDistribution2D_unmasked->ProjectionX(name,binLow,binHigh);
+		hProjection->SetTitle(name);
+		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+		hProjection->GetYaxis()->SetTitle("number of entries");
+		histSaver->SaveHistogram(hProjection);
+		delete hProjection;
+		hProjection=0;
+
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeedUnmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		hProjection = (TH1F*)histoLandauDistribution2DNoBorderSeed_unmasked->ProjectionX(name,binLow,binHigh);
+		hProjection->SetTitle(name);
+		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+		hProjection->GetYaxis()->SetTitle("number of entries");
+		histSaver->SaveHistogram(hProjection);
+		delete hProjection;
+		hProjection=0;
+
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHitUnmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		hProjection = (TH1F*)histoLandauDistribution2DNoBorderHit_unmasked->ProjectionX(name,binLow,binHigh);
+		hProjection->SetTitle(name);
+		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+		hProjection->GetYaxis()->SetTitle("number of entries");
+		histSaver->SaveHistogram(hProjection);
+		delete hProjection;
+		hProjection=0;
 	}
 	vector <Float_t> vecMP;
 	vector <Float_t> vecClusSize;
@@ -356,17 +481,27 @@ void TAnalysisOfSelection::analyseEvent()
 		if(clustSize>8) clustSize=8;
 		if(cluster.isSaturatedCluster())
 			return;
-		if (cluster.isScreened())
-			return;
+//		if (cluster.isScreened())
+//			return;
 		//		cout<<nEvent<<":\t"<<charge<<endl;
 		histoLandauDistribution->Fill(charge,clustSize);
 		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
 		hClusterPosition->Fill(pos);
 		if(clustSize<=2){
 			histoLandauDistribution2D_unmasked->Fill(charge,pos);
+			bool isBorderSeedCluster = settings->hasBorderSeed(TPlaneProperties::getDetDiamond(),cluster);
+			bool isBorderHitCluster = settings->hasBorderHit(TPlaneProperties::getDetDiamond(),cluster);
+			if (!isBorderSeedCluster)
+				histoLandauDistribution2DNoBorderSeed_unmasked->Fill(charge,pos);
+			if (!isBorderHitCluster)
+				histoLandauDistribution2DNoBorderHit_unmasked->Fill(charge,pos);
 			bool isMaskedCluster = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
 			if(!isMaskedCluster){
 				histoLandauDistribution2D->Fill(charge,pos);
+				if (!isBorderSeedCluster)
+					histoLandauDistribution2DNoBorderSeed->Fill(charge,pos);
+				if (!isBorderHitCluster)
+					histoLandauDistribution2DNoBorderHit->Fill(charge,pos);
 			}
 		}
 	}
