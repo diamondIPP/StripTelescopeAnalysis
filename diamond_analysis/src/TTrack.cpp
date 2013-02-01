@@ -71,12 +71,7 @@ Float_t TTrack::getMeasuredClusterPositionMetricSpace(UInt_t det, TCluster::calc
 }
 
 Float_t TTrack::inMetricDetectorSpace(UInt_t det, Float_t clusterPosition){
-	Float_t metricValue = 0;
-	if(TPlaneProperties::isSiliconDetector(det))
-		metricValue =  clusterPosition*settings->getSiliconPitchWidth();
-	else if(TPlaneProperties::isDiamondDetector(det))
-		metricValue = settings->diamondPattern.convertChannelToMetric(clusterPosition);
-//		metricValue =  clusterPosition*settings->getDiamondPitchWidth();
+	Float_t metricValue = settings->convertChannelToMetric(det,clusterPosition);
 	return metricValue;
 }
 
@@ -84,7 +79,7 @@ Float_t TTrack::inMetricDetectorSpace(UInt_t det, Float_t clusterPosition){
 Float_t TTrack::inChannelDetectorSpace(UInt_t det, Float_t metricPosition){
 	Float_t channelPosition  = N_INVALID;
 	if(TPlaneProperties::isSiliconDetector(det))
-		channelPosition =  channelPosition/settings->getSiliconPitchWidth();
+		channelPosition =  metricPosition/settings->getSiliconPitchWidth();
 	else if(TPlaneProperties::isDiamondDetector(det))
 		channelPosition = settings->diamondPattern.convertMetricToChannel(metricPosition);
 	return channelPosition;
@@ -424,6 +419,8 @@ Float_t TTrack::getPositionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_
 	TCluster xCluster,yCluster;
 	xCluster=event->getPlane(plane).getXCluster(0);
 	yCluster=event->getPlane(plane).getYCluster(0);
+	if(verbosity>5)
+		cout<<event<<":"<<event->getEventNumber()<<"->"<<xCluster.getPosition()<<"/"<<yCluster.getPosition()<<endl;
 	return getPostionInLabFrame(cor,plane,xCluster,yCluster,mode,histo);
 }
 
@@ -516,6 +513,13 @@ UInt_t TTrack::getRawChannelNumber(UInt_t det, Float_t xPred, Float_t yPred)
 	}
 }
 
+/** from pediction calculated hit Position of a detector in detector system, metric space
+ *
+ * @param det
+ * @param xPred
+ * @param yPred
+ * @return
+ */
 Float_t TTrack::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
 {
 	UInt_t plane = det/2;
@@ -529,11 +533,25 @@ Float_t TTrack::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred)
 	}
 }
 
+/** from prediction calculated X Position in Detector System - Metric Space
+ *
+ * @param plane
+ * @param xPred
+ * @param yPred
+ * @return
+ */
 Float_t TTrack::getXPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred)
 {
 	return (xPred-this->getXOffset(plane))/TMath::Cos(this->getPhiXOffset(plane)) - (yPred+(xPred-this->getXOffset(plane))*TMath::Tan(this->getPhiXOffset(plane)))*TMath::Sin(this->getPhiXOffset(plane));
 }
 
+/** from prediction calculated Y Position in Detector System - Metric Space
+ *
+ * @param plane
+ * @param xPred
+ * @param yPred
+ * @return
+ */
 Float_t TTrack::getYPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred)
 {
 	return (yPred-this->getYOffset(plane))/TMath::Cos(this->getPhiYOffset(plane)) + (xPred-(yPred-this->getYOffset(plane))*TMath::Tan(this->getPhiYOffset(plane)))*TMath::Sin(this->getPhiYOffset(plane));

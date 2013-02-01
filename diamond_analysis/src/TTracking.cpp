@@ -106,7 +106,7 @@ bool TTracking::LoadEvent(UInt_t eventNumber){
     cout<<"new eventNumber ==> "<<eventNumber;
   }
   if(myTrack!=NULL){
-    if(verbosity>3){cout<<"myTrack!=0"<<endl;};
+    if(verbosity>6){cout<<"myTrack!=0"<<endl;};
     bool retVal=TADCEventReader::LoadEvent(eventNumber);
     if(retVal)
       myTrack->setEvent(this->getEvent());
@@ -140,16 +140,34 @@ Float_t  TTracking::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UI
 		return 0;
 	return myTrack->getPostionInLabFrame(cor,plane,xCluster,yCluster,mode,histo);
 }
+
+
 Float_t TTracking::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode, TH1F* histo){
 	if(myTrack==0)
 		return 0;
 	return myTrack->getPositionOfCluster(det,cluster,predictedPerpPosition,mode,histo);
 }
+
+/** from the current activated event positionInLabFrame
+ *
+ * @param cor
+ * @param plane
+ * @param mode
+ * @return
+ */
 Float_t  TTracking::getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode){
 	if(myTrack==0)
 		return 0;
 	return myTrack->getPositionInLabFrame(cor,plane,mode);
 }
+
+/**  from pediction calculated hit Position of a detector in detector system, metric space
+ *
+ * @param det
+ * @param xPred
+ * @param yPred
+ * @return
+ */
 Float_t TTracking::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred){
 	if(myTrack==0)
 		return 0;

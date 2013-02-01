@@ -33,7 +33,7 @@ LD              := g++
 LDFLAGS 		:= -L/usr/local/lib  $(ROOTGLIBS) -g $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
-LIBFILES		+=   TDetector_Data.o TTrigger_Event.o
+LIBFILES		+=  TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o 
 LIBFILES		+=	RawEvent.class.o RawDetector.class.o TADCEventReader.o
 LIBFILES		+=	TRawEventReader.o  TRawEventSaver.o TPedestalCalculation.o
@@ -43,16 +43,15 @@ LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 
-LIBFILES		+=	TFidCutRegions.o TFiducialCut.o 
 LIBFILES		+=	libTEvent.so
 
 
-ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o TPlaneProperties.o
-ROOTLIBFILES	+=	TResults.o TChannelMapping.o ChannelScreen.o TSettings.class.o TDiamondPattern.o
+ROOTLIBFILES	:=	TEventDict.o TEvent.o  TPlane.o  TCluster.o TDetectorAlignment.o TPlaneProperties.o TFiducialCut.o 
+ROOTLIBFILES	+=	TResults.o TChannelMapping.o ChannelScreen.o TSettings.class.o TDiamondPattern.o TFidCutRegions.o
 PROGS			:= diamondAnalysis
 
-ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh 
-ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh TDiamondPattern.hh
+ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh  TFidCutRegions.hh
+ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh TDiamondPattern.hh TFiducialCut.hh
 ROOTHFILES		+= TEventLinkDef.h 
 
 all: rootclean diamondAnalysis

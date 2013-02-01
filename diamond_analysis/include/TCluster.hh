@@ -19,7 +19,7 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#define TCLUSTER_REV  33
+#define TCLUSTER_REV  34
 using namespace std;
 class TCluster :public TObject{
 public:

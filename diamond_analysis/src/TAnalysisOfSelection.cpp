@@ -11,6 +11,10 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	if(settings!=0)
 		this->settings=settings;
 	else exit(0);
+//	cout<<settings<<endl;
+//	settings->PrintPatterns();
+//	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
+//	char t;cin >>t;
 
 	sys = gSystem;
 	UInt_t runNumber=settings->getRunNumber();
@@ -18,7 +22,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	htmlLandau=new THTMLLandaus(settings);
 
 	settings->goToSelectionTreeDir();
-	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings->getRunNumber());
+	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
 	histSaver=new HistogrammSaver();
 	settings->goToSelectionAnalysisDir();
 	stringstream plotsPath;
@@ -104,7 +108,9 @@ void TAnalysisOfSelection::initialiseHistos()
 
 void TAnalysisOfSelection::saveHistos()
 {
-//	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
+	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
+	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
+	char t;cin >>t;
 	LandauGaussFit landauGauss;
 	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
 	histSaver->OptimizeXYRange(histoLandauDistribution2D);

@@ -19,6 +19,7 @@ public:
 	virtual ~TPositionPrediction();
 	Float_t getPosition(TPlaneProperties::enumCoordinate cor);
 	Float_t getSigma(TPlaneProperties::enumCoordinate cor);
+	Float_t getChi2();
 	Float_t getChi2(TPlaneProperties::enumCoordinate cor);
 	Float_t getPhi(TPlaneProperties::enumCoordinate cor);
 	void setxPos(Float_t pos);

@@ -19,7 +19,8 @@ TAlignment::TAlignment(TSettings* inputSettings) {
 	stringstream runString;
 	settings->goToSelectionTreeDir();
 	htmlAlign = new THTMLAlignment(settings);
-	eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(), settings->getRunNumber(),settings->getVerbosity()<15?0:settings->getVerbosity()-15);
+	eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
+//	settings->getRunNumber(),settings->getVerbosity()<15?0:settings->getVerbosity()-15);
 	eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
 	cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
 	histSaver = new HistogrammSaver();
@@ -636,6 +637,7 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 		if (verbosity > 5) cout << "Sil Alignment - Event No.:"<< nEvent << endl;
 		xLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
 		yLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
+		if(verbosity>5) cout<< "\tLabMeasMetric: "<<xLabMeasMetric<<"/"<<yLabMeasMetric<<endl;
 		if (verbosity > 5) cout<<"Predict Position: "<<endl;
 		predictedPostionMetric = myTrack->predictPosition(subjectPlane, vecRefPlanes, TCluster::corEta, verbosity>8);
 		if(verbosity>6)	predictedPostionMetric->Print(1);

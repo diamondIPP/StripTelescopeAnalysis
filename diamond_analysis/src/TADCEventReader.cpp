@@ -12,6 +12,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
 	init(FileName,runNumber,verb);
 	this->settings = new TSettings();
 }
+
 TADCEventReader::TADCEventReader(string FileName,TSettings* settings) {
 	init(FileName,settings->getRunNumber(),settings->getVerbosity());
 	this->settings = settings;
@@ -397,7 +398,7 @@ bool TADCEventReader::LoadEvent(UInt_t EventNumber){
 	if(EventNumber<tree->GetEntries()){
 			current_event=EventNumber;
 			tree->GetEvent(current_event);
-			if(verbosity>=2)
+			if(verbosity>=14)
 				cout<<"Got Event: "<<current_event<<endl;
 			return true;
 		}
@@ -405,7 +406,7 @@ bool TADCEventReader::LoadEvent(UInt_t EventNumber){
 }
 
 Long64_t TADCEventReader::GetEntries(){
-	if (verbosity>=2) {
+	if (verbosity>=14) {
 		cout<<"TADCEventReader::GetEntries:"<<tree<<flush;
 		cout<<" "<<tree->GetEntries();
 	}
@@ -643,7 +644,7 @@ UInt_t TADCEventReader::getNClusters(UInt_t det)
 	if(det<TPlaneProperties::getNDetectors()){
 
 		UInt_t nClusters = this->pEvent->getNClusters(det);
-		if(verbosity>1){
+		if(verbosity>7){
 			cout<<"TADCEventReader::getNClusters of det "<<det<<": "<<nClusters<<endl;
 			pEvent->setVerbosity(verbosity>3);
 		}

@@ -58,7 +58,7 @@ private:
 	UInt_t eventNumber;
 	UInt_t verbosity;
 
-    ClassDef(TEvent,11);
+    ClassDef(TEvent,12);
 public:
 	
 };

@@ -23,7 +23,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 	this->runNumber=settings->getRunNumber();
 	sys = gSystem;
 	settings->goToPedestalTreeDir();
-	eventReader=new TADCEventReader(settings->getRawTreeFilePath(),runNumber);
+	eventReader=new TADCEventReader(settings->getRawTreeFilePath(),settings);
 	histSaver = new HistogrammSaver();
 	histSaver->SetPlotsPath(settings->getToPedestalAnalysisDir());
 	histSaver->SetRunNumber(settings->getRunNumber());
