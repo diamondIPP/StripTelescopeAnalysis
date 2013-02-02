@@ -26,6 +26,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	createdNewFile=false;
 	selectionTree=NULL;
 	selectionFile=NULL;
+	settings->goToSelectionTreeDir();
 	htmlSelection = new THTMLSelection(settings);
 	cout<<"OPEN TADCEventReader"<<flush;
 	cout<<"\ngoToSelectionTreeDir"<<endl;
@@ -609,13 +610,13 @@ void TSelectionClass::saveHistos()
 	histSaver->SaveCanvas(c1);
 	std::string name2 = "c";
 	name2.append(hFiducialCutSiliconDiamondHit->GetName());
-	TCanvas *c2= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit);
+	TCanvas *c2= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit,true);
 	c2->SetName(name2.c_str());
 	histSaver->SaveCanvas(c2);
 
 	std::string name3 = "c";
 	name3.append(hSelectedEvents->GetName());
-	TCanvas *c3= fiducialCuts->getAllFiducialCutsCanvas(hSelectedEvents);
+	TCanvas *c3= fiducialCuts->getAllFiducialCutsCanvas(hSelectedEvents,true);
 	c3->SetName(name3.c_str());
 	histSaver->SaveCanvas(c3);
 

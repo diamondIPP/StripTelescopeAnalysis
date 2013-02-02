@@ -22,6 +22,7 @@
 #include "TH2F.h"
 #include "TPlaneProperties.hh"
 #include "TObject.h"
+#include "TMath.h"
 class TFidCutRegions:public TObject {
 public:
 	TFidCutRegions();
@@ -31,6 +32,7 @@ public:
 	virtual ~TFidCutRegions();
 	TCanvas* getFiducialCutCanvas(TPlaneProperties::enumCoordinate cor);
 	TFiducialCut* getFidCut(std::string);
+	TFiducialCut* getFidCut(UInt_t index);
 	void addFiducialCut(Float_t xLow,Float_t xHigh,Float_t yLow, Float_t yHigh);
 	Float_t getXLow(UInt_t i);
 	Float_t getYLow(UInt_t i);
@@ -40,10 +42,15 @@ public:
 	void setRunDescription(std::string runDes);
 	bool isInFiducialCut(Float_t xVal,Float_t yVal);
 	int getFidCutRegion(Float_t xVal,Float_t yVal);
-	TCanvas* getAllFiducialCutsCanvas(TH2F* hScatterPlot=0);
+	TCanvas* getAllFiducialCutsCanvas(TH2F* hScatterPlot=0, bool optimizeAxisRange = false);
 	void setHistogramm(TH2F* hEventScatterPlot){this->hEventScatterPlot=hEventScatterPlot;}
 	UInt_t getNFidCuts(){return fidCuts.size();}
+	Float_t getMaxFiducialX(UInt_t index = 0);
+	Float_t getMinFiducialX(UInt_t index = 0);
+	Float_t getMaxFiducialY(UInt_t index = 0);
+	Float_t getMinFiducialY(UInt_t index = 0);
 private:
+	void initVariables();
 	std::vector<std::pair<Float_t,Float_t> >findFiducialCutIntervall(TH1D* hProj,Float_t fidCutPercentage);
 	TCanvas*  getFiducialCutProjectionCanvas(TH1D* hProj,std::vector< std::pair<Float_t,Float_t> > intervals);
 
@@ -56,6 +63,7 @@ private:
 	std::vector<TFiducialCut*> fidCuts;
 	std::string runDescription;
 	TH2F* hEventScatterPlot;
+	UInt_t verbosity;
     ClassDef(TFidCutRegions,1);
 };
 

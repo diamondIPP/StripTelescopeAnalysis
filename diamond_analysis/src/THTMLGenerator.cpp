@@ -215,8 +215,9 @@ std::string THTMLGenerator::putLink(std::string link,std::string content){
 
 void THTMLGenerator::updatePath()
 {
+	cout<<"THTMLGenerator::updatePath:";
 	setPathName(mainPath+subdirPath+"/");
-
+	cout<<" \""<<this->path<<"\""<<endl;
 }
 string THTMLGenerator::putIntoCommand(string command, string input){
   stringstream output;
