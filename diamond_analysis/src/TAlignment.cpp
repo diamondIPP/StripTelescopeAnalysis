@@ -156,6 +156,8 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
+		if(!settings->useForAlignment(nEvent,nEvents))
+			return;
 		eventReader->LoadEvent(nEvent);
 		if (!eventReader->isValidTrack()) {
 			noHitDet++;
@@ -637,6 +639,8 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 		if (verbosity > 5) cout << "Sil Alignment - Event No.:"<< nEvent << endl;
 		xLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
 		yLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
+		if(xLabMeasMetric<-400e3||yLabMeasMetric <-400e3)
+			continue;
 		if(verbosity>5) cout<< "\tLabMeasMetric: "<<xLabMeasMetric<<"/"<<yLabMeasMetric<<endl;
 		if (verbosity > 5) cout<<"Predict Position: "<<endl;
 		predictedPostionMetric = myTrack->predictPosition(subjectPlane, vecRefPlanes, TCluster::corEta, verbosity>8);
