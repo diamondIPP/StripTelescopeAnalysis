@@ -74,7 +74,7 @@ public:
 	std::string getAlignmentDir(){return this->getAbsoluteOuputPath(true).append("/alignment/");};
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
-	TFidCutRegions* getSelectionFidCuts(){return fiducialCuts;}
+
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
@@ -255,6 +255,9 @@ public:
 	bool resetAlignment() const{return bResetAlignment;};
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
+	TFidCutRegions* getSelectionFidCuts(){return fiducialCuts;}
+	Float_t getMinDiamondChannel();
+	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
 	int getDiaDetectorAreaOfChannel(Int_t ch);

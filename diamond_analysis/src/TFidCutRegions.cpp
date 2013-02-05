@@ -150,6 +150,13 @@ void TFidCutRegions::setRunDescription(std::string runDes)
 	return;
 }
 
+Int_t TFidCutRegions::getFiducialCutIndex(Float_t xVal,Float_t yVal){
+	for(UInt_t i=0;i<fidCuts.size();i++)
+		if(fidCuts.at(i)->isInFiducialCut(xVal,yVal))
+			return i+1;
+	return -1;
+}
+
 bool TFidCutRegions::isInFiducialCut(Float_t xVal, Float_t yVal)
 {
 	//  cout<<"xVal = "<<xVal<<"\tyVal = "<<yVal<<"\tIndex = "<<index<<endl;
@@ -162,7 +169,7 @@ bool TFidCutRegions::isInFiducialCut(Float_t xVal, Float_t yVal)
 	}
 	if(index==0){ //all diamonds will be analyesd
 		bool inFidCut=false;
-		for(UInt_t i=0;i<fidCuts.size();i++)
+		for(UInt_t i=0;i<fidCuts.size()&&inFidCut==false;i++)
 			inFidCut = inFidCut || fidCuts.at(i)->isInFiducialCut(xVal,yVal);
 		return inFidCut;
 	}
@@ -318,7 +325,7 @@ int TFidCutRegions::getFidCutRegion(Float_t xVal, Float_t yVal)
 {
 	unsigned int i=0;
 	for(i=0;i<fidCuts.size();i++){
-		if(fidCuts.at(i)->isInFiducialCut(xVal,yVal)) return i;
+		if(fidCuts.at(i)->isInFiducialCut(xVal,yVal)) return i+1;
 	}
 	return -1;
 }

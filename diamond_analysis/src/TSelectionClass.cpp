@@ -232,6 +232,7 @@ void TSelectionClass::resetVariables(){
 	atLeastOneValidDiamondCluster=false;
 	oneAndOnlyOneDiamondCluster = false;
 	hasBigDiamondCluster=false;
+	fiducialRegion =-1;
 }
 
 
@@ -255,6 +256,8 @@ void TSelectionClass::checkSiliconTrackInFiducialCut(){
 	//if not one and only one cluster one cannot check the Silicon Track if is fullfills the fiducia cut
 	if (!oneAndOnlyOneSiliconCluster){
 		isInFiducialCut=false;
+		fiducialValueY=N_INVALID;
+		fiducialValueX=N_INVALID;
 		return;
 	}
 	isInFiducialCut=true;
@@ -269,6 +272,16 @@ void TSelectionClass::checkSiliconTrackInFiducialCut(){
 	fiducialValueY/=4.;
 	//check the fiducial Values
 	isInFiducialCut = fiducialCuts->isInFiducialCut(fiducialValueX,fiducialValueY);
+	if(isInFiducialCut){
+		fiducialRegion = fiducialCuts->getFiducialCutIndex(fiducialValueX,fiducialValueY);
+		if(verbosity>6){
+			cout<< setw(6) << nEvent <<" fidCut: "
+				<< std::right<<setw(6)<<std::setprecision(2)<<fiducialValueX<<" / "
+				<< std::left <<setw(6)<<std::setprecision(2)<<fiducialValueY
+				<<" - "<<std::right<<isInFiducialCut<< " -> "<<fiducialRegion<<"   "<<flush;
+			fiducialCuts->getFidCut(fiducialRegion)->Print();
+		}
+	}
 	//	if(verbosity>4)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<": Fidcut:"<<isInFiducialCut<<endl;
 }
 
@@ -443,6 +456,9 @@ void TSelectionClass::setBranchAdressess(){
 	selectionTree->Branch("useForAnalysis",&this->useForAnalysis,"useForAnalysis/O");
 	selectionTree->Branch("diaClusterSize",&this->nDiaClusterSize,"diaClusterSize/I");
 	selectionTree->Branch("isDiaSaturated",&this->isDiaSaturated,"isDiaSaturated/O");
+	selectionTree->Branch("fiducialRegion",&this->fiducialRegion,"fiducialRegion/I");
+	selectionTree->Branch("fiducialValueX",&this->fiducialValueX,"fiducialValueX/F");
+	selectionTree->Branch("fiducialValueY",&this->fiducialValueY,"fiducialValueY/F");
 }
 
 void TSelectionClass::initialiseHistos()

@@ -40,6 +40,7 @@ public:
 	Float_t getYHigh(UInt_t i);
 	void Print(int intend = 0);
 	void setRunDescription(std::string runDes);
+	Int_t getFiducialCutIndex(Float_t xVal, Float_t yVal);
 	bool isInFiducialCut(Float_t xVal,Float_t yVal);
 	int getFidCutRegion(Float_t xVal,Float_t yVal);
 	TCanvas* getAllFiducialCutsCanvas(TH2F* hScatterPlot=0, bool optimizeAxisRange = false);

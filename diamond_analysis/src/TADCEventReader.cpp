@@ -373,6 +373,21 @@ void TADCEventReader::SetBranchAddresses(){
 		tree->SetBranchAddress("cmnCreated",&this->cmnCreated);
 		if(verbosity>3)cout<<"SET BRANCH ADDRESS: \"CMN Noise Created\""<<endl;
 	}
+	if(tree->FindBranch("fiducialRegion")){
+		tree->SetBranchAddress("fiducialRegion",&this->fiducialRegion);
+		if(verbosity>3)cout<<"SET BRANCH ADDRESS: \"fiducialRegion\""<<endl;
+	}
+	if(tree->FindBranch("fiducialValueX")){
+		tree->SetBranchAddress("fiducialValueX",&this->fiducialValueX);
+		if(verbosity>3)
+			cout<<"SET BRANCH ADDRESS: \"fiducialValueX\""<<endl;
+	}
+	if(tree->FindBranch("fiducialValueY")){
+		tree->SetBranchAddress("fiducialValueY",&this->fiducialValueY);
+		if(verbosity>3)
+			cout<<"SET BRANCH ADDRESS: \"fiducialValueY\""<<endl;
+	}
+
 
 //	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
 //	UInt_t nDiamondHits; //number of clusters in diamond plane;

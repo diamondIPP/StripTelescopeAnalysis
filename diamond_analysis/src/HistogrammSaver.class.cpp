@@ -31,7 +31,7 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 				gROOT->SetStyle("Plain"); //General style (see TStyle)
 				//	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
 				if(gStyle->GetOptStat()!=221111111)
-					gStyle->SetOptStat("nemrKSiou");
+					gStyle->SetOptStat("nemr");//KSiou
 				if(gStyle->GetOptFit()!=1111){
 					gStyle->SetOptFit(1111);  //Fit options to be displayed
 					gStyle->SetStatH(0.12); //Sets Height of Stats Box
@@ -45,8 +45,11 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 				gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
 				currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
 				currentStyle->SetPalette(1);
+				currentStyle2D= (TStyle*)currentStyle->Clone("Plain_RD42_2D");
+				currentStyle2D->SetOptStat("ne");
+				currentStyle2D ->SetPalette(1);
 				currentStyle->cd();
-
+				gROOT->SetStyle("Plain_RD42");
 			}
 		}
 
@@ -279,8 +282,12 @@ void HistogrammSaver::SaveHistogramLogZ(TH2F* histo){
 	delete c1;
 }
 
-void HistogrammSaver::SaveHistogram(TH2F* histo) {
+void HistogrammSaver::SaveHistogram(TH2F* histo, bool drawStatBox) {
+	if (!histo)return;
 	if(histo->GetEntries()==0)return;
+	if (!drawStatBox)
+			histo->SetStats(false);
+//	histo->SetStats(false);
 	SaveHistogramPNG(histo);
 	SaveHistogramROOT(histo);
 }
@@ -475,11 +482,16 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
+
 	if(!histo){
 		cerr<<"HistogrammSaver::SaveHistogramPNG(TH2F*), histogram ==0"<<endl;
 				return;
 	}
 	if(histo->GetEntries()==0)return;
+	gROOT->SetStyle("Plain_RD42_2D");
+	gROOT->ForceStyle(true);
+	cout<<"Save: \""<<histo->GetName()<<"\""<<endl;
+	cout<<"\tgStyle2D: "<<gStyle<<"-->"<<flush;
 	TCanvas *plots_canvas =  new TCanvas(TString::Format("cPng_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
 	plots_canvas->Clear();
 	plots_canvas->cd();
@@ -492,6 +504,9 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas->Print(plot_filename.str().c_str());
+
+	gROOT->SetStyle("Plain_RD42");
+	cout<<"gStyle: "<<gStyle<<endl;
 //	if(plots_canvas)delete plots_canvas;
 }
 
@@ -525,6 +540,10 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 	plots_canvas->Write();
 	f->Close();
 //	if (plots_canvas) delete plots_canvas;
+}
+
+void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
+
 }
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
