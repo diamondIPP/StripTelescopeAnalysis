@@ -7,6 +7,7 @@
 #include "TFiducialCut.hh"
 
 ClassImp(TFiducialCut);
+using namespace std;
 TFiducialCut::TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh){
 	SetAllValuesZero();
 	index=i;
@@ -29,5 +30,7 @@ void TFiducialCut::SetAllValuesZero() {
 }
 
 void TFiducialCut::Print () {
-	std::cout << "FidCutRegion #" << index << ":\t XLow:\t" << x_low << "\t XHigh:\t" << x_high << "\t YLow:\t" << y_low << "\t YHigh:\t" << y_high << "\n"<<std::flush;
+	std::cout << "FidCutRegion #" << index << ":"<<
+			" X: " <<setw(6) <<std::right<< x_low << " - " <<setw(6)<<std::left<< x_high <<
+			" Y: " <<setw(6) <<std::right<< y_low << " - " <<setw(6)<<std::left<<y_high <<std::right<< "\n"<<std::flush;
 }

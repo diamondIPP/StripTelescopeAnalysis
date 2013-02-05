@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 #include "TH1F.h"
+#include "TH3F.h"
+#include "TH3.h"
 #include "TCanvas.h"
 #include "TH2F.h"
 #include "TGraph.h"
@@ -59,7 +61,7 @@ public:
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, UInt_t verbosity=0);
 	void SaveHistogramLogZ(TH2F* histo);
-	void SaveHistogram(TH2F* histo);
+	void SaveHistogram(TH2F* histo,bool drawStatBox=true);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPNG(TH1* histo);
 	void SaveHistogramPNG(TH2F* histo);
@@ -67,6 +69,7 @@ public:
 	void SaveHistogramFitGaussPNG(TH1* histo);
 	void SaveHistogramROOT(TH1* histo);
 	void SaveHistogramROOT(TH2F* histo);
+	void SaveHistogramROOT(TH3F* histo);
 	void SaveGraphROOT(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPDF(TH1F* histo);
 	void SaveHistogramPDF(TH2F* histo);
@@ -105,6 +108,7 @@ private:
     unsigned int nEvents;
     void UpdatePaveText();
     TStyle *currentStyle;
+    TStyle *currentStyle2D;
     TSystem *sys;
     TFile* histoFile;
 };

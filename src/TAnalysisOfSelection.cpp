@@ -15,7 +15,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 //	settings->PrintPatterns();
 //	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
 //	char t;cin >>t;
-
+	verbosity = settings->getVerbosity();
 	sys = gSystem;
 	UInt_t runNumber=settings->getRunNumber();
 
@@ -94,23 +94,111 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution2DNoBorderHit_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderHit_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderHit_unmasked->GetZaxis()->SetTitle("number of entries");
-	hFidCut= new TH2F("hFidCut","hFidCut",256,0,255,256,0,255);
+
+	hValidSiliconAndDiamondHit = new TH2F("hValidSiliconAndDiamondHit","hValidSiliconAndDiamondHit",256*4,0,255,256*4,0,255);
+	hValidSiliconAndDiamondHit->GetXaxis()->SetTitle("FidCutValue in X");
+	hValidSiliconAndDiamondHit->GetYaxis()->SetTitle("FidCutValue in Y");
+
+	hValidSiliconAndOneDiamondHit = new TH2F("hValidSiliconAndOneDiamondHit","hValidSiliconAndOneDiamondHit",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHit->GetXaxis()->SetTitle("FidCutValue in X");
+	hValidSiliconAndOneDiamondHit->GetYaxis()->SetTitle("FidCutValue in Y");
+
+	hValidSiliconAndOneDiamondHitNotMasked  = new TH2F("hValidSiliconAndOneDiamondHitNotMasked","hValidSiliconAndOneDiamondHitNotMasked	",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitNotMasked->GetXaxis()->SetTitle("FidCutValue in X");
+	hValidSiliconAndOneDiamondHitNotMasked->GetYaxis()->SetTitle("FidCutValue in Y");
+
+	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels= new TH2F("hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels","hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetXaxis()->SetTitle("FidCutValue in X");
+	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetYaxis()->SetTitle("FidCutValue in Y");
+
+	hValidSiliconAndOneDiamondHitInOneArea  = new TH2F("hValidSiliconAndOneDiamondHitInOneArea","hValidSiliconAndOneDiamondHitInOneArea	",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitInOneArea->GetXaxis()->SetTitle("FidCutValue in X");
+	hValidSiliconAndOneDiamondHitInOneArea->GetYaxis()->SetTitle("FidCutValue in Y");
+	hFidCut= new TH2F("hFidCut","hFidCut",256*4,0,255,256*4,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
+
+	hFidCutOneDiamondCluster= new TH2F("hFidCut_oneDiamondCluster","hFidCut_oneDiamondCluster",256*4,0,255,256*4,0,255);
+	hFidCutOneDiamondCluster->GetXaxis()->SetTitle("FidCutValue in X");
+	hFidCutOneDiamondCluster->GetYaxis()->SetTitle("FidCutValue in Y");
+
 	hClusterPosition=new TH1F("hClusterPositionDia","Events which have a valid Silicon Track",128,0,127);
 	hClusterPosition->GetXaxis()->SetTitle("highes Cluster Channel Position");
 	hClusterPosition->GetYaxis()->SetTitle("number of Events #");
+
 	h3dDiamond = new TH1F("h3dDiamond","Sum of Charge for all 18 3d-channels",4096,0,4095);
 	h3dDiamond_hit = new TH1F("h3dDiamond_hit","Sum of Charge for all 18 3d-channels with a Hit",4096,0,4095);
 	hNoDiamond = new TH1F("hNoDiamond","Sum of Charge for all 18 no-channels",4096,0,4095);
 	hNoDiamond_hit = new TH1F("hNoDiamond_hit","Sum of Charge for all 18 no-channels with a Hit",4096,0,4095);
+
+	for (UInt_t i=1;i<=settings->getSelectionFidCuts()->getNFidCuts();i++){
+		Float_t xMin = settings->getSelectionFidCuts()->getMinFiducialX(i);
+		Float_t xMax = settings->getSelectionFidCuts()->getMaxFiducialX(i);
+		UInt_t xBins = (Int_t)(2*(xMax-xMin));
+		TString name = TString::Format("hChargeVsFidX_HitInFidCutNo%d",i);
+		TH2F* histo = new TH2F(name,name,4096,0,4095,xBins,xMax,xMin);
+		histo->GetXaxis()->SetTitle("charge of diamond Hit");
+		histo->GetYaxis()->SetTitle("FiducialCut X/ch");
+		hChargeVsFidX.push_back(histo);
+		if(verbosity){
+		cout<<"added Histogram: "<<name
+			<< " X:"<<histo->GetNbinsX()<<"_"<<histo->GetXaxis()->GetXmin()<<":"<<histo->GetXaxis()->GetXmax()
+			<<" -Y:"<<histo->GetNbinsY()<<"_"<<histo->GetYaxis()->GetXmin()<<":"<<histo->GetYaxis()->GetXmax()<<endl;
+		}
+		Float_t yMin = settings->getSelectionFidCuts()->getMinFiducialY(i);
+		Float_t yMax =  settings->getSelectionFidCuts()->getMaxFiducialY(i);
+		xBins = (Int_t)(2*(yMax-yMin));
+		name = TString::Format("hChargeVsFidY_HitInFidCutNo%d",i);
+		histo = new TH2F(name,name,4096,0,4095,xBins,yMax,yMin);
+		histo->GetXaxis()->SetTitle("charge of diamond Hit");
+		histo->GetYaxis()->SetTitle("FiducialCut Y/ch");
+		hChargeVsFidY.push_back(histo);
+		if(verbosity){
+				cout<<"added Histogram: "<<name
+					<< " X:"<<histo->GetNbinsX()<<"_"<<histo->GetXaxis()->GetXmin()<<":"<<histo->GetXaxis()->GetXmax()
+					<<" -Y:"<<histo->GetNbinsY()<<"_"<<histo->GetYaxis()->GetXmin()<<":"<<histo->GetYaxis()->GetXmax()<<endl;
+		}
+		if(verbosity>4){
+			char t;
+			cin>>t;
+		}
+	}
+	TString name = TString::Format("hChargeVsFidCut");
+	Float_t xmin = settings->getSelectionFidCuts()->getMinFiducialX();
+	Float_t xmax = settings->getSelectionFidCuts()->getMaxFiducialX();
+	Float_t ymin = settings->getSelectionFidCuts()->getMinFiducialY();
+	Float_t ymax = settings->getSelectionFidCuts()->getMaxFiducialY();
+	Float_t deltaX = xmax - xmin;
+	xmin = xmin - .1 * deltaX;
+	xmax = xmax + .1 * deltaX;
+	Float_t deltaY = ymax - ymin;
+	ymin = ymin - .1 * deltaY;
+	ymax = ymax + .1 * deltaY;
+	Int_t xBins = (Int_t)(3*(xmax-xmin));
+	Int_t yBins = (Int_t)(3*(ymax-ymin));
+	hChargeVsFidCut = new TH3F(name,name,xBins,xmin,xmax,yBins,ymin,ymax,4096,0,4096);
+	hChargeVsFidCut->GetXaxis()->SetTitle("FiducialValue X/ch");
+	hChargeVsFidCut->GetYaxis()->SetTitle("FiducialValue Y/ch");
+	hChargeVsFidCut->GetZaxis()->SetTitle("charge");
+	cout<<"added Histogram: "<<name<<endl;
+	Float_t chBegin = settings->getMinDiamondChannel();
+	Float_t chEnd = settings->getMaxDiamondChannel();
+	Float_t deltaCh = chEnd - chBegin;
+	chBegin -= 0.1 * deltaCh;
+	chEnd   -+ 0.1 * deltaCh;
+	name = TString::Format("hFidCutXvsDiamondClusterChannelPos");
+	yBins=3*(chEnd-chBegin);
+	hFidCutXvsChannelPos = new TH2F(name,name,xBins,xmin,xmax,yBins,chBegin,chEnd);
+	hFidCutXvsChannelPos->GetXaxis()->SetTitle("FiducialValue X / ch");
+	hFidCutXvsChannelPos->GetYaxis()->SetTitle("DiamondCluster Channel Pos / ch");
+	hFidCutXvsChannelPos->GetYaxis()->SetTitle("# number of entries");
 }
 
 void TAnalysisOfSelection::saveHistos()
 {
 	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
-	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
-	char t;cin >>t;
+//	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
+//	char t;cin >>t;
 	LandauGaussFit landauGauss;
 	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
 	histSaver->OptimizeXYRange(histoLandauDistribution2D);
@@ -118,6 +206,65 @@ void TAnalysisOfSelection::saveHistos()
 	cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
 	histSaver->SaveHistogram(histoLandauDistribution2D);
 	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
+
+	TH2F* hEntriesOfMeanChargeHisto = (TH2F*)hChargeVsFidCut->Project3D("yx");
+	if(hEntriesOfMeanChargeHisto){
+		hEntriesOfMeanChargeHisto->SetName("hEntriesOfMeanChargeHisto");
+		hEntriesOfMeanChargeHisto->SetTitle("hEntriesOfMeanChargeHisto");
+		hEntriesOfMeanChargeHisto->GetXaxis()->SetTitle("fidCut X/ch");
+		hEntriesOfMeanChargeHisto->GetYaxis()->SetTitle("fidCut Y/ch");
+		hEntriesOfMeanChargeHisto->GetZaxis()->SetTitle("number of entries #");
+		histSaver->SaveHistogram(hEntriesOfMeanChargeHisto);
+	}
+
+
+	cout<<"create hChargeVsFidCutProfile"<<endl;
+	TH2F* hChargeVsFidCutProfile = (TH2F*)hChargeVsFidCut->Project3DProfile("yx");
+	cout<<"draw hChargeVsFidCutProfile"<<endl;
+	hChargeVsFidCutProfile->Draw();
+	hChargeVsFidCutProfile->SetName("hMeanChargeVsFiducialCutPosition");
+	hChargeVsFidCutProfile->SetTitle("MeanChargeVsFiducialCutPosition");
+	hChargeVsFidCutProfile->GetXaxis()->SetTitle("fiducialCut X/ch");
+	hChargeVsFidCutProfile->GetYaxis()->SetTitle("fiducialCut Y/ch");
+	hChargeVsFidCutProfile->GetZaxis()->SetTitle("mean charge");
+	TCanvas *c3 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hChargeVsFidCutProfile);
+	c3->SetName(hChargeVsFidCutProfile->GetName());
+	cout<<"save hChargeVsFidCutProfile"<<endl;
+	histSaver->SaveCanvas(c3);
+//	Histogram(hChargeVsFidCutProfile);
+//	cout<<"save hChargeVsFidCut"<<endl;
+//	histSaver->SaveHistogramROOT(hChargeVsFidCut);Profile;
+	histSaver->SaveHistogram(hFidCutXvsChannelPos);
+	delete hFidCutXvsChannelPos;
+	cout<<"save hChargeVsFidCut x/Y"<<endl;
+	for (UInt_t i=0;i<settings->getSelectionFidCuts()->getNFidCuts();i++){
+		if(i<hChargeVsFidX.size()){
+			cout<<"save: "<<hChargeVsFidX[i]->GetTitle()<<endl;
+			histSaver->OptimizeXYRange(hChargeVsFidX[i]);
+			histSaver->SaveHistogram(hChargeVsFidX[i]);
+		}
+		if(i<hChargeVsFidY.size() ){
+			cout<<"save: "<<hChargeVsFidY[i]->GetTitle()<<endl;
+			histSaver->OptimizeXYRange(hChargeVsFidY[i]);
+			histSaver->SaveHistogram(hChargeVsFidY[i]);
+		}
+		TString name  = TString::Format("hMeanChargeFiducialCutNo%d",i+1);
+		cout<<name<<" "<<hChargeVsFidCutProfile<<endl;
+		TH2F* hMeanChargeArea =  (TH2F*)hChargeVsFidCutProfile->Clone(name);
+		hMeanChargeArea->SetTitle(name);
+		Float_t xmin = settings->getSelectionFidCuts()->getMinFiducialX(i+1);
+		Float_t xmax = settings->getSelectionFidCuts()->getMaxFiducialX(i+1);
+		Float_t xCorrect = 0.1*(xmax-xmin);
+		Float_t ymin = settings->getSelectionFidCuts()->getMinFiducialY(i+1);
+		Float_t ymax = settings->getSelectionFidCuts()->getMaxFiducialY(i+1);
+		Float_t yCorrect = 0.1*(ymax-ymin);
+		hMeanChargeArea->GetXaxis()->SetRangeUser(xmin-xCorrect,xmax+xCorrect);
+		hMeanChargeArea->GetYaxis()->SetRangeUser(ymin-yCorrect,ymax+yCorrect);
+		histSaver->SaveHistogram(hMeanChargeArea);
+		delete hMeanChargeArea;
+	}
+	delete hChargeVsFidCut;
+	delete hChargeVsFidCutProfile;
 	for(Int_t area=0;area<settings->getNDiaDetectorAreas();area++){
 		Int_t chLow = settings->getDiaDetectorArea(area).first;
 		Int_t chHigh =  settings->getDiaDetectorArea(area).second;
@@ -147,7 +294,53 @@ void TAnalysisOfSelection::saveHistos()
 		histoLandauDistribution2DNoBorderHitarea->SetTitle(name);
 		histoLandauDistribution2DNoBorderHitarea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
 		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderHitarea);
-		delete histoLandauDistribution2DNoBorderSeedarea;
+		Int_t firstBin = histoLandauDistribution2DNoBorderHitarea->GetYaxis()->GetFirst();
+		Int_t lastBin = histoLandauDistribution2DNoBorderHitarea->GetYaxis()->GetLast();
+		vector<TH1F*> vecHistos;
+		Double_t max =0;
+		UInt_t colors[]={kBlack,kOrange,kBlue,kRed,kSpring+5,kGreen+2,kTeal,kViolet,kAzure+10,kCyan-5};
+		Int_t nColors =11;
+		int k = 0;
+		THStack* stack = new THStack("hStack",TString::Format("Charge of Cluster per Channel - Area %d",area));
+		for(Int_t bin = firstBin;bin<lastBin;bin++){
+			Int_t ch = histoLandauDistribution2DNoBorderHitarea->GetYaxis()->GetBinCenter(bin);
+			if(!settings->isInDiaDetectorArea(ch,area))
+				continue;
+			if(settings->isDet_channel_screened(TPlaneProperties::getDetDiamond(),ch))
+				continue;
+			name = TString::Format("hChargeOfCluster_ch%d_area%d",ch,area);
+			TH1F * histo = (TH1F*) histoLandauDistribution2DNoBorderHitarea->ProjectionX(name,bin,bin);
+			cout<<name<<"_"<<histo<<endl;
+			if(!histo)
+				continue;
+			name = TString::Format("ch %d, area %d",ch,area);
+			histo->SetTitle(name);
+			histo->Draw();
+			histo->Rebin();
+			histo->Rebin();
+			histo->GetXaxis()->SetTitle("Charge of Cluster");
+			histo->GetYaxis()->SetTitle("number of entries #");
+			histo->SetLineColor(colors[k%nColors]);
+			k++;
+			max = TMath::Max(max,histo->GetBinContent(histo->GetMaximumBin()));
+			vecHistos.push_back(histo);
+			stack->Add(histo);
+		}
+		name = TString::Format("cChargePerChannel_area%d",area);
+		max*=1.1;
+		TCanvas *c1 = new TCanvas(name,name,1024, 768);
+		c1->cd();
+//		Float_t xmin = histoLandauDistribution2DNoBorderHit->GetXaxis()->GetXmin();
+//		Float_t xmax = histoLandauDistribution2DNoBorderHit->GetXaxis()->GetXmax();
+//		Int_t bins = histoLandauDistribution2DNoBorderHit->GetXaxis()->GetNbins();
+		stack->Draw("nostack");
+		TLegend *leg = c1->BuildLegend();
+		leg->SetFillColor(kWhite);
+		leg->Draw();
+		histSaver->SaveCanvas(c1);
+
+
+//		delete histoLandauDistribution2DNoBorderSeedarea;
 
 		// 2d area clusterSize 1or 2 unmasked
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
@@ -419,8 +612,49 @@ void TAnalysisOfSelection::saveHistos()
 	delete mg;
 	delete c1;
 
-	histSaver->SaveHistogram(hFidCut);
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndDiamondHit,true);
+	c1->SetName(TString::Format("c%s",hValidSiliconAndDiamondHit->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	delete hValidSiliconAndDiamondHit;
+
+
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndOneDiamondHit,true);
+	c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHit->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	delete hValidSiliconAndOneDiamondHit;
+
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndOneDiamondHitNotMasked,true);
+	c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHitNotMasked->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	delete hValidSiliconAndOneDiamondHitNotMasked;
+
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels,true);
+	c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	delete hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels;
+
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndOneDiamondHitInOneArea,true);
+	c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHitInOneArea->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	delete hValidSiliconAndOneDiamondHitInOneArea;
+
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hFidCut,true);
+	c1->SetName(TString::Format("c%s",hFidCut->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
 	delete hFidCut;
+
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hFidCutOneDiamondCluster,true);
+	c1->SetName(TString::Format("c%s",hFidCutOneDiamondCluster->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	delete hFidCutOneDiamondCluster;
+
 	histSaver->SaveHistogram(hClusterPosition,0,1);
 	delete hClusterPosition;
 	cout<<"Save histos "<<endl;
@@ -452,45 +686,74 @@ void TAnalysisOfSelection::analyseEvent()
 	if(eventReader->isValidTrack()){//
 		//if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
 
-		for(UInt_t plane=0;plane<4;plane++){
-			fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
-			fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
-		}
-		fiducialValueX/=4.;
-		fiducialValueY/=4.;
-		Float_t charge3d=0;
-		for(UInt_t ch=0;ch<18;ch++){
-			Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
-			if(charge3d<rawSignal)charge3d=rawSignal;
-		}
-		h3dDiamond->Fill(charge3d);
-		Float_t chargeNo=0;
-		for(UInt_t ch=36;ch<54;ch++){
-			Float_t rawSignal=eventReader->getRawSignal(TPlaneProperties::getDetDiamond(),ch);
-			if(chargeNo<rawSignal)charge3d=rawSignal;
-		}
-		hNoDiamond->Fill(chargeNo);
-		if(eventReader->getNClusters(TPlaneProperties::getDetDiamond())<=0)
+		fiducialValueX= eventReader->getFiducialValueX();
+		fiducialValueY = eventReader->getFiducialValueY();
+		Int_t nDiaClusters = eventReader->getNClusters(TPlaneProperties::getDetDiamond());
+		if(nDiaClusters<=0)
 			return;
-		hNoDiamond_hit->Fill(chargeNo);
-		h3dDiamond_hit->Fill(charge3d);
+		TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+
+		Float_t charge = cluster.getCharge(false);
+		UInt_t clustSize = cluster.size();
+		bool isMasked = false;
+		isMasked = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
+
+		bool isMaskedAdjacentChannels = false;
+		isMaskedAdjacentChannels = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,true);
+
+		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
+		Int_t fidRegion = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
+
+		Int_t area = settings->getDiaDetectorAreaOfChannel(pos);
+		bool isInOneArea = !(area==-1);
+		//valid track, nDiaCLusters >0
+		hValidSiliconAndDiamondHit ->Fill(fiducialValueX,fiducialValueY);
+		if (nDiaClusters==1){
+			hValidSiliconAndOneDiamondHit ->Fill(fiducialValueX,fiducialValueY);
+			if(!isMasked)
+				hValidSiliconAndOneDiamondHitNotMasked ->Fill(fiducialValueX,fiducialValueY);
+			if(!isMaskedAdjacentChannels)
+				hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels ->Fill(fiducialValueX,fiducialValueY);
+
+			if(isInOneArea)
+				hValidSiliconAndOneDiamondHitInOneArea->Fill(fiducialValueX,fiducialValueY);
+		}
 
 		if(!eventReader->isInFiducialCut())
 			return;
 		hFidCut->Fill(fiducialValueX,fiducialValueY);
-		TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
-		Float_t charge = cluster.getCharge(false);
-		UInt_t clustSize = cluster.size();
+
+		if(nDiaClusters>1)
+			return;
+		hFidCutOneDiamondCluster->Fill(fiducialValueX,fiducialValueY);
+
+
 		if(clustSize>8) clustSize=8;
 		if(cluster.isSaturatedCluster())
 			return;
-//		if (cluster.isScreened())
-//			return;
-		//		cout<<nEvent<<":\t"<<charge<<endl;
 		histoLandauDistribution->Fill(charge,clustSize);
-		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
+		fidRegion--;
 		hClusterPosition->Fill(pos);
+		if(isMaskedAdjacentChannels)
+			return;
 		if(clustSize<=2){
+			if(area!=fidRegion){
+				if(verbosity>2)cout<<"\r"<<nEvent<<" Problem: "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<fidRegion<<" \t"<<pos<<"-->"<<area<<"_\n"<<flush;
+				return;
+			}
+			else{
+				if(verbosity>5)cout<<nEvent<<" Good"<<endl;
+			}
+			if(fidRegion<hChargeVsFidX.size()&&fidRegion>=0){
+				hChargeVsFidX[fidRegion]->Fill(charge,fiducialValueX);
+				hChargeVsFidY[fidRegion]->Fill(charge,fiducialValueY);
+			}
+			else{
+				cout<<"fidRegion not valid: "<<fidRegion<<" "<<fiducialValueX<<"/"<<fiducialValueY<<endl;
+				settings->getSelectionFidCuts()->Print();
+			}
+			hChargeVsFidCut->Fill(fiducialValueX,fiducialValueY,charge);
+			hFidCutXvsChannelPos->Fill(fiducialValueX,pos);
 			histoLandauDistribution2D_unmasked->Fill(charge,pos);
 			bool isBorderSeedCluster = settings->hasBorderSeed(TPlaneProperties::getDetDiamond(),cluster);
 			bool isBorderHitCluster = settings->hasBorderHit(TPlaneProperties::getDetDiamond(),cluster);
