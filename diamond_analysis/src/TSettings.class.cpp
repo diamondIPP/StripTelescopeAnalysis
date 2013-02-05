@@ -672,7 +672,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
 	}
 	else
 		cout<<"vecEntries.size(): "<<vecEntries.size()<<endl;
-	if (verbosity){
+	if (verbosity>3){
 		cout<<"Prss a key and enter: "<<flush;
 		char t;
 		cin>>t;
@@ -703,7 +703,7 @@ void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* 
 	}
 	else
 		cerr<<"TSettings::ParseFidCut: Cannot Parse FidCut - Size of vecEntries does not fit: "<<stringArray.size()<<endl;
-	if (verbosity){
+	if (verbosity>3){
 		cout<<"Prss a key and enter: "<<flush;
 		char t;
 		cin>>t;
@@ -1580,7 +1580,26 @@ std::pair< Int_t , Int_t > TSettings::getDiaDetectorArea(int n){
 	return std::make_pair((Int_t)-1, (Int_t)-1);
 
 }
+Float_t TSettings::getMinDiamondChannel(){
+	if(getNDiaDetectorAreas()>0){
+		Float_t min = getDiaDetectorArea(0).first;
+		for(Int_t area = 1; area < getNDiaDetectorAreas(); area++)
+			min = TMath::Min(min,(Float_t)getDiaDetectorArea(area).first);
+		return min;
+	}
+	return 0;
+}
 
+Float_t TSettings::getMaxDiamondChannel(){
+	if(getNDiaDetectorAreas()>0){
+		Float_t max = getDiaDetectorArea(0).second;
+		for(Int_t area = 1; area < getNDiaDetectorAreas(); area++)
+			max = TMath::Max(max,(Float_t)getDiaDetectorArea(area).second);
+		return max;
+		}
+	return TPlaneProperties::getNChannelsDiamond();
+
+}
 int TSettings::getDiaDetectorAreaOfChannel(Int_t ch){
 	for(Int_t area = 0; area < getNDiaDetectorAreas(); area++)
 		if(isInDiaDetectorArea(ch,area))

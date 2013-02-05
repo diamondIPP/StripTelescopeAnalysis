@@ -65,6 +65,7 @@ private:
 	bool createdNewTree;
 	bool createdNewFile;
 	bool isDiaSaturated;
+	Int_t fiducialRegion;
 	stringstream runString;
 	stringstream rawfilepath;
 	stringstream pedestalfilepath;

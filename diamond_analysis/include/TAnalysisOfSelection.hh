@@ -19,8 +19,10 @@
 
 #include "TSystem.h"
 #include "TH1F.h"
-#include "TH1.h"
+#include "TH2F.h"
+#include "TH3F.h"
 #include "TF1.h"
+#include "THStack.h"
 #include "TGraphErrors.h"
 #include "TMultiGraph.h"
 #include "TStopwatch.h"
@@ -43,6 +45,7 @@ private:
 	void saveHistos();
 	void analyseEvent();
 private:
+	Int_t verbosity;
 	TSettings *settings;
 	HistogrammSaver *histSaver;
 	TADCEventReader* eventReader;
@@ -55,12 +58,22 @@ private:
 	TH2F* histoLandauDistribution2D_unmasked;
 	TH2F* histoLandauDistribution2DNoBorderSeed_unmasked;
 	TH2F* histoLandauDistribution2DNoBorderHit_unmasked;
+	vector<TH2F*> hChargeVsFidX;
+	vector<TH2F*> hChargeVsFidY;
 	TH1F* hClusterPosition;
 	TH1F* h3dDiamond;
 	TH1F* hNoDiamond;
 	TH1F* h3dDiamond_hit;
 	TH1F* hNoDiamond_hit;
 	TH2F* hFidCut;
+	TH2F* hFidCutOneDiamondCluster;
+	TH2F* hValidSiliconAndDiamondHit;
+	TH2F* hValidSiliconAndOneDiamondHit;
+	TH2F* hValidSiliconAndOneDiamondHitNotMasked;
+	TH2F* hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels;
+	TH2F* hValidSiliconAndOneDiamondHitInOneArea;
+	TH3F* hChargeVsFidCut;
+	TH2F* hFidCutXvsChannelPos;
 	THTMLLandaus *htmlLandau;
 };
 

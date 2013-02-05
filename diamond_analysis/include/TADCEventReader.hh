@@ -87,6 +87,9 @@ public:
 	bool useForAnalysis(){return this->bUseForAnalysis;};
 	TH1F* getEtaIntegral(UInt_t det);
 	Float_t getCmnCreated(UInt_t det){if(det>=0&&det<9)return this->cmnCreated[det];return 0;}
+	Int_t getFiducialRegion(){return fiducialRegion;}
+	Float_t getFiducialValueX(){return fiducialValueX;}
+	Float_t getFiducialValueY(){return fiducialValueY;}
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
@@ -129,6 +132,9 @@ private:
 	bool bUseForAlignment;
 	bool bUseForAnalysis;
 	bool bUseForSiliconAlignment;
+	Int_t fiducialRegion;
+	Float_t fiducialValueX;
+	Float_t fiducialValueY;
 private:
 	TH1F *hEtaIntegral[9];
 	bool bEtaIntegrals;

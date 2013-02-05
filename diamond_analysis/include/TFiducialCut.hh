@@ -6,6 +6,7 @@
 #ifndef TFIDUCIALCUT_HH
 #define TFIDUCIALCUT_HH
 #include <iostream>
+#include <iomanip>
 #include "TROOT.h"
 #include "TObject.h"
 class TFiducialCut:public TObject {
