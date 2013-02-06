@@ -23,6 +23,7 @@
 #include "TPlaneProperties.hh"
 #include "TObject.h"
 #include "TMath.h"
+#include "TCluster.hh"
 class TFidCutRegions:public TObject {
 public:
 	TFidCutRegions();
@@ -50,6 +51,7 @@ public:
 	Float_t getMinFiducialX(UInt_t index = 0);
 	Float_t getMaxFiducialY(UInt_t index = 0);
 	Float_t getMinFiducialY(UInt_t index = 0);
+	void Reset();
 private:
 	void initVariables();
 	std::vector<std::pair<Float_t,Float_t> >findFiducialCutIntervall(TH1D* hProj,Float_t fidCutPercentage);

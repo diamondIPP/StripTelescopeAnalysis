@@ -45,6 +45,7 @@ TSettings::TSettings(TRunInfo *runInfo)
 	cout<<runInfo->getInputDir()<<endl;
 	setInputDir(runInfo->getInputDir());
 	SetFileName(fileNameStr.str());
+	checkSettings();
 }
 
 TSettings::TSettings(UInt_t runNumber){
@@ -59,6 +60,7 @@ TSettings::TSettings(UInt_t runNumber){
 	sys = gSystem;
 	path = sys->pwd();
 	runDescription="";
+	checkSettings();
 }
 
 TSettings::TSettings(string fileName,UInt_t runNumber){
@@ -73,6 +75,7 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	path = sys->pwd();
 	runDescription="";
 	SetFileName(fileName);
+	checkSettings();
 	//	createSettingsRootFile();
 }
 
@@ -81,6 +84,38 @@ TSettings::~TSettings(){
 	//  saveSettings();
 	//  settingsFile->Close();
 	cout<<"delete Settings"<<endl;
+}
+
+void TSettings::checkSettings(){
+	cout<<"Check Settings..."<<endl;
+	if (fiducialCuts)
+		if (isStandardFidCut==true){
+			fiducialCuts->Reset();
+			fiducialCuts->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
+		}
+	this->checkAlignmentFidcuts();
+	cout<<"Settings seems to be ok."<<endl;
+}
+
+void TSettings::checkAlignmentFidcuts(){
+	for(UInt_t i=0;i<this->alignmentFidCuts.size();i++){
+		Int_t fidCutIndex = alignmentFidCuts[i];
+		TFiducialCut* fidCut = this->getSelectionFidCuts()->getFidCut(fidCutIndex);
+		if(fidCut==0){
+			cout<<endl;
+			this->getSelectionFidCuts()->Print(1);
+			cout<<"fidCutIndex "<<fidCutIndex<<" seems not exist... ===> EXIT, Press a key and enter to confirm"<<endl;
+			char t;
+			cin>>t;
+			exit(-1);
+		}
+		else{
+			cout<<"fidCut No:"<<fidCutIndex<<endl;
+			fidCut->Print(1);
+		}
+
+	}
+	//exit(-1);
 }
 
 bool TSettings::existsDirectory(std::string dir){
@@ -298,6 +333,14 @@ void TSettings::LoadSettings(){
 			else
 				cerr<<"Not a valid Input for alignment Training Method : "<<method<<endl;
 		}
+		if(key == "alignment_training_fidcuts") {
+			ParseIntArray(key,value,alignmentFidCuts);
+			if(verbosity){
+				for(int i = 0; i<alignmentFidCuts.size();i++){
+					cout<<TCluster::Intent(1)<<"Region "<<alignmentFidCuts.at(i)<<endl;
+				}
+			}
+		}
 		if(key == "Si_Pedestal_Hit_Factor") ParseFloat(key,value,Si_Pedestal_Hit_Factor);
 		if(key == "Di_Pedestal_Hit_Factor") ParseFloat(key,value,Di_Pedestal_Hit_Factor);
 		if(key == "Si_Cluster_Seed_Factor") ParseFloat(key,value,Si_Cluster_Seed_Factor);
@@ -444,10 +487,7 @@ void TSettings::LoadSettings(){
 	for(int det=0;det<9;det++){
 		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det,0)<<"/"<<getClusterHitFactor(det,0)<<endl;
 	}
-	if (fiducialCuts)
-		if (fiducialCuts->getNFidCuts()==0)
-			fiducialCuts->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
-	cout<<endl<<"TSettings::Finished importing settings from "<<fileName<<endl<<endl;
+	checkSettings();
 }
 
 void TSettings::DefaultLoadDefaultSettings(){
@@ -562,7 +602,12 @@ void TSettings::DefaultLoadDefaultSettings(){
     //	cout<<"Print DefaultMapping:"<<endl;
 	//	diamondMapping.PrintMapping();
 	diamondPattern.loadStandardPitchWidthSettings();
+	alignmentFidCuts.clear();
+	alignmentFidCuts.push_back(1);
 	cout<<"DONE"<<endl;
+	isStandardFidCut=true;
+
+	checkSettings();
 }
 
 
@@ -696,8 +741,13 @@ void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* 
 		region = ParseRegionString(key, stringArray[1]);
 		Float_t beginY = (int)strtod(region.first.c_str(),0);
 		Float_t endY = (int)strtod(region.second.c_str(),0);
-		if(beginX<endX&&beginY<endY)
+		if(beginX<endX&&beginY<endY){
+			if(isStandardFidCut){
+				fidCutRegions->Reset();
+				isStandardFidCut=false;
+			}
 			fidCutRegions->addFiducialCut(beginX,endX,beginY,endY);
+		}
 		else
 			cerr<<"TSettings::ParseFidCut: Cannot Parse FidCut - entries are wrong, "<<beginX<<"-"<<endX<<", "<<beginY<<"-"<<endY<<endl;
 	}
@@ -1562,6 +1612,19 @@ bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
 		Float_t fraction = (Float_t)eventNumber/(Float_t)nEvents;
 		return fraction<=getAlignment_training_track_fraction();
 	}
+	return false;
+}
+
+bool TSettings::isInAlignmentFiducialRegion(Float_t xVal,Float_t yVal){
+
+	Int_t fidCutRegion = this->getSelectionFidCuts()->getFiducialCutIndex(xVal,yVal);
+	if(verbosity>6)cout<<" isInAlignmentFiducialRegion\t"<<fidCutRegion<<flush;
+	for(UInt_t i=0; i < alignmentFidCuts.size();i++)
+		if(alignmentFidCuts.at(i)==fidCutRegion){
+			if(verbosity>6)cout<<"\tTrue"<<endl;
+			return true;
+		}
+	if(verbosity>6)cout<<"\tFalse"<<endl;
 	return false;
 }
 

@@ -9,6 +9,7 @@
 #include <iomanip>
 #include "TROOT.h"
 #include "TObject.h"
+#include "TCluster.hh"
 class TFiducialCut:public TObject {
 	int index;
 	bool active;
@@ -24,7 +25,7 @@ public:
 	void SetXHigh(int xh) {x_high = xh;};
 	void SetYLow(int yl) {y_low = yl;};
 	void SetYHigh(int yh) {y_high = yh;};
-	void Print();
+	void Print(UInt_t i=0);
 	void SetActive(bool i) {active = i;};
 	bool GetActive() {return active;};
 	int GetXLow() {return x_low;};

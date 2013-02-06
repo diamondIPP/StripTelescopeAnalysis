@@ -29,8 +29,8 @@ void TFiducialCut::SetAllValuesZero() {
 	y_high = 0;
 }
 
-void TFiducialCut::Print () {
-	std::cout << "FidCutRegion #" << index << ":"<<
+void TFiducialCut::Print (UInt_t i) {
+	std::cout <<TCluster::Intent(i)<< "FidCutRegion #" << index << ":"<<
 			" X: " <<setw(6) <<std::right<< x_low << " - " <<setw(6)<<std::left<< x_high <<
 			" Y: " <<setw(6) <<std::right<< y_low << " - " <<setw(6)<<std::left<<y_high <<std::right<< "\n"<<std::flush;
 }
