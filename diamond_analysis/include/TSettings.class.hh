@@ -53,6 +53,8 @@ public:
 
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
 	std::string getEtaDistributionPath(Int_t step=-1);
+    std::string get3dDiamondTreeFilePath();
+    std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
 	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
 	void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
@@ -62,6 +64,8 @@ public:
 	void goToAlignmentRootDir(){goToDir(this->getAbsoluteOuputPath(false));}
 
 
+    void goTo3dDiamondTreeDir();
+    void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
 	void goToPedestalAnalysisDir();
 	void goToClusterAnalysisDir();
 	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
@@ -78,6 +82,7 @@ public:
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
+	void checkSettings();
 public:
 	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);
@@ -88,6 +93,8 @@ public:
 	void setRunDescription(std::string runDescription);
 	void setOutputDir(std::string ouputDir){this->outputDir=outputDir;}
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
+    bool is3dDiamond(){return b3dDiamond;};
+    bool b3dDiamond;
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -249,6 +256,7 @@ public:
 	UInt_t getVaChannelNo(UInt_t detChNo);
 	Int_t getVerbosity();
 	bool useForAlignment(UInt_t eventNumber, UInt_t nEvents=0);
+	bool isInAlignmentFiducialRegion(Float_t, Float_t);
 	UInt_t getAlignmentTrainingTrackNumber() const {return alignment_training_track_number;}
 	Float_t getAlignmentPrecisionOffset()const{return alignmentPrecision_Offset;}
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
@@ -274,6 +282,8 @@ public:
 protected:
 	float store_threshold;
 private:
+	bool isStandardFidCut;
+	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
 	void DefaultLoadDefaultSettings();
@@ -352,6 +362,7 @@ private:
 	std::vector<Float_t> alignment_y_offsets;
 	std::vector<Float_t> alignment_phi_offsets;
 	std::vector<Float_t> alignment_z_offsets;
+	std::vector<Int_t> alignmentFidCuts;
 
 	Float_t alignment_training_track_fraction;
 	UInt_t alignment_training_track_number;
@@ -406,6 +417,10 @@ public:
 	TDiamondPattern diamondPattern;
 private:
 	int verbosity;
+       Float_t silPitchWidth;
+       Float_t diaPitchWidth;
+       Float_t diaOffsetMetricSpace;
+       Float_t diaStartingChannel;
 
 	ClassDef(TSettings,4);
 };
