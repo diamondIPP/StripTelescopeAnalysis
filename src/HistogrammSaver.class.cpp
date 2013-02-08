@@ -269,6 +269,19 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
 //	if(plots_canvas)delete plots_canvas;
 }
 
+void HistogrammSaver::SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue){
+	TCanvas *c2 = new TCanvas(TString::Format("c%s",histo->GetName()),histo->GetTitle());
+	c2->cd();
+	histo->Draw();
+	double xCor[] = {cutValue,cutValue};
+	double yCor[] = {0,histo->GetMaximum()*2};
+	TGraph* line = new TGraph(2,xCor,yCor);
+	line->SetLineColor(kRed);
+	line->SetLineWidth(2);
+	line->Draw("Lsame");
+	this->SaveCanvas(c2);
+	delete c2;
+}
 void HistogrammSaver::SaveHistogramLogZ(TH2F* histo){
 	TString canvasName = "c_";
 	canvasName +=histo->GetName();
