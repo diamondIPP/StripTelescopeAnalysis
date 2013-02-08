@@ -79,6 +79,7 @@ public:
 	void checkADC();
 	UInt_t getNDiamondClusters();
 	bool isInFiducialCut();
+	bool isInCurrentFiducialCut();
 	bool isDetMasked();
 	TEvent* getEvent();
 	void setVerbosity(UInt_t verbosity);
