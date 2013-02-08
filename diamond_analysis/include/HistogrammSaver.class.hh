@@ -60,6 +60,7 @@ public:
 	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, UInt_t verbosity=0);
+	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
 	void SaveHistogramLogZ(TH2F* histo);
 	void SaveHistogram(TH2F* histo,bool drawStatBox=true);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");

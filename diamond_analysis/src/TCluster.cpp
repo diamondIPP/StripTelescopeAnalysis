@@ -229,6 +229,13 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
 	if(verbosity>2)cout<<flush;
 
 }
+
+/**
+ * Position of Cluster in channels calculated by calculation mode
+ * @param mode
+ * @param histo needed for eta corrected calculation
+ * @return
+ */
 Float_t TCluster::getPosition(calculationMode_t mode,TH1F *histo){
 	if(mode==maxValue)
 		return this->getHighestSignalChannel();

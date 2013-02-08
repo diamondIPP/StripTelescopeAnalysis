@@ -153,7 +153,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 	int nScreened = 0;
 	int nNotInFidCut=0;
 	cout << "CREATING VECTOR OF VALID EVENTS..." << endl;
-
+	cout<<settings->getAlignmentTrainingTrackNumber()<<endl;
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
 		if(!settings->useForAlignment(nEvent,nEvents))

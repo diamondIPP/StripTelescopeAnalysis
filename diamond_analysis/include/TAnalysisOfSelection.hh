@@ -72,6 +72,9 @@ private:
 	TH2F* hValidSiliconAndOneDiamondHitNotMasked;
 	TH2F* hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels;
 	TH2F* hValidSiliconAndOneDiamondHitInOneArea;
+	TH2F* hValidSiliconAndOneDiamondHitInSameAreaAndFidCut;
+	TH2F* hTwoClustersArea;
+	TH1F* hNDiaClusters;
 	TH3F* hChargeVsFidCut;
 	TH2F* hFidCutXvsChannelPos;
 	THTMLLandaus *htmlLandau;
