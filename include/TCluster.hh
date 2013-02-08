@@ -98,6 +98,7 @@ public:
     void Print(UInt_t level=0);
     static string Intent(UInt_t level);
 	Float_t getEta();
+	Float_t getEta(Int_t &leftChannel);
 	UInt_t getClusterSize();
 	void setVerbosity(UInt_t verbosity){this->verbosity=verbosity;};
 	static Float_t getValueOfHisto(Float_t x, TH1F* histo);

@@ -156,6 +156,8 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
+		if(!settings->useForAlignment(nEvent,nEvents))
+			return;
 		eventReader->LoadEvent(nEvent);
 		if (!eventReader->isValidTrack()) {
 			noHitDet++;
@@ -171,17 +173,19 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 		}
 		if(!eventReader->isInFiducialCut()){
 			nNotInFidCut++;
-			//    	float fiducialValueX=0;
-			//    	float fiducialValueY=0;
-			//    	for(UInt_t plane=0;plane<4;plane++){
-			//    		fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
-			//    		fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
-			//    	}
-			//    	fiducialValueX/=4.;
-			//    	fiducialValueY/=4.;
-			//    	cout<<nEvent<<" "<<eventReader->isInFiducialCut()<<" "<<fiducialValueX<<"/"<<fiducialValueY<<endl;
 			continue;
 		}
+
+		float fiducialValueX=eventReader->getFiducialValueX();
+		float fiducialValueY=eventReader->getFiducialValueY();
+
+		if(!settings->isInAlignmentFiducialRegion(fiducialValueX,fiducialValueY)){
+			if(verbosity>4)cout<<nEvent<<"\tevent not in correct fiducial region "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<settings->getSelectionFidCuts()->getFiducialCutIndex(fiducialValueX,fiducialValueY)<<endl;
+			continue;
+		}
+		else
+			if(verbosity>4)cout<<nEvent<<"\tevent in alignment fiducial region "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<settings->getSelectionFidCuts()->getFiducialCutIndex(fiducialValueX,fiducialValueY)<<endl;
+
 		if(nEvent==startEvent&&verbosity>4)
 			cout<<"\nEvent\tvalid\tnClus\tmasked\tFidCut\tAlign"<<endl;
 		if(verbosity>20)
@@ -637,6 +641,8 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 		if (verbosity > 5) cout << "Sil Alignment - Event No.:"<< nEvent << endl;
 		xLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
 		yLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
+		if(xLabMeasMetric<-400e3||yLabMeasMetric <-400e3)
+			continue;
 		if(verbosity>5) cout<< "\tLabMeasMetric: "<<xLabMeasMetric<<"/"<<yLabMeasMetric<<endl;
 		if (verbosity > 5) cout<<"Predict Position: "<<endl;
 		predictedPostionMetric = myTrack->predictPosition(subjectPlane, vecRefPlanes, TCluster::corEta, verbosity>8);

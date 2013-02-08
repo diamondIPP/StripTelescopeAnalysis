@@ -684,6 +684,11 @@ bool TADCEventReader::isInFiducialCut()
 	return this->bIsInFiducialCut;
 }
 
+bool TADCEventReader::isInCurrentFiducialCut(){
+	Float_t fiducialValueX = this->getFiducialValueX();
+	Float_t fiducialValueY = this->getFiducialValueY();
+	return settings->getSelectionFidCuts()->isInFiducialCut(fiducialValueX,fiducialValueY);
+}
 
 bool TADCEventReader::isDetMasked()
 {

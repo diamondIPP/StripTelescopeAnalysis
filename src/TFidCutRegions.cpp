@@ -14,11 +14,19 @@ TFidCutRegions::TFidCutRegions() {
 	initVariables();
 }
 
+void TFidCutRegions::Reset(){
+	initVariables();
+}
 void TFidCutRegions::initVariables(){
 	index = 0;
 	xInt.clear();
 	yInt.clear();
 	nFidCuts = 0;
+	for(UInt_t i =0;i<fidCuts.size();i++){
+		if (fidCuts.at(i))
+			delete fidCuts.at(i);
+	}
+	fidCuts.clear();
 	verbosity=0;
 }
 
@@ -82,13 +90,13 @@ TFidCutRegions::~TFidCutRegions() {
 
 void TFidCutRegions::Print(int intend)
 {
-	cout<<"Printing Fiducial cuts: "<<endl;
+	cout<<TCluster::Intent(intend)<<"Printing Fiducial cuts: "<<endl;
 	for(UInt_t i=0;i<fidCuts.size();i++){
-		fidCuts.at(i)->Print();
+		fidCuts.at(i)->Print(intend+1);
 	}
-	cout<<"Range to plot all Fiducial Cuts:"<<endl;
-	cout<<"\tX: "<<getMinFiducialX()<<"-"<<getMaxFiducialX()<<endl;
-	cout<<"\tY: "<<getMinFiducialY()<<"-"<<getMaxFiducialY()<<endl;
+	cout<<TCluster::Intent(intend)<<"Range to plot all Fiducial Cuts:"<<endl;
+	cout<<TCluster::Intent(intend)<<"\tX: "<<getMinFiducialX()<<"-"<<getMaxFiducialX()<<endl;
+	cout<<TCluster::Intent(intend)<<"\tY: "<<getMinFiducialY()<<"-"<<getMaxFiducialY()<<endl;
 
 	if(verbosity >3 ){
 		cout<<"Done\nPress a key..."<<flush;

@@ -16,7 +16,6 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 //	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
 //	char t;cin >>t;
 	verbosity = settings->getVerbosity();
-	sys = gSystem;
 	UInt_t runNumber=settings->getRunNumber();
 
 	htmlLandau=new THTMLLandaus(settings);
@@ -25,8 +24,6 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
 	histSaver=new HistogrammSaver();
 	settings->goToSelectionAnalysisDir();
-	stringstream plotsPath;
-	plotsPath<<sys->pwd()<<"/";
 	//	htmlPedestal->setSubdirPath("selectionAnalysis");
 	histSaver->SetPlotsPath(settings->getSelectionAnalysisPath());
 	histSaver->SetRunNumber(runNumber);
@@ -114,6 +111,11 @@ void TAnalysisOfSelection::initialiseHistos()
 	hValidSiliconAndOneDiamondHitInOneArea  = new TH2F("hValidSiliconAndOneDiamondHitInOneArea","hValidSiliconAndOneDiamondHitInOneArea	",256*4,0,255,256*4,0,255);
 	hValidSiliconAndOneDiamondHitInOneArea->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitInOneArea->GetYaxis()->SetTitle("FidCutValue in Y");
+
+	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut = new TH2F("hValidSiliconAndOneDiamondHitInSameAreaAndFidCut","hValidSiliconAndOneDiamondHitInSameAreaAndFidCut",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetXaxis()->SetTitle("FidCutValue in X");
+	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
+
 	hFidCut= new TH2F("hFidCut","hFidCut",256*4,0,255,256*4,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
@@ -192,6 +194,14 @@ void TAnalysisOfSelection::initialiseHistos()
 	hFidCutXvsChannelPos->GetXaxis()->SetTitle("FiducialValue X / ch");
 	hFidCutXvsChannelPos->GetYaxis()->SetTitle("DiamondCluster Channel Pos / ch");
 	hFidCutXvsChannelPos->GetYaxis()->SetTitle("# number of entries");
+
+	hTwoClustersArea = new TH2F("hTwoClustersArea","hTwoClustersArea",6,-1.5,4.5,6,-1.5,4.5);
+	hTwoClustersArea->GetXaxis()->SetTitle("Area of Cluster No. 1");
+	hTwoClustersArea->GetYaxis()->SetTitle("Area of CLuster No. 2");
+
+	hNDiaClusters = new TH1F("hNDiaClusters","hNDiaClusters",10,-.5,9.5);
+	hNDiaClusters->GetXaxis()->SetTitle("no of Dia Clusters");
+	hNDiaClusters->GetYaxis()->SetTitle("no of entries #");
 }
 
 void TAnalysisOfSelection::saveHistos()
@@ -199,6 +209,8 @@ void TAnalysisOfSelection::saveHistos()
 	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
 //	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
 //	char t;cin >>t;
+	histSaver->SaveHistogram(hTwoClustersArea);
+	delete hTwoClustersArea;
 	LandauGaussFit landauGauss;
 	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
 	histSaver->OptimizeXYRange(histoLandauDistribution2D);
@@ -643,6 +655,12 @@ void TAnalysisOfSelection::saveHistos()
 	delete c1;
 	delete hValidSiliconAndOneDiamondHitInOneArea;
 
+	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndOneDiamondHitInSameAreaAndFidCut,true);
+	c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetName()));
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	delete hValidSiliconAndOneDiamondHitInSameAreaAndFidCut;
+
 	c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hFidCut,true);
 	c1->SetName(TString::Format("c%s",hFidCut->GetName()));
 	histSaver->SaveCanvas(c1);
@@ -676,101 +694,103 @@ void TAnalysisOfSelection::saveHistos()
 	delete c2;
 	delete h3dDiamond;
 	delete hNoDiamond;
+
+	histSaver->SaveHistogram(hNDiaClusters);
+	delete hNDiaClusters;
 }
 
 void TAnalysisOfSelection::analyseEvent()
 {
-	Float_t fiducialValueX=0;
-	Float_t fiducialValueY=0;
+	if(!eventReader->isValidTrack()) //just Tracks with Valid Silicon Track
+		return;
 
-	if(eventReader->isValidTrack()){//
-		//if(eventReader->useForAnalysis()||eventReader->useForAlignment()){
+	Float_t fiducialValueX= eventReader->getFiducialValueX();
+	Float_t fiducialValueY = eventReader->getFiducialValueY();
+	Int_t nDiaClusters = eventReader->getNClusters(TPlaneProperties::getDetDiamond());
+	if(nDiaClusters<=0) // at least one Diamond Cluster
+		return;
+	TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+	Float_t charge = cluster.getCharge(false);
+	UInt_t clustSize = cluster.size();
+	bool isMasked = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
+	bool isMaskedAdjacentChannels = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,true);
+	Float_t pos = cluster.getPosition(TCluster::maxValue,0);
+	Int_t fidRegionIndex = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY)-1;
+	Int_t area = settings->getDiaDetectorAreaOfChannel(pos);
+	bool isInOneArea = !(area==-1);
 
-		fiducialValueX= eventReader->getFiducialValueX();
-		fiducialValueY = eventReader->getFiducialValueY();
-		Int_t nDiaClusters = eventReader->getNClusters(TPlaneProperties::getDetDiamond());
-		if(nDiaClusters<=0)
-			return;
-		TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+	hValidSiliconAndDiamondHit ->Fill(fiducialValueX,fiducialValueY);
+	if (nDiaClusters==1){
+		hValidSiliconAndOneDiamondHit ->Fill(fiducialValueX,fiducialValueY);
+		if(!isMasked)
+			hValidSiliconAndOneDiamondHitNotMasked ->Fill(fiducialValueX,fiducialValueY);
+		if(!isMaskedAdjacentChannels)
+			hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels ->Fill(fiducialValueX,fiducialValueY);
+		if(isInOneArea)
+			hValidSiliconAndOneDiamondHitInOneArea->Fill(fiducialValueX,fiducialValueY);
+		if (area==fidRegionIndex)
+			hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->Fill(fiducialValueX,fiducialValueY);
+	}
 
-		Float_t charge = cluster.getCharge(false);
-		UInt_t clustSize = cluster.size();
-		bool isMasked = false;
-		isMasked = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
+	if(!eventReader->isInCurrentFiducialCut())
+		return;
+	hFidCut->Fill(fiducialValueX,fiducialValueY);
+	hNDiaClusters -> Fill (nDiaClusters);
+	if (nDiaClusters > 1){
+		TCluster cluster2 = eventReader->getCluster(TPlaneProperties::getDetDiamond(),1);
+		Float_t pos2 = cluster2.getPosition(TCluster::maxValue,0);
+		Float_t area2 = settings->getDiaDetectorAreaOfChannel(pos2);
+		hTwoClustersArea->Fill(area,area2);
+	}
+	else if(nDiaClusters>1)
+		return;
+	hFidCutOneDiamondCluster->Fill(fiducialValueX,fiducialValueY);
 
-		bool isMaskedAdjacentChannels = false;
-		isMaskedAdjacentChannels = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,true);
 
-		Float_t pos = cluster.getPosition(TCluster::maxValue,0);
-		Int_t fidRegion = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
+	if(clustSize>8) clustSize=8;
+	if(cluster.isSaturatedCluster())
+		return;
+	histoLandauDistribution->Fill(charge,clustSize);
 
-		Int_t area = settings->getDiaDetectorAreaOfChannel(pos);
-		bool isInOneArea = !(area==-1);
-		//valid track, nDiaCLusters >0
-		hValidSiliconAndDiamondHit ->Fill(fiducialValueX,fiducialValueY);
-		if (nDiaClusters==1){
-			hValidSiliconAndOneDiamondHit ->Fill(fiducialValueX,fiducialValueY);
-			if(!isMasked)
-				hValidSiliconAndOneDiamondHitNotMasked ->Fill(fiducialValueX,fiducialValueY);
-			if(!isMaskedAdjacentChannels)
-				hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels ->Fill(fiducialValueX,fiducialValueY);
-
-			if(isInOneArea)
-				hValidSiliconAndOneDiamondHitInOneArea->Fill(fiducialValueX,fiducialValueY);
+	hClusterPosition->Fill(pos);
+//	if(isMaskedAdjacentChannels)
+//		return;
+//
+	if(clustSize<=2&&nDiaClusters==1&&area==fidRegionIndex){
+//		if(area!=fidRegionIndex){
+//			if(verbosity>2)cout<<"\r"<<nEvent<<" Problem: "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<fidRegionIndex<<" \t"<<pos<<"-->"<<area<<"_\n"<<flush;
+//			return;
+//		}
+//		else{
+//			if(verbosity>5)cout<<nEvent<<" Good"<<endl;
+//		}
+		if(fidRegionIndex<hChargeVsFidX.size()&&fidRegionIndex>=0){
+			hChargeVsFidX[fidRegionIndex]->Fill(charge,fiducialValueX);
+			hChargeVsFidY[fidRegionIndex]->Fill(charge,fiducialValueY);
 		}
-
-		if(!eventReader->isInFiducialCut())
-			return;
-		hFidCut->Fill(fiducialValueX,fiducialValueY);
-
-		if(nDiaClusters>1)
-			return;
-		hFidCutOneDiamondCluster->Fill(fiducialValueX,fiducialValueY);
-
-
-		if(clustSize>8) clustSize=8;
-		if(cluster.isSaturatedCluster())
-			return;
-		histoLandauDistribution->Fill(charge,clustSize);
-		fidRegion--;
-		hClusterPosition->Fill(pos);
-		if(isMaskedAdjacentChannels)
-			return;
-		if(clustSize<=2){
-			if(area!=fidRegion){
-				if(verbosity>2)cout<<"\r"<<nEvent<<" Problem: "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<fidRegion<<" \t"<<pos<<"-->"<<area<<"_\n"<<flush;
-				return;
-			}
-			else{
-				if(verbosity>5)cout<<nEvent<<" Good"<<endl;
-			}
-			if(fidRegion<hChargeVsFidX.size()&&fidRegion>=0){
-				hChargeVsFidX[fidRegion]->Fill(charge,fiducialValueX);
-				hChargeVsFidY[fidRegion]->Fill(charge,fiducialValueY);
-			}
-			else{
-				cout<<"fidRegion not valid: "<<fidRegion<<" "<<fiducialValueX<<"/"<<fiducialValueY<<endl;
-				settings->getSelectionFidCuts()->Print();
-			}
-			hChargeVsFidCut->Fill(fiducialValueX,fiducialValueY,charge);
-			hFidCutXvsChannelPos->Fill(fiducialValueX,pos);
-			histoLandauDistribution2D_unmasked->Fill(charge,pos);
-			bool isBorderSeedCluster = settings->hasBorderSeed(TPlaneProperties::getDetDiamond(),cluster);
-			bool isBorderHitCluster = settings->hasBorderHit(TPlaneProperties::getDetDiamond(),cluster);
+		else{
+			cout<<"fidRegion not valid: "<<fidRegionIndex<<" "<<fiducialValueX<<"/"<<fiducialValueY<<endl;
+			settings->getSelectionFidCuts()->Print();
+		}
+		hChargeVsFidCut->Fill(fiducialValueX,fiducialValueY,charge);
+		hFidCutXvsChannelPos->Fill(fiducialValueX,pos);
+		histoLandauDistribution2D_unmasked->Fill(charge,pos);
+		bool isBorderSeedCluster = settings->hasBorderSeed(TPlaneProperties::getDetDiamond(),cluster);
+		bool isBorderHitCluster = settings->hasBorderHit(TPlaneProperties::getDetDiamond(),cluster);
+		if (!isBorderSeedCluster)
+			histoLandauDistribution2DNoBorderSeed_unmasked->Fill(charge,pos);
+		if (!isBorderHitCluster)
+			histoLandauDistribution2DNoBorderHit_unmasked->Fill(charge,pos);
+		bool isMaskedCluster = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
+		if(!isMaskedCluster){
+			histoLandauDistribution2D->Fill(charge,pos);
 			if (!isBorderSeedCluster)
-				histoLandauDistribution2DNoBorderSeed_unmasked->Fill(charge,pos);
+				histoLandauDistribution2DNoBorderSeed->Fill(charge,pos);
 			if (!isBorderHitCluster)
-				histoLandauDistribution2DNoBorderHit_unmasked->Fill(charge,pos);
-			bool isMaskedCluster = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
-			if(!isMaskedCluster){
-				histoLandauDistribution2D->Fill(charge,pos);
-				if (!isBorderSeedCluster)
-					histoLandauDistribution2DNoBorderSeed->Fill(charge,pos);
-				if (!isBorderHitCluster)
-					histoLandauDistribution2DNoBorderHit->Fill(charge,pos);
-			}
+				histoLandauDistribution2DNoBorderHit->Fill(charge,pos);
 		}
 	}
+
 }
 
 

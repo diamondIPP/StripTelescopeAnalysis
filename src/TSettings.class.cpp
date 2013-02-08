@@ -13,19 +13,14 @@ ClassImp(TSettings);
 using namespace std;
 
 
-bool TSettings::existsDirectory(std::string dir){
-	struct stat sta;
-	int retVal = stat(dir.c_str(),&sta);
-	return (retVal>=0);
-}
-
 TSettings::TSettings(TRunInfo *runInfo)
 {
 	cout<<"TSettings TRunInfo"<<endl;
 	//  verbosity=runInfo->getVerbosity();
 	setVerbosity(runInfo->getVerbosity());
 	diamondMapping=0;
-	fiducialCuts = new TFidCutRegions();
+	fidCutsSelection = new TFidCutRegions();
+	fidCuts3D = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
@@ -51,6 +46,7 @@ TSettings::TSettings(TRunInfo *runInfo)
 	cout<<runInfo->getInputDir()<<endl;
 	setInputDir(runInfo->getInputDir());
 	SetFileName(fileNameStr.str());
+	checkSettings();
 }
 
 TSettings::TSettings(UInt_t runNumber){
@@ -58,13 +54,15 @@ TSettings::TSettings(UInt_t runNumber){
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
-	fiducialCuts = new TFidCutRegions();
+	fidCutsSelection = new TFidCutRegions();
+	fidCuts3D = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
 	sys = gSystem;
 	path = sys->pwd();
 	runDescription="";
+	checkSettings();
 }
 
 TSettings::TSettings(string fileName,UInt_t runNumber){
@@ -72,13 +70,15 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
-	fiducialCuts = new TFidCutRegions();
+	fidCutsSelection = new TFidCutRegions();
+	fidCuts3D = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runNumber;
 	sys = gSystem;
 	path = sys->pwd();
 	runDescription="";
 	SetFileName(fileName);
+	checkSettings();
 	//	createSettingsRootFile();
 }
 
@@ -88,6 +88,68 @@ TSettings::~TSettings(){
 	//  settingsFile->Close();
 	cout<<"delete Settings"<<endl;
 }
+
+void TSettings::checkSettings(){
+	cout<<"Check Settings..."<<endl;
+	if (!fidCutsSelection)
+		fidCutsSelection = new TFidCutRegions();
+	if (isStandardSelectionFidCut==true){
+		fidCutsSelection->Reset();
+		fidCutsSelection->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
+	}
+	if (isStandard3dFidCut==true){
+			fidCuts3D->Reset();
+			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
+		}
+	this->checkAlignmentFidcuts();
+	cout<<"Settings seems to be ok."<<endl;
+}
+
+void TSettings::checkAlignmentFidcuts(){
+	for(UInt_t i=0;i<this->alignmentFidCuts.size();i++){
+		Int_t fidCutIndex = alignmentFidCuts[i];
+		TFiducialCut* fidCut = this->getSelectionFidCuts()->getFidCut(fidCutIndex);
+		if(fidCut==0){
+			cout<<endl;
+			this->getSelectionFidCuts()->Print(1);
+			cout<<"fidCutIndex "<<fidCutIndex<<" seems not exist... ===> EXIT, Press a key and enter to confirm"<<endl;
+			char t;
+			cin>>t;
+			exit(-1);
+		}
+		else{
+			cout<<"fidCut No:"<<fidCutIndex<<endl;
+			fidCut->Print(1);
+		}
+
+	}
+	//exit(-1);
+}
+
+bool TSettings::existsDirectory(std::string dir){
+	struct stat sta;
+	int retVal = stat(dir.c_str(),&sta);
+	return (retVal>=0);
+}
+
+std::string TSettings::get3dDiamondTreeFilePath(){
+        stringstream path;
+        path<<getAbsoluteOuputPath(false);
+        path<<"selectionData."<<getRunNumber();
+        if(this->isSpecialAnalysis())
+            path<<"-"<<getRunDescription();
+        path<<".root";
+        return path.str();
+}
+void TSettings::goTo3dDiamondTreeDir(){
+ goToDir(this->getAbsoluteOuputPath(false));
+}
+
+void TSettings::goToOutputDir(){
+ goToDir(this->getOutputDir());
+}
+
+
 
 std::string TSettings::getRawTreeFilePath()
 {
@@ -161,9 +223,9 @@ void TSettings::goToSelectionTreeDir(){
 	goToDir(this->getAbsoluteOuputPath(false));
 }
 
-void TSettings::goToOutputDir(){
+/*void TSettings::goToOutputDir(){
 	goToDir(this->getOutputDir());
-}
+}*/
 
 void TSettings::goToPedestalAnalysisDir(){
 	goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/pedestalAnalysis/"));
@@ -194,8 +256,8 @@ void TSettings::SetFileName(string newFileName){
 		cout<<"TSettings::SetFileName:\""<<newFileName<<"\""<<endl;
 	fileName=newFileName;
 	LoadSettings();
-	if (fiducialCuts){
-		fiducialCuts->Print();
+	if (fidCutsSelection){
+		fidCutsSelection->Print();
 	}
 }
 
@@ -279,6 +341,14 @@ void TSettings::LoadSettings(){
 			else
 				cerr<<"Not a valid Input for alignment Training Method : "<<method<<endl;
 		}
+		if(key == "alignment_training_fidcuts") {
+			ParseIntArray(key,value,alignmentFidCuts);
+			if(verbosity){
+				for(int i = 0; i<alignmentFidCuts.size();i++){
+					cout<<TCluster::Intent(1)<<"Region "<<alignmentFidCuts.at(i)<<endl;
+				}
+			}
+		}
 		if(key == "Si_Pedestal_Hit_Factor") ParseFloat(key,value,Si_Pedestal_Hit_Factor);
 		if(key == "Di_Pedestal_Hit_Factor") ParseFloat(key,value,Di_Pedestal_Hit_Factor);
 		if(key == "Si_Cluster_Seed_Factor") ParseFloat(key,value,Si_Cluster_Seed_Factor);
@@ -312,11 +382,13 @@ void TSettings::LoadSettings(){
 		if(key == "D3X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[6]);
 		if(key == "D3Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[7]);
 		if(key == "Dia_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[8]);
+		if(key == "chi2Cut3D") ParseFloat(key,value,chi2Cut3D);
 		if(key == "si_avg_fidcut_xlow") ParseFloat(key,value,si_avg_fidcut_xlow);
 		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
-		if(key == "selectionFidCut") {if (!fiducialCuts) fiducialCuts=new TFidCutRegions();ParseFidCut(key,value,fiducialCuts);}
+		if(key == "selectionFidCut") {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
+		if(key == "3dFitCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
 		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
 		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
 		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);
@@ -397,6 +469,10 @@ void TSettings::LoadSettings(){
 			for(UInt_t i=0;i<vecClusterHitFactorsDia.size();i++)
 				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterHitFactorsDia.at(i)<<endl;
 		}
+        if(key == "is3dDiamond"){
+           cout<<key<<" =" <<value.c_str()<<endl;
+           b3dDiamond = (bool)strtod(value.c_str(),0);
+        }
 		/*if(key == "store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
@@ -421,16 +497,15 @@ void TSettings::LoadSettings(){
 	for(int det=0;det<9;det++){
 		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det,0)<<"/"<<getClusterHitFactor(det,0)<<endl;
 	}
-	if (fiducialCuts)
-		if (fiducialCuts->getNFidCuts()==0)
-			fiducialCuts->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
-	cout<<endl<<"TSettings::Finished importing settings from "<<fileName<<endl<<endl;
+	checkSettings();
 }
 
 void TSettings::DefaultLoadDefaultSettings(){
+
 	if(getVerbosity())
 		cout<<"TSettings::LoadDefaultSettings"<<endl;
 	//default general settings
+	isStandardSelectionFidCut=true;
 	runDescription="";
 	SaveAllFilesSwitch = 1; //1 for save files, 0 for don't
 	ClosePlotsOnSave = 1;
@@ -530,10 +605,21 @@ void TSettings::DefaultLoadDefaultSettings(){
 	UInt_t nDiaChannels=128;
 	diamondMapping=new TChannelMapping(nDiaChannels);
 	getDetChannelNo(0);
-//	cout<<"Print DefaultMapping:"<<endl;
+    b3dDiamond =false;
+    silPitchWidth=50;//in um
+    diaPitchWidth=50;//in um
+    diaOffsetMetricSpace=0;
+    diaStartingChannel=0;
+	cout<<"Print DefaultMapping:"<<endl;
+    //	cout<<"Print DefaultMapping:"<<endl;
 	//	diamondMapping.PrintMapping();
 	diamondPattern.loadStandardPitchWidthSettings();
+	alignmentFidCuts.clear();
+	alignmentFidCuts.push_back(1);
 	cout<<"DONE"<<endl;
+	isStandardSelectionFidCut=true;
+	chi2Cut3D=4.0;
+	checkSettings();
 }
 
 
@@ -651,7 +737,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
 
 }
 
-void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions){
+void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut){
 	cout<< "\nParse FidCut: "<<value<<endl;
 
 	if (fidCutRegions==0){
@@ -667,8 +753,13 @@ void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* 
 		region = ParseRegionString(key, stringArray[1]);
 		Float_t beginY = (int)strtod(region.first.c_str(),0);
 		Float_t endY = (int)strtod(region.second.c_str(),0);
-		if(beginX<endX&&beginY<endY)
+		if(beginX<endX&&beginY<endY){
+			if(isStandardFidCut){
+				fidCutRegions->Reset();
+				isStandardFidCut=false;
+			}
 			fidCutRegions->addFiducialCut(beginX,endX,beginY,endY);
+		}
 		else
 			cerr<<"TSettings::ParseFidCut: Cannot Parse FidCut - entries are wrong, "<<beginX<<"-"<<endX<<", "<<beginY<<"-"<<endY<<endl;
 	}
@@ -1533,6 +1624,19 @@ bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
 		Float_t fraction = (Float_t)eventNumber/(Float_t)nEvents;
 		return fraction<=getAlignment_training_track_fraction();
 	}
+	return false;
+}
+
+bool TSettings::isInAlignmentFiducialRegion(Float_t xVal,Float_t yVal){
+
+	Int_t fidCutRegion = this->getSelectionFidCuts()->getFiducialCutIndex(xVal,yVal);
+	if(verbosity>6)cout<<" isInAlignmentFiducialRegion\t"<<fidCutRegion<<flush;
+	for(UInt_t i=0; i < alignmentFidCuts.size();i++)
+		if(alignmentFidCuts.at(i)==fidCutRegion){
+			if(verbosity>6)cout<<"\tTrue"<<endl;
+			return true;
+		}
+	if(verbosity>6)cout<<"\tFalse"<<endl;
 	return false;
 }
 
