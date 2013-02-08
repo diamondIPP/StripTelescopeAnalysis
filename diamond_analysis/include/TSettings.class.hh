@@ -263,7 +263,8 @@ public:
 	bool resetAlignment() const{return bResetAlignment;};
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
-	TFidCutRegions* getSelectionFidCuts(){return fiducialCuts;}
+	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
+	TFidCutRegions* get3dFidCuts(){return fidCuts3D;};
 	Float_t getMinDiamondChannel();
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
@@ -278,11 +279,14 @@ public:
 	Float_t convertChannelToMetric(UInt_t det, Float_t channel);
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);
-	TFidCutRegions* fiducialCuts;
+	Float_t getChi2Cut3D(){return chi2Cut3D;}
+private:
+	TFidCutRegions* fidCutsSelection;
+	TFidCutRegions* fidCuts3D;
 protected:
 	float store_threshold;
 private:
-	bool isStandardFidCut;
+	bool isStandardSelectionFidCut,isStandard3dFidCut;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
@@ -292,7 +296,7 @@ private:
 	void ParseIntArray(std::string key, std::string value, std::vector<int> & vec);
 	void ParseRegionArray(std::string key, std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
 	void ParsePattern(std::string key, std::string value);
-	void ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions);
+	void ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut);
 	std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
 	bool ParseFloat(std::string key, std::string value,float  &output);
 	Float_t ParseFloat(std::string key, std::string value){float output;ParseFloat(key,value,output);return output;}
@@ -313,6 +317,7 @@ private:
 	TSystem *sys;
 	TFile *settingsFile;
 private:
+	Float_t chi2Cut3D;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
 	bool bResetAlignment;

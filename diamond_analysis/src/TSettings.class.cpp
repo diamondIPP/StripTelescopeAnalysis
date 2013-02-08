@@ -19,7 +19,8 @@ TSettings::TSettings(TRunInfo *runInfo)
 	//  verbosity=runInfo->getVerbosity();
 	setVerbosity(runInfo->getVerbosity());
 	diamondMapping=0;
-	fiducialCuts = new TFidCutRegions();
+	fidCutsSelection = new TFidCutRegions();
+	fidCuts3D = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
@@ -53,7 +54,8 @@ TSettings::TSettings(UInt_t runNumber){
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
-	fiducialCuts = new TFidCutRegions();
+	fidCutsSelection = new TFidCutRegions();
+	fidCuts3D = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
@@ -68,7 +70,8 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	if(verbosity)
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
-	fiducialCuts = new TFidCutRegions();
+	fidCutsSelection = new TFidCutRegions();
+	fidCuts3D = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runNumber;
 	sys = gSystem;
@@ -88,10 +91,15 @@ TSettings::~TSettings(){
 
 void TSettings::checkSettings(){
 	cout<<"Check Settings..."<<endl;
-	if (fiducialCuts)
-		if (isStandardFidCut==true){
-			fiducialCuts->Reset();
-			fiducialCuts->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
+	if (!fidCutsSelection)
+		fidCutsSelection = new TFidCutRegions();
+	if (isStandardSelectionFidCut==true){
+		fidCutsSelection->Reset();
+		fidCutsSelection->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
+	}
+	if (isStandard3dFidCut==true){
+			fidCuts3D->Reset();
+			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
 		}
 	this->checkAlignmentFidcuts();
 	cout<<"Settings seems to be ok."<<endl;
@@ -248,8 +256,8 @@ void TSettings::SetFileName(string newFileName){
 		cout<<"TSettings::SetFileName:\""<<newFileName<<"\""<<endl;
 	fileName=newFileName;
 	LoadSettings();
-	if (fiducialCuts){
-		fiducialCuts->Print();
+	if (fidCutsSelection){
+		fidCutsSelection->Print();
 	}
 }
 
@@ -374,11 +382,13 @@ void TSettings::LoadSettings(){
 		if(key == "D3X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[6]);
 		if(key == "D3Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[7]);
 		if(key == "Dia_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[8]);
+		if(key == "chi2Cut3D") ParseFloat(key,value,chi2Cut3D);
 		if(key == "si_avg_fidcut_xlow") ParseFloat(key,value,si_avg_fidcut_xlow);
 		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
-		if(key == "selectionFidCut") {if (!fiducialCuts) fiducialCuts=new TFidCutRegions();ParseFidCut(key,value,fiducialCuts);}
+		if(key == "selectionFidCut") {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
+		if(key == "3dFitCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
 		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
 		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
 		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);
@@ -491,9 +501,11 @@ void TSettings::LoadSettings(){
 }
 
 void TSettings::DefaultLoadDefaultSettings(){
+
 	if(getVerbosity())
 		cout<<"TSettings::LoadDefaultSettings"<<endl;
 	//default general settings
+	isStandardSelectionFidCut=true;
 	runDescription="";
 	SaveAllFilesSwitch = 1; //1 for save files, 0 for don't
 	ClosePlotsOnSave = 1;
@@ -605,8 +617,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	alignmentFidCuts.clear();
 	alignmentFidCuts.push_back(1);
 	cout<<"DONE"<<endl;
-	isStandardFidCut=true;
-
+	isStandardSelectionFidCut=true;
+	chi2Cut3D=4.0;
 	checkSettings();
 }
 
@@ -725,7 +737,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
 
 }
 
-void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions){
+void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut){
 	cout<< "\nParse FidCut: "<<value<<endl;
 
 	if (fidCutRegions==0){
