@@ -58,7 +58,7 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 
 void TAnalysisOfSelection::initialiseHistos()
 {
-	histoLandauDistribution= new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
+	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
 	histoLandauDistribution->GetXaxis()->SetTitle("Charge in ADC counts");
 	histoLandauDistribution->GetYaxis()->SetTitle("ClusterSize");
 
@@ -127,6 +127,10 @@ void TAnalysisOfSelection::initialiseHistos()
 	hClusterPosition=new TH1F("hClusterPositionDia","Events which have a valid Silicon Track",128,0,127);
 	hClusterPosition->GetXaxis()->SetTitle("highes Cluster Channel Position");
 	hClusterPosition->GetYaxis()->SetTitle("number of Events #");
+
+	hClusterSizeVsChannelPos = new TH2F("hClusterSizeVsChannelPos","hClusterSizeVsChannelPos",10,-.5,9.5,128,0,127);
+	hClusterSizeVsChannelPos->GetXaxis()->SetTitle("cluster size");
+	hClusterSizeVsChannelPos->GetYaxis()->SetTitle("channel of highest signal in cluster");
 
 	h3dDiamond = new TH1F("h3dDiamond","Sum of Charge for all 18 3d-channels",4096,0,4095);
 	h3dDiamond_hit = new TH1F("h3dDiamond_hit","Sum of Charge for all 18 3d-channels with a Hit",4096,0,4095);
@@ -277,12 +281,34 @@ void TAnalysisOfSelection::saveHistos()
 	}
 	delete hChargeVsFidCut;
 	delete hChargeVsFidCutProfile;
+	histSaver->SaveHistogram(hClusterSizeVsChannelPos,false);
 	for(Int_t area=0;area<settings->getNDiaDetectorAreas();area++){
 		Int_t chLow = settings->getDiaDetectorArea(area).first;
 		Int_t chHigh =  settings->getDiaDetectorArea(area).second;
 
+
+		//2d area channel vs cluster size
+		TString name = TString::Format("hClusterSizeVsChannelPos_Area_%d_ch_%d-%d",area,chLow,chHigh);
+		cout<<name<<endl;
+		TH2F* hClusterSizeVsChannelPosArea = (TH2F*)hClusterSizeVsChannelPos->Clone(name);
+		hClusterSizeVsChannelPosArea->SetTitle(name);
+		hClusterSizeVsChannelPosArea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		histSaver->SaveHistogram(hClusterSizeVsChannelPosArea,false);
+		delete hClusterSizeVsChannelPosArea;
+		Float_t yMax = hClusterSizeVsChannelPos->GetYaxis()->GetXmax();
+		Float_t yMin = hClusterSizeVsChannelPos->GetYaxis()->GetXmin();
+		int binMax = hClusterSizeVsChannelPos->GetYaxis()->FindBin(yMax);
+		int binMin = hClusterSizeVsChannelPos->GetYaxis()->FindBin(yMin);
+		name = TString::Format("hClusterSize_Area_%d_ch_%d-%d",area,chLow,chHigh);
+		TH1F* hClusterSizeVsChannelPosAreaProjection = (TH1F*)hClusterSizeVsChannelPos->ProjectionX(name,binMin,binMax);
+		hClusterSizeVsChannelPosAreaProjection->SetTitle(name);
+		hClusterSizeVsChannelPosAreaProjection->GetXaxis()->SetTitle("cluster size");
+		hClusterSizeVsChannelPosAreaProjection->GetYaxis()->SetTitle("number of entries");
+		histSaver->SaveHistogram(hClusterSizeVsChannelPosAreaProjection);
+		delete hClusterSizeVsChannelPosAreaProjection;
+
 		// 2d area clusterSize 1or 2 normal
-		TString name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d-%d",area,chLow,chHigh);
 		cout<<name<<endl;
 		TH2F* histoLandauDistribution2Darea = (TH2F*)histoLandauDistribution2D->Clone(name);
 		histoLandauDistribution2Darea->SetTitle(name);
@@ -299,9 +325,12 @@ void TAnalysisOfSelection::saveHistos()
 		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderSeedarea);
 		delete histoLandauDistribution2DNoBorderSeedarea;
 
+
 		// 2d area clusterSize 1or 2 noBorderHits
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_area_%d_ch_%d-%d",area,chLow,chHigh);
 		cout<<name<<endl;
+
+
 		TH2F* histoLandauDistribution2DNoBorderHitarea = (TH2F*)histoLandauDistribution2DNoBorderHit->Clone(name);
 		histoLandauDistribution2DNoBorderHitarea->SetTitle(name);
 		histoLandauDistribution2DNoBorderHitarea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
@@ -756,6 +785,7 @@ void TAnalysisOfSelection::analyseEvent()
 //	if(isMaskedAdjacentChannels)
 //		return;
 //
+	hClusterSizeVsChannelPos->Fill(clustSize,pos);
 	if(clustSize<=2&&nDiaClusters==1&&area==fidRegionIndex){
 //		if(area!=fidRegionIndex){
 //			if(verbosity>2)cout<<"\r"<<nEvent<<" Problem: "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<fidRegionIndex<<" \t"<<pos<<"-->"<<area<<"_\n"<<flush;
