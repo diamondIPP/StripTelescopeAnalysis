@@ -77,6 +77,7 @@ private:
 	TH1F* hNDiaClusters;
 	TH3F* hChargeVsFidCut;
 	TH2F* hFidCutXvsChannelPos;
+	TH2F* hClusterSizeVsChannelPos;
 	THTMLLandaus *htmlLandau;
 };
 
