@@ -48,7 +48,39 @@ private:
 	HistogrammSaver *histSaver;
 	TTracking* eventReader;
 	UInt_t nEvent;
-	vector<Float_t> vecXPredicted,vecYPredicted,vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHit;
+	vector<Float_t> vecXPredicted,vecYPredicted,vecXPredictedDiamondHit,vecYPredictedDiamondHit,
+					vecPHDiamondHit,vecXPredictedDiamondHitFidCut,vecYPredictedDiamondHitFidCut,
+					vecXFidCut,vecYFidCut,vecSpecialChannelMetricPos,vecChannel, vecChannelMetricPos;
+	Int_t subjectPlane;
+	vector<UInt_t> vecSilPlanes;
+
+	TPositionPrediction *predictedPosition;
+	TH1F* hChi2X;
+	TH1F* hChi2Y;
+	TH2F* hChi2XY;
+	TH1F* hChi2;
+	Int_t verbosity;
+
+	TH2F* hValidSiliconAndOneDiamondHit;
+	TH2F* hValidSiliconAndOneDiamondHitNotMasked;
+	TH2F* hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels;
+	TH2F* hValidSiliconAndOneDiamondHitInOneArea;
+	TH2F* hValidSiliconAndOneDiamondHitInSameAreaAndFidCut;
+	TH2F* hAreaVsFidCut;
+
+	UInt_t events;
+	UInt_t noValidTrack;
+	UInt_t tooHighChi2;
+	UInt_t invalidPositionPrediction;
+	UInt_t notOneDiaCluster;
+	UInt_t notInFidCut;
+	UInt_t saturatedCluster;
+	UInt_t areaAndFidCutDoNotAgree;
+	UInt_t hitNotInOneArea;
+	UInt_t validEvents;
+	UInt_t noDiaCluster;
+	UInt_t maskedClusters;
+
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */
