@@ -297,10 +297,12 @@ private:
 	void ParseRegionArray(std::string key, std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
 	void ParsePattern(std::string key, std::string value);
 	void ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut);
+	void ParseScreenedChannelArray(std::string key, std::string value, std::vector<int> & vec);
 	std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
 	bool ParseFloat(std::string key, std::string value,float  &output);
 	Float_t ParseFloat(std::string key, std::string value){float output;ParseFloat(key,value,output);return output;}
-	Int_t ParseInt(std::string key, std::string value){Int_t output;ParseInt(key,value,output);return output;}
+	Int_t ParseInt(std::string key, std::string value){cout<<"Parse: "<<value<<endl;Int_t output;ParseInt(key,value,output);return output;}
+	Int_t ParseInt(std::string value){return  (int)strtod(value.c_str(),0);}
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
