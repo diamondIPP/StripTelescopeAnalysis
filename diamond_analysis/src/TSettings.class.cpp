@@ -364,24 +364,24 @@ void TSettings::LoadSettings(){
 		if(key == "alignment_y_offsets") ParseFloatArray(key, value,alignment_y_offsets);
 		if(key == "alignment_phi_offsets") ParseFloatArray(key,value,alignment_phi_offsets);
 		if(key == "alignment_z_offsets") ParseFloatArray(key,value,alignment_z_offsets);
-		if(key == "D0X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[0]);
-		if(key == "D0Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[1]);
-		if(key == "D1X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[2]);
-		if(key == "D1Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[3]);
-		if(key == "D2X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[4]);
-		if(key == "D2Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[5]);
-		if(key == "D3X_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[6]);
-		if(key == "D3Y_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[7]);
-		if(key == "Dia_channel_screen_channels") ParseIntArray(key,value,Det_channel_screen_channels[8]);
-		if(key == "D0X_channel_screen_regions")  ParseIntArray(key,value,Det_channel_screen_regions[0]);
-		if(key == "D0Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[1]);
-		if(key == "D1X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[2]);
-		if(key == "D1Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[3]);
-		if(key == "D2X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[4]);
-		if(key == "D2Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[5]);
-		if(key == "D3X_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[6]);
-		if(key == "D3Y_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[7]);
-		if(key == "Dia_channel_screen_regions") ParseIntArray(key,value,Det_channel_screen_regions[8]);
+		if(key == "D0X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[0]);
+		if(key == "D0Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[1]);
+		if(key == "D1X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[2]);
+		if(key == "D1Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[3]);
+		if(key == "D2X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[4]);
+		if(key == "D2Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[5]);
+		if(key == "D3X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[6]);
+		if(key == "D3Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[7]);
+		if(key == "Dia_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[8]);
+		if(key == "D0X_channel_screen_regions")  ParseScreenedChannelArray(key,value,Det_channel_screen_regions[0]);
+		if(key == "D0Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[1]);
+		if(key == "D1X_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[2]);
+		if(key == "D1Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[3]);
+		if(key == "D2X_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[4]);
+		if(key == "D2Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[5]);
+		if(key == "D3X_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[6]);
+		if(key == "D3Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[7]);
+		if(key == "Dia_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[8]);
 		if(key == "chi2Cut3D") ParseFloat(key,value,chi2Cut3D);
 		if(key == "si_avg_fidcut_xlow") ParseFloat(key,value,si_avg_fidcut_xlow);
 		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
@@ -693,6 +693,30 @@ void TSettings::ParseIntArray(string key, string value, vector<int> &vec) {
 		vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
 }
 
+void TSettings::ParseScreenedChannelArray(std::string key, std::string value, std::vector< int> &vec){
+//	cout << key.c_str() << " = " << value.c_str() << endl;
+	std::vector <std::string> stringArray;
+	ParseStringArray(key, value,stringArray);
+	vec.clear();
+	for(UInt_t i=0;i<stringArray.size();i++){
+		std::string val= stringArray.at(i);
+		cout<<i<<"/"<<stringArray.size()<<"\tval: '"<<val<<"'"<<endl;
+		if(val.find('-')!=string::npos){
+			std::pair< std::string,std::string > region = ParseRegionString(key, stringArray[i]);
+			Int_t begin = ParseInt(region.first.c_str());
+			Int_t end = ParseInt(region.second.c_str());
+			cout<<"screen chanel "<<begin<<"-"<<end<<endl;
+			char t; cin>>t;
+			for(Int_t i=begin;i<=end;i++)
+				vec.push_back(i);
+		}
+		else
+			vec.push_back(ParseInt(val));
+	}
+
+//	this->ParseIntArray(key,value,vec);
+}
+
 void TSettings::ParseRegionArray(string key, string value, std::vector< std::pair<Int_t,Int_t> > &vec){
 	cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
@@ -736,6 +760,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
 	}
 
 }
+
 
 void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut){
 	cout<< "\nParse FidCut: "<<value<<endl;
