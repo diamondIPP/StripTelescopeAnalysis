@@ -705,8 +705,10 @@ void TSettings::ParseScreenedChannelArray(std::string key, std::string value, st
 			std::pair< std::string,std::string > region = ParseRegionString(key, stringArray[i]);
 			Int_t begin = ParseInt(region.first.c_str());
 			Int_t end = ParseInt(region.second.c_str());
-			cout<<"screen chanel "<<begin<<"-"<<end<<endl;
-			char t; cin>>t;
+			if(verbosity>5){
+				cout<<"screen channel "<<begin<<"-"<<end<<"\tPress a key and enter to continue."<<flush;
+				char t; cin>>t;
+			}
 			for(Int_t i=begin;i<=end;i++)
 				vec.push_back(i);
 		}
@@ -753,8 +755,8 @@ void TSettings::ParsePattern(std::string key, std::string value){
 	}
 	else
 		cout<<"vecEntries.size(): "<<vecEntries.size()<<endl;
-	if (verbosity>3){
-		cout<<"Prss a key and enter: "<<flush;
+	if (verbosity>5){
+		cout<<"Press a key and enter: "<<flush;
 		char t;
 		cin>>t;
 	}
@@ -790,8 +792,8 @@ void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* 
 	}
 	else
 		cerr<<"TSettings::ParseFidCut: Cannot Parse FidCut - Size of vecEntries does not fit: "<<stringArray.size()<<endl;
-	if (verbosity>3){
-		cout<<"Prss a key and enter: "<<flush;
+	if (verbosity>5){
+		cout<<"Press a key and enter: "<<flush;
 		char t;
 		cin>>t;
 	}
