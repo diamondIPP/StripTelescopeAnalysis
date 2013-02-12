@@ -555,9 +555,40 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 //	if (plots_canvas) delete plots_canvas;
 }
 
-void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
 
+void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
+	if(!histo){
+			cerr<<"HistogrammSaver::SaveHistogramROOT(TH2F*) histogram == 0"<<endl;
+			return;
+		}
+	if(histo->GetEntries()==0)return;
+	TH3F* htemp = (TH3F*)histo->Clone();
+	if(htemp==0)
+		return;
+	htemp->Draw();
+	TString name = histo->GetName();
+//	cout<<"Histo Name: "<<name<<endl;
+//	cout<<"plots path: "<<plots_path<<endl;
+	string fileName = plots_path.c_str();
+	fileName.append(name);
+	fileName.append(".root");
+//	cout<<"pwd: "<<gSystem->pwd()<<endl;;
+//	cout<<"Write 3d histo: " <<fileName<<flush;char t; cin>>t;
+	htemp->Write(fileName.c_str());
+	htemp->Write();
+	stringstream plot_filename;
+	plot_filename<< plots_path << histo->GetName() << ".root";
+	htemp->Print(plot_filename.str().c_str());
+	stringstream histo_filename;
+	histo_filename << plots_path << "histograms.root";
+	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+	f->cd();
+	htemp->Write();
+	f->Close();
+	if (htemp)
+		delete htemp;
 }
+
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
 	if(!graph) {
