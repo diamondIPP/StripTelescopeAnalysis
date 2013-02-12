@@ -19,6 +19,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	UInt_t runNumber=settings->getRunNumber();
 
 	htmlLandau=new THTMLLandaus(settings);
+	htmlSelection = new THTMLSelectionAnalysis(settings);
 
 	settings->goToSelectionTreeDir();
 	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
@@ -28,6 +29,9 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	histSaver->SetPlotsPath(settings->getSelectionAnalysisPath());
 	histSaver->SetRunNumber(runNumber);
 	htmlLandau->setFileGeneratingPath(settings->getSelectionAnalysisPath());
+
+	htmlSelection->setFileGeneratingPath(settings->getSelectionAnalysisPath());
+
 	settings->goToSelectionTreeDir();
 	initialiseHistos();
 
@@ -36,9 +40,16 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 
 TAnalysisOfSelection::~TAnalysisOfSelection() {
 	htmlLandau->generateHTMLFile();
+	htmlSelection->addSelectionPlots();
+	htmlSelection->addAreaPlots();
+	htmlSelection->addFiducialCutPlots();
+
+	htmlSelection->generateHTMLFile();
+
 	if(eventReader!=0) delete eventReader;
 	if(histSaver!=0)   delete histSaver;
 	if(htmlLandau!=0)  delete htmlLandau;
+	if(htmlSelection!=0) delete htmlSelection;
 	settings->goToOutputDir();
 }
 
@@ -222,7 +233,7 @@ void TAnalysisOfSelection::saveHistos()
 	cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
 	histSaver->SaveHistogram(histoLandauDistribution2D);
 	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
-
+	histSaver->SaveHistogramROOT(hChargeVsFidCut);
 	TH2F* hEntriesOfMeanChargeHisto = (TH2F*)hChargeVsFidCut->Project3D("yx");
 	if(hEntriesOfMeanChargeHisto){
 		hEntriesOfMeanChargeHisto->SetName("hEntriesOfMeanChargeHisto");
@@ -636,7 +647,6 @@ void TAnalysisOfSelection::saveHistos()
 	histSaver->SaveGraph(graph,name.str(),"APLE1");
 	htmlLandau->addLandauDiamond(width,MP,area,gWidth);
 	htmlLandau->addLandauDiamondTable(vecHistoMean,vecHistoMax,vecHistoMeanGaus,vecHistoMeanLandau);
-
 
 	histoClusSize->SetTitle("ClusterSize Diamond");
 	histoClusSize->GetXaxis()->SetTitle("ClusterSize");

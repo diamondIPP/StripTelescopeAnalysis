@@ -31,6 +31,7 @@
 #include "THTMLPedestal.hh"
 #include "LandauGaussFit.hh"
 #include "THTMLLandaus.hh"
+#include "THTMLSelectionAnalysis.hh"
 
 #include "TADCEventReader.hh"
 #include "TSettings.class.hh"
@@ -79,6 +80,7 @@ private:
 	TH2F* hFidCutXvsChannelPos;
 	TH2F* hClusterSizeVsChannelPos;
 	THTMLLandaus *htmlLandau;
+	THTMLSelectionAnalysis *htmlSelection;
 };
 
 #endif /* TANALYSISOFSELECTION_HH_ */
