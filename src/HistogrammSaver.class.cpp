@@ -503,8 +503,9 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
 	gROOT->SetStyle("Plain_RD42_2D");
 	gROOT->ForceStyle(true);
-	cout<<"Save: \""<<histo->GetName()<<"\""<<endl;
-	cout<<"\tgStyle2D: "<<gStyle<<"-->"<<flush;
+	currentStyle2D->cd();
+	//	cout<<"Save: \""<<histo->GetName()<<"\""<<endl;
+//	cout<<"\tgStyle2D: "<<gStyle<<"-->"<<flush;
 	TCanvas *plots_canvas =  new TCanvas(TString::Format("cPng_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
 	plots_canvas->Clear();
 	plots_canvas->cd();
@@ -517,10 +518,11 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas->Print(plot_filename.str().c_str());
-
+	currentStyle->cd();
 	gROOT->SetStyle("Plain_RD42");
 	cout<<"gStyle: "<<gStyle<<endl;
-//	if(plots_canvas)delete plots_canvas;
+	currentStyle->cd();
+	//	if(plots_canvas)delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
@@ -555,9 +557,40 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 //	if (plots_canvas) delete plots_canvas;
 }
 
-void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
 
+void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
+	if(!histo){
+			cerr<<"HistogrammSaver::SaveHistogramROOT(TH2F*) histogram == 0"<<endl;
+			return;
+		}
+	if(histo->GetEntries()==0)return;
+	TH3F* htemp = (TH3F*)histo->Clone();
+	if(htemp==0)
+		return;
+	htemp->Draw();
+	TString name = histo->GetName();
+//	cout<<"Histo Name: "<<name<<endl;
+//	cout<<"plots path: "<<plots_path<<endl;
+	string fileName = plots_path.c_str();
+	fileName.append(name);
+	fileName.append(".root");
+//	cout<<"pwd: "<<gSystem->pwd()<<endl;;
+//	cout<<"Write 3d histo: " <<fileName<<flush;char t; cin>>t;
+	htemp->Write(fileName.c_str());
+	htemp->Write();
+	stringstream plot_filename;
+	plot_filename<< plots_path << histo->GetName() << ".root";
+	htemp->Print(plot_filename.str().c_str());
+	stringstream histo_filename;
+	histo_filename << plots_path << "histograms.root";
+	TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+	f->cd();
+	htemp->Write();
+	f->Close();
+	if (htemp)
+		delete htemp;
 }
+
 
 void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string option){
 	if(!graph) {
