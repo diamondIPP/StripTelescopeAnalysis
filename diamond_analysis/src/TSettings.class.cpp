@@ -332,7 +332,7 @@ void TSettings::LoadSettings(){
 		if(key == "Taylor_speed_throttle") Parse(key,value,Taylor_speed_throttle);
 		if(key == "dia_input") Parse(key,value,dia_input);
 		if(key == "alignment_training_track_fraction") Parse(key,value,alignment_training_track_fraction);
-		if(key == "alignment_training_track_number") {Parse(key,value,alignment_training_track_number);cout<<key<<alignment_training_track_number<<endl;char t; cin>>t;}
+		if(key == "alignment_training_track_number") {Parse(key,value,alignment_training_track_number);}
 		if(key == "alignment_training_method"){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			int method = (int)strtod(value.c_str(),0);
