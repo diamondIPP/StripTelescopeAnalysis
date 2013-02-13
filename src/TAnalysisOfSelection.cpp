@@ -427,60 +427,72 @@ void TAnalysisOfSelection::saveHistos()
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
 		cout<<name<<endl;
 		TH1F* hProjection = (TH1F*)histoLandauDistribution2D->ProjectionX(name,binLow,binHigh);
-		hProjection->SetTitle(name);
-		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
-		hProjection->GetYaxis()->SetTitle("number of entries");
-		histSaver->SaveHistogram(hProjection);
-		delete hProjection;
+        if(hProjection){
+            hProjection->SetTitle(name);
+            hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+            hProjection->GetYaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hProjection);
+            delete hProjection;
+        }
 		hProjection=0;
 
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeed_area_%d_ch_%d-%d",area,chLow,chHigh);
 		cout<<name<<endl;
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderSeed->ProjectionX(name,binLow,binHigh);
-		hProjection->SetTitle(name);
-		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
-		hProjection->GetYaxis()->SetTitle("number of entries");
-		histSaver->SaveHistogram(hProjection);
-		delete hProjection;
+        if(hProjection){
+            hProjection->SetTitle(name);
+            hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+            hProjection->GetYaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hProjection);
+            delete hProjection;
+        }
 		hProjection=0;
 
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHit_area_%d_ch_%d-%d",area,chLow,chHigh);
 		cout<<name<<endl;
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderHit->ProjectionX(name,binLow,binHigh);
-		hProjection->SetTitle(name);
-		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
-		hProjection->GetYaxis()->SetTitle("number of entries");
-		histSaver->SaveHistogram(hProjection);
-		delete hProjection;
+        if(hProjection){
+            hProjection->SetTitle(name);
+            hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+            hProjection->GetYaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hProjection);
+            delete hProjection;
+        }
 		hProjection=0;
 
 		//unmasked projections
 		name = TString::Format("hChargeOfCluster_ClusterSizeUnmasked_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
 		cout<<name<<endl;
 		hProjection = (TH1F*)histoLandauDistribution2D_unmasked->ProjectionX(name,binLow,binHigh);
-		hProjection->SetTitle(name);
-		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
-		hProjection->GetYaxis()->SetTitle("number of entries");
-		histSaver->SaveHistogram(hProjection);
-		delete hProjection;
+        if(hProjection){
+            hProjection->SetTitle(name);
+            hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+            hProjection->GetYaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hProjection);
+            delete hProjection;
+        }
 		hProjection=0;
 
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeedUnmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderSeed_unmasked->ProjectionX(name,binLow,binHigh);
-		hProjection->SetTitle(name);
-		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
-		hProjection->GetYaxis()->SetTitle("number of entries");
-		histSaver->SaveHistogram(hProjection);
-		delete hProjection;
+        if(hProjection){
+            hProjection->SetTitle(name);
+            hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+            hProjection->GetYaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hProjection);
+            delete hProjection;
+        }
 		hProjection=0;
 
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHitUnmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderHit_unmasked->ProjectionX(name,binLow,binHigh);
-		hProjection->SetTitle(name);
-		hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
-		hProjection->GetYaxis()->SetTitle("number of entries");
-		histSaver->SaveHistogram(hProjection);
-		delete hProjection;
+        if(hProjection){
+            hProjection->SetTitle(name);
+            hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
+            hProjection->GetYaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hProjection);
+            delete hProjection;
+        }
 		hProjection=0;
 	}
 	vector <Float_t> vecMP;
