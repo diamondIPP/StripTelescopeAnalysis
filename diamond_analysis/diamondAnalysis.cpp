@@ -180,8 +180,8 @@ int main(int argc, char ** argv) {
 		cout<<"settings"<<endl;
 		settings = new TSettings((TRunInfo*)&RunParameters[i]);
 
-    TResults *currentResults =new TResults(settings);
-    currentResults->Print();
+		TResults *currentResults =new TResults(settings);
+		currentResults->Print();
 
 
 		TRawEventSaver *eventSaver;
