@@ -503,9 +503,6 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	if(histo->GetEntries()==0)return;
 	gROOT->SetStyle("Plain_RD42_2D");
 	gROOT->ForceStyle(true);
-	//currentStyle2D->cd();
-	//	cout<<"Save: \""<<histo->GetName()<<"\""<<endl;
-//	cout<<"\tgStyle2D: "<<gStyle<<"-->"<<flush;
 	TCanvas *plots_canvas =  new TCanvas(TString::Format("cPng_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
 	plots_canvas->Clear();
 	plots_canvas->cd();
@@ -518,9 +515,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas->Print(plot_filename.str().c_str());
-	//currentStyle->cd();
 	gROOT->SetStyle("Plain_RD42");
-	cout<<"gStyle: "<<gStyle<<endl;
 	//currentStyle->cd();
 	//	if(plots_canvas)delete plots_canvas;
 }
@@ -569,13 +564,9 @@ void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
 		return;
 	htemp->Draw();
 	TString name = histo->GetName();
-//	cout<<"Histo Name: "<<name<<endl;
-//	cout<<"plots path: "<<plots_path<<endl;
 	string fileName = plots_path.c_str();
 	fileName.append(name);
 	fileName.append(".root");
-//	cout<<"pwd: "<<gSystem->pwd()<<endl;;
-//	cout<<"Write 3d histo: " <<fileName<<flush;char t; cin>>t;
 	htemp->Write(fileName.c_str());
 	htemp->Write();
 	stringstream plot_filename;
