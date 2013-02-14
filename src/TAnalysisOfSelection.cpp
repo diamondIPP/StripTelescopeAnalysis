@@ -551,7 +551,14 @@ void TAnalysisOfSelection::saveHistos()
 	name.str("");
 	name.clear();
 	name<< "hPulseHeigthDiamond_1_2_ClusterSize";
-	TH1F* histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),1,2);
+	TH1F* histo12 =0;
+    if (histoLandauDistribution)
+        histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),1,2);
+    else{
+        cout<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
+        char t;
+        cin>>t;
+    }
 //	cout<<"CREATED "<<histo12->GetName()<<endl;
 	if(histo12==0) {
 		cout<<"TAnalysisOfSelection:: saverHistos ==> oooh Boy, something went terribly wrong, Lukas you better fix it! NOW!"<<endl;
