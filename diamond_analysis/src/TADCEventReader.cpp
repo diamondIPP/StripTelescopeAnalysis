@@ -42,7 +42,7 @@ void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 	this->LoadEvent(0);
 	this->fileName=FileName;
 
-  for(UInt_t det=0;det<9;det++)hEtaIntegral[det]=0;
+	for(UInt_t det=0;det<9;det++)hEtaIntegral[det]=0;
 	LoadEtaDistributions(runNumber);
 	pEvent=NULL;//new TEvent();
 }
@@ -56,7 +56,7 @@ TADCEventReader::~TADCEventReader() {
 }
 
 bool TADCEventReader::SetTree(string fileName){//TTree *tree){
-  pEvent=NULL;
+	pEvent=NULL;
 	if(tree!=NULL) {tree->Delete();tree=NULL;}
 	if(file!=NULL) {file->Delete();file=NULL;}
 	tree=NULL;
@@ -85,15 +85,15 @@ bool TADCEventReader::isOK(){
 }
 
 void TADCEventReader::SetBranchAddresses(){
-  pEvent=0;
+	pEvent=0;
 	//Event Header Branches
 	if(tree->FindBranch("RunNumber")){
 		tree->SetBranchAddress("RunNumber",&run_number);
 		if(verbosity>3)cout<<"Set Branch \"RunNumber\""<<endl;
 	}
 	else if(tree->FindBranch("runNumber")){
-			tree->SetBranchAddress("runNumber",&run_number);
-			if(verbosity>3)cout<<"Set Branch \"runNumber\""<<endl;
+		tree->SetBranchAddress("runNumber",&run_number);
+		if(verbosity>3)cout<<"Set Branch \"runNumber\""<<endl;
 	}
 	if(tree->FindBranch("EventNumber")){
 		tree->SetBranchAddress("EventNumber",&event_number);
@@ -103,7 +103,7 @@ void TADCEventReader::SetBranchAddresses(){
 		tree->SetBranchAddress("StoreThreshold",&store_threshold);
 		if(verbosity>3)cout<<"Set Branch \"StoreThreshold\""<<endl;
 	}
-//	tree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
+	//	tree->SetBranchAddress("CMNEvent_flag",&CMNEvent_flag);
 
 	if(tree->FindBranch("ZeroDivisorEvent_flag")){
 		tree->SetBranchAddress("ZeroDivisorEvent_flag",&ZeroDivisorEvent_flag);
@@ -117,117 +117,117 @@ void TADCEventReader::SetBranchAddresses(){
 	if(tree->FindBranch("D0Y_NChannels")){
 		tree->SetBranchAddress("D0Y_NChannels",&Det_NChannels[1]);
 		if(verbosity>3)cout<<"Set Branch \"D0Y_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1X_NChannels")){
 		tree->SetBranchAddress("D1X_NChannels",&Det_NChannels[2]);
 		if(verbosity>3)cout<<"Set Branch \"D1X_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1Y_NChannels")){
 		tree->SetBranchAddress("D1Y_NChannels",&Det_NChannels[3]);
 		if(verbosity>3)cout<<"Set Branch \"D1Y_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2X_NChannels")){
 		tree->SetBranchAddress("D2X_NChannels",&Det_NChannels[4]);
 		if(verbosity>3)cout<<"Set Branch \"D2X_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2Y_NChannels")){
 		tree->SetBranchAddress("D2Y_NChannels",&Det_NChannels[5]);
 		if(verbosity>3)cout<<"Set Branch \"D2Y_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3X_NChannels")){
 		tree->SetBranchAddress("D3X_NChannels",&Det_NChannels[6]);
 		if(verbosity>3)cout<<"Set Branch \"D3X_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3Y_NChannels")){
 		tree->SetBranchAddress("D3Y_NChannels",&Det_NChannels[7]);
 		if(verbosity>3)cout<<"Set Branch \"D3Y_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("Dia_NChannels")){
 		tree->SetBranchAddress("Dia_NChannels",&Det_NChannels[8]);
 		if(verbosity>3)cout<<"Set Branch \"Dia_NChannels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D0X_Channels")){
 		tree->SetBranchAddress("D0X_Channels",&Det_Channels[0]);
 		if(verbosity>3)cout<<"Set Branch \"D0X_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D0Y_Channels")){
 		tree->SetBranchAddress("D0Y_Channels",&Det_Channels[1]);
 		if(verbosity>3)cout<<"Set Branch \"D0Y_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1X_Channels")){
 		tree->SetBranchAddress("D1X_Channels",&Det_Channels[2]);
 		if(verbosity>3)cout<<"Set Branch \"D1X_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1Y_Channels")){
 		tree->SetBranchAddress("D1Y_Channels",&Det_Channels[3]);
 		if(verbosity>3)cout<<"Set Branch \"D1Y_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2X_Channels")){
 		tree->SetBranchAddress("D2X_Channels",&Det_Channels[4]);
 		if(verbosity>3)cout<<"Set Branch \"D2X_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2Y_Channels")){
 		tree->SetBranchAddress("D2Y_Channels",&Det_Channels[5]);
 		if(verbosity>3)cout<<"Set Branch \"D2Y_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3X_Channels")){
 		tree->SetBranchAddress("D3X_Channels",&Det_Channels[6]);
 		if(verbosity>3)cout<<"Set Branch \"D3X_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3Y_Channels")){
 		tree->SetBranchAddress("D3Y_Channels",&Det_Channels[7]);
 		if(verbosity>3)cout<<"Set Branch \"D3Y_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("Dia_Channels")){
 		tree->SetBranchAddress("Dia_Channels",&Det_Channels[8]);
 		if(verbosity>3)cout<<"Set Branch \"Dia_Channels\""<<endl;
-		}
+	}
 	//tree->SetBranchAddress("Det_ADC",&Det_ADC[0][0]);
 	if(tree->FindBranch("D0X_ADC")){
 		tree->SetBranchAddress("D0X_ADC",&Det_ADC[0]);
 		if(verbosity>3)cout<<"Set Branch \"D0X_ADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D0Y_ADC")){
 		tree->SetBranchAddress("D0Y_ADC",&Det_ADC[1]);
 		if(verbosity>3)cout<<"Set Branch \"D0Y_ADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1X_ADC")){
 		tree->SetBranchAddress("D1X_ADC",&Det_ADC[2]);
 		if(verbosity>3)cout<<"Set Branch \"D1X_ADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1Y_ADC")){
 		tree->SetBranchAddress("D1Y_ADC",&Det_ADC[3]);
 		if(verbosity>3)cout<<"Set Branch \"D1Y_ADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2X_ADC")){
 		tree->SetBranchAddress("D2X_ADC",&Det_ADC[4]);
 		if(verbosity>3)cout<<"Set Branch \"D2X_ADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2Y_ADC")){
 		tree->SetBranchAddress("D2Y_ADC",&Det_ADC[5]);
 		if(verbosity>3)cout<<"Set Branch \"D2Y_ADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3X_ADC")){
 		tree->SetBranchAddress("D3X_ADC",&Det_ADC[6]);
 		if(verbosity>3)cout<<"Set Branch \"D3X_ADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3Y_ADC")){
 		tree->SetBranchAddress("D3Y_ADC",&Det_ADC[7]);
 		if(verbosity>3)cout<<"Set Branch \"D3Y_ADC\""<<endl;
-		}
+	}
 	//tree->SetBranchAddress("Dia_ADC",&Dia_ADC);
 	if(tree->FindBranch("DiaADC")){
 		tree->SetBranchAddress("DiaADC",&Dia_ADC);
 		if(verbosity>3)cout<<"Set Branch \"DiaADC\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D0X_PedMean")){
 		tree->SetBranchAddress("D0X_PedMean",&Det_PedMean[0]);
 		if(verbosity>3)cout<<"Set Branch \"D0X_PedMean\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D0Y_PedMean")){
 		tree->SetBranchAddress("D0Y_PedMean",&Det_PedMean[1]);
 		if(verbosity>3)cout<<"Set Branch \"D0Y_PedMean\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1X_PedMean")){
 		tree->SetBranchAddress("D1X_PedMean",&Det_PedMean[2]);
 		if(verbosity>3)cout<<"Set Branch \"D1X_PedMean\""<<endl;
@@ -243,51 +243,51 @@ void TADCEventReader::SetBranchAddresses(){
 	if(tree->FindBranch("D2Y_PedMean")){
 		tree->SetBranchAddress("Dia_Channels",&Det_PedMean[5]);
 		if(verbosity>3)cout<<"Set Branch \"Dia_Channels\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3X_PedMean")){
 		tree->SetBranchAddress("D3X_PedMean",&Det_PedMean[6]);
 		if(verbosity>3)cout<<"Set Branch \"D3X_PedMean\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3Y_PedMean")){
 		tree->SetBranchAddress("D3Y_PedMean",&Det_PedMean[7]);
 		if(verbosity>3)cout<<"Set Branch \"D3Y_PedMean\""<<endl;
-		}
+	}
 	if(tree->FindBranch("Dia_PedMean")){
 		tree->SetBranchAddress("Dia_PedMean",&Det_PedMean[8]);
 		if(verbosity>3)cout<<"Set Branch \"Dia_PedMean\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D0X_PedWidth")){
 		tree->SetBranchAddress("D0X_PedWidth",&Det_PedWidth[0]);
 		if(verbosity>3)cout<<"Set Branch \"D0X_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D0Y_PedWidth")){
 		tree->SetBranchAddress("D0Y_PedWidth",&Det_PedWidth[1]);
 		if(verbosity>3)cout<<"Set Branch \"D0Y_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1X_PedWidth")){
 		tree->SetBranchAddress("D1X_PedWidth",&Det_PedWidth[2]);
 		if(verbosity>3)cout<<"Set Branch \"D1X_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D1Y_PedWidth")){
 		tree->SetBranchAddress("D1Y_PedWidth",&Det_PedWidth[3]);
 		if(verbosity>3)cout<<"Set Branch \"D1Y_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2X_PedWidth")){
 		tree->SetBranchAddress("D2X_PedWidth",&Det_PedWidth[4]);
 		if(verbosity>3)cout<<"Set Branch \"D2X_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D2Y_PedWidth")){
 		tree->SetBranchAddress("D2Y_PedWidth",&Det_PedWidth[5]);
 		if(verbosity>3)cout<<"Set Branch \"D2Y_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3X_PedWidth")){
 		tree->SetBranchAddress("D3X_PedWidth",&Det_PedWidth[6]);
 		if(verbosity>3)cout<<"Set Branch \"D3X_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("D3Y_PedWidth")){
 		tree->SetBranchAddress("D3Y_PedWidth",&Det_PedWidth[7]);
 		if(verbosity>3)cout<<"Set Branch \"D3Y_PedWidth\""<<endl;
-		}
+	}
 	if(tree->FindBranch("Dia_PedWidth")){
 		tree->SetBranchAddress("Dia_PedWidth",&Det_PedWidth[8]);
 		if(verbosity>3)cout<<"Set Branch \"Dia_PedWidth\""<<endl;
@@ -295,52 +295,52 @@ void TADCEventReader::SetBranchAddresses(){
 	if(tree->FindBranch("PedestalMean")){
 		tree->SetBranchAddress("PedestalMean",&pedestalMean);
 		if(verbosity>3)cout<<"Set Branch \"PedestalMean\""<<endl;
-		}
+	}
 	if(tree->FindBranch("PedestalSigma")){
 		tree->SetBranchAddress("PedestalSigma",&pedestalSigma);
 		if(verbosity>3)cout<<"Set Branch \"PedestalSigma\""<<endl;
-		}
+	}
 	if(tree->FindBranch("diaPedestalMean")){
-	    tree->SetBranchAddress("diaPedestalMean",&diaPedestalMean);
-	    if(verbosity>3)cout<<"Set Branch \"diaPedestalMean\""<<endl;
-	    }
-	  if(tree->FindBranch("diaPedestalSigma")){
-	    tree->SetBranchAddress("diaPedestalSigma",&diaPedestalSigma);
-	    if(verbosity>3)cout<<"Set Branch \"diaPedestalSigma\""<<endl;
-	    }
-	  if(tree->FindBranch("diaPedestalMeanCMN")){
-	    tree->SetBranchAddress("diaPedestalMeanCMN",&diaPedestalMeanCMN);
-	    if(verbosity>3)cout<<"Set Branch \"diaPedestalMeanCMN\""<<endl;
-	  }
-	  if(tree->FindBranch("diaPedestalSigmaCMN")){
-	    tree->SetBranchAddress("diaPedestalSigmaCMN",&diaPedestalSigmaCMN);
-	    if(verbosity>3)cout<<"Set Branch \"diaPedestalSigmaCMN\""<<endl;
-	  }
-//	if(tree->FindBranch("clusters")){
-//		//tree->SetBranchAddress("clusters",&pVecvecCluster);
-//		if(verbosity>3)cout<<"Set Branch \"clusters\""<<endl;
-//		}
+		tree->SetBranchAddress("diaPedestalMean",&diaPedestalMean);
+		if(verbosity>3)cout<<"Set Branch \"diaPedestalMean\""<<endl;
+	}
+	if(tree->FindBranch("diaPedestalSigma")){
+		tree->SetBranchAddress("diaPedestalSigma",&diaPedestalSigma);
+		if(verbosity>3)cout<<"Set Branch \"diaPedestalSigma\""<<endl;
+	}
+	if(tree->FindBranch("diaPedestalMeanCMN")){
+		tree->SetBranchAddress("diaPedestalMeanCMN",&diaPedestalMeanCMN);
+		if(verbosity>3)cout<<"Set Branch \"diaPedestalMeanCMN\""<<endl;
+	}
+	if(tree->FindBranch("diaPedestalSigmaCMN")){
+		tree->SetBranchAddress("diaPedestalSigmaCMN",&diaPedestalSigmaCMN);
+		if(verbosity>3)cout<<"Set Branch \"diaPedestalSigmaCMN\""<<endl;
+	}
+	//	if(tree->FindBranch("clusters")){
+	//		//tree->SetBranchAddress("clusters",&pVecvecCluster);
+	//		if(verbosity>3)cout<<"Set Branch \"clusters\""<<endl;
+	//		}
 	if(tree->FindBranch("isDetMasked")){
 		tree->SetBranchAddress(	"isDetMasked",&bIsDetMasked);
 		if(verbosity>3)cout<<"Set Branch \"isDetMasked\""<<endl;
-		}
+	}
 	if(tree->FindBranch("hasValidSiliconTrack")){
 		tree->SetBranchAddress("hasValidSiliconTrack",&bValidSiliconTrack);
 		if(verbosity>3)cout<<"Set Branch \"hasValidSiliconTrack\""<<endl;
-		}
+	}
 	if(tree->FindBranch("nDiamondHits")){
 		tree->SetBranchAddress("nDiamondHits",&nDiamondClusters);
 		if(verbosity>3)cout<<"Set Branch \"nDiamondHits\""<<endl;
-		}
+	}
 	if(tree->FindBranch("isInFiducialCut")){
 		tree->SetBranchAddress("isInFiducialCut",&bIsInFiducialCut);
 		if(verbosity>3)
 			cout<<"Set Branch \"isInFiducialCut\""<<endl;
 	}
-//	if(tree->FindBranch("isDiaMasked")){
-//		tree->SetBranchAddress("isDiaMasked",&this->maskedDiaClusters);
-//		if(verbosity>3)cout<<"Set Branch \"isDiaMasked\""<<endl;
-//	}
+	//	if(tree->FindBranch("isDiaMasked")){
+	//		tree->SetBranchAddress("isDiaMasked",&this->maskedDiaClusters);
+	//		if(verbosity>3)cout<<"Set Branch \"isDiaMasked\""<<endl;
+	//	}
 	if(tree->FindBranch("event")){
 		tree->SetBranchAddress("event",&pEvent);
 		if(verbosity>3)cout<<"Set Branch \"event\""<<endl;
@@ -362,12 +362,12 @@ void TADCEventReader::SetBranchAddresses(){
 	}
 
 	if(tree->FindBranch("cmnCorrection")){
-	  tree->SetBranchAddress("cmnCorrection",&this->bCMNoiseCorrected);
-	  if(verbosity>3)cout<<"Set Branch \n isCMNCOrrected\""<<endl;
+		tree->SetBranchAddress("cmnCorrection",&this->bCMNoiseCorrected);
+		if(verbosity>3)cout<<"Set Branch \n isCMNCOrrected\""<<endl;
 	}
 	if(tree->FindBranch("commonModeNoise")){
-	  tree->SetBranchAddress("commonModeNoise",&this->cmNoise);
-	  if(verbosity>3)cout<<"SET BRANCH ADDRESS: \"CMN Noise\""<<endl;
+		tree->SetBranchAddress("commonModeNoise",&this->cmNoise);
+		if(verbosity>3)cout<<"SET BRANCH ADDRESS: \"CMN Noise\""<<endl;
 	}
 	if(tree->FindBranch("cmnCreated")){
 		tree->SetBranchAddress("cmnCreated",&this->cmnCreated);
@@ -389,15 +389,15 @@ void TADCEventReader::SetBranchAddresses(){
 	}
 
 
-//	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
-//	UInt_t nDiamondHits; //number of clusters in diamond plane;
+	//	vector<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
+	//	UInt_t nDiamondHits; //number of clusters in diamond plane;
 	if(verbosity>3)cout<<"DONE"<<endl;
 
 }
 
 void TADCEventReader::initialiseTree(){
-  bCMNoiseCorrected=false;
-  if(verbosity>3)cout<<"initialise tree with "<<tree->GetEntries()<<" Entires."<<endl;
+	bCMNoiseCorrected=false;
+	if(verbosity>3)cout<<"initialise tree with "<<tree->GetEntries()<<" Entires."<<endl;
 	current_event = 1;
 	tree->GetEvent(current_event);
 	if(verbosity>3)cout<< "Loaded first event in Tree: "<<event_number<<endl;
@@ -411,12 +411,12 @@ bool TADCEventReader::GetNextEvent(){
 bool TADCEventReader::LoadEvent(UInt_t EventNumber){
 	if(tree==NULL) return false;
 	if(EventNumber<tree->GetEntries()){
-			current_event=EventNumber;
-			tree->GetEvent(current_event);
-			if(verbosity>=14)
-				cout<<"Got Event: "<<current_event<<endl;
-			return true;
-		}
+		current_event=EventNumber;
+		tree->GetEvent(current_event);
+		if(verbosity>=14)
+			cout<<"Got Event: "<<current_event<<endl;
+		return true;
+	}
 	return false;
 }
 
@@ -437,7 +437,7 @@ Long64_t TADCEventReader::GetEntries(){
 
 UInt_t TADCEventReader::getCurrent_event() const
 {
-    return current_event;
+	return current_event;
 }
 
 UChar_t TADCEventReader::getDet_ADC(UInt_t det , UInt_t ch) const
@@ -453,72 +453,72 @@ UChar_t TADCEventReader::getDet_Channels(UInt_t i , UInt_t j) const
 		cout<<"TADCEventReader::getDet_Channels not Valid "<<i<<" "<<j<<endl;
 		exit (-1);
 	}
-    return Det_Channels[i][j];
+	return Det_Channels[i][j];
 }
 
 UInt_t TADCEventReader::getDet_NChannels(UInt_t det)  const
 {
-    return Det_NChannels[det];
+	return Det_NChannels[det];
 }
 
 Float_t TADCEventReader::getDet_PedMean(UInt_t i, UInt_t j) const
 {
-    return Det_PedMean[i][j];
+	return Det_PedMean[i][j];
 }
 
 Float_t TADCEventReader::getDet_PedWidth(UInt_t i, UInt_t j) const
 {
-    return Det_PedWidth[i][j];
+	return Det_PedWidth[i][j];
 }
 
 Int_t TADCEventReader::getDia_ADC(UInt_t ch) {
-  if(ch<TPlaneProperties::getNChannelsDiamond())
-    return (Int_t)Dia_ADC[ch];
-  return -1;
+	if(ch<TPlaneProperties::getNChannelsDiamond())
+		return (Int_t)Dia_ADC[ch];
+	return -1;
 }
 
 UInt_t TADCEventReader::getEvent_number() const
 {
-    return event_number;
+	return event_number;
 }
 
 TTree * TADCEventReader::getPedTree() const
 {
-    return tree;
+	return tree;
 }
 
 UInt_t  TADCEventReader::getRun_number() const
 {
-    return run_number;
+	return run_number;
 }
 
 Float_t  TADCEventReader::getStore_threshold() const
 {
-    return store_threshold;
+	return store_threshold;
 }
 
 UInt_t  TADCEventReader::getVerbosity() const
 {
-    return verbosity;
+	return verbosity;
 }
 
 bool  TADCEventReader::getZeroDivisorEvent_flag() const
 {
-    return ZeroDivisorEvent_flag;
+	return ZeroDivisorEvent_flag;
 }
 
 int TADCEventReader::hasTree(){
 	if(file==NULL)return -1;
-	  TIter nextkey(file->GetListOfKeys());
-	  TKey *key;
-	  int hasATree = 0;
-	  while ((key = (TKey*)nextkey()))
-	    {
-	      TObject *obj = key->ReadObj();
-	      if ((obj->IsA()->InheritsFrom("TTree"))){
-	    	  hasATree++;}
-	    }
-	  return hasATree;
+	TIter nextkey(file->GetListOfKeys());
+	TKey *key;
+	int hasATree = 0;
+	while ((key = (TKey*)nextkey()))
+	{
+		TObject *obj = key->ReadObj();
+		if ((obj->IsA()->InheritsFrom("TTree"))){
+			hasATree++;}
+	}
+	return hasATree;
 }
 
 
@@ -538,7 +538,7 @@ Float_t TADCEventReader::getPedestalMean(UInt_t det, UInt_t ch,bool cmnCorrected
 	if(TPlaneProperties::isSiliconDetector(det)&&ch<TPlaneProperties::getNChannels(det))
 		return this->pedestalMean[det][ch];
 	if(TPlaneProperties::isDiamondDetector(det))
-	  return getDiaPedestalMean(ch,cmnCorrected);
+		return getDiaPedestalMean(ch,cmnCorrected);
 	return -99999;
 }
 
@@ -548,36 +548,36 @@ Float_t TADCEventReader::getPedestalSigma(UInt_t det, UInt_t ch,bool cmnCorrecte
 		if(this->pedestalSigma[det][ch]>=0)
 			return this->pedestalSigma[det][ch];
 	if(TPlaneProperties::isDiamondDetector(det))
-	  return getDiaPedestalSigma(ch,cmnCorrected);
+		return getDiaPedestalSigma(ch,cmnCorrected);
 	return 0;
 }
 
 
 Float_t TADCEventReader::getDiaPedestalMean(UInt_t ch, bool cmnCorrected){
-  if(ch<TPlaneProperties::getNChannelsDiamond()){
-    if(cmnCorrected)
-      return this->diaPedestalMeanCMN[ch];
-    else
-      return this->diaPedestalMean[ch];
-  }
-  return -99999;
+	if(ch<TPlaneProperties::getNChannelsDiamond()){
+		if(cmnCorrected)
+			return this->diaPedestalMeanCMN[ch];
+		else
+			return this->diaPedestalMean[ch];
+	}
+	return -99999;
 }
 
 Float_t TADCEventReader::getDiaPedestalSigma(UInt_t ch, bool cmnCorrected){
-  if(ch<TPlaneProperties::getNChannelsDiamond()){
-    if(cmnCorrected)
-      return this->diaPedestalSigmaCMN[ch];
-    else
-      return this->diaPedestalSigma[ch];
-  }
-  return 0;
+	if(ch<TPlaneProperties::getNChannelsDiamond()){
+		if(cmnCorrected)
+			return this->diaPedestalSigmaCMN[ch];
+		else
+			return this->diaPedestalSigma[ch];
+	}
+	return 0;
 }
 
 Int_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch){
 	if(TPlaneProperties::isSiliconDetector(det))
 		return (Int_t)this->getDet_ADC(det,ch);
 	if (TPlaneProperties::isDiamondDetector(det))
-	    return (Int_t)this->getDia_ADC(ch);
+		return (Int_t)this->getDia_ADC(ch);
 	return -1;
 }
 
@@ -597,20 +597,20 @@ TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
 }
 TCluster TADCEventReader::getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, UInt_t cl){
 	if(pEvent!=NULL)
-	return this->pEvent->getCluster(plane,cor,cl);
+		return this->pEvent->getCluster(plane,cor,cl);
 	return TCluster();
 }
 
 UInt_t TADCEventReader::getClusterSize(UInt_t det,UInt_t cl)
 {
 	if(pEvent!=NULL)
-	return pEvent->getClusterSize(det,cl);
+		return pEvent->getClusterSize(det,cl);
 	return 0;
 }
 UInt_t TADCEventReader::getClusterSeedSize(UInt_t det,UInt_t cl)
 {
 	if(pEvent!=NULL)
-	return pEvent->getClusterSeedSize(det,cl);
+		return pEvent->getClusterSeedSize(det,cl);
 	return 0;
 }
 
@@ -628,20 +628,20 @@ bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 }
 
 Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
-  if(det>=9)return -9999999;
-  Float_t cmn = getCMNoise();
-  Int_t adc = getAdcValue(det,ch);
-  Float_t pedReal= getPedestalMean(det,ch,cmnCorrected);
-  if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))
-         cmn=0;
- Float_t retVal = adc-pedReal-cmn;
-  return retVal;
+	if(det>=9)return -9999999;
+	Float_t cmn = getCMNoise();
+	Int_t adc = getAdcValue(det,ch);
+	Float_t pedReal= getPedestalMean(det,ch,cmnCorrected);
+	if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))
+		cmn=0;
+	Float_t retVal = adc-pedReal-cmn;
+	return retVal;
 }
 
 Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch,bool cmnCorrected){
-  if(det>=TPlaneProperties::getNDetectors()||(getPedestalSigma(det,ch,cmnCorrected)<=0))
-	  return -99999999;
-  return (getRawSignal(det,ch,cmnCorrected)/getPedestalSigma(det,ch,cmnCorrected));
+	if(det>=TPlaneProperties::getNDetectors()||(getPedestalSigma(det,ch,cmnCorrected)<=0))
+		return -99999999;
+	return (getRawSignal(det,ch,cmnCorrected)/getPedestalSigma(det,ch,cmnCorrected));
 }
 
 Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
@@ -711,8 +711,8 @@ TObject* TADCEventReader::getTreeName(){
 	TObject *obj=NULL;
 	int hastree=hasTree();
 	if(verbosity>3)cout<< "File has "<<hastree<<" trees"<<endl;
-//	if(hastree!=1)
-//		return obj;
+	//	if(hastree!=1)
+	//		return obj;
 	TIter nextkey(file->GetListOfKeys());
 	TKey *key;
 	while ((key = (TKey*)nextkey()))
@@ -730,7 +730,7 @@ TObject* TADCEventReader::getTreeName(){
 
 TTree *TADCEventReader::getTree() const
 {
-    return tree;
+	return tree;
 }
 
 std::string TADCEventReader::getFilePath(){
@@ -749,11 +749,11 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 	bEtaIntegrals=true;
 	stringstream etaFileName;
 
-  if(!TSettings::existsDirectory(etaDistributionPath))
-    etaFileName<<"etaCorrection."<<runNumber<<".root";
-  else
-    etaFileName<<etaDistributionPath;
-  cout<<etaFileName<<endl;
+	if(!TSettings::existsDirectory(etaDistributionPath))
+		etaFileName<<"etaCorrection."<<runNumber<<".root";
+	else
+		etaFileName<<etaDistributionPath;
+	cout<<etaFileName<<endl;
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
@@ -762,7 +762,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		return;
 	}
 	if(verbosity>3)cout<<etaFileName.str()<<endl;
-//	char t; cin>>t;
+	//	char t; cin>>t;
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		stringstream objectName;
 		objectName<<"hEtaIntegral_"<<det;
@@ -772,7 +772,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		bEtaIntegrals=bEtaIntegrals&&(histo!=0);
 		if(histo){
 			hEtaIntegral[det]=(TH1F*)histo->Clone();
-			cout<<"Loaded EtaIntegral of "<<det<<" Detector. "<<hEtaIntegral[det]<<endl;
+			if(verbosity)cout<<"Loaded EtaIntegral of "<<det<<" Detector. "<<hEtaIntegral[det]<<endl;
 		}
 		else
 			cerr<<"Object \""<<objectName.str()<<"\" does not exist"<<endl;

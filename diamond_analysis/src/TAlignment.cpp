@@ -778,7 +778,6 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 		clusterSize = myTrack->getClusterSize(subjectPlane*2+cor==TPlaneProperties::X_COR?0:1,0);
 		chi2x = predictedPostion->getChi2X();
 		chi2y = predictedPostion->getChi2Y();
-		int oldVerb=verbosity;
 
 		if(verbosity>3)	predictedPostion->Print();
 		if (verbosity > 3) events.at(nEvent).getPlane(subjectPlane).Print();

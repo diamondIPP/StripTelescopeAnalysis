@@ -10,11 +10,11 @@
 THTMLPedestal::THTMLPedestal(TSettings *settings):THTMLGenerator(settings) {
 	setTitle("Pedestals");
 
-  this->setMainPath("..//");
-  this->setSubdirPath("pedestalAnalysis");
-  this->setFileName("pedestal.html");
-//  path = mainPath+subdirPath;
-  cout<<"path: "<<mainPath<<" + "<<subdirPath<<" = "<<path<<endl;
+	this->setMainPath("..//");
+	this->setSubdirPath("pedestalAnalysis");
+	this->setFileName("pedestal.html");
+	//  path = mainPath+subdirPath;
+	cout<<"path: "<<mainPath<<" + "<<subdirPath<<" = "<<path<<endl;
 }
 
 THTMLPedestal::~THTMLPedestal() {
@@ -48,35 +48,35 @@ void THTMLPedestal::createTableOfCuts()
 	sectionContent<<"<br><h4> Y Coordinates</h4><br>"<<this->createTable(tablecontent2)<<"<br><br>";
 	sectionContent<<"<h3>Seed-Cuts</h3>\n";
 	sectionContent<<putImagesOfAllDetectors(path,"hPulseHeight_BiggestSignalInSigma");
-//	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-//		stringstream name;
-//		name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path,name.str());
-//	}
-//	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-//		stringstream name;
-//		name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path,name.str());
-//	}
-//	stringstream name;
-//	name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
-//	sectionContent<<putImage(path,name.str());
+	//	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
+	//		stringstream name;
+	//		name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(det);
+	//		sectionContent<<putImage(path,name.str());
+	//	}
+	//	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
+	//		stringstream name;
+	//		name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(det);
+	//		sectionContent<<putImage(path,name.str());
+	//	}
+	//	stringstream name;
+	//	name<<"hPulseHeight_BiggestHitChannelInSigma"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
+	//	sectionContent<<putImage(path,name.str());
 	sectionContent<<"<h3>Hit-Cuts</h3>\n";
 	sectionContent<<putImagesOfAllDetectors(path,"hPulseHeight_BiggestAdjacentInSigma_");
-//	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-//		stringstream name;
-//		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path,name.str());
-//	}
-//	sectionContent<<"<br";
-//	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-//		stringstream name;
-//		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
-//		sectionContent<<putImage(path,name.str());
-//	}
-//	name.str("");name.clear();name.str("");
-//	name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
-//	sectionContent<<putImage(path,name.str());
+	//	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
+	//		stringstream name;
+	//		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
+	//		sectionContent<<putImage(path,name.str());
+	//	}
+	//	sectionContent<<"<br";
+	//	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
+	//		stringstream name;
+	//		name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(det);
+	//		sectionContent<<putImage(path,name.str());
+	//	}
+	//	name.str("");name.clear();name.str("");
+	//	name<<"hPulseHeight_SecondBiggestHitChannelInSigma_"<<TADCEventReader::getStringForDetector(TPlaneProperties::getDetDiamond());
+	//	sectionContent<<putImage(path,name.str());
 	this->addSection("Cluster Cuts",sectionContent.str());
 }
 
@@ -123,7 +123,7 @@ void THTMLPedestal::createNoiseDistribution()
 	sectionContent<<"<p>\n";
 	sectionContent<<"Distribution of (ADC-Pedestal) for all events and all channels\n";
 	sectionContent<< " This Distribution tells you what is the mean noise of each Detector\n";
-//	sectionContent>>"";
+	//	sectionContent>>"";
 	sectionContent<<"</p>\n";
 	//hNoiseDistributionOfAllNonHitChannels_
 	sectionContent<<putImagesOfAllDetectors(path,"hNoiseDistributionOfAllNonHitChannels_")<<"<br>\n\n";

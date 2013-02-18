@@ -129,8 +129,8 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 	TStopwatch watch;
 	watch.Start(true);
 
-//	initialise detAdcValues, diaAdcValues with values from rawTree
-//	initialiseDeques();
+	//	initialise detAdcValues, diaAdcValues with values from rawTree
+	//	initialiseDeques();
 	calculateFirstPedestals(detAdcValues,diaAdcValues,MAXSDETSIGMA);
 	fillFirstEventsAndMakeDiaDeque();
 
@@ -194,7 +194,7 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDet(int det,i
 		Float_t adc = (Float_t)adcQueue.at(nEvent);
 		//mean - maxSigma*sigma<=adc<= mean + maxSigma*sigma <-- Than it is no hit/seed
 		if(  ( adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma) )
-		   &&( adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
+				&&( adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
 			detEventUsed[det][ch].push_back(true);
 			detSUM[det][ch]+=adc;
 			detSUM2[det][ch]+=adc*adc;
@@ -220,7 +220,7 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 	for(UInt_t nEvent=0;nEvent<adcQueue.size();nEvent++){
 		Float_t adc = (Float_t) adcQueue.at(nEvent);
 		if(   (adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma)  )
-		   && (adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
+				&& (adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
 			diaEventUsed[ch].push_back(true);
 			diaSUM[ch]+=adc;
 			diaSUM2[ch]+=adc*adc;
@@ -237,8 +237,8 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 	diaPedestalMean[ch]=RoundFloat(mean);
 	diaPedestalSigma[ch]=RoundFloat(sigma);
 	pair<Float_t,Float_t> output = make_pair(mean,sigma);
-//	if(verbosity>4&& ch ==103)
-//		cout<<"diamond ch "<<ch<<", it "<<iterations<<", usedEvents " <<diaEventsInSum[ch]<<"\t"<<mean<<"+/-"<<sigma<<endl;
+	//	if(verbosity>4&& ch ==103)
+	//		cout<<"diamond ch "<<ch<<", it "<<iterations<<", usedEvents " <<diaEventsInSum[ch]<<"\t"<<mean<<"+/-"<<sigma<<endl;
 	if(iterations==0)return output;
 	else return this->calculateFirstPedestalDia(ch,adcQueue,mean,sigma,iterations-1,maxSigma);
 }
@@ -448,14 +448,14 @@ void TPedestalCalculation::doCmNoiseCalculation()
 void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 {
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
-//		diaAdcValues[ch].clear();
+		//		diaAdcValues[ch].clear();
 		diaAdcValuesCMN[ch].clear();
 	}
-//	//save Sliding Pedestal Values for first slidingLength Events
+	//	//save Sliding Pedestal Values for first slidingLength Events
 
 	for(nEvent=0;nEvent<slidingLength;nEvent++){
 		//Fill tree
-//		eventReader->LoadEvent(nEvent);
+		//		eventReader->LoadEvent(nEvent);
 		doCmNoiseCalculation();
 		cmnValues.push_back(cmNoise);
 		for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){

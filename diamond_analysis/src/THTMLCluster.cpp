@@ -9,10 +9,10 @@
 
 THTMLCluster::THTMLCluster(TSettings *settings):THTMLGenerator(settings) {
 	setTitle("Clustering");
-  this->setMainPath("../");
-  this->setSubdirPath("clustering/");
-  this->setFileName("clustering.html");
-  this->updatePath();
+	this->setMainPath("../");
+	this->setSubdirPath("clustering/");
+	this->setFileName("clustering.html");
+	this->updatePath();
 }
 
 THTMLCluster::~THTMLCluster() {
@@ -45,7 +45,7 @@ void THTMLCluster::createTableOfCuts()
 
 void THTMLCluster::createContent()
 {
-//	createClusterSize();
+	//	createClusterSize();
 	createEtaDistributions();
 }
 
@@ -53,7 +53,7 @@ void THTMLCluster::createEtaDistributions()
 {
 	stringstream sectionContent;
 
-//	sectionContent<<"<h2>Eta Distributions </h2>\n";
+	//	sectionContent<<"<h2>Eta Distributions </h2>\n";
 	sectionContent<<putImagesOfAllDetectors(path,"hEtaDistribution_");
 	this->addSection("Eta Distributions",sectionContent.str());
 	sectionContent.clear();
@@ -104,8 +104,8 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	sectionContent<<this->createTable(vecTable)<<"<br>\n";
 	sectionContent<<"<h2>ClusterSize</h2>\n";
 	sectionContent<<"<p>\n";
-//	sectionContent<<"Histogramm of all Channels to see how often each channel got saturated\n";
-//	sectionContent>>"";
+	//	sectionContent<<"Histogramm of all Channels to see how often each channel got saturated\n";
+	//	sectionContent>>"";
 	sectionContent<<"</p>\n";
 	stringstream path;
 	path<<this->path<<"/";

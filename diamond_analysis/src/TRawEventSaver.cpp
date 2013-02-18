@@ -8,22 +8,22 @@
 #include "../include/TRawEventSaver.hh"
 
 TRawEventSaver::TRawEventSaver(TSettings *settings){
-  // TODO Auto-generated constructor stub
-  cout<<"Raw event Saver"<<endl;
+	// TODO Auto-generated constructor stub
+	cout<<"Raw event Saver"<<endl;
 	this->settings=settings;
 	this->runNumber=settings->getRunNumber();
 	rawEventReader = new TRawEventReader(settings);//this->runNumber);
 	sys = gSystem;
-//	if(!settings->existsDirectory(settings->getAbsoluteOuputPath(false)))
-//	  sys->MakeDirectory(settings->getAbsoluteOuputPath(false).c_str());;
-//	sys->cd(settings->getAbsoluteOuputPath(false).c_str());
-//	cout<<"current SYS: "<<sys->pwd()<<endl;
-//	rawfilepath.str("");
+	//	if(!settings->existsDirectory(settings->getAbsoluteOuputPath(false)))
+	//	  sys->MakeDirectory(settings->getAbsoluteOuputPath(false).c_str());;
+	//	sys->cd(settings->getAbsoluteOuputPath(false).c_str());
+	//	cout<<"current SYS: "<<sys->pwd()<<endl;
+	//	rawfilepath.str("");
 	settings->goToRawTreeDir();
-//	rawfilepath<<settings->getRelativeOuputPath().c_str();
+	//	rawfilepath<<settings->getRelativeOuputPath().c_str();
 	rawfilepath<<settings->getRawTreeFilePath();
-//	cout<<"current Path: "<<sys->pwd()<<endl;
-//	cout<<"raw File Path:  "<<rawfilepath.str()<<endl;
+	//	cout<<"current Path: "<<sys->pwd()<<endl;
+	//	cout<<"raw File Path:  "<<rawfilepath.str()<<endl;
 	cout<<"raw File Path2: "<<settings->getRawTreeFilePath()<<endl;
 	this->rawFile=TFile::Open(settings->getRawTreeFilePath().c_str());
 	cout<<"rawFile"<<rawFile<<"\t"<<flush;
@@ -43,8 +43,8 @@ TRawEventSaver::TRawEventSaver(TSettings *settings){
 	else
 		createdNewTree=false;
 	sys->cd("..");
-//
-//
+	//
+	//
 }
 
 TRawEventSaver::~TRawEventSaver() {
@@ -80,8 +80,8 @@ void TRawEventSaver::saveEvents(int nEvents){
 			showStatusBar(i,nEvents,100);
 			int  suceed = rawEventReader->ReadRawEvent(i,false);//true);
 			if(suceed<0){
-			  cout<<"could not open file break"<<endl;
-			  exit(-1);
+				cout<<"could not open file break"<<endl;
+				exit(-1);
 			}
 			loadEvent();
 			eventNumber=i;

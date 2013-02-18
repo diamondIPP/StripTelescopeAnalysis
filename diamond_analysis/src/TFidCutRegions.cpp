@@ -27,6 +27,7 @@ void TFidCutRegions::initVariables(){
 			delete fidCuts.at(i);
 	}
 	fidCuts.clear();
+	name="";
 	verbosity=0;
 }
 
@@ -256,7 +257,7 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 		continue;
 	Float_t binXmax=projX->GetNbinsX()-1;
 	for(binXmax=projX->GetNbinsX();binXmax>=0&&projX->GetBinContent(binXmax)==0;binXmax--)
-			continue;
+		continue;
 	if(verbosity){
 		cout<<"binXmin = "<<binXmin<<"--->"<<projX->GetBinLowEdge(binXmin)<<endl;
 		cout<<"binXmax = "<<binXmax<<"--->"<<projX->GetBinLowEdge(binXmax)<<endl;
@@ -271,7 +272,7 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 		continue;
 	Float_t binYmax=projY->GetNbinsX()-1;
 	for(binYmax=projY->GetNbinsX()-1;binYmax>=0&&projY->GetBinContent(binYmax)==0;binYmax--)
-			continue;
+		continue;
 	if(verbosity){
 		cout<<"binYmin = "<<binYmin<<"--->"<<projY->GetBinLowEdge(binYmin)<<endl;
 		cout<<"binYmax = "<<binYmax<<"--->"<<projY->GetBinLowEdge(binYmax)<<endl;
@@ -293,7 +294,7 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 	minY = minY - (maxY-minY)*.1;
 	maxY = maxY + (maxY-minY)*.1;
 	if(verbosity)
-	cout<<"Plot range: x: "<<minX<<"-"<<maxX<<",\ty: "<<minY<<"-"<<maxY<<endl;
+		cout<<"Plot range: x: "<<minX<<"-"<<maxX<<",\ty: "<<minY<<"-"<<maxY<<endl;
 	if(verbosity>3){
 		char t;
 		cin >>t;
@@ -354,7 +355,7 @@ void TFidCutRegions::addFiducialCut(Float_t xLow, Float_t xHigh, Float_t yLow, F
 
 		TFiducialCut* fidCut = new TFiducialCut(nFidCuts,xLow,xHigh,yLow,yHigh);
 		fidCuts.push_back(fidCut);
-		cout<<"Added another FiducialCut no. "<<nFidCuts<<"_"<<this->getNFidCuts()<<"_"<<fidCuts.size()<<": ["<<xLow<<"-"<<xHigh<<" , "<<yLow<<"-"<<yHigh<<"]"<<endl;
+		cout<<name<<": Added another FiducialCut no. "<<nFidCuts<<"_"<<this->getNFidCuts()<<"_"<<fidCuts.size()<<": ["<<xLow<<"-"<<xHigh<<" , "<<yLow<<"-"<<yHigh<<"]"<<endl;
 	}
 	else
 		cerr<<"Could not add Fiducial Cut since "<<xLow<<">="<<xHigh<<" or "<<yLow<<" >= "<<yHigh<<endl;

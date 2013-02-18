@@ -31,6 +31,7 @@ public:
 	TFidCutRegions(Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh,UInt_t nDiamonds);
 	TFidCutRegions(TH2F* histo, int nDiamonds,Float_t fidCutPercentage);
 	virtual ~TFidCutRegions();
+	void SetName(std::string newName){this->name=newName;};
 	TCanvas* getFiducialCutCanvas(TPlaneProperties::enumCoordinate cor);
 	TFiducialCut* getFidCut(std::string);
 	TFiducialCut* getFidCut(UInt_t index);
@@ -53,6 +54,7 @@ public:
 	Float_t getMinFiducialY(UInt_t index = 0);
 	void Reset();
 private:
+	std::string name;
 	void initVariables();
 	std::vector<std::pair<Float_t,Float_t> >findFiducialCutIntervall(TH1D* hProj,Float_t fidCutPercentage);
 	TCanvas*  getFiducialCutProjectionCanvas(TH1D* hProj,std::vector< std::pair<Float_t,Float_t> > intervals);

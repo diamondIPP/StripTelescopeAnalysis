@@ -91,14 +91,22 @@ TSettings::~TSettings(){
 
 void TSettings::checkSettings(){
 	cout<<"Check Settings..."<<endl;
-	if (!fidCutsSelection)
+	if (!fidCutsSelection){
 		fidCutsSelection = new TFidCutRegions();
+	}
+	fidCutsSelection->SetName("standard-FidCuts");
 	if (isStandardSelectionFidCut==true){
 		fidCutsSelection->Reset();
+		fidCutsSelection->SetName("standard-FidCuts");
 		fidCutsSelection->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
 	}
+	if(!fidCutsSelection)
+		fidCutsSelection =  new TFidCutRegions();
+	fidCutsSelection->SetName("3D-FidCuts");
+
 	if (isStandard3dFidCut==true){
 			fidCuts3D->Reset();
+			fidCutsSelection->SetName("3D-FidCuts");
 			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
 		}
 	this->checkAlignmentFidcuts();
@@ -344,7 +352,7 @@ void TSettings::LoadSettings(){
 		if(key == "alignment_training_fidcuts") {
 			ParseIntArray(key,value,alignmentFidCuts);
 			if(verbosity){
-				for(int i = 0; i<alignmentFidCuts.size();i++){
+				for(UInt_t i = 0; i<alignmentFidCuts.size();i++){
 					cout<<TCluster::Intent(1)<<"Region "<<alignmentFidCuts.at(i)<<endl;
 				}
 			}
@@ -449,7 +457,7 @@ void TSettings::LoadSettings(){
 		}
 		if(key == "Dia_ClusterSeedFactors"){
 			ParseFloatArray(key, value,vecClusterSeedFactorsDia);
-			if(vecClusterSeedFactorsDia.size()!=getNDiaDetectorAreas()){
+			if((Int_t)vecClusterSeedFactorsDia.size()!=getNDiaDetectorAreas()){
 				cerr<<"The number of defined ClusterSeedFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
 				cerr<<vecClusterSeedFactorsDia.size()<<" "<<getNDiaDetectorAreas()<<endl;
 				exit(-1);
@@ -460,7 +468,7 @@ void TSettings::LoadSettings(){
 		}
 		if(key == "Dia_ClusterHitFactors"){
 			ParseFloatArray(key, value,vecClusterHitFactorsDia);
-			if(vecClusterHitFactorsDia.size()!=getNDiaDetectorAreas()){
+			if((Int_t)vecClusterHitFactorsDia.size()!=getNDiaDetectorAreas()){
 				cerr<<"The number of defined ClusterHitFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
 				cerr<<vecClusterHitFactorsDia.size()<<" "<<getNDiaDetectorAreas()<<endl;
 				exit(-1);
@@ -638,7 +646,7 @@ void TSettings::ParseStringArray(string key, string value, vector<string> &vec){
 	string::size_type ending = value.find_last_of('}');
 	string analyseString = value.substr(beginning,ending-beginning);
 	//  cout<<"analyze: \'"<<analyseString<<"\'"<<endl;
-	int i;
+	size_t i;
 	while((i=analyseString.find(','))!=string::npos){
 		string data = analyseString.substr(0,i);
 		vec.push_back(data);
@@ -801,7 +809,7 @@ void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* 
 
 std::pair< std::string,std::string > TSettings::ParseRegionString(string key, string value){
 	cout << key.c_str() << " = " << value.c_str() << endl;
-	int index = value.find_first_of(":-");
+	size_t index = value.find_first_of(":-");
 	string beginString,endString;
 	if(index!=string::npos){
 		beginString = value.substr(0,index);
@@ -823,7 +831,7 @@ Float_t TSettings::getClusterSeedFactor(UInt_t det,UInt_t ch){
 	if(TPlaneProperties::isDiamondDetector(det)){
 		Int_t area = getDiaDetectorAreaOfChannel(ch);
 //		cout<<"Diamond: "<<det<<":"<<ch<<"--->"<<area<<endl;
-		if (vecClusterSeedFactorsDia.size()>area&&area>-1)
+		if ((Int_t)vecClusterSeedFactorsDia.size()>area&&area>-1)
 					return vecClusterSeedFactorsDia.at(area);
 		else{
 			if(det<clusterSeedFactors.size())
@@ -841,7 +849,7 @@ Float_t TSettings::getClusterHitFactor(UInt_t det,UInt_t ch){
 	if(TPlaneProperties::isDiamondDetector(det)){
 		Int_t area = getDiaDetectorAreaOfChannel(ch);
 //		cout<<det<<":"<<ch<<"--->"<<area<<endl;
-		if (vecClusterHitFactorsDia.size()>area&&area>-1)
+		if ((Int_t)vecClusterHitFactorsDia.size()>area&&area>-1)
 			return vecClusterHitFactorsDia.at(area);
 		else {
 			if(clusterHitFactors.size()>det)
