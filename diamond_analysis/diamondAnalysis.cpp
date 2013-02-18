@@ -276,28 +276,18 @@ int main(int argc, char ** argv) {
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
 		}
-<<<<<<< .working
-
-		currentResults->Print();
-		currentResults->saveResults();
-		delete currentResults;
-=======
->>>>>>> .merge-rechts.r534
 
 		//		currentResults->Print();
 		//		currentResults->saveResults();
-		//		delete currentResults;
-
-<<<<<<< .working
-		runWatch.Stop();
-		cout<<"needed Time for Run "<<RunParameters[i].getRunNumber()<<":"<<endl;
-		runWatch.Print();
-=======
+        delete currentResults;
 
 		runWatch.Stop();
 		cout<<"needed Time for Run "<<RunParameters[i].getRunNumber()<<":"<<endl;
 		runWatch.Print();
->>>>>>> .merge-rechts.r534
+
+		runWatch.Stop();
+		cout<<"needed Time for Run "<<RunParameters[i].getRunNumber()<<":"<<endl;
+		runWatch.Print();
 		if (settings!=NULL){
 			cout<<"delete Settings..."<<endl;
 			delete settings;
