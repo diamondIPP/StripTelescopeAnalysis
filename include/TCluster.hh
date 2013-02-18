@@ -19,7 +19,7 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#define TCLUSTER_REV  34
+#define TCLUSTER_REV  36
 using namespace std;
 class TCluster :public TObject{
 public:
@@ -63,8 +63,8 @@ public:
     UInt_t size();
     UInt_t seedSize();
     UInt_t getHighestSignalChannel();
-	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo);
-	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos);
+	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
+	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false);
     Float_t getChargeWeightedMean(bool useNonHits=false);
     Float_t getEtaPostion();
     Float_t getPositionCorEta(TH1F* histo=0);
@@ -97,10 +97,14 @@ public:
     Float_t getHighest2Centroid();
     void Print(UInt_t level=0);
     static string Intent(UInt_t level);
-	Float_t getEta();
-	Float_t getEta(Int_t &leftChannel);
+    Float_t getReversedEta(bool cmnCorrected=false);
+    Float_t getReversedEta(Int_t &rightChannel,bool cmnCorrected=false);
+	Float_t getEta(bool cmnCorrected=false);
+	Float_t getEta(Int_t &leftChannel,bool cmnCorrected=false);
 	UInt_t getClusterSize();
 	void setVerbosity(UInt_t verbosity){this->verbosity=verbosity;};
+	Float_t getLeftEta(bool cmnCorrected=false);
+	Float_t getRightEta(bool cmnCorrected=false);
 	static Float_t getValueOfHisto(Float_t x, TH1F* histo);
 
 private:

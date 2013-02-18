@@ -65,7 +65,7 @@ void TClustering::setSettings(TSettings* settings){
 void TClustering::ClusterEvents(UInt_t nEvents)
 {
 	if(settings==NULL) settings=new TSettings("");//todo anpassen
-//	vecvecCluster.resize(9);
+	//	vecvecCluster.resize(9);
 	createdTree=createClusterTree(nEvents);
 	if(!createdTree) return;
 	setBranchAdresses();
@@ -82,7 +82,7 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 		cout<< "\tSNRs for silicon plane "<<det<<": "<<settings->getClusterSeedFactor(det,0)<<"/"<<settings->getClusterHitFactor(det,0)<<endl;
 	cout<<endl;
 	for(UInt_t det=TPlaneProperties::getDetDiamond();det< TPlaneProperties::getNDetectors();det++)
-			cout<< "\tSNRs for diamond plane "<<det<<": "<<settings->getClusterSeedFactor(det,0)<<"/"<<settings->getClusterHitFactor(det,0)<<endl;
+		cout<< "\tSNRs for diamond plane "<<det<<": "<<settings->getClusterSeedFactor(det,0)<<"/"<<settings->getClusterHitFactor(det,0)<<endl;
 	UInt_t validEvents=0;
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 
@@ -109,7 +109,7 @@ void TClustering::clusterEvent()
 
 		//cluster Plane
 		clusterDetector(det);
-    }
+	}
 	//Save Planes to Event
 	if(pEvent!=NULL) {delete pEvent;pEvent=NULL;}
 	pEvent = new TEvent(nEvent);
@@ -130,9 +130,9 @@ void TClustering::clusterEvent()
 	if(true){pEvent->isValidSiliconEvent();}
 	if(verbosity>8){
 		cout<<"\n"<<nEvent<<" "<<pEvent->getEventNumber()<<" "<<pEvent->isValidSiliconEvent()<<" ";
-//		for (UInt_t det=0;det<vecvecCluster.size();det++){
-//			cout<<vecvecCluster.at(det).size()<<" ";
-//		}
+		//		for (UInt_t det=0;det<vecvecCluster.size();det++){
+		//			cout<<vecvecCluster.at(det).size()<<" ";
+		//		}
 		cout<<endl;
 	}
 
@@ -224,7 +224,7 @@ int TClustering::combineCluster(int det, int ch){
 			float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
 			float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
 			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
-//			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
+			//			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 		}
 		else{
 			if((verbosity>10&&det==8)||verbosity>11)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<sigma<<"/"<<adcValueInSigma<<"] ";
@@ -388,7 +388,7 @@ void TClustering::setBranchAdresses(){
 	if(verbosity)cout<<"Branch clusters"<<endl;
 	//clusterTree->Branch("vecvecChannel",&vecvecChannel[0])
 	// example t1.Branch("tracks","std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >",&pTracks);
-//	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
+	//	clusterTree->Branch("clusters","std::vector<std::vector<TCluster> >",&pVecvecCluster);
 	if(verbosity)cout<<"Branch event"<<endl;
 	pEvent=0;
 	clusterTree->Branch("event","TEvent",&pEvent);
@@ -397,19 +397,19 @@ void TClustering::setBranchAdresses(){
 
 TH1F *TClustering::createEtaIntegral(TH1F *histo, std::string histName)
 {
-  UInt_t nBins = histo->GetNbinsX();
-  TH1F *hIntegral=new TH1F(histName.c_str(),histName.c_str(),nBins,0,1);
-  Int_t entries = histo->GetEntries();
-  entries -=  histo->GetBinContent(0);
-  entries -=  histo->GetBinContent(nBins+1);
-  Int_t sum =0;
-  for(UInt_t bin=1;bin<nBins+1;bin++){
-    Int_t binContent = histo->GetBinContent(bin);
-    sum +=binContent;
-    Float_t pos =  histo->GetBinCenter(bin);
-    hIntegral->Fill(pos, (Float_t)sum/(Float_t)entries);
-  }
-  return hIntegral;
+	UInt_t nBins = histo->GetNbinsX();
+	TH1F *hIntegral=new TH1F(histName.c_str(),histName.c_str(),nBins,0,1);
+	Int_t entries = histo->GetEntries();
+	entries -=  histo->GetBinContent(0);
+	entries -=  histo->GetBinContent(nBins+1);
+	Int_t sum =0;
+	for(UInt_t bin=1;bin<nBins+1;bin++){
+		Int_t binContent = histo->GetBinContent(bin);
+		sum +=binContent;
+		Float_t pos =  histo->GetBinCenter(bin);
+		hIntegral->Fill(pos, (Float_t)sum/(Float_t)entries);
+	}
+	return hIntegral;
 }
 
 

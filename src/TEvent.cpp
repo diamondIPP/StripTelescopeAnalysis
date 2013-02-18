@@ -122,7 +122,7 @@ TCluster TEvent::getCluster(UInt_t plane,TPlaneProperties::enumCoordinate cor, U
 	if (plane<planes.size())
 		return planes.at(plane).getCluster(cor,cl);
 	cerr<< "Plane does not exist: "<<plane<<" "<<planes.size()<<endl;
-		return TCluster();
+	return TCluster();
 }
 
 TCluster TEvent::getCluster(UInt_t det,UInt_t cl){

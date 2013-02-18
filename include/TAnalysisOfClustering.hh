@@ -43,6 +43,7 @@ public:
 	void	doAnalysis(int nEvents=0);
 	void setSettings(TSettings* settings);
 private:
+	void analyseEvent();
 	void saveHistos();
 	void savePHHistos();
 
@@ -104,6 +105,9 @@ private:
 	TH2F *hRelativeClusterPositionEta[9];
 	TH1F *hClusterPosition[9];
 	TH1F *hEtaDistribution[9];
+	TH1F *hEtaDistributionCMN[9];
+	TH2F* hEtaDistributionVsLeftChannel[9];
+	TH2F* hEtaDistributionVsCharge[9];
 	TH1F *hEtaDistribution5Percent[9];
 	TH2F *hEtaDistributionVsSignalRight[9];
 	TH2F *hEtaDistributionVsSignalLeft[9];

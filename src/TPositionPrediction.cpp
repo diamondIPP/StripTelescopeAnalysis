@@ -28,17 +28,17 @@ TPositionPrediction::~TPositionPrediction() {
 
 void TPositionPrediction::setxChi2(Float_t chi2)
 {
-    xChi2 = chi2;
+	xChi2 = chi2;
 }
 
 void TPositionPrediction::setxPos(Float_t pos)
 {
-    xPos = pos;
+	xPos = pos;
 }
 
 void TPositionPrediction::setxSigma(Float_t sigma)
 {
-    xSigma = sigma;
+	xSigma = sigma;
 }
 
 
@@ -79,11 +79,11 @@ Float_t TPositionPrediction::getChi2(TPlaneProperties::enumCoordinate cor)
 	}
 }
 Float_t TPositionPrediction::getPhi(TPlaneProperties::enumCoordinate cor){
-  switch (cor){
-    case TPlaneProperties::X_COR: return this->getPhiX();break;
-    case TPlaneProperties::Y_COR: return this->getPhiY();break;
-    default: return N_INVALID;
-  }
+	switch (cor){
+	case TPlaneProperties::X_COR: return this->getPhiX();break;
+	case TPlaneProperties::Y_COR: return this->getPhiY();break;
+	default: return N_INVALID;
+	}
 }
 
 void TPositionPrediction::setyChi2(Float_t chi2)
@@ -93,12 +93,12 @@ void TPositionPrediction::setyChi2(Float_t chi2)
 
 void TPositionPrediction::setyPos(Float_t pos)
 {
-    yPos = pos;
+	yPos = pos;
 }
 
 void TPositionPrediction::setySigma(Float_t sigma)
 {
-    ySigma = sigma;
+	ySigma = sigma;
 }
 
 void TPositionPrediction::Print(UInt_t level){

@@ -64,7 +64,7 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 	Float_t pos = startPosition;
 	for(UInt_t i = firstChannel;i<=lastChannel;i++){
 		if(channelToMetricConversion[i] != N_INVALID) retVal = false;
-//		cout<<"add "<<i<<": "<<pos<<endl;
+		//		cout<<"add "<<i<<": "<<pos<<endl;
 		channelToMetricConversion[i] = pos;
 		pos +=pitchWidth;
 	}
@@ -78,7 +78,7 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 
 void TDiamondPattern::initialiseVector() {
 	for (UInt_t i=0;i<channelToMetricConversion.size();i++)
-			channelToMetricConversion[i] = N_INVALID;
+		channelToMetricConversion[i] = N_INVALID;
 }
 
 
@@ -90,8 +90,8 @@ void TDiamondPattern::Print() {
 		cout<<" "<<setw(3)<<i<<" | "<< setw(6)<<convertChannelToMetric(i)<<endl;
 	}
 	cout<<endl;
-//	char t;
-//	cin>>t;
+	//	char t;
+	//	cin>>t;
 }
 
 Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {

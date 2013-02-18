@@ -16,13 +16,13 @@ TPlaneProperties::~TPlaneProperties() {
 	// TODO Auto-generated destructor stub
 }
 
- UInt_t TPlaneProperties::getNChannels(UInt_t det){
+UInt_t TPlaneProperties::getNChannels(UInt_t det){
 	switch (det){
 	case 8: return TPlaneProperties::getNChannelsDiamond();break;
 	default: return TPlaneProperties::getNChannelsSilicon();break;
 	}
 }
- Int_t TPlaneProperties::getMaxSignalHeight(UInt_t det){
+Int_t TPlaneProperties::getMaxSignalHeight(UInt_t det){
 	switch(det){
 	case 8: return getMaxSignalHeightDiamond();
 	default: return getMaxSignalHeightSilicon();
@@ -55,17 +55,17 @@ std::string TPlaneProperties::getDetectorNameString(UInt_t det){
 }
 
 std::string TPlaneProperties::getStringForDetector(int det){
-    switch(det){
-    case 0: return "D0X";
-    case 1: return "D0Y";
-    case 2: return "D1X";
-    case 3: return "D1Y";
-    case 4: return "D2X";
-    case 5: return "D2Y";
-    case 6: return "D3X";
-    case 7: return "D3Y";
-    case 8: return "Dia";
-    default: return "Invalid";
-    }
-    return "Invalid";
+	switch(det){
+	case 0: return "D0X";
+	case 1: return "D0Y";
+	case 2: return "D1X";
+	case 3: return "D1Y";
+	case 4: return "D2X";
+	case 5: return "D2Y";
+	case 6: return "D3X";
+	case 7: return "D3Y";
+	case 8: return "Dia";
+	default: return "Invalid";
+	}
+	return "Invalid";
 }

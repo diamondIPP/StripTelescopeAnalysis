@@ -18,7 +18,7 @@ THTMLSelection::THTMLSelection(TSettings *settings):THTMLGenerator(settings) {
 
 THTMLSelection::~THTMLSelection() {
 	// TODO Auto-generated destructor stub
-  cout<<"Delete HTMLSelection"<<endl;
+	cout<<"Delete HTMLSelection"<<endl;
 }
 
 void THTMLSelection::createCutFlowTable(std::vector<int> vecCutFlow	)
@@ -46,8 +46,8 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<(putImage(this->path,(string)"chFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster","png",50))<<"<br>\n";
 
 	sectionContent<<putImage(this->path,(string)"chProjX","png",49)<<" \n";
-  sectionContent<<putImage(this->path,(string)"chProjY","png",49)<<"<br>\n";
-  sectionContent<<putImage(this->path,(string)"chSelectedEvents","png",50)<<" \n";
+	sectionContent<<putImage(this->path,(string)"chProjY","png",49)<<"<br>\n";
+	sectionContent<<putImage(this->path,(string)"chSelectedEvents","png",50)<<" \n";
 
 	sectionContent<<"</p>\n";
 	this->addSection("Fiducial Cut",sectionContent.str());
@@ -83,8 +83,8 @@ void THTMLSelection::createCutFlowGraph(std::string content)
 	sectionContent<<"<br>\n";
 
 	sectionContent<<putImage(this->path,(string)"hAnalysisFraction","png",70);
-  sectionContent<<"<br></p>";
-this->addSection("CutFlow",sectionContent.str());
+	sectionContent<<"<br></p>";
+	this->addSection("CutFlow",sectionContent.str());
 
 }
 

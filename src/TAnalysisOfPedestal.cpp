@@ -551,7 +551,8 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					TH1F* hBiggestPHinSigma_SubArea = (TH1F*) hBiggestSignalInSigma2D->ProjectionX(name,area.first,area.second);
 					hBiggestPHinSigma_SubArea->SetTitle(name);
 					hBiggestPHinSigma_SubArea->SetName(name);
-					Float_t ymax = findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
+					//					Float_t ymax =
+					findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
 					name = TString::Format("hPulseHeight_BiggestSignalInSigma_area%d_ch%d-ch%d_CMNcorrected",i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
 					TH1F* hBiggestPHInSigma_SubArea_CMNcorrected = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,area.first,area.second);
@@ -611,12 +612,12 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					TH2F* hist = hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected;
 					Float_t zmax = 0;//hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetBinContent(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetMaximumBin());
 					for(Int_t i = 0; i<hist->GetXaxis()->GetNbins();i++)
-					for(Int_t j=0;j<hist->GetYaxis()->GetNbins();j++){
-						Float_t xPos = hist->GetXaxis()->GetBinCenter(i);
-						Float_t binContent = hist->GetBinContent(j,j);
-						if(xPos>5&&binContent>zmax)
-							zmax=binContent;
-					}
+						for(Int_t j=0;j<hist->GetYaxis()->GetNbins();j++){
+							Float_t xPos = hist->GetXaxis()->GetBinCenter(i);
+							Float_t binContent = hist->GetBinContent(j,j);
+							if(xPos>5&&binContent>zmax)
+								zmax=binContent;
+						}
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetZaxis()->SetRangeUser(0,zmax*1.3);
 
 					hBiggestAndBiggestAdjacentSignal_in_SNR->GetXaxis()->SetTitle("Biggest Signal in SNR");
