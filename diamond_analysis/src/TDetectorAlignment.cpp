@@ -25,24 +25,24 @@ TDetectorAlignment::TDetectorAlignment(){
 	this->SetName("currentAlignment");
 	this->SetTitle("currentAlignment");
 	verbosity=0;
-   nDetectors = 5;
+	nDetectors = 5;
 
-   for(Int_t i=0; i<5; i++) {
-      det_x_offset[i] = 0;
-      det_y_offset[i] = 0;
-      det_z_offset[i] = 0;
-      det_phix_offset[i] = 0;
-      det_phiy_offset[i] = 0;
-      xResolution[i]=1;
-      yResolution[i]=1;
-   }
-   nUsedEvents=0;
-   alignmentTrainingTrackFraction=0;
-   intervallBeginEventNo.clear();
-   intervallEndEventNo.clear();
-   nEvents=0;
-   diaTime=TDatime(1995,0,0,0,0,0);
-   silTime=TDatime(1995,0,0,0,0,0);
+	for(Int_t i=0; i<5; i++) {
+		det_x_offset[i] = 0;
+		det_y_offset[i] = 0;
+		det_z_offset[i] = 0;
+		det_phix_offset[i] = 0;
+		det_phiy_offset[i] = 0;
+		xResolution[i]=1;
+		yResolution[i]=1;
+	}
+	nUsedEvents=0;
+	alignmentTrainingTrackFraction=0;
+	intervallBeginEventNo.clear();
+	intervallEndEventNo.clear();
+	nEvents=0;
+	diaTime=TDatime(1995,0,0,0,0,0);
+	silTime=TDatime(1995,0,0,0,0,0);
 }
 /**
  * class assignment function for TDetectorAlignment Class
@@ -51,35 +51,36 @@ TDetectorAlignment::TDetectorAlignment(){
  */
 TDetectorAlignment::TDetectorAlignment &TDetectorAlignment::operator=(const TDetectorAlignment::TDetectorAlignment &src){
 	cout<<"COpy consturctor of TDetectorAlignment"<<endl;
- for(UInt_t plane=0;plane<<6;plane++){
-   xResolution[plane]=src.xResolution[plane];
-   yResolution[plane]=src.yResolution[plane];
+	for(UInt_t plane=0;plane<<6;plane++){
+		xResolution[plane]=src.xResolution[plane];
+		yResolution[plane]=src.yResolution[plane];
 
-   det_x_offset[plane]=src.det_x_offset[plane];
-   det_x_offset[plane]=src.det_x_offset[plane];
-   det_x_offset[plane]=src.det_x_offset[plane];
-   for(UInt_t step=0;step<src.vecDetXOffset[plane].size();step++)vecDetXOffset[plane].push_back(src.vecDetXOffset[plane].at(step));
-   for(UInt_t step=0;step<src.vecDetYOffset[plane].size();step++)vecDetYOffset[plane].push_back(src.vecDetYOffset[plane].at(step));
-   for(UInt_t step=0;step<src.vecDetZOffset[plane].size();step++)vecDetZOffset[plane].push_back(src.vecDetZOffset[plane].at(step));
+		det_x_offset[plane]=src.det_x_offset[plane];
+		det_x_offset[plane]=src.det_x_offset[plane];
+		det_x_offset[plane]=src.det_x_offset[plane];
+		for(UInt_t step=0;step<src.vecDetXOffset[plane].size();step++)vecDetXOffset[plane].push_back(src.vecDetXOffset[plane].at(step));
+		for(UInt_t step=0;step<src.vecDetYOffset[plane].size();step++)vecDetYOffset[plane].push_back(src.vecDetYOffset[plane].at(step));
+		for(UInt_t step=0;step<src.vecDetZOffset[plane].size();step++)vecDetZOffset[plane].push_back(src.vecDetZOffset[plane].at(step));
 
-   det_phix_offset[plane]=src.det_phix_offset[plane];
-   det_phiy_offset[plane]=src.det_phiy_offset[plane];
-   for(UInt_t step=0;step<src.vecDetPhiXOffset[plane].size();step++)vecDetPhiXOffset[plane].push_back(src.vecDetPhiXOffset[plane].at(step));
-   for(UInt_t step=0;step<src.vecDetPhiYOffset[plane].size();step++)vecDetPhiYOffset[plane].push_back(src.vecDetPhiYOffset[plane].at(step));
- }
-   nDetectors=src.nDetectors<6?nDetectors:6;
-   runNumber=src.runNumber;
-   diaTime=src.diaTime;
-   silTime=src.silTime;
-   nUsedEvents=src.nUsedEvents;
-   alignmentTrainingTrackFraction=src.alignmentTrainingTrackFraction;
-   diaChi2=src.diaChi2;
-   nEvents=src.nEvents;
-   nDiamondAlignmentEvents=src.nDiamondAlignmentEvents;
-   verbosity=src.verbosity;
-   for(UInt_t i=0;i<src.intervallBeginEventNo.size();i++)intervallBeginEventNo.push_back(src.intervallBeginEventNo.at(i));
-   for(UInt_t i=0;i<src.intervallEndEventNo.size();i++)intervallEndEventNo.push_back(src.intervallEndEventNo.at(i));
-//  std::vector<UInt_t > intervallEndEventNo;
+		det_phix_offset[plane]=src.det_phix_offset[plane];
+		det_phiy_offset[plane]=src.det_phiy_offset[plane];
+		for(UInt_t step=0;step<src.vecDetPhiXOffset[plane].size();step++)vecDetPhiXOffset[plane].push_back(src.vecDetPhiXOffset[plane].at(step));
+		for(UInt_t step=0;step<src.vecDetPhiYOffset[plane].size();step++)vecDetPhiYOffset[plane].push_back(src.vecDetPhiYOffset[plane].at(step));
+	}
+	nDetectors=src.nDetectors<6?nDetectors:6;
+	runNumber=src.runNumber;
+	diaTime=src.diaTime;
+	silTime=src.silTime;
+	nUsedEvents=src.nUsedEvents;
+	alignmentTrainingTrackFraction=src.alignmentTrainingTrackFraction;
+	diaChi2=src.diaChi2;
+	nEvents=src.nEvents;
+	nDiamondAlignmentEvents=src.nDiamondAlignmentEvents;
+	verbosity=src.verbosity;
+	for(UInt_t i=0;i<src.intervallBeginEventNo.size();i++)intervallBeginEventNo.push_back(src.intervallBeginEventNo.at(i));
+	for(UInt_t i=0;i<src.intervallEndEventNo.size();i++)intervallEndEventNo.push_back(src.intervallEndEventNo.at(i));
+	//  std::vector<UInt_t > intervallEndEventNo;
+	return *this;
 }
 
 void TDetectorAlignment::addEventIntervall(UInt_t first, UInt_t last){
@@ -108,7 +109,7 @@ bool TDetectorAlignment::isPreAligned(Float_t maxOffset,Int_t nAlignedDetectors)
 
 int TDetectorAlignment::getVerbosity() const
 {
-    return verbosity;
+	return verbosity;
 }
 
 void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
@@ -139,10 +140,10 @@ void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 	}
 	if(verbosity)cout<<det_phiy_offset[plane]<<endl;
 	if(verbosity>4){
-			char t;
-			cout<<"Press a key and enter"<<endl;
-			cin>>t;
-		}
+		char t;
+		cout<<"Press a key and enter"<<endl;
+		cin>>t;
+	}
 	UpdateTime(plane);
 }
 
@@ -157,10 +158,10 @@ void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 	}
 	if(verbosity)cout<<det_x_offset[plane]<<endl;
 	if(verbosity>4){
-			char t;
-			cout<<"Press a key and enter"<<endl;
-			cin>>t;
-		}
+		char t;
+		cout<<"Press a key and enter"<<endl;
+		cin>>t;
+	}
 	UpdateTime(plane);
 }
 
@@ -280,7 +281,7 @@ std::string TDetectorAlignment::PrintResults(UInt_t level)
 		output<<PrintXOffset(plane,level+2);
 		output<<PrintYOffset(plane,level+2);
 		output<<PrintZOffset(plane,level+2);
-//		cout<<endl;
+		//		cout<<endl;
 		output<<PrintPhiXOffset(plane,level+2);
 		output<<PrintPhiYOffset(plane,level+2);
 		output<<PrintResolution(plane,level+2);
@@ -306,14 +307,14 @@ void TDetectorAlignment::ResetAlignment(Int_t plane){
 Double_t TDetectorAlignment::getXResolution(UInt_t plane)
 {
 	if(plane<6)
-    return xResolution[plane];
+		return xResolution[plane];
 	return 2;
 }
 
 Double_t TDetectorAlignment::getZResolution(UInt_t plane)
 {
 	if(plane<6)
-    return 0;//zResolution[plane];
+		return 0;//zResolution[plane];
 	return 2;
 }
 
@@ -329,7 +330,7 @@ void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
 Double_t TDetectorAlignment::getYResolution(UInt_t plane)
 {
 	if(plane<6)
-    return yResolution[plane];
+		return yResolution[plane];
 	return -9999;
 }
 
@@ -344,30 +345,30 @@ void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)
 Double_t TDetectorAlignment::getXMean(UInt_t plane)
 {
 
-  if(plane<6) return xMean[plane];
-  return -9999;
+	if(plane<6) return xMean[plane];
+	return -9999;
 }
 
 void TDetectorAlignment::setXMean(Double_t mean, UInt_t plane)
 {
-  printf("Set X-Mean of Plane %d to %2.6f\n",plane,mean);
-  if(plane<6)
-    xMean[plane] = mean;
-  UpdateTime(plane);
+	printf("Set X-Mean of Plane %d to %2.6f\n",plane,mean);
+	if(plane<6)
+		xMean[plane] = mean;
+	UpdateTime(plane);
 }
 
 Double_t TDetectorAlignment::getYMean(UInt_t plane)
 {
-  if(plane<6) return yMean[plane];
-  return -9999;
+	if(plane<6) return yMean[plane];
+	return -9999;
 }
 
 void TDetectorAlignment::setYMean(Double_t mean, UInt_t plane)
 {
-  printf("Set Y-Mean of Plane %d to %2.6f\n",plane,mean);
-  if(plane<6)
-    yMean[plane] = mean;
-  UpdateTime(plane);
+	printf("Set Y-Mean of Plane %d to %2.6f\n",plane,mean);
+	if(plane<6)
+		yMean[plane] = mean;
+	UpdateTime(plane);
 }
 
 void TDetectorAlignment::setVerbosity(int verbosity)

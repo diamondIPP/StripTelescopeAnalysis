@@ -11,18 +11,18 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 	this->subdirPath="";
 	this->mainPath="";
 	this->path="";
-
-	cout<<"\nGENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
 	settings=newSettings;
+	verbosity=settings->getVerbosity();
+	if(verbosity)cout<<"\nGENERATE HTML FILE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
+
 	if (settings==0)
 		cerr<<"settings does not exist"<<endl;
-	verbosity=settings->getVerbosity();
 	setTitle("Summary");
 	setFileName("overview.html");
 }
 
 THTMLGenerator::~THTMLGenerator() {
-  cout<<"delete HTML GEN"<<endl;
+	cout<<"delete HTML GEN"<<endl;
 }
 
 
@@ -43,47 +43,47 @@ void THTMLGenerator::generateHTMLFile(){
 
 void THTMLGenerator::generatorHTMLHeader()
 {
-		//summary page
+	//summary page
 	if (verbosity>2)cout <<"GENERATE HEADER"<<endl;
-		html_summary << "<html>" << endl;
-//		if (verbosity>2)cout << "Clustering::GenerateHTML():start html" <<eventReader<< endl;
-		//Set Title
+	html_summary << "<html>" << endl;
+	//		if (verbosity>2)cout << "Clustering::GenerateHTML():start html" <<eventReader<< endl;
+	//Set Title
 
-		html_summary << "<title>Run "<<settings->getRunNumber()<<" analysis results - "<<title<<"</title>" << endl;
-		if (verbosity>2)cout << "Clustering::GenerateHTML():done with eventReader" << endl;
+	html_summary << "<title>Run "<<settings->getRunNumber()<<" analysis results - "<<title<<"</title>" << endl;
+	if (verbosity>2)cout << "Clustering::GenerateHTML():done with eventReader" << endl;
 
-		html_summary << "<body bgcolor=\"White\">" << endl;
-		html_summary << "<font face=\"Arial,Sans\" size=2>"<<endl;
-		html_summary << "<a name=\"top\"></a>" << endl;
+	html_summary << "<body bgcolor=\"White\">" << endl;
+	html_summary << "<font face=\"Arial,Sans\" size=2>"<<endl;
+	html_summary << "<a name=\"top\"></a>" << endl;
 
-		if (verbosity>2)cout<<"Clustering::GenerateHTML():start summary"<<endl;
-		string correctionPath;
-		if(this->subdirPath!="")
-		  correctionPath="../";
-		else correctionPath="./";
+	if (verbosity>2)cout<<"Clustering::GenerateHTML():start summary"<<endl;
+	string correctionPath;
+	if(this->subdirPath!="")
+		correctionPath="../";
+	else correctionPath="./";
 
-		html_summary << "<b>"<<title<<"</b>||"
-				<< "<a href=\""<<correctionPath<<"/overview.html\">Summary</a>||"
-				<< "<a href=\""<<correctionPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
-				<< "<a href=\""<<correctionPath<<"/clustering/clustering.html\">Clustering</a>||"
-				<< "<a href=\""<<correctionPath<<"/selections/selection.html\">Selection</a>||"
-				<< "<a href=\""<<correctionPath<<"/alignment/alignment.html\">Alignment</a>||"
-				<< "<a href=\""<<correctionPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
-				<< "<a href=\""<<correctionPath<<"/transparentAnalysis/transparentAnalysis.html\">TransparentAnalysis</a>||"
-//				<< "<a href=\"d8.html\">Diamond</a>||"
-//				<< "<a href=\"d0.html\">D0X</a>||"
-//				<< "<a href=\"d1.html\">D0Y</a>||"
-//				<< "<a href=\"d2.html\">D1X</a>||"
-//				<< "<a href=\"d3.html\">D1Y</a>||"
-//				<< "<a href=\"d4.html\">D2X</a>||"
-//				<< "<a href=\"d5.html\">D2Y</a>||"
-//				<< "<a href=\"d6.html\">D3X</a>||"
-//				<< "<a href=\"d7.html\">D3Y</a>"
-				<<"<p>"
-				<<endl;
-		html_summary << "<center><font color=\"#000000\"><h1>Run "<<settings->getRunNumber()<<" analysis results - Summary</h1></font></center>"<<endl;
-		html_summary << "<hr size=\"10\" Color=\"#ffff33\">" << endl;
-		html_summary << "File generated at " << dateandtime.GetMonth() << "/ " << dateandtime.GetDay() << "/" << dateandtime.GetYear() << " at " << dateandtime.GetHour() << ":" << dateandtime.GetMinute() << ":" << dateandtime.GetSecond() << "<p>" << endl;
+	html_summary << "<b>"<<title<<"</b>||"
+			<< "<a href=\""<<correctionPath<<"/overview.html\">Summary</a>||"
+			<< "<a href=\""<<correctionPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
+			<< "<a href=\""<<correctionPath<<"/clustering/clustering.html\">Clustering</a>||"
+			<< "<a href=\""<<correctionPath<<"/selections/selection.html\">Selection</a>||"
+			<< "<a href=\""<<correctionPath<<"/alignment/alignment.html\">Alignment</a>||"
+			<< "<a href=\""<<correctionPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
+			<< "<a href=\""<<correctionPath<<"/transparentAnalysis/transparentAnalysis.html\">TransparentAnalysis</a>||"
+			//				<< "<a href=\"d8.html\">Diamond</a>||"
+			//				<< "<a href=\"d0.html\">D0X</a>||"
+			//				<< "<a href=\"d1.html\">D0Y</a>||"
+			//				<< "<a href=\"d2.html\">D1X</a>||"
+			//				<< "<a href=\"d3.html\">D1Y</a>||"
+			//				<< "<a href=\"d4.html\">D2X</a>||"
+			//				<< "<a href=\"d5.html\">D2Y</a>||"
+			//				<< "<a href=\"d6.html\">D3X</a>||"
+			//				<< "<a href=\"d7.html\">D3Y</a>"
+			<<"<p>"
+			<<endl;
+	html_summary << "<center><font color=\"#000000\"><h1>Run "<<settings->getRunNumber()<<" analysis results - Summary</h1></font></center>"<<endl;
+	html_summary << "<hr size=\"10\" Color=\"#ffff33\">" << endl;
+	html_summary << "File generated at " << dateandtime.GetMonth() << "/ " << dateandtime.GetDay() << "/" << dateandtime.GetYear() << " at " << dateandtime.GetHour() << ":" << dateandtime.GetMinute() << ":" << dateandtime.GetSecond() << "<p>" << endl;
 }
 
 void THTMLGenerator::setFileName(string Name)
@@ -107,7 +107,7 @@ void THTMLGenerator::addSection(string sectionName, string secContent)
 	output<<"\t<p>";
 	output<<"\t"<<secContent;
 	output<<"\t</p>";
-//	cout<<output.str()<<endl;
+	//	cout<<output.str()<<endl;
 	tableOfContent.push_back(sectionName);
 	this->content.push_back(output.str());
 }
@@ -137,12 +137,12 @@ void THTMLGenerator::generateHTMLTail(){
 
 	html_summary << "</font>"<<endl;
 	html_summary<<"This Page was created on " << dateandtime.GetMonth() << "/ "
-											  << dateandtime.GetDay() << "/"
-											  << dateandtime.GetYear()
-									<< " at " << dateandtime.GetHour() << ":"
-										 	  << dateandtime.GetMinute() << ":"
-										 	  << dateandtime.GetSecond()
-				  << " with SVN Version No. " << SVN_REV<<"<p>";
+			<< dateandtime.GetDay() << "/"
+			<< dateandtime.GetYear()
+			<< " at " << dateandtime.GetHour() << ":"
+			<< dateandtime.GetMinute() << ":"
+			<< dateandtime.GetSecond()
+			<< " with SVN Version No. " << SVN_REV<<"<p>";
 	html_summary<<"</body>"<<endl;
 	html_summary << "</HTML>" << endl;
 
@@ -215,18 +215,18 @@ std::string THTMLGenerator::putLink(std::string link,std::string content){
 
 void THTMLGenerator::updatePath()
 {
-	cout<<"THTMLGenerator::updatePath:";
+	if(verbosity)cout<<"THTMLGenerator::updatePath:";
 	setPathName(mainPath+subdirPath+"/");
-	cout<<" \""<<this->path<<"\""<<endl;
+	if(verbosity)cout<<" \""<<this->path<<"\""<<endl;
 }
 string THTMLGenerator::putIntoCommand(string command, string input){
-  stringstream output;
-  output<<"<"<<command<<">"<<input<<"</"<<command<<">";
-  return output.str();
+	stringstream output;
+	output<<"<"<<command<<">"<<input<<"</"<<command<<">";
+	return output.str();
 }
 string THTMLGenerator::center(string input)
 {
-  return putIntoCommand("center",input);
+	return putIntoCommand("center",input);
 }
 
 std::string THTMLGenerator::floatToString(Float_t value, UInt_t precision)

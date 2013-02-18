@@ -14,9 +14,12 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	cout<<"********TTransparentAnalysis::TTransparentAnalysis********"<<endl;
 	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
+	if(settings==0){
+		cerr<<"Settings invalid:"<<settings<<endl;
+		exit(-1);
+	}
 	sys = gSystem;
 	setSettings(settings);
-	UInt_t runNumber =settings->getRunNumber();
 	
 	settings->goToAlignmentRootDir();
 	eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);

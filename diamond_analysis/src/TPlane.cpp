@@ -57,7 +57,7 @@ TPlane::TPlane(const TPlane& rhs){
 }
 
 TPlane::~TPlane() {
-	
+
 }
 
 /**
@@ -65,7 +65,7 @@ TPlane::~TPlane() {
  */
 TPlane::TPlane& TPlane::operator =(const TPlane &src){
 
-    type=src.type;
+	type=src.type;
 	planeNo=src.planeNo;
 	verbosity=src.verbosity;
 	xClusters.clear();
@@ -80,18 +80,18 @@ TPlane::TPlane& TPlane::operator =(const TPlane &src){
 enum TPlaneProperties::enumDetectorType TPlane::getDetectorType() const
 {
 	return type;
-//	if(type==kSilicon)
-//		return 1;
-//	else if(type ==kDiamond)
-//		return 2;
-//	else if(type==kUndefined)
-//		return 0;
-//	else return 20;
+	//	if(type==kSilicon)
+	//		return 1;
+	//	else if(type ==kDiamond)
+	//		return 2;
+	//	else if(type==kUndefined)
+	//		return 0;
+	//	else return 20;
 }
 
 void TPlane::setDetectorType(TPlaneProperties::enumDetectorType type)
 {
-    this->type = type;
+	this->type = type;
 }
 
 
@@ -106,7 +106,7 @@ Float_t TPlane::getYPosition(UInt_t cl,TCluster::calculationMode_t mode,TH1F* hi
 	if(yClusters.size()>cl)
 		return this->yClusters.at(cl).getPosition(mode,histo);
 	else
-			return N_INVALID;
+		return N_INVALID;
 }
 
 Float_t TPlane::getPosition(TPlaneProperties::enumCoordinate cor, UInt_t cl, TCluster::calculationMode_t mode,TH1F* histo)

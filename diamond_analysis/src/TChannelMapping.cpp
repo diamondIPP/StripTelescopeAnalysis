@@ -15,7 +15,7 @@ TChannelMapping::TChannelMapping(UInt_t nChannels)
 	for(UInt_t ch =0;ch<nChannels;ch++)
 		changeMapping(ch,ch);
 	cout<<"PRINT:"<<flush;
-//	this->PrintMapping();
+	//	this->PrintMapping();
 	cout<<"DONE"<<endl;
 }
 
@@ -24,8 +24,8 @@ TChannelMapping::TChannelMapping(std::vector<UInt_t> channelMapping)
 	cout<<"TChannelMapping:: Constructor vect UInt..."<<flush;
 	for(UInt_t ch=0;ch<channelMapping.size();ch++){
 	}
-//		this->mapVaToDet[ch]=channelMapping.at(ch);
-//	this->PrintMapping();
+	//		this->mapVaToDet[ch]=channelMapping.at(ch);
+	//	this->PrintMapping();
 	cout<<"DONE"<<endl;
 }
 TChannelMapping::TChannelMapping(std::vector<int> channelMapping)
@@ -33,7 +33,7 @@ TChannelMapping::TChannelMapping(std::vector<int> channelMapping)
 	cout<<"TChannelMapping:: Constructor vect Int..."<<channelMapping.size()<<flush;
 	for(UInt_t ch=0;ch<channelMapping.size();ch++)
 		changeMapping(ch,channelMapping.at(ch));
-//	this->PrintMapping();
+	//	this->PrintMapping();
 	cout<<"DONE"<<endl;
 }
 
@@ -59,14 +59,14 @@ void TChannelMapping::changeMapping(UInt_t vaChNo, UInt_t detChNo)
 		mapVaToDet.at(vaChNo)=detChNo;
 	else
 		this->mapVaToDet.insert(std::pair<UInt_t,UInt_t>(vaChNo,detChNo));//[ch]=ch;
-//	mapVaToDet[vaChNo]=detChNo;
+	//	mapVaToDet[vaChNo]=detChNo;
 }
 
 
 void TChannelMapping::changeMapping(vector<UInt_t> channelMapping){
 	for(UInt_t ch=0;ch<channelMapping.size();ch++);
-//		this->mapVaToDet[ch]=channelMapping.at(ch);
-//	this->PrintMapping();
+	//		this->mapVaToDet[ch]=channelMapping.at(ch);
+	//	this->PrintMapping();
 }
 
 
@@ -74,19 +74,19 @@ UInt_t TChannelMapping::getDetChannelNo(UInt_t vaChNo)
 {
 	channelContainer::iterator it;
 	for ( it=mapVaToDet.begin() ; it != mapVaToDet.end(); it++ ){
-//		cout<<"\t"<<setw(3)<<(*it).first<<"-->"<<setw(3)<<(*it).second<<"\n";
-//		showMapping(it);
+		//		cout<<"\t"<<setw(3)<<(*it).first<<"-->"<<setw(3)<<(*it).second<<"\n";
+		//		showMapping(it);
 		if((*it).first==vaChNo)break;
 	}
-//	cout<<"###"<<flush;
+	//	cout<<"###"<<flush;
 	if(it==mapVaToDet.end()){
 		cerr<<vaChNo<<" does not exist:"<<endl;
 		return vaChNo;
 
 	}
 	return (*it).second;
-//
-//	return mapVaToDet[vaChNo];
+	//
+	//	return mapVaToDet[vaChNo];
 	return 999;
 }
 
@@ -110,16 +110,16 @@ UInt_t TChannelMapping::getVAChannelNo(UInt_t detChNo)
 
 void TChannelMapping::PrintMapping()
 {
-//	std::for_each( mapVaToDet.begin(), mapVaToDet.end(), showMappingPair);
+	//	std::for_each( mapVaToDet.begin(), mapVaToDet.end(), showMappingPair);
 	cout<< "TChannelMapping::PrintMapping: Channel Map: of "<<mapVaToDet.size()<<" Channels"<<endl;
 	channelContainer::iterator it;
 	for ( it=mapVaToDet.begin() ; it != mapVaToDet.end(); it++ ){
-		UInt_t ch = (*it).first;
+		//		UInt_t ch = (*it).first;
 		showMapping(it);
-//		cout<<"\t"<<setw(3)<<(*it).first<<"-->"<<
-//		getDetChannelNo(ch)<<
-////		getDetChannelNo( (it*).first )<<
-//		setw(3)<<(*it).second<<"\n";
+		//		cout<<"\t"<<setw(3)<<(*it).first<<"-->"<<
+		//		getDetChannelNo(ch)<<
+		//		getDetChannelNo( (it*).first )<<
+		//		setw(3)<<(*it).second<<"\n";
 	}
 	cout<<endl;
 }
@@ -131,18 +131,18 @@ void TChannelMapping::showMappingPair( const std::pair<UInt_t,UInt_t> p )
 	}
 	catch( std::exception &Fehler )
 	{
-//		std::cerr << "Fehler: <" << Fehler.what() << "> in showMapping(pair)\n"<<flush;
+		//		std::cerr << "Fehler: <" << Fehler.what() << "> in showMapping(pair)\n"<<flush;
 	}
 	catch( ... )
 	{
 		std::cerr << "unbekannter Fehler showMapping(pair)\n"<<flush;
-}
+	}
 }
 
 void TChannelMapping::showMapping(const channelContainer::iterator p)
 {
 	try{
-	  std::cout	  << (*p).first << "  -> " << getDetChannelNo((*p).first)  << std::endl;
+		std::cout	  << (*p).first << "  -> " << getDetChannelNo((*p).first)  << std::endl;
 	}
 	catch( std::exception &Fehler )
 	{

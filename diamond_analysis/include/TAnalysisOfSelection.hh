@@ -42,9 +42,11 @@ public:
 	virtual ~TAnalysisOfSelection();
 	void	doAnalysis(UInt_t nEvents=0);
 private:
+	void analyseEvent();
 	void initialiseHistos();
 	void saveHistos();
-	void analyseEvent();
+	void saveFidCutHistos();
+	void saveDiamondAreaHistos();
 private:
 	Int_t verbosity;
 	TSettings *settings;
@@ -61,6 +63,9 @@ private:
 	TH2F* histoLandauDistribution2DNoBorderHit_unmasked;
 	vector<TH2F*> hChargeVsFidX;
 	vector<TH2F*> hChargeVsFidY;
+
+	TH2F* hEtaVsLeftChannelNo;
+	TH2F* hEtaCMNcorrectedVsLeftChannelNo;
 	TH1F* hClusterPosition;
 	TH1F* h3dDiamond;
 	TH1F* hNoDiamond;
