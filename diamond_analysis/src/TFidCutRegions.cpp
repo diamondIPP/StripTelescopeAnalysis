@@ -193,6 +193,7 @@ Float_t TFidCutRegions::getMinFiducialX(UInt_t index){
 		return min;
 	}
 	if(index <= getNFidCuts()){
+        //cout<<"GetFidCut: "<<getNFidCuts()<<endl;
 		if (getFidCut(index))
 			return getFidCut(index)->GetXLow();
 	}

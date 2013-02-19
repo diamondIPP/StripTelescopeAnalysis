@@ -656,8 +656,11 @@ Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
 
 UInt_t TADCEventReader::getNClusters(UInt_t det)
 {
+    if (!pEvent){
+        cerr<<setw(6)<<current_event<<": Cannot getNClusters of detector no. "<<det<<", pointer pEvent ==0"<<endl;
+        return 0;
+    }
 	if(det<TPlaneProperties::getNDetectors()){
-
 		UInt_t nClusters = this->pEvent->getNClusters(det);
 		if(verbosity>7){
 			cout<<"TADCEventReader::getNClusters of det "<<det<<": "<<nClusters<<endl;
