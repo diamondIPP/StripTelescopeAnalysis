@@ -385,6 +385,8 @@ void TFidCutRegions::createFidCuts(){
 TFiducialCut* TFidCutRegions::getFidCut(UInt_t index){
 	if (index>getNFidCuts()&&index>0)
 		return NULL;
+	if(index==0)
+		return NULL;
 	return fidCuts.at(index-1);
 }
 

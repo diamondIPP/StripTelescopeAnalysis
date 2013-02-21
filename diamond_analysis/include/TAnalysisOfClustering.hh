@@ -107,6 +107,7 @@ private:
 	TH1F *hEtaDistribution[9];
 	TH1F *hEtaDistributionCMN[9];
 	TH2F* hEtaDistributionVsLeftChannel[9];
+	TH2F* hEtaDistributionVsClusterSize[9];
 	TH2F* hEtaDistributionVsCharge[9];
 	TH1F *hEtaDistribution5Percent[9];
 	TH2F *hEtaDistributionVsSignalRight[9];

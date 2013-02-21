@@ -172,7 +172,14 @@ void TAnalysisOfClustering::initialiseHistos()
 		hEtaDistributionVsLeftChannel[det]->GetZaxis()->SetTitle("number of entries #");
 		histName.str("");
 		histName.clear();
-		histName<<"hEtaDistributionVsCharge_)"<<TPlaneProperties::getStringForDetector(det);
+		histName<<"hEtaDistributionVsClusterSize_"<<TPlaneProperties::getStringForDetector(det);
+		hEtaDistributionVsClusterSize[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,1,10,-.5,9.5);
+		hEtaDistributionVsClusterSize[det]->GetXaxis()->SetTitle("#eta");
+		hEtaDistributionVsClusterSize[det]->GetYaxis()->SetTitle("ClusterSize");
+		hEtaDistributionVsClusterSize[det]->GetZaxis()->SetTitle("number of entries #");
+		histName.str("");
+		histName.clear();
+		histName<<"hEtaDistributionVsCharge_"<<TPlaneProperties::getStringForDetector(det);
 		Int_t maxCharge = TPlaneProperties::isDiamondDetector(det)?4096:512;
 		hEtaDistributionVsCharge[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),512,0,1,512,0,maxCharge);
 		hEtaDistributionVsCharge[det]->GetXaxis()->SetTitle("#eta");
@@ -469,7 +476,37 @@ void TAnalysisOfClustering::saveHistos(){
 		histSaver->SaveHistogram(this->hEtaDistribution[det]);
 		histSaver->SaveHistogram(this->hEtaDistributionCMN[det]);
 		histSaver->SaveHistogram(this->hEtaDistributionVsCharge[det]);
+		for(int area = 0; area < settings->getNDiaDetectorAreas() && TPlaneProperties::isDiamondDetector(det); area++){
+			TString name = TString::Format("hEtaDistributionVsLeftChannel_%d_Area%d",det,area);
+			TH2F *hEtaDistributionVsLeftChannelArea = (TH2F*)hEtaDistributionVsLeftChannel[det]->Clone();
+			Float_t yMin = settings->getDiaDetectorArea(area).first;
+			Float_t yMax = settings->getDiaDetectorArea(area).second;
+			hEtaDistributionVsLeftChannelArea->GetYaxis()->SetRangeUser(yMin,yMax);
+			histSaver->SaveHistogram(hEtaDistributionVsLeftChannelArea);
+			if(hEtaDistributionVsLeftChannelArea)
+				delete hEtaDistributionVsLeftChannelArea;
+		}
 		histSaver->SaveHistogram(this->hEtaDistributionVsLeftChannel[det]);
+
+		for(int i=1;(i<6&&TPlaneProperties::isDiamondDetector(det))||i<3;i++){
+			TString name =  TString::Format("hEtaDistribution_ClusterSize%d",i);
+			Int_t bin = hEtaDistributionVsClusterSize[det]->GetYaxis()->FindBin(i);
+			TH1F* hEtaOneClusterSize = (TH1F*)hEtaDistributionVsClusterSize[det]->ProjectionX(name,bin,bin);
+			hEtaOneClusterSize->SetTitle(name);
+			histSaver->SaveHistogram(hEtaOneClusterSize);
+			delete hEtaOneClusterSize;
+			if(i==1){
+				name =  TString::Format("hEtaDistribution_ClusterSize_%d-%d",i,i+1);
+				bin = hEtaDistributionVsClusterSize[det]->GetYaxis()->FindBin(i);
+				Int_t bin2 =hEtaDistributionVsClusterSize[det]->GetYaxis()->FindBin(i+1);
+				TH1F* hEtaTwoClusterSize = (TH1F*)hEtaDistributionVsClusterSize[det]->ProjectionX(name,bin,bin2);
+				hEtaTwoClusterSize->SetTitle(name);
+				histSaver->SaveHistogram(hEtaTwoClusterSize);
+				delete hEtaTwoClusterSize;
+			}
+		}
+		histSaver->SaveHistogram(this->hEtaDistributionVsClusterSize[det]);
+
 		histSaver->SaveHistogram(this->hEtaDistribution5Percent[det]);
 		histSaver->SaveHistogram(this->hEtaDistributionVsSignalLeft[det]);
 		histSaver->SaveHistogram(this->hEtaDistributionVsSignalRight[det]);
@@ -563,6 +600,7 @@ void TAnalysisOfClustering::analyseClusterPosition()
 				leftClPos=highestClPos;
 			}
 			TCluster cluster = eventReader->getCluster(det,cl);
+			int clusterSize =cluster.getClusterSize();
 			if(settings->isMaskedCluster(det,cluster,true))
 				return;
 			signalLeft= cluster.getSignal(leftClPos);
@@ -588,9 +626,10 @@ void TAnalysisOfClustering::analyseClusterPosition()
 			//			Float_t eta3= signalRightReal/(signalLeftReal+signalRightReal);
 			//			cout<<nEvent<<" "<<eta<<" "<<eta1<<" "<<eta2<<" "<<eta3<<endl;
 			if(hEtaDistribution[det])hEtaDistribution[det]->Fill(eta);
-			if(hEtaDistributionCMN[det])hEtaDistributionCMN[det]->Fill(eta);
-			if(hEtaDistributionVsLeftChannel[det])hEtaDistributionVsLeftChannel[det]->Fill(eta,leftChannel);
-			if(hEtaDistributionVsCharge[det])hEtaDistributionVsCharge[det]->Fill(eta,charge);
+			if(hEtaDistributionCMN[det])hEtaDistributionCMN[det]->Fill(etaCmnCorrected);
+			if(hEtaDistributionVsLeftChannel[det]) hEtaDistributionVsLeftChannel[det]->Fill(eta,leftChannel);
+			if(hEtaDistributionVsClusterSize[det]) hEtaDistributionVsClusterSize[det]->Fill(eta,clusterSize);
+			if(hEtaDistributionVsCharge[det]) hEtaDistributionVsCharge[det]->Fill(eta,charge);
 			hEtaDistribution5Percent[det]->Fill(eta2);
 			hSignalLeftVsSignalRight[det]->Fill(signalRight,signalLeft);
 

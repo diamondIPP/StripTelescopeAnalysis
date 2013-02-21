@@ -22,13 +22,17 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	//	sys=new TSystem();
 	sys=gSystem;
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: Set Style"<<endl;
-	currentStyle=gROOT->GetStyle("Plain_RD42");
-	if(currentStyle!=0)
+	currentStyle=0;
+	currentStyle2D=0;
+	currentStyle=(TStyle*)gROOT->FindObject("Plain_RD42");
+	if(currentStyle){
+		currentStyle=gROOT->GetStyle("Plain_RD42");
 		currentStyle->cd();
+	}
 	else if(gStyle!=0)
 		if(!gStyle->IsZombie()){
 			if((string)gStyle->GetName()!="Plain_RD42"){
-				gROOT->SetStyle("Plain"); //General style (see TStyle)
+				gROOT->SetStyle("Modern"); //General style (see TStyle)
 				//	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
 				if(gStyle->GetOptStat()!=221111111)
 					gStyle->SetOptStat("nemr");//KSiou
@@ -41,17 +45,25 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 				//	    gStyle->SetPadRightMargin(0.15);
 				if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
 				//gStyle->SetTitleColor(19,"");
-				gStyle->SetPalette(1); //
 				gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
 				currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
+				currentStyle->SetName("Plain_RD42");
 				currentStyle->SetPalette(1);
 				currentStyle2D= (TStyle*)currentStyle->Clone("Plain_RD42_2D");
+				currentStyle2D->SetName("Plain_RD42_2D");
 				currentStyle2D->SetOptStat("ne");
 				currentStyle2D ->SetPalette(1);
 				currentStyle->cd();
 				gROOT->SetStyle("Plain_RD42");
 			}
 		}
+	if(!currentStyle){
+			currentStyle = (TStyle*)gROOT->GetStyle("modern")->Clone("Plain_RD42");
+	}
+	if(!currentStyle2D){
+		currentStyle2D = (TStyle*)gROOT->GetStyle("modern")->Clone("Plain_RD42_2D");
+	}
+
 
 	gStyle->SetPalette(1); //
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;

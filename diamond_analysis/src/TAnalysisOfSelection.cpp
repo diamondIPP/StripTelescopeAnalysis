@@ -247,6 +247,8 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			cout<<"Projection does not work: "<<name<<endl;
 			char t;cin>>t;
 		}
+		else
+			hEtaVsLeftChannelNo->SetTitle(name);
 		histSaver->SaveHistogram(hEtaArea);
 		delete hEtaArea;
 
