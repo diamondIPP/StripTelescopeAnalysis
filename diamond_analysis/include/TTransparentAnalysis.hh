@@ -72,7 +72,7 @@ private:
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();
-	void fitTrack();
+//	void fitTrack();
 //	void analyzeTrack(TTrack track);
 	bool predictPositions();
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
@@ -122,8 +122,10 @@ private:
 	vector< vector<Float_t> > vecvecRelPos;
 	// histograms
 	vector<TH1F*> hLaundau;
+	vector< vector<Float_t> > vecVecLandau;
 	vector<TH1F*> hEta;
-	;
+	vector< vector<Float_t> > vecVecEta;
+
 	TH1F* hLaundauMean;
 	TH1F* hLaundauMP;
 	TH1F* hPredictedPositionInStrip;
@@ -139,6 +141,7 @@ private:
 	TH1F* hLaundau2HighestMean;
 	TH1F* hLaundau2HighestMP;
 	vector<TH1F*> hEtaIntegrals;
+//	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
 	
 	// fits
 	vector<TF1*> fitLandau;

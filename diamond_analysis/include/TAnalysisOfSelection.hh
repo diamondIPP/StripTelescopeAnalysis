@@ -65,6 +65,7 @@ private:
 	vector<TH2F*> hChargeVsFidY;
 
 	TH2F* hEtaVsLeftChannelNo;
+	TH2F* hEtaVsRelPos;
 	TH2F* hEtaCMNcorrectedVsLeftChannelNo;
 	TH1F* hClusterPosition;
 	TH1F* h3dDiamond;

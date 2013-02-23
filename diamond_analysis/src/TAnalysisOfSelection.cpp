@@ -145,6 +145,7 @@ void TAnalysisOfSelection::initialiseHistos()
 	hNoDiamond = new TH1F("hNoDiamond","Sum of Charge for all 18 no-channels",4096,0,4095);
 	hNoDiamond_hit = new TH1F("hNoDiamond_hit","Sum of Charge for all 18 no-channels with a Hit",4096,0,4095);
 
+
 	TString name = TString::Format("hEtaVsLeftChannelNo");
 	hEtaVsLeftChannelNo = new TH2F(name,name,256,0,1,128,0,127);
 	hEtaVsLeftChannelNo->GetXaxis()->SetTitle("#eta");
@@ -620,16 +621,9 @@ void TAnalysisOfSelection::saveHistos()
 	if (histoLandauDistribution)
 		histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),1,2);
 	else{
-		cout<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
-		char t;
-		cin>>t;
+		cerr<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
 	}
-	//	cout<<"CREATED "<<histo12->GetName()<<endl;
-	if(histo12==0) {
-		cout<<"TAnalysisOfSelection:: saverHistos ==> oooh Boy, something went terribly wrong, Lukas you better fix it! NOW!"<<endl;
-		return;
-	}
-	else if(histo!=0){
+	if(histo12!=0 && histo!=0){
 		histo12->SetTitle(name.str().c_str());
 		histo12->GetYaxis()->SetTitle("number of Entries #");
 		if(histo12->GetEntries()>0){
@@ -655,18 +649,16 @@ void TAnalysisOfSelection::saveHistos()
 		histSaver->SaveHistogram(histo12);
 		delete histo12;
 	}
-	else{
-		cout<<"histo12 AND histo 0 are not valid....Press a key and enter to confirm..."<<flush;
-		char t;
-		cin>>t;
-	}
+	else
+		cerr<<"histo: "<<histo <<" or histo12: "<<histo12<<" are not initialized correctly"<<endl;
+
 	for(UInt_t clusSize=1;clusSize<8;clusSize++){
 		stringstream name;
 		name<< "hPulseHeigthDiamond_"<<clusSize<<"_ClusterSize";
 		TH1F* histo = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),clusSize,clusSize);
 		if(histo==0) {
 			cout<<"TAnalysisOfSelection:: saverHistos ==> oooh Boy, something went terribly wrong, Lukas you better fix it! NOW!"<<endl;
-			return;
+			continue;
 		}
 		histo->SetTitle(name.str().c_str());
 		histo->GetYaxis()->SetTitle("number of Entries #");
@@ -933,7 +925,8 @@ void TAnalysisOfSelection::analyseEvent()
 		Int_t leftChannel =-1;
 		Float_t eta = cluster.getEta(leftChannel,false);
 		Float_t etaCMNCor = cluster.getEta(true);
-		Float_t relPos = pos - (Int_t) (pos-.5);
+//		Float_t relPos = pos - (Int_t) (pos-.5);
+//		if(clusSize==2) hEtaVsRelPos->Fill(eta,relPos);
 		if(clustSize==2) hEtaVsLeftChannelNo ->Fill(eta,leftChannel);
 		if(clustSize==2) hEtaCMNcorrectedVsLeftChannelNo ->Fill(etaCMNCor,leftChannel);
 		if(fidRegionIndex<(Int_t)hChargeVsFidX.size()&&fidRegionIndex>=0){

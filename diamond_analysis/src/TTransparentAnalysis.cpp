@@ -181,6 +181,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 			Float_t resXEtaCorrected = this->getResidual(this->vecTransparentClusters.at(iEvent)[clusterSize],TCluster::corEta);
 			Float_t resXHighest2Centroid = this->getResidual(this->vecTransparentClusters.at(iEvent)[clusterSize],TCluster::highest2Centroid);
 			Float_t relChannelPos = channelPosInDetSystem - (int)(channelPosInDetSystem+.5);
+			Float_t relHitPos = this->predPosition- (int)(predPosition+.5);
 			if(verbosity>4)
 				cout<<nEvent<<": "<<clusterSize<<"clusterSize: "<<channelPosInDetSystem<<"-->"<<relChannelPos<<" <-> "<<resXChargeWeighted<<", "<<resXEtaCorrected<<", "<<resXHighest2Centroid<<endl;
 			vecvecRelPos[clusterSize].push_back(relChannelPos);
@@ -322,6 +323,8 @@ void TTransparentAnalysis::initHistograms() {
 	vecvecResXHighest2Centroid.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecResXEtaCorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecRelPos.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecVecEta.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecVecLandau.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		// TODO: take care of histogram names and bins!!
 		stringstream histNameLaundau, histNameLaundau2Highest, histNameEta, histNameResidualChargeWeighted, histNameResidualHighest2Centroid, histNameResidualEtaCorrected;
@@ -371,13 +374,22 @@ void TTransparentAnalysis::fillHistograms() {
 //			printCluster(this->transparentClusters[clusterSize]);
 //			}
 //		}
+		Float_t relPos =this->predPosition-(int)(this->predPosition+.5);
+		Float_t residualCW =this->getResidual(this->transparentClusters[clusterSize],TCluster::chargeWeighted);
+		Float_t residualH2C = this->getResidual(this->transparentClusters[clusterSize],TCluster::highest2Centroid);
+
+//		if(hResidualChargeWeightedVsEstimatedHitPosition==0)
+//			hResidualChargeWeightedVsEstimatedHitPosition->Fill(residualCW,relPos,clusterSize);
+//		if(hResidualHighest2CentroidVsEstimatedHitPosition)
+//			hResidualHighest2CentroidVsEstimatedHitPosition>Fill(residualH2C,relPos,clusterSize);
 		if (clusterSize+1 != transparentClusters[clusterSize].getClusterSize()) {
 			cout << "wrong cluster size!" << endl;
 			cout << "clusterSize+1 = " << clusterSize+1 << "\ttransparentClusters[clusterSize].getClusterSize() = " << transparentClusters[clusterSize].getClusterSize() << endl;
 		}
-
-		hResidualChargeWeighted[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::chargeWeighted));
-		hResidualHighest2Centroid[clusterSize]->Fill(this->getResidual(this->transparentClusters[clusterSize],TCluster::highest2Centroid));
+		vecvecResXChargeWeighted[clusterSize].push_back(residualCW);
+		vecvecResXHighest2Centroid[clusterSize].push_back(residualH2C);
+		hResidualChargeWeighted[clusterSize]->Fill(residualCW);
+		hResidualHighest2Centroid[clusterSize]->Fill(residualH2C);
 	}
 //	hPredictedPositionInStrip->Fill();
 }
@@ -401,6 +413,14 @@ void TTransparentAnalysis::createEtaIntegrals() {
 
 void TTransparentAnalysis::fitHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		vector<Float_t> vecResChargeWeighted = vecvecResXChargeWeighted[clusterSize];
+		stringstream name;
+		name <<"hResidualChargeWeighted_ClusterSize_"<<clusterSize;
+		hResidualChargeWeighted[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecResChargeWeighted);
+
+		name <<"hResidualHighest2Centroid_ClusterSize_"<<clusterSize;
+		hResidualHighest2Centroid[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecvecResXHighest2Centroid[clusterSize]);
+
 		// fit histograms
 		fitLandau.push_back(landauGauss->doLandauGaussFit(hLaundau[clusterSize]));
 		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLaundau2Highest[clusterSize]));
