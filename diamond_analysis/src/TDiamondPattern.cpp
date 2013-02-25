@@ -13,6 +13,7 @@ TDiamondPattern::TDiamondPattern() {
 	// TODO Auto-generated constructor stub
 	channelToMetricConversion.resize(TPlaneProperties::getNChannelsDiamond());
 	bLoadedStandardPitchWidthSettings=false;
+	standardPW = TPlaneProperties::getStripDistance();
 }
 
 TDiamondPattern::~TDiamondPattern() {
@@ -27,6 +28,7 @@ void TDiamondPattern::loadStandardPitchWidthSettings() {
 void TDiamondPattern::loadPitchWidthSettings(Float_t pitchWidth) {
 	resetPattern();
 	addPattern(pitchWidth,0,0,channelToMetricConversion.size()-1);
+	standardPW =pitchWidth;
 }
 
 void TDiamondPattern::resetPattern() {
@@ -72,6 +74,7 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 	endOfInterval.push_back(channelToMetricConversion[lastChannel]);
 	firstChannelOfInterval.push_back(firstChannel);
 	nChannelsOfInterval.push_back(lastChannel-firstChannel);
+	this->pitchWidth.push_back(pitchWidth);
 	return retVal;
 }
 
@@ -135,4 +138,11 @@ Float_t TDiamondPattern::getChannelToMetric(UInt_t ch){
 	if(ch>=0&&ch<channelToMetricConversion.size())
 		return channelToMetricConversion[ch];
 	return N_INVALID;
+}
+
+Float_t TDiamondPattern::getPitchWidth(UInt_t area){
+	if(area<beginOfInterval.size())
+		return this->pitchWidth.at(area);
+	else
+		return this->standardPW;
 }

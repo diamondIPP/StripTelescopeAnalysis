@@ -550,7 +550,7 @@ TResidual TAlignment::alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t
 			align->AddToPhiYOffset(subjectPlane, phiy_offset);
 		}
 	}
-	if(verbosity>3){
+	if(verbosity>7){
 		cout<<"Press a Key to confirm and press enter!"<<endl;
 		char t; cin>>t;
 	}

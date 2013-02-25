@@ -129,7 +129,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		}
 		transparentClusters.clear();
 		if (!this->predictPositions()){
-			if (verbosity>4) cout<< nEvent << ": Chi2 to high"<<endl;
+			if (verbosity>4) cout<< nEvent << ": Chi2 to high: "<< positionPrediction->getChi2()<<endl;
 			highChi2++;
 			continue;
 		}
@@ -185,9 +185,9 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 			if(verbosity>4)
 				cout<<nEvent<<": "<<clusterSize<<"clusterSize: "<<channelPosInDetSystem<<"-->"<<relChannelPos<<" <-> "<<resXChargeWeighted<<", "<<resXEtaCorrected<<", "<<resXHighest2Centroid<<endl;
 			vecvecRelPos[clusterSize].push_back(relChannelPos);
-			vecvecResXChargeWeighted[clusterSize].push_back(resXChargeWeighted);
-			vecvecResXHighest2Centroid[clusterSize].push_back(resXHighest2Centroid);
-			vecvecResXEtaCorrected[clusterSize].push_back(resXEtaCorrected);
+			if (resXChargeWeighted > -6000) vecvecResXChargeWeighted[clusterSize].push_back(resXChargeWeighted);
+			if (resXHighest2Centroid > -6000) vecvecResXHighest2Centroid[clusterSize].push_back(resXHighest2Centroid);
+			if (resXEtaCorrected > -6000) vecvecResXEtaCorrected[clusterSize].push_back(resXEtaCorrected);
 		}
 	}
 }
@@ -415,12 +415,14 @@ void TTransparentAnalysis::fitHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		vector<Float_t> vecResChargeWeighted = vecvecResXChargeWeighted[clusterSize];
 		stringstream name;
-		name <<"hResidualChargeWeighted_ClusterSize_"<<clusterSize;
+		name <<"hDiaTranspAnaResidualChargeWeightedIn" << clusterSize+1 << "StripsMinusPred";
 		hResidualChargeWeighted[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecResChargeWeighted);
 
-		name <<"hResidualHighest2Centroid_ClusterSize_"<<clusterSize;
+		name.str("");name.clear();
+		name <<"hDiaTranspAnaResidualHighest2CentroidIn" << clusterSize+1 << "StripsMinusPred";
 		hResidualHighest2Centroid[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecvecResXHighest2Centroid[clusterSize]);
-
+		Float_t plotWidth = 1.5 * settings->getPitchWidth(subjectDetector);
+		hResidualHighest2Centroid[clusterSize]->GetXaxis()->SetRangeUser(-plotWidth,plotWidth);
 		// fit histograms
 		fitLandau.push_back(landauGauss->doLandauGaussFit(hLaundau[clusterSize]));
 		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLaundau2Highest[clusterSize]));
@@ -495,11 +497,22 @@ void TTransparentAnalysis::saveHistograms() {
 	histSaver->SaveHistogram(hLaundau2HighestMean);
 	histSaver->SaveHistogram(hLaundau2HighestMP);
 	for(UInt_t i=0;i<TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);i++){
-		string name = (string)TString::Format("hRelPosVsResolutionEtaCorrectedIn%d",i);
+		string name = (string)TString::Format("hRelPosVsResolutionEtaCorrectedIn%d",i+1);
 		TH2F* hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXEtaCorrected[i]);
-		hist->GetXaxis()->SetTitle("Relative predicted Position");
-		hist->GetYaxis()->SetTitle("Delta X, Eta corrected");
+		hist->GetYaxis()->SetTitle("Relative predicted Position /#mum");
+		hist->GetXaxis()->SetTitle("Residual, Eta corrected");
 		histSaver->SaveHistogram(hist);
+		name = (string)TString::Format("hRelChPosVsResChargeWeighted_In_%d",i+1);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXChargeWeighted[i]);
+		hist->GetYaxis()->SetTitle("Relative predicted Position");
+		hist->GetXaxis()->SetTitle("Residual, charge Weighted / #mum");
+		histSaver->SaveHistogram(hist);
+		name = (string)TString::Format("hRelChPosVsResHighest2Centroid_In_%d",i+1);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXHighest2Centroid[i]);
+		hist->GetYaxis()->SetTitle("Relative predicted Position");
+		hist->GetXaxis()->SetTitle("Residual, Highest 2 Centorid / #mum");
+		histSaver->SaveHistogram(hist);
+
 	}
 }
 

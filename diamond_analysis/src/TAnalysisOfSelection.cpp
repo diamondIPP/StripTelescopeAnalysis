@@ -181,7 +181,8 @@ void TAnalysisOfSelection::initialiseHistos()
 					<< " X:"<<histo->GetNbinsX()<<"_"<<histo->GetXaxis()->GetXmin()<<":"<<histo->GetXaxis()->GetXmax()
 					<<" -Y:"<<histo->GetNbinsY()<<"_"<<histo->GetYaxis()->GetXmin()<<":"<<histo->GetYaxis()->GetXmax()<<endl;
 		}
-		if(verbosity>4){
+		if(verbosity>8){
+			cout<<"Press a key and enter to continue.\t"<<flush;
 			char t;
 			cin>>t;
 		}
@@ -245,7 +246,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		name = TString::Format("hEta_Area_%d_ch_%d-%d",area,chLow,chHigh);
 		TH1F* hEtaArea = (TH1F*)hEtaVsLeftChannelNo->ProjectionX(name,minBin,maxBin);
 		if(!hEtaArea){
-			cout<<"Projection does not work: "<<name<<endl;
+			cout<<"Projection does not work: "<<name<< ".\tPress a key and enter to continue..."<<flush;
 			char t;cin>>t;
 		}
 		else
@@ -265,7 +266,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		name = TString::Format("hEtaCMNcorrected_Area_%d_ch_%d-%d",area,chLow,chHigh);
 		TH1F* hEtaCMNcorrectedArea = (TH1F*)hEtaCMNcorrectedVsLeftChannelNoArea->ProjectionX(name,minBin,maxBin);
 		if(!hEtaCMNcorrectedArea){
-			cout<<"Projection does not work: "<<name<<endl;
+			cout<<"Projection does not work: "<<name<<".\t Press a key and enter to continue..."<<flush;
 			char t;cin>>t;
 		}
 		histSaver->SaveHistogram(hEtaCMNcorrectedArea);
@@ -480,7 +481,8 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 	}
 }
 void TAnalysisOfSelection::saveFidCutHistos(){
-	if(verbosity)cout<<"create hChargeVsFidCutProfile"<<endl;
+	int bins = hChargeVsFidCut->GetNbinsX() * hChargeVsFidCut->GetNbinsY() * hChargeVsFidCut->GetNbinsZ();
+	if(verbosity)cout<<"create hChargeVsFidCutProfile (this take some time since is doing a Project3D Profile for "<<bins<<endl;
 	TH2F* hChargeVsFidCutProfile = (TH2F*)hChargeVsFidCut->Project3DProfile("yx");
 	if(verbosity)cout<<"draw hChargeVsFidCutProfile"<<endl;
 	hChargeVsFidCutProfile->Draw();
@@ -554,7 +556,9 @@ void TAnalysisOfSelection::saveHistos()
 	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
 	histSaver->OptimizeXYRange(histoLandauDistribution2D);
 	if(verbosity)cout<<"unmasked: "<<histoLandauDistribution2D_unmasked->GetEntries()<<"\nmasked: "<<histoLandauDistribution2D->GetEntries()<<endl;
+	if(verbosity)cout<< "save "<<histoLandauDistribution2D->GetName()<<endl;
 	histSaver->SaveHistogram(histoLandauDistribution2D);
+	if(verbosity)cout<< "save "<<histoLandauDistribution2D_unmasked->GetName()<<endl;
 	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
 
 
@@ -575,6 +579,11 @@ void TAnalysisOfSelection::saveHistos()
 		histo = (TH1F*)histoLandauDistribution->ProjectionX("hPulseHeightDiamondAll",0,8);
 	}
 
+	if(histo==0){
+		cout<<"Couldn't creaye histo hPulseHeightDiamondAll"<<flush;
+		char t;cin>>t;
+	}
+
 	Float_t histoMean,histoMax,histoRMS,histoMeanGausFit;
 	TF1* gausFit=0;
 
@@ -583,6 +592,8 @@ void TAnalysisOfSelection::saveHistos()
 	Float_t xmax,xmin;
 
 	if (histo){
+		if(verbosity)cout<< "preparing "<<histo->GetName()<<endl;
+
 		histo->GetYaxis()->SetTitle("number of Entries #");
 		Double_t xmin,xmax;
 		TF1* fit=0;
@@ -603,27 +614,49 @@ void TAnalysisOfSelection::saveHistos()
 		vecHistoMeanGaus.push_back(histoMeanGausFit);
 		vecHistoMeanLandau.push_back(fit->GetParameter(1));
 
+		if(verbosity)cout<< "saving "<<histo->GetName()<<endl;
 		histSaver->SaveHistogram(histo);
 		width=fit->GetParameter(0);
 		MP = fit->GetParameter(1);
 		area = fit->GetParameter(2);
 		gWidth = fit->GetParameter(3);
+		//	vecMP.push_back(MP);
+		//	vecWidth.push_back(width);
+		//vecClusSize.push_back(0);
+		//vecXError.push_back(0);
 	}
-	//	vecMP.push_back(MP);
-	//	vecWidth.push_back(width);
-	//vecClusSize.push_back(0);
-	//vecXError.push_back(0);
+
 	stringstream name;
 	name.str("");
 	name.clear();
 	name<< "hPulseHeigthDiamond_1_2_ClusterSize";
 	TH1F* histo12 =0;
-	if (histoLandauDistribution)
-		histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),1,2);
+	if (histoLandauDistribution){
+		Int_t binLow = histoLandauDistribution->GetYaxis()->FindBin(1);
+		Int_t binHigh = histoLandauDistribution->GetYaxis()->FindBin(2);
+		histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),binLow,binHigh);
+	}
 	else{
 		cerr<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
+		if(verbosity){char t; cin>>t;}
+	}
+	if(histo12==0){
+		cout<<"'hPulseHeigthDiamond_1_2_ClusterSize' == 0"<<flush;
+		if(verbosity){char t; cin>>t;}
+	}
+	else if(histo12->GetEntries()==0){
+		cout<<"'hPulseHeigthDiamond_1_2_ClusterSize' has 0 entries"<<flush;
+		if(verbosity){char t; cin>>t;}
+	}
+	else
+		cout<<"'hPulseHeigthDiamond_1_2_ClusterSize' has "<< histo12->GetEntries()<<" entries"<<endl;
+	if(histo==0){
+		cout<<""<<flush;
+		char t;
+		cin>>t;
 	}
 	if(histo12!=0 && histo!=0){
+		if(verbosity) cout<<"histo: "<<histo <<" or histo12: "<<histo12<<" are valid..."<<endl;
 		histo12->SetTitle(name.str().c_str());
 		histo12->GetYaxis()->SetTitle("number of Entries #");
 		if(histo12->GetEntries()>0){
@@ -636,8 +669,9 @@ void TAnalysisOfSelection::saveHistos()
 			histoRMS = histo->GetRMS();
 			xmin=histoMax-histoRMS, xmax=histoMax+histoRMS;
 			if(gausFit!=0)delete gausFit;
+			if (verbosity) cout<< "Fitting LandauGaus in "<<histo->GetName()<<endl;
 			gausFit = new TF1("gausFit","gaus",xmin,xmax);
-			histo->Fit(gausFit,"0+","goff",xmin,xmax);
+			histo->Fit(gausFit,"0+Q","goff",xmin,xmax);
 			histoMeanGausFit = gausFit->GetParameter(1);
 			if(fitCS12!=0)delete fitCS12;
 			fitCS12 = landauGauss.doLandauGaussFit(histo);
@@ -645,16 +679,20 @@ void TAnalysisOfSelection::saveHistos()
 		else{
 			cout<<"1_2 Cluster plot is empty....."<<endl;
 		}
-		//		cout<<"Save HISTOGRAM: "<<histo12->GetName()<<endl;
-		histSaver->SaveHistogram(histo12);
-		delete histo12;
+		if(histo12){
+			cout<<"Save HISTOGRAM: "<<histo12->GetName()<<endl;
+			histSaver->SaveHistogram(histo12);
+			delete histo12;
+		}
 	}
 	else
 		cerr<<"histo: "<<histo <<" or histo12: "<<histo12<<" are not initialized correctly"<<endl;
 
 	for(UInt_t clusSize=1;clusSize<8;clusSize++){
+
 		stringstream name;
 		name<< "hPulseHeigthDiamond_"<<clusSize<<"_ClusterSize";
+		if(verbosity>2)cout<<"save "<<name.str()<<endl;
 		TH1F* histo = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),clusSize,clusSize);
 		if(histo==0) {
 			cout<<"TAnalysisOfSelection:: saverHistos ==> oooh Boy, something went terribly wrong, Lukas you better fix it! NOW!"<<endl;
@@ -690,80 +728,104 @@ void TAnalysisOfSelection::saveHistos()
 		delete histo;
 	}
 
-	if(verbosity)cout<<"Create ErrorGraph"<<endl;
-	TGraphErrors* graph = new TGraphErrors(vecMP.size(),&vecClusSize.at(0),&vecMP.at(0),&vecXError.at(0),&vecWidth.at(0));
-	name.str("");name.clear();
-	name<<"MPV of Landau for one ClusterSizes";
-	graph->SetTitle(name.str().c_str());
-	name.clear();name.str("");name.clear();
-	name<<"hMPV_Landau_diff_ClusterSizes";
-	graph->SetName(name.str().c_str());
-	graph->Draw("APLE1 goff");
-	graph->GetXaxis()->SetTitle("Cluster Size");
-	graph->GetYaxis()->SetTitle("Most Probable Value of Landau");
-	graph->SetMarkerColor(kGreen);
-	graph->SetMarkerStyle(22);
-	graph->SetFillColor(kWhite);
-	graph->SetLineWidth(2);
-	if(verbosity)cout<<"Create Canvas"<<endl;
-	TCanvas *c1= new TCanvas("cMVP_Landau_vs_ClusterSize","cMVP_Landau_vs_ClusterSize",800,600);
-	c1->cd();
-	Float_t xVal[] = {0,5};
-	Float_t exVal[] = {0.5,0.5};
-	Float_t yVal[] = {MP,MP};
-	Float_t eyVal[]= {width,width};
-	if(verbosity)cout<<"Create ErrorGraph MEAN"<<endl;
-	TGraphErrors *gMVP = new TGraphErrors(2,xVal,yVal,exVal,eyVal);
-	gMVP->SetName("gMPV_ALL");
-	gMVP->SetTitle("MVP of all Clusters");
-	gMVP->SetFillColor(kRed);
-	gMVP->SetFillStyle(3002);
-	gMVP->SetLineColor(kBlue);
-	if(verbosity)cout<<"Create MultiGraph"<<endl;
-	TMultiGraph *mg = new TMultiGraph("mgMVP_ClusterSize","MVP of Landau vs. ClusterSize");
-	mg->Add(gMVP,"3L");
-	mg->Add(graph,"PLE1");
-	if(verbosity)cout<<"Draw Canvas"<<endl;
-	mg->Draw("a");
-	mg->GetXaxis()->SetTitle("Cluster Size of Diamond");
-	mg->GetYaxis()->SetTitle("MPV of Landau  ");
-	mg->GetXaxis()->SetRangeUser(0.5,4.5);
-	TLegend *leg = c1->BuildLegend(0.15,0.55,0.6,0.8);
-	leg->SetFillColor(kWhite);
-	if(verbosity)cout<<"Save Canvas"<<endl;
-	histSaver->SaveCanvas(c1);
 
-	//	TLine *lMVP = new TLine(graph->GetXaxis()->GetXmin(),MP,graph->GetXaxis()->GetXmax(),MP);
-	//	TLine *lMVPplus = new TLine(graph->GetXaxis()->GetXmin(),MP+width,graph->GetXaxis()->GetXmax(),MP+width);
-	//	TLine *lMVPminus = new TLine(graph->GetXaxis()->GetXmin(),MP-width,graph->GetXaxis()->GetXmax(),MP-width);
-	if (graph)
-		histSaver->SaveGraph(graph,name.str(),"APLE1");
-	htmlLandau->addLandauDiamond(width,MP,area,gWidth);
-	htmlLandau->addLandauDiamondTable(vecHistoMean,vecHistoMax,vecHistoMeanGaus,vecHistoMeanLandau);
+	if(vecMP.size()==0)
+		cout<<" size of vecMP is == 0"<<endl;
+	else{
+		if(verbosity)cout<<"Create ErrorGraph."<<vecClusSize.size()<<"."<<vecMP.size()<<"."<<vecXError.size()<<"."<<vecWidth.size()<<"."<<flush;
+		TGraphErrors* graph = new TGraphErrors(vecMP.size(),&vecClusSize.at(0),&vecMP.at(0),&vecXError.at(0),&vecWidth.at(0));
+		if(verbosity)cout<<"."<<flush;
+		name.str("");name.clear();
+		if(verbosity)cout<<"-"<<flush;
+		name<<"MPV of Landau for one ClusterSizes";
+		if(verbosity)cout<<"."<<flush;
+		graph->SetTitle(name.str().c_str());
+		if(verbosity)cout<<"+"<<flush;
+		name.clear();name.str("");name.clear();
+		name<<"hMPV_Landau_diff_ClusterSizes";
+		if(verbosity)cout<<"!"<<flush;
+		graph->SetName(name.str().c_str());
+		if(verbosity)cout<<"#"<<flush;
+		graph->Draw("APLE1 goff");
+		if(verbosity)cout<<"$"<<flush;
+		graph->GetXaxis()->SetTitle("Cluster Size");
+		if(verbosity)cout<<"%"<<flush;
+		graph->GetYaxis()->SetTitle("Most Probable Value of Landau");
+		if(verbosity)cout<<"^"<<flush;
+		graph->SetMarkerColor(kGreen);
+		if(verbosity)cout<<"*"<<flush;
+		graph->SetMarkerStyle(22);
+		if(verbosity)cout<<"&"<<flush;
+		graph->SetFillColor(kWhite);
+		if(verbosity)cout<<"?"<<flush;
+		graph->SetLineWidth(2);
+		if(verbosity)cout<<"done"<<endl;
+		if(verbosity)cout<<"Create Canvas"<<endl;
+		TCanvas *c1= new TCanvas("cMVP_Landau_vs_ClusterSize","cMVP_Landau_vs_ClusterSize",800,600);
+		c1->cd();
+		Float_t xVal[] = {0,5};
+		Float_t exVal[] = {0.5,0.5};
+		Float_t yVal[] = {MP,MP};
+		Float_t eyVal[]= {width,width};
+		if(verbosity)cout<<"Create ErrorGraph MEAN"<<flush;
+		TGraphErrors *gMVP = new TGraphErrors(2,xVal,yVal,exVal,eyVal);
+		if(verbosity)cout<<"."<<flush;
+		gMVP->SetName("gMPV_ALL");
+		if(verbosity)cout<<"."<<flush;
+		gMVP->SetTitle("MVP of all Clusters");
+		if(verbosity)cout<<"."<<flush;
+		gMVP->SetFillColor(kRed);
+		if(verbosity)cout<<"."<<flush;
+		gMVP->SetFillStyle(3002);
+		if(verbosity)cout<<"."<<flush;
+		gMVP->SetLineColor(kBlue);
+		if(verbosity)cout<<"DONE"<<endl;
+		if(verbosity)cout<<"Create MultiGraph"<<endl;
+		TMultiGraph *mg = new TMultiGraph("mgMVP_ClusterSize","MVP of Landau vs. ClusterSize");
+		mg->Add(gMVP,"3L");
+		mg->Add(graph,"PLE1");
+		if(verbosity)cout<<"Draw Canvas"<<endl;
+		mg->Draw("a");
+		mg->GetXaxis()->SetTitle("Cluster Size of Diamond");
+		mg->GetYaxis()->SetTitle("MPV of Landau  ");
+		mg->GetXaxis()->SetRangeUser(0.5,4.5);
+		TLegend *leg = c1->BuildLegend(0.15,0.55,0.6,0.8);
+		leg->SetFillColor(kWhite);
+		if(verbosity)cout<<"Save Canvas"<<endl;
+		histSaver->SaveCanvas(c1);
 
-	if(histoClusSize){
-		histoClusSize->SetTitle("ClusterSize Diamond");
-		histoClusSize->GetXaxis()->SetTitle("ClusterSize");
-		histoClusSize->GetYaxis()->SetTitle("Number of Entries #");
-		histSaver->SaveHistogram(histoClusSize);
-		delete histoClusSize;
+		//	TLine *lMVP = new TLine(graph->GetXaxis()->GetXmin(),MP,graph->GetXaxis()->GetXmax(),MP);
+		//	TLine *lMVPplus = new TLine(graph->GetXaxis()->GetXmin(),MP+width,graph->GetXaxis()->GetXmax(),MP+width);
+		//	TLine *lMVPminus = new TLine(graph->GetXaxis()->GetXmin(),MP-width,graph->GetXaxis()->GetXmax(),MP-width);
+		if (graph)
+			histSaver->SaveGraph(graph,name.str(),"APLE1");
+		htmlLandau->addLandauDiamond(width,MP,area,gWidth);
+		htmlLandau->addLandauDiamondTable(vecHistoMean,vecHistoMax,vecHistoMeanGaus,vecHistoMeanLandau);
+
+		if(histoClusSize){
+			histoClusSize->SetTitle("ClusterSize Diamond");
+			histoClusSize->GetXaxis()->SetTitle("ClusterSize");
+			histoClusSize->GetYaxis()->SetTitle("Number of Entries #");
+			histSaver->SaveHistogram(histoClusSize);
+			delete histoClusSize;
+		}
+		htmlLandau->addSection("ClusterSize Diamond",htmlLandau->putImageOfPath("ClusterSizeDiamond","png",50));
+		//	if(fit!=0)delete fit;
+		if (histo)delete histo;
+
+		histSaver->SaveHistogram(histoLandauDistribution);
+		if(histoLandauDistribution)
+			delete histoLandauDistribution;
+		if (histoLandauDistribution2D)
+			delete histoLandauDistribution2D;
+		if (histoLandauDistribution2D_unmasked)
+			delete histoLandauDistribution2D_unmasked;
+		if (mg)
+			delete mg;
+		if (c1)
+			delete c1;
 	}
-	htmlLandau->addSection("ClusterSize Diamond",htmlLandau->putImageOfPath("ClusterSizeDiamond","png",50));
-	//	if(fit!=0)delete fit;
-	if (histo)delete histo;
-
-	histSaver->SaveHistogram(histoLandauDistribution);
-	if(histoLandauDistribution)
-		delete histoLandauDistribution;
-	if (histoLandauDistribution2D)
-		delete histoLandauDistribution2D;
-	if (histoLandauDistribution2D_unmasked)
-		delete histoLandauDistribution2D_unmasked;
-	if (mg)
-		delete mg;
-	if (c1)
-		delete c1;
-
+	TCanvas* c1;
 	if (hValidSiliconAndDiamondHit){
 		c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndDiamondHit,true);
 		c1->SetName(TString::Format("c%s",hValidSiliconAndDiamondHit->GetName()));

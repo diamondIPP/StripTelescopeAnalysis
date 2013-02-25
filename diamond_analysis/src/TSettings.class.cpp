@@ -1812,6 +1812,16 @@ bool TSettings::hasBorderHit(UInt_t det, TCluster cluster){
 	return false;
 }
 
+Float_t TSettings::getPitchWidth(UInt_t det, UInt_t area){
+	if (TPlaneProperties::isDiamondDetector(det) ){
+		if (this->getNDiaDetectorAreas()>area)
+			return diamondPattern.getPitchWidth(area);
+		else
+			return getDiamondPitchWidth();
+	}
+	else
+		return this->getSiliconPitchWidth();
+}
 Float_t TSettings::convertChannelToMetric(UInt_t det, Float_t channel){
 	if (TPlaneProperties::isDiamondDetector(det))
 		return diamondPattern.convertChannelToMetric(channel);

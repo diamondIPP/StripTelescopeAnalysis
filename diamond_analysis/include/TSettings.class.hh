@@ -276,6 +276,7 @@ public:
 	bool hasBorderHit(UInt_t det, TCluster cluster);
 	Float_t getSiliconPitchWidth(){return this->pitchWidthSil;}
 	Float_t getDiamondPitchWidth(){return this->pitchWidthDia;}
+	Float_t getPitchWidth(UInt_t det, UInt_t area =0);
 	Float_t convertChannelToMetric(UInt_t det, Float_t channel);
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);

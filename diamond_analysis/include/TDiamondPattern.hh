@@ -35,6 +35,7 @@ public:
 	Float_t convertChannelToMetric(Float_t channel);
 	Float_t convertMetricToChannel(Float_t metric);
 	Float_t convertMetricToChannel(Float_t metric,UInt_t interval);
+	Float_t getPitchWidth(UInt_t area);
 
 	void loadPitchWidthSettings(Float_t pitchWidth);
 	void resetPattern();
@@ -50,7 +51,9 @@ private:
 	std::vector<Float_t> endOfInterval;
 	std::vector<Float_t> firstChannelOfInterval;
 	std::vector<Float_t> nChannelsOfInterval;
+	std::vector<Float_t> pitchWidth;
 	bool bLoadedStandardPitchWidthSettings;
+	Float_t standardPW;
     ClassDef(TDiamondPattern,1);
 };
 
