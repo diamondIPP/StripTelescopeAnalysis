@@ -784,7 +784,7 @@ Float_t TCluster::getEta(Int_t &leftChannel,bool cmnCorrected)
 Float_t TCluster::getEtaPostion(){
 	Int_t leftChannel;
 	Float_t eta = getEta(leftChannel);
-	if(leftChannel==-1)return -9999;
+	if(leftChannel==-1)return INVALID_POSITION;
 	return eta+leftChannel;
 }
 
@@ -800,7 +800,7 @@ Float_t TCluster::getPositionCorEta(TH1F* histo){
 	Float_t corEta= getValueOfHisto(eta,histo);
 	if(verbosity)	cout<<leftChannel<<" + "<<corEta<<" = "<<leftChannel+corEta;
 	if(leftChannel==-1)
-		return -9999;
+		return INVALID_POSITION;
 	return leftChannel+corEta;
 }
 /**

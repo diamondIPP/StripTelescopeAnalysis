@@ -19,7 +19,8 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#define TCLUSTER_REV  36
+#define TCLUSTER_REV  37
+#define INVALID_POSITION -9999
 using namespace std;
 class TCluster :public TObject{
 public:

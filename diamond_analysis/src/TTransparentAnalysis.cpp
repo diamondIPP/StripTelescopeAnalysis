@@ -395,7 +395,7 @@ void TTransparentAnalysis::fillHistograms() {
 		Float_t etaCMN = this->transparentClusters[clusterSize].getEta(true);
 		if(eta>0&&eta<1)
 			hEta[clusterSize]->Fill(eta);
-		else if(verbsoity>3)
+		else if(verbosity>3)
 			this->transparentClusters[clusterSize].Print();
 		if(etaCMN>0&&etaCMN<1)
 			hEtaCMNcorrected[clusterSize]->Fill(etaCMN);
