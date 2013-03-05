@@ -246,7 +246,7 @@ Float_t TCluster::getPosition(calculationMode_t mode,TH1F *histo){
 	else if(mode==eta)
 		return this->getEtaPostion();
 	else if(mode == corEta&&histo==0){
-		cerr<<"mode = cor Eta, but histo =0, "<<endl;
+		if(verbosity)cerr<<"mode = cor Eta, but histo =0, "<<endl;
 		//		this->Print();
 		return this->getEtaPostion();
 	}
@@ -747,12 +747,16 @@ Float_t TCluster::getEta(bool cmnCorrected){
 /**
  * @brief Calculation of Eta of the cluster
  * 			signalRight / (signalLeft+signalRight);
- * @return eta or -1 if not a valid Cluster
+ * @return eta, -2 if clusterSize<1, -1 if invalid cluster
  */
 Float_t TCluster::getEta(Int_t &leftChannel,bool cmnCorrected)
 {
 	leftChannel = -1;
-	if (checkClusterForSize() < 2) return -1;
+	if (checkClusterForSize() < 1) return -2;
+	if(checkClusterForSize()==1){
+		leftChannel= getChannel(0);
+		return -1;
+	}
 	UInt_t clPosHighest = getHighestHitClusterPosition();
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
 	UInt_t leftClPos = 0;
@@ -771,21 +775,28 @@ Float_t TCluster::getEta(Int_t &leftChannel,bool cmnCorrected)
 	Float_t sumSignal = (signalLeft+signalRight);
 	if(sumSignal==0)
 		return -1;
-	return signalRight / sumSignal;
+	Float_t eta = signalRight/sumSignal;
+	if(verbosity&&(eta<0||eta>1))
+		this->Print(1);
+	return eta;
 }
 
 Float_t TCluster::getEtaPostion(){
 	Int_t leftChannel;
 	Float_t eta = getEta(leftChannel);
-	if(eta==0||leftChannel==-1)return -9999;
+	if(leftChannel==-1)return -9999;
 	return eta+leftChannel;
 }
 
 Float_t TCluster::getPositionCorEta(TH1F* histo){
 	Int_t leftChannel;
 	Float_t eta = getEta(leftChannel);
-	if(eta<=0)
+	if(eta<=0){
 		return getEtaPostion();
+	}
+	if(eta>1){
+		return getEtaPostion();
+	}
 	Float_t corEta= getValueOfHisto(eta,histo);
 	if(verbosity)	cout<<leftChannel<<" + "<<corEta<<" = "<<leftChannel+corEta;
 	if(leftChannel==-1)

@@ -262,7 +262,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 		if(verbosity>2)cout << "TAlignment::Align::created new TTrack" << endl;
 		for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++){
 			TH1F* etaInt = eventReader->getEtaIntegral(det);
-			if(etaInt==0){char t;cout<<"eta Int ==0"<<det<<endl;cin >>t;}
+			if(etaInt==0){char t;cout<<"eta Int ==0"<<det<<"\tPress a key and enter to confirm"<<endl;cin >>t;}
 			myTrack->setEtaIntegral(det,etaInt );
 		}
 
@@ -533,8 +533,10 @@ TResidual TAlignment::alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t
 	//save corrections to alignment
 	if( res.getUsedTracks()/(Float_t)(vecXPred.size()) < 0.1){
 		cout<<"Something is wrong used less than 10% of the tracks for alignment: "<<res.getUsedTracks()<<" Tracks out of "<<vecXPred.size()<<endl;
-		char t;
-		cin >> t;
+		if(verbosity>2&&verbosity%2==1){
+			char t;
+			cin >> t;
+		}
 	}
 	if(verbosity)cout<<"Set Alignment of Detector "<<subjectPlane<<endl;
 
@@ -550,7 +552,7 @@ TResidual TAlignment::alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t
 			align->AddToPhiYOffset(subjectPlane, phiy_offset);
 		}
 	}
-	if(verbosity>7){
+	if(verbosity>7&&verbosity%2==1){
 		cout<<"Press a Key to confirm and press enter!"<<endl;
 		char t; cin>>t;
 	}

@@ -262,7 +262,7 @@ public:
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
 	bool resetAlignment() const{return bResetAlignment;};
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
-	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
+	Int_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
 	TFidCutRegions* get3dFidCuts(){return fidCuts3D;};
 	Float_t getMinDiamondChannel();
@@ -287,7 +287,7 @@ private:
 protected:
 	float store_threshold;
 private:
-	bool isStandardSelectionFidCut,isStandard3dFidCut;
+	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandardArea;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();

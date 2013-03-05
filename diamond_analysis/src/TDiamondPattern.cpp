@@ -25,6 +25,16 @@ void TDiamondPattern::loadStandardPitchWidthSettings() {
 	bLoadedStandardPitchWidthSettings=true;
 }
 
+std::pair<Int_t,Int_t> TDiamondPattern::getInterval(Int_t pattern){
+	Int_t first = -1;
+	Int_t last = -1;
+	if(pattern >= 0 && pattern<getNIntervals()){
+		first= firstChannelOfInterval.at(pattern);
+		last = nChannelsOfInterval.at(pattern) + first -1;
+	}
+	return make_pair(first,last);
+}
+
 void TDiamondPattern::loadPitchWidthSettings(Float_t pitchWidth) {
 	resetPattern();
 	addPattern(pitchWidth,0,0,channelToMetricConversion.size()-1);
@@ -95,6 +105,14 @@ void TDiamondPattern::Print() {
 	cout<<endl;
 	//	char t;
 	//	cin>>t;
+}
+
+void TDiamondPattern::showPatterns(){
+	cout<< "There are "<<getNIntervals()<<"/"<<getNPatterns()<<"  Patterns:"<<endl;
+	for (UInt_t i=0;i<getNIntervals();i++){
+		std::pair<Int_t, Int_t> interval = getInterval(i);
+		cout<<"Pattern "<<i<<":\t"<<interval.first<<"-"<<interval.second<<endl;
+	}
 }
 
 Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {

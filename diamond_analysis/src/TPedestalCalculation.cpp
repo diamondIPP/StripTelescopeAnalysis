@@ -486,8 +486,10 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 				cout<<" "<<setw(3)<<i<<"  "<<diaAdcValues[ch].at(i)<<" "<<diaEventUsed[ch].at(i)<<" "<<diaAdcValuesCMN[ch].at(i)<<" "<<diaEventUsedCMN[ch].at(i)<<" ";
 				cout<<std::setw(5)<<(diaAdcValues[ch].at(i)-diaAdcValuesCMN[ch].at(i))<<" "<<cmNoise<<" "<<diaEventsInSum[ch]<<" "<<diaEventsInSumCMN[ch]<<endl;
 			}
-			cout<<"press a key and enter..."<<endl;
+			if(verbosity%2==1){
+			cout<<"press a key and enter to continue..."<<endl;
 			char t; cin>>t;
+			}
 		}
 	}
 	for(nEvent = 0; nEvent<slidingLength;nEvent++){

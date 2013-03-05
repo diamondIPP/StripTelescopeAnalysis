@@ -122,9 +122,9 @@ void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
 		cout<<"\tadd PhiX-Offset of plane "<<plane<<": "<<addPhiXOffset<<endl;//todo
 	}
 	if(verbosity)cout<<det_phix_offset[plane]<<endl;
-	if(verbosity>4){
+	if(verbosity>4&&verbosity%2==1){
 		char t;
-		cout<<"Press a key and enter"<<endl;
+		cout<<"Press a key and enter\t"<<flush;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -139,9 +139,9 @@ void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 		cout<<"\tadd PhiY-Offset of plane "<<plane<<": "<<addPhiYOffset<<endl;//todo
 	}
 	if(verbosity)cout<<det_phiy_offset[plane]<<endl;
-	if(verbosity>4){
+	if(verbosity>4&&verbosity%2==1){
 		char t;
-		cout<<"Press a key and enter"<<endl;
+		cout<<"Press a key and enter.\t"<<flush;;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -157,9 +157,9 @@ void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 		cout<<"\tadd XOffset of plane "<<plane<<": "<<addXOffset<<endl;
 	}
 	if(verbosity)cout<<det_x_offset[plane]<<endl;
-	if(verbosity>4){
+	if(verbosity>4&&verbosity%2==1){
 		char t;
-		cout<<"Press a key and enter"<<endl;
+		cout<<"Press a key and enter\t"<<flush;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -175,9 +175,9 @@ void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 		cout<<"\tadd YOffset of plane "<<plane<<": "<<addYOffset<<endl;
 	}
 	if(verbosity)cout<<det_y_offset[plane]<<endl;
-	if(verbosity>4){
+	if(verbosity>4&&verbosity%2==1){
 		char t;
-		cout<<"Press a key and enter"<<endl;
+		cout<<"Press a key and enter\t"<<flush;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -190,9 +190,9 @@ void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
 		vecDetZOffset[plane].push_back(addZOffset);
 		det_z_offset[plane]+=addZOffset;
 	}
-	if(verbosity>4){
+	if(verbosity>4&&verbosity%2==1){
 		char t;
-		cout<<"Press a key and enter"<<endl;
+		cout<<"Press a key and enter\t"<<flush;
 		cin>>t;
 	}
 	UpdateTime(plane);

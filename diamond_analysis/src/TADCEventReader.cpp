@@ -761,7 +761,10 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
 		bEtaIntegrals=false;
-		if(etaDistributionPath.size()!=0){char t; cin>>t;}
+		if(etaDistributionPath.size()!=0){
+			cout<<"Please confirm with key press and enter"<<flush;
+			char t; cin>>t;
+		}
 		return;
 	}
 	if(verbosity>3)cout<<etaFileName.str()<<endl;

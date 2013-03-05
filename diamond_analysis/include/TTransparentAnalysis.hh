@@ -36,6 +36,8 @@
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TPaveText.h"
+#include "TList.h"
+#include "TPolyMarker.h"
 //#include "FidCutRegion.hh"
 
 #include "TSettings.class.hh"
@@ -50,6 +52,7 @@
 #include "THTMLTransparentAnalysis.hh"
 #include "LandauGaussFit.hh"
 #include "TClustering.hh"
+#include "TSpectrum.h"
 
 using namespace std;
 
@@ -66,8 +69,11 @@ private:
 	void initHistograms();
 	void fillHistograms();
 	TF1* doGaussFit(TH1F *histo);
+	TF1* doDoubleGaussFit(TH1F *histo);
 	void createEtaIntegrals();
 	void fitHistograms();
+	void analyseEtaDistributions();
+	void analyseEtaDistribution(TH1F* hEtaDist);
 	void saveHistograms();
 	void deleteHistograms();
 	void deleteFits();
@@ -120,10 +126,13 @@ private:
 	vector< vector<Float_t> > vecvecResXEtaCorrected;
 	vector< vector<Float_t> > vecvecResXHighest2Centroid;
 	vector< vector<Float_t> > vecvecRelPos;
+	vector< vector<Float_t> > vecvecEta;
+	vector< vector<Float_t> > vecvecEtaCMNcorrected;
 	// histograms
 	vector<TH1F*> hLaundau;
 	vector< vector<Float_t> > vecVecLandau;
 	vector<TH1F*> hEta;
+	vector<TH1F*> hEtaCMNcorrected;
 	vector< vector<Float_t> > vecVecEta;
 
 	TH1F* hLaundauMean;
@@ -178,6 +187,7 @@ private:
 	vector< pair <Float_t,Float_t> > vecResidualChargeWeighted;
 	vector< pair <Float_t,Float_t> > vecResidualHighest2Centroid;
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected;
+	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected_2ndGaus;
 	
 
 };

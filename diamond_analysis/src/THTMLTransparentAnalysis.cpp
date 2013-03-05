@@ -80,22 +80,33 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 			<<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
 	//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
-	vecTable.resize(7);
+	vecTable.resize(8);
 	vecTable.at(0).push_back("number of used channels");
-	vecTable.at(1).push_back("mean & width using charge weighted position");
+	vecTable.at(1).push_back("mean using charge weighted position  [&#956m]");
 	vecTable.at(2).push_back("resolution [&#956m]");
-	vecTable.at(3).push_back("mean & width using 2 highest channels");
+	vecTable.at(3).push_back("mean using 2 highest channels  [&#956m]");
 	vecTable.at(4).push_back("resolution [&#956m]");
-	vecTable.at(5).push_back("mean & width using 2 highest channels eta corrected");
-	vecTable.at(6).push_back("resolution [&#956m]");
+	vecTable.at(5).push_back("");
+	vecTable.at(6).push_back("mean using 2 highest channels eta corrected  [&#956m]");
+	vecTable.at(7).push_back("resolution [&#956m]");
+	if(resolutions.size()>3){
+		vecTable.resize(10);
+		vecTable.at(8).push_back("mean using 2nd Gauss  [&#956m]");
+		vecTable.at(9).push_back("resolution [&#956m]");
+	}
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		vecTable.at(0).push_back(floatToString(clusterSize+1));
-		vecTable.at(1).push_back(floatToString(resolutions.at(0).at(clusterSize).first)+"|"+floatToString(resolutions.at(0).at(clusterSize).second));
-		vecTable.at(2).push_back(floatToString(50.*resolutions.at(0).at(clusterSize).second));
-		vecTable.at(3).push_back(floatToString(resolutions.at(1).at(clusterSize).first)+"|"+floatToString(resolutions.at(1).at(clusterSize).second));
-		vecTable.at(4).push_back(floatToString(50.*resolutions.at(1).at(clusterSize).second));
-		vecTable.at(5).push_back(floatToString(resolutions.at(2).at(clusterSize).first)+"|"+floatToString(resolutions.at(2).at(clusterSize).second));
-		vecTable.at(6).push_back(floatToString(50.*resolutions.at(2).at(clusterSize).second));
+		vecTable.at(1).push_back(floatToString(resolutions.at(0).at(clusterSize).first,2));
+		vecTable.at(2).push_back(floatToString(resolutions.at(0).at(clusterSize).second,2));
+		vecTable.at(3).push_back(floatToString(resolutions.at(1).at(clusterSize).first,2));
+		vecTable.at(4).push_back(floatToString(resolutions.at(1).at(clusterSize).second,2));
+		vecTable.at(5).push_back("");
+		vecTable.at(6).push_back(floatToString(resolutions.at(2).at(clusterSize).first,2));
+		vecTable.at(7).push_back(floatToString(resolutions.at(2).at(clusterSize).second,2));
+		if(resolutions.size()>3){
+			vecTable.at(8).push_back(floatToString(resolutions.at(3).at(clusterSize).first,2));
+			vecTable.at(9).push_back(floatToString(resolutions.at(3).at(clusterSize).second,2));
+		}
 	}
 	sectionContent << createTable(vecTable);
 	sectionContent << "\n\n<br><br>\n\n";

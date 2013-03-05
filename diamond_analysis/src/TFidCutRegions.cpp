@@ -99,8 +99,8 @@ void TFidCutRegions::Print(int intend)
 	cout<<TCluster::Intent(intend)<<"\tX: "<<getMinFiducialX()<<"-"<<getMaxFiducialX()<<endl;
 	cout<<TCluster::Intent(intend)<<"\tY: "<<getMinFiducialY()<<"-"<<getMaxFiducialY()<<endl;
 
-	if(verbosity >3 ){
-		cout<<"Done\nPress a key..."<<flush;
+	if(verbosity >3 &&verbosity%2==1){
+		cout<<"Done\nPress a key...\t"<<flush;
 		char t;
 		cin>>t;
 	}
@@ -296,7 +296,8 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 	maxY = maxY + (maxY-minY)*.1;
 	if(verbosity)
 		cout<<"Plot range: x: "<<minX<<"-"<<maxX<<",\ty: "<<minY<<"-"<<maxY<<endl;
-	if(verbosity>3){
+	if(verbosity>3&&verbosity%2==1){
+		cout<<"\tPress a key and enter to confirm.\t"<<flush;
 		char t;
 		cin >>t;
 	}
@@ -455,8 +456,13 @@ std::vector< std::pair< Float_t,Float_t> > TFidCutRegions::findFiducialCutInterv
 
 TCanvas *TFidCutRegions::getFiducialCutCanvas(TPlaneProperties::enumCoordinate cor){
 	if(hEventScatterPlot==0) {
-		cout<<"hEventScatterPlot is Zero!!!!! Press any Key to Continue."<<endl;
-		char t; cin>>t;
+		cout<<"hEventScatterPlot is Zero!!!!!";
+		if(verbosity%2==1){
+			cout<<"Press any Key to Continue."<<endl;
+			char t; cin>>t;
+		}
+		else
+			cout<<endl;
 		return 0;
 	}
 	if(hEventScatterPlot->IsZombie())return 0;

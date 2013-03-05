@@ -48,10 +48,15 @@ bool checkDir(string dir){
 		printf(" %s is present\n",dir.c_str());
 		return true;
 	}
-	cout<<dir << "seeems not to be present. What to do?Exit? [y/n]"<<endl;
-	char t;
+	cout<<dir << "seems not to be present. What to do?Exit? [y/n]\t"<<flush;
+	char t='l';
 	cin >>t;
-	if (t=='y')
+	string possibleInputs = "yYnN";
+	while (possibleInputs.find(t)==string::npos){
+		cout<<"Please enter a valid input: 'y,Y,n,N'"<<flush;
+		cin >> t;
+	}
+	if (t=='y'||t=='Y')
 		exit(-1);
 	else return false;
 

@@ -52,6 +52,7 @@ TAnalysisOfSelection::~TAnalysisOfSelection() {
 
 void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 {
+	settings->diamondPattern.showPatterns();
 	cout<<"analyze selection data..."<<endl;
 	if(nEvents<=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
@@ -181,7 +182,7 @@ void TAnalysisOfSelection::initialiseHistos()
 					<< " X:"<<histo->GetNbinsX()<<"_"<<histo->GetXaxis()->GetXmin()<<":"<<histo->GetXaxis()->GetXmax()
 					<<" -Y:"<<histo->GetNbinsY()<<"_"<<histo->GetYaxis()->GetXmin()<<":"<<histo->GetYaxis()->GetXmax()<<endl;
 		}
-		if(verbosity>8){
+		if(verbosity>8&&verbosity%2==1){
 			cout<<"Press a key and enter to continue.\t"<<flush;
 			char t;
 			cin>>t;
@@ -246,8 +247,13 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		name = TString::Format("hEta_Area_%d_ch_%d-%d",area,chLow,chHigh);
 		TH1F* hEtaArea = (TH1F*)hEtaVsLeftChannelNo->ProjectionX(name,minBin,maxBin);
 		if(!hEtaArea){
-			cout<<"Projection does not work: "<<name<< ".\tPress a key and enter to continue..."<<flush;
-			char t;cin>>t;
+			cout<<"Projection does not work: "<<name;
+			if(verbosity%2==1){
+				cout<<".\tPress a key and enter to continue..."<<flush;
+				char t;cin>>t;
+			}
+			else
+				cout<<endl;
 		}
 		else
 			hEtaVsLeftChannelNo->SetTitle(name);
@@ -266,8 +272,13 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		name = TString::Format("hEtaCMNcorrected_Area_%d_ch_%d-%d",area,chLow,chHigh);
 		TH1F* hEtaCMNcorrectedArea = (TH1F*)hEtaCMNcorrectedVsLeftChannelNoArea->ProjectionX(name,minBin,maxBin);
 		if(!hEtaCMNcorrectedArea){
-			cout<<"Projection does not work: "<<name<<".\t Press a key and enter to continue..."<<flush;
-			char t;cin>>t;
+			cout<<"Projection does not work: "<<name;
+			if(verbosity%2==1){
+				cout<<".\t Press a key and enter to continue..."<<flush;
+				char t;cin>>t;
+			}
+			else
+				cout<<endl;
 		}
 		histSaver->SaveHistogram(hEtaCMNcorrectedArea);
 		histSaver->SaveHistogram(hEtaCMNcorrectedVsLeftChannelNoArea);
@@ -514,31 +525,43 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 			histSaver->SaveHistogram(hChargeVsFidY[i]);
 		}
 		TString name  = TString::Format("hMeanChargeFiducialCutNo%d",i+1);
-		if(verbosity)cout<<name<<" "<<hChargeVsFidCutProfile<<endl;
+		if(verbosity)cout<<name<<" "<<hChargeVsFidCutProfile<<flush;
 		TH2F* hMeanChargeArea =  (TH2F*)hChargeVsFidCutProfile->Clone(name);
 		hMeanChargeArea->SetTitle(name);
+		if(verbosity)cout<<"."<<flush;
 		xmin = settings->getSelectionFidCuts()->getMinFiducialX(i+1);
 		xmax = settings->getSelectionFidCuts()->getMaxFiducialX(i+1);
 		xCorrect = 0.1*(xmax-xmin);
+		if(verbosity)cout<<"."<<flush;
 		ymin = settings->getSelectionFidCuts()->getMinFiducialY(i+1);
 		ymax = settings->getSelectionFidCuts()->getMaxFiducialY(i+1);
 		yCorrect = 0.1*(ymax-ymin);
+		if(verbosity)cout<<"."<<flush;
 		hMeanChargeArea->GetXaxis()->SetRangeUser(xmin-xCorrect,xmax+xCorrect);
 		hMeanChargeArea->GetYaxis()->SetRangeUser(ymin-yCorrect,ymax+yCorrect);
+		if(verbosity)cout<<"."<<flush;
 		histSaver->SaveHistogram(hMeanChargeArea);
+		if(verbosity)cout<<"."<<flush;
 		delete hMeanChargeArea;
+		if(verbosity)cout<<"#"<<endl;
 	}
-	histSaver->SaveHistogramROOT(hChargeVsFidCut);
+//	histSaver->SaveHistogramROOT(hChargeVsFidCut);
+	if(verbosity)cout<<"create hEntriesOfMeanChargeHisto "<<flush;
 	TH2F* hEntriesOfMeanChargeHisto = (TH2F*)hChargeVsFidCut->Project3D("yx");
 	if(hEntriesOfMeanChargeHisto){
+		if(verbosity)cout<<"."<<flush;
 		hEntriesOfMeanChargeHisto->SetName("hEntriesOfMeanChargeHisto");
 		hEntriesOfMeanChargeHisto->SetTitle("hEntriesOfMeanChargeHisto");
+		if(verbosity)cout<<"."<<flush;
 		hEntriesOfMeanChargeHisto->GetXaxis()->SetTitle("fidCut X/ch");
 		hEntriesOfMeanChargeHisto->GetYaxis()->SetTitle("fidCut Y/ch");
 		hEntriesOfMeanChargeHisto->GetZaxis()->SetTitle("number of entries #");
+		if(verbosity)cout<<"."<<flush;
 		histSaver->SaveHistogram(hEntriesOfMeanChargeHisto);
+		if(verbosity)cout<<"#"<<flush;
 	}
 
+	if(verbosity)cout<<endl;
 
 	delete hChargeVsFidCut;
 	delete hChargeVsFidCutProfile;
@@ -638,22 +661,26 @@ void TAnalysisOfSelection::saveHistos()
 	}
 	else{
 		cerr<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
-		if(verbosity){char t; cin>>t;}
+		if(verbosity%2==1){char t; cin>>t;}
 	}
 	if(histo12==0){
 		cout<<"'hPulseHeigthDiamond_1_2_ClusterSize' == 0"<<flush;
-		if(verbosity){char t; cin>>t;}
+		if(verbosity%2==1){char t; cin>>t;}
 	}
 	else if(histo12->GetEntries()==0){
 		cout<<"'hPulseHeigthDiamond_1_2_ClusterSize' has 0 entries"<<flush;
-		if(verbosity){char t; cin>>t;}
+		if(verbosity%2==1){char t; cin>>t;}
 	}
 	else
 		cout<<"'hPulseHeigthDiamond_1_2_ClusterSize' has "<< histo12->GetEntries()<<" entries"<<endl;
 	if(histo==0){
-		cout<<""<<flush;
-		char t;
-		cin>>t;
+		cout<<"histo does not exist!";
+		if(verbosity%2==1){
+			cout<<"\t Press a key and enter to confirm."<<flush;
+			char t;cin>>t;
+		}
+		else
+			cout<<endl;
 	}
 	if(histo12!=0 && histo!=0){
 		if(verbosity) cout<<"histo: "<<histo <<" or histo12: "<<histo12<<" are valid..."<<endl;
@@ -920,6 +947,7 @@ void TAnalysisOfSelection::saveHistos()
 
 void TAnalysisOfSelection::analyseEvent()
 {
+
 	if(!eventReader->isValidTrack()) //just Tracks with Valid Silicon Track
 		return;
 
@@ -976,11 +1004,12 @@ void TAnalysisOfSelection::analyseEvent()
 	//		return;
 	//
 	hClusterSizeVsChannelPos->Fill(clustSize,pos);
+	if(area!=fidRegionIndex){
+		if(verbosity>2)cout<<"\r"<<nEvent<<" Problem: "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<fidRegionIndex<<" \t"<<pos<<"-->"<<area<<"_\n"<<flush;
+		return;
+	}
 	if(clustSize<=2&&nDiaClusters==1&&area==fidRegionIndex){
-		//		if(area!=fidRegionIndex){
-		//			if(verbosity>2)cout<<"\r"<<nEvent<<" Problem: "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<fidRegionIndex<<" \t"<<pos<<"-->"<<area<<"_\n"<<flush;
-		//			return;
-		//		}
+		//
 		//		else{
 		//			if(verbosity>5)cout<<nEvent<<" Good"<<endl;
 		//		}
@@ -1017,7 +1046,6 @@ void TAnalysisOfSelection::analyseEvent()
 				histoLandauDistribution2DNoBorderHit->Fill(charge,pos);
 		}
 	}
-
 }
 
 

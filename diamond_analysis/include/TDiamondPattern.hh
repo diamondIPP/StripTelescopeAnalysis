@@ -18,7 +18,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include <utility> //pair
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 
@@ -36,12 +36,15 @@ public:
 	Float_t convertMetricToChannel(Float_t metric);
 	Float_t convertMetricToChannel(Float_t metric,UInt_t interval);
 	Float_t getPitchWidth(UInt_t area);
-
+	Int_t getNPatterns(){return nChannelsOfInterval.size();}
 	void loadPitchWidthSettings(Float_t pitchWidth);
 	void resetPattern();
 	void clear(){resetPattern();}
 	void Print();
+	void showPatterns();
+	UInt_t size(){return getNPatterns();}
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
+	std::pair<Int_t,Int_t> getInterval(Int_t pattern);
 private:
 	UInt_t getNIntervals(){return nChannelsOfInterval.size();}
 	Float_t getChannelToMetric(UInt_t ch);

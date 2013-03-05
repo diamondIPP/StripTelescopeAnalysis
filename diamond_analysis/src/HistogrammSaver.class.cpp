@@ -735,7 +735,7 @@ void HistogrammSaver::SetDuckStyle() {
  *
  * @return TH2F histogram
  */
-TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins)
+TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins, Float_t minRangeX,Float_t maxRangeX)
 {
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(posX.size()!=posY.size()||posX.size()==0) {
@@ -747,6 +747,8 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	Float_t minX = posY.at(0);
 	Float_t minY = posY.at(0);
 	for(UInt_t i=0;i<posX.size();i++){
+		if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
+			continue;
 		if(posX.at(i)>maxX)maxX=posX.at(i);
 		else if(posX.at(i)<minX)minX=posX.at(i);
 		if(posY.at(i)>maxY)maxY=posY.at(i);
@@ -757,7 +759,8 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	Float_t deltaY=maxY-minY;
 	TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBins,minX-factor*deltaX,maxX+factor*deltaX,nBins,minY-factor*deltaY,maxY+factor*deltaY);
 	for(UInt_t i=0;i<posX.size();i++)
-		histo->Fill(posX.at(i),posY.at(i));
+		if (posX.at(i)>minRangeX&&posX.at(i)<maxRangeX)
+			histo->Fill(posX.at(i),posY.at(i));
 	histo->GetXaxis()->SetTitle("X-Position");
 	histo->GetYaxis()->SetTitle("Y-Position");
 
@@ -860,12 +863,13 @@ Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
 }
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
 {
+	int verbosity = 0;
 	Float_t factor = 0.05;//5% bigger INtervall...
 	if(vec.size()==0)
 		return new TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
 	Float_t max = vec.at(0);
 	Float_t min = vec.at(0);
-	cout<<"Create Histo: "<<range<<" "<<flush;
+	if(verbosity>3)cout<<"Create Histo "<<name<<", mode "<<range<<" "<<flush;
 	if (range==maxWidth){
 		for(UInt_t i=0;i<vec.size();i++){
 			if (max<vec.at(i))max=vec.at(i);
@@ -878,27 +882,35 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 			min-=0.5*min;
 			max+=0.5*min;
 		}
-		cout<<" maxWidth "<<min <<"-"<<max<<endl;
+		if(verbosity>3)cout<<" maxWidth "<<min <<"-"<<max<<endl;
 	}
 	else if(range==fiveSigma||range==threeSigma){
 		Float_t  mean2 =0;
 		Float_t sigma2 = 0;
+		int n=0;
 		for(UInt_t i=0;i<vec.size();i++){
-			mean2+=vec.at(i);
-			sigma2+=vec.at(i)*vec.at(i);
+			Float_t x = vec.at(i);
+			if(x<xmin||x>xmax)
+				continue;
+			mean2+=x;
+			sigma2+=x*x;
+			n++;
 		}
-		mean2/=(Float_t)vec.size();
-		sigma2/=(Float_t)vec.size();
+		mean2/=(Float_t)n;
+		sigma2/=(Float_t)n;
 
 		Float_t mean=0;
 		Float_t sigma=0;
 		UInt_t nEvents=0;
 		for(UInt_t i=0;i<vec.size();i++){
-			if( (vec.at(i)-mean2)/sigma2<3.){
-			mean+=vec.at(i);
-			sigma+=vec.at(i)*vec.at(i);
+			Float_t x = vec.at(i);
+			if(x<xmin||x>xmax)
+				continue;
+			if( (x-mean2)/sigma2>3.)
+				continue;
+			mean+=x;
+			sigma+=x*x;
 			nEvents++;
-			}
 		}
 		mean/=(Float_t)nEvents;
 		sigma/=(Float_t)nEvents;
@@ -909,13 +921,14 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		UInt_t nSigma = (range==fiveSigma)? 5:3;
 		max=mean+nSigma*sigma;
 		min=mean-nSigma*sigma;
-		//cout<<" nSigma:"<<nSigma<<" "<<mean<<"+/-"<<sigma<<" ==> "<<min <<"-"<<max<<endl;
+		if(verbosity>3)cout<<""<<nSigma<<"Sigma: "<<mean<<"+/-"<<sigma<<" ==> "<<min <<"-"<<max<<endl;
 	}
 	else if(range==positiveArea){
 		min=0;
 		for(UInt_t i=0;i<vec.size();i++)
 			if (max<vec.at(i))max=vec.at(i);
 		max*=(1+factor);
+		if(verbosity>3)cout<<" positiveArea: 0 -"<<max;
 	}
 	else if(range==positiveSigma){
 		min=0;
@@ -931,14 +944,19 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		sigma=TMath::Sqrt(sigma);
 		UInt_t nSigma = 3;
 		max=mean+nSigma*sigma;
+		if(verbosity>3)cout<<" positiveSigma: 0 - "<<max<<endl;
 	}
 	else if(range==manual){
 		max =xmax;
 		min=xmin;
+		if(verbosity>3)cout<<" manual: "<<min<<" - " << max <<endl;
 	}
 
 	TH1F* histo = new TH1F(name.c_str(),name.c_str(),nBins,min,max);
 	for(UInt_t i=0;i<vec.size();i++){
+		Float_t x = vec.at(i);
+		if(x<xmin||x>xmax)
+			continue;
 		histo->Fill(vec.at(i));
 	}
 	int ntries=0;
