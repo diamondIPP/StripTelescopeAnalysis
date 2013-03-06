@@ -8,7 +8,7 @@
 
 
 #include "../include/TAnalysisOfPedestal.hh"
-
+using namespace std;
 TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*********TAnalysisOfPedestal::TAnalysisOfPedestal*****"<<endl;
@@ -268,14 +268,14 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 		vecBiggestHitChannelCMN[det].push_back(bigHit);
 		vecBiggestSignalInSigmaCMN[det].push_back(biggestSignalInSigma);
 		if(biggestAdjacentHitChannel!=-9999){
-			vecBiggestAdjacentSignalCMN[det].push_back(biggestAdjacentSignalInSigma);
+			vecBiggestAdjacentSignalInSigmaCMN[det].push_back(biggestAdjacentSignalInSigma);
 			vecBiggestAdjacentHitChannelCMN[det].push_back(biggestAdjacentHitChannel);
 			//				vecHitOrder[det].push_back(biggestAdjacentHitChannel-bigHit);
 			hBiggestAdjacentSignalInSigmaCMN[det]->Fill(biggestAdjacentSignalInSigma);
 		}
 		else{
 			//				vecHitOrder[det].push_back(0);
-			vecBiggestAdjacentSignalCMN[det].push_back(0);
+			vecBiggestAdjacentSignalInSigmaCMN[det].push_back(0);
 			vecBiggestAdjacentHitChannelCMN[det].push_back(-9999);
 		}
 		//			hHitOrderMap[det]->Fill(hitOrder);
@@ -588,12 +588,25 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					TH2F *hBiggestAndBiggestAdjacentSignal_in_SNR = new TH2F(histoName,histoName,256,xMinBiggest,xMaxBiggest,256,xMinAdjacent,xMaxAdjacent);
 					histoName=histoName.Append("_CMNcorrected");
 					TH2F *hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected = new TH2F(histoName,histoName,256,xMinBiggest,xMaxBiggest,256,xMinAdjacent,xMaxAdjacent);
-					if(vecBiggestSignalInSigma[det].size()!=vecBiggestAdjacentSignalInSigma[det].size()||
-					   vecBiggestAdjacentSignalInSigma[det].size()!=vecBiggestAdjacentHitChannelCMN[det].size()||
-					   vecBiggestAdjacentHitChannelCMN[det].size()!=vecBiggestAdjacentSignalInSigma[det].size()	)
-						cout<<"Vector Sizes do NOT AGREE: "<<vecBiggestSignalInSigma[det].size()<<" "<<vecBiggestAdjacentSignalInSigma[det].size()<<" "
-						    <<vecBiggestAdjacentHitChannelCMN[det].size()<<" "<<vecBiggestAdjacentSignalInSigma[det].size()<<endl;
-					for(UInt_t i=0;i<vecBiggestSignalInSigma[det].size()&&i<vecBiggestAdjacentSignalInSigma[det].size();i++){
+					UInt_t bhc      = vecBiggestHitChannel[det].size();
+					UInt_t bhcCMN   = vecBiggestHitChannelCMN[det].size();
+					UInt_t bSNR     = vecBiggestSignalInSigma[det].size();
+					UInt_t bSNRCMN  = vecBiggestSignalInSigmaCMN[det].size();
+					UInt_t bahc     = vecBiggestAdjacentHitChannel[det].size();
+					UInt_t bahcCMN  = vecBiggestAdjacentHitChannelCMN[det].size();
+					UInt_t baSNR    = vecBiggestAdjacentSignalInSigma[det].size();
+					UInt_t baSNRCMN = vecBiggestAdjacentSignalInSigmaCMN[det].size();
+					if(bhc!=bhcCMN||bhcCMN!=bSNR||bSNR!=bSNRCMN||bSNRCMN!=bahc||bahc!=bahcCMN||bahcCMN!=baSNR||baSNR!=baSNRCMN)
+						cout<<"Vector Sizes do NOT AGREE: "<<bhc<<" "<<bhcCMN<<" "<<bSNR<<" "<<bSNRCMN<<" "<<bahc<<" "<<bahcCMN<<" "<<baSNR
+							<<" "<<baSNRCMN<<endl;
+
+					UInt_t minArray[] = {bhc,bhcCMN,bSNR,bSNRCMN,bahc,bahcCMN,baSNR,baSNRCMN};
+					UInt_t minSize = *min_element(minArray,minArray+8);
+					if(verbosity){
+						cout<<"minSize: "<<minSize<<endl;
+						if(verbosity%2==1){char t;cin>>t;}
+					}
+					for(UInt_t i=0;i<minSize&&i<vecBiggestSignalInSigma[det].size()&&i<vecBiggestAdjacentSignalInSigma[det].size();i++){
 						if(i>=vecBiggestHitChannel[det].size()){
 							cout<<"vecBiggestHitChannel["<<det<<"].size()= "<<vecBiggestAdjacentHitChannelCMN[det].size()<<"<= i="<<i<<endl;
 							continue;
@@ -608,7 +621,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 						}
 						if(area.first<=vecBiggestHitChannelCMN[det].at(i)&&vecBiggestAdjacentHitChannelCMN[det].at(i)<=area.second){
 							Float_t biggestSNR = vecBiggestSignalInSigmaCMN[det].at(i);
-							Float_t adjacentSNR = vecBiggestAdjacentSignalCMN[det].at(i);
+							Float_t adjacentSNR = vecBiggestAdjacentSignalInSigmaCMN[det].at(i);
 							Int_t biggestCh  = vecBiggestHitChannel[det].at(i);
 							Int_t adjacentCh = vecBiggestAdjacentHitChannel[det].at(i);
 							if(biggestSNR<adjacentSNR){
@@ -734,7 +747,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		hBiggestAndBiggestAdjacentSignal_in_SNR_CMN->GetZaxis()->SetTitle("number of entries # ");
 		for(UInt_t i=0;i<vecBiggestSignalInSigmaCMN[det].size()&&i<vecBiggestSignalInSigmaCMN[det].size();i++){
 			Float_t biggestSNR = vecBiggestSignalInSigmaCMN[det].at(i);
-			Float_t adjacentSNR= vecBiggestAdjacentSignalCMN[det].at(i);
+			Float_t adjacentSNR= vecBiggestAdjacentSignalInSigmaCMN[det].at(i);
 			hBiggestAndBiggestAdjacentSignal_in_SNR_CMN->Fill(biggestSNR,adjacentSNR);
 		}
 		histSaver->SaveHistogram(hBiggestAndBiggestAdjacentSignal_in_SNR_CMN);

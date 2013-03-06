@@ -23,6 +23,7 @@
 #include <cstring>
 #include <vector>
 #include <deque>
+#include <algorithm>
 
 #include "TSystem.h"
 #include "TH1F.h"
@@ -148,7 +149,7 @@ private:
 
 	std::vector<Float_t>vecBiggestSignalInSigmaCMN[N_DETECTORS];
 	std::vector<Int_t> vecBiggestHitChannelCMN[N_DETECTORS];
-	std::vector<Float_t>vecBiggestAdjacentSignalCMN[N_DETECTORS];
+	std::vector<Float_t>vecBiggestAdjacentSignalInSigmaCMN[N_DETECTORS];
 	std::vector<Int_t> vecBiggestAdjacentHitChannelCMN[N_DETECTORS];
 
 	std::vector<Int_t> vecHitOrder[N_DETECTORS];
