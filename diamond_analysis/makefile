@@ -17,9 +17,9 @@ INCLUDEDIR      := include
 OBJDIR			:= obj
 LIBDIR			:= ~/lib
 
-
-OPTIMAZATIONFLAG :=	-O0 -g3
-CFLAGS  		:= -g3 -Wall -I$(INCLUDEDIR) -D_REENTRANT 
+DEBUG			:= #-g3
+OPTIMAZATIONFLAG :=	-O2 $(DEBUG)
+CFLAGS  		:= -Wall -I$(INCLUDEDIR) -D_REENTRANT 
 CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
 
 
@@ -30,7 +30,7 @@ HEAD    		:=
 
 LD              := g++
 
-LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib -g $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
+LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib $(DEBUG) $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
 LIBFILES		+=  TDetector_Data.o TTrigger_Event.o

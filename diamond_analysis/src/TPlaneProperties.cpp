@@ -16,19 +16,6 @@ TPlaneProperties::~TPlaneProperties() {
 	// TODO Auto-generated destructor stub
 }
 
-UInt_t TPlaneProperties::getNChannels(UInt_t det){
-	switch (det){
-	case 8: return TPlaneProperties::getNChannelsDiamond();break;
-	default: return TPlaneProperties::getNChannelsSilicon();break;
-	}
-}
-Int_t TPlaneProperties::getMaxSignalHeight(UInt_t det){
-	switch(det){
-	case 8: return getMaxSignalHeightDiamond();
-	default: return getMaxSignalHeightSilicon();
-	}
-}
-
 std::string TPlaneProperties::getCoordinateString(enumCoordinate cor){
 	switch (cor){
 	case X_COR: return "X";break;
