@@ -84,6 +84,10 @@ void THTMLAlignment::createPostDiamondOverview()
 	UInt_t nDiamondAlignmentEvents = alignment!=0?alignment->getDiamondAlignmentEvents():0;
 	UInt_t nUsedEvents = alignment!=0?alignment->getNUsedEvents():0;
 	Float_t percentage = (Float_t)nDiamondAlignmentEvents/(Float_t)nUsedEvents*100;
+	sectionContent<<"Used TrainingMethod '";
+	if(settings->getTrainingMethod()==TSettings::enumFraction)sectionContent<<"fraction' with "<<settings->getAlignment_training_track_fraction()*100<<"%. <br>\n";
+	else sectionContent<<"number' with "<<settings->getAlignmentTrainingTrackNumber()<<" used Events.<br>\n";
+	sectionContent<<"chi2 cut: "<<settings->getAlignment_chi2()<<"<br>\n";
 	sectionContent<<"For the diamond Alignment "<<nDiamondAlignmentEvents<<" of "<<nUsedEvents <<" ("<<setprecision(4)<<percentage<<"%) fullfill a  Chi2 cut at ";
 	sectionContent<<(float)((alignment!=0)?alignment->getDiaChi2():-1.)<<".<br><br>\n";
 	sectionContent<<"The diamond is aligned with a digital resoltuion convoluted with a gaus of "<<setprecision(4)<<(float)(alignment!=0?alignment->getXResolution(4)*TPlaneProperties::getStripDistance():-1)<<" &#956m";
