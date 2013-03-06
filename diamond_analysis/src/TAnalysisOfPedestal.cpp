@@ -203,6 +203,8 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 		bigHit = biggestHitChannelCMN;
 		bigSignal=biggestSignalCMN;
 	}
+	if(bigSignal<0)
+		return;
 	if(det==TPlaneProperties::getDetDiamond()&&verbosity>8)
 		cout<<"Biggest Signal: "<<bigSignal<<"@"<<bigHit<<"-"<<CMN_corrected<<"\t"<<biggestSignal<<"@"<<biggestHitChannel<<"\t"<<biggestSignalCMN<<"@"<<biggestHitChannelCMN<<endl;
 
@@ -541,14 +543,21 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 				if(area.first<area.second){
 					TString name = TString::Format("hPulseHeight_BiggestSignalInSigma%s_area_%d_ch%d-ch%d",TPlaneProperties::getStringForDetector(det).c_str(),i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
-					TH1F* hBiggestPHinSigma_SubArea = (TH1F*) hBiggestSignalInSigma2D->ProjectionX(name,area.first,area.second);
+					Int_t binMin = hBiggestSignalInSigma2D->FindBin(area.first);
+					Int_t binMax = hBiggestSignalInSigma2D->FindBin(area.second);
+					TH1F* hBiggestPHinSigma_SubArea = (TH1F*) hBiggestSignalInSigma2D->ProjectionX(name,binMin,binMax);
+					if(!hBiggestPHinSigma_SubArea)continue;
 					hBiggestPHinSigma_SubArea->SetTitle(name);
 					hBiggestPHinSigma_SubArea->SetName(name);
 					//					Float_t ymax =
 					findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
+
 					name = TString::Format("hPulseHeight_BiggestSignalInSigma_area%d_ch%d-ch%d_CMNcorrected",i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
-					TH1F* hBiggestPHInSigma_SubArea_CMNcorrected = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,area.first,area.second);
+					binMin = hBiggestSignalInSigma2DCMN->FindBin(area.first);
+					binMax = hBiggestSignalInSigma2DCMN->FindBin(area.second);
+					TH1F* hBiggestPHInSigma_SubArea_CMNcorrected = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,binMin,binMax);
+					if(!hBiggestPHInSigma_SubArea_CMNcorrected) continue;
 					hBiggestPHInSigma_SubArea_CMNcorrected->SetTitle(name);
 					findYPlotRangeForPHHisto(hBiggestPHInSigma_SubArea_CMNcorrected,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
 					histSaver->CopyAxisRangesToHisto(hBiggestPHInSigma_SubArea_CMNcorrected,hBiggestPHinSigma_SubArea);
@@ -599,10 +608,13 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 								hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->Fill(biggestSNR,adjacentSNR);
 						}
 					}
+					if(!hBiggestAndBiggestAdjacentSignal_in_SNR)continue;
+					if(!hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected)continue;
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetXaxis()->SetTitle("Biggest Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetYaxis()->SetTitle("Biggest adjacent Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetZaxis()->SetTitle("number of entries #");
 					TH2F* hist = hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected;
+					if(!hist)continue;
 					Float_t zmax = 0;//hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetBinContent(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetMaximumBin());
 					for(Int_t i = 0; i<hist->GetXaxis()->GetNbins();i++)
 						for(Int_t j=0;j<hist->GetYaxis()->GetNbins();j++){
@@ -630,8 +642,8 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 
 					histSaver->SaveHistogramLogZ(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected);
 					histSaver->SaveHistogramLogZ(hBiggestAndBiggestAdjacentSignal_in_SNR);
-					delete hBiggestPHInSigma_SubArea_CMNcorrected;
-					delete hBiggestPHinSigma_SubArea;
+					if(hBiggestPHInSigma_SubArea_CMNcorrected)delete hBiggestPHInSigma_SubArea_CMNcorrected;
+					if(hBiggestPHinSigma_SubArea)delete hBiggestPHinSigma_SubArea;
 				}
 			}
 
