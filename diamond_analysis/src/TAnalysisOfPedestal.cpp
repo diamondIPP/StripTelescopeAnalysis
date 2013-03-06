@@ -588,8 +588,19 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					TH2F *hBiggestAndBiggestAdjacentSignal_in_SNR = new TH2F(histoName,histoName,256,xMinBiggest,xMaxBiggest,256,xMinAdjacent,xMaxAdjacent);
 					histoName=histoName.Append("_CMNcorrected");
 					TH2F *hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected = new TH2F(histoName,histoName,256,xMinBiggest,xMaxBiggest,256,xMinAdjacent,xMaxAdjacent);
-
+					if(vecBiggestSignalInSigma[det].size()!=vecBiggestAdjacentSignalInSigma[det].size()||
+					   vecBiggestAdjacentSignalInSigma[det].size()!=vecBiggestAdjacentHitChannelCMN[det].size()||
+					   vecBiggestAdjacentHitChannelCMN[det].size()!=vecBiggestAdjacentSignalInSigma[det].size()	)
+						cout<<"Vector Sizes do NOT AGREE: "<<vecBiggestSignalInSigma[det].size()<<" "<<vecBiggestAdjacentSignalInSigma[det].size()<<" "
+						    <<vecBiggestAdjacentHitChannelCMN[det].size()<<" "<<vecBiggestAdjacentSignalInSigma[det].size()<<endl;
 					for(UInt_t i=0;i<vecBiggestSignalInSigma[det].size()&&i<vecBiggestAdjacentSignalInSigma[det].size();i++){
+						if(i>=vecBiggestHitChannel[det].size()){
+							cout<<"vecBiggestHitChannel["<<det<<"].size()= "<<vecBiggestAdjacentHitChannelCMN[det].size()<<"<= i="<<i<<endl;
+							continue;
+						}
+						if(i>=vecBiggestAdjacentHitChannelCMN[det].size()){
+							cout<<"vecBiggestAdjacentHitChannelCMN["<<det<<"].size() = "<<vecBiggestAdjacentHitChannelCMN[det].size()<<"<= i = "<<i<<endl;
+						}
 						if(area.first<=vecBiggestHitChannel[det].at(i)&&vecBiggestHitChannel[det].at(i)<=area.second){
 							Float_t biggestSNR = vecBiggestSignalInSigma[det].at(i);
 							Float_t adjacentSNR = vecBiggestAdjacentSignalInSigma[det].at(i);
@@ -601,7 +612,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 							Int_t biggestCh  = vecBiggestHitChannel[det].at(i);
 							Int_t adjacentCh = vecBiggestAdjacentHitChannel[det].at(i);
 							if(biggestSNR<adjacentSNR){
-								cout<<i<<" "<<det<< " "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
+								cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
 							}
 
 							else
