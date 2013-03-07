@@ -822,8 +822,13 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 	TResidual res;
 	res.setResKeepFactor(res_keep_factor);
 	res.calculateResidual(cor, &vecXPred, &vecXDelta, &vecYPred, &vecYDelta);
+	if(calcMode == chi2CalcMode && bAlign){
+			align->setNDiamondAlignmentEvents((UInt_t) vecXDelta.size());
+			align->setDiaChi2(settings->getAlignment_chi2());
+	}
 	this->CreatePlots(cor, subjectPlane, refPlaneString.str(), bPlot, bAlign);
 	clearMeasuredVectors();
+
 	return res;
 }
 //
@@ -900,10 +905,7 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 //		predictedPosition->Delete();
 //	}
 //	cout<<"\tused "<<vecXDelta.size()<<" Events."<<endl;
-//	if (bAlign) {
-//		align->setNDiamondAlignmentEvents((UInt_t) vecXDelta.size());
-//		align->setDiaChi2(settings->getAlignment_chi2());
-//	}
+
 //
 //	if (verbosity) cout << vecXDelta.size() << " " << vecYDelta.size() << " " << vecXPred.size() << " " << vecYPred.size() << " " << vecXObs.size() << " " << vecYObs.size() << endl;
 //	if (verbosity) cout << "used " << vecXDelta.size() << " Events of " << events.size() << " with a Chi2 < " << settings->getAlignment_chi2() << endl;
