@@ -1589,6 +1589,51 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		if(verbosity>3)cout<<"DONE"<<endl;
 	}
 
+	if(bPlot){
+		vector<Float_t > vecRelPos;
+		for(int i=0;i<vecXPred.size();i++){
+			Float_t xPred = vecXPred.at(i);
+			int subjectDet = subjectPlane*2;
+			if(cor ==TPlaneProperties::Y_COR ) subjectPlane +1;
+			Float_t channelPos = myTrack->inChannelDetectorSpace(subjectDet,xPred);
+			Float_t relPos = channelPos-(int)(channelPos+.5);
+			vecRelPos.push_back(relPos);
+		}
+		histName.str("");
+		histName.clear();
+		histName << preName.str() << "_RelHitPos"<<TPlaneProperties::getCoordinateString(cor)<< "_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
+		TH1F* histo = histSaver->CreateDistributionHisto(histName.str(), vecRelPos, 512);
+		if(histo){
+			histo->GetXaxis()->SetTitle("relative Hit Position / ch");
+			histo->GetYaxis()->SetTitle("number of entries");
+			histSaver->SaveHistogram(histo);
+		}
+		if(bChi2){
+			histName.str("");
+			histName.clear();
+			histName << preName.str() << "_RelHitPos"<<TPlaneProperties::getCoordinateString(cor)<< "vsChi2X_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
+			TH2F* hist = histSaver->CreateScatterHisto(histName.str(), vecRelPos,vecXChi2);
+			if(hist){
+				hist->GetXaxis()->SetTitle("relative Hit Position / ch");
+				hist->GetYaxis()->SetTitle("#Chi^{2}_{X}");
+				hist->GetZaxis()->SetTitle("number of entries #");
+				histSaver->SaveHistogram(hist);
+				if(hist)delete hist;
+			}
+
+			histName.str("");
+			histName.clear();
+			histName << preName.str() << "_RelHitPos"<<TPlaneProperties::getCoordinateString(cor)<< "vsChi2Y_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
+			hist = histSaver->CreateScatterHisto(histName.str(), vecRelPos,vecYChi2);
+			if(hist){
+				hist->GetXaxis()->SetTitle("relative Hit Position / ch");
+				hist->GetYaxis()->SetTitle("#Chi^{2}_{Y}");
+				hist->GetZaxis()->SetTitle("number of entries #");
+				histSaver->SaveHistogram(hist);
+				if(hist)delete hist;
+			}
+		}
+	}
 }
 
 void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {

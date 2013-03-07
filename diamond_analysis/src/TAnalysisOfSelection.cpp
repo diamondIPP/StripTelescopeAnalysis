@@ -603,8 +603,9 @@ void TAnalysisOfSelection::saveHistos()
 	}
 
 	if(histo==0){
+
 		cout<<"Couldn't creaye histo hPulseHeightDiamondAll"<<flush;
-		char t;cin>>t;
+		if(verbosity%2==1){cout<<"\tPress a key to continue..."<<endl;char t;cin>>t;}
 	}
 
 	Float_t histoMean,histoMax,histoRMS,histoMeanGausFit;
