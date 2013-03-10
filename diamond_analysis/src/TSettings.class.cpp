@@ -98,7 +98,7 @@ void TSettings::checkSettings(){
 	if (isStandardSelectionFidCut==true){
 		fidCutsSelection->Reset();
 		fidCutsSelection->SetName("standard-FidCuts");
-		fidCutsSelection->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_xhigh());
+		fidCutsSelection->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_yhigh());
 	}
 	if(!fidCutsSelection)
 		fidCutsSelection =  new TFidCutRegions();
