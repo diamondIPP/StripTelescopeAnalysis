@@ -126,6 +126,7 @@ private:
 	vector< vector<Float_t> > vecvecResXEtaCorrected;
 	vector< vector<Float_t> > vecvecResXHighest2Centroid;
 	vector< vector<Float_t> > vecvecRelPos;
+	vector< vector<Float_t> > vecvecRelPos2;
 	vector< vector<Float_t> > vecvecEta;
 	vector< vector<Float_t> > vecvecEtaCMNcorrected;
 	// histograms

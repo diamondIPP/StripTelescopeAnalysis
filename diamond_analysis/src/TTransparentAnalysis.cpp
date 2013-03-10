@@ -167,6 +167,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 	for(UInt_t clusterSize = 0; clusterSize <TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);clusterSize++){
 		vecvecResXChargeWeighted[clusterSize].clear();
 		vecvecRelPos[clusterSize].clear();
+		vecvecRelPos2[clusterSize].clear();
 		vecvecEta[clusterSize].clear();
 		vecvecEtaCMNcorrected[clusterSize].clear();
 		vecvecResXHighest2Centroid[clusterSize].clear();
@@ -197,6 +198,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 			if(verbosity>4)
 				cout<<nEvent<<": "<<clusterSize<<"clusterSize: "<<channelPosInDetSystem<<"-->"<<relChannelPos<<" <-> "<<resXChargeWeighted<<", "<<resXEtaCorrected<<", "<<resXHighest2Centroid<<endl;
 			vecvecRelPos[clusterSize].push_back(relChannelPos);
+			vecvecRelPos2[clusterSize].push_back(relChannelPos+.5);
 			vecvecEta[clusterSize].push_back(eta);
 			vecvecEtaCMNcorrected[clusterSize].push_back(etaCMNcorrected);
 			//			if (resXChargeWeighted > -6000)
@@ -340,6 +342,7 @@ void TTransparentAnalysis::initHistograms() {
 	vecvecResXHighest2Centroid.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecResXEtaCorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecRelPos.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecvecRelPos2.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecEta.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecEtaCMNcorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecVecLandau.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
@@ -349,6 +352,7 @@ void TTransparentAnalysis::initHistograms() {
 		vecvecEta.at(clusterSize).clear();
 		vecvecEtaCMNcorrected.at(clusterSize).clear();
 		vecvecRelPos.at(clusterSize).clear();
+		vecvecRelPos2.at(clusterSize).clear();
 		vecvecResXEtaCorrected.at(clusterSize).clear();
 		vecvecResXChargeWeighted.at(clusterSize).clear();
 		// TODO: take care of histogram names and bins!!
@@ -425,6 +429,7 @@ void TTransparentAnalysis::fillHistograms() {
 		vecvecResXChargeWeighted[clusterSize].push_back(residualCW);
 		vecvecResXHighest2Centroid[clusterSize].push_back(residualH2C);
 		vecvecRelPos[clusterSize].push_back(relPos);
+		vecvecRelPos2[clusterSize].push_back(relPos+.5);
 		vecvecEta[clusterSize].push_back(eta);
 		vecvecEtaCMNcorrected[clusterSize].push_back(etaCMN);
 
@@ -668,6 +673,15 @@ void TTransparentAnalysis::saveHistograms() {
 		histSaver->SaveHistogram(hist);
 		if (hist)delete hist;
 
+		name = (string)TString::Format("hRelChPos2VsResChargeWeighted_In_%d",i+1);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos2[i],vecvecResXEtaCorrected[i],512,-6000);
+		hist->GetXaxis()->SetRangeUser(-pw,pw);
+		hist->GetYaxis()->SetTitle("Relative predicted Position");
+		hist->GetXaxis()->SetTitle("Residual, charge Weighted / #mum");
+		if(verbosity>6)cout<<hist<<" "<<hist->GetName()<<" --- > Entries:"<<hist->GetEntries()<<endl;
+		histSaver->SaveHistogram(hist);
+		if (hist)delete hist;
+
 		name = (string)TString::Format("hRelChPosVsResChargeWeighted_In_%d",i+1);
 		hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXChargeWeighted[i],512,-6000);
 		hist->GetXaxis()->SetRangeUser(-pw,pw);
@@ -702,6 +716,24 @@ void TTransparentAnalysis::saveHistograms() {
 		hist->GetXaxis()->SetRangeUser(-pw,pw);
 		histSaver->SaveHistogram(hist);
 		if(verbosity>6)cout<<hist<<" "<<hist->GetName()<<" --- > Entries:"<<hist->GetEntries()<<endl;
+		if (hist)delete hist;
+
+		name = (string)TString::Format("hRelChPosVsEta_In_%d",i+1);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos2[i],vecvecEta[i],512);
+		hist->GetXaxis()->SetRangeUser(0,1);
+		hist->GetYaxis()->SetTitle("Relative predicted Position");
+		hist->GetXaxis()->SetTitle("#eta ");
+		if(verbosity>6)cout<<hist<<" "<<hist->GetName()<<" --- > Entries:"<<hist->GetEntries()<<endl;
+		histSaver->SaveHistogram(hist);
+		if (hist)delete hist;
+
+		name = (string)TString::Format("hRelChPosVsEtaCMN_In_%d",i+1);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos2[i],vecvecEtaCMNcorrected[i],512);
+		hist->GetXaxis()->SetRangeUser(0,1);
+		hist->GetYaxis()->SetTitle("Relative predicted Position");
+		hist->GetXaxis()->SetTitle("#eta_{CMN corrected}");
+		if(verbosity>6)cout<<hist<<" "<<hist->GetName()<<" --- > Entries:"<<hist->GetEntries()<<endl;
+		histSaver->SaveHistogram(hist);
 		if (hist)delete hist;
 	}
 }
