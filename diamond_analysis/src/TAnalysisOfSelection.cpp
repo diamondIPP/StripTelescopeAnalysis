@@ -257,16 +257,15 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		}
 		else
 			hEtaVsLeftChannelNo->SetTitle(name);
-		histSaver->SaveHistogram(hEtaArea);
-		delete hEtaArea;
 
 
 
 		name = TString::Format("hEtaCMNcorrectedVsLeftChannelNoArea%d_ch_%d-%d",area,chLow,chHigh);
 		TH2F* hEtaCMNcorrectedVsLeftChannelNoArea = (TH2F*)hEtaCMNcorrectedVsLeftChannelNo->Clone(name);
-		hEtaCMNcorrectedVsLeftChannelNoArea->SetTitle(name);
-		hEtaCMNcorrectedVsLeftChannelNoArea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
-
+		if(hEtaCMNcorrectedVsLeftChannelNoArea){
+			hEtaCMNcorrectedVsLeftChannelNoArea->SetTitle(name);
+			hEtaCMNcorrectedVsLeftChannelNoArea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		}
 		minBin = hEtaCMNcorrectedVsLeftChannelNoArea->GetYaxis()->FindBin(chLow);
 		maxBin = hEtaCMNcorrectedVsLeftChannelNoArea->GetYaxis()->FindBin(chHigh);
 		name = TString::Format("hEtaCMNcorrected_Area_%d_ch_%d-%d",area,chLow,chHigh);
@@ -282,45 +281,58 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		}
 		histSaver->SaveHistogram(hEtaCMNcorrectedArea);
 		histSaver->SaveHistogram(hEtaCMNcorrectedVsLeftChannelNoArea);
-		delete hEtaArea;
+
+		histSaver->SaveHistogram(hEtaArea);
+		if(hEtaArea)delete hEtaArea;
+
 		//		delete hEtaCMNcorrectedVsLeftChannelNoArea;
 		//2d area channel vs cluster size
 		name = TString::Format("hClusterSizeVsChannelPos_Area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* hClusterSizeVsChannelPosArea = (TH2F*)hClusterSizeVsChannelPos->Clone(name);
-		hClusterSizeVsChannelPosArea->SetTitle(name);
-		hClusterSizeVsChannelPosArea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
-		histSaver->SaveHistogram(hClusterSizeVsChannelPosArea,false);
-		delete hClusterSizeVsChannelPosArea;
+		if(hClusterSizeVsChannelPosArea){
+			hClusterSizeVsChannelPosArea->SetTitle(name);
+			hClusterSizeVsChannelPosArea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+			histSaver->SaveHistogram(hClusterSizeVsChannelPosArea,false);
+		}
+		if(hClusterSizeVsChannelPosArea) delete hClusterSizeVsChannelPosArea;
+
 		Float_t yMax = hClusterSizeVsChannelPos->GetYaxis()->GetXmax();
 		Float_t yMin = hClusterSizeVsChannelPos->GetYaxis()->GetXmin();
 		int binMax = hClusterSizeVsChannelPos->GetYaxis()->FindBin(yMax);
 		int binMin = hClusterSizeVsChannelPos->GetYaxis()->FindBin(yMin);
 		name = TString::Format("hClusterSize_Area_%d_ch_%d-%d",area,chLow,chHigh);
 		TH1F* hClusterSizeVsChannelPosAreaProjection = (TH1F*)hClusterSizeVsChannelPos->ProjectionX(name,binMin,binMax);
-		hClusterSizeVsChannelPosAreaProjection->SetTitle(name);
-		hClusterSizeVsChannelPosAreaProjection->GetXaxis()->SetTitle("cluster size");
-		hClusterSizeVsChannelPosAreaProjection->GetYaxis()->SetTitle("number of entries");
-		histSaver->SaveHistogram(hClusterSizeVsChannelPosAreaProjection);
-		delete hClusterSizeVsChannelPosAreaProjection;
+		if(hClusterSizeVsChannelPosAreaProjection){
+			hClusterSizeVsChannelPosAreaProjection->SetTitle(name);
+			hClusterSizeVsChannelPosAreaProjection->GetXaxis()->SetTitle("cluster size");
+			hClusterSizeVsChannelPosAreaProjection->GetYaxis()->SetTitle("number of entries");
+			histSaver->SaveHistogram(hClusterSizeVsChannelPosAreaProjection);
+		}
+		if(hClusterSizeVsChannelPosAreaProjection)delete hClusterSizeVsChannelPosAreaProjection;
 
 		// 2d area clusterSize 1or 2 normal
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2Darea = (TH2F*)histoLandauDistribution2D->Clone(name);
-		histoLandauDistribution2Darea->SetTitle(name);
-		histoLandauDistribution2Darea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		if(histoLandauDistribution2Darea){
+			histoLandauDistribution2Darea->SetTitle(name);
+			histoLandauDistribution2Darea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		}
 		histSaver->SaveHistogram(histoLandauDistribution2Darea);
-		delete histoLandauDistribution2Darea;
+		if(histoLandauDistribution2Darea)delete histoLandauDistribution2Darea;
 
 		// 2d area clusterSize 1or 2 noBorderSeeds
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2DNoBorderSeedarea = (TH2F*)histoLandauDistribution2DNoBorderSeed->Clone(name);
+		if(histoLandauDistribution2DNoBorderSeedarea){
 		histoLandauDistribution2DNoBorderSeedarea->SetTitle(name);
 		histoLandauDistribution2DNoBorderSeedarea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		}
 		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderSeedarea);
-		delete histoLandauDistribution2DNoBorderSeedarea;
+		if(histoLandauDistribution2DNoBorderSeedarea)
+			delete histoLandauDistribution2DNoBorderSeedarea;
 
 
 		// 2d area clusterSize 1or 2 noBorderHits
@@ -383,31 +395,39 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		// 2d area clusterSize 1or 2 unmasked
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
+		UInt_t binLow=0;
+		UInt_t binHigh=-1;
 		TH2F* histoLandauDistribution2DareaUnmasked = (TH2F*)histoLandauDistribution2D_unmasked->Clone(name);
-		histoLandauDistribution2DareaUnmasked->SetTitle(name);
-		histoLandauDistribution2DareaUnmasked->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
-		UInt_t binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chLow);
-		UInt_t binHigh = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chHigh);
+		if(histoLandauDistribution2DareaUnmasked){
+			histoLandauDistribution2DareaUnmasked->SetTitle(name);
+			histoLandauDistribution2DareaUnmasked->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+			binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chLow);
+			binHigh = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chHigh);
+		}
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmasked);
-		delete histoLandauDistribution2DareaUnmasked;
+		if(histoLandauDistribution2DareaUnmasked)delete histoLandauDistribution2DareaUnmasked;
 
 		// 2d area clusterSize 1or 2 unmasked noBorderSeed
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2DareaUnmaskedNoBorderSeed = (TH2F*)histoLandauDistribution2DNoBorderSeed_unmasked->Clone(name);
-		histoLandauDistribution2DareaUnmaskedNoBorderSeed->SetTitle(name);
-		histoLandauDistribution2DareaUnmaskedNoBorderSeed->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		if(histoLandauDistribution2DareaUnmaskedNoBorderSeed){
+			histoLandauDistribution2DareaUnmaskedNoBorderSeed->SetTitle(name);
+			histoLandauDistribution2DareaUnmaskedNoBorderSeed->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		}
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderSeed);
-		delete histoLandauDistribution2DareaUnmaskedNoBorderSeed;
+		if(histoLandauDistribution2DareaUnmaskedNoBorderSeed) delete histoLandauDistribution2DareaUnmaskedNoBorderSeed;
 
 		// 2d area clusterSize 1or 2 unmasked noBorderSeed
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2DareaUnmaskedNoBorderHit = (TH2F*)histoLandauDistribution2DNoBorderHit_unmasked->Clone(name);
-		histoLandauDistribution2DareaUnmaskedNoBorderHit->SetTitle(name);
-		histoLandauDistribution2DareaUnmaskedNoBorderHit->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		if(histoLandauDistribution2DareaUnmaskedNoBorderHit){
+			histoLandauDistribution2DareaUnmaskedNoBorderHit->SetTitle(name);
+			histoLandauDistribution2DareaUnmaskedNoBorderHit->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+		}
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderHit);
-		delete histoLandauDistribution2DareaUnmaskedNoBorderHit;
+		if(histoLandauDistribution2DareaUnmaskedNoBorderHit)delete histoLandauDistribution2DareaUnmaskedNoBorderHit;
 
 		/******* PROJECTIONS ******/
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
@@ -496,21 +516,23 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 	if(verbosity)cout<<"create hChargeVsFidCutProfile (this take some time since is doing a Project3D Profile for "<<bins<<endl;
 	TH2F* hChargeVsFidCutProfile = (TH2F*)hChargeVsFidCut->Project3DProfile("yx");
 	if(verbosity)cout<<"draw hChargeVsFidCutProfile"<<endl;
-	hChargeVsFidCutProfile->Draw();
-	hChargeVsFidCutProfile->SetName("hMeanChargeVsFiducialCutPosition");
-	hChargeVsFidCutProfile->SetTitle("MeanChargeVsFiducialCutPosition");
-	hChargeVsFidCutProfile->GetXaxis()->SetTitle("fiducialCut X/ch");
-	hChargeVsFidCutProfile->GetYaxis()->SetTitle("fiducialCut Y/ch");
-	hChargeVsFidCutProfile->GetZaxis()->SetTitle("mean charge");
-	TCanvas *c3 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hChargeVsFidCutProfile);
-	c3->SetName(hChargeVsFidCutProfile->GetName());
-	if(verbosity)cout<<"save hChargeVsFidCutProfile"<<endl;
-	histSaver->SaveCanvas(c3);
+	if(	hChargeVsFidCutProfile){
+		hChargeVsFidCutProfile->Draw();
+		hChargeVsFidCutProfile->SetName("hMeanChargeVsFiducialCutPosition");
+		hChargeVsFidCutProfile->SetTitle("MeanChargeVsFiducialCutPosition");
+		hChargeVsFidCutProfile->GetXaxis()->SetTitle("fiducialCut X/ch");
+		hChargeVsFidCutProfile->GetYaxis()->SetTitle("fiducialCut Y/ch");
+		hChargeVsFidCutProfile->GetZaxis()->SetTitle("mean charge");
+		TCanvas *c3 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hChargeVsFidCutProfile);
+		c3->SetName(hChargeVsFidCutProfile->GetName());
+		if(verbosity)cout<<"save hChargeVsFidCutProfile"<<endl;
+		histSaver->SaveCanvas(c3);
+	}
 	//	Histogram(hChargeVsFidCutProfile);
 	//	cout<<"save hChargeVsFidCut"<<endl;
 	//	histSaver->SaveHistogramROOT(hChargeVsFidCut);Profile;
 	histSaver->SaveHistogram(hFidCutXvsChannelPos);
-	delete hFidCutXvsChannelPos;
+	if(hFidCutXvsChannelPos)delete hFidCutXvsChannelPos;
 	if(verbosity)cout<<"save hChargeVsFidCut x/Y"<<endl;
 	Float_t xmin,xmax,xCorrect,ymin,ymax,yCorrect;
 	for (UInt_t i=0;i<settings->getSelectionFidCuts()->getNFidCuts();i++){
@@ -542,7 +564,7 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 		if(verbosity)cout<<"."<<flush;
 		histSaver->SaveHistogram(hMeanChargeArea);
 		if(verbosity)cout<<"."<<flush;
-		delete hMeanChargeArea;
+		if(hMeanChargeArea)delete hMeanChargeArea;
 		if(verbosity)cout<<"#"<<endl;
 	}
 //	histSaver->SaveHistogramROOT(hChargeVsFidCut);
@@ -563,8 +585,8 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 
 	if(verbosity)cout<<endl;
 
-	delete hChargeVsFidCut;
-	delete hChargeVsFidCutProfile;
+	if(hChargeVsFidCut) delete hChargeVsFidCut;
+	if(hChargeVsFidCutProfile) delete hChargeVsFidCutProfile;
 }
 void TAnalysisOfSelection::saveHistos()
 {
@@ -574,7 +596,7 @@ void TAnalysisOfSelection::saveHistos()
 	//	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
 	//	char t;cin >>t;
 	histSaver->SaveHistogram(hTwoClustersArea);
-	delete hTwoClustersArea;
+	if(hTwoClustersArea)delete hTwoClustersArea;
 	LandauGaussFit landauGauss;
 	histSaver->OptimizeXYRange(histoLandauDistribution2D_unmasked);
 	histSaver->OptimizeXYRange(histoLandauDistribution2D);
@@ -753,7 +775,7 @@ void TAnalysisOfSelection::saveHistos()
 			vecHistoMeanLandau.push_back(fitCS->GetParameter(1));
 		}
 		histSaver->SaveHistogram(histo);
-		delete histo;
+		if(histo) delete histo;
 	}
 
 
@@ -859,7 +881,7 @@ void TAnalysisOfSelection::saveHistos()
 		c1->SetName(TString::Format("c%s",hValidSiliconAndDiamondHit->GetName()));
 		histSaver->SaveCanvas(c1);
 		delete c1;
-		delete hValidSiliconAndDiamondHit;
+		if(hValidSiliconAndDiamondHit)delete hValidSiliconAndDiamondHit;
 	}
 
 	if (hValidSiliconAndOneDiamondHit){
@@ -867,7 +889,7 @@ void TAnalysisOfSelection::saveHistos()
 		c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHit->GetName()));
 		histSaver->SaveCanvas(c1);
 		delete c1;
-		delete hValidSiliconAndOneDiamondHit;
+		if(hValidSiliconAndOneDiamondHit)delete hValidSiliconAndOneDiamondHit;
 	}
 
 	if (hValidSiliconAndOneDiamondHitNotMasked){
@@ -875,14 +897,14 @@ void TAnalysisOfSelection::saveHistos()
 		c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHitNotMasked->GetName()));
 		histSaver->SaveCanvas(c1);
 		delete c1;
-		delete hValidSiliconAndOneDiamondHitNotMasked;
+		if(hValidSiliconAndOneDiamondHitNotMasked)delete hValidSiliconAndOneDiamondHitNotMasked;
 	}
 	if (hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels){
 		c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels,true);
 		c1->SetName(TString::Format("c%s",hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetName()));
 		histSaver->SaveCanvas(c1);
 		delete c1;
-		delete hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels;
+		if(hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels)delete hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels;
 	}
 	if (hValidSiliconAndOneDiamondHitInOneArea){
 		c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hValidSiliconAndOneDiamondHitInOneArea,true);
