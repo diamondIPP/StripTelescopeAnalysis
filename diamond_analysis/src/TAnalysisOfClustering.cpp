@@ -374,6 +374,39 @@ void TAnalysisOfClustering::initialiseHistos()
 
 
 
+void TAnalysisOfClustering::saveEtaIntegrals(){
+	stringstream etaCorFileName;
+	etaCorFileName<<"etaCorrection."<<settings->getRunNumber()<<".root";
+	TFile* file = TFile::Open(etaCorFileName.str().c_str());
+	if(file){
+		cout<<"can read file: '"<<etaCorFileName.str()<<"'"<<endl;
+		if(verbosity>4&&verbosity%2==1){
+			cout<<"Press a key and enter to confirm.\t"<<flush;
+			char t; cin>>t;
+		}
+		file->Close();
+		return;
+	}
+	cout<<"cannot read file: '"<<etaCorFileName.str()<<"' ===> CREATE new Eta file"<<endl;
+	if(verbosity>4&&verbosity%2==1){
+		cout<<"Press a key and enter to confirm.]\t"<<flush;
+		char t; cin>>t;
+	}
+	file = new TFile(etaCorFileName.str().c_str(),"RECREATE");
+	file->cd();
+	for(UInt_t det=0;det<9;det++){
+		stringstream histName;
+		histName<<"hEtaIntegral_"<<det;
+		if(!hEtaDistribution[det])
+			continue;
+		TH1F *histo= TClustering::createEtaIntegral(hEtaDistribution[det],histName.str());
+		file->cd();
+		histo->Write();
+		hEtaDistribution[det]->Write();
+	}
+	file->Close();
+}
+
 
 
 void TAnalysisOfClustering::saveHistos(){
@@ -455,24 +488,13 @@ void TAnalysisOfClustering::saveHistos(){
 		delete hRelativeClusterPositionEta[det];
 		delete hRelativeClusterPositionCorEta[det];
 	}
-
+	saveEtaIntegrals();
 	for(UInt_t det=0;det<9;det++){
 		stringstream histName;
 		histName<<"hEtaIntegral_"<<TPlaneProperties::getStringForDetector(det);;
-		TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
-		UInt_t nBins = hEtaDistribution[det]->GetNbinsX();
-		Int_t entries = hEtaDistribution[det]->GetEntries();
-		entries -=  hEtaDistribution[det]->GetBinContent(0);
-		entries -=  hEtaDistribution[det]->GetBinContent(nBins+1);
-		Int_t sum =0;
-		for(UInt_t bin=1;bin<nBins+1;bin++){
-			Int_t binContent = hEtaDistribution[det]->GetBinContent(bin);
-			sum +=binContent;
-			Float_t pos =  hEtaDistribution[det]->GetBinCenter(bin);
-			histo->Fill(pos, (Float_t)sum/(Float_t)entries);
-		}
+		TH1F *histo= TClustering::createEtaIntegral(hEtaDistribution[det],histName.str());
 		histSaver->SaveHistogram(histo);
-		delete histo;
+		if(histo) delete histo;
 		histSaver->SaveHistogram(this->hEtaDistribution[det]);
 		histSaver->SaveHistogram(this->hEtaDistributionCMN[det]);
 		histSaver->SaveHistogram(this->hEtaDistributionVsCharge[det]);
@@ -514,7 +536,7 @@ void TAnalysisOfClustering::saveHistos(){
 		hSignalLeftVsSignalRight[det]->GetXaxis()->SetTitle("signalRight");
 		hSignalLeftVsSignalRight[det]->GetYaxis()->SetTitle("signalLeft");
 		histSaver->SaveHistogram(this->hSignalLeftVsSignalRight[det]);
-		delete hEtaDistribution[det];
+		if(hEtaDistribution[det])delete hEtaDistribution[det];
 	}
 	savePHHistos();
 	//    for (int det = 0; det < 9; det++) {

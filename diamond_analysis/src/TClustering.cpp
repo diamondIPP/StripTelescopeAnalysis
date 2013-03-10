@@ -354,18 +354,7 @@ void TClustering::saveEtaCorrections(){
 	for(UInt_t det=0;det<9;det++){
 		stringstream histName;
 		histName<<"hEtaIntegral_"<<det;
-		UInt_t nBins = hEtaDistribution[det]->GetNbinsX();
-		TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),nBins,0,1);
-		Int_t entries = hEtaDistribution[det]->GetEntries();
-		entries -=  hEtaDistribution[det]->GetBinContent(0);
-		entries -=  hEtaDistribution[det]->GetBinContent(nBins+1);
-		Int_t sum =0;
-		for(UInt_t bin=1;bin<nBins+1;bin++){
-			Int_t binContent = hEtaDistribution[det]->GetBinContent(bin);
-			sum +=binContent;
-			Float_t pos =  hEtaDistribution[det]->GetBinCenter(bin);
-			histo->Fill(pos, (Float_t)sum/(Float_t)entries);
-		}
+		TH1F *histo= createEtaIntegral(hEtaDistribution[det],histName.str());
 		file->cd();
 		histo->Write();
 		hEtaDistribution[det]->Write();

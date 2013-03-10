@@ -31,6 +31,7 @@
 
 #include "TADCEventReader.hh"
 #include "THTMLCluster.hh"
+#include "TClustering.hh"
 
 #define N_DET_CHANNELS 256
 #define N_DIA_CHANNELS 128
@@ -45,6 +46,7 @@ public:
 private:
 	void analyseEvent();
 	void saveHistos();
+	void saveEtaIntegrals();
 	void savePHHistos();
 
 	void initialiseHistos();
