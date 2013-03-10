@@ -17,7 +17,7 @@ INCLUDEDIR      := include
 OBJDIR			:= obj
 LIBDIR			:= ~/lib
 
-DEBUG			:= #-g3
+DEBUG			:= -g3
 OPTIMAZATIONFLAG :=	-O2 $(DEBUG)
 CFLAGS  		:= -Wall -I$(INCLUDEDIR) -D_REENTRANT 
 CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
