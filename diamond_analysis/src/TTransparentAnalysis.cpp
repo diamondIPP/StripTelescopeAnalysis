@@ -693,7 +693,7 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 		vecRightOverHighest.push_back(vecSignalRightOfHighest.at(i)/vecHighestSignal.at(i));
 	}
 	name.str("");name.clear();
-	name<<"hSignalLeftOfHighest";
+	name<<"hSignalLeftOverHighestVsSignalRightOverHighest";
 	histo2d = histSaver->CreateScatterHisto(name.str(),vecRightOverHighest,vecLeftOverHighest);
 	if(histo2d){
 		histo2d->GetXaxis()->SetTitle("signal left of highest signal over highest signal");
@@ -737,6 +737,30 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 	Float_t max = TMath::Max(histoLeft->GetMaximum(),histoRight->GetMaximum());
 	histoLeft->SetMaximum(max);
 	histoRight->SetMaximum(max);
+	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
+	if(histoLeft) delete histoLeft;
+	if(histoRight) delete histoRight;
+
+	name.str("");name.clear();
+	name<<"hSignalLeftOfEtaChannels";
+	histoLeft = histSaver->CreateDistributionHisto(name.str(),this->vecSignalLeftOfEta);
+	if(histoLeft){
+		histoLeft->GetXaxis()->SetTitle("Signal left of #eta");
+		histoLeft->GetYaxis()->SetTitle("number of entries #");
+		histoLeft->SetLineColor(kBlue);
+		histSaver->SaveHistogram(histoLeft);
+	}
+	name.str("");name.clear();
+	name<<"hSignalRightOfEtaChannels";
+	histoRight = histSaver->CreateDistributionHisto(name.str(),this->vecSignalRightOfEta);
+	if(histoLeft){
+		histoRight->GetXaxis()->SetTitle("Signal right of #eta");
+		histoRight->GetYaxis()->SetTitle("number of entries #");
+		histoRight->SetLineColor(kRed);
+		histSaver->SaveHistogram(histoLeft);
+	}
+	name.str("");name.clear();
+	name<<"cSignalOfSignalsAdjacentToEta";
 	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
 	if(histoLeft) delete histoLeft;
 	if(histoRight) delete histoRight;

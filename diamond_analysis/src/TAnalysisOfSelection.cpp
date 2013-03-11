@@ -635,7 +635,7 @@ void TAnalysisOfSelection::saveHistos()
 		vecRightOverHighest.push_back(vecSignalRightOfHighest.at(i)/vecHighestSignal.at(i));
 	}
 	name.str("");name.clear();
-	name<<"hSignalLeftOfHighest";
+	name<<"hSignalLeftOverHighestVsSignalRightOverHighest";
 	histo2d = histSaver->CreateScatterHisto(name.str(),vecRightOverHighest,vecLeftOverHighest);
 	if(histo2d){
 		histo2d->GetXaxis()->SetTitle("signal left of highest signal over highest signal");

@@ -760,7 +760,7 @@ Float_t TCluster::getEta(Int_t &leftChannel,bool cmnCorrected)
 		return -1;
 	}
 	UInt_t clPosHighest = getHighestHitClusterPosition();
-	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
+	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(clPosHighest);
 	UInt_t leftClPos = 0;
 	UInt_t rightClPos = 0;
 	if (clPosHighest < clPos2ndHighest) {
