@@ -49,7 +49,7 @@ TDetectorAlignment::TDetectorAlignment(){
  * @param src
  * @return pointer to this TDetectorAlignment
  */
-TDetectorAlignment::TDetectorAlignment &TDetectorAlignment::operator=(const TDetectorAlignment::TDetectorAlignment &src){
+TDetectorAlignment &TDetectorAlignment::operator=(const TDetectorAlignment &src){
 	cout<<"COpy consturctor of TDetectorAlignment"<<endl;
 	for(UInt_t plane=0;plane<<6;plane++){
 		xResolution[plane]=src.xResolution[plane];

@@ -63,7 +63,7 @@ TPlane::~TPlane() {
 /**
  * Class Assignment function
  */
-TPlane::TPlane& TPlane::operator =(const TPlane &src){
+TPlane& TPlane::operator =(const TPlane &src){
 
 	type=src.type;
 	planeNo=src.planeNo;
