@@ -129,6 +129,7 @@ private:
 	vector<Float_t> vecSignalLeftOfHighest;
 	vector<Float_t> vecSignalRightOfHighest;
 	vector<Float_t> vecClusterCharge;
+	vector<Float_t> vecHighestSignal;
 
 	vector< vector<Float_t> > vecvecResXChargeWeighted;
 	vector< vector<Float_t> > vecvecResXEtaCorrected;

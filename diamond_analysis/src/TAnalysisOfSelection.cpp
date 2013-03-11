@@ -626,10 +626,41 @@ void TAnalysisOfSelection::saveHistos()
 		histSaver->SaveHistogram(histo2d);
 		delete histo2d;
 	}
-	vector<Float_t> vecRightFactor, vecLeftFactor;
+
+	vector<Float_t> vecRightFactor, vecLeftFactor,vecRightOverHighest,vecLeftOverHighest;
 	for(UInt_t i=0;i<vecSignalLeftOfHighest.size()&&i<vecSignalRightOfHighest.size()&&i<vecClusterCharge.size();i++){
 		vecRightFactor.push_back(vecSignalRightOfHighest.at(i)/vecClusterCharge.at(i));
 		vecLeftFactor.push_back(vecSignalLeftOfHighest.at(i)/vecClusterCharge.at(i));
+		vecLeftOverHighest.push_back(vecSignalLeftOfHighest.at(i)/vecHighestSignal.at(i));
+		vecRightOverHighest.push_back(vecSignalRightOfHighest.at(i)/vecHighestSignal.at(i));
+	}
+	name.str("");name.clear();
+	name<<"hSignalLeftOfHighest";
+	histo2d = histSaver->CreateScatterHisto(name.str(),vecRightOverHighest,vecLeftOverHighest);
+	if(histo2d){
+		histo2d->GetXaxis()->SetTitle("signal left of highest signal over highest signal");
+		histo2d->GetYaxis()->SetTitle("signal right of highest signal over highest signal");
+		histSaver->SaveHistogram(histo2d);
+		delete histo2d;
+	}
+
+	name.str("");name.clear();
+	name<<"hSignalRightVsHighestSignal";
+	histo2d = histSaver->CreateScatterHisto(name.str(),vecSignalRightOfHighest,vecHighestSignal);
+	if(histo2d){
+		histo2d->GetXaxis()->SetTitle("highest signal");
+		histo2d->GetYaxis()->SetTitle("signal right of highest signal ");
+		histSaver->SaveHistogram(histo2d);
+		delete histo2d;
+	}
+	name.str("");name.clear();
+	name<<"hSignalLeftVsHighestSignal";
+	histo2d = histSaver->CreateScatterHisto(name.str(),vecSignalLeftOfHighest,vecHighestSignal);
+	if(histo2d){
+		histo2d->GetXaxis()->SetTitle("highest signal");
+		histo2d->GetYaxis()->SetTitle("signal left of highest signal ");
+		histSaver->SaveHistogram(histo2d);
+		delete histo2d;
 	}
 	name.str("");name.clear();
 	name<<"hSignalLeftOfHighest";
@@ -1085,6 +1116,7 @@ void TAnalysisOfSelection::analyseEvent()
 		Float_t signalLeftOfEta = cluster.getSignalOfChannel(leftChannel-1);
 		Float_t signalRightOfEta = cluster.getSignalOfChannel(leftChannel+2);
 		Int_t highestClusterPos = cluster.getHighestHitClusterPosition();
+		Float_t highestSignal = cluster.getHighestSignal();
 		Float_t leftOfHighestSignal = cluster.getSignal(highestClusterPos-1);
 		Float_t rightOfHighestSignal = cluster.getSignal(highestClusterPos+1);
 		this->vecSignalLeftOfEta.push_back(signalLeftOfEta);
@@ -1092,6 +1124,7 @@ void TAnalysisOfSelection::analyseEvent()
 		this->vecSignalLeftOfHighest.push_back(leftOfHighestSignal);
 		this->vecSignalRightOfHighest.push_back(rightOfHighestSignal);
 		this->vecClusterCharge.push_back(charge);
+		this->vecHighestSignal.push_back(highestSignal);
 		this->vecEta.push_back(eta);
 //		Float_t relPos = pos - (Int_t) (pos-.5);
 //		if(clusSize==2) hEtaVsRelPos->Fill(eta,relPos);

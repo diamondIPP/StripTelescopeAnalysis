@@ -92,6 +92,7 @@ private:
 	vector<Float_t> vecSignalRightOfEta;
 	vector<Float_t> vecSignalLeftOfHighest;
 	vector<Float_t> vecSignalRightOfHighest;
+	vector<Float_t> vecHighestSignal;
 	vector<Float_t> vecClusterCharge;
 };
 

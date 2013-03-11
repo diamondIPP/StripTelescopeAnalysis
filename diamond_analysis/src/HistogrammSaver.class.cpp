@@ -75,9 +75,11 @@ HistogrammSaver::~HistogrammSaver() {
 
 void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond, UInt_t verbosity)
 {
+	if(!histo1||!histo2)return;
 	if (verbosity>2) cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
 	c1->cd();
+	c1->SetObjectStat(false);
 	Float_t min1 = histo1->GetMinimum();
 	Float_t min2 = histo2->GetMinimum();
 	Float_t min = TMath::Min(min1,min2);
@@ -100,6 +102,8 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	if (verbosity>2) cout<<"min: "<<min<<" max: "<<max;
 	if (verbosity>2) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<histo1->GetMaximum()<<"\thisto2:"<<histo2->GetMaximum()<<flush;
 	if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
+	histo1->SetStats(false);
+	histo2->SetStats(false);
 	if(histo1->GetMaximum()>histo2->GetMaximum()){
 		if (verbosity>2) cout<<"\tdraw1-"<<flush;
 		histo1->Draw("");
