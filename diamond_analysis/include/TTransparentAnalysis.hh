@@ -122,6 +122,14 @@ private:
 	UInt_t highChi2;
 	//	UInt_t usedForSiliconAlignment;
 	// data for Histos
+
+	vector<Float_t> vecEta;
+	vector<Float_t> vecSignalLeftOfEta;
+	vector<Float_t> vecSignalRightOfEta;
+	vector<Float_t> vecSignalLeftOfHighest;
+	vector<Float_t> vecSignalRightOfHighest;
+	vector<Float_t> vecClusterCharge;
+
 	vector< vector<Float_t> > vecvecResXChargeWeighted;
 	vector< vector<Float_t> > vecvecResXEtaCorrected;
 	vector< vector<Float_t> > vecvecResXHighest2Centroid;

@@ -72,7 +72,7 @@ public:
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
-    Float_t getSignalOfChannel(UInt_t channel);
+    Float_t getSignalOfChannel(UInt_t channe, bool cmnCorrected=false);
     UInt_t getSmallestChannelNumber();
     UInt_t getHighestChannelNumber();
     Float_t getHighestSignal();

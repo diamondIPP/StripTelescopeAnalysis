@@ -193,7 +193,8 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 			Float_t resXHighest2Centroid = this->getResidual(this->vecTransparentClusters.at(iEvent)[clusterSize],TCluster::highest2Centroid,hEtaIntegrals[clusterSize]);
 			Float_t relChannelPos = channelPosInDetSystem - (int)(channelPosInDetSystem+.5);
 //			Float_t relHitPos = this->predPosition- (int)(predPosition+.5);
-			Float_t eta = vecTransparentClusters[iEvent][clusterSize].getEta();
+			Int_t leftChannel=-1;
+			Float_t eta = vecTransparentClusters[iEvent][clusterSize].getEta(leftChannel);
 			Float_t etaCMNcorrected = vecTransparentClusters[iEvent][clusterSize].getEta(true);
 			if(verbosity>4)
 				cout<<nEvent<<": "<<clusterSize<<"clusterSize: "<<channelPosInDetSystem<<"-->"<<relChannelPos<<" <-> "<<resXChargeWeighted<<", "<<resXEtaCorrected<<", "<<resXHighest2Centroid<<endl;
@@ -207,6 +208,21 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 			vecvecResXHighest2Centroid[clusterSize].push_back(resXHighest2Centroid);
 			//			if (resXEtaCorrected > -6000)
 			vecvecResXEtaCorrected[clusterSize].push_back(resXEtaCorrected);
+			if(clusterSize==TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1){
+
+				Float_t signalLeftOfEta = vecTransparentClusters[iEvent][clusterSize].getSignalOfChannel(leftChannel-1);
+				Float_t signalRightOfEta = vecTransparentClusters[iEvent][clusterSize].getSignalOfChannel(leftChannel+2);
+				Int_t highestClusterPos =  vecTransparentClusters[iEvent][clusterSize].getHighestHitClusterPosition();
+				Float_t leftOfHighestSignal =  vecTransparentClusters[iEvent][clusterSize].getSignal(highestClusterPos-1);
+				Float_t rightOfHighestSignal =  vecTransparentClusters[iEvent][clusterSize].getSignal(highestClusterPos+1);
+				Float_t charge = vecTransparentClusters[iEvent][clusterSize].getCharge(2,false);
+				this->vecSignalLeftOfEta.push_back(signalLeftOfEta);
+				this->vecSignalRightOfEta.push_back(signalRightOfEta);
+				this->vecSignalLeftOfHighest.push_back(leftOfHighestSignal);
+				this->vecSignalRightOfHighest.push_back(rightOfHighestSignal);
+				this->vecClusterCharge.push_back(charge);
+
+			}
 		}
 	}
 }
@@ -403,6 +419,16 @@ void TTransparentAnalysis::fillHistograms() {
 			this->transparentClusters[clusterSize].Print();
 		if(etaCMN>0&&etaCMN<1)
 			hEtaCMNcorrected[clusterSize]->Fill(etaCMN);
+		if (clusterSize>2){
+			Int_t highestSignalClusterPos = this->transparentClusters[clusterSize].getHighestHitClusterPosition();
+			if(highestSignalClusterPos<0){
+				cout<<nEvent<<"errror5: highestSignalClusterPos: "<<highestSignalClusterPos<<endl;
+				this->transparentClusters[clusterSize].Print();
+			}
+//			Float_t leftSig = transparentClusters[clusterSize].getSignal(highestSignalClusterPos-1);
+//			Float_t rightSig= transparentClusters[clusterSize].getSignal(highestSignalClusterPos+1);
+
+		}
 //		if (clusterSize == 1 /* && this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printCluster(this->transparentClusters[clusterSize]);
 //		if (clusterSize > 0 && this->transparentClusters[clusterSize].getEta() < 0) printCluster(this->transparentClusters[clusterSize]);
 		// TODO: why is the eta distribution for 2 channel clusters more symmetric than for 3 and more channel clusters?
@@ -636,6 +662,46 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 		hEtaDist = hEtaCMNcorrected[clusterSize];
 		analyseEtaDistribution(hEtaDist);
 	}
+
+	stringstream name;
+	name<<"hEtaVsSignalLeftOfEta";
+	TH2F* histo2d = histSaver->CreateScatterHisto(name.str(),this->vecSignalLeftOfEta,this->vecEta);
+	if(histo2d){
+		histo2d->GetXaxis()->SetTitle("Signal left of #eta");
+		histo2d->GetYaxis()->SetTitle("#eta");
+		histSaver->SaveHistogram(histo2d);
+		delete histo2d;
+	}
+
+	name.str("");name.clear();
+	name<<"hEtaVsSignalRightOfEta";
+	histo2d = histSaver->CreateScatterHisto(name.str(),this->vecSignalRightOfEta,this->vecEta);
+	if(histo2d){
+		histo2d->GetXaxis()->SetTitle("Signal right of #eta");
+		histo2d->GetYaxis()->SetTitle("#eta");
+		histSaver->SaveHistogram(histo2d);
+		delete histo2d;
+	}
+	vector<Float_t> vecRightFactor, vecLeftFactor;
+	for(UInt_t i=0;i<vecSignalLeftOfHighest.size()&&i<vecSignalRightOfHighest.size()&&i<vecClusterCharge.size();i++){
+		vecRightFactor.push_back(vecSignalRightOfHighest.at(i)/vecClusterCharge.at(i));
+		vecLeftFactor.push_back(vecSignalLeftOfHighest.at(i)/vecClusterCharge.at(i));
+	}
+	name.str("");name.clear();
+	name<<"hSignalLeftOfHighest";
+	TH1F* histoLeft = histSaver->CreateDistributionHisto(name.str(),vecLeftFactor);
+	histSaver->SaveHistogram(histoLeft);
+	name.str("");name.clear();
+	name<<"hSignalRightOfHighest";
+	TH1F* histoRight = histSaver->CreateDistributionHisto(name.str(),vecRightFactor);
+	histSaver->SaveHistogram(histoRight);
+
+	name.str("");name.clear();
+	name<<"cSignalNextToHighest";
+	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
+	if(histoLeft) delete histoLeft;
+	if(histoRight) delete histoRight;
+
 }
 void TTransparentAnalysis::saveHistograms() {
 	analyseEtaDistributions();

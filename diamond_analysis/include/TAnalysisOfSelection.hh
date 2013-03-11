@@ -87,6 +87,12 @@ private:
 	TH2F* hClusterSizeVsChannelPos;
 	THTMLLandaus *htmlLandau;
 	THTMLSelectionAnalysis *htmlSelection;
+	vector<Float_t> vecEta;
+	vector<Float_t> vecSignalLeftOfEta;
+	vector<Float_t> vecSignalRightOfEta;
+	vector<Float_t> vecSignalLeftOfHighest;
+	vector<Float_t> vecSignalRightOfHighest;
+	vector<Float_t> vecClusterCharge;
 };
 
 #endif /* TANALYSISOFSELECTION_HH_ */

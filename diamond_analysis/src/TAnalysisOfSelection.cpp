@@ -590,6 +590,7 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 }
 void TAnalysisOfSelection::saveHistos()
 {
+	TH1F *histo=0;
 	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
 	saveDiamondAreaHistos();
 	saveFidCutHistos();
@@ -606,6 +607,44 @@ void TAnalysisOfSelection::saveHistos()
 	if(verbosity)cout<< "save "<<histoLandauDistribution2D_unmasked->GetName()<<endl;
 	histSaver->SaveHistogram(histoLandauDistribution2D_unmasked);
 
+	stringstream name;
+	name<<"hEtaVsSignalLeftOfEta";
+	TH2F* histo2d = histSaver->CreateScatterHisto(name.str(),this->vecSignalLeftOfEta,this->vecEta);
+	if(histo2d){
+		histo2d->GetXaxis()->SetTitle("Signal left of #eta");
+		histo2d->GetYaxis()->SetTitle("#eta");
+		histSaver->SaveHistogram(histo2d);
+		delete histo2d;
+	}
+
+	name.str("");name.clear();
+	name<<"hEtaVsSignalRightOfEta";
+	histo2d = histSaver->CreateScatterHisto(name.str(),this->vecSignalRightOfEta,this->vecEta);
+	if(histo2d){
+		histo2d->GetXaxis()->SetTitle("Signal right of #eta");
+		histo2d->GetYaxis()->SetTitle("#eta");
+		histSaver->SaveHistogram(histo2d);
+		delete histo2d;
+	}
+	vector<Float_t> vecRightFactor, vecLeftFactor;
+	for(UInt_t i=0;i<vecSignalLeftOfHighest.size()&&i<vecSignalRightOfHighest.size()&&i<vecClusterCharge.size();i++){
+		vecRightFactor.push_back(vecSignalRightOfHighest.at(i)/vecClusterCharge.at(i));
+		vecLeftFactor.push_back(vecSignalLeftOfHighest.at(i)/vecClusterCharge.at(i));
+	}
+	name.str("");name.clear();
+	name<<"hSignalLeftOfHighest";
+	TH1F* histoLeft = histSaver->CreateDistributionHisto(name.str(),vecLeftFactor);
+	histSaver->SaveHistogram(histoLeft);
+	name.str("");name.clear();
+	name<<"hSignalRightOfHighest";
+	TH1F* histoRight = histSaver->CreateDistributionHisto(name.str(),vecRightFactor);
+	histSaver->SaveHistogram(histoRight);
+
+	name.str("");name.clear();
+	name<<"cSignalNextToHighest";
+	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
+	if(histoLeft) delete histoLeft;
+	if(histoRight) delete histoRight;
 
 	histSaver->SaveHistogram(hClusterSizeVsChannelPos,false);
 
@@ -618,7 +657,6 @@ void TAnalysisOfSelection::saveHistos()
 	vector <Float_t> vecHistoMeanGaus;
 	vector <Float_t> vecHistoMeanLandau;
 	TH1F* histoClusSize=0;
-	TH1F *histo=0;
 	if(histoLandauDistribution){
 		histoClusSize = (TH1F*)histoLandauDistribution->ProjectionY("ClusterSizeDiamond",0,4096);
 		histo = (TH1F*)histoLandauDistribution->ProjectionX("hPulseHeightDiamondAll",0,8);
@@ -672,7 +710,6 @@ void TAnalysisOfSelection::saveHistos()
 		//vecXError.push_back(0);
 	}
 
-	stringstream name;
 	name.str("");
 	name.clear();
 	name<< "hPulseHeigthDiamond_1_2_ClusterSize";
@@ -1037,8 +1074,19 @@ void TAnalysisOfSelection::analyseEvent()
 		//			if(verbosity>5)cout<<nEvent<<" Good"<<endl;
 		//		}
 		Int_t leftChannel =-1;
+
 		Float_t eta = cluster.getEta(leftChannel,false);
 		Float_t etaCMNCor = cluster.getEta(true);
+		Float_t signalLeftOfEta = cluster.getSignalOfChannel(leftChannel-1);
+		Float_t signalRightOfEta = cluster.getSignalOfChannel(leftChannel+2);
+		Int_t highestClusterPos = cluster.getHighestHitClusterPosition();
+		Float_t leftOfHighestSignal = cluster.getSignal(highestClusterPos-1);
+		Float_t rightOfHighestSignal = cluster.getSignal(highestClusterPos+1);
+		this->vecSignalLeftOfEta.push_back(signalLeftOfEta);
+		this->vecSignalRightOfEta.push_back(signalRightOfEta);
+		this->vecSignalLeftOfHighest.push_back(leftOfHighestSignal);
+		this->vecSignalRightOfHighest.push_back(rightOfHighestSignal);
+		this->vecClusterCharge.push_back(charge);
 //		Float_t relPos = pos - (Int_t) (pos-.5);
 //		if(clusSize==2) hEtaVsRelPos->Fill(eta,relPos);
 		if(clustSize==2) hEtaVsLeftChannelNo ->Fill(eta,leftChannel);

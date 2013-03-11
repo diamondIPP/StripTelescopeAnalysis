@@ -439,7 +439,10 @@ UInt_t TCluster::getHighestHitClusterPosition()
 		return clPos;
 	else return 9999;
 }
-
+/** hould be the same as getEtaPosition
+ *
+ * @return
+ */
 Float_t TCluster::getHighest2Centroid()
 {
 	if(getClusterSize()==0)return 0;
@@ -581,13 +584,12 @@ UInt_t TCluster::getClusterPosition(UInt_t channelNo){
 	return clPos;
 }
 
-Float_t TCluster::getSignalOfChannel(UInt_t channel)
+Float_t TCluster::getSignalOfChannel(UInt_t channel, bool cmnCorrected)
 {
 	if(channel<this->getSmallestChannelNumber()&&channel>this->getHighestSignalChannel()) return 0;
-	UInt_t clPos;
-	for(clPos=0;clPos<checkClusterForSize()&&getChannel(clPos)!=channel;clPos++){};
+	UInt_t clPos =getClusterPosition(channel);
 	if(clPos<getClusterSize()){//TODO
-		Float_t signal = getSignal(clPos);
+		Float_t signal = getSignal(clPos,cmnCorrected);
 		//		if (signal>0)
 		return signal;
 	}
