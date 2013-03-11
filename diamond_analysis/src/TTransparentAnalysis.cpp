@@ -221,6 +221,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 				this->vecSignalLeftOfHighest.push_back(leftOfHighestSignal);
 				this->vecSignalRightOfHighest.push_back(rightOfHighestSignal);
 				this->vecClusterCharge.push_back(charge);
+				this->vecEta.push_back(eta);
 
 			}
 		}
@@ -698,6 +699,11 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 
 	name.str("");name.clear();
 	name<<"cSignalNextToHighest";
+	histoLeft->SetLineColor(kBlue);
+	histoRight->SetLineColor(kRed);
+	Float_t max = TMath::Max(histoLeft->GetMaximum(),histoRight->GetMaximum());
+	histoLeft->SetMaximum(max);
+	histoRight->SetMaximum(max);
 	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
 	if(histoLeft) delete histoLeft;
 	if(histoRight) delete histoRight;
