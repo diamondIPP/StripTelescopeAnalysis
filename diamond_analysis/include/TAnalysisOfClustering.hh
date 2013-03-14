@@ -59,6 +59,9 @@ private:
 	void analyseCluster();
 	void createPHDistribution();
 
+	void etaInvestigation();
+	void saveEtaInvestigationHistos();
+	void saveEtaDividedHistos(TH3F* h3DLeft,TH3F* h3DRight, TH2F* h2DLeft, TH2F* h2DRight,string name_comparision, Float_t etaWidth=.2);
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
@@ -117,6 +120,15 @@ private:
 	TH2F *hEtaDistributionVsSignalSum[9];
 	TH2F *hSignalLeftVsSignalRight[9];
 	TH2F *hPHDistribution[9];
+private:
+	vector < vector <Float_t> > vecvecSignalLeftOfEta;
+	vector < vector <Float_t> > vecvecSignalRightOfEta;
+	vector < vector <Float_t> > vecvecLeftEtaSignal;
+	vector < vector <Float_t> > vecvecRightEtaSignal;
+	vector < vector <Float_t> > vecvecSignalLeftOfHighest;
+	vector < vector <Float_t> > vecvecSignalRightOfHighest;
+	vector < vector <Float_t> > vecvecSignalHighest;
+	vector < vector <Float_t> > vecvecEta;
 };
-
 #endif /* TDEADCHANNELS_HH_ */
+

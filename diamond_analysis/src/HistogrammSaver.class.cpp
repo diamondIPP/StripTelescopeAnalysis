@@ -737,6 +737,74 @@ void HistogrammSaver::SetDuckStyle() {
 /**
  * @brief creates a scatter histogram with posX_vs_posY as an input
  *
+ * @return TH3F histogram
+ */
+TH3F* HistogrammSaver::Create3DHisto(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,UInt_t nBinsX, UInt_t nBinsY,UInt_t nBinsZ,
+									Float_t minRangeX,Float_t maxRangeX,Float_t minRangeY,Float_t maxRangeY,Float_t minRangeZ,Float_t maxRangeZ)
+{
+	Float_t factor = 0.05;//5% bigger INtervall...
+	if(posX.size()!=posY.size()||posX.size()!=posZ.size()||posX.size()==0) {
+		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
+		return new TH3F();
+	}
+	Float_t maxX = posX.at(0);
+	Float_t maxY = posY.at(0);
+	Float_t maxZ = posZ.at(0);
+	Float_t minX = posY.at(0);
+	Float_t minY = posY.at(0);
+	Float_t minZ = posZ.at(0);
+	cout<<" Create Histo: '"<<name<<"' - Range ("<<minRangeX<<"-"<<maxRangeX<<"),  ("
+			<<minRangeY<<"-"<<maxRangeY<<"), ("<<minRangeZ<<"-"<<maxRangeZ<<")"<<endl;
+	for(UInt_t i=0;i<posX.size();i++){
+		if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
+			continue;
+		if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
+			continue;
+		if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
+			continue;
+		if(posX.at(i)>maxX)maxX=posX.at(i);
+		else if(posX.at(i)<minX)minX=posX.at(i);
+		if(posY.at(i)>maxY)maxY=posY.at(i);
+		else if(posY.at(i)<minY)minY=posY.at(i);
+		if(posZ.at(i)>maxZ)maxZ=posZ.at(i);
+		else if(posZ.at(i)<minZ)minZ=posZ.at(i);
+	}
+	cout<<"\t"<<minX<<"-"<<maxX<<"."<<minY<<"-"<<maxY<<","<<minZ<<"-"<<maxZ<<endl;
+	Float_t deltaX=maxX-minX;
+	Float_t deltaY=maxY-minY;
+	Float_t deltaZ=maxZ-minZ;
+	TH3F* histo = new TH3F(name.c_str(),name.c_str(),
+			nBinsX,minX-factor*deltaX,maxX+factor*deltaX,
+			nBinsY,minY-factor*deltaY,maxY+factor*deltaY,
+			nBinsZ,minZ-factor*deltaZ,maxZ+factor*deltaZ);
+	for(UInt_t i=0;i<posX.size();i++){
+		if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
+			continue;
+		if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
+			continue;
+		if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
+			continue;
+		histo->Fill(posX.at(i),posY.at(i),posZ.at(i));
+	}
+	histo->GetXaxis()->SetTitle("X-Position");
+	histo->GetYaxis()->SetTitle("Y-Position");
+	histo->GetZaxis()->SetTitle("Z-Position");
+	histo->Draw();
+	int minXbin = histo->GetXaxis()->FindBin(minX);
+	int maxXbin = histo->GetXaxis()->FindBin(maxX);
+	histo->GetXaxis()->SetRange(minXbin,maxXbin);
+	int minYbin = histo->GetYaxis()->FindBin(minY);
+	int maxYbin = histo->GetYaxis()->FindBin(maxY);
+	histo->GetYaxis()->SetRange(minYbin,maxYbin);
+	int minZbin = histo->GetZaxis()->FindBin(minZ);
+	int maxZbin = histo->GetZaxis()->FindBin(maxZ);
+	histo->GetZaxis()->SetRange(minZbin,maxZbin);
+
+	return histo;
+}
+/**
+ * @brief creates a scatter histogram with posX_vs_posY as an input
+ *
  * @return TH2F histogram
  */
 TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins, Float_t minRangeX,Float_t maxRangeX)

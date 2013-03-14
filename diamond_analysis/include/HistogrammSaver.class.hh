@@ -89,8 +89,12 @@ public:
 	static void OptimizeYRange(TH2F* histo);
 	static void OptimizeXYRange(TH2F* histo);
 
-
-	static TH2F* CreateScatterHisto(std::string name,std::vector<Float_t> posY, std::vector<Float_t> posX,UInt_t nBins=512,Float_t minRange =-1.*std::numeric_limits<float>::infinity(), Float_t maxRange=std::numeric_limits<float>::infinity());
+	static TH3F* Create3DHisto(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
+			UInt_t nBinsX=128, UInt_t nBinsY=128,UInt_t nBinsZ=128,
+			Float_t minRangeX = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeX= std::numeric_limits<float>::infinity(),
+			Float_t minRangeY = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeY= std::numeric_limits<float>::infinity(),
+			Float_t minRangeZ = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeZ= std::numeric_limits<float>::infinity());
+	static TH2F* CreateScatterHisto(std::string name,std::vector<Float_t> posY, std::vector<Float_t> posX,UInt_t nBins=512,Float_t minRange =(-1)*std::numeric_limits<float>::infinity(), Float_t maxRange= std::numeric_limits<float>::infinity());
 	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos);
 	static TH2F* CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=512);
 	static TH1F* CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096,EnumAxisRange range=maxWidth,Float_t xmin=-1*std::numeric_limits<float>::infinity(),Float_t xmax = std::numeric_limits<float>::infinity());
@@ -102,7 +106,6 @@ public:
 	static void CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto);
 private:
 	Float_t xRangeMin,xRangeMax;
-
     TPaveText *pt;
     TDatime dateandtime;
     std::string plots_path;
