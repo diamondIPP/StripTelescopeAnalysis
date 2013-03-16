@@ -173,6 +173,9 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		vecvecResXHighest2Centroid[clusterSize].clear();
 		vecvecResXEtaCorrected[clusterSize].clear();
 	}
+//	vecPredictedPosition.clear();
+//	vecRelPredictedPosition.clear();
+//	vecChi2.clear();
 	for (UInt_t iEvent = 0; iEvent < eventNumbers.size(); iEvent++) {
 		TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
 		nEvent = eventNumbers.at(iEvent);
@@ -247,11 +250,14 @@ bool TTransparentAnalysis::predictPositions() {
 	// TODO: position in det system
 	this->positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
 	this->positionInDetSystemChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,positionInDetSystemMetric);
+	vecPredictedPosition.push_back(positionInDetSystemChannelSpace);
+	vecRelPredictedPosition.push_back(positionInDetSystemChannelSpace-(int)(positionInDetSystemChannelSpace));
 	if(verbosity>5)cout<<"\nEventNo: "<<nEvent<<":\t"<<predPosition<<"/"<<predPerpPosition<<"--->"<<positionInDetSystemMetric<<" mum --> "<<positionInDetSystemChannelSpace<<" ch"<<flush;
 	//		if (verbosity > 4) cout << "position in det system:\t" << this->positionInDetSystem << endl;
 	//		if (verbosity > 4)
 	//			cout << "clustered analysis strip position:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
 	Float_t chi2 = positionPrediction->getChi2();
+	vecChi2.push_back(chi2);
 	if(chi2>settings->getTransparentChi2())
 		return false;
 	return true;
@@ -864,6 +870,45 @@ void TTransparentAnalysis::saveHistograms() {
 		if(verbosity>6)cout<<hist<<" "<<hist->GetName()<<" --- > Entries:"<<hist->GetEntries()<<endl;
 		histSaver->SaveHistogram(hist);
 		if (hist)delete hist;
+	}
+
+	Float_t inf = std::numeric_limits<float>::infinity();
+	stringstream name;
+	name <<"hPredictedChannelPositionVsChi2";
+	TH2F* hPredictedPositionVsChi2 = histSaver->CreateScatterHisto(name.str(),vecChi2,vecPredictedPosition,2048,128,0,inf,0,20,0.05);
+	if (hPredictedPositionVsChi2){
+		hPredictedPositionVsChi2->GetXaxis()->SetTitle("Predicted Channel Position");
+		hPredictedPositionVsChi2->GetYaxis()->SetTitle("Max. #chi^{2}_{X,Y}");
+		histSaver->SaveHistogram(hPredictedPositionVsChi2,false);
+		delete hPredictedPositionVsChi2;
+	}
+	name.str("");
+	name.clear();
+	name <<"hRelativePredictedChannelPositionVsChi2";
+	hPredictedPositionVsChi2 = histSaver->CreateScatterHisto(name.str(),vecChi2,vecRelPredictedPosition,512,128,0,1,0,20,0.05);
+	if (hPredictedPositionVsChi2){
+		hPredictedPositionVsChi2->GetXaxis()->SetTitle("relative Predicted Channel Position");
+		hPredictedPositionVsChi2->GetYaxis()->SetTitle("Max. #chi^{2}_{X,Y}");
+		histSaver->SaveHistogram(hPredictedPositionVsChi2,false);
+		delete hPredictedPositionVsChi2;
+	}
+	name.str("");
+	name.clear();
+	name<<"hPredictedChannelPosition";
+	TH1F* hPredictedPosition = histSaver->CreateDistributionHisto(name.str(),vecPredictedPosition,2048,histSaver->maxWidth,0,inf);
+	if (hPredictedPosition){
+		hPredictedPosition->GetXaxis()->SetTitle("Predicted Channel Position");
+		histSaver->SaveHistogram(hPredictedPosition);
+		delete hPredictedPosition;
+	}
+	name.str("");
+	name.clear();
+	name<<"hRelativePredictedChannelPosition";
+	hPredictedPosition = histSaver->CreateDistributionHisto(name.str(),vecRelPredictedPosition,512,histSaver->maxWidth,0,1);
+	if (hPredictedPosition){
+		hPredictedPosition->GetXaxis()->SetTitle("relative Predicted Channel Position");
+		histSaver->SaveHistogram(hPredictedPosition);
+		delete hPredictedPosition;
 	}
 }
 

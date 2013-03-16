@@ -740,9 +740,8 @@ void HistogrammSaver::SetDuckStyle() {
  * @return TH3F histogram
  */
 TH3F* HistogrammSaver::Create3DHisto(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,UInt_t nBinsX, UInt_t nBinsY,UInt_t nBinsZ,
-									Float_t minRangeX,Float_t maxRangeX,Float_t minRangeY,Float_t maxRangeY,Float_t minRangeZ,Float_t maxRangeZ)
+									Float_t minRangeX,Float_t maxRangeX,Float_t minRangeY,Float_t maxRangeY,Float_t minRangeZ,Float_t maxRangeZ, Float_t factor)
 {
-	Float_t factor = 0.05;//5% bigger INtervall...
 	if(posX.size()!=posY.size()||posX.size()!=posZ.size()||posX.size()==0) {
 		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
 		return new TH3F();
@@ -807,9 +806,10 @@ TH3F* HistogrammSaver::Create3DHisto(std::string name, std::vector<Float_t> posX
  *
  * @return TH2F histogram
  */
-TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX, UInt_t nBins, Float_t minRangeX,Float_t maxRangeX)
+TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX,
+		UInt_t nBinsX, UInt_t nBinsY, Float_t minRangeX,Float_t maxRangeX, Float_t minRangeY, Float_t maxRangeY,Float_t factor)
 {
-	Float_t factor = 0.05;//5% bigger INtervall...
+//	Float_t factor = 0.05;//5% bigger INtervall...
 	if(posX.size()!=posY.size()||posX.size()==0) {
 		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
 		return new TH2F();
@@ -821,6 +821,8 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	for(UInt_t i=0;i<posX.size();i++){
 		if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
 			continue;
+		if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
+					continue;
 		if(posX.at(i)>maxX)maxX=posX.at(i);
 		else if(posX.at(i)<minX)minX=posX.at(i);
 		if(posY.at(i)>maxY)maxY=posY.at(i);
@@ -829,10 +831,14 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	//cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
 	Float_t deltaX=maxX-minX;
 	Float_t deltaY=maxY-minY;
-	TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBins,minX-factor*deltaX,maxX+factor*deltaX,nBins,minY-factor*deltaY,maxY+factor*deltaY);
-	for(UInt_t i=0;i<posX.size();i++)
-		if (posX.at(i)>minRangeX&&posX.at(i)<maxRangeX)
-			histo->Fill(posX.at(i),posY.at(i));
+	TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBinsX,minX-factor*deltaX,maxX+factor*deltaX,nBinsY,minY-factor*deltaY,maxY+factor*deltaY);
+	for(UInt_t i=0;i<posX.size();i++){
+		if (posX.at(i) < minRangeX && posX.at(i) > maxRangeX)
+			continue;
+		if (posY.at(i) < minRangeY && posY.at(i) > maxRangeY)
+					continue;
+		histo->Fill(posX.at(i),posY.at(i));
+	}
 	histo->GetXaxis()->SetTitle("X-Position");
 	histo->GetYaxis()->SetTitle("Y-Position");
 
@@ -933,10 +939,10 @@ Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
 	cout<<"Mean: "<<mean*100<<" +/- " <<sigma*100<<"\t"<<vec.size() << mean<<"/"<<mean2<<endl;
 	return mean;
 }
-TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
+TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax, Float_t factor)
 {
 	int verbosity = 0;
-	Float_t factor = 0.05;//5% bigger INtervall...
+//	Float_t factor = 0.05;//5% bigger INtervall...
 	if(vec.size()==0)
 		return new TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
 	Float_t max = vec.at(0);
@@ -1036,6 +1042,7 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		histo->Rebin();ntries++;
 	}
 	histo->GetXaxis()->SetRangeUser(min,max);
+	histo->GetYaxis()->SetTitle("number of entries #");
 	return histo;
 }
 

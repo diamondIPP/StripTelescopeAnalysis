@@ -199,6 +199,8 @@ private:
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected;
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected_2ndGaus;
 	
+	vector<Float_t> vecPredictedPosition, vecRelPredictedPosition;
+	vector<Float_t> vecChi2;
 
 };
 
