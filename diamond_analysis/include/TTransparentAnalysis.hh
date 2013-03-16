@@ -80,7 +80,7 @@ private:
 	void printCutFlow();
 //	void fitTrack();
 //	void analyzeTrack(TTrack track);
-	bool predictPositions();
+	bool predictPositions(bool savePrediction=true);
 	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	int getSignedChannelNumber(Float_t position);

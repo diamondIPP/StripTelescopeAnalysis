@@ -130,7 +130,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 			continue;
 		}
 		transparentClusters.clear();
-		if (!this->predictPositions()){
+		if (!this->predictPositions(true)){
 			if (verbosity>4) cout<< nEvent << ": Chi2 to high: "<< positionPrediction->getChi2()<<endl;
 			highChi2++;
 			continue;
@@ -180,7 +180,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
 		nEvent = eventNumbers.at(iEvent);
 		eventReader->LoadEvent(nEvent);
-		if(!this->predictPositions())
+		if(!this->predictPositions(false))
 			continue;
 		for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 			if (clusterSize == 2 && false) {
@@ -233,7 +233,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 	}
 }
 
-bool TTransparentAnalysis::predictPositions() {
+bool TTransparentAnalysis::predictPositions(bool savePrediction) {
 	if (positionPrediction) delete positionPrediction;
 	positionPrediction = eventReader->predictPosition(subjectPlane,refPlanes,false);
 	this->predXPosition = positionPrediction->getPositionX();
@@ -250,14 +250,16 @@ bool TTransparentAnalysis::predictPositions() {
 	// TODO: position in det system
 	this->positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
 	this->positionInDetSystemChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,positionInDetSystemMetric);
-	vecPredictedPosition.push_back(positionInDetSystemChannelSpace);
-	vecRelPredictedPosition.push_back(positionInDetSystemChannelSpace-(int)(positionInDetSystemChannelSpace));
 	if(verbosity>5)cout<<"\nEventNo: "<<nEvent<<":\t"<<predPosition<<"/"<<predPerpPosition<<"--->"<<positionInDetSystemMetric<<" mum --> "<<positionInDetSystemChannelSpace<<" ch"<<flush;
 	//		if (verbosity > 4) cout << "position in det system:\t" << this->positionInDetSystem << endl;
 	//		if (verbosity > 4)
 	//			cout << "clustered analysis strip position:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
 	Float_t chi2 = positionPrediction->getChi2();
-	vecChi2.push_back(chi2);
+	if(savePrediction){
+	vecPredictedPosition.push_back(positionInDetSystemChannelSpace);
+	vecRelPredictedPosition.push_back(positionInDetSystemChannelSpace-(int)(positionInDetSystemChannelSpace));
+	vecChi2.push_back(chi2);}
+
 	if(chi2>settings->getTransparentChi2())
 		return false;
 	return true;
