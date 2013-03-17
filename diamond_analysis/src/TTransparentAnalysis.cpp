@@ -877,7 +877,7 @@ void TTransparentAnalysis::saveHistograms() {
 	Float_t inf = std::numeric_limits<float>::infinity();
 	stringstream name;
 	name <<"hPredictedChannelPositionVsChi2";
-	TH2F* hPredictedPositionVsChi2 = histSaver->CreateScatterHisto(name.str(),vecChi2,vecPredictedPosition,2048,128,0,inf,0,20,0.05);
+	TH2F* hPredictedPositionVsChi2 = histSaver->CreateScatterHisto(name.str(),vecChi2,vecPredictedPosition,2048,128,0,inf,0,20,0);
 	if (hPredictedPositionVsChi2){
 		hPredictedPositionVsChi2->GetXaxis()->SetTitle("Predicted Channel Position");
 		hPredictedPositionVsChi2->GetYaxis()->SetTitle("Max. #chi^{2}_{X,Y}");
@@ -887,7 +887,7 @@ void TTransparentAnalysis::saveHistograms() {
 	name.str("");
 	name.clear();
 	name <<"hRelativePredictedChannelPositionVsChi2";
-	hPredictedPositionVsChi2 = histSaver->CreateScatterHisto(name.str(),vecChi2,vecRelPredictedPosition,512,128,0,1,0,20,0.05);
+	hPredictedPositionVsChi2 = histSaver->CreateScatterHisto(name.str(),vecChi2,vecRelPredictedPosition,512,128,0,1,0,20,0);
 	if (hPredictedPositionVsChi2){
 		hPredictedPositionVsChi2->GetXaxis()->SetTitle("relative Predicted Channel Position");
 		hPredictedPositionVsChi2->GetYaxis()->SetTitle("Max. #chi^{2}_{X,Y}");

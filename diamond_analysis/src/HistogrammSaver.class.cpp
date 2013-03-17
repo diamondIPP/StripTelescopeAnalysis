@@ -833,9 +833,9 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	Float_t deltaY=maxY-minY;
 	TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBinsX,minX-factor*deltaX,maxX+factor*deltaX,nBinsY,minY-factor*deltaY,maxY+factor*deltaY);
 	for(UInt_t i=0;i<posX.size();i++){
-		if (posX.at(i) < minRangeX && posX.at(i) > maxRangeX)
+		if (posX.at(i) < minRangeX || posX.at(i) > maxRangeX)
 			continue;
-		if (posY.at(i) < minRangeY && posY.at(i) > maxRangeY)
+		if (posY.at(i) < minRangeY || posY.at(i) > maxRangeY)
 					continue;
 		histo->Fill(posX.at(i),posY.at(i));
 	}
