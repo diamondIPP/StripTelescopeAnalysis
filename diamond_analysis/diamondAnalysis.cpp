@@ -284,7 +284,7 @@ int main(int argc, char ** argv) {
 			delete alignment;
 
 			TTransparentAnalysis *transpAna;
-			transpAna = new TTransparentAnalysis(settings);
+			transpAna = new TTransparentAnalysis(settings,TSettings::transparentMode);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
 		}
