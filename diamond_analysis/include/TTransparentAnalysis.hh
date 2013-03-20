@@ -58,7 +58,7 @@ using namespace std;
 
 class TTransparentAnalysis {
 public:
-	TTransparentAnalysis(TSettings* settings, TSettings::alignmentMode mode = TSettings::transparentMode);
+	TTransparentAnalysis(TSettings* settings, TSettings::alignmentMode mode = TSettings::normalMode);
 	virtual ~TTransparentAnalysis();
 //	void	doAnalysis(int nEvents=0);
 	void analyze(UInt_t nEvents, UInt_t startEvent);
