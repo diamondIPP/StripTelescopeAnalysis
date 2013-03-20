@@ -187,12 +187,16 @@ std::string TSettings::getClusterTreeFilePath()
 	return path.str();
 }
 
-std::string TSettings::getAlignmentFilePath()
+std::string TSettings::getAlignmentFilePath(TSettings::alignmentMode mode)
 {
 
 	stringstream path;
 	path<<getAbsoluteOuputPath(false);
-	path<<"alignment."<<getRunNumber();
+	if(mode == TSettings::transparentMode)
+		path << "alignment-trans.";
+	else
+		path<<"alignment.";
+	path<<getRunNumber();
 	if(this->isSpecialAnalysis())
 		path<<"-"<<getRunDescription();
 	path<<".root";
@@ -246,6 +250,30 @@ void TSettings::goToPedestalAnalysisDir(){
 void TSettings::goToClusterAnalysisDir(){
 	goToDir(this->getAbsoluteOuputPath(isSpecialAnalysis()).append("/clustering/"));
 }
+
+void TSettings::goToAlignmentDir(alignmentMode mode) {
+	if(mode == transparentMode)
+		goToDir(this->getAbsoluteOuputPath(true).append("/alignment2/"));
+	else
+		goToDir(this->getAbsoluteOuputPath(true).append("/alignment/"));
+}
+
+
+std::string TSettings::getAlignmentDir(TSettings::alignmentMode mode) {
+	if(mode == transparentMode)
+		return this->getAbsoluteOuputPath(true).append("/alignment2/");
+	else
+		return this->getAbsoluteOuputPath(true).append("/alignment/");
+}
+
+std::string TSettings::getTransparentAnalysisDir(alignmentMode mode){
+	if (mode == transparentMode)
+		return this->getAbsoluteOuputPath(true).append("/transparentAnalysis2/");
+	return this->getAbsoluteOuputPath(true).append("/transparentAnalysis/");
+}
+
+
+
 void TSettings::setRunDescription(std::string runDescription)
 {
 	this->runDescription = runDescription;

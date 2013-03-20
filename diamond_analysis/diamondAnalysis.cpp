@@ -274,6 +274,20 @@ int main(int argc, char ** argv) {
 			delete transpAna;
 		}
 
+		if (true){
+			sys->cd(currentDir.c_str());
+			TAlignment *alignment = new TAlignment(settings,TSettings::transparentMode);
+			alignment->createTransparentEventVectors();
+			//			alignment->setSettings(settings);
+			//alignment->PrintEvents(1511,1501);
+			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::diaAlignment);
+			delete alignment;
+
+			TTransparentAnalysis *transpAna;
+			transpAna = new TTransparentAnalysis(settings);
+			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
+			delete transpAna;
+		}
 		//		currentResults->Print();
 		//		currentResults->saveResults();
 		//		delete currentResults;

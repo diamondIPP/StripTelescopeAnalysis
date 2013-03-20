@@ -39,6 +39,8 @@
 #include "TPlane.hh"
 #include "TResults.hh"
 #include "TResidual.hh"
+#include "TTracking.hh"
+#include "TTransparentAnalysis.hh"
 
 #include "THTMLAlignment.hh"
 
@@ -63,26 +65,27 @@ private:
 public:
 	enum enumDetectorsToAlign {diaAlignment,silAlignment,bothAlignment};
 public:
-	TAlignment(TSettings* settings);
+	TAlignment(TSettings* settings,TSettings::alignmentMode mode = TSettings::normalMode);
 	virtual ~TAlignment();
 	int Align(UInt_t nEvents=0,UInt_t startEvent=0,enumDetectorsToAlign detAlign=bothAlignment);
 	int AlignSilicon(UInt_t nEvents=0,UInt_t startEvent=0);
 	int AlignDiamond(UInt_t nEvents=0,UInt_t startEvent=0);
 	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
+	void createTransparentEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
 	void setVerbosity(UInt_t verb){verbosity=verb;};
 	void setResults(TResults *res){results=res;}
 private:
 	void clearMeasuredVectors();
-	void initialiseDetectorAlignment();
-	void loadDetectorAlignment();
+	void initialiseDetectorAlignment(TSettings::alignmentMode mode =TSettings::normalMode);
+	void loadDetectorAlignment(TSettings::alignmentMode mode =TSettings::normalMode);
 	void AlignSiliconPlanes();
 	void doPreAlignment();
 	bool siliconAlignmentStep(bool bPrint=false,bool bUpdateAlignment = true);
 	void AlignDiamondPlane();
 
-	void saveAlignment();
+	void saveAlignment(TSettings::alignmentMode mode = TSettings::normalMode);
 	void getChi2Distribution(Float_t maxChi2=1000);
 	void AlignDetectorXY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::XY_COR,subjectPlane,refPlane1,refPlane2);};
 	void AlignDetectorX(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::X_COR,subjectPlane,refPlane1,refPlane2);};
@@ -109,7 +112,7 @@ private:
 //	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
 
 //	TResidual calculateResidualWithChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool bAlign=false,bool plot=false);
-	TADCEventReader* eventReader;
+	TTracking* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
     TRandom rand;
@@ -138,6 +141,7 @@ private:
     TCluster::calculationMode_t silCalcMode;
     THTMLAlignment *htmlAlign;
     bool bPlotAll;
+    TSettings::alignmentMode mode;
 private:
     TResidual resPlane1,resPlane2,resPlane3;
     TResults* results;

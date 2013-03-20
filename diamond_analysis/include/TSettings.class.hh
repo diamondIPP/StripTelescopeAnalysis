@@ -33,6 +33,8 @@
 #include <sys/stat.h>
 
 class TSettings:public TObject {
+public:
+	enum alignmentMode {normalMode,transparentMode};
 private:
 	std::string runDescription;
 	std::string outputDir;
@@ -47,7 +49,7 @@ public:
 	std::string getRawTreeFilePath();
 	std::string getPedestalTreeFilePath();
 	std::string getClusterTreeFilePath();
-	std::string getAlignmentFilePath();
+	std::string getAlignmentFilePath(TSettings::alignmentMode mode = TSettings::normalMode);
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
 
@@ -61,7 +63,7 @@ public:
 	void goToSelectionTreeDir();
 	void goToOutputDir();
 	void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
-	void goToAlignmentRootDir(){goToDir(this->getAbsoluteOuputPath(false));}
+	void goToAlignmentRootDir(alignmentMode mode = normalMode){goToDir(this->getAbsoluteOuputPath(false));}
 
 
     void goTo3dDiamondTreeDir();
@@ -70,12 +72,13 @@ public:
 	void goToClusterAnalysisDir();
 	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
 	void goToSelectionAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selectionAnalysis/"));}
-	void goToAlignmentDir(){goToDir(this->getAbsoluteOuputPath(true).append("/alignment/"));}
+	void goToAlignmentDir(alignmentMode mode =normalMode);
 	void goToAlignmentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/anaAlignmnet/"));}
 	void goToTransparentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/transparentAnalysis/"));}
-	std::string getTransparentAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/transparentAnalysis/");}
+	std::string getTransparentAnalysisDir(TSettings::alignmentMode mode = TSettings::normalMode);
+
 	std::string getToPedestalAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/pedestalAnalysis/");}
-	std::string getAlignmentDir(){return this->getAbsoluteOuputPath(true).append("/alignment/");};
+	std::string getAlignmentDir(TSettings::alignmentMode mode = normalMode);
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 

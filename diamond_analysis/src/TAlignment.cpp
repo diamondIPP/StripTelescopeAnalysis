@@ -7,7 +7,7 @@
 
 #include "../include/TAlignment.hh"
 
-TAlignment::TAlignment(TSettings* inputSettings) {
+TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	cout << "\n\n\n**********************************************************" << endl;
 	cout << "*************TAlignment::TAlignment***********************" << endl;
 	cout << "**********************************************************" << endl;
@@ -19,17 +19,26 @@ TAlignment::TAlignment(TSettings* inputSettings) {
 	stringstream runString;
 	settings->goToSelectionTreeDir();
 	htmlAlign = new THTMLAlignment(settings);
-	eventReader = new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
+	if (mode == TSettings::transparentMode){
+		settings->goToAlignmentRootDir();
+		eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);
+	}
+	else{
+		//TTracking* trackReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);
+
+		eventReader = (TTracking*) new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
 //	settings->getRunNumber(),settings->getVerbosity()<15?0:settings->getVerbosity()-15);
-	eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
-	cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
+		eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
+		cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
+	}
+
 	histSaver = new HistogrammSaver();
-	settings->goToAlignmentDir();
-	histSaver->SetPlotsPath(settings->getAlignmentDir());
+	settings->goToAlignmentDir(mode);
+	histSaver->SetPlotsPath(settings->getAlignmentDir(mode));
 	histSaver->SetRunNumber(runNumber);
 	histSaver->SetNumberOfEvents(eventReader->GetEntries());
-	htmlAlign->setFileGeneratingPath(settings->getAlignmentDir());
-	settings->goToAlignmentRootDir();
+	htmlAlign->setFileGeneratingPath(settings->getAlignmentDir(mode));
+	settings->goToAlignmentRootDir(mode);
 	cout << "end initialise" << endl;
 	alignmentPercentage = settings->getAlignment_training_track_fraction();
 	Float_t stripSize = 1.;    // 50./10000.;//mu m
@@ -49,11 +58,15 @@ TAlignment::TAlignment(TSettings* inputSettings) {
 	nDiaAlignmentStep = -1;
 	nDiaAlignSteps = settings->GetDiamondAlignmentSteps();
 	
-	diaCalcMode = TCluster::maxValue;    //todo
+	if(mode == TSettings::transparentMode)
+		diaCalcMode = TCluster::corEta;
+	else
+		diaCalcMode = TCluster::maxValue;    //todo
 	silCalcMode = TCluster::corEta;    //todo
 
 	bPlotAll = settings->doAllAlignmentPlots()||verbosity>6;
 	results=0;
+	this->mode = mode;
 
 }
 
@@ -63,7 +76,7 @@ TAlignment::~TAlignment() {
 	htmlAlign->setAlignment(align);
 	htmlAlign->createContent();
 	htmlAlign->generateHTMLFile();
-	this->saveAlignment();
+	this->saveAlignment(this->mode);
 	if(htmlAlign!=0)delete htmlAlign;
 	if (myTrack) delete myTrack;
 	if (histSaver) delete histSaver;
@@ -84,8 +97,13 @@ void TAlignment::setSettings(TSettings* settings) {
 /**
  * initialise the variable align and set the Z Offsets
  */
-void TAlignment::initialiseDetectorAlignment() {
-	if (align == NULL) {
+void TAlignment::initialiseDetectorAlignment(TSettings::alignmentMode mode) {
+	if (align == NULL & mode == TSettings::transparentMode){
+		cout<<"Loading transparent analysis mode..."<<flush;
+		char t; cin >>t;
+		loadDetectorAlignment(mode);
+	}
+	else if (align ==NULL) {
 		align = new TDetectorAlignment();
 		align->setVerbosity(verbosity-4>0?verbosity-4:0);
 		htmlAlign->setAlignment(align);
@@ -98,7 +116,7 @@ void TAlignment::initialiseDetectorAlignment() {
 	}
 }
 
-void TAlignment::loadDetectorAlignment(){
+void TAlignment::loadDetectorAlignment(TSettings::alignmentMode mode){
 	if (align == NULL) {
 		settings->goToAlignmentRootDir();
 		TFile *alignmentFile = new TFile(settings->getAlignmentFilePath().c_str(), "READ");
@@ -112,7 +130,7 @@ void TAlignment::loadDetectorAlignment(){
 			align = (TDetectorAlignment*)alignmentFile->Get("alignment");
 			if (align!=0){
 				cout<<"Found DetectorAlignment!"<<endl;
-				if(verbosity)align->Print();
+//				if(verbosity)align->Print();
 				alignmentFile->Close();
 				align = (TDetectorAlignment*)align->Clone();
 			}
@@ -134,6 +152,79 @@ void TAlignment::loadDetectorAlignment(){
 	if(myTrack!=0){
 		myTrack->setDetectorAlignment(align);
 	}
+	if(mode == TSettings::transparentMode){
+		cout<<" Loaded Alignment for transparent Alignment. "<<endl;
+		align->Print();
+	}
+
+}
+
+
+void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent) {
+	initialiseDetectorAlignment(TSettings::transparentMode);
+	if (nEvents == 0) nEvents = eventReader->GetEntries() - startEvent;
+	if (nEvents + startEvent > eventReader->GetEntries()) nEvents = eventReader->GetEntries() - startEvent;
+	int noHitDet = 0;
+	//	int falseClusterSizeDet=0;
+	//int noHitDia=0;
+//	int falseClusterSizeDia = 0;
+	int nCandidates = 0;
+//	int nScreened = 0;
+	int nNotInFidCut=0;
+	cout << "CREATING VECTOR OF VALID EVENTS TRANSPARENT..." << endl;
+
+	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
+			TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
+			if(!settings->useForAlignment(nEvent,nEvents))
+				return;
+			eventReader->LoadEvent(nEvent);
+			if (!eventReader->isValidTrack()) {
+				noHitDet++;
+				continue;
+			}
+			if(!eventReader->isInFiducialCut()){
+				nNotInFidCut++;
+				continue;
+			}
+
+//			float fiducialValueX=eventReader->getFiducialValueX();
+//			float fiducialValueY=eventReader->getFiducialValueY();
+			Int_t subjectPlane = TPlaneProperties::getDiamondPlane();
+			UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
+			vector< UInt_t > refPlanes =  TPlaneProperties::getSiliconPlaneVector();
+			TPositionPrediction* predictedPosition = eventReader->predictPosition(subjectPlane,refPlanes,false);
+//			cout<<"\n"<<endl;
+//			predictedPosition->Print(2);
+			Float_t predX = predictedPosition->getPositionX();
+			Float_t predY = predictedPosition->getPositionY();
+			Float_t metricPosInDetSystem = eventReader->getPositionInDetSystem(subjectDetector,predX,predY);
+			Float_t centerPos = settings->convertMetricToChannelSpace(subjectDetector,metricPosInDetSystem);
+//			cout<<nEvent<<" "<<predX<<"/"<<predY<<"\t"<<metricPosInDetSystem<< " - "<< centerPos<<endl;
+			TCluster cluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,centerPos,10);
+//			cluster.Print(1);
+			TEvent *event = eventReader->getEvent();
+			TEvent* clonedEvent = (TEvent*)event->Clone();
+			TPlane* plane = clonedEvent->getPlanePointer(subjectPlane);
+//			cout<<"\n\n***\n";
+//			event->Print(1);
+			vector<TCluster> vecClus(1,cluster);
+			plane->SetXClusters(vecClus);
+//			cout<<"\n";
+//			clonedEvent->Print(1);
+			for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
+				Float_t clusPos = eventReader->getCluster(det,0).getPosition();
+				if(clusPos<0||clusPos>=TPlaneProperties::getNChannels(det)||eventReader->getNClusters(det)!=1){
+					cout<<"Do not take event clusPos is not valid...."<<endl;
+					continue;
+				}
+			}
+			nCandidates++;
+
+			this->events.push_back(*clonedEvent);
+
+			if (eventReader->useForAnalysis())
+				break;
+	}
 
 }
 /**
@@ -153,7 +244,6 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 	int nScreened = 0;
 	int nNotInFidCut=0;
 	cout << "CREATING VECTOR OF VALID EVENTS..." << endl;
-
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
 		if(!settings->useForAlignment(nEvent,nEvents))
@@ -249,6 +339,11 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 		cout << "\t\t " << eventReader << " ." << endl;
 	}
 
+	if(this->mode == TSettings::transparentMode){
+		cout<< "\n Det to align:: "<<detToAlign<<endl;
+		cout<< " ResetAlignmen: "<<settings->resetAlignment()<<endl;
+		cout<< " AlignmentMode of diamond: "<<diaCalcMode<<endl;
+	}
 	if(detToAlign!=diaAlignment&&settings->resetAlignment())
 		initialiseDetectorAlignment();
 	else
@@ -285,7 +380,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 			align->ResetAlignment(TPlaneProperties::getDiamondPlane());
 		AlignDiamondPlane();
 	}
-	align->PrintResults((UInt_t) 1);
+//	align->PrintResults((UInt_t) 1);
 	cout<<"Done with alignment of ";
 	if (detToAlign==diaAlignment)cout<<"diamond"<<endl;
 	else if(detToAlign==silAlignment)cout<<"silicon"<<endl;
@@ -961,11 +1056,16 @@ TResidual TAlignment::CheckStripDetectorAlignmentChi2(TPlaneProperties::enumCoor
 /**
  *
  */
-void TAlignment::saveAlignment() {
-	stringstream fileName;
+void TAlignment::saveAlignment(TSettings::alignmentMode mode) {
 	settings->goToAlignmentRootDir();
-	TFile *alignmentFile = new TFile(settings->getAlignmentFilePath().c_str(), "RECREATE");
-	cout << "TAlignment:saveAlignment(): path: \"" << settings->getAlignmentFilePath().c_str() << "\"" << endl;
+//	if(mode == TSettings::normalMode)
+	string fileName = settings->getAlignmentFilePath(mode);
+	TFile *alignmentFile = new TFile(fileName.c_str(), "RECREATE");
+	cout << "TAlignment:saveAlignment(): path: \"" << fileName << "\"" << endl;
+	if(mode==TSettings::transparentMode){
+		cout<<"PLease confirm...."<<flush;
+		char t; cin >>t;
+	}
 	alignmentFile->cd();
 	align->SetName("alignment");
 	stringstream title;
@@ -1234,7 +1334,22 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 			Float_t mean = histo->GetMean();
 			cout << "Alignment for plane" << subjectPlane << endl;
 			TF1* fitX=0;
-			if(TPlaneProperties::isDiamondPlane(subjectPlane)){
+			if(TPlaneProperties::isDiamondPlane(subjectPlane) && this->mode == TSettings::transparentMode){
+				fitWidth = 3 * sigma;
+				fitX = new TF1("doubleGausFit","gaus(0)+gaus(3)",mean-fitWidth,mean+fitWidth);
+//				fitX->SetParLimits(0,0,4*sigma);
+				fitX->SetParLimits(1,-4*sigma,4*sigma);
+				fitX->SetParLimits(2,0,4*sigma);
+//				fitX->SetParLimits(3,0,4*sigma);
+				fitX->SetParLimits(4,-4*sigma,4*sigma);
+				fitX->SetParLimits(5,0,4*sigma);
+				fitX->SetParNames("C_{0}","#mu_{0}","#sigma_{0}","#C_{1}","#mu_{1}","#sigma_{1}");
+				fitX->SetParameter(1,mean);
+				fitX->SetParameter(2,sigma);
+				fitX->SetParameter(4,mean);
+				fitX->SetParameter(5,sigma);
+			}
+			else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
 				fitWidth = 3*sigma;
 				fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",mean-fitWidth,mean+fitWidth);
 				fitX->FixParameter(3,settings->getDiamondPitchWidth()/2);//TODO
@@ -1248,10 +1363,17 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 				fitX->SetParameter(1,mean);
 				fitX->SetParameter(2,sigma);
 			}
+			if (this->mode==TSettings::transparentMode){
+				cout<<"Fitfunction: "<<fitX->GetName()<<" "<<fitX->GetTitle()<<endl;
+			}
 			histo->Fit(fitX, "Q", "",mean-fitWidth, mean+fitWidth);
 			Float_t xRes=0;
 
-			if(TPlaneProperties::isDiamondPlane(subjectPlane)){
+
+			if(TPlaneProperties::isDiamondPlane(subjectPlane) && mode == TSettings::transparentMode){
+
+			}
+			else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
 				xRes = TMath::Max(fitX->GetParameter(1),fitX->GetParError(2));
 				mean = fitX->GetParameter(2);
 			}

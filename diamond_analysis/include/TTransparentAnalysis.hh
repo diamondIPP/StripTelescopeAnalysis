@@ -58,12 +58,13 @@ using namespace std;
 
 class TTransparentAnalysis {
 public:
-	TTransparentAnalysis(TSettings* settings);
+	TTransparentAnalysis(TSettings* settings, TSettings::alignmentMode mode = TSettings::transparentMode);
 	virtual ~TTransparentAnalysis();
 //	void	doAnalysis(int nEvents=0);
 	void analyze(UInt_t nEvents, UInt_t startEvent);
 	void calcEtaCorrectedResiduals();
 	void setSettings(TSettings* settings);
+	static TCluster makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	
 private:
 	void initHistograms();
@@ -81,9 +82,8 @@ private:
 //	void fitTrack();
 //	void analyzeTrack(TTrack track);
 	bool predictPositions(bool savePrediction = true);
-	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
-	int getSignedChannelNumber(Float_t position);
+	static int getSignedChannelNumber(Float_t position);
 	void printEvent();
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);

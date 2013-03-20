@@ -52,6 +52,7 @@ public:
 	UInt_t getEventNumber(){return eventNumber;};
 	void setVerbosity(UInt_t verbosity);
 	void Print(UInt_t level);
+	TPlane* getPlanePointer(UInt_t plane){if(plane<planes.size())return (TPlane* )(&planes[plane]); return 0;}
 private:
 	
 	vector<TPlane> planes;

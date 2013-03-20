@@ -15,6 +15,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <vector>
 #define N_INVALID -9999
 class TPlaneProperties:public TObject {
 public:
@@ -34,6 +35,7 @@ public:
 	inline static UInt_t getNSiliconDetectors(){return 8;};
 	inline static UInt_t getDetDiamond(){return 8;};
 	inline static UInt_t getDiamondPlane(){return 4;};
+	static std::vector<UInt_t> getSiliconPlaneVector();
 	inline static UInt_t getNDetectors(){return 9;};
 	inline static UInt_t getMaxTransparentClusterSize(UInt_t det){return 10;};
 	static std::string getCoordinateString(enumCoordinate cor);

@@ -12,12 +12,7 @@ ClassImp(TPlane);
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
 	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<"\tyClusters:"<<yClusters.size()<<endl;
-	this->xClusters.clear();
-	this->yClusters.clear();
-	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
-		this->xClusters.push_back(xClusters.at(xCl));
-	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
-		this->yClusters.push_back(yClusters.at(yCl));
+	this->SetClusters(xClusters, yClusters);
 	this->type=type;
 	this->planeNo=planeNo;
 
@@ -26,9 +21,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
 	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
-	this->xClusters.clear();
-	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
-		this->xClusters.push_back(xClusters.at(xCl));
+	this->SetXClusters(xClusters);
 	this->yClusters.clear();
 	this->type=type;
 	this->planeNo=planeNo;
@@ -162,6 +155,26 @@ TCluster TPlane::getCluster(TPlaneProperties::enumCoordinate cor, UInt_t cl){
 		cerr<<"Coordinate is neither X nor Y< return empty cluster"<<endl;
 		return (TCluster());
 	}
+}
+
+
+void TPlane::SetClusters(vector<TCluster> xClusters,
+		vector<TCluster> yClusters) {
+	this->SetXClusters(xClusters);
+	this->SetYClusters(yClusters);
+}
+
+void TPlane::SetXClusters(vector<TCluster> xClusters) {
+	this->xClusters.clear();
+	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
+		this->xClusters.push_back(xClusters.at(xCl));
+}
+
+void TPlane::SetYClusters(vector<TCluster> yClusters) {
+	this->yClusters.clear();
+	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
+		this->yClusters.push_back(yClusters.at(yCl));
+
 }
 
 void TPlane::Print(UInt_t level)

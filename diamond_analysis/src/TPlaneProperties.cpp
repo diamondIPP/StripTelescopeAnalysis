@@ -41,6 +41,13 @@ std::string TPlaneProperties::getDetectorNameString(UInt_t det){
 	return output.str();
 }
 
+std::vector<UInt_t> TPlaneProperties::getSiliconPlaneVector() {
+	std::vector<UInt_t> vecPlanes;
+	for (UInt_t i=0;i<getNSiliconPlanes();i++)
+		vecPlanes.push_back(i);
+	return vecPlanes;
+}
+
 std::string TPlaneProperties::getStringForDetector(int det){
 	switch(det){
 	case 0: return "D0X";
