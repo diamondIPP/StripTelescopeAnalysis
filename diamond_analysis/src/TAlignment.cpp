@@ -100,7 +100,6 @@ void TAlignment::setSettings(TSettings* settings) {
 void TAlignment::initialiseDetectorAlignment(TSettings::alignmentMode mode) {
 	if (align == NULL & mode == TSettings::transparentMode){
 		cout<<"Loading transparent analysis mode..."<<flush;
-		char t; cin >>t;
 		loadDetectorAlignment(mode);
 	}
 	else if (align ==NULL) {
@@ -1062,8 +1061,8 @@ void TAlignment::saveAlignment(TSettings::alignmentMode mode) {
 	string fileName = settings->getAlignmentFilePath(mode);
 	TFile *alignmentFile = new TFile(fileName.c_str(), "RECREATE");
 	cout << "TAlignment:saveAlignment(): path: \"" << fileName << "\"" << endl;
-	if(mode==TSettings::transparentMode){
-		cout<<"PLease confirm...."<<flush;
+	if(mode==TSettings::transparentMode&&verbosity%2==1&&verbosity>6){
+		cout<<"Please confirm...."<<flush;
 		char t; cin >>t;
 	}
 	alignmentFile->cd();

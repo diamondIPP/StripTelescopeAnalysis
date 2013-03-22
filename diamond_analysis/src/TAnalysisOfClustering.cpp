@@ -1071,7 +1071,7 @@ void TAnalysisOfClustering::savePHHistos()
 				vecMVP.push_back(fit->GetParameter(1));
 				vecClusterSizeError.push_back(0.5);
 				vecWidth.push_back(fit->GetParameter(0));
-				histSaver->SaveHistogramWithFit(htemp,fit);
+				histSaver->SaveHistogramLandau(htemp);
 			}
 			else
 				histSaver->SaveHistogram(htemp);

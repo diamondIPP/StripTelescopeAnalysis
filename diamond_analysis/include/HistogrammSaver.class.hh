@@ -37,6 +37,9 @@
 #include "TGraphErrors.h"
 #include "TString.h"
 #include <limits>
+#include "TCutG.h"
+#include "TPaveStats.h"
+#include "TText.h"
 
 //#include <sys/dirent.h>
 #include <sys/stat.h>
@@ -54,11 +57,15 @@ public:
 	void SetOptStat(std::string optStat){gStyle->SetOptStat(optStat.c_str());}
 	void SetOptStat(Int_t stat){gStyle->SetOptStat(stat);}
 	void SetOptFit(Int_t fitOpt){gStyle->SetOptFit(fitOpt);}
+	TPaveText* updateMean(TH1F* histo,Float_t minX = (-1)*std::numeric_limits<float>::infinity(),
+								Float_t maxX =      std::numeric_limits<float>::infinity() );
+	TPaveText* GetUpdatedLandauMeans(TH1F* histo,Float_t mpv);
 	//void SetOptFit(std::string fitOpt){gStyle->SetOptFit(fitOpt.c_str());}
 	void SaveCanvas(TCanvas* canvas);
 	void SaveCanvasROOT(TCanvas* canvas);
 	void SaveCanvasPNG(TCanvas* canvas);
 	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
+	void SaveHistogramLandau(TH1F* histo);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);

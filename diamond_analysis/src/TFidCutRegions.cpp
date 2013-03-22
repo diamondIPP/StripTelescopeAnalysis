@@ -308,11 +308,11 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 		htemp->GetYaxis()->SetRangeUser(minY,maxY);
 	}
 	for(UInt_t i=0;i<fidCuts.size();i++)
-		getFiducialAreaPaveText(i)->Draw("same");
+		getFiducialAreaCut(i)->Draw("same");
 	return c1;
 }
 
-TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
+TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 {
 	if (nFidCut>=fidCuts.size())
 		return 0;
@@ -320,14 +320,25 @@ TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
 	Float_t xHigh = fidCuts.at(nFidCut)->GetXHigh();
 	Float_t yLow = fidCuts.at(nFidCut)->GetYLow();
 	Float_t yHigh = fidCuts.at(nFidCut)->GetYHigh();
-	TPaveText * pt = new TPaveText(xLow,yLow,xHigh,yHigh);
+	TString name = TString::Format("fidCut_%d",nFidCut);
+	TCutG * pt = new TCutG(name,5);
+	pt->SetPoint(0,xLow,yLow);
+	pt->SetPoint(1,xLow,yHigh);
+	pt->SetPoint(2,xHigh,yHigh);
+	pt->SetPoint(3,xHigh,yLow);
+	pt->SetPoint(4,xLow,yLow);
+	//(xLow,yLow,xHigh,yHigh);
 	if(index == nFidCut + 1||index == 0){
 		pt->SetFillColor(kRed);
+		pt->SetLineColor(kRed);
+		pt->SetLineWidth(3);
 		pt->SetFillStyle(3013);
 	}
 	else{
 		pt->SetFillColor(kOrange);
 		pt->SetFillStyle(3013);
+		pt->SetLineColor(kOrange);
+		pt->SetLineWidth(3);
 	}
 	return pt;
 }
@@ -496,14 +507,21 @@ TCanvas *TFidCutRegions::getFiducialCutProjectionCanvas(TH1D* hProj,std::vector<
 	TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
 	c1->cd();
 	hProj->Draw();
-	vector<TBox* > boxes;
+	vector<TCutG* > boxes;
 	for(UInt_t i=0;i<intervals.size();i++){
-		TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
+		TString name = TString::Format("cut_%s_interval_%d",hProj->GetName(),i);
+		TCutG *box = new TCutG(name,5);
+		//TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
+		box->SetPoint(0,intervals.at(i).first,0);
+		box->SetPoint(1,intervals.at(i).first,hProj->GetMaximum());
+		box->SetPoint(2,intervals.at(i).second,hProj->GetMaximum());
+		box->SetPoint(3,intervals.at(i).second,0);
+		box->SetPoint(4,intervals.at(i).first,0);
 		box->SetFillColor(kRed+i);
 		box->SetFillStyle(3013);
-		box->AddText("");
-		box->AddText("");
-		box->AddText(Form("Area\n\n%i",i));
+//		box->AddText("");
+//		box->AddText("");
+//		box->AddText(Form("Area\n\n%i",i));
 		boxes.push_back(box);
 		box->Draw("same");
 	}

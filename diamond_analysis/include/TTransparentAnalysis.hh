@@ -139,17 +139,17 @@ private:
 	vector< vector<Float_t> > vecvecEta;
 	vector< vector<Float_t> > vecvecEtaCMNcorrected;
 	// histograms
-	vector<TH1F*> hLaundau;
+	vector<TH1F*> hLandau;
 	vector< vector<Float_t> > vecVecLandau;
 	vector<TH1F*> hEta;
 	vector<TH1F*> hEtaCMNcorrected;
 	vector< vector<Float_t> > vecVecEta;
 
-	TH1F* hLaundauMean;
-	TH1F* hLaundauMP;
+	TH1F* hLandauMean;
+	TH1F* hLandauMP;
 	TH1F* hPredictedPositionInStrip;
 	
-	vector<TH1F*> hLaundau2Highest;
+	vector<TH1F*> hLandau2Highest;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
 	vector<TH1F*> hResidualEtaCorrected;
@@ -157,8 +157,8 @@ private:
 	vector<TH2F*> hResidualVsHitPositionChargeWeighted;
 	vector<TH2F*> hResidualVsHitPositionHigehest2Centroid;
 	vector<TH2F*> hResidualVsHitPositionEtaCorrected;
-	TH1F* hLaundau2HighestMean;
-	TH1F* hLaundau2HighestMP;
+	TH1F* hLandau2HighestMean;
+	TH1F* hLandau2HighestMP;
 	vector<TH1F*> hEtaIntegrals;
 //	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
 	

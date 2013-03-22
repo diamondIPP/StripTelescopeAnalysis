@@ -160,6 +160,89 @@ void HistogrammSaver::SaveStringToFile(string name, string data)
 	file.close();
 }
 
+/**
+ *
+ * @param histo
+ * @param minX
+ * @param maxX
+ * @return
+ * @todo add sigma value to pt
+ */
+TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) {
+	Int_t minBin = histo->FindBin(minX);
+	Int_t maxBin = histo->FindBin(maxX);
+	Float_t mean = 0;
+	Float_t sigma = 0;
+	Float_t nEntries = 0;
+	for (Int_t bin = minBin; bin<maxBin+1;bin++){
+		Float_t weighted = histo->GetBinContent(bin)*histo->GetBinCenter(bin);
+		nEntries+=histo->GetBinContent(bin);
+		mean += weighted;
+		sigma+= weighted*weighted;
+	}
+	mean = mean/nEntries;
+	cout<<"new calculation of mean for range ["<<minX<<","<<maxX<<"]"<<endl;
+	TCanvas *c1 = new TCanvas();
+	histo->Draw();
+	c1->Update();
+	TPaveStats* hstat = (TPaveStats*)histo->GetListOfFunctions()->FindObject("stats");
+	TPaveText* hstat2 = 0;
+	if (hstat) hstat2 = (TPaveText*) hstat->Clone();
+	else
+		histo->GetListOfFunctions()->Print();
+	if(hstat2){
+
+		TText * text = hstat2->AddText("");
+		text->SetTextSize(0);
+		text = hstat2->AddText(TString::Format("Mean_{> %.1f}  =   %.1f",minX,mean));
+		text->SetTextSize(0);
+		text = hstat2->AddText(TString::Format("Mean_{all}  =   %.1f",histo->GetMean()));
+		text->SetTextSize(0);
+		text = hstat2->AddText("");
+		text->SetTextSize(0);
+		Float_t yNDC = 0.5;
+		hstat2->SetY1NDC(yNDC);
+	}
+	else{
+		cout<<"something is bad..."<<endl;
+	}
+	return hstat2;
+
+}
+
+
+TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
+	if (!histo)
+		return 0;
+	Float_t minX,maxX;
+	minX = (-1.) *   std::numeric_limits<float>::infinity();
+	maxX =  std::numeric_limits<float>::infinity();
+	//Find good mean calculation Area
+	Int_t startBin = histo->FindBin(mpv);
+	cout<<"Start Bin: " <<startBin<<endl;
+	Float_t max = histo->GetBinContent(startBin);
+	Int_t bin;
+	for(bin = startBin;bin>0;bin--){
+		if(histo->GetBinContent(bin)<.05*max)
+			break;
+	}
+	Int_t deltaBins = startBin - bin;
+	bin = startBin-deltaBins*2;
+	if(bin>0)
+		minX = histo->GetBinLowEdge(bin);
+	else
+		minX = mpv*.5;
+	//Add a "fit" to histo
+	TPaveText* pt = updateMean(histo,minX,maxX);
+	maxX = histo->GetBinLowEdge(histo->GetNbinsX());
+	TF1* fMeanCalculationArea = new TF1("fMeanCalculationArea","pol0",minX,maxX);
+	fMeanCalculationArea->SetLineColor(kGreen);
+	fMeanCalculationArea->FixParameter(0,0);
+	fMeanCalculationArea->SetLineWidth(5);
+	histo->Fit(fMeanCalculationArea,"+","",minX,maxX);
+	return pt;
+}
+
 void HistogrammSaver::UpdatePaveText(){
 	pt->Clear();
 	pt->SetTextSize(0.0250);
@@ -219,6 +302,27 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
 	currentStyle->cd();
 }
 
+
+void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
+	if(histo->GetEntries()==0)return;
+
+	TF1* fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("Fitfcn_%s",histo->GetName()));
+	Float_t mpv = histo->GetMean();
+	if(fit)
+	 mpv = fit->GetParameter(1);
+	cout<<"MPV: "<<mpv<<" mean: "<<histo->GetMean()<<" "<<fit->GetName()<<endl;
+	TPaveText* stats = (TPaveText*) this->GetUpdatedLandauMeans(histo,mpv);
+	TString name = TString::Format("c_%s",histo->GetName());
+	TCanvas *c1 = new TCanvas(name,name);
+	c1->cd();
+	histo->Draw();
+	stats->Draw();
+//	cout<<"Saving: "<<c1->GetName()<<endl;
+	SaveCanvas(c1);
+	//create ROOT
+	SaveHistogramROOT(histo);
+}
+
 /**
  * *********************************************************
  * *********************************************************
@@ -238,6 +342,7 @@ void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) 
 	//create ROOT
 	SaveHistogramROOT(histo);
 }
+
 void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosity){
 	if(histo==0)return;
 	if(histo->GetEntries()==0)return;

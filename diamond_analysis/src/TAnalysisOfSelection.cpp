@@ -437,7 +437,9 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			hProjection->SetTitle(name);
 			hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 			hProjection->GetYaxis()->SetTitle("number of entries");
-			histSaver->SaveHistogram(hProjection);
+			LandauGaussFit landaugaus;
+			landaugaus.doLandauGaussFit(hProjection);
+			histSaver->SaveHistogramLandau(hProjection);
 			delete hProjection;
 		}
 		hProjection=0;
@@ -735,7 +737,7 @@ void TAnalysisOfSelection::saveHistos()
 		vecHistoMeanLandau.push_back(fit->GetParameter(1));
 
 		if(verbosity)cout<< "saving "<<histo->GetName()<<endl;
-		histSaver->SaveHistogram(histo);
+		histSaver->SaveHistogramLandau(histo);
 		width=fit->GetParameter(0);
 		MP = fit->GetParameter(1);
 		area = fit->GetParameter(2);
@@ -750,10 +752,12 @@ void TAnalysisOfSelection::saveHistos()
 	name.clear();
 	name<< "hPulseHeigthDiamond_1_2_ClusterSize";
 	TH1F* histo12 =0;
+
 	if (histoLandauDistribution){
 		Int_t binLow = histoLandauDistribution->GetYaxis()->FindBin(1);
 		Int_t binHigh = histoLandauDistribution->GetYaxis()->FindBin(2);
 		histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),binLow,binHigh);
+		landauGauss.doLandauGaussFit(histo12);
 	}
 	else{
 		cerr<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
@@ -804,7 +808,7 @@ void TAnalysisOfSelection::saveHistos()
 		}
 		if(histo12){
 			cout<<"Save HISTOGRAM: "<<histo12->GetName()<<endl;
-			histSaver->SaveHistogram(histo12);
+			histSaver->SaveHistogramLandau(histo12);
 			delete histo12;
 		}
 	}
@@ -846,8 +850,11 @@ void TAnalysisOfSelection::saveHistos()
 			vecHistoMean.push_back(histoMean);
 			vecHistoMeanGaus.push_back(histoMeanGausFit);
 			vecHistoMeanLandau.push_back(fitCS->GetParameter(1));
+			histSaver->SaveHistogramLandau(histo);
 		}
-		histSaver->SaveHistogram(histo);
+		else
+			histSaver->SaveHistogram(histo);
+
 		if(histo) delete histo;
 	}
 
