@@ -792,7 +792,7 @@ void TTransparentAnalysis::saveHistograms() {
 		histSaver->SaveHistogramWithFit(hResidualEtaCorrected[clusterSize],fitResidualEtaCorrected[clusterSize]);
 		histSaver->SaveHistogram(hEtaIntegrals[clusterSize],0);
 	}
-	histSaver->SaveHistogram(hLandauMean);
+	histSaver->SaveHistogram(DiaTranspAnaPulseHeightOfMean);
 	histSaver->SaveHistogram(hLandauMP);
 	histSaver->SaveHistogram(hLandau2HighestMean);
 	histSaver->SaveHistogram(hLandau2HighestMP);
@@ -800,7 +800,7 @@ void TTransparentAnalysis::saveHistograms() {
 	for(UInt_t i=0;i<TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);i++){
 		string name = (string)TString::Format("hRelPosVsResolutionEtaCorrectedIn%d",i+1);
 		if(verbosity>6)cout<<"creating "<<name<<": "<<vecvecRelPos[i].size()<<"-"<<vecvecResXEtaCorrected[i].size()<<endl;
-		TH2F* hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXEtaCorrected[i],512,-6000);
+		TH2F* hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXEtaCorrected[i],512,512,-6000);
 		hist->GetXaxis()->SetRangeUser(-pw,pw);
 		hist->GetYaxis()->SetTitle("Relative predicted Position ");
 		hist->GetXaxis()->SetTitle("Residual, Eta corrected / #mum");
@@ -809,7 +809,7 @@ void TTransparentAnalysis::saveHistograms() {
 		if (hist)delete hist;
 
 		name = (string)TString::Format("hRelChPos2VsResChargeWeighted_In_%d",i+1);
-		hist = histSaver->CreateScatterHisto(name,vecvecRelPos2[i],vecvecResXEtaCorrected[i],512,-6000);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos2[i],vecvecResXEtaCorrected[i],512,512,-6000);
 		hist->GetXaxis()->SetRangeUser(-pw,pw);
 		hist->GetYaxis()->SetTitle("Relative predicted Position");
 		hist->GetXaxis()->SetTitle("Residual, charge Weighted / #mum");
@@ -818,7 +818,7 @@ void TTransparentAnalysis::saveHistograms() {
 		if (hist)delete hist;
 
 		name = (string)TString::Format("hRelChPosVsResChargeWeighted_In_%d",i+1);
-		hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXChargeWeighted[i],512,-6000);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXChargeWeighted[i],512,512,-6000);
 		hist->GetXaxis()->SetRangeUser(-pw,pw);
 		hist->GetYaxis()->SetTitle("Relative predicted Position");
 		hist->GetXaxis()->SetTitle("Residual, charge Weighted / #mum");
@@ -827,7 +827,7 @@ void TTransparentAnalysis::saveHistograms() {
 		if (hist)delete hist;
 
 		name = (string)TString::Format("hRelChPosVsResHighest2Centroid_In_%d",i+1);
-		hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXHighest2Centroid[i],512,-6000);
+		hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXHighest2Centroid[i],512,512,-6000);
 		hist->GetYaxis()->SetTitle("Relative predicted Position");
 		hist->GetXaxis()->SetTitle("Residual, Highest 2 Centorid / #mum");
 		hist->GetXaxis()->SetRangeUser(-pw,pw);
@@ -836,7 +836,7 @@ void TTransparentAnalysis::saveHistograms() {
 		if (hist)delete hist;
 
 		name = (string)TString::Format("hEtaVsResolutionEtaCorrectedIn%d",i+1);
-		hist = histSaver->CreateScatterHisto(name,vecvecEta[i],vecvecResXEtaCorrected[i],512,-6000);
+		hist = histSaver->CreateScatterHisto(name,vecvecEta[i],vecvecResXEtaCorrected[i],512,512,-6000);
 		hist->GetYaxis()->SetTitle("#eta");
 		hist->GetXaxis()->SetTitle("Residual, Eta corrected / #mum");
 		hist->GetXaxis()->SetRangeUser(-pw,pw);
@@ -845,7 +845,7 @@ void TTransparentAnalysis::saveHistograms() {
 		if (hist)delete hist;
 
 		name = (string)TString::Format("hEtaCMNCorrectedVsResolutionEtaCorrectedIn%d",i+1);
-		hist = histSaver->CreateScatterHisto(name,vecvecEtaCMNcorrected[i],vecvecResXEtaCorrected[i],512,-6000);
+		hist = histSaver->CreateScatterHisto(name,vecvecEtaCMNcorrected[i],vecvecResXEtaCorrected[i],512,512,-6000);
 		hist->GetYaxis()->SetTitle("#eta_{CMN-corrected}");
 		hist->GetXaxis()->SetTitle("Residual, Eta corrected / #mum");
 		hist->GetXaxis()->SetRangeUser(-pw,pw);

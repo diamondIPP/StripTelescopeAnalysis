@@ -227,7 +227,7 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 			break;
 	}
 	Int_t deltaBins = startBin - bin;
-	bin = startBin-deltaBins*2;
+	bin = startBin-deltaBins*1.5;
 	if(bin>0)
 		minX = histo->GetBinLowEdge(bin);
 	else
@@ -239,7 +239,7 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 	fMeanCalculationArea->SetLineColor(kGreen);
 	fMeanCalculationArea->FixParameter(0,0);
 	fMeanCalculationArea->SetLineWidth(5);
-	histo->Fit(fMeanCalculationArea,"+","",minX,maxX);
+	histo->Fit(fMeanCalculationArea,"Q+","",minX,maxX);
 	return pt;
 }
 
