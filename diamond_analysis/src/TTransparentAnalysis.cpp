@@ -792,7 +792,7 @@ void TTransparentAnalysis::saveHistograms() {
 		histSaver->SaveHistogramWithFit(hResidualEtaCorrected[clusterSize],fitResidualEtaCorrected[clusterSize]);
 		histSaver->SaveHistogram(hEtaIntegrals[clusterSize],0);
 	}
-	histSaver->SaveHistogram(DiaTranspAnaPulseHeightOfMean);
+	histSaver->SaveHistogram(hLandauMean);
 	histSaver->SaveHistogram(hLandauMP);
 	histSaver->SaveHistogram(hLandau2HighestMean);
 	histSaver->SaveHistogram(hLandau2HighestMP);
