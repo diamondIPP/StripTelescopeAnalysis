@@ -43,7 +43,7 @@ void THTMLSelectionAnalysis::addAreaPlots() {
 		sectionContent<<"<h2>"<<TString::Format("Area %d: Channel %d - %d ",area,firstCh,lastCh)<<"</h2>\n";
 		sectionContent<<this->putImage(path,name,(string)"png",49)<<"\n";
 
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHit_area_%d_ch_%d-%d",area,firstCh,lastCh);
+		name = TString::Format("c_hChargeOfCluster_ClusterSize_1_2_NoBorderHit_area_%d_ch_%d-%d",area,firstCh,lastCh);
 		sectionContent<<this->putImage(path,name,(string)"png",49)<<"<br>\n";
 		name = TString::Format("cChargePerChannel_area%d",area);
 		sectionContent<<this->putImage(path,name,(string)"png",33)<<"\n";

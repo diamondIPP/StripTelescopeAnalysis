@@ -429,6 +429,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderHit);
 		if(histoLandauDistribution2DareaUnmaskedNoBorderHit)delete histoLandauDistribution2DareaUnmaskedNoBorderHit;
 
+		LandauGaussFit landaugaus;
 		/******* PROJECTIONS ******/
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
@@ -437,7 +438,6 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			hProjection->SetTitle(name);
 			hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 			hProjection->GetYaxis()->SetTitle("number of entries");
-			LandauGaussFit landaugaus;
 			landaugaus.doLandauGaussFit(hProjection);
 			histSaver->SaveHistogramLandau(hProjection);
 			delete hProjection;
@@ -451,7 +451,8 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			hProjection->SetTitle(name);
 			hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 			hProjection->GetYaxis()->SetTitle("number of entries");
-			histSaver->SaveHistogram(hProjection);
+			landaugaus.doLandauGaussFit(hProjection);
+			histSaver->SaveHistogramLandau(hProjection);
 			delete hProjection;
 		}
 		hProjection=0;
@@ -463,7 +464,8 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			hProjection->SetTitle(name);
 			hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 			hProjection->GetYaxis()->SetTitle("number of entries");
-			histSaver->SaveHistogram(hProjection);
+			landaugaus.doLandauGaussFit(hProjection);
+			histSaver->SaveHistogramLandau(hProjection);
 			delete hProjection;
 		}
 		hProjection=0;
@@ -476,7 +478,8 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			hProjection->SetTitle(name);
 			hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 			hProjection->GetYaxis()->SetTitle("number of entries");
-			histSaver->SaveHistogram(hProjection);
+			landaugaus.doLandauGaussFit(hProjection);
+			histSaver->SaveHistogramLandau(hProjection);
 			delete hProjection;
 		}
 		hProjection=0;
@@ -487,7 +490,8 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			hProjection->SetTitle(name);
 			hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 			hProjection->GetYaxis()->SetTitle("number of entries");
-			histSaver->SaveHistogram(hProjection);
+			landaugaus.doLandauGaussFit(hProjection);
+			histSaver->SaveHistogramLandau(hProjection);
 			delete hProjection;
 		}
 		hProjection=0;
@@ -498,7 +502,8 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			hProjection->SetTitle(name);
 			hProjection->GetXaxis()->SetTitle(TString::Format("ChargeOfCluster in area %d",area));
 			hProjection->GetYaxis()->SetTitle("number of entries");
-			histSaver->SaveHistogram(hProjection);
+			landaugaus.doLandauGaussFit(hProjection);
+			histSaver->SaveHistogramLandau(hProjection);
 			delete hProjection;
 		}
 		hProjection=0;
@@ -726,7 +731,7 @@ void TAnalysisOfSelection::saveHistos()
 		xmax=histoMax+histoRMS;
 		gausFit = new TF1("gausFit","gaus",xmin,xmax);
 		//	cout<<"gausFit: "<<gausFit<<endl;
-		histo->Fit(gausFit,"","same+",xmin,xmax);
+		histo->Fit(gausFit,"0+","goff",xmin,xmax);
 		fit = landauGauss.doLandauGaussFit(histo);
 		//	cout <<"gausFit:"<<gausFit->GetTitle()<<" is a:"<< gausFit->ClassName()<<" "<<gausFit->GetNpar()<<endl;
 		histoMeanGausFit = gausFit->GetParameter(1);

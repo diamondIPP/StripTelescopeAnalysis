@@ -59,8 +59,8 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	stringstream plots1, plots2;
 	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 		stringstream histoname1, histoname2;
-		histoname1 << "hDiaTranspAnaPulseHeightOf"<<clusterSize<<"Strips";
-		histoname2 << "hDiaTranspAnaPulseHeightOf2HighestIn"<<clusterSize<<"Strips";
+		histoname1 << "c_hDiaTranspAnaPulseHeightOf"<<clusterSize<<"Strips";
+		histoname2 << "c_hDiaTranspAnaPulseHeightOf2HighestIn"<<clusterSize<<"Strips";
 		plots1 << putImage(".",histoname1.str()) << " \n";
 		plots2 << putImage(".",histoname2.str()) << " \n";
 	}
