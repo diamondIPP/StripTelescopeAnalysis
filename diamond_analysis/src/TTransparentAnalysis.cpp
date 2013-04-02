@@ -718,9 +718,11 @@ void TTransparentAnalysis::saveHistograms() {
 	//else{
 	else cout<<"couldn't ";
 		cout<<"create scatterplot: "<<name<<"\t"<<vecVecFidCutX.size()<<" "<<vecVecLandau.at(i).size()<<" "<<i<<" "<<endl;
+	if(!htemp){
 		char t;
 		cin>>t;
-	//}
+	}
+
 	histSaver->SaveHistogram(htemp);
 	if(htemp)delete htemp;
 	name << "hLandauVsFidCutY_ClusterSize10";

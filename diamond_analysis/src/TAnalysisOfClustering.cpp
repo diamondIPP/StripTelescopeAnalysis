@@ -598,14 +598,14 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 	for(Float_t eta=0;eta<=1;eta+=etaWidth){
 		eta1 = eta<1?eta:-1000;
 		eta2 = eta<1?eta+etaWidth:1000;
-		cout<<"eta in "<<eta1<<"-"<<eta2<<endl;
+//		cout<<"eta in "<<eta1<<"-"<<eta2<<endl;
 		/**** 2D  ***/
 
 		name.str("");
 		name.clear();
 		minZbin = histo3dLeft->GetZaxis()->FindBin(eta1);
 		maxZbin = histo3dLeft->GetZaxis()->FindBin(eta2);
-		cout<<"eta "<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
+//		cout<<"eta "<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
 		histo3dLeft->GetZaxis()->SetRange(minZbin, maxZbin);
 		minZ = histo3dLeft->GetZaxis()->GetBinLowEdge(minZbin)*100;
 		minZ=minZ<0?0:minZ;
@@ -627,7 +627,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		name.clear();
 		minZbin = histo3dRight->GetZaxis()->FindBin(eta1);
 		maxZbin = histo3dRight->GetZaxis()->FindBin(eta2);
-		cout<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
+//		cout<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
 		histo3dRight->GetZaxis()->SetRange(minZbin, maxZbin);
 		minZ = histo3dRight->GetZaxis()->GetBinLowEdge(minZbin)*100;
 		minZ=minZ<0?0:minZ;
@@ -669,13 +669,13 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		TH1F *histo1dRight = (TH1F*)histo2Right->ProjectionY(name.str().c_str(),minXbin,maxXbin);
 		histo1dRight->SetTitle(name.str().c_str());
 
-		cout<<"save "<<histo1dRight->GetName()<<endl;
+//		cout<<"save "<<histo1dRight->GetName()<<endl;
 		histSaver->SaveHistogram(histo1dRight);
-		cout<<"save "<<histo1dLeft->GetName()<<endl;
+//		cout<<"save "<<histo1dLeft->GetName()<<endl;
 		histSaver->SaveHistogram(histo1dLeft);
-		cout<<"saving "<<histo2dLeft->GetName()<<endl;;
+//		cout<<"saving "<<histo2dLeft->GetName()<<endl;;
 		histSaver->SaveHistogram(histo2dLeft,false);
-		cout<<"saving "<<histo2dRight->GetName()<<endl;
+//		cout<<"saving "<<histo2dRight->GetName()<<endl;
 		histSaver->SaveHistogram(histo2dRight,false);
 		name.str("");
 		name.clear();
@@ -699,7 +699,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		pRight->SetMarkerColor(kGreen);
 		TCanvas *c1 = new TCanvas(TString::Format("cProfile_%s_%d",name_comparision.c_str(),i));
 
-		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
+//		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
 		c1->cd();
 		TString title = TString::Format("hProfile_%s_%d",name_comparision.c_str(),i);
 		TH1F* pTitle = new TH1F(title,title,pLeft->GetNbinsX(),pLeft->GetXaxis()->GetXmin(),pLeft->GetXaxis()->GetXmax());
@@ -767,9 +767,9 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 	cout<<"saving "<<histo3dLeft->GetName()<<endl;
 	histSaver->SaveHistogramROOT(histo3dLeft);
 
-	cout<<"saving "<<histo2Left->GetName()<<endl;
+//	cout<<"saving "<<histo2Left->GetName()<<endl;
 	histSaver->SaveHistogram(histo2Left);
-	cout<<"saving "<<histo2Right->GetName()<<endl;
+//	cout<<"saving "<<histo2Right->GetName()<<endl;
 	histSaver->SaveHistogram(histo2Right);
 }
 

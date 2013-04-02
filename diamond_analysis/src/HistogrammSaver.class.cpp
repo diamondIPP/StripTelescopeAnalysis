@@ -310,7 +310,7 @@ void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
 	Float_t mpv = histo->GetMean();
 	if(fit)
 	 mpv = fit->GetParameter(1);
-	cout<<"MPV: "<<mpv<<" mean: "<<histo->GetMean()<<" "<<fit->GetName()<<endl;
+//	cout<<"MPV: "<<mpv<<" mean: "<<histo->GetMean()<<" "<<fit->GetName()<<endl;
 	TPaveText* stats = (TPaveText*) this->GetUpdatedLandauMeans(histo,mpv);
 	TString name = TString::Format("c_%s",histo->GetName());
 	TCanvas *c1 = new TCanvas(name,name);
@@ -857,8 +857,8 @@ TH3F* HistogrammSaver::Create3DHisto(std::string name, std::vector<Float_t> posX
 	Float_t minX = posY.at(0);
 	Float_t minY = posY.at(0);
 	Float_t minZ = posZ.at(0);
-	cout<<" Create Histo: '"<<name<<"' - Range ("<<minRangeX<<"-"<<maxRangeX<<"),  ("
-			<<minRangeY<<"-"<<maxRangeY<<"), ("<<minRangeZ<<"-"<<maxRangeZ<<")"<<endl;
+//	cout<<" Create Histo: '"<<name<<"' - Range ("<<minRangeX<<"-"<<maxRangeX<<"),  ("
+//			<<minRangeY<<"-"<<maxRangeY<<"), ("<<minRangeZ<<"-"<<maxRangeZ<<")"<<endl;
 	for(UInt_t i=0;i<posX.size();i++){
 		if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
 			continue;
