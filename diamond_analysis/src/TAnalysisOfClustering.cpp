@@ -697,12 +697,20 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 	}
 	for(UInt_t i=0; i<vecLeftProfiles.size()-1&&i<vecRightProfiles.size()-1;i++){
 		TProfile* pLeft = vecLeftProfiles.at(i);
-		int j = vecRightProfiles.size()-2-i;
+		Int_t j = vecRightProfiles.size()-2-i;
 		TProfile* pRight = vecRightProfiles.at(j);
+		Int_t nbins = pRight->GetNbinsX();
+		Float_t xlow = pRight->GetBinLowEdge(1);
+		Float_t xup = pRight->GetBinLowEdge(nbins+1);
+		TString pname = TString::Format("pDiff_RightMinusLeft_%s_%d",name_comparision.c_str(),i);
+		TProfile* pDiff = new TProfile(pname,pname,nbins,xlow,xup);
+		pDiff->Add(pLeft,pRight,-1.,1.);
+		pDiff->SetLineColor(kBlue);
 		pLeft->SetLineColor(kRed);
 		pLeft->SetMarkerColor(kRed);
 		pRight->SetLineColor(kGreen);
 		pRight->SetMarkerColor(kGreen);
+		Float_t minY = pDiff->GetBinContent(pDiff->GetMinimumBin());
 		TCanvas *c1 = new TCanvas(TString::Format("cProfile_%s_%d",name_comparision.c_str(),i));
 
 //		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
@@ -723,7 +731,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 //		pLeft->GetXaxis()->SetRangeUser(0,maxX);
 		Float_t maxY = 1.1*TMath::Max(maxLeft,maxRight);
 		pTitle->SetMaximum(maxY);
-		pTitle->GetYaxis()->SetRangeUser(0,maxY);
+		pTitle->GetYaxis()->SetRangeUser(1.1*minY,maxY);
 
 		TString rightName = pRight->GetTitle();
 		TString leftName = pLeft->GetTitle();
@@ -740,30 +748,32 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 			pTitle->GetYaxis()->SetTitle("avrg. signal adjacent (signal2)");
 
 		}
-
 		pTitle->Draw();
 		pRight->Draw("same");
 		pLeft->Draw("same");
+		pDiff->Draw("same");
 
 		TLegend *leg = c1->BuildLegend();
 		leg->Clear();
 		leg->AddEntry(pRight);
 		leg->AddEntry(pLeft);
+		leg->AddEntry(pDiff);
 		leg->SetFillColor(kWhite);
 		Float_t x1NDC = leg->GetX1NDC();
 		Float_t x2NDC = leg->GetX2NDC();
 		Float_t val = x1NDC;
 		x1NDC = -(x2NDC-x1NDC) + x1NDC;
 		x2NDC=val;
-		leg->SetX1NDC(x1NDC);
-		leg->SetX2NDC(x2NDC);
-
+		leg->SetX1NDC(.15);//x1NDC);
+		leg->SetX2NDC(.5);//x2NDC);
 
 		leg->Draw();
 		histSaver->SaveCanvas(c1);
 		histSaver->SaveHistogram(pLeft);
 		histSaver->SaveHistogram(pRight);
+		histSaver->SaveHistogram(pDiff);
 		delete c1;
+		if (pDiff) delete pDiff;
 	}
 
 	for(UInt_t i=0; i<vecLeftProfiles.size()&&i<vecRightProfiles.size();i++){
