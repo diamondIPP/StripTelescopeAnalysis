@@ -621,6 +621,9 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		TProfile * hLeft_pfx = histo2dLeft->ProfileX(name.str().c_str());
 		hLeft_pfx->GetXaxis()->SetTitle("signal 'Left'");
 		hLeft_pfx->GetYaxis()->SetTitle("avrg. signal 'LeftLeft'");
+		hLeft_pfx->Draw("goff");
+		if(hLeft_pfx->GetXaxis()->GetXmax()>2000)
+			hLeft_pfx->GetXaxis()->SetRangeUser(0,2000);
 		vecLeftProfiles.push_back(hLeft_pfx);
 
 		name.str("");
@@ -644,6 +647,9 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		TProfile * hRight_pfx = histo2dRight->ProfileX(name.str().c_str());
 		hRight_pfx->GetXaxis()->SetTitle("signal 'Right'");
 		hRight_pfx->GetYaxis()->SetTitle("avrg. signal 'RightRight'");
+		hRight_pfx->Draw("goff");
+		if(hRight_pfx->GetXaxis()->GetXmax()>2000)
+			hRight_pfx->GetXaxis()->SetRangeUser(0,2000);
 		vecRightProfiles.push_back(hRight_pfx);
 
 		/**** 1D  ***/
@@ -713,6 +719,8 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		}
 		pTitle->Draw();
 		pTitle->GetXaxis()->SetRangeUser(0,maxX);
+//		pRight->GetXaxis()->SetRangeUser(0,maxX);
+//		pLeft->GetXaxis()->SetRangeUser(0,maxX);
 		Float_t maxY = 1.1*TMath::Max(maxLeft,maxRight);
 		pTitle->SetMaximum(maxY);
 		pTitle->GetYaxis()->SetRangeUser(0,maxY);
