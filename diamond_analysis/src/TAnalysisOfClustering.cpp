@@ -133,8 +133,8 @@ void TAnalysisOfClustering::initialiseHistos()
 		histo_H2C_biggestHit=new TH1F(histoName.str().c_str(),histoName.str().c_str(),512,-0.6,0.6);
 	}
 	size_t nDet = TPlaneProperties::getNDetectors();
-	vecvecSignalLeftOfEta.resize(nDet);
-	vecvecSignalRightOfEta.resize(nDet);
+	vecvecSignalLeftLeft.resize(nDet);
+	vecvecSignalRightRight.resize(nDet);
 	vecvecLeftEtaSignal.resize(nDet);
 	vecvecRightEtaSignal.resize(nDet);
 	vecvecSignalLeftOfHighest.resize(nDet);
@@ -583,12 +583,18 @@ void TAnalysisOfClustering::saveHistos(){
 }
 
 void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3dRight, TH2F* histo2Left, TH2F* histo2Right,string name_comparision, Float_t etaWidth){
-	if(etaWidth<0) return;
+	if(etaWidth<=0) {
+		cout<<"etaWidth <= 0"<<endl;
+		return;
+	}
 	int minZbin,maxZbin, minXbin,maxXbin;
 	int minZ,minX,maxX,maxZ;
 	Float_t eta1,eta2;
 	stringstream name;
 	name<<setfill('0');
+	vector<TProfile *> vecLeftProfiles;
+	vector<TProfile *> vecRightProfiles;
+
 	for(Float_t eta=0;eta<=1;eta+=etaWidth){
 		eta1 = eta<1?eta:-1000;
 		eta2 = eta<1?eta+etaWidth:1000;
@@ -609,6 +615,13 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		TH2F* histo2dLeft = (TH2F*)histo3dLeft->Project3D("yx");
 		histo2dLeft->SetName(name.str().c_str());
 		histo2dLeft->SetTitle(name.str().c_str());
+		name.str("");
+		name.clear();
+		name<<histo2dLeft->GetName()<<"_pfx";
+		TProfile * hLeft_pfx = histo2dLeft->ProfileX(name.str().c_str());
+		hLeft_pfx->GetXaxis()->SetTitle("signal 'Left'");
+		hLeft_pfx->GetYaxis()->SetTitle("avrg. signal 'LeftLeft'");
+		vecLeftProfiles.push_back(hLeft_pfx);
 
 		name.str("");
 		name.clear();
@@ -621,9 +634,17 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		maxZ = histo3dRight->GetZaxis()->GetBinLowEdge(maxZbin+1)*100;
 		name<<histo3dRight->GetName()<<"_eta_"<<setw(3)<<(minZ)<<"_"<<setw(3)<<(maxZ);
 		histo3dRight->GetZaxis()->SetBit(TAxis::kAxisRange);
+
 		TH2F* histo2dRight = (TH2F*)histo3dRight->Project3D("yx");
 		histo2dRight->SetName(name.str().c_str());
 		histo2dRight->SetTitle(name.str().c_str());
+		name.str("");
+		name.clear();
+		name<<histo2dRight->GetName()<<"_pfx";
+		TProfile * hRight_pfx = histo2dRight->ProfileX(name.str().c_str());
+		hRight_pfx->GetXaxis()->SetTitle("signal 'Right'");
+		hRight_pfx->GetYaxis()->SetTitle("avrg. signal 'RightRight'");
+		vecRightProfiles.push_back(hRight_pfx);
 
 		/**** 1D  ***/
 		name.str("");
@@ -658,7 +679,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		histSaver->SaveHistogram(histo2dRight,false);
 		name.str("");
 		name.clear();
-		name<<name_comparision<<setw(3)<<minX<<"_"<<setw(3)<<maxX;
+		name<<"cComparision_"<<name_comparision<<"_"<<setw(3)<<minX<<"_"<<setw(3)<<maxX;
 		histo1dRight->SetLineColor(kBlue);
 		histo1dLeft->SetLineColor(kRed);
 		histSaver->SaveTwoHistos(name.str(),histo1dRight,histo1dLeft,1);
@@ -667,6 +688,79 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		if(histo2dRight) delete histo2dRight;
 		if (histo1dLeft) delete histo1dLeft;
 		if(histo2dLeft) delete histo2dLeft;
+	}
+	for(UInt_t i=0; i<vecLeftProfiles.size()-1&&i<vecRightProfiles.size()-1;i++){
+		TProfile* pLeft = vecLeftProfiles.at(i);
+		int j = vecRightProfiles.size()-2-i;
+		TProfile* pRight = vecRightProfiles.at(j);
+		pLeft->SetLineColor(kRed);
+		pLeft->SetMarkerColor(kRed);
+		pRight->SetLineColor(kGreen);
+		pRight->SetMarkerColor(kGreen);
+		TCanvas *c1 = new TCanvas(TString::Format("cProfile_%s_%d",name_comparision.c_str(),i));
+
+		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
+		c1->cd();
+		TString title = TString::Format("hProfile_%s_%d",name_comparision.c_str(),i);
+		TH1F* pTitle = new TH1F(title,title,pLeft->GetNbinsX(),pLeft->GetXaxis()->GetXmin(),pLeft->GetXaxis()->GetXmax());
+		Float_t maxX = 1000;
+		Int_t maxBin = pLeft->FindBin(maxX);
+		Double_t maxLeft =0;
+		Double_t maxRight=0;
+		for(Int_t i=0;i<maxBin;i++){
+			maxLeft = TMath::Max(maxLeft,pLeft->GetBinContent(i));
+			maxRight = TMath::Max(maxRight,pRight->GetBinContent(i));
+		}
+		pTitle->Draw();
+		pTitle->GetXaxis()->SetRangeUser(0,maxX);
+		Float_t maxY = 1.1*TMath::Max(maxLeft,maxRight);
+		pTitle->SetMaximum(maxY);
+		pTitle->GetYaxis()->SetRangeUser(0,maxY);
+
+		TString rightName = pRight->GetTitle();
+		TString leftName = pLeft->GetTitle();
+		if (rightName.Contains("rightright",TString::kIgnoreCase)){
+			pTitle->GetXaxis()->SetTitle("signal 'Left / Right'");
+			pTitle->GetYaxis()->SetTitle("avrg. signal adjacent ('LeftLeft / RightRight')");
+		}
+		else if (rightName.Contains("highest",TString::kIgnoreCase)){
+			pTitle->GetXaxis()->SetTitle("highest Signal");
+			pTitle->GetYaxis()->SetTitle("avrg. signal adjacent (Left/Right)");
+		}
+		else{
+			pTitle->GetXaxis()->SetTitle("signal 1");
+			pTitle->GetYaxis()->SetTitle("avrg. signal adjacent (signal2)");
+
+		}
+
+		pTitle->Draw();
+		pRight->Draw("same");
+		pLeft->Draw("same");
+
+		TLegend *leg = c1->BuildLegend();
+		leg->Clear();
+		leg->AddEntry(pRight);
+		leg->AddEntry(pLeft);
+		leg->SetFillColor(kWhite);
+		Float_t x1NDC = leg->GetX1NDC();
+		Float_t x2NDC = leg->GetX2NDC();
+		Float_t val = x1NDC;
+		x1NDC = -(x2NDC-x1NDC) + x1NDC;
+		x2NDC=val;
+		leg->SetX1NDC(x1NDC);
+		leg->SetX2NDC(x2NDC);
+
+
+		leg->Draw();
+		histSaver->SaveCanvas(c1);
+		histSaver->SaveHistogram(pLeft);
+		histSaver->SaveHistogram(pRight);
+		delete c1;
+	}
+
+	for(UInt_t i=0; i<vecLeftProfiles.size()&&i<vecRightProfiles.size();i++){
+		delete vecLeftProfiles.at(i);
+		delete vecRightProfiles.at(i);
 	}
 	cout<<"saving "<<histo3dRight->GetName()<<endl;
 	histSaver->SaveHistogramROOT(histo3dRight);
@@ -685,23 +779,23 @@ void TAnalysisOfClustering::saveEtaInvestigationHistos(){
 		name.str("");
 		name.clear();
 		name<<"hLeftLeft_"<<TPlaneProperties::getStringForDetector(det);
-		TH2F* histo2Left = histSaver->CreateScatterHisto(name.str(),vecvecSignalLeftOfEta.at(det),vecvecEta.at(det),512,0,1);
+		TH2F* histo2Left = histSaver->CreateScatterHisto(name.str(),vecvecSignalLeftLeft.at(det),vecvecEta.at(det),512,0,1);
 		histo2Left->GetXaxis()->SetTitle("#eta");
-		histo2Left->GetYaxis()->SetTitle("Signal left of #eta cluster");
+		histo2Left->GetYaxis()->SetTitle("Signal 'LeftLeft'");
 
 		name.str("");
 		name.clear();
 		name<<"hRightRight_"<<TPlaneProperties::getStringForDetector(det);
-		TH2F* histo2Right = histSaver->CreateScatterHisto(name.str(),vecvecSignalRightOfEta.at(det),vecvecEta.at(det),512,0,1);
+		TH2F* histo2Right = histSaver->CreateScatterHisto(name.str(),vecvecSignalRightRight.at(det),vecvecEta.at(det),512,0,1);
 		histo2Right->GetXaxis()->SetTitle("#eta");
-		histo2Right->GetYaxis()->SetTitle("Signal reight of #eta cluster");
+		histo2Right->GetYaxis()->SetTitle("Signal 'RightRight'");
 
 		name.str("");name.clear();
 		name<<"hLeftLeft_vs_Left_3D_"<<TPlaneProperties::getStringForDetector(det);
 		Float_t inf = std::numeric_limits<float>::infinity();
-		TH3F* histo3dLeft = histSaver->Create3DHisto(name.str(),vecvecLeftEtaSignal.at(det),vecvecSignalLeftOfEta.at(det),vecvecEta.at(det),512,512,20,-inf,inf,-inf,inf,0,1);
-		histo3dLeft->GetXaxis()->SetTitle("Signal of left #eta channel");
-		histo3dLeft->GetYaxis()->SetTitle("Signal left of #eta cluster");
+		TH3F* histo3dLeft = histSaver->Create3DHisto(name.str(),vecvecLeftEtaSignal.at(det),vecvecSignalLeftLeft.at(det),vecvecEta.at(det),512,512,20,-100,inf,-100,inf,0,1);
+		histo3dLeft->GetXaxis()->SetTitle("Signal 'Left'");
+		histo3dLeft->GetYaxis()->SetTitle("Signal 'LeftLeft'");
 		histo3dLeft->GetZaxis()->SetTitle("#eta");
 		/*****************/
 
@@ -709,14 +803,14 @@ void TAnalysisOfClustering::saveEtaInvestigationHistos(){
 		name.str("");
 		name.clear();
 		name<<"hRightRight_vs_Right_3D_"<<TPlaneProperties::getStringForDetector(det);
-		TH3F* histo3dRight = histSaver->Create3DHisto(name.str(),vecvecRightEtaSignal.at(det),vecvecSignalRightOfEta.at(det),vecvecEta.at(det),512,512,20,-inf,inf,-inf,inf,0,1);
-		histo3dRight->GetXaxis()->SetTitle("Signal of right #eta channel");
-		histo3dRight->GetYaxis()->SetTitle("Signal right of #eta cluster");
+		TH3F* histo3dRight = histSaver->Create3DHisto(name.str(),vecvecRightEtaSignal.at(det),vecvecSignalRightRight.at(det),vecvecEta.at(det),512,512,20,-100,inf,-100,inf,0,1);
+		histo3dRight->GetXaxis()->SetTitle("Signal 'Right'");
+		histo3dRight->GetYaxis()->SetTitle("Signal 'RightRight'");
 		histo3dRight->GetZaxis()->SetTitle("#eta");
 
 		name.str("");
 		name.str();
-		name<<"cComparision_LeftLeft-RighRight_"<<TPlaneProperties::getStringForDetector(det);
+		name<<"LeftLeft-RightRight_"<<TPlaneProperties::getStringForDetector(det);
 		this->saveEtaDividedHistos(histo3dLeft,histo3dRight,histo2Left,histo2Right,name.str());
 
 
@@ -730,11 +824,11 @@ void TAnalysisOfClustering::saveEtaInvestigationHistos(){
 		name.str("");
 		name.clear();
 		name<<"hLeft_vs_Highest_3D_"<<TPlaneProperties::getStringForDetector(det);
-		histo3dLeft = histSaver->Create3DHisto(name.str(),vecvecSignalHighest.at(det),vecvecSignalLeftOfHighest.at(det),vecvecEta.at(det),512,512,20,-inf,inf,-inf,inf,0,1);
+		histo3dLeft = histSaver->Create3DHisto(name.str(),vecvecSignalHighest.at(det),vecvecSignalLeftOfHighest.at(det),vecvecEta.at(det),512,512,20,-100,inf,-100,inf,0,1);
 		name.str("");
 		name.clear();
 		name<<"hRight_vs_Highest_3D_"<<TPlaneProperties::getStringForDetector(det);
-		histo3dRight = histSaver->Create3DHisto(name.str(),vecvecSignalHighest.at(det),vecvecSignalRightOfHighest.at(det),vecvecEta.at(det),512,512,20,-inf,inf,-inf,inf,0,1);
+		histo3dRight = histSaver->Create3DHisto(name.str(),vecvecSignalHighest.at(det),vecvecSignalRightOfHighest.at(det),vecvecEta.at(det),512,512,20,-100,inf,-100,inf,0,1);
 		name.str("");
 		name.clear();
 
@@ -750,7 +844,9 @@ void TAnalysisOfClustering::saveEtaInvestigationHistos(){
 		histo2Right->GetXaxis()->SetTitle("#eta");
 		histo2Right->GetYaxis()->SetTitle("Signal right of highest channel");
 
-		name<<"cComparision_LeftHighest-RightHighest_"<<TPlaneProperties::getStringForDetector(det);
+		name.str("");
+		name.clear();
+		name<<"LeftHighest-RightHighest_"<<TPlaneProperties::getStringForDetector(det);
 		this->saveEtaDividedHistos(histo3dLeft,histo3dRight,histo2Left,histo2Right,name.str());
 
 		if (histo3dRight) delete histo3dRight;
@@ -988,10 +1084,10 @@ void TAnalysisOfClustering::etaInvestigation(){
 			Int_t leftEtaChannel =-1;
 			Float_t eta = cluster.getEta(leftEtaChannel,false);
 			Int_t leftEtaClusterPosition = cluster.getClusterPosition(leftEtaChannel);
-			Float_t signalLeftOfEta = cluster.getSignal(leftEtaClusterPosition-1);
+			Float_t signalLeftLeft = cluster.getSignal(leftEtaClusterPosition-1);
 			Float_t leftEtaSignal = cluster.getSignal(leftEtaClusterPosition);
 			Float_t rightEtaSignal = cluster.getSignal(leftEtaClusterPosition+1);
-			Float_t signalRightOfEta = cluster.getSignal(leftEtaClusterPosition+2);
+			Float_t signalRightRight = cluster.getSignal(leftEtaClusterPosition+2);
 			Float_t highestSignal = cluster.getHighestSignal();
 			Int_t highestSignalChannel = cluster.getHighestSignalChannel();
 			Int_t highestSignalClusterPos = cluster.getClusterPosition(highestSignalChannel);
@@ -999,8 +1095,13 @@ void TAnalysisOfClustering::etaInvestigation(){
 			Float_t signalRightOfHighest = cluster.getSignal(highestSignalClusterPos+1);
 //			cout<< signalLeftOfEta<<" "<< leftEtaSignal<<" "<<rightEtaSignal<<" "<<signalRightOfEta<<"  ----  "<<signalLeftOfHighest<<" "<< highestSignal<<" "<<signalRightOfHighest<<"\n"<<endl;
 			//		Float_t signalLeftOfEta = eventReader->
-			vecvecSignalLeftOfEta.at(det).push_back(signalLeftOfEta);
-			vecvecSignalRightOfEta.at(det).push_back(signalRightOfEta);;
+			if (signalLeftLeft < -100){
+				int clusPos = leftEtaClusterPosition-1;
+				cout<<"\n"<< nEvent<<", Problem signalLeftLeft: "<<signalLeftLeft<<" "<<leftEtaChannel<<": "<<cluster.getPedestalMean(clusPos)<<", "<<cluster.getAdcValue(clusPos)<<endl;
+//				cluster.Print(1);
+			}
+			vecvecSignalLeftLeft.at(det).push_back(signalLeftLeft);
+			vecvecSignalRightRight.at(det).push_back(signalRightRight);;
 			vecvecLeftEtaSignal.at(det).push_back(leftEtaSignal);;
 			vecvecRightEtaSignal.at(det).push_back(rightEtaSignal);;
 			vecvecSignalLeftOfHighest.at(det).push_back(signalLeftOfHighest);

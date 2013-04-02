@@ -94,14 +94,6 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		char t;
 		cin >>t;
 	}
-	nAnalyzedEvents = 0;
-	regionNotOnPlane = 0;
-	saturatedChannel = 0;
-	screenedChannel = 0;
-	noValidTrack = 0;
-	noFidCutRegion = 0;
-	usedForAlignment = 0;
-	highChi2 =0;
 //	usedForSiliconAlignment = 0;
 	if(verbosity>6)cout<<"Current Dir: "<<sys->pwd()<<endl;
 	if (nEvents+startEvent > eventReader->GetEntries()) {
@@ -109,46 +101,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		nEvents = eventReader->GetEntries()-startEvent;
 	}
 	this->nEvents = nEvents;
-	cout<<"Creating  Event Vector "<<endl;
-	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
-		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
-//		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
-		eventReader->LoadEvent(nEvent);
-		if (eventReader->isValidTrack() == 0) {
-//		if (eventReader->useForAnalysis() == 0) {
-			if (verbosity > 6) printEvent();
-			noValidTrack++;
-			continue;
-		}
-		if (eventReader->isInFiducialCut() == 0) {
-			noFidCutRegion++;
-			continue;
-		}
-		if (eventReader->useForAlignment() == true) {
-			usedForAlignment++;
-			continue;
-		}
-		transparentClusters.clear();
-		if (!this->predictPositions(true)){
-			if (verbosity>4) cout<< nEvent << ": Chi2 to high: "<< positionPrediction->getChi2()<<endl;
-			highChi2++;
-			continue;
-		}
-		
-		
-		if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystemChannelSpace, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)) == false)
-			continue;
-		for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
-			transparentClusters.push_back(this->makeTransparentCluster(this->eventReader, this->settings,subjectDetector, this->positionInDetSystemChannelSpace, clusterSize));
-		}
-		nAnalyzedEvents++;
-		this->fillHistograms();
-		if (verbosity > 4) printEvent();
-
-		// save clusters for eta corrected analysis
-		vecTransparentClusters.push_back(transparentClusters);
-		eventNumbers.push_back(nEvent);
-	}
+	createEventVector(startEvent);
 	this->printCutFlow();
 	createEtaIntegrals();
 	calcEtaCorrectedResiduals();
@@ -306,35 +259,6 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
 }
 
 // TODO: avoid wrong channel numbers (>128, <0)
-TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
-	// get channel and direction for clustering
-	UInt_t centerChannel;
-	int direction;
-	direction = getSignedChannelNumber(centerPosition);
-//	cout << "centerPosition: " << centerPosition << "\tdirection: " << direction << endl;
-	centerChannel = TMath::Abs(direction);
-	if (direction < 0) direction = -1;
-	else direction = 1;
-	Float_t cmNoise = reader->getCMNoise();
-	
-	// make cluster
-	TCluster transparentCluster = TCluster(reader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
-	int currentChannel = centerChannel;
-	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
-		direction *= -1;
-		currentChannel += direction * iChannel;
-		Int_t adcValue=reader->getAdcValue(det,currentChannel);
-		Float_t pedMean = reader->getPedestalMean(det,currentChannel,false);
-		Float_t pedMeanCMN = reader->getPedestalMean(det,currentChannel,true);
-		Float_t pedSigma = reader->getPedestalSigma(det,currentChannel,false);
-		Float_t pedSigmaCMN = reader->getPedestalSigma(det,currentChannel,true);
-		bool isScreened = set->isDet_channel_screened(det,currentChannel);
-		transparentCluster.addChannel(currentChannel,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
-//		transparentCluster.addChannel(currentChannel, reader->getRawSignal(det,currentChannel), reader->getRawSignalInSigma(det,currentChannel), reader->getAdcValue(det,currentChannel), reader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
-	}
-	return transparentCluster;
-}
-
 /**
  *	returns the next channel number including a sign: + if pos - (int)pos <.5 else minus
  *	different approach:
@@ -372,10 +296,12 @@ void TTransparentAnalysis::initHistograms() {
 	vecvecEta.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecEtaCMNcorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecVecLandau.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecVecFidCutX.clear();
+	vecVecFidCutY.clear();
 	hEtaIntegrals.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		vecVecLandau.at(clusterSize).clear();
-		vecvecEta.at(clusterSize).clear();
 		vecvecEtaCMNcorrected.at(clusterSize).clear();
 		vecvecRelPos.at(clusterSize).clear();
 		vecvecRelPos2.at(clusterSize).clear();
@@ -418,9 +344,15 @@ void TTransparentAnalysis::initHistograms() {
 }
 
 void TTransparentAnalysis::fillHistograms() {
+		vecVecFidCutX.push_back(eventReader->getFiducialValueX());
+		vecVecFidCutY.push_back(eventReader->getFiducialValueY());
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-		hLandau[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge());
-		hLandau2Highest[clusterSize]->Fill(this->transparentClusters[clusterSize].getCharge(2,false));
+		Float_t charge = this->transparentClusters[clusterSize].getCharge();
+		Float_t chargeOfTwo = this->transparentClusters[clusterSize].getCharge(2,false);
+		vecVecLandau[clusterSize].push_back(charge);
+		hLandau[clusterSize]->Fill(charge);
+		hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
+
 		Float_t eta = this->transparentClusters[clusterSize].getEta();
 		Float_t etaCMN = this->transparentClusters[clusterSize].getEta(true);
 		if(eta>0&&eta<1)
@@ -774,6 +706,31 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 
 }
 void TTransparentAnalysis::saveHistograms() {
+	stringstream name;
+	name << "hLandauVsFidCutX_ClusterSize10";
+
+	int i = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1;
+	TH2F* htemp = histSaver->CreateScatterHisto(name.str(),vecVecFidCutX,vecVecLandau.at(i));
+	if(htemp){
+		htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
+		htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");
+	}
+	//else{
+	else cout<<"couldn't ";
+		cout<<"create scatterplot: "<<name<<"\t"<<vecVecFidCutX.size()<<" "<<vecVecLandau.at(i).size()<<" "<<i<<" "<<endl;
+		char t;
+		cin>>t;
+	//}
+	histSaver->SaveHistogram(htemp);
+	if(htemp)delete htemp;
+	name << "hLandauVsFidCutY_ClusterSize10";
+	htemp = histSaver->CreateScatterHisto(name.str(),vecVecFidCutX,vecVecLandau.at(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1));
+	if(htemp){
+		htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
+		htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");
+	}
+	histSaver->SaveHistogram(htemp);
+	if (htemp) delete htemp;
 	analyseEtaDistributions();
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		histSaver->SaveHistogram(hEta[clusterSize],0);
@@ -873,7 +830,8 @@ void TTransparentAnalysis::saveHistograms() {
 	}
 
 	Float_t inf = std::numeric_limits<float>::infinity();
-	stringstream name;
+	name.str("");
+	name.clear();
 	name <<"hPredictedChannelPositionVsChi2";
 	TH2F* hPredictedPositionVsChi2 = histSaver->CreateScatterHisto(name.str(),vecChi2,vecPredictedPosition,2048,128,0,inf,0,20,0);
 	if (hPredictedPositionVsChi2){
@@ -977,6 +935,10 @@ void TTransparentAnalysis::printEvent() {
 	return;
 }
 
+Float_t TTransparentAnalysis::getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt) {
+	return eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,clusterCalculationMode, hEtaInt)-this->predPosition;
+}
+
 void TTransparentAnalysis::printCluster(TCluster cluster) {
 	cout << "\n--- event " << nEvent;
 	cout << "\n\tcluster size: " << cluster.getClusterSize();
@@ -1013,7 +975,88 @@ void TTransparentAnalysis::printCluster(TCluster cluster) {
  * @author Lukas Baeni
  * @return
  */
-Float_t TTransparentAnalysis::getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt) {
-	return eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,clusterCalculationMode, hEtaInt)-this->predPosition;
+void TTransparentAnalysis::createEventVector(Int_t startEvent) {
+
+	nAnalyzedEvents = 0;
+	regionNotOnPlane = 0;
+	saturatedChannel = 0;
+	screenedChannel = 0;
+	noValidTrack = 0;
+	noFidCutRegion = 0;
+	usedForAlignment = 0;
+	highChi2 =0;
+	vecTransparentClusters.clear();
+	eventNumbers.clear();
+	vecEvents.clear();
+	cout<<"Creating  Event Vector "<<endl;
+	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
+		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
+		//		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
+		eventReader->LoadEvent(nEvent);
+		if (eventReader->isValidTrack() == 0) {
+			//		if (eventReader->useForAnalysis() == 0) {
+			if (verbosity > 6) printEvent();
+			noValidTrack++;
+			continue;
+		}
+		if (eventReader->isInFiducialCut() == 0) {
+			noFidCutRegion++;
+			continue;
+		}
+		if (eventReader->useForAlignment() == true) {
+			usedForAlignment++;
+			continue;
+		}
+		transparentClusters.clear();
+		if (!this->predictPositions(true)){
+			if (verbosity>4) cout<< nEvent << ": Chi2 to high: "<< positionPrediction->getChi2()<<endl;
+			highChi2++;
+			continue;
+		}
+
+
+		if (this->checkPredictedRegion(subjectDetector, this->positionInDetSystemChannelSpace, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)) == false)
+			continue;
+		for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
+			transparentClusters.push_back(this->makeTransparentCluster(this->eventReader, this->settings,subjectDetector, this->positionInDetSystemChannelSpace, clusterSize));
+		}
+		nAnalyzedEvents++;
+		this->fillHistograms();
+		if (verbosity > 4) printEvent();
+
+		// save clusters for eta corrected analysis
+		vecTransparentClusters.push_back(transparentClusters);
+		eventNumbers.push_back(nEvent);
+		vecEvents.push_back(eventReader->getEvent());
+	}
+}
+
+TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
+	// get channel and direction for clustering
+	UInt_t centerChannel;
+	int direction;
+	direction = getSignedChannelNumber(centerPosition);
+//	cout << "centerPosition: " << centerPosition << "\tdirection: " << direction << endl;
+	centerChannel = TMath::Abs(direction);
+	if (direction < 0) direction = -1;
+	else direction = 1;
+	Float_t cmNoise = reader->getCMNoise();
+
+	// make cluster
+	TCluster transparentCluster = TCluster(reader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
+	int currentChannel = centerChannel;
+	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
+		direction *= -1;
+		currentChannel += direction * iChannel;
+		Int_t adcValue=reader->getAdcValue(det,currentChannel);
+		Float_t pedMean = reader->getPedestalMean(det,currentChannel,false);
+		Float_t pedMeanCMN = reader->getPedestalMean(det,currentChannel,true);
+		Float_t pedSigma = reader->getPedestalSigma(det,currentChannel,false);
+		Float_t pedSigmaCMN = reader->getPedestalSigma(det,currentChannel,true);
+		bool isScreened = set->isDet_channel_screened(det,currentChannel);
+		transparentCluster.addChannel(currentChannel,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
+//		transparentCluster.addChannel(currentChannel, reader->getRawSignal(det,currentChannel), reader->getRawSignalInSigma(det,currentChannel), reader->getAdcValue(det,currentChannel), reader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
+	}
+	return transparentCluster;
 }
 

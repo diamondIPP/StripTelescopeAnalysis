@@ -181,7 +181,7 @@ TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) 
 		sigma+= weighted*weighted;
 	}
 	mean = mean/nEntries;
-	cout<<"new calculation of mean for range ["<<minX<<","<<maxX<<"]"<<endl;
+//	cout<<"new calculation of mean for range ["<<minX<<","<<maxX<<"]"<<endl;
 	TCanvas *c1 = new TCanvas();
 	histo->Draw();
 	c1->Update();
@@ -219,7 +219,7 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 	maxX =  std::numeric_limits<float>::infinity();
 	//Find good mean calculation Area
 	Int_t startBin = histo->FindBin(mpv);
-	cout<<"Start Bin: " <<startBin<<endl;
+//	cout<<"Start Bin: " <<startBin<<endl;
 	Float_t max = histo->GetBinContent(startBin);
 	Int_t bin;
 	for(bin = startBin;bin>0;bin--){

@@ -67,6 +67,7 @@ public:
 	static TCluster makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	
 private:
+	void createEventVector(Int_t startEvent = 0);
 	void initHistograms();
 	void fillHistograms();
 	TF1* doGaussFit(TH1F *histo);
@@ -99,6 +100,7 @@ private:
 	// event variables
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;
+	vector<TEvent* > vecEvents;
 	Float_t predXPosition, predYPosition;
 	Float_t positionInDetSystemMetric,positionInDetSystemChannelSpace, predPerpPosition, predPosition;
 	
@@ -140,7 +142,9 @@ private:
 	vector< vector<Float_t> > vecvecEtaCMNcorrected;
 	// histograms
 	vector<TH1F*> hLandau;
-	vector< vector<Float_t> > vecVecLandau;
+	vector< vector< Float_t> > vecVecLandau;
+	vector< Float_t> vecVecFidCutX;
+	vector< Float_t> vecVecFidCutY;
 	vector<TH1F*> hEta;
 	vector<TH1F*> hEtaCMNcorrected;
 	vector< vector<Float_t> > vecVecEta;

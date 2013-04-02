@@ -121,8 +121,8 @@ private:
 	TH2F *hSignalLeftVsSignalRight[9];
 	TH2F *hPHDistribution[9];
 private:
-	vector < vector <Float_t> > vecvecSignalLeftOfEta;
-	vector < vector <Float_t> > vecvecSignalRightOfEta;
+	vector < vector <Float_t> > vecvecSignalLeftLeft;
+	vector < vector <Float_t> > vecvecSignalRightRight;
 	vector < vector <Float_t> > vecvecLeftEtaSignal;
 	vector < vector <Float_t> > vecvecRightEtaSignal;
 	vector < vector <Float_t> > vecvecSignalLeftOfHighest;

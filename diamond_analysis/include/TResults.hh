@@ -82,7 +82,11 @@ private:
     UInt_t nExactlyOneDiamondHit;
     UInt_t nUseForAlignment;
     UInt_t nUseForAnalysis;
-    ClassDef(TResults,2);
+    ClassDef(TResults,2)
+	int getRunNumber() const;
+	void setRunNumber(int runNumber);
+
+	;
 };
 
 #endif /* TRESULTS_HH_ */

@@ -14,6 +14,8 @@ using namespace std;
 TResults::TResults(UInt_t runnumber){
 	path = gSystem->pwd();
 	this->runnumber = runnumber;
+	TString name =  TString::Format("results_%d",this->runnumber);
+	this->SetName(name);
 	initialiseResults();
 }
 
@@ -27,7 +29,7 @@ TResults::TResults(TSettings *settings) {
 
 TResults::~TResults() {
 	// TODO Auto-generated destructor stub
-	cout<<"delete Results..."<<endl;
+	cout<<"delete Results of run "<<runnumber<<endl;
 }
 
 TResults::TResults(const   TResults& rhs){//copy constructor
@@ -138,4 +140,13 @@ void TResults::setAlignment(TDetectorAlignment* newAlignment)
 {
 	this->alignment= *newAlignment;
 	cout<<"TResults:SetAlignment"<<endl;
+}
+
+
+int TResults::getRunNumber() const {
+	return runNumber;
+}
+
+void TResults::setRunNumber(int runNumber) {
+	this->runNumber = runNumber;
 }
