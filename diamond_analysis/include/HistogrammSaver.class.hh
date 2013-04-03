@@ -106,7 +106,7 @@ public:
 			Float_t minRangeX = (-1)*std::numeric_limits<float>::infinity(), Float_t maxRangeX = std::numeric_limits<float>::infinity(),
 			Float_t minRangeY = (-1)*std::numeric_limits<float>::infinity(), Float_t maxRangeY = std::numeric_limits<float>::infinity(),
 			Float_t factor = 0.05);
-	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos);
+	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos, ULong_t maxSize=-1);
 	static TH2F* CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=512);
 	static TH1F* CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096,EnumAxisRange range=maxWidth,
 			Float_t xmin = -1*std::numeric_limits<float>::infinity(),Float_t xmax = std::numeric_limits<float>::infinity(),

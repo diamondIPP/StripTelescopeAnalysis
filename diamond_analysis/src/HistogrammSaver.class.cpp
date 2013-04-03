@@ -969,14 +969,15 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	return histo;
 }
 
-TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Float_t> vecY, std::vector<Float_t> vecX)
+TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Float_t> vecY, std::vector<Float_t> vecX,ULong_t maxSize)
 {
 	if(vecY.size()!=vecX.size()||vecX.size()==0) {
 		cerr<<"ERROR HistogrammSaver::CreateDipendencyGraph vectors have different size "<<vecY.size()<<" "<<vecX.size()<<": "<<name<<endl;
 		return TGraph();
 	}
 	//cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
-	TGraph hGraph = TGraph(vecY.size(),&vecX.at(0),&vecY.at(0));
+	ULong_t size = TMath::Min(maxSize,(ULong_t)vecY.size());
+	TGraph hGraph = TGraph(size,&vecX.at(0),&vecY.at(0));
 	hGraph.GetXaxis()->SetName("PredictedPosition");
 	hGraph.GetYaxis()->SetName("Delta");
 	hGraph.SetTitle(name.c_str());

@@ -930,10 +930,11 @@ void TAnalysisOfPedestal::saveHistos(){
 			delete hAllAdcNoise[det];
 		}
 	}
-	cout<<"hFitX:"<<hDiaAllAdcNoise<<endl;
-	cout<<hDiaAllAdcNoise->GetMean()<<endl;
-	cout<<hDiaAllAdcNoise->GetRMS()<<endl;
-
+	if(verbosity){
+	cout<<"hFitX:"<<hDiaAllAdcNoise<<"\t"<<flush;
+	cout<<"Mean: "<<hDiaAllAdcNoise->GetMean()<<"\t"<<flush;
+	cout<<"'RMS': "<<hDiaAllAdcNoise->GetRMS()<<"\t"<<flush;
+	}
 	TF1 histofitx("histofitx","gaus",hDiaAllAdcNoise->GetMean()-2*hDiaAllAdcNoise->GetRMS(),hDiaAllAdcNoise->GetMean()+2*hDiaAllAdcNoise->GetRMS());
 	histofitx.SetLineColor(kBlue);
 	hDiaAllAdcNoise->Fit(&histofitx,"rq");
@@ -949,12 +950,12 @@ void TAnalysisOfPedestal::saveHistos(){
 	histSaver->SaveHistogram(hCMNoiseDistribution,true);
 	stringstream name;
 	name<< "gADC_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gADC = histSaver->CreateDipendencyGraph(name.str(),adcValues,eventNumbers);
+	TGraph gADC = histSaver->CreateDipendencyGraph(name.str(),adcValues,eventNumbers,20000);
 	gADC.SetMarkerStyle(7);
 
 	name.str("");name.clear();
 	name<< "gPed_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gPed = histSaver->CreateDipendencyGraph(name.str(),pedestalValues,eventNumbers);
+	TGraph gPed = histSaver->CreateDipendencyGraph(name.str(),pedestalValues,eventNumbers,20000);
 	gPed.SetLineColor(kBlue);
 	gPed.SetMarkerColor(kBlue);
 	gPed.SetLineWidth(2);
@@ -962,20 +963,20 @@ void TAnalysisOfPedestal::saveHistos(){
 
 	name.str("");name.clear();
 	name<< "gPedCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gPedCMN = histSaver->CreateDipendencyGraph(name.str(),pedestalValuesCMN,eventNumbers);
+	TGraph gPedCMN = histSaver->CreateDipendencyGraph(name.str(),pedestalValuesCMN,eventNumbers,20000);
 	gPedCMN.SetLineColor(kGreen);
 	gPed.SetLineWidth(2);
 
 	name.str("");name.clear();
 	name<< "gUpperHitCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gUpperHitCut = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValues,eventNumbers);
+	TGraph gUpperHitCut = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValues,eventNumbers,20000);
 	gUpperHitCut.SetLineColor(kRed);
 	gUpperHitCut.SetMarkerColor(kRed);
 	gUpperHitCut.SetLineWidth(2);
 
 	name.str("");name.clear();
 	name<< "gUpperSeedCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gUpperSeedCut = histSaver->CreateDipendencyGraph(name.str(),upperSeedCutValues,eventNumbers);
+	TGraph gUpperSeedCut = histSaver->CreateDipendencyGraph(name.str(),upperSeedCutValues,eventNumbers,20000);
 	int n = gUpperSeedCut.GetN();
 	double* y = gUpperSeedCut.GetY();
 	Float_t max = MaxElement(n,y);
@@ -986,12 +987,12 @@ void TAnalysisOfPedestal::saveHistos(){
 
 	name.str("");name.clear();
 	name<< "gUpperHitCutCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gUpperHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValuesCMN,eventNumbers);
+	TGraph gUpperHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValuesCMN,eventNumbers,20000);
 	gUpperHitCutCMN.SetLineColor(kOrange);
 
 	name.str("");name.clear();
 	name<< "gLowerHitCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gLowerHitCut = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValues,eventNumbers);
+	TGraph gLowerHitCut = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValues,eventNumbers,20000);
 	gLowerHitCut.SetLineColor(kRed);
 	gLowerHitCut.SetMarkerColor(kRed);
 	n = gLowerHitCut.GetN();
@@ -1001,7 +1002,7 @@ void TAnalysisOfPedestal::saveHistos(){
 
 	name.str("");name.clear();
 	name << "gLowerHitCutCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
-	TGraph gLowerHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValuesCMN,eventNumbers);
+	TGraph gLowerHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValuesCMN,eventNumbers,20000);
 	gLowerHitCutCMN.SetLineColor(kOrange);
 
 	name.str("");name.clear();
@@ -1163,6 +1164,7 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 		vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
 		vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);
 		vecAvrgSigmaCMN.push_back(sumNoiseCMN/(float)nSumNoiseCMN);
+		vecEventNo.push_back(nEvent);
 	}
 }
 
