@@ -1370,7 +1370,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 
 
 			if(TPlaneProperties::isDiamondPlane(subjectPlane) && mode == TSettings::transparentMode){
-
+				//check TODO
 			}
 			else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
 				xRes = TMath::Max(fitX->GetParameter(1),fitX->GetParError(2));
