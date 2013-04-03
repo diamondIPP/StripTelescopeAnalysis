@@ -49,6 +49,11 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	this->diaRawADCvalues.resize(TPlaneProperties::getNChannelsDiamond(),std::vector<UInt_t>());
 
 	verbosity = 0;
+
+	adcValues.clear();
+	pedestalValues.clear();
+	upperHitCutValues.clear();
+	lowerHitCutValues.clear();
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
@@ -100,6 +105,7 @@ void TAnalysisOfPedestal::analyseEvent(){
 			snr = eventReader->getSignalInSigma(det,ch,false);
 
 			pedestalCMN = eventReader->getPedestalMean(det,ch,true);
+			sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
 			noiseCMN =  eventReader->getRawSignal(det,ch,true);
 			signalCMN = eventReader->getSignal(det,ch, true);
 
@@ -108,6 +114,23 @@ void TAnalysisOfPedestal::analyseEvent(){
 			checkForDeadChannels(det,ch);
 			updateMeanCalulation(det,ch);
 			findBiggestSignalInDet(det,ch);
+
+			if(det == TPlaneProperties::getDetDiamond() && ch == settings->getNoisePlotChannel()){
+				Float_t hitCut = settings->getClusterHitFactor(det,ch);
+				Float_t seedCut = settings->getClusterSeedFactor(det,ch);
+				adcValues.push_back(adc);
+				pedestalValues.push_back(pedestal);
+				upperHitCutValues.push_back(pedestal + sigma * hitCut);
+				lowerHitCutValues.push_back(pedestal - sigma * hitCut);
+				upperSeedCutValues.push_back(pedestal + sigma * seedCut);
+				lowerSeedCutValues.push_back(pedestal - sigma * seedCut);
+				pedestalValuesCMN.push_back(pedestalCMN);
+				upperHitCutValuesCMN.push_back(pedestalCMN + sigmaCMN * hitCut);
+				lowerHitCutValuesCMN.push_back(pedestalCMN - sigmaCMN * hitCut);
+				upperSeedCutValuesCMN.push_back(pedestalCMN + sigmaCMN * seedCut);
+				lowerSeedCutValuesCMN.push_back(pedestalCMN - sigmaCMN * seedCut);
+				eventNumbers.push_back(nEvent);
+			}
 		}
 		analyseBiggestHit(det,false);
 		analyseBiggestHit(det,true);
@@ -924,6 +947,116 @@ void TAnalysisOfPedestal::saveHistos(){
 	for(Int_t ntries=0;hCMNoiseDistribution->GetBinContent(hCMNoiseDistribution->GetMaximumBin())<.05*hCMNoiseDistribution->GetEntries()&&ntries<2;ntries++)
 		hCMNoiseDistribution->Rebin(2);
 	histSaver->SaveHistogram(hCMNoiseDistribution,true);
+	stringstream name;
+	name<< "gADC_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gADC = histSaver->CreateDipendencyGraph(name.str(),adcValues,eventNumbers);
+	gADC.SetMarkerStyle(7);
+
+	name.str("");name.clear();
+	name<< "gPed_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gPed = histSaver->CreateDipendencyGraph(name.str(),pedestalValues,eventNumbers);
+	gPed.SetLineColor(kBlue);
+	gPed.SetMarkerColor(kBlue);
+	gPed.SetLineWidth(2);
+
+
+	name.str("");name.clear();
+	name<< "gPedCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gPedCMN = histSaver->CreateDipendencyGraph(name.str(),pedestalValuesCMN,eventNumbers);
+	gPedCMN.SetLineColor(kGreen);
+	gPed.SetLineWidth(2);
+
+	name.str("");name.clear();
+	name<< "gUpperHitCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gUpperHitCut = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValues,eventNumbers);
+	gUpperHitCut.SetLineColor(kRed);
+	gUpperHitCut.SetMarkerColor(kRed);
+	gUpperHitCut.SetLineWidth(2);
+
+	name.str("");name.clear();
+	name<< "gUpperSeedCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gUpperSeedCut = histSaver->CreateDipendencyGraph(name.str(),upperSeedCutValues,eventNumbers);
+	int n = gUpperSeedCut.GetN();
+	double* y = gUpperSeedCut.GetY();
+	Float_t max = MaxElement(n,y);
+	gUpperSeedCut.SetLineColor(kMagenta);
+	gUpperSeedCut.SetMarkerColor(kMagenta);
+	gUpperSeedCut.SetLineWidth(2);
+
+
+	name.str("");name.clear();
+	name<< "gUpperHitCutCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gUpperHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValuesCMN,eventNumbers);
+	gUpperHitCutCMN.SetLineColor(kOrange);
+
+	name.str("");name.clear();
+	name<< "gLowerHitCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gLowerHitCut = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValues,eventNumbers);
+	gLowerHitCut.SetLineColor(kRed);
+	gLowerHitCut.SetMarkerColor(kRed);
+	n = gLowerHitCut.GetN();
+	y = gLowerHitCut.GetY();
+	Float_t min = MinElement(n,y);
+	gLowerHitCut.SetLineWidth(2);
+
+	name.str("");name.clear();
+	name << "gLowerHitCutCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gLowerHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValuesCMN,eventNumbers);
+	gLowerHitCutCMN.SetLineColor(kOrange);
+
+	name.str("");name.clear();
+	name << "mgClusterCut_Ch_"<<settings->getNoisePlotChannel();
+	TMultiGraph* mg = new TMultiGraph(name.str().c_str(),TString::Format("eventNumber vs adc - Ch %03d",settings->getNoisePlotChannel()));
+	mg->Add(&gADC,"P");
+	mg->Add(&gPed,"C");
+	mg->Add(&gUpperSeedCut,"C");
+	mg->Add(&gUpperHitCut,"C");
+	mg->Add(&gLowerHitCut,"C");
+	mg->Add(&gPedCMN,"C");
+	mg->Add(&gUpperHitCutCMN,"C");
+	mg->Add(&gLowerHitCutCMN,"C");
+
+	name.str("");name.clear();
+	name << "cClusterCut_Ch_"<<settings->getNoisePlotChannel();
+	TCanvas *c1 = new TCanvas(name.str().c_str(),name.str().c_str(),1024,640);
+	c1->cd();
+	mg->Draw("AP");
+	mg->GetXaxis()->SetTitle("event number");
+	mg->GetXaxis()->SetRangeUser(0,10000);
+	mg->GetYaxis()->SetTitle("Adc Value");
+	mg->GetYaxis()->SetRangeUser(min-.1*(max-min),max+.3*(max-min));
+	mg->Draw("A");
+	TLegend* leg = c1->BuildLegend(0.5,0.75,0.88,0.99);
+	leg->SetFillColor(kWhite);
+	leg->Clear();
+	leg->AddEntry(&gADC,"ADC","LP");
+	leg->AddEntry(&gPed,"Pedestal","LP");
+	Float_t nSigmasHit = settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),settings->getNoisePlotChannel());
+	Float_t nSigmasSeed = settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),settings->getNoisePlotChannel());
+	leg->AddEntry(&gUpperSeedCut,  TString::Format("Seed Limit     - %1.0f #sigma",nSigmasSeed),"L");
+	leg->AddEntry(&gUpperHitCut,   TString::Format("Hit Limit      -  %1.0f #sigma",nSigmasHit),"L");
+	leg->AddEntry(&gLowerHitCutCMN,TString::Format("Hit Limit_{CMN} - %1.0f #sigma",nSigmasHit),"L");
+	leg->AddEntry(&gPedCMN,"Pedestal_{CMN}","L");
+
+	leg->Draw();
+	histSaver->SaveCanvas(c1);
+	delete c1;
+
+	name.str("");name.clear();
+	name << "mgClusterCut-CMN-Ch_"<<settings->getNoisePlotChannel();
+	TMultiGraph* mgCMN = new TMultiGraph(name.str().c_str(),TString::Format("eventNumber vs adc - Ch %03d - CMN",settings->getNoisePlotChannel()));
+	mgCMN->Add(&gADC);
+	mgCMN->Add(&gPedCMN);
+	mgCMN->Add(&gUpperHitCutCMN);
+	mgCMN->Add(&gLowerHitCutCMN);
+	name.str("");name.clear();
+	name << "cClusterCut-CMN-Ch_"<<settings->getNoisePlotChannel();
+	c1 = new TCanvas(name.str().c_str());
+	c1->cd();
+	mgCMN->Draw("APL");
+	histSaver->SaveCanvas(c1);
+	delete c1;
+
 }
 
 /**

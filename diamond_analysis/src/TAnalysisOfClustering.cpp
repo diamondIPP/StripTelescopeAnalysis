@@ -710,7 +710,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		pLeft->SetMarkerColor(kRed);
 		pRight->SetLineColor(kGreen);
 		pRight->SetMarkerColor(kGreen);
-		Float_t minY = pDiff->GetBinContent(pDiff->GetMinimumBin());
+		Float_t minY = TMath::Max(-40.,pDiff->GetBinContent(pDiff->GetMinimumBin()));
 		TCanvas *c1 = new TCanvas(TString::Format("cProfile_%s_%d",name_comparision.c_str(),i));
 
 //		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
@@ -732,6 +732,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		Float_t maxY = 1.1*TMath::Max(maxLeft,maxRight);
 		pTitle->SetMaximum(maxY);
 		pTitle->GetYaxis()->SetRangeUser(1.1*minY,maxY);
+		pTitle->SetMaximum(1.1*minY);
 
 		TString rightName = pRight->GetTitle();
 		TString leftName = pLeft->GetTitle();

@@ -98,6 +98,7 @@ public:
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
     bool is3dDiamond(){return b3dDiamond;};
     bool b3dDiamond;
+    bool doTransparentAlignmnet()const {return bTransparenAlignment;}
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -148,6 +149,7 @@ public:
 	Float_t getAlignment_training_track_fraction() const;
 	ChannelScreen getDet_channel_screen(int i);
 	bool isDet_channel_screened(UInt_t det,UInt_t ch);
+	UInt_t getNoisePlotChannel(){return 48;}//todo: variable in setttings file
 	std::vector<int> getDet_channel_screen_channels(int i) const;
 	std::vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
@@ -323,6 +325,7 @@ private:
 	TSystem *sys;
 	TFile *settingsFile;
 private:
+	bool bTransparenAlignment;
 	Float_t chi2Cut3D;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;

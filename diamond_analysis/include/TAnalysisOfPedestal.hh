@@ -31,6 +31,8 @@
 #include "TF1.h"
 #include "TGraphErrors.h"
 #include "TStopwatch.h"
+#include "TMultiGraph.h"
+
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
 #include "THTMLPedestal.hh"
@@ -97,6 +99,18 @@ private:
 	TH1F *hAllAdcNoise[9];
 	TH1F *hDiaAllAdcNoise;
 	TH1F *hDiaAllAdcNoiseCMN;
+	vector <Float_t> adcValues;
+	vector <Float_t> pedestalValues;
+	vector <Float_t> upperHitCutValues;
+	vector <Float_t> lowerHitCutValues;
+	vector <Float_t> upperSeedCutValues;
+	vector <Float_t> lowerSeedCutValues;
+	vector <Float_t> pedestalValuesCMN;
+	vector <Float_t> upperHitCutValuesCMN;
+	vector <Float_t> lowerHitCutValuesCMN;
+	vector <Float_t> upperSeedCutValuesCMN;
+	vector <Float_t> lowerSeedCutValuesCMN;
+	vector <Float_t> eventNumbers;
 private:
 	Float_t numberOfSeeds;
 	Float_t sumPed;
@@ -118,6 +132,7 @@ private:
 	UInt_t adc;
 	Float_t snr;
 	Float_t sigma;
+	Float_t sigmaCMN;
 
 	Float_t pedestal;
 	Float_t noise;
