@@ -143,6 +143,8 @@ private:
 	// histograms
 	vector<TH1F*> hLandau;
 	vector< vector< Float_t> > vecVecLandau;
+	vector< Float_t> vecPredictedChannel;
+	Int_t predChannel;
 	vector< Float_t> vecVecFidCutX;
 	vector< Float_t> vecVecFidCutY;
 	vector<TH1F*> hEta;

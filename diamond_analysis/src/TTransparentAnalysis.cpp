@@ -127,6 +127,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 	}
 //	vecPredictedPosition.clear();
 //	vecRelPredictedPosition.clear();
+//	vecPredictedChannel.clear();
 //	vecChi2.clear();
 	for (UInt_t iEvent = 0; iEvent < eventNumbers.size(); iEvent++) {
 		TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
@@ -346,6 +347,7 @@ void TTransparentAnalysis::initHistograms() {
 void TTransparentAnalysis::fillHistograms() {
 		vecVecFidCutX.push_back(eventReader->getFiducialValueX());
 		vecVecFidCutY.push_back(eventReader->getFiducialValueY());
+		vecPredictedChannel.push_back(positionInDetSystemChannelSpace);
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		Float_t charge = this->transparentClusters[clusterSize].getCharge();
 		Float_t chargeOfTwo = this->transparentClusters[clusterSize].getCharge(2,false);
@@ -706,6 +708,7 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 
 }
 void TTransparentAnalysis::saveHistograms() {
+
 	stringstream name;
 	name << "hLandauVsFidCutX_ClusterSize10";
 
@@ -722,11 +725,22 @@ void TTransparentAnalysis::saveHistograms() {
 		char t;
 		cin>>t;
 	}
-
 	histSaver->SaveHistogram(htemp);
 	if(htemp)delete htemp;
+
+	name.str("");name.clear();
+	name << "hLandauVsPredChannel_ClusterSize10";
+	htemp = histSaver->CreateScatterHisto(name.str(),vecPredictedChannel,vecVecLandau.at(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1));
+	if(htemp){
+		htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
+		htemp->GetYaxis()->SetTitle("predicted channel position /ch");
+	}
+	histSaver->SaveHistogram(htemp);
+	if(htemp) delete htemp;
+
+	name.str("");name.clear();
 	name << "hLandauVsFidCutY_ClusterSize10";
-	htemp = histSaver->CreateScatterHisto(name.str(),vecVecFidCutX,vecVecLandau.at(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1));
+	htemp = histSaver->CreateScatterHisto(name.str(),vecVecFidCutY,vecVecLandau.at(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1));
 	if(htemp){
 		htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
 		htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");

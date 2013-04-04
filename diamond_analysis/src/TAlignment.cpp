@@ -1712,10 +1712,10 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 
 	if(bPlot){
 		vector<Float_t > vecRelPos;
-		for(int i=0;i<vecXPred.size();i++){
+		for(UInt_t i = 0; i < vecXPred.size(); i++){
 			Float_t xPred = vecXPred.at(i);
 			int subjectDet = subjectPlane*2;
-			if(cor ==TPlaneProperties::Y_COR ) subjectPlane +1;
+			if(cor == TPlaneProperties::Y_COR ) subjectDet += 1;
 			Float_t channelPos = myTrack->inChannelDetectorSpace(subjectDet,xPred);
 			Float_t relPos = channelPos-(int)(channelPos+.5);
 			vecRelPos.push_back(relPos);

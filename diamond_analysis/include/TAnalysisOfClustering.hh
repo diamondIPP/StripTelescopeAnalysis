@@ -62,6 +62,7 @@ private:
 	void etaInvestigation();
 	void saveEtaInvestigationHistos();
 	void saveEtaDividedHistos(TH3F* h3DLeft,TH3F* h3DRight, TH2F* h2DLeft, TH2F* h2DRight,string name_comparision, Float_t etaWidth=.1);
+	void saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision);
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];

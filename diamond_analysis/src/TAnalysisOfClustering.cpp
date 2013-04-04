@@ -582,6 +582,91 @@ void TAnalysisOfClustering::saveHistos(){
 	saveEtaInvestigationHistos();
 }
 
+void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision){
+	cout << "Creating Profile Histos: " << etaLow << " - " << etaHigh << endl;
+	Int_t nbins = pRight->GetNbinsX();
+	Float_t xlow = pRight->GetBinLowEdge(1);
+	Float_t xup = pRight->GetBinLowEdge(nbins+1);
+	TString pname = TString::Format("pDiff_RightMinusLeft_%s_in_%03d_%03d",name_comparision.c_str(),etaLow,etaHigh);
+	TProfile* pDiff = new TProfile(pname,pname,nbins,xlow,xup);
+	for(int i = 0; i <= pLeft->GetNbinsX() && i <= pRight->GetNbinsX(); i++){
+		Float_t value =  pRight->GetBinContent(i) - pLeft->GetBinContent(i);
+//		cout<< pDiff->GetBinCenter(i)<<": "<<value<<"\t\t"<<pRight->GetBinContent(i)<<" - "<<pLeft->GetBinContent(i)<<endl;
+		pDiff->SetBinContent(i,value);
+	}
+	pDiff->SetLineColor(kBlue);
+	pLeft->SetLineColor(kRed);
+	pLeft->SetMarkerColor(kRed);
+	pRight->SetLineColor(kGreen);
+	pRight->SetMarkerColor(kGreen);
+	Float_t minY = TMath::Max(-40.,pDiff->GetBinContent(pDiff->GetMinimumBin()));
+	minY = minY>0?minY*.7:minY*1.1;
+	TCanvas *c1 = new TCanvas(TString::Format("cProfile_%s_in_%03d_%03d",name_comparision.c_str(),etaLow,etaHigh));
+
+	//		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
+	c1->cd();
+	TString title = TString::Format("hProfile_%s_eta_in_%03d_%03d",name_comparision.c_str(),etaLow,etaHigh);
+	TH1F* pTitle = new TH1F(title,title,pLeft->GetNbinsX(),pLeft->GetXaxis()->GetXmin(),pLeft->GetXaxis()->GetXmax());
+	Float_t maxX = 1000;
+	Int_t maxBin = pLeft->FindBin(maxX);
+	Double_t maxLeft =0;
+	Double_t maxRight=0;
+	for(Int_t i=0;i<maxBin;i++){
+		maxLeft = TMath::Max(maxLeft,pLeft->GetBinContent(i));
+		maxRight = TMath::Max(maxRight,pRight->GetBinContent(i));
+	}
+	pTitle->Draw();
+	pTitle->GetXaxis()->SetRangeUser(0,maxX);
+	//		pRight->GetXaxis()->SetRangeUser(0,maxX);
+	//		pLeft->GetXaxis()->SetRangeUser(0,maxX);
+	Float_t maxY = 1.1*TMath::Max(maxLeft,maxRight);
+	pTitle->SetMaximum(maxY);
+	pTitle->SetMinimum(minY);
+	pTitle->GetYaxis()->SetRangeUser(minY,maxY);
+
+	TString rightName = pRight->GetTitle();
+	TString leftName = pLeft->GetTitle();
+	if (rightName.Contains("rightright",TString::kIgnoreCase)){
+		pTitle->GetXaxis()->SetTitle("signal 'Left / Right'");
+		pTitle->GetYaxis()->SetTitle("avrg. signal adjacent ('LeftLeft / RightRight')");
+	}
+	else if (rightName.Contains("highest",TString::kIgnoreCase)){
+		pTitle->GetXaxis()->SetTitle("highest Signal");
+		pTitle->GetYaxis()->SetTitle("avrg. signal adjacent (Left/Right)");
+	}
+	else{
+		pTitle->GetXaxis()->SetTitle("signal 1");
+		pTitle->GetYaxis()->SetTitle("avrg. signal adjacent (signal2)");
+
+	}
+	pTitle->Draw();
+	pRight->Draw("sameHIST");
+	pLeft->Draw("sameHIST");
+//	pDiff->Draw("same");
+
+	TLegend *leg = c1->BuildLegend();
+	leg->Clear();
+	leg->AddEntry(pRight);
+	leg->AddEntry(pLeft);
+//	leg->AddEntry(pDiff);
+	leg->SetFillColor(kWhite);
+	Float_t x1NDC = leg->GetX1NDC();
+	Float_t x2NDC = leg->GetX2NDC();
+	Float_t val = x1NDC;
+	x1NDC = -(x2NDC-x1NDC) + x1NDC;
+	x2NDC=val;
+	leg->SetX1NDC(.15);//x1NDC);
+	leg->SetX2NDC(.5);//x2NDC);
+
+	leg->Draw();
+	histSaver->SaveCanvas(c1);
+	histSaver->SaveHistogram(pLeft);
+	histSaver->SaveHistogram(pRight);
+//	histSaver->SaveHistogram(pDiff);
+	delete c1;
+	if (pDiff) delete pDiff;
+}
+
 void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3dRight, TH2F* histo2Left, TH2F* histo2Right,string name_comparision, Float_t etaWidth){
 	if(etaWidth<=0) {
 		cout<<"etaWidth <= 0"<<endl;
@@ -594,11 +679,17 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 	name<<setfill('0');
 	vector<TProfile *> vecLeftProfiles;
 	vector<TProfile *> vecRightProfiles;
-
+	vector<Float_t> vecEtaLow;
+	vector<Float_t> vecEtaHigh;
+	cout<<"EtaWidth: "<<etaWidth<<endl;
+	cout<<histo3dLeft->GetZaxis()->GetNbins()<<": "<<histo3dLeft->GetZaxis()->GetXmin()<<"-"<<histo3dLeft->GetZaxis()->GetXmax()<<endl;
+	for(int i=0; i<=histo3dLeft->GetZaxis()->GetNbins()+1;i++)
+		cout<<histo3dLeft->GetZaxis()->GetBinLowEdge(i)<<", "<<flush;
+	cout<<endl;
 	for(Float_t eta=0;eta<=1;eta+=etaWidth){
 		eta1 = eta<1?eta:-1000;
 		eta2 = eta<1?eta+etaWidth:1000;
-//		cout<<"eta in "<<eta1<<"-"<<eta2<<endl;
+		cout<<"eta in "<<eta1<<"-"<<eta2<<endl;
 		/**** 2D  ***/
 
 		name.str("");
@@ -609,7 +700,8 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		histo3dLeft->GetZaxis()->SetRange(minZbin, maxZbin);
 		minZ = histo3dLeft->GetZaxis()->GetBinLowEdge(minZbin)*100;
 		minZ=minZ<0?0:minZ;
-		maxZ = histo3dLeft->GetZaxis()->GetBinLowEdge(maxZbin+1)*100;
+		maxZ = histo3dLeft->GetZaxis()->GetBinLowEdge(maxZbin)*100;
+		maxZ=maxZ>100?100:maxZ;
 		name<<histo3dLeft->GetName()<<"_eta_"<< setw(3)<<(minZ)<<"_"<<setw(3)<<(maxZ);
 		histo3dLeft->GetZaxis()->SetBit(TAxis::kAxisRange);
 		TH2F* histo2dLeft = (TH2F*)histo3dLeft->Project3D("yx");
@@ -619,12 +711,15 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		name.clear();
 		name<<histo2dLeft->GetName()<<"_pfx";
 		TProfile * hLeft_pfx = histo2dLeft->ProfileX(name.str().c_str());
+		cout << name.str() << endl;
 		hLeft_pfx->GetXaxis()->SetTitle("signal 'Left'");
 		hLeft_pfx->GetYaxis()->SetTitle("avrg. signal 'LeftLeft'");
 		hLeft_pfx->Draw("goff");
 		if(hLeft_pfx->GetXaxis()->GetXmax()>2000)
 			hLeft_pfx->GetXaxis()->SetRangeUser(0,2000);
 		vecLeftProfiles.push_back(hLeft_pfx);
+		vecEtaLow.push_back(minZ);
+		vecEtaHigh.push_back(maxZ);
 
 		name.str("");
 		name.clear();
@@ -634,7 +729,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		histo3dRight->GetZaxis()->SetRange(minZbin, maxZbin);
 		minZ = histo3dRight->GetZaxis()->GetBinLowEdge(minZbin)*100;
 		minZ=minZ<0?0:minZ;
-		maxZ = histo3dRight->GetZaxis()->GetBinLowEdge(maxZbin+1)*100;
+		maxZ = histo3dRight->GetZaxis()->GetBinLowEdge(maxZbin)*100;
 		name<<histo3dRight->GetName()<<"_eta_"<<setw(3)<<(minZ)<<"_"<<setw(3)<<(maxZ);
 		histo3dRight->GetZaxis()->SetBit(TAxis::kAxisRange);
 
@@ -645,6 +740,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		name.clear();
 		name<<histo2dRight->GetName()<<"_pfx";
 		TProfile * hRight_pfx = histo2dRight->ProfileX(name.str().c_str());
+		cout << name.str() << endl;
 		hRight_pfx->GetXaxis()->SetTitle("signal 'Right'");
 		hRight_pfx->GetYaxis()->SetTitle("avrg. signal 'RightRight'");
 		hRight_pfx->Draw("goff");
@@ -695,88 +791,38 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
 		if (histo1dLeft) delete histo1dLeft;
 		if(histo2dLeft) delete histo2dLeft;
 	}
-	for(UInt_t i=0; i<vecLeftProfiles.size()-1&&i<vecRightProfiles.size()-1;i++){
+
+	TProfile *pLowLeft = 0;
+	TProfile *pLowRight = 0;
+	for(UInt_t i=0; i<vecLeftProfiles.size()&&i<vecRightProfiles.size();i++){
 		TProfile* pLeft = vecLeftProfiles.at(i);
-		Int_t j = vecRightProfiles.size()-2-i;
+		Int_t j = vecRightProfiles.size()-1-i;
 		TProfile* pRight = vecRightProfiles.at(j);
-		Int_t nbins = pRight->GetNbinsX();
-		Float_t xlow = pRight->GetBinLowEdge(1);
-		Float_t xup = pRight->GetBinLowEdge(nbins+1);
-		TString pname = TString::Format("pDiff_RightMinusLeft_%s_%d",name_comparision.c_str(),i);
-		TProfile* pDiff = new TProfile(pname,pname,nbins,xlow,xup);
-		pDiff->Add(pLeft,pRight,-1.,1.);
-		pDiff->SetLineColor(kBlue);
-		pLeft->SetLineColor(kRed);
-		pLeft->SetMarkerColor(kRed);
-		pRight->SetLineColor(kGreen);
-		pRight->SetMarkerColor(kGreen);
-		Float_t minY = TMath::Max(-40.,pDiff->GetBinContent(pDiff->GetMinimumBin()));
-		minY = minY>0?minY*.7:minY*1.1;
-		TCanvas *c1 = new TCanvas(TString::Format("cProfile_%s_%d",name_comparision.c_str(),i));
-
-//		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
-		c1->cd();
-		TString title = TString::Format("hProfile_%s_%d",name_comparision.c_str(),i);
-		TH1F* pTitle = new TH1F(title,title,pLeft->GetNbinsX(),pLeft->GetXaxis()->GetXmin(),pLeft->GetXaxis()->GetXmax());
-		Float_t maxX = 1000;
-		Int_t maxBin = pLeft->FindBin(maxX);
-		Double_t maxLeft =0;
-		Double_t maxRight=0;
-		for(Int_t i=0;i<maxBin;i++){
-			maxLeft = TMath::Max(maxLeft,pLeft->GetBinContent(i));
-			maxRight = TMath::Max(maxRight,pRight->GetBinContent(i));
+		Float_t etaLow = vecEtaLow.at(i);
+		Float_t etaHigh = vecEtaHigh.at(i);
+		cout<<"create profile:"<<"\n\t"<<pLeft->GetName()<<"\n\t"<<pRight->GetName()<<endl;
+		if(pLowLeft == 0 && etaHigh <= etaWidth * 100){
+			TString name = TString::Format("pLeft_%s_eta_%3.f_%3.f",name_comparision.c_str(),100-etaWidth*100,etaWidth*100);
+			cout<<"Creating "<<name<<endl;
+			pLowLeft = (TProfile*)pLeft->Clone(name);
 		}
-		pTitle->Draw();
-		pTitle->GetXaxis()->SetRangeUser(0,maxX);
-//		pRight->GetXaxis()->SetRangeUser(0,maxX);
-//		pLeft->GetXaxis()->SetRangeUser(0,maxX);
-		Float_t maxY = 1.1*TMath::Max(maxLeft,maxRight);
-		pTitle->SetMaximum(maxY);
-		pTitle->SetMinimum(minY);
-		pTitle->GetYaxis()->SetRangeUser(minY,maxY);
-
-		TString rightName = pRight->GetTitle();
-		TString leftName = pLeft->GetTitle();
-		if (rightName.Contains("rightright",TString::kIgnoreCase)){
-			pTitle->GetXaxis()->SetTitle("signal 'Left / Right'");
-			pTitle->GetYaxis()->SetTitle("avrg. signal adjacent ('LeftLeft / RightRight')");
+		if(pLowRight == 0 && etaHigh <= etaWidth * 100){
+			TString name = TString::Format("pRight_%s_eta_%3.f_%3.f",name_comparision.c_str(),100-etaWidth*100,etaWidth*100);
+			cout<<"Creating "<<name<<endl;
+			pLowRight = (TProfile*)pRight->Clone(name);
 		}
-		else if (rightName.Contains("highest",TString::kIgnoreCase)){
-			pTitle->GetXaxis()->SetTitle("highest Signal");
-			pTitle->GetYaxis()->SetTitle("avrg. signal adjacent (Left/Right)");
+		if(pLowLeft && etaLow >= (1-etaWidth)*100){
+			cout << "Adding " << pLeft->GetName() << " to " << pLowLeft->GetName() << endl;
+			pLowLeft->Add(pLeft);
 		}
-		else{
-			pTitle->GetXaxis()->SetTitle("signal 1");
-			pTitle->GetYaxis()->SetTitle("avrg. signal adjacent (signal2)");
-
+		if(pLowRight&& etaLow >= (1-etaWidth)*100){
+			cout << "Adding " << pRight->GetName() << " to " << pLowRight->GetName() << endl;
+			pLowRight->Add(pRight);
 		}
-		pTitle->Draw();
-		pRight->Draw("same");
-		pLeft->Draw("same");
-		pDiff->Draw("same");
-
-		TLegend *leg = c1->BuildLegend();
-		leg->Clear();
-		leg->AddEntry(pRight);
-		leg->AddEntry(pLeft);
-		leg->AddEntry(pDiff);
-		leg->SetFillColor(kWhite);
-		Float_t x1NDC = leg->GetX1NDC();
-		Float_t x2NDC = leg->GetX2NDC();
-		Float_t val = x1NDC;
-		x1NDC = -(x2NDC-x1NDC) + x1NDC;
-		x2NDC=val;
-		leg->SetX1NDC(.15);//x1NDC);
-		leg->SetX2NDC(.5);//x2NDC);
-
-		leg->Draw();
-		histSaver->SaveCanvas(c1);
-		histSaver->SaveHistogram(pLeft);
-		histSaver->SaveHistogram(pRight);
-		histSaver->SaveHistogram(pDiff);
-		delete c1;
-		if (pDiff) delete pDiff;
+		saveProfileHistos(pLeft,pRight,etaLow,etaHigh,name_comparision);
 	}
+	if(pLowLeft&&pLowRight)
+		saveProfileHistos(pLowLeft,pLowRight,(1-etaWidth)*100,etaWidth*100,name_comparision);
 
 	for(UInt_t i=0; i<vecLeftProfiles.size()&&i<vecRightProfiles.size();i++){
 		delete vecLeftProfiles.at(i);

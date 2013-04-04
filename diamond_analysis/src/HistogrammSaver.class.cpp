@@ -851,6 +851,8 @@ TH3F* HistogrammSaver::Create3DHisto(std::string name, std::vector<Float_t> posX
 		cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
 		return new TH3F();
 	}
+	cout<<"Creating 3dHisto: "<<name<<endl;
+	cout<<TString::Format("maxRange:\nX: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minRangeX,maxRangeX,minRangeY,maxRangeY,minRangeZ,maxRangeZ)<<endl;
 	Float_t maxX = posX.at(0);
 	Float_t maxY = posY.at(0);
 	Float_t maxZ = posZ.at(0);
@@ -873,14 +875,46 @@ TH3F* HistogrammSaver::Create3DHisto(std::string name, std::vector<Float_t> posX
 		if(posZ.at(i)>maxZ)maxZ=posZ.at(i);
 		else if(posZ.at(i)<minZ)minZ=posZ.at(i);
 	}
-	cout<<"\t"<<minX<<"-"<<maxX<<"."<<minY<<"-"<<maxY<<","<<minZ<<"-"<<maxZ<<endl;
+//	cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
+	Float_t factorX = factor;
+	Float_t factorY = factor;
+	Float_t factorZ = factor;
+	Float_t deltaXMax = maxRangeX - minRangeX;
+	Float_t deltaYMax = maxRangeY - minRangeY;
+	Float_t deltaZMax = maxRangeZ - minRangeZ;
+	Float_t maxDiff = 0.02;
+	if ( TMath::Abs(maxRangeX-maxX)/deltaXMax <= maxDiff && TMath::Abs(minRangeX - minX)/deltaXMax <= maxDiff ) {
+		factorX = 0;
+		maxX = maxRangeX;
+		minX = minRangeX;
+	}
+	if ( TMath::Abs(maxRangeY-maxY)/deltaYMax <= maxDiff && TMath::Abs(minRangeY - minY)/deltaYMax <= maxDiff ) {
+		factorY = 0;
+		minY = minRangeY;
+		maxY = maxRangeY;
+	}
+	if ( TMath::Abs(maxRangeZ-maxZ)/deltaZMax <= maxDiff && TMath::Abs(minRangeZ - minZ)/deltaZMax <= maxDiff ) {
+		factorZ = 0;
+		minZ = minRangeZ;
+		maxZ = maxRangeZ;
+	}
 	Float_t deltaX=maxX-minX;
 	Float_t deltaY=maxY-minY;
 	Float_t deltaZ=maxZ-minZ;
+//	cout<<"\t"<<deltaX<<" "<<deltaY<<" "<<deltaZ<<endl;
+//	cout<<"\t"<<factorX<<" "<<factorY<<" "<<factorZ<<endl;
+	minX = minX-factorX*deltaX;
+	maxX = maxX+factorX*deltaX;
+	minY = minY-factorY*deltaY;
+	maxY = maxY+factorY*deltaY;
+	minZ = minZ-factorZ*deltaZ;
+	maxZ = maxZ+factorZ*deltaZ;
+	cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
+//	char t; cin>>t;
 	TH3F* histo = new TH3F(name.c_str(),name.c_str(),
-			nBinsX,minX-factor*deltaX,maxX+factor*deltaX,
-			nBinsY,minY-factor*deltaY,maxY+factor*deltaY,
-			nBinsZ,minZ-factor*deltaZ,maxZ+factor*deltaZ);
+			nBinsX,minX,maxX,
+			nBinsY,minY,maxY,
+			nBinsZ,minZ,maxZ);
 	for(UInt_t i=0;i<posX.size();i++){
 		if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
 			continue;

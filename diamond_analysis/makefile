@@ -62,15 +62,16 @@ all: rootclean diamondAnalysis
 	
 	
 	
-diamondAnalysis: $(LIBFILES)
-		# @echo "TEST\n\n" 
-		# Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
-        #
+#diamondAnalysis: $(LIBFILES)
+#		# @echo "TEST\n\n" 
+#		
+#        #
         
-$(PROGS):
+$(PROGS): $(LIBFILES)
         #
         # linking $@
         #
+        # Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
 		@echo  "\n\nPlease do: export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:~/lib"
 
