@@ -177,7 +177,8 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 			if(clusterSize==maxSize-1){
 				Float_t deltaEta = eta-etaClusSizeOf2;
 				vecDeltaEta.push_back(deltaEta);
-				vecRelatedEta.push_back(etaClusSizeOf2);
+				vecRelatedEta2.push_back(etaClusSizeOf2);
+				vecRelatedEta10.push_back(eta);
 				vecRelatedResXEtaCorrected.push_back(resXEtaCorrected);
 				Float_t signalLeftOfEta = vecTransparentClusters[iEvent][clusterSize].getSignalOfChannel(leftChannel-1);
 				Float_t signalRightOfEta = vecTransparentClusters[iEvent][clusterSize].getSignalOfChannel(leftChannel+2);
@@ -635,12 +636,12 @@ void TTransparentAnalysis::analyseEtaDistribution(TH1F* hEtaDist){
 void TTransparentAnalysis::analyseEtaDistributions(){
 	stringstream name;
 	name<<TString::Format("hEtaOf10_minus_EtaOf2_vs_etaOf2");
-	if(vecRelatedEta.size()!=vecDeltaEta.size()){
+	if(vecRelatedEta2.size()!=vecDeltaEta.size()){
 		cout<<"Something is wrong with vedDeltaEta Size"<<flush;
 		char t;
 		cin>>t;
 	}
-	TH2F* hDeltaEta = histSaver->CreateScatterHisto(name.str(),vecRelatedEta,vecDeltaEta,400,400,-1,1,0,1);
+	TH2F* hDeltaEta = histSaver->CreateScatterHisto(name.str(),vecRelatedEta2,vecDeltaEta,400,400,-1,1,0,1);
 	if(hDeltaEta){
 		hDeltaEta->GetXaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
 		hDeltaEta->GetYaxis()->SetTitle("#eta_{2 of 2}");
@@ -658,10 +659,37 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 		hDeltaEtaVsResidual->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
 	}
 	histSaver->SaveHistogram(hDeltaEtaVsResidual,false);
+
+	name.str("");name.clear();
+	name<<TString::Format("hEtaOf10_minus_EtaOf2_vs_etaOf10");
+	TH2F* hDeltaEtaVsEta = histSaver->CreateScatterHisto(name.str(),vecDeltaEta,vecRelatedEta10,512,512,0,1,0,1);
+	if(hDeltaEtaVsEta){
+		hDeltaEtaVsEta->GetXaxis()->SetTitle("#eta_{2 of 10}");
+		hDeltaEtaVsEta->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
+	}
+	histSaver->SaveHistogram(hDeltaEtaVsEta,false);
 	Float_t maxDelta = .199999;
-	Int_t bin1 = hDeltaEtaVsResidual->GetYaxis()->FindBin(-maxDelta);
-	Int_t bin2 = hDeltaEtaVsResidual->GetYaxis()->FindBin(+maxDelta);
-	TString hName = TString::Format("hResidualEtaCorrectedIn10_DeltaEta_below_020");
+	Int_t bin1 = hDeltaEtaVsEta->GetYaxis()->FindBin(-maxDelta);
+	Int_t bin2 = hDeltaEtaVsEta->GetYaxis()->FindBin(+maxDelta);
+	TString hName = TString::Format("hEtaIn10_DeltaEta_below_020");
+	TH1F* hEtaBoundedEtaCorrected = (TH1F*)hDeltaEtaVsEta->ProjectionX(hName,bin1,bin2);
+	hEtaBoundedEtaCorrected->SetTitle(TString::Format("#eta_{2 of 10}, |#Delta#eta| < 0.2"));
+	histSaver->SaveHistogram(hEtaBoundedEtaCorrected);
+	if(hEtaBoundedEtaCorrected)delete hEtaBoundedEtaCorrected;
+
+//	name.str("");name.clear();
+//	name<<TString::Format("hEtaOf10_minus_EtaOf2_vs_ResidualEtaCorrectedIn10");
+//	TH2F* hDeltaEtaVsResidual = histSaver->CreateScatterHisto(name.str(),vecDeltaEta,vecRelatedResXEtaCorrected,512,400,-2*pw,2*pw,-1,1);
+//	if(hDeltaEtaVsResidual){
+//		hDeltaEtaVsResidual->GetXaxis()->SetTitle("Residual Eta Correct, 2 of 10 / #mum");
+//		hDeltaEtaVsResidual->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
+//	}
+//	histSaver->SaveHistogram(hDeltaEtaVsResidual,false);
+
+	maxDelta = .199999;
+	bin1 = hDeltaEtaVsResidual->GetYaxis()->FindBin(-maxDelta);
+	bin2 = hDeltaEtaVsResidual->GetYaxis()->FindBin(+maxDelta);
+	hName = TString::Format("hResidualEtaCorrectedIn10_DeltaEta_below_020");
 	TH1F* hEtaBoundedEtaCorrectedResidual = (TH1F*)hDeltaEtaVsResidual->ProjectionX(hName,bin1,bin2);
 	hEtaBoundedEtaCorrectedResidual->SetTitle(TString::Format("Residual #eta corrected in 10 strips, |#Delta#eta| < 0.2"));
 	histSaver->SaveHistogram(hEtaBoundedEtaCorrectedResidual);

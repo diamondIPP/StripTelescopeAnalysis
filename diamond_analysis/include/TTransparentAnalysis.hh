@@ -142,7 +142,8 @@ private:
 	vector< vector<Float_t> > vecvecEta;
 	vector< vector<Float_t> > vecvecEtaCMNcorrected;
 	vector< Float_t> vecDeltaEta;
-	vector< Float_t> vecRelatedEta;
+	vector< Float_t> vecRelatedEta2;
+	vector< Float_t> vecRelatedEta10;
 	vector< Float_t> vecRelatedResXEtaCorrected;
 
 	Float_t inf;
