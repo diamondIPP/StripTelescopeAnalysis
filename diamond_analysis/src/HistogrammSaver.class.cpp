@@ -185,7 +185,16 @@ TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) 
 	TCanvas *c1 = new TCanvas();
 	histo->Draw();
 	c1->Update();
+	Float_t maxY = histo->GetBinContent(histo->GetMaximumBin());
+	Float_t maxYPos = histo->GetBinCenter(histo->GetMaximumBin());
+	Int_t bin1 = histo->FindFirstBinAbove(maxY/2);
+	Int_t bin2 = histo->FindLastBinAbove(maxY/2);
+	Float_t fwhm = histo->GetBinCenter(bin2) - histo->GetBinCenter(bin1);
 	TPaveStats* hstat = (TPaveStats*)histo->GetListOfFunctions()->FindObject("stats");
+
+	TF1* fit = 0;
+	fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("Fitfcn_%s",histo->GetName()));
+
 	TPaveText* hstat2 = 0;
 	if (hstat) hstat2 = (TPaveText*) hstat->Clone();
 	else
@@ -200,6 +209,22 @@ TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) 
 		text->SetTextSize(0);
 		text = hstat2->AddText("");
 		text->SetTextSize(0);
+		text = hstat2->AddText(TString::Format("FWHM  =   %.1f",fwhm));
+		text->SetTextSize(0);
+		text = hstat2->AddText(TString::Format("MP_{histo}  =   %.1f",maxYPos));
+		text->SetTextSize(0);
+		text = hstat2->AddText(TString::Format("FWHM/MP_{histo}  =   %.3f",fwhm/maxYPos));
+		text->SetTextSize(0);
+		text = hstat2->AddText("");
+		text->SetTextSize(0);
+		if(fit){
+			Float_t width = fit->GetParameter(0);
+			Float_t gsigma = fit->GetParameter(3);
+			text = hstat2->AddText(TString::Format("Width/GSigma  =   %.3f",width/gsigma));
+			text->SetTextSize(0);
+			text = hstat2->AddText("");
+			text->SetTextSize(0);
+		}
 		Float_t yNDC = 0.5;
 		hstat2->SetY1NDC(yNDC);
 	}

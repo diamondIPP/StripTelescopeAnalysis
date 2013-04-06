@@ -133,13 +133,19 @@ private:
 	vector<Float_t> vecClusterCharge;
 	vector<Float_t> vecHighestSignal;
 
-	vector< vector<Float_t> > vecvecResXChargeWeighted;
-	vector< vector<Float_t> > vecvecResXEtaCorrected;
-	vector< vector<Float_t> > vecvecResXHighest2Centroid;
+	vector< vector < Float_t> > vecvecResXChargeWeighted;
+	vector< vector < Float_t> > vecvecResXEtaCorrected;
+	vector< vector < Float_t> > vecvecResXHighest2Centroid;
+	vector< vector < Float_t> > vecvecResXHighestHit;
 	vector< vector<Float_t> > vecvecRelPos;
 	vector< vector<Float_t> > vecvecRelPos2;
 	vector< vector<Float_t> > vecvecEta;
 	vector< vector<Float_t> > vecvecEtaCMNcorrected;
+	vector< Float_t> vecDeltaEta;
+	vector< Float_t> vecRelatedEta;
+	vector< Float_t> vecRelatedResXEtaCorrected;
+
+	Float_t inf;
 	// histograms
 	vector<TH1F*> hLandau;
 	vector< vector< Float_t> > vecVecLandau;
@@ -158,6 +164,7 @@ private:
 	vector<TH1F*> hLandau2Highest;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
+	vector<TH1F*> hResidualHighestHit;
 	vector<TH1F*> hResidualEtaCorrected;
 	vector<TH1F*> hResidualChargeWeighted;
 	vector<TH2F*> hResidualVsHitPositionChargeWeighted;
