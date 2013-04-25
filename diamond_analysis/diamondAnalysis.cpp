@@ -171,7 +171,9 @@ int main(int argc, char ** argv) {
 		timestamp = gmtime(&rawtime);
 
 		ostringstream logfilename;
-		logfilename << "analyse_log_" << RunParameters[i].getRunNumber() << "_" << timestamp->tm_year << "-" << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
+		logfilename << "analyse_log_" << RunParameters[i].getRunNumber() << "_" << timestamp->tm_year << "-" 
+                        << timestamp->tm_mon << "-" << timestamp->tm_mday << "." << timestamp->tm_hour << "." 
+                        << timestamp->tm_min << "." << timestamp->tm_sec << ".log";
 		//
 		//		FILE *log;
 		//		log = freopen(logfilename.str().c_str(), "w", stdout);
@@ -343,12 +345,15 @@ int ReadRunList() {
 			continue;
 		}
 		//		cout<<"Read Line"<<endl;
-		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d %d", &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis, &bTransAna);
+		sscanf(line.c_str(), "%d %s %d %d %d %d %d %d %d %d %d", 
+                        &RunNumber, RunDescription, &Verbosity, &NEvents, &nStartEvent, &bPedestalAnalysis, &bClusterAnalysis, 
+                        &bSelectionAnalysis,&bAlignment,&bAlignmentAnalysis, &bTransAna);
 		//		cout << "RunDescription Char: " << RunDescription[0] << endl;
 		cout<<RunNumber<<endl;
 		cout<<NEvents<<endl;
 		cout<<nStartEvent<<":"<<bPedestalAnalysis<<bClusterAnalysis<<bSelectionAnalysis<<bAlignment<<bAlignmentAnalysis<<endl;
-		run.setParameters(RunNumber,(string)RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,bSelectionAnalysis,bAlignment,bAlignmentAnalysis,bTransAna);
+		run.setParameters(RunNumber,(string)RunDescription,Verbosity,NEvents,nStartEvent,bPedestalAnalysis,bClusterAnalysis,
+                        bSelectionAnalysis,bAlignment,bAlignmentAnalysis,bTransAna);
 		run.setRunSettingsDir(runSettingsDir);
 		run.setOutputDir(outputDir);
 		run.setInputDir(inputDir);
