@@ -64,6 +64,7 @@ private:
 
 	void etaInvestigation();
 	void analyseAsymmetricSample();
+	void analyseAsymmetricSample2();
 	void fillDiamondEtaVector();
 	void saveEtaInvestigationHistos();
 	void saveEtaDividedHistos(TH3F* h3DLeft,TH3F* h3DRight, TH2F* h2DLeft, TH2F* h2DRight,string name_comparision, Float_t etaWidth=.1);
