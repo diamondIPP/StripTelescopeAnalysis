@@ -267,6 +267,15 @@ UInt_t TCluster::seedSize(){
 void TCluster::clear(){
 	numberOfSeeds=0;
 	numberOfHits=0;
+	clusterChannel.clear();
+	clusterSignal.clear();
+	clusterADC.clear();
+	clusterSignalInSigma.clear();
+	clusterChannelScreened.clear();
+	clusterPedMean.clear();
+	clusterPedSigma.clear();
+	clusterPedMeanCMN.clear();
+	clusterPedSigmaCMN.clear();
 	//cluster.clear();
 }
 bool TCluster::isLumpyCluster(){

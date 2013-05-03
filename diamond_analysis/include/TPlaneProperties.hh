@@ -32,6 +32,7 @@ public:
 	inline static Int_t getMaxSignalHeight(UInt_t det){switch(det){case 8: return getMaxSignalHeightDiamond();default: return getMaxSignalHeightSilicon();}}
 	inline static UInt_t getPlaneNumber(UInt_t det){return det/2;};
 	inline static UInt_t getNSiliconPlanes(){return 4;};
+	inline static UInt_t getNPlanes(){return getNSiliconPlanes()+1;};
 	inline static UInt_t getNSiliconDetectors(){return 8;};
 	inline static UInt_t getDetDiamond(){return 8;};
 	inline static UInt_t getDiamondPlane(){return 4;};

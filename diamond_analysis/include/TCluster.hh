@@ -58,6 +58,7 @@ public:
     bool isLumpyCluster();
     bool isGoldenGateCluster();
     bool hasSaturatedChannels();
+    UInt_t getDetector(){return this->det;}
     Float_t getCharge(bool useSmallSignals=false);
     Float_t getCharge(UInt_t clusters,bool useSmallSignals=false);
     void setPositionCalulation(calculationMode_t mode);
@@ -107,7 +108,7 @@ public:
 	Float_t getLeftEta(bool cmnCorrected=false);
 	Float_t getRightEta(bool cmnCorrected=false);
 	static Float_t getValueOfHisto(Float_t x, TH1F* histo);
-
+	UInt_t getEventNumber(){return eventNumber;};
 private:
     void checkForGoldenGate();
     void checkForLumpyCluster();

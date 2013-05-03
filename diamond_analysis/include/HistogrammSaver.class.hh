@@ -66,7 +66,7 @@ public:
 	void SaveCanvasPNG(TCanvas* canvas);
 	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
-	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0);
+	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
 	void SaveHistogramLogZ(TH2F* histo);

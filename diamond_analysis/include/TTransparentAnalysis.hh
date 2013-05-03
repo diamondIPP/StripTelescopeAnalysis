@@ -74,6 +74,7 @@ private:
 	TF1* doDoubleGaussFit(TH1F *histo);
 	void createEtaIntegrals();
 	void fitHistograms();
+	void createEfficiencyPlots(TH1F* hLandauDistribution);
 	void analyseEtaDistributions();
 	void analyseEtaDistribution(TH1F* hEtaDist);
 	void saveHistograms();
@@ -163,6 +164,7 @@ private:
 	TH1F* hPredictedPositionInStrip;
 	
 	vector<TH1F*> hLandau2Highest;
+	vector<TH1F*> hLandau1Highest;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
 	vector<TH1F*> hResidualHighestHit;

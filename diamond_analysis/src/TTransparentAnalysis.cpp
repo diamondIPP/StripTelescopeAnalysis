@@ -324,9 +324,10 @@ void TTransparentAnalysis::initHistograms() {
 		vecvecResXEtaCorrected.at(clusterSize).clear();
 		vecvecResXChargeWeighted.at(clusterSize).clear();
 		// TODO: take care of histogram names and bins!!
-		stringstream histNameLandau, histNameLandau2Highest, histNameEta, histNameResidualChargeWeighted, histNameResidualHighest2Centroid, histNameResidualEtaCorrected;
+		stringstream histNameLandau,histNameLandau1Highest, histNameLandau2Highest, histNameEta, histNameResidualChargeWeighted, histNameResidualHighest2Centroid, histNameResidualEtaCorrected;
 		// TODO: histogram naming!!
 		histNameLandau << "hDiaTranspAnaPulseHeightOf" << clusterSize+1 << "Strips";
+		histNameLandau1Highest<< "hDiaTranspAnaPulseHeightOfHighestIn"<<clusterSize+1<<"Strips";
 		histNameLandau2Highest << "hDiaTranspAnaPulseHeightOf2HighestIn" << clusterSize+1 << "Strips";
 		histNameEta << "hDiaTranspAnaEta2HighestIn" << clusterSize+1 << "Strips";
 		histNameResidualChargeWeighted << "hDiaTranspAnaResidualChargeWeightedIn" << clusterSize+1 << "StripsMinusPred";
@@ -339,6 +340,8 @@ void TTransparentAnalysis::initHistograms() {
 
 		hLandau.push_back(new TH1F(histNameLandau.str().c_str(),histNameLandau.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
 		hLandau2Highest.push_back(new TH1F(histNameLandau2Highest.str().c_str(),histNameLandau2Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+		this->hLandau1Highest.push_back(new TH1F(histNameLandau1Highest.str().c_str(),histNameLandau1Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+
 		hEta.push_back(new TH1F(histNameEta.str().c_str(),histNameEta.str().c_str(),bins,0,1));
 		histNameEta.str("");
 		histNameEta.clear();
@@ -477,8 +480,32 @@ void TTransparentAnalysis::createEtaIntegrals() {
 	}
 }
 
+
+void TTransparentAnalysis::createEfficiencyPlots(TH1F *hLandau){
+	TString name = TString::Format("hEfficiency_%s",hLandau->GetName());
+	TH1F* hEfficiency = new TH1F(name,name,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector) );
+	Float_t nentries = hLandau->GetEntries();
+	Float_t integral = 0;
+	for(Int_t bin = 1;bin <= hLandau->GetNbinsX();bin++){
+		integral += hLandau->GetBinContent(bin);
+		hEfficiency->SetBinContent(bin, (1.-integral/nentries)*100);
+	}
+	if(hEfficiency){
+		hEfficiency->GetXaxis()->SetTitle("PH / adc counts");
+		hEfficiency->GetYaxis()->SetTitle("efficientcy / %");
+	}
+//	TCutG *MP = new TCutG("gMP",1);
+	histSaver->SaveHistogram(hEfficiency);
+	if(hEfficiency) delete hEfficiency;
+}
+
+
 void TTransparentAnalysis::fitHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+
+		createEfficiencyPlots(hLandau2Highest[clusterSize]);
+		createEfficiencyPlots(hLandau[clusterSize]);
+		createEfficiencyPlots(hLandau1Highest[clusterSize]);
 		vector<Float_t> vecResChargeWeighted = vecvecResXChargeWeighted[clusterSize];
 
 		stringstream name;
@@ -849,6 +876,7 @@ void TTransparentAnalysis::saveHistograms() {
 //		if (clusterSize == 0) {
 			histSaver->SaveHistogramLandau(hLandau[clusterSize]);
 			histSaver->SaveHistogramLandau(hLandau2Highest[clusterSize]);
+			histSaver->SaveHistogramLandau(hLandau1Highest[clusterSize]);
 			histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize]);
 			histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize]);
 			histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
@@ -985,6 +1013,7 @@ void TTransparentAnalysis::deleteHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		if(hLandau[clusterSize]) delete hLandau[clusterSize];
 		if(hLandau2Highest[clusterSize])delete hLandau2Highest[clusterSize];
+		if(hLandau1Highest[clusterSize])delete hLandau1Highest[clusterSize];
 		if ( hEta[clusterSize]) delete hEta[clusterSize];
 		if ( hEtaCMNcorrected[clusterSize]) delete hEtaCMNcorrected[clusterSize];
 		if (hResidualChargeWeighted[clusterSize]) delete hResidualChargeWeighted[clusterSize];

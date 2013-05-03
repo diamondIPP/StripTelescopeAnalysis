@@ -352,8 +352,10 @@ void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
  * *********************************************************
  * *********************************************************
  */
-void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) {
+void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange,bool drawStatBox) {
 	if(histo->GetEntries()==0)return;
+	if (!drawStatBox)
+				histo->SetStats(false);
 	if(adjustRange){
 		int binxMin=0;
 		for(binxMin=0;binxMin<histo->GetNbinsX();binxMin++)if(histo->GetBinContent(binxMin))break;

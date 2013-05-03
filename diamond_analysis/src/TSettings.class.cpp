@@ -353,6 +353,7 @@ void TSettings::LoadSettings(){
 		}
 
 		//cant switch on strings so use if statements
+		if(key == "asymmetricSample") Parse(key,value,bAsymmetricSample);
 		if(key == "SaveAllFilesSwitch") Parse(key,value,SaveAllFilesSwitch);
 		if(key == "siliconAlignmentSteps")Parse(key,value,siliconAlignmentSteps);
 		if(key == "ClosePlotsOnSave") Parse(key,value,ClosePlotsOnSave);
@@ -389,6 +390,7 @@ void TSettings::LoadSettings(){
 				}
 			}
 		}
+		if (key == "res_keep_factor") {ParseFloat(key,value,res_keep_factor);}
 		if(key == "Si_Pedestal_Hit_Factor") ParseFloat(key,value,Si_Pedestal_Hit_Factor);
 		if(key == "Di_Pedestal_Hit_Factor") ParseFloat(key,value,Di_Pedestal_Hit_Factor);
 		if(key == "Si_Cluster_Seed_Factor") ParseFloat(key,value,Si_Cluster_Seed_Factor);
@@ -436,7 +438,7 @@ void TSettings::LoadSettings(){
 		if(key == "snr_distribution_di_max")  Parse(key,value,snr_distribution_di_max);
 		if (key == "alignment_chi2") Parse(key,value,alignment_chi2);
 		if (key == "UseAutoFidCut") Parse(key,value,UseAutoFidCut);
-		if(key == "nDiamonds")this->setNDiamonds(ParseInt(key,value));
+		if (key == "nDiamonds")this->setNDiamonds(ParseInt(key,value));
 		if (key == "AlternativeClustering") Parse(key,value,AlternativeClustering);
 		if(key == "store_threshold") Parse(key,value,store_threshold);
 		if(key == "plotChannel_on") Parse(key,value,plotChannel_on);
@@ -663,6 +665,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	isStandardSelectionFidCut=true;
 	isStandardArea = true;
 	chi2Cut3D=4.0;
+	bAsymmetricSample=false;
 	checkSettings();
 }
 

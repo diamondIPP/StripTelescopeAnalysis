@@ -82,6 +82,8 @@ public:
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 
+
+
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
@@ -140,6 +142,9 @@ public:
 	Float_t getEta_hiq_slice_low() const;
 	Float_t getEta_lowq_slice_hi() const;
 	Float_t getEta_lowq_slice_low() const;
+
+	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
+
 	std::vector<Float_t> getAlignment_phi_offsets() const;
 	std::vector<Float_t> getAlignment_x_offsets() const;
 	std::vector<Float_t> getAlignment_y_offsets() const;
@@ -165,6 +170,8 @@ public:
 	std::vector<int> getSingle_channel_analysis_channels();
 	float getStore_threshold();
 	UInt_t getRunNumber();
+
+	bool isAsymmetricSample(){return bAsymmetricSample;};
 
 	void setAlignment_training_track_fraction(Float_t alignment_training_track_fraction);
 	void setFix_dia_noise(float fix_dia_noise);
@@ -326,6 +333,7 @@ private:
 	TFile *settingsFile;
 private:
 	bool bTransparenAlignment;
+	bool bAsymmetricSample;
 	Float_t chi2Cut3D;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
@@ -436,6 +444,6 @@ private:
        Float_t diaOffsetMetricSpace;
        Float_t diaStartingChannel;
 
-	ClassDef(TSettings,4);
+ClassDef(TSettings,4);
 };
 #endif

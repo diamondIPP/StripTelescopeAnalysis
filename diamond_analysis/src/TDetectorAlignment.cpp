@@ -318,9 +318,19 @@ Double_t TDetectorAlignment::getZResolution(UInt_t plane)
 	return 2;
 }
 
-
+void TDetectorAlignment::setResolution(Double_t res, UInt_t plane,TPlaneProperties::enumCoordinate cor){
+	if(res<=0) return;
+	if(cor==TPlaneProperties::XY_COR)
+		return;
+	if(cor==TPlaneProperties::X_COR)
+		setXResolution(res,plane);
+	else
+		setYResolution(res,plane);
+}
 void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
 {
+	if(xres<=0)
+		return;
 	printf("Set X-Resolution of Plane %d to %2.6f\n",plane,xres);
 	if(plane<6)
 		xResolution[plane] = xres;
@@ -336,6 +346,8 @@ Double_t TDetectorAlignment::getYResolution(UInt_t plane)
 
 void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)
 {
+	if(resolution<=0)
+		return;
 	printf("Set Y-Resolution of Plane %d to %2.6f\n",plane,resolution);
 	if(plane<6)
 		yResolution[plane] = resolution;

@@ -67,6 +67,8 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	bPlotAll = settings->doAllAlignmentPlots()||verbosity>6;
 	results=0;
 	this->mode = mode;
+	gausFitValuesX.resize(4);
+	gausFitValuesY.resize(4);
 
 }
 
@@ -1228,9 +1230,54 @@ void TAlignment::getFinalSiliconAlignmentResuluts() {
 	//	setDetectorResolution(maxChi2);
 	setSiliconDetectorResolution(maxChi2);
 	getChi2Distribution(15);
-	TResidual res = CheckDetectorAlignment(TPlaneProperties::XY_COR,3,0,0,true);
-	CheckDetectorAlignment(TPlaneProperties::XY_COR,3,0,0,true,res);
+//	TResidual res = CheckDetectorAlignment(TPlaneProperties::XY_COR,3,0,0,true);
+//	CheckDetectorAlignment(TPlaneProperties::XY_COR,3,0,0,true,res);
 }
+
+
+
+void TAlignment::SetResolutionsWithUserInput() {
+	cout<<"The measured Residuals are: "<<endl;
+	cout<<"\tPlane"<<"\t"<<"X-COR"<<"\t"<<"Y-COR"<<endl;
+	for(int i=0;i<4;i++)
+		cout<<"\t"<<setw(5)<<i<<"\t"<<setw(5)<<gausFitValuesX.at(i).second<<"\t"<<setw(5)<<gausFitValuesY.at(i).second<<endl;
+	cout<<endl;
+	cout<<"Please enter the resolutions of each plane:"<<endl;
+	for(int i=0;i<4;i++){
+		inputResolution(i,TPlaneProperties::X_COR);
+	}
+	cout<<"\n And now the resolutions of the Y Detectors"<<endl;
+	for(int i=0;i<4;i++){
+		inputResolution(i,TPlaneProperties::Y_COR);
+	}
+}
+
+void TAlignment::inputResolution(UInt_t plane, TPlaneProperties::enumCoordinate cor){
+	float resolution=-1;
+	bool validValue = false;
+	//	cin.ignore(100,'\n');
+	while (!validValue){
+		cout<<"Enter the resolution of detector D"<<plane<<TPlaneProperties::getCoordinateString(cor)<<":\t"<<flush;
+		cin>>resolution;
+		string checkRes="";
+		while (checkRes.size()!=1|| checkRes.find_first_of("jJyYnN")!=0){
+			cout<<"Is the resolution for detector D"<<plane<<TPlaneProperties::getCoordinateString(cor)<<": "<<resolution<<" mum correct? [y,Y,n,N]"<<flush;
+			cin>>checkRes;
+			cin.clear();
+			cout<<(checkRes.size()!=1)<<" "<<(checkRes.find_first_of("jJyYnN")!=0)<<endl;
+			cout<<((checkRes.size()!=1&& checkRes.find_first_of("jJyYnN")!=0))<<endl;
+		}
+		if( checkRes.find_first_of("nN")!=string::npos){//not ok
+			continue;
+		}
+		else{
+			cout<<"Setting resolution of D"<<plane<<TPlaneProperties::getCoordinateString(cor)<<": "<<resolution<<endl;
+			align->setResolution(resolution,plane,cor);
+			validValue=true;
+		}
+	}
+}
+
 
 void TAlignment::setSiliconDetectorResolution(Float_t maxChi2) {
 	//get  something like a aprroximate Sigma with calculating the residual
@@ -1248,12 +1295,27 @@ void TAlignment::setSiliconDetectorResolution(Float_t maxChi2) {
 		align->setYMean(res.getDeltaYMean(),plane);
 	}
 
+	//do first convergence step
 	for (UInt_t plane = 0; plane < 4; plane++) {
 		vector<UInt_t> vecRefPlanes;
 		for (UInt_t i = 0; i < 4; i++)
 			if (i != plane) vecRefPlanes.push_back(i);
 		TResidual res = getResidual(TPlaneProperties::XY_COR, plane, vecRefPlanes,true,TResidual(),getClusterCalcMode(plane),chi2CalcMode,maxChi2);
 	}
+	//get user input
+	SetResolutionsWithUserInput();
+	//do at maximum 5 convergence steps...
+	int nSilicionResolutionMaxSteps=5;
+	nSilicionResolutionMaxSteps=0;
+	for(int nSiliconResolutionStep=0;nSiliconResolutionStep<nSilicionResolutionMaxSteps;nSiliconResolutionStep++){
+		for (UInt_t plane = 0; plane < 4; plane++) {
+			vector<UInt_t> vecRefPlanes;
+			for (UInt_t i = 0; i < 4; i++)
+				if (i != plane) vecRefPlanes.push_back(i);
+			TResidual res = getResidual(TPlaneProperties::XY_COR, plane, vecRefPlanes,true,TResidual(),getClusterCalcMode(plane),chi2CalcMode,maxChi2);
+		}
+	}
+
 }
 
 void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, string refPlaneString, bool bPlot, bool bUpdateResolution, bool bChi2) {
@@ -1379,6 +1441,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 			else{
 				mean = fitX->GetParameter(1);
 				xRes = fitX->GetParameter(2);
+				gausFitValuesX.at(subjectPlane)= make_pair(mean,xRes);
 			}
 
 			if(xRes>0&&bUpdateResolution&&histo->GetEntries()>0){
@@ -1535,6 +1598,8 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 			fitGausY2->SetParameter(2,fitGausY->GetParameter(2));
 			Float_t yRes = fitGausY->GetParameter(2);
 			mean = fitGausY->GetParameter(1);
+
+			gausFitValuesY.at(subjectPlane)= make_pair(mean,yRes);
 			if (bUpdateResolution&&histo->GetEntries()>0 && yRes > 0) {
 				cout << "\n\nset Y-Resolution via Gaus-Fit: " << yRes*100 << " with " << vecYDelta.size() << " Events" << endl;
 				cout << "yRes: "<<yRes*100<<endl;

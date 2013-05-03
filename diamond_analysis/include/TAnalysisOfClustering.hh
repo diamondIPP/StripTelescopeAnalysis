@@ -28,6 +28,9 @@
 #include "TSettings.class.hh"
 #include "LandauGaussFit.hh"
 #include "TProfile.h"
+#include "TPolyMarker.h"
+#include "TList.h"
+#include "TPaveStats.h"
 
 #include "TADCEventReader.hh"
 #include "THTMLCluster.hh"
@@ -60,9 +63,12 @@ private:
 	void createPHDistribution();
 
 	void etaInvestigation();
+	void analyseAsymmetricSample();
+	void fillDiamondEtaVector();
 	void saveEtaInvestigationHistos();
 	void saveEtaDividedHistos(TH3F* h3DLeft,TH3F* h3DRight, TH2F* h2DLeft, TH2F* h2DRight,string name_comparision, Float_t etaWidth=.1);
 	void saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision);
+	TPolyMarker* FindPeaks(TH1F* histo, int nPeaks, Float_t sigma=4, TString option='Markov', Float_t threshold=.2);
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
@@ -130,6 +136,7 @@ private:
 	vector < vector <Float_t> > vecvecSignalRightOfHighest;
 	vector < vector <Float_t> > vecvecSignalHighest;
 	vector < vector <Float_t> > vecvecEta;
+	vector <TCluster> vecDiamondCluster;
 };
 #endif /* TDEADCHANNELS_HH_ */
 

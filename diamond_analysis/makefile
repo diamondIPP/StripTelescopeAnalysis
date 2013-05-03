@@ -55,8 +55,8 @@ ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh
 ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh TDiamondPattern.hh TFiducialCut.hh
 ROOTHFILES		+= TEventLinkDef.h 
 
-all: rootclean diamondAnalysis
-
+#all: rootclean diamondAnalysis
+all: diamondAnalysis
 #all: $(OBJ) $(HEAD) makefile
 #	$(CC) $(CFLAGS) $(LDFLAGS) $(ROOTGLIBS) $(OBJ) -o diamondAnalysis 
 	
