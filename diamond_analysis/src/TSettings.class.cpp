@@ -109,7 +109,7 @@ void TSettings::checkSettings(){
 			fidCutsSelection->SetName("3D-FidCuts");
 			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
 		}
-	diamondPattern.Print();
+//	diamondPattern.Print();
 	cout<<diamondPattern.getNPatterns()<<endl;
 
 	this->checkAlignmentFidcuts();

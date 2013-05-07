@@ -340,8 +340,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t sigma_my = linFitY->GetParError(1);
 	Float_t by = linFitY->GetParameter(0);
 	Float_t sigma_by = linFitY->GetParError(0);
-	Float_t xChi2 = linFitX->GetChisquare();///linFitX->GetNumberFreeParameters();
-	Float_t yChi2 = linFitY->GetChisquare();///linFitY->GetNumberFreeParameters();
+	Float_t xChi2 = linFitX->GetChisquare()/(linFitX->GetNpoints()-linFitX->GetNumberFreeParameters());
+	Float_t yChi2 = linFitY->GetChisquare()/(linFitY->GetNpoints()-linFitY->GetNumberFreeParameters());
 	if(verbosity>4){
 			cout<<"\tParameters:\n\t mx: "<<mx<<" +/- "<<sigma_mx<<"\tbx: "<<bx<<" +/- "<<sigma_bx<<"\tzPos:"<<zPos<<endl;
 			cout<<"\t my: "<<my<<" +/- "<<sigma_my<<"\tby: "<<by<<" +/- "<<sigma_by<<"\tzPos:"<<zPos<<endl;

@@ -904,5 +904,6 @@ void TCluster::Print(UInt_t level){
 			cout<<"\t["<<this->getChannel(cl)<<"|"<<this->getAdcValue(cl)<<"|"<<this->getSignal(cl)<<"|"<<this->getSNR(cl)<<"]"<<flush;
 	}
 	cout<<"\t||"<<this->getHighestSignalChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean()<<" "<<this->getEtaPostion()<<" "<<this->getPositionCorEta();
+	cout<<" "<<this->getEta()<<" "<<this->getEta(true);
 	cout<<endl;
 }

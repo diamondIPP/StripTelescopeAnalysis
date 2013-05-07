@@ -1204,8 +1204,11 @@ void TAnalysisOfClustering::analyseAsymmetricSample2(){
 						isSaturated,clus.isScreened(cl));
 			}
 			Float_t newEta = newClus.getEta();
-			if(newEta>0&&newEta<1)
+			if(newEta>=0&&newEta<=1)
 				hAsymmetricEta->Fill(newEta);
+			else{
+				newClus.Print(1);
+			}
 		}
 		int leftHalf = 0;
 		int bin=0;
