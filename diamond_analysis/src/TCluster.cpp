@@ -297,6 +297,27 @@ bool TCluster::hasSaturatedChannels(){
 	return false;
 	return isSaturated;//todo
 }
+
+TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
+	TCluster newClus = TCluster(this->eventNumber,this->det,this->seedSigma,this->hitSigma,this->nChannels,this->cmNoise);
+	newClus.clear();//(clus.getEventNumber(),clus.getD);
+	UInt_t det = this->getDetector();
+	Float_t sharedCharge = 0;
+
+	for(UInt_t cl =0;cl<this->getClusterSize();cl++){
+		UInt_t adc = this->getAdcValue(cl);
+		Float_t pedMean = this->getPedestalMean(cl);
+		adc +=sharedCharge;
+		sharedCharge = (adc - pedMean)*alpha;
+		bool isSaturated = this->getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(det);
+		newClus.addChannel(this->getChannel(cl),this->getPedestalMean(cl),this->getPedestalSigma(cl),
+				this->getPedestalMean(cl,true),this->getPedestalSigma(cl,true),adc,
+				isSaturated,this->isScreened(cl));
+	}
+	return newClus;
+}
+
+
 Float_t TCluster::getCharge(bool useSmallSignals){
 	//	if(useSmallSignals)
 	return getCharge(1000,useSmallSignals);
@@ -490,7 +511,7 @@ void TCluster::checkForLumpyCluster(){
 	if(this->checkClusterForSize()<=2)
 		return;//for lumpy cluster at least 3 hits are needed
 	bool isfalling;
-	Float_t lastSeed;
+	Float_t lastSeed = -99999.;
 	if(verbosity>10)cout<<" Do Loop: "<<endl;
 	for(UInt_t i=0;i<clSize&&!isLumpy;i++){
 		float signal = getSignal(i);

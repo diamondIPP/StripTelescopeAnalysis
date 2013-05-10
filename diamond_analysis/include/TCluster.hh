@@ -59,6 +59,7 @@ public:
     bool isGoldenGateCluster();
     bool hasSaturatedChannels();
     UInt_t getDetector(){return this->det;}
+    TCluster getCrossTalkCorrectedCluster(Float_t alpha);
     Float_t getCharge(bool useSmallSignals=false);
     Float_t getCharge(UInt_t clusters,bool useSmallSignals=false);
     void setPositionCalulation(calculationMode_t mode);

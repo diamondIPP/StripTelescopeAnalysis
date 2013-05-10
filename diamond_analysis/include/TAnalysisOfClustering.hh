@@ -31,6 +31,7 @@
 #include "TPolyMarker.h"
 #include "TList.h"
 #include "TPaveStats.h"
+#include "TMultiGraph.h"
 
 #include "TADCEventReader.hh"
 #include "THTMLCluster.hh"
@@ -69,7 +70,7 @@ private:
 	void saveEtaInvestigationHistos();
 	void saveEtaDividedHistos(TH3F* h3DLeft,TH3F* h3DRight, TH2F* h2DLeft, TH2F* h2DRight,string name_comparision, Float_t etaWidth=.1);
 	void saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision);
-	TPolyMarker* FindPeaks(TH1F* histo, int nPeaks, Float_t sigma=4, TString option='Markov', Float_t threshold=.2);
+	TPolyMarker* FindPeaks(TH1F* histo, int nPeaks, Float_t sigma=4, TString option="Markov", Float_t threshold=.2);
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];

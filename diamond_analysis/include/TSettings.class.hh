@@ -35,6 +35,7 @@
 class TSettings:public TObject {
 public:
 	enum alignmentMode {normalMode,transparentMode};
+	enum enumRunDescription {leftDia=1,rightDia=2,allDia=0,unknown=-1};
 private:
 	std::string runDescription;
 	std::string outputDir;
@@ -82,8 +83,7 @@ public:
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 
-
-
+	enumRunDescription getAnalysedDiamond();
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
@@ -293,6 +293,7 @@ public:
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);
 	Float_t getChi2Cut3D(){return chi2Cut3D;}
+//	int getAreaOfInterest(){return inde
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3D;

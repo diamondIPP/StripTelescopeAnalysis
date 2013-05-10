@@ -58,7 +58,8 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 	bool retVal = true;
 	Float_t endPosition = startPosition+pitchWidth*(lastChannel-firstChannel);
 	//check If interval overlaps with existing one
-	for(UInt_t i=0;i<nChannelsOfInterval.size() && retVal == true;i++){
+	UInt_t i;
+	for( i=0;i<nChannelsOfInterval.size() && retVal == true;i++){
 		if(beginOfInterval[i]<startPosition && startPosition<endOfInterval[i])
 			retVal = false;
 		if(beginOfInterval[i]<endPosition && endPosition<endOfInterval[i])
@@ -69,7 +70,8 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 			retVal = false;
 	}
 	if (retVal == false){
-		cout<<"Couldn't create Pattern, pattern overlaps with another one."<<endl;
+		cout<<"Couldn't create Pattern, pattern overlaps with another one."<<i<<endl;
+//		this->Print();
 		return retVal;
 	}
 	cout<< "Adding new Pattern with a pitchWidth of "<<pitchWidth<<" um @ "<<startPosition << " um, Channels: "<<firstChannel <<" - "<<lastChannel<<endl;

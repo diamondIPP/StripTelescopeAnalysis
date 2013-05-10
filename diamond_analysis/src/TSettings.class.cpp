@@ -272,6 +272,16 @@ std::string TSettings::getTransparentAnalysisDir(alignmentMode mode){
 	return this->getAbsoluteOuputPath(true).append("/transparentAnalysis/");
 }
 
+TSettings::enumRunDescription TSettings::getAnalysedDiamond(){
+	cout<<"rundes: "<<getRunDescription()<<endl;
+	if(!isSpecialAnalysis())
+		return allDia;
+	if(getRunDescription()=="left"||getRunDescription()=="1")
+		return leftDia;
+	if(getRunDescription()=="right"||getRunDescription()=="2")
+		return rightDia;
+	return unknown;
+}
 
 
 void TSettings::setRunDescription(std::string runDescription)
@@ -480,6 +490,7 @@ void TSettings::LoadSettings(){
 			cout<<key<<" = "<<value.c_str()<<endl;
 //			vector<string> vecDetectorChannelString;
 //			ParseStringArray(key, value,vecDetectorChannelString);
+			diamondPattern.resetPattern();
 			ParseRegionArray(key, value,vecDiaDetectorAreasInChannel);
 			Int_t detChannel = -1;
 			for(UInt_t i=0;i<vecDiaDetectorAreasInChannel.size();i++){
@@ -771,7 +782,7 @@ void TSettings::ParseScreenedChannelArray(std::string key, std::string value, st
 }
 
 void TSettings::ParseRegionArray(string key, string value, std::vector< std::pair<Int_t,Int_t> > &vec){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	cout << "Parsing: "<<key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
 	ParseStringArray(key, value,stringArray);
 	vec.clear();
@@ -779,8 +790,10 @@ void TSettings::ParseRegionArray(string key, string value, std::vector< std::pai
 		std::pair< std::string,std::string > region = ParseRegionString(key, stringArray[i]);
 		Int_t begin = (int)strtod(region.first.c_str(),0);
 		Int_t end = (int)strtod(region.second.c_str(),0);
+		cout<<i<<" "<<begin<<"-"<<end<<endl;
 		if(begin<end){
 			Float_t pos = begin*getDiamondPitchWidth();
+			cout<<pos<<","<<begin<<end<<endl;
 			diamondPattern.addPattern(getDiamondPitchWidth(),pos,begin,end);
 		}
 	}

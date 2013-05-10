@@ -423,7 +423,8 @@ void TAnalysisOfClustering::saveEtaIntegrals(){
 
 void TAnalysisOfClustering::saveHistos(){
 	analyseAsymmetricSample();
-	analyseAsymmetricSample2();
+//	analyseAsymmetricSample2();
+	char t; cin>>t;
 	if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
 	histSaver->SaveHistogram(histo_CWM_biggestHit);
 	histo_CWM_biggestHit->Delete();
@@ -1150,8 +1151,8 @@ TPolyMarker* TAnalysisOfClustering::FindPeaks(TH1F* histo, int nPeaks, Float_t s
 	int n=-1;
 	int nTries=0;
 	int maxTries =20;
+	histo->Smooth(2);
 	while(n!=nPeaks&&nTries<maxTries){
-		histo->Smooth(2);
 		n = histo->ShowPeaks(sigma,option,threshold);
 		if (n>nPeaks){
 			threshold*=1;
@@ -1172,7 +1173,7 @@ void TAnalysisOfClustering::analyseAsymmetricSample2(){
 	cout<<"AnalyseAsymmetricSample2:"<<vecDiamondCluster.size()<<endl;
 	TString hName ="hAsymmetricEta2";
 	TH1F* hAsymmetricEta = new TH1F(hName,hName,512,0,1);
-	Float_t alpha= +0.02;
+	Float_t alpha= 0;//+0.02;
 	Float_t mean = 0;
 	UInt_t nTries =0;
 	TPolyMarker *pm = 0;
@@ -1252,10 +1253,22 @@ void TAnalysisOfClustering::analyseAsymmetricSample2(){
 		else
 			valid = false;
 		if(!valid){
-			if (mean - .5 < 0 )
-				alpha*=1.1;
-			else
-				alpha*=.9;
+			if (mean - .5 < 0 ){
+				if(alpha == 0)
+					alpha=.02;
+				else if (alpha<0)
+					alpha*=.9;
+				else
+					alpha*=1.1;
+			}
+			else{
+				if (alpha == 0)
+					alpha=-.02;
+				else if (alpha<0)
+					alpha*=1.1;
+				else
+					alpha*=.9;
+			}
 		}
 		nTries++;
 	}
@@ -1287,56 +1300,90 @@ void TAnalysisOfClustering::analyseAsymmetricSample2(){
 }
 
 void TAnalysisOfClustering::analyseAsymmetricSample(){
-	cout<<"AnalyseAsymmetricSample:"<<vecDiamondCluster.size()<<endl;
-	TString hName ="hAsymmetricEta";
-	TH1F* hAsymmetricEta = new TH1F(hName,hName,512,0,1);
-	Float_t alpha= -0.02;
+	cout<<"\nAnalyseAsymmetricSample:"<<vecDiamondCluster.size()<<endl;
+	TString hName ="hAsymmetricEtaCorrected";
+	int nDiamonds = settings->getNDiamonds();
+	TH2F* hAsymmetricEtaDia = new TH2F(hName,hName,512,0,1,nDiamonds+3,-1.5,nDiamonds+1.5);
+//	TH1F* hAsymmetricEta = new TH1F(hName,hName,512,0,1);
+	Float_t alpha= 0;
 	Float_t mean = 0;
 	UInt_t nTries =0;
 	TPolyMarker *pm = 0;
 
+	TH1F* hAsymmetricEta;
 	bool valid=false;
-	while (!valid && nTries < 40){
-		cout<<"new try no. "<<nTries<<endl;
-		hAsymmetricEta->Reset();
-		hAsymmetricEta->Clear();
-		cout<<hAsymmetricEta->GetEntries()<<endl;
+	vector <Float_t> alphaValues;
+	vector <Float_t> means;
+	vector <Float_t> skewnesses;
+	vector <Float_t> rightLefts;
+	vector <Float_t> vecTries;
+	while (!valid && nTries < 60){
+		cout<<"\n\nnew try no. "<<nTries<<endl;
+		hAsymmetricEtaDia->Reset();
+		hAsymmetricEtaDia->Clear();
+		TString name = hName;
+		name.Append(TString::Format("_%05d",(int)(TMath::Abs(alpha)*10000)));
+		cout<<name<<endl;
+		hAsymmetricEtaDia->SetName(name);
+		name = hName;
+		name.Append(TString::Format("_%03.2f",alpha));
+		hAsymmetricEtaDia->SetTitle(name);
+		cout<<hAsymmetricEtaDia->GetEntries()<<" "<<hAsymmetricEtaDia->GetName()<<endl;
+		//Fill histo with Asymmetric Cluster data..
 		for (UInt_t i=0;i<vecDiamondCluster.size();i++){
 			TCluster  clus = vecDiamondCluster.at(i);
-			TCluster newClus = clus;
-			newClus.clear();//(clus.getEventNumber(),clus.getD);
-			UInt_t det = clus.getDetector();
-			Float_t sharedCharge = 0;
-			for(UInt_t cl =0;cl<clus.getClusterSize();cl++){
-				UInt_t adc = clus.getAdcValue(cl);
-				Float_t pedMean = clus.getPedestalMean(cl);
-				adc +=sharedCharge;
-				sharedCharge = (adc - pedMean)*alpha;
-				bool isSaturated = clus.getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(det);
-				newClus.addChannel(clus.getChannel(cl),clus.getPedestalMean(cl),clus.getPedestalSigma(cl),
-						clus.getPedestalMean(cl,true),clus.getPedestalSigma(cl,false),adc,
-						isSaturated,clus.isScreened(cl));
+			TCluster newClus = clus.getCrossTalkCorrectedCluster(alpha);
+			Int_t leftChannel;
+			Float_t newEta = newClus.getEta(leftChannel);
+			Int_t nDia = settings->getDiaDetectorAreaOfChannel(leftChannel)+1;
+			if(newEta>0&&newEta<1){
+				hAsymmetricEtaDia->Fill(newEta,nDia);
+//				cout<<i<<" nDia: "<<nDia<<" eta: "<<newEta<<endl;
 			}
-			Float_t newEta = newClus.getEta();
-			if(newEta>0&&newEta<1)
-				hAsymmetricEta->Fill(newEta);
 		}
+
+		if(alpha==0) histSaver->SaveHistogram(hAsymmetricEtaDia);
+		int nDia = settings->getAnalysedDiamond();
+		int bin;
+		cout<<"nDias: "<<nDia<<endl;
+		if(settings->getNDiamonds()!=1){
+			if (settings->getAnalysedDiamond()==TSettings::leftDia||true){
+				cout<<"nDia: "<<nDia<<endl;
+				bin = hAsymmetricEtaDia->GetYaxis()->FindBin(0.0);
+				cout<<"bin:"<<bin<<endl;
+				cout<<hName<<endl;
+				TString name = hName;//+"_left";//TString::Format("%s_left",hName);
+				name.Append(TString::Format("%06d_left",(int)(TMath::Abs(alpha)*100000)));
+				cout<<name<<endl;
+				cout<<hAsymmetricEtaDia<<endl;
+				hAsymmetricEta = (TH1F*) hAsymmetricEtaDia->ProjectionX(name,bin+1,bin+1);
+				if (alpha == 0) histSaver->SaveHistogram(hAsymmetricEta);
+			}
+		}
+		else{
+			TString name = hName;
+			name.Append("_py");
+			hAsymmetricEta = (TH1F*) hAsymmetricEtaDia->ProjectionX(name);
+		}
+
 		int leftHalf = 0;
-		int bin=0;
+		bin=0;
 		for (bin=0; hAsymmetricEta->GetBinLowEdge(bin)<.5;bin++){
 			leftHalf+=hAsymmetricEta->GetBinContent(bin);
 		}
 		int rightHalf = 0;
-		for (bin; bin<hAsymmetricEta->GetNbinsX();bin++){
+		for (bin=bin; bin<hAsymmetricEta->GetNbinsX();bin++){
 			rightHalf+=hAsymmetricEta->GetBinContent(bin);
 		}
-		mean =hAsymmetricEta->GetMean();
+		mean = hAsymmetricEta->GetMean();
 		cout<<"Asymmetric eta with a charge share of "<<alpha*100<<"%"<<endl;
 		cout<<"nentries: "<<hAsymmetricEta->GetEntries()<<endl;
-
+		Float_t skewness = hAsymmetricEta->GetSkewness();
+		cout<<"skewness*100: "<<skewness*100<<endl;
 		cout<<"left: "<<leftHalf<<"\tright: "<<rightHalf<<" "<<(Float_t)leftHalf/(Float_t)rightHalf*100<<endl;
 
-		valid = TMath::Abs(mean-.5)<.002;
+		valid = TMath::Abs(mean-.5)<.005;
+		valid = valid || TMath::Abs(skewness)<0.005;
 		cout<<"Mean "<<mean*100<<" "<<valid<<endl;
 		pm = FindPeaks(hAsymmetricEta,2);
 		Float_t p1,p2;
@@ -1362,14 +1409,76 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
 		}
 		else
 			valid = false;
+		valid = TMath::Abs(mean-.5)<.001;
+		valid = valid || TMath::Abs(skewness)<0.0001;
+		alphaValues.push_back(alpha*10);
+		rightLefts.push_back((Float_t)leftHalf/(Float_t)rightHalf-1);
+		skewnesses.push_back(skewness);
+		means.push_back(mean-.5);
+		vecTries.push_back(nTries);
+
 		if(!valid){
-			if (mean - .5 < 0 )
-				alpha*=1.1;
-			else
-				alpha*=.9;
+			if (alpha ==0){
+				if(mean- .5>0)
+					alpha = .01;
+				else
+					alpha = -.01;
+			}
+			else {
+				if( TMath::Abs(mean-.5)>.02){
+					if(alpha<0)
+						alpha *= .5/mean*2;
+					else
+						alpha *= mean/.5/2;
+				}
+				else if (skewness > 0 ){
+					if(alpha<0)
+						alpha*=1.01;
+					else
+						alpha *=.95;
+				}
+				else{
+					if (alpha<0)
+						alpha*=.95;
+					else
+						alpha*=1.01;
+				}
+			}
 		}
 		nTries++;
 	}
+
+	{//convergence plot
+	TGraph *gr1 = new TGraph(vecTries.size(),&vecTries[0],&alphaValues[0]);
+	gr1->SetTitle("#alpha Values (10%)");
+	gr1->SetLineColor(kBlack);
+	TGraph *gr2 = new TGraph(vecTries.size(),&vecTries[0],&means.at(0));
+	gr2->SetTitle("mean value");
+	gr2->SetLineColor(kRed);
+	TGraph *gr3 = new TGraph(vecTries.size(),&vecTries[0],&rightLefts[0]);
+	gr3->SetTitle("rightLeft asymmetry");
+	gr3->SetLineColor(kBlue);
+	TGraph *gr4 = new TGraph(vecTries.size(),&vecTries[0],&skewnesses[0]);
+	gr4->SetTitle("skewness");
+	gr4->SetLineColor(kGreen);
+	TMultiGraph *mg = new TMultiGraph("mg","convergence of crosstalk #alpha");
+	mg->Add(gr1,"lp");
+	mg->Add(gr2,"lp");
+	mg->Add(gr3,"lp");
+	mg->Add(gr4,"lp");
+	TCanvas* c2 = new TCanvas("gCrossTalkConvergence");
+	c2->cd();
+	mg->Draw("APL");
+	TLegend *leg = c2->BuildLegend();
+	leg->SetFillColor(kWhite);
+	leg->Draw();
+	c2->Draw();
+	cout<<"save: "<<c2->GetName()<<endl;
+	histSaver->SaveCanvas(c2);
+	histSaver->SaveCanvas(c2);
+	delete c2;
+	}
+
 	hName = TString::Format("hAsymmetricEta_%05d",(int)((-1)*alpha*10000));
 	hAsymmetricEta->SetName(hName);
 	hAsymmetricEta->SetTitle(hName);
@@ -1391,6 +1500,36 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
 		cout<<"cannot find ps"<<endl;
 	histSaver->SaveHistogram(hAsymmetricEta,false,false,true);;
 	histSaver->SaveHistogram(hAsymmetricEta,false,false,true);;
+	cout<<"nDiamonds: "<<settings->getNDiamonds()<<endl;
+	for ( Int_t dia=-1; hAsymmetricEtaDia->GetYaxis()->GetBinCenter(dia)<(int)settings->getNDiamonds()+2; dia++ ){
+		TString name = "hAsymmetricEtaFinal_";
+		if(dia==-1)
+			name.Append(TString::Format("%05d_All",(int)(alpha*100000)));
+		else
+			name.Append(TString::Format("%05d_Area%d",(int)(alpha*100000),(int)hAsymmetricEtaDia->GetYaxis()->GetBinCenter(dia)));
+
+		TH1F* hist;
+		if(dia==-1)
+			hist = (TH1F*)hAsymmetricEtaDia->ProjectionX(name);
+		else
+			hist = (TH1F*)hAsymmetricEtaDia->ProjectionX(name,dia,dia);
+		cout<<"BinCenter of "<<dia<<": "<<hAsymmetricEtaDia->GetYaxis()->GetBinCenter(dia)<<endl;
+		name = "hAsymmetricEtaFinal_";
+		if(dia==-1)
+			name.Append(TString::Format("%02.3f_All",alpha*100));
+		else
+			name.Append(TString::Format("%02.3f_Area%d",alpha*100,(int)hAsymmetricEtaDia->GetYaxis()->GetBinCenter(dia)));
+		cout<<name<<" "<<hist<<endl;
+		if(hist){
+			hist->SetTitle(name);
+			histSaver->SaveHistogram(hist,false,false,true);
+			delete hist;
+		}
+		else
+			cout<<"hist==0 "<<name<<endl;
+	}
+	TString name = "hDiamondHitNo";
+	histSaver->SaveHistogram((TH1F*)hAsymmetricEtaDia->ProjectionY(name));
 //	histSaver->SaveHistogram(hAsymmetricEta);
 	cout<<flush;
 //	char t;

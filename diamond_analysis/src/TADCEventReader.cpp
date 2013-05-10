@@ -51,7 +51,16 @@ void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 TADCEventReader::~TADCEventReader() {
 	if(verbosity>3)cout<< "deleting instance of TADCEventReader"<<flush;
 	//delete tree;
-	if(file!=0)delete file;
+
+	if(file!=0){
+		cout<<"Zombie: "<<file->IsZombie()<<endl;
+		cout<<"File: "<<file->GetName()<<" is open: "<<file->IsOpen()<<" "<<endl;
+		if (gROOT->FindObject(file->GetName()))
+			delete file;
+		else
+			cout<<"couldn't find object: "<< file->GetName()<< " " <<gROOT->FindObject(file->GetName())<<endl;
+//		delete file;
+	}
 	if(verbosity>3)cout<< "DONE"<<flush;
 }
 
