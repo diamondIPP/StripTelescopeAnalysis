@@ -1167,6 +1167,15 @@ void TSettings::createSettingsRootFile()
 
 }
 
+//todo
+UInt_t TSettings::getMaxAllowedClustersize(UInt_t det){
+	if(TPlaneProperties::isDiamondDetector(det))
+		return 8+2;//two because of outer additional channels
+	else
+		return 4+2;//two because of outer additional channels
+
+}
+
 /**
  * @todo
  * @param k

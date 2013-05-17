@@ -303,17 +303,31 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 	newClus.clear();//(clus.getEventNumber(),clus.getD);
 	UInt_t det = this->getDetector();
 	Float_t sharedCharge = 0;
+	UInt_t clSize = this->getClusterSize();
+//	if(alpha)cout<<"\n\nAlpha: "<<alpha<<endl;
+//	if(alpha)cout<<"OLD: "<<endl;
+//	if(alpha)this->Print(1);
 
-	for(UInt_t cl =0;cl<this->getClusterSize();cl++){
-		UInt_t adc = this->getAdcValue(cl);
-		Float_t pedMean = this->getPedestalMean(cl);
-		adc +=sharedCharge;
+	for(UInt_t cl = 0; cl < clSize;cl++){
+		UInt_t clPos = cl;
+		if(det == 2 || det == 6)
+			clPos = clSize - cl-1;
+		Int_t adc = this->getAdcValue(clPos);
+		Float_t pedMean = this->getPedestalMean(clPos);
+		Int_t oldAdc = adc;
+//		if(alpha)cout<<"ClPos: "<<clPos<<" "<<adc<<"\t"<<pedMean<<"\t"<<sharedCharge<<" -->\t"<<(Float_t)adc-pedMean;
+		adc = Int_t((Float_t)adc + sharedCharge+.5);
+
+//		if(alpha)cout<<"\tnewAdc: "<<adc <<" ==>\t"<<adc-oldAdc<<endl;
 		sharedCharge = (adc - pedMean)*alpha;
-		bool isSaturated = this->getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(det);
-		newClus.addChannel(this->getChannel(cl),this->getPedestalMean(cl),this->getPedestalSigma(cl),
-				this->getPedestalMean(cl,true),this->getPedestalSigma(cl,true),adc,
-				isSaturated,this->isScreened(cl));
+
+		bool isSaturated = this->getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det);
+		newClus.addChannel(this->getChannel(clPos),this->getPedestalMean(clPos),this->getPedestalSigma(clPos),
+				this->getPedestalMean(clPos,true),this->getPedestalSigma(clPos,true),adc,
+				isSaturated,this->isScreened(clPos));
 	}
+//	if(alpha)cout<<"\nNEW: "<<endl;
+//	if(alpha)newClus.Print(1);
 	return newClus;
 }
 

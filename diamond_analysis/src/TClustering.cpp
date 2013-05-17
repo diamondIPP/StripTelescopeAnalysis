@@ -44,7 +44,7 @@ TClustering::~TClustering() {
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
 		if(verbosity)cout<<"CLOSING TREE"<<endl;
-		if(verbosity)cout<<"pedestalTree"<<" "<<filepath.str().c_str()<<endl;
+		if(verbosity)cout<<"pedestalTree"<<" "<<settings->getPedestalTreeFilePath()<<" "<<filepath.str().c_str()<<endl;
 		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
 		if(verbosity)cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
 		clusterTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());

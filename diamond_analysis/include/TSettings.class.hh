@@ -78,6 +78,7 @@ public:
 	void goToTransparentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/transparentAnalysis/"));}
 	std::string getTransparentAnalysisDir(TSettings::alignmentMode mode = TSettings::normalMode);
 
+	std::string getClusterAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/clustering/");}
 	std::string getToPedestalAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/pedestalAnalysis/");}
 	std::string getAlignmentDir(TSettings::alignmentMode mode = normalMode);
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
@@ -142,6 +143,7 @@ public:
 	Float_t getEta_hiq_slice_low() const;
 	Float_t getEta_lowq_slice_hi() const;
 	Float_t getEta_lowq_slice_low() const;
+	UInt_t getMaxAllowedClustersize(UInt_t det);
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
