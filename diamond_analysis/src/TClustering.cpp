@@ -29,7 +29,7 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	histSaver->SetRunNumber(runNumber);
 	settings->goToPedestalTreeDir();
 	this->runNumber=runNumber;
-	verbosity=0;
+	verbosity=1;
 	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
@@ -46,7 +46,7 @@ TClustering::~TClustering() {
 		if(verbosity)cout<<"CLOSING TREE"<<endl;
 		if(verbosity)cout<<"pedestalTree"<<" "<<settings->getPedestalTreeFilePath()<<" "<<filepath.str().c_str()<<endl;
 		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
-		if(verbosity)cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
+		if(verbosity)cout<<"rawTree"<<" "<<settings->getRawTreeFilePath()<<" "<<rawFilePath.str().c_str()<<endl;
 		clusterTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 		if(verbosity)cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 		clusterTree->Write();
