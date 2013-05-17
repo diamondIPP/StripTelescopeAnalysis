@@ -37,6 +37,8 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	cout<<"end initialise"<<endl;
 	settings=0;
 	vecVecClusters.resize(TPlaneProperties::getNDetectors());
+
+	nMaxClusters = 40000;
 }
 
 TAnalysisOfClustering::~TAnalysisOfClustering() {
@@ -1185,6 +1187,8 @@ void TAnalysisOfClustering::fillClusterVector(){
 //	UInt_t det = 8;
 	if(eventReader->getNClusters(det)!=1)
 		return;
+	if (vecVecClusters.at(det).size()>nMaxClusters)
+		continue;
 	TCluster cluster = eventReader->getCluster(det,0);
 	vecVecClusters.at(det).push_back(cluster);
 	}
