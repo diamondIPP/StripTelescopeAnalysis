@@ -60,7 +60,7 @@ void TAnalysisOfAsymmetricEta::setClusters(vector<TCluster> clusters) {
 
 TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 	//	cout<<"[TAnalysisOfAsymmetricEta::getProjection] "<<hAsymmetricEta2D<<endl;
-	if(!hAsymmetricEta2D){
+	if(hAsymmetricEta2D==0){
 		cout<<"Cannot get Projection of invalid histo."<<endl;
 		exit(-1);
 	}
@@ -145,7 +145,9 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 	}
 	cout<<"hName"<<endl;
 	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
-
+	if(hAsymmetricEta2D ==0){
+		cout<<"histo with name: '"<<hName<<"' was not created...."<<endl;//hAsymmetricEta2D<<
+	}
 	while (!valid && nTries < maxTriesAlpha){
 		cout<<"\n\nnew try no. "<<nTries << " / " << maxTriesAlpha <<" "<<hAsymmetricEta2D << " "<<hAsymmetricEta2D->GetName();
 		cout<<" "<<hAsymmetricEta2D->GetEntries()<<endl;
@@ -166,6 +168,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 			hAsymmetricEta_px=0;
 		}
 		//		cout<<"get Projection"<<endl;
+		cout<<hAsymmetricEta2D<<endl;
 		hAsymmetricEta_px = getProjection();
 		//		cout<<"find new alpha"<<endl;
 		int leftHalf = 0;
