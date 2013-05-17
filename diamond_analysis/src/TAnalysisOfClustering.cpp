@@ -1207,6 +1207,11 @@ void TAnalysisOfClustering::fillClusterVector(){
 
 void TAnalysisOfClustering::etaInvestigation(){
 	for(int det=0;det<9;det++){
+		Float_t minSignal;
+		if (TPlaneProperties::isSiliconDetector(det))
+			minSignal = -10;
+		else
+			minSignal = -50;//todo
 		for(UInt_t cl = 0; cl< eventReader->getNClusters(det);cl++){
 			TCluster cluster = eventReader->getCluster(det,cl);
 //			cluster.Print(1);
@@ -1222,6 +1227,8 @@ void TAnalysisOfClustering::etaInvestigation(){
 			Int_t highestSignalClusterPos = cluster.getClusterPosition(highestSignalChannel);
 			Float_t signalLeftOfHighest = cluster.getSignal(highestSignalClusterPos-1);
 			Float_t signalRightOfHighest = cluster.getSignal(highestSignalClusterPos+1);
+			if(signalLeftLeft<minSignal||signalLeftOfHighest<minSignal||signalRightOfHighest<minSignal||signalRightRight<minSignal)
+				continue;
 //			cout<< signalLeftOfEta<<" "<< leftEtaSignal<<" "<<rightEtaSignal<<" "<<signalRightOfEta<<"  ----  "<<signalLeftOfHighest<<" "<< highestSignal<<" "<<signalRightOfHighest<<"\n"<<endl;
 			//		Float_t signalLeftOfEta = eventReader->
 			if (signalLeftLeft < -100){
