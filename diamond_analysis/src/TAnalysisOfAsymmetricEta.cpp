@@ -87,7 +87,7 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 				TString name = hName;//+"_left";//TString::Format("%s_left",hName);
 				name.Append(TString::Format("%06d_left",(int)(TMath::Abs(alpha)*100000)));
 				cout<<"Title: "<<flush;
-				hTitle.Append(TString::Format("%02.2f %, left",alpha*100));
+				hTitle.Append(TString::Format("%02.2f %%, left",alpha*100));
 				cout<<hTitle<<endl;
 				cout<<name<<endl;
 				hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(name,bin+1,bin+1);
@@ -382,10 +382,6 @@ void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TString st
 		}
 		else
 			cout<<"hist==0 "<<histName<<endl;
-	}
-	if(hAsymmetricEta2D){
-		delete hAsymmetricEta2D;
-		hAsymmetricEta2D=0;
 	}
 }
 
