@@ -927,6 +927,24 @@ Float_t TCluster::getValueOfHisto(Float_t x, TH1F* histo){
 
 }
 
+
+bool TCluster::hasInvalidReadout(){
+//	cout<<"\t\tTCluster::hasInvalidReadout\t "<<flush;
+	bool invalidReadout = false;
+	Float_t minInvalidSignal = TPlaneProperties::GetMinInvalidSignal(det);
+	UInt_t cl;
+	for(cl=0;cl<checkClusterForSize()&&!invalidReadout;cl++){
+//		cout<<cl<<" / "<<checkClusterForSize()<<flush;
+		invalidReadout = getSignal(cl)<minInvalidSignal||invalidReadout;
+//		cout<<"."<<flush;
+	}
+//	cout<<" last "<<cl<<"__\t__"<<flush;
+//	if(invalidReadout)
+//		cout<<"InvalidReadout "<<cl<<flush;
+//	cout<<endl;
+	return invalidReadout;
+}
+
 void TCluster::Print(UInt_t level){
 	cout<<Intent(level)<<"Cluster of Event "<<flush;
 	cout<<eventNumber<<" in detector"<<(int)det<<" with "<<size()<<"/"<<checkClusterForSize()<<" Cluster entries"<<flush;

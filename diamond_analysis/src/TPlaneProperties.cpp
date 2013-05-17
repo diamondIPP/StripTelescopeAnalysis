@@ -63,3 +63,12 @@ std::string TPlaneProperties::getStringForDetector(int det){
 	}
 	return "Invalid";
 }
+
+Float_t TPlaneProperties::GetMinInvalidSignal(UInt_t det){
+	if(isSiliconDetector(det))
+		return -5;
+	else
+		return -50;
+}
+
+

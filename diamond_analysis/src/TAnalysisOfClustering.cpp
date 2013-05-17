@@ -39,6 +39,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	vecVecClusters.resize(TPlaneProperties::getNDetectors());
 
 	nMaxClusters = 40000;
+	nInvalidReadout =0;
 }
 
 TAnalysisOfClustering::~TAnalysisOfClustering() {
@@ -72,6 +73,11 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 }
 
 void TAnalysisOfClustering::analyseEvent(){
+	if(eventReader->getEvent()->hasInvalidReadout()){
+//		cout<<nEvent<<": Invalid Readout..."<<endl;
+		nInvalidReadout++;
+		return;
+	}
 	checkForDeadChannels();
 	checkForSaturatedChannels();
 	//		getBiggestHit();//not working
@@ -1197,8 +1203,12 @@ void TAnalysisOfClustering::fillClusterVector(){
 //	UInt_t det = 8;
 	if(eventReader->getNClusters(det)!=1)
 		return;
-	if (vecVecClusters.at(det).size()>nMaxClusters)
-		continue;
+	if(TPlaneProperties::isSiliconDetector(det))
+		if (vecVecClusters.at(det).size()>nMaxClusters)
+			continue;
+	if(TPlaneProperties::isDiamondDetector(det))
+		if (vecVecClusters.at(det).size()>3*nMaxClusters)
+					continue;
 	TCluster cluster = eventReader->getCluster(det,0);
 	vecVecClusters.at(det).push_back(cluster);
 	}

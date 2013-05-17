@@ -57,6 +57,7 @@ public:
     void SetClusters(vector<TCluster> xClusters, vector<TCluster> yClusters);
     void SetXClusters(vector<TCluster> xClusters);
     void SetYClusters(vector<TCluster> yClusters);
+    bool hasInvalidReadout();
 private:
     TPlaneProperties::enumDetectorType type;
 	UInt_t planeNo;

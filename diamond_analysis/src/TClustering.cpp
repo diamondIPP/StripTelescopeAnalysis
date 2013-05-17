@@ -38,9 +38,11 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 	}
+	nInvalidReadout=0;
 }
 
 TClustering::~TClustering() {
+	cout<<"Invalid readouts: "<<nInvalidReadout<<endl;
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
 		if(verbosity)cout<<"CLOSING TREE"<<endl;
@@ -96,7 +98,7 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 			validEvents++;
 	}
 
-	cout<<"'nvalid Events: "<<validEvents<<" of "<<nEvents<<endl;
+	cout<<"nvalid Events: "<<validEvents<<" of "<<nEvents<<endl;
 }
 
 void TClustering::clusterEvent()
@@ -134,6 +136,10 @@ void TClustering::clusterEvent()
 		//			cout<<vecvecCluster.at(det).size()<<" ";
 		//		}
 		cout<<endl;
+	}
+	if(pEvent->hasInvalidReadout()){
+		cout<<nEvent<<": InvalidReadout"<<endl;
+		nInvalidReadout++;
 	}
 
 }

@@ -75,6 +75,7 @@ private:
     UShort_t maxDiaAdcValue;
     TEvent *pEvent;
     TH1F* hEtaDistribution[9];
+    UInt_t nInvalidReadout;
 
 };
 

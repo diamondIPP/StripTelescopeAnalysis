@@ -19,7 +19,7 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#define TCLUSTER_REV  38
+#define TCLUSTER_REV  39
 #define INVALID_POSITION -9999
 using namespace std;
 class TCluster :public TObject{
@@ -110,6 +110,7 @@ public:
 	Float_t getRightEta(bool cmnCorrected=false);
 	static Float_t getValueOfHisto(Float_t x, TH1F* histo);
 	UInt_t getEventNumber(){return eventNumber;};
+	bool hasInvalidReadout();
 private:
     void checkForGoldenGate();
     void checkForLumpyCluster();

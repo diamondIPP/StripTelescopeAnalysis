@@ -47,7 +47,7 @@ public:
 	inline static bool isDiamondDetector(UInt_t det){return (det==getDetDiamond());}
 	inline static bool isDiamondPlane(UInt_t plane){return (plane==getDiamondPlane());}
 	inline static bool isSaturated(UInt_t det, Int_t adcValue){return (adcValue>=getMaxSignalHeight(det));}
-
+	static Float_t GetMinInvalidSignal(UInt_t det);
     ClassDef(TPlaneProperties,1);
 
 };

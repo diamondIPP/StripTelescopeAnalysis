@@ -141,6 +141,7 @@ private:
 	vector < vector <Float_t> > vecvecEta;
 	vector < vector <TCluster> > vecVecClusters;
 	vector<Float_t> vecClusterSize,vecMPV,vecClusterSizeError,vecWidth;
+	UInt_t nInvalidReadout;
 };
 #endif /* TDEADCHANNELS_HH_ */
 

@@ -177,6 +177,25 @@ void TPlane::SetYClusters(vector<TCluster> yClusters) {
 
 }
 
+
+bool TPlane::hasInvalidReadout(){
+//	cout<<"\tTPlane::hasInvalidReadout "<<planeNo<<": "<<xClusters.size()<<"-"<<yClusters.size()<<endl;
+	bool invalidReadout=false;
+//	cout<<"\tX:\t"<<endl;
+	UInt_t xCl;
+	for(xCl=0;xCl<xClusters.size()&&!invalidReadout;xCl++)
+		invalidReadout = invalidReadout || xClusters.at(xCl).hasInvalidReadout();
+//	if(invalidReadout)
+//		cout<<planeNo<<" X"<<xCl<<endl;
+//	cout<<"\tY:"<<endl;
+	UInt_t yCl;
+	for(yCl=0;yCl<yClusters.size()&&!invalidReadout;yCl++){
+		invalidReadout = invalidReadout || yClusters.at(yCl).hasInvalidReadout();
+//		if(invalidReadout)
+//			cout<<planeNo<<"Y"<<xCl<<endl;
+	}//	cout<<"\treturning: "<<invalidReadout<<endl;
+	return invalidReadout;
+}
 void TPlane::Print(UInt_t level)
 {
 	cout<< TCluster::Intent(level)<<TPlaneProperties::getDetectortypeString(this->getDetectorType())<<"-Plane with "<<getNXClusters()<<"/"<<getNYClusters()<<endl;
