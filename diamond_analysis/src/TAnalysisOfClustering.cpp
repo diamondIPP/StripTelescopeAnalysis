@@ -1165,8 +1165,14 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
 		}
 	}
 	cout<<"****\n****\n FINAL RESULTS: "<<endl;
-	for(UInt_t det = 0 ; det < vecAlphas.size();det ++)
-		cout<<det<<": "<< vecAlphas.at(det)*100 << "%\t in "<< vecNSteps.at(det) << " Steps" << endl;
+	string fileName;
+	fileName =TString::Format("crossTalkCorrectionFactors.%d.txt",settings->getRunNumber());
+	std::ofstream ofs (fileName.c_str(), std::ofstream::out);
+	for(UInt_t det = 0 ; det < vecAlphas.size();det ++){
+		cout<<det<<": "<< TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<< vecNSteps.at(det) << " Steps" << endl;
+		ofs<<det<<": "<<  TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<< vecNSteps.at(det) << " Steps" << endl;
+	}
+	ofs.close();
 }
 
 
