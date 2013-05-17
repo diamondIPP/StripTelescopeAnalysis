@@ -130,7 +130,7 @@ private:
 	TH2F *hSignalLeftVsSignalRight[9];
 	TH2F *hPHDistribution[9];
 private:
-	int nMaxClusters;
+	UInt_t nMaxClusters;
 	vector < vector <Float_t> > vecvecSignalLeftLeft;
 	vector < vector <Float_t> > vecvecSignalRightRight;
 	vector < vector <Float_t> > vecvecLeftEtaSignal;

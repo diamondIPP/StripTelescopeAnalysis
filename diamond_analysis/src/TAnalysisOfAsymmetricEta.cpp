@@ -59,12 +59,12 @@ void TAnalysisOfAsymmetricEta::setClusters(vector<TCluster> clusters) {
 }
 
 TH1F* TAnalysisOfAsymmetricEta::getProjection(){
-//	cout<<"[TAnalysisOfAsymmetricEta::getProjection] "<<hAsymmetricEta2D<<endl;
+	//	cout<<"[TAnalysisOfAsymmetricEta::getProjection] "<<hAsymmetricEta2D<<endl;
 	if(!hAsymmetricEta2D){
 		cout<<"Cannot get Projection of invalid histo."<<endl;
 		exit(-1);
 	}
-//	cout<<"GetProjection"<<endl;
+	//	cout<<"GetProjection"<<endl;
 	cout<<"GetProjection"<<endl;
 	TH1F* hProjection = 0;
 	TString hName = "hAsymmetricEta_";
@@ -124,12 +124,12 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 
 UInt_t TAnalysisOfAsymmetricEta::analyse() {
 	cout<<"ANALYSE ASYMMETRIC ETA SAMPLE - CROSS TALK CORRECTION - Detector "<<this->det<<endl;
-//	cout<<"Press a key..."<<flush;
-//	char t; cin>>t;
+	//	cout<<"Press a key..."<<flush;
+	//	char t; cin>>t;
 	TString hName ="hAsymmetricEtaCorrected";
 	hName.Append(TPlaneProperties::getStringForDetector(det).c_str());
 	int nDiamonds = settings->getNDiamonds();
-//	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+3,-1.5,nDiamonds+1.5);
+	//	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+3,-1.5,nDiamonds+1.5);
 	//	TH1F* hAsymmetricEta = new TH1F(hName,hName,512,0,1);
 	alpha= 0;
 	Float_t mean = 0;
@@ -143,6 +143,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		delete hAsymmetricEta2D;
 		hAsymmetricEta2D=0;
 	}
+	cout<<"hName"<<endl;
 	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
 
 	while (!valid && nTries < maxTriesAlpha){
@@ -157,16 +158,16 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		name.Append(TString::Format("_%03.2f",alpha));
 		hAsymmetricEta2D->SetTitle(name);
 		FillEtaDistribution(hAsymmetricEta2D);
-//		cout<<"save asym. etaDists"<<endl;
+		//		cout<<"save asym. etaDists"<<endl;
 		if(alpha==0) saveAsymmetricEtaPerArea(hAsymmetricEta2D,"hAsymmetricEta_",alpha);
-//		cout<<"delete projection"<<endl;
+		//		cout<<"delete projection"<<endl;
 		if(hAsymmetricEta_px) {
 			delete hAsymmetricEta_px;
 			hAsymmetricEta_px=0;
 		}
-//		cout<<"get Projection"<<endl;
+		//		cout<<"get Projection"<<endl;
 		hAsymmetricEta_px = getProjection();
-//		cout<<"find new alpha"<<endl;
+		//		cout<<"find new alpha"<<endl;
 		int leftHalf = 0;
 		int bin=0;
 		for (bin=0; hAsymmetricEta_px->GetBinLowEdge(bin)<.5;bin++){
@@ -344,78 +345,82 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 
 
 
-	void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TString startname, Float_t alpha){
-		histSaver->SaveHistogram(hAsymmetricEta2D);
-		//	TString name = "hAsymmetricEtaFinal_";
-		int maxDia =(int)settings->getNDiamonds()+2;
-		if(TPlaneProperties::isSiliconDetector(this->det))
-			maxDia = 0;
-		if(!startname.Contains(TPlaneProperties::getStringForDetector(det)))
-			startname.Append(TPlaneProperties::getStringForDetector(det));
-		for ( Int_t dia=-1; histo->GetYaxis()->GetBinCenter(dia)<maxDia; dia++ ){
-			TString histName = startname;
-			if(dia==-1)
-				histName.Append(TString::Format("%05d_All",(int)(alpha*100000)));
-			else
-				histName.Append(TString::Format("%05d_Area%d",(int)(alpha*100000),(int)histo->GetYaxis()->GetBinCenter(dia)));
+void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TString startname, Float_t alpha){
+	histSaver->SaveHistogram(hAsymmetricEta2D);
+	//	TString name = "hAsymmetricEtaFinal_";
+	int maxDia =(int)settings->getNDiamonds()+2;
+	if(TPlaneProperties::isSiliconDetector(this->det))
+		maxDia = 0;
+	if(!startname.Contains(TPlaneProperties::getStringForDetector(det)))
+		startname.Append(TPlaneProperties::getStringForDetector(det));
+	for ( Int_t dia=-1; histo->GetYaxis()->GetBinCenter(dia)<maxDia; dia++ ){
+		TString histName = startname;
+		if(dia==-1)
+			histName.Append(TString::Format("%05d_All",(int)(alpha*100000)));
+		else
+			histName.Append(TString::Format("%05d_Area%d",(int)(alpha*100000),(int)histo->GetYaxis()->GetBinCenter(dia)));
 
-			TH1F* hist;
-			if(dia==-1)
-				hist = (TH1F*)histo->ProjectionX(histName);
-			else
-				hist = (TH1F*)histo->ProjectionX(histName,dia,dia);
-//			cout<<"BinCenter of "<<dia<<": "<<histo->GetYaxis()->GetBinCenter(dia)<<endl;
-			TString title = startname;
-			if(dia==-1)
-				title.Append(TString::Format("%02.3f_All",alpha*100));
-			else
-				title.Append(TString::Format("%02.3f_Area%d",alpha*100,(int)histo->GetYaxis()->GetBinCenter(dia)));
-//			cout<<title<<" "<<hist<<endl;
-			if(hist){
-				hist->SetTitle(title);
-				histSaver->SaveHistogram(hist,false,false,true);
-				delete hist;
-			}
-			else
-				cout<<"hist==0 "<<histName<<endl;
-		}
-	}
-
-	void TAnalysisOfAsymmetricEta::Reset() {
-		alphaValues.clear();
-		means.clear();
-		skewnesses.clear();
-		rightLefts.clear();
-		vecTries.clear();
-	}
-	TPolyMarker* TAnalysisOfAsymmetricEta::FindPeaks(TH1F* histo, int nPeaks, Float_t sigma, TString option, Float_t threshold){
-		histo->Smooth(2);
-		return FindPeaks(maxTriesPeakfinding,histo,nPeaks,sigma,option,threshold);
-	}
-	TPolyMarker* TAnalysisOfAsymmetricEta::FindPeaks(UInt_t nTries,TH1F* histo, int nPeaks, Float_t sigma, TString option, Float_t threshold){
-		if (!histo)
-			return NULL;
-		int n = histo->ShowPeaks(sigma,option,threshold);
-		TList *functions = histo->GetListOfFunctions();
-		TPolyMarker *pm = (TPolyMarker*)functions->FindObject("TPolyMarker");
-
-		if(nPeaks != n && nTries != 0){
-			if(verbosity>8)cout<<"Peakfinding: " << nTries <<"/"<<maxTriesPeakfinding<<" "<< n <<" / "<<nPeaks<< " Peaks, thrs. " <<threshold<<", sigma: " << sigma <<endl;
-			if (n>nPeaks){
-				if(verbosity>10)cout<<"increase threshold"<<endl;
-				threshold*=1.1;
-			}
-			else if(n<nPeaks){
-				threshold/=.9;
-				if(verbosity>10)cout<<"decrease threshold"<<endl;
-			}
-			return FindPeaks(nTries-1,histo,nPeaks,sigma,option,threshold);
+		TH1F* hist;
+		if(dia==-1)
+			hist = (TH1F*)histo->ProjectionX(histName);
+		else
+			hist = (TH1F*)histo->ProjectionX(histName,dia,dia);
+		//			cout<<"BinCenter of "<<dia<<": "<<histo->GetYaxis()->GetBinCenter(dia)<<endl;
+		TString title = startname;
+		if(dia==-1)
+			title.Append(TString::Format("%02.3f_All",alpha*100));
+		else
+			title.Append(TString::Format("%02.3f_Area%d",alpha*100,(int)histo->GetYaxis()->GetBinCenter(dia)));
+		//			cout<<title<<" "<<hist<<endl;
+		if(hist){
+			hist->SetTitle(title);
+			histSaver->SaveHistogram(hist,false,false,true);
+			delete hist;
 		}
 		else
-			if (nTries==0)
-				if(verbosity>6)cout<<"Couldn't find "<< nPeaks << " peaks, having: "<<n<<" Peaks"<<endl;
+			cout<<"hist==0 "<<histName<<endl;
+	}
+	if(hAsymmetricEta2D){
+		delete hAsymmetricEta2D;
+		hAsymmetricEta2D=0;
+	}
+}
 
-		return pm;
+void TAnalysisOfAsymmetricEta::Reset() {
+	alphaValues.clear();
+	means.clear();
+	skewnesses.clear();
+	rightLefts.clear();
+	vecTries.clear();
+}
+TPolyMarker* TAnalysisOfAsymmetricEta::FindPeaks(TH1F* histo, int nPeaks, Float_t sigma, TString option, Float_t threshold){
+	histo->Smooth(2);
+	return FindPeaks(maxTriesPeakfinding,histo,nPeaks,sigma,option,threshold);
+}
+TPolyMarker* TAnalysisOfAsymmetricEta::FindPeaks(UInt_t nTries,TH1F* histo, int nPeaks, Float_t sigma, TString option, Float_t threshold){
+	if (!histo)
+		return NULL;
+	int n = histo->ShowPeaks(sigma,option,threshold);
+	TList *functions = histo->GetListOfFunctions();
+	TPolyMarker *pm = (TPolyMarker*)functions->FindObject("TPolyMarker");
+
+	if(nPeaks != n && nTries != 0){
+		if(verbosity>8)cout<<"Peakfinding: " << nTries <<"/"<<maxTriesPeakfinding<<" "<< n <<" / "<<nPeaks<< " Peaks, thrs. " <<threshold<<", sigma: " << sigma <<endl;
+		if (n>nPeaks){
+			if(verbosity>10)cout<<"increase threshold"<<endl;
+			threshold*=1.1;
+		}
+		else if(n<nPeaks){
+			threshold/=.9;
+			if(verbosity>10)cout<<"decrease threshold"<<endl;
+		}
+		return FindPeaks(nTries-1,histo,nPeaks,sigma,option,threshold);
+	}
+	else
+		if (nTries==0)
+			if(verbosity>6)cout<<"Couldn't find "<< nPeaks << " peaks, having: "<<n<<" Peaks"<<endl;
+
+	return pm;
 
 
 
