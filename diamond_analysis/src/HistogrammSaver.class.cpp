@@ -329,6 +329,7 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
 
 
 void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
+	if(histo==0)return;
 	if(histo->GetEntries()==0)return;
 
 	TF1* fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("Fitfcn_%s",histo->GetName()));
@@ -353,6 +354,7 @@ void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
  * *********************************************************
  */
 void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange,bool drawStatBox) {
+	if(histo==0)return;
 	if(histo->GetEntries()==0)return;
 	if (!drawStatBox)
 				histo->SetStats(false);
@@ -406,6 +408,7 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
 }
 
 void HistogrammSaver::SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue){
+	if(histo==0)return;
 	TCanvas *c2 = new TCanvas(TString::Format("c%s",histo->GetName()),histo->GetTitle());
 	c2->cd();
 	histo->Draw();
@@ -419,6 +422,7 @@ void HistogrammSaver::SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue){
 	delete c2;
 }
 void HistogrammSaver::SaveHistogramLogZ(TH2F* histo){
+	if(histo==0)return;
 	TString canvasName = "c_";
 	canvasName +=histo->GetName();
 	TCanvas *c1 = new TCanvas(canvasName,canvasName);
@@ -449,6 +453,7 @@ void HistogrammSaver::SaveCanvas(TCanvas *canvas)
 	SaveCanvasROOT(canvas);
 }
 void HistogrammSaver::SaveGraph(TGraph* graph,std::string name,std::string option){
+	if(graph==0)return;
 	if(graph->GetN()==0)return;
 	SaveGraphPNG(graph,name,option);
 	SaveGraphROOT(graph,name,option);
@@ -481,6 +486,7 @@ void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
 }
 
 void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
+	if(histo==0)return;
 	if(histo->GetEntries()==0)return;
 	TCanvas *plots_canvas = new TCanvas(TString::Format("cPdf_%s",histo->GetName()),TString::Format("c_%s",histo->GetName()));
 	plots_canvas->cd();
@@ -505,6 +511,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
 }
 
 void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
+	if(histo==0)return;
 	if(!histo){
 		cout<<"Histogram is not existing..."<<endl;
 		return;
