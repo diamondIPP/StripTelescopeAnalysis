@@ -425,7 +425,6 @@ void TAnalysisOfClustering::saveEtaIntegrals(){
 
 
 void TAnalysisOfClustering::saveHistos(){
-	analyseAsymmetricSample();
 //	analyseAsymmetricSample2();
 //	char t; cin>>t;
 	if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
@@ -557,6 +556,7 @@ void TAnalysisOfClustering::saveHistos(){
 		if(hEtaDistribution[det])delete hEtaDistribution[det];
 	}
 	savePHHistos();
+	analyseAsymmetricSample();
 	//    for (int det = 0; det < 9; det++) {
 	//		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
 	//        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
@@ -1171,8 +1171,18 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
 	fileName =TString::Format("crossTalkCorrectionFactors.%d.txt",settings->getRunNumber());
 	std::ofstream ofs (fileName.c_str(), std::ofstream::out);
 	for(UInt_t det = 0 ; det < vecAlphas.size();det ++){
-		cout<<det<<": "<< TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<< vecNSteps.at(det) << " Steps" << endl;
-		ofs<<det<<": "<<  TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<< vecNSteps.at(det) << " Steps" << endl;
+
+		cout<<det<<": "<< TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps" ;
+		ofs<<det<<": "<<  TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps";
+
+		if(det<vecMPV.size()){
+			cout<<TString::Format("\tMean: %4.1f, Noise: %2.2f",vecMPV.at(det),vecWidth.at(det))<<endl;
+			ofs<<TString::Format("\tMean: %4.1f, Noise: %2.2f",vecMPV.at(det),vecWidth.at(det))<<endl;
+		}
+		else{
+			cout<<endl;
+			ofs<<endl;
+		}
 	}
 	ofs.close();
 }
@@ -1217,7 +1227,7 @@ void TAnalysisOfClustering::etaInvestigation(){
 			if (signalLeftLeft < -100){
 				int clusPos = leftEtaClusterPosition-1;
 				cout<<"\n"<< nEvent<<", Problem signalLeftLeft: "<<signalLeftLeft<<" "<<leftEtaChannel<<": "<<cluster.getPedestalMean(clusPos)<<", "<<cluster.getAdcValue(clusPos)<<endl;
-//				cluster.Print(1);
+				cluster.Print(1);
 			}
 			vecvecSignalLeftLeft.at(det).push_back(signalLeftLeft);
 			vecvecSignalRightRight.at(det).push_back(signalRightRight);;
@@ -1234,12 +1244,11 @@ void TAnalysisOfClustering::etaInvestigation(){
 
 void TAnalysisOfClustering::savePHHistos()
 {
-	vector<Float_t> vecClusterSize,vecMVP,vecClusterSizeError,vecWidth;
 
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		histSaver->SaveHistogram(hPHDistribution[det]);
 		vecClusterSize.clear();
-		vecMVP.clear();
+		vecMPV.clear();
 		vecClusterSizeError.clear();
 		vecWidth.clear();
 		for(UInt_t nClusters=0;nClusters<10;nClusters++){
@@ -1288,7 +1297,7 @@ void TAnalysisOfClustering::savePHHistos()
 				if(nClusters==0)
 					vecPHMeans.push_back(fit->GetParameter(1));
 				vecClusterSize.push_back(nClusters);
-				vecMVP.push_back(fit->GetParameter(1));
+				vecMPV.push_back(fit->GetParameter(1));
 				vecClusterSizeError.push_back(0.5);
 				vecWidth.push_back(fit->GetParameter(0));
 				histSaver->SaveHistogramLandau(htemp);
@@ -1300,7 +1309,7 @@ void TAnalysisOfClustering::savePHHistos()
 		if(det==TPlaneProperties::getDetDiamond()){
 			stringstream histTitle;
 			histTitle<<"gChargeOfClusterVsClusterSize_"<<det;
-			TGraphErrors graph = histSaver->CreateErrorGraph(histTitle.str(),vecClusterSize,vecMVP,vecClusterSizeError,vecWidth);
+			TGraphErrors graph = histSaver->CreateErrorGraph(histTitle.str(),vecClusterSize,vecMPV,vecClusterSizeError,vecWidth);
 			graph.GetXaxis()->SetTitle("Cluster Size");
 			graph.GetYaxis()->SetTitle("Charge of Cluster");
 			histSaver->SaveGraph(&graph,histTitle.str());

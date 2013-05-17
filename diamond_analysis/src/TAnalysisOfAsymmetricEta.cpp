@@ -139,12 +139,13 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 	TH1F* hAsymmetricEta_px=0;
 	bool valid=false;
 	Reset();
+	if(hAsymmetricEta2D){
+		delete hAsymmetricEta2D;
+		hAsymmetricEta2D=0;
+	}
+	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
+
 	while (!valid && nTries < maxTriesAlpha){
-		if(hAsymmetricEta2D){
-			delete hAsymmetricEta2D;
-			hAsymmetricEta2D=0;
-		}
-		hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
 		cout<<"\n\nnew try no. "<<nTries << " / " << maxTriesAlpha <<" "<<hAsymmetricEta2D << " "<<hAsymmetricEta2D->GetName();
 		cout<<" "<<hAsymmetricEta2D->GetEntries()<<endl;
 		hAsymmetricEta2D->Reset();

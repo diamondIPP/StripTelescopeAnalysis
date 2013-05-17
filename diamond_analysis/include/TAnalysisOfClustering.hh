@@ -140,6 +140,7 @@ private:
 	vector < vector <Float_t> > vecvecSignalHighest;
 	vector < vector <Float_t> > vecvecEta;
 	vector < vector <TCluster> > vecVecClusters;
+	vector<Float_t> vecClusterSize,vecMPV,vecClusterSizeError,vecWidth;
 };
 #endif /* TDEADCHANNELS_HH_ */
 

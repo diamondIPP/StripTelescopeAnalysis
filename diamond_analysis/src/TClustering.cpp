@@ -190,7 +190,7 @@ void TClustering::clusterDetector(UInt_t det){
  *
  * 			\return first channel which is not part of the cluster
  */
-int TClustering::combineCluster(int det, int ch){
+int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	int maxAdcValue = TPlaneProperties::getMaxSignalHeight(det);
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"combine Cluster...start:"<<ch<<" ";
 
@@ -211,7 +211,7 @@ int TClustering::combineCluster(int det, int ch){
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>10)cout<<cluster.size()<<" ";
 	UInt_t currentCh;
-	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0;currentCh--){
+	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0&&currentCh<=TPlaneProperties::getNChannels(det);currentCh--){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
 		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";
