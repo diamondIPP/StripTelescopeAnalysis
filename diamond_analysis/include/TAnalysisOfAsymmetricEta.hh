@@ -40,7 +40,7 @@ public:
 	UInt_t analyse();
 	Float_t getAlpha(){return alpha;}
 	void setAlpha(Float_t newAlpha) {alpha=newAlpha;}
-	void saveAsymmetricEtaPerArea(TH2F* histo, TString histName, Float_t alpha);
+	void saveAsymmetricEtaPerArea(TH2F* histo,TH2F* histoNoCor, TString histName, Float_t alpha);
 //	const vector<TCluster>& getClusters() const { return clusters; }
 	void setClusters(vector<TCluster> clusters);// { this->clusters = clusters; }
 	void Reset();

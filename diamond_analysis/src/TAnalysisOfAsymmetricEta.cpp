@@ -142,13 +142,12 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 	//	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+3,-1.5,nDiamonds+1.5);
 	//	TH1F* hAsymmetricEta = new TH1F(hName,hName,512,0,1);
 	alpha= 0;
-	Float_t mean = 0;
 	UInt_t nTries =0;
-	TPolyMarker *pm = 0;
 
 	TH1F* hAsymmetricEta_px=0;
 	bool valid=false;
 	Reset();
+	TH2F* hAsymmetricEta2DNoCorrection=0;
 	if(hAsymmetricEta2D){
 		delete hAsymmetricEta2D;
 		hAsymmetricEta2D=0;
@@ -163,7 +162,10 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 
 		FillEtaDistribution(hAsymmetricEta2D,alpha,hName);
 
-		if(alpha==0) saveAsymmetricEtaPerArea(hAsymmetricEta2D,"hAsymmetricEta_",alpha);
+		if(alpha==0) {
+			hAsymmetricEta2DNoCorrection = (TH2F*)hAsymmetricEta2D->Clone();
+			saveAsymmetricEtaPerArea(hAsymmetricEta2D,hAsymmetricEta2DNoCorrection,"hAsymmetricEta_",alpha);
+		}
 
 		if(hAsymmetricEta_px) {
 			delete hAsymmetricEta_px;
@@ -224,7 +226,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 	if(verbosity>4)cout<<"nDiamonds: "<<settings->getNDiamonds()<<endl;
 	hName = "hAsymmetricEtaFinal_";
 	hName.Append(TPlaneProperties::getStringForDetector(det).c_str());
-	saveAsymmetricEtaPerArea(hAsymmetricEta2D,hName,bestAlpha);
+	saveAsymmetricEtaPerArea(hAsymmetricEta2D,hAsymmetricEta2DNoCorrection,hName,bestAlpha);
 	TString name = "hDiamondHitNo";
 	histSaver->SaveHistogram((TH1F*)hAsymmetricEta2D->ProjectionY(name));
 	//	histSaver->SaveHistogram(hAsymmetricEta);
@@ -283,8 +285,12 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
 	valid = TMath::Abs(mean-.5)<.001;
 	valid = valid || TMath::Abs(skewness)<0.0001;
 	alphaValues.push_back(alpha*10);
-	rightLefts.push_back((Float_t)leftHalf/(Float_t)rightHalf-1);
+	Float_t value = (Float_t)leftHalf/(Float_t)rightHalf-1;
+	if(value!=value) value = -1;
+	rightLefts.push_back(value);
+	if(skewness!=skewness)skewness= -1;
 	skewnesses.push_back(skewness);
+	if(mean!=mean) mean = -1.5;
 	means.push_back(mean-.5);
 	vecTries.push_back(nTries);
 	if(valid)
@@ -420,7 +426,7 @@ bool TAnalysisOfAsymmetricEta::checkBadConvergence(UInt_t nTries){
 	return false;
 }
 
-void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TString startname, Float_t alpha){
+void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TH2F* histoNoCor, TString startname, Float_t alpha){
 	histSaver->SaveHistogram(hAsymmetricEta2D);
 	//	TString name = "hAsymmetricEtaFinal_";
 	int maxDia =(int)settings->getNDiamonds()+2;
@@ -430,30 +436,78 @@ void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TString st
 		startname.Append(TPlaneProperties::getStringForDetector(det));
 	for ( Int_t dia=-1; histo->GetYaxis()->GetBinCenter(dia)<maxDia; dia++ ){
 		TString histName = startname;
+		if(!startname.Contains("hAsymmetricEtaFinal"))
+			histName.Append(TString::Format("%05d_",(int)(alpha*100000)));
 		if(dia==-1)
-			histName.Append(TString::Format("%05d_All",(int)(alpha*100000)));
+			histName.Append("All");
 		else
-			histName.Append(TString::Format("%05d_Area%d",(int)(alpha*100000),(int)histo->GetYaxis()->GetBinCenter(dia)));
+			histName.Append(TString::Format("Area%d",(int)histo->GetYaxis()->GetBinCenter(dia)));
 
-		TH1F* hist;
-		if(dia==-1)
+		TH1F* hist = 0;
+		TH1F* histNoCor = 0;
+		if(dia==-1){
 			hist = (TH1F*)histo->ProjectionX(histName);
-		else
+			if(histoNoCor) histNoCor =  (TH1F*)histoNoCor->ProjectionX();
+		}
+		else{
 			hist = (TH1F*)histo->ProjectionX(histName,dia,dia);
+			if (histoNoCor) histNoCor =  (TH1F*)histoNoCor->ProjectionX("_px",dia,dia);
+		}
+		if(histoNoCor && alpha!=0) {
+			histNoCor->SetLineColor(kGray);
+//			histNoCor->SetLineStyle(2);
+//			histNoCor->Smooth(4);
+		}
 		//			cout<<"BinCenter of "<<dia<<": "<<histo->GetYaxis()->GetBinCenter(dia)<<endl;
 		TString title = startname;
 		if(dia==-1)
 			title.Append(TString::Format("%02.3f_All",alpha*100));
 		else
-			title.Append(TString::Format("%02.3f_Area%d",alpha*100,(int)histo->GetYaxis()->GetBinCenter(dia)));
+			title.Append(TString::Format("%02.3f Area%d",alpha*100,(int)histo->GetYaxis()->GetBinCenter(dia)));
+		int nbins = 512;
+		TString histName2 = histName;
+		TString title2 = title;
+		histName2.Append("inverted");
+		title.Append(" inverted");
+//		hist->Smooth(4);
+		TH1F* histInverted = new TH1F(histName2,title2,nbins,0,1);
+		for(int bin = 1; bin <= nbins;bin++){
+			histInverted->SetBinContent(bin,hist->GetBinContent(nbins+1-bin));
+		}
+		histInverted->SetLineColor(kBlue-7);
+		if(hist)cout<<hist->GetName()<<": "<<hist<<endl;
+		if(histInverted)cout<<histInverted->GetName()<<": "<<histInverted<<endl;
+		if(histNoCor) cout<<histNoCor->GetName()<<": " << histNoCor<<endl;
 		//			cout<<title<<" "<<hist<<endl;
 		if(hist){
 			hist->SetTitle(title);
-			histSaver->SaveHistogram(hist,false,false,true);
-			delete hist;
+			string name = "c_";
+			name.append(histName);
+			if(hist->GetEntries()>0){
+				TCanvas *c1 = new TCanvas(name.c_str());
+				c1->cd();
+				hist->Draw();
+				if(histInverted && alpha!=0) histInverted->Draw("same");
+				hist->Draw("same");
+				histSaver->SaveCanvas(c1);
+				if(histNoCor&& histInverted && alpha!=0) {
+					c1->Clear();
+					histNoCor->Draw();
+					histInverted->Draw("same");
+					hist->Draw("same");
+					name.insert(1,"1");
+					name.append("_diff");
+					c1->SetName(name.c_str());
+					c1->SetTitle(name.c_str());
+					histSaver->SaveCanvas(c1);
+				}
+			}
+//				histSaver->SaveTwoHistos(name,hist,histInverted);
+			if(hist) delete hist;
+
 		}
-		else
-			cout<<"hist==0 "<<histName<<endl;
+		if(histInverted) delete histInverted;
+		if(histNoCor) delete histNoCor;
 	}
 }
 

@@ -79,7 +79,7 @@ void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
 	}
 	sectionContent<<createTable(vecTable);
 	sectionContent<<"\n\n<br><br>\n\n";
-	sectionContent<<this->putImagesOfAllDetectors(path,"hPulseHeightDistribution_allClusterSizes_");
+	sectionContent<<this->putImagesOfAllDetectors(path,"c_hPulseHeightDistribution_allClusterSizes_");
 	addSection("Pulse Height Distribution",sectionContent.str());
 }
 
