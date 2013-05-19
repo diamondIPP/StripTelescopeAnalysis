@@ -97,6 +97,7 @@ void TSettings::checkSettings(){
 	fidCutsSelection->SetName("standard-FidCuts");
 	if (isStandardSelectionFidCut==true){
 		fidCutsSelection->Reset();
+		cout<<"Standard FidCut: "<<endl;
 		fidCutsSelection->SetName("standard-FidCuts");
 		fidCutsSelection->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_yhigh());
 	}
@@ -435,7 +436,7 @@ void TSettings::LoadSettings(){
 		if(key == "D3Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[7]);
 		if(key == "Dia_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[8]);
 		if(key == "chi2Cut3D") ParseFloat(key,value,chi2Cut3D);
-		if(key == "si_avg_fidcut_xlow") ParseFloat(key,value,si_avg_fidcut_xlow);
+		if(key == "si_avg_fidcut_xlow") {ParseFloat(key,value,si_avg_fidcut_xlow);};
 		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);

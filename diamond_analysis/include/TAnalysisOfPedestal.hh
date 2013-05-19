@@ -24,6 +24,7 @@
 #include <vector>
 #include <deque>
 #include <algorithm>
+#include <set>
 
 #include "TSystem.h"
 #include "TH1F.h"
@@ -169,6 +170,7 @@ private:
 
 	std::vector<Int_t> vecHitOrder[N_DETECTORS];
 	std::vector< std::vector<UInt_t> > diaRawADCvalues; //vector of vector of adc Value (ch, eventNo)
+	std::vector< std::set <UInt_t> > invalidBiggestHitChannels;
 	THTMLPedestal *htmlPedestal;
 };
 

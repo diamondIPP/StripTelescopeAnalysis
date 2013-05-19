@@ -65,7 +65,7 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 		exit(-1);
 	}
 	//	cout<<"GetProjection"<<endl;
-	cout<<"GetProjection"<<endl;
+	if(settings->getVerbosity()>4)cout<<"GetProjection"<<endl;
 	TH1F* hProjection = 0;
 	TString hName = "hAsymmetricEta_";
 	hName.Append(TPlaneProperties::getStringForDetector(det).c_str());
@@ -74,24 +74,24 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 	hTitle.Append(TPlaneProperties::getStringForDetector(det).c_str());
 	hTitle.Append(", #alpha = ");
 	if( TPlaneProperties::isDiamondDetector(det)){
-		cout<<"Diamond Detector"<<endl;
+		if(settings->getVerbosity()>4)cout<<"Diamond Detector"<<endl;
 		int nDias = settings->getNDiamonds();
 		int nDia = settings->getAnalysedDiamond();
-		cout<<"nDias: "<<nDias<<endl;
-		cout<<"nDia: "<<nDia<<endl;
+		if(settings->getVerbosity()>4)cout<<"nDias: "<<nDias<<endl;
+		if(settings->getVerbosity()>4)cout<<"nDia: "<<nDia<<endl;
 		int bin;
 		if(settings->getNDiamonds()!=1){
 			if (true){//settings->getAnalysedDiamond()==TSettings::leftDia||true){//todo
 				bin = hAsymmetricEta2D->GetYaxis()->FindBin(0.0);
-				cout<<"bin:"<<bin<<endl;
+				if(settings->getVerbosity()>4)cout<<"bin:"<<bin<<endl;
 				TString name = hName;//+"_left";//TString::Format("%s_left",hName);
 				name.Append(TString::Format("%06d_left",(int)(TMath::Abs(alpha)*100000)));
-				cout<<"Title: "<<flush;
+				if(settings->getVerbosity()>4)cout<<"Title: "<<flush;
 				hTitle.Append(TString::Format("%02.2f %%, left",alpha*100));
-				cout<<hTitle<<endl;
-				cout<<name<<endl;
+				if(settings->getVerbosity()>4)cout<<hTitle<<endl;
+				if(settings->getVerbosity()>4)cout<<name<<endl;
 				hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(name,bin+1,bin+1);
-				cout<<"lDia:"<<hProjection<<endl;
+				if(settings->getVerbosity()>4)cout<<"lDia:"<<hProjection<<endl;
 			}
 			else if(settings->getAnalysedDiamond()==TSettings::rightDia){//todo
 			}
@@ -103,21 +103,21 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 			hName.Append("all_px");
 			hTitle.Append(TString::Format("%02.2f %%, all",alpha*100));
 			hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(hName);
-			cout<<"1Dia"<<hProjection<<endl;
+			if(settings->getVerbosity()>4)cout<<"1Dia"<<hProjection<<endl;
 		}
 	}
 	else{// is Silicon Detector
-		cout<<"Silicon Detector "<<endl;
+		if(settings->getVerbosity()>4)cout<<"Silicon Detector "<<endl;
 		hName.Append("_px");
 		hTitle.Append(TString::Format("%02.2f %%",alpha*100));
 		hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(hName);
-		cout<<"Sil: "<<hProjection<<endl;
+		if(settings->getVerbosity()>4)cout<<"Sil: "<<hProjection<<endl;
 	}
 	if(hProjection)
 		hProjection->SetTitle(hTitle);
 	else
-		cout<<"hProjection is not Valid."<<endl;
-	cout<<"returning "<<hProjection<<": "<<hProjection->GetTitle()<<" "<<hProjection->GetEntries()<<endl;;
+		if(settings->getVerbosity()>4)cout<<"hProjection is not Valid."<<endl;
+	if(settings->getVerbosity()>4)cout<<"returning "<<hProjection<<": "<<hProjection->GetTitle()<<" "<<hProjection->GetEntries()<<endl;;
 	return hProjection;
 }
 
@@ -143,14 +143,14 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		delete hAsymmetricEta2D;
 		hAsymmetricEta2D=0;
 	}
-	cout<<"hName"<<endl;
+	if(verbosity>4)cout<<"hName"<<endl;
 	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
 	if(hAsymmetricEta2D ==0){
 		cout<<"histo with name: '"<<hName<<"' was not created...."<<endl;//hAsymmetricEta2D<<
 	}
 	while (!valid && nTries < maxTriesAlpha){
-		cout<<"\n\nnew try no. "<<nTries << " / " << maxTriesAlpha <<" "<<hAsymmetricEta2D << " "<<hAsymmetricEta2D->GetName();
-		cout<<" "<<hAsymmetricEta2D->GetEntries()<<endl;
+		if(verbosity>4)cout<<"\n\nnew try no. "<<nTries << " / " << maxTriesAlpha <<" "<<hAsymmetricEta2D << " "<<hAsymmetricEta2D->GetName();
+		if(verbosity>4)cout<<" "<<hAsymmetricEta2D->GetEntries()<<endl;
 		hAsymmetricEta2D->Reset();
 		hAsymmetricEta2D->Clear();
 		TString name = hName;
@@ -168,7 +168,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 			hAsymmetricEta_px=0;
 		}
 		//		cout<<"get Projection"<<endl;
-		cout<<hAsymmetricEta2D<<endl;
+		if(verbosity>4)cout<<hAsymmetricEta2D<<endl;
 		hAsymmetricEta_px = getProjection();
 		//		cout<<"find new alpha"<<endl;
 		int leftHalf = 0;
@@ -181,16 +181,16 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 			rightHalf+=hAsymmetricEta_px->GetBinContent(bin);
 		}
 		mean = hAsymmetricEta_px->GetMean();
-		cout<<"Analysising: "<<hAsymmetricEta_px->GetName()<<endl;
-		cout<<"Asymmetric eta with a charge share of "<<alpha*100<<"%"<<endl;
-		cout<<"nentries: "<<hAsymmetricEta_px->GetEntries()<<endl;
+		if(verbosity>4)cout<<"Analysising: "<<hAsymmetricEta_px->GetName()<<endl;
+		if(verbosity>4)cout<<"Asymmetric eta with a charge share of "<<alpha*100<<"%"<<endl;
+		if(verbosity>4)cout<<"nentries: "<<hAsymmetricEta_px->GetEntries()<<endl;
 		Float_t skewness = hAsymmetricEta_px->GetSkewness();
-		cout<<"skewness*100: "<<skewness*100<<endl;
-		cout<<"left: "<<leftHalf<<"\tright: "<<rightHalf<<" "<<(Float_t)leftHalf/(Float_t)rightHalf*100<<endl;
+		if(verbosity>4)cout<<"skewness*100: "<<skewness*100<<endl;
+		if(verbosity>4)cout<<"left: "<<leftHalf<<"\tright: "<<rightHalf<<" "<<(Float_t)leftHalf/(Float_t)rightHalf*100<<endl;
 
 		valid = TMath::Abs(mean-.5)<.005;
 		valid = valid || TMath::Abs(skewness)<0.005;
-		cout<<"Mean "<<mean*100<<" "<<valid<<endl;
+		if(verbosity>4)cout<<"Mean "<<mean*100<<" "<<valid<<endl;
 		pm = FindPeaks(hAsymmetricEta_px,2);
 		Float_t p1,p2;
 		if(pm){
@@ -202,16 +202,16 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 					p1 = peakPos;
 				else if(i==1)
 					p2 = peakPos;
-				cout<<"\t"<<i<<"\t"<<peakPos*100.<<": "<<pm->GetY()[i]<<"\n";
+				if(verbosity>4)cout<<"\t"<<i<<"\t"<<peakPos*100.<<": "<<pm->GetY()[i]<<"\n";
 			}
 			if (pm->GetN()==2){
-				cout<< (TMath::Abs(p1/p2-1)*100);
+				if(verbosity>4)cout<< (TMath::Abs(p1/p2-1)*100);
 				valid = valid && TMath::Abs(p1/p2-1)*100<8;
-				cout<<" "<<valid;
+				if(verbosity>4)cout<<" "<<valid;
 			}
 			else
 				valid=false;
-			cout<<" "<<valid<<"\n";
+			if(verbosity>4)cout<<" "<<valid<<"\n";
 		}
 		else
 			valid = false;
@@ -263,6 +263,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		}
 		nTries++;
 	}
+
 	if (true)
 	{//convergence plot
 		TGraph *gr1 = new TGraph(vecTries.size(),&vecTries[0],&alphaValues[0]);
@@ -308,7 +309,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		histSaver->SaveCanvas(c2);
 		delete c2;
 	}
-
+	cout<<"Convergered after "<<nTries<<"/"<<maxTriesAlpha<<" best alpha: "<<alpha<<endl;
 	hName ="hAsymmetricEta_";
 	hName.Append(TPlaneProperties::getStringForDetector(det).c_str());
 	hName.Append(TString::Format("%05d",(int)(TMath::Abs(alpha)*10000)));

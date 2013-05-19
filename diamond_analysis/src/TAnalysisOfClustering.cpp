@@ -21,7 +21,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	htmlClus= new THTMLCluster(settings);
 
 	settings->goToClusterTreeDir();
-	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),runNumber);
+	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings);
 	histSaver=new HistogrammSaver();
 
 
@@ -35,7 +35,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	verbosity=0;
 	initialiseHistos();
 	cout<<"end initialise"<<endl;
-	settings=0;
+//	settings=0;
 	vecVecClusters.resize(TPlaneProperties::getNDetectors());
 
 	nMaxClusters = 40000;

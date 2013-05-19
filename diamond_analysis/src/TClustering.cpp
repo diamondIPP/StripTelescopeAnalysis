@@ -42,9 +42,9 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 }
 
 TClustering::~TClustering() {
-	cout<<"Invalid readouts: "<<nInvalidReadout<<endl;
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
+		cout<<"Invalid readouts: "<<nInvalidReadout<<endl;
 		if(verbosity)cout<<"CLOSING TREE"<<endl;
 		if(verbosity)cout<<"pedestalTree"<<" "<<settings->getPedestalTreeFilePath()<<" "<<filepath.str().c_str()<<endl;
 		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
@@ -138,7 +138,7 @@ void TClustering::clusterEvent()
 		cout<<endl;
 	}
 	if(pEvent->hasInvalidReadout()){
-		cout<<nEvent<<": InvalidReadout"<<endl;
+		if(verbosity>4)cout<<nEvent<<": InvalidReadout"<<endl;
 		nInvalidReadout++;
 	}
 

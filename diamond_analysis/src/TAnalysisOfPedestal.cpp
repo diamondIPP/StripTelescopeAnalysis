@@ -9,12 +9,14 @@
 
 #include "../include/TAnalysisOfPedestal.hh"
 using namespace std;
-TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
+TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* newSettings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*********TAnalysisOfPedestal::TAnalysisOfPedestal*****"<<endl;
 	cout<<"**********************************************************"<<endl;
-	if(settings==0)
+	if(newSettings==0)
 		exit(0);
+
+	this->settings=newSettings;
 	res=0;
 	htmlPedestal= new THTMLPedestal(settings);
 	sys = gSystem;
@@ -23,7 +25,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	sys->cd(settings->getAbsoluteOuputPath().c_str());
 	settings->goToPedestalTreeDir();
 
-	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings->getRunNumber());
+	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings);//->getRunNumber());
 	histSaver=new HistogrammSaver();
 	histSaver->SetOptStat("ormen");
 	histSaver->SetOptFit(111);
@@ -35,7 +37,6 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	htmlPedestal->setFileGeneratingPath(sys->pwd());
 	settings->goToPedestalTreeDir();
 	initialiseHistos();
-	this->settings=settings;
 	cout<<"end initialise"<<endl;
 
 	pedestalMeanValue.resize(TPlaneProperties::getNDetectors());
@@ -47,7 +48,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 		nPedestalHits.at(det).resize(TPlaneProperties::getNChannels(det),0);
 	}
 	this->diaRawADCvalues.resize(TPlaneProperties::getNChannelsDiamond(),std::vector<UInt_t>());
-
+	this->invalidBiggestHitChannels.resize(TPlaneProperties::getNDetectors());
 	verbosity = 0;
 
 	adcValues.clear();
@@ -57,6 +58,15 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
+	cout<<"Invalid SNR for Biggest Channel can be found in "<<endl;
+	for(UInt_t det = 0; det < invalidBiggestHitChannels.size(); det++){
+		cout<<"Detector: "<<det<<", endries: "<<invalidBiggestHitChannels[det].size()<<"\t{"<<flush;
+		std::set<UInt_t>::iterator it;
+		for (it=invalidBiggestHitChannels[det].begin(); it!=invalidBiggestHitChannels[det].end(); ++it)
+			cout<<setw(3)<<*it<<",";
+		cout<<"}"<<endl;
+
+	}
 	htmlPedestal->createPageContent();
 	//	htmlPedestal->createPedestalDistribution();
 	htmlPedestal->generateHTMLFile();
@@ -283,7 +293,7 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 		}
 		if(vecBiggestAdjacentSignal[det].back()>vecBiggestSignal[det].back()&&false)
 			cout<<setw(5)<<nEvent<<" "<<det<<" "<<CMN_corrected<<" "<<setw(3)<<vecBiggestHitChannel[det].back()<<":"<<vecBiggestSignal[det].back()<<":"<<vecBiggestSignalInSigma[det].back()
-				<<"\t"<<setw(3)<<vecBiggestAdjacentHitChannel[det].back()<<":"<<vecBiggestAdjacentSignal[det].back()<<":"<<vecBiggestAdjacentSignalInSigma[det].back()<<endl;
+			<<"\t"<<setw(3)<<vecBiggestAdjacentHitChannel[det].back()<<":"<<vecBiggestAdjacentSignal[det].back()<<":"<<vecBiggestAdjacentSignalInSigma[det].back()<<endl;
 		hHitOrderMap[det]->Fill(hitOrder);
 		hBiggestHitChannelMap[det]->Fill(bigHit);
 	}
@@ -621,7 +631,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					UInt_t baSNRCMN = vecBiggestAdjacentSignalInSigmaCMN[det].size();
 					if(bhc!=bhcCMN||bhcCMN!=bSNR||bSNR!=bSNRCMN||bSNRCMN!=bahc||bahc!=bahcCMN||bahcCMN!=baSNR||baSNR!=baSNRCMN)
 						cout<<"Vector Sizes do NOT AGREE: "<<bhc<<" "<<bhcCMN<<" "<<bSNR<<" "<<bSNRCMN<<" "<<bahc<<" "<<bahcCMN<<" "<<baSNR
-							<<" "<<baSNRCMN<<endl;
+						<<" "<<baSNRCMN<<endl;
 					int len = 4;
 					UInt_t minArrayCMN[] = {bhcCMN,bSNRCMN,bahcCMN,baSNRCMN};
 					UInt_t minArray[] = {bhc,bSNR,bahc,baSNR};
@@ -647,7 +657,10 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 								Int_t biggestCh  = vecBiggestHitChannel[det].at(i);
 								Int_t adjacentCh = vecBiggestAdjacentHitChannel[det].at(i);
 								if(biggestSNR<adjacentSNR){
-									cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
+									if(TMath::Abs(adjacentSNR/biggestSNR) > 1.05){
+										cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
+										invalidBiggestHitChannels.at(det).insert(biggestCh);
+									}
 								}
 
 								else
@@ -931,9 +944,9 @@ void TAnalysisOfPedestal::saveHistos(){
 		}
 	}
 	if(verbosity){
-	cout<<"hFitX:"<<hDiaAllAdcNoise<<"\t"<<flush;
-	cout<<"Mean: "<<hDiaAllAdcNoise->GetMean()<<"\t"<<flush;
-	cout<<"'RMS': "<<hDiaAllAdcNoise->GetRMS()<<"\t"<<flush;
+		cout<<"hFitX:"<<hDiaAllAdcNoise<<"\t"<<flush;
+		cout<<"Mean: "<<hDiaAllAdcNoise->GetMean()<<"\t"<<flush;
+		cout<<"'RMS': "<<hDiaAllAdcNoise->GetRMS()<<"\t"<<flush;
 	}
 	TF1 histofitx("histofitx","gaus",hDiaAllAdcNoise->GetMean()-2*hDiaAllAdcNoise->GetRMS(),hDiaAllAdcNoise->GetMean()+2*hDiaAllAdcNoise->GetRMS());
 	histofitx.SetLineColor(kBlue);
