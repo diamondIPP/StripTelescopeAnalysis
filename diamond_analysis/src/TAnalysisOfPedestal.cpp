@@ -658,8 +658,10 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 								Int_t adjacentCh = vecBiggestAdjacentHitChannel[det].at(i);
 								if(biggestSNR<adjacentSNR){
 									if(TMath::Abs(adjacentSNR/biggestSNR) > 1.05){
-										cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
-										invalidBiggestHitChannels.at(det).insert(biggestCh);
+										if(!settings->isDet_channel_screened(det,biggestCh)&&!settings->isDet_channel_screened(det,adjacentCh)){
+											cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
+											invalidBiggestHitChannels.at(det).insert(biggestCh);
+										}
 									}
 								}
 
@@ -1172,7 +1174,7 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 	if(TPlaneProperties::getDetDiamond()==det){
 		diaRawADCvalues.at(ch).push_back(adc);
 	}
-	if(det==TPlaneProperties::getNDetectors()-1 && ch == TPlaneProperties::getNChannels(det) -1){
+	if(det==TPlaneProperties::getNDetectors()-1 && ch <= TPlaneProperties::getNChannels(det) -1){
 		vecAvrgPed.push_back(sumPed/(float)nSumPed);
 		vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
 		vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);

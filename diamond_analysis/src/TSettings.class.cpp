@@ -224,6 +224,15 @@ std::string TSettings::getSelectionTreeFilePath()
 	return path.str();
 }
 
+std::string TSettings::getCrossTalkFactorsFileName(){
+	string hName = this->getAbsoluteOuputPath(false);
+	hName.append(TString::Format("crossTalkCorrectionFactors.%d",runNumber));
+	if(isSpecialAnalysis())
+		hName.append("-"+getRunDescription());
+	hName.append(".txt");
+	return hName;
+}
+
 void TSettings::goToDir(std::string dir){
 	if(this->getVerbosity()>3)cout<<"\ncurrent Dir: "<<sys->pwd()<<endl;
 	if(this->getVerbosity()>3)cout<<"goTo Dir: "<<dir<<endl;

@@ -23,6 +23,7 @@
 #include "TList.h"
 #include "TPaveStats.h"
 #include "TMultiGraph.h"
+#include "TCutG.h"
 
 #include "TSettings.class.hh"
 #include "TCluster.hh"
@@ -49,12 +50,17 @@ public:
 private:
 	UInt_t det;
 	TH2F* hAsymmetricEta2D;
-	void FillEtaDistribution(TH2F* hAsymmetricEta);
+	bool checkBadConvergence(UInt_t nTries);
+	void createConvergencePlot();
+	bool updateAlpha(Float_t skewness, Float_t mean);
+	Float_t checkConvergence(TH1F* histo,UInt_t nTries);
+	void FillEtaDistribution(TH2F* hAsymmetricEta,Float_t correctionAlpha,TString hName);
 	TPolyMarker* FindPeaks(TH1F* histo, int nPeaks, Float_t sigma=4, TString option="Markov", Float_t threshold=.2);
 	TPolyMarker* FindPeaks(UInt_t nTries,TH1F* histo, int nPeaks, Float_t sigma=4, TString option="Markov", Float_t threshold=.2);
 	TH1F* getProjection();
 	vector <TCluster> clusters;
 	Float_t alpha;
+	Float_t bestAlpha;
 	TSettings *settings;
 	HistogrammSaver *histSaver;
 	UInt_t maxTriesPeakfinding;
@@ -65,6 +71,7 @@ private:
 	vector <Float_t> skewnesses;
 	vector <Float_t> rightLefts;
 	vector <Float_t> vecTries;
+	UInt_t bestTry;
 	int verbosity;
 };
 

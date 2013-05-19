@@ -39,7 +39,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	vecVecClusters.resize(TPlaneProperties::getNDetectors());
 
 	nMaxClusters = 40000;
-	nInvalidReadout =0;
+	nInvalidReadout = 0;
 }
 
 TAnalysisOfClustering::~TAnalysisOfClustering() {
@@ -1173,17 +1173,15 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
 		}
 	}
 	cout<<"****\n****\n FINAL RESULTS: "<<endl;
-	string fileName;
-	fileName =TString::Format("crossTalkCorrectionFactors.%d.txt",settings->getRunNumber());
-	std::ofstream ofs (fileName.c_str(), std::ofstream::out);
+	std::ofstream ofs (settings->getCrossTalkFactorsFileName().c_str(), std::ofstream::out);
 	for(UInt_t det = 0 ; det < vecAlphas.size();det ++){
 
 		cout<<det<<": "<< TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps" ;
 		ofs<<det<<": "<<  TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps";
 
-		if(det<vecMPV.size()){
-			cout<<TString::Format("\tMean: %4.1f, Noise: %2.2f",vecMPV.at(det),vecWidth.at(det))<<endl;
-			ofs<<TString::Format("\tMean: %4.1f, Noise: %2.2f",vecMPV.at(det),vecWidth.at(det))<<endl;
+		if(det<vecPHMeans.size()){
+			cout<<TString::Format("\tMean: %4.1f, Noise: %2.2f",vecPHMeans.at(det),vecWidth.at(det))<<endl;
+			ofs<<TString::Format("\tMean: %4.1f, Noise: %2.2f",vecPHMeans.at(det),vecWidth.at(det))<<endl;
 		}
 		else{
 			cout<<endl;
@@ -1261,7 +1259,6 @@ void TAnalysisOfClustering::etaInvestigation(){
 
 void TAnalysisOfClustering::savePHHistos()
 {
-
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		histSaver->SaveHistogram(hPHDistribution[det]);
 		vecClusterSize.clear();

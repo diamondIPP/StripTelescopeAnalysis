@@ -53,7 +53,7 @@ public:
 	std::string getAlignmentFilePath(TSettings::alignmentMode mode = TSettings::normalMode);
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
-
+	std::string getCrossTalkFactorsFileName();
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
 	std::string getEtaDistributionPath(Int_t step=-1);
     std::string get3dDiamondTreeFilePath();
