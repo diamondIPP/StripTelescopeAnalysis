@@ -475,10 +475,10 @@ void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TH2F* hist
 			histInverted->SetBinContent(bin,hist->GetBinContent(nbins+1-bin));
 		}
 		histInverted->SetLineColor(kBlue-7);
-		if(hist)cout<<hist->GetName()<<": "<<hist<<endl;
-		if(histInverted)cout<<histInverted->GetName()<<": "<<histInverted<<endl;
-		if(histNoCor) cout<<histNoCor->GetName()<<": " << histNoCor<<endl;
-		//			cout<<title<<" "<<hist<<endl;
+//		if(hist)cout<<hist->GetName()<<": "<<hist<<endl;
+//		if(histInverted)cout<<histInverted->GetName()<<": "<<histInverted<<endl;
+//		if(histNoCor) cout<<histNoCor->GetName()<<": " << histNoCor<<endl;
+//		//			cout<<title<<" "<<hist<<endl;
 		if(hist){
 			hist->SetTitle(title);
 			string name = "c_";
@@ -491,14 +491,19 @@ void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TH2F* hist
 				hist->Draw("same");
 				histSaver->SaveCanvas(c1);
 				if(histNoCor&& histInverted && alpha!=0) {
-					c1->Clear();
-					histNoCor->Draw();
-					histInverted->Draw("same");
-					hist->Draw("same");
 					name.insert(1,"1");
 					name.append("_diff");
+					c1->Clear();
 					c1->SetName(name.c_str());
 					c1->SetTitle(name.c_str());
+					name = "stack_";
+					name.append(histName);
+					THStack *stack = new THStack(name.c_str(),hist->GetTitle());
+					stack->Add(histNoCor,"");//->Draw("AXIS");
+					stack->Add(histInverted,"");//->Draw("same");
+					stack->Add(hist,"");//->Draw("same");
+					stack->Draw("nostack");
+//					histNoCor->Draw("same");
 					histSaver->SaveCanvas(c1);
 				}
 			}

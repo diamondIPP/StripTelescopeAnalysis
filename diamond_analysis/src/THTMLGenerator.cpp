@@ -237,24 +237,24 @@ std::string THTMLGenerator::floatToString(Float_t value, UInt_t precision)
 }
 
 
-std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string name, std::string type,int percentage){
-	cout<<"add all images for "<<name<<" at path: "<<path<<endl;
+std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string name, std::string ending, std::string type,int percentage){
+	cout<<"add all images for "<<name<<"DXX"<<ending<<" at path: "<<path<<endl;
 	stringstream output;
 	output<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name2;
-		name2<<name<<TPlaneProperties::getStringForDetector(det);
+		name2<<name<<TPlaneProperties::getStringForDetector(det)<<ending;
 		output<<putImage(path,name2.str());
 	}
 	output<<"\n<br\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name2;
-		name2<<name<<TPlaneProperties::getStringForDetector(det);
+		name2<<name<<TPlaneProperties::getStringForDetector(det)<<ending;
 		output<<putImage(path,name2.str());
 	}
 	output<<"\n<br>\n\t";
 	stringstream name2;
-	name2<<name<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name2<<name<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond())<<ending;
 	output<<putImage(path,name2.str());
 	return (output.str());
 }

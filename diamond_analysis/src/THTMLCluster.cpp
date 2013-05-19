@@ -60,6 +60,13 @@ void THTMLCluster::createEtaDistributions()
 	sectionContent.str("");
 	sectionContent<<putImagesOfAllDetectors(path,"hEtaIntegral_");
 	this->addSection("Eta Integrals",sectionContent.str());
+
+
+	//c_hAsymmetricEtaFinal_
+	sectionContent.clear();
+	sectionContent.str("");
+	sectionContent<<putImagesOfAllDetectors(path,"c_hAsymmetricEtaFinal_","All");
+	this->addSection("Cross Talk Corrected Eta Distributions",sectionContent.str());
 }
 
 void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)

@@ -24,6 +24,7 @@
 #include "TPaveStats.h"
 #include "TMultiGraph.h"
 #include "TCutG.h"
+#include "THStack.h"
 
 #include "TSettings.class.hh"
 #include "TCluster.hh"
