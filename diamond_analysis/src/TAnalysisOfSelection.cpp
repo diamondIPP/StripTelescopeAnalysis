@@ -715,7 +715,10 @@ void TAnalysisOfSelection::saveHistos()
 	TF1* gausFit=0;
 
 
-	Float_t width,MP,area,gWidth;
+	Float_t width=0;
+	Float_t MP=0;
+	Float_t area=0;
+	Float_t gWidth=0;
 	Float_t xmax,xmin;
 
 	if (histo){

@@ -321,7 +321,7 @@ TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 	Float_t yLow = fidCuts.at(nFidCut)->GetYLow();
 	Float_t yHigh = fidCuts.at(nFidCut)->GetYHigh();
 	cout<<"getting fitucial Area for "<<nFidCut<<": ";
-	cout<<TString::Format("X: %d-%d, Y: %d-%d",xLow,xHigh,yLow,yHigh);
+	cout<<TString::Format("X: %.1f-%.1f, Y: %.1f-%.1f",xLow,xHigh,yLow,yHigh);
 	TString name = TString::Format("fidCut_%d",nFidCut);
 	TCutG * pt = new TCutG(name,5);
 	pt->SetPoint(0,xLow,yLow);

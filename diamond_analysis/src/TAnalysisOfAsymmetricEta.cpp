@@ -192,7 +192,8 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		valid = valid || TMath::Abs(skewness)<0.005;
 		if(verbosity>4)cout<<"Mean "<<mean*100<<" "<<valid<<endl;
 		pm = FindPeaks(hAsymmetricEta_px,2);
-		Float_t p1,p2;
+		Float_t p1=0;
+		Float_t p2=0;
 		if(pm){
 			for (int i=0;i< pm->GetN();i++){
 				Float_t peakPos = pm->GetX()[i];

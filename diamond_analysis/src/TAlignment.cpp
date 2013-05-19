@@ -100,7 +100,7 @@ void TAlignment::setSettings(TSettings* settings) {
  * initialise the variable align and set the Z Offsets
  */
 void TAlignment::initialiseDetectorAlignment(TSettings::alignmentMode mode) {
-	if (align == NULL & mode == TSettings::transparentMode){
+	if (align == NULL && mode == TSettings::transparentMode){
 		cout<<"Loading transparent analysis mode..."<<flush;
 		loadDetectorAlignment(mode);
 	}
@@ -459,7 +459,7 @@ void TAlignment::doPreAlignment(){
 		xOff3 = TMath::Abs(align->GetLastXOffset(3));
 		yOff3 = TMath::Abs(align->GetLastYOffset(3));
 		xPhiOff3  = TMath::Abs(align->GetLastPhiXOffset(3));
-		xPhiOff3 = TMath::Abs(align->GetLastPhiYOffset(3));
+		yPhiOff3 = TMath::Abs(align->GetLastPhiYOffset(3));
 		xAlignment3 = xOff3<settings->getAlignmentPrecisionOffset() && xPhiOff3<settings->getAlignmentPrecisionAngle();
 		yAlignment3 = yOff3<settings->getAlignmentPrecisionOffset() && yPhiOff3<settings->getAlignmentPrecisionAngle();
 		nTry++;
@@ -1493,13 +1493,14 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		}
 		histName << "_graph";
 		TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecYPred);
-		if(&graph==0) cerr<<"Could not create DipendencyGraph vecXDelta,vecYPred"<<endl;
-		else {
-			graph.Draw("APL");
-			graph.GetXaxis()->SetTitle("predicted Y position / #mum");
-			graph.GetYaxis()->SetTitle("delta X / #mum");
-			histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
-		}
+		//		if(&graph==0) cerr<<"Could not create DipendencyGraph vecXDelta,vecYPred"<<endl;
+		//		else
+		//		{
+		graph.Draw("APL");
+		graph.GetXaxis()->SetTitle("predicted Y position / #mum");
+		graph.GetYaxis()->SetTitle("delta X / #mum");
+		histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+		//		}
 	}
 
 	if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) && subjectPlane == TPlaneProperties::getDiamondPlane()) {    //ScatterPlot DeltaX vs Xpred
@@ -1517,14 +1518,14 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		}
 		histName << "_graph";
 		TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXPred);
-		if(&graph==0)
-			cerr<<"Could not CreateDipendencyHisto: vecXDelta,vecXPred"<<endl;
-		else{
-			graph.Draw("APL");
-			graph.GetXaxis()->SetTitle("predicted X position / #mum");
-			graph.GetYaxis()->SetTitle("delta X / #mum");
-			histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
-		}
+//		if(&graph==0)
+//			cerr<<"Could not CreateDipendencyHisto: vecXDelta,vecXPred"<<endl;
+		//		else{
+		graph.Draw("APL");
+		graph.GetXaxis()->SetTitle("predicted X position / #mum");
+		graph.GetYaxis()->SetTitle("delta X / #mum");
+		histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+		//		}
 	}
 
 	if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) && subjectPlane == TPlaneProperties::getDiamondPlane()) {    //ScatterPlot DeltaX vs XMeas
@@ -1542,14 +1543,14 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		}
 		histName << "_graph";
 		TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecXDelta, vecXMeasured);
-		if(&graph==0)
-			cerr<<"Could not CreateDipendencyGraph: "<<histName.str()<<endl;
-		else{
-			graph.Draw("APL");
-			graph.GetXaxis()->SetTitle("measured X  / #mum");
-			graph.GetYaxis()->SetTitle("delta X / #mum");
-			histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
-		}
+//		if(&graph==0)
+//			cerr<<"Could not CreateDipendencyGraph: "<<histName.str()<<endl;
+//		else{
+		graph.Draw("APL");
+		graph.GetXaxis()->SetTitle("measured X  / #mum");
+		graph.GetYaxis()->SetTitle("delta X / #mum");
+		histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+//		}
 	}
 	Float_t yPredictionSigma=0;
 	if (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR) {    																  //DistributionPlot DeltaX
@@ -1643,14 +1644,14 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		}
 		histName << "_graph";
 		TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecYDelta, vecXPred);
-		if(&graph==0)
-			cerr<<"Could not CreateDipendencyGraph "<<histName.str()<<endl;
-		else{
-			graph.Draw("APL");
-			graph.GetXaxis()->SetTitle("X Predicted / #mum");
-			graph.GetYaxis()->SetTitle("Delta Y / #mum");
-			histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
-		}
+//		if(&graph==0)
+//			cerr<<"Could not CreateDipendencyGraph "<<histName.str()<<endl;
+		//		else{
+		graph.Draw("APL");
+		graph.GetXaxis()->SetTitle("X Predicted / #mum");
+		graph.GetYaxis()->SetTitle("Delta Y / #mum");
+		histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+		//		}
 		if(verbosity>3)cout<<" DONE"<<endl;
 	}
 

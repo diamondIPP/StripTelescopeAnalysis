@@ -25,7 +25,7 @@ void TDiamondPattern::loadStandardPitchWidthSettings() {
 	bLoadedStandardPitchWidthSettings=true;
 }
 
-std::pair<Int_t,Int_t> TDiamondPattern::getInterval(Int_t pattern){
+std::pair<Int_t,Int_t> TDiamondPattern::getInterval(UInt_t pattern){
 	Int_t first = -1;
 	Int_t last = -1;
 	if(pattern >= 0 && pattern<getNIntervals()){

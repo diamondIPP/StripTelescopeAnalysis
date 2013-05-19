@@ -44,7 +44,7 @@ public:
 	void showPatterns();
 	UInt_t size(){return getNPatterns();}
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
-	std::pair<Int_t,Int_t> getInterval(Int_t pattern);
+	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);
 private:
 	UInt_t getNIntervals(){return nChannelsOfInterval.size();}
 	Float_t getChannelToMetric(UInt_t ch);

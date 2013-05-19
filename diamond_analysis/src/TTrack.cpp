@@ -378,7 +378,7 @@ vector<Float_t> TTrack::getSiYPositions() {
 
 	vector<Float_t> yPositions;
 	if(event==NULL)return yPositions;
-	for (int plane; plane < 4; plane++) {
+	for (int plane=0; plane < 4; plane++) {
 		yPositions.push_back(this->getYPositionMetric(plane));
 	}
 	return yPositions;

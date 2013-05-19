@@ -209,7 +209,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	//create Cluster
 	int seedSigma=settings->getClusterSeedFactor(det,ch);
 	int hitSigma=settings->getClusterHitFactor(det,ch);
-	bool isScreened;
+	bool isScreened=false;
 	int maxChannel=TPlaneProperties::getNChannels(det);
 
 	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel,cmNoise);

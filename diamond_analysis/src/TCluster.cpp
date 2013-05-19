@@ -319,7 +319,8 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 		adc = Int_t((Float_t)adc + sharedCharge+.5);
 
 //		if(alpha)cout<<"\tnewAdc: "<<adc <<" ==>\t"<<adc-oldAdc<<endl;
-		sharedCharge = (adc - pedMean)*alpha;
+//		sharedCharge = (adc - pedMean)*alpha;
+		sharedCharge = (oldAdc - pedMean)*alpha;
 
 		bool isSaturated = this->getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det);
 		newClus.addChannel(this->getChannel(clPos),this->getPedestalMean(clPos),this->getPedestalSigma(clPos),
@@ -455,7 +456,7 @@ void TCluster::setSeedSigma(int seedSigma)
 bool TCluster::isScreened()
 {
 	bool isOneChannelScreened=false;
-	for(UInt_t cl;cl<clusterChannelScreened.size();cl++)
+	for(UInt_t cl = 0;cl<clusterChannelScreened.size();cl++)
 		isOneChannelScreened+=isScreened(cl);
 	isOneChannelScreened+=((this->getSmallestChannelNumber()==0)||this->getHighestChannelNumber()==nChannels-1);
 	return isOneChannelScreened;
@@ -598,7 +599,7 @@ UInt_t TCluster::getHighestChannelNumber()
 
 Float_t TCluster::getHighestSignal(){
 	Float_t signal=0;
-	UInt_t highestSignalClusterPos;
+	UInt_t highestSignalClusterPos = -1;
 	UInt_t highestSignalChannelPos;
 	for(UInt_t clPos=0;clPos<checkClusterForSize();clPos++){
 		if(getSignal(clPos)>signal){
