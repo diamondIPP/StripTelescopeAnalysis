@@ -84,15 +84,15 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 	hTitle.Append(TPlaneProperties::getStringForDetector(det).c_str());
 	hTitle.Append(", #alpha = ");
 	if( TPlaneProperties::isDiamondDetector(det)){
-		if(settings->getVerbosity()>4)cout<<"Diamond Detector"<<endl;
+		if(verbosity>4)cout<<"Diamond Detector"<<endl;
 		int nDias = settings->getNDiamonds();
 		int nDia = settings->getAnalysedDiamond();
 		if(settings->getVerbosity()>4)cout<<"nDias: "<<nDias<<endl;
 		if(settings->getVerbosity()>4)cout<<"nDia: "<<nDia<<endl;
 		int bin;
 		if(settings->getNDiamonds()!=1){
-			if (true){//settings->getAnalysedDiamond()==TSettings::leftDia||true){//todo
-				bin = hAsymmetricEta2D->GetYaxis()->FindBin(0.0);
+			if (settings->getAnalysedDiamond()==TSettings::leftDia||true){//todo
+				bin = hAsymmetricEta2D->GetYaxis()->FindBin(1.0);
 				if(settings->getVerbosity()>4)cout<<"bin:"<<bin<<endl;
 				TString name = hName;//+"_left";//TString::Format("%s_left",hName);
 				name.Append(TString::Format("%06d_left",(int)(TMath::Abs(alpha)*100000)));
@@ -100,12 +100,32 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 				hTitle.Append(TString::Format("%02.2f %%, left",alpha*100));
 				if(settings->getVerbosity()>4)cout<<hTitle<<endl;
 				if(settings->getVerbosity()>4)cout<<name<<endl;
-				hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(name,bin+1,bin+1);
+				hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(name,bin,bin);
 				if(settings->getVerbosity()>4)cout<<"lDia:"<<hProjection<<endl;
 			}
 			else if(settings->getAnalysedDiamond()==TSettings::rightDia){//todo
+				bin = hAsymmetricEta2D->GetYaxis()->FindBin(2.0);
+				if(settings->getVerbosity()>4)cout<<"bin:"<<bin<<endl;
+				TString name = hName;//+"_left";//TString::Format("%s_left",hName);
+				name.Append(TString::Format("%06d_right",(int)(TMath::Abs(alpha)*100000)));
+				if(settings->getVerbosity()>4)cout<<"Title: "<<flush;
+				hTitle.Append(TString::Format("%02.2f %%, right",alpha*100));
+				if(settings->getVerbosity()>4)cout<<hTitle<<endl;
+				if(settings->getVerbosity()>4)cout<<name<<endl;
+				hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(name,bin,bin);
+				if(settings->getVerbosity()>4)cout<<"rDia:"<<hProjection<<endl;
 			}
 			else {//todo
+				bin = hAsymmetricEta2D->GetYaxis()->FindBin(1.0);
+				if(settings->getVerbosity()>4)cout<<"bin:"<<bin<<endl;
+				TString name = hName;//+"_left";//TString::Format("%s_left",hName);
+				name.Append(TString::Format("%06d_all",(int)(TMath::Abs(alpha)*100000)));
+				if(settings->getVerbosity()>4)cout<<"Title: "<<flush;
+				hTitle.Append(TString::Format("%02.2f %%, all",alpha*100));
+				if(settings->getVerbosity()>4)cout<<hTitle<<endl;
+				if(settings->getVerbosity()>4)cout<<name<<endl;
+				hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(name);//,bin,bin);
+				if(settings->getVerbosity()>4)cout<<"lDia:"<<hProjection<<endl;
 
 			}
 		}
