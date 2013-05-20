@@ -245,7 +245,7 @@ void LoopOverTree(TTree* inputTree,TTree* outputTree){
 			PedestalMeanOld[det][ch]=0;
 	setBranchAdresses(inputTree);
 	UInt_t nEntries = inputTree->GetEntries();
-	char t; cin>>t;
+//	char t; cin>>t;
 	for (int i=0;i<inputTree->GetEntries();i++){
 		showStatusBar(i,nEntries,100,0,0);
 		inputTree->GetEntry(i);
