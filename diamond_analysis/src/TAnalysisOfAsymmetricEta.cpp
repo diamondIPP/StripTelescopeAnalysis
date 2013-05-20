@@ -19,7 +19,7 @@ TAnalysisOfAsymmetricEta::TAnalysisOfAsymmetricEta(TSettings *settings) {
 	histSaver=new HistogrammSaver();
 	histSaver->SetVerbosity(0);
 	maxTriesPeakfinding = 30;
-	maxTriesAlpha = 60;
+	maxTriesAlpha = 120;
 	settings->goToClusterAnalysisDir();
 	histSaver->SetPlotsPath(settings->getClusterAnalysisDir().c_str());
 	histSaver->SetRunNumber(settings->getRunNumber());
@@ -91,7 +91,8 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 		if(settings->getVerbosity()>4)cout<<"nDia: "<<nDia<<endl;
 		int bin;
 		if(settings->getNDiamonds()!=1){
-			if (settings->getAnalysedDiamond()==TSettings::leftDia||true){//todo
+			if (settings->getAnalysedDiamond()==TSettings::leftDia){//todo
+			//	cout<<"LEFT DIAMOND ANALYSED..."<<endl;
 				bin = hAsymmetricEta2D->GetYaxis()->FindBin(1.0);
 				if(settings->getVerbosity()>4)cout<<"bin:"<<bin<<endl;
 				TString name = hName;//+"_left";//TString::Format("%s_left",hName);
@@ -113,6 +114,8 @@ TH1F* TAnalysisOfAsymmetricEta::getProjection(){
 				if(settings->getVerbosity()>4)cout<<hTitle<<endl;
 				if(settings->getVerbosity()>4)cout<<name<<endl;
 				hProjection = (TH1F*) hAsymmetricEta2D->ProjectionX(name,bin,bin);
+				if(alpha==0)
+					histSaver->SaveHistogram(hProjection);
 				if(settings->getVerbosity()>4)cout<<"rDia:"<<hProjection<<endl;
 			}
 			else {//todo
@@ -320,7 +323,7 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
 
 bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
 
-	if (alpha ==0){
+	if (alpha == 0){
 		if(det == 6 || det ==2){
 			if(mean- .5>0)
 				alpha = -.01;
@@ -335,7 +338,7 @@ bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
 		}
 	}
 	else {
-		if(det == 6 || det ==2)
+		if(det == 6 || det ==2) 
 			skewness*=-1;
 		//				if( TMath::Abs(mean-.5)>.05){
 			//					if(alpha<0)
