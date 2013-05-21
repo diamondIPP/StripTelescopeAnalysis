@@ -485,7 +485,7 @@ void TSettings::LoadSettings(){
 		if(key == "pitchWidthDia") Parse(key,value,pitchWidthDia);
 		if(key == "pitchWidthSil") Parse(key,value,pitchWidthSil);
 		if(key == "diamondPattern") ParsePattern(key,value);
-		if(key == "TransparenAlignment") ParseBool("TransparenAlignment",value,bTransparenAlignment);
+		if(key == "TransparentAlignment") ParseBool(key,value,bTransparentAlignment);
 		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -616,7 +616,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	//default clustering settings
 	snr_plots_enable = 0;
-	bTransparenAlignment=false;
+	bTransparentAlignment=false;
 
 	Di_Cluster_Seed_Factor = 10;
 	Di_Cluster_Hit_Factor = 7;

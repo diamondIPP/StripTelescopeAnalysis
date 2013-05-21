@@ -101,7 +101,7 @@ public:
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
     bool is3dDiamond(){return b3dDiamond;};
     bool b3dDiamond;
-    bool doTransparentAlignmnet()const {return bTransparenAlignment;}
+    bool doTransparentAlignmnet()const {return bTransparentAlignment;}
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -346,7 +346,7 @@ private:
 	TFile *settingsFile;
 private:
 	bool bUseUserResolutionInput;
-	bool bTransparenAlignment;
+	bool bTransparentAlignment;
 	bool bAsymmetricSample;
 	Float_t chi2Cut3D;
 	Float_t transparentChi2;
