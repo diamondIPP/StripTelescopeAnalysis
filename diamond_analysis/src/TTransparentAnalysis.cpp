@@ -718,9 +718,11 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 	bin2 = hDeltaEtaVsResidual->GetYaxis()->FindBin(+maxDelta);
 	hName = TString::Format("hResidualEtaCorrectedIn10_DeltaEta_below_020");
 	TH1F* hEtaBoundedEtaCorrectedResidual = (TH1F*)hDeltaEtaVsResidual->ProjectionX(hName,bin1,bin2);
-	hEtaBoundedEtaCorrectedResidual->SetTitle(TString::Format("Residual #eta corrected in 10 strips, |#Delta#eta| < 0.2"));
+	if(hEtaBoundedEtaCorrectedResidual)
+		hEtaBoundedEtaCorrectedResidual->SetTitle(TString::Format("Residual #eta corrected in 10 strips, |#Delta#eta| < 0.2"));
 	histSaver->SaveHistogram(hEtaBoundedEtaCorrectedResidual);
 	if(hDeltaEtaVsResidual)delete hDeltaEtaVsResidual;
+	if(hEtaBoundedEtaCorrectedResidual) delete hEtaBoundedEtaCorrectedResidual;
 
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		TH1F* hEtaDist = hEta[clusterSize];

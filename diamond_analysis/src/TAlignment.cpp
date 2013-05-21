@@ -15,7 +15,6 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	this->mode = mode;
 	sys = gSystem;
 	setSettings(inputSettings);
-//	settings->diamondPattern.Print();
 	runNumber = settings->getRunNumber();
 	cout << runNumber << endl;
 	stringstream runString;
