@@ -100,9 +100,11 @@ private:
 	void getFinalSiliconAlignmentResuluts();
 	void UpdateResolutions();
 	void setSiliconDetectorResolution(Float_t maxChi2);
+
 	void CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, string refPlaneString, bool bPlot, bool bUpdateResolution, bool bChi2=false);
 //	void CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,string refPlaneString,bool bPlot=true, resolutionUpdateMode bUpdateResolution = noUpdate,bool bChi2=false);
 	void SetResolutionsWithUserInput();
+	void LoadResolutionFromSettingsFile();
 	void inputResolution(UInt_t plane, TPlaneProperties::enumCoordinate cor);
 
 	TResidual alignDetector(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t>vecRefPlanes,bool bPlot=false,TResidual res=TResidual(true));

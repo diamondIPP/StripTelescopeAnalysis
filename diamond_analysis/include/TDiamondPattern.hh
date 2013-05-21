@@ -45,8 +45,10 @@ public:
 	UInt_t size(){return getNPatterns();}
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
 	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);
+	bool hasInvalidIntervals();
+
 private:
-	UInt_t getNIntervals(){return nChannelsOfInterval.size();}
+	UInt_t getNIntervals();//
 	Float_t getChannelToMetric(UInt_t ch);
 	void initialiseVector();
 	std::vector<Float_t> channelToMetricConversion;

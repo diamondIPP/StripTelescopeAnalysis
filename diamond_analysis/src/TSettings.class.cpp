@@ -111,7 +111,7 @@ void TSettings::checkSettings(){
 			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
 		}
 //	diamondPattern.Print();
-	cout<<diamondPattern.getNPatterns()<<endl;
+	cout<<"NDiamond Patterns: "<<diamondPattern.getNPatterns()<<endl;
 
 	this->checkAlignmentFidcuts();
 	cout<<"Settings seems to be ok."<<endl;
@@ -411,6 +411,7 @@ void TSettings::LoadSettings(){
 			}
 		}
 		if (key == "res_keep_factor") {ParseFloat(key,value,res_keep_factor);}
+		if (key == "MinimalAbsoluteEtaValue") ParseFloat(key,value,minAbsEtaVal);
 		if(key == "Si_Pedestal_Hit_Factor") ParseFloat(key,value,Si_Pedestal_Hit_Factor);
 		if(key == "Di_Pedestal_Hit_Factor") ParseFloat(key,value,Di_Pedestal_Hit_Factor);
 		if(key == "Si_Cluster_Seed_Factor") ParseFloat(key,value,Si_Cluster_Seed_Factor);
@@ -564,6 +565,22 @@ void TSettings::LoadSettings(){
 	checkSettings();
 }
 
+void TSettings::LoadDefaultResolutions(){
+	alignment_resolutions.resize(9);
+	//X
+	alignment_resolutions[0] = 2.3;
+	alignment_resolutions[2] = 2.2;
+	alignment_resolutions[4] = 1.6;
+	alignment_resolutions[6] = 1.7;
+
+	//Y
+	alignment_resolutions[1] = 1.6;
+	alignment_resolutions[3] = 1.5;
+	alignment_resolutions[5] = 1.9;
+	alignment_resolutions[7] = 2.0;
+
+	alignment_resolutions[8] = 10.0;//todo
+}
 void TSettings::DefaultLoadDefaultSettings(){
 
 	if(getVerbosity())
@@ -591,9 +608,9 @@ void TSettings::DefaultLoadDefaultSettings(){
 	res_keep_factor=2;
 	alignmentPrecision_Offset = 0.01;
 	alignmentPrecision_Angle = 0.001;
-	alignment_chi2=1.0;
-	alignment_training_track_fraction=0.25;
-	alignment_training_track_number=10000;
+	alignment_chi2 = 4.0;
+	alignment_training_track_fraction = 0.25;
+	alignment_training_track_number = 100000;
 	trainingMethod=enumEvents;
 	bResetAlignment=false;
 
@@ -687,8 +704,13 @@ void TSettings::DefaultLoadDefaultSettings(){
 	isStandardArea = true;
 	chi2Cut3D=4.0;
 	bAsymmetricSample=false;
+	minAbsEtaVal = .05;
+	bUseUserResolutionInput = false;
+	LoadDefaultResolutions();
+
 	checkSettings();
 }
+
 
 
 /**
@@ -803,7 +825,7 @@ void TSettings::ParseRegionArray(string key, string value, std::vector< std::pai
 		cout<<i<<" "<<begin<<"-"<<end<<endl;
 		if(begin<end){
 			Float_t pos = begin*getDiamondPitchWidth();
-			cout<<pos<<","<<begin<<end<<endl;
+			cout<<pos<<","<<begin<<"-"<<end<<endl;
 			diamondPattern.addPattern(getDiamondPitchWidth(),pos,begin,end);
 		}
 	}
@@ -1908,7 +1930,8 @@ Float_t TSettings::convertChannelToMetric(UInt_t det, Float_t channel){
 Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
 	Float_t channelPosition  = N_INVALID;
 	channelPosition =  metricValue/this->getSiliconPitchWidth();
-	if(TPlaneProperties::isDiamondDetector(det))
+	if(TPlaneProperties::isDiamondDetector(det)){
 			channelPosition = this->diamondPattern.convertMetricToChannel(metricValue);
+	}
 	return channelPosition;
 }

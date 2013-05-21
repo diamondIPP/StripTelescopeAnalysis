@@ -80,8 +80,11 @@ Float_t TTrack::inChannelDetectorSpace(UInt_t det, Float_t metricPosition){
 	Float_t channelPosition  = N_INVALID;
 	if(TPlaneProperties::isSiliconDetector(det))
 		channelPosition =  metricPosition/settings->getSiliconPitchWidth();
-	else if(TPlaneProperties::isDiamondDetector(det))
+	else if(TPlaneProperties::isDiamondDetector(det)){
+//		cout<<"validPAttern  TTrack::inChannelDetectorSpace "<<det<<" "<<metricPosition<<": "<<flush;
+//		cout<<settings->diamondPattern.hasInvalidIntervals()<<endl;
 		channelPosition = settings->diamondPattern.convertMetricToChannel(metricPosition);
+	}
 	return channelPosition;
 }
 /**

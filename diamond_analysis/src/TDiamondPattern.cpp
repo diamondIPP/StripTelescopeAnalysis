@@ -38,7 +38,7 @@ std::pair<Int_t,Int_t> TDiamondPattern::getInterval(UInt_t pattern){
 void TDiamondPattern::loadPitchWidthSettings(Float_t pitchWidth) {
 	resetPattern();
 	addPattern(pitchWidth,0,0,channelToMetricConversion.size()-1);
-	standardPW =pitchWidth;
+	standardPW = pitchWidth;
 }
 
 void TDiamondPattern::resetPattern() {
@@ -51,7 +51,7 @@ void TDiamondPattern::resetPattern() {
 }
 
 bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt_t firstChannel, UInt_t lastChannel) {
-	if(firstChannel<0||lastChannel>=channelToMetricConversion.size()||lastChannel-firstChannel<0){
+	if(firstChannel<0||lastChannel>=channelToMetricConversion.size()||(int)lastChannel-(int)firstChannel<0){
 		cout<< "Want to create pattern with invalid channel No: "<<firstChannel<<"-"<<lastChannel<<endl;
 		return false;
 	}
@@ -83,9 +83,12 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 		pos +=pitchWidth;
 	}
 	beginOfInterval.push_back(startPosition);
-	endOfInterval.push_back(channelToMetricConversion[lastChannel]);
+	Float_t endPos = channelToMetricConversion[lastChannel];
+	endOfInterval.push_back(endPos);
 	firstChannelOfInterval.push_back(firstChannel);
-	nChannelsOfInterval.push_back(lastChannel-firstChannel);
+	UInt_t deltaChannels = lastChannel-firstChannel;
+
+	nChannelsOfInterval.push_back(deltaChannels);
 	this->pitchWidth.push_back(pitchWidth);
 	return retVal;
 }
@@ -99,16 +102,44 @@ void TDiamondPattern::initialiseVector() {
 
 void TDiamondPattern::Print() {
 	cout<<"Diamond Detector Pattern \n"<<endl;
+//	cout<<"Valid: "<< this->hasInvalidIntervals()<<endl;
 	cout<<"  ch | Pos [um]"<<endl;
 	cout<<"-----+---------"<<endl;
 	for(UInt_t i = 0; i<channelToMetricConversion.size();i++){
 		cout<<" "<<setw(3)<<i<<" | "<< setw(6)<<convertChannelToMetric(i)<<endl;
 	}
 	cout<<endl;
+
+	cout<<"nChannelsOfInterval:   "<<nChannelsOfInterval.size()<<endl;
+	cout<<"beginOfInterval:       "<<beginOfInterval.size()<<endl;
+	cout<<"endOfInterval:         "<<endOfInterval.size()<<endl;
+	cout<<"firstChannelOfInterval "<<firstChannelOfInterval.size()<<endl;
+	cout<<"pitchWidth:            "<<pitchWidth.size()<<endl;
 	//	char t;
 	//	cin>>t;
 }
 
+
+UInt_t TDiamondPattern::getNIntervals(){
+	if (hasInvalidIntervals())
+		return 0;
+	return nChannelsOfInterval.size();
+}
+
+bool TDiamondPattern::hasInvalidIntervals(){
+	bool retVal;
+	retVal = nChannelsOfInterval.size() == beginOfInterval.size();
+	retVal = retVal && (beginOfInterval.size() == endOfInterval.size());
+	retVal = retVal && (endOfInterval.size() == firstChannelOfInterval.size());
+	if(!retVal){
+		cerr << " ERROR!! *********************************"<<endl;
+		cout <<"hasInvalidIntervals! "<< nChannelsOfInterval.size() << " " << beginOfInterval.size() << " " << endOfInterval.size() << " " << firstChannelOfInterval.size() <<endl;
+//		this->Print();
+		exit(-1);
+	}
+
+	return !retVal;
+}
 void TDiamondPattern::showPatterns(){
 	cout<< "There are "<<getNIntervals()<<"/"<<getNPatterns()<<"  Patterns:"<<endl;
 	for (UInt_t i=0;i<getNIntervals();i++){
@@ -118,8 +149,10 @@ void TDiamondPattern::showPatterns(){
 }
 
 Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {
-	if(channel>=channelToMetricConversion.size()||channel<0)
+	if(channel>=channelToMetricConversion.size()||channel<0){
+		cout<<" TDiamondPattern::convertChannelToMetric "<<channel<<" INVALID"<<endl;
 		return N_INVALID;
+	}
 	int leftChannel = (UInt_t)channel;
 	int rightChannel = leftChannel+1;
 	Float_t leftPosition =  getChannelToMetric(leftChannel);
@@ -128,16 +161,24 @@ Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {
 	if(leftChannel==channel)
 		return leftPosition;
 	if (leftPosition == N_INVALID || rightPosition == N_INVALID){
-		//cerr<<"One of the channels is invalid: "<<leftChannel<<"-"<<rightChannel<<"\t"<<leftPosition<<"-"<<rightPosition<<endl;
+		cerr<<"One of the channels is invalid: "<<leftChannel<<"-"<<rightChannel<<"\t"<<leftPosition<<"-"<<rightPosition<<endl;
 		return N_INVALID;
 	}
 	return position;
 }
 
 Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
+	if(hasInvalidIntervals()){
+
+		cout<<" TDiamondPattern::convertMetricToChannel "<<metric<<" INVALID INTERVALS"<<endl;
+		return N_INVALID;
+	}
 	for(UInt_t i = 0; i < getNIntervals();i++){
+		if(i<beginOfInterval.size() && i < endOfInterval.size()){
 		if( beginOfInterval[i] <= metric && metric <= endOfInterval[i] )
 			return convertMetricToChannel(metric,i);
+		}
+//		else return N_INVALID;
 	}
 	return N_INVALID;
 }

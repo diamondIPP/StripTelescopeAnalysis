@@ -295,6 +295,13 @@ public:
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);
 	Float_t getChi2Cut3D(){return chi2Cut3D;}
+	Float_t getMinimalAbsoluteEtaValue(){return minAbsEtaVal;}
+	void setMinimalAbsoluteEtaValue(Float_t minAbsEtaVal) {this->minAbsEtaVal = minAbsEtaVal;}
+	bool isUseUserResolutionInput() const {return bUseUserResolutionInput;}
+	void setUseUserResolutionInput(bool useUserResolutionInput) {bUseUserResolutionInput = useUserResolutionInput;}
+	Float_t GetDefaultResolutionX(UInt_t plane){if(plane<9)return alignment_resolutions.at(plane*2);return 0;}
+	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 0;};
+//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
 //	int getAreaOfInterest(){return inde
 private:
 	TFidCutRegions* fidCutsSelection;
@@ -302,6 +309,7 @@ private:
 protected:
 	float store_threshold;
 private:
+	Float_t minAbsEtaVal;
 	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandardArea;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
@@ -329,12 +337,15 @@ private:
 	bool Parse(std::string key, std::string value, UInt_t &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
 
+	void LoadDefaultResolutions();
+
 private:
 	std::string path;
 	std::string fileName;
 	TSystem *sys;
 	TFile *settingsFile;
 private:
+	bool bUseUserResolutionInput;
 	bool bTransparenAlignment;
 	bool bAsymmetricSample;
 	Float_t chi2Cut3D;
@@ -383,10 +394,12 @@ private:
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
 
+
 	std::vector<Float_t> alignment_x_offsets;
 	std::vector<Float_t> alignment_y_offsets;
 	std::vector<Float_t> alignment_phi_offsets;
 	std::vector<Float_t> alignment_z_offsets;
+	std::vector<Float_t> alignment_resolutions;
 	std::vector<Int_t> alignmentFidCuts;
 
 	Float_t alignment_training_track_fraction;
@@ -447,6 +460,7 @@ private:
        Float_t diaOffsetMetricSpace;
        Float_t diaStartingChannel;
 
-ClassDef(TSettings,4);
+ClassDef(TSettings,4)
+
 };
 #endif

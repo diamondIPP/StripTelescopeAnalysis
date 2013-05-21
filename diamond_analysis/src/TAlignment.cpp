@@ -12,8 +12,10 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	cout << "*************TAlignment::TAlignment***********************" << endl;
 	cout << "**********************************************************" << endl;
 
+	this->mode = mode;
 	sys = gSystem;
 	setSettings(inputSettings);
+//	settings->diamondPattern.Print();
 	runNumber = settings->getRunNumber();
 	cout << runNumber << endl;
 	stringstream runString;
@@ -31,7 +33,6 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 		eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
 		cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
 	}
-
 	histSaver = new HistogrammSaver();
 	settings->goToAlignmentDir(mode);
 	histSaver->SetPlotsPath(settings->getAlignmentDir(mode));
@@ -66,7 +67,6 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 
 	bPlotAll = settings->doAllAlignmentPlots()||verbosity>6;
 	results=0;
-	this->mode = mode;
 	gausFitValuesX.resize(4);
 	gausFitValuesY.resize(4);
 
@@ -87,13 +87,13 @@ TAlignment::~TAlignment() {
 	if(verbosity)cout<<"Closed TAlginment"<<endl;
 }
 
-void TAlignment::setSettings(TSettings* settings) {
-	if(settings==0)
+void TAlignment::setSettings(TSettings* inputsettings) {
+	if(inputsettings==0)
 	{
 		cerr<<"Input settings == 0. BREAK!"<<endl;
 		exit(-1);
 	}
-	this->settings = settings;
+	this->settings = inputsettings;
 }
 
 /**
@@ -108,7 +108,7 @@ void TAlignment::initialiseDetectorAlignment(TSettings::alignmentMode mode) {
 		align = new TDetectorAlignment();
 		align->setVerbosity(verbosity-4>0?verbosity-4:0);
 		htmlAlign->setAlignment(align);
-		cout << "TAlignment::Align::Detectoralignment did not exist, so created new DetectorAlignment" << endl;
+		cout << "TAlignment::Align::Detector alignment did not exist, so created new DetectorAlignment" << endl;
 		align->SetZOffset(0, detectorD0Z);
 		align->SetZOffset(1, detectorD1Z);
 		align->SetZOffset(2, detectorD2Z);
@@ -172,13 +172,15 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 	int nCandidates = 0;
 //	int nScreened = 0;
 	int nNotInFidCut=0;
+	int nNotGoodEta = 0;
+	int nAnalysedEvents = 0;
 	cout << "CREATING VECTOR OF VALID EVENTS TRANSPARENT..." << endl;
-
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
 			TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
 			if(!settings->useForAlignment(nEvent,nEvents))
-				return;
+				break;
 			eventReader->LoadEvent(nEvent);
+			nAnalysedEvents++;
 			if (!eventReader->isValidTrack()) {
 				noHitDet++;
 				continue;
@@ -200,6 +202,8 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 			Float_t predY = predictedPosition->getPositionY();
 			Float_t metricPosInDetSystem = eventReader->getPositionInDetSystem(subjectDetector,predX,predY);
 			Float_t centerPos = settings->convertMetricToChannelSpace(subjectDetector,metricPosInDetSystem);
+			if(centerPos <  0)
+				cout<<nEvent<<" "<<predX<<"/"<<predY<<": "<<metricPosInDetSystem<<" -->"<<centerPos<<endl;
 //			cout<<nEvent<<" "<<predX<<"/"<<predY<<"\t"<<metricPosInDetSystem<< " - "<< centerPos<<endl;
 			TCluster cluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,centerPos,10);
 //			cluster.Print(1);
@@ -219,15 +223,29 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 					continue;
 				}
 			}
+			Float_t eta = cluster.getEta();
+			Float_t minEtaDif = settings->getMinimalAbsoluteEtaValue();
+			if (eta<minEtaDif || eta > 1- minEtaDif){
+				nNotGoodEta++;
+				if(clonedEvent) delete clonedEvent;
+				continue;
+			}
 			nCandidates++;
 
 			this->events.push_back(*clonedEvent);
 
-			if (eventReader->useForAnalysis())
-				break;
+//			if (eventReader->useForAnalysis())
+//				break;
 	}
 
+	cout << "nAnalysedEvents " << setw(7) << nAnalysedEvents << endl;
+	cout << " -     noHitDet " << setw(7) << noHitDet << endl;
+	cout << " - nNotInFidCut " << setw(7) << nNotInFidCut << endl;
+	cout << " -  nNotGoodEta " << setw(7) << nNotGoodEta << endl;
+	cout << " =  nCandidates " << setw(7) << nCandidates << endl;
 }
+
+
 /**
  * Fills a vector of TEvents which are candidates to be used in the Alignment
  * @param nEvents
@@ -334,6 +352,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
  * @todo work on return values
  */
 int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign detToAlign) {
+
 	if (verbosity>2) {
 		cout << "\n\n\nTAlignment::Align:Starting \"" << histSaver->GetPlotsPath() << "\"" << endl;
 		cout << "\t\t" << events.size() << "\t";
@@ -351,7 +370,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 		loadDetectorAlignment();
 	if (events.size() == 0) createEventVectors(nEvents, startEvent);
 
-	//create an TTRack object and set the eta distributions.
+	//create an TTrack object and set the eta distributions.
 	if (myTrack == NULL) {
 		if(verbosity>2)cout << "TAlignment::Align::create new TTrack" << endl;
 		myTrack = new TTrack(align,settings);
@@ -368,6 +387,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 		cerr<<"could not create my Track ----> EXIT"<<endl;
 		exit(-1);
 	}
+
 	myTrack->setDetectorAlignment(align);
 
 	/*
@@ -376,6 +396,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 	if(detToAlign==silAlignment||detToAlign==bothAlignment){
 		AlignSiliconPlanes();
 	}
+
 	if(detToAlign==diaAlignment||detToAlign==bothAlignment) {
 		if(settings->resetAlignment())
 			align->ResetAlignment(TPlaneProperties::getDiamondPlane());
@@ -536,6 +557,7 @@ void TAlignment::AlignDiamondPlane() {
 	cout << "*******************************************************" << endl;
 	cout << "*******************************************************\n" << endl;
 
+	settings->diamondPattern.hasInvalidIntervals();
 	//create ReferencePlane Vector: using all Silicon Planes for Alignment 0,1,2,3
 	UInt_t diaPlane = 4;
 	vector<UInt_t> vecRefPlanes;
@@ -543,16 +565,19 @@ void TAlignment::AlignDiamondPlane() {
 		if (i != diaPlane) vecRefPlanes.push_back(i);
 	nDiaAlignmentStep = -1;
 	//checking Residual
+	settings->diamondPattern.hasInvalidIntervals();
 	TResidual resDia = CheckStripDetectorAlignment(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, false, true);
 	bool diaAlignmentDone = false;
 
+	settings->diamondPattern.hasInvalidIntervals();
 	for (nDiaAlignmentStep = 0; (nDiaAlignmentStep < nDiaAlignSteps) && (!diaAlignmentDone||nDiaAlignmentStep<2)	 ; nDiaAlignmentStep++) {
 		cout << "\n\n " << nDiaAlignmentStep << " of " << nDiaAlignSteps << " Steps..." << endl;
+		settings->diamondPattern.hasInvalidIntervals();
 		//do Alignment using the resDia Residual
 		alignStripDetector(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, false||bPlotAll, resDia);
+		settings->diamondPattern.hasInvalidIntervals();
 		//creating new Residual resDia
 		resDia = CheckStripDetectorAlignment(TPlaneProperties::X_COR, diaPlane, vecRefPlanes);
-
 		//check if this was the alignment has changed less than certain values read from the settings file
 		diaAlignmentDone = (TMath::Abs(align->GetLastXOffset(TPlaneProperties::getDiamondPlane())) < settings->getAlignmentPrecisionOffset());
 		diaAlignmentDone =diaAlignmentDone &&
@@ -566,10 +591,13 @@ void TAlignment::AlignDiamondPlane() {
 		if(verbosity||diaAlignmentDone)
 			cout<<align->GetLastXOffset(TPlaneProperties::getDiamondPlane())<<" "<<
 				align->GetLastPhiXOffset(TPlaneProperties::getDiamondPlane())*1000<<" mrad"<<endl;
+		settings->diamondPattern.hasInvalidIntervals();
 	}
 	nDiaAlignmentStep = nDiaAlignSteps;
 	resDia = CheckStripDetectorAlignment(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, true, true, resDia);
+	settings->diamondPattern.hasInvalidIntervals();
 	CheckStripDetectorAlignmentChi2(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, true, true, settings->getAlignment_chi2());
+	settings->diamondPattern.hasInvalidIntervals();
 	align->setDiamondDate();
 }
 
@@ -833,6 +861,7 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, TResidual resOld,
 									   TCluster::calculationMode_t mode,resCalcMode calcMode,Float_t maxChi2)
 {
+	cout<<"validPatternStrip: "<<flush;
 	stringstream refPlaneString;
 	for (UInt_t i = 0; i < vecRefPlanes.size(); i++)
 		if (i == 0)
@@ -922,9 +951,11 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 			align->setNDiamondAlignmentEvents((UInt_t) vecXDelta.size());
 			align->setDiaChi2(settings->getAlignment_chi2());
 	}
+
+	cout<<"ValidPatterStripPlot:"<<flush;
 	this->CreatePlots(cor, subjectPlane, refPlaneString.str(), bPlot, bAlign);
 	clearMeasuredVectors();
-
+	cout<<"ValidPatterStripEnd:"<<flush;
 	return res;
 }
 //
@@ -1235,6 +1266,14 @@ void TAlignment::getFinalSiliconAlignmentResuluts() {
 }
 
 
+void TAlignment::LoadResolutionFromSettingsFile(){
+	cout<<" Loading Resolution From Settings File..."<<flush;
+	for(int pl = 0; pl < TPlaneProperties::getNSiliconPlanes(); pl++){
+		align->setXResolution(settings->GetDefaultResolutionX(pl),pl);
+		align->setYResolution(settings->GetDefaultResolutionY(pl),pl);
+	}
+	cout<<"DONE"<<endl;
+}
 
 void TAlignment::SetResolutionsWithUserInput() {
 	cout<<"The measured Residuals are: "<<endl;
@@ -1279,6 +1318,7 @@ void TAlignment::inputResolution(UInt_t plane, TPlaneProperties::enumCoordinate 
 }
 
 
+
 void TAlignment::setSiliconDetectorResolution(Float_t maxChi2) {
 	//get  something like a aprroximate Sigma with calculating the residual
 	for (UInt_t plane = 0; plane < 4; plane++) {
@@ -1303,7 +1343,10 @@ void TAlignment::setSiliconDetectorResolution(Float_t maxChi2) {
 		TResidual res = getResidual(TPlaneProperties::XY_COR, plane, vecRefPlanes,true,TResidual(),getClusterCalcMode(plane),chi2CalcMode,maxChi2);
 	}
 	//get user input
-	SetResolutionsWithUserInput();
+	if (settings->isUseUserResolutionInput())
+		SetResolutionsWithUserInput();
+	else
+		LoadResolutionFromSettingsFile();
 	//do at maximum 5 convergence steps...
 	int nSilicionResolutionMaxSteps=5;
 	nSilicionResolutionMaxSteps=0;
@@ -1393,7 +1436,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 			Float_t sigma = histo->GetRMS();
 			Float_t fitWidth = sigma * 1.5;
 			Float_t mean = histo->GetMean();
-			cout << "Alignment for plane" << subjectPlane << endl;
+			cout << "Alignment for plane " << subjectPlane << endl;
 			TF1* fitX=0;
 			if(TPlaneProperties::isDiamondPlane(subjectPlane) && this->mode == TSettings::transparentMode){
 				fitWidth = 3 * sigma;

@@ -1174,6 +1174,15 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 
 TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
 	// get channel and direction for clustering
+	if (reader==0){
+		cerr<<" TTransparentAnalysis::makeTransparentCluster TTracking == 0 "<<endl;
+		return TCluster();
+	}
+	if (set == 0 ){
+		cerr<<" TTransparentAnalysis::makeTransparentCluster TSettings == 0 "<<endl;
+		return TCluster();
+	}
+
 	UInt_t centerChannel;
 	int direction;
 	direction = getSignedChannelNumber(centerPosition);
@@ -1187,6 +1196,8 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 	TCluster transparentCluster = TCluster(reader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
 	int currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
+		if( currentChannel < 0 || currentChannel >= TPlaneProperties::getNChannelsDiamond() )
+			cout<<reader->getEvent_number()<<": Cannot create channel with: det"<<det<<", centerPoisition: "<<centerPosition<< ", direction: "<<direction<<", centerChannel: "<<centerChannel<<" "<<iChannel<<endl;
 		direction *= -1;
 		currentChannel += direction * iChannel;
 		Int_t adcValue=reader->getAdcValue(det,currentChannel);

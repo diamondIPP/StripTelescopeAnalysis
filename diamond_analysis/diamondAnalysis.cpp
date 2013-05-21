@@ -274,7 +274,7 @@ int main(int argc, char ** argv) {
 			delete transpAna;
 		}
 
-		if (settings&& settings->doTransparentAlignmnet()){
+		if (settings && settings->doTransparentAlignmnet()){
 			sys->cd(currentDir.c_str());
 			TAlignment *alignment = new TAlignment(settings,TSettings::transparentMode);
 			alignment->createTransparentEventVectors();
