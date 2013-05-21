@@ -482,6 +482,7 @@ void TTransparentAnalysis::createEtaIntegrals() {
 
 
 void TTransparentAnalysis::createEfficiencyPlots(TH1F *hLandau){
+	if (!hLandau) cout<<"TTransparentAnalysis::createEfficiencyPlots: HLandau Histo Not Valid..."<<endl;
 	TString name = TString::Format("hEfficiency_%s",hLandau->GetName());
 	TH1F* hEfficiency = new TH1F(name,name,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector) );
 	Float_t nentries = hLandau->GetEntries();
@@ -502,7 +503,7 @@ void TTransparentAnalysis::createEfficiencyPlots(TH1F *hLandau){
 
 void TTransparentAnalysis::fitHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-
+		cout<<"Create EfficencyPlots "<<clusterSize<<endl;
 		createEfficiencyPlots(hLandau2Highest[clusterSize]);
 		createEfficiencyPlots(hLandau[clusterSize]);
 		createEfficiencyPlots(hLandau1Highest[clusterSize]);
@@ -661,6 +662,7 @@ void TTransparentAnalysis::analyseEtaDistribution(TH1F* hEtaDist){
 }
 
 void TTransparentAnalysis::analyseEtaDistributions(){
+	cout<<" TTransparentAnalysis::analyseEtaDistributions"<<endl;
 	stringstream name;
 	name<<TString::Format("hEtaOf10_minus_EtaOf2_vs_etaOf2");
 	if(vecRelatedEta2.size()!=vecDeltaEta.size()){
@@ -673,7 +675,8 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 		hDeltaEta->GetXaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
 		hDeltaEta->GetYaxis()->SetTitle("#eta_{2 of 2}");
 	}
-	histSaver->SaveHistogram(hDeltaEta,false);
+	if(hDeltaEta)
+		histSaver->SaveHistogram(hDeltaEta,false);
 
 	if(hDeltaEta)delete hDeltaEta;
 
@@ -685,6 +688,7 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 		hDeltaEtaVsResidual->GetXaxis()->SetTitle("Residual Eta Correct, 2 of 10 / #mum");
 		hDeltaEtaVsResidual->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
 	}
+	if(hDeltaEtaVsResidual)
 	histSaver->SaveHistogram(hDeltaEtaVsResidual,false);
 
 	name.str("");name.clear();
@@ -694,13 +698,17 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 		hDeltaEtaVsEta->GetXaxis()->SetTitle("#eta_{2 of 10}");
 		hDeltaEtaVsEta->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
 	}
-	histSaver->SaveHistogram(hDeltaEtaVsEta,false);
+	if(hDeltaEtaVsEta)
+		histSaver->SaveHistogram(hDeltaEtaVsEta,false);
 	Float_t maxDelta = .199999;
 	Int_t bin1 = hDeltaEtaVsEta->GetYaxis()->FindBin(-maxDelta);
 	Int_t bin2 = hDeltaEtaVsEta->GetYaxis()->FindBin(+maxDelta);
 	TString hName = TString::Format("hEtaIn10_DeltaEta_below_020");
 	TH1F* hEtaBoundedEtaCorrected = (TH1F*)hDeltaEtaVsEta->ProjectionX(hName,bin1,bin2);
-	hEtaBoundedEtaCorrected->SetTitle(TString::Format("#eta_{2 of 10}, |#Delta#eta| < 0.2"));
+	if(hEtaBoundedEtaCorrected)
+		hEtaBoundedEtaCorrected->SetTitle(TString::Format("#eta_{2 of 10}, |#Delta#eta| < 0.2"));
+	else
+		cout<<"hEtaBoundedEtaCorrecte = 0"<<endl;
 	histSaver->SaveHistogram(hEtaBoundedEtaCorrected);
 	if(hEtaBoundedEtaCorrected)delete hEtaBoundedEtaCorrected;
 
@@ -797,11 +805,17 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 
 	name.str("");name.clear();
 	name<<"cSignalNextToHighest";
-	histoLeft->SetLineColor(kBlue);
-	histoRight->SetLineColor(kRed);
+	if(histoLeft)
+		histoLeft->SetLineColor(kBlue);
+	else
+		cout<<"histoLeft = 0"<<endl;
+	if (histoRight)
+		histoRight->SetLineColor(kRed);
+	else
+		cout<<"histoRight = 0"<<endl;
 	Float_t max = TMath::Max(histoLeft->GetMaximum(),histoRight->GetMaximum());
-	histoLeft->SetMaximum(max);
-	histoRight->SetMaximum(max);
+	if (histoLeft) histoLeft->SetMaximum(max);
+	if (histoRight) histoRight->SetMaximum(max);
 	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
 	if(histoLeft) delete histoLeft;
 	if(histoRight) delete histoRight;
@@ -826,7 +840,8 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 	}
 	name.str("");name.clear();
 	name<<"cSignalOfSignalsAdjacentToEta";
-	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
+	if (histoLeft && histoRight)
+		histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
 	if(histoLeft) delete histoLeft;
 	if(histoRight) delete histoRight;
 
