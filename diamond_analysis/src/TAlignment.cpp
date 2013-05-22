@@ -162,6 +162,7 @@ void TAlignment::loadDetectorAlignment(TSettings::alignmentMode mode){
 
 void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent) {
 	initialiseDetectorAlignment(TSettings::transparentMode);
+	cout<<"nEvents: "<<nEvents<<", startEvent: "<<startEvent<<endl;
 	if (nEvents == 0) nEvents = eventReader->GetEntries() - startEvent;
 	if (nEvents + startEvent > eventReader->GetEntries()) nEvents = eventReader->GetEntries() - startEvent;
 	int noHitDet = 0;
@@ -173,7 +174,8 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 	int nNotInFidCut=0;
 	int nNotGoodEta = 0;
 	int nAnalysedEvents = 0;
-	cout << "CREATING VECTOR OF VALID EVENTS TRANSPARENT..." << endl;
+	Float_t minEtaDif = settings->getMinimalAbsoluteEtaValue();
+	cout << "CREATING VECTOR OF VALID EVENTS TRANSPARENT..."<<minEtaDif << endl;
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
 			TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
 			if(!settings->useForAlignment(nEvent,nEvents))
@@ -222,8 +224,7 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 					continue;
 				}
 			}
-			Float_t eta = cluster.getEta();
-			Float_t minEtaDif = settings->getMinimalAbsoluteEtaValue();
+			Float_t eta = cluster.getEta(true);
 			if (eta<minEtaDif || eta > 1- minEtaDif){
 				nNotGoodEta++;
 				if(clonedEvent) delete clonedEvent;
@@ -883,6 +884,7 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 	Float_t xPredictedMetric,yPredictedMetric;
 	Int_t clusterSize;
 	Float_t chi2x,chi2y;
+	Float_t eta;
 	for (UInt_t nEvent = 0; nEvent < events.size(); nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent, events.size());
 		myTrack->setEvent(&events.at(nEvent));
@@ -904,6 +906,7 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 		clusterSize = myTrack->getClusterSize(subjectPlane*2+cor==TPlaneProperties::X_COR?0:1,0);
 		chi2x = predictedPostion->getChi2X();
 		chi2y = predictedPostion->getChi2Y();
+		eta = events.at(nEvent).getCluster(subjectPlane,cor,0).getEta(true);
 
 		if(verbosity>3)	predictedPostion->Print();
 		if (verbosity > 3) events.at(nEvent).getPlane(subjectPlane).Print();
@@ -935,6 +938,7 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 			vecXResPrediction.push_back(xPredSigma);
 			vecYResPrediction.push_back(yPredSigma);
 			vecClusterSize.push_back(clusterSize);
+			vecEta.push_back(eta);
 		}
 		if (verbosity > 3) cout << deltaXMetric << " " << deltaY << endl;
 		predictedPostion->Delete();
@@ -1545,6 +1549,35 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		//		}
 	}
 
+
+	if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) && mode == TSettings::transparentMode) {   														  //ScatterPlot DeltaX vs Ypred
+			histName.str("");
+			histName.clear();
+			histName << preName.str()<< "_ScatterPlot_Eta_vs_DeltaX"<< "_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
+			TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecEta, vecXDelta, 256);
+			//    histo.Draw("goff");
+			if(histo){
+				histo->GetYaxis()->SetTitle("#eta");
+				histo->GetXaxis()->SetTitle("Delta X / #mum");
+				Float_t minX = histo->GetMean(1) - histo->GetRMS(1)*5;
+				Float_t maxX = histo->GetMean(1) + histo->GetRMS(1)*5;
+				histo->GetXaxis()->SetRangeUser(minX,maxX);
+				histSaver->SaveHistogram(histo);
+				delete histo;
+			}
+			histName << "_graph";
+			TGraph graph = histSaver->CreateDipendencyGraph(histName.str(), vecEta, vecXDelta);
+			//		if(&graph==0) cerr<<"Could not create DipendencyGraph vecXDelta,vecYPred"<<endl;
+			//		else
+			//		{
+			graph.Draw("APL");
+			graph.GetYaxis()->SetTitle("#eta");
+			graph.GetXaxis()->SetTitle("delta X / #mum");
+			histSaver->SaveGraph((TGraph*) graph.Clone(), histName.str());
+			//		}
+		}
+
+
 	if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) && subjectPlane == TPlaneProperties::getDiamondPlane()) {    //ScatterPlot DeltaX vs Xpred
 		histName.str("");
 		histName.clear();
@@ -2034,5 +2067,6 @@ void TAlignment::clearMeasuredVectors() {
 	vecYMeasured.clear();
 	vecXResPrediction.clear();
 	vecYResPrediction.clear();
+	vecEta.clear();
 }
 

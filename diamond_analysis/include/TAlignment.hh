@@ -173,6 +173,7 @@ private:
 	vector<Float_t> vecYChi2;
 	vector<Float_t> vecXPhi;
 	vector<Float_t> vecYPhi;
+	vector<Float_t> vecEta;
 	vector<Float_t> vecXResPrediction;
 	vector<Float_t> vecYResPrediction;
 	vector<Float_t> vecClusterSize;
