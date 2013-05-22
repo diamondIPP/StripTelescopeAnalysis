@@ -574,7 +574,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 			for(Int_t i = 0;i < diamondAreas;i++){
 				std::pair<Int_t, Int_t> area = settings->getDiaDetectorArea(i);
 				if(area.first<area.second){
-					cout<<" save NDiaDetecotAreas "<<<<"/"<<diamondAreas<<endl;
+					cout<<" save NDiaDetecotAreas "<<i<<"/"<<diamondAreas<<endl;
 					TString name = TString::Format("hPulseHeight_BiggestSignalInSigma%s_area_%d_ch%d-ch%d",TPlaneProperties::getStringForDetector(det).c_str(),i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
 					Int_t binMin = hBiggestSignalInSigma2D->FindBin(area.first);
