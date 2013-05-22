@@ -277,7 +277,7 @@ int main(int argc, char ** argv) {
 		if (settings && settings->doTransparentAlignmnet()){
 			sys->cd(currentDir.c_str());
 			TAlignment *alignment = new TAlignment(settings,TSettings::transparentMode);
-			alignment->createTransparentEventVectors();
+			alignment->createTransparentEventVectors(RunParameters[i].getEvents());
 			//			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
 			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::diaAlignment);
