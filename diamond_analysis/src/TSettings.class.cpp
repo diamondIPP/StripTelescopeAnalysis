@@ -704,7 +704,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	isStandardArea = true;
 	chi2Cut3D=4.0;
 	bAsymmetricSample=false;
-	minAbsEtaVal = .05;
+	minAbsEtaVal = .2;
 	bUseUserResolutionInput = false;
 	LoadDefaultResolutions();
 
