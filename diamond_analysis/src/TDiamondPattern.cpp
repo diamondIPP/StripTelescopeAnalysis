@@ -150,7 +150,7 @@ void TDiamondPattern::showPatterns(){
 
 Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {
 	if(channel>=channelToMetricConversion.size()||channel<0){
-		cout<<" TDiamondPattern::convertChannelToMetric "<<channel<<" INVALID"<<endl;
+//		cout<<" TDiamondPattern::convertChannelToMetric "<<channel<<" INVALID"<<endl;
 		return N_INVALID;
 	}
 	int leftChannel = (UInt_t)channel;
