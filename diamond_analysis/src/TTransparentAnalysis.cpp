@@ -312,6 +312,7 @@ void TTransparentAnalysis::initHistograms() {
 	vecvecEta.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecEtaCMNcorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecVecLandau.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecVecPh2Highest.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecVecFidCutX.clear();
 	vecVecFidCutY.clear();
 	hEtaIntegrals.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
@@ -321,6 +322,7 @@ void TTransparentAnalysis::initHistograms() {
 		vecvecEtaCMNcorrected.at(clusterSize).clear();
 		vecvecRelPos.at(clusterSize).clear();
 		vecvecRelPos2.at(clusterSize).clear();
+		vecVecPh2Highest.at(clusterSize).clear();
 		vecvecResXEtaCorrected.at(clusterSize).clear();
 		vecvecResXChargeWeighted.at(clusterSize).clear();
 		// TODO: take care of histogram names and bins!!
@@ -376,6 +378,7 @@ void TTransparentAnalysis::fillHistograms() {
 		vecVecLandau[clusterSize].push_back(charge);
 		hLandau[clusterSize]->Fill(charge);
 		hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
+		vecVecPh2Highest[clusterSize].push_back(chargeOfTwo);
 
 		Float_t eta = this->transparentClusters[clusterSize].getEta();
 		Float_t etaCMN = this->transparentClusters[clusterSize].getEta(true);
@@ -433,6 +436,8 @@ void TTransparentAnalysis::fillHistograms() {
 		hResidualHighestHit[clusterSize]->Fill(resXHighestHit);
 
 	}
+	Float_t eventNo = eventReader->getEvent_number();
+	vectorEventNo.push_back(eventNo);
 //	hPredictedPositionInStrip->Fill();
 }
 
@@ -888,6 +893,19 @@ void TTransparentAnalysis::saveHistograms() {
 	if (htemp) delete htemp;
 	analyseEtaDistributions();
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		string name = (string)TString::Format("hLandauVsEventNo_2outOf%d",clusterSize+1);
+		TH2F* hLandauVsEventNo = histSaver->CreateScatterHisto(name,vecVecPh2Highest.at(clusterSize),vectorEventNo,100,512,0,nEvents,0,3000);
+		cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize).size()<<endl;
+		if(hLandauVsEventNo){
+			hLandauVsEventNo->GetXaxis()->SetTitle("Event no.");
+			hLandauVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
+			histSaver->SaveHistogram(hLandauVsEventNo);
+			TH1F* hProj = (TH1F*)hLandauVsEventNo->ProfileX();
+			histSaver->SaveHistogram(hProj,false,false,false);
+			if(hProj) delete hProj;
+			if (hLandauVsEventNo)
+				delete hLandauVsEventNo;
+		}
 		histSaver->SaveHistogram(hEta[clusterSize],0);
 		histSaver->SaveHistogram(hEtaCMNcorrected[clusterSize],0);
 //		if (clusterSize == 0) {
