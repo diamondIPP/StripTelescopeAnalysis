@@ -90,6 +90,7 @@ private:
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
 	
+	void saveResolutionPlot(TH1F* hRes);
 	// run variables
 	UInt_t subjectDetector, subjectPlane;
 	TPlaneProperties::enumCoordinate subjectDetectorCoordinate;

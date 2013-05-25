@@ -561,7 +561,8 @@ void TTransparentAnalysis::fitHistograms() {
 		fitResidualChargeWeighted.push_back(doGaussFit(hResidualChargeWeighted[clusterSize]));
 		fitResidualHighest2Centroid.push_back(doGaussFit(hResidualHighest2Centroid[clusterSize]));
 		fitResidualEtaCorrected.push_back(doDoubleGaussFit(hResidualEtaCorrected[clusterSize]));
-		
+		if(clusterSize+1 >= TPlaneProperties::getMaxTransparentClusterSize(subjectDetector))
+			saveResolutionPlot(hResidualEtaCorrected[clusterSize]);
 		// save fit parameters
 		vecMPLandau.push_back(fitLandau[clusterSize]->GetParameter(1));
 		vecMPLandau2Highest.push_back(fitLandau2Highest[clusterSize]->GetParameter(1));
@@ -968,13 +969,31 @@ void TTransparentAnalysis::saveHistograms() {
 		if (hist)delete hist;
 
 		name = (string)TString::Format("hEtaVsResolutionEtaCorrectedIn%d",i+1);
-		hist = histSaver->CreateScatterHisto(name,vecvecEta[i],vecvecResXEtaCorrected[i],512,512,-6000);
-		hist->GetYaxis()->SetTitle("#eta");
-		hist->GetXaxis()->SetTitle("Residual, Eta corrected / #mum");
-		hist->GetXaxis()->SetRangeUser(-pw,pw);
-		histSaver->SaveHistogram(hist);
-		if(verbosity>6)cout<<hist<<" "<<hist->GetName()<<" --- > Entries:"<<hist->GetEntries()<<endl;
-		if (hist)delete hist;
+		Float_t inf = 1./0.;
+		hist = histSaver->CreateScatterHisto(name,vecvecEta[i],vecvecResXEtaCorrected[i],512,512,-6000,inf,0,1);
+		if(hist){
+			hist->GetYaxis()->SetTitle("#eta");
+			hist->GetXaxis()->SetTitle("Residual, Eta corrected / #mum");
+			hist->GetXaxis()->SetRangeUser(-pw,pw);
+			histSaver->SaveHistogram(hist);
+			if(verbosity>6)cout<<hist<<" "<<hist->GetName()<<" --- > Entries:"<<hist->GetEntries()<<endl;
+			if ( i+1 >= TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)){
+				Float_t minEta = settings->getMinimalAbsoluteEtaValue();
+				TString hname = TString::Format("hResolutionEtaCorrectedIn%d_Eta_%02d_%02d",i+1,(int)(minEta*100),(int)((1-minEta)*100));
+				Int_t minBin =  hist->GetYaxis()->FindBin(minEta);
+				Int_t maxBin = hist->GetYaxis()->FindBin(1-minEta);
+				cout<<hname<<":"<<minEta<<" --> "<<minBin<<"-"<<maxBin<<" "<<flush;
+				TString title = TString::Format("Resolution_{#eta-corrected} in %d channels, %.2f < #eta < %.2f",i+1,minEta,1-minEta);
+				TH1F* hProj = (TH1F*)hist->ProjectionX(hname,minBin,maxBin);
+				if (hProj) hProj->SetTitle(title);
+				if (hProj) cout<<hProj->GetEntries()<<"/"<<	hist->GetEntries()<<endl;
+				saveResolutionPlot(hProj);
+				if (hProj) delete hProj;
+
+			}
+			if (hist)delete hist;
+		}
+
 
 		name = (string)TString::Format("hEtaCMNCorrectedVsResolutionEtaCorrectedIn%d",i+1);
 		hist = histSaver->CreateScatterHisto(name,vecvecEtaCMNcorrected[i],vecvecResXEtaCorrected[i],512,512,-6000);
@@ -1233,7 +1252,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 
 	// make cluster
 	TCluster transparentCluster = TCluster(reader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
-	int currentChannel = centerChannel;
+	UInt_t currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
 		if( currentChannel < 0 || currentChannel >= TPlaneProperties::getNChannelsDiamond() )
 			cout<<reader->getEvent_number()<<": Cannot create channel with: det"<<det<<", centerPoisition: "<<centerPosition<< ", direction: "<<direction<<", centerChannel: "<<centerChannel<<" "<<iChannel<<endl;
@@ -1251,3 +1270,28 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 	return transparentCluster;
 }
 
+void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes) {
+	if(!hRes)
+		return;
+	Float_t mean = hRes->GetMean();
+	Float_t sigma = hRes->GetRMS();
+	TString hName;
+	for(int i=0;i<3;i++){
+		hName = hRes->GetName();
+		switch (i){
+		case 0: hName.Append("_SingleGausFit");break;
+		case 1: hName.Append("_SingleGausFitSmall");break;
+		case 2: hName.Append("_DoubleGausFit");break;
+		}
+		TH1F* hClone = (TH1F*)hRes->Clone(hName);
+		if(hClone) {
+			switch(i){
+			case 0: hClone->Fit("gaus","","",mean-sigma,mean+sigma);break;
+			case 1: hClone->Fit("gaus","","",mean-.5*sigma,mean+.5*sigma);break;
+			case 2: doDoubleGaussFit(hClone);break;
+			}
+			histSaver->SaveHistogram(hClone);
+			delete hClone;
+		}
+	}
+}

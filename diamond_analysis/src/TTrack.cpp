@@ -560,6 +560,33 @@ Float_t TTrack::getYPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPr
 	return (yPred-this->getYOffset(plane))/TMath::Cos(this->getPhiYOffset(plane)) + (xPred-(yPred-this->getYOffset(plane))*TMath::Tan(this->getPhiYOffset(plane)))*TMath::Sin(this->getPhiYOffset(plane));
 }
 
+
+/** from prediction calulation X Position in Strip Detector
+ * @todo make it work for a y strip detector as well
+ * @param plane
+ * @param xPred
+ * @param yPred
+ * @return
+ */
+Float_t  TTrack::getXPositionInStripDetSystem(UInt_t plane, Float_t xPred, Float_t yPred){
+
+}
+
+/** from prediction calulation Y Position in Strip Detector
+ *
+ * @param plane
+ * @param xPred
+ * @param yPred
+ * @return
+ */
+Float_t  TTrack::getYPositionInStripDetSystem(UInt_t plane, Float_t xPred, Float_t yPred){
+
+	Float_t xPredOff = xPred - this->getXOffset(plane);
+	Float_t phiX = getPhiXOffset(plane);
+	return yPred * TMath::Cos(phiX) + xPredOff * TMath::Sin(phiX);
+}
+
+
 UInt_t TTrack::getVerbosity() const
 {
     return verbosity;
