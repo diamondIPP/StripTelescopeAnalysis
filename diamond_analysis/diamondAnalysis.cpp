@@ -308,7 +308,9 @@ int main(int argc, char ** argv) {
 int ReadRunList() {
 	TRunInfo run;
 	RunParameters.clear();
-	cout << endl << "reading runlist.." << endl;
+	cout << endl << "reading runlist.." << flush;
+	cout << "RunListPath: \""<<runListPath<<"\""<<endl;
+
 	ifstream file(runListPath.c_str());//"RunList.ini");
 	if (!file) {
 		cout << "An error has encountered while trying to open RunList.ini" << endl;

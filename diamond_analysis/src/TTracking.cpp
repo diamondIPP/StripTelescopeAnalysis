@@ -173,3 +173,9 @@ Float_t TTracking::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPr
 		return 0;
 	return myTrack->getPositionInDetSystem(det,xPred,yPred);
 }
+
+Float_t TTracking::getXPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred){
+	if(myTrack==0)
+		return 0;
+	return myTrack->getXPositionInDetSystem(det,xPred,yPred);
+}

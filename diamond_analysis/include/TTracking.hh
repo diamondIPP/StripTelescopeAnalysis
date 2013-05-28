@@ -29,6 +29,7 @@ public:
 	Float_t getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode=TCluster::highest2Centroid, TH1F* histo=0);
 	Float_t getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 	Float_t getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
+	Float_t getXPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
 	Float_t getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid);
 //	Float_t getPosition(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster::calculationMode_t mode=TCluster::highest2Centroid){return myTrack->getPosition(cor,plane, mode);};
 //	Float_t getXPosition(UInt_t plane);

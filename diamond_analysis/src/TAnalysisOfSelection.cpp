@@ -63,7 +63,6 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 	saveHistos();
 
 }
-
 void TAnalysisOfSelection::initialiseHistos()
 {
 	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
