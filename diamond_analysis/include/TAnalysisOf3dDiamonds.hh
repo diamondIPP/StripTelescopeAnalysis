@@ -138,15 +138,27 @@ private:
 	TH2D* hDetXvsDetY3DvsEvents;
 	TH2D* hDetXvsDetY3DMeanCharge;
 	TCanvas* h3DdetMeanChargeRebinned;
+	TCanvas* h3DdetEventsRebinned;
 	TH2D* hDetXvsDetY3DRebinned;
 	TH2D* hDetXvsDetY3DvsEventsRebinned;
 	TH2D* hDetXvsDetY3DMeanChargeRebinned;
+	TCanvas* hOverview;
+	TH2D* hDetXvsDetY3DOverview;
 	vector<TH2D*> hCellsCharge;
 	vector<TH2D*> hCellsEvents;
 	TCanvas* hCellsOverlayedCanvas;
 	TH2D* hCellsOverlayedCharge;
 	TH2D* hCellsOverlayedEvents;
 	TH2D* hCellsOverlayedMeanCharge;
+	vector<TH1F*> hCellsLandau;
+	vector<TH1F*> hCellsLandauGraded;
+	//Removed Columns
+	TH2D* hCellsColumnCheck;
+	TCanvas* hCellsEventsNoColumnCanvas;
+	TH2D* hCellsOverlayedEventsNoColumns;
+	vector<TH2D*> hCellsEventsNoColumn;
+	vector<TH1F*> hCellsLandauNoColumn;
+	vector<TH1F*> hCellsLandauGradedNoColumn;
 	TH1F* hBinnedMeanCharge;
 	//xEdge
 	TH1F* hEdgeCharge;
