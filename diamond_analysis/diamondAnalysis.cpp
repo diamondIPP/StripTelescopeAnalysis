@@ -28,6 +28,7 @@
 #include "TAnalysisOfAlignment.hh"
 #include "TResults.hh"
 #include "TRunInfo.hh"
+#include "TFile.h"
 
 using namespace std;
 /*** USAGE ***/
@@ -270,6 +271,7 @@ int main(int argc, char ** argv) {
 		if (DO_TRANSPARENT_ANALYSIS) {
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings);
+			transpAna->setResults(currentResults);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
 		}
@@ -285,12 +287,32 @@ int main(int argc, char ** argv) {
 
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings,TSettings::transparentMode);
+			transpAna->setResults(currentResults);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
 		}
-		//		currentResults->Print();
-		//		currentResults->saveResults();
-		//		delete currentResults;
+		cout<<"PRINT RESULTS"<<endl;
+		currentResults->Print();
+		cout<<"SAVE RESULTS"<<endl;
+//		currentResults->saveResults(settings->getResultsRootFilePath());
+		TFile* file = new TFile (settings->getResultsRootFilePath().c_str(),"RECREATE");
+		file->Print();
+		file->ls();
+		file->SetName("fileName");
+		file->cd();
+		cout<<"KEYS: "<<file->GetNkeys()<<endl;
+		file->GetListOfKeys()->Print();
+		cout<<"Write"<<endl;
+
+		currentResults->Write("test");
+		cout<<"CLOSE FILE"<<endl;
+		file->Close();
+		if (currentResults){
+			cout<<"DELETE RESULTS"<<endl;
+			delete currentResults;
+			cout<<"#"<<endl;;
+		}
+		cout<<"saved results..."<<endl;
 
 
 		runWatch.Stop();

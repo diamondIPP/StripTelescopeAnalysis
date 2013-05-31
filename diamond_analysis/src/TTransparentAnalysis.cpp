@@ -20,7 +20,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 	}
 	sys = gSystem;
 	setSettings(settings);
-	
+	results=0;
 	settings->goToAlignmentRootDir();
 	eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(mode),settings->getEtaDistributionPath(),settings);
 	// TODO: load settings!!!
@@ -51,6 +51,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 	cout<<"end initialise"<<endl;
 	positionPrediction = 0;
 	inf  = std::numeric_limits<float>::infinity();
+	alignMode = mode;
 
 }
 
@@ -69,7 +70,9 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 	mpPulseHeights.push_back(vecMPLandau);
 	mpPulseHeights.push_back(vecMPLandau2Highest);
 	meanPulseHeights.push_back(vecMeanLandau);
+//	this->settings->res
 	meanPulseHeights.push_back(vecMeanLandau2Highest);
+	if(results) this->results->setPH_NoutOfN(vecMeanLandau, alignMode);
 	resolutions.push_back(vecResidualChargeWeighted);
 	resolutions.push_back(vecResidualHighest2Centroid);
 	resolutions.push_back(vecResidualEtaCorrected);
@@ -556,13 +559,50 @@ void TTransparentAnalysis::fitHistograms() {
 		//,
 		//,1024,HistogrammSaver::maxWidth,-6000);
 		// fit histograms
-		fitLandau.push_back(landauGauss->doLandauGaussFit(hLandau[clusterSize]));
+		TF1* fit = landauGauss->doLandauGaussFit(hLandau[clusterSize]);
+		if(fit==0){cout<<"PROBLEM with fit..."<<clusterSize<<endl;}
+		fitLandau.push_back(fit);
 		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLandau2Highest[clusterSize]));
+		if(clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1){
+			cout<<"MOVING TO RESULTS...."<<endl;
+
+			Float_t mean;
+			if(hLandau2Highest[clusterSize]) mean = hLandau2Highest[clusterSize]->GetMean();
+			else mean = -1;
+			cout<<"#"<<flush;
+			Float_t mp;
+			TF1* fit = fitLandau2Highest.back();
+			if(fit) mp = fit->GetParameter(1);
+			else mp = -1;
+			cout<<"-"<<flush;
+			Float_t width;
+			if (fit) width = fit->GetParameter(0);
+			else width = -1;
+			cout<<"+"<<flush;
+			Float_t gSigma;
+			if (fit) gSigma = fit->GetParameter(3);
+			else gSigma = -1;
+			cout<<"@"<<" "<<results<<endl;
+			if(results){
+				cout<< "RESULTS: "<<results<<endl;
+				results->Print();
+				results->setPH_2outOf10(mean,mp,width,gSigma,alignMode);
+			}
+
+
+			else cout<<"setPH_2outOf10 DIDN'T WORK!!!"<<endl;
+			cout<<"&"<<flush;
+			cout<<"DONE"<<endl;
+		}
+		else if (clusterSize == 2){
+		}
+		else if (clusterSize == 4){
+		}
 		fitResidualChargeWeighted.push_back(doGaussFit(hResidualChargeWeighted[clusterSize]));
 		fitResidualHighest2Centroid.push_back(doGaussFit(hResidualHighest2Centroid[clusterSize]));
 		fitResidualEtaCorrected.push_back(doDoubleGaussFit(hResidualEtaCorrected[clusterSize]));
 		if(clusterSize+1 >= TPlaneProperties::getMaxTransparentClusterSize(subjectDetector))
-			saveResolutionPlot(hResidualEtaCorrected[clusterSize]);
+			saveResolutionPlot(hResidualEtaCorrected[clusterSize],clusterSize);
 		// save fit parameters
 		vecMPLandau.push_back(fitLandau[clusterSize]->GetParameter(1));
 		vecMPLandau2Highest.push_back(fitLandau2Highest[clusterSize]->GetParameter(1));
@@ -894,7 +934,7 @@ void TTransparentAnalysis::saveHistograms() {
 	if (htemp) delete htemp;
 	analyseEtaDistributions();
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-		string name = (string)TString::Format("hLandauVsEventNo_2outOf%d",clusterSize+1);
+		string name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize+1);
 		TH2F* hLandauVsEventNo = histSaver->CreateScatterHisto(name,vecVecPh2Highest.at(clusterSize),vectorEventNo,100,512,0,nEvents,0,3000);
 		cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize).size()<<endl;
 		if(hLandauVsEventNo){
@@ -987,7 +1027,7 @@ void TTransparentAnalysis::saveHistograms() {
 				TH1F* hProj = (TH1F*)hist->ProjectionX(hname,minBin,maxBin);
 				if (hProj) hProj->SetTitle(title);
 				if (hProj) cout<<hProj->GetEntries()<<"/"<<	hist->GetEntries()<<endl;
-				saveResolutionPlot(hProj);
+				saveResolutionPlot(hProj,i);
 				if (hProj) delete hProj;
 
 			}
@@ -1270,12 +1310,15 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 	return transparentCluster;
 }
 
-void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes) {
+void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, int clusterSize) {
 	if(!hRes)
 		return;
-	Float_t mean = hRes->GetMean();
-	Float_t sigma = hRes->GetRMS();
+//	Float_t mean = hRes->GetMean();
+//	Float_t sigma = hRes->GetRMS();
 	TString hName;
+	TFitResultPtr resPtr = hRes->Fit("gaus","NQS");
+	Float_t mean = resPtr.Get()->GetParams()[1];//->Parameter(1);
+	Float_t sigma = resPtr.Get()->GetParams()[2];//Parameter(2);
 	for(int i=0;i<3;i++){
 		hName = hRes->GetName();
 		switch (i){
@@ -1284,12 +1327,25 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes) {
 		case 2: hName.Append("_DoubleGausFit");break;
 		}
 		TH1F* hClone = (TH1F*)hRes->Clone(hName);
+		Float_t gaus1,gaus2;
+		TF1* fit;
 		if(hClone) {
 			switch(i){
-			case 0: hClone->Fit("gaus","","",mean-sigma,mean+sigma);break;
-			case 1: hClone->Fit("gaus","","",mean-.5*sigma,mean+.5*sigma);break;
-			case 2: doDoubleGaussFit(hClone);break;
+			case 0: resPtr=hClone->Fit("gaus","SQ","",mean-sigma,mean+sigma);
+				gaus1 = resPtr.Get()->GetParams()[2]; break;
+			case 1: resPtr=hClone->Fit("gaus","SQ","",mean-.5*sigma,mean+.5*sigma);
+				gaus1 = resPtr.Get()->GetParams()[2]; break;
+			case 2: fit = doDoubleGaussFit(hClone);
+				gaus1 = fit->GetParameter(2);
+				gaus2 = fit->GetParameter(5);
+			break;
 			}
+			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
+				if( i == 0 ) results->setSingleGaussianResolution(gaus1,alignMode);
+				else if (i == 1 ) results->setSingleGaussianShortResolution(gaus1,alignMode);
+				else if (i == 2 ) results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
+			}
+
 			histSaver->SaveHistogram(hClone);
 			delete hClone;
 		}

@@ -59,6 +59,7 @@ private:
 	std::vector<Float_t> pitchWidth;
 	bool bLoadedStandardPitchWidthSettings;
 	Float_t standardPW;
+	UInt_t verbosity;
     ClassDef(TDiamondPattern,1);
 };
 

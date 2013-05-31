@@ -34,7 +34,7 @@
 
 class TSettings:public TObject {
 public:
-	enum alignmentMode {normalMode,transparentMode};
+	enum alignmentMode {normalMode=0,transparentMode=1};
 	enum enumRunDescription {leftDia=1,rightDia=2,allDia=0,unknown=-1};
 private:
 	std::string runDescription;
@@ -58,7 +58,8 @@ public:
 	std::string getEtaDistributionPath(Int_t step=-1);
     std::string get3dDiamondTreeFilePath();
     std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
-	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
+	std::string getResultsRootFilePath();
+    bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
 	void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
 	void goToSelectionTreeDir();

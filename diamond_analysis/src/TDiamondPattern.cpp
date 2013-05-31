@@ -14,6 +14,7 @@ TDiamondPattern::TDiamondPattern() {
 	channelToMetricConversion.resize(TPlaneProperties::getNChannelsDiamond());
 	bLoadedStandardPitchWidthSettings=false;
 	standardPW = TPlaneProperties::getStripDistance();
+	verbosity = 0;
 }
 
 TDiamondPattern::~TDiamondPattern() {
@@ -161,7 +162,7 @@ Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {
 	if(leftChannel==channel)
 		return leftPosition;
 	if (leftPosition == N_INVALID || rightPosition == N_INVALID){
-		cerr<<"One of the channels is invalid: "<<leftChannel<<"-"<<rightChannel<<"\t"<<leftPosition<<"-"<<rightPosition<<endl;
+		if(verbosity) cerr<<"One of the channels is invalid: "<<leftChannel<<"-"<<rightChannel<<"\t"<<leftPosition<<"-"<<rightPosition<<endl;
 		return N_INVALID;
 	}
 	return position;
@@ -170,7 +171,7 @@ Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {
 Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 	if(hasInvalidIntervals()){
 
-		cout<<" TDiamondPattern::convertMetricToChannel "<<metric<<" INVALID INTERVALS"<<endl;
+		if(verbosity)  cout<<" TDiamondPattern::convertMetricToChannel "<<metric<<" INVALID INTERVALS"<<endl;
 		return N_INVALID;
 	}
 	for(UInt_t i = 0; i < getNIntervals();i++){

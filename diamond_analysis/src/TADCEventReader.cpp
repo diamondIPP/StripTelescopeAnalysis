@@ -59,7 +59,7 @@ TADCEventReader::~TADCEventReader() {
 			delete file;
 		else
 			cout<<"couldn't find object: "<< file->GetName()<< " " <<gROOT->FindObject(file->GetName())<<endl;
-//		delete file;
+		//		delete file;
 	}
 	if(verbosity>3)cout<< "DONE"<<flush;
 }
@@ -525,7 +525,8 @@ int TADCEventReader::hasTree(){
 	{
 		TObject *obj = key->ReadObj();
 		if ((obj->IsA()->InheritsFrom("TTree"))){
-			hasATree++;}
+			hasATree++;
+		}
 	}
 	return hasATree;
 }
@@ -665,10 +666,10 @@ Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
 
 UInt_t TADCEventReader::getNClusters(UInt_t det)
 {
-    if (!pEvent){
-        cerr<<setw(6)<<current_event<<": Cannot getNClusters of detector no. "<<det<<", pointer pEvent ==0"<<endl;
-        return 0;
-    }
+	if (!pEvent){
+		cerr<<setw(6)<<current_event<<": Cannot getNClusters of detector no. "<<det<<", pointer pEvent ==0"<<endl;
+		return 0;
+	}
 	if(det<TPlaneProperties::getNDetectors()){
 		UInt_t nClusters = this->pEvent->getNClusters(det);
 		if(verbosity>7){

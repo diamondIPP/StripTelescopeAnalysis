@@ -162,6 +162,15 @@ void TSettings::goToOutputDir(){
  goToDir(this->getOutputDir());
 }
 
+string TSettings::getResultsRootFilePath(){
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"Results."<<getRunNumber();
+	if(this->isSpecialAnalysis())
+		path<<"-"<<getRunDescription();
+	path<<".root";
+	return path.str();
+}
 
 
 std::string TSettings::getRawTreeFilePath()

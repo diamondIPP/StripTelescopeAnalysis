@@ -32,6 +32,7 @@
 #include "TSystem.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TFitResult.h"//TFitResultPtr.h"
 //#include "TGraph.h"
 #include "TF1.h"
 #include "TCanvas.h"
@@ -52,6 +53,7 @@
 #include "THTMLTransparentAnalysis.hh"
 #include "LandauGaussFit.hh"
 #include "TClustering.hh"
+#include "TResults.hh"
 #include "TSpectrum.h"
 
 using namespace std;
@@ -65,7 +67,7 @@ public:
 	void calcEtaCorrectedResiduals();
 	void setSettings(TSettings* settings);
 	static TCluster makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize);
-	
+	void setResults(TResults* res){cout<<"Setting results!"<<endl;results=res;};
 private:
 	void createEventVector(Int_t startEvent = 0);
 	void initHistograms();
@@ -90,7 +92,7 @@ private:
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
 	
-	void saveResolutionPlot(TH1F* hRes);
+	void saveResolutionPlot(TH1F* hRes, int clusterSize);
 	// run variables
 	UInt_t subjectDetector, subjectPlane;
 	TPlaneProperties::enumCoordinate subjectDetectorCoordinate;
@@ -110,6 +112,7 @@ private:
     TSystem* sys;
 	HistogrammSaver* histSaver;
     TSettings* settings;
+    TResults* results;
 	TTracking* eventReader;
 	THTMLTransparentAnalysis* htmlTransAna;
 	LandauGaussFit* landauGauss;
@@ -185,7 +188,7 @@ private:
 	vector<TF1*> fitResidualChargeWeighted;
 	vector<TF1*> fitResidualHighest2Centroid;
 	vector<TF1*> fitResidualEtaCorrected;
-	
+	TSettings::alignmentMode alignMode;
 	
 	
 //	TH1F* histo_transparentclustering_landau[10];
@@ -220,6 +223,7 @@ private:
 	
 	vector<Float_t> vecPredictedPosition, vecRelPredictedPosition;
 	vector<Float_t> vecChi2;
+
 
 };
 
