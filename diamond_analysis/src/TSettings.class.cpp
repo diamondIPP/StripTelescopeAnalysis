@@ -250,6 +250,7 @@ void TSettings::goToDir(std::string dir){
 	sys->cd(dir.c_str());
 	if(this->getVerbosity()>3)cout<<"new Dir: "<<sys->pwd()<<endl;
 }
+
 void TSettings::goToRawTreeDir(){
 	goToDir(this->getAbsoluteOuputPath(false));
 }

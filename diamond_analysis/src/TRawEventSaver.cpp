@@ -51,7 +51,11 @@ TRawEventSaver::~TRawEventSaver() {
 	// TODO Auto-generated destructor stub
 	cout<<"closing Files...,"<<endl;
 	if(createdNewTree)rawTree->Write("rawTree");
+	rawTree->Delete();
+
+//	if(rawTree) delete rawTree;
 	rawFile->Close();
+	if(rawFile) delete rawFile;
 	settings->goToOutputDir();
 }
 

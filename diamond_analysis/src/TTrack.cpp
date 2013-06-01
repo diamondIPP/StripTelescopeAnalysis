@@ -28,6 +28,11 @@ TTrack::TTrack(TDetectorAlignment *alignment,TSettings* settings) {
 }
 
 TTrack::~TTrack() {
+	for(std::map<UInt_t,TH1F*>::iterator iterator = histoMap.begin(); iterator != histoMap.end(); iterator++) {
+//		UInt_t det = iterator->first;
+		if (iterator->second) delete iterator->second;
+		histoMap.erase(iterator);
+	}
 	delete linFitX;
 	delete linFitY;
 }

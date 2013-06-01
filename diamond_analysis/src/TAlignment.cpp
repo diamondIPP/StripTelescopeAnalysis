@@ -8,6 +8,7 @@
 #include "../include/TAlignment.hh"
 
 TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
+	if (settings) verbosity = settings->getVerbosity();
 	cout << "\n\n\n**********************************************************" << endl;
 	cout << "*************TAlignment::TAlignment***********************" << endl;
 	cout << "**********************************************************" << endl;
@@ -16,7 +17,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	sys = gSystem;
 	setSettings(inputSettings);
 	runNumber = settings->getRunNumber();
-	cout << runNumber << endl;
+	if(verbosity) cout << runNumber << endl;
 	stringstream runString;
 	settings->goToSelectionTreeDir();
 	htmlAlign = new THTMLAlignment(settings);
@@ -30,7 +31,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 		eventReader = (TTracking*) new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
 //	settings->getRunNumber(),settings->getVerbosity()<15?0:settings->getVerbosity()-15);
 		eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
-		cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
+//		cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
 	}
 	histSaver = new HistogrammSaver();
 	settings->goToAlignmentDir(mode);
@@ -39,7 +40,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	histSaver->SetNumberOfEvents(eventReader->GetEntries());
 	htmlAlign->setFileGeneratingPath(settings->getAlignmentDir(mode));
 	settings->goToAlignmentRootDir(mode);
-	cout << "end initialise" << endl;
+	if(verbosity) cout << "end initialise" << endl;
 	alignmentPercentage = settings->getAlignment_training_track_fraction();
 	Float_t stripSize = 1.;    // 50./10000.;//mu m
 	detectorD0Z = 0.725 / stripSize;    // by definition in cm
@@ -47,10 +48,9 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	detectorD2Z = 18.725 / stripSize;    // by definition in cm
 	detectorD3Z = 19.625 / stripSize;    // by definition in cm
 	detectorDiaZ = 10.2 / stripSize;    // by definition in cm
-	verbosity = settings->getVerbosity();
-	cout<<"Verbosity is: "<<verbosity<<" "<<settings->getVerbosity()<<endl;
+//	cout<<"Verbosity is: "<<verbosity<<" "<<settings->getVerbosity()<<endl;
 	res_keep_factor = settings->getRes_keep_factor();
-	cout << "Res Keep factor is set to " << res_keep_factor << endl;
+	if(verbosity) cout << "Res Keep factor is set to " << res_keep_factor << endl;
 	align = NULL;
 	myTrack = NULL;
 	nAlignmentStep = -1;
@@ -72,6 +72,10 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 }
 
 TAlignment::~TAlignment() {
+	while (events.size()) {
+		events.back().Delete();
+		events.pop_back();
+	}
 	if(verbosity)cout << "TAlignment deconstructor" << endl;
 	if (results!=0)results->setAlignment(this->align);
 	htmlAlign->setAlignment(align);
@@ -132,7 +136,7 @@ void TAlignment::loadDetectorAlignment(TSettings::alignmentMode mode){
 				cout<<"Found DetectorAlignment!"<<endl;
 //				if(verbosity)align->Print();
 				alignmentFile->Close();
-				align = (TDetectorAlignment*)align->Clone();
+//				align = (TDetectorAlignment*)align->Clone();
 			}
 			else{
 				cout<<"Couldn't find detectorAlignment in alignmentFile: "<<endl;
@@ -1271,7 +1275,7 @@ void TAlignment::getFinalSiliconAlignmentResuluts() {
 
 void TAlignment::LoadResolutionFromSettingsFile(){
 	cout<<" Loading Resolution From Settings File..."<<flush;
-	for(int pl = 0; pl < TPlaneProperties::getNSiliconPlanes(); pl++){
+	for(UInt_t pl = 0; pl < TPlaneProperties::getNSiliconPlanes(); pl++){
 		align->setXResolution(settings->GetDefaultResolutionX(pl),pl);
 		align->setYResolution(settings->GetDefaultResolutionY(pl),pl);
 	}

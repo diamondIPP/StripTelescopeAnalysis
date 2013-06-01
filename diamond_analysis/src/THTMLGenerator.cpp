@@ -22,7 +22,7 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 }
 
 THTMLGenerator::~THTMLGenerator() {
-	cout<<"delete HTML GEN"<<endl;
+	if(verbosity)cout<<"delete HTML GEN"<<endl;
 }
 
 
@@ -32,7 +32,7 @@ void THTMLGenerator::generateHTMLFile(){
 	stringstream htmlOutputFileName;
 	if(verbosity>2)cout<<"FILE: "<<fileName<<endl;
 	htmlOutputFileName<<fileGenPath<<"/"<<	fileName;
-	cout<<"create HTML file: \""<<htmlOutputFileName.str()<<"\""<<endl;
+	if(verbosity)cout<<"create HTML file: \""<<htmlOutputFileName.str()<<"\""<<endl;
 	html_summary.open(htmlOutputFileName.str().c_str());
 	generatorHTMLHeader();
 	generateHTMLTail();

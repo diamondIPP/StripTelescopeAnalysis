@@ -14,6 +14,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
 }
 
 TADCEventReader::TADCEventReader(string FileName,TSettings* settings) {
+	if (settings) verbosity = settings->getVerbosity();
 	init(FileName,settings->getRunNumber(),settings->getVerbosity());
 	this->settings = settings;
 }
@@ -53,12 +54,12 @@ TADCEventReader::~TADCEventReader() {
 	//delete tree;
 
 	if(file!=0){
-		cout<<"Zombie: "<<file->IsZombie()<<endl;
-		cout<<"File: "<<file->GetName()<<" is open: "<<file->IsOpen()<<" "<<endl;
+//		cout<<"Zombie: "<<file->IsZombie()<<endl;
+//		cout<<"File: "<<file->GetName()<<" is open: "<<file->IsOpen()<<" "<<endl;
 		if (gROOT->FindObject(file->GetName()))
 			delete file;
 		else
-			cout<<"couldn't find object: "<< file->GetName()<< " " <<gROOT->FindObject(file->GetName())<<endl;
+			if(verbosity) cout<<"couldn't find object: "<< file->GetName()<< " " <<gROOT->FindObject(file->GetName())<<endl;
 		//		delete file;
 	}
 	if(verbosity>3)cout<< "DONE"<<flush;
@@ -758,7 +759,7 @@ TH1F *TADCEventReader::getEtaIntegral(UInt_t det)
 }
 
 void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
-	cout<<"Load Eta Distributions of run "<<runNumber<<"\t"<<flush;
+	if(verbosity) cout<<"Load Eta Distributions of run "<<runNumber<<"\t"<<flush;
 	bEtaIntegrals=true;
 	stringstream etaFileName;
 
@@ -766,7 +767,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		etaFileName<<"etaCorrection."<<runNumber<<".root";
 	else
 		etaFileName<<etaDistributionPath;
-	cout<<etaFileName<<endl;
+	if(verbosity) cout<<etaFileName<<endl;
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
@@ -798,7 +799,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 
 void TADCEventReader::setEtaDistributionPath(std::string path)
 {
-	cout<<"Set Eta DistributionPath: "<<path<<endl;
+	if(verbosity) cout<<"Set Eta DistributionPath: "<<path<<endl;
 	etaDistributionPath=path;
 }
 

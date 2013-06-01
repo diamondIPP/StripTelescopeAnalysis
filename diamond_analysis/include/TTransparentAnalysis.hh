@@ -69,6 +69,7 @@ public:
 	static TCluster makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	void setResults(TResults* res){cout<<"Setting results!"<<endl;results=res;};
 private:
+	void clearEventVector();
 	void createEventVector(Int_t startEvent = 0);
 	void initHistograms();
 	void fillHistograms();

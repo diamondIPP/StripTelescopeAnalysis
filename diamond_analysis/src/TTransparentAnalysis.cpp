@@ -511,7 +511,7 @@ void TTransparentAnalysis::createEfficiencyPlots(TH1F *hLandau){
 
 void TTransparentAnalysis::fitHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-		cout<<"Create EfficencyPlots "<<clusterSize<<endl;
+		if (verbosity) cout<<"Create EfficencyPlots "<<clusterSize<<endl;
 		createEfficiencyPlots(hLandau2Highest[clusterSize]);
 		createEfficiencyPlots(hLandau[clusterSize]);
 		createEfficiencyPlots(hLandau1Highest[clusterSize]);
@@ -564,39 +564,24 @@ void TTransparentAnalysis::fitHistograms() {
 		fitLandau.push_back(fit);
 		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLandau2Highest[clusterSize]));
 		if(clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1){
-			cout<<"MOVING TO RESULTS...."<<endl;
 
 			Float_t mean;
 			if(hLandau2Highest[clusterSize]) mean = hLandau2Highest[clusterSize]->GetMean();
 			else mean = -1;
-			cout<<"#"<<flush;
 			Float_t mp;
 			TF1* fit = fitLandau2Highest.back();
 			if(fit) mp = fit->GetParameter(1);
 			else mp = -1;
-			cout<<"-"<<flush;
 			Float_t width;
 			if (fit) width = fit->GetParameter(0);
 			else width = -1;
-			cout<<"+"<<flush;
 			Float_t gSigma;
 			if (fit) gSigma = fit->GetParameter(3);
 			else gSigma = -1;
-			cout<<"@"<<" "<<results<<endl;
 			if(results){
-				cout<< "RESULTS: "<<results<<endl;
-				results->Print();
 				results->setPH_2outOf10(mean,mp,width,gSigma,alignMode);
 			}
-
-
 			else cout<<"setPH_2outOf10 DIDN'T WORK!!!"<<endl;
-			cout<<"&"<<flush;
-			cout<<"DONE"<<endl;
-		}
-		else if (clusterSize == 2){
-		}
-		else if (clusterSize == 4){
 		}
 		fitResidualChargeWeighted.push_back(doGaussFit(hResidualChargeWeighted[clusterSize]));
 		fitResidualHighest2Centroid.push_back(doGaussFit(hResidualHighest2Centroid[clusterSize]));
@@ -679,13 +664,13 @@ void TTransparentAnalysis::analyseEtaDistribution(TH1F* hEtaDist){
 	}
 	TList *functions = hEtaDist->GetListOfFunctions();
 	TPolyMarker *pm = (TPolyMarker*)functions->FindObject("TPolyMarker");
-	cout<<hEtaDist->GetName()<<" - "<<ntries<<endl;
+	if(verbosity) cout<<hEtaDist->GetName()<<" - "<<ntries<<endl;
 	if (!pm){
 		if(functions) functions->Print();
 		return;
 	}
 	for (int i=0;i< pm->GetN();i++)
-		cout<<"\t"<<i<<"\t"<<pm->GetX()[i]*100.<<": "<<pm->GetY()[i]<<"\n";
+		if(verbosity) cout<<"\t"<<i<<"\t"<<pm->GetX()[i]*100.<<": "<<pm->GetY()[i]<<"\n";
 	if(pm->GetN()==2){
 		Float_t x_0 = pm->GetX()[0];
 		Float_t x_1 = pm->GetX()[1];
@@ -701,10 +686,10 @@ void TTransparentAnalysis::analyseEtaDistribution(TH1F* hEtaDist){
 			x_1 = 1-x_1;
 		x_0*=100.;
 		x_1*=100.;
-		cout<<"\t\t"<<x_0<<" - "<< x_1 <<"\t"<<(x_0-x_1)<<"\t"<<x_0/x_1<<"\t"<<(x_0-x_1)*100./x_0<<endl;
-		cout<<"\t\t"<<y_0<<" - "<< y_1 <<"\t"<<(y_0-y_1)<<"\t"<<y_0/y_1<<"\t"<<(y_0-y_1)*100/y_0<<endl;
+		if(verbosity)cout<<"\t\t"<<x_0<<" - "<< x_1 <<"\t"<<(x_0-x_1)<<"\t"<<x_0/x_1<<"\t"<<(x_0-x_1)*100./x_0<<endl;
+		if(verbosity)cout<<"\t\t"<<y_0<<" - "<< y_1 <<"\t"<<(y_0-y_1)<<"\t"<<y_0/y_1<<"\t"<<(y_0-y_1)*100/y_0<<endl;
 	}
-	cout<<"\n"<<flush;
+	if(verbosity)cout<<"\n"<<flush;
 }
 
 void TTransparentAnalysis::analyseEtaDistributions(){
@@ -904,8 +889,8 @@ void TTransparentAnalysis::saveHistograms() {
 		htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");
 	}
 	//else{
-	else cout<<"couldn't ";
-		cout<<"create scatterplot: "<<name<<"\t"<<vecVecFidCutX.size()<<" "<<vecVecLandau.at(i).size()<<" "<<i<<" "<<endl;
+	else if(verbosity) cout<<"couldn't ";
+	if(verbosity)cout<<"create scatterplot: "<<name<<"\t"<<vecVecFidCutX.size()<<" "<<vecVecLandau.at(i).size()<<" "<<i<<" "<<endl;
 	if(!htemp){
 		char t;
 		cin>>t;
@@ -936,7 +921,7 @@ void TTransparentAnalysis::saveHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		string name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize+1);
 		TH2F* hLandauVsEventNo = histSaver->CreateScatterHisto(name,vecVecPh2Highest.at(clusterSize),vectorEventNo,100,512,0,nEvents,0,3000);
-		cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize).size()<<endl;
+		if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize).size()<<endl;
 		if(hLandauVsEventNo){
 			hLandauVsEventNo->GetXaxis()->SetTitle("Event no.");
 			hLandauVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
@@ -1022,7 +1007,7 @@ void TTransparentAnalysis::saveHistograms() {
 				TString hname = TString::Format("hResolutionEtaCorrectedIn%d_Eta_%02d_%02d",i+1,(int)(minEta*100),(int)((1-minEta)*100));
 				Int_t minBin =  hist->GetYaxis()->FindBin(minEta);
 				Int_t maxBin = hist->GetYaxis()->FindBin(1-minEta);
-				cout<<hname<<":"<<minEta<<" --> "<<minBin<<"-"<<maxBin<<" "<<flush;
+				if(verbosity) cout<<hname<<":"<<minEta<<" --> "<<minBin<<"-"<<maxBin<<" "<<flush;
 				TString title = TString::Format("Resolution_{#eta-corrected} in %d channels, %.2f < #eta < %.2f",i+1,minEta,1-minEta);
 				TH1F* hProj = (TH1F*)hist->ProjectionX(hname,minBin,maxBin);
 				if (hProj) hProj->SetTitle(title);
@@ -1308,6 +1293,15 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 //		transparentCluster.addChannel(currentChannel, reader->getRawSignal(det,currentChannel), reader->getRawSignalInSigma(det,currentChannel), reader->getAdcValue(det,currentChannel), reader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
 	return transparentCluster;
+}
+
+void TTransparentAnalysis::clearEventVector() {
+	while ( this->vecEvents.size() != 0)  {
+		TEvent* event = vecEvents.back();
+		if (event) delete event;
+		vecEvents.pop_back();
+	}
+
 }
 
 void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, int clusterSize) {

@@ -532,6 +532,7 @@ void TAnalysisOfClustering::saveHistos(){
 				delete hEtaDistributionVsLeftChannelArea;
 		}
 		histSaver->SaveHistogram(this->hEtaDistributionVsLeftChannel[det]);
+		if(hEtaDistributionVsLeftChannel) delete hEtaDistributionVsLeftChannel;
 
 		for(int i=1;(i<6&&TPlaneProperties::isDiamondDetector(det))||i<3;i++){
 			TString name =  TString::Format("hEtaDistribution_ClusterSize%d",i);

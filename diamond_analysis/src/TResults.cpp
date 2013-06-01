@@ -242,7 +242,6 @@ void TResults::setDoubleGaussianResolution(Float_t gaus1,Float_t gaus2, TSetting
 }
 
 void TResults::setSingleGaussianResolution(Float_t gaus,TSettings::alignmentMode mode){
-	cout<<"TResults::setSingleGaussianResolution "<<gaus<<" "<<((int)mode)<<endl;
 	if (mode == TSettings::normalMode){
 		singleGaus_normal = gaus;
 	}

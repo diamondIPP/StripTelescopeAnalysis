@@ -42,6 +42,14 @@ TCluster::TCluster(int nEvent,UChar_t det, int seedSigma,int hitSigma,UInt_t nCh
 }
 
 TCluster::~TCluster() {
+	while (clusterSignal.size())	clusterSignal.pop_back();
+	while (clusterChannel.size()) clusterChannel.pop_back();
+	while (clusterADC.size()) clusterADC.pop_back();
+	while (clusterSignalInSigma.size()) clusterSignalInSigma.pop_back();
+	while (clusterPedMean.size()) clusterPedMean.pop_back();
+	while (clusterPedSigma.size()) clusterPedSigma.pop_back();
+	while (clusterPedMeanCMN.size()) clusterPedMeanCMN.pop_back();
+	while (clusterPedSigmaCMN.size()) clusterPedSigmaCMN.pop_back();
 }
 
 

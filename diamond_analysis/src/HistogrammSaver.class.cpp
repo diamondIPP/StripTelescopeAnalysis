@@ -644,8 +644,8 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 				return;
 	}
 	if(histo->GetEntries()==0)return;
-	gROOT->SetStyle("Plain_RD42_2D");
-	gROOT->ForceStyle(true);
+//	gROOT->SetStyle("Plain_RD42_2D");
+//	gROOT->ForceStyle(true);
 	TCanvas *plots_canvas =  new TCanvas(TString::Format("cPng_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
 	plots_canvas->Clear();
 	plots_canvas->cd();
@@ -658,9 +658,11 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	ostringstream plot_filename;
 	plot_filename << plots_path << histo->GetName() << ".png";
 	plots_canvas->Print(plot_filename.str().c_str());
-	gROOT->SetStyle("Plain_RD42");
+//	gROOT->SetStyle("Plain_RD42");
 	//currentStyle->cd();
 	//	if(plots_canvas)delete plots_canvas;
+	if (htemp) delete htemp;
+	if (plots_canvas) delete plots_canvas;
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
@@ -692,6 +694,9 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 	f->cd();
 	plots_canvas->Write();
 	f->Close();
+	if (htemp) delete htemp;
+	if (plots_canvas) delete plots_canvas;
+
 //	if (plots_canvas) delete plots_canvas;
 }
 
