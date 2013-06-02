@@ -182,7 +182,7 @@ int main(int argc, char ** argv) {
 		//		log = freopen(logfilename.str().c_str(), "w", stdout);
 
 
-		TSettings *settings=0;
+		TSettings *settings = 0;
 		cout<<"settings"<<endl;
 		settings = new TSettings((TRunInfo*)&RunParameters[i]);
 

@@ -56,10 +56,10 @@ public:
 	std::string getCrossTalkFactorsFileName();
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
 	std::string getEtaDistributionPath(Int_t step=-1);
-    std::string get3dDiamondTreeFilePath();
-    std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
+	std::string get3dDiamondTreeFilePath();
+	std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
 	std::string getResultsRootFilePath();
-    bool doCommonModeNoiseCorrection() const {return DO_CMC;}
+	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
 	void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
 	void goToSelectionTreeDir();
@@ -68,8 +68,8 @@ public:
 	void goToAlignmentRootDir(alignmentMode mode = normalMode){goToDir(this->getAbsoluteOuputPath(false));}
 
 
-    void goTo3dDiamondTreeDir();
-    void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
+	void goTo3dDiamondTreeDir();
+	void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
 	void goToPedestalAnalysisDir();
 	void goToClusterAnalysisDir();
 	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
@@ -100,9 +100,9 @@ public:
 	void setRunDescription(std::string runDescription);
 	void setOutputDir(std::string ouputDir){this->outputDir=outputDir;}
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
-    bool is3dDiamond(){return b3dDiamond;};
-    bool b3dDiamond;
-    bool doTransparentAlignmnet()const {return bTransparentAlignment;}
+	bool is3dDiamond(){return b3dDiamond;};
+	bool b3dDiamond;
+	bool doTransparentAlignmnet()const {return bTransparentAlignment;}
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -302,8 +302,8 @@ public:
 	void setUseUserResolutionInput(bool useUserResolutionInput) {bUseUserResolutionInput = useUserResolutionInput;}
 	Float_t GetDefaultResolutionX(UInt_t plane){if(plane<9)return alignment_resolutions.at(plane*2);return 0;}
 	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 0;};
-//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
-//	int getAreaOfInterest(){return inde
+	//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
+	//	int getAreaOfInterest(){return inde
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3D;
@@ -456,12 +456,12 @@ public:
 	TDiamondPattern diamondPattern;
 private:
 	int verbosity;
-       Float_t silPitchWidth;
-       Float_t diaPitchWidth;
-       Float_t diaOffsetMetricSpace;
-       Float_t diaStartingChannel;
+	Float_t silPitchWidth;
+	Float_t diaPitchWidth;
+	Float_t diaOffsetMetricSpace;
+	Float_t diaStartingChannel;
 
-ClassDef(TSettings,4)
+	ClassDef(TSettings,5)
 
 };
 #endif

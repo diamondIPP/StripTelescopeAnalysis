@@ -1304,7 +1304,7 @@ void TTransparentAnalysis::clearEventVector() {
 
 }
 
-void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, int clusterSize) {
+void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	if(!hRes)
 		return;
 //	Float_t mean = hRes->GetMean();
@@ -1321,7 +1321,8 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, int clusterSize) {
 		case 2: hName.Append("_DoubleGausFit");break;
 		}
 		TH1F* hClone = (TH1F*)hRes->Clone(hName);
-		Float_t gaus1,gaus2;
+		Float_t gaus1=-1;
+		Float_t gaus2=-1;
 		TF1* fit;
 		if(hClone) {
 			switch(i){

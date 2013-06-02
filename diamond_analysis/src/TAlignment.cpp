@@ -8,7 +8,7 @@
 #include "../include/TAlignment.hh"
 
 TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
-	if (settings) verbosity = settings->getVerbosity();
+	if (inputSettings) verbosity = inputSettings->getVerbosity();
 	cout << "\n\n\n**********************************************************" << endl;
 	cout << "*************TAlignment::TAlignment***********************" << endl;
 	cout << "**********************************************************" << endl;
