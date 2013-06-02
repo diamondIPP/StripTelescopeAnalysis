@@ -73,7 +73,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 
 TAlignment::~TAlignment() {
 	while (events.size()) {
-		events.back().Delete();
+//		events.back().Delete();
 		events.pop_back();
 	}
 	if(verbosity)cout << "TAlignment deconstructor" << endl;
