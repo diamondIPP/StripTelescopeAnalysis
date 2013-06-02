@@ -217,11 +217,11 @@ void TResults::setAlignment(TDetectorAlignment* newAlignment)
 
 
 int TResults::getRunNumber() const {
-	return runNumber;
+	return runnumber;
 }
 
-void TResults::setRunNumber(int runNumber) {
-	this->runNumber = runNumber;
+void TResults::setRunNumber(UInt_t runNumber) {
+	this->runnumber = runNumber;
 }
 
 
@@ -299,19 +299,20 @@ void TResults::createOutputTextFile(){
 	ofstream myfile;
 	myfile.open (textFileName, ios::out	|ios::trunc);
 	UInt_t det  = 8;
-	myfile << "#     \t      \tCMN\t";
+	myfile << "#\t     \t      \tCMN\t";
 	myfile << "normal\t      \t     \t      \t    \t    \t";
 	myfile << "transAlign    \t     \t       \t    \t   \t";
 	myfile << "Res. normal\t\t   \t";
 	myfile << "Res. trans\t\t   \t";
 	myfile << endl;
-	myfile << "#noise\tCMCnoi\tCMN\t";
+	myfile << "#RUN\tnoise\tCMCnoi\tCMN\t";
 	myfile << "m2/10\tmp2/10\tw2/10\tsig2/10\tm2/2\tm4\4\t";
 	myfile << "m2/10\tmp2/10\tw2/10\tsig2/10\tm2/2\tm4\4\t";
 	myfile << "res1\tres2\tres3\tres4\t";
 	myfile << "res1\tres2\tres3\tres4";
 	myfile << endl;
 	myfile << " ";
+	myfile << TString::Format("%6d\t",runnumber);
 	myfile << TString::Format("%2.2f\t",noise[det]);
 	myfile << TString::Format("%2.2f\t",CMN);
 	myfile << TString::Format("%2.2f\t",diaCMCNoise);

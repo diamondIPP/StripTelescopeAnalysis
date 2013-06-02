@@ -64,7 +64,7 @@ public:
 	void setSeedSigma(UInt_t det,Float_t sigma){if(det<seedSigma.size())seedSigma[det]=sigma;}
 	void setHitSigma(UInt_t det,Float_t sigma){if(det<hitSigma.size())hitSigma[det]=sigma;}
 	int getRunNumber() const;
-	void setRunNumber(int runNumber);
+	void setRunNumber(UInt_t runNumber);
 	void setDoubleGaussianResolution(Float_t gaus1,Float_t gaus2,TSettings::alignmentMode mode);
 	void setSingleGaussianResolution(Float_t gaus,TSettings::alignmentMode mode);
 	void setSingleGaussianShortResolution(Float_t gaus,TSettings::alignmentMode mode);
@@ -78,7 +78,6 @@ public:
 private:
 	TString rootFileName;
 	TDetectorAlignment alignment;
-	int runNumber;
 	//  TSettings Settings;
 	TDatime lastUpdate;
 	std::string path;
