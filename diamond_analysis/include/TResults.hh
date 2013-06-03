@@ -41,8 +41,8 @@ public:
 	void setAlignment(TDetectorAlignment* newAlignment);
 	TDatime getLastUpdateDate(){return lastUpdate;};
 	void SetNoise(UInt_t det, Float_t detNoise);
-	void setCMCNoise(Float_t noise){diaCMCNoise = noise;}
-	void setCMNoise(Float_t cmn);
+	void setDiaNoiseCMcorrected(Float_t noise){diaCMCNoise = noise;}
+	void setCMN(Float_t cmn);
 	UInt_t getAllEvents() const{return nAllEvents;}
 	UInt_t getExactlyOneDiamondHit() const { return nExactlyOneDiamondHit;}
 	UInt_t getMoreThanOneDiamondHit() const {return nMoreThanOneDiamondHit;}
@@ -77,6 +77,7 @@ public:
 	void setResultsFromSettings(TSettings * settings);
 private:
 	TString rootFileName;
+	TString runDescription;
 	TDetectorAlignment alignment;
 	//  TSettings Settings;
 	TDatime lastUpdate;
@@ -127,7 +128,7 @@ private:
 	Float_t singleGausShort_trans;
 	Float_t singleGaus_normal;
 	Float_t singleGaus_trans;
-	ClassDef(TResults,4);
+	ClassDef(TResults,6);
 };
 
 #endif /* TRESULTS_HH_ */

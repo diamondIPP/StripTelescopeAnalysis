@@ -955,7 +955,7 @@ void TAnalysisOfPedestal::saveHistos(){
 	histofitx.SetLineColor(kBlue);
 	hDiaAllAdcNoise->Fit(&histofitx,"rq");
 
-	if(res!=0)res->SetNoise(TPlaneProperties::getDetDiamond(),histofitx.GetParameter(2));
+	Float_t diaNoise = histofitx.GetParameter(2);
 	histSaver->SaveHistogram(hDiaAllAdcNoise,true);
 	TF1 histofitAllNoiseCMN("histofitx","gaus",hDiaAllAdcNoiseCMN->GetMean()-2*hDiaAllAdcNoiseCMN->GetRMS(),hDiaAllAdcNoiseCMN->GetMean()+2*hDiaAllAdcNoiseCMN->GetRMS());
 	histofitAllNoiseCMN.SetLineColor(kBlue);
@@ -963,14 +963,25 @@ void TAnalysisOfPedestal::saveHistos(){
 	//    if(res!=0)res->SetNoise(TPlaneProperties::getDetDiamond(),histofitx.GetParameter(2));
 	histSaver->SaveHistogram(hDiaAllAdcNoiseCMN,true);
 
-	if(res!=0)res->setCMNoise(histofitAllNoiseCMN.GetParameter(2));
+	Float_t noiseCMC = histofitAllNoiseCMN.GetParameter(2);
 	for(Int_t ntries=0;hCMNoiseDistribution->GetBinContent(hCMNoiseDistribution->GetMaximumBin())<.05*hCMNoiseDistribution->GetEntries()&&ntries<2;ntries++)
 		hCMNoiseDistribution->Rebin(2);
 	TF1 histofitCMN("histofitx","gaus",hCMNoiseDistribution->GetMean()-2*hCMNoiseDistribution->GetRMS(),hCMNoiseDistribution->GetMean()+2*hCMNoiseDistribution->GetRMS());
 	histofitCMN.SetLineColor(kBlue);
 	hCMNoiseDistribution->Fit(&histofitCMN,"rq");
 
-	if(res!=0)res->setCMCNoise(histofitCMN.GetParameter(2));
+	Float_t cmn = histofitCMN.GetParameter(2);
+	if(verbosity > 3){
+		cout<<" diaNoise = "<<diaNoise<<endl;
+		cout<<" CMN      = "<<cmn<<endl;
+		cout<<" noiseCMC = "<<noiseCMC<<endl;
+		char t;
+		if(verbosity%2==1) cin>>t;
+	}
+
+	if(res!=0) res->setDiaNoiseCMcorrected(noiseCMC);
+	if(res!=0) res->setCMN(cmn);
+	if(res!=0) res->SetNoise(TPlaneProperties::getDetDiamond(),diaNoise);
 	histSaver->SaveHistogram(hCMNoiseDistribution,true);
 	stringstream name;
 	name<< "gADC_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();

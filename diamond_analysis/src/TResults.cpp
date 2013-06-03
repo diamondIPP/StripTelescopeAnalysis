@@ -23,6 +23,7 @@ TResults::TResults(UInt_t runnumber){
 TResults::TResults(TSettings *settings) {
 	path = gSystem->pwd();
 	initialiseResults();
+	setResultsFromSettings(settings);
 	cout<<"New TResults with settings "<<settings;
 	if (settings) cout << "\t run: "<<settings->getRunNumber()<<endl;
 	else cout<<"\t run: XXXXXXXX "<<endl;
@@ -155,12 +156,17 @@ void TResults::openResults(TSettings *settings){
 }
 
 void TResults::setResultsFromSettings(TSettings* settings){
+//	cout<<"setResultsFromSettings"<<endl;
 	hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
 	seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		seedSigma.at(det)=settings->getClusterSeedFactor(det,0);
 		hitSigma.at(det)=settings->getClusterHitFactor(det,0);
 	}
+	runDescription = settings->getRunDescription();
+//	cout<<runDescription<<endl;
+//	char t;
+//	cin>>t;
 }
 
 void TResults::saveResults(TString name){
@@ -292,7 +298,7 @@ void TResults::setPH_NoutOfN(vector<Float_t> vecPHNoutOfN, TSettings::alignmentM
 
 }
 
-void TResults::setCMNoise(Float_t cmn){
+void TResults::setCMN(Float_t cmn){
 	this->CMN = cmn;
 }
 
@@ -301,13 +307,13 @@ void TResults::createOutputTextFile(){
 	ofstream myfile;
 	myfile.open (textFileName, ios::out	|ios::trunc);
 	UInt_t det  = 8;
-	myfile << "#\t     \t      \tCMN\t";
+	myfile << "#\t     \t    \t      \tCMN\t";
 	myfile << "normal\t      \t     \t      \t    \t    \t";
 	myfile << "transAlign    \t     \t       \t    \t   \t";
 	myfile << "Res. normal\t\t   \t";
 	myfile << "Res. trans\t\t   \t";
 	myfile << endl;
-	myfile << "#RUN\tnoise\tCMCnoi\tCMN\t";
+	myfile << "#RUN\tdescr.\tnoise\tCMCnoi\tCMN\t";
 	myfile << "m2/10\tmp2/10\tw2/10\tsig2/10\tm2/2\tm4\4\t";
 	myfile << "m2/10\tmp2/10\tw2/10\tsig2/10\tm2/2\tm4\4\t";
 	myfile << "res1\tres2\tres3\tres4\t";
@@ -315,9 +321,10 @@ void TResults::createOutputTextFile(){
 	myfile << endl;
 	myfile << " ";
 	myfile << TString::Format("%6d\t",runnumber);
+	myfile << runDescription <<"\t";
 	myfile << TString::Format("%2.2f\t",noise[det]);
-	myfile << TString::Format("%2.2f\t",CMN);
 	myfile << TString::Format("%2.2f\t",diaCMCNoise);
+	myfile << TString::Format("%2.2f\t",CMN);
 //	myfile <<" \t";
 	myfile << TString::Format("%2.1f\t",mean2outOf10_normal);
 	myfile << TString::Format("%2.1f\t",mp2outOf10_normal);
@@ -342,6 +349,7 @@ void TResults::createOutputTextFile(){
 	myfile << TString::Format("%2.2f\t",doubleGaus2_normal);
 	myfile << TString::Format("%2.2f\t",singleGausShort_trans);
 	myfile << TString::Format("%2.2f\t",singleGaus_trans);
+	myfile << SVN_REV;
 	myfile << endl;
 
 	myfile.close();
