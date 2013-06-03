@@ -307,11 +307,11 @@ int main(int argc, char ** argv) {
 		currentResults->Write("test");
 		cout<<"CLOSE FILE"<<endl;
 		file->Close();
-		if (currentResults){
-			cout<<"DELETE RESULTS"<<endl;
-			delete currentResults;
-			cout<<"#"<<endl;;
-		}
+//		if (currentResults){
+//			cout<<"DELETE RESULTS"<<endl;
+//			delete currentResults;
+//			cout<<"#"<<endl;;
+//		}
 		cout<<"saved results..."<<endl;
 
 

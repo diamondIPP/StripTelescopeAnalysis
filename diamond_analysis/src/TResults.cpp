@@ -155,6 +155,8 @@ void TResults::openResults(TSettings *settings){
 }
 
 void TResults::setResultsFromSettings(TSettings* settings){
+	hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
+	seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 		seedSigma.at(det)=settings->getClusterSeedFactor(det,0);
 		hitSigma.at(det)=settings->getClusterHitFactor(det,0);
