@@ -1313,32 +1313,46 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	TFitResultPtr resPtr = hRes->Fit("gaus","NQS");
 	Float_t mean = resPtr.Get()->GetParams()[1];//->Parameter(1);
 	Float_t sigma = resPtr.Get()->GetParams()[2];//Parameter(2);
-	for(int i=0;i<3;i++){
+	//find fwhm
+	Float_t max = hRes->GetBinContent(hRes->GetMaximumBin());
+	Float_t start = hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/2));
+	Float_t end =  hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1);
+	Float_t mean2 = (start+end)/2;
+	Float_t sigma2 = end-mean2;
+	TString hTitle;
+	hTitle = hRes->GetTitle();
+	for(int i=0;i<4;i++){
 		hName = hRes->GetName();
 		switch (i){
-		case 0: hName.Append("_SingleGausFit");break;
-		case 1: hName.Append("_SingleGausFitSmall");break;
-		case 2: hName.Append("_DoubleGausFit");break;
+		case 0: hName.Append("_SingleGausFit");hTitle.Append(" Single Gaus Fit 2x FWHM");break;
+		case 1: hName.Append("_SingleGausFitFWHM");hTitle.Append(" Single Gaus Fit FWHM");break;
+		case 2: hName.Append("_DoubleGausFit");hTitle.Append(" 2 x Gaus Fit");break;
+		case 3: hName.Append("_FixedGausFit");hTitle.Append(" Single Gaus Fit -20#mum - 20 #mum");break;
 		}
 		TH1F* hClone = (TH1F*)hRes->Clone(hName);
+		hClone->SetTitle(hTitle);
 		Float_t gaus1=-1;
 		Float_t gaus2=-1;
 		TF1* fit;
 		if(hClone) {
 			switch(i){
-			case 0: resPtr=hClone->Fit("gaus","SQ","",mean-sigma,mean+sigma);
+			case 0: resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
 				gaus1 = resPtr.Get()->GetParams()[2]; break;
-			case 1: resPtr=hClone->Fit("gaus","SQ","",mean-.5*sigma,mean+.5*sigma);
+			case 1: resPtr=hClone->Fit("gaus","SQ","",start,end);
 				gaus1 = resPtr.Get()->GetParams()[2]; break;
 			case 2: fit = doDoubleGaussFit(hClone);
 				gaus1 = fit->GetParameter(2);
 				gaus2 = fit->GetParameter(5);
-			break;
+				break;
+			case 3: resPtr= hClone->Fit("gaus","SQ","",-20,20);
+				gaus1 = fit->GetParameter(2);
+				break;
 			}
 			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
 				if( i == 0 ) results->setSingleGaussianResolution(gaus1,alignMode);
 				else if (i == 1 ) results->setSingleGaussianShortResolution(gaus1,alignMode);
 				else if (i == 2 ) results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
+				else if (i == 3 ) results->setSingleGaussianFixedResolution(gaus1,alignMode);
 			}
 
 			histSaver->SaveHistogram(hClone);
