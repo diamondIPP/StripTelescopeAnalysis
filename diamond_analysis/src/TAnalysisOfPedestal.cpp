@@ -940,7 +940,7 @@ void TAnalysisOfPedestal::saveHistos(){
 			TF1 histofitx("histofitx","gaus",hAllAdcNoise[det]->GetMean()-2*hAllAdcNoise[det]->GetRMS(),hAllAdcNoise[det]->GetMean()+2*hAllAdcNoise[det]->GetRMS());
 			histofitx.SetLineColor(kBlue);
 			hAllAdcNoise[det]->Fit(&histofitx,"rq");
-			if(res!=0)res->SetNoise(det,histofitx.GetParameter(2));
+			if(res!=0)res->setNoise(det,histofitx.GetParameter(2));
 			histSaver->SaveHistogram(hAllAdcNoise[det],true);
 
 			delete hAllAdcNoise[det];
@@ -981,7 +981,7 @@ void TAnalysisOfPedestal::saveHistos(){
 
 	if(res!=0) res->setDiaNoiseCMcorrected(noiseCMC);
 	if(res!=0) res->setCMN(cmn);
-	if(res!=0) res->SetNoise(TPlaneProperties::getDetDiamond(),diaNoise);
+	if(res!=0) res->setNoise(TPlaneProperties::getDetDiamond(),diaNoise);
 	histSaver->SaveHistogram(hCMNoiseDistribution,true);
 	stringstream name;
 	name<< "gADC_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
