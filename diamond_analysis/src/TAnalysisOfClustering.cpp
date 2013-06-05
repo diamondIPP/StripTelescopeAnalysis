@@ -14,8 +14,10 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"**********************************************************\n\n\n"<<endl;
 	if(settings==0)
-		settings=new TSettings();
+		exit(-1);//todo
+		//settings=new TSettings();
 	setSettings(settings);
+	res = 0;
 	UInt_t runNumber=settings->getRunNumber();
 	sys = gSystem;
 	htmlClus= new THTMLCluster(settings);
@@ -32,7 +34,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 	histSaver->SetRunNumber(runNumber);
 	htmlClus->setFileGeneratingPath(sys->pwd());
 	settings->goToClusterTreeDir();
-	verbosity=0;
+	verbosity=settings->getVerbosity();
 	initialiseHistos();
 	cout<<"end initialise"<<endl;
 //	settings=0;
@@ -69,6 +71,7 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 		eventReader->LoadEvent(nEvent);
 		analyseEvent();
 	}
+	cout<<"Save Histos!"<<endl;
 	saveHistos();
 }
 
@@ -400,19 +403,23 @@ void TAnalysisOfClustering::saveEtaIntegrals(){
 	etaCorFileName<<"etaCorrection."<<settings->getRunNumber()<<".root";
 	TFile* file = TFile::Open(etaCorFileName.str().c_str());
 	if(file){
-		cout<<"can read file: '"<<etaCorFileName.str()<<"'"<<endl;
+		if(verbosity>4)cout<<"can read file: '"<<etaCorFileName.str()<<"'"<<endl;
 		if(verbosity>4&&verbosity%2==1){
 			cout<<"Press a key and enter to confirm.\t"<<flush;
 			char t; cin>>t;
 		}
+		if(verbosity>4)cout<<"Close file"<<endl;
 		file->Close();
+		if(verbosity>4)cout<<"Return"<<endl;
+
 		return;
 	}
-	cout<<"cannot read file: '"<<etaCorFileName.str()<<"' ===> CREATE new Eta file"<<endl;
+	if(verbosity>4)cout<<"cannot read file: '"<<etaCorFileName.str()<<"' ===> CREATE new Eta file"<<endl;
 	if(verbosity>4&&verbosity%2==1){
 		cout<<"Press a key and enter to confirm.]\t"<<flush;
 		char t; cin>>t;
 	}
+	if(verbosity>4)cout <<"RECREATE file..."<<endl;
 	file = new TFile(etaCorFileName.str().c_str(),"RECREATE");
 	file->cd();
 	for(UInt_t det=0;det<9;det++){
@@ -512,16 +519,22 @@ void TAnalysisOfClustering::saveHistos(){
 		delete hRelativeClusterPositionCorEta[det];
 	}
 	saveEtaIntegrals();
+	if (verbosity) cout<<"create Eta Integrals"<<endl;
 	for(UInt_t det=0;det<9;det++){
 		stringstream histName;
 		histName<<"hEtaIntegral_"<<TPlaneProperties::getStringForDetector(det);;
 		TH1F *histo= TClustering::createEtaIntegral(hEtaDistribution[det],histName.str());
+		if (verbosity) cout<<"Save: "<<histName.str()<<endl;
 		histSaver->SaveHistogram(histo);
-		if(histo) delete histo;
+//		if(histo) delete histo;
+		if (verbosity) cout<<hEtaDistribution[det]->GetName()<<endl;
 		histSaver->SaveHistogram(this->hEtaDistribution[det]);
+		if (verbosity) cout<<hEtaDistributionCMN[det]->GetName()<<endl;
 		histSaver->SaveHistogram(this->hEtaDistributionCMN[det]);
+		if (verbosity) cout<<hEtaDistributionVsCharge[det]->GetName()<<endl;
 		histSaver->SaveHistogram(this->hEtaDistributionVsCharge[det]);
 		for(int area = 0; area < settings->getNDiaDetectorAreas() && TPlaneProperties::isDiamondDetector(det); area++){
+			if (verbosity) cout<< "Save Eta Distributions plots for area "<<area<<endl;
 			TString name = TString::Format("hEtaDistributionVsLeftChannel_%d_Area%d",det,area);
 			TH2F *hEtaDistributionVsLeftChannelArea = (TH2F*)hEtaDistributionVsLeftChannel[det]->Clone();
 			Float_t yMin = settings->getDiaDetectorArea(area).first;
@@ -531,9 +544,11 @@ void TAnalysisOfClustering::saveHistos(){
 			if(hEtaDistributionVsLeftChannelArea)
 				delete hEtaDistributionVsLeftChannelArea;
 		}
+		if (verbosity)  cout<<"Save "<< hEtaDistributionVsLeftChannel[det]->GetName()<<endl;
 		histSaver->SaveHistogram(this->hEtaDistributionVsLeftChannel[det]);
-		if(hEtaDistributionVsLeftChannel) delete hEtaDistributionVsLeftChannel;
+//		if(hEtaDistributionVsLeftChannel) delete hEtaDistributionVsLeftChannel;
 
+		if (verbosity)  cout<<"Save ClusterSize Plotss"<<endl;
 		for(int i=1;(i<6&&TPlaneProperties::isDiamondDetector(det))||i<3;i++){
 			TString name =  TString::Format("hEtaDistribution_ClusterSize%d",i);
 			Int_t bin = hEtaDistributionVsClusterSize[det]->GetYaxis()->FindBin(i);
@@ -551,18 +566,24 @@ void TAnalysisOfClustering::saveHistos(){
 				delete hEtaTwoClusterSize;
 			}
 		}
+		if (verbosity)  cout<<"Save "<< hEtaDistributionVsClusterSize[det]->GetName() << endl;
 		histSaver->SaveHistogram(this->hEtaDistributionVsClusterSize[det]);
 
 		histSaver->SaveHistogram(this->hEtaDistribution5Percent[det]);
+		if (verbosity)  cout<<"Save "<< hEtaDistributionVsSignalLeft[det]->GetName() << endl;
 		histSaver->SaveHistogram(this->hEtaDistributionVsSignalLeft[det]);
 		histSaver->SaveHistogram(this->hEtaDistributionVsSignalRight[det]);
+		if (verbosity)  cout<<"Save "<< hEtaDistributionVsSignalSum[det]->GetName() << endl;
 		histSaver->SaveHistogram(this->hEtaDistributionVsSignalSum[det]);
 		hSignalLeftVsSignalRight[det]->GetXaxis()->SetTitle("signalRight");
 		hSignalLeftVsSignalRight[det]->GetYaxis()->SetTitle("signalLeft");
+		if (verbosity)  cout<<"Save "<< hSignalLeftVsSignalRight[det]->GetName() << endl;
 		histSaver->SaveHistogram(this->hSignalLeftVsSignalRight[det]);
 		if(hEtaDistribution[det])delete hEtaDistribution[det];
 	}
+	if (verbosity)  cout<<"Save PH Histos"<<endl;
 	savePHHistos();
+	if (verbosity)  cout<<"Save Asymmetric Eta Sample analysis"<<endl;
 	analyseAsymmetricSample();
 	//    for (int det = 0; det < 9; det++) {
 	//		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
@@ -1176,7 +1197,7 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
 	cout<<"****\n****\n FINAL RESULTS: "<<endl;
 	std::ofstream ofs (settings->getCrossTalkFactorsFileName().c_str(), std::ofstream::out);
 	for(UInt_t det = 0 ; det < vecAlphas.size();det ++){
-
+		if (res) res->setSignalFeedOverCorrection(det, vecAlphas[det]);
 		cout<<det<<": "<< TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps" ;
 		ofs<<det<<": "<<  TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps";
 

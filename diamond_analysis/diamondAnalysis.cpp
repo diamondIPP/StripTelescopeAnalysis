@@ -233,7 +233,8 @@ int main(int argc, char ** argv) {
 		if(RunParameters[i].doClusterAnalysis()){
 			sys->cd(currentDir.c_str());
 			TAnalysisOfClustering* analysisClustering;
-			analysisClustering= new TAnalysisOfClustering(settings);
+			analysisClustering = new TAnalysisOfClustering(settings);
+			analysisClustering->setResults(currentResults);
 			analysisClustering->doAnalysis(RunParameters[i].getEvents());
 			delete analysisClustering;
 		}

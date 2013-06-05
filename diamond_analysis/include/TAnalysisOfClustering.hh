@@ -33,6 +33,7 @@
 #include "TPaveStats.h"
 #include "TMultiGraph.h"
 
+#include "TResults.hh"
 #include "TADCEventReader.hh"
 #include "THTMLCluster.hh"
 #include "TClustering.hh"
@@ -48,6 +49,7 @@ public:
 	virtual ~TAnalysisOfClustering();
 	void	doAnalysis(int nEvents=0);
 	void setSettings(TSettings* settings);
+	void setResults(TResults* res) {this->res = res;}
 private:
 	void analyseEvent();
 	void saveHistos();
@@ -142,6 +144,7 @@ private:
 	vector < vector <TCluster> > vecVecClusters;
 	vector<Float_t> vecClusterSize,vecMPV,vecClusterSizeError,vecWidth;
 	UInt_t nInvalidReadout;
+	TResults* res;
 };
 #endif /* TDEADCHANNELS_HH_ */
 
