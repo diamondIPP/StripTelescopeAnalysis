@@ -60,6 +60,8 @@ void TResults::inheritOldResults(const TResults & rhs)
 	for(UInt_t det=0;det<rhs.hitSigma.size();det++)this->hitSigma.push_back(rhs.hitSigma[det]);
 	this->noise.clear();
 	for(UInt_t det=0;det<rhs.noise.size();det++)this->noise.push_back(rhs.noise[det]);
+	signalFeedOverCorrection.clear();
+	for(UInt_t det=0;det<rhs.signalFeedOverCorrection.size();det++)signalFeedOverCorrection.push_back(signalFeedOverCorrection[det]);
 	diaCMCNoise = rhs.diaCMCNoise;
 	CMN = rhs.CMN;
 	mean2outOf10_normal = rhs.mean2outOf10_normal;
@@ -93,6 +95,7 @@ void TResults::initialiseResults(){
 	singleGausShort_trans = -1;
 	singleGaus_normal = -1;
 	singleGaus_trans = -1;
+	signalFeedOverCorrection.resize(TPlaneProperties::getNDetectors(),-100);
 }
 
 
@@ -207,7 +210,16 @@ void TResults::Print(){
 	createOutputTextFile();
 }
 
-void TResults::SetNoise(UInt_t det,Float_t detNoise){
+void TResults::setSignalFeedOverCorrection(UInt_t det, Float_t correction){
+	if(det>=TPlaneProperties::getNDetectors())
+		return;
+	if(signalFeedOverCorrection.size() <= det)
+		signalFeedOverCorrection.resize(det+1 , -100);
+	signalFeedOverCorrection[det] = correction;
+	cout<<"Set Results: signal feed over correction of det "<<det<<": "<<correction*100<<" %"<<endl;
+}
+
+void TResults::setNoise(UInt_t det,Float_t detNoise){
 	if(det>=TPlaneProperties::getNDetectors())
 		return;
 	if(noise.size()<=det)
@@ -246,6 +258,15 @@ void TResults::setDoubleGaussianResolution(Float_t gaus1,Float_t gaus2, TSetting
 	else if ( mode == TSettings::transparentMode){
 		doubleGaus1_trans = gaus1;
 		doubleGaus2_trans = gaus2;
+	}
+}
+
+void TResults::setSingleGaussianFixedResolution(Float_t gaus,TSettings::alignmentMode mode){
+	if (mode == TSettings::normalMode){
+		singleGausFixed_normal = gaus;
+	}
+	else if ( mode == TSettings::transparentMode){
+		singleGausFixed_trans = gaus;
 	}
 }
 
@@ -302,29 +323,65 @@ void TResults::setCMN(Float_t cmn){
 	this->CMN = cmn;
 }
 
+Float_t TResults::getAvergDiamondCorrection(){
+	UInt_t det = TPlaneProperties::getDetDiamond();
+	if ( signalFeedOverCorrection.size()>det){
+		return signalFeedOverCorrection[det];
+	}
+	return -100;
+}
+std::pair<Float_t, Float_t> TResults::getAvergSiliconCorrection(){
+	UInt_t nSilDetectors = 0;
+	Float_t mean = 0;
+	Float_t sigma2 = 0;
+	for( UInt_t det = 0; det < TPlaneProperties::getNDetectors() && det < signalFeedOverCorrection.size(); det++){
+		if(TPlaneProperties::isSiliconDetector(det) && signalFeedOverCorrection[det] != -100){
+			nSilDetectors ++;
+			Float_t correction = signalFeedOverCorrection[det]*100.;
+			mean += correction;
+			sigma2 += correction * correction;
+//			cout<<"det: "<<correction*100.
+//					<<" "<<mean/nSilDetectors<<"+/-"<<sigma2<<" "<<correction*100.*correction*100.<<endl;
+		}
+	}
+	mean = mean/(Float_t) nSilDetectors;
+	sigma2 = sigma2/(Float_t) nSilDetectors;
+//	cout<< mean*1e2 <<" "<<sigma2*1e4<<endl;
+//	cout<< mean *mean *1e4<<" "<<sigma2*1e4<<endl;
+	sigma2 = sigma2 - mean * mean;
+	mean/=100.;
+	sigma2/=100;
+	cout << "avrg Sil Feed over correction: " << mean*100 << " +/- " << sigma2*100 <<" % in "<< nSilDetectors<< " Dectectors." << endl;
+	return make_pair(mean,sigma2);
+}
 void TResults::createOutputTextFile(){
 //	cout<<"CREATE OUPTUT TEXT FILE"<<endl;
 	ofstream myfile;
 	myfile.open (textFileName, ios::out	|ios::trunc);
 	UInt_t det  = 8;
-	myfile << "#\t     \t    \t      \tCMN\t";
+	myfile << "#\t     \t    \t      \tCMN\t\t\t\t";
 	myfile << "normal\t      \t     \t      \t    \t    \t";
 	myfile << "transAlign    \t     \t       \t    \t   \t";
 	myfile << "Res. normal\t\t   \t";
 	myfile << "Res. trans\t\t   \t";
 	myfile << endl;
-	myfile << "#RUN\tdescr.\tnoise\tCMCnoi\tCMN\t";
+	myfile << "#RUN\tdescr.\tnoise\tCMCnoi\tCMN\tCorSil\tsigSil\tCorDia\t";
 	myfile << "m2/10\tmp2/10\tw2/10\tsig2/10\tm2/2\tm4\4\t";
 	myfile << "m2/10\tmp2/10\tw2/10\tsig2/10\tm2/2\tm4\4\t";
-	myfile << "res1\tres2\tres3\tres4\t";
-	myfile << "res1\tres2\tres3\tres4";
+	myfile << "res1\tres2\tres3\tres4\tres5\t";
+	myfile << "res1\tres2\tres3\tres4\tres5";
 	myfile << endl;
-	myfile << " ";
+	myfile << "";
 	myfile << TString::Format("%6d\t",runnumber);
 	myfile << runDescription <<"\t";
 	myfile << TString::Format("%2.2f\t",noise[det]);
 	myfile << TString::Format("%2.2f\t",diaCMCNoise);
 	myfile << TString::Format("%2.2f\t",CMN);
+	myfile << TString::Format("%2.2f\t",getAvergSiliconCorrection().first*100);
+	myfile << TString::Format("%2.2f\t",getAvergSiliconCorrection().second*100);
+	myfile << TString::Format("%2.2f\t",getAvergDiamondCorrection()*100);
+
+
 //	myfile <<" \t";
 	myfile << TString::Format("%2.1f\t",mean2outOf10_normal);
 	myfile << TString::Format("%2.1f\t",mp2outOf10_normal);
@@ -344,11 +401,13 @@ void TResults::createOutputTextFile(){
 	myfile << TString::Format("%2.2f\t",doubleGaus2_normal);
 	myfile << TString::Format("%2.2f\t",singleGausShort_normal);
 	myfile << TString::Format("%2.2f\t",singleGaus_normal);
+	myfile << TString::Format("%2.2f\t",singleGausFixed_normal);
 	//	myfile <<" \t";
 	myfile << TString::Format("%2.2f\t",doubleGaus1_trans);
 	myfile << TString::Format("%2.2f\t",doubleGaus2_normal);
 	myfile << TString::Format("%2.2f\t",singleGausShort_trans);
 	myfile << TString::Format("%2.2f\t",singleGaus_trans);
+	myfile << TString::Format("%2.2f\t",singleGausFixed_normal);
 	myfile << SVN_REV;
 	myfile << endl;
 

@@ -40,7 +40,7 @@ public:
 public:
 	void setAlignment(TDetectorAlignment* newAlignment);
 	TDatime getLastUpdateDate(){return lastUpdate;};
-	void SetNoise(UInt_t det, Float_t detNoise);
+	void setNoise(UInt_t det, Float_t detNoise);
 	void setDiaNoiseCMcorrected(Float_t noise){diaCMCNoise = noise;}
 	void setCMN(Float_t cmn);
 	UInt_t getAllEvents() const{return nAllEvents;}
@@ -52,6 +52,8 @@ public:
 	UInt_t getValidSiliconTrack() const {return nValidSiliconTrack;}
 	UInt_t getUseForAlignment() const {return nUseForAlignment;}
 	UInt_t getUseForAnalysis() const {return nUseForAnalysis;}
+	std::pair<Float_t, Float_t> getAvergSiliconCorrection();
+	Float_t getAvergDiamondCorrection();
 	void setAllEvents(UInt_t allEvents){nAllEvents = allEvents;}
 	void setExactlyOneDiamondHit(UInt_t exactlyOneDiamondHit){ nExactlyOneDiamondHit = exactlyOneDiamondHit;}
 	void setMoreThanOneDiamondHit(UInt_t moreThanOneDiamondHit){ nMoreThanOneDiamondHit = moreThanOneDiamondHit;}
@@ -68,6 +70,8 @@ public:
 	void setDoubleGaussianResolution(Float_t gaus1,Float_t gaus2,TSettings::alignmentMode mode);
 	void setSingleGaussianResolution(Float_t gaus,TSettings::alignmentMode mode);
 	void setSingleGaussianShortResolution(Float_t gaus,TSettings::alignmentMode mode);
+	void setSingleGaussianFixedResolution(Float_t gaus,TSettings::alignmentMode mode);
+	void setSignalFeedOverCorrection(UInt_t det, Float_t correction);
 public:
 	void initialiseResults();
 	void inheritOldResults(const TResults & rhs);
@@ -94,6 +98,7 @@ private:
 	std::vector<Float_t> nClusters;
 	std::vector<Float_t> clusterPHmean;
 	std::vector<Float_t> clusterPHwidth;
+	std::vector<Float_t> signalFeedOverCorrection;
 	UInt_t nAllEvents;
 	UInt_t nNoSiliconHit;
 	UInt_t nOneAndOnlyOneSiliconNotFiducialCut;
@@ -124,11 +129,13 @@ private:
 	Float_t doubleGaus1_trans;
 	Float_t doubleGaus2_trans;
 
+	Float_t singleGausFixed_normal;
+	Float_t singleGausFixed_trans;
 	Float_t singleGausShort_normal;
 	Float_t singleGausShort_trans;
 	Float_t singleGaus_normal;
 	Float_t singleGaus_trans;
-	ClassDef(TResults,6);
+	ClassDef(TResults,7);
 };
 
 #endif /* TRESULTS_HH_ */
