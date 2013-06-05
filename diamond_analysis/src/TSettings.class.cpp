@@ -293,7 +293,7 @@ std::string TSettings::getTransparentAnalysisDir(alignmentMode mode){
 }
 
 TSettings::enumRunDescription TSettings::getAnalysedDiamond(){
-	cout<<"rundes: "<<getRunDescription()<<endl;
+	if(verbosity>4) cout<<"rundes: "<<getRunDescription()<<endl;
 	if(!isSpecialAnalysis())
 		return allDia;
 	if(getRunDescription()=="left"||getRunDescription()=="1")
