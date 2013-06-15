@@ -51,21 +51,29 @@ private:
 	void saveYAlignmentHistos();
 	void YAlignment();
 	void DrawYAlignmentFidCutRegions();
+	Int_t* CellToChannel(int nCell,float nXcell);
 	int YAlignmentFiducialCut(int nRegion);
-	void DrawMetallisationGrid();
+	void DrawMetallisationGrid(TCanvas* nCanvas);
 	Float_t GetYPositionInDetSystem();
+	float* SortArrayBtoS(float* nArray, int nSize);
+	void printArray(float* nArray, int nSize, const std::string& space);
 
 	//new functions
 	void HitandSeedCount(TCluster* nCluster, int ni);
 	void ClusterShape(TCluster* nCluster);
 	void RemoveLumpyClusters(TCluster* nCluster);
 	void RemoveEdgeHits(TCluster* nCluster, int* nEdgeChannel);
+	void ClusterChannels(TCluster* nCluster);
+	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
+	int RemoveEdge3DClusters(TCluster* nCluster);
 	int FiducialCut(int Detector);
 	void DrawFidCutRegions();
 	void PredictChannelHit(TCluster* nCluster);
 
 
 private:
+
+	float SortArrayPointer[4];
 
 	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
@@ -129,6 +137,8 @@ private:
 	/////////////
 	//For YAlignment Histos
 	/////////////
+	TCanvas* hGridReferenceCanvas;
+	TH2D* hGridReference;
 	TCanvas* hCombinedMeanChargeYAlignment;
 	TH2D* hFidCutXvsFidCutYvsChargeYAlignment;
 	TH2D* hFidCutXvsFidCutYvsEventsYAlignment;
@@ -137,25 +147,83 @@ private:
 	TH2D* hDetXvsDetY3D;
 	TH2D* hDetXvsDetY3DvsEvents;
 	TH2D* hDetXvsDetY3DMeanCharge;
+	TCanvas* h3DdetMeanChargeWithMeanClusterSize;
+	TH2D* hCellsMeanClusteSize;
 	TCanvas* h3DdetMeanChargeRebinned;
 	TCanvas* h3DdetEventsRebinned;
 	TH2D* hDetXvsDetY3DRebinned;
 	TH2D* hDetXvsDetY3DvsEventsRebinned;
 	TH2D* hDetXvsDetY3DMeanChargeRebinned;
+	TCanvas* RebinnedQuarterCellFailsCanvas;
+	TH2D* RebinnedQuarterCellFails;
+	TCanvas* hDetXvsDetY3DRebinnedRMSCanvas;
+	TH2D* hDetXvsDetY3DRebinnedRMS;
+	vector<TH1F*> hQuaterCellsLandau;
+	TCanvas* hDetXvsDetY3DMeanChargeRebinnedQuarterCellCanvas;
+	TH2D* hDetXvsDetY3DMeanChargeRebinnedQuarterCell;
+	TCanvas* hDetXvsDetY3DRebinnedQuarterCellRMSCanvas;
+	TH2D* hDetXvsDetY3DRebinnedQuarterCellRMS;
+	vector<TCanvas*> hDetXvsDetY3DMeanChargeQuarterCellGradingCanvas;
+	vector<TH2D*> hDetXvsDetY3DMeanChargeQuarterCellGrading;
+	vector<TH1F*> hDetXvsDetY3DMeanChargeQuarterCellGradingLandau;
+	TCanvas* hDetXvsDetY3DMeanChargeHighlightedQuartersCanvas;
 	TCanvas* hOverview;
 	TH2D* hDetXvsDetY3DOverview;
+	TCanvas* hCellNumberingCanvas;
+	TH2D* hCellNumbering;
+	TCanvas* h3DdetDeltaXChannelCanvas;
+	TH2D* h3DdetDeltaXChannel;
+	vector<TH1F*> hCellsDeltaX;
+	vector<TH1F*> hCellsDeltaXQuarterCellGrading;
+	TCanvas* h3DdetDeltaXChannelAbove1000Canvas;
+	TH2D* h3DdetDeltaXChannelAbove1000;
 	vector<TH2D*> hCellsCharge;
 	vector<TH2D*> hCellsEvents;
+	vector<TH2D*> hCellsEventsCheck;
+	TH1F* hTransparentCharge3D;
+	vector<TH1F*> hCellTransparentLandau;
+	vector<TH1F*> hQuarterCellGradedTransparentLandau;
+	TCanvas* hCellsTransparentHitPositionCellGraded0Canvas;
+	vector<TH2D*> hCellsTransparentHitPosition;
+	TH2D* hCellsTransparentHitPositionCellGraded0;
+	vector<TH2D*> hCellsChargeBinAlignment[9];
+	vector<TH2D*> hCellsEventsBinAlignment[9];
 	TCanvas* hCellsOverlayedCanvas;
 	TH2D* hCellsOverlayedCharge;
 	TH2D* hCellsOverlayedEvents;
 	TH2D* hCellsOverlayedMeanCharge;
+	vector<TCanvas*> hCellsOverlayedBinAlignmentCanvas;
+	vector<TH2D*> hCellsOverlayedChargeBinAlignment;
+	vector<TH2D*> hCellsOverlayedEventsBinAlignment;
+	vector<TH2D*> hCellsOverlayedMeanChargeBinAlignment;
+	vector<TCanvas*> hCellsOverlayedBinAlignmentCanvas1;
+	vector<TH2D*> hCellsOverlayedChargeBinAlignment1;
+	vector<TH2D*> hCellsOverlayedEventsBinAlignment1;
+	vector<TH2D*> hCellsOverlayedMeanChargeBinAlignment1;
 	vector<TH1F*> hCellsLandau;
+	vector<TH1F*> hCellsClusteSize;
 	vector<TH1F*> hCellsLandauGraded;
+	//hCellsGoodandBad
+	TH1F* hCellsHarris18Good;
+	TH1F* hCellsHarris10Bad;
+	TH1F* hCellsAlexAllQuarters;
+	TCanvas* hCellsLandau2DCanvas;
+	TCanvas* hCellsLandau2DCanvas1;
+	TH2D* hCellsLandau2D;
+	TH2D* hCellsLandau2DQuarterFail;
 	//Removed Columns
-	TH2D* hCellsColumnCheck;
+	TH2D* hCellsColumnCheck55;
+	TH2D* hCellsColumnCheck1010;
+	vector<TH1F*> hCellsOverlayBinSpec55;
+	vector<TH1F*> hCellsOverlayBinSpec1010;
+	TH2D* hCellsOverlayed55RMS;
+	TH2D* hCellsOverlayed1010RMS;
+	TF1* Landau;
 	TCanvas* hCellsEventsNoColumnCanvas;
 	TH2D* hCellsOverlayedEventsNoColumns;
+	TH1F* hCellsOverlayedEntriesNoColumns;
+	TH1F* hCellsOverlayedLandauNoColumn;
+	TH1F* hCellsOverlayedColumnLandau;
 	vector<TH2D*> hCellsEventsNoColumn;
 	vector<TH1F*> hCellsLandauNoColumn;
 	vector<TH1F*> hCellsLandauGradedNoColumn;
