@@ -438,6 +438,8 @@ private:
        vector<Int_t> goodCells3d;
 public:
        void setNRows3d(int nRows){nRows3d=nRows;};
+       int getNRows3d(){return nRows3d;};
+       int getNColumns3d(){return nColumns3d;};
        void setNColumns3d(int nColumns){nColumns3d=nColumns;};
        vector<Int_t> getGoodCells3D(){return goodCells3d;};
        vector<Int_t> getBadCells3D(){return badCells3d;};

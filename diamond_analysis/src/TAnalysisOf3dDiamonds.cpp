@@ -1921,7 +1921,7 @@ void TAnalysisOf3dDiamonds::DrawYAlignmentFidCutRegions() {
 Int_t* TAnalysisOf3dDiamonds::CellToChannel(int nCell, float nXcell) {
 	Int_t* ChannelsToRead;
 	Int_t Channel = -9999;
-	Int_t nCellsPerRow = 11;
+	Int_t nCellsPerRow = settings->get;
 	Int_t nColumn = nCell / nCellsPerRow;
 	Int_t startChannel = 85;
 	Channel = startChannel + nColumn;
