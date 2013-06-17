@@ -159,6 +159,10 @@ private:
 	TCanvas* hDetXvsDetY3DRebinnedRMSCanvas;
 	TH2D* hDetXvsDetY3DRebinnedRMS;
 	vector<TH1F*> hQuaterCellsLandau;
+	vector<TH1F*> hQuarterCellsClusterSize;
+	TCanvas* h2DClusterSizeCanvas;
+	TH2D* h2DClusterSize;
+	TH2D* h2DClusterSizeXAxis;
 	TCanvas* hDetXvsDetY3DMeanChargeRebinnedQuarterCellCanvas;
 	TH2D* hDetXvsDetY3DMeanChargeRebinnedQuarterCell;
 	TCanvas* hDetXvsDetY3DRebinnedQuarterCellRMSCanvas;

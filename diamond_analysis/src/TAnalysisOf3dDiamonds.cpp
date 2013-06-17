@@ -929,6 +929,9 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 				//cout<<"This should not repeat: "<<((i*11*4)+j*4+k)<<endl;
 				stringstream hQuaterCellsLandauName; hQuaterCellsLandauName<<"hQuaterCellsLandau"<<((i*11*4)+j*4+k)<<FileNameEnd;
 				hQuaterCellsLandau.push_back(new TH1F(hQuaterCellsLandauName.str().c_str(),hQuaterCellsLandauName.str().c_str(),256,0,2800));
+
+				stringstream hQuarterCellsClusterSizeName; hQuarterCellsClusterSizeName<<"hQuarterCellsClusterSize"<<((i*11*4)+j*4+k)<<FileNameEnd;
+				hQuarterCellsClusterSize.push_back(new TH1F(hQuarterCellsClusterSizeName.str().c_str(),hQuarterCellsClusterSizeName.str().c_str(),20,0,20));
 			}
 		}
 	}
@@ -1001,6 +1004,39 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	hCellsLandau2DQuarterFail->GetXaxis()->SetTitle("Charge ADC");
 	hCellsLandau2DQuarterFail->GetYaxis()->SetTitle("Cell");
 	//hCellsLandau2D->SetCanExtend(TH1F::kAllAxes);
+
+	//h2DClusterSize
+	stringstream h2DClusterSizeName; h2DClusterSizeName<<"h2DClusterSize"<<FileNameEnd;
+	h2DClusterSize = new TH2D(h2DClusterSizeName.str().c_str(),h2DClusterSizeName.str().c_str(),16,0,16,5,0,5);
+	h2DClusterSize->GetXaxis()->SetTitle("");
+	h2DClusterSize->GetYaxis()->SetTitle("ClusterSize");
+	vector<char> PassFail;
+	PassFail.push_back('P');PassFail.push_back('P');PassFail.push_back('P');PassFail.push_back('P');
+	PassFail.push_back('P');PassFail.push_back('P');PassFail.push_back('P');PassFail.push_back('F');
+	PassFail.push_back('P');PassFail.push_back('P');PassFail.push_back('F');PassFail.push_back('F');
+	PassFail.push_back('P');PassFail.push_back('F');PassFail.push_back('F');PassFail.push_back('F');
+	for(int i=0;i<16;i++){
+		stringstream iLetter; iLetter<<PassFail.at(i);
+		h2DClusterSize->GetXaxis()->SetBinLabel(i+1,iLetter.str().c_str());
+	}
+	for(int i=0;i<5;i++){
+		stringstream jNumber;
+		if(i==5)
+			jNumber<<"5+";
+		else
+			jNumber<<(i+1);
+		h2DClusterSize->GetYaxis()->SetBinLabel(i+1,jNumber.str().c_str());
+	}
+	//h2DClusterSize->SetTitleOffset(0.015,"X");
+
+	h2DClusterSizeXAxis = new TH2D(h2DClusterSizeName.str().c_str(),h2DClusterSizeName.str().c_str(),4,0,16,5,0,5);
+	for(int i=0;i<4;i++){
+		stringstream jNumber; jNumber<<(i+1);
+		h2DClusterSizeXAxis->GetXaxis()->SetBinLabel(i+1,jNumber.str().c_str());
+	}
+	h2DClusterSizeXAxis->GetXaxis()->SetTitle("Failed Quarters");
+	h2DClusterSizeXAxis->SetLabelOffset(0.015,"X");
+	//h2DClusterSizeXAxis->GetXaxis()->TitleOffset()
 
 	//hEdgeCharge
 	stringstream hEdgeChargeName; hEdgeChargeName<<"hEdgeCharge"<<FileNameEnd;
@@ -1160,7 +1196,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 				}
 				QuaterCellEntrySumAddition = QuaterCellEntrySum;
 				QuaterCellEntrySum = QuaterCellEntrySumAddition + hQuaterCellsLandau.at(i*11*4+j*4+k)->GetEntries();
-				//histSaver->SaveHistogram(hQuaterCellsLandau.at(i*11*4+j*4+k));
+				histSaver->SaveHistogram(hQuaterCellsLandau.at(i*11*4+j*4+k));
+				histSaver->SaveHistogram(hQuarterCellsClusterSize.at(i*11*4+j*4+k));
 			}
 		}
 	}
@@ -1262,8 +1299,27 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 					}
 				}
 				RebinnedQuarterCellFails->SetBinContent(i+1,j+1,NumberQuarterFails);
-				if(NumberQuarterFails ==0)
+				if(NumberQuarterFails ==0){
 					hCellsTransparentHitPositionCellGraded0->Add(hCellsTransparentHitPosition.at(i*11+j));
+					for(int k=0;k<4;k++){
+						int Events =0;
+						int ContentSum =0;
+						for(int l=2;l<7;l++){
+							if(l==6){
+								int EventsSum = 0;
+								for(int m=6;m<20;m++){
+									EventsSum = Events;
+									Events = hQuarterCellsClusterSize.at(i*11*4+j*4+k)->GetBinContent(m+1)+EventsSum;
+								}
+							}
+							else{
+								Events = hQuarterCellsClusterSize.at(i*11*4+j*4+k)->GetBinContent(l);
+								ContentSum = h2DClusterSize->GetBinContent(k+1,l-1,Events);
+								h2DClusterSize->SetBinContent(k+1,l-1,Events+ContentSum);
+							}
+						}
+					}	//End of running over quarters.
+				}
 				for(int k=0;k<NumberQuarterFails;k++){		//To fill highlighted grading, plot 5.
 						//NumberQuarterFails++;
 					if(SortArrayPointer[k]<2)			//To make it more obvious which quarters have failed.
@@ -1292,7 +1348,25 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 							if(l>1){
 								hDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->SetBinContent((2*i+2),(2*j+1+l-2),hQuaterCellsLandau.at(i*11*4+j*4+l)->GetMean());
 							}
-						}
+
+							int Events =0;
+							int ContentSum =0;
+							for(int l=2;l<7;l++){
+								if(l==6){
+									int EventsSum = 0;
+									for(int m=6;m<20;m++){
+										EventsSum = Events;
+										Events = hQuarterCellsClusterSize.at(i*11*4+j*4+SortArrayPointer[k])->GetBinContent(m+1)+EventsSum;
+									}
+								}
+								else{
+									Events = hQuarterCellsClusterSize.at(i*11*4+j*4+SortArrayPointer[k])->GetBinContent(l);
+									cout<<"Cell: "<<i*11*4+j*4+SortArrayPointer[k]<<"Quarter Fails: "<<NumberQuarterFails<<"ClusterSize: "<<l-1<<"Events: "<<Events<<endl;
+									ContentSum = h2DClusterSize->GetBinContent(NumberQuarterFails*4+SortArrayPointer[k]+1,l-1,Events);
+									h2DClusterSize->SetBinContent(NumberQuarterFails*4+SortArrayPointer[k]+1,l-1,Events+ContentSum);
+								}
+							}
+						}	//End of running over number of quarters
 					}
 				}
 
@@ -1574,6 +1648,34 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	stringstream str1440; str1440<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsLandau2DHighlightedQuarters"<<FileNameEnd<<".png";
 	hCellsLandau2DCanvas1->SaveAs(str1440.str().c_str());
 
+	//h2DClusterSize
+	h2DClusterSizeCanvas = new TCanvas();
+	//h2DClusterSizeCanvas->SetCanvasSize(1500,3000);
+	h2DClusterSizeCanvas->cd();
+	//h2DClusterSize->SetEntries(hCellsLandau2DEntries);
+	//hCellsLandau2DQuarterFail->Draw("COLZ");
+	//h2DClusterSize->SetStats(kFALSE);
+	h2DClusterSize->Draw("COLZ");
+	//h2DClusterSizeXAxis->Draw("sameCOL");
+	for(int i=0;i<5;i++){	//Draw lines for Bin edges.
+		TLine* BinEdge = new TLine(i*4,0,i*4,-.5);
+		BinEdge->SetLineWidth(0.5);
+		BinEdge->SetLineColor(kBlack);
+		BinEdge->Draw("same");
+		if(i<4){
+			stringstream Label; Label<<i;
+			TText* Text = new TText(h2DClusterSizeXAxis->GetXaxis()->GetBinCenter(i+1),-.5,Label.str().c_str());
+			Text->SetTextSize(0.04);
+			Text->Draw("same");
+		}
+	}
+	TText* XTitle = new TText((h2DClusterSizeXAxis->GetXaxis()->GetBinCenter(4)-1.75),-.80,"Failed Quarters");
+	XTitle->SetTextSize(0.04);
+	XTitle->Draw("same");
+	//hCellsLandau2D->Draw("sameTEXT");
+	stringstream str1444; str1444<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h2DClusterSize"<<FileNameEnd<<".png";
+	h2DClusterSizeCanvas->SaveAs(str1444.str().c_str());
+
 	//For h3DdetMeanCharge with Mean ClusterSize.
 	h3DdetMeanChargeWithMeanClusterSize = new TCanvas();
 	h3DdetMeanChargeWithMeanClusterSize->cd();
@@ -1753,7 +1855,6 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 		/*if(YAlignmentFiducialCut())
 			return;
 				*/
-
 		hFidCutXvsFidCutYvsChargeYAlignment->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
 		hFidCutXvsFidCutYvsEventsYAlignment->Fill(fiducialValueX,fiducialValueY,1);
 
@@ -1817,15 +1918,19 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 					//To fill quarter cell histograms
 					if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom left
 						hQuaterCellsLandau.at(i*11*4+j*4)->Fill(diamondCluster.getCharge(false));
+						hQuarterCellsClusterSize.at(i*11*4+j*4)->Fill((diamondCluster.getClusterSize()-2));
 					}
 					if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top left
 						hQuaterCellsLandau.at(i*11*4+j*4+1)->Fill(diamondCluster.getCharge(false));
+						hQuarterCellsClusterSize.at(i*11*4+j*4+1)->Fill((diamondCluster.getClusterSize()-2));
 					}
 					if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom right
 						hQuaterCellsLandau.at(i*11*4+j*4+2)->Fill(diamondCluster.getCharge(false));
+						hQuarterCellsClusterSize.at(i*11*4+j*4+2)->Fill((diamondCluster.getClusterSize()-2));
 					}
 					if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top right
 						hQuaterCellsLandau.at(i*11*4+j*4+3)->Fill(diamondCluster.getCharge(false));
+						hQuarterCellsClusterSize.at(i*11*4+j*4+3)->Fill((diamondCluster.getClusterSize()-2));
 					}
 					//
 					for(int k=0;k<30;k++){		//looping over number of cell bins in x		//5*5um
