@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cctype>
 
 //ROOT libraries
 #include "Rtypes.h"
@@ -306,12 +307,14 @@ private:
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
+    void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
 	void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
 	void Parse(std::string key, std::string value, std::vector<int> & vec){ ParseIntArray(key,value,vec);}
 	bool Parse(std::string key, std::string value, bool &output){return ParseBool(key,value,output);}
 	bool Parse(std::string key, std::string value, int &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, UInt_t &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
+	pair<char,int> ParseCellPosition(std::string value);
 
 private:
 	std::string path;
@@ -428,6 +431,18 @@ private:
        Float_t diaPitchWidth;
        Float_t diaOffsetMetricSpace;
        Float_t diaStartingChannel;
+private:
+       int nRows3d;
+       int nColumns3d;
+       vector<Int_t> badCells3d;
+       vector<Int_t> goodCells3d;
+public:
+       void setNRows3d(int nRows){nRows3d=nRows;};
+       void setNColumns3d(int nColumns){nColumns3d=nColumns;};
+       vector<Int_t> getGoodCells3D(){return goodCells3d;};
+       vector<Int_t> getBadCells3D(){return badCells3d;};
+       int get3DCellNo(char row, int column);
+       int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
 
 	ClassDef(TSettings,4);
 };

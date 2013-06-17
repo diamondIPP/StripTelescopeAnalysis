@@ -1334,6 +1334,9 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	hCellsOverlayedCanvas->cd();
 	*hCellsOverlayedMeanCharge = (*hCellsOverlayedCharge/(*hCellsOverlayedEvents));
 	hCellsOverlayedMeanCharge->SetEntries(hCellsOverlayedEvents->Integral());
+
+	hCellsOverlayedMeanCharge->GetZaxis()->SetRangeUser(800,1200);
+	hCellsOverlayedMeanCharge->SetContour(99);
 	hCellsOverlayedMeanCharge->Draw("COLZ");
 	//hCellsOverlayed55RMS->Draw("sameTEXT");
 	stringstream str13; str13<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsOverlayedMeanCharge"<<FileNameEnd<<".png";
@@ -1918,28 +1921,33 @@ void TAnalysisOf3dDiamonds::DrawYAlignmentFidCutRegions() {
 Int_t* TAnalysisOf3dDiamonds::CellToChannel(int nCell, float nXcell) {
 	Int_t* ChannelsToRead;
 	Int_t Channel = -9999;
-	if(nCell<11 && nCell>=0)
-		Channel = 85;
-	if(nCell<22 && nCell>=11)
-		Channel = 86;
-	if(nCell<33 && nCell>=22)
-		Channel = 87;
-	if(nCell<44 && nCell>=33)
-		Channel = 88;
-	if(nCell<55 && nCell>=44)
-		Channel = 89;
-	if(nCell<66 && nCell>=55)
-		Channel = 90;
-	if(nCell<77 && nCell>=66)
-		Channel = 91;
-	if(nCell<88 && nCell>=77)
-		Channel = 92;
-	if(nCell<99 && nCell>=88)
-		Channel = 93;
+	Int_t nCellsPerRow = 11;
+	Int_t nColumn = nCell / nCellsPerRow;
+	Int_t startChannel = 85;
+	Channel = startChannel + nColumn;
+//	if(nCell<11 && nCell>=0)
+//		Channel = 85;
+//	if(nCell<22 && nCell>=11)
+//		Channel = 86;
+//	if(nCell<33 && nCell>=22)
+//		Channel = 87;
+//	if(nCell<44 && nCell>=33)
+//		Channel = 88;
+//	if(nCell<55 && nCell>=44)
+//		Channel = 89;
+//	if(nCell<66 && nCell>=55)
+//		Channel = 90;
+//	if(nCell<77 && nCell>=66)
+//		Channel = 91;
+//	if(nCell<88 && nCell>=77)
+//		Channel = 92;
+//	if(nCell<99 && nCell>=88)
+//		Channel = 93;
 
-	int BadCells[] = {1,6,7,8,13,27,45,53,77,90,97};
-	int BadCell =0;
-	for(int i=0; i<11; i++){
+//	int BadCells[] = {1,6,7,8,13,27,45,53,77,90,97};
+	vector<int> BadCells = settings->getBadCells3D();
+	int BadCell = 0;
+	for(int i=0; i<BadCells.size(); i++){
 		if(nCell ==  BadCells[i]){
 			BadCell = 1;
 			if(nCell<11 && nCell>=0){	//If cell on left edge

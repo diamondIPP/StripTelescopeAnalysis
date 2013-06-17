@@ -481,6 +481,10 @@ void TSettings::LoadSettings(){
            cout<<key<<" =" <<value.c_str()<<endl;
            b3dDiamond = (bool)strtod(value.c_str(),0);
         }
+        if(key == "badCells3D"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,badCells3d);
+        }
 		/*if(key == "store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
@@ -627,7 +631,11 @@ void TSettings::DefaultLoadDefaultSettings(){
 	cout<<"DONE"<<endl;
 	isStandardSelectionFidCut=true;
 	chi2Cut3D=4.0;
+
+	nRows3d = 11;
+	nColumns3d = 9;
 	checkSettings();
+
 }
 
 
@@ -658,29 +666,59 @@ void TSettings::ParseStringArray(string key, string value, vector<string> &vec){
 }
 
 bool TSettings::ParseFloat(string key, string value, float &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (float)strtod(value.c_str(),0);
 	return true;
 }
 
 bool TSettings::ParseInt(string key, string value, int &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (int)strtod(value.c_str(),0);
 	return true;
 }
 
 bool TSettings::ParseInt(string key, string value, UInt_t &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (UInt_t)strtod(value.c_str(),0);
 	return true;
 }
 
 bool TSettings::ParseBool(string key, string value, bool &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (bool)strtod(value.c_str(),0);
 	return true;
 }
 
+pair<char,int> TSettings::ParseCellPosition(std::string value){
+	char row = 'A'-1;
+	int column = -1;
+	cout<<"Parsing Cell Position: "<<value<<flush;
+	Int_t pos = value.find_first_of("0123456789");
+	if (pos == 1){
+		row = value[0];
+		string columnString = value.substr(pos);
+		ParseInt("ParseCellColumn",columnString,column);
+	}
+	cout<< " = "<< row << " "<<column<<endl;
+	return make_pair(row,column);
+}
+
+void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells){
+	cout << key.c_str() << " = " << value.c_str() << endl;
+	std::vector <std::string> stringArray;
+	ParseStringArray(key, value,stringArray);
+	vecCells.clear();
+	for(UInt_t i=0;i<stringArray.size();i++){
+		string str = stringArray.at(i);
+		pair<char,int> cellPosition = ParseCellPosition(str);
+		int cellNo =get3DCellNo(cellPosition);
+		vecCells.push_back(cellNo);
+		cout<< "add cell "<<cellPosition.first << cellPosition.second<<" --> "<<cellNo<<endl;
+	}
+	cout<<"DONE"<<endl;
+	char t; cin>>t;
+
+}
 void TSettings::ParseFloatArray(string key, string value, vector<float> &vec) {
 	cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
@@ -1667,7 +1705,7 @@ bool TSettings::isInAlignmentFiducialRegion(Float_t xVal,Float_t yVal){
 	Int_t fidCutRegion = this->getSelectionFidCuts()->getFiducialCutIndex(xVal,yVal);
 	if(verbosity>6)cout<<" isInAlignmentFiducialRegion\t"<<fidCutRegion<<flush;
 	for(UInt_t i=0; i < alignmentFidCuts.size();i++)
-		if(alignmentFidCuts.at(i)==fidCutRegion){
+		if(alignmentFidCuts[i]==fidCutRegion){
 			if(verbosity>6)cout<<"\tTrue"<<endl;
 			return true;
 		}
@@ -1824,4 +1862,21 @@ Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
 	if(TPlaneProperties::isDiamondDetector(det))
 			channelPosition = this->diamondPattern.convertMetricToChannel(metricValue);
 	return channelPosition;
+}
+
+
+
+int TSettings::get3DCellNo(char row, int column){
+	column --;
+	row=toupper(row);
+	int nRow = row-'A';
+	if (nRow<0 || nRow > 25||column < 0){
+		cerr<<"cannot convert "<<row<<column<< " to a cell no.: "<<nRow<<endl;
+		return -1;
+	}
+
+	int nCell = column + nRow * nRows3d;
+	cout<<"column "<<column<<", row "<<row<<"="<<nRow<<" * "<<nRows3d<<" = " <<nCell<<endl;
+	return nCell;
+
 }
