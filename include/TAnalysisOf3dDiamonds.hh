@@ -160,8 +160,8 @@ private:
 	TH2D* hDetXvsDetY3DRebinnedRMS;
 	vector<TH1F*> hQuaterCellsLandau;
 	vector<TH1F*> hQuarterCellsClusterSize;
-	TCanvas* h2DClusterSizeCanvas;
-	TH2D* h2DClusterSize;
+	TCanvas* h2DClusterSizeQuarterCellCanvas;
+	TH2D* h2DClusterSizeQuarterCell;
 	TH2D* h2DClusterSizeXAxis;
 	TCanvas* hDetXvsDetY3DMeanChargeRebinnedQuarterCellCanvas;
 	TH2D* hDetXvsDetY3DMeanChargeRebinnedQuarterCell;
@@ -179,6 +179,8 @@ private:
 	TH2D* h3DdetDeltaXChannel;
 	vector<TH1F*> hCellsDeltaX;
 	vector<TH1F*> hCellsDeltaXQuarterCellGrading;
+	TCanvas* h3DdetQuarterCellFluctuationCanvas;
+	TH2D* h3DdetQuarterCellFluctuation;
 	TCanvas* h3DdetDeltaXChannelAbove1000Canvas;
 	TH2D* h3DdetDeltaXChannelAbove1000;
 	vector<TH2D*> hCellsCharge;
@@ -187,9 +189,9 @@ private:
 	TH1F* hTransparentCharge3D;
 	vector<TH1F*> hCellTransparentLandau;
 	vector<TH1F*> hQuarterCellGradedTransparentLandau;
-	TCanvas* hCellsTransparentHitPositionCellGraded0Canvas;
+	vector<TCanvas*> hCellsTransparentHitPositionCellGradedCanvas;
 	vector<TH2D*> hCellsTransparentHitPosition;
-	TH2D* hCellsTransparentHitPositionCellGraded0;
+	vector<TH2D*> hCellsTransparentHitPositionCellGraded;
 	vector<TH2D*> hCellsChargeBinAlignment[9];
 	vector<TH2D*> hCellsEventsBinAlignment[9];
 	TCanvas* hCellsOverlayedCanvas;
@@ -206,6 +208,8 @@ private:
 	vector<TH2D*> hCellsOverlayedMeanChargeBinAlignment1;
 	vector<TH1F*> hCellsLandau;
 	vector<TH1F*> hCellsClusteSize;
+	TCanvas* h2DClusterSizeCanvas;
+	TH2D* h2DClusterSize;
 	vector<TH1F*> hCellsLandauGraded;
 	//hCellsGoodandBad
 	TH1F* hCellsHarris18Good;
@@ -222,6 +226,7 @@ private:
 	vector<TH1F*> hCellsOverlayBinSpec1010;
 	TH2D* hCellsOverlayed55RMS;
 	TH2D* hCellsOverlayed1010RMS;
+	TH2D* hCellsOverlayed1010Significance;
 	TF1* Landau;
 	TCanvas* hCellsEventsNoColumnCanvas;
 	TH2D* hCellsOverlayedEventsNoColumns;

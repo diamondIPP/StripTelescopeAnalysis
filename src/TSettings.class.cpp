@@ -12,7 +12,6 @@
 ClassImp(TSettings);
 using namespace std;
 
-
 TSettings::TSettings(TRunInfo *runInfo)
 {
 	cout<<"TSettings TRunInfo"<<endl;
@@ -485,6 +484,9 @@ void TSettings::LoadSettings(){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,badCells3d);
         }
+        if(key == "nColumns3d") Parse(key,value,nColumns3d);
+        if(key == "nRows3d") Parse(key,value,nRows3d);
+
 		/*if(key == "store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
@@ -637,7 +639,6 @@ void TSettings::DefaultLoadDefaultSettings(){
 	checkSettings();
 
 }
-
 
 /**
  * function which parses an string of the format  '{XX,XX,XX,XX,XX}' to an
