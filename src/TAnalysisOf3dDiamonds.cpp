@@ -2221,10 +2221,13 @@ Int_t* TAnalysisOf3dDiamonds::CellToChannel(int nCell, float nXcell) {
 	Int_t Channel = -9999;
 	Int_t nCellsPerColumn = settings->getNRows3d();
 	Int_t nColumn = nCell / nCellsPerColumn;
-	Int_t startChannel = settings->diamondPattern.getPatternChannels(settings->get3dWithHolesDiamondPattern()).first;//85;
-	cout<<"First 3DwH channel: "<<settings->diamondPattern.getPatternChannels(settings->get3dWithHolesDiamondPattern()).first<<endl;
+	int pattern3d = settings->get3dWithHolesDiamondPattern();
+	pair<int,int> channels = settings->diamondPattern.getPatternChannels(pattern3d);
+//	cout<<"\tPattern3D "<<pattern3d<<": channels "<<channels.first<<"-"<<channels.second<<endl;
+	Int_t startChannel = channels.first;//85;
+//	cout<<"First 3DwH channel: "<<settings->diamondPattern.getPatternChannels(settings->get3dWithHolesDiamondPattern()).first<<endl;
 	/// This part of code is not working properly.
-	cout<<"nColumn hit is: "<<nColumn<<endl;
+//	cout<<"nColumn hit is: "<<nColumn<<endl;
 	Channel = startChannel + nColumn;
 
 //	int BadCells[] = {1,6,7,8,13,27,45,53,77,90,97};

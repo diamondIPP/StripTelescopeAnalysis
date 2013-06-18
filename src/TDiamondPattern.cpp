@@ -139,6 +139,7 @@ Float_t TDiamondPattern::getChannelToMetric(UInt_t ch){
 std::pair<int,int> TDiamondPattern::getPatternChannels(UInt_t pattern){
 	int firstChannel=-1;
 	int lastChannel=-1;
+	pattern--;
 	if(pattern<firstChannelOfInterval.size()&&pattern<nChannelsOfInterval.size()){
 		firstChannel = firstChannelOfInterval[pattern];
 		lastChannel = nChannelsOfInterval[pattern];
