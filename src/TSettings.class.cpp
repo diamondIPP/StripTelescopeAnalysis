@@ -692,19 +692,19 @@ bool TSettings::ParseBool(string key, string value, bool &output){
 pair<char,int> TSettings::ParseCellPosition(std::string value){
 	char row = 'A'-1;
 	int column = -1;
-	cout<<"Parsing Cell Position: "<<value<<flush;
+//	cout<<"Parsing Cell Position: "<<value<<flush;
 	Int_t pos = value.find_first_of("0123456789");
 	if (pos == 1){
 		row = value[0];
 		string columnString = value.substr(pos);
 		ParseInt("ParseCellColumn",columnString,column);
 	}
-	cout<< " = "<< row << " "<<column<<endl;
+//	cout<< " = "<< row << " "<<column<<endl;
 	return make_pair(row,column);
 }
 
 void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+//	cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
 	ParseStringArray(key, value,stringArray);
 	vecCells.clear();
@@ -715,8 +715,8 @@ void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells){
 		vecCells.push_back(cellNo);
 		cout<< "add cell "<<cellPosition.first << cellPosition.second<<" --> "<<cellNo<<endl;
 	}
-	cout<<"DONE"<<endl;
-	char t; cin>>t;
+//	cout<<"DONE"<<endl;
+//	char t; cin>>t;
 
 }
 void TSettings::ParseFloatArray(string key, string value, vector<float> &vec) {

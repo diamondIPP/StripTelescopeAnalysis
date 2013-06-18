@@ -54,8 +54,8 @@ public:
 
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
 	std::string getEtaDistributionPath(Int_t step=-1);
-    std::string get3dDiamondTreeFilePath();
-    std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
+	std::string get3dDiamondTreeFilePath();
+	std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
 	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
 	void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
@@ -65,8 +65,8 @@ public:
 	void goToAlignmentRootDir(){goToDir(this->getAbsoluteOuputPath(false));}
 
 
-    void goTo3dDiamondTreeDir();
-    void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
+	void goTo3dDiamondTreeDir();
+	void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
 	void goToPedestalAnalysisDir();
 	void goToClusterAnalysisDir();
 	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
@@ -94,8 +94,8 @@ public:
 	void setRunDescription(std::string runDescription);
 	void setOutputDir(std::string ouputDir){this->outputDir=outputDir;}
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
-    bool is3dDiamond(){return b3dDiamond;};
-    bool b3dDiamond;
+	bool is3dDiamond(){return b3dDiamond;};
+	bool b3dDiamond;
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -307,7 +307,7 @@ private:
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
-    void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
+	void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
 	void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
 	void Parse(std::string key, std::string value, std::vector<int> & vec){ ParseIntArray(key,value,vec);}
 	bool Parse(std::string key, std::string value, bool &output){return ParseBool(key,value,output);}
@@ -427,24 +427,25 @@ public:
 	TDiamondPattern diamondPattern;
 private:
 	int verbosity;
-       Float_t silPitchWidth;
-       Float_t diaPitchWidth;
-       Float_t diaOffsetMetricSpace;
-       Float_t diaStartingChannel;
+	Float_t silPitchWidth;
+	Float_t diaPitchWidth;
+	Float_t diaOffsetMetricSpace;
+	Float_t diaStartingChannel;
 private:
-       int nRows3d;
-       int nColumns3d;
-       vector<Int_t> badCells3d;
-       vector<Int_t> goodCells3d;
+	int nRows3d;
+	int nColumns3d;
+	vector<Int_t> badCells3d;
+	vector<Int_t> goodCells3d;
 public:
-       void setNRows3d(int nRows){nRows3d=nRows;};
-       int getNRows3d(){return nRows3d;};
-       int getNColumns3d(){return nColumns3d;};
-       void setNColumns3d(int nColumns){nColumns3d=nColumns;};
-       vector<Int_t> getGoodCells3D(){return goodCells3d;};
-       vector<Int_t> getBadCells3D(){return badCells3d;};
-       int get3DCellNo(char row, int column);
-       int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
+	void setNRows3d(int nRows){nRows3d=nRows;};
+	int getNRows3d(){return nRows3d;};
+	int getNColumns3d(){return nColumns3d;};
+	void setNColumns3d(int nColumns){nColumns3d=nColumns;};
+	vector<Int_t> getGoodCells3D(){return goodCells3d;};
+	vector<Int_t> getBadCells3D(){return badCells3d;};
+	int get3DCellNo(char row, int column);
+	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
+	UInt_t get3dWithHolesDiamondPattern(){return 3;};
 
 	ClassDef(TSettings,4);
 };

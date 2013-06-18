@@ -269,7 +269,8 @@ private:
 	int HitCount, SeedCount;
 
 	vector<int*> Detector;
-	vector<int*> FidCut;
+	vector<TFiducialCut*> FidCut;
+	TFidCutRegions fidCuts;
 
 };
 

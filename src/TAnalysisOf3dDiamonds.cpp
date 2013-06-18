@@ -43,49 +43,54 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	FileNameEnd = "";
 	cout<<"analyze selection data..."<<endl;
 	//Print out detectors to be analysed
-	int Strip[] = {26,38};
-	int threeDnH[] = {56,62};
-	int threeDwH[] = {86,92};
+//	int Strip[] = {26,38};
+//	int threeDnH[] = {56,62};
+//	int threeDwH[] = {86,92};
 
 	//int Strip[] = {32,32};
 	//int threeDnH[] = {59,59};
 	//int threeDwH[] = {88,88};
 
-	Detector.push_back(Strip); //Strip
-	Detector.push_back(threeDnH); //3D no holes
-	Detector.push_back(threeDwH); //3D with holes
-	//Fiducial Cut Regions       (xHigh, xLow, yHigh, yLow,     xChHigh, xChLow, yChHigh, yChLow)
-	int StripFid[] =             {102,   92,   110,   68,       104,     93,     96,      68};
-	int threeDnHFid[] =          {102,   92,   110,   68,       130,     112,    105,     98};
-	int threeDwHFid[] =          {102,   92,   110,   68,       161,     141,    107,     70};
-	FidCut.push_back(StripFid); //Strip
-	FidCut.push_back(threeDnHFid); //3D no holes
-	FidCut.push_back(threeDwHFid); //3D with holes
+//	Detector.push_back(Strip); //Strip
+//	Detector.push_back(threeDnH); //3D no holes
+//	Detector.push_back(threeDwH); //3D with holes
+//	//Fiducial Cut Regions       (xHigh, xLow, yHigh, yLow,     xChHigh, xChLow, yChHigh, yChLow)
+//	int StripFid[] =             {102,   92,   110,   68,       104,     93,     96,      68};
+//	int threeDnHFid[] =          {102,   92,   110,   68,       130,     112,    105,     98};
+//	int threeDwHFid[] =          {102,   92,   110,   68,       161,     141,    107,     70};
+	TFiducialCut* fidCutStrip = new TFiducialCut(0,93,104,68,96);
+	TFiducialCut* fidCut3DNoHoles = new TFiducialCut(1,112,130,98,105);
+	TFiducialCut* fidCut3DWiHoles = new TFiducialCut(2,141,161,70,107);
+	FidCut.push_back(fidCutStrip);
+	FidCut.push_back(fidCut3DNoHoles);
+	FidCut.push_back(fidCut3DWiHoles);
+	fidCuts.addFiducialCut(fidCutStrip);
+	fidCuts.addFiducialCut(fidCut3DNoHoles);
+	fidCuts.addFiducialCut(fidCut3DWiHoles);
 
 	FiducialMetric=0;			// Which Fiducial cut to apply
 	FiducialChannel=1;
 
-	/*for(int i=0;i<FidCut.size();i++){
-		for(int j=0; j<8;j++){
-			cout<<FidCut.at(i)[j]<<endl;
-		}
-	}
-		*/
 
 	//For YAlignment Fiducial cuts
 	//Fiducial Cut Regions    (xHigh, xLow, yHigh, yLow,     xChHigh, xChLow, yChHigh, yChLow)
 	int xEdge[] =             {102,   92,   110,   68,       170,     162,    100,     83};
 	int yEdge[] =             {102,   92,   110,   68,       164,     140,    112,     103};
+	TFiducialCut* fidCutYAlignmentX = new TFiducialCut(0,162,170,83,100);
+	TFiducialCut* fidCutYAlignmentY = new TFiducialCut(0,140,164,103,112);
+
 	FidCutYAlignment.push_back(xEdge);
 	FidCutYAlignment.push_back(yEdge);
-	for(int i=0;i<FidCutYAlignment.size();i++){
-		for(int j=0; j<8;j++){
-			cout<<FidCutYAlignment.at(i)[j]<<endl;
-		}
-	}
+	fidCutYAlignmentX->Print();
+	fidCutYAlignmentY->Print();
+//	for(int i=0;i<FidCutYAlignment.size();i++){
+//		for(int j=0; j<8;j++){
+//			cout<<FidCutYAlignment.at(i)[j]<<endl;
+//		}
+//	}
 
 	//intialise vectors
-	for(int i=0;i<Detector.size();i++){
+	for(int i=0;i<settings->diamondPattern.getNIntervals();i++){
 		vecPHDiamondHit.push_back(new vector<float>);
 		vecXPredicted.push_back(new vector<float>);
 		vecYPredicted.push_back(new vector<float>);
@@ -94,8 +99,9 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 		ptrCanvasMean.push_back(new TCanvas);
 	}
 	cout<<"Areas to be analysed:"<<endl;
-	for(int i=0; i<Detector.size(); i++){
-		cout<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<endl;
+	for(int i=0; i<settings->diamondPattern.getNIntervals(); i++){
+		pair<int,int> channels = settings->diamondPattern.getPatternChannels(i);
+		cout<<channels.first<<"-"<<channels.second<<endl;
 	}
 	//Moved initialiseHistos to here
 	initialiseYAlignmentHistos();
@@ -172,23 +178,23 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 	hLandauDoubleCombined->GetXaxis()->SetTitle("Number of Clusters");
 	hLandauDoubleCombined->GetYaxis()->SetTitle("Number of Entries #");
 
-	for(int i=0; i<Detector.size(); i++){
-
+	for(int i=0; i<settings->diamondPattern.getNIntervals(); i++){
+		pair<int,int> channels =settings->diamondPattern.getPatternChannels(i);
 		//hLandau
-		stringstream hLandauName; hLandauName<<"hLandau%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hLandauName; hLandauName<<"hLandau%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hLandau.push_back(new TH1F(hLandauName.str().c_str(),hLandauName.str().c_str(),256,0,2800));
 		hLandau.at(i)->SetTitle(hLandauName.str().c_str());
 		hLandau.at(i)->GetXaxis()->SetTitle("PH of diamond cluster");
 		hLandau.at(i)->GetYaxis()->SetTitle("number of entries #");
 
 		//hPHvsChannel
-		stringstream hEventsvsChannelName; hEventsvsChannelName<<"hEventsvsChannel%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hEventsvsChannelName; hEventsvsChannelName<<"hEventsvsChannel%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hEventsvsChannel.push_back(new TH1F(hEventsvsChannelName.str().c_str(),hEventsvsChannelName.str().c_str(),90,10,100));
 		hEventsvsChannel.at(i)->GetXaxis()->SetTitle("HighestPH [ch]");
 		hEventsvsChannel.at(i)->GetYaxis()->SetTitle("No. Events");
 
 		//hPHvsChannel
-		stringstream hPHvsChannelName; hPHvsChannelName<<"hPHvsChannel%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hPHvsChannelName; hPHvsChannelName<<"hPHvsChannel%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hPHvsChannel.push_back(new TH2F(hPHvsChannelName.str().c_str(),hPHvsChannelName.str().c_str(),150,0,2900,80,20,100));
 		hPHvsChannel.at(i)->GetXaxis()->SetTitle("Charge in ADC counts");
 		hPHvsChannel.at(i)->GetYaxis()->SetTitle("XPos(channel)");
@@ -198,7 +204,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 		//hPHvsChannel.at(i)->SetMinimum(0);
 
 		//hPHvsPredictedChannel
-		stringstream hPHvsPredictedChannelName; hPHvsPredictedChannelName<<"hPHvsPredictedChannel%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hPHvsPredictedChannelName; hPHvsPredictedChannelName<<"hPHvsPredictedChannel%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hPHvsPredictedChannel.push_back(new TH2F(hPHvsPredictedChannelName.str().c_str(),hPHvsPredictedChannelName.str().c_str(),150,0,2900,320,20,100));
 		hPHvsPredictedChannel.at(i)->GetXaxis()->SetTitle("Charge in ADC counts");
 		hPHvsPredictedChannel.at(i)->GetYaxis()->SetTitle("XPos(Predicted channel)");
@@ -208,7 +214,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 		//hPHvsPredictedChannel.at(i)->SetMinimum(0);
 
 		//hPHvsPredictedXPos
-		stringstream hPHvsPredictedXPosName; hPHvsPredictedXPosName<<"hPHvsPredictedXPos%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hPHvsPredictedXPosName; hPHvsPredictedXPosName<<"hPHvsPredictedXPos%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hPHvsPredictedXPos.push_back(new TH2F(hPHvsPredictedXPosName.str().c_str(),hPHvsPredictedXPosName.str().c_str(),150,0,2900,50,5800,10200));
 		hPHvsPredictedXPos.at(i)->GetXaxis()->SetTitle("Charge in ADC counts");
 		hPHvsPredictedXPos.at(i)->GetYaxis()->SetTitle("XPos(um)");
@@ -218,25 +224,25 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 		//hPHvsPredictedXPos.at(i)->SetMinimum(0);
 
 		//hHitandSeedCount
-		stringstream hHitandSeedCountName; hHitandSeedCountName<<"hHitandSeedCount%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hHitandSeedCountName; hHitandSeedCountName<<"hHitandSeedCount%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hHitandSeedCount.push_back(new TH2F(hHitandSeedCountName.str().c_str(),hHitandSeedCountName.str().c_str(),10,0,10,10,0,10));
 		hHitandSeedCount.at(i)->GetXaxis()->SetTitle("Hit Count");
 		hHitandSeedCount.at(i)->GetYaxis()->SetTitle("Seed Count");
 
 		//hChi2XChi2Y
-		stringstream hChi2XChi2YName; hChi2XChi2YName<<"hChi2XChi2Y%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hChi2XChi2YName; hChi2XChi2YName<<"hChi2XChi2Y%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hChi2XChi2Y.push_back(new TH2F(hChi2XChi2YName.str().c_str(),hChi2XChi2YName.str().c_str(),60,0,60,60,0,60));
 		hChi2XChi2Y.at(i)->GetXaxis()->SetTitle("Chi2X");
 		hChi2XChi2Y.at(i)->GetYaxis()->SetTitle("Chi2Y");
 
 		//hFidCutXvsFidCutY
-		stringstream hFidCutXvsFidCutYName; hFidCutXvsFidCutYName<<"hFidCutXvsFidCutY%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hFidCutXvsFidCutYName; hFidCutXvsFidCutYName<<"hFidCutXvsFidCutY%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hFidCutXvsFidCutY.push_back(new TH2F(hFidCutXvsFidCutYName.str().c_str(),hFidCutXvsFidCutYName.str().c_str(),160,90,170,120,60,120));
 		hFidCutXvsFidCutY.at(i)->GetXaxis()->SetTitle("FidCutX");
 		hFidCutXvsFidCutY.at(i)->GetYaxis()->SetTitle("FidCutY");
 
 		//hFidCutXvsFidCutYvsCharge		For TH2D
-		stringstream hFidCutXvsFidCutYvsChargeName; hFidCutXvsFidCutYvsChargeName<<"hFidCutXvsFidCutYvsCharge%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hFidCutXvsFidCutYvsChargeName; hFidCutXvsFidCutYvsChargeName<<"hFidCutXvsFidCutYvsCharge%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hFidCutXvsFidCutYvsCharge.push_back(new TH2D(hFidCutXvsFidCutYvsChargeName.str().c_str(),hFidCutXvsFidCutYvsChargeName.str().c_str(),213,90,170,160,60,120));
 		hFidCutXvsFidCutYvsCharge.at(i)->GetXaxis()->SetTitle("FidCutX");
 		hFidCutXvsFidCutYvsCharge.at(i)->GetYaxis()->SetTitle("FidCutY");
@@ -249,7 +255,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 		hFidCutXvsFidCutYvsMeanCharge.push_back((TH2D*)hFidCutXvsFidCutYvsCharge.at(i)->Clone("hFidCutXvsFidCutYvsMeanCharge"));
 
 		/*//hFidCutXvsFidCutYvsCharge		For TH3F
-		stringstream hFidCutXvsFidCutYvsChargeName; hFidCutXvsFidCutYvsChargeName<<"hFidCutXvsFidCutYvsCharge%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%";
+		stringstream hFidCutXvsFidCutYvsChargeName; hFidCutXvsFidCutYvsChargeName<<"hFidCutXvsFidCutYvsCharge%%"<<firstCh<<"-"<<channels.second<<"%%";
 		hFidCutXvsFidCutYvsCharge.push_back(new TH3F(hFidCutXvsFidCutYvsChargeName.str().c_str(),hFidCutXvsFidCutYvsChargeName.str().c_str(),160,90,170,120,60,120,30,0,3000));
 		hFidCutXvsFidCutYvsCharge.at(i)->GetXaxis()->SetTitle("FidCutX");
 		hFidCutXvsFidCutYvsCharge.at(i)->GetYaxis()->SetTitle("FidCutY");
@@ -337,7 +343,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 	hXPosvsYPosvsCharge = (TH2D*)hXPosvsYPosvsMeanCharge->Clone("hXPosvsYPosvsCharge");
 	hXPosvsYPosvsEvents = (TH2D*)hXPosvsYPosvsMeanCharge->Clone("hXPosvsYPosvsEvents");
 	//hFidCutXvsFidCutYvsCharge
-	/*stringstream hFidCutXvsFidCutYvsChargeName; hFidCutXvsFidCutYvsChargeName<<"hFidCutXvsFidCutYvsCharge%%";   //<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%";
+	/*stringstream hFidCutXvsFidCutYvsChargeName; hFidCutXvsFidCutYvsChargeName<<"hFidCutXvsFidCutYvsCharge%%";   //<<firstCh<<"-"<<channels.second<<"%%";
 	//hFidCutXvsFidCutYvsCharge.push_back(new TH3F(hFidCutXvsFidCutYvsChargeName.str().c_str(),hFidCutXvsFidCutYvsChargeName.str().c_str(),2800,90,170,2800,60,120,2800,0,3000));
 	hFidCutXvsFidCutYvsCharge = new TH3F(hFidCutXvsFidCutYvsChargeName.str().c_str(),hFidCutXvsFidCutYvsChargeName.str().c_str(),160,90,170,120,60,120,30,0,3000);
 	hFidCutXvsFidCutYvsCharge->GetXaxis()->SetTitle("FidCutX");
@@ -365,18 +371,19 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 	DoubleCluster->SaveAs(str111.str().c_str());
 
 
-	for(int i=0;i<Detector.size();i++){
+	for(int i=0;i<settings->diamondPattern.getNIntervals();i++){
 		/*//hLandau
-		stringstream hLandauName; hLandauName<<"hLandau%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hLandauName; hLandauName<<"hLandau%%"<<firstCh<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hLandau.push_back(HistogrammSaver::CreateDistributionHisto(hLandauName.str().c_str(),*vecPHDiamondHit.at(i),256));
 		hLandau.at(i)->SetTitle(hLandauName.str().c_str());
 		hLandau.at(i)->GetXaxis()->SetTitle("PH of diamond cluster");
 		hLandau.at(i)->GetYaxis()->SetTitle("number of entries #");
 		*/
+		pair<int,int> channels = settings->diamondPattern.getPatternChannels(i);
 		histSaver->SaveHistogram(hLandau.at(i));
 
 		//hPredictedPositionDiamondHit
-		stringstream hPredictedPositionDiamondHitName; hPredictedPositionDiamondHitName<<"hPredictedPositionDiamondHit%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd;
+		stringstream hPredictedPositionDiamondHitName; hPredictedPositionDiamondHitName<<"hPredictedPositionDiamondHit%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hPredictedPositionDiamondHit.push_back(HistogrammSaver::CreateScatterHisto(hPredictedPositionDiamondHitName.str().c_str(),*vecXPredicted.at(i),*vecYPredicted.at(i),512));
 		hPredictedPositionDiamondHit.at(i)->SetTitle(hPredictedPositionDiamondHitName.str().c_str());
 		hPredictedPositionDiamondHit.at(i)->GetXaxis()->SetTitle("predicted x Position");
@@ -395,20 +402,20 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 		//hFidCutXvsFidCutYvsCharge
 		ptrCanvas.at(i)->cd();
 		hFidCutXvsFidCutYvsCharge.at(i)->Draw("COLZ");
-		stringstream str; str<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsCharge%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd<<".png";
+		stringstream str; str<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsCharge%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd<<".png";
 		ptrCanvas.at(i)->SaveAs(str.str().c_str());
 
 		//hFidCutXvsFidCutYvsEvents
 		ptrCanvasEvents.at(i)->cd();
 		hFidCutXvsFidCutYvsEvents.at(i)->Draw("COLZ");
-		stringstream str1; str1<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsChargeClone%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd<<".png";
+		stringstream str1; str1<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsChargeClone%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd<<".png";
 		ptrCanvasEvents.at(i)->SaveAs(str1.str().c_str());
 
 		//hFidCutXvsFidCutYvsMeanCharge
 		ptrCanvasMean.at(i)->cd();
 		*hFidCutXvsFidCutYvsMeanCharge.at(i) = (*hFidCutXvsFidCutYvsCharge.at(i)/(*hFidCutXvsFidCutYvsEvents.at(i)));
 		hFidCutXvsFidCutYvsMeanCharge.at(i)->Draw("COLZ");
-		stringstream str2; str2<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsMeanCharge%%"<<Detector.at(i)[0]<<"-"<<Detector.at(i)[1]<<"%%"<<FileNameEnd<<".png";
+		stringstream str2; str2<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsMeanCharge%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd<<".png";
 		ptrCanvasMean.at(i)->SaveAs(str2.str().c_str());
 
 	} //End of for loop
@@ -422,12 +429,11 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 	/*DrawFidCutRegions(); //Draw Fiducial Cut Regions
 	 	 */
 	//FidCudBoundMetric->Draw("same"); //To draw the fiducial cut regions
-	stringstream str1; str1<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn"<<"%%"<<FileNameEnd<<".png";
-	hCombinedMeanCharge->SaveAs(str1.str().c_str());
-
-	DrawFidCutRegions(); //Draw Fiducial Cut Regions
-	stringstream str11; str11<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsMeanChargeAllDetectors"<<"%%"<<FileNameEnd<<".png";
-	hCombinedMeanCharge->SaveAs(str11.str().c_str());
+	hCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn");
+	histSaver->SaveCanvas(hCombinedMeanCharge);
+	fidCuts.drawFiducialCutsToCanvas(hCombinedMeanCharge);
+	hCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectors");
+	histSaver->SaveCanvas(hCombinedMeanCharge);
 
 	//For efficiency
 	//Predicted Events
@@ -605,12 +611,12 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 	//RemoveLumpyClusters(&diamondCluster);
 
 	//Universal PHvsChannel Plot
-	for(int i=0; i<Detector.size(); i++){
+	for(int i=0; i<settings->diamondPattern.getNIntervals(); i++){
 		//RemoveEdgeHits(&diamondCluster, Detector.at(i));
 		//hFidCutXvsFidCutYvsCharge->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
 		if(eventReader->getNDiamondClusters()==1){
-
-			if(diamondCluster.getHighestSignalChannel()<=Detector.at(i)[1]&&diamondCluster.getHighestSignalChannel()>=Detector.at(i)[0]){
+			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i);
+			if(diamondCluster.getHighestSignalChannel()<=channels.second&&diamondCluster.getHighestSignalChannel()>=channels.first){
 
 				if(FiducialCut(i)==1)		//Cut on fiducial cuts
 					return;
@@ -643,14 +649,15 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 				hXPosvsYPosvsCharge->Fill(xPos,yPos,diamondCluster.getCharge(false));
 				//hXPosvsYPosvsMeanCharge->Fill(xPos,yPos,diamondCluster.getCharge(false));
 				hXPosvsYPosvsEvents->Fill(xPos,yPos,1);
-			}        			//if(diamondCluster.getHighestSignalChannel()<=Detector.at(i)[1]&&diamondCluster.getHighestSignalChannel()>=Detector.at(i)[0]){
+			}        			//if(diamondCluster.getHighestSignalChannel()<=channels.second&&diamondCluster.getHighestSignalChannel()>=firstCh){
 
 		}     		//if(eventReader->getNDiamondClusters()==1){
 
 		// Part of loop for Transparent analysis
 		// Calculate Detector efficiency
 		if(eventReader->getNDiamondClusters()==1||eventReader->getNDiamondClusters()==0){
-			if(positionInDetSystemChannelSpace<=(Detector.at(i)[1]+0.5)&&positionInDetSystemChannelSpace>=(Detector.at(i)[0]-0.5)){
+			pair <int,int> channels = settings->diamondPattern.getPatternChannels(settings->get3dWithHolesDiamondPattern());
+			if(positionInDetSystemChannelSpace<=(channels.second+0.5)&&positionInDetSystemChannelSpace>=(channels.first-0.5)){
 
 				if(FiducialCut(i)==1)		//Cut on fiducial cuts
 					return;
@@ -670,22 +677,22 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 }
 void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 
-	//hGridReference
-	vector<char> GridReference;
-	GridReference.push_back('A');GridReference.push_back('B');GridReference.push_back('C');
-	GridReference.push_back('D');GridReference.push_back('E');GridReference.push_back('F');
-	GridReference.push_back('G');GridReference.push_back('H');GridReference.push_back('I');
-	int GridReferenceY[] = {1,2,3,4,5,6,7,8,9,10,11};
 	stringstream hGridReferenceName; hGridReferenceName<<""<<FileNameEnd;
 	hGridReference = new TH2D(hGridReferenceName.str().c_str(),hGridReferenceName.str().c_str(),9,2365,3715,11,0,1650);
-	for(int i=0;i<9;i++){
-		stringstream iLetter; iLetter<<GridReference.at(i);
-		hGridReference->GetXaxis()->SetBinLabel(i+1,iLetter.str().c_str());
+
+	//hGridReference
+
+	vector<char> GridReference;
+	for(UInt_t i = 0; i< settings->getNColumns3d();i++){
+		GridReference.push_back((char)('A'+i));
 	}
-	for(int j=0;j<11;j++){
-		stringstream jNumber; jNumber<<GridReferenceY[j];
-		hGridReference->GetYaxis()->SetBinLabel(j+1,jNumber.str().c_str());
-	}
+	vector<int> GridReferenceY;
+	for(UInt_t i = 0; i < settings->getNRows3d();i++)GridReferenceY.push_back(i+1);
+	for(int i=0;i<9;i++)
+		hGridReference->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
+
+	for(int j=0;j<11;j++)
+		hGridReference->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
 	hGridReference->SetStats(kFALSE);
 	hGridReference->SetTickLength(0.0, "X");
 	hGridReference->SetTickLength(0.0, "Y");
@@ -2026,28 +2033,10 @@ void TAnalysisOf3dDiamonds::DrawYAlignmentFidCutRegions() {
 Int_t* TAnalysisOf3dDiamonds::CellToChannel(int nCell, float nXcell) {
 	Int_t* ChannelsToRead;
 	Int_t Channel = -9999;
-	Int_t nCellsPerRow = settings->get;
+	Int_t nCellsPerRow = settings->getNRows3d();
 	Int_t nColumn = nCell / nCellsPerRow;
-	Int_t startChannel = 85;
+	Int_t startChannel = settings->diamondPattern.getPatternChannels(settings->get3dWithHolesDiamondPattern()).first;//85;
 	Channel = startChannel + nColumn;
-//	if(nCell<11 && nCell>=0)
-//		Channel = 85;
-//	if(nCell<22 && nCell>=11)
-//		Channel = 86;
-//	if(nCell<33 && nCell>=22)
-//		Channel = 87;
-//	if(nCell<44 && nCell>=33)
-//		Channel = 88;
-//	if(nCell<55 && nCell>=44)
-//		Channel = 89;
-//	if(nCell<66 && nCell>=55)
-//		Channel = 90;
-//	if(nCell<77 && nCell>=66)
-//		Channel = 91;
-//	if(nCell<88 && nCell>=77)
-//		Channel = 92;
-//	if(nCell<99 && nCell>=88)
-//		Channel = 93;
 
 //	int BadCells[] = {1,6,7,8,13,27,45,53,77,90,97};
 	vector<int> BadCells = settings->getBadCells3D();
@@ -2273,7 +2262,7 @@ int TAnalysisOf3dDiamonds::RemoveEdge3DClusters(TCluster* nCluster) {
 	for (UInt_t clPos=0;clPos < nCluster->getClusterSize();clPos++){
 		if(nCluster->isHit(clPos)){
 			if(nCluster->getChannel(clPos)>=93||nCluster->getChannel(clPos)<=85)
-				Remove =1;
+				Remove = 1;
 		}
 	}
 	return Remove;
@@ -2288,9 +2277,9 @@ int TAnalysisOf3dDiamonds::FiducialCut(int Detector){
 	//cout<<"X Less than: "<<FidCut.at(Detector)[5]<<" Greater than: "<<FidCut.at(Detector)[4]<<endl;
 	//cout<<"Y Less than: "<<FidCut.at(Detector)[7]<<" Greater than: "<<FidCut.at(Detector)[6]<<endl;
 	if(FiducialChannel){
-		if(fiducialValueX<FidCut.at(Detector)[5]||fiducialValueX>FidCut.at(Detector)[4])
+		if(fiducialValueX<FidCut.at(Detector)->GetXHigh()||fiducialValueX>FidCut.at(Detector)->GetXLow())
 			Throw =1;
-		if(fiducialValueY<FidCut.at(Detector)[7]||fiducialValueY>FidCut.at(Detector)[6])
+		if(fiducialValueY<FidCut.at(Detector)->GetYHigh()||fiducialValueY>FidCut.at(Detector)->GetYLow())
 			Throw =1;
 	}
 	if(Throw==1)
@@ -2301,9 +2290,8 @@ int TAnalysisOf3dDiamonds::FiducialCut(int Detector){
 void TAnalysisOf3dDiamonds::DrawFidCutRegions() {
 
 	hCombinedMeanCharge->cd();
-
 	for(int i=0;i<FidCut.size();i++){
-		FidCutChannelTBox.push_back(new TBox(FidCut.at(i)[5], FidCut.at(i)[7], FidCut.at(i)[4], FidCut.at(i)[6]));
+		FidCutChannelTBox.push_back(new TBox(FidCut.at(i)->GetXLow(), FidCut.at(i)->GetYLow(), FidCut.at(i)->GetXHigh(), FidCut.at(i)->GetYHigh()));
 		FidCutChannelTBox.at(i)->SetFillStyle(0);
 		FidCutChannelTBox.at(i)->SetLineWidth(2);
 		FidCutChannelTBox.at(i)->SetLineColor(kRed);

@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "TROOT.h"
+
 #include "TPlaneProperties.hh"
 
 
@@ -41,8 +42,10 @@ public:
 	void clear(){resetPattern();}
 	void Print();
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
-private:
+	std::pair<int,int> getPatternChannels(UInt_t pattern);
+
 	UInt_t getNIntervals(){return nChannelsOfInterval.size();}
+private:
 	Float_t getChannelToMetric(UInt_t ch);
 	void initialiseVector();
 	std::vector<Float_t> channelToMetricConversion;
