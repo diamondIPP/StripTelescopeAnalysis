@@ -48,6 +48,9 @@ private:
 	void analyseEvent();
 
 	//YAlignment
+	void initialise3DGridReference();
+	void initialise3DYAlignmentHistos();
+	void initialise3DOverviewHistos();
 	void initialiseYAlignmentHistos();
 	void saveYAlignmentHistos();
 	void YAlignment();

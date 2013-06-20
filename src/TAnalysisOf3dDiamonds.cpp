@@ -105,6 +105,9 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 		cout<<channels.first<<"-"<<channels.second<<endl;
 	}
 	//Moved initialiseHistos to here
+	initialise3DGridReference();
+	initialise3DYAlignmentHistos();
+	initialise3DOverviewHistos();
 	initialiseYAlignmentHistos();
 	/*initialiseHistos();
 	 	 */
@@ -696,7 +699,8 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 	}
 
 }
-void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
+
+void TAnalysisOf3dDiamonds::initialise3DGridReference() {
 
 	stringstream hGridReferenceName; hGridReferenceName<<""<<FileNameEnd;
 	hGridReference = new TH2D(hGridReferenceName.str().c_str(),hGridReferenceName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
@@ -708,7 +712,7 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	}
 	vector<int> GridReferenceY;
 	for(UInt_t i = 0; i < settings->getNRows3d();i++)GridReferenceY.push_back(i+1);
-	for(int i=0;i<9;i++)
+	for(int i=0;i<settings->getNRows3d();i++)
 		hGridReference->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
 
 	for(int j=0;j<settings->getNRows3d();j++)
@@ -717,6 +721,11 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	hGridReference->SetTickLength(0.0, "X");
 	hGridReference->SetTickLength(0.0, "Y");
 
+}
+
+void TAnalysisOf3dDiamonds::initialise3DYAlignmentHistos() {
+
+	//Fiducial Region with Edge Alignment Regions Highlighted
 	//hFidCutXvsFidCutYvsChargeYAlignment
 	stringstream hFidCutXvsFidCutYvsChargeYAlignmentName; hFidCutXvsFidCutYvsChargeYAlignmentName<<"hFidCutXvsFidCutYvsChargeYAlignment"<<FileNameEnd;
 	hFidCutXvsFidCutYvsChargeYAlignment = new TH2D(hFidCutXvsFidCutYvsChargeYAlignmentName.str().c_str(),hFidCutXvsFidCutYvsChargeYAlignmentName.str().c_str(),213,90,170,160,60,120);
@@ -730,17 +739,86 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	//hFidCutXvsFidCutYvsMeanChargeYAlignment
 	hFidCutXvsFidCutYvsMeanChargeYAlignment = (TH2D*)hFidCutXvsFidCutYvsChargeYAlignment->Clone("hFidCutXvsFidCutYvsMeanChargeYAlignment");
 
-	//hDetXvsDetY3D
+	//hXEdgeCharge
+	stringstream hEdgeChargeName; hEdgeChargeName<<"hEdgeCharge"<<FileNameEnd;
+	hEdgeCharge = new TH1F(hEdgeChargeName.str().c_str(),hEdgeChargeName.str().c_str(),250,3100,4100);
+	hEdgeCharge->SetTitle(hEdgeChargeName.str().c_str());
+	hEdgeCharge->GetXaxis()->SetTitle("X Diamond (um)");
+	hEdgeCharge->GetYaxis()->SetTitle("Total Charge [ADC]");
+
+	hEdgeChargeEvents = (TH1F*)hEdgeCharge->Clone("hEdgeChargeEvents");
+	hEdgeChargeEvents->GetYaxis()->SetTitle("Entries");
+
+	hEdgeMeanCharge = (TH1F*)hEdgeCharge->Clone("hEdgeMeanCharge");
+	hEdgeMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
+
+	//hYEdgeCharge
+	stringstream hyEdgeChargeName; hyEdgeChargeName<<"hyEdgeCharge"<<FileNameEnd;
+	hyEdgeCharge = new TH1F(hyEdgeChargeName.str().c_str(),hyEdgeChargeName.str().c_str(),250,5000,6000);
+	hyEdgeCharge->SetTitle(hyEdgeChargeName.str().c_str());
+	hyEdgeCharge->GetXaxis()->SetTitle("Y Diamond (um)");
+	hyEdgeCharge->GetYaxis()->SetTitle("Total Charge [ADC]");
+
+	hyEdgeChargeEvents = (TH1F*)hyEdgeCharge->Clone("hyEdgeChargeEvents");
+	hyEdgeChargeEvents->GetYaxis()->SetTitle("Entries");
+
+	hyEdgeMeanCharge = (TH1F*)hyEdgeCharge->Clone("hyEdgeMeanCharge");
+	hyEdgeMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
+
+	//hDeadCellsProfile
+	stringstream hDeadCellName; hDeadCellName<<"hDeadCell"<<FileNameEnd;
+	hDeadCell = new TH1F(hDeadCellName.str().c_str(),hDeadCellName.str().c_str(),90,600,1050);
+	hDeadCell->SetTitle(hDeadCellName.str().c_str());
+	hDeadCell->GetXaxis()->SetTitle("Y Diamond (um)");
+	hDeadCell->GetYaxis()->SetTitle("Mean Charge [ADC]");
+
+	hDeadCellEvents = (TH1F*)hDeadCell->Clone("hDeadCellEvents");
+	hDeadCellEvents->GetYaxis()->SetTitle("Entries");
+
+	hDeadCellMeanCharge = (TH1F*)hDeadCell->Clone("hDeadCellMeanCharge");
+	hDeadCellMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
+
+	/*
+	stringstream hDeadCellsProfileChargeName; hDeadCellsProfileChargeName<<"hEdgeCharge%%"<<FileNameEnd;
+	hDeadCellsProfileCharge = new TH1F(hDeadCellsProfileChargeName.str().c_str(),hDeadCellsProfileChargeName.str().c_str(),90,0,450);
+	hDeadCellsProfileCharge->SetTitle(hDeadCellsProfileChargeName.str().c_str());
+	hDeadCellsProfileCharge->GetXaxis()->SetTitle("X Diamond (um)");
+	hDeadCellsProfileCharge->GetYaxis()->SetTitle("Total Charge [ADC]");
+
+	hDeadCellsProfileEvents = (TH1F*)hDeadCellsProfileCharge->Clone("hEdgeChargeEvents");
+	hDeadCellsProfileEvents->GetYaxis()->SetTitle("Entries");
+
+	hDeadCellsProfileMeanCharge = (TH1F*)hDeadCellsProfileCharge->Clone("hEdgeMeanCharge");
+	hDeadCellsProfileMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
+
+	int DeadCellsArray[] = {13, 27, 53, 97};
+	DeadCellsArrayPointer = DeadCellsArray;
+	for(int i=0;i<4;i++){
+		stringstream hDeadCellsChargeName; hDeadCellsChargeName<<"TotalCharge"<<(i)<<FileNameEnd;
+		hDeadCellsCharge.push_back(new TH1F(hDeadCellsChargeName.str().c_str(),hDeadCellsChargeName.str().c_str(),90,0,450));
+		stringstream hDeadCellsEventsName; hDeadCellsEventsName<<"Events"<<(i)<<FileNameEnd;
+		hDeadCellsEvents.push_back(new TH1F(hDeadCellsEventsName.str().c_str(),hDeadCellsEventsName.str().c_str(),90,0,450));
+	}
+	 */
+}
+
+void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
+
+}
+
+void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
+
+	//hDetXvsDetY3DTotolCharge
 	stringstream hDetXvsDetY3DName; hDetXvsDetY3DName<<"hFidCutXvsFidCutYvsChargeYAlignment"<<FileNameEnd;
 	hDetXvsDetY3D = new TH2D(hDetXvsDetY3DName.str().c_str(),hDetXvsDetY3DName.str().c_str(),270,settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),330,0,settings->getYMetalisationEnd3d());
 	hDetXvsDetY3D->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3D->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3D->GetZaxis()->SetTitle("Charge ADC");
 
-	//hFidCutXvsFidCutYvsEventsYAlignment
+	//hDetXvsDetY3DEvents
 	hDetXvsDetY3DvsEvents = (TH2D*)hDetXvsDetY3D->Clone("hDetXvsDetY3DvsEvents");
 
-	//hFidCutXvsFidCutYvsMeanChargeYAlignment
+	//hDetXvsDetY3DMeanCharge
 	hDetXvsDetY3DMeanCharge = (TH2D*)hDetXvsDetY3D->Clone("hDetXvsDetY3DMeanCharge");
 
 	//hCellsMeanClusteSize
@@ -751,12 +829,26 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	stringstream hQuarterCellsMeanClusterSizeName; hQuarterCellsMeanClusterSizeName<<"hQuarterCellsMeanClusterSize"<<FileNameEnd;
 	hQuarterCellsMeanClusterSize = new TH2D(hQuarterCellsMeanClusterSizeName.str().c_str(),hQuarterCellsMeanClusterSizeName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
 
-	//hDetXvsDetY3DRebinned
+	//hDetXvsDetY3DRebinnedChargeTotal
 	stringstream hDetXvsDetY3DRebinnedName; hDetXvsDetY3DRebinnedName<<"hFidCutXvsFidCutYvsChargeRebinnedYAlignment"<<FileNameEnd;
 	hDetXvsDetY3DRebinned = new TH2D(hDetXvsDetY3DRebinnedName.str().c_str(),hDetXvsDetY3DRebinnedName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
 	hDetXvsDetY3DRebinned->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DRebinned->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3DRebinned->GetZaxis()->SetTitle("Charge ADC");
+
+	//hDetXvsDetY3DRebinnedEvents
+	hDetXvsDetY3DvsEventsRebinned = (TH2D*)hDetXvsDetY3DRebinned->Clone("hDetXvsDetY3DvsEventsRebinned");
+
+	//hDetXvsDetY3DRebinnedMeanCharge
+	hDetXvsDetY3DMeanChargeRebinned = (TH2D*)hDetXvsDetY3DRebinned->Clone("hDetXvsDetY3DMeanChargeRebinned");
+	//hDetXvsDetY3DMeanChargeRebinned->SetBins(9,2365,3715,11,0,1650,12,0,1200);
+
+	//hDetXvsDetY3DRebinnedMeanChargeRMS
+	stringstream hDetXvsDetY3DRebinnedRMSName; hDetXvsDetY3DRebinnedRMSName<<"h3DdetRebinnedRMS"<<FileNameEnd;
+	hDetXvsDetY3DRebinnedRMS = new TH2D(hDetXvsDetY3DRebinnedRMSName.str().c_str(),hDetXvsDetY3DRebinnedRMSName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hDetXvsDetY3DRebinnedRMS->GetXaxis()->SetTitle("Xdet (um)");
+	hDetXvsDetY3DRebinnedRMS->GetYaxis()->SetTitle("Ydet (um)");
+	hDetXvsDetY3DRebinnedRMS->GetZaxis()->SetTitle("Charge ADC");
 
 	//RebinnedQuarterCellFails
 	stringstream RebinnedQuarterCellFailsName; RebinnedQuarterCellFailsName<<"3DdetNumberofQuarterCellFails"<<FileNameEnd;
@@ -765,28 +857,21 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	RebinnedQuarterCellFails->GetYaxis()->SetTitle("Ydet (um)");
 	RebinnedQuarterCellFails->GetZaxis()->SetTitle("Quarter Fails");
 
-	//hDetXvsDetY3DRebinnedRMS
-	stringstream hDetXvsDetY3DRebinnedRMSName; hDetXvsDetY3DRebinnedRMSName<<"h3DdetRebinnedRMS"<<FileNameEnd;
-	hDetXvsDetY3DRebinnedRMS = new TH2D(hDetXvsDetY3DRebinnedRMSName.str().c_str(),hDetXvsDetY3DRebinnedRMSName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
-	hDetXvsDetY3DRebinnedRMS->GetXaxis()->SetTitle("Xdet (um)");
-	hDetXvsDetY3DRebinnedRMS->GetYaxis()->SetTitle("Ydet (um)");
-	hDetXvsDetY3DRebinnedRMS->GetZaxis()->SetTitle("Charge ADC");
-
-	//hDetXvsDetY3DMeanChargeRebinnedQuarterCell
+	//hDetXvsDetY3DQuarterCellMeanCharge
 	stringstream hDetXvsDetY3DMeanChargeRebinnedQuarterCellName; hDetXvsDetY3DMeanChargeRebinnedQuarterCellName<<"h3DdetQuarterCellMeanCharge"<<FileNameEnd;
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell = new TH2D(hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetZaxis()->SetTitle("Charge ADC");
 
-	//hDetXvsDetY3DRebinnedQuarterCellRMS
+	//hDetXvsDetY3DQuarterCellRMS
 	stringstream hDetXvsDetY3DRebinnedQuarterCellRMSName; hDetXvsDetY3DRebinnedQuarterCellRMSName<<"h3DdetQuarterCellRMS"<<FileNameEnd;
 	hDetXvsDetY3DRebinnedQuarterCellRMS = new TH2D(hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
 	hDetXvsDetY3DRebinnedQuarterCellRMS->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DRebinnedQuarterCellRMS->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3DRebinnedQuarterCellRMS->GetZaxis()->SetTitle("Charge ADC");
 
-	//hDetXvsDetY3DMeanChargeQuarterCellGrading
+	//hDetXvsDetY3DQuarterCellGrading
 	for(int k=0; k<6; k++){
 		stringstream hDetXvsDetY3DMeanChargeQuarterCellGradingName; hDetXvsDetY3DMeanChargeQuarterCellGradingName<<"hDetXvsDetY3DMeanChargeQuarterCellGrading"<<k<<"%%Fail"<<FileNameEnd;
 		hDetXvsDetY3DMeanChargeQuarterCellGrading.push_back(new TH2D(hDetXvsDetY3DMeanChargeQuarterCellGradingName.str().c_str(),hDetXvsDetY3DMeanChargeQuarterCellGradingName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d()));
@@ -809,6 +894,10 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	h3DdetQuarterCellFluctuation1->GetYaxis()->SetTitle("Ydet (um)");
 	h3DdetQuarterCellFluctuation1->GetZaxis()->SetTitle("Fluctuation");
 
+
+
+
+
 	//hDetXvsDetY3DMeanChargeQuarterCellGradingLandau
 	for(int k=0;k<5;k++){
 
@@ -824,13 +913,6 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 		stringstream hCellsDeltaXQuarterCellGradingName; hCellsDeltaXQuarterCellGradingName<<"hCellsDeltaXQuarterCellGrading"<<k<<FileNameEnd;
 		hCellsDeltaXQuarterCellGrading.push_back(new TH1F(hCellsDeltaXQuarterCellGradingName.str().c_str(),hCellsDeltaXQuarterCellGradingName.str().c_str(),100,-3,3));
 	}
-
-	//hFidCutXvsFidCutYvsEventsYAlignmentRebinned
-	hDetXvsDetY3DvsEventsRebinned = (TH2D*)hDetXvsDetY3DRebinned->Clone("hDetXvsDetY3DvsEventsRebinned");
-
-	//hFidCutXvsFidCutYvsMeanChargeYAlignmentRebinned
-	hDetXvsDetY3DMeanChargeRebinned = (TH2D*)hDetXvsDetY3DRebinned->Clone("hDetXvsDetY3DMeanChargeRebinned");
-	//hDetXvsDetY3DMeanChargeRebinned->SetBins(9,2365,3715,11,0,1650,12,0,1200);
 
 	//hDetXvsDetY3DOverview
 	stringstream hDetXvsDetY3DOverviewName; hDetXvsDetY3DOverviewName<<"hDetXvsDetY3DOverview"<<FileNameEnd;
@@ -1132,72 +1214,6 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 	h2DClusterSizeXAxis->SetLabelOffset(0.015,"X");
 	//h2DClusterSizeXAxis->GetXaxis()->TitleOffset()
 
-	//hEdgeCharge
-	stringstream hEdgeChargeName; hEdgeChargeName<<"hEdgeCharge"<<FileNameEnd;
-	hEdgeCharge = new TH1F(hEdgeChargeName.str().c_str(),hEdgeChargeName.str().c_str(),250,3100,4100);
-	hEdgeCharge->SetTitle(hEdgeChargeName.str().c_str());
-	hEdgeCharge->GetXaxis()->SetTitle("X Diamond (um)");
-	hEdgeCharge->GetYaxis()->SetTitle("Total Charge [ADC]");
-
-	hEdgeChargeEvents = (TH1F*)hEdgeCharge->Clone("hEdgeChargeEvents");
-	hEdgeChargeEvents->GetYaxis()->SetTitle("Entries");
-
-	hEdgeMeanCharge = (TH1F*)hEdgeCharge->Clone("hEdgeMeanCharge");
-	hEdgeMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
-
-	//hEdgeCharge
-	stringstream hyEdgeChargeName; hyEdgeChargeName<<"hyEdgeCharge"<<FileNameEnd;
-	hyEdgeCharge = new TH1F(hyEdgeChargeName.str().c_str(),hyEdgeChargeName.str().c_str(),250,5000,6000);
-	hyEdgeCharge->SetTitle(hyEdgeChargeName.str().c_str());
-	hyEdgeCharge->GetXaxis()->SetTitle("Y Diamond (um)");
-	hyEdgeCharge->GetYaxis()->SetTitle("Total Charge [ADC]");
-
-	hyEdgeChargeEvents = (TH1F*)hyEdgeCharge->Clone("hyEdgeChargeEvents");
-	hyEdgeChargeEvents->GetYaxis()->SetTitle("Entries");
-
-	hyEdgeMeanCharge = (TH1F*)hyEdgeCharge->Clone("hyEdgeMeanCharge");
-	hyEdgeMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
-
-	/////////////////
-	// Alignment using dead cells profile
-	/////////////////
-
-	//hDeadCellsProfile
-	//hEdgeCharge
-	stringstream hDeadCellName; hDeadCellName<<"hDeadCell"<<FileNameEnd;
-	hDeadCell = new TH1F(hDeadCellName.str().c_str(),hDeadCellName.str().c_str(),90,600,1050);
-	hDeadCell->SetTitle(hDeadCellName.str().c_str());
-	hDeadCell->GetXaxis()->SetTitle("Y Diamond (um)");
-	hDeadCell->GetYaxis()->SetTitle("Mean Charge [ADC]");
-
-	hDeadCellEvents = (TH1F*)hDeadCell->Clone("hDeadCellEvents");
-	hDeadCellEvents->GetYaxis()->SetTitle("Entries");
-
-	hDeadCellMeanCharge = (TH1F*)hDeadCell->Clone("hDeadCellMeanCharge");
-	hDeadCellMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
-
-	/*
-	stringstream hDeadCellsProfileChargeName; hDeadCellsProfileChargeName<<"hEdgeCharge%%"<<FileNameEnd;
-	hDeadCellsProfileCharge = new TH1F(hDeadCellsProfileChargeName.str().c_str(),hDeadCellsProfileChargeName.str().c_str(),90,0,450);
-	hDeadCellsProfileCharge->SetTitle(hDeadCellsProfileChargeName.str().c_str());
-	hDeadCellsProfileCharge->GetXaxis()->SetTitle("X Diamond (um)");
-	hDeadCellsProfileCharge->GetYaxis()->SetTitle("Total Charge [ADC]");
-
-	hDeadCellsProfileEvents = (TH1F*)hDeadCellsProfileCharge->Clone("hEdgeChargeEvents");
-	hDeadCellsProfileEvents->GetYaxis()->SetTitle("Entries");
-
-	hDeadCellsProfileMeanCharge = (TH1F*)hDeadCellsProfileCharge->Clone("hEdgeMeanCharge");
-	hDeadCellsProfileMeanCharge->GetYaxis()->SetTitle("Mean Charge [ADC]");
-
-	int DeadCellsArray[] = {13, 27, 53, 97};
-	DeadCellsArrayPointer = DeadCellsArray;
-	for(int i=0;i<4;i++){
-		stringstream hDeadCellsChargeName; hDeadCellsChargeName<<"TotalCharge"<<(i)<<FileNameEnd;
-		hDeadCellsCharge.push_back(new TH1F(hDeadCellsChargeName.str().c_str(),hDeadCellsChargeName.str().c_str(),90,0,450));
-		stringstream hDeadCellsEventsName; hDeadCellsEventsName<<"Events"<<(i)<<FileNameEnd;
-		hDeadCellsEvents.push_back(new TH1F(hDeadCellsEventsName.str().c_str(),hDeadCellsEventsName.str().c_str(),90,0,450));
-	}
-		*/
 }
 void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 
