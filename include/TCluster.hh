@@ -84,6 +84,8 @@ public:
     UInt_t getHighestHitClusterPosition();
     UInt_t getClusterPosition(UInt_t channelNo);
     UInt_t getChannel(UInt_t clusterPos);
+    UInt_t getFirstHitChannel();
+    UInt_t getLastHitChannel();
 //    Float_t getPedestalSigma(UInt_t clusterPos);
 //    Float_t getPedestalMean(UInt_t clusterPos);
     int getHitSigma() const;

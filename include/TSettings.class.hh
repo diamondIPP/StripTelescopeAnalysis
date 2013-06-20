@@ -270,6 +270,7 @@ public:
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
+	bool isClusterInDiaDetectorArea(TCluster cluster, Int_t area);
 	int getDiaDetectorAreaOfChannel(Int_t ch);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
@@ -281,6 +282,7 @@ public:
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);
 	Float_t getChi2Cut3D(){return chi2Cut3D;}
+	Float_t get3DYOffset(){return yOffset3D;};//todo
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3D;
@@ -432,14 +434,15 @@ private:
 	Float_t diaOffsetMetricSpace;
 	Float_t diaStartingChannel;
 private:
-	int XmetalisationStart3d;
-	int XmetalisationEnd3d;
-	int YmetalisationEnd3d;
+	Float_t yOffset3D;
 	int nRows3d;
 	int nColumns3d;
 	vector<Int_t> badCells3d;
 	vector<Int_t> goodCells3d;
 	vector<Int_t> deadCell3d;
+	int XmetalisationStart3d;
+	int XmetalisationEnd3d;
+	int YmetalisationEnd3d;
 public:
 	void setNRows3d(int nRows){nRows3d=nRows;};
 	int getNRows3d(){return nRows3d;};

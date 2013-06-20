@@ -429,6 +429,7 @@ void TSettings::LoadSettings(){
 		if(key == "pitchWidthDia") Parse(key,value,pitchWidthDia);
 		if(key == "pitchWidthSil") Parse(key,value,pitchWidthSil);
 		if(key == "diamondPattern") ParsePattern(key,value);
+		if(key == "yOffset3D")ParseFloat(key,value,yOffset3D);
 		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -647,6 +648,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	nRows3d = 11;
 	nColumns3d = 9;
+	yOffset3D = 3840;
 	checkSettings();
 
 }
@@ -1733,6 +1735,18 @@ bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
 	if(area<getNDiaDetectorAreas())
 		return getDiaDetectorArea(area).first <= ch && ch <= getDiaDetectorArea(area).second;
 	else return false;
+}
+bool TSettings::isClusterInDiaDetectorArea(TCluster cluster, Int_t area){
+	if(area<getNDiaDetectorAreas()){
+		int firstClusterChannel = cluster.getFirstHitChannel();
+		int lastClusterChannel = cluster.getLastHitChannel();
+		int firstAreaChannel = getDiaDetectorArea(area).first;
+		int lastAreaChannel =  getDiaDetectorArea(area).second;
+//		cout<<TString::Format("area: %d/%d %d-%d, channels: %d-%d",area,  getNDiaDetectorAreas(), firstAreaChannel, lastAreaChannel,firstClusterChannel, lastClusterChannel)<<endl;
+		return firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
+	}
+	return false;
+
 }
 std::pair< Int_t , Int_t > TSettings::getDiaDetectorArea(int n){
 	if(n < getNDiaDetectorAreas() && n >= 0)

@@ -32,6 +32,7 @@
 #include "TTracking.hh"
 #include "TSettings.class.hh"
 #include "TCluster.hh"
+#include "TCellAnalysisClass.hh"
 
 using namespace std;
 
@@ -70,9 +71,11 @@ private:
 	void DrawFidCutRegions();
 	void PredictChannelHit(TCluster* nCluster);
 
+	pair<int,int> getCellNo(Float_t xPos, Float_t yPos);
+
 
 private:
-
+	TCellAnalysisClass* clusteredAnalysis;
 	float SortArrayPointer[4];
 
 	string FileNameEnd;
@@ -282,13 +285,18 @@ private:
 	TTracking* eventReader;
 	UInt_t nEvent;
 	vector<Float_t> vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHitStrip,vecPHDiamondHit3dNoHoles,vecPHDiamondHit3dWithHoles,vecClusterSize,vecChi2Y,vecChi2X,vecClusterSeedSize,vecXPredictedStrip,vecYPredictedStrip;
-	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency;
+	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency,vecXPreditedDetector,vecYPreditedDetector;
 	int HitCount, SeedCount;
 
 	vector<int*> Detector;
 	vector<TFiducialCut*> FidCut;
 	TFidCutRegions fidCuts;
+	TPositionPrediction *predictedPosition;
 
+	Int_t verbosity;
+
+
+private:
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */

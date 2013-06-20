@@ -220,6 +220,7 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
  * *********************************************************
  */
 void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange) {
+	if(!histo) return;
 	if(histo->GetEntries()==0)return;
 	if(adjustRange){
 		int binxMin=0;
