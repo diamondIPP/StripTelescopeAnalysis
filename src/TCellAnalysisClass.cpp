@@ -17,7 +17,7 @@ TCellAnalysisClass::TCellAnalysisClass(TSettings * set) {
 	// TODO Auto-generated constructor stub
 	Float_t nan = 1./0.;
 	cellAnalysisTree = new TTree("cellAnalysisTree","CellAnalysisTree");
-
+	initialiseBranchAddresses();
 
 }
 
@@ -48,6 +48,8 @@ TH1* TCellAnalysisClass::getHistogram(string histoName,string varexp, string sel
 }
 
 void TCellAnalysisClass::initialiseBranchAddresses() {
+	if(!cellAnalysisTree)
+		return;
 //	cellAnalysisTree->Branch("D0X_ADC",&Det_ADC[0],"D0X_ADC[256]/b");
 //	cellAnalysisTree->Branch("pulseHeight", "Event", &event, bsize,split);
 	cellAnalysisTree->Branch("pulseHeight",&ph,"pulseHeight/F");

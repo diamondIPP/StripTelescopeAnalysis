@@ -126,6 +126,8 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	file->cd();
 	TTree* tree = (TTree*)clusteredAnalysis->cellAnalysisTree->Clone("analysisTree");
 	tree->Write();
+	cout<<"tree: "<<tree->GetEntries()<<endl;
+	cout<<gSystem->pwd()<<" "<<file->GetPath()<<" "<<file->GetName()<<endl;
 	file->Close();
 
 	histSaver->SaveHistogram(histo);
@@ -2227,12 +2229,10 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 	Float_t relPosY = Ydet - yminus;
 	Int_t area3DwithColumns = 2;
 	if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
-		if(!RemoveClustersWithHitOutside3D(&diamondCluster)){
-			diamondCluster.Print();
-			cout<<"cluster not valid???" <<settings->getNDiaDetectorAreas()<<endl;
-		}
 		return;
 	}
+	if(cellNo<0)
+		return;
 
 	clusteredAnalysis->addEvent(xPos,yPos,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
 	//ClusterShape(&diamondCluster);
