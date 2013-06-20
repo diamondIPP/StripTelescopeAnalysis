@@ -162,6 +162,14 @@ private:
 	vector<TH1F*> hQuarterCellsClusterSize;
 	TCanvas* h2DClusterSizeQuarterCellCanvas;
 	TH2D* h2DClusterSizeQuarterCell;
+	TH2D* h2DClusterSizeQuarterCellClone;
+	TH2D* h2DClusterSizeClone;
+	TH2D* h2DClusterSizeQuarterCellClone1;
+	TH2D* h2DClusterSizeClone1;
+	TCanvas* h2DMeanClusterSizeQuarterCellCanvas;
+	TH2D* h2DMeanClusterSizeQuarterCell;
+	TH2D* h2DMeanClusterSizeQuarterCellTotal;
+	TH2D* h2DMeanClusterSizeQuarterCellEvents;
 	TH2D* h2DClusterSizeXAxis;
 	TCanvas* hDetXvsDetY3DMeanChargeRebinnedQuarterCellCanvas;
 	TH2D* hDetXvsDetY3DMeanChargeRebinnedQuarterCell;
@@ -171,6 +179,8 @@ private:
 	vector<TH2D*> hDetXvsDetY3DMeanChargeQuarterCellGrading;
 	vector<TH1F*> hDetXvsDetY3DMeanChargeQuarterCellGradingLandau;
 	TCanvas* hDetXvsDetY3DMeanChargeHighlightedQuartersCanvas;
+	TCanvas* h3DdetQuarterCellClusterSizeCanvas;
+	TH2D* hQuarterCellsMeanClusterSize;
 	TCanvas* hOverview;
 	TH2D* hDetXvsDetY3DOverview;
 	TCanvas* hCellNumberingCanvas;
@@ -181,6 +191,8 @@ private:
 	vector<TH1F*> hCellsDeltaXQuarterCellGrading;
 	TCanvas* h3DdetQuarterCellFluctuationCanvas;
 	TH2D* h3DdetQuarterCellFluctuation;
+	TCanvas* h3DdetQuarterCellFluctuation1Canvas;
+	TH2D* h3DdetQuarterCellFluctuation1;
 	TCanvas* h3DdetDeltaXChannelAbove1000Canvas;
 	TH2D* h3DdetDeltaXChannelAbove1000;
 	vector<TH2D*> hCellsCharge;

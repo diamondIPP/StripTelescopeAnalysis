@@ -432,17 +432,29 @@ private:
 	Float_t diaOffsetMetricSpace;
 	Float_t diaStartingChannel;
 private:
+	int XmetalisationStart3d;
+	int XmetalisationEnd3d;
+	int YmetalisationEnd3d;
 	int nRows3d;
 	int nColumns3d;
 	vector<Int_t> badCells3d;
 	vector<Int_t> goodCells3d;
+	vector<Int_t> deadCell3d;
 public:
 	void setNRows3d(int nRows){nRows3d=nRows;};
 	int getNRows3d(){return nRows3d;};
 	int getNColumns3d(){return nColumns3d;};
 	void setNColumns3d(int nColumns){nColumns3d=nColumns;};
+	void setXMetalisationStart3d(int nXMetalisationStart3d){XmetalisationStart3d=nXMetalisationStart3d;};
+	int getXMetalisationStart3d(){return XmetalisationStart3d;};
+	void setXMetalisationEnd3d(int nXMetalisationEnd3d){XmetalisationEnd3d=nXMetalisationEnd3d;};
+	int getXMetalisationEnd3d(){return XmetalisationEnd3d;};
+	void setYMetalisationEnd3d(int nYMetalisationEnd3d){YmetalisationEnd3d=nYMetalisationEnd3d;};
+	int getYMetalisationEnd3d(){return YmetalisationEnd3d;};
+	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
 	vector<Int_t> getGoodCells3D(){return goodCells3d;};
 	vector<Int_t> getBadCells3D(){return badCells3d;};
+	vector<Int_t> getDeadCell3D(){return deadCell3d;};
 	int get3DCellNo(char row, int column);
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};

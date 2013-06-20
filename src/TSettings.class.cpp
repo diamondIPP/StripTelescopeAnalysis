@@ -480,10 +480,21 @@ void TSettings::LoadSettings(){
            cout<<key<<" =" <<value.c_str()<<endl;
            b3dDiamond = (bool)strtod(value.c_str(),0);
         }
-        if(key == "badCells3D"){
+        if(key == "badCells3d"){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,badCells3d);
         }
+        if(key == "goodCells3d"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,goodCells3d);
+        }
+        if(key == "deadCell3d"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,deadCell3d);
+        }
+        if(key == "XmetalisationStart3d") Parse(key,value,XmetalisationStart3d);
+        if(key == "XmetalisationEnd3d") Parse(key,value,XmetalisationEnd3d);
+        if(key == "YmetalisationEnd3d") Parse(key,value,YmetalisationEnd3d);
         if(key == "nColumns3d") Parse(key,value,nColumns3d);
         if(key == "nRows3d") Parse(key,value,nRows3d);
 
@@ -1864,7 +1875,6 @@ Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
 			channelPosition = this->diamondPattern.convertMetricToChannel(metricValue);
 	return channelPosition;
 }
-
 
 
 int TSettings::get3DCellNo(char row, int column){
