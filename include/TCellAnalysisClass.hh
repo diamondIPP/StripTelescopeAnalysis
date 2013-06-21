@@ -21,7 +21,7 @@ class TCellAnalysisClass {
 public:
 	TCellAnalysisClass(TSettings *settings);
 	virtual ~TCellAnalysisClass();
-	void addEvent(Float_t xPred,Float_t yPred, UInt_t cell, UInt_t quarter, Float_t relCellPosX, Float_t relCellPosY, TCluster clus);
+	void addEvent(Float_t xPred,Float_t yPred, Int_t cell, UInt_t quarter, Float_t relCellPosX, Float_t relCellPosY, TCluster clus);
 	TH1* getHistogram(string histoName,string varexp,string selection, string drawOption);
 	int getEntries(string selection=""){return cellAnalysisTree->GetEntries(selection.c_str());}
 	TTree* cellAnalysisTree;
@@ -45,6 +45,8 @@ private:
 	Float_t xPred;
 	Float_t yPred;
 	Int_t nCell;
+	Int_t nColumn;
+	Int_t nRow;
 	Int_t nQuarter;
 	Float_t relCellPosX;
 	Float_t relCellPosY;

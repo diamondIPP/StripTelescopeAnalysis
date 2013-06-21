@@ -61,7 +61,7 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 //	int threeDwHFid[] =          {102,   92,   110,   68,       161,     141,    107,     70};
 	TFiducialCut* fidCutStrip = new TFiducialCut(0,93,104,68,96);
 	TFiducialCut* fidCut3DNoHoles = new TFiducialCut(1,112,130,98,105);
-	TFiducialCut* fidCut3DWiHoles = new TFiducialCut(2,141,161,70,107);
+	TFiducialCut* fidCut3DWiHoles = new TFiducialCut(2,135,165,65,115);
 	FidCut.push_back(fidCutStrip);
 	FidCut.push_back(fidCut3DNoHoles);
 	FidCut.push_back(fidCut3DWiHoles);
@@ -124,7 +124,6 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	cout<< "ENTRIES: "<<clusteredAnalysis->getEntries()<<endl;
 	TH1F* histo = (TH1F*) clusteredAnalysis->getHistogram("hTest","pulseHeight","","");
 
-	clusteredAnalysis->cellAnalysisTree->SaveAs("analysis3d.root");
 	TFile *file = new TFile("analysis3d-2.root","RECREATE");
 	file->cd();
 	TTree* tree = (TTree*)clusteredAnalysis->cellAnalysisTree->Clone("analysisTree");
@@ -1210,6 +1209,7 @@ void TAnalysisOf3dDiamonds::initialiseYAlignmentHistos() {
 void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 
 	//For all Diamond hFidCutXvsFidCutYvsMeanCharge
+	cout<<"hFidCutXvsFidCutYvsMeanCharge"<<endl;
 	cCombinedMeanChargeYAlignment = new TCanvas("cFidCutXvsFidCutYvsMeanChargeYAlignmentNoFidDrawn","cFidCutXvsFidCutYvsMeanChargeYAlignmentNoFidDrawn");
 	cCombinedMeanChargeYAlignment->cd();
 	*hFidCutXvsFidCutYvsMeanChargeYAlignment = (*hFidCutXvsFidCutYvsChargeYAlignment/(*hFidCutXvsFidCutYvsEventsYAlignment));
@@ -1225,6 +1225,7 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	histSaver->SaveCanvas(cCombinedMeanChargeYAlignment);
 
 	//For h3DdetMeanCharge
+	cout<<"h3DdetMeanCharge"<<endl;
 	c3DdetMeanCharge = new TCanvas("c3DdetMeanCharge","c3DdetMeanCharge");
 	c3DdetMeanCharge->cd();
 	*hDetXvsDetY3DMeanCharge = (*hDetXvsDetY3D/(*hDetXvsDetY3DvsEvents));
@@ -1238,6 +1239,7 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	histSaver->SaveCanvas(c3DdetMeanCharge);
 
 	//RebinnedMeanCharge
+	cout<<"RebinnedMeanCharge"<<endl;
 	c3DdetMeanChargeRebinned = new TCanvas("c3DdetMeanChargeRebinned","c3DdetMeanChargeRebinned");
 	c3DdetMeanChargeRebinned->cd();
 	//hDetXvsDetY3DvsEventsRebinned->Draw("TEXT");
@@ -1259,6 +1261,7 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 		*/
 
 	//h3DdetDeltaXChannel
+	cout<<"h3DdetDeltaXChannel"<<endl;
 	c3DdetDeltaXChannel = new TCanvas("c3DdetDeltaXChannel","c3DdetDeltaXChannel");
 	c3DdetDeltaXChannel->cd();
 	h3DdetDeltaXChannel->SetStats(kFALSE);
@@ -1270,6 +1273,7 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	histSaver->SaveCanvas(c3DdetDeltaXChannel);
 
 	//h3DdetDeltaXChannelAbove1000
+	cout<<"h3DdetDeltaXChannelAbove1000"<<endl;
 	c3DdetDeltaXChannelAbove1000 = new TCanvas("c3DdetDeltaXChannelAbove1000","c3DdetDeltaXChannelAbove1000");
 	c3DdetDeltaXChannelAbove1000->cd();
 	h3DdetDeltaXChannelAbove1000->SetStats(kFALSE);
@@ -1283,6 +1287,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	for(int i=0;i<settings->getNColumns3d();i++){
 		for(int j=0;j<settings->getNRows3d();j++){
 			for(int k=0;k<4;k++){	//For each quater cell
+
+				cout<<"hDetXvsDetY3DMeanChargeRebinnedQuarterCell" <<i<<j<<k<<endl;
 				if(k<2){
 					hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetBinContent((2*i+1),(2*j+1+k),hQuaterCellsLandau.at(i*settings->getNRows3d()*4+j*4+k)->GetMean());
 					hDetXvsDetY3DRebinnedQuarterCellRMS->SetBinContent((2*i+1),(2*j+1+k),hQuaterCellsLandau.at(i*settings->getNRows3d()*4+j*4+k)->GetRMS());
@@ -2124,8 +2130,11 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 	float fiducialValueY= eventReader->getFiducialValueY();
 	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
 	Float_t Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
-	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
+//	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
+//		return;
+	if(!settings->getSelectionFidCuts()->isInFiducialCut(fiducialValueX,fiducialValueY)){
 		return;
+	}
 	vecChi2X.push_back(chi2x);
 	vecChi2Y.push_back(chi2y);
 //	vecXPredicted.push_back(xPos);
@@ -2138,6 +2147,7 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 	float TransparentCharge = 0;
 	float TransparentChargeAddition = 0;
 	int SaturatedEvent = 0;
+	//transparent analysis loop
 	for(int i=0;i<settings->getNColumns3d();i++){
 	for(int j=0;j<settings->getNRows3d();j++){
 		hEntries0 = hCellsEventsCheck.at(i*11+j)->Integral();
@@ -2192,8 +2202,9 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 	pair<int,int> cell = getCellNo(Xdet,Ydet);
 	Int_t cellNo = cell.first;
 	Int_t quarterNo = cell.second;
-	Int_t row = cellNo% settings->getNColumns3d();
-	Int_t column = cellNo / settings->getNColumns3d();
+	Int_t row = cellNo% settings->getNRows3d();
+	Int_t column = cellNo / settings->getNRows3d();
+
 //	if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> row "<<row<<", column "<<column<<endl;
 	Float_t cellWidth = 150;
 	Float_t cellHight = 150;
@@ -2201,15 +2212,13 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
 	Float_t yminus = row*cellHight;
 
-	Float_t relPosX =Xdet - xminus;
+	Float_t relPosX = Xdet - xminus;
 	Float_t relPosY = Ydet - yminus;
 	Int_t area3DwithColumns = 2;
 	if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
 		return;
 	}
-//	if(cellNo<0)
-//		return;
-
+	if(cellNo>=0)
 	clusteredAnalysis->addEvent(xPos,yPos,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
 	//ClusterShape(&diamondCluster);
 
@@ -2265,6 +2274,7 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 	float hEntries = 0;
 	for(int i=0;i<settings->getNColumns3d();i++){
 		for(int j=0;j<settings->getNRows3d();j++){
+			int currentCell = i*11+j;
 			hEntries = hCellsEvents.at(i*11+j)->Integral();
 			float xminus = 2365+i*150; //+5;		//2365 is the start of the 3D detector in x
 			float yminus = j*150;
@@ -2272,8 +2282,12 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 			hCellsEvents.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),1);
 			if(hEntries != hCellsEvents.at(i*11+j)->Integral()){	//If entries in this histogram range have increased fill corresponding hCellLandau
 //				cout<< i<<" "<<j<<" "<<i*11+j<<" ?= "<< cellNo<<" "<<xPos<<" "<<yPos<<endl;
-				if(cellNo != i*11+j)
-					cerr<<"something is wrong "<<i<<" "<<j<<endl;
+				if(cellNo != currentCell){
+					cout<<"\nsomething is wrong "<<i<<" "<<j<<endl;
+				}
+				if(row != j || column != i)
+					cout<<"\nsomething is wrong "<< i<<"/"<<j<<" "<<column<<"/"<<row<<endl;
+//				cout <<cellNo<<"/"<<currentCell<<" "<<i<<"/"<<column<< " "<<j<<"/"<<row<<endl;
 				hCellsLandau.at(i*11+j)->Fill(diamondCluster.getCharge(false));
 				hCellsClusteSize.at(i*11+j)->Fill((diamondCluster.getClusterSize()-2));		//Cluster seems to be 2 smaller than ClusterSize for some reason?
 				hCellsDeltaX.at(i*11+j)->Fill((diamondCluster.getHighestSignalChannel()-XdetChannelSpace));
@@ -2758,6 +2772,8 @@ pair<int,int> TAnalysisOf3dDiamonds::getCellNo(Float_t xDet, Float_t yDet) {
 		cout << "\tdeltaX: " << deltaX << ", deltaY: " << deltaY <<endl;
 		cout<<"\t cell: "<< cell << ", quarter: " << quarter <<endl;
 	}
+	if(cell > settings->getNColumns3d()*settings->getNRows3d())
+		cout<<"Something is wrong..."<<cell<<" = "<<column<<" "<<row<<endl;
 //	i*11+j
 	return make_pair(cell,quarter);
 }
