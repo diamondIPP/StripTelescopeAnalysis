@@ -1212,16 +1212,17 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	cout<<"hFidCutXvsFidCutYvsMeanCharge"<<endl;
 	cCombinedMeanChargeYAlignment = new TCanvas("cFidCutXvsFidCutYvsMeanChargeYAlignmentNoFidDrawn","cFidCutXvsFidCutYvsMeanChargeYAlignmentNoFidDrawn");
 	cCombinedMeanChargeYAlignment->cd();
+
 	*hFidCutXvsFidCutYvsMeanChargeYAlignment = (*hFidCutXvsFidCutYvsChargeYAlignment/(*hFidCutXvsFidCutYvsEventsYAlignment));
 	hFidCutXvsFidCutYvsMeanChargeYAlignment->SetEntries(hFidCutXvsFidCutYvsEventsYAlignment->Integral());
-	hFidCutXvsFidCutYvsMeanChargeYAlignment->Draw("COLAH");
+	hFidCutXvsFidCutYvsMeanChargeYAlignment->Draw("COL");
 	histSaver->SaveCanvas(cCombinedMeanChargeYAlignment);
 
 	/*DrawFidCutRegions(); //Draw Fiducial Cut Regions
 		 */
 
 	DrawYAlignmentFidCutRegions(); //Draw Fiducial Cut Regions
-	cCombinedMeanChargeYAlignment->SetName("hFidCutXvsFidCutYvsMeanCharge");
+	cCombinedMeanChargeYAlignment->SetName("cFidCutXvsFidCutYvsMeanCharge");
 	histSaver->SaveCanvas(cCombinedMeanChargeYAlignment);
 
 	//For h3DdetMeanCharge
@@ -2219,7 +2220,7 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 		return;
 	}
 	if(cellNo>=0)
-	clusteredAnalysis->addEvent(xPos,yPos,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
+	clusteredAnalysis->addEvent(xPos,yPos,Xdet,Ydet,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
 	//ClusterShape(&diamondCluster);
 
 	/*if(YAlignmentFiducialCut())

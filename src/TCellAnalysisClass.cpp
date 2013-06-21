@@ -25,7 +25,7 @@ TCellAnalysisClass::~TCellAnalysisClass() {
 	// TODO Auto-generated destructor stub
 }
 
-void TCellAnalysisClass::addEvent(Float_t xPred, Float_t yPred, Int_t cell,
+void TCellAnalysisClass::addEvent(Float_t xPred, Float_t yPred, Float_t xDet,Float_t yDet, Int_t cell,
 		UInt_t quarter, Float_t relCellPosX, Float_t relCellPosY,TCluster clus) {
 	ph = clus.getCharge();
 	clusterSize = clus.getClusterSize();
@@ -37,6 +37,8 @@ void TCellAnalysisClass::addEvent(Float_t xPred, Float_t yPred, Int_t cell,
 	this->nCell = cell;
 	this->nColumn = cell/settings->getNRows3d();
 	this->nRow = cell % settings->getNRows3d();
+	this->xDet = xDet;
+	this->yDet=yDet;
 	if(nColumn<0|| nColumn>12){
 		cout<<"cannot fill column/row: "<<cell<<" = "<<nColumn<<"/"<<nRow<<endl;
 		nColumn = -1;
@@ -65,6 +67,8 @@ void TCellAnalysisClass::initialiseBranchAddresses() {
 	cellAnalysisTree->Branch("pulseHeight",&ph,"pulseHeight/F");
 	cellAnalysisTree->Branch("xPred",&xPred,"xPred/F");
 	cellAnalysisTree->Branch("yPred",&yPred,"yPred/F");
+	cellAnalysisTree->Branch("xDet",&xPred,"xDet/F");
+	cellAnalysisTree->Branch("yDet",&yPred,"yDet/F");
 	cellAnalysisTree->Branch("nCell",&nCell,"nCell/I");
 	cellAnalysisTree->Branch("nRow",&nRow,"nRow/I");
 	cellAnalysisTree->Branch("nColumn",&nColumn,"nColumn/I");
