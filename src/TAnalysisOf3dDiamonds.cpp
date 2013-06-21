@@ -380,12 +380,11 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 	histSaver->SaveHistogram(hLandauCluster2);
 	histSaver->SaveHistogram(hLandauDoubleCombined);
 
-	DoubleCluster = new TCanvas();
-	DoubleCluster->cd();
+	cDoubleCluster = new TCanvas("cDoubleClusterCombinedPos","cDoubleClusterCombinedPos");
+	cDoubleCluster->cd();
 	hDoubleClusterPos0->Draw();
 	hDoubleClusterPos1->Draw("samehist");
-	stringstream str111; str111<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hDoubleClusterCombinedPos%%"<<FileNameEnd<<".png";
-	DoubleCluster->SaveAs(str111.str().c_str());
+	histSaver->SaveCanvas(cDoubleCluster);
 
 
 	for(int i=0;i<settings->diamondPattern.getNIntervals();i++){
@@ -419,22 +418,24 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 		//hFidCutXvsFidCutYvsCharge
 		ptrCanvas.at(i)->cd();
 		hFidCutXvsFidCutYvsCharge.at(i)->Draw("COLZ");
-		stringstream str; str<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsCharge%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd<<".png";
-		ptrCanvas.at(i)->SaveAs(str.str().c_str());
+		TString hName = TString::Format("cFidCutXvsFidCutYvsCharge_%d_%d",channels.first,channels.second);
+		ptrCanvas.at(i)->SetName(hName);
+		histSaver->SaveCanvas(ptrCanvas.at(i));
 
 		//hFidCutXvsFidCutYvsEvents
 		ptrCanvasEvents.at(i)->cd();
 		hFidCutXvsFidCutYvsEvents.at(i)->Draw("COLZ");
-		stringstream str1; str1<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsChargeClone%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd<<".png";
-		ptrCanvasEvents.at(i)->SaveAs(str1.str().c_str());
+		hName  = TString::Format("cFidCutXvsFidCutYvsChargeClone_%d_%d",channels.first,channels.second);
+		ptrCanvasEvents.at(i)->SetName(hName);
+		histSaver->SaveCanvas(ptrCanvasEvents.at(i));
 
 		//hFidCutXvsFidCutYvsMeanCharge
 		ptrCanvasMean.at(i)->cd();
 		*hFidCutXvsFidCutYvsMeanCharge.at(i) = (*hFidCutXvsFidCutYvsCharge.at(i)/(*hFidCutXvsFidCutYvsEvents.at(i)));
 		hFidCutXvsFidCutYvsMeanCharge.at(i)->Draw("COLZ");
-		stringstream str2; str2<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsMeanCharge%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd<<".png";
-		ptrCanvasMean.at(i)->SaveAs(str2.str().c_str());
-
+		hName  = TString::Format("cFidCutXvsFidCutYvsMeanCharge_%d_%d",channels.first,channels.second);
+		ptrCanvasMean.at(i)->SetName(hName);
+		histSaver->SaveCanvas(ptrCanvasMean[i]);
 	} //End of for loop
 	//For all Diamond hFidCutXvsFidCutYvsMeanCharge
 	hCombinedMeanCharge = new TCanvas();
@@ -454,30 +455,28 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 
 	//For efficiency
 	//Predicted Events
-	hPredictedEvents = new TCanvas();
-	hPredictedEvents->cd();
+	cPredictedEvents = new TCanvas("cFidCutXvsFidCutYvsPredictedEvents","cFidCutXvsFidCutYvsPredictedEvents");
+	cPredictedEvents->cd();
 	hFidCutXvsFidCutYvsPredictedEvents->Draw("COLZ");
-	stringstream str; str<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsPredictedEvents"<<"%%"<<FileNameEnd<<".png";
-	hPredictedEvents->SaveAs(str.str().c_str());
+	histSaver->SaveCanvas(cPredictedEvents);
+
 	//Seen Events
-	hSeenEvents = new TCanvas();
-	hSeenEvents->cd();
+	cSeenEvents = new TCanvas("cFidCutXvsFidCutYvsSeenEvents","cFidCutXvsFidCutYvsSeenEvents");
+	cSeenEvents->cd();
 	hFidCutXvsFidCutYvsSeenEvents->Draw("COLZ");
-	stringstream str3; str3<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutYvsSeenEvents"<<"%%"<<FileNameEnd<<".png";
-	hSeenEvents->SaveAs(str3.str().c_str());
+	histSaver->SaveCanvas(cSeenEvents);
+
 	//Efficiency
-	TCanvas* hEfficiencyMap = new TCanvas();
+	TCanvas* cEfficiencyMap = new TCanvas("cEfficiencyMap","cEfficiencyMap");
 	*hEfficiency = (*hFidCutXvsFidCutYvsSeenEvents/(*hFidCutXvsFidCutYvsPredictedEvents));
 	hEfficiency->Draw("COLZ");
-	stringstream str4; str4<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hEfficiencyMap"<<"%%"<<FileNameEnd<<".png";
-	hEfficiencyMap->SaveAs(str4.str().c_str());
+	histSaver->SaveCanvas(cEfficiencyMap);
 
 	//0Clusters
-	h0Clusters = new TCanvas();
-	h0Clusters->cd();
+	c0Clusters = new TCanvas("cFidCutXvsFidCutY0Clusters","cFidCutXvsFidCutY0Clusters");
+	c0Clusters->cd();
 	hFidCutXvsFidCutY0Clusters->Draw("COLZ");
-	stringstream str7; str7<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutY0Clusters"<<"%%"<<FileNameEnd<<".png";
-	h0Clusters->SaveAs(str7.str().c_str());
+	histSaver->SaveCanvas(c0Clusters);
 
 	//1_1Clusters
 	h1_1Clusters = new TCanvas();
@@ -1669,23 +1668,21 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 			hCellsOverlayed55RMS->SetBinContent(i+1,j+1,hCellsOverlayBinSpec55.at(i*30+j)->GetRMS());
 		}
 	}
-	hCellsOverlayedCanvas = new TCanvas();
-	hCellsOverlayedCanvas->cd();
+	cCellsOverlayed = new TCanvas("cCellsOverlayedMeanCharge","cCellsOverlayedMeanCharge");
+	cCellsOverlayed->cd();
 	*hCellsOverlayedMeanCharge = (*hCellsOverlayedCharge/(*hCellsOverlayedEvents));
 	hCellsOverlayedMeanCharge->SetEntries(hCellsOverlayedEvents->Integral());
 
 	hCellsOverlayedMeanCharge->GetZaxis()->SetRangeUser(800,1200);
 	hCellsOverlayedMeanCharge->SetContour(99);
 	hCellsOverlayedMeanCharge->Draw("COLZ");
+	histSaver->SaveCanvas(cCellsOverlayed);
 	//hCellsOverlayed55RMS->Draw("sameTEXT");
-	stringstream str13; str13<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsOverlayedMeanCharge"<<FileNameEnd<<".png";
-	hCellsOverlayedCanvas->SaveAs(str13.str().c_str());
 
 	/*hCellsOverlayedEvents->Draw("sameTEXT");
-	stringstream str133; str133<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsOverlayedMeanChargeWithEntries"<<FileNameEnd<<".png";
-	hCellsOverlayedCanvas->SaveAs(str133.str().c_str());
-	histSaver->SaveHistogram(hBinnedMeanCharge);
-		*/
+	 cCellsOverlayed->SetName("cCellsOverlayedMeanChargeWithEntries");
+	 histSaver->SaveCanvas(cCellsOverlayed);
+	histSaver->SaveHistogram(hBinnedMeanCharge);	//*/
 
 	//To rebin and replot Overlayed plot.
 	int minus0X[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
@@ -1739,16 +1736,16 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 					}
 				}
 			}	//end of if first plot
-			hCellsOverlayedBinAlignmentCanvas1.push_back(new TCanvas());
-			hCellsOverlayedBinAlignmentCanvas1.at(i*3+ii)->cd();
+			TString hName = TString::Format("hCellsOverlayedMeanChargeBinAlignment_%03d",i*3+ii);
+			cCellsOverlayedBinAlignment.push_back(new TCanvas(hName,hName));
+			cCellsOverlayedBinAlignment.at(i*3+ii)->cd();
 			*hCellsOverlayedMeanChargeBinAlignment1.at(i*3+ii) = (*hCellsOverlayedChargeBinAlignment1.at(i*3+ii)/(*hCellsOverlayedEventsBinAlignment1.at(i*3+ii)));
 			hCellsOverlayedMeanChargeBinAlignment1.at(i*3+ii)->SetEntries(hCellsOverlayedEventsBinAlignment1.at(i*3+ii)->Integral());
 			hCellsOverlayedMeanChargeBinAlignment1.at(i*3+ii)->Draw("COLZ");
 			if((i*3+ii)==0)
 				hCellsOverlayed1010Significance->Draw("sameTEXT");
+			histSaver->SaveCanvas(cCellsOverlayedBinAlignment.at(i*3+ii));
 			//hCellsOverlayedEventsBinAlignment1.at(i*3+ii)->Draw("sameTEXT");
-			stringstream str13001; str13001<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsOverlayedMeanCharge"<<"BinAlignment"<<i*3+ii<<FileNameEnd<<".png";
-			hCellsOverlayedBinAlignmentCanvas1.at(i*3+ii)->SaveAs(str13001.str().c_str());
 		}	//increment y
 	}	//increment x
 
@@ -1804,17 +1801,17 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	//Transparent Analysis
 	//hCellsTransparentHitPositionCellGraded
 	for(int i=0;i<4;i++){
-		hCellsTransparentHitPositionCellGradedCanvas.push_back(new TCanvas());
-		hCellsTransparentHitPositionCellGradedCanvas.at(i)->cd();
+		TString hName = TString::Format("cCellsTransparentHitPositionCellGraded%d",i);
+		cCellsTransparentHitPositionCellGraded.push_back(new TCanvas(hName, hName));
+		cCellsTransparentHitPositionCellGraded.at(i)->cd();
 		hCellsTransparentHitPositionCellGraded.at(i)->SetStats(kFALSE);
 		hCellsTransparentHitPositionCellGraded.at(i)->Draw("COLZ");
 		hCellsTransparentHitPositionCellGraded.at(i)->Draw("sameTEXT");
-		stringstream str14020; str14020<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsTransparentHitPositionCellGraded"<<i<<FileNameEnd<<".png";
-		hCellsTransparentHitPositionCellGradedCanvas.at(i)->SaveAs(str14020.str().c_str());
+		histSaver->SaveCanvas(cCellsTransparentHitPositionCellGraded.at(i));
 	}
 	//hDetXvsDetY3DMeanChargeHighlightedQuarters
-	hDetXvsDetY3DMeanChargeHighlightedQuartersCanvas = new TCanvas();
-	hDetXvsDetY3DMeanChargeHighlightedQuartersCanvas->cd();
+	cDetXvsDetY3DMeanChargeHighlightedQuarters = new TCanvas("cDetXvsDetY3DMeanChargeHighlightedQuarters","cDetXvsDetY3DMeanChargeHighlightedQuarters");
+	cDetXvsDetY3DMeanChargeHighlightedQuarters->cd();
 	hDetXvsDetY3DMeanCharge->SetStats(kFALSE);
 	hGridReference->SetTitle("hDetXvsDetY3DMeanChargeHighlightedQuarters");		//Set title to require
 	hGridReference->Draw("COL");
@@ -1822,67 +1819,60 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	hDetXvsDetY3DMeanCharge->Draw("sameCOLZAH");
 	//hDetXvsDetY3DMeanCharge->Draw("sameTEXTAH");
 	//hDetXvsDetY3DMeanCharge->Draw("sameCOLZ");
-	DrawMetallisationGrid(hDetXvsDetY3DMeanChargeHighlightedQuartersCanvas);
-	stringstream str1402; str1402<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hDetXvsDetY3DMeanChargeHighlightedQuarters"<<FileNameEnd<<".png";
-	hDetXvsDetY3DMeanChargeHighlightedQuartersCanvas->SaveAs(str1402.str().c_str());
+	DrawMetallisationGrid(cDetXvsDetY3DMeanChargeHighlightedQuarters);
+	histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeHighlightedQuarters);
 
 	//h3DdetQuarterCellFluctuation
-	h3DdetQuarterCellFluctuationCanvas = new TCanvas();
-	h3DdetQuarterCellFluctuationCanvas->cd();
+	c3DdetQuarterCellFluctuation1 = new TCanvas("c3DdetQuarterCellFluctuation","c3DdetQuarterCellFluctuation");
+	c3DdetQuarterCellFluctuation1->cd();
 	hGridReference->SetTitle("h3DdetQuarterCellFluctuation");		//Set title to require
 	hGridReference->Draw("COL");
 	hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->Draw("sameCOLAH");
 	gStyle->SetPaintTextFormat("3.2g");
 	h3DdetQuarterCellFluctuation->Draw("sameTEXT");
-	DrawMetallisationGrid(h3DdetQuarterCellFluctuationCanvas);
-	//histSaver->SaveCanvas(h3DdetQuarterCellFluctuationCanvas);
-	stringstream str1299; str1299<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h3DdetQuarterCellFluctuation"<<FileNameEnd<<".png";
-	h3DdetQuarterCellFluctuationCanvas->SaveAs(str1299.str().c_str());
+	DrawMetallisationGrid(c3DdetQuarterCellFluctuation1);
+	histSaver->SaveCanvas(c3DdetQuarterCellFluctuation1);
+
 
 	//h3DdetQuarterCellFluctuation1
-	h3DdetQuarterCellFluctuation1Canvas = new TCanvas();
-	h3DdetQuarterCellFluctuation1Canvas->cd();
+	c3DdetQuarterCellFluctuation = new TCanvas("c3DdetQuarterCellFluctuation1","c3DdetQuarterCellFluctuation1");
+	c3DdetQuarterCellFluctuation->cd();
 	hGridReference->SetTitle("h3DdetQuarterCellFluctuation1");		//Set title to require
 	hGridReference->Draw("COL");
 	hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->Draw("sameCOLAH");
 	gStyle->SetPaintTextFormat("3.2g");
 	h3DdetQuarterCellFluctuation1->Draw("sameTEXT");
-	DrawMetallisationGrid(h3DdetQuarterCellFluctuation1Canvas);
-	//histSaver->SaveCanvas(h3DdetQuarterCellFluctuationCanvas);
-	stringstream str12999; str12999<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h3DdetQuarterCellFluctuation1"<<FileNameEnd<<".png";
-	h3DdetQuarterCellFluctuation1Canvas->SaveAs(str12999.str().c_str());
+	DrawMetallisationGrid(c3DdetQuarterCellFluctuation);
+	histSaver->SaveCanvas(c3DdetQuarterCellFluctuation1);
 
 	gStyle->SetPaintTextFormat("g");
 
 	//hCellNumbering
-	hCellNumberingCanvas = new TCanvas();
-	hCellNumberingCanvas->cd();
+	cCellNumbering = new TCanvas("cCellNumbering","cCellNumbering");
+	cCellNumbering->cd();
 	hGridReference->SetTitle("hCellNumbering");		//Set title to require
 	hGridReference->Draw("COL");
 	hCellNumbering->Draw("sameCOLZAH");
 	hCellNumbering->Draw("sameTEXTAH");
-	DrawMetallisationGrid(hCellNumberingCanvas);
-	stringstream str1400; str1400<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellNumbering"<<FileNameEnd<<".png";
-	hCellNumberingCanvas->SaveAs(str1400.str().c_str());
+	DrawMetallisationGrid(cCellNumbering);
+	histSaver->SaveCanvas(cCellNumbering);
 
 	//hCellsOverlayedEventsNoColumns
-	hCellsEventsNoColumnCanvas = new TCanvas();
-	hCellsEventsNoColumnCanvas->cd();
+	cCellsEventsNoColumn = new TCanvas("cCellsEventsNoColumn","cCellsEventsNoColumn");
+	cCellsEventsNoColumn->cd();
 	hCellsOverlayedEventsNoColumns->Draw("COLZ");
 	hCellsOverlayedEventsNoColumns->Draw("sameTEXT");
-	stringstream str14; str14<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsOverlayedEventsNoColumns"<<FileNameEnd<<".png";
-	hCellsEventsNoColumnCanvas->SaveAs(str14.str().c_str());
+	histSaver->SaveCanvas(cCellsEventsNoColumn);
 
 	//hDetXvsDetY3DRebinnedRMS
-	hDetXvsDetY3DRebinnedRMSCanvas = new TCanvas();
-	hDetXvsDetY3DRebinnedRMSCanvas->cd();
+	cDetXvsDetY3DRebinnedRMS = new TCanvas("cDetXvsDetY3DRebinnedRMS","cDetXvsDetY3DRebinnedRMS");
+	cDetXvsDetY3DRebinnedRMS->cd();
 	hGridReference->SetTitle("h3DdetRebinnedRMS");		//Set title to require
 	hGridReference->Draw("COL");
 	hDetXvsDetY3DRebinnedRMS->Draw("sameCOLZAH");
 	hDetXvsDetY3DRebinnedRMS->Draw("sameTEXTAH");
-	DrawMetallisationGrid(hDetXvsDetY3DRebinnedRMSCanvas);
-	stringstream str145; str145<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h3DdetRebinnedRMS"<<FileNameEnd<<".png";
-	hDetXvsDetY3DRebinnedRMSCanvas->SaveAs(str145.str().c_str());
+	DrawMetallisationGrid(cDetXvsDetY3DRebinnedRMS);
+	histSaver->SaveCanvas(cDetXvsDetY3DRebinnedRMS);
 
 	//hCellsLandauGraded			//Save each of the histograms
 	for(int k=0;k<12;k++){	// to fill each of the sub ranges in 100's of ADC
@@ -1937,45 +1927,40 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 			hDetXvsDetY3DMeanChargeRebinnedForCellOrdering->SetBinContent(minX, minY, 99999);	//The minimum bin now becomes maximum.
 		}
 	}	//End of looping over all cells
-	hCellsLandau2DCanvas = new TCanvas();
-	hCellsLandau2DCanvas->SetCanvasSize(1500,3000);
-	hCellsLandau2DCanvas->cd();
+	cCellsLandau2D = new TCanvas("cCellsLandau2D","cCellsLandau2D");
+	cCellsLandau2D->SetCanvasSize(1500,3000);
+	cCellsLandau2D->cd();
 	//hCellsLandau2D->LabelsDeflate();
 	hCellsLandau2D->SetEntries(hCellsLandau2DEntries);
 	//hCellsLandau2DQuarterFail->Draw("COLZ");
 	hCellsLandau2D->SetStats(kFALSE);
 	hCellsLandau2D->Draw("COLZ");
+	histSaver->SaveCanvas(cCellsLandau2D);
 	//hCellsLandau2D->Draw("sameTEXT");
-	stringstream str144; str144<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsLandau2D"<<FileNameEnd<<".png";
-	hCellsLandau2DCanvas->SaveAs(str144.str().c_str());
 
-	hCellsLandau2DCanvas1 = new TCanvas();
-	hCellsLandau2DCanvas1->SetCanvasSize(1500,3000);
-	hCellsLandau2DCanvas1->cd();
+	cCellsLandau2DHighlightedQuarters = new TCanvas("cCellsLandau2DHighlightedQuarters","cCellsLandau2DHighlightedQuarters");
+	cCellsLandau2DHighlightedQuarters->SetCanvasSize(1500,3000);
+	cCellsLandau2DHighlightedQuarters->cd();
 	hCellsLandau2DQuarterFail->SetStats(kFALSE);
 	hCellsLandau2DQuarterFail->Draw("COL");
 	hCellsLandau2D->Draw("sameCOLZ");
-	stringstream str1440; str1440<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hCellsLandau2DHighlightedQuarters"<<FileNameEnd<<".png";
-	hCellsLandau2DCanvas1->SaveAs(str1440.str().c_str());
+	histSaver->SaveCanvas(cCellsLandau2DHighlightedQuarters);
 
 	//h2DClusterSize
-	h2DClusterSizeCanvas = new TCanvas();
-	h2DClusterSizeCanvas->cd();
+	c2DClusterSizeCanvas = new TCanvas("c2DClusterSizeCanvas","c2DClusterSizeCanvas");
+	c2DClusterSizeCanvas->cd();
 	h2DClusterSize->SetStats(kFALSE);
 	h2DClusterSize->Draw("COLZ");
-	cout<<"here"<<endl;
 	*h2DClusterSizeClone1 = *h2DClusterSize/(*h2DClusterSizeClone);
 	gStyle->SetPaintTextFormat("3.2g");
 	h2DClusterSizeClone1->Draw("sameTEXT");
 	gStyle->SetPaintTextFormat("g");
-	cout<<"here2"<<endl;
-	stringstream str1444; str1444<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h2DClusterSize"<<FileNameEnd<<".png";
-	h2DClusterSizeCanvas->SaveAs(str1444.str().c_str());
+	histSaver->SaveCanvas(c2DClusterSizeCanvas);
 
 	//h2DClusterSizeQuarterCell
-	h2DClusterSizeQuarterCellCanvas = new TCanvas();
+	c2DClusterSizeQuarterCell = new TCanvas("c2DClusterSizeQuarterCell","c2DClusterSizeQuarterCell");
 	//h2DClusterSizeQuarterCellCanvas->SetCanvasSize(1500,3000);
-	h2DClusterSizeQuarterCellCanvas->cd();
+	c2DClusterSizeQuarterCell->cd();
 	//h2DClusterSize->SetEntries(hCellsLandau2DEntries);
 	//hCellsLandau2DQuarterFail->Draw("COLZ");
 	h2DClusterSizeQuarterCell->SetStats(kFALSE);
@@ -2001,13 +1986,12 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	TText* XTitle = new TText((h2DClusterSizeXAxis->GetXaxis()->GetBinCenter(5)-1.75),-.80,"Failed Quarters");
 	XTitle->SetTextSize(0.04);
 	XTitle->Draw("same");
+	histSaver->SaveCanvas(c2DClusterSizeQuarterCell);
 	//hCellsLandau2D->Draw("sameTEXT");
-	stringstream str14444; str14444<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h2DClusterSizeQuarterCell"<<FileNameEnd<<".png";
-	h2DClusterSizeQuarterCellCanvas->SaveAs(str14444.str().c_str());
 
 	//h2DMeanClusterSizeQuarterCell
-	h2DMeanClusterSizeQuarterCellCanvas = new TCanvas();
-	h2DMeanClusterSizeQuarterCellCanvas->cd();
+	c2DMeanClusterSizeQuarterCell = new TCanvas("c2DClusterSizeQuarterCell","c2DClusterSizeQuarterCell");
+	c2DMeanClusterSizeQuarterCell->cd();
 	h2DMeanClusterSizeQuarterCell->SetStats(kFALSE);
 	//*h2DMeanClusterSizeQuarterCell = *h2DMeanClusterSizeQuarterCellTotal/(*h2DMeanClusterSizeQuarterCellEvents);
 	h2DMeanClusterSizeQuarterCell->Draw("COLZ");
@@ -2029,13 +2013,12 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	//TText* XTitle = new TText((h2DClusterSizeXAxis->GetXaxis()->GetBinCenter(5)-1.75),-.80,"Failed Quarters");
 	//XTitle->SetTextSize(0.04);
 	XTitle->Draw("same");
+	histSaver->SaveCanvas(c2DClusterSizeQuarterCell);
 	//hCellsLandau2D->Draw("sameTEXT");
-	stringstream str144444; str144444<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h2DMeanClusterSizeQuarterCell"<<FileNameEnd<<".png";
-	h2DMeanClusterSizeQuarterCellCanvas->SaveAs(str144444.str().c_str());
 
 	//For h3DdetMeanCharge with Mean ClusterSize.
-	h3DdetMeanChargeWithMeanClusterSize = new TCanvas();
-	h3DdetMeanChargeWithMeanClusterSize->cd();
+	c3DdetMeanChargeWithMeanClusterSize = new TCanvas("c3DdetMeanChargeWithMeanClusterSize","c3DdetMeanChargeWithMeanClusterSize");
+	c3DdetMeanChargeWithMeanClusterSize->cd();
 	*hDetXvsDetY3DMeanChargeRebinned = (*hDetXvsDetY3DRebinned/(*hDetXvsDetY3DvsEventsRebinned));
 	hDetXvsDetY3DMeanChargeRebinned->SetEntries(hDetXvsDetY3DvsEventsRebinned->Integral());
 	hDetXvsDetY3DMeanChargeRebinned->SetStats(kFALSE);
@@ -2043,53 +2026,48 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	hGridReference->Draw("COL");
 	hDetXvsDetY3DMeanChargeRebinned->Draw("sameCOLZAH");
 	hCellsMeanClusteSize->Draw("sameTEXTAH");
-	DrawMetallisationGrid(h3DdetMeanChargeWithMeanClusterSize);
-	stringstream str1200; str1200<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h3DdetMeanChargeWithMeanClusterSize"<<FileNameEnd<<".png";
-	h3DdetMeanChargeWithMeanClusterSize->SaveAs(str1200.str().c_str());
+	DrawMetallisationGrid(c3DdetMeanChargeWithMeanClusterSize);
+	histSaver->SaveCanvas(c3DdetMeanChargeWithMeanClusterSize);
 
 	//Quarter Cell Mean ClusterSize, with highlighted Fails.
-	h3DdetQuarterCellClusterSizeCanvas = new TCanvas();
-	h3DdetQuarterCellClusterSizeCanvas->cd();
+	c3DdetQuarterCellClusterSize = new TCanvas("cQuarterCellsMeanClusteSize","cQuarterCellsMeanClusteSize");
+	c3DdetQuarterCellClusterSize->cd();
 	hQuarterCellsMeanClusterSize->SetStats(kFALSE);
 	hGridReference->SetTitle("h3DdetQuarterCellMeanClusterSize");		//Set title to require
 	hGridReference->Draw("COL");
 	hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->Draw("sameCOLAH");
 	gStyle->SetPaintTextFormat("3.2g");
 	hQuarterCellsMeanClusterSize->Draw("sameTEXT");
-	DrawMetallisationGrid(h3DdetQuarterCellClusterSizeCanvas);
-	stringstream str12009; str12009<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hQuarterCellsMeanClusteSize"<<FileNameEnd<<".png";
-	h3DdetQuarterCellClusterSizeCanvas->SaveAs(str12009.str().c_str());
-
+	DrawMetallisationGrid(c3DdetQuarterCellClusterSize);
+	histSaver->SaveCanvas(c3DdetQuarterCellClusterSize);
 	gStyle->SetPaintTextFormat("g");
 
 	//RebinnedQuarterCellFails
-	RebinnedQuarterCellFailsCanvas = new TCanvas();
-	RebinnedQuarterCellFailsCanvas->cd();
+	cRebinnedQuarterCellFails = new TCanvas("c3DdetNumberofQuarterCellFails","c3DdetNumberofQuarterCellFails");
+	cRebinnedQuarterCellFails->cd();
 	RebinnedQuarterCellFails->SetStats(kFALSE);
 	hGridReference->SetTitle("h3DdetNumberofQuarterCellFails");		//Set title to require
 	hGridReference->Draw("COL");
 	RebinnedQuarterCellFails->Draw("sameCOLZAH");
 	RebinnedQuarterCellFails->Draw("sameTEXTAH");
-	DrawMetallisationGrid(RebinnedQuarterCellFailsCanvas);
-	stringstream str146; str146<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h3DdetNumberofQuarterCellFails"<<FileNameEnd<<".png";
-	RebinnedQuarterCellFailsCanvas->SaveAs(str146.str().c_str());
+	DrawMetallisationGrid(cRebinnedQuarterCellFails);
+	histSaver->SaveCanvas(cRebinnedQuarterCellFails);
 
 	//hDetXvsDetY3DOverview
-	hOverview = new TCanvas();
+	hOverview = new TCanvas("c3DdetOverview","c3DdetOverview");
 	hOverview->cd();
 	hDetXvsDetY3DOverview->SetStats(kFALSE);
 	hGridReference->SetTitle("h3DdetOverview");		//Set title to require
 	hGridReference->Draw("COL");
 	hDetXvsDetY3DOverview->Draw("sameCOLZAH");
-	stringstream str131; str131<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"h3DdetOverview"<<FileNameEnd<<".png";
-	hOverview->SaveAs(str131.str().c_str());
+	histSaver->SaveCanvas(hOverview);
 
 	//hDeadCell
 	//histSaver->SaveHistogram(hDeadCell);
 	//histSaver->SaveHistogram(hDeadCellEvents);
 
-	hDeadCellMeanChargeCanvas = new TCanvas();
-	hDeadCellMeanChargeCanvas->cd();
+	cDeadCellMeanCharge = new TCanvas("cDeadCellMeanCharge","cDeadCellMeanCharge");
+	cDeadCellMeanCharge->cd();
 	*hDeadCellMeanCharge = (*hDeadCell/(*hDeadCellEvents));
 	hDeadCellMeanCharge->SetEntries(hDeadCellEvents->Integral());
 	hDeadCellMeanCharge->Draw();
@@ -2099,16 +2077,14 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	CellEdge1->SetLineWidth(2);		CellEdge2->SetLineWidth(2);
 	CellEdge1->SetLineColor(kRed);	CellEdge2->SetLineColor(kRed);
 	CellEdge1->Draw("same");		CellEdge2->Draw("same");
-
-	stringstream hDeadCellMeanChargeCanvasName; hDeadCellMeanChargeCanvasName<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hDeadCellMeanCharge"<<FileNameEnd<<".png";
-	hDeadCellMeanChargeCanvas->SaveAs(hDeadCellMeanChargeCanvasName.str().c_str());
+	histSaver->SaveCanvas(cDeadCellMeanCharge);
 
 	//hxEdgeCharge
 	//histSaver->SaveHistogram(hEdgeCharge);
 	//histSaver->SaveHistogram(hEdgeChargeEvents);
 
-	hEdgeMeanChargeCanvas = new TCanvas();
-	hEdgeMeanChargeCanvas->cd();
+	cEdgeMeanCharge = new TCanvas("cEdgeMeanCharge","cEdgeMeanCharge");
+	cEdgeMeanCharge->cd();
 	*hEdgeMeanCharge = (*hEdgeCharge/(*hEdgeChargeEvents));
 	hEdgeMeanCharge->SetEntries(hEdgeChargeEvents->Integral());
 	hEdgeMeanCharge->Draw();
@@ -2117,16 +2093,15 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	DetectorEdge->SetLineWidth(2);
 	DetectorEdge->SetLineColor(kRed);
 	DetectorEdge->Draw("same");
-	stringstream hEdgeMeanChargeCanvasName; hEdgeMeanChargeCanvasName<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hEdgeMeanCharge"<<FileNameEnd<<".png";
-	hEdgeMeanChargeCanvas->SaveAs(hEdgeMeanChargeCanvasName.str().c_str());
+	histSaver->SaveCanvas(cEdgeMeanCharge);
 	//histSaver->SaveHistogram(hEdgeMeanCharge);
 
 	//hyEdgeCharge
 	//histSaver->SaveHistogram(hyEdgeCharge);
 	//histSaver->SaveHistogram(hyEdgeChargeEvents);
 
-	hyEdgeMeanChargeCanvas = new TCanvas();
-	hyEdgeMeanChargeCanvas->cd();
+	cyEdgeMeanCharge = new TCanvas("cyEdgeMeanCharge","cyEdgeMeanCharge");
+	cyEdgeMeanCharge->cd();
 	*hyEdgeMeanCharge = (*hyEdgeCharge/(*hyEdgeChargeEvents));
 	hyEdgeMeanCharge->SetEntries(hyEdgeChargeEvents->Integral());
 	hyEdgeMeanCharge->Draw();
@@ -2135,8 +2110,7 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	//DetectorEdge->SetLineWidth(2);
 	//DetectorEdge->SetLineColor(kRed);
 	//DetectorEdge->Draw("same");
-	stringstream hyEdgeMeanChargeCanvasName; hyEdgeMeanChargeCanvasName<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hyEdgeMeanCharge"<<FileNameEnd<<".png";
-	hyEdgeMeanChargeCanvas->SaveAs(hyEdgeMeanChargeCanvasName.str().c_str());
+	histSaver->SaveCanvas(cyEdgeMeanCharge);
 
 }
 void TAnalysisOf3dDiamonds::YAlignment() {
@@ -2247,8 +2221,8 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 	if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
 		return;
 	}
-	if(cellNo<0)
-		return;
+//	if(cellNo<0)
+//		return;
 
 	clusteredAnalysis->addEvent(xPos,yPos,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
 	//ClusterShape(&diamondCluster);
@@ -2311,6 +2285,9 @@ void TAnalysisOf3dDiamonds::YAlignment() {
 			hCellsCharge.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),diamondCluster.getCharge(false));
 			hCellsEvents.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),1);
 			if(hEntries != hCellsEvents.at(i*11+j)->Integral()){	//If entries in this histogram range have increased fill corresponding hCellLandau
+//				cout<< i<<" "<<j<<" "<<i*11+j<<" ?= "<< cellNo<<" "<<xPos<<" "<<yPos<<endl;
+				if(cellNo != i*11+j)
+					cerr<<"something is wrong "<<i<<" "<<j<<endl;
 				hCellsLandau.at(i*11+j)->Fill(diamondCluster.getCharge(false));
 				hCellsClusteSize.at(i*11+j)->Fill((diamondCluster.getClusterSize()-2));		//Cluster seems to be 2 smaller than ClusterSize for some reason?
 				hCellsDeltaX.at(i*11+j)->Fill((diamondCluster.getHighestSignalChannel()-XdetChannelSpace));
@@ -2782,7 +2759,7 @@ pair<int,int> TAnalysisOf3dDiamonds::getCellNo(Float_t xDet, Float_t yDet) {
 	Float_t deltaY = yDet - yminus;
 	Int_t cell = -1;
 	if(column >= 0 && column < settings->getNColumns3d() && row >= 0 && row < settings->getNRows3d())
-		cell = column * settings->getNColumns3d()+row;
+		cell = column * settings->getNRows3d()+row;
 	Int_t quarter = -1;
 	if (deltaY>=0&&deltaX>=0&&deltaX<=cellWidth&&deltaY<=cellHight){
 		int quarterX = deltaX/(cellWidth/2);
