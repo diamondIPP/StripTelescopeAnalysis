@@ -191,7 +191,7 @@ private:
 	TH2D* hDetXvsDetY3DOverview;
 	TCanvas* cCellNumbering;
 	TH2D* hCellNumbering;
-	TCanvas* c3DdetDeltaXChannelCanvas;
+	TCanvas* c3DdetDeltaXChannel;
 	TH2D* h3DdetDeltaXChannel;
 	vector<TH1F*> hCellsDeltaX;
 	vector<TH1F*> hCellsDeltaXQuarterCellGrading;

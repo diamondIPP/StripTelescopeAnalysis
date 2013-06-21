@@ -1259,14 +1259,14 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 		*/
 
 	//h3DdetDeltaXChannel
-	c3DdetDeltaXChannelCanvas = new TCanvas("c3DdetDeltaXChannel","c3DdetDeltaXChannel");
-	c3DdetDeltaXChannelCanvas->cd();
+	c3DdetDeltaXChannel = new TCanvas("c3DdetDeltaXChannel","c3DdetDeltaXChannel");
+	c3DdetDeltaXChannel->cd();
 	h3DdetDeltaXChannel->SetStats(kFALSE);
 	hGridReference->SetTitle("h3DdetDeltaXChannelCanvas");		//Set title to require
 	hGridReference->Draw("COL");
 	h3DdetDeltaXChannel->Draw("sameCOLZAH");
 	//h3DdetDeltaXChannelCanvas->Draw("sameTEXTAH");
-	DrawMetallisationGrid(c3DdetDeltaXChannelCanvas);
+	DrawMetallisationGrid(c3DdetDeltaXChannel);
 	histSaver->SaveCanvas(c3DdetDeltaXChannel);
 
 	//h3DdetDeltaXChannelAbove1000
@@ -1307,7 +1307,7 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameCOLZAH");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameTEXTAH");
 	DrawMetallisationGrid(cDetXvsDetY3DMeanChargeRebinnedQuarterCell);
-	histSaver->Save(cDetXvsDetY3DMeanChargeRebinnedQuarterCell);
+	histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeRebinnedQuarterCell);
 
 	cDetXvsDetY3DRebinnedQuarterCellRMSCanvas = new TCanvas("c3DdetQuarterCellRMS","c3DdetQuarterCellRMS");
 	cDetXvsDetY3DRebinnedQuarterCellRMSCanvas->cd();
@@ -1769,7 +1769,7 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 		hDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->Draw("sameTEXTAH");
 		//gStyle->SetPaintTextFormat(3.2g);
 		DrawMetallisationGrid(cDetXvsDetY3DMeanChargeQuarterCellGrading.at(k));
-		histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeQuarterCellGrading);
+		histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeQuarterCellGrading.at(k));
 		if(k!=5){
 			//For Transparent Analysis
 			TF1* fit2 = landauGauss.doLandauGaussFit(hQuarterCellGradedTransparentLandau.at(k));
