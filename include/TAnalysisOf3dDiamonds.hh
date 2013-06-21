@@ -127,12 +127,12 @@ private:
 	TCanvas* cPredictedEvents;
 	TCanvas* cSeenEvents;
 	TCanvas* c0Clusters;
-	TCanvas* h1_1Clusters;
-	TCanvas* h1Clusters;
-	TCanvas* h2Clusters;
-	TCanvas* h2Clusters0;
-	TCanvas* h2Clusters1;
-	TCanvas* h3Clusters;
+	TCanvas* c1_1Clusters;
+	TCanvas* c1Clusters;
+	TCanvas* c2Clusters;
+	TCanvas* c2Clusters0;
+	TCanvas* c2Clusters1;
+	TCanvas* c3Clusters;
 	float FiducialMetric;			// Which Fiducial cut to apply
 	float FiducialChannel;
 	TCanvas* FidCudBoundMetricCanvas;

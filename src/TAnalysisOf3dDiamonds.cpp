@@ -479,54 +479,47 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 	histSaver->SaveCanvas(c0Clusters);
 
 	//1_1Clusters
-	h1_1Clusters = new TCanvas();
-	h1_1Clusters->cd();
+	c1_1Clusters = new TCanvas("cFidCutXvsFidCutY1_1Clusters","cFidCutXvsFidCutY1_1Clusters");
+	c1_1Clusters->cd();
 	hFidCutXvsFidCutY1_1Clusters->Draw("COLZ");
-	stringstream str8; str8<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutY1_1Clusters"<<"%%"<<FileNameEnd<<".png";
-	h1_1Clusters->SaveAs(str8.str().c_str());
+	histSaver->SaveCanvas(c1_1Clusters);
 
 	//1Clusters
-	h1Clusters = new TCanvas();
-	h1Clusters->cd();
+	c1Clusters = new TCanvas("cFidCutXvsFidCutY1Clusters","cFidCutXvsFidCutY1Clusters");
+	c1Clusters->cd();
 	hFidCutXvsFidCutY1Clusters->Draw("COLZ");
-	stringstream str9; str9<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutY1Clusters"<<"%%"<<FileNameEnd<<".png";
-	h1Clusters->SaveAs(str9.str().c_str());
+	histSaver->SaveCanvas(c1Clusters);
 
 	//2Clusters
-	h2Clusters = new TCanvas();
-	h2Clusters->cd();
+	c2Clusters = new TCanvas("hFidCutXvsFidCutY2Clusters","hFidCutXvsFidCutY2Clusters");
+	c2Clusters->cd();
 	hFidCutXvsFidCutY2Clusters->Draw("COLZ");
-	stringstream str5; str5<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutY2Clusters"<<"%%"<<FileNameEnd<<".png";
-	h2Clusters->SaveAs(str5.str().c_str());
+	histSaver->SaveCanvas(c2Clusters);
 
 	//2Clusters0
-	h2Clusters0 = new TCanvas();
-	h2Clusters0->cd();
+	c2Clusters0 = new TCanvas("cFidCutXvsFidCutY2Clusters0","cFidCutXvsFidCutY2Clusters0");
+	c2Clusters0->cd();
 	hFidCutXvsFidCutY2Clusters0->Draw("COLZ");
-	stringstream str50; str50<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutY2Clusters0"<<"%%"<<FileNameEnd<<".png";
-	h2Clusters0->SaveAs(str50.str().c_str());
+	histSaver->SaveCanvas(c2Clusters0);
 
 	//2Clusters1
-	h2Clusters1 = new TCanvas();
-	h2Clusters1->cd();
+	c2Clusters1 = new TCanvas("cFidCutXvsFidCutY2Clusters1","cFidCutXvsFidCutY2Clusters1");
+	c2Clusters1->cd();
 	hFidCutXvsFidCutY2Clusters1->Draw("COLZ");
-	stringstream str51; str51<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutY2Clusters1"<<"%%"<<FileNameEnd<<".png";
-	h2Clusters1->SaveAs(str51.str().c_str());
+	histSaver->SaveCanvas(c2Clusters1);
 
 	//3Clusters
-	h3Clusters = new TCanvas();
-	h3Clusters->cd();
+	c3Clusters = new TCanvas("cFidCutXvsFidCutY3Clusters","cFidCutXvsFidCutY3Clusters");
+	c3Clusters->cd();
 	hFidCutXvsFidCutY3Clusters->Draw("COLZ");
-	stringstream str6; str6<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"hFidCutXvsFidCutY3Clusters"<<"%%"<<FileNameEnd<<".png";
-	h3Clusters->SaveAs(str6.str().c_str());
+	histSaver->SaveCanvas(c3Clusters);
 
 	//For hXPosvsYPosvsMeanCharge
-	TCanvas* XPosvsYPosvsMean = new TCanvas();
-	XPosvsYPosvsMean->cd();
+	TCanvas* cXPosvsYPosvsMean = new TCanvas("cXPosvsYPosvsMeanCharge","cXPosvsYPosvsMeanCharge");
+	cXPosvsYPosvsMean->cd();
 	*hXPosvsYPosvsMeanCharge = (*hXPosvsYPosvsCharge/(*hXPosvsYPosvsEvents));
 	hXPosvsYPosvsMeanCharge->Draw("COLZ");
-	stringstream str2; str2<<"/Users/iainhaughton/3D_diamond_analysis/output/17107/3dDiamondAnalysis/"<<"XPosvsYPosvsMeanCharge"<<"%%"<<FileNameEnd<<".png";
-	XPosvsYPosvsMean->SaveAs(str2.str().c_str());
+	histSaver->SaveCanvas(cXPosvsYPosvsMean);
 }
 
 void TAnalysisOf3dDiamonds::analyseEvent() {
