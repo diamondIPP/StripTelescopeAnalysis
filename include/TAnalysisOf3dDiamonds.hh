@@ -136,7 +136,7 @@ private:
 	float FiducialMetric;			// Which Fiducial cut to apply
 	float FiducialChannel;
 	TCanvas* FidCudBoundMetricCanvas;
-	TCanvas* FidCudBoundChannelCanvas;
+	TCanvas* cFidCudBoundChannel;
 	TH2F* FidCudBoundMetric;
 	TH2F* FidCudBoundChannel;
 
@@ -145,17 +145,17 @@ private:
 	/////////////
 	TCanvas* hGridReferenceCanvas;
 	TH2D* hGridReference;
-	TCanvas* hCombinedMeanChargeYAlignment;
+	TCanvas* cCombinedMeanChargeYAlignment;
 	TH2D* hFidCutXvsFidCutYvsChargeYAlignment;
 	TH2D* hFidCutXvsFidCutYvsEventsYAlignment;
 	TH2D* hFidCutXvsFidCutYvsMeanChargeYAlignment;
-	TCanvas* h3DdetMeanCharge;
+	TCanvas* c3DdetMeanCharge;
 	TH2D* hDetXvsDetY3D;
 	TH2D* hDetXvsDetY3DvsEvents;
 	TH2D* hDetXvsDetY3DMeanCharge;
 	TCanvas* c3DdetMeanChargeWithMeanClusterSize;
 	TH2D* hCellsMeanClusteSize;
-	TCanvas* h3DdetMeanChargeRebinned;
+	TCanvas* c3DdetMeanChargeRebinned;
 	TCanvas* h3DdetEventsRebinned;
 	TH2D* hDetXvsDetY3DRebinned;
 	TH2D* hDetXvsDetY3DvsEventsRebinned;
@@ -177,11 +177,11 @@ private:
 	TH2D* h2DMeanClusterSizeQuarterCellTotal;
 	TH2D* h2DMeanClusterSizeQuarterCellEvents;
 	TH2D* h2DClusterSizeXAxis;
-	TCanvas* hDetXvsDetY3DMeanChargeRebinnedQuarterCellCanvas;
+	TCanvas* cDetXvsDetY3DMeanChargeRebinnedQuarterCell;
 	TH2D* hDetXvsDetY3DMeanChargeRebinnedQuarterCell;
-	TCanvas* hDetXvsDetY3DRebinnedQuarterCellRMSCanvas;
+	TCanvas* cDetXvsDetY3DRebinnedQuarterCellRMSCanvas;
 	TH2D* hDetXvsDetY3DRebinnedQuarterCellRMS;
-	vector<TCanvas*> hDetXvsDetY3DMeanChargeQuarterCellGradingCanvas;
+	vector<TCanvas*> cDetXvsDetY3DMeanChargeQuarterCellGrading;
 	vector<TH2D*> hDetXvsDetY3DMeanChargeQuarterCellGrading;
 	vector<TH1F*> hDetXvsDetY3DMeanChargeQuarterCellGradingLandau;
 	TCanvas* cDetXvsDetY3DMeanChargeHighlightedQuarters;
@@ -191,7 +191,7 @@ private:
 	TH2D* hDetXvsDetY3DOverview;
 	TCanvas* cCellNumbering;
 	TH2D* hCellNumbering;
-	TCanvas* h3DdetDeltaXChannelCanvas;
+	TCanvas* c3DdetDeltaXChannelCanvas;
 	TH2D* h3DdetDeltaXChannel;
 	vector<TH1F*> hCellsDeltaX;
 	vector<TH1F*> hCellsDeltaXQuarterCellGrading;
@@ -199,7 +199,7 @@ private:
 	TH2D* h3DdetQuarterCellFluctuation;
 	TCanvas* c3DdetQuarterCellFluctuation;
 	TH2D* h3DdetQuarterCellFluctuation1;
-	TCanvas* h3DdetDeltaXChannelAbove1000Canvas;
+	TCanvas* c3DdetDeltaXChannelAbove1000;
 	TH2D* h3DdetDeltaXChannelAbove1000;
 	vector<TH2D*> hCellsCharge;
 	vector<TH2D*> hCellsEvents;
