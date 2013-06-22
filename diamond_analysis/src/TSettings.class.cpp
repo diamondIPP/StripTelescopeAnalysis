@@ -107,7 +107,7 @@ void TSettings::checkSettings(){
 
 	if (isStandard3dFidCut==true){
 			fidCuts3D->Reset();
-			fidCutsSelection->SetName("3D-FidCuts");
+			fidCutsSelection->SetName("standard-FidCuts");
 			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
 		}
 //	diamondPattern.Print();
@@ -871,11 +871,18 @@ void TSettings::ParsePattern(std::string key, std::string value){
 }
 
 
+/**
+ * input: {[X11-X12,Y11-Y12],[X21-X22,Y21-Y22]}
+ * @param key
+ * @param value
+ * @param fidCutRegions
+ * @param isStandardFidCut
+ */
 void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut){
 	cout<< "\nParse FidCut: "<<value<<endl;
 
 	if (fidCutRegions==0){
-		cerr<<"TSettings::ParseFidCut: Couldn't Parse Since fidCutRegions ==0 "<<fidCutRegions<<endl;
+		cerr<<"TSettings::ParseFidCut: Couldn't Parse Since fidCutRegions == 0 "<<fidCutRegions<<endl;
 		return;
 	}
 	std::vector <std::string> stringArray;
@@ -1817,10 +1824,15 @@ Float_t TSettings::getMaxDiamondChannel(){
 	return TPlaneProperties::getNChannelsDiamond();
 
 }
-int TSettings::getDiaDetectorAreaOfChannel(Int_t ch){
-	for(Int_t area = 0; area < getNDiaDetectorAreas(); area++)
-		if(isInDiaDetectorArea(ch,area))
+int TSettings::getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verb){
+	if (verb) cout <<"TSettings::getDiaDetectorAreaOfChannel "<< ch <<" "<< verb<<endl;
+	for(Int_t area = 0; area < getNDiaDetectorAreas(); area++){
+		if (verb) cout<< area <<" check "<< ch << " is in Area"<< area <<flush;
+		bool check = isInDiaDetectorArea(ch,area);
+		if (verb) cout<<" found"<<endl;
+		if(check)
 			return area;
+	}
 //	cout<<"cannot find ch "<<ch<<" in "<<getNDiaDetectorAreas()<<""<<endl;
 	if(verbosity>5)
 		diamondPattern.showPatterns();

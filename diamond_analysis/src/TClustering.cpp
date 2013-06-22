@@ -9,14 +9,16 @@
 
 #include "../include/TClustering.hh"
 
-TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
+TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*************TClustering::TClustering*********************"<<endl;
 	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
-	if(settings==0)
-		settings=new TSettings();
-	setSettings(settings);
+	if(set==0){
+		cerr<< "Settings ==0 , exit"<<endl;
+		exit(-1);
+	}
+	setSettings(set);
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
 	settings->goToPedestalTreeDir();
@@ -29,7 +31,7 @@ TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,i
 	histSaver->SetRunNumber(runNumber);
 	settings->goToPedestalTreeDir();
 	this->runNumber=runNumber;
-	verbosity=1;
+	verbosity=settings->getVerbosity();
 	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
@@ -161,7 +163,7 @@ void TClustering::clusterDetector(UInt_t det){
 		//if(verbosity>9&&nEvent==0&&det==8&&ch<128)cout<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
 		//if(det==8)cout<<nEvent<<" # "<<det<<" # "<<ch<<" "<<signal<<" "<<sigma<<" "<<endl;
 		if(sigma==0){
-			if(verbosity>1)cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
+			if(verbosity>8 ||(det ==8 && verbosity>3))cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
 			continue;
 		}
 		Float_t SNR=eventReader->getSignalInSigma(det,ch);
@@ -170,12 +172,12 @@ void TClustering::clusterDetector(UInt_t det){
 
 
 		if( SNR>settings->getClusterSeedFactor(det,ch)){
-			if(verbosity>3)cout<<"Found a Seed "<<nEvent<<" "<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
+			if(verbosity>8||(det ==8 && verbosity>3))cout<<"Found a Seed "<<nEvent<<" "<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
 			ch=combineCluster(det,ch);
-			if(verbosity>20)cout<<"new channel no.:"<<ch<<flush;
+			if(verbosity>20||(det ==8 && verbosity>5))cout<<"new channel no.:"<<ch<<flush;
 		}
 	}
-	if(verbosity>3)cout<<endl;
+	if(verbosity>8||(det ==8 && verbosity>3))cout<<endl;
 
 }
 
@@ -276,7 +278,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	vecCluster[det].push_back(cluster);
 	nClusters[det]++;
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"\tclusterSize: "<<cluster.size()<<endl;
-	if(verbosity>1)cluster.Print();
+	if(verbosity>8||(det ==8 && verbosity>3))cluster.Print();
 	return currentCh;
 }
 

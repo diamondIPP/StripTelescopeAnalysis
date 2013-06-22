@@ -57,7 +57,7 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 	if(nEvents<=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
-		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
+//		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
 		analyseEvent();
 	}
@@ -228,10 +228,15 @@ void TAnalysisOfSelection::initialiseHistos()
 }
 
 void TAnalysisOfSelection::saveDiamondAreaHistos(){
+	settings->diamondPattern.showPatterns();
+	cout << "Save: "<<histoLandauDistribution2DNoBorderSeed_unmasked->GetName() << endl;
+	histSaver->SaveHistogram(histoLandauDistribution2DNoBorderSeed_unmasked);
 	for(Int_t area=0;area<settings->getNDiaDetectorAreas();area++){
+
 		Int_t chLow = settings->getDiaDetectorArea(area).first;
 		Int_t chHigh =  settings->getDiaDetectorArea(area).second;
 
+		cout <<" Area: " << area << ", ch: : "<< chLow <<" - "<< chHigh <<endl;
 
 		TString name = TString::Format("hEtaVsLeftChannelNoArea%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<"save: "<<name<<endl;
@@ -360,7 +365,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 				continue;
 			name = TString::Format("hChargeOfCluster_ch%d_area%d",ch,area);
 			TH1F * histo = (TH1F*) histoLandauDistribution2DNoBorderHitarea->ProjectionX(name,bin,bin);
-			if(verbosity)cout<<name<<"_"<<histo<<endl;
+			if(verbosity>4)cout<<name<<" - "<<histo<<endl;
 			if(!histo)
 				continue;
 			name = TString::Format("ch %d, area %d",ch,area);
@@ -392,7 +397,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 
 		//		delete histoLandauDistribution2DNoBorderSeedarea;
 
-		// 2d area clusterSize 1or 2 unmasked
+		// 2d area clusterSize 1 or 2 unmasked
 		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		UInt_t binLow=0;
@@ -633,6 +638,11 @@ void TAnalysisOfSelection::saveHistos()
 		histSaver->SaveHistogram(histo2d);
 		delete histo2d;
 	}
+	name.str("");name.clear();
+	name<<"hTest";
+	histo = histSaver->CreateDistributionHisto(name.str(),vecTest,512);
+	histSaver->SaveHistogram(histo);
+	delete histo;
 
 	vector<Float_t> vecRightFactor, vecLeftFactor,vecRightOverHighest,vecLeftOverHighest;
 	for(UInt_t i=0;i<vecSignalLeftOfHighest.size()&&i<vecSignalRightOfHighest.size()&&i<vecClusterCharge.size();i++){
@@ -1074,8 +1084,10 @@ void TAnalysisOfSelection::analyseEvent()
 	bool isMaskedAdjacentChannels = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,true);
 	Float_t pos = cluster.getPosition(TCluster::maxValue,0);
 	Int_t fidRegionIndex = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY)-1;
-	Int_t area = settings->getDiaDetectorAreaOfChannel(pos);
+	Int_t area = settings->getDiaDetectorAreaOfChannel(pos,0);
 	bool isInOneArea = !(area==-1);
+//	if(verbosity && pos <= 20) settings->diamondPattern.showPatterns();
+//	if(verbosity && pos <= 13 && pos>0) cout<<"\n*****"<<(int)pos<< " "<< fidRegionIndex << " / " << area <<" "<<nDiaClusters<<" "<<eventReader->isInOneFiducialArea()<<"\t"<<flush;
 
 	hValidSiliconAndDiamondHit ->Fill(fiducialValueX,fiducialValueY);
 	if (nDiaClusters==1){
@@ -1090,15 +1102,17 @@ void TAnalysisOfSelection::analyseEvent()
 			hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->Fill(fiducialValueX,fiducialValueY);
 	}
 
-	if(!eventReader->isInCurrentFiducialCut())
+	if(!eventReader->isInOneFiducialArea())
 		return;
+//	if(fidRegionIndex>0) cout<<"FidRegion: "<<fidRegionIndex<<" "<<endl;
 	hFidCut->Fill(fiducialValueX,fiducialValueY);
-	hNDiaClusters -> Fill (nDiaClusters);
+	hNDiaClusters -> Fill(nDiaClusters);
 	if (nDiaClusters > 1){
 		TCluster cluster2 = eventReader->getCluster(TPlaneProperties::getDetDiamond(),1);
 		Float_t pos2 = cluster2.getPosition(TCluster::maxValue,0);
 		Float_t area2 = settings->getDiaDetectorAreaOfChannel(pos2);
 		hTwoClustersArea->Fill(area,area2);
+//		if(verbosity && pos <= 20) {cluster.Print();cluster2.Print();}
 	}
 	else if(nDiaClusters>1)
 		return;
@@ -1120,10 +1134,12 @@ void TAnalysisOfSelection::analyseEvent()
 		return;
 	}
 	if(clustSize<=2&&nDiaClusters==1&&area==fidRegionIndex){
+		if(verbosity && pos <= 20) cout<<"FILL AT "<<pos<< " "<< fidRegionIndex << " / " << area <<" nClus"<< nDiaClusters<<" size"<<clustSize<<" "<<flush;
 		//
 		//		else{
 		//			if(verbosity>5)cout<<nEvent<<" Good"<<endl;
 		//		}
+		vecTest.push_back(pos);
 		Int_t leftChannel =-1;
 
 		Float_t eta = cluster.getEta(leftChannel,false);
@@ -1163,6 +1179,7 @@ void TAnalysisOfSelection::analyseEvent()
 		if (!isBorderHitCluster)
 			histoLandauDistribution2DNoBorderHit_unmasked->Fill(charge,pos);
 		bool isMaskedCluster = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
+		if(verbosity && pos <= 20) cout<<"masked:"<< isMaskedCluster;
 		if(!isMaskedCluster){
 			histoLandauDistribution2D->Fill(charge,pos);
 			if (!isBorderSeedCluster)
@@ -1170,6 +1187,7 @@ void TAnalysisOfSelection::analyseEvent()
 			if (!isBorderHitCluster)
 				histoLandauDistribution2DNoBorderHit->Fill(charge,pos);
 		}
+		if(verbosity && pos <= 20) cout<<endl;
 	}
 }
 

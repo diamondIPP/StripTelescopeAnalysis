@@ -284,7 +284,7 @@ public:
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
-	int getDiaDetectorAreaOfChannel(Int_t ch);
+	int getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verbosity = 0);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
 	bool hasBorderSeed(UInt_t det, TCluster cluster);

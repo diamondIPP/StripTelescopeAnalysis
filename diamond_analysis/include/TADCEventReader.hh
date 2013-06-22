@@ -76,6 +76,8 @@ public:
 	UInt_t getNDiamondClusters();
 	bool isInFiducialCut();
 	bool isInCurrentFiducialCut();
+	bool isInOneFiducialArea();
+
 	bool isDetMasked();
 	TEvent* getEvent();
 	void setVerbosity(UInt_t verbosity);

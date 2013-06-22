@@ -94,6 +94,7 @@ private:
 	vector<Float_t> vecSignalRightOfHighest;
 	vector<Float_t> vecHighestSignal;
 	vector<Float_t> vecClusterCharge;
+	vector<Float_t> vecTest;
 };
 
 #endif /* TANALYSISOFSELECTION_HH_ */

@@ -704,6 +704,12 @@ bool TADCEventReader::isInCurrentFiducialCut(){
 	return settings->getSelectionFidCuts()->isInFiducialCut(fiducialValueX,fiducialValueY);
 }
 
+bool TADCEventReader::isInOneFiducialArea(){
+	Float_t fiducialValueX = this->getFiducialValueX();
+		Float_t fiducialValueY = this->getFiducialValueY();
+		return (settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY) != -1);
+}
+
 bool TADCEventReader::isDetMasked()
 {
 	return this->bIsDetMasked;
