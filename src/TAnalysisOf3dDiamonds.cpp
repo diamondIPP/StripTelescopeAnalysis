@@ -122,8 +122,7 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 		YAlignment();
 	}
 	cout<< "ENTRIES: "<<clusteredAnalysis->getEntries()<<endl;
-	TH1F* histo = (TH1F*) clusteredAnalysis->getHistogram("hTest","pulseHeight","","");
-
+	createTreeTestHistos();
 	TFile *file = new TFile("analysis3d-2.root","RECREATE");
 	file->cd();
 	TTree* tree = (TTree*)clusteredAnalysis->cellAnalysisTree->Clone("analysisTree");
@@ -132,7 +131,6 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	cout<<gSystem->pwd()<<" "<<file->GetPath()<<" "<<file->GetName()<<endl;
 	file->Close();
 
-	histSaver->SaveHistogram(histo);
 	saveYAlignmentHistos();
 	/*saveHistos();
 	 	 */
@@ -694,30 +692,31 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 void TAnalysisOf3dDiamonds::initialise3DGridReference() {
 
 	stringstream hGridReferenceName; hGridReferenceName<<""<<FileNameEnd;
-	TString name = "hGridRefenrence";
+	TString nameDet = "hGridRefenrenceDetSpace";
+	TString nameCell = "hGridRefenrenceCellSpace";
 	Float_t xBins = settings->getNColumns3d();
 	Float_t xLow = settings->getXMetalisationStart3d();
 	Float_t xHigh =settings->getXMetalisationEnd3d();
 	Float_t yBins = settings->getNRows3d();
 	Float_t yLow = 0;
 	Float_t yHigh = settings->getYMetalisationEnd3d();
-	hGridReference = new TH2D(name,name,xBins,xLow,xHigh,yBins,0,);
+	hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
+	hGridReferenceCellSpace = new TH2D(nameCell,nameDet,xBins,0,xBins,yBins,0,yBins);
 
-	//hGridReference
-//	vector<char> GridReference;
-//	for(UInt_t i = 0; i< settings->getNColumns3d();i++){
-//		GridReference.push_back((char)('A'+i));
-//	}
-//	vector<int> GridReferenceY;
-//	for(UInt_t i = 0; i < settings->getNRows3d();i++)GridReferenceY.push_back(i+1);
-	for(int i=0;i<settings->getNRows3d();i++)
-		hGridReference->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
-
-	for(int j=0;j<settings->getNRows3d();j++)
-		hGridReference->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
-	hGridReference->SetStats(kFALSE);
-	hGridReference->SetTickLength(0.0, "X");
-	hGridReference->SetTickLength(0.0, "Y");
+	for(int i=0;i<settings->getNRows3d();i++){
+		hGridReferenceDetSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
+		hGridReferenceCellSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
+	}
+	for(int j=0;j<settings->getNRows3d();j++){
+		hGridReferenceDetSpace->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
+		hGridReferenceCellSpace->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
+	}
+	hGridReferenceDetSpace->SetStats(kFALSE);
+	hGridReferenceDetSpace->SetTickLength(0.0, "X");
+	hGridReferenceDetSpace->SetTickLength(0.0, "Y");
+	hGridReferenceCellSpace->SetStats(kFALSE);
+	hGridReferenceCellSpace->SetTickLength(0.0, "X");
+	hGridReferenceCellSpace->SetTickLength(0.0, "Y");
 
 }
 
@@ -1239,8 +1238,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	*hDetXvsDetY3DMeanCharge = (*hDetXvsDetY3D/(*hDetXvsDetY3DvsEvents));
 	hDetXvsDetY3DMeanCharge->SetEntries(hDetXvsDetY3DvsEvents->Integral());
 	//hDetXvsDetY3DMeanCharge->SetStats(kFALSE);
-	hGridReference->SetTitle("c3DdetMeanCharge");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("c3DdetMeanCharge");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanCharge->Draw("sameCOLZAH");
 	//hGridReference->Draw("COL");
 	DrawMetallisationGrid(c3DdetMeanCharge);
@@ -1254,8 +1253,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	*hDetXvsDetY3DMeanChargeRebinned = (*hDetXvsDetY3DRebinned/(*hDetXvsDetY3DvsEventsRebinned));
 	hDetXvsDetY3DMeanChargeRebinned->SetEntries(hDetXvsDetY3DvsEventsRebinned->Integral());
 	hDetXvsDetY3DMeanChargeRebinned->SetStats(kFALSE);
-	hGridReference->SetTitle("h3DdetMeanChargeRebinned");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetMeanChargeRebinned");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanChargeRebinned->Draw("sameCOLZAH");
 	hDetXvsDetY3DvsEventsRebinned->Draw("sameTEXTAH");
 	//hDetXvsDetY3DvsEventsRebinned->Draw("TEXT");
@@ -1273,8 +1272,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	c3DdetDeltaXChannel = new TCanvas("c3DdetDeltaXChannel","c3DdetDeltaXChannel");
 	c3DdetDeltaXChannel->cd();
 	h3DdetDeltaXChannel->SetStats(kFALSE);
-	hGridReference->SetTitle("h3DdetDeltaXChannelCanvas");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetDeltaXChannelCanvas");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	h3DdetDeltaXChannel->Draw("sameCOLZAH");
 	//h3DdetDeltaXChannelCanvas->Draw("sameTEXTAH");
 	DrawMetallisationGrid(c3DdetDeltaXChannel);
@@ -1331,8 +1330,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	cDetXvsDetY3DMeanChargeRebinnedQuarterCell->cd();
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetEntries(QuaterCellEntrySum);
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetStats(kFALSE);
-	hGridReference->SetTitle("h3DdetQuarterCellMeanCharge");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetQuarterCellMeanCharge");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameCOLZAH");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameTEXTAH");
 	DrawMetallisationGrid(cDetXvsDetY3DMeanChargeRebinnedQuarterCell);
@@ -1342,8 +1341,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	cDetXvsDetY3DRebinnedQuarterCellRMSCanvas = new TCanvas("c3DdetQuarterCellRMS","c3DdetQuarterCellRMS");
 	cDetXvsDetY3DRebinnedQuarterCellRMSCanvas->cd();
 	hDetXvsDetY3DRebinnedQuarterCellRMS->SetEntries(QuaterCellEntrySum);
-	hGridReference->SetTitle("h3DdetQuarterCellRMS");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetQuarterCellRMS");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DRebinnedQuarterCellRMS->Draw("sameCOLZAH");
 	hDetXvsDetY3DRebinnedQuarterCellRMS->Draw("sameTEXTAH");
 	DrawMetallisationGrid(cDetXvsDetY3DRebinnedQuarterCellRMSCanvas);
@@ -1794,8 +1793,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 		TString hName = TString::Format("hDetXvsDetY3DMeanChargeQuarterCellGrading%d",k);
 		cDetXvsDetY3DMeanChargeQuarterCellGrading.push_back(new TCanvas(hName,hName));
 		cDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->cd();
-		hGridReference->SetTitle("hDetXvsDetY3DMeanChargeQuarterCellGrading");		//Set title to require
-		hGridReference->Draw("COL");
+		hGridReferenceDetSpace->SetTitle("hDetXvsDetY3DMeanChargeQuarterCellGrading");		//Set title to require
+		hGridReferenceDetSpace->Draw("COL");
 		hDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->Draw("sameCOLZAH");
 		hDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->Draw("sameTEXTAH");
 		//gStyle->SetPaintTextFormat(3.2g);
@@ -1830,8 +1829,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	cDetXvsDetY3DMeanChargeHighlightedQuarters = new TCanvas("cDetXvsDetY3DMeanChargeHighlightedQuarters","cDetXvsDetY3DMeanChargeHighlightedQuarters");
 	cDetXvsDetY3DMeanChargeHighlightedQuarters->cd();
 	hDetXvsDetY3DMeanCharge->SetStats(kFALSE);
-	hGridReference->SetTitle("hDetXvsDetY3DMeanChargeHighlightedQuarters");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("hDetXvsDetY3DMeanChargeHighlightedQuarters");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->Draw("sameCOLAH");
 	hDetXvsDetY3DMeanCharge->Draw("sameCOLZAH");
 	//hDetXvsDetY3DMeanCharge->Draw("sameTEXTAH");
@@ -1842,8 +1841,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	//h3DdetQuarterCellFluctuation
 	c3DdetQuarterCellFluctuation1 = new TCanvas("c3DdetQuarterCellFluctuation","c3DdetQuarterCellFluctuation");
 	c3DdetQuarterCellFluctuation1->cd();
-	hGridReference->SetTitle("h3DdetQuarterCellFluctuation");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetQuarterCellFluctuation");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->Draw("sameCOLAH");
 	gStyle->SetPaintTextFormat("3.2g");
 	h3DdetQuarterCellFluctuation->Draw("sameTEXT");
@@ -1854,8 +1853,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	//h3DdetQuarterCellFluctuation1
 	c3DdetQuarterCellFluctuation = new TCanvas("c3DdetQuarterCellFluctuation1","c3DdetQuarterCellFluctuation1");
 	c3DdetQuarterCellFluctuation->cd();
-	hGridReference->SetTitle("h3DdetQuarterCellFluctuation1");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetQuarterCellFluctuation1");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->Draw("sameCOLAH");
 	gStyle->SetPaintTextFormat("3.2g");
 	h3DdetQuarterCellFluctuation1->Draw("sameTEXT");
@@ -1867,8 +1866,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	//hCellNumbering
 	cCellNumbering = new TCanvas("cCellNumbering","cCellNumbering");
 	cCellNumbering->cd();
-	hGridReference->SetTitle("hCellNumbering");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("hCellNumbering");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hCellNumbering->Draw("sameCOLZAH");
 	hCellNumbering->Draw("sameTEXTAH");
 	DrawMetallisationGrid(cCellNumbering);
@@ -1884,8 +1883,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	//hDetXvsDetY3DRebinnedRMS
 	cDetXvsDetY3DRebinnedRMS = new TCanvas("cDetXvsDetY3DRebinnedRMS","cDetXvsDetY3DRebinnedRMS");
 	cDetXvsDetY3DRebinnedRMS->cd();
-	hGridReference->SetTitle("h3DdetRebinnedRMS");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetRebinnedRMS");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DRebinnedRMS->Draw("sameCOLZAH");
 	hDetXvsDetY3DRebinnedRMS->Draw("sameTEXTAH");
 	DrawMetallisationGrid(cDetXvsDetY3DRebinnedRMS);
@@ -2040,8 +2039,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	*hDetXvsDetY3DMeanChargeRebinned = (*hDetXvsDetY3DRebinned/(*hDetXvsDetY3DvsEventsRebinned));
 	hDetXvsDetY3DMeanChargeRebinned->SetEntries(hDetXvsDetY3DvsEventsRebinned->Integral());
 	hDetXvsDetY3DMeanChargeRebinned->SetStats(kFALSE);
-	hGridReference->SetTitle("h3DdetMeanChargeWithMeanClusterSize");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetMeanChargeWithMeanClusterSize");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanChargeRebinned->Draw("sameCOLZAH");
 	hCellsMeanClusteSize->Draw("sameTEXTAH");
 	DrawMetallisationGrid(c3DdetMeanChargeWithMeanClusterSize);
@@ -2051,8 +2050,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	c3DdetQuarterCellClusterSize = new TCanvas("cQuarterCellsMeanClusteSize","cQuarterCellsMeanClusteSize");
 	c3DdetQuarterCellClusterSize->cd();
 	hQuarterCellsMeanClusterSize->SetStats(kFALSE);
-	hGridReference->SetTitle("h3DdetQuarterCellMeanClusterSize");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetQuarterCellMeanClusterSize");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->Draw("sameCOLAH");
 	gStyle->SetPaintTextFormat("3.2g");
 	hQuarterCellsMeanClusterSize->Draw("sameTEXT");
@@ -2064,8 +2063,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	cRebinnedQuarterCellFails = new TCanvas("c3DdetNumberofQuarterCellFails","c3DdetNumberofQuarterCellFails");
 	cRebinnedQuarterCellFails->cd();
 	RebinnedQuarterCellFails->SetStats(kFALSE);
-	hGridReference->SetTitle("h3DdetNumberofQuarterCellFails");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetNumberofQuarterCellFails");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	RebinnedQuarterCellFails->Draw("sameCOLZAH");
 	RebinnedQuarterCellFails->Draw("sameTEXTAH");
 	DrawMetallisationGrid(cRebinnedQuarterCellFails);
@@ -2075,8 +2074,8 @@ void TAnalysisOf3dDiamonds::saveYAlignmentHistos() {
 	hOverview = new TCanvas("c3DdetOverview","c3DdetOverview");
 	hOverview->cd();
 	hDetXvsDetY3DOverview->SetStats(kFALSE);
-	hGridReference->SetTitle("h3DdetOverview");		//Set title to require
-	hGridReference->Draw("COL");
+	hGridReferenceDetSpace->SetTitle("h3DdetOverview");		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
 	hDetXvsDetY3DOverview->Draw("sameCOLZAH");
 	histSaver->SaveCanvas(hOverview);
 
@@ -2755,6 +2754,27 @@ void TAnalysisOf3dDiamonds::PredictChannelHit(TCluster* nCluster) {
 		if(nCluster->isSeed(clPos)) cout<<" SEED ";
 	}
 	cout<<endl;
+}
+
+void TAnalysisOf3dDiamonds::createTreeTestHistos() {
+	TH1F* histo = (TH1F*) clusteredAnalysis->getHistogram("hTest","pulseHeight","","");
+	TH3F* histo2 = (TH3F*) clusteredAnalysis->getHistogram("hMeanPH","pulseHeight:nRow:nColumn","","");
+	if(histo2){
+		TH2F* hAvrgCharge = (TH2F*) histo2->Project3DProfile("yx");
+		if(hAvrgCharge)hAvrgCharge->SetName("hAvrgChargeInCells");
+		histSaver->SaveHistogram(hAvrgCharge);
+		TCanvas *c1 = new TCanvas("cAvrgChargeInCells","cAvrgChargeInCells");
+		c1->cd();
+		hGridReferenceCellSpace->Draw("COL");
+		hAvrgCharge->Draw("sameCOLZAH");
+		histSaver->SaveCanvas(c1);
+
+
+	}
+	else{
+		cout<<"PROBLEM: "<<histo2<<endl;
+	}
+	histSaver->SaveHistogram(histo);
 }
 
 /**

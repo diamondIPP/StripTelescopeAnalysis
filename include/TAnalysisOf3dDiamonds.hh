@@ -45,6 +45,7 @@ public:
 
 private:
 	void initialiseHistos();
+	void createTreeTestHistos();
 	void saveHistos();
 	void analyseEvent();
 
@@ -145,7 +146,8 @@ private:
 	//For YAlignment Histos
 	/////////////
 	TCanvas* hGridReferenceCanvas;
-	TH2D* hGridReference;
+	TH2D* hGridReferenceDetSpace;
+	TH2D* hGridReferenceCellSpace;
 	TCanvas* cCombinedMeanChargeYAlignment;
 	TH2D* hFidCutXvsFidCutYvsChargeYAlignment;
 	TH2D* hFidCutXvsFidCutYvsEventsYAlignment;
