@@ -447,6 +447,7 @@ public:
 	void setNRows3d(int nRows){nRows3d=nRows;};
 	int getNRows3d(){return nRows3d;};
 	int getNColumns3d(){return nColumns3d;};
+	int getNQuarters3d(){return 4;}
 	void setNColumns3d(int nColumns){nColumns3d=nColumns;};
 	void setXMetalisationStart3d(int nXMetalisationStart3d){XmetalisationStart3d=nXMetalisationStart3d;};
 	int getXMetalisationStart3d(){return XmetalisationStart3d;};

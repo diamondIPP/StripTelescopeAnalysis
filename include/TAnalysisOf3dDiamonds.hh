@@ -20,6 +20,7 @@
 #include "TH1F.h"
 #include "TH1.h"
 #include "TF1.h"
+#include "TCutG.h"
 #include "TGraphErrors.h"
 #include "TMultiGraph.h"
 #include "TStopwatch.h"
