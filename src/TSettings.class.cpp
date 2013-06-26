@@ -648,7 +648,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	nRows3d = 11;
 	nColumns3d = 9;
-	yOffset3D = 3840;
+	yOffset3D = 3890;
 	checkSettings();
 
 }

@@ -53,7 +53,9 @@ private:
 	void initialise3DGridReference();
 	void initialise3DYAlignmentHistos();
 	void initialise3DOverviewHistos();
-	void initialiseYAlignmentHistos();
+	void initialise3D2DLandauAndClustersizeHistos();
+	void initialise3DCellOverlayHistos();
+	//void initialiseYAlignmentHistos();
 	void saveYAlignmentHistos();
 	void YAlignment();
 	void DrawYAlignmentFidCutRegions();
@@ -71,7 +73,7 @@ private:
 	void RemoveEdgeHits(TCluster* nCluster, int* nEdgeChannel);
 	void ClusterChannels(TCluster* nCluster);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
-	int RemoveEdge3DClusters(TCluster* nCluster);
+	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
 	int FiducialCut(int Detector);
 	void DrawFidCutRegions();
 	void PredictChannelHit(TCluster* nCluster);
@@ -240,6 +242,12 @@ private:
 	TCanvas* cCellsLandau2DHighlightedQuarters;
 	TH2D* hCellsLandau2D;
 	TH2D* hCellsLandau2DQuarterFail;
+	TCanvas* cHarrisGoodandStripNormailsed;
+	TCanvas* cGoodGradedandStripNormailsed;
+	TCanvas* cStripFidCutXFidCutYvsMeanCharge;
+	TH2D* hStripFidCutXFidCutYvsCharge;
+	TH2D* hStripFidCutXFidCutYvsEvents;
+	TH2D* hStripFidCutXFidCutYvsMeanCharge;
 	//Removed Columns
 	TH2D* hCellsColumnCheck55;
 	TH2D* hCellsColumnCheck1010;
