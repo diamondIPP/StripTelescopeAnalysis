@@ -395,7 +395,7 @@ void TSettings::LoadSettings(){
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
 		if(key == "selectionFidCut") {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
-		if(key == "3dFitCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
+		if(key == "3dFidCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
 		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
 		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
 		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);

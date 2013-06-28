@@ -60,17 +60,18 @@ private:
 	void YAlignment();
 	void DrawYAlignmentFidCutRegions();
 	Int_t* CellToChannel(int nCell,float nXcell);
-	int YAlignmentFiducialCut(int nRegion);
+	int YAlignmentFiducialCut(vector<int> nFiducialRegion);
 	void DrawMetallisationGrid(TCanvas* nCanvas);
 	Float_t GetYPositionInDetSystem();
 	float* SortArrayBtoS(float* nArray, int nSize);
 	void printArray(float* nArray, int nSize, const std::string& space);
 
 	//new functions
-	void HitandSeedCount(TCluster* nCluster, int ni);
+	void HitandSeedCount(TCluster* nCluster);
+	void ClusterPlots(int nClusters, float nfiducialValueX, float nfiducialValueY);
 	void ClusterShape(TCluster* nCluster);
 	void RemoveLumpyClusters(TCluster* nCluster);
-	void RemoveEdgeHits(TCluster* nCluster, int* nEdgeChannel);
+	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
 	void ClusterChannels(TCluster* nCluster);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
@@ -80,7 +81,6 @@ private:
 
 	pair<int,int> getCellNo(Float_t xPos, Float_t yPos);
 
-
 private:
 	TCellAnalysisClass* clusteredAnalysis;
 	float SortArrayPointer[4];
@@ -88,6 +88,7 @@ private:
 	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
 	vector<TH1F*>hEventsvsChannel;
+	TH1F* hEventsvsChannelCombined;
 	TH1F* hNumberofClusters;
 	TH1F* hDoubleClusterPos;
 	TCanvas* cDoubleCluster;
@@ -108,13 +109,7 @@ private:
 	TH2D* hXPosvsYPosvsMeanCharge;
 	TH2D* hFidCutXvsFidCutYvsPredictedEvents;
 	TH2D* hFidCutXvsFidCutYvsSeenEvents;
-	TH2D* hFidCutXvsFidCutY0Clusters;
-	TH2D* hFidCutXvsFidCutY1_1Clusters;
-	TH2D* hFidCutXvsFidCutY1Clusters;
-	TH2D* hFidCutXvsFidCutY2Clusters;
-	TH2D* hFidCutXvsFidCutY2Clusters0;
-	TH2D* hFidCutXvsFidCutY2Clusters1;
-	TH2D* hFidCutXvsFidCutY3Clusters;
+	vector<TH2D*> hFidCutXvsFidCutYClusters;
 	TH2D* hEfficiency;
 	//TH3F* hFidCutXvsFidCutYvsCharge;
 	vector<TH1F*> hLandau;
@@ -130,13 +125,7 @@ private:
 	TCanvas* hCombinedMeanCharge;    //TCanvas for MeanCharge All detectors
 	TCanvas* cPredictedEvents;
 	TCanvas* cSeenEvents;
-	TCanvas* c0Clusters;
-	TCanvas* c1_1Clusters;
-	TCanvas* c1Clusters;
-	TCanvas* c2Clusters;
-	TCanvas* c2Clusters0;
-	TCanvas* c2Clusters1;
-	TCanvas* c3Clusters;
+	vector<TCanvas*> cClusters;
 	float FiducialMetric;			// Which Fiducial cut to apply
 	float FiducialChannel;
 	TCanvas* FidCudBoundMetricCanvas;

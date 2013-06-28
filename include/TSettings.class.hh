@@ -283,6 +283,11 @@ public:
 	void PrintPatterns(int k=0);
 	Float_t getChi2Cut3D(){return chi2Cut3D;}
 	Float_t get3DYOffset(){return yOffset3D;};//todo
+	vector<int> getxEdgeFicucialRegion(){return xEdgeFicucialRegion;};
+	vector<int> getyEdgeFicucialRegion(){return yEdgeFicucialRegion;};
+	vector<int> getstripAnalysisFidCut(){return stripAnalysisFidCut;};
+	vector<int> get3DnHAnalysisFidCut(){return TDnHAnalysisFidCut;};
+	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3D;
@@ -435,6 +440,12 @@ private:
 	Float_t diaStartingChannel;
 private:
 	Float_t yOffset3D;
+	vector<int> xEdgeFicucialRegion;
+	vector<int> yEdgeFicucialRegion;
+	vector<int> stripAnalysisFidCut;
+	vector<int> TDnHAnalysisFidCut;
+	vector<int> TDwHAnalysisFidCut;
+
 	int nRows3d;
 	int nColumns3d;
 	vector<Int_t> badCells3d;
