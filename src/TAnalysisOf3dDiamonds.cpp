@@ -527,11 +527,11 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 		//Universal PHvsChannel Plot
 		for(int i=0; i<settings->diamondPattern.getNIntervals();i++){      //settings->diamondPattern.getNIntervals(); i++){
 
-			hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-			hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
-
 			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
 			if(diamondCluster.getHighestSignalChannel()<=channels.second&&diamondCluster.getHighestSignalChannel()>=channels.first){
+
+				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
 
 				if(FiducialCut(i+1)==1)	//Cut on fiducial cuts
 					return;

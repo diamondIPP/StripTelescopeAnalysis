@@ -266,6 +266,7 @@ public:
 	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
 	TFidCutRegions* get3dFidCuts(){return fidCuts3D;};
+	TFidCutRegions* get3dEdgeFidCuts(){return fidCuts3DEdge;};
 	Float_t getMinDiamondChannel();
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
@@ -291,10 +292,11 @@ public:
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3D;
+	TFidCutRegions* fidCuts3DEdge;
 protected:
 	float store_threshold;
 private:
-	bool isStandardSelectionFidCut,isStandard3dFidCut;
+	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandard3dEdgeFidCut;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
