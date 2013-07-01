@@ -60,7 +60,7 @@ private:
 	void YAlignment();
 	void DrawYAlignmentFidCutRegions();
 	Int_t* CellToChannel(int nCell,float nXcell);
-	int YAlignmentFiducialCut(vector<int> nFiducialRegion);
+	int YAlignmentFiducialCut(int nFidRegion);
 	void DrawMetallisationGrid(TCanvas* nCanvas);
 	Float_t GetYPositionInDetSystem();
 	float* SortArrayBtoS(float* nArray, int nSize);
