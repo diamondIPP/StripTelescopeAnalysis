@@ -267,6 +267,7 @@ public:
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
 	TFidCutRegions* get3dFidCuts(){return fidCuts3D;};
 	TFidCutRegions* get3dEdgeFidCuts(){return fidCuts3DEdge;};
+	TFidCutRegions* get3dMetallisationFidCuts(){return fidCuts3DMetallisation;};
 	Float_t getMinDiamondChannel();
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
@@ -293,10 +294,11 @@ private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3D;
 	TFidCutRegions* fidCuts3DEdge;
+	TFidCutRegions* fidCuts3DMetallisation;
 protected:
 	float store_threshold;
 private:
-	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandard3dEdgeFidCut;
+	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandard3dEdgeFidCut,isStandard3dMetallisationFidCut;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
@@ -448,15 +450,22 @@ private:
 	vector<int> TDnHAnalysisFidCut;
 	vector<int> TDwHAnalysisFidCut;
 
+	int b3dShortAnalysis;
+	int b3dLongAnalysis;
+	int b3dTransparentAnalysis;
 	int nRows3d;
 	int nColumns3d;
 	vector<Int_t> badCells3d;
+	vector<Int_t> badCells3dnH;
 	vector<Int_t> goodCells3d;
-	vector<Int_t> deadCell3d;
+	//vector<Int_t> deadCell3d;
 	int XmetalisationStart3d;
 	int XmetalisationEnd3d;
 	int YmetalisationEnd3d;
 public:
+	int do3dShortAnalysis() {return b3dShortAnalysis;}
+	int do3dLongAnalysis() {return b3dLongAnalysis;}
+	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
 	void setNRows3d(int nRows){nRows3d=nRows;};
 	int getNRows3d(){return nRows3d;};
 	int getNColumns3d(){return nColumns3d;};
@@ -471,7 +480,7 @@ public:
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
 	vector<Int_t> getGoodCells3D(){return goodCells3d;};
 	vector<Int_t> getBadCells3D(){return badCells3d;};
-	vector<Int_t> getDeadCell3D(){return deadCell3d;};
+	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
 	int get3DCellNo(char row, int column);
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};

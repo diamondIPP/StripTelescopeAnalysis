@@ -20,6 +20,8 @@ TSettings::TSettings(TRunInfo *runInfo)
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
 	fidCuts3D = new TFidCutRegions();
+	fidCuts3DEdge = new TFidCutRegions();
+	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
@@ -55,6 +57,8 @@ TSettings::TSettings(UInt_t runNumber){
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
 	fidCuts3D = new TFidCutRegions();
+	fidCuts3DEdge = new TFidCutRegions();
+	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
@@ -71,6 +75,8 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
 	fidCuts3D = new TFidCutRegions();
+	fidCuts3DEdge = new TFidCutRegions();
+	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runNumber;
 	sys = gSystem;
@@ -104,10 +110,20 @@ void TSettings::checkSettings(){
 	fidCutsSelection->SetName("3D-FidCuts");
 
 	if (isStandard3dFidCut==true){
-			fidCuts3D->Reset();
-			fidCutsSelection->SetName("3D-FidCuts");
-			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
-		}
+		fidCuts3D->Reset();
+		fidCutsSelection->SetName("3D-FidCuts");
+		fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
+	}
+	if (isStandard3dEdgeFidCut==true){
+		fidCuts3DEdge->Reset();
+		fidCutsSelection->SetName("3DEdge-FidCuts");
+		fidCuts3DEdge->addFiducialCut(-1e9,1e9,-1e9,1e9);
+	}
+	if (isStandard3dMetallisationFidCut==true){
+		fidCuts3DMetallisation->Reset();
+		fidCutsSelection->SetName("3DMetallisation-FidCuts");
+		fidCuts3DMetallisation->addFiducialCut(-1e9,1e9,-1e9,1e9);
+	}
 	this->checkAlignmentFidcuts();
 	cout<<"Settings seems to be ok."<<endl;
 }
@@ -396,6 +412,8 @@ void TSettings::LoadSettings(){
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
 		if(key == "selectionFidCut") {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
 		if(key == "3dFidCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
+		if(key == "3dMetallisationFidCut"){if (!fidCuts3DMetallisation) fidCuts3DMetallisation=new TFidCutRegions();ParseFidCut(key,value,fidCuts3DMetallisation,isStandard3dMetallisationFidCut);}
+		if(key == "3dEdgeFidCut"){if (!fidCuts3DEdge) fidCuts3DEdge =new TFidCutRegions();ParseFidCut(key,value,fidCuts3DEdge,isStandard3dEdgeFidCut);}
 		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
 		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
 		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);
@@ -485,19 +503,28 @@ void TSettings::LoadSettings(){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,badCells3d);
         }
+        if(key == "badCells3dnH"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,badCells3dnH);
+        }
         if(key == "goodCells3d"){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,goodCells3d);
         }
-        if(key == "deadCell3d"){
+
+       /*if(key == "deadCell3d"){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,deadCell3d);
         }
+        		*/
         if(key == "XmetalisationStart3d") Parse(key,value,XmetalisationStart3d);
         if(key == "XmetalisationEnd3d") Parse(key,value,XmetalisationEnd3d);
         if(key == "YmetalisationEnd3d") Parse(key,value,YmetalisationEnd3d);
         if(key == "nColumns3d") Parse(key,value,nColumns3d);
         if(key == "nRows3d") Parse(key,value,nRows3d);
+        if(key == "3dShortAnalysis") Parse(key,value,b3dShortAnalysis);
+        if(key == "3dLongAnalysis") Parse(key,value,b3dLongAnalysis);
+        if(key == "3dTransparentAnalysis") Parse(key,value,b3dTransparentAnalysis);
 
 		/*if(key == "store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;

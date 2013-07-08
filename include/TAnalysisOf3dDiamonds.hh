@@ -44,10 +44,17 @@ public:
 	void	doAnalysis(UInt_t nEvents=0);
 
 private:
-	void initialiseHistos();
+	void initialiseShortAnalysisHistos();
 	void createTreeTestHistos();
-	void saveHistos();
-	void analyseEvent();
+	void saveShortAnalysisHistos();
+	void ShortAnalysis();
+
+	void initialiseTransparentAnalysisHistos();
+	void TransparentAnalysis();
+	void saveTransparentAnalysisHistos();
+	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
+	Int_t RemoveBadCells(Int_t nDiamondPattern, Float_t xDet, Float_t yDet);
+	float* VectorToArray(vector<float> nvector);
 
 	//YAlignment
 	void initialise3DGridReference();
@@ -56,12 +63,12 @@ private:
 	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
 	//void initialiseYAlignmentHistos();
-	void saveYAlignmentHistos();
-	void YAlignment();
+	void saveLongAnalysisHistos();
+	void LongAnalysis();
 	void DrawYAlignmentFidCutRegions();
 	Int_t* CellToChannel(int nCell,float nXcell);
-	int YAlignmentFiducialCut(int nFidRegion);
-	void DrawMetallisationGrid(TCanvas* nCanvas);
+	int xEdgeyEdgeFiducialCut(int nEdge);
+	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
 	Float_t GetYPositionInDetSystem();
 	float* SortArrayBtoS(float* nArray, int nSize);
 	void printArray(float* nArray, int nSize, const std::string& space);
@@ -75,15 +82,17 @@ private:
 	void ClusterChannels(TCluster* nCluster);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
-	int FiducialCut(int Detector);
+	int FiducialCut(int nDiamondPattern);
 	void DrawFidCutRegions();
 	void PredictChannelHit(TCluster* nCluster);
 
+	int getChannel(Float_t xDet, Float_t yDet);
+	//pair<int,int> getMetallisationPattern(Float_t xDet, Float_t yDet);
 	pair<int,int> getCellNo(Float_t xPos, Float_t yPos);
 
 private:
 	TCellAnalysisClass* clusteredAnalysis;
-	float SortArrayPointer[4];
+	vector<float> SortArrayPointer;
 
 	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
@@ -113,6 +122,13 @@ private:
 	TH2D* hEfficiency;
 	//TH3F* hFidCutXvsFidCutYvsCharge;
 	vector<TH1F*> hLandau;
+	vector<TH1F*> hLandauTransparent;
+	vector<TH1F*> hLandauTransparentBadCellsRemoved;
+	TH2D* hCellOverlayvsCharge;
+	TH2D* hCellOverlayvsEvents;
+	TH2D* hCellOverlayvsMeanCharge;
+	TCanvas* cCellOverlayvsMeanCharge;
+
 	TH2F* hPHvsChannelStrip;
 	TH2F* hPHvsPredictedXPosStrip;
 	TH2F* hPHvsChannel3dNoHoles;
@@ -237,6 +253,10 @@ private:
 	TH2D* hStripFidCutXFidCutYvsCharge;
 	TH2D* hStripFidCutXFidCutYvsEvents;
 	TH2D* hStripFidCutXFidCutYvsMeanCharge;
+	vector<TH2D*> hXdetvsYdetvsCharge;
+	vector<TH2D*> hXdetvsYdetvsEvents;
+	vector<TH2D*> hXdetvsYdetvsMeanCharge;
+	vector<TCanvas*> ptrCanvasXdetvsYdetMeanCharge;
 	//Removed Columns
 	TH2D* hCellsColumnCheck55;
 	TH2D* hCellsColumnCheck1010;
@@ -260,6 +280,7 @@ private:
 	TH1F* hEdgeChargeEvents;
 	TCanvas* cEdgeMeanCharge;
 	TH1F* hEdgeMeanCharge;
+	TCanvas* cxEdgeyEdgeFiducialRegions;
 	//yEdge
 	TH1F* hyEdgeCharge;
 	TH1F* hyEdgeChargeEvents;

@@ -526,14 +526,14 @@ Float_t TFidCutRegions::getXHigh(UInt_t i) {
 
 Float_t TFidCutRegions::getYLow(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return xInt.at((i-1)/xInt.size()).first;
+		return yInt.at((i-1)%yInt.size()).first;		//return xInt.at((i-1)/xInt.size()).first;
 	return TPlaneProperties::getNChannelsSilicon();
 
 	return N_INVALID;
 }
 Float_t TFidCutRegions::getYHigh(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return xInt.at((i-1)/xInt.size()).second;
+		return yInt.at((i-1)%yInt.size()).second;		//return xInt.at((i-1)/xInt.size()).second;
 	return TPlaneProperties::getNChannelsDiamond();
 	return N_INVALID;
 }
