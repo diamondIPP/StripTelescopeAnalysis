@@ -453,11 +453,11 @@ private:
 	int b3dShortAnalysis;
 	int b3dLongAnalysis;
 	int b3dTransparentAnalysis;
-	int nRows3d;
-	int nColumns3d;
-	vector<Int_t> badCells3d;
-	vector<Int_t> badCells3dnH;
-	vector<Int_t> goodCells3d;
+	UInt_t nRows3d;
+	UInt_t nColumns3d;
+	vector<UInt_t> badCells3d;
+	vector<UInt_t> badCells3dnH;
+	vector<UInt_t> goodCells3d;
 	//vector<Int_t> deadCell3d;
 	int XmetalisationStart3d;
 	int XmetalisationEnd3d;
@@ -466,11 +466,11 @@ public:
 	int do3dShortAnalysis() {return b3dShortAnalysis;}
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
 	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
-	void setNRows3d(int nRows){nRows3d=nRows;};
-	int getNRows3d(){return nRows3d;};
-	int getNColumns3d(){return nColumns3d;};
-	int getNQuarters3d(){return 4;}
-	void setNColumns3d(int nColumns){nColumns3d=nColumns;};
+	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
+	UInt_t getNRows3d(){return nRows3d;};
+	UInt_t getNColumns3d(){return nColumns3d;};
+	UInt_t getNQuarters3d(){return 4;}
+	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
 	void setXMetalisationStart3d(int nXMetalisationStart3d){XmetalisationStart3d=nXMetalisationStart3d;};
 	int getXMetalisationStart3d(){return XmetalisationStart3d;};
 	void setXMetalisationEnd3d(int nXMetalisationEnd3d){XmetalisationEnd3d=nXMetalisationEnd3d;};
@@ -478,9 +478,9 @@ public:
 	void setYMetalisationEnd3d(int nYMetalisationEnd3d){YmetalisationEnd3d=nYMetalisationEnd3d;};
 	int getYMetalisationEnd3d(){return YmetalisationEnd3d;};
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
-	vector<Int_t> getGoodCells3D(){return goodCells3d;};
-	vector<Int_t> getBadCells3D(){return badCells3d;};
-	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
+	vector<UInt_t> getGoodCells3D(){return goodCells3d;};
+	vector<UInt_t> getBadCells3D(){return badCells3d;};
+	vector<UInt_t> getBadCells3DnH(){return badCells3dnH;};
 	int get3DCellNo(char row, int column);
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};

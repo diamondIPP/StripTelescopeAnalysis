@@ -321,6 +321,8 @@ private:
 	vector<TFiducialCut*> FidCut;
 	TFidCutRegions fidCuts;
 	TPositionPrediction *predictedPosition;
+	Float_t xPos,yPos;
+	Float_t Xdet,Ydet;
 	Float_t fiducialValueX,fiducialValueY;
 	UInt_t subjectDetector,subjectPlane;
 	vector<UInt_t> vecSilPlanes;
