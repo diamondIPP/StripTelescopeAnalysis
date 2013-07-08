@@ -42,26 +42,32 @@ public:
 	TAnalysisOf3dDiamonds(TSettings *settings);
 	virtual ~TAnalysisOf3dDiamonds();
 	void	doAnalysis(UInt_t nEvents=0);
+private:
+	bool doGlobalSelection();
+	void analysingEvent();
+	void ShortAnalysis();
+	void TransparentAnalysis();
 
 private:
+	void initialiseHistos();
 	void initialiseShortAnalysisHistos();
-	void createTreeTestHistos();
-	void saveShortAnalysisHistos();
-	void ShortAnalysis();
-
-	void initialiseTransparentAnalysisHistos();
-	void TransparentAnalysis();
-	void saveTransparentAnalysisHistos();
-	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
-	Int_t RemoveBadCells(Int_t nDiamondPattern, Float_t xDet, Float_t yDet);
-	float* VectorToArray(vector<float> nvector);
-
 	//YAlignment
 	void initialise3DGridReference();
 	void initialise3DYAlignmentHistos();
 	void initialise3DOverviewHistos();
 	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
+	void initialiseTransparentAnalysisHistos();
+
+	void saveTransparentAnalysisHistos();
+	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
+	Int_t RemoveBadCells(Int_t nDiamondPattern, Float_t xDet, Float_t yDet);
+	float* VectorToArray(vector<float> nvector);
+
+
+	void createTreeTestHistos();
+	void saveShortAnalysisHistos();
+
 	//void initialiseYAlignmentHistos();
 	void saveLongAnalysisHistos();
 	void LongAnalysis();
@@ -94,7 +100,6 @@ private:
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
 
-	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
 	vector<TH1F*>hEventsvsChannel;
 	TH1F* hEventsvsChannelCombined;
@@ -300,7 +305,7 @@ private:
 	vector<TH1F*> hDeadCellsEvents;
 	//Fiducial Cut
 	vector <TBox*> FidCutChannelYAlignmentTBox;
-	vector<int*> FidCutYAlignment;
+//	vector<int*> FidCutYAlignment;
 	//vector<float> FidYAlignment;
 
 
@@ -316,7 +321,10 @@ private:
 	vector<TFiducialCut*> FidCut;
 	TFidCutRegions fidCuts;
 	TPositionPrediction *predictedPosition;
-
+	Float_t fiducialValueX,fiducialValueY;
+	UInt_t subjectDetector,subjectPlane;
+	vector<UInt_t> vecSilPlanes;
+	Float_t chi2x,chi2y;
 	Int_t verbosity;
 
 
