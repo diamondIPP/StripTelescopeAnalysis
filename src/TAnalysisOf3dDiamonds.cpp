@@ -480,32 +480,41 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 
 void TAnalysisOf3dDiamonds::analyseEvent() {
 
-	cout<<"Here 1"<<endl;
+	//	cout<<"Here 1"<<endl;
 	if(!eventReader->isValidTrack()) return;
 	vector<UInt_t> vecSilPlanes;
-	cout<<"Here 2"<<endl;
-	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);cout<<TPlaneProperties::getNSiliconPlanes()<<endl;}
+	//	cout<<"Here 2"<<endl;
+	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){
+		vecSilPlanes.push_back(pl);
+
+		//	cout<<TPlaneProperties::getNSiliconPlanes()<<endl;
+	}
 	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
-	cout<<TPlaneProperties::getDiamondPlane()<<endl;
+	//	cout<<TPlaneProperties::getDiamondPlane()<<endl;
 	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
-	cout<<TPlaneProperties::getDetDiamond()<<endl;
-	cout<<"Here 3"<<endl;
+	//	cout<<TPlaneProperties::getDetDiamond()<<endl;
+	//	cout<<"Here 3"<<endl;
 	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
 		return;
-	cout<<"Here 4"<<endl;
+	//	cout<<"Here 4"<<endl;
 	TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
 	if(diamondCluster.isSaturatedCluster())
 		return;
 	if(predictedPosition)
 		delete predictedPosition;
-	//predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
+	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
+	if(!predictedPosition){
+		cerr<<"Predicted Position is a null pointer, continue"<<endl;
+		return;
+	}
+
 	Float_t chi2x = predictedPosition->getChi2X();
 	Float_t chi2y = predictedPosition->getChi2Y();
-	cout<<"Here 5"<<endl;
+	//	cout<<"Here 5"<<endl;
 	if(chi2x>20||chi2y>20)
 		return;
-//	cout<< nEvent<<" "<<chi2x<<" "<<chi2y<<endl;
-	cout<<"Here 6"<<endl;
+	//	cout<< nEvent<<" "<<chi2x<<" "<<chi2y<<endl;
+	//	cout<<"Here 6"<<endl;
 	//Float_t xPos = predictedPosition->getPositionX();
 	//Float_t yPos = predictedPosition->getPositionY();
 	float fiducialValueX= eventReader->getFiducialValueX();
@@ -513,22 +522,22 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 	//Predict Channel hit
 	//Float_t positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos); //This takes x and y predicted in lab frame and gives corresponding position in detector frame.
 	//Float_t positionInDetSystemChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,positionInDetSystemMetric);
-	cout<<"Here 7"<<endl;
+	//	cout<<"Here 7"<<endl;
 	HitandSeedCount(&diamondCluster);
 	Int_t clusterSize = diamondCluster.size()-2;
 	vecClusterSize.push_back(clusterSize);
-	cout<<"Here 8"<<endl;
+	//	cout<<"Here 8"<<endl;
 	hNumberofClusters->Fill(clusterSize);
 	ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
-	cout<<"Here 9"<<endl;
+	//	cout<<"Here 9"<<endl;
 	//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
 
 	if(eventReader->getNDiamondClusters()==1){
-		cout<<"Here 10"<<endl;
+		//		cout<<"Here 10"<<endl;
 		//RemoveLumpyClusters(&diamondCluster);
 
 		//Universal PHvsChannel Plot
-		for(int i=0; i<settings->diamondPattern.getNIntervals();i++){      //settings->diamondPattern.getNIntervals(); i++){
+		for(int i=0; i < settings->diamondPattern.getNIntervals();i++){
 
 			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
 			if(diamondCluster.getHighestSignalChannel()<=channels.second&&diamondCluster.getHighestSignalChannel()>=channels.first){
@@ -565,6 +574,7 @@ void TAnalysisOf3dDiamonds::analyseEvent() {
 			}
 		}
 	}
+
 }
 
 void TAnalysisOf3dDiamonds::initialise3DGridReference() {
@@ -578,8 +588,8 @@ void TAnalysisOf3dDiamonds::initialise3DGridReference() {
 	Float_t yBins = settings->getNRows3d();
 	Float_t yLow = 0;
 	Float_t yHigh = settings->getYMetalisationEnd3d();
-	cout<<"nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh"<<endl;
-	cout<<nameDet<<" "<<nameDet<<" "<<xBins<<" "<<xLow<<" "<<xHigh<<" "<<yBins<<" "<<yLow<<" "<<yHigh<<endl;
+//	cout<<"nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh"<<endl;
+//	cout<<nameDet<<" "<<nameDet<<" "<<xBins<<" "<<xLow<<" "<<xHigh<<" "<<yBins<<" "<<yLow<<" "<<yHigh<<endl;
 	hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
 	hGridReferenceCellSpace = new TH2D(nameCell,nameDet,xBins,0,xBins,yBins,0,yBins);
 
@@ -2675,10 +2685,21 @@ int TAnalysisOf3dDiamonds::FiducialCut(int Detector){
 	//cout<<"FidY: "<<fiducialValueY<<endl;
 	//cout<<"X Less than: "<<FidCut.at(Detector)->GetXHigh()<<" Greater than: "<<FidCut.at(Detector)->GetXLow()<<endl;
 	//cout<<"Y Less than: "<<FidCut.at(Detector)->GetYHigh()<<" Greater than: "<<FidCut.at(Detector)->GetYLow()<<endl;
+	TFiducialCut* fidCut = settings->get3dFidCuts()->getFidCut(Detector);
+	if (!fidCut){
+		cerr<< "[TAnalysisOf3dDiamonds::FiducialCut] FidCut is a nullpointer: "<<Detector<<endl;
+		 settings->get3dFidCuts()->Print();
+		return Throw;
+	}
+
+	Float_t xLow = fidCut->GetXLow();
+	Float_t xHigh = settings->get3dFidCuts()->getFidCut(Detector)->GetXHigh();
+	Float_t yLow = settings->get3dFidCuts()->getFidCut(Detector)->GetYLow();
+	Float_t yHigh = settings->get3dFidCuts()->getFidCut(Detector)->GetYHigh();
 	if(FiducialChannel){
-		if(fiducialValueX<settings->get3dFidCuts()->getFidCut(Detector)->GetXLow()||fiducialValueX>settings->get3dFidCuts()->getFidCut(Detector)->GetXHigh())
+		if(fiducialValueX<xLow||fiducialValueX>xHigh)
 			Throw =1;
-		if(fiducialValueY<settings->get3dFidCuts()->getFidCut(Detector)->GetYLow()||fiducialValueY>settings->get3dFidCuts()->getFidCut(Detector)->GetYHigh())
+		if(fiducialValueY<yLow||fiducialValueY>yHigh)
 			Throw =1;
 	}
 	//if(Throw==1)
