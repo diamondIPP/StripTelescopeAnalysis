@@ -72,7 +72,7 @@ private:
 	void saveLongAnalysisHistos();
 	void LongAnalysis();
 	void DrawYAlignmentFidCutRegions();
-	Int_t* CellToChannel(int nCell,float nXcell);
+	Int_t* CellToChannel(UInt_t nCell,float nXcell);
 	int xEdgeyEdgeFiducialCut(int nEdge);
 	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
 	Float_t GetYPositionInDetSystem();
