@@ -116,6 +116,15 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
 }
 
+void TAnalysisOf3dDiamonds::analysingEvent(){
+	if(!doGlobalSelection())
+		return;
+	if(settings->do3dShortAnalysis() == 1){ShortAnalysis();}
+	if(settings->do3dLongAnalysis() == 1){LongAnalysis();}
+	if(settings->do3dTransparentAnalysis() == 1){TransparentAnalysis();}
+
+}
+
 bool TAnalysisOf3dDiamonds::doGlobalSelection(){
 
 	if(!eventReader->isValidTrack())
@@ -144,18 +153,383 @@ bool TAnalysisOf3dDiamonds::doGlobalSelection(){
 	Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
 	Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
 	//todo: fiducialCUT!
-	if(!settings->get3dMetallisationFidCuts()->isInFiducialCut(Xdet,Ydet))		// return if not in any of the metallisation regions
-		return false;
+
 	return true;
 }
 
-void TAnalysisOf3dDiamonds::analysingEvent(){
-	if(!doGlobalSelection())
-		return;
-	if(settings->do3dShortAnalysis() == 1){ShortAnalysis();}
-	if(settings->do3dLongAnalysis() == 1){LongAnalysis();}
-	if(settings->do3dTransparentAnalysis() == 1){TransparentAnalysis();}
+void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
+	hNumberofClusters->Fill(eventReader->getNDiamondClusters());
+	ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
+
+	if(eventReader->getNDiamondClusters()==1){
+
+		TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
+		if(diamondCluster.isSaturatedCluster())
+			return;
+
+		HitandSeedCount(&diamondCluster);
+		Int_t clusterSize = diamondCluster.size()-2;
+		vecClusterSize.push_back(clusterSize);
+
+		//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+		//RemoveLumpyClusters(&diamondCluster);
+
+		//xEdge
+		if(xEdgeyEdgeFiducialCut(0)==0){
+			Float_t positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos); //This takes x and y predicted in lab frame and gives corresponding position in detector frame.
+			hEdgeChargeEvents->Fill(positionInDetSystemMetric);
+			hEdgeCharge->Fill(positionInDetSystemMetric, diamondCluster.getCharge(false));
+		}
+		//yEdge
+		if(xEdgeyEdgeFiducialCut(1)==0){
+			hyEdgeChargeEvents->Fill(GetYPositionInDetSystem());
+			hyEdgeCharge->Fill(GetYPositionInDetSystem(), diamondCluster.getCharge(false));
+		}
+
+		//Universal PHvsChannel Plot
+		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
+
+			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
+			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
+
+			if((int)diamondCluster.getHighestSignalChannel()<=channels.second&&(int)diamondCluster.getHighestSignalChannel()>=channels.first){
+
+				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
+
+				if(FiducialCut(i)==1)	//Cut on fiducial cuts
+					return;
+				if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
+					return;
+
+				/*if(HitCount>0||SeedCount>1)
+					return;
+				 */
+
+				hEventsvsChannel.at(i)->Fill(diamondCluster.getHighestSignalChannel());
+				hPHvsChannel.at(i)->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
+				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
+				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPos);
+				hLandau.at(i)->Fill(diamondCluster.getCharge(false));
+				vecPHDiamondHit.at(i)->push_back(diamondCluster.getCharge(false));
+				//vecXPredicted.at(i)->push_back(xPos);
+				//vecYPredicted.at(i)->push_back(yPos);
+				hHitandSeedCount.at(i)->Fill(HitCount,SeedCount);
+				hChi2XChi2Y.at(i)->Fill(chi2x, chi2y);
+				hFidCutXvsFidCutY.at(i)->Fill(fiducialValueX,fiducialValueY);
+				//For hFidCutXvsFidCutYvsMeanCharge
+				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
+
+			}
+		}		//End of for diamond patterns
+	}		//End of if clusters = 1
+
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis() {
+
+	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
+	//cout<<"YOffset: "<<settings->get3DYOffset()<<endl;
+	Float_t Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
+
+
+//	vecXPredicted.push_back(xPos);
+//	vecYPredicted.push_back(yPos);
+//	vecXPreditedDetector.push_back(Xdet);
+//	vecYPreditedDetector.push_back(Ydet);
+
+	if(eventReader->getNDiamondClusters()!=1)
+		return;
+
+	TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
+	if(diamondCluster.isSaturatedCluster())
+		return;
+
+	//HitandSeedCount(&diamondCluster, 0);
+
+	//To create Strip detector Spectrum
+	if(RemoveEdgeClusters(&diamondCluster, 1)==0){
+		//if(fiducialValueX<101&&fiducialValueX>94&&fiducialValueY<102&&fiducialValueY>72){
+		if(fiducialValueX<104&&fiducialValueX>93&&fiducialValueY<96&&fiducialValueY>70){
+			hLandau.at(0)->Fill(diamondCluster.getCharge(false));
+			hStripFidCutXFidCutYvsCharge->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+			hStripFidCutXFidCutYvsEvents->Fill(fiducialValueX,fiducialValueY,1);
+			//cout<<"Made it into loop"<<endl;
+		}
+	}
+
+	//if(HitCount==1&&SeedCount==1){
+	//if(SeedCount<3){
+	pair<int,int> cell = getCellNo(Xdet,Ydet);
+	Int_t cellNo = cell.first;
+	Int_t quarterNo = cell.second;
+	Int_t row = cellNo% settings->getNColumns3d();
+	Int_t column = cellNo / settings->getNColumns3d();
+//	if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> row "<<row<<", column "<<column<<endl;
+	Float_t cellWidth = 150;
+	Float_t cellHight = 150;
+	Float_t startOf3dDetectorX = 2365;
+	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
+	Float_t yminus = row*cellHight;
+
+	Float_t relPosX =Xdet - xminus;
+	Float_t relPosY = Ydet - yminus;
+	Int_t area3DwithColumns = 2;
+	if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
+		return;
+	}
+//	if(cellNo<0)
+//		return;
+
+	//clusteredAnalysis->addEvent(xPos,yPos,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
+	//ClusterShape(&diamondCluster);
+
+	/*if(YAlignmentFiducialCut())
+			return;
+	 */
+	hFidCutXvsFidCutYvsChargeYAlignment->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+	hFidCutXvsFidCutYvsEventsYAlignment->Fill(fiducialValueX,fiducialValueY,1);
+
+	hDetXvsDetY3D->Fill(Xdet,Ydet,diamondCluster.getCharge(false));
+	hDetXvsDetY3DvsEvents->Fill(Xdet,Ydet,1);
+	hDetXvsDetY3DRebinned->Fill(Xdet,Ydet,diamondCluster.getCharge(false));
+	hDetXvsDetY3DvsEventsRebinned->Fill(Xdet,Ydet,1);
+
+	//h3DdetDeltaXChannel
+	//if(RemoveEdge3DClusters(&diamondCluster)==0){
+	Float_t XdetChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,Xdet);
+	//h3DdetDeltaXChannel->Fill(Xdet,Ydet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
+	if(sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))<1000){
+		h3DdetDeltaXChannel->Fill(Xdet,Ydet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
+		//cout<<"Delta X is: "<<sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))<<endl;
+		//cout<<"Xdet is: "<<Xdet<<" Ydet is: "<<Ydet<<endl;
+		//cout<<"HighestChannel: "<<diamondCluster.getHighestSignalChannel()<<" PredictedChannel: "<<XdetChannelSpace<<endl;
+		//ClusterChannels(&diamondCluster);
+	}
+	//}
+	//if(sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))>1000)
+	//h3DdetDeltaXChannelAbove1000->Fill(Xdet, Ydet, 1);
+
+	if(Xdet>2665&&Xdet<2815){	//Dead cell chosen to be: (2,5) in cell space
+		hDeadCell->Fill(Ydet, diamondCluster.getCharge(false));
+		hDeadCellEvents->Fill(Ydet, 1);
+	}
+	//	To fill multiple cell histograms
+	//for(int i=0;i<hCellsCharge.size();i++){
+	int CellsAboveThousand[]={0,12,14,15,16,17,18,20,21,22,23,25,26,28,31,32,33,35,36,38,39,40,41,42,43,48,49,50,51,52,54,55,56,58,61,62,66,69,70,72,73,76,81,83,84,85,86,87,92,93,94,95,96,98};	//Cells predetermined to be above 1000 ADC.
+	float hEntries = 0;
+	for(UInt_t column=0;column<settings->getNColumns3d();column++){
+		for(UInt_t row=0;row<settings->getNRows3d();row++){
+			hEntries = hCellsEvents.at(column*11+row)->Integral();
+			float xminus = 2365+column*150; //+5;		//2365 is the start of the 3D detector in x
+			float yminus = row*150;
+			hCellsCharge.at((column*11+row))->Fill((Xdet-xminus),(Ydet-yminus),diamondCluster.getCharge(false));
+			hCellsEvents.at((column*11+row))->Fill((Xdet-xminus),(Ydet-yminus),1);
+			if(hEntries != hCellsEvents.at(column*11+row)->Integral()){	//If entries in this histogram range have increased fill corresponding hCellLandau
+//				cout<< i<<" "<<j<<" "<<i*11+j<<" ?= "<< cellNo<<" "<<xPos<<" "<<yPos<<endl;
+				if(cellNo != column*11+row)
+					cerr<<"something is wrong "<<column<<" "<<row<<endl;
+				hCellsLandau.at(column*11+row)->Fill(diamondCluster.getCharge(false));
+				hCellsClusteSize.at(column*11+row)->Fill((diamondCluster.getClusterSize()-2));		//Cluster seems to be 2 smaller than ClusterSize for some reason?
+				hCellsDeltaX.at(column*11+row)->Fill((diamondCluster.getHighestSignalChannel()-XdetChannelSpace));
+				hCellsColumnCheck55->Fill((Xdet-xminus),(Ydet-yminus),1);	//Fill Column Check histo 5*5
+				hCellsColumnCheck1010->Fill((Xdet-xminus),(Ydet-yminus),1);	//Fill Column Check histo 10*10
+				//To fill quarter cell histograms
+				if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom left
+					hQuaterCellsLandau.at(column*11*4+row*4)->Fill(diamondCluster.getCharge(false));
+					hQuarterCellsClusterSize.at(column*11*4+row*4)->Fill((diamondCluster.getClusterSize()-2));
+				}
+				if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top left
+					hQuaterCellsLandau.at(column*11*4+row*4+1)->Fill(diamondCluster.getCharge(false));
+					hQuarterCellsClusterSize.at(column*11*4+row*4+1)->Fill((diamondCluster.getClusterSize()-2));
+				}
+				if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom right
+					hQuaterCellsLandau.at(column*11*4+row*4+2)->Fill(diamondCluster.getCharge(false));
+					hQuarterCellsClusterSize.at(column*11*4+row*4+2)->Fill((diamondCluster.getClusterSize()-2));
+				}
+				if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top right
+					hQuaterCellsLandau.at(column*11*4+row*4+3)->Fill(diamondCluster.getCharge(false));
+					hQuarterCellsClusterSize.at(column*11*4+row*4+3)->Fill((diamondCluster.getClusterSize()-2));
+				}
+				//
+				for(int k=0;k<30;k++){		//looping over number of cell bins in x		//5*5um
+					for(int l=0;l<30;l++){		//looping over number of cell bins in y
+						int ColumnEntriesX[] = {1,1,2,2,1,1,2,2,16,16,17,17,29,29,30,30,29,29,30,30};	//Column cell x coordinates
+						int ColumnEntriesY[] = {1,2,1,2,29,30,29,30,15,16,15,16,1,2,1,2,29,30,29,30};	//Column cell y coordinates
+						if(hCellsColumnCheck55->GetBinContent((k+1),(l+1))==1){	//True when in hit bin
+							/*int inColumn =0;
+								for(int m=0;m<20;m++){	//Loop over number of column cells
+									if((k+1)==ColumnEntriesX[m]&&(l+1)==ColumnEntriesY[m]) inColumn =1;
+								}
+								if(inColumn==0){
+									hCellsLandauNoColumn.at(i*settings->getNRows3d()+j)->Fill(diamondCluster.getCharge(false));
+									hCellsEventsNoColumn.at((i*settings->getNRows3d()+row))->Fill((Xdet-xminus),(Ydet-yminus),1);
+								}
+							 */
+							//Fill 5*5 overlay bin spec.
+							for(int m=0;m<54;m++){
+								if(CellsAboveThousand[m]==(column*11+row))
+									hCellsOverlayBinSpec55.at(k*30+l)->Fill(diamondCluster.getCharge(false));
+							}
+						}	//End of in hit bin
+						hCellsColumnCheck55->SetBinContent((k+1),(l+1),0);	//Empty column check histo
+					}	//End of y cells loop
+				}	//End of x cells loop
+
+				for(int k=0;k<15;k++){		//looping over number of cell bins in x		//10*10um
+					for(int l=0;l<15;l++){		//looping over number of cell bins in y
+						int ColumnEntriesX[] = {1,8,9};	//Column cell x coordinates
+						int ColumnEntriesY[] = {1,8,8};	//Column cell y coordinates
+						if(hCellsColumnCheck1010->GetBinContent((k+1),(l+1))==1){	//True when in hit bin
+							int inColumn =0;
+							for(int m=0;m<3;m++){	//Loop over number of column cells
+								if((k+1)==ColumnEntriesX[m]&&(l+1)==ColumnEntriesY[m]) inColumn =1;
+							}
+							if(inColumn==1)
+								hCellsOverlayedColumnLandau->Fill(diamondCluster.getCharge(false));	//Fill with column Spectrum.
+							if(inColumn==0){
+								hCellsLandauNoColumn.at(column*11+row)->Fill(diamondCluster.getCharge(false));
+								hCellsEventsNoColumn.at((column*11+row))->Fill((Xdet-xminus),(Ydet-yminus),1);
+							}
+							//Fill 10*10 overlay bin spec.
+							for(int m=0;m<54;m++){
+								if(CellsAboveThousand[m]==(column*11+row))
+									hCellsOverlayBinSpec1010.at(k*15+l)->Fill(diamondCluster.getCharge(false));
+							}
+						}	//End of in hit bin
+						hCellsColumnCheck1010->SetBinContent((k+1),(l+1),0);	//Empty column check histo
+					}	//End of y cells loop
+				}	//End of x cells loop
+			}
+		}
+	}
+
+
+}
+
+void TAnalysisOf3dDiamonds::TransparentAnalysis() {
+//
+	if(!settings->get3dMetallisationFidCuts()->isInFiducialCut(Xdet,Ydet))		// return if not in any of the metallisation regions
+			return;
+	vecChi2X.push_back(chi2x);
+	vecChi2Y.push_back(chi2y);
+	//	vecXPredicted.push_back(xPos);
+	//	vecYPredicted.push_back(yPos);
+	//	vecXPreditedDetector.push_back(Xdet);
+	//	vecYPreditedDetector.push_back(Ydet);
+
+
+
+	Int_t DiamondPattern;
+	DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(Xdet,Ydet);
+	pair<int,int> channels = settings->diamondPattern.getPatternChannels(DiamondPattern);
+
+	//Int_t XdetChannelSpaceInt = settings->convertMetricToChannelSpace(subjectDetector,Xdet)+0.5;
+	//Float_t XdetChannelSpaceFloat = settings->convertMetricToChannelSpace(subjectDetector,Xdet);
+	//cout<<"Diamond Pattern: "<<DiamondPattern<<endl;
+	//cout<<"Hit coordinates: "<<"("<<Xdet<<", "<<Ydet<<")"<<endl;
+	//cout<<"Channel Hit: "<<XdetChannelSpaceInt<<"   "<<XdetChannelSpaceFloat<<endl;
+	Int_t XdetChannelSpaceInt = getChannel(Xdet,Ydet);
+
+	Float_t TransparentCharge = getTransparentCharge(DiamondPattern, XdetChannelSpaceInt);
+
+	if(TransparentCharge == -9999)
+		return;
+
+	hXdetvsYdetvsCharge.at(DiamondPattern-1)->Fill(Xdet,Ydet,TransparentCharge);
+	hXdetvsYdetvsEvents.at(DiamondPattern-1)->Fill(Xdet,Ydet,1);
+	hLandauTransparent.at(DiamondPattern-1)->Fill(TransparentCharge);
+
+	if(DiamondPattern ==2 || DiamondPattern ==3){
+		if(RemoveBadCells(DiamondPattern,Xdet,Ydet) == 1){
+			//cout<<getCellNo(Xdet,Ydet).first<<endl;
+			return;
+		}
+		hLandauTransparentBadCellsRemoved.at(DiamondPattern-1)->Fill(TransparentCharge);
+	}
+
+	//For overlay of 3DwH
+	if(DiamondPattern == 3){
+		Int_t cellNo = getCellNo(Xdet,Ydet).first;
+		Int_t column = (cellNo+1) / settings->getNRows3d();
+		Int_t row =  cellNo - column*settings->getNRows3d();         // (cellNo+1) / settings->getNColumns3d();
+		if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> column "<<column<<", row "<<row<<endl;
+		Float_t cellWidth = 150;
+		Float_t cellHight = 150;
+		Float_t startOf3dDetectorX = settings->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
+		Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;
+		Float_t yminus = row*cellHight;
+
+		Float_t relPosX = Xdet - xminus;
+		Float_t relPosY = Ydet - yminus;
+		cout<<"cell: "<<cellNo<<"--> relPosX "<<relPosX<<", relPosY "<<relPosY<<endl;
+
+		hCellOverlayvsCharge->Fill(relPosX,relPosY,TransparentCharge);
+		hCellOverlayvsEvents->Fill(relPosX,relPosY,1);
+	}
+
+/*
+	//For Transparent Analysis.
+	Int_t HitCell;
+	float hEntries0 = 0;
+	float TransparentCharge = 0;
+	float TransparentChargeAddition = 0;
+	int SaturatedEvent = 0;
+	for(int i=0;i<settings->getNColumns3d();i++){
+		for(int j=0;j<settings->getNRows3d();j++){
+
+				for(int k=1;k<3;k++){	//First memeber of array is the number of channels to readout.
+					if(eventReader->isSaturated(subjectDetector,CellToChannel(HitCell,Xcell)[k]))
+						SaturatedEvent = 1;
+					//					cout<<"Hit channel: "<<CellToChannel(HitCell,Xcell)[k]<<endl;
+					//TransparentCharge = eventReader->getAdcValue(subjectDetector,HitChannel);
+					TransparentChargeAddition = TransparentCharge;
+					TransparentCharge = eventReader->getSignal(subjectDetector,CellToChannel(HitCell,Xcell)[k]) + TransparentChargeAddition;
+				}	//End of for HitChannels
+				if(SaturatedEvent == 0){	// Only plot events with no saturated channels.
+					//					cout<<"Transparent charge is: "<<TransparentCharge<<endl;
+					hTransparentCharge3D->Fill(TransparentCharge);
+					hCellTransparentLandau.at(i*11+j)->Fill(TransparentCharge);
+					if(TransparentCharge<700)
+						hCellsTransparentHitPosition.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),1);
+					//cout<<eventReader->getSignal(subjectDetector,HitChannel)<<endl;
+				}
+			}
+		}
+	}
+
+		//Universal PHvsChannel Plot
+		for(int i=0; i<settings->diamondPattern.getNIntervals();i++){      //settings->diamondPattern.getNIntervals(); i++){
+
+			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
+			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
+
+			if(diamondCluster.getHighestSignalChannel()<=channels.second&&diamondCluster.getHighestSignalChannel()>=channels.first){
+
+				hEventsvsChannel.at(i)->Fill(diamondCluster.getHighestSignalChannel());
+				hPHvsChannel.at(i)->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
+				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
+				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPos);
+				hLandau.at(i)->Fill(diamondCluster.getCharge(false));
+				vecPHDiamondHit.at(i)->push_back(diamondCluster.getCharge(false));
+				//vecXPredicted.at(i)->push_back(xPos);
+				//vecYPredicted.at(i)->push_back(yPos);
+				hHitandSeedCount.at(i)->Fill(HitCount,SeedCount);
+				//hChi2XChi2Y.at(i)->Fill(chi2x, chi2y);
+				hFidCutXvsFidCutY.at(i)->Fill(fiducialValueX,fiducialValueY);
+				//For hFidCutXvsFidCutYvsMeanCharge
+				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
+
+			}
+		}		//End of for diamond patterns
+	//eventReader->getAdcValue(subjectDetector,CellToChannel());
+
+	//Int_t getAdcValue(UInt_t det,UInt_t ch);
+
+	//CellToChannel();
+	 *
+	 */
 }
 
 void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
@@ -443,76 +817,6 @@ void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
 	cxEdgeyEdgeFiducialRegions->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectorsxEdgeyEdge");
 	settings->get3dEdgeFidCuts()->drawFiducialCutsToCanvas(cxEdgeyEdgeFiducialRegions);
 	histSaver->SaveCanvas(cxEdgeyEdgeFiducialRegions);
-}
-
-void TAnalysisOf3dDiamonds::ShortAnalysis() {
-
-	hNumberofClusters->Fill(eventReader->getNDiamondClusters());
-	ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
-
-	if(eventReader->getNDiamondClusters()==1){
-
-		TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
-		if(diamondCluster.isSaturatedCluster())
-			return;
-
-		HitandSeedCount(&diamondCluster);
-		Int_t clusterSize = diamondCluster.size()-2;
-		vecClusterSize.push_back(clusterSize);
-
-		//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-		//RemoveLumpyClusters(&diamondCluster);
-
-		//xEdge
-		if(xEdgeyEdgeFiducialCut(0)==0){
-			Float_t positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos); //This takes x and y predicted in lab frame and gives corresponding position in detector frame.
-			hEdgeChargeEvents->Fill(positionInDetSystemMetric);
-			hEdgeCharge->Fill(positionInDetSystemMetric, diamondCluster.getCharge(false));
-		}
-		//yEdge
-		if(xEdgeyEdgeFiducialCut(1)==0){
-			hyEdgeChargeEvents->Fill(GetYPositionInDetSystem());
-			hyEdgeCharge->Fill(GetYPositionInDetSystem(), diamondCluster.getCharge(false));
-		}
-
-		//Universal PHvsChannel Plot
-		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
-
-			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
-			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
-
-			if((int)diamondCluster.getHighestSignalChannel()<=channels.second&&(int)diamondCluster.getHighestSignalChannel()>=channels.first){
-
-				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
-
-				if(FiducialCut(i)==1)	//Cut on fiducial cuts
-					return;
-				if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
-					return;
-
-				/*if(HitCount>0||SeedCount>1)
-					return;
-				 */
-
-				hEventsvsChannel.at(i)->Fill(diamondCluster.getHighestSignalChannel());
-				hPHvsChannel.at(i)->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
-				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
-				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPos);
-				hLandau.at(i)->Fill(diamondCluster.getCharge(false));
-				vecPHDiamondHit.at(i)->push_back(diamondCluster.getCharge(false));
-				//vecXPredicted.at(i)->push_back(xPos);
-				//vecYPredicted.at(i)->push_back(yPos);
-				hHitandSeedCount.at(i)->Fill(HitCount,SeedCount);
-				hChi2XChi2Y.at(i)->Fill(chi2x, chi2y);
-				hFidCutXvsFidCutY.at(i)->Fill(fiducialValueX,fiducialValueY);
-				//For hFidCutXvsFidCutYvsMeanCharge
-				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
-
-			}
-		}		//End of for diamond patterns
-	}		//End of if clusters = 1
-
 }
 
 void TAnalysisOf3dDiamonds::initialise3DGridReference() {
@@ -2145,128 +2449,6 @@ void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
 			*/
 }
 
-void TAnalysisOf3dDiamonds::TransparentAnalysis() {
-//
-	vecChi2X.push_back(chi2x);
-	vecChi2Y.push_back(chi2y);
-	//	vecXPredicted.push_back(xPos);
-	//	vecYPredicted.push_back(yPos);
-	//	vecXPreditedDetector.push_back(Xdet);
-	//	vecYPreditedDetector.push_back(Ydet);
-
-
-
-	Int_t DiamondPattern;
-	DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(Xdet,Ydet);
-	pair<int,int> channels = settings->diamondPattern.getPatternChannels(DiamondPattern);
-
-	//Int_t XdetChannelSpaceInt = settings->convertMetricToChannelSpace(subjectDetector,Xdet)+0.5;
-	//Float_t XdetChannelSpaceFloat = settings->convertMetricToChannelSpace(subjectDetector,Xdet);
-	//cout<<"Diamond Pattern: "<<DiamondPattern<<endl;
-	//cout<<"Hit coordinates: "<<"("<<Xdet<<", "<<Ydet<<")"<<endl;
-	//cout<<"Channel Hit: "<<XdetChannelSpaceInt<<"   "<<XdetChannelSpaceFloat<<endl;
-	Int_t XdetChannelSpaceInt = getChannel(Xdet,Ydet);
-
-	Float_t TransparentCharge = getTransparentCharge(DiamondPattern, XdetChannelSpaceInt);
-
-	if(TransparentCharge == -9999)
-		return;
-
-	hXdetvsYdetvsCharge.at(DiamondPattern-1)->Fill(Xdet,Ydet,TransparentCharge);
-	hXdetvsYdetvsEvents.at(DiamondPattern-1)->Fill(Xdet,Ydet,1);
-	hLandauTransparent.at(DiamondPattern-1)->Fill(TransparentCharge);
-
-	if(DiamondPattern ==2 || DiamondPattern ==3){
-		if(RemoveBadCells(DiamondPattern,Xdet,Ydet) == 1){
-			//cout<<getCellNo(Xdet,Ydet).first<<endl;
-			return;
-		}
-		hLandauTransparentBadCellsRemoved.at(DiamondPattern-1)->Fill(TransparentCharge);
-	}
-
-	//For overlay of 3DwH
-	if(DiamondPattern == 3){
-		Int_t cellNo = getCellNo(Xdet,Ydet).first;
-		Int_t column = (cellNo+1) / settings->getNRows3d();
-		Int_t row =  cellNo - column*settings->getNRows3d();         // (cellNo+1) / settings->getNColumns3d();
-		if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> column "<<column<<", row "<<row<<endl;
-		Float_t cellWidth = 150;
-		Float_t cellHight = 150;
-		Float_t startOf3dDetectorX = settings->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
-		Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;
-		Float_t yminus = row*cellHight;
-
-		Float_t relPosX = Xdet - xminus;
-		Float_t relPosY = Ydet - yminus;
-		cout<<"cell: "<<cellNo<<"--> relPosX "<<relPosX<<", relPosY "<<relPosY<<endl;
-
-		hCellOverlayvsCharge->Fill(relPosX,relPosY,TransparentCharge);
-		hCellOverlayvsEvents->Fill(relPosX,relPosY,1);
-	}
-
-/*
-	//For Transparent Analysis.
-	Int_t HitCell;
-	float hEntries0 = 0;
-	float TransparentCharge = 0;
-	float TransparentChargeAddition = 0;
-	int SaturatedEvent = 0;
-	for(int i=0;i<settings->getNColumns3d();i++){
-		for(int j=0;j<settings->getNRows3d();j++){
-
-				for(int k=1;k<3;k++){	//First memeber of array is the number of channels to readout.
-					if(eventReader->isSaturated(subjectDetector,CellToChannel(HitCell,Xcell)[k]))
-						SaturatedEvent = 1;
-					//					cout<<"Hit channel: "<<CellToChannel(HitCell,Xcell)[k]<<endl;
-					//TransparentCharge = eventReader->getAdcValue(subjectDetector,HitChannel);
-					TransparentChargeAddition = TransparentCharge;
-					TransparentCharge = eventReader->getSignal(subjectDetector,CellToChannel(HitCell,Xcell)[k]) + TransparentChargeAddition;
-				}	//End of for HitChannels
-				if(SaturatedEvent == 0){	// Only plot events with no saturated channels.
-					//					cout<<"Transparent charge is: "<<TransparentCharge<<endl;
-					hTransparentCharge3D->Fill(TransparentCharge);
-					hCellTransparentLandau.at(i*11+j)->Fill(TransparentCharge);
-					if(TransparentCharge<700)
-						hCellsTransparentHitPosition.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),1);
-					//cout<<eventReader->getSignal(subjectDetector,HitChannel)<<endl;
-				}
-			}
-		}
-	}
-
-		//Universal PHvsChannel Plot
-		for(int i=0; i<settings->diamondPattern.getNIntervals();i++){      //settings->diamondPattern.getNIntervals(); i++){
-
-			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
-			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
-
-			if(diamondCluster.getHighestSignalChannel()<=channels.second&&diamondCluster.getHighestSignalChannel()>=channels.first){
-
-				hEventsvsChannel.at(i)->Fill(diamondCluster.getHighestSignalChannel());
-				hPHvsChannel.at(i)->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
-				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
-				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPos);
-				hLandau.at(i)->Fill(diamondCluster.getCharge(false));
-				vecPHDiamondHit.at(i)->push_back(diamondCluster.getCharge(false));
-				//vecXPredicted.at(i)->push_back(xPos);
-				//vecYPredicted.at(i)->push_back(yPos);
-				hHitandSeedCount.at(i)->Fill(HitCount,SeedCount);
-				//hChi2XChi2Y.at(i)->Fill(chi2x, chi2y);
-				hFidCutXvsFidCutY.at(i)->Fill(fiducialValueX,fiducialValueY);
-				//For hFidCutXvsFidCutYvsMeanCharge
-				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
-
-			}
-		}		//End of for diamond patterns
-	//eventReader->getAdcValue(subjectDetector,CellToChannel());
-
-	//Int_t getAdcValue(UInt_t det,UInt_t ch);
-
-	//CellToChannel();
-	 *
-	 */
-}
-
 void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 
 	/*//hNumberofClusters
@@ -2354,188 +2536,6 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 		histSaver->SaveCanvas(cClusters.at(i));
 	}
 			*/
-
-}
-
-void TAnalysisOf3dDiamonds::LongAnalysis() {
-
-
-	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
-	//cout<<"YOffset: "<<settings->get3DYOffset()<<endl;
-	Float_t Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
-
-
-//	vecXPredicted.push_back(xPos);
-//	vecYPredicted.push_back(yPos);
-//	vecXPreditedDetector.push_back(Xdet);
-//	vecYPreditedDetector.push_back(Ydet);
-
-	if(eventReader->getNDiamondClusters()!=1)
-		return;
-
-	TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
-	if(diamondCluster.isSaturatedCluster())
-		return;
-
-	//HitandSeedCount(&diamondCluster, 0);
-
-	//To create Strip detector Spectrum
-	if(RemoveEdgeClusters(&diamondCluster, 1)==0){
-		//if(fiducialValueX<101&&fiducialValueX>94&&fiducialValueY<102&&fiducialValueY>72){
-		if(fiducialValueX<104&&fiducialValueX>93&&fiducialValueY<96&&fiducialValueY>70){
-			hLandau.at(0)->Fill(diamondCluster.getCharge(false));
-			hStripFidCutXFidCutYvsCharge->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-			hStripFidCutXFidCutYvsEvents->Fill(fiducialValueX,fiducialValueY,1);
-			//cout<<"Made it into loop"<<endl;
-		}
-	}
-
-	//if(HitCount==1&&SeedCount==1){
-	//if(SeedCount<3){
-	pair<int,int> cell = getCellNo(Xdet,Ydet);
-	Int_t cellNo = cell.first;
-	Int_t quarterNo = cell.second;
-	Int_t row = cellNo% settings->getNColumns3d();
-	Int_t column = cellNo / settings->getNColumns3d();
-//	if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> row "<<row<<", column "<<column<<endl;
-	Float_t cellWidth = 150;
-	Float_t cellHight = 150;
-	Float_t startOf3dDetectorX = 2365;
-	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
-	Float_t yminus = row*cellHight;
-
-	Float_t relPosX =Xdet - xminus;
-	Float_t relPosY = Ydet - yminus;
-	Int_t area3DwithColumns = 2;
-	if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
-		return;
-	}
-//	if(cellNo<0)
-//		return;
-
-	//clusteredAnalysis->addEvent(xPos,yPos,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
-	//ClusterShape(&diamondCluster);
-
-	/*if(YAlignmentFiducialCut())
-			return;
-	 */
-	hFidCutXvsFidCutYvsChargeYAlignment->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-	hFidCutXvsFidCutYvsEventsYAlignment->Fill(fiducialValueX,fiducialValueY,1);
-
-	hDetXvsDetY3D->Fill(Xdet,Ydet,diamondCluster.getCharge(false));
-	hDetXvsDetY3DvsEvents->Fill(Xdet,Ydet,1);
-	hDetXvsDetY3DRebinned->Fill(Xdet,Ydet,diamondCluster.getCharge(false));
-	hDetXvsDetY3DvsEventsRebinned->Fill(Xdet,Ydet,1);
-
-	//h3DdetDeltaXChannel
-	//if(RemoveEdge3DClusters(&diamondCluster)==0){
-	Float_t XdetChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,Xdet);
-	//h3DdetDeltaXChannel->Fill(Xdet,Ydet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
-	if(sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))<1000){
-		h3DdetDeltaXChannel->Fill(Xdet,Ydet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
-		//cout<<"Delta X is: "<<sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))<<endl;
-		//cout<<"Xdet is: "<<Xdet<<" Ydet is: "<<Ydet<<endl;
-		//cout<<"HighestChannel: "<<diamondCluster.getHighestSignalChannel()<<" PredictedChannel: "<<XdetChannelSpace<<endl;
-		//ClusterChannels(&diamondCluster);
-	}
-	//}
-	//if(sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))>1000)
-	//h3DdetDeltaXChannelAbove1000->Fill(Xdet, Ydet, 1);
-
-	if(Xdet>2665&&Xdet<2815){	//Dead cell chosen to be: (2,5) in cell space
-		hDeadCell->Fill(Ydet, diamondCluster.getCharge(false));
-		hDeadCellEvents->Fill(Ydet, 1);
-	}
-	//	To fill multiple cell histograms
-	//for(int i=0;i<hCellsCharge.size();i++){
-	int CellsAboveThousand[]={0,12,14,15,16,17,18,20,21,22,23,25,26,28,31,32,33,35,36,38,39,40,41,42,43,48,49,50,51,52,54,55,56,58,61,62,66,69,70,72,73,76,81,83,84,85,86,87,92,93,94,95,96,98};	//Cells predetermined to be above 1000 ADC.
-	float hEntries = 0;
-	for(UInt_t column=0;column<settings->getNColumns3d();column++){
-		for(UInt_t row=0;row<settings->getNRows3d();row++){
-			hEntries = hCellsEvents.at(column*11+row)->Integral();
-			float xminus = 2365+column*150; //+5;		//2365 is the start of the 3D detector in x
-			float yminus = row*150;
-			hCellsCharge.at((column*11+row))->Fill((Xdet-xminus),(Ydet-yminus),diamondCluster.getCharge(false));
-			hCellsEvents.at((column*11+row))->Fill((Xdet-xminus),(Ydet-yminus),1);
-			if(hEntries != hCellsEvents.at(column*11+row)->Integral()){	//If entries in this histogram range have increased fill corresponding hCellLandau
-//				cout<< i<<" "<<j<<" "<<i*11+j<<" ?= "<< cellNo<<" "<<xPos<<" "<<yPos<<endl;
-				if(cellNo != column*11+row)
-					cerr<<"something is wrong "<<column<<" "<<row<<endl;
-				hCellsLandau.at(column*11+row)->Fill(diamondCluster.getCharge(false));
-				hCellsClusteSize.at(column*11+row)->Fill((diamondCluster.getClusterSize()-2));		//Cluster seems to be 2 smaller than ClusterSize for some reason?
-				hCellsDeltaX.at(column*11+row)->Fill((diamondCluster.getHighestSignalChannel()-XdetChannelSpace));
-				hCellsColumnCheck55->Fill((Xdet-xminus),(Ydet-yminus),1);	//Fill Column Check histo 5*5
-				hCellsColumnCheck1010->Fill((Xdet-xminus),(Ydet-yminus),1);	//Fill Column Check histo 10*10
-				//To fill quarter cell histograms
-				if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom left
-					hQuaterCellsLandau.at(column*11*4+row*4)->Fill(diamondCluster.getCharge(false));
-					hQuarterCellsClusterSize.at(column*11*4+row*4)->Fill((diamondCluster.getClusterSize()-2));
-				}
-				if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top left
-					hQuaterCellsLandau.at(column*11*4+row*4+1)->Fill(diamondCluster.getCharge(false));
-					hQuarterCellsClusterSize.at(column*11*4+row*4+1)->Fill((diamondCluster.getClusterSize()-2));
-				}
-				if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom right
-					hQuaterCellsLandau.at(column*11*4+row*4+2)->Fill(diamondCluster.getCharge(false));
-					hQuarterCellsClusterSize.at(column*11*4+row*4+2)->Fill((diamondCluster.getClusterSize()-2));
-				}
-				if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top right
-					hQuaterCellsLandau.at(column*11*4+row*4+3)->Fill(diamondCluster.getCharge(false));
-					hQuarterCellsClusterSize.at(column*11*4+row*4+3)->Fill((diamondCluster.getClusterSize()-2));
-				}
-				//
-				for(int k=0;k<30;k++){		//looping over number of cell bins in x		//5*5um
-					for(int l=0;l<30;l++){		//looping over number of cell bins in y
-						int ColumnEntriesX[] = {1,1,2,2,1,1,2,2,16,16,17,17,29,29,30,30,29,29,30,30};	//Column cell x coordinates
-						int ColumnEntriesY[] = {1,2,1,2,29,30,29,30,15,16,15,16,1,2,1,2,29,30,29,30};	//Column cell y coordinates
-						if(hCellsColumnCheck55->GetBinContent((k+1),(l+1))==1){	//True when in hit bin
-							/*int inColumn =0;
-								for(int m=0;m<20;m++){	//Loop over number of column cells
-									if((k+1)==ColumnEntriesX[m]&&(l+1)==ColumnEntriesY[m]) inColumn =1;
-								}
-								if(inColumn==0){
-									hCellsLandauNoColumn.at(i*settings->getNRows3d()+j)->Fill(diamondCluster.getCharge(false));
-									hCellsEventsNoColumn.at((i*settings->getNRows3d()+row))->Fill((Xdet-xminus),(Ydet-yminus),1);
-								}
-							 */
-							//Fill 5*5 overlay bin spec.
-							for(int m=0;m<54;m++){
-								if(CellsAboveThousand[m]==(column*11+row))
-									hCellsOverlayBinSpec55.at(k*30+l)->Fill(diamondCluster.getCharge(false));
-							}
-						}	//End of in hit bin
-						hCellsColumnCheck55->SetBinContent((k+1),(l+1),0);	//Empty column check histo
-					}	//End of y cells loop
-				}	//End of x cells loop
-
-				for(int k=0;k<15;k++){		//looping over number of cell bins in x		//10*10um
-					for(int l=0;l<15;l++){		//looping over number of cell bins in y
-						int ColumnEntriesX[] = {1,8,9};	//Column cell x coordinates
-						int ColumnEntriesY[] = {1,8,8};	//Column cell y coordinates
-						if(hCellsColumnCheck1010->GetBinContent((k+1),(l+1))==1){	//True when in hit bin
-							int inColumn =0;
-							for(int m=0;m<3;m++){	//Loop over number of column cells
-								if((k+1)==ColumnEntriesX[m]&&(l+1)==ColumnEntriesY[m]) inColumn =1;
-							}
-							if(inColumn==1)
-								hCellsOverlayedColumnLandau->Fill(diamondCluster.getCharge(false));	//Fill with column Spectrum.
-							if(inColumn==0){
-								hCellsLandauNoColumn.at(column*11+row)->Fill(diamondCluster.getCharge(false));
-								hCellsEventsNoColumn.at((column*11+row))->Fill((Xdet-xminus),(Ydet-yminus),1);
-							}
-							//Fill 10*10 overlay bin spec.
-							for(int m=0;m<54;m++){
-								if(CellsAboveThousand[m]==(column*11+row))
-									hCellsOverlayBinSpec1010.at(k*15+l)->Fill(diamondCluster.getCharge(false));
-							}
-						}	//End of in hit bin
-						hCellsColumnCheck1010->SetBinContent((k+1),(l+1),0);	//Empty column check histo
-					}	//End of y cells loop
-				}	//End of x cells loop
-			}
-		}
-	}
-
 
 }
 
