@@ -318,7 +318,7 @@ private:
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
-	void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
+	void ParseCellArray(std::string key, std::string value, vector<UInt_t> &cells);
 	void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
 	void Parse(std::string key, std::string value, std::vector<int> & vec){ ParseIntArray(key,value,vec);}
 	bool Parse(std::string key, std::string value, bool &output){return ParseBool(key,value,output);}

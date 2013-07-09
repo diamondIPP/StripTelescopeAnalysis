@@ -2556,7 +2556,7 @@ Int_t* TAnalysisOf3dDiamonds::CellToChannel(int nCell, float nXcell) {
 	Channel = startChannel + nColumn;
 
 //	int BadCells[] = {1,6,7,8,13,27,45,53,77,90,97};
-	vector<int> BadCells = settings->getBadCells3D();
+	vector<UInt_t> BadCells = settings->getBadCells3D();
 	int BadCell = 0;
 	for(int i=0; i<BadCells.size(); i++){
 		if(nCell ==  BadCells[i]){

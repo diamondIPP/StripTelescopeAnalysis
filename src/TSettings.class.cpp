@@ -744,7 +744,7 @@ pair<char,int> TSettings::ParseCellPosition(std::string value){
 	return make_pair(row,column);
 }
 
-void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells){
+void TSettings::ParseCellArray(string key, string value, vector<UInt_t> &vecCells){
 //	cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
 	ParseStringArray(key, value,stringArray);
