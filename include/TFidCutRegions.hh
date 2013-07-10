@@ -8,7 +8,6 @@
 #ifndef TFIDCUTREGIONS_HH_
 #define TFIDCUTREGIONS_HH_
 #include <vector>
-#include <utility>
 //#include <pair>
 #include "TFiducialCut.hh"
 #include "TROOT.h"
@@ -25,6 +24,7 @@
 #include "TObject.h"
 #include "TMath.h"
 #include "TCluster.hh"
+#include "TCutG.h"
 class TFidCutRegions:public TObject {
 public:
 	TFidCutRegions();
@@ -60,7 +60,7 @@ private:
 	std::vector<std::pair<Float_t,Float_t> >findFiducialCutIntervall(TH1D* hProj,Float_t fidCutPercentage);
 	TCanvas*  getFiducialCutProjectionCanvas(TH1D* hProj,std::vector< std::pair<Float_t,Float_t> > intervals);
 
-	TPaveText* getFiducialAreaPaveText(UInt_t nFidCut);
+	TCutG* getFiducialAreaCut(UInt_t nFidCut);
 	UInt_t index;
 	void createFidCuts();
 	std::vector<std::pair<Float_t,Float_t> > xInt,yInt;

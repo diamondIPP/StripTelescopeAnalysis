@@ -16,19 +16,6 @@ TPlaneProperties::~TPlaneProperties() {
 	// TODO Auto-generated destructor stub
 }
 
-UInt_t TPlaneProperties::getNChannels(UInt_t det){
-	switch (det){
-	case 8: return TPlaneProperties::getNChannelsDiamond();break;
-	default: return TPlaneProperties::getNChannelsSilicon();break;
-	}
-}
-Int_t TPlaneProperties::getMaxSignalHeight(UInt_t det){
-	switch(det){
-	case 8: return getMaxSignalHeightDiamond();
-	default: return getMaxSignalHeightSilicon();
-	}
-}
-
 std::string TPlaneProperties::getCoordinateString(enumCoordinate cor){
 	switch (cor){
 	case X_COR: return "X";break;
@@ -54,6 +41,13 @@ std::string TPlaneProperties::getDetectorNameString(UInt_t det){
 	return output.str();
 }
 
+std::vector<UInt_t> TPlaneProperties::getSiliconPlaneVector() {
+	std::vector<UInt_t> vecPlanes;
+	for (UInt_t i=0;i<getNSiliconPlanes();i++)
+		vecPlanes.push_back(i);
+	return vecPlanes;
+}
+
 std::string TPlaneProperties::getStringForDetector(int det){
 	switch(det){
 	case 0: return "D0X";
@@ -69,3 +63,12 @@ std::string TPlaneProperties::getStringForDetector(int det){
 	}
 	return "Invalid";
 }
+
+Float_t TPlaneProperties::GetMinInvalidSignal(UInt_t det){
+	if(isSiliconDetector(det))
+		return -5;
+	else
+		return -50;
+}
+
+

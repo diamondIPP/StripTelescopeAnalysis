@@ -28,6 +28,7 @@
 #include "TAnalysisOfAlignment.hh"
 #include "TResults.hh"
 #include "TRunInfo.hh"
+#include "TFile.h"
 
 using namespace std;
 /*** USAGE ***/
@@ -48,10 +49,15 @@ bool checkDir(string dir){
 		printf(" %s is present\n",dir.c_str());
 		return true;
 	}
-	cout<<dir << "seeems not to be present. What to do?Exit? [y/n]"<<endl;
-	char t;
+	cout<<dir << "seems not to be present. What to do?Exit? [y/n]\t"<<flush;
+	char t='l';
 	cin >>t;
-	if (t=='y')
+	string possibleInputs = "yYnN";
+	while (possibleInputs.find(t)==string::npos){
+		cout<<"Please enter a valid input: 'y,Y,n,N'"<<flush;
+		cin >> t;
+	}
+	if (t=='y'||t=='Y')
 		exit(-1);
 	else return false;
 
@@ -176,7 +182,7 @@ int main(int argc, char ** argv) {
 		//		log = freopen(logfilename.str().c_str(), "w", stdout);
 
 
-		TSettings *settings=0;
+		TSettings *settings = 0;
 		cout<<"settings"<<endl;
 		settings = new TSettings((TRunInfo*)&RunParameters[i]);
 
@@ -227,7 +233,8 @@ int main(int argc, char ** argv) {
 		if(RunParameters[i].doClusterAnalysis()){
 			sys->cd(currentDir.c_str());
 			TAnalysisOfClustering* analysisClustering;
-			analysisClustering= new TAnalysisOfClustering(settings);
+			analysisClustering = new TAnalysisOfClustering(settings);
+			analysisClustering->setResults(currentResults);
 			analysisClustering->doAnalysis(RunParameters[i].getEvents());
 			delete analysisClustering;
 		}
@@ -265,13 +272,48 @@ int main(int argc, char ** argv) {
 		if (DO_TRANSPARENT_ANALYSIS) {
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings);
+			transpAna->setResults(currentResults);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
 		}
 
-		//		currentResults->Print();
-		//		currentResults->saveResults();
-		//		delete currentResults;
+		if (settings && settings->doTransparentAlignmnet()){
+			sys->cd(currentDir.c_str());
+			TAlignment *alignment = new TAlignment(settings,TSettings::transparentMode);
+			alignment->createTransparentEventVectors(RunParameters[i].getEvents());
+			//			alignment->setSettings(settings);
+			//alignment->PrintEvents(1511,1501);
+			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::diaAlignment);
+			delete alignment;
+
+			TTransparentAnalysis *transpAna;
+			transpAna = new TTransparentAnalysis(settings,TSettings::transparentMode);
+			transpAna->setResults(currentResults);
+			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
+			delete transpAna;
+		}
+		cout<<"PRINT RESULTS"<<endl;
+		currentResults->Print();
+		cout<<"SAVE RESULTS"<<endl;
+//		currentResults->saveResults(settings->getResultsRootFilePath());
+		TFile* file = new TFile (settings->getResultsRootFilePath().c_str(),"RECREATE");
+		file->Print();
+		file->ls();
+		file->SetName("fileName");
+		file->cd();
+		cout<<"KEYS: "<<file->GetNkeys()<<endl;
+		file->GetListOfKeys()->Print();
+		cout<<"Write"<<endl;
+
+		currentResults->Write("test");
+		cout<<"CLOSE FILE"<<endl;
+		file->Close();
+//		if (currentResults){
+//			cout<<"DELETE RESULTS"<<endl;
+//			delete currentResults;
+//			cout<<"#"<<endl;;
+//		}
+		cout<<"saved results..."<<endl;
 
 
 		runWatch.Stop();

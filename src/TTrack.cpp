@@ -28,6 +28,11 @@ TTrack::TTrack(TDetectorAlignment *alignment,TSettings* settings) {
 }
 
 TTrack::~TTrack() {
+	for(std::map<UInt_t,TH1F*>::iterator iterator = histoMap.begin(); iterator != histoMap.end(); iterator++) {
+//		UInt_t det = iterator->first;
+		if (iterator->second) delete iterator->second;
+		histoMap.erase(iterator);
+	}
 	delete linFitX;
 	delete linFitY;
 }
@@ -80,8 +85,11 @@ Float_t TTrack::inChannelDetectorSpace(UInt_t det, Float_t metricPosition){
 	Float_t channelPosition  = N_INVALID;
 	if(TPlaneProperties::isSiliconDetector(det))
 		channelPosition =  metricPosition/settings->getSiliconPitchWidth();
-	else if(TPlaneProperties::isDiamondDetector(det))
+	else if(TPlaneProperties::isDiamondDetector(det)){
+//		cout<<"validPAttern  TTrack::inChannelDetectorSpace "<<det<<" "<<metricPosition<<": "<<flush;
+//		cout<<settings->diamondPattern.hasInvalidIntervals()<<endl;
 		channelPosition = settings->diamondPattern.convertMetricToChannel(metricPosition);
+	}
 	return channelPosition;
 }
 /**
@@ -340,8 +348,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t sigma_my = linFitY->GetParError(1);
 	Float_t by = linFitY->GetParameter(0);
 	Float_t sigma_by = linFitY->GetParError(0);
-	Float_t xChi2 = linFitX->GetChisquare();///linFitX->GetNumberFreeParameters();
-	Float_t yChi2 = linFitY->GetChisquare();///linFitY->GetNumberFreeParameters();
+	Float_t xChi2 = linFitX->GetChisquare()/(linFitX->GetNpoints()-linFitX->GetNumberFreeParameters());
+	Float_t yChi2 = linFitY->GetChisquare()/(linFitY->GetNpoints()-linFitY->GetNumberFreeParameters());
 	if(verbosity>4){
 			cout<<"\tParameters:\n\t mx: "<<mx<<" +/- "<<sigma_mx<<"\tbx: "<<bx<<" +/- "<<sigma_bx<<"\tzPos:"<<zPos<<endl;
 			cout<<"\t my: "<<my<<" +/- "<<sigma_my<<"\tby: "<<by<<" +/- "<<sigma_by<<"\tzPos:"<<zPos<<endl;
@@ -378,7 +386,7 @@ vector<Float_t> TTrack::getSiYPositions() {
 
 	vector<Float_t> yPositions;
 	if(event==NULL)return yPositions;
-	for (int plane; plane < 4; plane++) {
+	for (int plane=0; plane < 4; plane++) {
 		yPositions.push_back(this->getYPositionMetric(plane));
 	}
 	return yPositions;
@@ -556,6 +564,33 @@ Float_t TTrack::getYPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPr
 {
 	return (yPred-this->getYOffset(plane))/TMath::Cos(this->getPhiYOffset(plane)) + (xPred-(yPred-this->getYOffset(plane))*TMath::Tan(this->getPhiYOffset(plane)))*TMath::Sin(this->getPhiYOffset(plane));
 }
+
+
+/** from prediction calulation X Position in Strip Detector
+ * @todo make it work for a y strip detector as well
+ * @param plane
+ * @param xPred
+ * @param yPred
+ * @return
+ */
+Float_t  TTrack::getXPositionInStripDetSystem(UInt_t plane, Float_t xPred, Float_t yPred){
+
+}
+
+/** from prediction calulation Y Position in Strip Detector
+ *
+ * @param plane
+ * @param xPred
+ * @param yPred
+ * @return
+ */
+Float_t  TTrack::getYPositionInStripDetSystem(UInt_t plane, Float_t xPred, Float_t yPred){
+
+	Float_t xPredOff = xPred - this->getXOffset(plane);
+	Float_t phiX = getPhiXOffset(plane);
+	return yPred * TMath::Cos(phiX) + xPredOff * TMath::Sin(phiX);
+}
+
 
 UInt_t TTrack::getVerbosity() const
 {

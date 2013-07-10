@@ -12,12 +12,7 @@ ClassImp(TPlane);
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type) {
 	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<"\tyClusters:"<<yClusters.size()<<endl;
-	this->xClusters.clear();
-	this->yClusters.clear();
-	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
-		this->xClusters.push_back(xClusters.at(xCl));
-	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
-		this->yClusters.push_back(yClusters.at(yCl));
+	this->SetClusters(xClusters, yClusters);
 	this->type=type;
 	this->planeNo=planeNo;
 
@@ -26,9 +21,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
 	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
-	this->xClusters.clear();
-	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
-		this->xClusters.push_back(xClusters.at(xCl));
+	this->SetXClusters(xClusters);
 	this->yClusters.clear();
 	this->type=type;
 	this->planeNo=planeNo;
@@ -63,7 +56,7 @@ TPlane::~TPlane() {
 /**
  * Class Assignment function
  */
-TPlane& TPlane::operator =(const TPlane &src){
+TPlane::TPlane& TPlane::operator =(const TPlane &src){
 
 	type=src.type;
 	planeNo=src.planeNo;
@@ -164,6 +157,45 @@ TCluster TPlane::getCluster(TPlaneProperties::enumCoordinate cor, UInt_t cl){
 	}
 }
 
+
+void TPlane::SetClusters(vector<TCluster> xClusters,
+		vector<TCluster> yClusters) {
+	this->SetXClusters(xClusters);
+	this->SetYClusters(yClusters);
+}
+
+void TPlane::SetXClusters(vector<TCluster> xClusters) {
+	this->xClusters.clear();
+	for(UInt_t xCl=0;xCl<xClusters.size();xCl++)
+		this->xClusters.push_back(xClusters.at(xCl));
+}
+
+void TPlane::SetYClusters(vector<TCluster> yClusters) {
+	this->yClusters.clear();
+	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
+		this->yClusters.push_back(yClusters.at(yCl));
+
+}
+
+
+bool TPlane::hasInvalidReadout(){
+//	cout<<"\tTPlane::hasInvalidReadout "<<planeNo<<": "<<xClusters.size()<<"-"<<yClusters.size()<<endl;
+	bool invalidReadout=false;
+//	cout<<"\tX:\t"<<endl;
+	UInt_t xCl;
+	for(xCl=0;xCl<xClusters.size()&&!invalidReadout;xCl++)
+		invalidReadout = invalidReadout || xClusters.at(xCl).hasInvalidReadout();
+//	if(invalidReadout)
+//		cout<<planeNo<<" X"<<xCl<<endl;
+//	cout<<"\tY:"<<endl;
+	UInt_t yCl;
+	for(yCl=0;yCl<yClusters.size()&&!invalidReadout;yCl++){
+		invalidReadout = invalidReadout || yClusters.at(yCl).hasInvalidReadout();
+//		if(invalidReadout)
+//			cout<<planeNo<<"Y"<<xCl<<endl;
+	}//	cout<<"\treturning: "<<invalidReadout<<endl;
+	return invalidReadout;
+}
 void TPlane::Print(UInt_t level)
 {
 	cout<< TCluster::Intent(level)<<TPlaneProperties::getDetectortypeString(this->getDetectorType())<<"-Plane with "<<getNXClusters()<<"/"<<getNYClusters()<<endl;

@@ -35,7 +35,7 @@ TEvent::TEvent(const TEvent& rhs){
  * @param src
  * @return pointer to this TEvent
  */
-TEvent &TEvent::operator=(const TEvent &src){
+TEvent::TEvent &TEvent::operator=(const TEvent::TEvent &src){
 	planes.clear();
 	for(UInt_t i=0;i<src.planes.size();i++)
 		planes.push_back(src.planes.at(i));
@@ -155,7 +155,14 @@ Float_t TEvent::getPosition(UInt_t det, UInt_t cl,TCluster::calculationMode_t mo
 	return cluster.getPosition(mode,histo);
 }
 
-
+bool TEvent::hasInvalidReadout(){
+	bool invalidReadout=false;
+//	cout<<eventNumber<<" TEvent: invalidReadout"<<endl;
+	for(UInt_t plane=0;plane<getNPlanes()&&!invalidReadout;plane++){
+		invalidReadout = planes.at(plane).hasInvalidReadout()||invalidReadout;
+	}
+	return invalidReadout;
+}
 void TEvent::Print(UInt_t level){
 	cout<<TCluster::Intent(level)<<"EventNo"<<getEventNumber()<<" with "<<getNPlanes()<< "Planes:"<<endl;
 	for(UInt_t plane=0;plane<getNPlanes();plane++)
