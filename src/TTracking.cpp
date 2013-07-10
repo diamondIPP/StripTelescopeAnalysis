@@ -10,8 +10,8 @@
 TTracking::TTracking(std::string pathName, std::string alignmentName,std::string etaDistributionPath, TSettings*settings):TADCEventReader(pathName,settings){
 	this->settings= settings;
 	alignmentFile=NULL;
-
-	cout<<"new TTracking: \n\tpathName:"<<pathName<<"\n\ta;ignmentName: "<<alignmentName<<"\n\tetaDistPath: "<<etaDistributionPath<<"\n\tRunNumber: "<<settings->getRunNumber()<<endl;
+	verbosity = settings->getVerbosity();
+	if(verbosity) cout<<"new TTracking: \n\tpathName:"<<pathName<<"\n\ta;ignmentName: "<<alignmentName<<"\n\tetaDistPath: "<<etaDistributionPath<<"\n\tRunNumber: "<<settings->getRunNumber()<<endl;
 	setAlignment(alignmentName);
 	this->setEtaDistributionPath(etaDistributionPath);
 	if(myAlignment==0){
@@ -26,18 +26,18 @@ TTracking::TTracking(std::string pathName, std::string alignmentName,std::string
 	if(myTrack!=NULL)
 		for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
 		{
-      cout<<"Set EtaIntegral of detector "<<det<<flush;
-      TH1F* etaIntegral=(TH1F*)this->getEtaIntegral(det);
+			if(verbosity) cout<<"Set EtaIntegral of detector "<<det<<flush;
+			TH1F* etaIntegral=(TH1F*)this->getEtaIntegral(det);
 			myTrack->setEtaIntegral(det,etaIntegral);
-			cout<<" successful"<<endl;
+			if(verbosity) cout<<" successful"<<endl;
 		}
-	cout<<"DONE WITH LOADING TTRACKING"<<endl;
+	if(verbosity) cout<<"DONE WITH LOADING TTRACKING"<<endl;
 }
 
 TTracking::~TTracking() {
-  delete myTrack;
-  delete myAlignment;
-  delete alignmentFile;
+	delete myTrack;
+	delete myAlignment;
+	delete alignmentFile;
 }
 
 TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPrint)
@@ -50,22 +50,22 @@ TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt
 Float_t TTracking::getXPosition(UInt_t plane)
 {
 	if(myTrack==0)
-			return 0;
-		return myTrack->getXPositionMetric(plane);
+		return 0;
+	return myTrack->getXPositionMetric(plane);
 }
 
 Float_t TTracking::getYPosition(UInt_t plane)
 {
 	if(myTrack==0)
-			return 0;
-		return myTrack->getYPositionMetric(plane);
+		return 0;
+	return myTrack->getYPositionMetric(plane);
 }
 
 Float_t TTracking::getZPosition(UInt_t plane)
 {
 	if(myTrack==0)
-			return 0;
-		return myTrack->getZPosition(plane);
+		return 0;
+	return myTrack->getZPosition(plane);
 }
 
 Float_t TTracking::getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
@@ -78,7 +78,7 @@ Float_t TTracking::getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordina
 bool TTracking::setAlignment(std::string alignmentName){
 	if(this->alignmentFile!=NULL) alignmentFile->Delete();
 	alignmentFile=NULL;
-	cout<<"load AlignmentFile: \""<<alignmentName<<"\""<<endl;
+	if(verbosity) cout <<"load AlignmentFile: \""<<alignmentName<<"\""<<endl;
 	alignmentFile = new TFile(alignmentName.c_str());
 	alignmentFile->GetObject("alignment",myAlignment);
 	if(myAlignment==NULL){
@@ -86,51 +86,51 @@ bool TTracking::setAlignment(std::string alignmentName){
 		return false;
 	}
 	else{
-		cout<<"Read the Alignment of AlignmentFile...\n"<<endl;
-		myAlignment->PrintResults();
+		if(verbosity) cout<<"Read the Alignment of AlignmentFile...\n"<<endl;
+		if(verbosity) myAlignment->PrintResults();
 		return true;
 	}
 	return true;
 }
 
 bool TTracking::LoadEvent(UInt_t eventNumber){
-  if(verbosity>3){
-//    cout<<"Load Event: "<<eventNumber<<flush;
-//    cout<<" "<<GetEntries()<<endl;
-  }
+	if(verbosity>3){
+		//    cout<<"Load Event: "<<eventNumber<<flush;
+		//    cout<<" "<<GetEntries()<<endl;
+	}
 
-  if(eventNumber>GetEntries()){
-    cout<<"eventNumber > entries: "<<eventNumber<<" "<<GetEntries()<<endl;
-    eventNumber=GetEntries()-1;
-    if(eventNumber<0)eventNumber=0;
-    cout<<"new eventNumber ==> "<<eventNumber;
-  }
-  if(myTrack!=NULL){
-    if(verbosity>6){cout<<"myTrack!=0"<<endl;};
-    bool retVal=TADCEventReader::LoadEvent(eventNumber);
-    if(retVal)
-      myTrack->setEvent(this->getEvent());
-    return retVal;
-    }
-    else{
-      cout<<"MYTRACK==0!!!!!! WHATS WRONG???????"<<endl;
-      char t;cin>>t;
-      exit(-1);
-    }
+	if(eventNumber>GetEntries()){
+		if(verbosity) cout<<"eventNumber > entries: "<<eventNumber<<" "<<GetEntries()<<endl;
+		eventNumber=GetEntries()-1;
+		if(eventNumber<0)eventNumber=0;
+		if(verbosity) cout<<"new eventNumber ==> "<<eventNumber;
+	}
+	if(myTrack!=NULL){
+		if(verbosity>6){cout<<"myTrack!=0"<<endl;};
+		bool retVal=TADCEventReader::LoadEvent(eventNumber);
+		if(retVal)
+			myTrack->setEvent(this->getEvent());
+		return retVal;
+	}
+	else{
+		cout<<"MYTRACK==0!!!!!! WHATS WRONG???????"<<endl;
+		char t;cin>>t;
+		exit(-1);
+	}
 
-    return false;
-  }
+	return false;
+}
 
 Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
 	if(myTrack==0)
-				return 0;
+		return 0;
 	if (histo==0)
 		histo=getEtaIntegral(plane*2);
 	return myTrack->getXPositionInLabFrameStripDetector(plane,xCluster,yPred,mode,histo);
 }
 Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
 	if(myTrack==0)
-				return 0;
+		return 0;
 	TH1F* histo=getEtaIntegral(plane*2);
 	return myTrack->getStripXPosition(plane,yPred,mode,histo);
 
