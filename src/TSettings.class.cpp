@@ -1040,10 +1040,10 @@ Float_t TSettings::getClusterSeedFactor(UInt_t det,UInt_t ch){
 }
 
 Float_t TSettings::getClusterHitFactor(UInt_t det,UInt_t ch){
-
+	if(verbosity>8)cout<<"[TSettings::getClusterHitFactor] "<<det<<" "<<ch<<endl;
 	if(TPlaneProperties::isDiamondDetector(det)){
 		Int_t area = getDiaDetectorAreaOfChannel(ch);
-//		cout<<det<<":"<<ch<<"--->"<<area<<endl;
+		if(verbosity>8)cout<<"Diamond:"<<det<<":"<<ch<<"--->"<<area<<endl;
 		if ((Int_t)vecClusterHitFactorsDia.size()>area&&area>-1)
 			return vecClusterHitFactorsDia.at(area);
 		else {
@@ -1052,8 +1052,11 @@ Float_t TSettings::getClusterHitFactor(UInt_t det,UInt_t ch){
 			return getDi_Cluster_Hit_Factor();
 		}
 	}
-	if(clusterHitFactors.size()>det)
+	if(clusterHitFactors.size()>det){
+		if(verbosity>8)cout<<"clusterHitFactors:"<<det<<":"<<ch<<"--->"<<endl;
 		return clusterHitFactors.at(det);
+	}
+	if(verbosity>8)cout<<"silicon:"<<det<<":"<<ch<<"--->"<<endl;
 	return getSi_Cluster_Hit_Factor();
 }
 
