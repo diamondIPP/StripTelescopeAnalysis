@@ -312,6 +312,26 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 	return c1;
 }
 
+TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
+{
+	if (nFidCut>=fidCuts.size())
+		return 0;
+	Float_t xLow = fidCuts.at(nFidCut)->GetXLow();
+	Float_t xHigh = fidCuts.at(nFidCut)->GetXHigh();
+	Float_t yLow = fidCuts.at(nFidCut)->GetYLow();
+	Float_t yHigh = fidCuts.at(nFidCut)->GetYHigh();
+	TPaveText * pt = new TPaveText(xLow,yLow,xHigh,yHigh);
+	if(index == nFidCut + 1||index == 0){
+		pt->SetFillColor(kRed);
+		pt->SetFillStyle(3013);
+	}
+	else{
+		pt->SetFillColor(kOrange);
+		pt->SetFillStyle(3013);
+	}
+	return pt;
+}
+
 TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 {
 	if (nFidCut>=fidCuts.size())
@@ -374,6 +394,15 @@ void TFidCutRegions::addFiducialCut(Float_t xLow, Float_t xHigh, Float_t yLow, F
 	}
 	else
 		cerr<<"Could not add Fiducial Cut since "<<xLow<<">="<<xHigh<<" or "<<yLow<<" >= "<<yHigh<<endl;
+}
+
+void TFidCutRegions::addFiducialCut(TFiducialCut* fidCut){
+	if (fidCut){
+		this->addFiducialCut(fidCut->GetXLow(),fidCut->GetXHigh(),fidCut->GetYLow(),fidCut->GetYHigh());
+	}
+	else{
+		cerr<<"Could not add Fiducial Cut since fidCut == 0"<<endl;
+	}
 }
 
 void TFidCutRegions::createFidCuts(){
@@ -558,4 +587,14 @@ Float_t TFidCutRegions::getYHigh(UInt_t i) {
 		return xInt.at((i-1)/xInt.size()).second;
 	return TPlaneProperties::getNChannelsDiamond();
 	return N_INVALID;
+}
+
+
+void TFidCutRegions::drawFiducialCutsToCanvas(TCanvas* c1){
+	if(!c1)
+		return;
+	c1->cd();
+	for(UInt_t i=0;i<fidCuts.size();i++)
+		getFiducialAreaCut(i)->Draw("same");
+
 }

@@ -37,6 +37,7 @@ public:
 	TFiducialCut* getFidCut(std::string);
 	TFiducialCut* getFidCut(UInt_t index);
 	void addFiducialCut(Float_t xLow,Float_t xHigh,Float_t yLow, Float_t yHigh);
+	void addFiducialCut(TFiducialCut* fidCut);
 	Float_t getXLow(UInt_t i);
 	Float_t getYLow(UInt_t i);
 	Float_t getXHigh(UInt_t i);
@@ -53,6 +54,7 @@ public:
 	Float_t getMinFiducialX(UInt_t index = 0);
 	Float_t getMaxFiducialY(UInt_t index = 0);
 	Float_t getMinFiducialY(UInt_t index = 0);
+	void drawFiducialCutsToCanvas(TCanvas* c1);
 	void Reset();
 private:
 	std::string name;
@@ -60,6 +62,7 @@ private:
 	std::vector<std::pair<Float_t,Float_t> >findFiducialCutIntervall(TH1D* hProj,Float_t fidCutPercentage);
 	TCanvas*  getFiducialCutProjectionCanvas(TH1D* hProj,std::vector< std::pair<Float_t,Float_t> > intervals);
 
+	TPaveText* getFiducialAreaPaveText(UInt_t nFidCut);
 	TCutG* getFiducialAreaCut(UInt_t nFidCut);
 	UInt_t index;
 	void createFidCuts();
