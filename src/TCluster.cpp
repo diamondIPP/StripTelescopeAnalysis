@@ -295,16 +295,6 @@ Float_t TCluster::getCharge(bool useSmallSignals){
 }
 
 /**
- *
- * @param clusters
- * @param useSmallSignals
- * @return
- */
-Float_t TCluster::getChargeAroundHitChannel(UInt_t clusters, bool useSmallSignals){
-
-}
-
-/**
  * @param nClusterEntries
  * @param useSmallSignals
  * @return

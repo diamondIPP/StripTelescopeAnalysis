@@ -28,7 +28,7 @@
 #include "HistogrammSaver.class.hh"
 #include "THTMLPedestal.hh"
 #include "LandauGaussFit.hh"
-#include "TTransparentAnalysis.hh"
+
 #include "TADCEventReader.hh"
 #include "TTracking.hh"
 #include "TSettings.class.hh"
@@ -61,7 +61,6 @@ private:
 
 	void saveTransparentAnalysisHistos();
 	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
-	TCluster getTransparentCluster(Int_t nDiamondPattern, Float_t nChannelHit);
 	Int_t RemoveBadCells(Int_t nDiamondPattern, Float_t xDet, Float_t yDet);
 	float* VectorToArray(vector<float> nvector);
 
@@ -73,7 +72,7 @@ private:
 	void saveLongAnalysisHistos();
 	void LongAnalysis();
 	void DrawYAlignmentFidCutRegions();
-	Int_t* CellToChannel(UInt_t nCell,float nXcell);
+	Int_t* CellToChannel(int nCell,float nXcell);
 	int xEdgeyEdgeFiducialCut(int nEdge);
 	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
 	Float_t GetYPositionInDetSystem();
