@@ -21,6 +21,8 @@ TSettings::TSettings(TRunInfo *runInfo)
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
 	fidCuts3D = new TFidCutRegions();
+	fidCuts3DEdge = new TFidCutRegions();
+	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
@@ -56,6 +58,8 @@ TSettings::TSettings(UInt_t runNumber){
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
 	fidCuts3D = new TFidCutRegions();
+	fidCuts3DEdge = new TFidCutRegions();
+	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	SetFileName("SETTINGS.new.ini");
 	this->runNumber=runNumber;
@@ -72,6 +76,8 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
 	fidCuts3D = new TFidCutRegions();
+	fidCuts3DEdge = new TFidCutRegions();
+	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
 	this->runNumber=runNumber;
 	sys = gSystem;
@@ -106,10 +112,21 @@ void TSettings::checkSettings(){
 	fidCutsSelection->SetName("3D-FidCuts");
 
 	if (isStandard3dFidCut==true){
-			fidCuts3D->Reset();
-			fidCutsSelection->SetName("standard-FidCuts");
-			fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
+		fidCuts3D->Reset();
+		fidCutsSelection->SetName("standard-3D-FidCuts");
+		fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
 		}
+
+	if (isStandard3dEdgeFidCut==true){
+		fidCuts3DEdge->Reset();
+		fidCutsSelection->SetName("3DEdge-FidCuts");
+		fidCuts3DEdge->addFiducialCut(-1e9,1e9,-1e9,1e9);
+	}
+	if (isStandard3dMetallisationFidCut==true){
+		fidCuts3DMetallisation->Reset();
+		fidCutsSelection->SetName("3DMetallisation-FidCuts");
+		fidCuts3DMetallisation->addFiducialCut(-1e9,1e9,-1e9,1e9);
+	}
 //	diamondPattern.Print();
 	cout<<"NDiamond Patterns: "<<diamondPattern.getNPatterns()<<endl;
 
@@ -461,7 +478,10 @@ void TSettings::LoadSettings(){
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
 		if(key == "selectionFidCut") {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
-		if(key == "3dFitCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
+		if(key == "3dFidCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
+		if(key == "3dMetallisationFidCut"){if (!fidCuts3DMetallisation) fidCuts3DMetallisation=new TFidCutRegions();ParseFidCut(key,value,fidCuts3DMetallisation,isStandard3dMetallisationFidCut);}
+		if(key == "3dEdgeFidCut"){if (!fidCuts3DEdge) fidCuts3DEdge =new TFidCutRegions();ParseFidCut(key,value,fidCuts3DEdge,isStandard3dEdgeFidCut);}
+
 		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
 		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
 		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);
@@ -495,6 +515,7 @@ void TSettings::LoadSettings(){
 		if(key == "pitchWidthDia") Parse(key,value,pitchWidthDia);
 		if(key == "pitchWidthSil") Parse(key,value,pitchWidthSil);
 		if(key == "diamondPattern") ParsePattern(key,value);
+		if(key == "yOffset3D")ParseFloat(key,value,yOffset3D);
 		if(key == "TransparentAlignment") ParseBool(key,value,bTransparentAlignment);
 		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
@@ -548,7 +569,33 @@ void TSettings::LoadSettings(){
            cout<<key<<" =" <<value.c_str()<<endl;
            b3dDiamond = (bool)strtod(value.c_str(),0);
         }
-		/*if(key == "store_threshold") {//TODO It's needed in settings reader
+        if(key == "badCells3d"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,badCells3d);
+        }
+        if(key == "badCells3dnH"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,badCells3dnH);
+        }
+        if(key == "goodCells3d"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,goodCells3d);
+        }
+
+        /*if(key == "deadCell3d"){
+               	cout<<key<<"="<<value<<endl;
+               	ParseCellArray(key,value,deadCell3d);
+               }
+         */
+        if(key == "XmetalisationStart3d") Parse(key,value,XmetalisationStart3d);
+        if(key == "XmetalisationEnd3d") Parse(key,value,XmetalisationEnd3d);
+        if(key == "YmetalisationEnd3d") Parse(key,value,YmetalisationEnd3d);
+        if(key == "nColumns3d") Parse(key,value,nColumns3d);
+        if(key == "nRows3d") Parse(key,value,nRows3d);
+        if(key == "3dShortAnalysis") Parse(key,value,b3dShortAnalysis);
+        if(key == "3dLongAnalysis") Parse(key,value,b3dLongAnalysis);
+        if(key == "3dTransparentAnalysis") Parse(key,value,b3dTransparentAnalysis);
+        /*if(key == "store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
 	      }*/
@@ -718,6 +765,12 @@ void TSettings::DefaultLoadDefaultSettings(){
 	bUseUserResolutionInput = false;
 	LoadDefaultResolutions();
 
+
+
+	nRows3d = 11;
+	nColumns3d = 9;
+	yOffset3D = 3890;
+
 	checkSettings();
 }
 
@@ -750,31 +803,63 @@ void TSettings::ParseStringArray(string key, string value, vector<string> &vec){
 }
 
 bool TSettings::ParseFloat(string key, string value, float &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (float)strtod(value.c_str(),0);
 	return true;
 }
 
 bool TSettings::ParseInt(string key, string value, int &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (int)strtod(value.c_str(),0);
 	return true;
 }
 
 bool TSettings::ParseInt(string key, string value, UInt_t &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (UInt_t)strtod(value.c_str(),0);
 	return true;
 }
 
 bool TSettings::ParseBool(string key, string value, bool &output){
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (bool)strtod(value.c_str(),0);
 	return true;
 }
 
+
+pair<char,int> TSettings::ParseCellPosition(std::string value){
+	char row = 'A'-1;
+	int column = -1;
+//	cout<<"Parsing Cell Position: "<<value<<flush;
+	Int_t pos = value.find_first_of("0123456789");
+	if (pos == 1){
+		row = value[0];
+		string columnString = value.substr(pos);
+		ParseInt("ParseCellColumn",columnString,column);
+	}
+//	cout<< " = "<< row << " "<<column<<endl;
+	return make_pair(row,column);
+}
+
+void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells){
+//	cout << key.c_str() << " = " << value.c_str() << endl;
+	std::vector <std::string> stringArray;
+	ParseStringArray(key, value,stringArray);
+	vecCells.clear();
+	for(UInt_t i=0;i<stringArray.size();i++){
+		string str = stringArray.at(i);
+		pair<char,int> cellPosition = ParseCellPosition(str);
+		int cellNo =get3DCellNo(cellPosition);
+		vecCells.push_back(cellNo);
+		cout<< "add cell "<<cellPosition.first << cellPosition.second<<" --> "<<cellNo<<endl;
+	}
+//	cout<<"DONE"<<endl;
+//	char t; cin>>t;
+
+}
+
 void TSettings::ParseFloatArray(string key, string value, vector<float> &vec) {
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
 	ParseStringArray(key, value,stringArray);
 	vec.clear();
@@ -784,7 +869,7 @@ void TSettings::ParseFloatArray(string key, string value, vector<float> &vec) {
 }
 
 void TSettings::ParseIntArray(string key, string value, vector<int> &vec) {
-	cout << key.c_str() << " = " << value.c_str() << endl;
+	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	std::vector <std::string> stringArray;
 	ParseStringArray(key, value,stringArray);
 	vec.clear();
@@ -837,6 +922,7 @@ void TSettings::ParseRegionArray(string key, string value, std::vector< std::pai
 			Float_t pos = begin*getDiamondPitchWidth();
 			cout<<pos<<","<<begin<<"-"<<end<<endl;
 			diamondPattern.addPattern(getDiamondPitchWidth(),pos,begin,end);
+			vecDiaDetectorAreasInChannel.push_back(make_pair(begin,end));
 		}
 	}
 
@@ -856,6 +942,9 @@ void TSettings::ParsePattern(std::string key, std::string value){
 		if(diamondPattern.isStandardPitchWidth())
 			diamondPattern.clear();
 		diamondPattern.addPattern(pitchWidth,pos,firstCh,lastCh);
+		vecDiaDetectorAreasInChannel.push_back(make_pair(firstCh,lastCh));
+		cout<<"new Area of Interest: no. "<<vecDiaDetectorAreasInChannel.size()-1<<" "<<vecDiaDetectorAreasInChannel.back().first<<"-"<<vecDiaDetectorAreasInChannel.back().second<<endl;
+		cout<< vecDiaDetectorAreasInChannel.size()<<endl;
 		cout<<"new Area of Interest: no. "<<diamondPattern.getNPatterns()-1<<" "<<firstCh<<"-"<<lastCh<<endl;
 		PrintPatterns();
 		isStandardArea=false;
@@ -1795,15 +1884,31 @@ Int_t TSettings::getVerbosity(){
 }
 
 bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
+//	if(area<getNDiaDetectorAreas())
+//			return getDiaDetectorArea(area).first <= ch && ch <= getDiaDetectorArea(area).second;
 	if(area<getNDiaDetectorAreas()){
 		pair<Int_t, Int_t > interval = getDiaDetectorArea(area);
 		return interval.first <= ch && ch <= interval.second;
 	}
 	else return false;
 }
-std::pair< Int_t , Int_t > TSettings::getDiaDetectorArea(int n){
-		return diamondPattern.getInterval(n);
+
+
+bool TSettings::isClusterInDiaDetectorArea(TCluster cluster, Int_t area){
+	if(area<getNDiaDetectorAreas()){
+		int firstClusterChannel = cluster.getFirstHitChannel();
+		int lastClusterChannel = cluster.getLastHitChannel();
+		int firstAreaChannel = getDiaDetectorArea(area).first;
+		int lastAreaChannel =  getDiaDetectorArea(area).second;
+//		cout<<TString::Format("area: %d/%d %d-%d, channels: %d-%d",area,  getNDiaDetectorAreas(), firstAreaChannel, lastAreaChannel,firstClusterChannel, lastClusterChannel)<<endl;
+		return firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
+	}
+	return false;
+
 }
+
+
+
 Float_t TSettings::getMinDiamondChannel(){
 	if(getNDiaDetectorAreas()>0){
 		Float_t min = getDiaDetectorArea(0).first;
@@ -1824,6 +1929,17 @@ Float_t TSettings::getMaxDiamondChannel(){
 	return TPlaneProperties::getNChannelsDiamond();
 
 }
+
+std::pair< Int_t , Int_t > TSettings::getDiaDetectorArea(int n){
+		return diamondPattern.getInterval(n);
+}
+
+//std::pair< Int_t , Int_t > TSettings::getDiaDetectorArea(int n){
+//	if(n < getNDiaDetectorAreas() && n >= 0)
+//		return vecDiaDetectorAreasInChannel[n];
+//	return std::make_pair((Int_t)-1, (Int_t)-1);
+//}
+
 int TSettings::getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verb){
 	if (verb) cout <<"TSettings::getDiaDetectorAreaOfChannel "<< ch <<" "<< verb<<endl;
 	for(Int_t area = 0; area < getNDiaDetectorAreas(); area++){
@@ -1956,4 +2072,20 @@ Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
 			channelPosition = this->diamondPattern.convertMetricToChannel(metricValue);
 	}
 	return channelPosition;
+}
+
+
+int TSettings::get3DCellNo(char row, int column){
+	column --;
+	row=toupper(row);
+	int nRow = row-'A';
+	if (nRow<0 || nRow > 25||column < 0){
+		cerr<<"cannot convert "<<row<<column<< " to a cell no.: "<<nRow<<endl;
+		return -1;
+	}
+
+	int nCell = column + nRow * nRows3d;
+	cout<<"column "<<column<<", row "<<row<<"="<<nRow<<" * "<<nRows3d<<" = " <<nCell<<endl;
+	return nCell;
+
 }

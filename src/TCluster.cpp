@@ -870,6 +870,20 @@ UInt_t TCluster::getChannel(UInt_t clusterPos)
 	else return 5000;
 }
 
+UInt_t TCluster::getFirstHitChannel(){
+	UInt_t cl = 0;
+	UInt_t size =  this->getClusterSize();
+	while (!isHit(cl) && cl < size)
+		cl++;
+	return getChannel(cl);
+}
+
+UInt_t TCluster::getLastHitChannel(){
+	UInt_t cl = this->getClusterSize()-1;
+	while ( !isHit(cl) && cl >= 0)
+		cl--;
+	return getChannel(cl);
+}
 
 UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected)
 {
