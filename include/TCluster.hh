@@ -43,6 +43,7 @@ public:
         hasBadChannel=false;
         numberOfNoHits=0;
         nChannels=256;
+        hitChannel = -1;
 
     };
     TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256, float cmNoise=0);
@@ -59,6 +60,7 @@ public:
     bool hasSaturatedChannels();
     Float_t getCharge(bool useSmallSignals=false);
     Float_t getCharge(UInt_t clusters,bool useSmallSignals=false);
+    Float_t getChargeAroundHitChannel(UInt_t clusters, bool useSmallSignals=true);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
     UInt_t seedSize();
@@ -84,6 +86,7 @@ public:
     UInt_t getHighestHitClusterPosition();
     UInt_t getClusterPosition(UInt_t channelNo);
     UInt_t getChannel(UInt_t clusterPos);
+    void setHitChannel(Int_t hitChannel){this->hitChannel=hitChannel;}
     UInt_t getFirstHitChannel();
     UInt_t getLastHitChannel();
 //    Float_t getPedestalSigma(UInt_t clusterPos);
@@ -145,6 +148,7 @@ private:
     UChar_t det;
     UInt_t eventNumber;
     Float_t cmNoise;
+    Int_t hitChannel;
     ClassDef(TCluster,TCLUSTER_REV);
 };
 #endif /* TCLUSTER_HH_ */

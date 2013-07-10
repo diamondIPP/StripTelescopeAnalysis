@@ -61,7 +61,8 @@ public:
 	void analyze(UInt_t nEvents, UInt_t startEvent);
 	void calcEtaCorrectedResiduals();
 	void setSettings(TSettings* settings);
-	
+	static TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize,TTracking* eventReader,TSettings* settings);
+	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize){return makeTransparentCluster(det,centerPosition,clusterSize,eventReader,settings);}
 private:
 	void initHistograms();
 	void fillHistograms();
@@ -75,9 +76,8 @@ private:
 	void fitTrack();
 //	void analyzeTrack(TTrack track);
 	bool predictPositions();
-	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
-	int getSignedChannelNumber(Float_t position);
+	static int getSignedChannelNumber(Float_t position);
 	void printEvent();
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);

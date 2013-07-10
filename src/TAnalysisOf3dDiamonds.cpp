@@ -2992,6 +2992,81 @@ void TAnalysisOf3dDiamonds::createTreeTestHistos() {
 	histSaver->SaveHistogram(histo);
 }
 
+
+/**
+ * Cell Labeling
+ * 			+-----------+-----------+
+ * 			+           +           +
+ * 			+     0     +     1     +       ^
+ * 			+           +           +     Y |
+ * 			+-----------+-----------+       |
+ * 			+           +           +       |
+ * 			+     2     +     3     +       |
+ * 			+           +           +       |
+ * 			+-----------+-----------+       +-------->
+ * 			                                       X
+ * @param xDet
+ * @param yDet
+ * @return
+ **/
+TCluster TAnalysisOf3dDiamonds::getTransparentCluster(Int_t nDiamondPattern, Float_t nChannelHitPosition) {
+	TCluster *transparentCluster= new TCluster(nEvent,subjectDetector,-99,-99,TPlaneProperties::getNChannelsDiamond(),eventReader->getCMNoise());
+	Float_t TransparentCharge = -9999;
+	pair<int,int> channels = settings->diamondPattern.getPatternChannels(nDiamondPattern);
+	UInt_t ChannelsToRead;
+	//todo
+	if(nDiamondPattern==1)
+		ChannelsToRead = 5;
+	else{ChannelsToRead = 3;}
+
+	vector<Float_t> ChannelsCharge;
+	float* ptrChannelsChargeSorted;
+	Int_t startChannel = (Int_t)(nChannelHitPosition+.5);
+	Int_t nChannelHit = startChannel;
+//	Int_t startDirection = nChannelHit
+	TTransparentAnalysis::makeTransparentCluster(subjectDetector,nChannelHitPosition,5,eventReader,settings);
+	//cout<<XdetChannelSpaceInt<<endl;
+	Int_t StripStart = -(ChannelsToRead/2);
+	//cout<<"StripStart: "<<StripStart<<endl;
+	Int_t ChannelStart = nChannelHit + StripStart;
+	//cout<<"ChannelStart: "<<ChannelStart<<endl;
+	Int_t DetectorLeftMostChannel = channels.first;
+	Int_t DetectorRightMostChannel = channels.second;
+
+	SortArrayPointer.clear();
+	for(UInt_t i=0;i<ChannelsToRead;i++){
+		Int_t Channel = ChannelStart + i;
+		SortArrayPointer.push_back(Channel);
+		ChannelsCharge.push_back(eventReader->getSignal(subjectDetector,Channel));
+		//cout<<"Channel: "<<Channel<<"   Charge: "<<ChannelsCharge.at(i)<<endl;
+	}
+
+	ptrChannelsChargeSorted = SortArrayBtoS(VectorToArray(ChannelsCharge), ChannelsCharge.size());
+
+	//cout<<"DiamondPattern"<<nDiamondPattern<<endl;
+	for(UInt_t i=0; i<ChannelsCharge.size();i++){
+		//cout<<SortArrayPointer.at(i)<<"   "<<ptrChannelsChargeSorted[i]<<endl;
+	}
+
+	Float_t HighestCharge = ptrChannelsChargeSorted[ChannelsCharge.size()-1];
+	Int_t HighestChargeChannel = SortArrayPointer.at(ChannelsCharge.size()-1);
+	//cout<<HighestChargeChannel<<"   "<<HighestCharge<<endl;
+	Float_t SecondHighestCharge = ptrChannelsChargeSorted[ChannelsCharge.size()-2];
+	Int_t SecondHighestChargeChannel = SortArrayPointer.at(ChannelsCharge.size()-2);
+	//cout<<SecondHighestChargeChannel<<"   "<<SecondHighestCharge<<endl;
+
+	Int_t Saturated =0;
+	if(eventReader->isSaturated(subjectDetector,HighestChargeChannel)||eventReader->isSaturated(subjectDetector,SecondHighestChargeChannel))
+		Saturated = 1;
+	if(Saturated == 1||HighestChargeChannel == DetectorLeftMostChannel||HighestChargeChannel == DetectorRightMostChannel)    //||SecondHighestChargeChannel == DetectorLeftMostChannel||SecondHighestChargeChannel == DetectorRightMostChannel)
+		TransparentCharge = -9999;
+	else{
+		TransparentCharge = HighestCharge + SecondHighestCharge;
+	}
+
+	return *transparentCluster;
+}
+
 /**
  * Cell Labeling
  * 			+-----------+-----------+

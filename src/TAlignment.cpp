@@ -1155,6 +1155,7 @@ void TAlignment::setSiliconDetectorResolution(Float_t maxChi2) {
 
 void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, string refPlaneString, bool bPlot, bool bUpdateResolution, bool bChi2) {
 	if (!bPlot && !bUpdateResolution) return;
+	bool siliconPostAlignment = false;
 	if (bPlot)
 		if(verbosity>3)cout<<"Save Histograms: "<<  vecXDelta.size() << " " << vecYDelta.size() << " " << vecXPred.size() << " " << vecYPred.size() << " " << vecXObs.size() << " " << vecYObs.size() << endl;
 	// define preName
@@ -1171,10 +1172,13 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		preName << "hSilicon_";
 		if (nAlignmentStep == -1)
 			preName << "PreAlignment";
-		else if (nAlignmentStep == nAlignSteps)
+		else if (nAlignmentStep == nAlignSteps){
 			preName << "PostAlignment";
+			siliconPostAlignment=true;
+		}
 		else
 			preName << nAlignmentStep << "_Step";
+
 	}
 	if(bChi2){
 		postName<<"with_Chi2_cut_on_"<<settings->getAlignment_chi2();
@@ -1295,7 +1299,11 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		histName.str("");
 		histName.clear();
 		histName << preName.str()<< "_ScatterPlot_YPred_vs_DeltaX"<< "_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
-		TH2F *histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta, vecYPred, 256);
+		TH2F *histo;
+		if(siliconPostAlignment)
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred, 256);
+		else
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta, vecYPred, 256);
 		//    histo.Draw("goff");
 		if(histo){
 			histo->GetXaxis()->SetTitle("Y Predicted / #mum");
