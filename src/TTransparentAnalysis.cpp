@@ -52,6 +52,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings) {
 	positionPrediction = 0;
 	
 
+
 }
 
 TTransparentAnalysis::~TTransparentAnalysis() {
@@ -94,6 +95,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		char t;
 		cin >>t;
 	}
+<<<<<<< .working
 	nAnalyzedEvents = 0;
 	regionNotOnPlane = 0;
 	saturatedChannel = 0;
@@ -102,6 +104,9 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	noFidCutRegion = 0;
 	usedForAlignment = 0;
 	highChi2 =0;
+=======
+	highChi2 =0;
+>>>>>>> .merge-rechts.r699
 //	usedForSiliconAlignment = 0;
 	cout<<"Current Dir: "<<sys->pwd()<<endl;
 	if (nEvents+startEvent >= eventReader->GetEntries()) {
@@ -297,6 +302,14 @@ TCluster TTransparentAnalysis::makeTransparentCluster(UInt_t det, Float_t center
  * @author Lukas Baeni
  * @return
  */
+/**
+ *	returns the next channel number including a sign: + if pos - (int)pos <.5 else minus
+ *	different approach:
+ *	 ( 1+2*( (int)pos-(int)(pos+.5) ) ) * int (pos+.5)
+ * @param position
+ * @author Lukas Baeni
+ * @return
+ */
 int TTransparentAnalysis::getSignedChannelNumber(Float_t position) {
 	if (position < 0) return -9999;
 	UInt_t channel = 0;
@@ -318,6 +331,10 @@ void TTransparentAnalysis::setSettings(TSettings* settings) {
 
 void TTransparentAnalysis::initHistograms() {
 	UInt_t bins=100;
+	vecvecResXChargeWeighted.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecvecResXHighest2Centroid.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecvecResXEtaCorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecvecRelPos.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecResXChargeWeighted.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecResXHighest2Centroid.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecResXEtaCorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
@@ -474,6 +491,13 @@ void TTransparentAnalysis::saveHistograms() {
 	histSaver->SaveHistogram(hLaundauMP);
 	histSaver->SaveHistogram(hLaundau2HighestMean);
 	histSaver->SaveHistogram(hLaundau2HighestMP);
+	for(UInt_t i=0;i<TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);i++){
+		string name = (string)TString::Format("hRelPosVsResolutionEtaCorrectedIn%d",i);
+		TH2F* hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXEtaCorrected[i]);
+		hist->GetXaxis()->SetTitle("Relative predicted Position");
+		hist->GetYaxis()->SetTitle("Delta X, Eta corrected");
+		histSaver->SaveHistogram(hist);
+	}
 	for(UInt_t i=0;i<TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);i++){
 		string name = (string)TString::Format("hRelPosVsResolutionEtaCorrectedIn%d",i);
 		TH2F* hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXEtaCorrected[i]);

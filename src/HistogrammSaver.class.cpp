@@ -860,9 +860,21 @@ Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
 	cout<<"Mean: "<<mean*100<<" +/- " <<sigma*100<<"\t"<<vec.size() << mean<<"/"<<mean2<<endl;
 	return mean;
 }
+<<<<<<< .working
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax)
+=======
+
+TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax, Float_t factor)
+>>>>>>> .merge-rechts.r699
 {
+<<<<<<< .working
 	Float_t factor = 0.05;//5% bigger INtervall...
+=======
+	Float_t mean,sigma;
+	UInt_t nEvents = 0;
+	int verbosity = 0;
+//	Float_t factor = 0.05;//5% bigger INtervall...
+>>>>>>> .merge-rechts.r699
 	if(vec.size()==0)
 		return new TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
 	Float_t max = vec.at(0);
@@ -892,15 +904,19 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		mean2/=(Float_t)vec.size();
 		sigma2/=(Float_t)vec.size();
 
-		Float_t mean=0;
-		Float_t sigma=0;
-		UInt_t nEvents=0;
+		mean = 0;
+		sigma = 0;
+		nEvents = 0;
 		for(UInt_t i=0;i<vec.size();i++){
 			if( (vec.at(i)-mean2)/sigma2<3.){
 			mean+=vec.at(i);
 			sigma+=vec.at(i)*vec.at(i);
 			nEvents++;
+<<<<<<< .working
 			}
+=======
+			nEvents++;
+>>>>>>> .merge-rechts.r699
 		}
 		mean/=(Float_t)nEvents;
 		sigma/=(Float_t)nEvents;

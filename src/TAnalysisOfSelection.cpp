@@ -617,7 +617,7 @@ void TAnalysisOfSelection::saveHistos()
 	TH1F* histo12 =0;
 	if (histoLandauDistribution)
 		histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),1,2);
-	else{
+	else if(histo!=0){
 		cout<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
 		char t;
 		cin>>t;
