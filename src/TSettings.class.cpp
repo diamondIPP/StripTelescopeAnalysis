@@ -593,6 +593,7 @@ void TSettings::LoadDefaultResolutions(){
 }
 void TSettings::DefaultLoadDefaultSettings(){
 
+
 	if(getVerbosity())
 		cout<<"TSettings::LoadDefaultSettings"<<endl;
 	//default general settings

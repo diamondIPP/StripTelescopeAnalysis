@@ -37,9 +37,9 @@ public:
 	virtual bool LoadEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
 	bool isOK();
-//    bool getCMNEvent_flag() const;
+	//    bool getCMNEvent_flag() const;
 	bool isValidTrack();
-  Int_t getAdcValue(UInt_t det,UInt_t ch);
+	Int_t getAdcValue(UInt_t det,UInt_t ch);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected=false);
 	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);
 	Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected=false);
@@ -105,7 +105,7 @@ private:
 	UInt_t run_number;
 	UInt_t event_number;
 	Float_t store_threshold;
-//	bool CMNEvent_flag;
+	//	bool CMNEvent_flag;
 	bool ZeroDivisorEvent_flag;
 	UInt_t Det_NChannels[9];
 	UChar_t Det_Channels[9][256];
@@ -115,10 +115,10 @@ private:
 	Float_t Det_PedWidth[9][256];
 	Float_t pedestalMean[8][256];
 	Float_t pedestalSigma[8][256];
-  Float_t diaPedestalMean[128];
-  Float_t diaPedestalSigma[128];
-  Float_t diaPedestalMeanCMN[128];
-  Float_t diaPedestalSigmaCMN[128];
+	Float_t diaPedestalMean[128];
+	Float_t diaPedestalSigma[128];
+	Float_t diaPedestalMeanCMN[128];
+	Float_t diaPedestalSigmaCMN[128];
 	Float_t cmNoise;
 	Float_t cmnCreated[9];
 	bool bCMNoiseCorrected;

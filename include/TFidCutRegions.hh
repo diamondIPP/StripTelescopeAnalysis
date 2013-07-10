@@ -8,6 +8,7 @@
 #ifndef TFIDCUTREGIONS_HH_
 #define TFIDCUTREGIONS_HH_
 #include <vector>
+#include <utility>
 //#include <pair>
 #include "TFiducialCut.hh"
 #include "TROOT.h"

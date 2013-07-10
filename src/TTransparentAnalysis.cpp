@@ -53,6 +53,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 	inf  = std::numeric_limits<float>::infinity();
 	alignMode = mode;
 
+
 }
 
 TTransparentAnalysis::~TTransparentAnalysis() {
@@ -98,6 +99,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		char t;
 		cin >>t;
 	}
+	highChi2 =0;
 //	usedForSiliconAlignment = 0;
 	if(verbosity>6)cout<<"Current Dir: "<<sys->pwd()<<endl;
 	if (nEvents+startEvent > eventReader->GetEntries()) {
@@ -285,6 +287,14 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
  * @author Lukas Baeni
  * @return
  */
+/**
+ *	returns the next channel number including a sign: + if pos - (int)pos <.5 else minus
+ *	different approach:
+ *	 ( 1+2*( (int)pos-(int)(pos+.5) ) ) * int (pos+.5)
+ * @param position
+ * @author Lukas Baeni
+ * @return
+ */
 int TTransparentAnalysis::getSignedChannelNumber(Float_t position) {
 	if (position < 0) return -9999;
 	UInt_t channel = 0;
@@ -320,6 +330,10 @@ void TTransparentAnalysis::initHistograms() {
 	vecVecFidCutY.clear();
 	hEtaIntegrals.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 
+	vecvecResXChargeWeighted.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecvecResXHighest2Centroid.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecvecResXEtaCorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecvecRelPos.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		vecVecLandau.at(clusterSize).clear();
 		vecvecEtaCMNcorrected.at(clusterSize).clear();
@@ -1085,6 +1099,13 @@ void TTransparentAnalysis::saveHistograms() {
 		hPredictedPosition->GetXaxis()->SetTitle("relative Predicted Channel Position");
 		histSaver->SaveHistogram(hPredictedPosition);
 		delete hPredictedPosition;
+	}
+	for(UInt_t i=0;i<TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);i++){
+		string name = (string)TString::Format("hRelPosVsResolutionEtaCorrectedIn%d",i);
+		TH2F* hist = histSaver->CreateScatterHisto(name,vecvecRelPos[i],vecvecResXEtaCorrected[i]);
+		hist->GetXaxis()->SetTitle("Relative predicted Position");
+		hist->GetYaxis()->SetTitle("Delta X, Eta corrected");
+		histSaver->SaveHistogram(hist);
 	}
 }
 
