@@ -595,6 +595,6 @@ void TFidCutRegions::drawFiducialCutsToCanvas(TCanvas* c1){
 		return;
 	c1->cd();
 	for(UInt_t i=0;i<fidCuts.size();i++)
-		getFiducialAreaPaveText(i)->Draw("same");
+		getFiducialAreaCut(i)->Draw("same");
 
 }
