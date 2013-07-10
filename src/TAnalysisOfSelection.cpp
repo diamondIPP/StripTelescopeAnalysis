@@ -777,7 +777,7 @@ void TAnalysisOfSelection::saveHistos()
 		histo12 = (TH1F*)histoLandauDistribution->ProjectionX(name.str().c_str(),binLow,binHigh);
 		landauGauss.doLandauGaussFit(histo12);
 	}
-	else if(histo!=0){
+	else{
 		cerr<<"histoLandauDistribution is not valid, Press a key to continue..."<<flush;
 		if(verbosity%2==1){char t; cin>>t;}
 	}

@@ -304,7 +304,7 @@ void HistogrammSaver::SetPlotsPath(string path){
 		//		cout<<"***************************************************\n";
 		//		cout<<"********** Directory not created ******************\n";
 		//		cout<<"***************************************************\n";
-		if(verbosity)cout<<plots_path<<endl;
+		cout<<plots_path<<endl;
 	}
 	sys->mkdir(plots_path.c_str(),true);
 	int stat = mkdir(plots_path.c_str(),0777);//0777(S_IRWXO||S_IRWXG||S_IRWXU));// S_IRWXU|S_IRGRP|S_IXGRP||S_IRWXU||S_IRWXG||S_IRWXO);
@@ -1118,11 +1118,8 @@ Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
 	cout<<"Mean: "<<mean*100<<" +/- " <<sigma*100<<"\t"<<vec.size() << mean<<"/"<<mean2<<endl;
 	return mean;
 }
-
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax, Float_t factor)
 {
-	Float_t mean,sigma;
-	UInt_t nEvents = 0;
 	int verbosity = 0;
 //	Float_t factor = 0.05;//5% bigger INtervall...
 	if(vec.size()==0)
@@ -1159,9 +1156,9 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 		mean2/=(Float_t)n;
 		sigma2/=(Float_t)n;
 
-		mean = 0;
-		sigma = 0;
-		nEvents = 0;
+		Float_t mean=0;
+		Float_t sigma=0;
+		UInt_t nEvents=0;
 		for(UInt_t i=0;i<vec.size();i++){
 			Float_t x = vec.at(i);
 			if(x<xmin||x>xmax)
@@ -1170,7 +1167,6 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 				continue;
 			mean+=x;
 			sigma+=x*x;
-			nEvents++;
 			nEvents++;
 		}
 		mean/=(Float_t)nEvents;
