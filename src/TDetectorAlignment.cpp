@@ -49,7 +49,7 @@ TDetectorAlignment::TDetectorAlignment(){
  * @param src
  * @return pointer to this TDetectorAlignment
  */
-TDetectorAlignment::TDetectorAlignment &TDetectorAlignment::operator=(const TDetectorAlignment::TDetectorAlignment &src){
+TDetectorAlignment &TDetectorAlignment::operator=(const TDetectorAlignment &src){
 	cout<<"COpy consturctor of TDetectorAlignment"<<endl;
 	for(UInt_t plane=0;plane<<6;plane++){
 		xResolution[plane]=src.xResolution[plane];
@@ -122,9 +122,9 @@ void TDetectorAlignment::AddToPhiXOffset(UInt_t plane, Float_t addPhiXOffset)
 		cout<<"\tadd PhiX-Offset of plane "<<plane<<": "<<addPhiXOffset<<endl;//todo
 	}
 	if(verbosity)cout<<det_phix_offset[plane]<<endl;
-	if(verbosity>4&&verbosity%2==1){
+	if(verbosity>4){
 		char t;
-		cout<<"Press a key and enter\t"<<flush;
+		cout<<"Press a key and enter"<<endl;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -139,9 +139,9 @@ void TDetectorAlignment::AddToPhiYOffset(UInt_t plane, Float_t addPhiYOffset)
 		cout<<"\tadd PhiY-Offset of plane "<<plane<<": "<<addPhiYOffset<<endl;//todo
 	}
 	if(verbosity)cout<<det_phiy_offset[plane]<<endl;
-	if(verbosity>4&&verbosity%2==1){
+	if(verbosity>4){
 		char t;
-		cout<<"Press a key and enter.\t"<<flush;;
+		cout<<"Press a key and enter"<<endl;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -157,9 +157,9 @@ void TDetectorAlignment::AddToXOffset(UInt_t plane, Float_t addXOffset)
 		cout<<"\tadd XOffset of plane "<<plane<<": "<<addXOffset<<endl;
 	}
 	if(verbosity)cout<<det_x_offset[plane]<<endl;
-	if(verbosity>4&&verbosity%2==1){
+	if(verbosity>4){
 		char t;
-		cout<<"Press a key and enter\t"<<flush;
+		cout<<"Press a key and enter"<<endl;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -175,9 +175,9 @@ void TDetectorAlignment::AddToYOffset(UInt_t plane, Float_t addYOffset)
 		cout<<"\tadd YOffset of plane "<<plane<<": "<<addYOffset<<endl;
 	}
 	if(verbosity)cout<<det_y_offset[plane]<<endl;
-	if(verbosity>4&&verbosity%2==1){
+	if(verbosity>4){
 		char t;
-		cout<<"Press a key and enter\t"<<flush;
+		cout<<"Press a key and enter"<<endl;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -190,9 +190,9 @@ void TDetectorAlignment::AddToZOffset(UInt_t plane, Float_t addZOffset)
 		vecDetZOffset[plane].push_back(addZOffset);
 		det_z_offset[plane]+=addZOffset;
 	}
-	if(verbosity>4&&verbosity%2==1){
+	if(verbosity>4){
 		char t;
-		cout<<"Press a key and enter\t"<<flush;
+		cout<<"Press a key and enter"<<endl;
 		cin>>t;
 	}
 	UpdateTime(plane);
@@ -318,19 +318,9 @@ Double_t TDetectorAlignment::getZResolution(UInt_t plane)
 	return 2;
 }
 
-void TDetectorAlignment::setResolution(Double_t res, UInt_t plane,TPlaneProperties::enumCoordinate cor){
-	if(res<=0) return;
-	if(cor==TPlaneProperties::XY_COR)
-		return;
-	if(cor==TPlaneProperties::X_COR)
-		setXResolution(res,plane);
-	else
-		setYResolution(res,plane);
-}
+
 void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
 {
-	if(xres<=0)
-		return;
 	printf("Set X-Resolution of Plane %d to %2.6f\n",plane,xres);
 	if(plane<6)
 		xResolution[plane] = xres;
@@ -346,8 +336,6 @@ Double_t TDetectorAlignment::getYResolution(UInt_t plane)
 
 void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)
 {
-	if(resolution<=0)
-		return;
 	printf("Set Y-Resolution of Plane %d to %2.6f\n",plane,resolution);
 	if(plane<6)
 		yResolution[plane] = resolution;

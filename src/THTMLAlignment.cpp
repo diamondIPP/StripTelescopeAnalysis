@@ -86,7 +86,7 @@ void THTMLAlignment::createPostDiamondOverview()
 	Float_t percentage = (Float_t)nDiamondAlignmentEvents/(Float_t)nUsedEvents*100;
 	sectionContent<<"For the diamond Alignment "<<nDiamondAlignmentEvents<<" of "<<nUsedEvents <<" ("<<setprecision(4)<<percentage<<"%) fullfill a  Chi2 cut at ";
 	sectionContent<<(float)((alignment!=0)?alignment->getDiaChi2():-1.)<<".<br><br>\n";
-	sectionContent<<"The diamond is aligned with a digital resoltuion convoluted with a gaus of "<<setprecision(4)<<(float)(alignment!=0?alignment->getXResolution(4):-1)<<" &#956m";
+	sectionContent<<"The diamond is aligned with a digital resoltuion convoluted with a gaus of "<<setprecision(4)<<(float)(alignment!=0?alignment->getXResolution(4)*TPlaneProperties::getStripDistance():-1)<<" &#956m";
 	sectionContent<<" (pure digital resolution: "<<setprecision(4)<<1./TMath::Sqrt(12)*TPlaneProperties::getStripDistance()<<"&#956m)<br><br>\n\n";
 	sectionContent<<center(putImage(".",(string)"hDiamond_PostAlignment_Distribution_DeltaX_-_Plane_4_with_0_1_2_and_3","png",40))<<"<br>\n";
 	sectionContent<<putImage(".",(string)"hDiamond_PostAlignment_ScatterPlot_XMeasured_vs_DeltaX_-_Plane_4_with_0_1_2_and_3","png",33)<<" ";
@@ -162,11 +162,6 @@ void THTMLAlignment::createOverviewTable()
 	sectionContent<<"<p> Alignent of RUN "<<settings->getRunNumber()<<"<br>\n ";
 	sectionContent<<" Made on "<<(string)(alignment!=0?alignment->getLastUpdateTimeAsString():"0 ")<<"<br>\n";
 	sectionContent<<" Used "<<(int)(alignment!=0?alignment->getNUsedEvents():-1)<<"Events for the Alignemnt procedure.<br>\n";
-
-	sectionContent<<"chi2 cut: "<<settings->getAlignment_chi2()<<"<br>\n";
-	sectionContent<<"Used TrainingMethod '";
-	if(settings->getTrainingMethod()==TSettings::enumFraction)sectionContent<<"fraction' with "<<settings->getAlignment_training_track_fraction()*100<<"%. <br>\n";
-	else sectionContent<<"number' with "<<settings->getAlignmentTrainingTrackNumber()<<" used Events.<br>\n";
 	sectionContent<<this->createTable(table)<<endl;
 	this->addSection("Alignment Overview",sectionContent.str());
 }

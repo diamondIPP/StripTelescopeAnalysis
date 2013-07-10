@@ -99,8 +99,8 @@ void TFidCutRegions::Print(int intend)
 	cout<<TCluster::Intent(intend)<<"\tX: "<<getMinFiducialX()<<"-"<<getMaxFiducialX()<<endl;
 	cout<<TCluster::Intent(intend)<<"\tY: "<<getMinFiducialY()<<"-"<<getMaxFiducialY()<<endl;
 
-	if(verbosity >3 &&verbosity%2==1){
-		cout<<"Done\nPress a key...\t"<<flush;
+	if(verbosity >3 ){
+		cout<<"Done\nPress a key..."<<flush;
 		char t;
 		cin>>t;
 	}
@@ -193,7 +193,6 @@ Float_t TFidCutRegions::getMinFiducialX(UInt_t index){
 		return min;
 	}
 	if(index <= getNFidCuts()){
-        //cout<<"GetFidCut: "<<getNFidCuts()<<endl;
 		if (getFidCut(index))
 			return getFidCut(index)->GetXLow();
 	}
@@ -296,8 +295,7 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 	maxY = maxY + (maxY-minY)*.1;
 	if(verbosity)
 		cout<<"Plot range: x: "<<minX<<"-"<<maxX<<",\ty: "<<minY<<"-"<<maxY<<endl;
-	if(verbosity>3&&verbosity%2==1){
-		cout<<"\tPress a key and enter to confirm.\t"<<flush;
+	if(verbosity>3){
 		char t;
 		cin >>t;
 	}
@@ -308,11 +306,11 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 		htemp->GetYaxis()->SetRangeUser(minY,maxY);
 	}
 	for(UInt_t i=0;i<fidCuts.size();i++)
-		getFiducialAreaCut(i)->Draw("same");
+		getFiducialAreaPaveText(i)->Draw("same");
 	return c1;
 }
 
-TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
+TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
 {
 	if (nFidCut>=fidCuts.size())
 		return 0;
@@ -320,27 +318,14 @@ TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 	Float_t xHigh = fidCuts.at(nFidCut)->GetXHigh();
 	Float_t yLow = fidCuts.at(nFidCut)->GetYLow();
 	Float_t yHigh = fidCuts.at(nFidCut)->GetYHigh();
-	cout<<"getting fitucial Area for "<<nFidCut<<": ";
-	cout<<TString::Format("X: %.1f-%.1f, Y: %.1f-%.1f",xLow,xHigh,yLow,yHigh);
-	TString name = TString::Format("fidCut_%d",nFidCut);
-	TCutG * pt = new TCutG(name,5);
-	pt->SetPoint(0,xLow,yLow);
-	pt->SetPoint(1,xLow,yHigh);
-	pt->SetPoint(2,xHigh,yHigh);
-	pt->SetPoint(3,xHigh,yLow);
-	pt->SetPoint(4,xLow,yLow);
-	//(xLow,yLow,xHigh,yHigh);
+	TPaveText * pt = new TPaveText(xLow,yLow,xHigh,yHigh);
 	if(index == nFidCut + 1||index == 0){
 		pt->SetFillColor(kRed);
-		pt->SetLineColor(kRed);
-		pt->SetLineWidth(3);
 		pt->SetFillStyle(3013);
 	}
 	else{
 		pt->SetFillColor(kOrange);
 		pt->SetFillStyle(3013);
-		pt->SetLineColor(kOrange);
-		pt->SetLineWidth(3);
 	}
 	return pt;
 }
@@ -398,8 +383,6 @@ void TFidCutRegions::createFidCuts(){
 
 TFiducialCut* TFidCutRegions::getFidCut(UInt_t index){
 	if (index>getNFidCuts()&&index>0)
-		return NULL;
-	if(index==0)
 		return NULL;
 	return fidCuts.at(index-1);
 }
@@ -469,13 +452,8 @@ std::vector< std::pair< Float_t,Float_t> > TFidCutRegions::findFiducialCutInterv
 
 TCanvas *TFidCutRegions::getFiducialCutCanvas(TPlaneProperties::enumCoordinate cor){
 	if(hEventScatterPlot==0) {
-		cout<<"hEventScatterPlot is Zero!!!!!";
-		if(verbosity%2==1){
-			cout<<"Press any Key to Continue."<<endl;
-			char t; cin>>t;
-		}
-		else
-			cout<<endl;
+		cout<<"hEventScatterPlot is Zero!!!!! Press any Key to Continue."<<endl;
+		char t; cin>>t;
 		return 0;
 	}
 	if(hEventScatterPlot->IsZombie())return 0;
@@ -509,21 +487,14 @@ TCanvas *TFidCutRegions::getFiducialCutProjectionCanvas(TH1D* hProj,std::vector<
 	TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
 	c1->cd();
 	hProj->Draw();
-	vector<TCutG* > boxes;
+	vector<TBox* > boxes;
 	for(UInt_t i=0;i<intervals.size();i++){
-		TString name = TString::Format("cut_%s_interval_%d",hProj->GetName(),i);
-		TCutG *box = new TCutG(name,5);
-		//TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
-		box->SetPoint(0,intervals.at(i).first,0);
-		box->SetPoint(1,intervals.at(i).first,hProj->GetMaximum());
-		box->SetPoint(2,intervals.at(i).second,hProj->GetMaximum());
-		box->SetPoint(3,intervals.at(i).second,0);
-		box->SetPoint(4,intervals.at(i).first,0);
+		TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
 		box->SetFillColor(kRed+i);
 		box->SetFillStyle(3013);
-//		box->AddText("");
-//		box->AddText("");
-//		box->AddText(Form("Area\n\n%i",i));
+		box->AddText("");
+		box->AddText("");
+		box->AddText(Form("Area\n\n%i",i));
 		boxes.push_back(box);
 		box->Draw("same");
 	}

@@ -9,16 +9,14 @@
 
 #include "../include/TClustering.hh"
 
-TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
+TClustering::TClustering(TSettings* settings){//int runNumber,int seedDetSigma,int hitDetSigma,int seedDiaSigma, int hitDiaSigma) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*************TClustering::TClustering*********************"<<endl;
 	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
-	if(set==0){
-		cerr<< "Settings ==0 , exit"<<endl;
-		exit(-1);
-	}
-	setSettings(set);
+	if(settings==0)
+		settings=new TSettings();
+	setSettings(settings);
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
 	settings->goToPedestalTreeDir();
@@ -31,7 +29,7 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 	histSaver->SetRunNumber(runNumber);
 	settings->goToPedestalTreeDir();
 	this->runNumber=runNumber;
-	verbosity=settings->getVerbosity();
+	verbosity=0;
 	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
@@ -40,17 +38,15 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
 		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
 	}
-	nInvalidReadout=0;
 }
 
 TClustering::~TClustering() {
 	clusterFile->cd();
 	if(clusterTree!=NULL&&this->createdTree){
-		cout<<"Invalid readouts: "<<nInvalidReadout<<endl;
 		if(verbosity)cout<<"CLOSING TREE"<<endl;
-		if(verbosity)cout<<"pedestalTree"<<" "<<settings->getPedestalTreeFilePath()<<" "<<filepath.str().c_str()<<endl;
+		if(verbosity)cout<<"pedestalTree"<<" "<<filepath.str().c_str()<<endl;
 		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
-		if(verbosity)cout<<"rawTree"<<" "<<settings->getRawTreeFilePath()<<" "<<rawFilePath.str().c_str()<<endl;
+		if(verbosity)cout<<"rawTree"<<" "<<rawFilePath.str().c_str()<<endl;
 		clusterTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 		if(verbosity)cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 		clusterTree->Write();
@@ -100,7 +96,7 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 			validEvents++;
 	}
 
-	cout<<"nvalid Events: "<<validEvents<<" of "<<nEvents<<endl;
+	cout<<"'nvalid Events: "<<validEvents<<" of "<<nEvents<<endl;
 }
 
 void TClustering::clusterEvent()
@@ -139,10 +135,6 @@ void TClustering::clusterEvent()
 		//		}
 		cout<<endl;
 	}
-	if(pEvent->hasInvalidReadout()){
-		if(verbosity>4)cout<<nEvent<<": InvalidReadout"<<endl;
-		nInvalidReadout++;
-	}
 
 }
 
@@ -163,7 +155,7 @@ void TClustering::clusterDetector(UInt_t det){
 		//if(verbosity>9&&nEvent==0&&det==8&&ch<128)cout<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
 		//if(det==8)cout<<nEvent<<" # "<<det<<" # "<<ch<<" "<<signal<<" "<<sigma<<" "<<endl;
 		if(sigma==0){
-			if(verbosity>8 ||(det ==8 && verbosity>3))cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
+			if(verbosity>1)cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
 			continue;
 		}
 		Float_t SNR=eventReader->getSignalInSigma(det,ch);
@@ -172,12 +164,12 @@ void TClustering::clusterDetector(UInt_t det){
 
 
 		if( SNR>settings->getClusterSeedFactor(det,ch)){
-			if(verbosity>8||(det ==8 && verbosity>3))cout<<"Found a Seed "<<nEvent<<" "<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
+			if(verbosity>3)cout<<"Found a Seed "<<nEvent<<" "<<eventReader->getCurrent_event() <<" "<<det<<" "<<ch<<" "<<signal<<" "<<SNR<<" "<<flush;
 			ch=combineCluster(det,ch);
-			if(verbosity>20||(det ==8 && verbosity>5))cout<<"new channel no.:"<<ch<<flush;
+			if(verbosity>20)cout<<"new channel no.:"<<ch<<flush;
 		}
 	}
-	if(verbosity>8||(det ==8 && verbosity>3))cout<<endl;
+	if(verbosity>3)cout<<endl;
 
 }
 
@@ -198,7 +190,7 @@ void TClustering::clusterDetector(UInt_t det){
  *
  * 			\return first channel which is not part of the cluster
  */
-int TClustering::combineCluster(UInt_t det, UInt_t ch){
+int TClustering::combineCluster(int det, int ch){
 	int maxAdcValue = TPlaneProperties::getMaxSignalHeight(det);
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"combine Cluster...start:"<<ch<<" ";
 
@@ -211,7 +203,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	//create Cluster
 	int seedSigma=settings->getClusterSeedFactor(det,ch);
 	int hitSigma=settings->getClusterHitFactor(det,ch);
-	bool isScreened=false;
+	bool isScreened;
 	int maxChannel=TPlaneProperties::getNChannels(det);
 
 	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel,cmNoise);
@@ -219,7 +211,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>10)cout<<cluster.size()<<" ";
 	UInt_t currentCh;
-	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0&&currentCh<=TPlaneProperties::getNChannels(det);currentCh--){
+	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0;currentCh--){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
 		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";
@@ -278,7 +270,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	vecCluster[det].push_back(cluster);
 	nClusters[det]++;
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"\tclusterSize: "<<cluster.size()<<endl;
-	if(verbosity>8||(det ==8 && verbosity>3))cluster.Print();
+	if(verbosity>1)cluster.Print();
 	return currentCh;
 }
 
@@ -362,7 +354,18 @@ void TClustering::saveEtaCorrections(){
 	for(UInt_t det=0;det<9;det++){
 		stringstream histName;
 		histName<<"hEtaIntegral_"<<det;
-		TH1F *histo= createEtaIntegral(hEtaDistribution[det],histName.str());
+		UInt_t nBins = hEtaDistribution[det]->GetNbinsX();
+		TH1F *histo=new TH1F(histName.str().c_str(),histName.str().c_str(),nBins,0,1);
+		Int_t entries = hEtaDistribution[det]->GetEntries();
+		entries -=  hEtaDistribution[det]->GetBinContent(0);
+		entries -=  hEtaDistribution[det]->GetBinContent(nBins+1);
+		Int_t sum =0;
+		for(UInt_t bin=1;bin<nBins+1;bin++){
+			Int_t binContent = hEtaDistribution[det]->GetBinContent(bin);
+			sum +=binContent;
+			Float_t pos =  hEtaDistribution[det]->GetBinCenter(bin);
+			histo->Fill(pos, (Float_t)sum/(Float_t)entries);
+		}
 		file->cd();
 		histo->Write();
 		hEtaDistribution[det]->Write();

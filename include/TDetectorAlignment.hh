@@ -93,7 +93,6 @@ public:
   Double_t getXResolution(UInt_t plane);
   Double_t getZResolution(UInt_t plane);
   void setXResolution(Double_t xRes,UInt_t plane);
-  void setResolution(Double_t xRes, UInt_t plane,TPlaneProperties::enumCoordinate cor);
   Double_t getXMean(UInt_t plane);
   void setXMean(Double_t xMean,UInt_t plane);
 

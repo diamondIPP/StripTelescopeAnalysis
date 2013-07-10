@@ -82,4 +82,4 @@ struct RZEvent
 };
 
 //end of structure declaration
-#endif
+#endif //RZEVENT_STRUCT_HH_

@@ -33,9 +33,6 @@
 #include <sys/stat.h>
 
 class TSettings:public TObject {
-public:
-	enum alignmentMode {normalMode=0,transparentMode=1};
-	enum enumRunDescription {leftDia=1,rightDia=2,allDia=0,unknown=-1};
 private:
 	std::string runDescription;
 	std::string outputDir;
@@ -50,42 +47,38 @@ public:
 	std::string getRawTreeFilePath();
 	std::string getPedestalTreeFilePath();
 	std::string getClusterTreeFilePath();
-	std::string getAlignmentFilePath(TSettings::alignmentMode mode = TSettings::normalMode);
+	std::string getAlignmentFilePath();
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
-	std::string getCrossTalkFactorsFileName();
+
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
 	std::string getEtaDistributionPath(Int_t step=-1);
-	std::string get3dDiamondTreeFilePath();
-	std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
-	std::string getResultsRootFilePath();
+    std::string get3dDiamondTreeFilePath();
+    std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
 	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
 	void goToClusterTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
 	void goToSelectionTreeDir();
 	void goToOutputDir();
 	void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
-	void goToAlignmentRootDir(alignmentMode mode = normalMode){goToDir(this->getAbsoluteOuputPath(false));}
+	void goToAlignmentRootDir(){goToDir(this->getAbsoluteOuputPath(false));}
 
 
-	void goTo3dDiamondTreeDir();
-	void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
+    void goTo3dDiamondTreeDir();
+    void goTo3dDiamondAnalysisDir(){goToDir(this->get3dDiamondAnalysisPath());}
 	void goToPedestalAnalysisDir();
 	void goToClusterAnalysisDir();
 	void goToSelectionDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selections/"));}
 	void goToSelectionAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/selectionAnalysis/"));}
-	void goToAlignmentDir(alignmentMode mode =normalMode);
+	void goToAlignmentDir(){goToDir(this->getAbsoluteOuputPath(true).append("/alignment/"));}
 	void goToAlignmentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/anaAlignmnet/"));}
 	void goToTransparentAnalysisDir(){goToDir(this->getAbsoluteOuputPath(true).append("/transparentAnalysis/"));}
-	std::string getTransparentAnalysisDir(TSettings::alignmentMode mode = TSettings::normalMode);
-
-	std::string getClusterAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/clustering/");}
+	std::string getTransparentAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/transparentAnalysis/");}
 	std::string getToPedestalAnalysisDir(){return this->getAbsoluteOuputPath(true).append("/pedestalAnalysis/");}
-	std::string getAlignmentDir(TSettings::alignmentMode mode = normalMode);
+	std::string getAlignmentDir(){return this->getAbsoluteOuputPath(true).append("/alignment/");};
 	std::string getAlignmentAnalysisFilePath(){return this->getAbsoluteOuputPath(true).append("/anaAlignmnet/");};
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 
-	enumRunDescription getAnalysedDiamond();
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
@@ -100,9 +93,8 @@ public:
 	void setRunDescription(std::string runDescription);
 	void setOutputDir(std::string ouputDir){this->outputDir=outputDir;}
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
-	bool is3dDiamond(){return b3dDiamond;};
-	bool b3dDiamond;
-	bool doTransparentAlignmnet()const {return bTransparentAlignment;}
+    bool is3dDiamond(){return b3dDiamond;};
+    bool b3dDiamond;
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -144,10 +136,6 @@ public:
 	Float_t getEta_hiq_slice_low() const;
 	Float_t getEta_lowq_slice_hi() const;
 	Float_t getEta_lowq_slice_low() const;
-	UInt_t getMaxAllowedClustersize(UInt_t det);
-
-	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
-
 	std::vector<Float_t> getAlignment_phi_offsets() const;
 	std::vector<Float_t> getAlignment_x_offsets() const;
 	std::vector<Float_t> getAlignment_y_offsets() const;
@@ -157,7 +145,6 @@ public:
 	Float_t getAlignment_training_track_fraction() const;
 	ChannelScreen getDet_channel_screen(int i);
 	bool isDet_channel_screened(UInt_t det,UInt_t ch);
-	UInt_t getNoisePlotChannel(){return 48;}//todo: variable in setttings file
 	std::vector<int> getDet_channel_screen_channels(int i) const;
 	std::vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
@@ -173,8 +160,6 @@ public:
 	std::vector<int> getSingle_channel_analysis_channels();
 	float getStore_threshold();
 	UInt_t getRunNumber();
-
-	bool isAsymmetricSample(){return bAsymmetricSample;};
 
 	void setAlignment_training_track_fraction(Float_t alignment_training_track_fraction);
 	void setFix_dia_noise(float fix_dia_noise);
@@ -277,41 +262,31 @@ public:
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
 	bool resetAlignment() const{return bResetAlignment;};
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
-	Int_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
+	Int_t getNDiaDetectorAreas(){return vecDiaDetectorAreasInChannel.size();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
 	TFidCutRegions* get3dFidCuts(){return fidCuts3D;};
 	Float_t getMinDiamondChannel();
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
-	int getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verbosity = 0);
+	int getDiaDetectorAreaOfChannel(Int_t ch);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
 	bool hasBorderSeed(UInt_t det, TCluster cluster);
 	bool hasBorderHit(UInt_t det, TCluster cluster);
 	Float_t getSiliconPitchWidth(){return this->pitchWidthSil;}
 	Float_t getDiamondPitchWidth(){return this->pitchWidthDia;}
-	Float_t getPitchWidth(UInt_t det, UInt_t area =0);
 	Float_t convertChannelToMetric(UInt_t det, Float_t channel);
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);
 	Float_t getChi2Cut3D(){return chi2Cut3D;}
-	Float_t getMinimalAbsoluteEtaValue(){return minAbsEtaVal;}
-	void setMinimalAbsoluteEtaValue(Float_t minAbsEtaVal) {this->minAbsEtaVal = minAbsEtaVal;}
-	bool isUseUserResolutionInput() const {return bUseUserResolutionInput;}
-	void setUseUserResolutionInput(bool useUserResolutionInput) {bUseUserResolutionInput = useUserResolutionInput;}
-	Float_t GetDefaultResolutionX(UInt_t plane){if(plane<9)return alignment_resolutions.at(plane*2);return 0;}
-	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 0;};
-	//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
-	//	int getAreaOfInterest(){return inde
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3D;
 protected:
 	float store_threshold;
 private:
-	Float_t minAbsEtaVal;
-	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandardArea;
+	bool isStandardSelectionFidCut,isStandard3dFidCut;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
@@ -338,17 +313,12 @@ private:
 	bool Parse(std::string key, std::string value, UInt_t &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
 
-	void LoadDefaultResolutions();
-
 private:
 	std::string path;
 	std::string fileName;
 	TSystem *sys;
 	TFile *settingsFile;
 private:
-	bool bUseUserResolutionInput;
-	bool bTransparentAlignment;
-	bool bAsymmetricSample;
 	Float_t chi2Cut3D;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
@@ -395,12 +365,10 @@ private:
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
 
-
 	std::vector<Float_t> alignment_x_offsets;
 	std::vector<Float_t> alignment_y_offsets;
 	std::vector<Float_t> alignment_phi_offsets;
 	std::vector<Float_t> alignment_z_offsets;
-	std::vector<Float_t> alignment_resolutions;
 	std::vector<Int_t> alignmentFidCuts;
 
 	Float_t alignment_training_track_fraction;
@@ -456,12 +424,11 @@ public:
 	TDiamondPattern diamondPattern;
 private:
 	int verbosity;
-	Float_t silPitchWidth;
-	Float_t diaPitchWidth;
-	Float_t diaOffsetMetricSpace;
-	Float_t diaStartingChannel;
+       Float_t silPitchWidth;
+       Float_t diaPitchWidth;
+       Float_t diaOffsetMetricSpace;
+       Float_t diaStartingChannel;
 
-	ClassDef(TSettings,5)
-
+	ClassDef(TSettings,4);
 };
 #endif

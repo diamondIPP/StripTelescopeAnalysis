@@ -22,7 +22,7 @@ THTMLGenerator::THTMLGenerator(TSettings* newSettings) {
 }
 
 THTMLGenerator::~THTMLGenerator() {
-	if(verbosity)cout<<"delete HTML GEN"<<endl;
+	cout<<"delete HTML GEN"<<endl;
 }
 
 
@@ -32,7 +32,7 @@ void THTMLGenerator::generateHTMLFile(){
 	stringstream htmlOutputFileName;
 	if(verbosity>2)cout<<"FILE: "<<fileName<<endl;
 	htmlOutputFileName<<fileGenPath<<"/"<<	fileName;
-	if(verbosity)cout<<"create HTML file: \""<<htmlOutputFileName.str()<<"\""<<endl;
+	cout<<"create HTML file: \""<<htmlOutputFileName.str()<<"\""<<endl;
 	html_summary.open(htmlOutputFileName.str().c_str());
 	generatorHTMLHeader();
 	generateHTMLTail();
@@ -237,24 +237,24 @@ std::string THTMLGenerator::floatToString(Float_t value, UInt_t precision)
 }
 
 
-std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string name, std::string ending, std::string type,int percentage){
-	cout<<"add all images for "<<name<<"DXX"<<ending<<" at path: "<<path<<endl;
+std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string name, std::string type,int percentage){
+	cout<<"add all images for "<<name<<" at path: "<<path<<endl;
 	stringstream output;
 	output<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name2;
-		name2<<name<<TPlaneProperties::getStringForDetector(det)<<ending;
+		name2<<name<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path,name2.str());
 	}
 	output<<"\n<br\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name2;
-		name2<<name<<TPlaneProperties::getStringForDetector(det)<<ending;
+		name2<<name<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path,name2.str());
 	}
 	output<<"\n<br>\n\t";
 	stringstream name2;
-	name2<<name<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond())<<ending;
+	name2<<name<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
 	output<<putImage(path,name2.str());
 	return (output.str());
 }

@@ -64,7 +64,7 @@ public:
 	std::string putImageOfPath(std::string name, std::string type="png",int sizeInPercentage=20){return putImage(path,name,type,sizeInPercentage);};
 protected:
 	std::string fileGenPath;
-	std::string putImagesOfAllDetectors(std::string path,std::string name, std::string ending ="",std::string type="png", int percentage =20);
+	std::string putImagesOfAllDetectors(std::string path,std::string name, std::string type="png", int percentage =20);
 	std::string putLink(std::string link,std::string content);
 	TSettings* settings;
 	UInt_t verbosity;

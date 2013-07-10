@@ -90,8 +90,6 @@ public:
 	Float_t getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPred);
 	Float_t getXPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
 	Float_t getYPositionInDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
-	Float_t getXPositionInStripDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
-	Float_t getYPositionInStripDetSystem(UInt_t plane, Float_t xPred, Float_t yPred);
 	void setEtaIntegral(UInt_t det,TH1F* histo);
 	TH1F* getEtaIntegral(UInt_t det);
 

@@ -37,15 +37,19 @@ public:
 	virtual bool LoadEvent(UInt_t EventNumber);
 	Long64_t GetEntries();
 	bool isOK();
-	//    bool getCMNEvent_flag() const;
+//    bool getCMNEvent_flag() const;
 	bool isValidTrack();
-	Int_t getAdcValue(UInt_t det,UInt_t ch);
+  Int_t getAdcValue(UInt_t det,UInt_t ch);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected=false);
+//	Float_t getSignalInSigma(UInt_t det,UInt_t ch){return getSignalInSigma(det,ch,bCMNoiseCorrected);};
+//	Float_t getSignal(UInt_t det,UInt_t ch){return getSignal(det,ch,bCMNoiseCorrected);}
 	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);
+//	Float_t getRawSignal(UInt_t det,UInt_t ch) {return getRawSignal(det,ch,bCMNoiseCorrected);};
 	Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected=false);
+//  Float_t getRawSignalInSigma(UInt_t det,UInt_t ch){return getRawSignalInSigma(det,ch,bCMNoiseCorrected);}
 	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected=false);
-	inline Float_t getCMNoise() const {return cmNoise;};
-	inline bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
+	Float_t getCMNoise() const {return cmNoise;};
+	bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
 	UInt_t getCurrent_event() const;
 	UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
 	UChar_t getDet_Channels(UInt_t i , UInt_t j) const;
@@ -76,19 +80,17 @@ public:
 	UInt_t getNDiamondClusters();
 	bool isInFiducialCut();
 	bool isInCurrentFiducialCut();
-	bool isInOneFiducialArea();
-
 	bool isDetMasked();
 	TEvent* getEvent();
 	void setVerbosity(UInt_t verbosity);
-	inline bool useForAlignment(){/*cout<<event_number<<" "<<bUseForAlignment<<endl;*/return this->bUseForAlignment;};
-	inline bool useForSiliconAlignment(){return this->bUseForSiliconAlignment;};
-	inline bool useForAnalysis(){return this->bUseForAnalysis;};
+	bool useForAlignment(){/*cout<<event_number<<" "<<bUseForAlignment<<endl;*/return this->bUseForAlignment;};
+	bool useForSiliconAlignment(){return this->bUseForSiliconAlignment;};
+	bool useForAnalysis(){return this->bUseForAnalysis;};
 	TH1F* getEtaIntegral(UInt_t det);
-	inline Float_t getCmnCreated(UInt_t det){if(det>=0&&det<9)return this->cmnCreated[det];return 0;}
-	inline Int_t getFiducialRegion(){return fiducialRegion;}
-	inline Float_t getFiducialValueX(){return fiducialValueX;}
-	inline Float_t getFiducialValueY(){return fiducialValueY;}
+	Float_t getCmnCreated(UInt_t det){if(det>=0&&det<9)return this->cmnCreated[det];return 0;}
+	Int_t getFiducialRegion(){return fiducialRegion;}
+	Float_t getFiducialValueX(){return fiducialValueX;}
+	Float_t getFiducialValueY(){return fiducialValueY;}
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
@@ -98,14 +100,14 @@ private:
 	void LoadEtaDistributions(UInt_t runNumber);
 public:
 	void setEtaDistributionPath(std::string path);
-	inline std::string getEtaDistributionPath() const {return etaDistributionPath;}
+	std::string getEtaDistributionPath() const {return etaDistributionPath;}
 private:
 	std::string etaDistributionPath;
 	std::string fileName;
 	UInt_t run_number;
 	UInt_t event_number;
 	Float_t store_threshold;
-	//	bool CMNEvent_flag;
+//	bool CMNEvent_flag;
 	bool ZeroDivisorEvent_flag;
 	UInt_t Det_NChannels[9];
 	UChar_t Det_Channels[9][256];
@@ -115,10 +117,10 @@ private:
 	Float_t Det_PedWidth[9][256];
 	Float_t pedestalMean[8][256];
 	Float_t pedestalSigma[8][256];
-	Float_t diaPedestalMean[128];
-	Float_t diaPedestalSigma[128];
-	Float_t diaPedestalMeanCMN[128];
-	Float_t diaPedestalSigmaCMN[128];
+  Float_t diaPedestalMean[128];
+  Float_t diaPedestalSigma[128];
+  Float_t diaPedestalMeanCMN[128];
+  Float_t diaPedestalSigmaCMN[128];
 	Float_t cmNoise;
 	Float_t cmnCreated[9];
 	bool bCMNoiseCorrected;

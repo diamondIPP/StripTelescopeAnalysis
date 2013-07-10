@@ -17,9 +17,9 @@ INCLUDEDIR      := include
 OBJDIR			:= obj
 LIBDIR			:= ~/lib
 
-DEBUG			:= -g3
-OPTIMAZATIONFLAG :=	-O2 $(DEBUG)
-CFLAGS  		:= -Wall -I$(INCLUDEDIR) -D_REENTRANT 
+
+OPTIMAZATIONFLAG :=	-O0 -g3
+CFLAGS  		:= -g3 -Wall -I$(INCLUDEDIR) -D_REENTRANT 
 CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
 
 
@@ -30,7 +30,7 @@ HEAD    		:=
 
 LD              := g++
 
-LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib $(DEBUG) $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
+LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib -g $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
 LIBFILES		+=  TDetector_Data.o TTrigger_Event.o
@@ -41,7 +41,7 @@ LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTracking.o
 LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.o
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
-LIBFILES		+=  THTMLSelectionAnalysis.o TAnalysisOfAsymmetricEta.o
+LIBFILES		+=  THTMLSelectionAnalysis.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 
 LIBFILES		+=	libTEvent.so
@@ -55,23 +55,22 @@ ROOTHFILES		+= TCluster.hh TPlane.hh TDetectorAlignment.hh TEvent.hh TResults.hh
 ROOTHFILES		+= TChannelMapping.hh ChannelScreen.hh TSettings.class.hh TDiamondPattern.hh TFiducialCut.hh
 ROOTHFILES		+= TEventLinkDef.h 
 
-#all: rootclean diamondAnalysis
-all: diamondAnalysis
+all: rootclean diamondAnalysis
+
 #all: $(OBJ) $(HEAD) makefile
 #	$(CC) $(CFLAGS) $(LDFLAGS) $(ROOTGLIBS) $(OBJ) -o diamondAnalysis 
 	
 	
 	
-#diamondAnalysis: $(LIBFILES)
-#		# @echo "TEST\n\n" 
-#		
-#        #
+diamondAnalysis: $(LIBFILES)
+		# @echo "TEST\n\n" 
+		# Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
+        #
         
-$(PROGS): $(LIBFILES)
+$(PROGS):
         #
         # linking $@
         #
-        # Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
 		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
 		@echo  "\n\nPlease do: export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:~/lib"
 

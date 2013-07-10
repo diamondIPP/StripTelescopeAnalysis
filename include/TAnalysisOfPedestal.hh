@@ -23,8 +23,6 @@
 #include <cstring>
 #include <vector>
 #include <deque>
-#include <algorithm>
-#include <set>
 
 #include "TSystem.h"
 #include "TH1F.h"
@@ -32,8 +30,6 @@
 #include "TF1.h"
 #include "TGraphErrors.h"
 #include "TStopwatch.h"
-#include "TMultiGraph.h"
-
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
 #include "THTMLPedestal.hh"
@@ -52,20 +48,20 @@ public:
 	void setResults(TResults* results){this->res=results;};
 	void	doAnalysis(UInt_t nEvents=0);
 private:
-
-	void initialiseHistos();
+	void analyseEvent();
+	TResults *res;
+	void updateMeanCalulation();
+	void createPedestalMeanHistos();
 	void saveHistos();
 	void savePHinSigmaHistos();
 	Float_t findYPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
-	void createPedestalMeanHistos();
-private:
-	void analyseEvent();
-	void updateMeanCalulation(UInt_t det,UInt_t ch);
-	void checkForDeadChannels(UInt_t det,UInt_t ch);
-    void analyseBiggestHit(UInt_t det,bool CMN_corrected=false);
-    void findBiggestSignalInDet(UInt_t det, UInt_t ch);
-private:
-	TResults *res;
+	void checkForDeadChannels();
+	void analyseForSeeds();
+	void getBiggestHit();
+	void initialiseHistos();
+	void checkForSaturatedChannels();
+//	void analyseCluster();
+    void analyseBiggestHit(bool CMN_corrected=false);
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
 	TH1F *hSeedMap2[9];
@@ -100,50 +96,7 @@ private:
 	TH1F *hAllAdcNoise[9];
 	TH1F *hDiaAllAdcNoise;
 	TH1F *hDiaAllAdcNoiseCMN;
-	vector <Float_t> adcValues;
-	vector <Float_t> pedestalValues;
-	vector <Float_t> upperHitCutValues;
-	vector <Float_t> lowerHitCutValues;
-	vector <Float_t> upperSeedCutValues;
-	vector <Float_t> lowerSeedCutValues;
-	vector <Float_t> pedestalValuesCMN;
-	vector <Float_t> upperHitCutValuesCMN;
-	vector <Float_t> lowerHitCutValuesCMN;
-	vector <Float_t> upperSeedCutValuesCMN;
-	vector <Float_t> lowerSeedCutValuesCMN;
-	vector <Float_t> eventNumbers;
-private:
-	Float_t numberOfSeeds;
-	Float_t sumPed;
-	Float_t sumPedCMN;
-	Float_t sumNoise;
-	Float_t sumNoiseCMN;
-	int nSumPed;
-	int nSumPedCMN;
-	int nSumNoiseCMN;
-	int nSumNoise;
 
-	Float_t biggestSignal;
-	UInt_t biggestHitChannel;
-	Float_t biggestSignalCMN;
-	UInt_t biggestHitChannelCMN;
-
-	Float_t cmNoise;
-
-	UInt_t adc;
-	Float_t snr;
-	Float_t sigma;
-	Float_t sigmaCMN;
-
-	Float_t pedestal;
-	Float_t noise;
-	Float_t signal;
-
-	Float_t signalCMN;
-	Float_t pedestalCMN ;
-	Float_t noiseCMN;
-	Float_t cmn;
-	bool isSaturated;
 private:
 	std::vector< std::vector<Float_t> > pedestalMeanValue,pedestalSigmaValue;
 	std::vector< std::vector<UInt_t> > nPedestalHits;
@@ -165,12 +118,11 @@ private:
 
 	std::vector<Float_t>vecBiggestSignalInSigmaCMN[N_DETECTORS];
 	std::vector<Int_t> vecBiggestHitChannelCMN[N_DETECTORS];
-	std::vector<Float_t>vecBiggestAdjacentSignalInSigmaCMN[N_DETECTORS];
+	std::vector<Float_t>vecBiggestAdjacentSignalCMN[N_DETECTORS];
 	std::vector<Int_t> vecBiggestAdjacentHitChannelCMN[N_DETECTORS];
 
 	std::vector<Int_t> vecHitOrder[N_DETECTORS];
 	std::vector< std::vector<UInt_t> > diaRawADCvalues; //vector of vector of adc Value (ch, eventNo)
-	std::vector< std::set <UInt_t> > invalidBiggestHitChannels;
 	THTMLPedestal *htmlPedestal;
 };
 

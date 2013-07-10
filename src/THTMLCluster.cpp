@@ -60,13 +60,6 @@ void THTMLCluster::createEtaDistributions()
 	sectionContent.str("");
 	sectionContent<<putImagesOfAllDetectors(path,"hEtaIntegral_");
 	this->addSection("Eta Integrals",sectionContent.str());
-
-
-	//c_hAsymmetricEtaFinal_
-	sectionContent.clear();
-	sectionContent.str("");
-	sectionContent<<putImagesOfAllDetectors(path,"c_hAsymmetricEtaFinal_","All");
-	this->addSection("Cross Talk Corrected Eta Distributions",sectionContent.str());
 }
 
 void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
@@ -86,7 +79,7 @@ void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
 	}
 	sectionContent<<createTable(vecTable);
 	sectionContent<<"\n\n<br><br>\n\n";
-	sectionContent<<this->putImagesOfAllDetectors(path,"c_hPulseHeightDistribution_allClusterSizes_");
+	sectionContent<<this->putImagesOfAllDetectors(path,"hPulseHeightDistribution_allClusterSizes_");
 	addSection("Pulse Height Distribution",sectionContent.str());
 }
 

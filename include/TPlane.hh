@@ -54,16 +54,12 @@ public:
     enum TPlaneProperties::enumDetectorType getDetectorType() const;
     void setDetectorType(TPlaneProperties::enumDetectorType type);
     void Print(UInt_t level=0);
-    void SetClusters(vector<TCluster> xClusters, vector<TCluster> yClusters);
-    void SetXClusters(vector<TCluster> xClusters);
-    void SetYClusters(vector<TCluster> yClusters);
-    bool hasInvalidReadout();
 private:
     TPlaneProperties::enumDetectorType type;
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-    ClassDef(TPlane,9);
+    ClassDef(TPlane,8);
 };
 
 #endif // TPlane_hh

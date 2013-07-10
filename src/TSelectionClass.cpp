@@ -693,8 +693,8 @@ void TSelectionClass::createFiducialCut(){
 	histSaver->SaveCanvas(c1);
 	if(verbosity)
 		fiducialCuts->Print(1);
-	if (verbosity>3&&verbosity%2==1){
-		cout<<"Press a key and enter to continue..."<<flush;
+	if (verbosity>3){
+		cout<<"Press a key and enter...<"<<flush;
 		char t;
 		cin >>t;
 	}

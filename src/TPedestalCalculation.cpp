@@ -482,14 +482,12 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 		diaPedestalSigmaCMN[ch] = values.second;
 		if(ch==7&&verbosity>4){
 			//      cout<<"PEDESTAL: ch: "<<ch<<" "<<values.first<<" "<<values.second<<endl;
-			for(UInt_t i=0;i<diaAdcValues[ch].size()&&i<diaAdcValuesCMN[ch].size();i++){
+			for(UInt_t i;i<diaAdcValues[ch].size()&&i<diaAdcValuesCMN[ch].size();i++){
 				cout<<" "<<setw(3)<<i<<"  "<<diaAdcValues[ch].at(i)<<" "<<diaEventUsed[ch].at(i)<<" "<<diaAdcValuesCMN[ch].at(i)<<" "<<diaEventUsedCMN[ch].at(i)<<" ";
 				cout<<std::setw(5)<<(diaAdcValues[ch].at(i)-diaAdcValuesCMN[ch].at(i))<<" "<<cmNoise<<" "<<diaEventsInSum[ch]<<" "<<diaEventsInSumCMN[ch]<<endl;
 			}
-			if(verbosity%2==1){
-			cout<<"press a key and enter to continue..."<<endl;
+			cout<<"press a key and enter..."<<endl;
 			char t; cin>>t;
-			}
 		}
 	}
 	for(nEvent = 0; nEvent<slidingLength;nEvent++){
