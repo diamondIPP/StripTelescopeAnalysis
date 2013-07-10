@@ -19,7 +19,7 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#define TCLUSTER_REV  39
+#define TCLUSTER_REV  40
 #define INVALID_POSITION -9999
 using namespace std;
 class TCluster :public TObject{
@@ -87,6 +87,8 @@ public:
     UInt_t getHighestHitClusterPosition();
     UInt_t getClusterPosition(UInt_t channelNo);
     UInt_t getChannel(UInt_t clusterPos);
+    UInt_t getFirstHitChannel();
+    UInt_t getLastHitChannel();
 //    Float_t getPedestalSigma(UInt_t clusterPos);
 //    Float_t getPedestalMean(UInt_t clusterPos);
     int getHitSigma() const;
