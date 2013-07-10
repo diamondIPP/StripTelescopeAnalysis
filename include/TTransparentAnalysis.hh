@@ -32,10 +32,13 @@
 #include "TSystem.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TFitResult.h"//TFitResultPtr.h"
 //#include "TGraph.h"
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TPaveText.h"
+#include "TList.h"
+#include "TPolyMarker.h"
 //#include "FidCutRegion.hh"
 
 #include "TSettings.class.hh"
@@ -50,38 +53,47 @@
 #include "THTMLTransparentAnalysis.hh"
 #include "LandauGaussFit.hh"
 #include "TClustering.hh"
+#include "TResults.hh"
+#include "TSpectrum.h"
 
 using namespace std;
 
 class TTransparentAnalysis {
 public:
-	TTransparentAnalysis(TSettings* settings);
+	TTransparentAnalysis(TSettings* settings, TSettings::alignmentMode mode = TSettings::normalMode);
 	virtual ~TTransparentAnalysis();
 //	void	doAnalysis(int nEvents=0);
 	void analyze(UInt_t nEvents, UInt_t startEvent);
 	void calcEtaCorrectedResiduals();
 	void setSettings(TSettings* settings);
-	
+	static TCluster makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize);
+	void setResults(TResults* res){cout<<"Setting results!"<<endl;results=res;};
 private:
+	void clearEventVector();
+	void createEventVector(Int_t startEvent = 0);
 	void initHistograms();
 	void fillHistograms();
 	TF1* doGaussFit(TH1F *histo);
+	TF1* doDoubleGaussFit(TH1F *histo);
 	void createEtaIntegrals();
 	void fitHistograms();
+	void createEfficiencyPlots(TH1F* hLandauDistribution);
+	void analyseEtaDistributions();
+	void analyseEtaDistribution(TH1F* hEtaDist);
 	void saveHistograms();
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();
-	void fitTrack();
+//	void fitTrack();
 //	void analyzeTrack(TTrack track);
-	bool predictPositions();
-	TCluster makeTransparentCluster(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
+	bool predictPositions(bool savePrediction = true);
 	bool checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize);
-	int getSignedChannelNumber(Float_t position);
+	static int getSignedChannelNumber(Float_t position);
 	void printEvent();
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
 	
+	void saveResolutionPlot(TH1F* hRes, UInt_t clusterSize);
 	// run variables
 	UInt_t subjectDetector, subjectPlane;
 	TPlaneProperties::enumCoordinate subjectDetectorCoordinate;
@@ -93,6 +105,7 @@ private:
 	// event variables
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;
+	vector<TEvent* > vecEvents;
 	Float_t predXPosition, predYPosition;
 	Float_t positionInDetSystemMetric,positionInDetSystemChannelSpace, predPerpPosition, predPosition;
 	
@@ -100,6 +113,7 @@ private:
     TSystem* sys;
 	HistogrammSaver* histSaver;
     TSettings* settings;
+    TResults* results;
 	TTracking* eventReader;
 	THTMLTransparentAnalysis* htmlTransAna;
 	LandauGaussFit* landauGauss;
@@ -116,29 +130,58 @@ private:
 	UInt_t highChi2;
 	//	UInt_t usedForSiliconAlignment;
 	// data for Histos
-	vector< vector<Float_t> > vecvecResXChargeWeighted;
-	vector< vector<Float_t> > vecvecResXEtaCorrected;
-	vector< vector<Float_t> > vecvecResXHighest2Centroid;
+
+	vector<Float_t> vecEta;
+	vector<Float_t> vecSignalLeftOfEta;
+	vector<Float_t> vecSignalRightOfEta;
+	vector<Float_t> vecSignalLeftOfHighest;
+	vector<Float_t> vecSignalRightOfHighest;
+	vector<Float_t> vecClusterCharge;
+	vector<Float_t> vecHighestSignal;
+
+	vector< vector < Float_t> > vecvecResXChargeWeighted;
+	vector< vector < Float_t> > vecvecResXEtaCorrected;
+	vector< vector < Float_t> > vecvecResXHighest2Centroid;
+	vector< vector < Float_t> > vecvecResXHighestHit;
 	vector< vector<Float_t> > vecvecRelPos;
+	vector< vector<Float_t> > vecvecRelPos2;
+	vector< vector<Float_t> > vecvecEta;
+	vector< vector<Float_t> > vecvecEtaCMNcorrected;
+	vector< Float_t> vecDeltaEta;
+	vector< Float_t> vecRelatedEta2;
+	vector< Float_t> vecRelatedEta10;
+	vector< Float_t> vecRelatedResXEtaCorrected;
+
+	Float_t inf;
 	// histograms
-	vector<TH1F*> hLaundau;
+	vector<TH1F*> hLandau;
+	vector< vector< Float_t> > vecVecLandau;
+	vector< Float_t> vecPredictedChannel;
+	Int_t predChannel;
+	vector< Float_t> vecVecFidCutX;
+	vector< Float_t> vecVecFidCutY;
 	vector<TH1F*> hEta;
-	;
-	TH1F* hLaundauMean;
-	TH1F* hLaundauMP;
+	vector<TH1F*> hEtaCMNcorrected;
+	vector< vector<Float_t> > vecVecEta;
+
+	TH1F* hLandauMean;
+	TH1F* hLandauMP;
 	TH1F* hPredictedPositionInStrip;
 	
-	vector<TH1F*> hLaundau2Highest;
+	vector<TH1F*> hLandau2Highest;
+	vector<TH1F*> hLandau1Highest;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
+	vector<TH1F*> hResidualHighestHit;
 	vector<TH1F*> hResidualEtaCorrected;
 	vector<TH1F*> hResidualChargeWeighted;
 	vector<TH2F*> hResidualVsHitPositionChargeWeighted;
 	vector<TH2F*> hResidualVsHitPositionHigehest2Centroid;
 	vector<TH2F*> hResidualVsHitPositionEtaCorrected;
-	TH1F* hLaundau2HighestMean;
-	TH1F* hLaundau2HighestMP;
+	TH1F* hLandau2HighestMean;
+	TH1F* hLandau2HighestMP;
 	vector<TH1F*> hEtaIntegrals;
+//	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
 	
 	// fits
 	vector<TF1*> fitLandau;
@@ -146,7 +189,7 @@ private:
 	vector<TF1*> fitResidualChargeWeighted;
 	vector<TF1*> fitResidualHighest2Centroid;
 	vector<TF1*> fitResidualEtaCorrected;
-	
+	TSettings::alignmentMode alignMode;
 	
 	
 //	TH1F* histo_transparentclustering_landau[10];
@@ -175,7 +218,13 @@ private:
 	vector< pair <Float_t,Float_t> > vecResidualChargeWeighted;
 	vector< pair <Float_t,Float_t> > vecResidualHighest2Centroid;
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected;
+	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected_2ndGaus;
+	vector<Float_t> vectorEventNo;
+	vector< vector<Float_t> > vecVecPh2Highest;
 	
+	vector<Float_t> vecPredictedPosition, vecRelPredictedPosition;
+	vector<Float_t> vecChi2;
+
 
 };
 

@@ -19,7 +19,8 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#define TCLUSTER_REV  36
+#define TCLUSTER_REV  39
+#define INVALID_POSITION -9999
 using namespace std;
 class TCluster :public TObject{
 public:
@@ -57,6 +58,8 @@ public:
     bool isLumpyCluster();
     bool isGoldenGateCluster();
     bool hasSaturatedChannels();
+    UInt_t getDetector(){return this->det;}
+    TCluster getCrossTalkCorrectedCluster(Float_t alpha);
     Float_t getCharge(bool useSmallSignals=false);
     Float_t getCharge(UInt_t clusters,bool useSmallSignals=false);
     void setPositionCalulation(calculationMode_t mode);
@@ -71,7 +74,7 @@ public:
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
-    Float_t getSignalOfChannel(UInt_t channel);
+    Float_t getSignalOfChannel(UInt_t channe, bool cmnCorrected=false);
     UInt_t getSmallestChannelNumber();
     UInt_t getHighestChannelNumber();
     Float_t getHighestSignal();
@@ -106,7 +109,8 @@ public:
 	Float_t getLeftEta(bool cmnCorrected=false);
 	Float_t getRightEta(bool cmnCorrected=false);
 	static Float_t getValueOfHisto(Float_t x, TH1F* histo);
-
+	UInt_t getEventNumber(){return eventNumber;};
+	bool hasInvalidReadout();
 private:
     void checkForGoldenGate();
     void checkForLumpyCluster();

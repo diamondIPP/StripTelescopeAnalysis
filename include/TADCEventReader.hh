@@ -41,15 +41,11 @@ public:
 	bool isValidTrack();
 	Int_t getAdcValue(UInt_t det,UInt_t ch);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected=false);
-//	Float_t getSignalInSigma(UInt_t det,UInt_t ch){return getSignalInSigma(det,ch,bCMNoiseCorrected);};
-//	Float_t getSignal(UInt_t det,UInt_t ch){return getSignal(det,ch,bCMNoiseCorrected);}
 	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);
-//	Float_t getRawSignal(UInt_t det,UInt_t ch) {return getRawSignal(det,ch,bCMNoiseCorrected);};
 	Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected=false);
-//  Float_t getRawSignalInSigma(UInt_t det,UInt_t ch){return getRawSignalInSigma(det,ch,bCMNoiseCorrected);}
 	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected=false);
-	Float_t getCMNoise() const {return cmNoise;};
-	bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
+	inline Float_t getCMNoise() const {return cmNoise;};
+	inline bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
 	UInt_t getCurrent_event() const;
 	UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
 	UChar_t getDet_Channels(UInt_t i , UInt_t j) const;
@@ -80,17 +76,19 @@ public:
 	UInt_t getNDiamondClusters();
 	bool isInFiducialCut();
 	bool isInCurrentFiducialCut();
+	bool isInOneFiducialArea();
+
 	bool isDetMasked();
 	TEvent* getEvent();
 	void setVerbosity(UInt_t verbosity);
-	bool useForAlignment(){/*cout<<event_number<<" "<<bUseForAlignment<<endl;*/return this->bUseForAlignment;};
-	bool useForSiliconAlignment(){return this->bUseForSiliconAlignment;};
-	bool useForAnalysis(){return this->bUseForAnalysis;};
+	inline bool useForAlignment(){/*cout<<event_number<<" "<<bUseForAlignment<<endl;*/return this->bUseForAlignment;};
+	inline bool useForSiliconAlignment(){return this->bUseForSiliconAlignment;};
+	inline bool useForAnalysis(){return this->bUseForAnalysis;};
 	TH1F* getEtaIntegral(UInt_t det);
-	Float_t getCmnCreated(UInt_t det){if(det>=0&&det<9)return this->cmnCreated[det];return 0;}
-	Int_t getFiducialRegion(){return fiducialRegion;}
-	Float_t getFiducialValueX(){return fiducialValueX;}
-	Float_t getFiducialValueY(){return fiducialValueY;}
+	inline Float_t getCmnCreated(UInt_t det){if(det>=0&&det<9)return this->cmnCreated[det];return 0;}
+	inline Int_t getFiducialRegion(){return fiducialRegion;}
+	inline Float_t getFiducialValueX(){return fiducialValueX;}
+	inline Float_t getFiducialValueY(){return fiducialValueY;}
 private:
 	void SetBranchAddresses();
 	bool SetTree(std::string fileName);//TTree *tree);
@@ -100,7 +98,7 @@ private:
 	void LoadEtaDistributions(UInt_t runNumber);
 public:
 	void setEtaDistributionPath(std::string path);
-	std::string getEtaDistributionPath() const {return etaDistributionPath;}
+	inline std::string getEtaDistributionPath() const {return etaDistributionPath;}
 private:
 	std::string etaDistributionPath;
 	std::string fileName;
