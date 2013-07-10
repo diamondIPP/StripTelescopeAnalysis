@@ -10,7 +10,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -28,9 +28,16 @@
 #include "TSettings.class.hh"
 #include "LandauGaussFit.hh"
 #include "TProfile.h"
+#include "TPolyMarker.h"
+#include "TList.h"
+#include "TPaveStats.h"
+#include "TMultiGraph.h"
 
+#include "TResults.hh"
 #include "TADCEventReader.hh"
 #include "THTMLCluster.hh"
+#include "TClustering.hh"
+#include "TAnalysisOfAsymmetricEta.hh"
 
 #define N_DET_CHANNELS 256
 #define N_DIA_CHANNELS 128
@@ -42,9 +49,11 @@ public:
 	virtual ~TAnalysisOfClustering();
 	void	doAnalysis(int nEvents=0);
 	void setSettings(TSettings* settings);
+	void setResults(TResults* res) {this->res = res;}
 private:
 	void analyseEvent();
 	void saveHistos();
+	void saveEtaIntegrals();
 	void savePHHistos();
 
 	void initialiseHistos();
@@ -56,6 +65,13 @@ private:
 	void checkForSaturatedChannels();
 	void analyseCluster();
 	void createPHDistribution();
+
+	void etaInvestigation();
+	void analyseAsymmetricSample();
+	void fillClusterVector();
+	void saveEtaInvestigationHistos();
+	void saveEtaDividedHistos(TH3F* h3DLeft,TH3F* h3DRight, TH2F* h2DLeft, TH2F* h2DRight,string name_comparision, Float_t etaWidth=.1);
+	void saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision);
 
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];
@@ -107,6 +123,7 @@ private:
 	TH1F *hEtaDistribution[9];
 	TH1F *hEtaDistributionCMN[9];
 	TH2F* hEtaDistributionVsLeftChannel[9];
+	TH2F* hEtaDistributionVsClusterSize[9];
 	TH2F* hEtaDistributionVsCharge[9];
 	TH1F *hEtaDistribution5Percent[9];
 	TH2F *hEtaDistributionVsSignalRight[9];
@@ -114,6 +131,20 @@ private:
 	TH2F *hEtaDistributionVsSignalSum[9];
 	TH2F *hSignalLeftVsSignalRight[9];
 	TH2F *hPHDistribution[9];
+private:
+	UInt_t nMaxClusters;
+	vector < vector <Float_t> > vecvecSignalLeftLeft;
+	vector < vector <Float_t> > vecvecSignalRightRight;
+	vector < vector <Float_t> > vecvecLeftEtaSignal;
+	vector < vector <Float_t> > vecvecRightEtaSignal;
+	vector < vector <Float_t> > vecvecSignalLeftOfHighest;
+	vector < vector <Float_t> > vecvecSignalRightOfHighest;
+	vector < vector <Float_t> > vecvecSignalHighest;
+	vector < vector <Float_t> > vecvecEta;
+	vector < vector <TCluster> > vecVecClusters;
+	vector<Float_t> vecClusterSize,vecMPV,vecClusterSizeError,vecWidth;
+	UInt_t nInvalidReadout;
+	TResults* res;
 };
-
 #endif /* TDEADCHANNELS_HH_ */
+

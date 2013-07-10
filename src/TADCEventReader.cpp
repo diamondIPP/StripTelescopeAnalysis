@@ -14,6 +14,7 @@ TADCEventReader::TADCEventReader(string FileName,UInt_t runNumber,int verb) {
 }
 
 TADCEventReader::TADCEventReader(string FileName,TSettings* settings) {
+	if (settings) verbosity = settings->getVerbosity();
 	init(FileName,settings->getRunNumber(),settings->getVerbosity());
 	this->settings = settings;
 }
@@ -51,7 +52,16 @@ void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 TADCEventReader::~TADCEventReader() {
 	if(verbosity>3)cout<< "deleting instance of TADCEventReader"<<flush;
 	//delete tree;
-	if(file!=0)delete file;
+
+	if(file!=0){
+//		cout<<"Zombie: "<<file->IsZombie()<<endl;
+//		cout<<"File: "<<file->GetName()<<" is open: "<<file->IsOpen()<<" "<<endl;
+		if (gROOT->FindObject(file->GetName()))
+			delete file;
+		else
+			if(verbosity) cout<<"couldn't find object: "<< file->GetName()<< " " <<gROOT->FindObject(file->GetName())<<endl;
+		//		delete file;
+	}
 	if(verbosity>3)cout<< "DONE"<<flush;
 }
 
@@ -516,7 +526,8 @@ int TADCEventReader::hasTree(){
 	{
 		TObject *obj = key->ReadObj();
 		if ((obj->IsA()->InheritsFrom("TTree"))){
-			hasATree++;}
+			hasATree++;
+		}
 	}
 	return hasATree;
 }
@@ -656,8 +667,11 @@ Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
 
 UInt_t TADCEventReader::getNClusters(UInt_t det)
 {
+	if (!pEvent){
+		cerr<<setw(6)<<current_event<<": Cannot getNClusters of detector no. "<<det<<", pointer pEvent ==0"<<endl;
+		return 0;
+	}
 	if(det<TPlaneProperties::getNDetectors()){
-
 		UInt_t nClusters = this->pEvent->getNClusters(det);
 		if(verbosity>7){
 			cout<<"TADCEventReader::getNClusters of det "<<det<<": "<<nClusters<<endl;
@@ -688,6 +702,12 @@ bool TADCEventReader::isInCurrentFiducialCut(){
 	Float_t fiducialValueX = this->getFiducialValueX();
 	Float_t fiducialValueY = this->getFiducialValueY();
 	return settings->getSelectionFidCuts()->isInFiducialCut(fiducialValueX,fiducialValueY);
+}
+
+bool TADCEventReader::isInOneFiducialArea(){
+	Float_t fiducialValueX = this->getFiducialValueX();
+		Float_t fiducialValueY = this->getFiducialValueY();
+		return (settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY) != -1);
 }
 
 bool TADCEventReader::isDetMasked()
@@ -745,7 +765,7 @@ TH1F *TADCEventReader::getEtaIntegral(UInt_t det)
 }
 
 void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
-	cout<<"Load Eta Distributions of run "<<runNumber<<"\t"<<flush;
+	if(verbosity) cout<<"Load Eta Distributions of run "<<runNumber<<"\t"<<flush;
 	bEtaIntegrals=true;
 	stringstream etaFileName;
 
@@ -753,12 +773,15 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		etaFileName<<"etaCorrection."<<runNumber<<".root";
 	else
 		etaFileName<<etaDistributionPath;
-	cout<<etaFileName<<endl;
+	if(verbosity) cout<<etaFileName<<endl;
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
 		bEtaIntegrals=false;
-		if(etaDistributionPath.size()!=0){char t; cin>>t;}
+		if(etaDistributionPath.size()!=0){
+			cout<<"Please confirm with key press and enter"<<flush;
+			char t; cin>>t;
+		}
 		return;
 	}
 	if(verbosity>3)cout<<etaFileName.str()<<endl;
@@ -782,7 +805,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 
 void TADCEventReader::setEtaDistributionPath(std::string path)
 {
-	cout<<"Set Eta DistributionPath: "<<path<<endl;
+	if(verbosity) cout<<"Set Eta DistributionPath: "<<path<<endl;
 	etaDistributionPath=path;
 }
 

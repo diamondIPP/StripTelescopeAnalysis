@@ -18,9 +18,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include <utility> //pair
 #include "TROOT.h"
-
 #include "TPlaneProperties.hh"
 
 
@@ -36,16 +35,20 @@ public:
 	Float_t convertChannelToMetric(Float_t channel);
 	Float_t convertMetricToChannel(Float_t metric);
 	Float_t convertMetricToChannel(Float_t metric,UInt_t interval);
-
+	Float_t getPitchWidth(UInt_t area);
+	Int_t getNPatterns(){return nChannelsOfInterval.size();}
 	void loadPitchWidthSettings(Float_t pitchWidth);
 	void resetPattern();
 	void clear(){resetPattern();}
 	void Print();
+	void showPatterns();
+	UInt_t size(){return getNPatterns();}
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
-	std::pair<int,int> getPatternChannels(UInt_t pattern);
+	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);
+	bool hasInvalidIntervals();
 
-	UInt_t getNIntervals(){return nChannelsOfInterval.size();}
 private:
+	UInt_t getNIntervals();//
 	Float_t getChannelToMetric(UInt_t ch);
 	void initialiseVector();
 	std::vector<Float_t> channelToMetricConversion;
@@ -53,7 +56,10 @@ private:
 	std::vector<Float_t> endOfInterval;
 	std::vector<Float_t> firstChannelOfInterval;
 	std::vector<Float_t> nChannelsOfInterval;
+	std::vector<Float_t> pitchWidth;
 	bool bLoadedStandardPitchWidthSettings;
+	Float_t standardPW;
+	UInt_t verbosity;
     ClassDef(TDiamondPattern,1);
 };
 

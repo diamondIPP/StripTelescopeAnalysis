@@ -99,8 +99,8 @@ void TFidCutRegions::Print(int intend)
 	cout<<TCluster::Intent(intend)<<"\tX: "<<getMinFiducialX()<<"-"<<getMaxFiducialX()<<endl;
 	cout<<TCluster::Intent(intend)<<"\tY: "<<getMinFiducialY()<<"-"<<getMaxFiducialY()<<endl;
 
-	if(verbosity >3 ){
-		cout<<"Done\nPress a key..."<<flush;
+	if(verbosity >3 &&verbosity%2==1){
+		cout<<"Done\nPress a key...\t"<<flush;
 		char t;
 		cin>>t;
 	}
@@ -193,6 +193,7 @@ Float_t TFidCutRegions::getMinFiducialX(UInt_t index){
 		return min;
 	}
 	if(index <= getNFidCuts()){
+        //cout<<"GetFidCut: "<<getNFidCuts()<<endl;
 		if (getFidCut(index))
 			return getFidCut(index)->GetXLow();
 	}
@@ -295,7 +296,8 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 	maxY = maxY + (maxY-minY)*.1;
 	if(verbosity)
 		cout<<"Plot range: x: "<<minX<<"-"<<maxX<<",\ty: "<<minY<<"-"<<maxY<<endl;
-	if(verbosity>3){
+	if(verbosity>3&&verbosity%2==1){
+		cout<<"\tPress a key and enter to confirm.\t"<<flush;
 		char t;
 		cin >>t;
 	}
@@ -305,11 +307,12 @@ TCanvas *TFidCutRegions::getAllFiducialCutsCanvas(TH2F *hScatter,bool optimizeAx
 		htemp->GetXaxis()->SetRangeUser(minX,maxX);
 		htemp->GetYaxis()->SetRangeUser(minY,maxY);
 	}
-	drawFiducialCutsToCanvas(c1);
+	for(UInt_t i=0;i<fidCuts.size();i++)
+		getFiducialAreaCut(i)->Draw("same");
 	return c1;
 }
 
-TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
+TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 {
 	if (nFidCut>=fidCuts.size())
 		return 0;
@@ -317,14 +320,27 @@ TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
 	Float_t xHigh = fidCuts.at(nFidCut)->GetXHigh();
 	Float_t yLow = fidCuts.at(nFidCut)->GetYLow();
 	Float_t yHigh = fidCuts.at(nFidCut)->GetYHigh();
-	TPaveText * pt = new TPaveText(xLow,yLow,xHigh,yHigh);
+	cout<<"getting fitucial Area for "<<nFidCut<<": ";
+	cout<<TString::Format("X: %.1f-%.1f, Y: %.1f-%.1f",xLow,xHigh,yLow,yHigh);
+	TString name = TString::Format("fidCut_%d",nFidCut);
+	TCutG * pt = new TCutG(name,5);
+	pt->SetPoint(0,xLow,yLow);
+	pt->SetPoint(1,xLow,yHigh);
+	pt->SetPoint(2,xHigh,yHigh);
+	pt->SetPoint(3,xHigh,yLow);
+	pt->SetPoint(4,xLow,yLow);
+	//(xLow,yLow,xHigh,yHigh);
 	if(index == nFidCut + 1||index == 0){
 		pt->SetFillColor(kRed);
+		pt->SetLineColor(kRed);
+		pt->SetLineWidth(3);
 		pt->SetFillStyle(3013);
 	}
 	else{
 		pt->SetFillColor(kOrange);
 		pt->SetFillStyle(3013);
+		pt->SetLineColor(kOrange);
+		pt->SetLineWidth(3);
 	}
 	return pt;
 }
@@ -359,14 +375,6 @@ void TFidCutRegions::addFiducialCut(Float_t xLow, Float_t xHigh, Float_t yLow, F
 	else
 		cerr<<"Could not add Fiducial Cut since "<<xLow<<">="<<xHigh<<" or "<<yLow<<" >= "<<yHigh<<endl;
 }
-void TFidCutRegions::addFiducialCut(TFiducialCut* fidCut){
-	if (fidCut){
-		this->addFiducialCut(fidCut->GetXLow(),fidCut->GetXHigh(),fidCut->GetYLow(),fidCut->GetYHigh());
-	}
-	else{
-		cerr<<"Could not add Fiducial Cut since fidCut == 0"<<endl;
-	}
-}
 
 void TFidCutRegions::createFidCuts(){
 	if(nDiamonds!=nFidCuts){
@@ -390,6 +398,8 @@ void TFidCutRegions::createFidCuts(){
 
 TFiducialCut* TFidCutRegions::getFidCut(UInt_t index){
 	if (index>getNFidCuts()&&index>0)
+		return NULL;
+	if(index==0)
 		return NULL;
 	return fidCuts.at(index-1);
 }
@@ -459,8 +469,13 @@ std::vector< std::pair< Float_t,Float_t> > TFidCutRegions::findFiducialCutInterv
 
 TCanvas *TFidCutRegions::getFiducialCutCanvas(TPlaneProperties::enumCoordinate cor){
 	if(hEventScatterPlot==0) {
-		cout<<"hEventScatterPlot is Zero!!!!! Press any Key to Continue."<<endl;
-		char t; cin>>t;
+		cout<<"hEventScatterPlot is Zero!!!!!";
+		if(verbosity%2==1){
+			cout<<"Press any Key to Continue."<<endl;
+			char t; cin>>t;
+		}
+		else
+			cout<<endl;
 		return 0;
 	}
 	if(hEventScatterPlot->IsZombie())return 0;
@@ -494,14 +509,21 @@ TCanvas *TFidCutRegions::getFiducialCutProjectionCanvas(TH1D* hProj,std::vector<
 	TCanvas *c1 =new TCanvas(canvasName.str().c_str(),canvasName.str().c_str(),800,600);
 	c1->cd();
 	hProj->Draw();
-	vector<TBox* > boxes;
+	vector<TCutG* > boxes;
 	for(UInt_t i=0;i<intervals.size();i++){
-		TPaveText *box = new TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
+		TString name = TString::Format("cut_%s_interval_%d",hProj->GetName(),i);
+		TCutG *box = new TCutG(name,5);
+		//TPaveText(intervals.at(i).first,0,intervals.at(i).second,hProj->GetMaximum());
+		box->SetPoint(0,intervals.at(i).first,0);
+		box->SetPoint(1,intervals.at(i).first,hProj->GetMaximum());
+		box->SetPoint(2,intervals.at(i).second,hProj->GetMaximum());
+		box->SetPoint(3,intervals.at(i).second,0);
+		box->SetPoint(4,intervals.at(i).first,0);
 		box->SetFillColor(kRed+i);
 		box->SetFillStyle(3013);
-		box->AddText("");
-		box->AddText("");
-		box->AddText(Form("Area\n\n%i",i));
+//		box->AddText("");
+//		box->AddText("");
+//		box->AddText(Form("Area\n\n%i",i));
 		boxes.push_back(box);
 		box->Draw("same");
 	}
@@ -526,24 +548,14 @@ Float_t TFidCutRegions::getXHigh(UInt_t i) {
 
 Float_t TFidCutRegions::getYLow(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return yInt.at((i-1)%yInt.size()).first;		//return xInt.at((i-1)/xInt.size()).first;
+		return xInt.at((i-1)/xInt.size()).first;
 	return TPlaneProperties::getNChannelsSilicon();
 
 	return N_INVALID;
 }
 Float_t TFidCutRegions::getYHigh(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return yInt.at((i-1)%yInt.size()).second;		//return xInt.at((i-1)/xInt.size()).second;
+		return xInt.at((i-1)/xInt.size()).second;
 	return TPlaneProperties::getNChannelsDiamond();
 	return N_INVALID;
-}
-
-
-void TFidCutRegions::drawFiducialCutsToCanvas(TCanvas* c1){
-	if(!c1)
-		return;
-	c1->cd();
-	for(UInt_t i=0;i<fidCuts.size();i++)
-		getFiducialAreaPaveText(i)->Draw("same");
-
 }

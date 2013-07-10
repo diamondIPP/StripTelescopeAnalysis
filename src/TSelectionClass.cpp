@@ -310,7 +310,7 @@ void TSelectionClass::checkDiamondTrack(){
 	isDiaSaturated=this->isSaturated(TPlaneProperties::getDetDiamond());
 	if(verbosity>4&&nDiamondClusters>0&&!isInFiducialCut)
 		cout<<"\nThis event has diamond hit which is not in fid Cut"<<endl;
-	atLeastOneValidDiamondCluster = nDiamondClusters > 0 && !isDiaSaturated && !checkDetMasked(TPlaneProperties::getDetDiamond()) ;
+	atLeastOneValidDiamondCluster = nDiamondClusters >0 && !checkDetMasked(TPlaneProperties::getDetDiamond()) && !isDiaSaturated;
 	oneAndOnlyOneDiamondCluster = atLeastOneValidDiamondCluster && nDiamondClusters==1;
 	hasBigDiamondCluster =false;
 	for(UInt_t cl=0;cl<nDiamondClusters;cl++){
@@ -318,7 +318,7 @@ void TSelectionClass::checkDiamondTrack(){
 		if(nDiaClusterSize>=3){
 			hasBigDiamondCluster=true;
 			oneAndOnlyOneDiamondCluster=false;
-//			atLeastOneValidDiamondCluster=false;
+			atLeastOneValidDiamondCluster=false;
 		}
 	}
 	if(verbosity>3){
@@ -338,10 +338,8 @@ void TSelectionClass::setVariables(){
 	checkDiamondTrack();
 
 	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster&&isInFiducialCut;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
-//	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
-//	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&isInFiducialCut;;
-	useForAlignment = atLeastOneValidDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
-	useForAnalysis=atLeastOneValidDiamondCluster&&!useForAlignment&&isInFiducialCut;;
+	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
+	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&isInFiducialCut;;
 	validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster&&isInFiducialCut;
 	doEventCounting();
 	fillHitOccupancyPlots();
@@ -695,8 +693,8 @@ void TSelectionClass::createFiducialCut(){
 	histSaver->SaveCanvas(c1);
 	if(verbosity)
 		fiducialCuts->Print(1);
-	if (verbosity>3){
-		cout<<"Press a key and enter...<"<<flush;
+	if (verbosity>3&&verbosity%2==1){
+		cout<<"Press a key and enter to continue..."<<flush;
 		char t;
 		cin >>t;
 	}

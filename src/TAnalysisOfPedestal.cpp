@@ -8,13 +8,15 @@
 
 
 #include "../include/TAnalysisOfPedestal.hh"
-
-TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
+using namespace std;
+TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* newSettings) {
 	cout<<"**********************************************************"<<endl;
 	cout<<"*********TAnalysisOfPedestal::TAnalysisOfPedestal*****"<<endl;
 	cout<<"**********************************************************"<<endl;
-	if(settings==0)
+	if(newSettings==0)
 		exit(0);
+
+	this->settings=newSettings;
 	res=0;
 	htmlPedestal= new THTMLPedestal(settings);
 	sys = gSystem;
@@ -23,7 +25,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	sys->cd(settings->getAbsoluteOuputPath().c_str());
 	settings->goToPedestalTreeDir();
 
-	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings->getRunNumber());
+	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings);//->getRunNumber());
 	histSaver=new HistogrammSaver();
 	histSaver->SetOptStat("ormen");
 	histSaver->SetOptFit(111);
@@ -35,7 +37,6 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 	htmlPedestal->setFileGeneratingPath(sys->pwd());
 	settings->goToPedestalTreeDir();
 	initialiseHistos();
-	this->settings=settings;
 	cout<<"end initialise"<<endl;
 
 	pedestalMeanValue.resize(TPlaneProperties::getNDetectors());
@@ -47,11 +48,25 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* settings) {
 		nPedestalHits.at(det).resize(TPlaneProperties::getNChannels(det),0);
 	}
 	this->diaRawADCvalues.resize(TPlaneProperties::getNChannelsDiamond(),std::vector<UInt_t>());
-
+	this->invalidBiggestHitChannels.resize(TPlaneProperties::getNDetectors());
 	verbosity = 0;
+
+	adcValues.clear();
+	pedestalValues.clear();
+	upperHitCutValues.clear();
+	lowerHitCutValues.clear();
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
+	cout<<"Invalid SNR for Biggest Channel can be found in "<<endl;
+	for(UInt_t det = 0; det < invalidBiggestHitChannels.size(); det++){
+		cout<<"Detector: "<<det<<", endries: "<<invalidBiggestHitChannels[det].size()<<"\t{"<<flush;
+		std::set<UInt_t>::iterator it;
+		for (it=invalidBiggestHitChannels[det].begin(); it!=invalidBiggestHitChannels[det].end(); ++it)
+			cout<<setw(3)<<*it<<",";
+		cout<<"}"<<endl;
+
+	}
 	htmlPedestal->createPageContent();
 	//	htmlPedestal->createPedestalDistribution();
 	htmlPedestal->generateHTMLFile();
@@ -82,90 +97,74 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 }
 
 void TAnalysisOfPedestal::analyseEvent(){
-	analyseBiggestHit();
-	analyseBiggestHit(true);
-	checkForSaturatedChannels();
-	updateMeanCalulation();
-	//		UInt_t ch=30;
-	//		cout<<nEvent<<"  "<<eventReader->getPedestalMean(8,ch,false)<<" "<<eventReader->getPedestalMean(8,ch,true)<<"\t";
-	//		cout<<eventReader->getPedestalSigma(8,ch,false)<<" "<<eventReader->getPedestalSigma(8,ch,true)<<"\t"<<eventReader->getCMNoise()<<"\t\t";
-	//		cout<<eventReader->getRawSignal(8,ch,false)<<" "<<eventReader->getRawSignal(8,ch,true)<<endl;
-	/*cout<<nEvent;
-	 for(unsigned int det=0;det< (eventReader->getCluster()->size());det++)
-	 for(unsigned int cl=0;cl< eventReader->getCluster()->at(det).size();cl++)
-	 cout<<" "<<eventReader->getCluster()->at(det).at(cl).getChargeWeightedMean()<<flush;
-	 cout<<endl;//*/
-	//		checkForDeadChannels();
-
-	//		getBiggestHit();
-	//		analyseForSeeds();
-	//		analyseCluster();
-
-}
-
-void TAnalysisOfPedestal::checkForDeadChannels()
-{
 	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
-		int numberOfSeeds=0;
+		if(det==TPlaneProperties::getDetDiamond())
+			cmn = eventReader->getCMNoise();
+		biggestSignal = -999;
+		biggestHitChannel =-1;
+		biggestSignalCMN = -999;
+		biggestHitChannelCMN =-1;
 		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
-			if(settings->isDet_channel_screened(det,ch))
-				continue;
-			Float_t sigma=eventReader->getPedestalSigma(det,ch);
-			Float_t signalInSigma = eventReader->getSignalInSigma(det,ch);
-			if(sigma==0){
-				//cout<<nEvent<<" "<<det<<" "<<ch<<" sigma==0"<<endl;
-				continue;
-			};
-			if(signalInSigma>settings->getClusterSeedFactor(det,ch)){
-				hSeedMap[det]->Fill(ch);
-				numberOfSeeds++;
+			adc = eventReader->getAdcValue(det,ch);
+			isSaturated = eventReader->isSaturated(det,ch);
+
+			pedestal = eventReader->getPedestalMean(det,ch,false);
+			sigma = eventReader->getPedestalSigma(det,ch,false);
+			noise = eventReader->getRawSignal(det,ch,false);//adc-pedestal;
+			signal = eventReader->getSignal(det,ch, false);
+			snr = eventReader->getSignalInSigma(det,ch,false);
+
+			pedestalCMN = eventReader->getPedestalMean(det,ch,true);
+			sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
+			noiseCMN =  eventReader->getRawSignal(det,ch,true);
+			signalCMN = eventReader->getSignal(det,ch, true);
+
+			if(det==TPlaneProperties::getDetDiamond()&&verbosity>8)
+				cout<<nEvent<<" "<<det<<" "<<ch<<" "<<adc<<" "<<pedestal<<" "<<pedestalCMN<<" "<<signal<<" "<<signalCMN<<endl;
+			checkForDeadChannels(det,ch);
+			updateMeanCalulation(det,ch);
+			findBiggestSignalInDet(det,ch);
+
+			if(det == TPlaneProperties::getDetDiamond() && ch == settings->getNoisePlotChannel()){
+				Float_t hitCut = settings->getClusterHitFactor(det,ch);
+				Float_t seedCut = settings->getClusterSeedFactor(det,ch);
+				adcValues.push_back(adc);
+				pedestalValues.push_back(pedestal);
+				upperHitCutValues.push_back(pedestal + sigma * hitCut);
+				lowerHitCutValues.push_back(pedestal - sigma * hitCut);
+				upperSeedCutValues.push_back(pedestal + sigma * seedCut);
+				lowerSeedCutValues.push_back(pedestal - sigma * seedCut);
+				pedestalValuesCMN.push_back(pedestalCMN);
+				upperHitCutValuesCMN.push_back(pedestalCMN + sigmaCMN * hitCut);
+				lowerHitCutValuesCMN.push_back(pedestalCMN - sigmaCMN * hitCut);
+				upperSeedCutValuesCMN.push_back(pedestalCMN + sigmaCMN * seedCut);
+				lowerSeedCutValuesCMN.push_back(pedestalCMN - sigmaCMN * seedCut);
+				eventNumbers.push_back(nEvent);
 			}
 		}
-		hNumberOfSeeds[det]->Fill(numberOfSeeds);
+		analyseBiggestHit(det,false);
+		analyseBiggestHit(det,true);
 	}
-
-}
-void TAnalysisOfPedestal::analyseForSeeds(){
-	//	for(int det=0;det<TPlaneProperties::getNDetectors();det++){
-	//		int nClusters = eventReader->getNClusters(det);
-	//		if(nClusters==1)
-	//			hSeedMap2[det]->Fill(eventReader->getCluster(det,0).getHighestSignalChannel());
-	//	}
 }
 
-void TAnalysisOfPedestal::checkForSaturatedChannels()
+void TAnalysisOfPedestal::checkForDeadChannels(UInt_t det,UInt_t ch)
 {
+	if(ch==0)numberOfSeeds=0;
+	if(settings->isDet_channel_screened(det,ch))
+		return;
+	if(sigma==0){
+		//cout<<nEvent<<" "<<det<<" "<<ch<<" sigma==0"<<endl;
+		return;
+	};
+	if(snr>settings->getClusterSeedFactor(det,ch)){
+		hSeedMap[det]->Fill(ch);
+		numberOfSeeds++;
+	}
+	if(ch==TPlaneProperties::getNChannels(det)-1)
+		hNumberOfSeeds[det]->Fill(numberOfSeeds);
 
 }
-void TAnalysisOfPedestal::getBiggestHit(){
-	//
-	//	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
-	//		int biggestHit=0;
-	//		Float_t biggestHitInSigma=0;
-	//		int chBiggestHit;
-	//		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){//todo warum 70 bis 200
-	//			if(settings->isDet_channel_screened(det,ch))
-	//				continue;
-	//			Int_t adcValue=eventReader->getAdcValue(det,ch);
-	//			if (adcValue<TPlaneProperties::getMaxSignalHeight(det))
-	//				if(adcValue>biggestHit){
-	//					biggestHit=eventReader->getAdcValue(det,ch);
-	//					biggestHitInSigma=eventReader->getSignalInSigma(det,ch);
-	//					chBiggestHit=ch;
-	//				}
-	//		}
-	//		if(biggestHitInSigma>4){//removing all events where biggest hit is  <4 sigma, since probability of haveing one channel
-	//			//higher than 3 sigma is approx 50% (1-0.997^128)
-	//			hPulsHeightBiggestHit[det]->Fill(biggestHitInSigma);
-	//			hChannelBiggestHit[det]->Fill(chBiggestHit);
-	//			if(eventReader->getAdcValue(det,chBiggestHit-1)<eventReader->getAdcValue(det,chBiggestHit+1))
-	//				hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit+1));
-	//			else
-	//				hPulsHeightNextBiggestHit[det]->Fill(eventReader->getSignalInSigma(det,chBiggestHit-1));
-	//		}
-	//	}
 
-}
 
 /**
  *
@@ -201,91 +200,120 @@ Float_t TAnalysisOfPedestal::findYPlotRangeForPHHisto(TH1F *histo, Float_t hitCu
 	return max;
 }
 
+
+void TAnalysisOfPedestal::findBiggestSignalInDet(UInt_t det,UInt_t ch){
+	if(!settings->isDet_channel_screened(det,ch)){
+		if (!isSaturated){
+			if (signal > biggestSignal) {
+				biggestHitChannel = ch;
+				biggestSignal = signal;
+			}
+			if(signalCMN > biggestSignalCMN){
+				biggestHitChannelCMN = ch;
+				biggestSignalCMN = signalCMN;
+			}
+		}
+		else{
+			vecSaturatedChannels[det].push_back(ch);
+			hSaturatedChannels[det]->Fill(ch);
+		}
+	}
+}
+
 /**
  * create vector with biggest and biggest adjacent hit with PH in Sigma
  */
-void TAnalysisOfPedestal::analyseBiggestHit(bool CMN_corrected) {
-	//loop over all detectors
-	for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++) {
-		Float_t biggestSignal = -999;
-		UInt_t biggestHitChannel =-999;
-		//loop over all channels
-		for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++) {
-			if(!settings->isDet_channel_screened(det,ch)){
-				Float_t signal = eventReader->getSignal(det,ch, CMN_corrected);
-				if (!eventReader->isSaturated(det,ch)){
-					if (signal > biggestSignal) {
-						biggestHitChannel = ch;
-						biggestSignal = signal;
-					}
-				}
-				else{
-					if(!CMN_corrected){
-						vecSaturatedChannels[det].push_back(ch);
-						hSaturatedChannels[det]->Fill(ch);
-					}
-				}
-			}
-		}//end loop over channels
+void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
+	if(CMN_corrected&&TPlaneProperties::getDetDiamond()!=det)
+		return;
+	Int_t bigHit;
+	Float_t bigSignal;
+	if(!CMN_corrected){
+		bigHit = biggestHitChannel;
+		bigSignal=biggestSignal;
+	}
+	else{
+		bigHit = biggestHitChannelCMN;
+		bigSignal=biggestSignalCMN;
+	}
+	if(bigSignal<0)
+		return;
+	if(det==TPlaneProperties::getDetDiamond()&&verbosity>8)
+		cout<<"Biggest Signal: "<<bigSignal<<"@"<<bigHit<<"-"<<CMN_corrected<<"\t"<<biggestSignal<<"@"<<biggestHitChannel<<"\t"<<biggestSignalCMN<<"@"<<biggestHitChannelCMN<<endl;
 
-		Float_t leftSignal=settings->isDet_channel_screened(det,biggestHitChannel-1)||eventReader->isSaturated(det,biggestHitChannel-1)?0:eventReader->getSignal(det,biggestHitChannel-1, CMN_corrected);
-		Float_t rightSignal=settings->isDet_channel_screened(det,biggestHitChannel+1)||eventReader->isSaturated(det,biggestHitChannel+1)?0:eventReader->getSignal(det,biggestHitChannel+1,CMN_corrected);
-		Float_t biggestAdjacentSignal=0;
-		Int_t biggestAdjacentHitChannel = -9999;
-		if(leftSignal>rightSignal){
-			biggestAdjacentSignal=leftSignal;
-			biggestAdjacentHitChannel = biggestHitChannel-1;
-		}
-		else if (rightSignal>leftSignal){
-			biggestAdjacentSignal = rightSignal;
-			biggestAdjacentHitChannel = biggestHitChannel+1;
-		}
-		Int_t hitOrder = biggestAdjacentHitChannel!=-9999?biggestAdjacentHitChannel-biggestHitChannel:0;
-		//		if(det==6)cout<<nEvent<<" "<<setw(3)<<biggestHitChannel<<": "<<setw(8)<<biggestSignal<<" \t"<<setw(5)<<biggestAdjacentHitChannel<<": "<<setw(8)<<biggestAdjacentSignal<<"\t"<<setw(2)<<hitOrder<<endl;
-		if(biggestAdjacentHitChannel!=-9999&&(biggestAdjacentHitChannel<0||biggestAdjacentHitChannel>=(Int_t)TPlaneProperties::getNChannels(det)))
-			cout<<"something is wrong: biggestAdjacentHitChannel: "<<biggestAdjacentHitChannel<<" BiggestHitChannel:"<<biggestHitChannel<<" "<<leftSignal<<" "<<rightSignal<<endl;
-		Float_t biggestSignalInSigma = eventReader->getSignalInSigma(det,biggestHitChannel,CMN_corrected);
-		Float_t biggestAdjacentSignalInSigma =biggestAdjacentHitChannel>=0&&biggestAdjacentHitChannel< (Int_t)TPlaneProperties::getNChannels(det)? eventReader->getSignalInSigma(det,biggestAdjacentHitChannel,CMN_corrected):0;
-		if(!CMN_corrected){
-			vecBiggestHitChannel[det].push_back(biggestHitChannel);
-			vecBiggestSignalInSigma[det].push_back(biggestSignalInSigma);
-			vecBiggestSignal[det].push_back(biggestSignal);
+	Int_t leftCh = bigHit-1;
+	Float_t leftSignal = 0;
+	if(settings->isDet_channel_screened(det,bigHit)&&eventReader->isSaturated(det,bigHit))
+		cout<<"Error1:"<<det<<"_"<<setw(5)<<nEvent<<"\t"<<settings->isDet_channel_screened(det,bigHit)<<eventReader->isSaturated(det,bigHit)<<endl;
+	if(!settings->isDet_channel_screened(det,leftCh)&&!eventReader->isSaturated(det,leftCh))
+		leftSignal = eventReader->getSignal(det,leftCh, CMN_corrected);
+	Int_t rightCh = bigHit+1;
+	Float_t rightSignal = 0;
+	if(!settings->isDet_channel_screened(det,rightCh)&&!eventReader->isSaturated(det,rightCh))
+		rightSignal=eventReader->getSignal(det,rightCh,CMN_corrected);
+
+	Float_t biggestAdjacentSignal=0;
+	Int_t biggestAdjacentHitChannel = -9999;
+
+	if(leftSignal>rightSignal){
+		biggestAdjacentSignal=leftSignal;
+		biggestAdjacentHitChannel = bigHit-1;
+	}
+	else if (rightSignal>leftSignal){
+		biggestAdjacentSignal = rightSignal;
+		biggestAdjacentHitChannel = bigHit+1;
+	}
+	if(leftSignal>bigSignal||rightSignal>bigSignal)
+		cout<<"Error2:"<<det<<"_"<<setw(5)<<nEvent<<"\t"<<leftSignal<<"-"<<bigSignal<<"-"<<rightSignal<<"\t"<<leftCh<<"_"<<bigHit<<"_"<<rightCh<<endl;
+
+	Int_t hitOrder = biggestAdjacentHitChannel!=-9999?biggestAdjacentHitChannel-bigHit:0;
+
+	if(biggestAdjacentHitChannel!=-9999&&(biggestAdjacentHitChannel<0||biggestAdjacentHitChannel>=(Int_t)TPlaneProperties::getNChannels(det)))
+		cout<<"something is wrong: biggestAdjacentHitChannel: "<<biggestAdjacentHitChannel<<" BiggestHitChannel:"<<bigHit<<" "<<leftSignal<<" "<<rightSignal<<endl;
+
+	Float_t biggestSignalInSigma = eventReader->getSignalInSigma(det,bigHit,CMN_corrected);
+	Float_t biggestAdjacentSignalInSigma =biggestAdjacentHitChannel>=0&&biggestAdjacentHitChannel< (Int_t)TPlaneProperties::getNChannels(det)? eventReader->getSignalInSigma(det,biggestAdjacentHitChannel,CMN_corrected):0;
+
+	if(!CMN_corrected){
+		vecBiggestHitChannel[det].push_back(biggestHitChannel);
+		vecBiggestSignalInSigma[det].push_back(biggestSignalInSigma);
+		vecBiggestSignal[det].push_back(bigSignal);
+		vecBiggestAdjacentSignal[det].push_back(biggestAdjacentSignal);
+		if(biggestAdjacentHitChannel!=-9999){
+			vecBiggestAdjacentSignalInSigma[det].push_back(biggestAdjacentSignalInSigma);
 			vecBiggestAdjacentSignal[det].push_back(biggestAdjacentSignal);
-			if(biggestAdjacentHitChannel!=-9999){
-				vecBiggestAdjacentSignalInSigma[det].push_back(biggestAdjacentSignalInSigma);
-				vecBiggestAdjacentSignal[det].push_back(biggestAdjacentSignal);
-				vecBiggestAdjacentHitChannel[det].push_back(biggestAdjacentHitChannel);
-				vecHitOrder[det].push_back(biggestAdjacentHitChannel-biggestHitChannel);
-				hBiggestAdjacentSignalInSigma[det]->Fill(biggestAdjacentSignalInSigma);
-			}
-			else{
-				vecHitOrder[det].push_back(0);
-				vecBiggestAdjacentSignalInSigma[det].push_back(0);
-				vecBiggestAdjacentHitChannel[det].push_back(-9999);
-			}
-			if(vecBiggestAdjacentSignal[det].back()>vecBiggestSignal[det].back())
-				cout<<nEvent<<" "<<det<<" "<<vecBiggestHitChannel[det].back()<<":"<<vecBiggestSignal[det].back()<<":"<<vecBiggestSignalInSigma[det].back()<<"\t"<<vecBiggestAdjacentHitChannel[det].back()<<":"<<vecBiggestAdjacentSignal[det].back()<<":"<<vecBiggestAdjacentSignalInSigma[det].back()<<endl;
-			hHitOrderMap[det]->Fill(hitOrder);
-			hBiggestHitChannelMap[det]->Fill(biggestHitChannel);
+			vecBiggestAdjacentHitChannel[det].push_back(biggestAdjacentHitChannel);
+			vecHitOrder[det].push_back(biggestAdjacentHitChannel-bigHit);
+			hBiggestAdjacentSignalInSigma[det]->Fill(biggestAdjacentSignalInSigma);
 		}
-		else if (TPlaneProperties::isDiamondDetector(det)){
-			vecBiggestHitChannelCMN[det].push_back(biggestHitChannel);
-			vecBiggestSignalInSigmaCMN[det].push_back(biggestSignalInSigma);
-			if(biggestAdjacentHitChannel!=-9999){
-				vecBiggestAdjacentSignalCMN[det].push_back(biggestAdjacentSignalInSigma);
-				vecBiggestAdjacentHitChannelCMN[det].push_back(biggestAdjacentHitChannel);
-				//				vecHitOrder[det].push_back(biggestAdjacentHitChannel-biggestHitChannel);
-				hBiggestAdjacentSignalInSigmaCMN[det]->Fill(biggestAdjacentSignalInSigma);
-			}
-			else{
-				//				vecHitOrder[det].push_back(0);
-				vecBiggestAdjacentSignalCMN[det].push_back(0);
-				vecBiggestAdjacentHitChannelCMN[det].push_back(-9999);
-			}
-			//			hHitOrderMap[det]->Fill(hitOrder);
-			hBiggestHitChannelMapCMN[det]->Fill(biggestHitChannel);
+		else{
+			vecHitOrder[det].push_back(0);
+			vecBiggestAdjacentSignalInSigma[det].push_back(0);
+			vecBiggestAdjacentHitChannel[det].push_back(-9999);
 		}
-	}//end loop over detectors
+		if(vecBiggestAdjacentSignal[det].back()>vecBiggestSignal[det].back()&&false)
+			cout<<setw(5)<<nEvent<<" "<<det<<" "<<CMN_corrected<<" "<<setw(3)<<vecBiggestHitChannel[det].back()<<":"<<vecBiggestSignal[det].back()<<":"<<vecBiggestSignalInSigma[det].back()
+			<<"\t"<<setw(3)<<vecBiggestAdjacentHitChannel[det].back()<<":"<<vecBiggestAdjacentSignal[det].back()<<":"<<vecBiggestAdjacentSignalInSigma[det].back()<<endl;
+		hHitOrderMap[det]->Fill(hitOrder);
+		hBiggestHitChannelMap[det]->Fill(bigHit);
+	}
+	else if (TPlaneProperties::isDiamondDetector(det)){
+		vecBiggestHitChannelCMN[det].push_back(bigHit);
+		vecBiggestSignalInSigmaCMN[det].push_back(biggestSignalInSigma);
+		if(biggestAdjacentHitChannel!=-9999){
+			vecBiggestAdjacentSignalInSigmaCMN[det].push_back(biggestAdjacentSignalInSigma);
+			vecBiggestAdjacentHitChannelCMN[det].push_back(biggestAdjacentHitChannel);
+			//				vecHitOrder[det].push_back(biggestAdjacentHitChannel-bigHit);
+			hBiggestAdjacentSignalInSigmaCMN[det]->Fill(biggestAdjacentSignalInSigma);
+		}
+		else{
+			//				vecHitOrder[det].push_back(0);
+			vecBiggestAdjacentSignalInSigmaCMN[det].push_back(0);
+			vecBiggestAdjacentHitChannelCMN[det].push_back(-9999);
+		}
+		//			hHitOrderMap[det]->Fill(hitOrder);
+		hBiggestHitChannelMapCMN[det]->Fill(bigHit);
+	}
 }
 
 
@@ -542,20 +570,28 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		delete lineGraph;
 		delete c1;
 		if (TPlaneProperties::isDiamondDetector(det)){
-			for(Int_t i = 0;i < settings->getNDiaDetectorAreas();i++){
-				cout<<" save NDiaDetecotAreas "<<i<<endl;
+			Int_t diamondAreas = settings->getNDiaDetectorAreas();
+			for(Int_t i = 0;i < diamondAreas;i++){
 				std::pair<Int_t, Int_t> area = settings->getDiaDetectorArea(i);
 				if(area.first<area.second){
+					cout<<" save NDiaDetecotAreas "<<i<<"/"<<diamondAreas<<endl;
 					TString name = TString::Format("hPulseHeight_BiggestSignalInSigma%s_area_%d_ch%d-ch%d",TPlaneProperties::getStringForDetector(det).c_str(),i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
-					TH1F* hBiggestPHinSigma_SubArea = (TH1F*) hBiggestSignalInSigma2D->ProjectionX(name,area.first,area.second);
+					Int_t binMin = hBiggestSignalInSigma2D->FindBin(area.first);
+					Int_t binMax = hBiggestSignalInSigma2D->FindBin(area.second);
+					TH1F* hBiggestPHinSigma_SubArea = (TH1F*) hBiggestSignalInSigma2D->ProjectionX(name,binMin,binMax);
+					if(!hBiggestPHinSigma_SubArea)continue;
 					hBiggestPHinSigma_SubArea->SetTitle(name);
 					hBiggestPHinSigma_SubArea->SetName(name);
 					//					Float_t ymax =
 					findYPlotRangeForPHHisto(hBiggestPHinSigma_SubArea,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
+
 					name = TString::Format("hPulseHeight_BiggestSignalInSigma_area%d_ch%d-ch%d_CMNcorrected",i,area.first,area.second);
 					cout<<"Create "<<name<<endl;
-					TH1F* hBiggestPHInSigma_SubArea_CMNcorrected = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,area.first,area.second);
+					binMin = hBiggestSignalInSigma2DCMN->FindBin(area.first);
+					binMax = hBiggestSignalInSigma2DCMN->FindBin(area.second);
+					TH1F* hBiggestPHInSigma_SubArea_CMNcorrected = (TH1F*) hBiggestSignalInSigma2DCMN->ProjectionX(name,binMin,binMax);
+					if(!hBiggestPHInSigma_SubArea_CMNcorrected) continue;
 					hBiggestPHInSigma_SubArea_CMNcorrected->SetTitle(name);
 					findYPlotRangeForPHHisto(hBiggestPHInSigma_SubArea_CMNcorrected,settings->getClusterSeedFactor(det,(area.second+area.first)/2));
 					histSaver->CopyAxisRangesToHisto(hBiggestPHInSigma_SubArea_CMNcorrected,hBiggestPHinSigma_SubArea);
@@ -586,30 +622,62 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 					TH2F *hBiggestAndBiggestAdjacentSignal_in_SNR = new TH2F(histoName,histoName,256,xMinBiggest,xMaxBiggest,256,xMinAdjacent,xMaxAdjacent);
 					histoName=histoName.Append("_CMNcorrected");
 					TH2F *hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected = new TH2F(histoName,histoName,256,xMinBiggest,xMaxBiggest,256,xMinAdjacent,xMaxAdjacent);
+					UInt_t bhc      = vecBiggestHitChannel[det].size();
+					UInt_t bhcCMN   = vecBiggestHitChannelCMN[det].size();
+					UInt_t bSNR     = vecBiggestSignalInSigma[det].size();
+					UInt_t bSNRCMN  = vecBiggestSignalInSigmaCMN[det].size();
+					UInt_t bahc     = vecBiggestAdjacentHitChannel[det].size();
+					UInt_t bahcCMN  = vecBiggestAdjacentHitChannelCMN[det].size();
+					UInt_t baSNR    = vecBiggestAdjacentSignalInSigma[det].size();
+					UInt_t baSNRCMN = vecBiggestAdjacentSignalInSigmaCMN[det].size();
+					if(bhc!=bhcCMN||bhcCMN!=bSNR||bSNR!=bSNRCMN||bSNRCMN!=bahc||bahc!=bahcCMN||bahcCMN!=baSNR||baSNR!=baSNRCMN)
+						cout<<"Vector Sizes do NOT AGREE: "<<bhc<<" "<<bhcCMN<<" "<<bSNR<<" "<<bSNRCMN<<" "<<bahc<<" "<<bahcCMN<<" "<<baSNR
+						<<" "<<baSNRCMN<<endl;
+					int len = 4;
+					UInt_t minArrayCMN[] = {bhcCMN,bSNRCMN,bahcCMN,baSNRCMN};
+					UInt_t minArray[] = {bhc,bSNR,bahc,baSNR};
+					UInt_t minSize = *min_element(minArray,minArray+4);
+					UInt_t minSizeCMN = *min_element(minArrayCMN,minArrayCMN+len);
 
-					for(UInt_t i=0;i<vecBiggestSignalInSigma[det].size()&&i<vecBiggestAdjacentSignalInSigma[det].size();i++){
-						if(area.first<=vecBiggestHitChannel[det].at(i)&&vecBiggestHitChannel[det].at(i)<=area.second){
-							Float_t biggestSNR = vecBiggestSignalInSigma[det].at(i);
-							Float_t adjacentSNR = vecBiggestAdjacentSignalInSigma[det].at(i);
-							hBiggestAndBiggestAdjacentSignal_in_SNR->Fill(biggestSNR,adjacentSNR);
-						}
-						if(area.first<=vecBiggestHitChannelCMN[det].at(i)&&vecBiggestAdjacentHitChannelCMN[det].at(i)<=area.second){
-							Float_t biggestSNR = vecBiggestSignalInSigmaCMN[det].at(i);
-							Float_t adjacentSNR = vecBiggestAdjacentSignalCMN[det].at(i);
-							Int_t biggestCh  = vecBiggestHitChannel[det].at(i);
-							Int_t adjacentCh = vecBiggestAdjacentHitChannel[det].at(i);
-							if(biggestSNR<adjacentSNR){
-								cout<<i<<" "<<det<< " "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
+					if(verbosity){
+						cout<<"minSize: "<<minSize<<endl;
+						if(verbosity%2==1){char t;cin>>t;}
+					}
+					for(UInt_t i=0;i<minSize||i<minSizeCMN;i++){
+						if(i<minSize){
+							if(area.first<=vecBiggestHitChannel[det].at(i)&&vecBiggestHitChannel[det].at(i)<=area.second){
+								Float_t biggestSNR = vecBiggestSignalInSigma[det].at(i);
+								Float_t adjacentSNR = vecBiggestAdjacentSignalInSigma[det].at(i);
+								hBiggestAndBiggestAdjacentSignal_in_SNR->Fill(biggestSNR,adjacentSNR);
 							}
+						}
+						if(i<minSize&&i<minSizeCMN){
+							if(area.first<=vecBiggestHitChannelCMN[det].at(i)&&vecBiggestAdjacentHitChannelCMN[det].at(i)<=area.second){
+								Float_t biggestSNR = vecBiggestSignalInSigmaCMN[det].at(i);
+								Float_t adjacentSNR = vecBiggestAdjacentSignalInSigmaCMN[det].at(i);
+								Int_t biggestCh  = vecBiggestHitChannel[det].at(i);
+								Int_t adjacentCh = vecBiggestAdjacentHitChannel[det].at(i);
+								if(biggestSNR<adjacentSNR){
+									if(TMath::Abs(adjacentSNR/biggestSNR) > 1.05){
+										if(!settings->isDet_channel_screened(det,biggestCh)&&!settings->isDet_channel_screened(det,adjacentCh)){
+											cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
+											invalidBiggestHitChannels.at(det).insert(biggestCh);
+										}
+									}
+								}
 
-							else
-								hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->Fill(biggestSNR,adjacentSNR);
+								else
+									hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->Fill(biggestSNR,adjacentSNR);
+							}
 						}
 					}
+					if(!hBiggestAndBiggestAdjacentSignal_in_SNR)continue;
+					if(!hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected)continue;
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetXaxis()->SetTitle("Biggest Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetYaxis()->SetTitle("Biggest adjacent Signal in SNR");
 					hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetZaxis()->SetTitle("number of entries #");
 					TH2F* hist = hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected;
+					if(!hist)continue;
 					Float_t zmax = 0;//hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetBinContent(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected->GetMaximumBin());
 					for(Int_t i = 0; i<hist->GetXaxis()->GetNbins();i++)
 						for(Int_t j=0;j<hist->GetYaxis()->GetNbins();j++){
@@ -637,8 +705,8 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 
 					histSaver->SaveHistogramLogZ(hBiggestAndBiggestAdjacentSignal_in_SNR_CMNcorrected);
 					histSaver->SaveHistogramLogZ(hBiggestAndBiggestAdjacentSignal_in_SNR);
-					delete hBiggestPHInSigma_SubArea_CMNcorrected;
-					delete hBiggestPHinSigma_SubArea;
+					if(hBiggestPHInSigma_SubArea_CMNcorrected)delete hBiggestPHInSigma_SubArea_CMNcorrected;
+					if(hBiggestPHinSigma_SubArea)delete hBiggestPHinSigma_SubArea;
 				}
 			}
 
@@ -718,7 +786,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		hBiggestAndBiggestAdjacentSignal_in_SNR_CMN->GetZaxis()->SetTitle("number of entries # ");
 		for(UInt_t i=0;i<vecBiggestSignalInSigmaCMN[det].size()&&i<vecBiggestSignalInSigmaCMN[det].size();i++){
 			Float_t biggestSNR = vecBiggestSignalInSigmaCMN[det].at(i);
-			Float_t adjacentSNR= vecBiggestAdjacentSignalCMN[det].at(i);
+			Float_t adjacentSNR= vecBiggestAdjacentSignalInSigmaCMN[det].at(i);
 			hBiggestAndBiggestAdjacentSignal_in_SNR_CMN->Fill(biggestSNR,adjacentSNR);
 		}
 		histSaver->SaveHistogram(hBiggestAndBiggestAdjacentSignal_in_SNR_CMN);
@@ -872,29 +940,159 @@ void TAnalysisOfPedestal::saveHistos(){
 			TF1 histofitx("histofitx","gaus",hAllAdcNoise[det]->GetMean()-2*hAllAdcNoise[det]->GetRMS(),hAllAdcNoise[det]->GetMean()+2*hAllAdcNoise[det]->GetRMS());
 			histofitx.SetLineColor(kBlue);
 			hAllAdcNoise[det]->Fit(&histofitx,"rq");
-			if(res!=0)res->SetNoise(det,histofitx.GetParameter(2));
+			if(res!=0)res->setNoise(det,histofitx.GetParameter(2));
 			histSaver->SaveHistogram(hAllAdcNoise[det],true);
 
 			delete hAllAdcNoise[det];
 		}
 	}
-	cout<<"hFitX:"<<hDiaAllAdcNoise<<endl;
-	cout<<hDiaAllAdcNoise->GetMean()<<endl;
-	cout<<hDiaAllAdcNoise->GetRMS()<<endl;
-
+	if(verbosity){
+		cout<<"hFitX:"<<hDiaAllAdcNoise<<"\t"<<flush;
+		cout<<"Mean: "<<hDiaAllAdcNoise->GetMean()<<"\t"<<flush;
+		cout<<"'RMS': "<<hDiaAllAdcNoise->GetRMS()<<"\t"<<flush;
+	}
 	TF1 histofitx("histofitx","gaus",hDiaAllAdcNoise->GetMean()-2*hDiaAllAdcNoise->GetRMS(),hDiaAllAdcNoise->GetMean()+2*hDiaAllAdcNoise->GetRMS());
 	histofitx.SetLineColor(kBlue);
 	hDiaAllAdcNoise->Fit(&histofitx,"rq");
-	if(res!=0)res->SetNoise(TPlaneProperties::getDetDiamond(),histofitx.GetParameter(2));
+
+	Float_t diaNoise = histofitx.GetParameter(2);
 	histSaver->SaveHistogram(hDiaAllAdcNoise,true);
 	TF1 histofitAllNoiseCMN("histofitx","gaus",hDiaAllAdcNoiseCMN->GetMean()-2*hDiaAllAdcNoiseCMN->GetRMS(),hDiaAllAdcNoiseCMN->GetMean()+2*hDiaAllAdcNoiseCMN->GetRMS());
 	histofitAllNoiseCMN.SetLineColor(kBlue);
 	hDiaAllAdcNoiseCMN->Fit(&histofitAllNoiseCMN,"rq");
 	//    if(res!=0)res->SetNoise(TPlaneProperties::getDetDiamond(),histofitx.GetParameter(2));
 	histSaver->SaveHistogram(hDiaAllAdcNoiseCMN,true);
+
+	Float_t noiseCMC = histofitAllNoiseCMN.GetParameter(2);
 	for(Int_t ntries=0;hCMNoiseDistribution->GetBinContent(hCMNoiseDistribution->GetMaximumBin())<.05*hCMNoiseDistribution->GetEntries()&&ntries<2;ntries++)
 		hCMNoiseDistribution->Rebin(2);
+	TF1 histofitCMN("histofitx","gaus",hCMNoiseDistribution->GetMean()-2*hCMNoiseDistribution->GetRMS(),hCMNoiseDistribution->GetMean()+2*hCMNoiseDistribution->GetRMS());
+	histofitCMN.SetLineColor(kBlue);
+	hCMNoiseDistribution->Fit(&histofitCMN,"rq");
+
+	Float_t cmn = histofitCMN.GetParameter(2);
+	if(verbosity > 3){
+		cout<<" diaNoise = "<<diaNoise<<endl;
+		cout<<" CMN      = "<<cmn<<endl;
+		cout<<" noiseCMC = "<<noiseCMC<<endl;
+		char t;
+		if(verbosity%2==1) cin>>t;
+	}
+
+	if(res!=0) res->setDiaNoiseCMcorrected(noiseCMC);
+	if(res!=0) res->setCMN(cmn);
+	if(res!=0) res->setNoise(TPlaneProperties::getDetDiamond(),diaNoise);
 	histSaver->SaveHistogram(hCMNoiseDistribution,true);
+	stringstream name;
+	name<< "gADC_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gADC = histSaver->CreateDipendencyGraph(name.str(),adcValues,eventNumbers,20000);
+	gADC.SetMarkerStyle(7);
+
+	name.str("");name.clear();
+	name<< "gPed_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gPed = histSaver->CreateDipendencyGraph(name.str(),pedestalValues,eventNumbers,20000);
+	gPed.SetLineColor(kBlue);
+	gPed.SetMarkerColor(kBlue);
+	gPed.SetLineWidth(2);
+
+
+	name.str("");name.clear();
+	name<< "gPedCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gPedCMN = histSaver->CreateDipendencyGraph(name.str(),pedestalValuesCMN,eventNumbers,20000);
+	gPedCMN.SetLineColor(kGreen);
+	gPed.SetLineWidth(2);
+
+	name.str("");name.clear();
+	name<< "gUpperHitCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gUpperHitCut = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValues,eventNumbers,20000);
+	gUpperHitCut.SetLineColor(kRed);
+	gUpperHitCut.SetMarkerColor(kRed);
+	gUpperHitCut.SetLineWidth(2);
+
+	name.str("");name.clear();
+	name<< "gUpperSeedCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gUpperSeedCut = histSaver->CreateDipendencyGraph(name.str(),upperSeedCutValues,eventNumbers,20000);
+	int n = gUpperSeedCut.GetN();
+	double* y = gUpperSeedCut.GetY();
+	Float_t max = MaxElement(n,y);
+	gUpperSeedCut.SetLineColor(kMagenta);
+	gUpperSeedCut.SetMarkerColor(kMagenta);
+	gUpperSeedCut.SetLineWidth(2);
+
+
+	name.str("");name.clear();
+	name<< "gUpperHitCutCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gUpperHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),upperHitCutValuesCMN,eventNumbers,20000);
+	gUpperHitCutCMN.SetLineColor(kOrange);
+
+	name.str("");name.clear();
+	name<< "gLowerHitCut_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gLowerHitCut = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValues,eventNumbers,20000);
+	gLowerHitCut.SetLineColor(kRed);
+	gLowerHitCut.SetMarkerColor(kRed);
+	n = gLowerHitCut.GetN();
+	y = gLowerHitCut.GetY();
+	Float_t min = MinElement(n,y);
+	gLowerHitCut.SetLineWidth(2);
+
+	name.str("");name.clear();
+	name << "gLowerHitCutCMN_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
+	TGraph gLowerHitCutCMN = histSaver->CreateDipendencyGraph(name.str(),lowerHitCutValuesCMN,eventNumbers,20000);
+	gLowerHitCutCMN.SetLineColor(kOrange);
+
+	name.str("");name.clear();
+	name << "mgClusterCut_Ch_"<<settings->getNoisePlotChannel();
+	TMultiGraph* mg = new TMultiGraph(name.str().c_str(),TString::Format("eventNumber vs adc - Ch %03d",settings->getNoisePlotChannel()));
+	mg->Add(&gADC,"P");
+	mg->Add(&gPed,"C");
+	mg->Add(&gUpperSeedCut,"C");
+	mg->Add(&gUpperHitCut,"C");
+	mg->Add(&gLowerHitCut,"C");
+	mg->Add(&gPedCMN,"C");
+	mg->Add(&gUpperHitCutCMN,"C");
+	mg->Add(&gLowerHitCutCMN,"C");
+
+	name.str("");name.clear();
+	name << "cClusterCut_Ch_"<<settings->getNoisePlotChannel();
+	TCanvas *c1 = new TCanvas(name.str().c_str(),name.str().c_str(),1024,640);
+	c1->cd();
+	mg->Draw("AP");
+	mg->GetXaxis()->SetTitle("event number");
+	mg->GetXaxis()->SetRangeUser(0,10000);
+	mg->GetYaxis()->SetTitle("Adc Value");
+	mg->GetYaxis()->SetRangeUser(min-.1*(max-min),max+.3*(max-min));
+	mg->Draw("A");
+	TLegend* leg = c1->BuildLegend(0.5,0.75,0.88,0.99);
+	leg->SetFillColor(kWhite);
+	leg->Clear();
+	leg->AddEntry(&gADC,"ADC","LP");
+	leg->AddEntry(&gPed,"Pedestal","LP");
+	Float_t nSigmasHit = settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),settings->getNoisePlotChannel());
+	Float_t nSigmasSeed = settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),settings->getNoisePlotChannel());
+	leg->AddEntry(&gUpperSeedCut,  TString::Format("Seed Limit     - %1.0f #sigma",nSigmasSeed),"L");
+	leg->AddEntry(&gUpperHitCut,   TString::Format("Hit Limit      -  %1.0f #sigma",nSigmasHit),"L");
+	leg->AddEntry(&gLowerHitCutCMN,TString::Format("Hit Limit_{CMN} - %1.0f #sigma",nSigmasHit),"L");
+	leg->AddEntry(&gPedCMN,"Pedestal_{CMN}","L");
+
+	leg->Draw();
+	histSaver->SaveCanvas(c1);
+	delete c1;
+
+	name.str("");name.clear();
+	name << "mgClusterCut-CMN-Ch_"<<settings->getNoisePlotChannel();
+	TMultiGraph* mgCMN = new TMultiGraph(name.str().c_str(),TString::Format("eventNumber vs adc - Ch %03d - CMN",settings->getNoisePlotChannel()));
+	mgCMN->Add(&gADC);
+	mgCMN->Add(&gPedCMN);
+	mgCMN->Add(&gUpperHitCutCMN);
+	mgCMN->Add(&gLowerHitCutCMN);
+	name.str("");name.clear();
+	name << "cClusterCut-CMN-Ch_"<<settings->getNoisePlotChannel();
+	c1 = new TCanvas(name.str().c_str());
+	c1->cd();
+	mgCMN->Draw("APL");
+	histSaver->SaveCanvas(c1);
+	delete c1;
+
 }
 
 /**
@@ -956,61 +1154,53 @@ void TAnalysisOfPedestal::createPedestalMeanHistos()
 
 }
 
-void TAnalysisOfPedestal::updateMeanCalulation(){
-	Float_t sumPed =0;
-	Float_t sumPedCMN=0;
-	Float_t sumNoise=0;
-	Float_t sumNoiseCMN=0;
-	int nSumPed =0;
-	int nSumPedCMN=0;
-	int nSumNoiseCMN=0;
-	int nSumNoise=0;
-	Float_t cmNoise = eventReader->getCMNoise();
-	vecCMNoise.push_back(cmNoise);
-	vecEventNo.push_back(nEvent);
-	hCMNoiseDistribution->Fill(cmNoise);
-	for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
-		for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
-			if(settings->isDet_channel_screened(det,ch))
-				continue;
-			Float_t snr = eventReader->getSignalInSigma(det,ch);
-			Float_t pedestal = eventReader->getPedestalMean(det,ch,false);
-			Float_t sigma = eventReader->getPedestalSigma(det,ch,false);
-			UInt_t adc = eventReader->getAdcValue(det,ch);
-			Float_t noise = eventReader->getRawSignal(det,ch,false);//adc-pedestal;
-			Float_t pedestalCMN = eventReader->getPedestalMean(det,ch,true);
-			////		  Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true);
-			//		  pedestalCMN-=cmNoise;
-			Float_t noiseCMN =  eventReader->getRawSignal(det,ch,true);
-			if(snr<settings->getClusterHitFactor(det,ch)){
-				pedestalMeanValue.at(det).at(ch) +=pedestal;
-				pedestalSigmaValue.at(det).at(ch) +=sigma;
-				nPedestalHits.at(det).at(ch)++;
-				if(TPlaneProperties::isSiliconDetector(det))
-					hAllAdcNoise[det]->Fill(noise);
-				else if(TPlaneProperties::isDiamondDetector(det)){
+void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
+	if(det==0&&ch==0){
+		sumPed =0;
+		sumPedCMN=0;
+		sumNoise=0;
+		sumNoiseCMN=0;
+		sumPed =0;
+		nSumPedCMN=0;
+		nSumNoiseCMN=0;
+		nSumNoise=0;
+		cmNoise = eventReader->getCMNoise();
+		vecCMNoise.push_back(cmNoise);
+		vecEventNo.push_back(nEvent);
+		hCMNoiseDistribution->Fill(cmNoise);
+	}
+	if(settings->isDet_channel_screened(det,ch))
+		return;
+	if(snr<settings->getClusterHitFactor(det,ch)){
+		pedestalMeanValue.at(det).at(ch) +=pedestal;
+		pedestalSigmaValue.at(det).at(ch) +=sigma;
+		nPedestalHits.at(det).at(ch)++;
+		if(TPlaneProperties::isSiliconDetector(det))
+			hAllAdcNoise[det]->Fill(noise);
+		else if(TPlaneProperties::isDiamondDetector(det)){
 
-					hDiaAllAdcNoise->Fill(noise);
-					hDiaAllAdcNoiseCMN->Fill(noiseCMN);
-					sumPed += pedestal;
-					sumPedCMN+=pedestalCMN;
-					nSumPed++;
-					nSumPedCMN++;
-					nSumNoise++;
-					nSumNoiseCMN++;
-					sumNoise+=noise;
-					sumNoiseCMN+=noiseCMN;
-				}
-			}
-			if(TPlaneProperties::getDetDiamond()==det){
-				diaRawADCvalues.at(ch).push_back(adc);
-			}
-
+			hDiaAllAdcNoise->Fill(noise);
+			hDiaAllAdcNoiseCMN->Fill(noiseCMN);
+			sumPed += pedestal;
+			sumPedCMN+=pedestalCMN;
+			nSumPed++;
+			nSumPedCMN++;
+			nSumNoise++;
+			nSumNoiseCMN++;
+			sumNoise+=noise;
+			sumNoiseCMN+=noiseCMN;
 		}
-	vecAvrgPed.push_back(sumPed/(float)nSumPed);
-	vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
-	vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);
-	vecAvrgSigmaCMN.push_back(sumNoiseCMN/(float)nSumNoiseCMN);
+	}
+	if(TPlaneProperties::getDetDiamond()==det){
+		diaRawADCvalues.at(ch).push_back(adc);
+	}
+	if(det==TPlaneProperties::getNDetectors()-1 && ch <= TPlaneProperties::getNChannels(det) -1){
+		vecAvrgPed.push_back(sumPed/(float)nSumPed);
+		vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
+		vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);
+		vecAvrgSigmaCMN.push_back(sumNoiseCMN/(float)nSumNoiseCMN);
+		vecEventNo.push_back(nEvent);
+	}
 }
 
 
