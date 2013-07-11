@@ -14,6 +14,8 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 	cout<<"*************TClustering::TClustering*********************"<<endl;
 	cout<<"**********************************************************"<<endl;
 	// TODO Auto-generated constructor stub
+
+	settings=NULL;
 	if(set==0){
 		cerr<< "Settings ==0 , exit"<<endl;
 		exit(-1);
@@ -32,7 +34,6 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 	settings->goToPedestalTreeDir();
 	this->runNumber=runNumber;
 	verbosity=settings->getVerbosity();
-	settings=NULL;
 	createdTree=false;
 	pEvent=0;//new TEvent();
 	for(UInt_t det=0;det<9;det++){
@@ -45,7 +46,10 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 
 TClustering::~TClustering() {
 	clusterFile->cd();
+	clusterFile->GetListOfKeys()->Print();
+
 	if(clusterTree!=NULL&&this->createdTree){
+
 		cout<<"Invalid readouts: "<<nInvalidReadout<<endl;
 		if(verbosity)cout<<"CLOSING TREE"<<endl;
 		if(verbosity)cout<<"pedestalTree"<<" "<<settings->getPedestalTreeFilePath()<<" "<<filepath.str().c_str()<<endl;
@@ -305,7 +309,10 @@ bool TClustering::createClusterTree(int nEvents)
 	clusterFile->cd();
 	stringstream treeDescription;
 	treeDescription<<"Cluster Data of run "<<runNumber;
-	clusterFile->GetObject("clusterTree",clusterTree);
+	if(!createdNewFile)
+		clusterFile->GetObject("clusterTree",clusterTree);
+	else
+		clusterTree=NULL;
 	if(clusterTree!=NULL){
 		if(verbosity)cout<<"File and Tree Exists... \t"<<flush;
 		if(clusterTree->GetEntries()>=nEvents){
@@ -332,8 +339,11 @@ bool TClustering::createClusterTree(int nEvents)
 		}
 	}
 	if(clusterTree==NULL){
-		clusterFile->Close();
-		clusterFile=new TFile(clusterfilepath.str().c_str(),"RECREATE");
+		if(!createdNewFile||!clusterFile){
+			clusterFile->Close();
+			clusterFile=new TFile(clusterfilepath.str().c_str(),"RECREATE");
+		}
+		clusterFile->cd();
 		this->clusterTree=new TTree("clusterTree",treeDescription.str().c_str());
 		createdNewTree=true;
 		if(verbosity)cout<<"\n\n***************************************************************\n";
