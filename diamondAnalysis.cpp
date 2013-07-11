@@ -14,6 +14,7 @@
 #include "TAnalysisOfPedestal.hh"
 #include "TAnalysisOfClustering.hh"
 #include "TAnalysisOfSelection.hh"
+#include "TAnalysisOf3dDiamonds.hh"
 #include "TClustering.hh"
 #include "TSelectionClass.hh"
 #include "THTMLGenerator.hh"
@@ -261,6 +262,13 @@ int main(int argc, char ** argv) {
 			delete alignment;
 		}
 
+		//		if(settings->is3dDiamond()){
+		if(true){
+			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+			delete analyse3dDiamond;
+		}
+
 		if(DO_ALIGNMENTANALYSIS){
 			sys->cd(currentDir.c_str());
 			TAnalysisOfAlignment *anaAlignment;
@@ -337,7 +345,9 @@ int main(int argc, char ** argv) {
 int ReadRunList() {
 	TRunInfo run;
 	RunParameters.clear();
-	cout << endl << "reading runlist.." << endl;
+	cout << endl << "reading runlist.."  << flush;
+	cout << "RunListPath: \""<<runListPath<<"\""<<endl;
+
 	ifstream file(runListPath.c_str());//"RunList.ini");
 	if (!file) {
 		cout << "An error has encountered while trying to open RunList.ini" << endl;
