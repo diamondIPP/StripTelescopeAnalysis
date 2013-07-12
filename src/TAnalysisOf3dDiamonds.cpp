@@ -370,7 +370,7 @@ void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
 	//FidCudBoundMetric->Draw("same"); //To draw the fiducial cut regions
 	hCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn");
 	histSaver->SaveCanvas(hCombinedMeanCharge);
-	settings->get3dFidCuts()->drawFiducialCutsToCanvas(hCombinedMeanCharge);
+	settings->getSelectionFidCuts()->drawFiducialCutsToCanvas(hCombinedMeanCharge);
 	hCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectors");
 	histSaver->SaveCanvas(hCombinedMeanCharge);
 
@@ -518,11 +518,13 @@ void TAnalysisOf3dDiamonds::initialise3DGridReference() {
 	TString nameDet = "hGridRefenrenceDetSpace";
 	TString nameCell = "hGridRefenrenceCellSpace";
 	Float_t xBins = settings->getNColumns3d();
-	Float_t xLow = settings->getXMetalisationStart3d();
-	Float_t xHigh =settings->getXMetalisationEnd3d();
+	TFidCutRegions* mettalisationFidCuts = settings->get3dMetallisationFidCuts();
+	TFiducialCut* fidCut = mettalisationFidCuts->getFidCut(3);
+	Float_t xLow = fidCut->GetXLow();//getXMetalisationStart3d;
+	Float_t xHigh = fidCut->GetXHigh();//getXMetalisationEnd3d;
 	Float_t yBins = settings->getNRows3d();
-	Float_t yLow = 0;
-	Float_t yHigh = settings->getYMetalisationEnd3d();
+	Float_t yLow = fidCut->GetYLow();
+	Float_t yHigh = fidCut->GetYHigh();//getYMetalisationEnd3d;
 //	cout<<"nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh"<<endl;
 //	cout<<nameDet<<" "<<nameDet<<" "<<xBins<<" "<<xLow<<" "<<xHigh<<" "<<yBins<<" "<<yLow<<" "<<yHigh<<endl;
 	hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
@@ -600,9 +602,16 @@ void TAnalysisOf3dDiamonds::initialise3DYAlignmentHistos() {
 
 void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
+	Float_t getXMetalisationStart3d = settings->get3dMetallisationFidCuts()->getFidCut(4)->GetXLow();
+	Float_t getXMetalisationEnd3d = settings->get3dMetallisationFidCuts()->getFidCut(4)->GetXHigh();
+
+	Float_t getYMetalisationStart3d = settings->get3dMetallisationFidCuts()->getFidCut(4)->GetYLow();
+	Float_t getYMetalisationEnd3d = settings->get3dMetallisationFidCuts()->getFidCut(4)->GetYHigh();
 	//hDetXvsDetY3DTotolCharge
 	stringstream hDetXvsDetY3DName; hDetXvsDetY3DName<<"hFidCutXvsFidCutYvsChargeYAlignment"<<FileNameEnd;
-	hDetXvsDetY3D = new TH2D(hDetXvsDetY3DName.str().c_str(),hDetXvsDetY3DName.str().c_str(),270,settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),330,0,settings->getYMetalisationEnd3d());
+	hDetXvsDetY3D = new TH2D(hDetXvsDetY3DName.str().c_str(),hDetXvsDetY3DName.str().c_str(),
+					270,getXMetalisationStart3d,getXMetalisationEnd3d,
+					330,getYMetalisationStart3d,getYMetalisationEnd3d);
 	hDetXvsDetY3D->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3D->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3D->GetZaxis()->SetTitle("Charge ADC");
@@ -615,7 +624,9 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
 	//hDetXvsDetY3DRebinnedChargeTotal
 	stringstream hDetXvsDetY3DRebinnedName; hDetXvsDetY3DRebinnedName<<"hFidCutXvsFidCutYvsChargeRebinnedYAlignment"<<FileNameEnd;
-	hDetXvsDetY3DRebinned = new TH2D(hDetXvsDetY3DRebinnedName.str().c_str(),hDetXvsDetY3DRebinnedName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hDetXvsDetY3DRebinned = new TH2D(hDetXvsDetY3DRebinnedName.str().c_str(),hDetXvsDetY3DRebinnedName.str().c_str(),
+			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
+			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
 	hDetXvsDetY3DRebinned->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DRebinned->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3DRebinned->GetZaxis()->SetTitle("Charge ADC");
@@ -629,7 +640,9 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
 	//hDetXvsDetY3DRebinnedMeanChargeRMS
 	stringstream hDetXvsDetY3DRebinnedRMSName; hDetXvsDetY3DRebinnedRMSName<<"h3DdetRebinnedRMS"<<FileNameEnd;
-	hDetXvsDetY3DRebinnedRMS = new TH2D(hDetXvsDetY3DRebinnedRMSName.str().c_str(),hDetXvsDetY3DRebinnedRMSName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hDetXvsDetY3DRebinnedRMS = new TH2D(hDetXvsDetY3DRebinnedRMSName.str().c_str(),hDetXvsDetY3DRebinnedRMSName.str().c_str(),
+			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
+			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
 	hDetXvsDetY3DRebinnedRMS->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DRebinnedRMS->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3DRebinnedRMS->GetZaxis()->SetTitle("Charge ADC");
@@ -643,45 +656,49 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
 	//hDetXvsDetY3DOverview
 	stringstream hDetXvsDetY3DOverviewName; hDetXvsDetY3DOverviewName<<"hDetXvsDetY3DOverview"<<FileNameEnd;
-	hDetXvsDetY3DOverview = new TH2D(hDetXvsDetY3DOverviewName.str().c_str(),hDetXvsDetY3DOverviewName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hDetXvsDetY3DOverview = new TH2D(hDetXvsDetY3DOverviewName.str().c_str(),hDetXvsDetY3DOverviewName.str().c_str(),
+			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
+			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
 	hDetXvsDetY3DOverview->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DOverview->GetYaxis()->SetTitle("Ydet (um)");
 	//hDetXvsDetY3DOverview->GetZaxis()->SetTitle();
 
 	//hCellNumbering
 	stringstream hCellNumberingName; hCellNumberingName<<"h3DdetCellNumbering"<<FileNameEnd;
-	hCellNumbering = new TH2D(hCellNumberingName.str().c_str(),hCellNumberingName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hCellNumbering = new TH2D(hCellNumberingName.str().c_str(),hCellNumberingName.str().c_str(),
+			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
+			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
 	hCellNumbering->GetXaxis()->SetTitle("Xdet (um)");
 	hCellNumbering->GetYaxis()->SetTitle("Ydet (um)");
 	//hDetXvsDetY3DOverview->GetZaxis()->SetTitle();
 
 	//hCellsMeanClusteSize
 	stringstream hCellsMeanClusteSizeName; hCellsMeanClusteSizeName<<"hCellsMeanClusteSize"<<FileNameEnd;
-	hCellsMeanClusteSize = new TH2D(hCellsMeanClusteSizeName.str().c_str(),hCellsMeanClusteSizeName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hCellsMeanClusteSize = new TH2D(hCellsMeanClusteSizeName.str().c_str(),hCellsMeanClusteSizeName.str().c_str(),settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
 
 	///// For Quarter Cell /////
 
 	//hDetXvsDetY3DQuarterCellMeanCharge
 	stringstream hDetXvsDetY3DMeanChargeRebinnedQuarterCellName; hDetXvsDetY3DMeanChargeRebinnedQuarterCellName<<"h3DdetQuarterCellMeanCharge"<<FileNameEnd;
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell = new TH2D(hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hDetXvsDetY3DMeanChargeRebinnedQuarterCell = new TH2D(hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetZaxis()->SetTitle("Charge ADC");
 
 	//hDetXvsDetY3DQuarterCellRMS
 	stringstream hDetXvsDetY3DRebinnedQuarterCellRMSName; hDetXvsDetY3DRebinnedQuarterCellRMSName<<"h3DdetQuarterCellRMS"<<FileNameEnd;
-	hDetXvsDetY3DRebinnedQuarterCellRMS = new TH2D(hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hDetXvsDetY3DRebinnedQuarterCellRMS = new TH2D(hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
 	hDetXvsDetY3DRebinnedQuarterCellRMS->GetXaxis()->SetTitle("Xdet (um)");
 	hDetXvsDetY3DRebinnedQuarterCellRMS->GetYaxis()->SetTitle("Ydet (um)");
 	hDetXvsDetY3DRebinnedQuarterCellRMS->GetZaxis()->SetTitle("Charge ADC");
 
 	//hQuarterCellsMeanClusteSize
 	stringstream hQuarterCellsMeanClusterSizeName; hQuarterCellsMeanClusterSizeName<<"hQuarterCellsMeanClusterSize"<<FileNameEnd;
-	hQuarterCellsMeanClusterSize = new TH2D(hQuarterCellsMeanClusterSizeName.str().c_str(),hQuarterCellsMeanClusterSizeName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	hQuarterCellsMeanClusterSize = new TH2D(hQuarterCellsMeanClusterSizeName.str().c_str(),hQuarterCellsMeanClusterSizeName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
 
 	//RebinnedQuarterCellFails
 	stringstream RebinnedQuarterCellFailsName; RebinnedQuarterCellFailsName<<"3DdetNumberofQuarterCellFails"<<FileNameEnd;
-	RebinnedQuarterCellFails = new TH2D(RebinnedQuarterCellFailsName.str().c_str(),RebinnedQuarterCellFailsName.str().c_str(),settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	RebinnedQuarterCellFails = new TH2D(RebinnedQuarterCellFailsName.str().c_str(),RebinnedQuarterCellFailsName.str().c_str(),settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
 	RebinnedQuarterCellFails->GetXaxis()->SetTitle("Xdet (um)");
 	RebinnedQuarterCellFails->GetYaxis()->SetTitle("Ydet (um)");
 	RebinnedQuarterCellFails->GetZaxis()->SetTitle("Quarter Fails");
@@ -689,7 +706,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 	//hDetXvsDetY3DQuarterCellGrading
 	for(int k=0; k<6; k++){
 		stringstream hDetXvsDetY3DMeanChargeQuarterCellGradingName; hDetXvsDetY3DMeanChargeQuarterCellGradingName<<"hDetXvsDetY3DMeanChargeQuarterCellGrading"<<k<<"%%Fail"<<FileNameEnd;
-		hDetXvsDetY3DMeanChargeQuarterCellGrading.push_back(new TH2D(hDetXvsDetY3DMeanChargeQuarterCellGradingName.str().c_str(),hDetXvsDetY3DMeanChargeQuarterCellGradingName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d()));
+		hDetXvsDetY3DMeanChargeQuarterCellGrading.push_back(new TH2D(hDetXvsDetY3DMeanChargeQuarterCellGradingName.str().c_str(),hDetXvsDetY3DMeanChargeQuarterCellGradingName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d));
 		hDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->GetXaxis()->SetTitle("Xdet (um)");
 		hDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->GetYaxis()->SetTitle("Ydet (um)");
 		hDetXvsDetY3DMeanChargeQuarterCellGrading.at(k)->GetZaxis()->SetTitle("Charge ADC");
@@ -697,14 +714,14 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
 	//h3DdetQuarterCellFluctuation
 	stringstream h3DdetQuarterCellFluctuationName; h3DdetQuarterCellFluctuationName<<"h3DdetQuarterCellFluctuation"<<FileNameEnd;
-	h3DdetQuarterCellFluctuation = new TH2D(h3DdetQuarterCellFluctuationName.str().c_str(),h3DdetQuarterCellFluctuationName.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	h3DdetQuarterCellFluctuation = new TH2D(h3DdetQuarterCellFluctuationName.str().c_str(),h3DdetQuarterCellFluctuationName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
 	h3DdetQuarterCellFluctuation->GetXaxis()->SetTitle("Xdet (um)");
 	h3DdetQuarterCellFluctuation->GetYaxis()->SetTitle("Ydet (um)");
 	h3DdetQuarterCellFluctuation->GetZaxis()->SetTitle("Fluctuation");
 
 	//h3DdetQuarterCellFluctuation1
 	stringstream h3DdetQuarterCellFluctuation1Name; h3DdetQuarterCellFluctuation1Name<<"h3DdetQuarterCellFluctuation1"<<FileNameEnd;
-	h3DdetQuarterCellFluctuation1 = new TH2D(h3DdetQuarterCellFluctuation1Name.str().c_str(),h3DdetQuarterCellFluctuation1Name.str().c_str(),2*settings->getNColumns3d(),settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),2*settings->getNRows3d(),0,settings->getYMetalisationEnd3d());
+	h3DdetQuarterCellFluctuation1 = new TH2D(h3DdetQuarterCellFluctuation1Name.str().c_str(),h3DdetQuarterCellFluctuation1Name.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
 	h3DdetQuarterCellFluctuation1->GetXaxis()->SetTitle("Xdet (um)");
 	h3DdetQuarterCellFluctuation1->GetYaxis()->SetTitle("Ydet (um)");
 	h3DdetQuarterCellFluctuation1->GetZaxis()->SetTitle("Fluctuation");
@@ -837,14 +854,14 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
 	//h3DdetDeltaXChannel
 	stringstream h3DdetDeltaXChannelName; h3DdetDeltaXChannelName<<"h3DdetDeltaXChannel"<<FileNameEnd;
-	h3DdetDeltaXChannel = new TH2D(h3DdetDeltaXChannelName.str().c_str(),h3DdetDeltaXChannelName.str().c_str(),270,settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),330,0,settings->getYMetalisationEnd3d());
+	h3DdetDeltaXChannel = new TH2D(h3DdetDeltaXChannelName.str().c_str(),h3DdetDeltaXChannelName.str().c_str(),270,getXMetalisationStart3d,getXMetalisationEnd3d,330,getXMetalisationStart3d,getYMetalisationEnd3d);
 	h3DdetDeltaXChannel->GetXaxis()->SetTitle("Xdet (um)");
 	h3DdetDeltaXChannel->GetYaxis()->SetTitle("Ydet (um)");
 	h3DdetDeltaXChannel->GetZaxis()->SetTitle("Delta X (ch)");
 
 	//h3DdetDeltaXChannelAbove1000
 	stringstream h3DdetDeltaXChannelAbove1000Name; h3DdetDeltaXChannelAbove1000Name<<"h3DdetDeltaXChannelAbove1000"<<FileNameEnd;
-	h3DdetDeltaXChannelAbove1000 = new TH2D(h3DdetDeltaXChannelAbove1000Name.str().c_str(),h3DdetDeltaXChannelAbove1000Name.str().c_str(),270,settings->getXMetalisationStart3d(),settings->getXMetalisationEnd3d(),330,0,settings->getYMetalisationEnd3d());
+	h3DdetDeltaXChannelAbove1000 = new TH2D(h3DdetDeltaXChannelAbove1000Name.str().c_str(),h3DdetDeltaXChannelAbove1000Name.str().c_str(),270,getXMetalisationStart3d,getXMetalisationEnd3d,330,getXMetalisationStart3d,getYMetalisationEnd3d);
 	h3DdetDeltaXChannelAbove1000->GetXaxis()->SetTitle("Xdet (um)");
 	h3DdetDeltaXChannelAbove1000->GetYaxis()->SetTitle("Ydet (um)");
 	h3DdetDeltaXChannelAbove1000->GetZaxis()->SetTitle("Delta X (ch)");
@@ -2926,9 +2943,10 @@ int TAnalysisOf3dDiamonds::FiducialCut(int nDiamondPattern){
 	//cout<<"FidY: "<<fiducialValueY<<endl;
 	//cout<<"X Less than: "<<FidCut.at(Detector)->GetXHigh()<<" Greater than: "<<FidCut.at(Detector)->GetXLow()<<endl;
 	//cout<<"Y Less than: "<<FidCut.at(Detector)->GetYHigh()<<" Greater than: "<<FidCut.at(Detector)->GetYLow()<<endl;
-	if(fiducialValueX<settings->get3dFidCuts()->getFidCut(Detector)->GetXLow()||fiducialValueX>settings->get3dFidCuts()->getFidCut(Detector)->GetXHigh())
+	TFiducialCut *fidCut = settings->getSelectionFidCuts()->getFidCut(Detector);
+	if(fiducialValueX<fidCut->GetXLow()||fiducialValueX>fidCut->GetXHigh())
 		Throw =1;
-	if(fiducialValueY<settings->get3dFidCuts()->getFidCut(Detector)->GetYLow()||fiducialValueY>settings->get3dFidCuts()->getFidCut(Detector)->GetYHigh())
+	if(fiducialValueY<fidCut->GetYLow()||fiducialValueY>fidCut->GetYHigh())
 		Throw =1;
 	//if(Throw==1)
 	//cout<<"Detector: "<<Detector<<"Thrown: "<<fiducialValueX<<",    "<<fiducialValueY<<endl;
@@ -2972,8 +2990,9 @@ void TAnalysisOf3dDiamonds::DrawYAlignmentFidCutRegions() {
 void TAnalysisOf3dDiamonds::DrawFidCutRegions() {
 
 	hCombinedMeanCharge->cd();
-	for(int i=0;i<settings->get3dFidCuts()->getNFidCuts();i++){
-		FidCutChannelTBox.push_back(new TBox(settings->get3dFidCuts()->getFidCut(i+1)->GetXLow(), settings->get3dFidCuts()->getFidCut(i+1)->GetYLow(), settings->get3dFidCuts()->getFidCut(i+1)->GetXHigh(), settings->get3dFidCuts()->getFidCut(i+1)->GetYHigh()));
+	for(int i=0;i<settings->getSelectionFidCuts()->getNFidCuts();i++){
+		TFiducialCut* fidCut = settings->getSelectionFidCuts()->getFidCut(i+1);
+		FidCutChannelTBox.push_back(new TBox(fidCut->GetXLow(), fidCut->GetYLow(), fidCut->GetXHigh(), fidCut->GetYHigh()));
 		FidCutChannelTBox.at(i)->SetFillStyle(0);
 		FidCutChannelTBox.at(i)->SetLineWidth(2);
 		FidCutChannelTBox.at(i)->SetLineColor(kRed);
