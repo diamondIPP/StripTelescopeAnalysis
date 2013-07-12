@@ -84,7 +84,6 @@ private:
 	THTMLSelection *htmlSelection;
 	UInt_t nEvent;
 	bool isDetMasked;//one of the Silicon Planes contains a Cluster with a masked channel
-	deque<bool> isDiaMasked;//thediamond plane contains a cluster wit a masked channel (size of nDiamondHits)
 	UInt_t nDiamondClusters; //number of clusters in diamond plane;
 	bool oneAndOnlyOneSiliconCluster; //One and only one cluster in each silicon plane;
 	bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region

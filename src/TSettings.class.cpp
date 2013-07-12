@@ -20,7 +20,6 @@ TSettings::TSettings(TRunInfo *runInfo)
 	setVerbosity(runInfo->getVerbosity());
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
-	fidCuts3D = new TFidCutRegions();
 	fidCuts3DEdge = new TFidCutRegions();
 	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
@@ -57,7 +56,6 @@ TSettings::TSettings(UInt_t runNumber){
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
-	fidCuts3D = new TFidCutRegions();
 	fidCuts3DEdge = new TFidCutRegions();
 	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
@@ -75,7 +73,6 @@ TSettings::TSettings(string fileName,UInt_t runNumber){
 		cout<<"TSettings:Create TSettings-member with file:\""<<fileName<<"\""<<endl;
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
-	fidCuts3D = new TFidCutRegions();
 	fidCuts3DEdge = new TFidCutRegions();
 	fidCuts3DMetallisation = new TFidCutRegions();
 	DefaultLoadDefaultSettings();
@@ -97,6 +94,7 @@ TSettings::~TSettings(){
 
 void TSettings::checkSettings(){
 	cout<<"Check Settings..."<<endl;
+
 	if (!fidCutsSelection){
 		fidCutsSelection = new TFidCutRegions();
 	}
@@ -107,28 +105,20 @@ void TSettings::checkSettings(){
 		fidCutsSelection->SetName("standard-FidCuts");
 		fidCutsSelection->addFiducialCut(getSi_avg_fidcut_xlow(),getSi_avg_fidcut_xhigh(),getSi_avg_fidcut_ylow(),getSi_avg_fidcut_yhigh());
 	}
-	if(!fidCutsSelection)
-		fidCutsSelection =  new TFidCutRegions();
-	fidCutsSelection->SetName("3D-FidCuts");
-
-	if (isStandard3dFidCut==true){
-		fidCuts3D->Reset();
-		fidCutsSelection->SetName("standard-3D-FidCuts");
-		fidCuts3D->addFiducialCut(-1e9,1e9,-1e9,1e9);
-		}
 
 	if (isStandard3dEdgeFidCut==true){
 		fidCuts3DEdge->Reset();
-		fidCutsSelection->SetName("3DEdge-FidCuts");
+		fidCuts3DEdge->SetName("3DEdge-FidCuts");
 		fidCuts3DEdge->addFiducialCut(-1e9,1e9,-1e9,1e9);
 	}
 	if (isStandard3dMetallisationFidCut==true){
 		fidCuts3DMetallisation->Reset();
-		fidCutsSelection->SetName("3DMetallisation-FidCuts");
+		fidCuts3DMetallisation->SetName("3DMetallisation-FidCuts");
 		fidCuts3DMetallisation->addFiducialCut(-1e9,1e9,-1e9,1e9);
 	}
 //	diamondPattern.Print();
 	cout<<"NDiamond Patterns: "<<diamondPattern.getNPatterns()<<endl;
+
 
 	this->checkAlignmentFidcuts();
 	cout<<"Settings seems to be ok."<<endl;
@@ -136,8 +126,12 @@ void TSettings::checkSettings(){
 }
 
 void TSettings::checkAlignmentFidcuts(){
+	cout<<"checking Alignment Fiducial Cut: "<<endl;
+	getSelectionFidCuts()->Print(1);
+	cout<<"There are "<<getSelectionFidCuts()->getNFidCuts()<< " Fiducial Cuts using the following cuts for Alignment"<<endl;
 	for(UInt_t i=0;i<this->alignmentFidCuts.size();i++){
 		Int_t fidCutIndex = alignmentFidCuts[i];
+//		cout<<"checking "<<fidCutIndex<<endl;
 		TFiducialCut* fidCut = this->getSelectionFidCuts()->getFidCut(fidCutIndex);
 		if(fidCut==0){
 			cout<<endl;
@@ -148,11 +142,13 @@ void TSettings::checkAlignmentFidcuts(){
 			exit(-1);
 		}
 		else{
-			cout<<"fidCut No:"<<fidCutIndex<<endl;
-			fidCut->Print(1);
+			cout<<"\tfidCut No:"<<fidCutIndex<<endl;
+			fidCut->Print(2);
 		}
 
 	}
+	char t;
+	cin >> t;
 	//exit(-1);
 }
 
@@ -477,8 +473,8 @@ void TSettings::LoadSettings(){
 		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
 		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
+
 		if(key == "selectionFidCut") {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
-		if(key == "3dFidCut"){if (!fidCuts3D) fidCuts3D=new TFidCutRegions();ParseFidCut(key,value,fidCuts3D,isStandard3dFidCut);}
 		if(key == "3dMetallisationFidCut"){if (!fidCuts3DMetallisation) fidCuts3DMetallisation=new TFidCutRegions();ParseFidCut(key,value,fidCuts3DMetallisation,isStandard3dMetallisationFidCut);}
 		if(key == "3dEdgeFidCut"){if (!fidCuts3DEdge) fidCuts3DEdge =new TFidCutRegions();ParseFidCut(key,value,fidCuts3DEdge,isStandard3dEdgeFidCut);}
 
@@ -587,9 +583,6 @@ void TSettings::LoadSettings(){
                	ParseCellArray(key,value,deadCell3d);
                }
          */
-        if(key == "XmetalisationStart3d") Parse(key,value,XmetalisationStart3d);
-        if(key == "XmetalisationEnd3d") Parse(key,value,XmetalisationEnd3d);
-        if(key == "YmetalisationEnd3d") Parse(key,value,YmetalisationEnd3d);
         if(key == "nColumns3d") Parse(key,value,nColumns3d);
         if(key == "nRows3d") Parse(key,value,nRows3d);
         if(key == "3dShortAnalysis") Parse(key,value,b3dShortAnalysis);
@@ -609,17 +602,18 @@ void TSettings::LoadSettings(){
 	file.close();
 
 	for(int det=0; det<9; det++) {
+		Det_channel_screen[det].setDetectorNumber(det);
 		this->Det_channel_screen[det].ScreenChannels(this->getDet_channel_screen_channels(det));
 		//this->getDet_channel_screen(det).ScreenRegions(this->getDet_channel_screen_regions(det));
-		cout<<"Detector "<<det<<" screened channels: ";
+//		cout<<"Detector "<<det<<" screened channels: ";
 		this->getDet_channel_screen(det).PrintScreenedChannels();
-		cout<<endl;
+//		cout<<endl;
 	}
 
 	for(int det=0;det<9;det++){
 		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det,0)<<"/"<<getClusterHitFactor(det,0)<<endl;
 	}
-	checkSettings();
+//	checkSettings();
 }
 
 void TSettings::LoadDefaultResolutions(){
@@ -771,7 +765,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	nColumns3d = 9;
 	yOffset3D = 3890;
 
-	checkSettings();
+//	checkSettings();
 }
 
 
@@ -851,8 +845,10 @@ void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells){
 		pair<char,int> cellPosition = ParseCellPosition(str);
 		int cellNo =get3DCellNo(cellPosition);
 		vecCells.push_back(cellNo);
-		cout<< "add cell "<<cellPosition.first << cellPosition.second<<" --> "<<cellNo<<endl;
+		if (verbosity) cout<< "add cell "<<cellPosition.first << cellPosition.second<<" --> "<<cellNo<<endl;
 	}
+	//todo@ Felix: Create Print of all cells:
+	cout<<"Cells of key '"<<key<<"': TODO"<<endl;
 //	cout<<"DONE"<<endl;
 //	char t; cin>>t;
 
@@ -885,7 +881,7 @@ void TSettings::ParseScreenedChannelArray(std::string key, std::string value, st
 	vec.clear();
 	for(UInt_t i=0;i<stringArray.size();i++){
 		std::string val= stringArray.at(i);
-		cout<<i<<"/"<<stringArray.size()<<"\tval: '"<<val<<"'"<<endl;
+		if(verbosity>3)cout<<i<<"/"<<stringArray.size()<<"\tval: '"<<val<<"'"<<endl;
 		if(val.find('-')!=string::npos){
 			std::pair< std::string,std::string > region = ParseRegionString(key, stringArray[i]);
 			Int_t begin = ParseInt(region.first.c_str());
@@ -930,7 +926,7 @@ void TSettings::ParseRegionArray(string key, string value, std::vector< std::pai
 
 
 void TSettings::ParsePattern(std::string key, std::string value){
-	cout<< "\nParse Pattern"<<endl;
+//	cout<< "\nParse Pattern"<<endl;
 	vector<Float_t> vecEntries;
 	ParseFloatArray(key,value,vecEntries);
 	if(vecEntries.size()==4){
@@ -938,14 +934,14 @@ void TSettings::ParsePattern(std::string key, std::string value){
 		Float_t pitchWidth = vecEntries[1];
 		UInt_t firstCh = vecEntries[2];
 		UInt_t lastCh = vecEntries[3];
-		cout<<"Position: "<<pos<<"\tpw:"<<pitchWidth<<" first: "<<firstCh<<" last: lastCh"<<endl;
+		if(verbosity)cout<<"Position: "<<pos<<"\tpw:"<<pitchWidth<<" first: "<<firstCh<<" last: lastCh"<<endl;
 		if(diamondPattern.isStandardPitchWidth())
 			diamondPattern.clear();
 		diamondPattern.addPattern(pitchWidth,pos,firstCh,lastCh);
 		vecDiaDetectorAreasInChannel.push_back(make_pair(firstCh,lastCh));
-		cout<<"new Area of Interest: no. "<<vecDiaDetectorAreasInChannel.size()-1<<" "<<vecDiaDetectorAreasInChannel.back().first<<"-"<<vecDiaDetectorAreasInChannel.back().second<<endl;
-		cout<< vecDiaDetectorAreasInChannel.size()<<endl;
-		cout<<"new Area of Interest: no. "<<diamondPattern.getNPatterns()-1<<" "<<firstCh<<"-"<<lastCh<<endl;
+		if(verbosity)cout<<"new Area of Interest: no. "<<vecDiaDetectorAreasInChannel.size()-1<<" "<<vecDiaDetectorAreasInChannel.back().first<<"-"<<vecDiaDetectorAreasInChannel.back().second<<endl;
+//		cout<< vecDiaDetectorAreasInChannel.size()<<endl;
+		if(verbosity)cout<<"new Area of Interest: no. "<<diamondPattern.getNPatterns()-1<<" "<<firstCh<<"-"<<lastCh<<endl;
 		PrintPatterns();
 		isStandardArea=false;
 	}
@@ -968,7 +964,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
  * @param isStandardFidCut
  */
 void TSettings::ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut){
-	cout<< "\nParse FidCut: "<<value<<endl;
+//	cout<< "\nParse FidCut: "<<value<<endl;
 
 	if (fidCutRegions==0){
 		cerr<<"TSettings::ParseFidCut: Couldn't Parse Since fidCutRegions == 0 "<<fidCutRegions<<endl;
@@ -2088,7 +2084,7 @@ int TSettings::get3DCellNo(char row, int column){
 	}
 
 	int nCell = column + nRow * nRows3d;
-	cout<<"column "<<column<<", row "<<row<<"="<<nRow<<" * "<<nRows3d<<" = " <<nCell<<endl;
+	if(verbosity>4) cout<<"column "<<column<<", row "<<row<<"="<<nRow<<" * "<<nRows3d<<" = " <<nCell<<endl;
 	return nCell;
 
 }

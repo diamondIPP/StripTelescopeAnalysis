@@ -280,7 +280,6 @@ public:
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	Int_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
-	TFidCutRegions* get3dFidCuts(){return fidCuts3D;};
 	TFidCutRegions* get3dEdgeFidCuts(){return fidCuts3DEdge;};
 	TFidCutRegions* get3dMetallisationFidCuts(){return fidCuts3DMetallisation;};
 	Float_t getMinDiamondChannel();
@@ -291,6 +290,7 @@ public:
 	int getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verbosity = 0);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
+	bool checkAdjacentChannelsMasked(){return false;}//todo
 	bool hasBorderSeed(UInt_t det, TCluster cluster);
 	bool hasBorderHit(UInt_t det, TCluster cluster);
 	Float_t getSiliconPitchWidth(){return this->pitchWidthSil;}
@@ -316,14 +316,13 @@ public:
 	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};
 private:
 	TFidCutRegions* fidCutsSelection;
-	TFidCutRegions* fidCuts3D;
 	TFidCutRegions* fidCuts3DEdge;
 	TFidCutRegions* fidCuts3DMetallisation;
 protected:
 	float store_threshold;
 private:
 	Float_t minAbsEtaVal;
-	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandardArea,isStandard3dEdgeFidCut,isStandard3dMetallisationFidCut;;
+	bool isStandardSelectionFidCut,isStandardArea,isStandard3dEdgeFidCut,isStandard3dMetallisationFidCut;;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
@@ -338,7 +337,7 @@ private:
 	std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
 	bool ParseFloat(std::string key, std::string value,float  &output);
 	Float_t ParseFloat(std::string key, std::string value){float output;ParseFloat(key,value,output);return output;}
-	Int_t ParseInt(std::string key, std::string value){cout<<"Parse: "<<value<<endl;Int_t output;ParseInt(key,value,output);return output;}
+	Int_t ParseInt(std::string key, std::string value){Int_t output;ParseInt(key,value,output);return output;}
 	Int_t ParseInt(std::string value){return  (int)strtod(value.c_str(),0);}
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
@@ -490,9 +489,6 @@ private:
 	vector<Int_t> badCells3dnH;
 	vector<Int_t> goodCells3d;
 	//vector<Int_t> deadCell3d;
-	int XmetalisationStart3d;
-	int XmetalisationEnd3d;
-	int YmetalisationEnd3d;
 public:
 	int do3dShortAnalysis() {return b3dShortAnalysis;}
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
@@ -502,12 +498,6 @@ public:
 	int getNColumns3d(){return nColumns3d;};
 	int getNQuarters3d(){return 4;}
 	void setNColumns3d(int nColumns){nColumns3d=nColumns;};
-	void setXMetalisationStart3d(int nXMetalisationStart3d){XmetalisationStart3d=nXMetalisationStart3d;};
-	int getXMetalisationStart3d(){return XmetalisationStart3d;};
-	void setXMetalisationEnd3d(int nXMetalisationEnd3d){XmetalisationEnd3d=nXMetalisationEnd3d;};
-	int getXMetalisationEnd3d(){return XmetalisationEnd3d;};
-	void setYMetalisationEnd3d(int nYMetalisationEnd3d){YmetalisationEnd3d=nYMetalisationEnd3d;};
-	int getYMetalisationEnd3d(){return YmetalisationEnd3d;};
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
 	vector<Int_t> getGoodCells3D(){return goodCells3d;};
 	vector<Int_t> getBadCells3D(){return badCells3d;};
