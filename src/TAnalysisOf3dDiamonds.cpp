@@ -659,8 +659,8 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 	hDetXvsDetY3DOverview = new TH2D(hDetXvsDetY3DOverviewName.str().c_str(),hDetXvsDetY3DOverviewName.str().c_str(),
 			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
 			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
-	hDetXvsDetY3DOverview->GetXaxis()->SetTitle("Xdet (um)");
-	hDetXvsDetY3DOverview->GetYaxis()->SetTitle("Ydet (um)");
+	hDetXvsDetY3DOverview->GetXaxis()->SetTitle("Xdet (#mum)");
+	hDetXvsDetY3DOverview->GetYaxis()->SetTitle("Ydet (#mum)");
 	//hDetXvsDetY3DOverview->GetZaxis()->SetTitle();
 
 	//hCellNumbering
@@ -668,8 +668,8 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 	hCellNumbering = new TH2D(hCellNumberingName.str().c_str(),hCellNumberingName.str().c_str(),
 			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
 			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
-	hCellNumbering->GetXaxis()->SetTitle("Xdet (um)");
-	hCellNumbering->GetYaxis()->SetTitle("Ydet (um)");
+	hCellNumbering->GetXaxis()->SetTitle("Xdet (#mum)");
+	hCellNumbering->GetYaxis()->SetTitle("Ydet (#mum)");
 	//hDetXvsDetY3DOverview->GetZaxis()->SetTitle();
 
 	//hCellsMeanClusteSize
@@ -681,15 +681,15 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 	//hDetXvsDetY3DQuarterCellMeanCharge
 	stringstream hDetXvsDetY3DMeanChargeRebinnedQuarterCellName; hDetXvsDetY3DMeanChargeRebinnedQuarterCellName<<"h3DdetQuarterCellMeanCharge"<<FileNameEnd;
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell = new TH2D(hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetXaxis()->SetTitle("Xdet (um)");
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetYaxis()->SetTitle("Ydet (um)");
+	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetXaxis()->SetTitle("Xdet (#mum)");
+	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetYaxis()->SetTitle("Ydet (#mum)");
 	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetZaxis()->SetTitle("Charge ADC");
 
 	//hDetXvsDetY3DQuarterCellRMS
 	stringstream hDetXvsDetY3DRebinnedQuarterCellRMSName; hDetXvsDetY3DRebinnedQuarterCellRMSName<<"h3DdetQuarterCellRMS"<<FileNameEnd;
 	hDetXvsDetY3DRebinnedQuarterCellRMS = new TH2D(hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),hDetXvsDetY3DRebinnedQuarterCellRMSName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
-	hDetXvsDetY3DRebinnedQuarterCellRMS->GetXaxis()->SetTitle("Xdet (um)");
-	hDetXvsDetY3DRebinnedQuarterCellRMS->GetYaxis()->SetTitle("Ydet (um)");
+	hDetXvsDetY3DRebinnedQuarterCellRMS->GetXaxis()->SetTitle("Xdet (#mum)");
+	hDetXvsDetY3DRebinnedQuarterCellRMS->GetYaxis()->SetTitle("Ydet (#mum)");
 	hDetXvsDetY3DRebinnedQuarterCellRMS->GetZaxis()->SetTitle("Charge ADC");
 
 	//hQuarterCellsMeanClusteSize
