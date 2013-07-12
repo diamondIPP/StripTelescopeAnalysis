@@ -8,6 +8,9 @@
 #include "../include/TAnalysisOf3dDiamonds.hh"
 
 TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
+	cout<<"\n*********************************************************\n";
+	cout<<"*****TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds********\n";
+	cout<<"**********************************************************"<<endl;
 	if(newSettings!=0)
 		this->settings=newSettings;
 	else exit(-1);
@@ -43,6 +46,8 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
 }
 
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
+
+
 
 	FileNameEnd = "";
 	cout<<"analyze selection data..."<<endl;
