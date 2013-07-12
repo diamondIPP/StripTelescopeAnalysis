@@ -147,8 +147,6 @@ void TSettings::checkAlignmentFidcuts(){
 		}
 
 	}
-	char t;
-	cin >> t;
 	//exit(-1);
 }
 
