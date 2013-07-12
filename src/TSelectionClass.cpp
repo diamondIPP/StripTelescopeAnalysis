@@ -223,7 +223,6 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 void TSelectionClass::resetVariables(){
 
 	isDetMasked = false;//one of the Silicon Planes contains a Cluster with a masked channel
-	isDiaMasked.clear();
 	nDiamondClusters=0;
 	oneAndOnlyOneSiliconCluster=true;; //One and only one cluster in each silicon plane;
 	useForAnalysis=false;
@@ -301,20 +300,19 @@ void TSelectionClass::checkDiamondTrack(){
 	//Do not look at tracks where is not at least one and only one cluster in each sil det
 	if(!oneAndOnlyOneSiliconCluster)
 		return;
+	UInt_t diaDet =TPlaneProperties::getDetDiamond();
 
-	for(UInt_t cl=0;cl<eventReader->getNClusters(TPlaneProperties::getDetDiamond());cl++){
-		isDiaMasked.push_back(checkDetMasked(8,cl));
-		if(verbosity>10)cout<<isDiaMasked[cl]<<endl;
-	}
-	nDiamondClusters=eventReader->getNClusters(TPlaneProperties::getDetDiamond());
-	isDiaSaturated=this->isSaturated(TPlaneProperties::getDetDiamond());
+	nDiamondClusters=eventReader->getNClusters(diaDet);
+
+	isDiaSaturated=this->isSaturated(diaDet);
 	if(verbosity>4&&nDiamondClusters>0&&!isInFiducialCut)
 		cout<<"\nThis event has diamond hit which is not in fid Cut"<<endl;
-	atLeastOneValidDiamondCluster = nDiamondClusters >0 && !checkDetMasked(TPlaneProperties::getDetDiamond()) && !isDiaSaturated;
+
+	atLeastOneValidDiamondCluster = nDiamondClusters >0 && !checkDetMasked(diaDet) && !isDiaSaturated;
 	oneAndOnlyOneDiamondCluster = atLeastOneValidDiamondCluster && nDiamondClusters==1;
 	hasBigDiamondCluster =false;
 	for(UInt_t cl=0;cl<nDiamondClusters;cl++){
-		nDiaClusterSize = eventReader->getClusterSize(TPlaneProperties::getDetDiamond(),cl);
+		nDiaClusterSize = eventReader->getClusterSize(diaDet,cl);
 		if(nDiaClusterSize>=3){
 			hasBigDiamondCluster=true;
 			oneAndOnlyOneDiamondCluster=false;
@@ -337,9 +335,12 @@ void TSelectionClass::setVariables(){
 	checkSiliconTrack();
 	checkDiamondTrack();
 
+
 	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster&&isInFiducialCut;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
-	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
-	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&isInFiducialCut;;
+	//	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
+	//	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&isInFiducialCut;;
+	useForAlignment = atLeastOneValidDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
+	useForAnalysis=atLeastOneValidDiamondCluster&&!useForAlignment&&isInFiducialCut;;
 	validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster&&isInFiducialCut;
 	doEventCounting();
 	fillHitOccupancyPlots();
@@ -405,7 +406,8 @@ bool TSelectionClass::checkDetMasked(UInt_t det){
 	if((verbosity>5 && TPlaneProperties::isDiamondDetector(det))||verbosity>7)
 		cout<<"checkDetMasked("<<det<<"):\t";
 	for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
-		bool clusterMasked = checkDetMasked(det,cl);
+		TCluster cluster = eventReader->getCluster(det,cl);
+		bool clusterMasked = settings->isMaskedCluster(det,cluster,settings->checkAdjacentChannelsMasked());
 		isMasked=isMasked||clusterMasked;
 		if((verbosity>5 && TPlaneProperties::isDiamondDetector(det))||verbosity>7)
 			cout<<cl<<":"<<clusterMasked<<" ";
@@ -450,7 +452,6 @@ void TSelectionClass::setBranchAdressess(){
 	selectionTree->Branch("isInFiducialCut",&isInFiducialCut,"isInFiducialCut/O");
 	selectionTree->Branch("isDetMasked",&isDetMasked,"isDetMasked/O");
 	selectionTree->Branch("hasValidSiliconTrack",&oneAndOnlyOneSiliconCluster,"hasValidSiliconTrack/O");
-	selectionTree->Branch("isDiaMasked",&this->isDiaMasked,"isDiaMasked");
 	selectionTree->Branch("useForSiliconAlignment",&this->useForSiliconAlignment,"useForSiliconAlignment/O");
 	selectionTree->Branch("useForAlignment",&this->useForAlignment,"useForAlignment/O");
 	selectionTree->Branch("useForAnalysis",&this->useForAnalysis,"useForAnalysis/O");

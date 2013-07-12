@@ -9,14 +9,16 @@
 #include "TMath.h"
 #include "TObject.h"
 #include <vector>
+#include "TPlaneProperties.hh"
 
 typedef unsigned int uint;
 
 class ChannelScreen :public TObject {
 
    public:
-      ChannelScreen();
+      ChannelScreen(UInt_t det=0);
       ~ChannelScreen();
+      void setDetectorNumber(UInt_t det){this->det=det;}
       void ScreenChannels(std::vector<int> channels_to_screen);
       void ScreenRegions(std::vector<int> regions_to_screen);
       void ChannelOff(Int_t index);
@@ -26,6 +28,7 @@ class ChannelScreen :public TObject {
       
    private:
       Int_t channel_switch[256];
+      UInt_t det;
 
       ClassDef(ChannelScreen,1);
 };

@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cctype>
 
 //ROOT libraries
 #include "Rtypes.h"
@@ -279,14 +280,17 @@ public:
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	Int_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
-	TFidCutRegions* get3dFidCuts(){return fidCuts3D;};
+	TFidCutRegions* get3dEdgeFidCuts(){return fidCuts3DEdge;};
+	TFidCutRegions* get3dMetallisationFidCuts(){return fidCuts3DMetallisation;};
 	Float_t getMinDiamondChannel();
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
+	bool isClusterInDiaDetectorArea(TCluster cluster, Int_t area);
 	int getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verbosity = 0);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
+	bool checkAdjacentChannelsMasked(){return false;}//todo
 	bool hasBorderSeed(UInt_t det, TCluster cluster);
 	bool hasBorderHit(UInt_t det, TCluster cluster);
 	Float_t getSiliconPitchWidth(){return this->pitchWidthSil;}
@@ -304,14 +308,21 @@ public:
 	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 0;};
 	//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
 	//	int getAreaOfInterest(){return inde
+	Float_t get3DYOffset(){return yOffset3D;};//todo
+	vector<int> getxEdgeFicucialRegion(){return xEdgeFicucialRegion;};
+	vector<int> getyEdgeFicucialRegion(){return yEdgeFicucialRegion;};
+	vector<int> getstripAnalysisFidCut(){return stripAnalysisFidCut;};
+	vector<int> get3DnHAnalysisFidCut(){return TDnHAnalysisFidCut;};
+	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};
 private:
 	TFidCutRegions* fidCutsSelection;
-	TFidCutRegions* fidCuts3D;
+	TFidCutRegions* fidCuts3DEdge;
+	TFidCutRegions* fidCuts3DMetallisation;
 protected:
 	float store_threshold;
 private:
 	Float_t minAbsEtaVal;
-	bool isStandardSelectionFidCut,isStandard3dFidCut,isStandardArea;
+	bool isStandardSelectionFidCut,isStandardArea,isStandard3dEdgeFidCut,isStandard3dMetallisationFidCut;;
 	void checkAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
@@ -326,18 +337,19 @@ private:
 	std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
 	bool ParseFloat(std::string key, std::string value,float  &output);
 	Float_t ParseFloat(std::string key, std::string value){float output;ParseFloat(key,value,output);return output;}
-	Int_t ParseInt(std::string key, std::string value){cout<<"Parse: "<<value<<endl;Int_t output;ParseInt(key,value,output);return output;}
+	Int_t ParseInt(std::string key, std::string value){Int_t output;ParseInt(key,value,output);return output;}
 	Int_t ParseInt(std::string value){return  (int)strtod(value.c_str(),0);}
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
+	void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
 	void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
 	void Parse(std::string key, std::string value, std::vector<int> & vec){ ParseIntArray(key,value,vec);}
 	bool Parse(std::string key, std::string value, bool &output){return ParseBool(key,value,output);}
 	bool Parse(std::string key, std::string value, int &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, UInt_t &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
-
+	pair<char,int> ParseCellPosition(std::string value);
 	void LoadDefaultResolutions();
 
 private:
@@ -460,8 +472,41 @@ private:
 	Float_t diaPitchWidth;
 	Float_t diaOffsetMetricSpace;
 	Float_t diaStartingChannel;
+private:
+	Float_t yOffset3D;
+	vector<int> xEdgeFicucialRegion;
+	vector<int> yEdgeFicucialRegion;
+	vector<int> stripAnalysisFidCut;
+	vector<int> TDnHAnalysisFidCut;
+	vector<int> TDwHAnalysisFidCut;
 
-	ClassDef(TSettings,5)
+	int b3dShortAnalysis;
+	int b3dLongAnalysis;
+	int b3dTransparentAnalysis;
+	int nRows3d;
+	int nColumns3d;
+	vector<Int_t> badCells3d;
+	vector<Int_t> badCells3dnH;
+	vector<Int_t> goodCells3d;
+	//vector<Int_t> deadCell3d;
+public:
+	int do3dShortAnalysis() {return b3dShortAnalysis;}
+	int do3dLongAnalysis() {return b3dLongAnalysis;}
+	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
+	void setNRows3d(int nRows){nRows3d=nRows;};
+	int getNRows3d(){return nRows3d;};
+	int getNColumns3d(){return nColumns3d;};
+	int getNQuarters3d(){return 4;}
+	void setNColumns3d(int nColumns){nColumns3d=nColumns;};
+	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
+	vector<Int_t> getGoodCells3D(){return goodCells3d;};
+	vector<Int_t> getBadCells3D(){return badCells3d;};
+	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
+	int get3DCellNo(char row, int column);
+	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
+	UInt_t get3dWithHolesDiamondPattern(){return 3;};
+
+	ClassDef(TSettings,6)
 
 };
 #endif
