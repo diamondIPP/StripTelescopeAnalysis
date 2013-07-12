@@ -190,7 +190,9 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 				noHitDet++;
 				continue;
 			}
-			if(!eventReader->isInFiducialCut()){
+			Float_t fidCutX = eventReader->getFiducialValueX();
+			Float_t fidCutY = eventReader->getFiducialValueY();
+			if(!settings->isInAlignmentFiducialRegion(fidCutX,fidCutY)){
 				nNotInFidCut++;
 				continue;
 			}
@@ -1374,6 +1376,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		if(verbosity>3)cout<<"Save Histograms: "<<  vecXDelta.size() << " " << vecYDelta.size() << " " << vecXPred.size() << " " << vecYPred.size() << " " << vecXObs.size() << " " << vecYObs.size() << endl;
 	// define preName
 	stringstream preName,postName;
+	bool isSiliconPostAlignment = false;
 	if (subjectPlane == 4) {
 		preName << "hDiamond_";
 		if (nDiaAlignmentStep == -1)
@@ -1386,8 +1389,10 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		preName << "hSilicon_";
 		if (nAlignmentStep == -1)
 			preName << "PreAlignment";
-		else if (nAlignmentStep == nAlignSteps)
+		else if (nAlignmentStep == nAlignSteps){
 			preName << "PostAlignment";
+			isSiliconPostAlignment = true;
+		}
 		else
 			preName << nAlignmentStep << "_Step";
 	}
@@ -1533,7 +1538,14 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		histName.str("");
 		histName.clear();
 		histName << preName.str()<< "_ScatterPlot_YPred_vs_DeltaX"<< "_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
-		TH2F *histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta, vecYPred, 256);
+		TH2F *histo;
+		if(isSiliconPostAlignment){
+			Float_t xmin = -50;
+			Float_t xmax = +50;
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred,256,512,xmin,xmax);
+		}
+		else
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta, vecYPred, 256);
 		//    histo.Draw("goff");
 		if(histo){
 			histo->GetXaxis()->SetTitle("Y Predicted / #mum");
@@ -1586,7 +1598,13 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		histName.str("");
 		histName.clear();
 		histName << preName.str() << "_ScatterPlot_XPred_vs_DeltaX" << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
-		TH2F *histo = histSaver->CreateScatterHisto(histName.str(), vecXDelta,vecXPred, 256);
+		TH2F *histo;if(isSiliconPostAlignment){
+			Float_t xmin = -50;
+			Float_t xmax = +50;
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred,256,512,xmin,xmax);
+		}
+		else
+			histo = histSaver->CreateScatterHisto(histName.str(), vecXDelta,vecXPred, 256);
 		if(!histo)
 			cerr<<"Could not CreateScatterHisto: vecXDelta,vecXPred"<<endl;
 		else{
