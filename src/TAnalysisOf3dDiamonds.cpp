@@ -105,6 +105,11 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
 		eventReader->LoadEvent(nEvent);
+		if(!eventValid()){
+//			cout<<"don't use"<<endl;
+			continue;
+		}
+//		cout<<"use Event"<<endl;
 		// Analyse
 		if(settings->do3dShortAnalysis() == 1){ShortAnalysis();}
 		if(settings->do3dLongAnalysis() == 1){LongAnalysis();}
@@ -125,6 +130,32 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	if(settings->do3dShortAnalysis() == 1){saveShortAnalysisHistos();}
 	if(settings->do3dLongAnalysis() == 1){saveLongAnalysisHistos();}
 	if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
+}
+
+bool TAnalysisOf3dDiamonds::eventValid(){
+	if(!eventReader->isValidTrack()){
+//		cout<<nEvent<<" invalid Track"<<endl;
+		return false;
+	}
+	fiducialValueX = eventReader->getFiducialValueX();
+	fiducialValueY = eventReader->getFiducialValueY();
+	if (!settings->isInRoughFiducialCut(fiducialValueX,fiducialValueY)){
+//		cout<<nEvent<<" not in rough fiducial cut: "<<fiducialValueX<<"/"<<fiducialValueY<<endl;
+		return false;
+	}
+	if(predictedPosition) delete predictedPosition;
+
+	vector<UInt_t> vecSilPlanes;
+
+	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}//cout<<TPlaneProperties::getNSiliconPlanes()<<endl;}
+	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
+//	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
+
+	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
+	chi2x = predictedPosition->getChi2X();
+	chi2y = predictedPosition->getChi2Y();
+//	cout<<nEvent<<"Valid Track"<<endl;
+	return true;
 }
 
 void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
@@ -296,7 +327,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 
 	//hYEdgeCharge
 	stringstream hyEdgeChargeName; hyEdgeChargeName<<"hyEdgeCharge"<<FileNameEnd;
-	hyEdgeCharge = new TH1F(hyEdgeChargeName.str().c_str(),hyEdgeChargeName.str().c_str(),250,5000,6000);
+	hyEdgeCharge = new TH1F(hyEdgeChargeName.str().c_str(),hyEdgeChargeName.str().c_str(),2500,0000,6000);
 	hyEdgeCharge->SetTitle(hyEdgeChargeName.str().c_str());
 	hyEdgeCharge->GetXaxis()->SetTitle("Y Diamond (um)");
 	hyEdgeCharge->GetYaxis()->SetTitle("Total Charge [ADC]");
@@ -416,32 +447,19 @@ void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
-	if(!eventReader->isValidTrack())
-		return;
-	vector<UInt_t> vecSilPlanes;
 
-	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}//cout<<TPlaneProperties::getNSiliconPlanes()<<endl;}
-	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
 	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
-
-	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
-		return;
+//
+//	if(!settings->isInRoughFiducialCut()()eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
+//		return;
 
 	//cout<<"The diamondCluster charge is: "<<diamondCluster.getCharge(false)<<endl;
-
-	if(predictedPosition)
-		delete predictedPosition;
-	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
-	Float_t chi2x = predictedPosition->getChi2X();
-	Float_t chi2y = predictedPosition->getChi2Y();
 	Float_t maxChi2 = settings->getChi2Cut3D();
 	if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
 		return;
 
 	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
 	Float_t yPos = predictedPosition->getPositionY();
-	float fiducialValueX= eventReader->getFiducialValueX();
-	float fiducialValueY= eventReader->getFiducialValueY();
 	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
 
 	hNumberofClusters->Fill(eventReader->getNDiamondClusters());
@@ -473,12 +491,12 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 		}
 
 		//Universal PHvsChannel Plot
-		for(int i=0; i < settings->diamondPattern.getNIntervals();i++){
+		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
 
 			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
 			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
 
-			if(diamondCluster.getHighestSignalChannel()<=channels.second&&diamondCluster.getHighestSignalChannel()>=channels.first){
+			if((Int_t)diamondCluster.getHighestSignalChannel()<=channels.second&&(Int_t)diamondCluster.getHighestSignalChannel()>=channels.first){
 
 				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
 				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
@@ -2173,19 +2191,12 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
 		return;
 
-	if(predictedPosition)
-		delete predictedPosition;
-	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
-	Float_t chi2x = predictedPosition->getChi2X();
-	Float_t chi2y = predictedPosition->getChi2Y();
 	//Float_t maxChi2 = settings->getChi2Cut3D();
 	if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
 		return;
 
 	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
 	Float_t yPos = predictedPosition->getPositionY();
-	float fiducialValueX= eventReader->getFiducialValueX();
-	float fiducialValueY= eventReader->getFiducialValueY();
 	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
 	//cout<<"YOffset: "<<settings->get3DYOffset()<<endl;
 	Float_t Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
@@ -2414,19 +2425,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
 		return;
 
-	if(predictedPosition)
-		delete predictedPosition;
-	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
-	Float_t chi2x = predictedPosition->getChi2X();
-	Float_t chi2y = predictedPosition->getChi2Y();
 	Float_t maxChi2 = settings->getChi2Cut3D();
 	if(chi2x>maxChi2||chi2y>maxChi2)     //(chi2x>maxChi2||chi2y>maxChi2)
 		return;
 
 	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
 	Float_t yPos = predictedPosition->getPositionY();
-	float fiducialValueX= eventReader->getFiducialValueX();
-	float fiducialValueY= eventReader->getFiducialValueY();
 	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
 	//cout<<"YOffset: "<<settings->get3DYOffset()<<endl;
 	Float_t Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
@@ -2734,13 +2738,13 @@ void TAnalysisOf3dDiamonds::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondP
 
 Float_t TAnalysisOf3dDiamonds::GetYPositionInDetSystem() {
 
-	vector<UInt_t> vecSilPlanes;
-
-	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}
+//	vector<UInt_t> vecSilPlanes;
+//
+//	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}
 	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
-	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
-
-	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
+//	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
+//
+//	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
 	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
 	Float_t yPos = predictedPosition->getPositionY();
 
@@ -2936,8 +2940,6 @@ int TAnalysisOf3dDiamonds::RemoveEdgeClusters(TCluster* nCluster, int nDetector)
 int TAnalysisOf3dDiamonds::FiducialCut(int nDiamondPattern){
 
 	int Detector = nDiamondPattern + 1;
-	float fiducialValueX= eventReader->getFiducialValueX();
-	float fiducialValueY= eventReader->getFiducialValueY();
 	int Throw=0;
 	//cout<<"FidX: "<<fiducialValueX<<endl;
 	//cout<<"FidY: "<<fiducialValueY<<endl;
@@ -2956,20 +2958,16 @@ int TAnalysisOf3dDiamonds::FiducialCut(int nDiamondPattern){
 int TAnalysisOf3dDiamonds::xEdgeyEdgeFiducialCut(int nEdge){	//FidRegion 1 = xEdge and 2 = yEdge.
 	settings->get3dEdgeFidCuts()->getFidCut(1)->GetXLow();
 	int EdgeRegion = nEdge + 1;
-	float fiducialValueX= eventReader->getFiducialValueX();
-	float fiducialValueY= eventReader->getFiducialValueY();
-	int Throw=0;
+	TFiducialCut* edgeFidCut = settings->get3dEdgeFidCuts()->getFidCut(EdgeRegion);
 	//cout<<"FidX: "<<fiducialValueX<<endl;
 	//cout<<"FidY: "<<fiducialValueY<<endl;
 	//cout<<"X Less than: "<<FidCut.at(Detector)->GetXHigh()<<" Greater than: "<<FidCut.at(Detector)->GetXLow()<<endl;
 	//cout<<"Y Less than: "<<FidCut.at(Detector)->GetYHigh()<<" Greater than: "<<FidCut.at(Detector)->GetYLow()<<endl;
-	if(fiducialValueX<settings->get3dEdgeFidCuts()->getFidCut(EdgeRegion)->GetXLow()||fiducialValueX>settings->get3dEdgeFidCuts()->getFidCut(EdgeRegion)->GetXHigh())
-		Throw =1;
-	if(fiducialValueY<settings->get3dEdgeFidCuts()->getFidCut(EdgeRegion)->GetYLow()||fiducialValueY>settings->get3dEdgeFidCuts()->getFidCut(EdgeRegion)->GetYHigh())
-		Throw =1;
-	//if(Throw==1)
-	//cout<<"Detector: "<<Detector<<"Thrown: "<<fiducialValueX<<",    "<<fiducialValueY<<endl;
-	return Throw;
+	if (edgeFidCut->isInFiducialCut(fiducialValueX,fiducialValueY))
+		return 0;
+	else
+		return 1;
+
 }
 
 void TAnalysisOf3dDiamonds::DrawYAlignmentFidCutRegions() {
