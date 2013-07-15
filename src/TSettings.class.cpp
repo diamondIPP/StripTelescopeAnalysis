@@ -1876,6 +1876,12 @@ bool TSettings::isInAlignmentFiducialRegion(Float_t xVal,Float_t yVal){
 	return false;
 }
 
+bool TSettings::isInRoughFiducialCut(Float_t xVal,Float_t yVal){
+	bool retVal = si_avg_fidcut_xlow < xVal && xVal < si_avg_fidcut_xhigh;
+	retVal = retVal && si_avg_fidcut_ylow < yVal && yVal < si_avg_fidcut_yhigh;
+	return retVal;
+}
+
 Int_t TSettings::getVerbosity(){
 	return this->verbosity;
 }
