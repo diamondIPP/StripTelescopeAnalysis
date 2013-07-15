@@ -94,7 +94,7 @@ private:
 private:
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
-	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y;
+	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y,xPredicted,yPredicted,xPredDet,yPredDet;
 
 	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
@@ -312,6 +312,7 @@ private:
 	UInt_t nEvent;
 	vector<Float_t> vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHitStrip,vecPHDiamondHit3dNoHoles,vecPHDiamondHit3dWithHoles,vecClusterSize,vecChi2Y,vecChi2X,vecClusterSeedSize,vecXPredictedStrip,vecYPredictedStrip;
 	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency,vecXPreditedDetector,vecYPreditedDetector;
+	vector<Float_t> vecXEdgeRegionPredX,vecXEdgeRegionPredY,vecXEdgeRegionPulseHeight,vecYEdgeRegionPredX,vecYEdgeRegionPredY,vecYEdgeRegionPulseHeight;
 	int HitCount, SeedCount;
 
 	vector<int*> Detector;

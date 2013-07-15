@@ -147,12 +147,16 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 
 	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}//cout<<TPlaneProperties::getNSiliconPlanes()<<endl;}
 	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
-//	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
+	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 
 	if(predictedPosition) delete predictedPosition;
 	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
 	chi2x = predictedPosition->getChi2X();
 	chi2y = predictedPosition->getChi2Y();
+	xPredicted = predictedPosition->getPositionX();	//Predicted positions in labframe
+	yPredicted = predictedPosition->getPositionY();
+	xPredDet = eventReader->getPositionInDetSystem(subjectDetector, xPredicted, yPredicted);
+	yPredDet = GetYPositionInDetSystem()-settings->get3DYOffset();;
 //	cout<<nEvent<<"Valid Track"<<endl;
 	return true;
 }
@@ -341,14 +345,48 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
 
+	vector<Float_t> xPred = vecXEdgeRegionPredX;
+	vector<Float_t> yPred = vecXEdgeRegionPredY;
+	vector<Float_t> charge = vecXEdgeRegionPulseHeight;
+	//a.end(), b.begin(), b.end());
+	xPred.insert(xPred.end(),vecYEdgeRegionPredX.begin(),vecYEdgeRegionPredX.end());
+	yPred.insert(yPred.end(),vecYEdgeRegionPredY.begin(),vecYEdgeRegionPredY.end());
+	charge.insert(charge.end(),vecYEdgeRegionPulseHeight.begin(),vecYEdgeRegionPulseHeight.end());
+
+	cout<<"xPred: " << xPred.size()  <<"="<<vecXEdgeRegionPredX.size()<<"+"<<vecYEdgeRegionPredX.size()<<endl;
+	cout<<"yPred: " << yPred.size()  <<"="<<vecXEdgeRegionPredY.size()<<"+"<<vecYEdgeRegionPredY.size()<<endl;
+	cout<<"charge:" << charge.size() <<"="<<vecXEdgeRegionPulseHeight.size()<<"+"<<vecYEdgeRegionPulseHeight.size()<<endl;
+	histSaver->SaveHistogram(histSaver->CreateScatterHisto("hEdgeFittingPredictedPosition",yPred,xPred),false);
+	TH3F* hEdgeFittingCharge = histSaver->Create3DHisto("hEdgeFittingCharge",xPred,yPred,charge);
+	TH2F* hEdgeFittingAvrgCharge = (TH2F*) hEdgeFittingCharge->Project3DProfile("yx");
+	histSaver->SaveHistogram(hEdgeFittingAvrgCharge);
+
+
+	TH2F* hXEdgeFittingAvrgCharge =histSaver->CreateScatterHisto("hXEdgeFittingCharge",vecXEdgeRegionPulseHeight,vecXEdgeRegionPredX);
+	hXEdgeFittingAvrgCharge->GetYaxis()->SetTitle("Pulse Height /ADC");
+	hXEdgeFittingAvrgCharge->GetXaxis()->SetTitle("predicted Position X / #mum");
+	histSaver->SaveHistogram(hXEdgeFittingAvrgCharge);
+	TH1F* hXEdgeFittingAvrgCharge_pfx = (TH1F*)hXEdgeFittingAvrgCharge->ProfileX();
+	hXEdgeFittingAvrgCharge_pfx->GetYaxis()->SetTitle("avrg. Charge / ADC");
+	histSaver->SaveHistogram(hXEdgeFittingAvrgCharge_pfx);
+
+	TH2F* hYEdgeFittingAvrgCharge =histSaver->CreateScatterHisto("hYEdgeFittingCharge",vecYEdgeRegionPulseHeight,vecYEdgeRegionPredY);
+	hYEdgeFittingAvrgCharge->GetYaxis()->SetTitle("Pulse Height /ADC");
+	hYEdgeFittingAvrgCharge->GetXaxis()->SetTitle("predicted Position Y / #mum");
+	histSaver->SaveHistogram(hYEdgeFittingAvrgCharge);
+	TH1F* hYEdgeFittingAvrgCharge_pfx = (TH1F*)hYEdgeFittingAvrgCharge->ProfileX();
+	hYEdgeFittingAvrgCharge_pfx->GetYaxis()->SetTitle("avrg. Charge / ADC");
+	histSaver->SaveHistogram(hYEdgeFittingAvrgCharge_pfx);
+
+//	char t; cin>>t;
 	//hNumberofClusters
 	histSaver->SaveHistogram(hNumberofClusters);
-	for(int i=0;i<settings->diamondPattern.getNIntervals();i++){
+	for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
 		hEventsvsChannelCombined->Add(hEventsvsChannel.at(i));
 	}
 	histSaver->SaveHistogram(hEventsvsChannelCombined);
 
-	for(int i=0;i<settings->diamondPattern.getNIntervals();i++){
+	for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
 		/*//hLandau
 		stringstream hLandauName; hLandauName<<"hLandau%%"<<firstCh<<"-"<<channels.second<<"%%"<<FileNameEnd;
 		hLandau.push_back(HistogrammSaver::CreateDistributionHisto(hLandauName.str().c_str(),*vecPHDiamondHit.at(i),256));
@@ -457,9 +495,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 	if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
 		return;
 
-	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
-	Float_t yPos = predictedPosition->getPositionY();
-	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
+
+//	Float_t xPredDet = eventReader->getPositionInDetSystem(subjectDetector, xPredicted, yPredicted);
 
 	hNumberofClusters->Fill(eventReader->getNDiamondClusters());
 	ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
@@ -476,17 +513,23 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
 		//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
 		//RemoveLumpyClusters(&diamondCluster);
-
+		Float_t clusterCharge = diamondCluster.getCharge(false);
 		//xEdge
 		if(xEdgeyEdgeFiducialCut(0)==0){
-			Float_t positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos); //This takes x and y predicted in lab frame and gives corresponding position in detector frame.
+			Float_t positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, xPredicted, yPredicted); //This takes x and y predicted in lab frame and gives corresponding position in detector frame.
 			hEdgeChargeEvents->Fill(positionInDetSystemMetric);
-			hEdgeCharge->Fill(positionInDetSystemMetric, diamondCluster.getCharge(false));
+			hEdgeCharge->Fill(positionInDetSystemMetric,clusterCharge);
+			vecXEdgeRegionPredX.push_back(xPredDet);
+			vecXEdgeRegionPredY.push_back(yPredDet);
+			vecXEdgeRegionPulseHeight.push_back(clusterCharge);
 		}
 		//yEdge
 		if(xEdgeyEdgeFiducialCut(1)==0){
 			hyEdgeChargeEvents->Fill(GetYPositionInDetSystem());
-			hyEdgeCharge->Fill(GetYPositionInDetSystem(), diamondCluster.getCharge(false));
+			hyEdgeCharge->Fill(GetYPositionInDetSystem(), clusterCharge);
+			vecYEdgeRegionPredX.push_back(xPredDet);
+			vecYEdgeRegionPredY.push_back(yPredicted);
+			vecYEdgeRegionPulseHeight.push_back(clusterCharge);
 		}
 
 		//Universal PHvsChannel Plot
@@ -512,11 +555,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 				hEventsvsChannel.at(i)->Fill(diamondCluster.getHighestSignalChannel());
 				hPHvsChannel.at(i)->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
 				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
-				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPos);
+				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
 				hLandau.at(i)->Fill(diamondCluster.getCharge(false));
 				vecPHDiamondHit.at(i)->push_back(diamondCluster.getCharge(false));
-				//vecXPredicted.at(i)->push_back(xPos);
-				//vecYPredicted.at(i)->push_back(yPos);
+				//vecXPredicted.at(i)->push_back(xPredicted);
+				//vecYPredicted.at(i)->push_back(yPredicted);
 				hHitandSeedCount.at(i)->Fill(HitCount,SeedCount);
 				hChi2XChi2Y.at(i)->Fill(chi2x, chi2y);
 				hFidCutXvsFidCutY.at(i)->Fill(fiducialValueX,fiducialValueY);
@@ -2184,7 +2227,7 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	vector<UInt_t> vecSilPlanes;
 
 	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}
-	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
+//	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
 	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 
 	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
@@ -2194,24 +2237,22 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
 		return;
 
-	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
-	Float_t yPos = predictedPosition->getPositionY();
-	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
+//	Float_t xPredDet = eventReader->getPositionInDetSystem(subjectDetector, xPredicted, yPredicted);
 	//cout<<"YOffset: "<<settings->get3DYOffset()<<endl;
-	Float_t Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
+//	Float_t yPredDet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
 
 	vecChi2X.push_back(chi2x);
 	vecChi2Y.push_back(chi2y);
-	//	vecXPredicted.push_back(xPos);
-	//	vecYPredicted.push_back(yPos);
+	//	vecXPredicted.push_back(xPredicted);
+	//	vecYPredicted.push_back(yPredicted);
 	//	vecXPreditedDetector.push_back(Xdet);
 	//	vecYPreditedDetector.push_back(Ydet);
 
-	if(!settings->get3dMetallisationFidCuts()->isInFiducialCut(Xdet,Ydet))		// return if not in any of the metallisation regions
+	if(!settings->get3dMetallisationFidCuts()->isInFiducialCut(xPredDet,yPredDet))		// return if not in any of the metallisation regions
 		return;
 
 	Int_t DiamondPattern;
-	DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(Xdet,Ydet);
+	DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
 	pair<int,int> channels = settings->diamondPattern.getPatternChannels(DiamondPattern);
 
 	//Int_t XdetChannelSpaceInt = settings->convertMetricToChannelSpace(subjectDetector,Xdet)+0.5;
@@ -2219,19 +2260,19 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	//cout<<"Diamond Pattern: "<<DiamondPattern<<endl;
 	//cout<<"Hit coordinates: "<<"("<<Xdet<<", "<<Ydet<<")"<<endl;
 	//cout<<"Channel Hit: "<<XdetChannelSpaceInt<<"   "<<XdetChannelSpaceFloat<<endl;
-	Int_t XdetChannelSpaceInt = getChannel(Xdet,Ydet);
+	Int_t XdetChannelSpaceInt = getChannel(xPredDet,yPredDet);
 
 	Float_t TransparentCharge = getTransparentCharge(DiamondPattern, XdetChannelSpaceInt);
 
 	if(TransparentCharge == -9999)
 		return;
 
-	hXdetvsYdetvsCharge.at(DiamondPattern-1)->Fill(Xdet,Ydet,TransparentCharge);
-	hXdetvsYdetvsEvents.at(DiamondPattern-1)->Fill(Xdet,Ydet,1);
+	hXdetvsYdetvsCharge.at(DiamondPattern-1)->Fill(xPredDet,yPredDet,TransparentCharge);
+	hXdetvsYdetvsEvents.at(DiamondPattern-1)->Fill(xPredDet,yPredDet,1);
 	hLandauTransparent.at(DiamondPattern-1)->Fill(TransparentCharge);
 
 	if(DiamondPattern ==2 || DiamondPattern ==3){
-		if(RemoveBadCells(DiamondPattern,Xdet,Ydet) == 1){
+		if(RemoveBadCells(DiamondPattern,xPredDet,yPredDet) == 1){
 			//cout<<getCellNo(Xdet,Ydet).first<<endl;
 			return;
 		}
@@ -2240,7 +2281,7 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
 	//For overlay of 3DwH
 	if(DiamondPattern ==3){
-		Int_t cellNo = getCellNo(Xdet,Ydet).first;
+		Int_t cellNo = getCellNo(xPredDet,yPredDet).first;
 		Int_t column = (cellNo+1) / settings->getNRows3d();
 		Int_t row =  cellNo - column*settings->getNRows3d();         // (cellNo+1) / settings->getNColumns3d();
 		if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> column "<<column<<", row "<<row<<endl;
@@ -2250,8 +2291,8 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 		Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;
 		Float_t yminus = row*cellHight;
 
-		Float_t relPosX =Xdet - xminus;
-		Float_t relPosY = Ydet - yminus;
+		Float_t relPosX =xPredDet - xminus;
+		Float_t relPosY = yPredDet - yminus;
 		cout<<"cell: "<<cellNo<<"--> relPosX "<<relPosX<<", relPosY "<<relPosY<<endl;
 
 		hCellOverlayvsCharge->Fill(relPosX,relPosY,TransparentCharge);
@@ -2299,11 +2340,11 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 				hEventsvsChannel.at(i)->Fill(diamondCluster.getHighestSignalChannel());
 				hPHvsChannel.at(i)->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
 				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
-				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPos);
+				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
 				hLandau.at(i)->Fill(diamondCluster.getCharge(false));
 				vecPHDiamondHit.at(i)->push_back(diamondCluster.getCharge(false));
-				//vecXPredicted.at(i)->push_back(xPos);
-				//vecYPredicted.at(i)->push_back(yPos);
+				//vecXPredicted.at(i)->push_back(xPredicted);
+				//vecYPredicted.at(i)->push_back(yPredicted);
 				hHitandSeedCount.at(i)->Fill(HitCount,SeedCount);
 				//hChi2XChi2Y.at(i)->Fill(chi2x, chi2y);
 				hFidCutXvsFidCutY.at(i)->Fill(fiducialValueX,fiducialValueY);
@@ -2418,7 +2459,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	vector<UInt_t> vecSilPlanes;
 
 	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}
-	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
+//	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
 	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 
 	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
@@ -2428,17 +2469,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	if(chi2x>maxChi2||chi2y>maxChi2)     //(chi2x>maxChi2||chi2y>maxChi2)
 		return;
 
-	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
-	Float_t yPos = predictedPosition->getPositionY();
-	Float_t Xdet = eventReader->getPositionInDetSystem(subjectDetector, xPos, yPos);
+//	Float_t xPredDet = eventReader->getPositionInDetSystem(subjectDetector, xPredicted, yPredicted);
 	//cout<<"YOffset: "<<settings->get3DYOffset()<<endl;
-	Float_t Ydet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
+//	Float_t yPredDet = GetYPositionInDetSystem()-settings->get3DYOffset();	//3890 is the calculated offset from comparing x and y edge charge profiles.
 
 
 	vecChi2X.push_back(chi2x);
 	vecChi2Y.push_back(chi2y);
-//	vecXPredicted.push_back(xPos);
-//	vecYPredicted.push_back(yPos);
+//	vecXPredicted.push_back(xPredicted);
+//	vecYPredicted.push_back(yPredicted);
 //	vecXPreditedDetector.push_back(Xdet);
 //	vecYPreditedDetector.push_back(Ydet);
 
@@ -2464,7 +2503,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 	//if(HitCount==1&&SeedCount==1){
 	//if(SeedCount<3){
-	pair<int,int> cell = getCellNo(Xdet,Ydet);
+	pair<int,int> cell = getCellNo(xPredDet,yPredDet);
 	Int_t cellNo = cell.first;
 	Int_t quarterNo = cell.second;
 	Int_t row = cellNo% settings->getNColumns3d();
@@ -2476,8 +2515,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
 	Float_t yminus = row*cellHight;
 
-	Float_t relPosX =Xdet - xminus;
-	Float_t relPosY = Ydet - yminus;
+	Float_t relPosX =xPredDet - xminus;
+	Float_t relPosY = yPredDet - yminus;
 	Int_t area3DwithColumns = 2;
 	if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
 		return;
@@ -2485,7 +2524,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 //	if(cellNo<0)
 //		return;
 
-	//clusteredAnalysis->addEvent(xPos,yPos,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
+	//clusteredAnalysis->addEvent(xPredicted,yPredicted,cellNo,quarterNo,relPosX,relPosY,diamondCluster);
 	//ClusterShape(&diamondCluster);
 
 	/*if(YAlignmentFiducialCut())
@@ -2494,17 +2533,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	hFidCutXvsFidCutYvsChargeYAlignment->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
 	hFidCutXvsFidCutYvsEventsYAlignment->Fill(fiducialValueX,fiducialValueY,1);
 
-	hDetXvsDetY3D->Fill(Xdet,Ydet,diamondCluster.getCharge(false));
-	hDetXvsDetY3DvsEvents->Fill(Xdet,Ydet,1);
-	hDetXvsDetY3DRebinned->Fill(Xdet,Ydet,diamondCluster.getCharge(false));
-	hDetXvsDetY3DvsEventsRebinned->Fill(Xdet,Ydet,1);
+	hDetXvsDetY3D->Fill(xPredDet,yPredDet,diamondCluster.getCharge(false));
+	hDetXvsDetY3DvsEvents->Fill(xPredDet,yPredDet,1);
+	hDetXvsDetY3DRebinned->Fill(xPredDet,yPredDet,diamondCluster.getCharge(false));
+	hDetXvsDetY3DvsEventsRebinned->Fill(xPredDet,yPredDet,1);
 
 	//h3DdetDeltaXChannel
 	//if(RemoveEdge3DClusters(&diamondCluster)==0){
-	Float_t XdetChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,Xdet);
-	//h3DdetDeltaXChannel->Fill(Xdet,Ydet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
+	Float_t XdetChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,xPredDet);
+	//h3DdetDeltaXChannel->Fill(xPredDet,Ydet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
 	if(sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))<1000){
-		h3DdetDeltaXChannel->Fill(Xdet,Ydet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
+		h3DdetDeltaXChannel->Fill(xPredDet,yPredDet,sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace)));
 		//cout<<"Delta X is: "<<sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))<<endl;
 		//cout<<"Xdet is: "<<Xdet<<" Ydet is: "<<Ydet<<endl;
 		//cout<<"HighestChannel: "<<diamondCluster.getHighestSignalChannel()<<" PredictedChannel: "<<XdetChannelSpace<<endl;
@@ -2514,9 +2553,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	//if(sqrt((diamondCluster.getHighestSignalChannel()-XdetChannelSpace)*(diamondCluster.getHighestSignalChannel()-XdetChannelSpace))>1000)
 	//h3DdetDeltaXChannelAbove1000->Fill(Xdet, Ydet, 1);
 
-	if(Xdet>2665&&Xdet<2815){	//Dead cell chosen to be: (2,5) in cell space
-		hDeadCell->Fill(Ydet, diamondCluster.getCharge(false));
-		hDeadCellEvents->Fill(Ydet, 1);
+	if(xPredDet>2665 && xPredDet < 2815){	//Dead cell chosen to be: (2,5) in cell space
+		hDeadCell->Fill(yPredDet, diamondCluster.getCharge(false));
+		hDeadCellEvents->Fill(yPredDet, 1);
 	}
 	//	To fill multiple cell histograms
 	//for(int i=0;i<hCellsCharge.size();i++){
@@ -2527,31 +2566,31 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 			hEntries = hCellsEvents.at(i*11+j)->Integral();
 			float xminus = 2365+i*150; //+5;		//2365 is the start of the 3D detector in x
 			float yminus = j*150;
-			hCellsCharge.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),diamondCluster.getCharge(false));
-			hCellsEvents.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),1);
+			hCellsCharge.at((i*11+j))->Fill((xPredDet-xminus),(yPredDet-yminus),diamondCluster.getCharge(false));
+			hCellsEvents.at((i*11+j))->Fill((xPredDet-xminus),(yPredDet-yminus),1);
 			if(hEntries != hCellsEvents.at(i*11+j)->Integral()){	//If entries in this histogram range have increased fill corresponding hCellLandau
-//				cout<< i<<" "<<j<<" "<<i*11+j<<" ?= "<< cellNo<<" "<<xPos<<" "<<yPos<<endl;
+//				cout<< i<<" "<<j<<" "<<i*11+j<<" ?= "<< cellNo<<" "<<xPredicted<<" "<<yPredicted<<endl;
 				if(cellNo != i*11+j)
 					cerr<<"something is wrong "<<i<<" "<<j<<endl;
 				hCellsLandau.at(i*11+j)->Fill(diamondCluster.getCharge(false));
 				hCellsClusteSize.at(i*11+j)->Fill((diamondCluster.getClusterSize()-2));		//Cluster seems to be 2 smaller than ClusterSize for some reason?
 				hCellsDeltaX.at(i*11+j)->Fill((diamondCluster.getHighestSignalChannel()-XdetChannelSpace));
-				hCellsColumnCheck55->Fill((Xdet-xminus),(Ydet-yminus),1);	//Fill Column Check histo 5*5
-				hCellsColumnCheck1010->Fill((Xdet-xminus),(Ydet-yminus),1);	//Fill Column Check histo 10*10
+				hCellsColumnCheck55->Fill((xPredDet-xminus),(yPredDet-yminus),1);	//Fill Column Check histo 5*5
+				hCellsColumnCheck1010->Fill((xPredDet-xminus),(yPredDet-yminus),1);	//Fill Column Check histo 10*10
 				//To fill quarter cell histograms
-				if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom left
+				if((xPredDet-xminus)>0&&(xPredDet-xminus)<75  &&  (yPredDet-yminus)>0&&(yPredDet-yminus)<75){	//bottom left
 					hQuaterCellsLandau.at(i*11*4+j*4)->Fill(diamondCluster.getCharge(false));
 					hQuarterCellsClusterSize.at(i*11*4+j*4)->Fill((diamondCluster.getClusterSize()-2));
 				}
-				if((Xdet-xminus)>0&&(Xdet-xminus)<75  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top left
+				if((xPredDet-xminus)>0&&(xPredDet-xminus)<75  &&  (yPredDet-yminus)>75&&(yPredDet-yminus)<150){	//top left
 					hQuaterCellsLandau.at(i*11*4+j*4+1)->Fill(diamondCluster.getCharge(false));
 					hQuarterCellsClusterSize.at(i*11*4+j*4+1)->Fill((diamondCluster.getClusterSize()-2));
 				}
-				if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>0&&(Ydet-yminus)<75){	//bottom right
+				if((xPredDet-xminus)>75&&(xPredDet-xminus)<150  &&  (yPredDet-yminus)>0&&(yPredDet-yminus)<75){	//bottom right
 					hQuaterCellsLandau.at(i*11*4+j*4+2)->Fill(diamondCluster.getCharge(false));
 					hQuarterCellsClusterSize.at(i*11*4+j*4+2)->Fill((diamondCluster.getClusterSize()-2));
 				}
-				if((Xdet-xminus)>75&&(Xdet-xminus)<150  &&  (Ydet-yminus)>75&&(Ydet-yminus)<150){	//top right
+				if((xPredDet-xminus)>75&&(xPredDet-xminus)<150  &&  (yPredDet-yminus)>75&&(yPredDet-yminus)<150){	//top right
 					hQuaterCellsLandau.at(i*11*4+j*4+3)->Fill(diamondCluster.getCharge(false));
 					hQuarterCellsClusterSize.at(i*11*4+j*4+3)->Fill((diamondCluster.getClusterSize()-2));
 				}
@@ -2567,7 +2606,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 								}
 								if(inColumn==0){
 									hCellsLandauNoColumn.at(i*settings->getNRows3d()+j)->Fill(diamondCluster.getCharge(false));
-									hCellsEventsNoColumn.at((i*settings->getNRows3d()+j))->Fill((Xdet-xminus),(Ydet-yminus),1);
+									hCellsEventsNoColumn.at((i*settings->getNRows3d()+j))->Fill((xPredDet-xminus),(Ydet-yminus),1);
 								}
 							 */
 							//Fill 5*5 overlay bin spec.
@@ -2593,7 +2632,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 								hCellsOverlayedColumnLandau->Fill(diamondCluster.getCharge(false));	//Fill with column Spectrum.
 							if(inColumn==0){
 								hCellsLandauNoColumn.at(i*11+j)->Fill(diamondCluster.getCharge(false));
-								hCellsEventsNoColumn.at((i*11+j))->Fill((Xdet-xminus),(Ydet-yminus),1);
+								hCellsEventsNoColumn.at((i*11+j))->Fill((xPredDet-xminus),(yPredDet-yminus),1);
 							}
 							//Fill 10*10 overlay bin spec.
 							for(int m=0;m<54;m++){
@@ -2744,14 +2783,12 @@ Float_t TAnalysisOf3dDiamonds::GetYPositionInDetSystem() {
 //	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 //
 //	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
-	Float_t xPos = predictedPosition->getPositionX();	//Predicted positions in labframe
-	Float_t yPos = predictedPosition->getPositionY();
 
 	TDetectorAlignment* detectorAlignment = eventReader->getAlignment();
 	Double_t xOffset = detectorAlignment->GetXOffset(subjectPlane);
 	Double_t PhiOffset = detectorAlignment->GetPhiXOffset(subjectPlane);
 
-	Float_t yDet = yPos*TMath::Cos(PhiOffset)+(xPos-xOffset)*TMath::Sin(PhiOffset);
+	Float_t yDet = yPredicted*TMath::Cos(PhiOffset)+(xPredicted-xOffset)*TMath::Sin(PhiOffset);
 
 	return yDet;
 
