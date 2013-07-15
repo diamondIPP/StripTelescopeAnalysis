@@ -44,6 +44,7 @@ public:
 	void	doAnalysis(UInt_t nEvents=0);
 
 private:
+	bool eventValid();
 	void initialiseShortAnalysisHistos();
 	void createTreeTestHistos();
 	void saveShortAnalysisHistos();
@@ -93,6 +94,7 @@ private:
 private:
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
+	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y;
 
 	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;

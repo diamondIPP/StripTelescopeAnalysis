@@ -48,7 +48,6 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 
 
-
 	FileNameEnd = "";
 	cout<<"analyze selection data..."<<endl;
 
@@ -143,7 +142,6 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 //		cout<<nEvent<<" not in rough fiducial cut: "<<fiducialValueX<<"/"<<fiducialValueY<<endl;
 		return false;
 	}
-	if(predictedPosition) delete predictedPosition;
 
 	vector<UInt_t> vecSilPlanes;
 
@@ -151,6 +149,7 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
 //	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 
+	if(predictedPosition) delete predictedPosition;
 	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
 	chi2x = predictedPosition->getChi2X();
 	chi2y = predictedPosition->getChi2Y();
