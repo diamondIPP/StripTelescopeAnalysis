@@ -312,7 +312,7 @@ private:
 	UInt_t nEvent;
 	vector<Float_t> vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHitStrip,vecPHDiamondHit3dNoHoles,vecPHDiamondHit3dWithHoles,vecClusterSize,vecChi2Y,vecChi2X,vecClusterSeedSize,vecXPredictedStrip,vecYPredictedStrip;
 	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency,vecXPreditedDetector,vecYPreditedDetector;
-	vector<Float_t> vecXEdgeRegionPredX,vecXEdgeRegionPredY,vecXEdgeRegionPulseHeight,vecYEdgeRegionPredX,vecYEdgeRegionPredY,vecYEdgeRegionPulseHeight;
+	vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
 	int HitCount, SeedCount;
 
 	vector<int*> Detector;
