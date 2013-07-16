@@ -16,17 +16,18 @@
 
 //ROOT libraries
 #include "Rtypes.h"
-
+#include "TCutG.h"
+#include "TObject.h"
+#include "TSystem.h"
+#include "TFile.h"
 
 #include "ChannelScreen.hh"
 #include "TChannelMapping.hh"
-#include "TObject.h"
 #include "TCluster.hh"
 #include "TPlaneProperties.hh"
 #include "TDiamondPattern.hh"
 //#include "TSettings.class.hh"
-#include "TSystem.h"
-#include "TFile.h"
+
 #include "TFiducialCut.hh"
 #include "TFidCutRegions.hh"
 #include "TRunInfo.hh"
@@ -46,6 +47,7 @@ public:
 	TSettings(TRunInfo* runInfo);
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
+	virtual ~TSettings();
 	std::string getAbsoluteOuputPath(bool withRunDescribtion=0);
 	std::string getAbsoluteInputPath(){return inputDir;};//todo
 	std::string getRawTreeFilePath();
@@ -92,7 +94,6 @@ private:
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
 	void checkSettings();
 public:
-	virtual ~TSettings();
 	void setFidCut(TFiducialCut* fidcut);
 	void saveSettings();
 	void loadSettingsFromRootFile();
@@ -490,7 +491,13 @@ private:
 	vector<Int_t> badCells3dnH;
 	vector<Int_t> goodCells3d;
 	//vector<Int_t> deadCell3d;
+	vector<TPlaneProperties::enumCoordinate> vecEdgePositionType;
+	vector<TString> vecEdgePositionName;
+	vector<Int_t> vecEdgePositionDetector;
 public:
+	TString getEdgePositionName(int i){if(i<vecEdgePositionName.size()) return vecEdgePositionName[i];return "";}//todo make it safe
+	TPlaneProperties::enumCoordinate getEdgePositionType(int i){if(i<vecEdgePositionType.size()) return vecEdgePositionType[i];return TPlaneProperties::UNKOWN_COR;}
+	TCutG* getEdgePosition(int i);
 	int do3dShortAnalysis() {return b3dShortAnalysis;}
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
 	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}

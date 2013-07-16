@@ -42,6 +42,9 @@ public:
 	Float_t getYLow(UInt_t i);
 	Float_t getXHigh(UInt_t i);
 	Float_t getYHigh(UInt_t i);
+	Float_t getHigh(TPlaneProperties::enumCoordinate cor, UInt_t i);
+	Float_t getLow(TPlaneProperties::enumCoordinate cor, UInt_t i);
+
 	void Print(int intend = 0);
 	void setRunDescription(std::string runDes);
 	Int_t getFiducialCutIndex(Float_t xVal, Float_t yVal);

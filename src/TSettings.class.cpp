@@ -763,6 +763,18 @@ void TSettings::DefaultLoadDefaultSettings(){
 	nColumns3d = 9;
 	yOffset3D = 3890;
 
+//	vecEdgePositions.push_back(3715);
+//	vecEdgePositions.push_back(1370);
+//	vecEdgePositions.push_back(1650);
+	vecEdgePositionType.push_back(TPlaneProperties::X_COR);
+	vecEdgePositionType.push_back(TPlaneProperties::Y_COR);
+	vecEdgePositionType.push_back(TPlaneProperties::Y_COR);
+	vecEdgePositionDetector.push_back(2);
+	vecEdgePositionDetector.push_back(0);
+	vecEdgePositionDetector.push_back(2);
+	vecEdgePositionName.push_back("X_Edge3D");
+	vecEdgePositionName.push_back("Y_Strip");
+	vecEdgePositionName.push_back("Y_Edge3D");
 //	checkSettings();
 }
 
@@ -2077,6 +2089,32 @@ Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
 	return channelPosition;
 }
 
+TCutG* TSettings::getEdgePosition(int i) {
+	if(vecEdgePositionType.size()<=i)
+		return 0;
+	TCutG* edgeCut;
+	TString name = "edge";
+	name.Append(vecEdgePositionName[i]);
+	edgeCut = new TCutG(name,2);
+	edgeCut->SetLineColor(kRed);
+	edgeCut->SetLineWidth(3);
+	Int_t det = this->vecEdgePositionDetector[i]+1;
+	cout<<"Edge Position Type: "<<vecEdgePositionType[i]<<" "<<det<<endl;
+//	cout<<"Detector: "<<det<<endl;
+	Float_t edgePosition =this->fidCuts3DMetallisation->getHigh(vecEdgePositionType[i],det);
+	cout<<" getEdgePosition of "<<i<<" "<<edgePosition<<endl;
+//	if(edgePositionType.at(i) == TPlaneProperties::X_COR){
+//		Float_t edgePosition =  vecEdgePositions[i];
+		edgeCut->SetPoint(0,edgePosition,-1e9);
+		edgeCut->SetPoint(1,edgePosition,+1e9);
+//	}
+//	else{
+//		Float_t edgePosition = vecEdgePositions[i];
+//		edgeCut->SetPoint(0,edgePosition,-1e9);
+//		edgeCut->SetPoint(1,edgePosition,+1e9);
+//	}
+	return edgeCut;
+}
 
 int TSettings::get3DCellNo(char row, int column){
 	column --;

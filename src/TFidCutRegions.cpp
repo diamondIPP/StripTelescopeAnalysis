@@ -405,6 +405,24 @@ void TFidCutRegions::addFiducialCut(TFiducialCut* fidCut){
 	}
 }
 
+Float_t TFidCutRegions::getHigh(TPlaneProperties::enumCoordinate cor,
+		UInt_t i) {
+	cout<<"TFidCutRegions::getHigh "<<TPlaneProperties::getCoordinateString(cor)<<" "<<i<<endl;
+	if (cor == TPlaneProperties::X_COR)
+		return getXHigh(i);
+	else if (cor == TPlaneProperties::Y_COR)
+		return getYHigh(i);
+	return -1e9;
+}
+
+Float_t TFidCutRegions::getLow(TPlaneProperties::enumCoordinate cor, UInt_t i) {
+	if (cor == TPlaneProperties::X_COR)
+		return getXLow(i);
+	else if (cor == TPlaneProperties::Y_COR)
+		return getYLow(i);
+	return +1e9;
+}
+
 void TFidCutRegions::createFidCuts(){
 	if(nDiamonds!=nFidCuts){
 		cout<<"Fid Cut does not match with nDIamonds"<<endl;
@@ -577,15 +595,15 @@ Float_t TFidCutRegions::getXHigh(UInt_t i) {
 
 Float_t TFidCutRegions::getYLow(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return xInt.at((i-1)/xInt.size()).first;
-	return TPlaneProperties::getNChannelsSilicon();
+		return yInt.at((i-1)%xInt.size()).first;
+	return 0;// TPlaneProperties::getNChannelsSilicon();
 
 	return N_INVALID;
 }
 Float_t TFidCutRegions::getYHigh(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return xInt.at((i-1)/xInt.size()).second;
-	return TPlaneProperties::getNChannelsDiamond();
+		return yInt.at((i-1)%xInt.size()).second;
+	return TPlaneProperties::getNChannelsSilicon();
 	return N_INVALID;
 }
 

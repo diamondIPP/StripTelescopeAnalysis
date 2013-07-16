@@ -19,7 +19,7 @@
 #define N_INVALID -9999
 class TPlaneProperties:public TObject {
 public:
-	enum enumCoordinate{ X_COR =0, Y_COR=1, Z_COR =2, XY_COR=3,};
+	enum enumCoordinate{ X_COR =0, Y_COR=1, Z_COR =2, XY_COR=3,UNKOWN_COR=-1};
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
 	TPlaneProperties();
 	virtual ~TPlaneProperties();
