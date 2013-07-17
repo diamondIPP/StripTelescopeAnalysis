@@ -36,7 +36,7 @@ public:
 	Float_t convertMetricToChannel(Float_t metric);
 	Float_t convertMetricToChannel(Float_t metric,UInt_t interval);
 	Float_t getPitchWidth(UInt_t area);
-	Int_t getNPatterns(){return getNIntervals();}// nChannelsOfInterval.size();}
+	UInt_t getNPatterns(){return getNIntervals();}// nChannelsOfInterval.size();}
 	void loadPitchWidthSettings(Float_t pitchWidth);
 	void resetPattern();
 	void clear(){resetPattern();}

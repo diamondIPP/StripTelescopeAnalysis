@@ -75,6 +75,21 @@ Float_t TTracking::getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordina
 	return myTrack->getMeasuredClusterPositionMetricSpace(cor,plane,mode);
 }
 
+Float_t TTracking::getYPositionInDetSystem(UInt_t det, Float_t xPredicted,
+		Float_t yPredicted) {
+//	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
+//	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
+//
+//	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
+	UInt_t subjectPlane = TPlaneProperties::getPlaneNumber(det);
+	Double_t xOffset = myAlignment->GetXOffset(subjectPlane);
+	Double_t PhiOffset = myAlignment->GetPhiXOffset(subjectPlane);
+
+	Float_t yDet = yPredicted*TMath::Cos(PhiOffset)+(xPredicted-xOffset)*TMath::Sin(PhiOffset);
+	yDet -= settings->get3DYOffset();
+	return yDet;
+}
+
 bool TTracking::setAlignment(std::string alignmentName){
 	if(this->alignmentFile!=NULL) alignmentFile->Delete();
 	alignmentFile=NULL;

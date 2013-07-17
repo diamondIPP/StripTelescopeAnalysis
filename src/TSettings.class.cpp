@@ -769,12 +769,18 @@ void TSettings::DefaultLoadDefaultSettings(){
 	vecEdgePositionType.push_back(TPlaneProperties::X_COR);
 	vecEdgePositionType.push_back(TPlaneProperties::Y_COR);
 	vecEdgePositionType.push_back(TPlaneProperties::Y_COR);
+	vecEdgePositionType.push_back(TPlaneProperties::X_COR);
+	vecEdgePositionType.push_back(TPlaneProperties::Y_COR);
 	vecEdgePositionDetector.push_back(2);
 	vecEdgePositionDetector.push_back(0);
+	vecEdgePositionDetector.push_back(2);
+	vecEdgePositionDetector.push_back(2);
 	vecEdgePositionDetector.push_back(2);
 	vecEdgePositionName.push_back("X_Edge3D");
 	vecEdgePositionName.push_back("Y_Strip");
 	vecEdgePositionName.push_back("Y_Edge3D");
+	vecEdgePositionName.push_back("X_Edge3D_small");
+	vecEdgePositionName.push_back("Y_Edge3D_small");
 //	checkSettings();
 }
 
@@ -2089,7 +2095,7 @@ Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
 	return channelPosition;
 }
 
-TCutG* TSettings::getEdgePosition(int i) {
+TCutG* TSettings::getEdgePosition(UInt_t i) {
 	if(vecEdgePositionType.size()<=i)
 		return 0;
 	TCutG* edgeCut;
@@ -2129,4 +2135,42 @@ int TSettings::get3DCellNo(char row, int column){
 	if(verbosity>4) cout<<"column "<<column<<", row "<<row<<"="<<nRow<<" * "<<nRows3d<<" = " <<nCell<<endl;
 	return nCell;
 
+}
+
+
+pair<int,int> TSettings::getCellNo(Float_t xDet, Float_t yDet) {
+	// i column
+	// j row
+
+	Int_t DiamondPattern = this->get3dMetallisationFidCuts()->getFidCutRegion(xDet,yDet);
+
+	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
+	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
+	Float_t cellWidth =150;
+	Float_t cellHight = 150;
+	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
+	Int_t row = (yDet - startOf3dDetectorY)/cellHight;
+
+	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
+	Float_t yminus = row*cellHight;
+	Float_t deltaX = xDet - xminus;
+	Float_t deltaY = yDet - yminus;
+	Int_t cell = -1;
+	if(column >= 0 && column < this->getNColumns3d() && row >= 0 && row < this->getNRows3d())
+		cell = column * this->getNRows3d()+row;
+	Int_t quarter = -1;
+	if (deltaY>=0&&deltaX>=0&&deltaX<=cellWidth&&deltaY<=cellHight){
+		int quarterX = deltaX/(cellWidth/2);
+		int quarterY = deltaY/(cellHight/2);
+		quarter = quarterX +quarterY*2;
+		if(verbosity>4)cout << "\t"<<deltaX <<"/"<<deltaY << " "<<quarterX<< "/"<<quarterY<<" "<<cellWidth<<"/"<<cellHight<<endl;
+	}
+	if(verbosity>4 && column >= 0 && row >= 0){
+		cout<<" TAnalysisOf3dDiamonds::getCellNo " << xDet <<"/"<<yDet<<endl;
+		cout << "\tcolumn: " << column << ", row: " << row << endl;
+		cout << "\tdeltaX: " << deltaX << ", deltaY: " << deltaY <<endl;
+		cout<<"\t cell: "<< cell << ", quarter: " << quarter <<endl;
+	}
+//	i*11+j
+	return make_pair(cell,quarter);
 }

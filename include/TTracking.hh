@@ -39,6 +39,7 @@ public:
 //	Float_t getMeasured(TPlaneProperties::enumCoordinate cor,UInt_t plane);
 //	TPositionPrediction* predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bPrint=false);
 	TDetectorAlignment* getAlignment(){return myAlignment;};
+	Float_t getYPositionInDetSystem(UInt_t det,Float_t xPredicted,Float_t yPredicted);
 private:
 	bool setAlignment(std::string alignmentName);
 	TTrack *myTrack;

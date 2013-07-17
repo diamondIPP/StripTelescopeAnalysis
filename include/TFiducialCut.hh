@@ -18,7 +18,7 @@ public:
 	TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh);
 	TFiducialCut(int i = 0);
 	bool isInFiducialCut(Float_t xVal, Float_t yVal)const {
-	  return ((xVal<x_high)&&(xVal>x_low)&&(yVal>y_low)&&(yVal<y_high));
+	  return ((x_low<xVal)&&(xVal<x_high)&&(y_low<yVal)&&(yVal<y_high));
 	}
 	void SetAllValuesZero();
 	void SetXLow(int xl) {x_low = xl;};
