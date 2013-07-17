@@ -280,7 +280,7 @@ public:
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
 	bool resetAlignment() const{return bResetAlignment;};
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
-	Int_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
+	UInt_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
 	TFidCutRegions* get3dEdgeFidCuts(){return fidCuts3DEdge;};
 	TFidCutRegions* get3dMetallisationFidCuts(){return fidCuts3DMetallisation;};
@@ -311,11 +311,9 @@ public:
 	//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
 	//	int getAreaOfInterest(){return inde
 	Float_t get3DYOffset(){return yOffset3D;};//todo
-	vector<int> getxEdgeFicucialRegion(){return xEdgeFicucialRegion;};
-	vector<int> getyEdgeFicucialRegion(){return yEdgeFicucialRegion;};
-	vector<int> getstripAnalysisFidCut(){return stripAnalysisFidCut;};
-	vector<int> get3DnHAnalysisFidCut(){return TDnHAnalysisFidCut;};
-	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};
+	vector<int> getstripAnalysisFidCut(){return stripAnalysisFidCut;};//todo: ????
+	vector<int> get3DnHAnalysisFidCut(){return TDnHAnalysisFidCut;};//todo: ????
+	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};//todo: ????
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3DEdge;
@@ -476,8 +474,8 @@ private:
 	Float_t diaStartingChannel;
 private:
 	Float_t yOffset3D;
-	vector<int> xEdgeFicucialRegion;
-	vector<int> yEdgeFicucialRegion;
+//	vector<int> xEdgeFicucialRegion;
+//	vector<int> yEdgeFicucialRegion;
 	vector<int> stripAnalysisFidCut;
 	vector<int> TDnHAnalysisFidCut;
 	vector<int> TDwHAnalysisFidCut;
@@ -495,9 +493,9 @@ private:
 	vector<TString> vecEdgePositionName;
 	vector<Int_t> vecEdgePositionDetector;
 public:
-	TString getEdgePositionName(int i){if(i<vecEdgePositionName.size()) return vecEdgePositionName[i];return "";}//todo make it safe
-	TPlaneProperties::enumCoordinate getEdgePositionType(int i){if(i<vecEdgePositionType.size()) return vecEdgePositionType[i];return TPlaneProperties::UNKOWN_COR;}
-	TCutG* getEdgePosition(int i);
+	TString getEdgePositionName(UInt_t i){if(i<vecEdgePositionName.size()) return vecEdgePositionName[i];return "";}//todo make it safe
+	TPlaneProperties::enumCoordinate getEdgePositionType(UInt_t i){if(i<vecEdgePositionType.size()) return vecEdgePositionType[i];return TPlaneProperties::UNKOWN_COR;}
+	TCutG* getEdgePosition(UInt_t i);
 	int do3dShortAnalysis() {return b3dShortAnalysis;}
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
 	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
@@ -512,6 +510,7 @@ public:
 	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
 	int get3DCellNo(char row, int column);
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
+	pair<int,int> getCellNo(Float_t xDet, Float_t yDet);
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};
 
 	ClassDef(TSettings,6)

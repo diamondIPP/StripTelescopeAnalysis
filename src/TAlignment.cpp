@@ -374,7 +374,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 		initialiseDetectorAlignment();
 	else
 		loadDetectorAlignment();
-	if (events.size() == 0) createEventVectors(nEvents, startEvent);
+	vector<Float_t> test1,test2;
 
 	//create an TTrack object and set the eta distributions.
 	if (myTrack == NULL) {
@@ -393,6 +393,8 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 		cerr<<"could not create my Track ----> EXIT"<<endl;
 		exit(-1);
 	}
+	UpdateResolutions(test1,test2);
+	if (events.size() == 0) createEventVectors(nEvents, startEvent);
 
 	myTrack->setDetectorAlignment(align);
 
@@ -851,6 +853,9 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 	return res;
 
 }
+
+
+
 /**
  * @brief creates element TResidual to adjust the alignment
  *
@@ -1284,6 +1289,7 @@ void TAlignment::LoadResolutionFromSettingsFile(){
 	cout<<"DONE"<<endl;
 }
 
+
 void TAlignment::SetResolutionsWithUserInput() {
 	cout<<"The measured Residuals are: "<<endl;
 	cout<<"\tPlane"<<"\t"<<"X-COR"<<"\t"<<"Y-COR"<<endl;
@@ -1324,6 +1330,73 @@ void TAlignment::inputResolution(UInt_t plane, TPlaneProperties::enumCoordinate 
 			validValue=true;
 		}
 	}
+}
+
+
+/**
+ * Takes the current resolutions and the current Residuals and tries to converge to new resolutions
+ *
+ */
+void TAlignment::UpdateResolutions(vector<Float_t> residuals, vector<Float_t> resolutions) {
+	cout<<"TAlignment::UpdateResolutions"<<endl;
+	vector<Float_t> newResolutions;
+	newResolutions.resize(resolutions.size());
+	vector<Float_t> zPositions;
+	zPositions.push_back(-0.2);
+	zPositions.push_back(-0);
+	zPositions.push_back(+19);
+	zPositions.push_back(+19.9);
+
+	residuals.clear();
+	residuals.push_back(2);
+	residuals.push_back(2);
+	residuals.push_back(2.1);
+	residuals.push_back(2.1);
+
+	resolutions.clear();
+	resolutions.push_back(1.5);
+	resolutions.push_back(1.5);
+	resolutions.push_back(2);
+	resolutions.push_back(2);
+
+	if (residuals.size()!=resolutions.size()||resolutions.size()!=zPositions.size()){
+		cerr << "[TAlignment::UpdateResolutions]: Vectors are from differnet size: "<<residuals.size()<<" "<<resolutions.size()<<" "<<zPositions.size()<<endl;
+		exit(-1);
+	}
+	newResolutions = resolutions;
+	for(int it = 0; it < 50; it++){
+		cout<<"\n***** iteration "<< it<<"/50"<<endl;
+		for(UInt_t subject = 0; subject <  residuals.size();subject++){
+			vector<Float_t> res,zPos;
+			for(UInt_t k=0;k<residuals.size();k++){
+				if(k==subject)
+					continue;
+				res.push_back(resolutions[k]);
+				zPos.push_back(zPositions[k]);
+			}
+			Float_t position = zPositions[subject];
+//			cout<<subject<<" "<<position<<" "<<res.size()<<" "<<zPos.size()<<endl;
+			Float_t trackResolution =  myTrack->calculateTrackResolution(position,zPos,res);
+			Float_t residual = residuals[subject];
+			if(trackResolution>residual){
+				cout<<subject<<"  Track Resolution > residual...."<<endl;
+				continue;
+			}
+			Float_t newResolution = TMath::Sqrt(residual*residual - trackResolution*trackResolution);
+			Float_t resolution = resolutions[subject];
+			if(newResolution/resolution<.5)
+				newResolution = resolution *.8;
+			else if (newResolution/resolution >1.5)
+				newResolution = resolution *1.2;
+
+
+			cout<<"old Resolution in "<<subject<<": "<<resolutions.at(subject)<<"("<<newResolution/resolution*100.<<") --> "<< newResolution<<endl;
+			newResolutions[subject]=newResolution;
+		}
+		resolutions = newResolutions;
+	}
+//	cout<<"Resolution is: "<<resolution<<endl;
+	char t; cin>>t;
 }
 
 
@@ -1540,12 +1613,21 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		histName << preName.str()<< "_ScatterPlot_YPred_vs_DeltaX"<< "_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
 		TH2F *histo;
 		if(isSiliconPostAlignment){
-			Float_t xmin = -50;
-			Float_t xmax = +50;
-			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred,256,512,xmin,xmax);
+			Float_t xmin = -1e9;
+			Float_t xmax = +1e9;
+			Float_t ymin = -50;
+			Float_t ymax = 50;
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred,256,512,xmin,xmax,ymin,ymax);
+			Float_t mean = histo->GetMean(2);
+			Float_t sigma = histo->GetRMS(2);
+			delete histo;
+			xmin = mean - 3 * sigma;
+			xmax = mean + 3 * sigma;
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred,256,512,xmin,xmax,ymin,ymax);
 		}
 		else
-			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta, vecYPred, 256);
+			histo = histSaver->CreateScatterHisto(histName.str(), vecXDelta,vecXPred, 256);
+//		histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta, vecYPred, 256);
 		//    histo.Draw("goff");
 		if(histo){
 			histo->GetXaxis()->SetTitle("Y Predicted / #mum");
@@ -1594,14 +1676,17 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
 		}
 
 
-	if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) && subjectPlane == TPlaneProperties::getDiamondPlane()) {    //ScatterPlot DeltaX vs Xpred
+	if (bPlot && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR) ) {    //ScatterPlot DeltaX vs Xpred
 		histName.str("");
 		histName.clear();
 		histName << preName.str() << "_ScatterPlot_XPred_vs_DeltaX" << "_-_Plane_" << subjectPlane << "_with_" << refPlaneString<<postName.str();
-		TH2F *histo;if(isSiliconPostAlignment){
-			Float_t xmin = -50;
-			Float_t xmax = +50;
-			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred,256,512,xmin,xmax);
+		TH2F *histo;
+		if(isSiliconPostAlignment){
+			Float_t xmin = -1e9;
+			Float_t xmax = +1e9;
+			Float_t ymin = -100;
+			Float_t ymax = 100;
+			histo = histSaver->CreateScatterHisto(histName.str(),vecXDelta,vecYPred,256,512,xmin,xmax,ymin,ymax);
 		}
 		else
 			histo = histSaver->CreateScatterHisto(histName.str(), vecXDelta,vecXPred, 256);

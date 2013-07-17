@@ -276,6 +276,45 @@ Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
 }
 
 
+Float_t TTrack::calculateTrackResolution(Float_t zPosSubjectPlane,
+		vector<Float_t> zPositions, vector<Float_t> resolutions) {
+//	cout<<"TTrack::calculateTrackResolution "<<zPositions.size()<<" "<<resolutions.size()<<endl;
+//	Float_t zSigma= alignment->getZResolution(subjectPlane);//todo
+	linFitX->ClearPoints();
+	for(UInt_t pl=0;pl<zPositions.size();pl++){
+		vector<Double_t> zPosVec;
+//		cout<<"adding "<<pl<<"\t"<<flush;
+		Float_t x = zPositions.at(pl)-zPosSubjectPlane;
+		Float_t y = 0;
+		Float_t res = resolutions.at(pl);
+//		cout<<"adding "<<pl<<" "<<x<<" "<<y<<" "<<res<<flush;
+		zPosVec.push_back(x);
+//		cout<<"#"<<endl;
+		linFitX->AddPoint(&zPosVec.at(0),y,res);
+//		cout<<"DONE"<<endl;
+	}
+//	cout<<"evaluate"<<endl;
+	linFitX->Eval();
+//	cout<<"evaluated"<<linFitX<<"\nGetParameter 1"<<endl;
+	Float_t m = linFitX->GetParameter(1);
+//	cout <<"Get ParError 1"<<endl;
+	Float_t sigma_m = linFitX->GetParError(1);
+//	cout<<"GetParameter 0"<<endl;
+	Float_t b = linFitX->GetParameter(0);
+//	cout<<"Get PAr Error 0"<<endl;
+	Float_t sigma_b = linFitX->GetParError(0);
+//	cout<<"get result"<<endl;
+	pair<Float_t,Float_t> result = getPredictedHitPosition(0,m,b,0,sigma_m,sigma_b);
+	return result.second;
+}
+
+
+std::pair<Float_t, Float_t> TTrack::getPredictedHitPosition(Float_t zPos,Float_t m, Float_t b,Float_t sigma_z, Float_t sigma_m, Float_t sigma_b){
+	Float_t position = m*zPos+b;
+	Float_t sigma = (zPos*sigma_m)*(zPos*sigma_m)+(m*sigma_z)*(m*sigma_z)+(sigma_b*sigma_b);
+	sigma = TMath::Sqrt(sigma);
+	return make_pair(position,sigma);
+}
 /**
  * @brief predicts the Position calculated by a linear fit out of all planes in vecRefPlanes
  * In Order to be able to calculate the right sigma the subject Plane is set to z_subject = 0
@@ -293,7 +332,7 @@ Float_t TTrack::getZPosition(UInt_t plane,TCluster::calculationMode_t mode){
 TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,TCluster::calculationMode_t mode,bool bPrint)
 {
 	Float_t zPosSubjectPlane = getZPosition(subjectPlane);
-	Float_t zSigma= alignment->getZResolution(subjectPlane);//todo
+	Float_t sigma_z= alignment->getZResolution(subjectPlane);//todo
 	linFitX->ClearPoints();
 	linFitY->ClearPoints();
 	if(event==NULL){
@@ -309,7 +348,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	if(vecRefPlanes.size()==1){
 		if(verbosity>3)	cout<<"TTrack::predictPosition with 1 refPlane"<<endl;
 		//todo anpassen so dass sigmas da drin reinkommen...
-		TPositionPrediction *prediction=new TPositionPrediction(zPosSubjectPlane,zSigma,getXPositionMetric(vecRefPlanes.at(0),mode), 0.,0.,getYPositionMetric(vecRefPlanes.at(0),mode),0.,0.,0,0);
+		TPositionPrediction *prediction=new TPositionPrediction(zPosSubjectPlane,sigma_z,getXPositionMetric(vecRefPlanes.at(0),mode), 0.,0.,getYPositionMetric(vecRefPlanes.at(0),mode),0.,0.,0,0);
 		return prediction;
 	}
 	vector<Double_t> zPosVec;//todo add xsigma ysigma
@@ -339,6 +378,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	linFitY->Eval();
 	linFitX->Chisquare();
 	linFitY->Chisquare();
+//	pair<Float_t,Float_t> result = getPredictedHitPosition(zPos,mx,bx,sigma_z,sigma_mx,sigma_bx)
 	Float_t zPos = 0;//zPosSubjectPlane;//alignment->GetZOffset(subjectPlane);
 	Float_t mx = linFitX->GetParameter(1);
 	Float_t sigma_mx = linFitX->GetParError(1);
@@ -356,20 +396,22 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 			cout<<"\tNDFx: "<<linFitX->GetNumberFreeParameters()<<"\t"<<"\tNDFy: "<<linFitY->GetNumberFreeParameters()<<endl;
 			cout<<"\t chi2x:"<<xChi2<<"\tchi2y:"<<yChi2<<endl;
 		}
-	Float_t xPos = mx*zPos+bx;
-	Float_t yPos = my*zPos+by;
-	Float_t xSigma = (zPos*sigma_mx)*(zPos*sigma_mx)+(mx*zSigma)*(mx*zSigma)+(sigma_bx*sigma_bx);
-	xSigma = TMath::Sqrt(xSigma);
-	Float_t ySigma = (zPos*sigma_my)*(zPos*sigma_my)+(my*zSigma)*(my*zSigma)+(sigma_by*sigma_by);
-	ySigma = TMath::Sqrt(ySigma);
+	pair<Float_t,Float_t> xprediction = this->getPredictedHitPosition(zPos,mx,bx,sigma_z,sigma_mx,sigma_bx);
+	pair<Float_t,Float_t> yprediction = this->getPredictedHitPosition(zPos,my,by,sigma_z,sigma_my,sigma_by);
+//	Float_t xPos = mx*zPos+bx;
+//	Float_t yPos = my*zPos+by;
+//	Float_t xSigma = (zPos*sigma_mx)*(zPos*sigma_mx)+(mx*sigma_z)*(mx*sigma_z)+(sigma_bx*sigma_bx);
+//	xSigma = TMath::Sqrt(xSigma);
+//	Float_t ySigma = (zPos*sigma_my)*(zPos*sigma_my)+(my*sigma_z)*(my*sigma_z)+(sigma_by*sigma_by);
+//	ySigma = TMath::Sqrt(ySigma);
 	Float_t xPhi = TMath::ATan(mx);
 	Float_t yPhi = TMath::ATan(my);
 	zPos=zPosSubjectPlane;
-	TPositionPrediction* prediction=new TPositionPrediction(zPos,zSigma,xPos,xSigma,xChi2,yPos,ySigma,yChi2,xPhi,yPhi);
+	TPositionPrediction* prediction=new TPositionPrediction(zPos,sigma_z,xprediction.first,xprediction.second,xChi2,yprediction.first,yprediction.second,yChi2,xPhi,yPhi);
 	if(!lastPredictionValid)prediction->setValid(false);
 	if(verbosity>3||bPrint)	cout<<"\tPrediction of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes for ZPosition: "<<zPos<<endl;
-	if(verbosity>3||bPrint)	cout<<"\t X: "<<xPos<<" +/- "<<xSigma<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
-	if(verbosity>3||bPrint)	cout<<"\t Y: "<<yPos<<" +/- "<<ySigma<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
+	if(verbosity>3||bPrint)	cout<<"\t X: "<<xprediction.first<<" +/- "<<xprediction.second<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
+	if(verbosity>3||bPrint)	cout<<"\t Y: "<<yprediction.first<<" +/- "<<yprediction.second<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
 	return prediction;
 }
 
@@ -617,11 +659,4 @@ TH1F *TTrack::getEtaIntegral(UInt_t det)
 	else
 		return 0;
 }
-
-
-
-
-
-
-
 

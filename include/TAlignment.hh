@@ -98,7 +98,7 @@ private:
 	void AlignDetectorY(UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2){alignDetector(TPlaneProperties::Y_COR,subjectPlane,refPlane1,refPlane2);};
 	void DoEtaCorrectionSilicon(UInt_t correctionStep=0);
 	void getFinalSiliconAlignmentResuluts();
-	void UpdateResolutions();
+	void UpdateResolutions(vector<Float_t> residuals, vector<Float_t> resolutions);
 	void setSiliconDetectorResolution(Float_t maxChi2);
 
 	void CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, string refPlaneString, bool bPlot, bool bUpdateResolution, bool bChi2=false);

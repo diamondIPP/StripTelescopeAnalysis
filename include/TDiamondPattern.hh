@@ -36,7 +36,7 @@ public:
 	Float_t convertMetricToChannel(Float_t metric);
 	Float_t convertMetricToChannel(Float_t metric,UInt_t interval);
 	Float_t getPitchWidth(UInt_t area);
-	Int_t getNPatterns(){return getNIntervals();}// nChannelsOfInterval.size();}
+	UInt_t getNPatterns(){return getNIntervals();}// nChannelsOfInterval.size();}
 	void loadPitchWidthSettings(Float_t pitchWidth);
 	void resetPattern();
 	void clear(){resetPattern();}
@@ -44,11 +44,12 @@ public:
 	void showPatterns();
 	UInt_t size(){return getNPatterns();}
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
-	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);
+	std::pair<int,int> getPatternChannels(UInt_t pattern);
+	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);//{return getPatternChannels(pattern);}
 	bool hasInvalidIntervals();
-
+	UInt_t getNIntervals();//{return nChannelsOfInterval.size();}
 private:
-	UInt_t getNIntervals();//
+//	UInt_t getNIntervals();//
 	Float_t getChannelToMetric(UInt_t ch);
 	void initialiseVector();
 	std::vector<Float_t> channelToMetricConversion;
