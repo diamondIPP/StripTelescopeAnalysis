@@ -208,3 +208,17 @@ Float_t TDiamondPattern::getPitchWidth(UInt_t area){
 	else
 		return this->standardPW;
 }
+
+
+std::pair<int,int> TDiamondPattern::getPatternChannels(UInt_t pattern){
+    int firstChannel=-1;
+    int lastChannel=-1;
+    pattern--;
+    if(pattern<firstChannelOfInterval.size()&&pattern<nChannelsOfInterval.size()){
+        firstChannel = firstChannelOfInterval[pattern];
+        lastChannel = nChannelsOfInterval[pattern];
+        lastChannel+=firstChannel;
+    }
+
+    return make_pair(firstChannel,lastChannel);
+}
