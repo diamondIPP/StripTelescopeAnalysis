@@ -65,7 +65,6 @@ private:
 	void initialise3DCellOverlayHistos();
 	void saveLongAnalysisHistos();
 	void LongAnalysis();
-//	Int_t* CellToChannel(int nCell,float nXcell);//todo exist in TTracking? if no move --> TTracking
 	float* SortArrayBtoS(float* nArray, int nSize);
 	void printArray(float* nArray, int nSize, const std::string& space);
 
