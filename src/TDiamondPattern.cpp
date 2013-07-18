@@ -48,6 +48,7 @@ void TDiamondPattern::resetPattern() {
 	endOfInterval.clear();
 	firstChannelOfInterval.clear();
 	nChannelsOfInterval.clear();
+	pitchWidth.clear();
 	bLoadedStandardPitchWidthSettings=false;
 }
 
