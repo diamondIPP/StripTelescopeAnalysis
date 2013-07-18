@@ -94,7 +94,6 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 	return retVal;
 }
 
-
 void TDiamondPattern::initialiseVector() {
 	for (UInt_t i=0;i<channelToMetricConversion.size();i++)
 		channelToMetricConversion[i] = N_INVALID;
@@ -168,7 +167,8 @@ Float_t TDiamondPattern::convertChannelToMetric(Float_t channel) {
 	return position;
 }
 
-Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
+
+Int_t TDiamondPattern::getPatternOfHit(Float_t metric) {
 	if(hasInvalidIntervals()){
 
 		if(verbosity)  cout<<" TDiamondPattern::convertMetricToChannel "<<metric<<" INVALID INTERVALS"<<endl;
@@ -176,7 +176,27 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 	}
 	for(UInt_t i = 0; i < getNIntervals();i++){
 		if(i<beginOfInterval.size() && i < endOfInterval.size()){
-		if( beginOfInterval[i] <= metric && metric <= endOfInterval[i] )
+			if( beginOfInterval[i] <= metric && metric <= endOfInterval[i] )
+				return i;
+		}
+	}
+	return N_INVALID;
+}
+
+Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
+	if(hasInvalidIntervals()){
+
+		if(verbosity)  cout<<" TDiamondPattern::convertMetricToChannel "<<metric<<" INVALID INTERVALS"<<endl;
+		return N_INVALID;
+	}
+	for(UInt_t i = 0; i < getNIntervals();i++){
+		if(i<beginOfInterval.size() && i < endOfInterval.size() && i < pitchWidth.size()){
+			Float_t pw = pitchWidth[i];
+			Float_t begin = beginOfInterval[i];
+			Float_t end = endOfInterval[i];
+			begin -= pw/2;
+			end -= pw/2;
+		if( begin <= metric && metric <= end )
 			return convertMetricToChannel(metric,i);
 		}
 //		else return N_INVALID;
@@ -187,9 +207,18 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 Float_t TDiamondPattern::convertMetricToChannel(Float_t metric,UInt_t interval) {
 	if (interval>=getNIntervals())
 		return N_INVALID;
-	for(UInt_t ch=firstChannelOfInterval[interval];ch < firstChannelOfInterval[interval] + nChannelsOfInterval[interval];ch++){
-		Float_t leftPos = getChannelToMetric(ch);
-		Float_t rightPos = getChannelToMetric(ch+1);
+	Float_t leftPos,rightPos;
+	Int_t firstChannel = firstChannelOfInterval[interval]-1;
+	Int_t lastChannel = firstChannelOfInterval[interval] + nChannelsOfInterval[interval];
+	for(UInt_t ch = firstChannel; ch <= lastChannel;ch++){
+		if(ch == firstChannelOfInterval[interval]-1)
+			leftPos = getChannelToMetric(ch+1) - pitchWidth[interval];
+		else
+			leftPos = getChannelToMetric(ch);
+		if (ch == lastChannel)
+			rightPos = getChannelToMetric(ch-1) + pitchWidth[interval];
+		else
+			rightPos = getChannelToMetric(ch+1);
 		if ( leftPos <= metric && metric <= rightPos )
 			return (metric-leftPos)/(rightPos-leftPos)+ch;
 	}
@@ -209,16 +238,14 @@ Float_t TDiamondPattern::getPitchWidth(UInt_t area){
 		return this->standardPW;
 }
 
-
 std::pair<int,int> TDiamondPattern::getPatternChannels(UInt_t pattern){
-    int firstChannel=-1;
-    int lastChannel=-1;
-    pattern--;
-    if(pattern<firstChannelOfInterval.size()&&pattern<nChannelsOfInterval.size()){
-        firstChannel = firstChannelOfInterval[pattern];
-        lastChannel = nChannelsOfInterval[pattern];
-        lastChannel+=firstChannel;
-    }
-
-    return make_pair(firstChannel,lastChannel);
+	int firstChannel=-1;
+	int lastChannel=-1;
+	pattern--;
+	if(pattern<firstChannelOfInterval.size()&&pattern<nChannelsOfInterval.size()){
+		firstChannel = firstChannelOfInterval[pattern];
+		lastChannel = nChannelsOfInterval[pattern];
+		lastChannel+=firstChannel;
+	}
+	return make_pair(firstChannel,lastChannel);
 }

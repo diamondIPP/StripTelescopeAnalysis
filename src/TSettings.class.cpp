@@ -2137,6 +2137,96 @@ int TSettings::get3DCellNo(char row, int column){
 
 }
 
+/**
+ * @todo look at hardcoded numbers
+ * @param nCanvas
+ * @param DiamondPattern
+ */
+void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
+
+	if (!nCanvas)
+		return;
+	nCanvas->cd();
+	//vector<TBox*> Grid;
+	TCutG* gridPoint;
+	cout<<"DiamondPattern: "<<DiamondPattern<<endl;
+	if(DiamondPattern==1){
+		pair<int,int> channels = diamondPattern.getPatternChannels(DiamondPattern);
+		for(int i=0;i<(channels.second - channels.first);i++){		//Number of metallisation lines to be drawn.
+			for(int j=0;j<2;j++){	//Strip detector has 1 row
+				float xLow = get3dMetallisationFidCuts()->getXLow(DiamondPattern) + i*50 +25;
+				float yLow = get3dMetallisationFidCuts()->getYLow(DiamondPattern);
+				float xHigh = xLow+50;//todo: IAIN: WHY is there a hard coded 50?
+				float yHigh = get3dMetallisationFidCuts()->getYHigh(DiamondPattern);
+				TString name = nCanvas->GetName();
+				name.Append(TString::Format("_CellGrid%d_%d",i,j));
+				TCutG * gridPoint = new TCutG(name,5);
+				gridPoint->SetPoint(0,xLow,yLow);
+				gridPoint->SetPoint(1,xLow,yHigh);
+				gridPoint->SetPoint(2,xHigh,yHigh);
+				gridPoint->SetPoint(3,xHigh,yLow);
+				gridPoint->SetPoint(4,xLow,yLow);
+				gridPoint->SetFillStyle(0);
+				gridPoint->SetLineWidth(1);
+				gridPoint->SetLineColor(kBlack);
+				gridPoint->Draw("same");
+			}
+		}
+	}		//for Strip structure
+
+	if(DiamondPattern==2||DiamondPattern==3){
+		for(int i=0;i<getNColumns3d();i++){
+			for(int j=0;j<getNRows3d();j++){
+				float xLow = get3dMetallisationFidCuts()->getXLow(DiamondPattern) + i*150;
+				float yLow = get3dMetallisationFidCuts()->getYLow(DiamondPattern) + j*150;
+				float xHigh = xLow+150;
+				float yHigh = yLow+150;
+				TString name = nCanvas->GetName();
+				name.Append(TString::Format("_CellGrid%d_%d",i,j));
+				TCutG * gridPoint = new TCutG(name,5);
+				gridPoint->SetPoint(0,xLow,yLow);
+				gridPoint->SetPoint(1,xLow,yHigh);
+				gridPoint->SetPoint(2,xHigh,yHigh);
+				gridPoint->SetPoint(3,xHigh,yLow);
+				gridPoint->SetPoint(4,xLow,yLow);
+				gridPoint->SetFillStyle(0);
+				gridPoint->SetLineWidth(1);
+				gridPoint->SetLineColor(kBlack);
+				gridPoint->Draw("same");
+			}
+		}
+	}		//for 3D structures
+}
+
+/** todo: hardcoded 2 & 3 replace by suitable variables
+ *
+ *
+ * @param cellNo
+ * @param nDiamondPattern
+ * @return
+ */
+bool TSettings::isBadCell(UInt_t nDiamondPattern, Int_t cellNo) {
+	if(nDiamondPattern == 2){
+		//cout<<settings->getBadCells3DnH().size()<<endl;
+		for ( UInt_t i = 0; i < getBadCells3DnH().size(); i++)
+			if ( cellNo == getBadCells3DnH().at(i)) {
+				return true;
+			}
+	}
+
+	if(nDiamondPattern == 3){
+		for ( UInt_t i=0; i < getBadCells3D().size(); i++)
+			if ( cellNo == getBadCells3D().at(i)) {
+				return true;
+			}
+
+	}
+	return false;
+}
+
+bool TSettings::isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet) {
+	return isBadCell(getCellNo(xDet,yDet).first, nDiamondPattern);
+}
 
 pair<int,int> TSettings::getCellNo(Float_t xDet, Float_t yDet) {
 	// i column
