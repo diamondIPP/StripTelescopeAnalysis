@@ -89,6 +89,9 @@ public:
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 
 	enumRunDescription getAnalysedDiamond();
+
+
+	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
@@ -508,6 +511,8 @@ public:
 	vector<Int_t> getGoodCells3D(){return goodCells3d;};
 	vector<Int_t> getBadCells3D(){return badCells3d;};
 	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
+	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
+	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
 	int get3DCellNo(char row, int column);
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
 	pair<int,int> getCellNo(Float_t xDet, Float_t yDet);

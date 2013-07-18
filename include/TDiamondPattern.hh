@@ -33,7 +33,10 @@ public:
 	void loadStandardPitchWidthSettings();
 	bool addPattern(Float_t pitchWidth, Float_t startPosition, UInt_t firstChannel,UInt_t lastChannel);
 	Float_t convertChannelToMetric(Float_t channel);
+	Int_t convertMetricToIntChannel(Float_t metric){return (Int_t)(convertMetricToChannel(metric)+.5);}
 	Float_t convertMetricToChannel(Float_t metric);
+	Float_t getChannel(Float_t metric){return convertMetricToChannel(metric);}
+	Int_t getPatternOfHit(Float_t metric);
 	Float_t convertMetricToChannel(Float_t metric,UInt_t interval);
 	Float_t getPitchWidth(UInt_t area);
 	UInt_t getNPatterns(){return getNIntervals();}// nChannelsOfInterval.size();}
