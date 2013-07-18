@@ -54,7 +54,7 @@ private:
 	void TransparentAnalysis();
 	void saveTransparentAnalysisHistos();
 	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
-	Int_t RemoveBadCells(Int_t nDiamondPattern, Float_t xDet, Float_t yDet);
+
 	float* VectorToArray(vector<float> nvector);
 
 	//YAlignment
@@ -63,33 +63,19 @@ private:
 	void initialise3DOverviewHistos();
 	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
-	//void initialiseYAlignmentHistos();
 	void saveLongAnalysisHistos();
 	void LongAnalysis();
-	void DrawYAlignmentFidCutRegions();
-	Int_t* CellToChannel(int nCell,float nXcell);
-	int xEdgeyEdgeFiducialCut(int nEdge);
-	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
-	Float_t GetYPositionInDetSystem();
+	Int_t* CellToChannel(int nCell,float nXcell);//todo exist in TTracking? if no move --> TTracking
 	float* SortArrayBtoS(float* nArray, int nSize);
 	void printArray(float* nArray, int nSize, const std::string& space);
 
 	//new functions
 	void HitandSeedCount(TCluster* nCluster);
 	void ClusterPlots(int nClusters, float nfiducialValueX, float nfiducialValueY);
-	void ClusterShape(TCluster* nCluster);
 	void RemoveLumpyClusters(TCluster* nCluster);
 	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
-	void ClusterChannels(TCluster* nCluster);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
-	int FiducialCut(int nDiamondPattern);
-	void DrawFidCutRegions();
-	void PredictChannelHit(TCluster* nCluster);
-
-	int getChannel(Float_t xDet, Float_t yDet);
-	//pair<int,int> getMetallisationPattern(Float_t xDet, Float_t yDet);
-	pair<int,int> getCellNo(Float_t xPos, Float_t yPos);
 
 private:
 	TCellAnalysisClass* clusteredAnalysis;
@@ -277,17 +263,7 @@ private:
 	vector<TH1F*> hCellsLandauNoColumn;
 	vector<TH1F*> hCellsLandauGradedNoColumn;
 	TH1F* hBinnedMeanCharge;
-	//xEdge
-	TH1F* hEdgeCharge;
-	TH1F* hEdgeChargeEvents;
-	TCanvas* cEdgeMeanCharge;
-	TH1F* hEdgeMeanCharge;
-	TCanvas* cxEdgeyEdgeFiducialRegions;
-	//yEdge
-	TH1F* hyEdgeCharge;
-	TH1F* hyEdgeChargeEvents;
-	TCanvas* cyEdgeMeanCharge;
-	TH1F* hyEdgeMeanCharge;
+
 	//DeadCellProfile
 	TCanvas* cDeadCellMeanCharge;
 	TH1F* hDeadCell;
@@ -302,7 +278,6 @@ private:
 	vector<TH1F*> hDeadCellsEvents;
 	//Fiducial Cut
 	vector <TBox*> FidCutChannelYAlignmentTBox;
-	vector<int*> FidCutYAlignment;
 	//vector<float> FidYAlignment;
 
 
@@ -315,9 +290,6 @@ private:
 	vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
 	int HitCount, SeedCount;
 
-	vector<int*> Detector;
-	vector<TFiducialCut*> FidCut;
-	TFidCutRegions fidCuts;
 	TPositionPrediction *predictedPosition;
 
 	Int_t verbosity;
