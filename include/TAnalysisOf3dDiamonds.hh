@@ -292,7 +292,9 @@ private:
 	TPositionPrediction *predictedPosition;
 
 	Int_t verbosity;
-
+	vector<UInt_t> vecSilPlanes;
+	UInt_t subjectDetector;
+	UInt_t subjectPlane;
 
 private:
 };

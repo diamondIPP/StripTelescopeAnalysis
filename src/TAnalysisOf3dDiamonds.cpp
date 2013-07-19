@@ -39,6 +39,10 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 	vecEdgePredY.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
 	vecEdgePulseHeight.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
 
+	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}//cout<<TPlaneProperties::getNSiliconPlanes()<<endl;}
+	subjectPlane = TPlaneProperties::getDiamondPlane();
+	subjectDetector = TPlaneProperties::getDetDiamond();
+
 }
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
@@ -131,14 +135,11 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 		return false;
 	}
 
-	vector<UInt_t> vecSilPlanes;
-
-	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}//cout<<TPlaneProperties::getNSiliconPlanes()<<endl;}
-	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
-	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 
 	if(predictedPosition) delete predictedPosition;
 	predictedPosition = eventReader->predictPosition(subjectPlane,vecSilPlanes);
+	if (!predictedPosition)
+		return false;
 	chi2x = predictedPosition->getChi2X();
 	chi2y = predictedPosition->getChi2Y();
 	xPredicted = predictedPosition->getPositionX();	//Predicted positions in labframe
@@ -152,7 +153,6 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
 
-	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 //
 //	if(!settings->isInRoughFiducialCut()()eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
 //		return;
@@ -238,11 +238,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 	if(!eventReader->isValidTrack())
 		return;
-	vector<UInt_t> vecSilPlanes;
 
-	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}
-//	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
-	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 
 	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
 		return;
@@ -434,11 +430,6 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	if(!eventReader->isValidTrack())
 		return;
 
-	vector<UInt_t> vecSilPlanes;
-
-	for(UInt_t pl=0;pl<TPlaneProperties::getNSiliconPlanes();pl++){vecSilPlanes.push_back(pl);}
-//	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
-	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 
 	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
 		return;
@@ -2809,7 +2800,6 @@ void TAnalysisOf3dDiamonds::createTreeTestHistos() {
 Float_t TAnalysisOf3dDiamonds::getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit) {
 
 	Float_t TransparentCharge = -9999;
-	UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
 	pair<int,int> channels = settings->diamondPattern.getPatternChannels(nDiamondPattern);
 	Int_t ChannelsToRead;
 	if(nDiamondPattern==1)
