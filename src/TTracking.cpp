@@ -44,9 +44,9 @@ TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt
 {
 	if(myTrack==0)
 		return 0;
-	if (pEvent ==0)
-		cerr<<"pEvent pointer is null...."
-	myTrack->setEvent(this->pEvent);
+	if (this->getEvent() ==0)
+		cerr<<"pEvent pointer is null...."<<endl;
+	myTrack->setEvent(this->getEvent());
 	return myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,bPrint);
 }
 
