@@ -515,7 +515,12 @@ public:
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
 	int get3DCellNo(char row, int column);
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
-	pair<int,int> getCellNo(Float_t xDet, Float_t yDet);
+	Int_t getCellNo(Float_t xDet,Float_t yDet);
+	pair<int,int> getCellAndQuarterNo(Float_t xDet, Float_t yDet);
+
+	inline Int_t getRowOfCell(Int_t cellNo){return cellNo % getNRows3d();}
+	inline Int_t getColumnOfCell(Int_t cellNo){return cellNo / getNRows3d();}
+	pair<Float_t,Float_t> getRelativePositionInCell(Float_t xPredDet,Float_t yPredDet);
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};
 
 	ClassDef(TSettings,6)
