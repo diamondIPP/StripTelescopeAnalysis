@@ -123,6 +123,14 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
 }
 
+/**
+ * checks if the event has one and only one valid silicon cluster in each
+ * telescope plane
+ * it predicts the position and than sets some variables as fiducialValue,
+ * chi2, predictedPsosition and predictedDetectorPosition as global variables
+ * since they are used quite often
+ * @return wheater the event should be used for analysis or not
+ */
 bool TAnalysisOf3dDiamonds::eventValid(){
 	if(!eventReader->isValidTrack()){
 //		cout<<nEvent<<" invalid Track"<<endl;
@@ -152,18 +160,9 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
-
-//
-//	if(!settings->isInRoughFiducialCut()()eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
-//		return;
-
-	//cout<<"The diamondCluster charge is: "<<diamondCluster.getCharge(false)<<endl;
 	Float_t maxChi2 = settings->getChi2Cut3D();
 	if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
 		return;
-
-
-//	Float_t xPredDet = eventReader->getPositionInDetSystem(subjectDetector, xPredicted, yPredicted);
 
 	hNumberofClusters->Fill(eventReader->getNDiamondClusters());
 	ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
@@ -181,18 +180,9 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 		//RemoveLumpyClusters(&diamondCluster);
 
 		//Edge Finding
+
 		Float_t clusterCharge = diamondCluster.getCharge(false);
-		for(UInt_t i = 0; i < settings->get3dEdgeFidCuts()->getNFidCuts();i++ ){
-			TFiducialCut* fidCut = settings->get3dEdgeFidCuts()->getFidCut(i+1);
-			if(!fidCut)
-				continue;
-			if(fidCut->isInFiducialCut(fiducialValueX,fiducialValueY)){
-				vecEdgePredX[i].push_back(xPredDet);
-				vecEdgePredY[i].push_back(yPredDet);
-				vecEdgePulseHeight[i].push_back(clusterCharge);
-//				cout<<nEvent<<": "<<xPredDet<<"/"<<yPredDet<<" --> "<<i<<endl;
-			}
-		}
+		fillEdgeDistributions(clusterCharge);
 
 		//Universal PHvsChannel Plot
 		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
@@ -214,17 +204,17 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 					return;
 				 */
 
-				hEventsvsChannel.at(i)->Fill(diamondCluster.getHighestSignalChannel());
-				hPHvsChannel.at(i)->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
+				hEventsvsChannel[i]->Fill(diamondCluster.getHighestSignalChannel());
+				hPHvsChannel[i]->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
 				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
 				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
-				hLandau.at(i)->Fill(diamondCluster.getCharge(false));
-				vecPHDiamondHit.at(i)->push_back(diamondCluster.getCharge(false));
+				hLandau[i]->Fill(diamondCluster.getCharge(false));
+				vecPHDiamondHit[i]->push_back(diamondCluster.getCharge(false));
 				//vecXPredicted.at(i)->push_back(xPredicted);
 				//vecYPredicted.at(i)->push_back(yPredicted);
-				hHitandSeedCount.at(i)->Fill(HitCount,SeedCount);
-				hChi2XChi2Y.at(i)->Fill(chi2x, chi2y);
-				hFidCutXvsFidCutY.at(i)->Fill(fiducialValueX,fiducialValueY);
+				hHitandSeedCount[i]->Fill(HitCount,SeedCount);
+				hChi2XChi2Y[i]->Fill(chi2x, chi2y);
+				hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
 				//For hFidCutXvsFidCutYvsMeanCharge
 				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
 
@@ -280,7 +270,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 	//if(HitCount==1&&SeedCount==1){
 	//if(SeedCount<3){
-	pair<int,int> cell = settings->getCellNo(xPredDet,yPredDet);
+	pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
 	Int_t cellNo = cell.first;
 	Int_t quarterNo = cell.second;
 	Int_t row = cellNo% settings->getNColumns3d();
@@ -427,12 +417,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
-	if(!eventReader->isValidTrack())
-		return;
-
-
-	if(!eventReader->isInFiducialCut())	//This is a larger fiducial cut around silicon
-		return;
 
 	//Float_t maxChi2 = settings->getChi2Cut3D();
 	if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
@@ -461,15 +445,26 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	//cout<<"Hit coordinates: "<<"("<<Xdet<<", "<<Ydet<<")"<<endl;
 	//cout<<"Channel Hit: "<<XdetChannelSpaceInt<<"   "<<XdetChannelSpaceFloat<<endl;
 	Int_t XdetChannelSpaceInt =  settings->diamondPattern.convertMetricToIntChannel(xPredDet);
-
+	Float_t XdetChannelSpace = settings->diamondPattern.convertMetricToChannel(xPredDet);
+	UInt_t clusterSize =5;
+	if(DiamondPattern == 1)
+		clusterSize = 5;
+	else{clusterSize = 3;}
+	if(!TPlaneProperties::isValidChannel(subjectDetector,XdetChannelSpaceInt))
+		return;
+	TCluster transparentCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,XdetChannelSpace,clusterSize);
 	Float_t TransparentCharge = getTransparentCharge(DiamondPattern, XdetChannelSpaceInt);
+//	cout<<TString::Format("%7d: Event in diamond pattern %d:\t %05.1f/%05.1f --> %3d --> %5.1f  ADC counts",nEvent,DiamondPattern,xPredDet,yPredDet,XdetChannelSpaceInt-channels.first,TransparentCharge)<<endl;
 
+	//** WHY?
 	if(TransparentCharge == -9999)
 		return;
+	if (DiamondPattern == 3)
+	cout << TString::Format("%7d: %f - %f = %f\t%d\t%d",nEvent, TransparentCharge, transparentCluster.getCharge(true),TransparentCharge-transparentCluster.getCharge(true),DiamondPattern,settings->isMaskedCluster(subjectDetector,transparentCluster) ) << endl;
 
-	hXdetvsYdetvsCharge.at(DiamondPattern-1)->Fill(xPredDet,yPredDet,TransparentCharge);
-	hXdetvsYdetvsEvents.at(DiamondPattern-1)->Fill(xPredDet,yPredDet,1);
-	hLandauTransparent.at(DiamondPattern-1)->Fill(TransparentCharge);
+	hXdetvsYdetvsCharge[DiamondPattern-1]->Fill(xPredDet,yPredDet,TransparentCharge);
+	hXdetvsYdetvsEvents[DiamondPattern-1]->Fill(xPredDet,yPredDet,1);
+	hLandauTransparent[DiamondPattern-1]->Fill(TransparentCharge);
 
 	if(DiamondPattern ==2 || DiamondPattern ==3){
 		if(settings->isBadCell(DiamondPattern,xPredDet,yPredDet) == 1){
@@ -480,23 +475,11 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	}
 
 	//For overlay of 3DwH
-	if(DiamondPattern ==3){
-		Int_t cellNo = settings->getCellNo(xPredDet,yPredDet).first;
-		Int_t column = (cellNo+1) / settings->getNRows3d();
-		Int_t row =  cellNo - column*settings->getNRows3d();         // (cellNo+1) / settings->getNColumns3d();
-		if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> column "<<column<<", row "<<row<<endl;
-		Float_t cellWidth = 150;
-		Float_t cellHight = 150;
-		Float_t startOf3dDetectorX = settings->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
-		Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;
-		Float_t yminus = row*cellHight;
+	if(DiamondPattern == 3){
+		pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
-		Float_t relPosX =xPredDet - xminus;
-		Float_t relPosY = yPredDet - yminus;
-		cout<<"cell: "<<cellNo<<"--> relPosX "<<relPosX<<", relPosY "<<relPosY<<endl;
-
-		hCellOverlayvsCharge->Fill(relPosX,relPosY,TransparentCharge);
-		hCellOverlayvsEvents->Fill(relPosX,relPosY,1);
+		hCellOverlayvsCharge->Fill(relPos.first,relPos.second,TransparentCharge);
+		hCellOverlayvsEvents->Fill(relPos.first,relPos.second,1);
 	}
 
 /*
@@ -2887,3 +2870,17 @@ float* TAnalysisOf3dDiamonds::VectorToArray(vector<float> nvector){
 	return ret;
 }
 
+void TAnalysisOf3dDiamonds::fillEdgeDistributions(Float_t clusterCharge){
+	for(UInt_t i = 0; i < settings->get3dEdgeFidCuts()->getNFidCuts();i++ ){
+		TFiducialCut* fidCut = settings->get3dEdgeFidCuts()->getFidCut(i+1);
+		if(!fidCut)
+			continue;
+		if(fidCut->isInFiducialCut(fiducialValueX,fiducialValueY)){
+			vecEdgePredX[i].push_back(xPredDet);
+			vecEdgePredY[i].push_back(yPredDet);
+			vecEdgePulseHeight[i].push_back(clusterCharge);
+			//				cout<<nEvent<<": "<<xPredDet<<"/"<<yPredDet<<" --> "<<i<<endl;
+		}
+	}
+
+}

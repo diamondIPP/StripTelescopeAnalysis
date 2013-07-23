@@ -34,6 +34,7 @@
 #include "TSettings.class.hh"
 #include "TCluster.hh"
 #include "TCellAnalysisClass.hh"
+#include "TTransparentAnalysis.hh"
 
 using namespace std;
 
@@ -75,7 +76,7 @@ private:
 	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
-
+	void fillEdgeDistributions(Float_t clusterCharge);
 private:
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
