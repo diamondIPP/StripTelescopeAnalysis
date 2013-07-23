@@ -393,7 +393,8 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 		cerr<<"could not create my Track ----> EXIT"<<endl;
 		exit(-1);
 	}
-	UpdateResolutions(test1,test2);
+	if (false)
+		UpdateResolutions(test1,test2);
 	if (events.size() == 0) createEventVectors(nEvents, startEvent);
 
 	myTrack->setDetectorAlignment(align);
