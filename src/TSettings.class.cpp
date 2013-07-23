@@ -2225,10 +2225,37 @@ bool TSettings::isBadCell(UInt_t nDiamondPattern, Int_t cellNo) {
 }
 
 bool TSettings::isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet) {
-	return isBadCell(getCellNo(xDet,yDet).first, nDiamondPattern);
+	return isBadCell(getCellAndQuarterNo(xDet,yDet).first, nDiamondPattern);
 }
 
-pair<int,int> TSettings::getCellNo(Float_t xDet, Float_t yDet) {
+/**
+ *
+ * @param xDet
+ * @param yDet
+ * @return
+ */
+Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
+	Int_t DiamondPattern = this->get3dMetallisationFidCuts()->getFidCutRegion(xDet,yDet);
+
+	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
+	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
+	Float_t cellWidth =150;
+	Float_t cellHight = 150;
+	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
+	Int_t row = (yDet - startOf3dDetectorY)/cellHight;
+	Int_t cell = -1;
+	if(column >= 0 && column < this->getNColumns3d() && row >= 0 && row < this->getNRows3d())
+		cell = column * this->getNRows3d()+row;
+	return cell;
+}
+
+/**
+ *
+ * @param xDet
+ * @param yDet
+ * @return pair of cellNo and quarter
+ */
+pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 	// i column
 	// j row
 
@@ -2263,4 +2290,20 @@ pair<int,int> TSettings::getCellNo(Float_t xDet, Float_t yDet) {
 	}
 //	i*11+j
 	return make_pair(cell,quarter);
+}
+
+pair<Float_t, Float_t> TSettings::getRelativePositionInCell(Float_t xPredDet,
+		Float_t yPredDet) {
+
+	Int_t DiamondPattern = this->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
+	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
+	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
+	Float_t cellWidth = 150;
+	Float_t cellHight = 150;
+	Int_t cellNo = getCellNo(xPredDet,yPredDet);
+	Int_t row = getRowOfCell(cellNo);
+	Int_t column = getColumnOfCell(cellNo);
+	Float_t relX = xPredDet - (startOf3dDetectorX+column*cellWidth); //+5;		//2365 is the start of the 3D detector in x
+	Float_t relY = yPredDet - (row*cellHight);
+	return make_pair(relX,relY);
 }

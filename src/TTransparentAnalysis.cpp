@@ -1265,7 +1265,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 		cerr<<" TTransparentAnalysis::makeTransparentCluster TSettings == 0 "<<endl;
 		return TCluster();
 	}
-
+//	cout<<"[TTransparentAnalysis::makeTransparentCluster]\t";
 	UInt_t centerChannel;
 	int direction;
 	direction = getSignedChannelNumber(centerPosition);
@@ -1279,8 +1279,8 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 	TCluster transparentCluster = TCluster(reader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
 	UInt_t currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
-		if( currentChannel < 0 || currentChannel >= TPlaneProperties::getNChannelsDiamond() )
-			cout<<reader->getEvent_number()<<": Cannot create channel with: det"<<det<<", centerPoisition: "<<centerPosition<< ", direction: "<<direction<<", centerChannel: "<<centerChannel<<" "<<iChannel<<endl;
+//		if( currentChannel < 0 || currentChannel >= TPlaneProperties::getNChannelsDiamond() )
+//			cout<<"\n"<<reader->getEvent_number()<<": Cannot create channel with: det"<<det<<", centerPoisition: "<<centerPosition<< ", direction: "<<direction<<", centerChannel: "<<centerChannel<<" "<<iChannel<<flush;
 		direction *= -1;
 		currentChannel += direction * iChannel;
 		Int_t adcValue=reader->getAdcValue(det,currentChannel);
@@ -1289,9 +1289,13 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 		Float_t pedSigma = reader->getPedestalSigma(det,currentChannel,false);
 		Float_t pedSigmaCMN = reader->getPedestalSigma(det,currentChannel,true);
 		bool isScreened = set->isDet_channel_screened(det,currentChannel);
-		transparentCluster.addChannel(currentChannel,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
-//		transparentCluster.addChannel(currentChannel, reader->getRawSignal(det,currentChannel), reader->getRawSignalInSigma(det,currentChannel), reader->getAdcValue(det,currentChannel), reader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
+		if (TPlaneProperties::isValidChannel(det,currentChannel))
+			transparentCluster.addChannel(currentChannel,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
+		else
+			cout<<"\t cannot add invalid channel"<<currentChannel<<" @ "<<reader->getEvent_number()<<endl;
+		//		transparentCluster.addChannel(currentChannel, reader->getRawSignal(det,currentChannel), reader->getRawSignalInSigma(det,currentChannel), reader->getAdcValue(det,currentChannel), reader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
+//	cout<<"[done]"<<endl;
 	return transparentCluster;
 }
 
