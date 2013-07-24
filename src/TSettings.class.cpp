@@ -587,6 +587,7 @@ void TSettings::LoadSettings(){
         if(key == "3dShortAnalysis") Parse(key,value,b3dShortAnalysis);
         if(key == "3dLongAnalysis") Parse(key,value,b3dLongAnalysis);
         if(key == "3dTransparentAnalysis") Parse(key,value,b3dTransparentAnalysis);
+        if(key == "3dColumnRadius") Parse(key,value,columnRadius);
         /*if(key == "store_threshold") {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
@@ -2352,8 +2353,8 @@ bool TSettings::IsWithInTheColumnRadius(Float_t relCellPosX, Float_t relCellPosY
 //	columnPositions.push_back(make_pair((Float_t)cellwidth,(Float_t)0));
 
 	for (UInt_t i = 0; i < columnPositions.size();i++){
-		Float_t deltaX = fmod(relCellPosX-columnPositions[i].first,cellwidth);
-		Float_t deltaY = fmod(relCellPosY-columnPositions[i].second,cellheight);
+		Float_t deltaX = TMath::Min(fmod(relCellPosX-columnPositions[i].first,cellwidth),fmod(cellwidth-(relCellPosX-columnPositions[i].first),cellwidth));
+		Float_t deltaY = TMath::Min( fmod(relCellPosY-columnPositions[i].second,cellheight), fmod(cellwidth-(relCellPosY-columnPositions[i].second),cellheight));
 		Float_t delta = TMath::Sqrt(deltaX*deltaX + deltaY*deltaY);
 		if (delta <= columnRadius){
 //			cout<<" Within the radius of Column "<<i<<endl;
