@@ -76,7 +76,14 @@ private:
 	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
-	void fillEdgeDistributions(Float_t clusterCharge);
+private:
+	void ShortAnalysis_Analyse1Cluster(UInt_t clusterNo=0);
+	void ShortAnalysis_Analyse2Cluster();
+	void ShortAnalysis_Save2ClusterPlots();
+	void ShortAnalysis_FillEdgeDistributions(Float_t clusterCharge);
+	void ShortAnalysis_SaveEdgeDistributions();
+	void ShortAnalysis_FillMeanChargeVector(Float_t clusterCharge);
+	void ShortAnalysis_SaveMeanChargeVector();
 private:
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
@@ -126,7 +133,6 @@ private:
 
 	//For Fiducial Cut Boundaries Histograms
 	vector <TBox*> FidCutChannelTBox;
-	TCanvas* hCombinedMeanCharge;    //TCanvas for MeanCharge All detectors
 	TCanvas* cPredictedEvents;
 	TCanvas* cSeenEvents;
 	vector<TCanvas*> cClusters;
@@ -288,6 +294,10 @@ private:
 	vector<Float_t> vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHitStrip,vecPHDiamondHit3dNoHoles,vecPHDiamondHit3dWithHoles,vecClusterSize,vecChi2Y,vecChi2X,vecClusterSeedSize,vecXPredictedStrip,vecYPredictedStrip;
 	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency,vecXPreditedDetector,vecYPreditedDetector;
 	vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
+private:
+	vector <Float_t> vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna;
+	vector <Float_t> vecPH_Cluster1_ShortAna,vecPH_Cluster2_ShortAna,vecCh_Cluster2_ShortAna,vecCh_Cluster1_ShortAna;
+private:
 	int HitCount, SeedCount;
 
 	TPositionPrediction *predictedPosition;
