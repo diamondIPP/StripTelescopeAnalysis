@@ -1223,7 +1223,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 			noValidTrack++;
 			continue;
 		}
-		if (eventReader->isInFiducialCut() == 0) {
+		if (eventReader->IsInFiducialCut() == 0) {
 			noFidCutRegion++;
 			continue;
 		}

@@ -286,7 +286,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 			falseClusterSizeDia++;
 			continue;
 		}
-		if(!eventReader->isInFiducialCut()){
+		if(!eventReader->IsInFiducialCut()){
 			nNotInFidCut++;
 			continue;
 		}
@@ -305,7 +305,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 			cout<<"\nEvent\tvalid\tnClus\tmasked\tFidCut\tAlign"<<endl;
 		if(verbosity>20)
 			cout<<nEvent<<"\t"<<eventReader->isValidTrack()<<"\t"<<eventReader->getNDiamondClusters()
-			<<"\t"<<eventReader->isDetMasked()<<"\t"<<eventReader->isInFiducialCut()<<"\t"<<eventReader->useForAlignment()<<endl;
+			<<"\t"<<eventReader->isDetMasked()<<"\t"<<eventReader->IsInFiducialCut()<<"\t"<<eventReader->useForAlignment()<<endl;
 		if (eventReader->useForAlignment()) {
 			bool bBreak = false;
 			for(UInt_t det=0;det<TPlaneProperties::getNDetectors()&&!bBreak;det++){

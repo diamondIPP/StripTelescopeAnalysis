@@ -86,7 +86,7 @@ private:
 	bool isDetMasked;//one of the Silicon Planes contains a Cluster with a masked channel
 	UInt_t nDiamondClusters; //number of clusters in diamond plane;
 	bool oneAndOnlyOneSiliconCluster; //One and only one cluster in each silicon plane;
-	bool isInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
+	bool IsInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
 	bool isSiliconTrackNotFiducialCut;
 	bool createdTree;
 	bool useForAlignment;

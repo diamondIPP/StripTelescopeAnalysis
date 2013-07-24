@@ -25,6 +25,7 @@
 #include "TMath.h"
 #include "TCluster.hh"
 #include "TCutG.h"
+#include "TLegend.h"
 class TFidCutRegions:public TObject {
 public:
 	TFidCutRegions();
@@ -48,7 +49,7 @@ public:
 	void Print(int intend = 0);
 	void setRunDescription(std::string runDes);
 	Int_t getFiducialCutIndex(Float_t xVal, Float_t yVal);
-	bool isInFiducialCut(Float_t xVal,Float_t yVal);
+	bool IsInFiducialCut(Float_t xVal,Float_t yVal);
 	int getFidCutRegion(Float_t xVal,Float_t yVal);
 	TCanvas* getAllFiducialCutsCanvas(TH2F* hScatterPlot=0, bool optimizeAxisRange = false);
 	void setHistogramm(TH2F* hEventScatterPlot){this->hEventScatterPlot=hEventScatterPlot;}
@@ -57,8 +58,10 @@ public:
 	Float_t getMinFiducialX(UInt_t index = 0);
 	Float_t getMaxFiducialY(UInt_t index = 0);
 	Float_t getMinFiducialY(UInt_t index = 0);
-	void drawFiducialCutsToCanvas(TCanvas* c1);
+	void DrawFiducialCutsToCanvas(TCanvas* c1,bool DrawLegend=false);
+	TCutG* getFiducialAreaCut(UInt_t nFidCut);
 	void Reset();
+	UInt_t size(){return getNFidCuts();}
 private:
 	std::string name;
 	void initVariables();
@@ -66,7 +69,6 @@ private:
 	TCanvas*  getFiducialCutProjectionCanvas(TH1D* hProj,std::vector< std::pair<Float_t,Float_t> > intervals);
 
 	TPaveText* getFiducialAreaPaveText(UInt_t nFidCut);
-	TCutG* getFiducialAreaCut(UInt_t nFidCut);
 	UInt_t index;
 	void createFidCuts();
 	std::vector<std::pair<Float_t,Float_t> > xInt,yInt;

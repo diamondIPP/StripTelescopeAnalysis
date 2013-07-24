@@ -21,6 +21,7 @@
 #include <utility> //pair
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
+#include "TCluster.hh"
 
 
 /*
@@ -50,6 +51,8 @@ public:
 	std::pair<int,int> getPatternChannels(UInt_t pattern);
 	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);//{return getPatternChannels(pattern);}
 	bool hasInvalidIntervals();
+	bool isValidChannelPosition(Float_t channel);
+	bool isValidCluster(TCluster cluster);
 	UInt_t getNIntervals();//{return nChannelsOfInterval.size();}
 private:
 //	UInt_t getNIntervals();//

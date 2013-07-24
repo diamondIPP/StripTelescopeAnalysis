@@ -95,6 +95,22 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 	return retVal;
 }
 
+bool TDiamondPattern::isValidChannelPosition(Float_t channel) {
+	for ( UInt_t i = 0; i <nChannelsOfInterval.size(); i++){
+		if (firstChannelOfInterval[i]-.5 < channel && channel < firstChannelOfInterval[i]+nChannelsOfInterval[i] +.5)
+			return true;
+	}
+	return false;
+}
+
+bool TDiamondPattern::isValidCluster(TCluster cluster) {
+	for (UInt_t cl = 0; cl < cluster.size(); cl ++)
+		if (cluster.isHit(cl)||cluster.isSeed(cl))
+			if ( !isValidChannelPosition( cluster.getChannel(cl) ) )
+				return false;
+	return true;
+}
+
 void TDiamondPattern::initialiseVector() {
 	for (UInt_t i=0;i<channelToMetricConversion.size();i++)
 		channelToMetricConversion[i] = N_INVALID;

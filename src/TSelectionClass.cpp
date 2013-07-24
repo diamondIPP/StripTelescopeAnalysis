@@ -254,12 +254,12 @@ bool TSelectionClass::isOneAndOnlyOneClusterSiliconEvent(){
 void TSelectionClass::checkSiliconTrackInFiducialCut(){
 	//if not one and only one cluster one cannot check the Silicon Track if is fullfills the fiducia cut
 	if (!oneAndOnlyOneSiliconCluster){
-		isInFiducialCut=false;
+		IsInFiducialCut=false;
 		fiducialValueY=N_INVALID;
 		fiducialValueX=N_INVALID;
 		return;
 	}
-	isInFiducialCut=true;
+	IsInFiducialCut=true;
 	//Calculate Fiducial Values
 	fiducialValueX=0;
 	fiducialValueY=0;
@@ -270,18 +270,18 @@ void TSelectionClass::checkSiliconTrackInFiducialCut(){
 	fiducialValueX/=4.;
 	fiducialValueY/=4.;
 	//check the fiducial Values
-	isInFiducialCut = fiducialCuts->isInFiducialCut(fiducialValueX,fiducialValueY);
-	if(isInFiducialCut){
+	IsInFiducialCut = fiducialCuts->IsInFiducialCut(fiducialValueX,fiducialValueY);
+	if(IsInFiducialCut){
 		fiducialRegion = fiducialCuts->getFiducialCutIndex(fiducialValueX,fiducialValueY);
 		if(verbosity>6){
 			cout<< setw(6) << nEvent <<" fidCut: "
 				<< std::right<<setw(6)<<std::setprecision(2)<<fiducialValueX<<" / "
 				<< std::left <<setw(6)<<std::setprecision(2)<<fiducialValueY
-				<<" - "<<std::right<<isInFiducialCut<< " -> "<<fiducialRegion<<"   "<<flush;
+				<<" - "<<std::right<<IsInFiducialCut<< " -> "<<fiducialRegion<<"   "<<flush;
 			fiducialCuts->getFidCut(fiducialRegion)->Print();
 		}
 	}
-	//	if(verbosity>4)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<": Fidcut:"<<isInFiducialCut<<endl;
+	//	if(verbosity>4)cout<<"fidCut:"<<fiducialValueX<<"/"<<fiducialValueY<<": Fidcut:"<<IsInFiducialCut<<endl;
 }
 
 
@@ -290,10 +290,10 @@ void TSelectionClass::checkSiliconTrack(){
 	oneAndOnlyOneSiliconCluster = isOneAndOnlyOneClusterSiliconEvent();
 	checkSiliconTrackInFiducialCut();
 	if(verbosity>3)
-		cout<<"\t"<<fiducialValueX<<"/"<<fiducialValueY<<"\tSilicon: oneAndOnlyOne:"<<oneAndOnlyOneSiliconCluster<<"\tinFidCut:"<<isInFiducialCut<<endl;
-	//if isInFiducialCut it has one and Only One CLuster in each silicon detector
-	isValidSiliconTrack = isInFiducialCut;
-	isSiliconTrackNotFiducialCut = !isInFiducialCut&&oneAndOnlyOneSiliconCluster;
+		cout<<"\t"<<fiducialValueX<<"/"<<fiducialValueY<<"\tSilicon: oneAndOnlyOne:"<<oneAndOnlyOneSiliconCluster<<"\tinFidCut:"<<IsInFiducialCut<<endl;
+	//if IsInFiducialCut it has one and Only One CLuster in each silicon detector
+	isValidSiliconTrack = IsInFiducialCut;
+	isSiliconTrackNotFiducialCut = !IsInFiducialCut&&oneAndOnlyOneSiliconCluster;
 }
 
 void TSelectionClass::checkDiamondTrack(){
@@ -305,7 +305,7 @@ void TSelectionClass::checkDiamondTrack(){
 	nDiamondClusters=eventReader->getNClusters(diaDet);
 
 	isDiaSaturated=this->isSaturated(diaDet);
-	if(verbosity>4&&nDiamondClusters>0&&!isInFiducialCut)
+	if(verbosity>4&&nDiamondClusters>0&&!IsInFiducialCut)
 		cout<<"\nThis event has diamond hit which is not in fid Cut"<<endl;
 
 	atLeastOneValidDiamondCluster = nDiamondClusters >0 && !checkDetMasked(diaDet) && !isDiaSaturated;
@@ -336,12 +336,12 @@ void TSelectionClass::setVariables(){
 	checkDiamondTrack();
 
 
-	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster&&isInFiducialCut;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
-	//	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
-	//	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&isInFiducialCut;;
-	useForAlignment = atLeastOneValidDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&isInFiducialCut;//one and only one hit in all detectors (also diamond)
-	useForAnalysis=atLeastOneValidDiamondCluster&&!useForAlignment&&isInFiducialCut;;
-	validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster&&isInFiducialCut;
+	useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster&&IsInFiducialCut;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
+	//	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&IsInFiducialCut;//one and only one hit in all detectors (also diamond)
+	//	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&IsInFiducialCut;;
+	useForAlignment = atLeastOneValidDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&IsInFiducialCut;//one and only one hit in all detectors (also diamond)
+	useForAnalysis=atLeastOneValidDiamondCluster&&!useForAlignment&&IsInFiducialCut;;
+	validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster&&IsInFiducialCut;
 	doEventCounting();
 	fillHitOccupancyPlots();
 }
@@ -356,7 +356,7 @@ void TSelectionClass::fillHitOccupancyPlots(){
 	hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(!oneAndOnlyOneDiamondCluster)
 		return;
-	if(!isInFiducialCut)
+	if(!IsInFiducialCut)
 		return;
 	hAnalysisFraction->Fill(nEvent);
 	hSelectedEvents->Fill(fiducialValueX,fiducialValueY);
@@ -449,7 +449,7 @@ bool TSelectionClass::checkDetMasked(UInt_t det,UInt_t cl){
 
 void TSelectionClass::setBranchAdressess(){
 	selectionTree->Branch("nDiamondHits",&nDiamondClusters,"nDiamondHits/i");
-	selectionTree->Branch("isInFiducialCut",&isInFiducialCut,"isInFiducialCut/O");
+	selectionTree->Branch("IsInFiducialCut",&IsInFiducialCut,"IsInFiducialCut/O");
 	selectionTree->Branch("isDetMasked",&isDetMasked,"isDetMasked/O");
 	selectionTree->Branch("hasValidSiliconTrack",&oneAndOnlyOneSiliconCluster,"hasValidSiliconTrack/O");
 	selectionTree->Branch("useForSiliconAlignment",&this->useForSiliconAlignment,"useForSiliconAlignment/O");
