@@ -74,7 +74,7 @@ public:
 	bool isSaturated(UInt_t det,UInt_t ch);
 	void checkADC();
 	UInt_t getNDiamondClusters();
-	bool isInFiducialCut();
+	bool IsInFiducialCut();
 	bool isInCurrentFiducialCut();
 	bool isInOneFiducialArea();
 

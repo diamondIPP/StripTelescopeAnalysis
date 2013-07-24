@@ -10,16 +10,22 @@
 #include "TROOT.h"
 #include "TObject.h"
 #include "TCluster.hh"
+#include "TCutG.h"
+#include "TCanvas.h"
 class TFiducialCut:public TObject {
 	int index;
 	bool active;
 	int x_low, x_high, y_low, y_high;
+	TCutG* GetFiducialAreaCut(bool bEmphasis);
+	TString name;
 public:
 	TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh);
 	TFiducialCut(int i = 0);
-	bool isInFiducialCut(Float_t xVal, Float_t yVal)const {
+	bool IsInFiducialCut(Float_t xVal, Float_t yVal)const {
 	  return ((x_low<xVal)&&(xVal<x_high)&&(y_low<yVal)&&(yVal<y_high));
 	}
+	void SetName(TString name){this->name=name;}
+	TString GetName(){return name;};
 	void SetAllValuesZero();
 	void SetXLow(int xl) {x_low = xl;};
 	void SetXHigh(int xh) {x_high = xh;};
@@ -32,6 +38,7 @@ public:
 	int GetXHigh() {return x_high;};
 	int GetYLow() {return y_low;};
 	int GetYHigh() {return y_high;};
+	void DrawFiducialCutToCanvas(TCanvas* c1, bool bEmphasis);
 
 	ClassDef(TFiducialCut,1);
 

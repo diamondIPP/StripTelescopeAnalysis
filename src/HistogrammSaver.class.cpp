@@ -304,7 +304,7 @@ void HistogrammSaver::SetPlotsPath(string path){
 		//		cout<<"***************************************************\n";
 		//		cout<<"********** Directory not created ******************\n";
 		//		cout<<"***************************************************\n";
-		cout<<plots_path<<endl;
+		if(verbosity)cout<<plots_path<<endl;
 	}
 	sys->mkdir(plots_path.c_str(),true);
 	int stat = mkdir(plots_path.c_str(),0777);//0777(S_IRWXO||S_IRWXG||S_IRWXU));// S_IRWXU|S_IRGRP|S_IXGRP||S_IRWXU||S_IRWXG||S_IRWXO);

@@ -161,25 +161,25 @@ void TFidCutRegions::setRunDescription(std::string runDes)
 
 Int_t TFidCutRegions::getFiducialCutIndex(Float_t xVal,Float_t yVal){
 	for(UInt_t i=0;i<fidCuts.size();i++)
-		if(fidCuts.at(i)->isInFiducialCut(xVal,yVal))
+		if(fidCuts.at(i)->IsInFiducialCut(xVal,yVal))
 			return i+1;
 	return -1;
 }
 
-bool TFidCutRegions::isInFiducialCut(Float_t xVal, Float_t yVal)
+bool TFidCutRegions::IsInFiducialCut(Float_t xVal, Float_t yVal)
 {
 	//  cout<<"xVal = "<<xVal<<"\tyVal = "<<yVal<<"\tIndex = "<<index<<endl;
 	if(index>0){// one special diamond is choosen e.g. left/right
 		if( index<this->fidCuts.size()+1){
 			//      TFiducialCut fidCut = fidCuts.at(index-1);
-			//      cout<<xVal<<"/"<<yVal<<"\t"<<index<<" "<<fidCuts.at(index-1)->isInFiducialCut(xVal,yVal)<<endl;
-			return fidCuts.at(index-1)->isInFiducialCut(xVal,yVal);
+			//      cout<<xVal<<"/"<<yVal<<"\t"<<index<<" "<<fidCuts.at(index-1)->IsInFiducialCut(xVal,yVal)<<endl;
+			return fidCuts.at(index-1)->IsInFiducialCut(xVal,yVal);
 		}
 	}
 	if(index==0){ //all diamonds will be analyesd
 		bool inFidCut=false;
 		for(UInt_t i=0;i<fidCuts.size()&&inFidCut==false;i++)
-			inFidCut = inFidCut || fidCuts.at(i)->isInFiducialCut(xVal,yVal);
+			inFidCut = inFidCut || fidCuts.at(i)->IsInFiducialCut(xVal,yVal);
 		return inFidCut;
 	}
 	return false;
@@ -369,7 +369,7 @@ int TFidCutRegions::getFidCutRegion(Float_t xVal, Float_t yVal)
 {
 	unsigned int i=0;
 	for(i=0;i<fidCuts.size();i++){
-		if(fidCuts.at(i)->isInFiducialCut(xVal,yVal)) return i+1;
+		if(fidCuts.at(i)->IsInFiducialCut(xVal,yVal)) return i+1;
 	}
 	return -1;
 }
@@ -608,11 +608,25 @@ Float_t TFidCutRegions::getYHigh(UInt_t i) {
 }
 
 
-void TFidCutRegions::drawFiducialCutsToCanvas(TCanvas* c1){
+void TFidCutRegions::DrawFiducialCutsToCanvas(TCanvas* c1, bool drawLegend){
 	if(!c1)
 		return;
 	c1->cd();
-	for(UInt_t i=0;i<fidCuts.size();i++)
-		getFiducialAreaCut(i)->Draw("same");
+	TLegend *leg;
+	if (drawLegend){
+		leg = new TLegend(0.75, 0.75, 1, 1);
+		leg->SetFillColor(kWhite);
+	}
+	for(UInt_t i=0;i<fidCuts.size();i++){
+		TCutG* cut = getFiducialAreaCut(i);
+		cut->SetLineColor(kRed+i);
+		cut->Draw("same");
+		if(drawLegend){
+			TString label = fidCuts[i]->GetName();
+			leg->AddEntry(cut,label,"L");
+		}
+	}
+	if (drawLegend)
+		leg->Draw();
 
 }

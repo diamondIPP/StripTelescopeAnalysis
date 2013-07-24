@@ -15,10 +15,12 @@ TFiducialCut::TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t
 	SetXHigh(xHigh);
 	SetYLow(yLow);
 	SetYHigh(yHigh);
+	name = TString::Format("fidcut_%d",i);
 }
 TFiducialCut::TFiducialCut(int i) {
 	SetAllValuesZero();
 	index = i;
+	name = TString::Format("fidcut_%d",i);
 }
 
 void TFiducialCut::SetAllValuesZero() {
@@ -27,10 +29,47 @@ void TFiducialCut::SetAllValuesZero() {
 	x_high = 0;
 	y_low = 0;
 	y_high = 0;
+	name = "fidcut";
 }
 
 void TFiducialCut::Print (UInt_t i) {
 	std::cout <<TCluster::Intent(i)<< "FidCutRegion #" << index << ":"<<
 			" X: " <<setw(6) <<std::right<< x_low << " - " <<setw(6)<<std::left<< x_high <<
 			" Y: " <<setw(6) <<std::right<< y_low << " - " <<setw(6)<<std::left<<y_high <<std::right<< "\n"<<std::flush;
+}
+
+TCutG* TFiducialCut::GetFiducialAreaCut(bool bEmphasis) {
+	cout<<"getting fitucial Area for "<<index<<"'"<<name<<"': ";
+	cout<<TString::Format("X: %.1f-%.1f, Y: %.1f-%.1f",GetXLow(),GetXHigh(),GetYLow(),GetYHigh());
+	TString name = TString::Format("fidCut_%d",index);
+	TCutG * pt = new TCutG(name,5);
+	pt->SetPoint(0,GetXLow(),GetYLow());
+	pt->SetPoint(1,GetXLow(),GetYHigh());
+	pt->SetPoint(2,GetXHigh(),GetYHigh());
+	pt->SetPoint(3,GetXHigh(),GetYLow());
+	pt->SetPoint(4,GetXLow(),GetYLow());
+	//(xLow,yLow,xHigh,yHigh);
+	if(active||bEmphasis){
+		pt->SetFillColor(kRed);
+		pt->SetLineColor(kRed);
+		pt->SetLineWidth(3);
+		pt->SetFillStyle(3013);
+	}
+	else{
+		pt->SetFillColor(kOrange);
+		pt->SetFillStyle(3013);
+		pt->SetLineColor(kOrange);
+		pt->SetLineWidth(3);
+	}
+	return pt;
+}
+
+void TFiducialCut::DrawFiducialCutToCanvas(TCanvas* c1,bool bEmphasis=false) {
+	if (!c1)
+		return;
+	c1->cd();
+	TCutG* cut = GetFiducialAreaCut(bEmphasis);
+	if (cut)
+		cut->Draw("same");
+
 }

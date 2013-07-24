@@ -342,10 +342,10 @@ void TADCEventReader::SetBranchAddresses(){
 		tree->SetBranchAddress("nDiamondHits",&nDiamondClusters);
 		if(verbosity>3)cout<<"Set Branch \"nDiamondHits\""<<endl;
 	}
-	if(tree->FindBranch("isInFiducialCut")){
-		tree->SetBranchAddress("isInFiducialCut",&bIsInFiducialCut);
+	if(tree->FindBranch("IsInFiducialCut")){
+		tree->SetBranchAddress("IsInFiducialCut",&bIsInFiducialCut);
 		if(verbosity>3)
-			cout<<"Set Branch \"isInFiducialCut\""<<endl;
+			cout<<"Set Branch \"IsInFiducialCut\""<<endl;
 	}
 	//	if(tree->FindBranch("isDiaMasked")){
 	//		tree->SetBranchAddress("isDiaMasked",&this->maskedDiaClusters);
@@ -693,7 +693,7 @@ UInt_t TADCEventReader::getNDiamondClusters()
 	return this->nDiamondClusters;
 }
 
-bool TADCEventReader::isInFiducialCut()
+bool TADCEventReader::IsInFiducialCut()
 {
 	return this->bIsInFiducialCut;
 }
@@ -701,7 +701,7 @@ bool TADCEventReader::isInFiducialCut()
 bool TADCEventReader::isInCurrentFiducialCut(){
 	Float_t fiducialValueX = this->getFiducialValueX();
 	Float_t fiducialValueY = this->getFiducialValueY();
-	return settings->getSelectionFidCuts()->isInFiducialCut(fiducialValueX,fiducialValueY);
+	return settings->getSelectionFidCuts()->IsInFiducialCut(fiducialValueX,fiducialValueY);
 }
 
 bool TADCEventReader::isInOneFiducialArea(){

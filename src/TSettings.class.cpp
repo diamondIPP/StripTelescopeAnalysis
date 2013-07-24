@@ -120,12 +120,13 @@ void TSettings::checkSettings(){
 	cout<<"NDiamond Patterns: "<<diamondPattern.getNPatterns()<<endl;
 
 
-	this->checkAlignmentFidcuts();
+	this->CheckAlignmentFidcuts();
+	this->CheckEdgeFidcuialCuts();
 	cout<<"Settings seems to be ok."<<endl;
 	if(verbosity>5&&verbosity%2==1){char t; cin>>t;}
 }
 
-void TSettings::checkAlignmentFidcuts(){
+void TSettings::CheckAlignmentFidcuts(){
 	cout<<"checking Alignment Fiducial Cut: "<<endl;
 	getSelectionFidCuts()->Print(1);
 	cout<<"There are "<<getSelectionFidCuts()->getNFidCuts()<< " Fiducial Cuts using the following cuts for Alignment"<<endl;
@@ -762,6 +763,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	nRows3d = 11;
 	nColumns3d = 9;
 	yOffset3D = 3890;
+	cellHeight = 150;
+	columnRadius = 5;//#mum
 
 //	vecEdgePositions.push_back(3715);
 //	vecEdgePositions.push_back(1370);
@@ -2140,7 +2143,7 @@ int TSettings::get3DCellNo(char row, int column){
 /**
  * @todo look at hardcoded numbers
  * @param nCanvas
- * @param DiamondPattern
+ * @param DiamondPattern 1:Strip, 2:3dnoColumns, 3: 3dwithColumns
  */
 void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 
@@ -2150,6 +2153,9 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 	//vector<TBox*> Grid;
 	TCutG* gridPoint;
 	cout<<"DiamondPattern: "<<DiamondPattern<<endl;
+	UInt_t det = TPlaneProperties::getDetDiamond();
+	Float_t cellwidth = GetCellWidth(det,DiamondPattern-1);
+	Float_t cellheight = GetCellHeight();
 	if(DiamondPattern==1){
 		pair<int,int> channels = diamondPattern.getPatternChannels(DiamondPattern);
 		for(int i=0;i<(channels.second - channels.first);i++){		//Number of metallisation lines to be drawn.
@@ -2173,16 +2179,16 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 			}
 		}
 	}		//for Strip structure
-
 	if(DiamondPattern==2||DiamondPattern==3){
-		for(int i=0;i<getNColumns3d();i++){
-			for(int j=0;j<getNRows3d();j++){
-				float xLow = get3dMetallisationFidCuts()->getXLow(DiamondPattern) + i*150;
-				float yLow = get3dMetallisationFidCuts()->getYLow(DiamondPattern) + j*150;
-				float xHigh = xLow+150;
-				float yHigh = yLow+150;
+		for(int column=0;column<getNColumns3d();column++){
+			for(int row=0;row<getNRows3d();row++){
+
+				float xLow = get3dMetallisationFidCuts()->getXLow(DiamondPattern) + column*cellwidth;
+				float yLow = get3dMetallisationFidCuts()->getYLow(DiamondPattern) + row*cellheight;
+				float xHigh = xLow+cellwidth;
+				float yHigh = yLow+cellheight;
 				TString name = nCanvas->GetName();
-				name.Append(TString::Format("_CellGrid%d_%d",i,j));
+				name.Append(TString::Format("_CellGrid%d_%d",column,row));
 				TCutG * gridPoint = new TCutG(name,5);
 				gridPoint->SetPoint(0,xLow,yLow);
 				gridPoint->SetPoint(1,xLow,yHigh);
@@ -2239,8 +2245,8 @@ Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
 
 	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
 	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
-	Float_t cellWidth =150;
-	Float_t cellHight = 150;
+	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern);
+	Float_t cellHight = GetCellHeight();
 	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
 	Int_t row = (yDet - startOf3dDetectorY)/cellHight;
 	Int_t cell = -1;
@@ -2263,8 +2269,8 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 
 	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
 	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
-	Float_t cellWidth =150;
-	Float_t cellHight = 150;
+	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern);
+	Float_t cellHight = GetCellHeight();
 	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
 	Int_t row = (yDet - startOf3dDetectorY)/cellHight;
 
@@ -2297,13 +2303,65 @@ pair<Float_t, Float_t> TSettings::getRelativePositionInCell(Float_t xPredDet,
 
 	Int_t DiamondPattern = this->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
 	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
-	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
-	Float_t cellWidth = 150;
-	Float_t cellHight = 150;
+//	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
+	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern);
+	Float_t cellHight = GetCellHeight();
 	Int_t cellNo = getCellNo(xPredDet,yPredDet);
 	Int_t row = getRowOfCell(cellNo);
 	Int_t column = getColumnOfCell(cellNo);
 	Float_t relX = xPredDet - (startOf3dDetectorX+column*cellWidth); //+5;		//2365 is the start of the 3D detector in x
 	Float_t relY = yPredDet - (row*cellHight);
 	return make_pair(relX,relY);
+}
+
+void TSettings::CheckEdgeFidcuialCuts(){
+	if (vecEdgePositionDetector.size()!= vecEdgePositionName.size() ||
+		vecEdgePositionName.size() != vecEdgePositionType.size() ||
+		vecEdgePositionType.size() < fidCuts3DEdge->size()){
+		cerr<<"sizes for edge fiducial cuts do not agree..."<<
+				TString::Format("%d/%d/%d/%d",vecEdgePositionName.size(),vecEdgePositionType.size(),vecEdgePositionName.size(),fidCuts3DEdge->size());
+		exit(-1);
+	}
+	else{
+		for ( UInt_t i = 0; i < fidCuts3DEdge->size(); i++ ){
+			TString label = "edgeFidcut_";
+			label.Append(vecEdgePositionName[i]);
+			fidCuts3DEdge->getFidCut(i+1)->SetName(label);
+		}
+	}
+}
+
+/**
+ * Checks if a relative Cell hit is within the radius of a column
+ * The columns are placed in the four corners for bias column
+ * and one for readout in the middle of the column;
+ * @param relCellPosX
+ * @param relCellPosY
+ * @return
+ */
+bool TSettings::IsWithInTheColumnRadius(Float_t relCellPosX, Float_t relCellPosY) {
+//	cout<<"[ TSettings::IsWithInTheColumnRadius]: "<<relCellPosX<<"/"<<relCellPosY<<":\t";
+	Float_t cellheight = GetCellHeight();
+	Float_t cellwidth = GetCellWidth(TPlaneProperties::getDetDiamond(),2);
+	vector< pair<Float_t,Float_t> > columnPositions;
+
+	columnPositions.push_back(make_pair((Float_t)cellwidth/2,(Float_t)cellheight/2));
+	columnPositions.push_back(make_pair((Float_t)0,(Float_t)0));
+//	columnPositions.push_back(make_pair((Float_t)0,(Float_t)cellheight));
+//	columnPositions.push_back(make_pair((Float_t)cellwidth,(Float_t)cellheight));
+//	columnPositions.push_back(make_pair((Float_t)cellwidth,(Float_t)0));
+
+	for (UInt_t i = 0; i < columnPositions.size();i++){
+		Float_t deltaX = fmod(relCellPosX-columnPositions[i].first,cellwidth);
+		Float_t deltaY = fmod(relCellPosY-columnPositions[i].second,cellheight);
+		Float_t delta = TMath::Sqrt(deltaX*deltaX + deltaY*deltaY);
+		if (delta <= columnRadius){
+//			cout<<" Within the radius of Column "<<i<<endl;
+			return true;
+		}
+//		cout<<endl;
+	}
+//	cout<<" not in a column"<<endl;
+	return false;
+
 }

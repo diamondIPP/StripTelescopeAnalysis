@@ -326,7 +326,7 @@ protected:
 private:
 	Float_t minAbsEtaVal;
 	bool isStandardSelectionFidCut,isStandardArea,isStandard3dEdgeFidCut,isStandard3dMetallisationFidCut;;
-	void checkAlignmentFidcuts();
+	void CheckAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
 	void DefaultLoadDefaultSettings();
@@ -488,6 +488,7 @@ private:
 	int b3dTransparentAnalysis;
 	int nRows3d;
 	int nColumns3d;
+	Float_t columnRadius;//in mum
 	vector<Int_t> badCells3d;
 	vector<Int_t> badCells3dnH;
 	vector<Int_t> goodCells3d;
@@ -495,7 +496,11 @@ private:
 	vector<TPlaneProperties::enumCoordinate> vecEdgePositionType;
 	vector<TString> vecEdgePositionName;
 	vector<Int_t> vecEdgePositionDetector;
+	Float_t cellHeight;
+	void CheckEdgeFidcuialCuts();
 public:
+	Float_t GetCellHeight(){return cellHeight;}
+	Float_t GetCellWidth(int det,int pattern){return getPitchWidth(det,pattern);}
 	TString getEdgePositionName(UInt_t i){if(i<vecEdgePositionName.size()) return vecEdgePositionName[i];return "";}//todo make it safe
 	TPlaneProperties::enumCoordinate getEdgePositionType(UInt_t i){if(i<vecEdgePositionType.size()) return vecEdgePositionType[i];return TPlaneProperties::UNKOWN_COR;}
 	TCutG* getEdgePosition(UInt_t i);
@@ -522,6 +527,7 @@ public:
 	inline Int_t getColumnOfCell(Int_t cellNo){return cellNo / getNRows3d();}
 	pair<Float_t,Float_t> getRelativePositionInCell(Float_t xPredDet,Float_t yPredDet);
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};
+	bool IsWithInTheColumnRadius(Float_t relCellPosX,Float_t relCellPosY);
 
 	ClassDef(TSettings,6)
 
