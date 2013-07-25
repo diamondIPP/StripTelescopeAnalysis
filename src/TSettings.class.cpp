@@ -2270,7 +2270,7 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 
 	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
 	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
-	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern);
+	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern-1);
 	Float_t cellHight = GetCellHeight();
 	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
 	Int_t row = (yDet - startOf3dDetectorY)/cellHight;

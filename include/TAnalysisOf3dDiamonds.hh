@@ -241,8 +241,11 @@ private:
 
 	vector<TH1F*> hCellsLandau;
 	vector<TH1F*> hCellsClusteSize;
+	vector<Int_t> hCellGrading;
+
 	vector< vector<TH1F*> > hQuarterCellsLandau;
 	vector< vector<TH1F*> > hQuarterCellsClusterSize;
+	vector< vector<Int_t> > hQuarterCellsPassFail;
 
 	TCanvas* cCellsOverlayMeanCharge;
 	TH2D* hCellsOverlayCharge;
@@ -253,14 +256,16 @@ private:
 	TH1F* hCellOverlayNoColumnLandau;
 	TH1F* hCellOverlayColumnLandau;
 
+	TH1F* hCellsHarrisGood;
+	TH1F* hCellsHarrisBad;
+
 	//LongAnalysis End
 
 	TCanvas* c2DClusterSizeCanvas;
 	TH2D* h2DClusterSize;
 	vector<TH1F*> hCellsLandauGraded;
 	//hCellsGoodandBad
-	TH1F* hCellsHarris18Good;
-	TH1F* hCellsHarris10Bad;
+
 	TH1F* hCellsAlexAllQuarters;
 	TCanvas* cCellsLandau2D;
 	TCanvas* cCellsLandau2DHighlightedQuarters;
