@@ -492,7 +492,7 @@ private:
 	vector<Int_t> badCells3d;
 	vector<Int_t> badCells3dnH;
 	vector<Int_t> goodCells3d;
-	//vector<Int_t> deadCell3d;
+	vector<Int_t> deadCell3d;
 	vector<TPlaneProperties::enumCoordinate> vecEdgePositionType;
 	vector<TString> vecEdgePositionName;
 	vector<Int_t> vecEdgePositionDetector;
@@ -516,6 +516,7 @@ public:
 	vector<Int_t> getGoodCells3D(){return goodCells3d;};
 	vector<Int_t> getBadCells3D(){return badCells3d;};
 	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
+	vector<Int_t> getDeadCell3D(){return deadCell3d;}
 	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
 	int get3DCellNo(char row, int column);

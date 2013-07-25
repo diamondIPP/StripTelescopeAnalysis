@@ -577,11 +577,11 @@ void TSettings::LoadSettings(){
         	ParseCellArray(key,value,goodCells3d);
         }
 
-        /*if(key == "deadCell3d"){
-               	cout<<key<<"="<<value<<endl;
-               	ParseCellArray(key,value,deadCell3d);
-               }
-         */
+        if(key == "deadCell3d"){
+        	cout<<key<<"="<<value<<endl;
+        	ParseCellArray(key,value,deadCell3d);
+        }
+
         if(key == "nColumns3d") Parse(key,value,nColumns3d);
         if(key == "nRows3d") Parse(key,value,nRows3d);
         if(key == "3dShortAnalysis") Parse(key,value,b3dShortAnalysis);
