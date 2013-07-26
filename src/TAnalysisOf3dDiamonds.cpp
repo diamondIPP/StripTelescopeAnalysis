@@ -166,63 +166,164 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
 	hNumberofClusters->Fill(eventReader->getNDiamondClusters());
 	ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
+	switch (eventReader->getNDiamondClusters()) {
+			case 1:
+				ShortAnalysis_Analyse1Cluster();
+				break;
+			case 2:
+				ShortAnalysis_Analyse2Cluster();
+				break;
+			default:
+				break;
+		}
+//	if(eventReader->getNDiamondClusters()==1){
+//		TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
+//		if(diamondCluster.isSaturatedCluster())
+//			return;
+//
+//		HitandSeedCount(&diamondCluster);
+//		Int_t clusterSize = diamondCluster.size()-2;
+//		vecClusterSize.push_back(clusterSize);
+//
+//		//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+//		//RemoveLumpyClusters(&diamondCluster);
+//
+//		//Edge Finding
+//
+//		Float_t clusterCharge = diamondCluster.getCharge(false);
+////		this->fillEdgeDistributionmakes(clusterCharge);
+//
+//		//Universal PHvsChannel Plot
+//		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
+//
+//			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
+//			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
+//
+//			if((Int_t)diamondCluster.getHighestSignalChannel()<=channels.second&&(Int_t)diamondCluster.getHighestSignalChannel()>=channels.first){
+//
+//				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+//				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
+//				//if(!settings->getSelectionFidCuts()->getFidCut(i+1)->isInFiducialCut(fiducialValueX,fiducialValueY))
+//				//return;
+//
+//				if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
+//					return;
+//
+//				/*if(HitCount>0||SeedCount>1)
+//					return;
+//				 */
+//
+//				hEventsvsChannel[i]->Fill(diamondCluster.getHighestSignalChannel());
+//				hPHvsChannel[i]->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
+//				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
+//				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
+//				hLandau[i]->Fill(diamondCluster.getCharge(false));
+//				vecPHDiamondHit[i]->push_back(diamondCluster.getCharge(false));
+//				//vecXPredicted.at(i)->push_back(xPredicted);
+//				//vecYPredicted.at(i)->push_back(yPredicted);
+//				hHitandSeedCount[i]->Fill(HitCount,SeedCount);
+//				hChi2XChi2Y[i]->Fill(chi2x, chi2y);
+//				hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
+//				//For hFidCutXvsFidCutYvsMeanCharge
+//				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
+//
+//			}
+//		}		//End of for diamond patterns
+//	}		//End of if clusters = 1
+}
 
-	if(eventReader->getNDiamondClusters()==1){
-		TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
-		if(diamondCluster.isSaturatedCluster())
-			return;
 
-		HitandSeedCount(&diamondCluster);
-		Int_t clusterSize = diamondCluster.size()-2;
-		vecClusterSize.push_back(clusterSize);
+void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
+	TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),clusterNo);
+	if(diamondCluster.isSaturatedCluster())
+		return;
+	if( !settings->diamondPattern.isValidCluster(diamondCluster)){
+		cerr <<" Cluster is invalid: ";
+		diamondCluster.Print(1);
+		return;
+	}
+	HitandSeedCount(&diamondCluster);
+	Int_t clusterSize = diamondCluster.size()-2;
+	vecClusterSize.push_back(clusterSize);
 
-		//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-		//RemoveLumpyClusters(&diamondCluster);
+	//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+	//RemoveLumpyClusters(&diamondCluster);
 
-		//Edge Finding
+	//Edge Finding
 
-		Float_t clusterCharge = diamondCluster.getCharge(false);
-//		this->fillEdgeDistributionmakes(clusterCharge);
+	Float_t clusterCharge = diamondCluster.getCharge(false);
+	ShortAnalysis_FillEdgeDistributions(clusterCharge);
+	ShortAnalysis_FillMeanChargeVector(clusterCharge);
+	//Universal PHvsChannel Plot
+	for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
 
-		//Universal PHvsChannel Plot
-		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
+		pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
+		//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
 
-			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
-			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
+		if((Int_t)diamondCluster.getHighestSignalChannel()<=channels.second&&(Int_t)diamondCluster.getHighestSignalChannel()>=channels.first){
 
-			if((Int_t)diamondCluster.getHighestSignalChannel()<=channels.second&&(Int_t)diamondCluster.getHighestSignalChannel()>=channels.first){
+			hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+			hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
+			if(!settings->getSelectionFidCuts()->getFidCut(i+1)->IsInFiducialCut(fiducialValueX,fiducialValueY))
+				return;
 
-				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
-				//if(!settings->getSelectionFidCuts()->getFidCut(i+1)->isInFiducialCut(fiducialValueX,fiducialValueY))
-				//return;
+			if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
+				return;
 
-				if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
-					return;
+			/*if(HitCount>0||SeedCount>1)
+						return;
+			 */
 
-				/*if(HitCount>0||SeedCount>1)
-					return;
-				 */
+			hEventsvsChannel[i]->Fill(diamondCluster.getHighestSignalChannel());
+			hPHvsChannel[i]->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
+			//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
+			//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
+			hLandau[i]->Fill(diamondCluster.getCharge(false));
+			vecPHDiamondHit[i]->push_back(diamondCluster.getCharge(false));
+			//vecXPredicted.at(i)->push_back(xPredicted);
+			//vecYPredicted.at(i)->push_back(yPredicted);
+			hHitandSeedCount[i]->Fill(HitCount,SeedCount);
+			hChi2XChi2Y[i]->Fill(chi2x, chi2y);
+			hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
+			//For hFidCutXvsFidCutYvsMeanCharge
+			//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
 
-				hEventsvsChannel[i]->Fill(diamondCluster.getHighestSignalChannel());
-				hPHvsChannel[i]->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
-				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
-				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
-				hLandau[i]->Fill(diamondCluster.getCharge(false));
-				vecPHDiamondHit[i]->push_back(diamondCluster.getCharge(false));
-				//vecXPredicted.at(i)->push_back(xPredicted);
-				//vecYPredicted.at(i)->push_back(yPredicted);
-				hHitandSeedCount[i]->Fill(HitCount,SeedCount);
-				hChi2XChi2Y[i]->Fill(chi2x, chi2y);
-				hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
-				//For hFidCutXvsFidCutYvsMeanCharge
-				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
+		}
+	}		//End of for diamond patterns
+}
 
-			}
-		}		//End of for diamond patterns
-	}		//End of if clusters = 1
+
+void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
+	TCluster cluster1 = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+	TCluster cluster2 = eventReader->getCluster(TPlaneProperties::getDetDiamond(),1);
+	Float_t pos1 = cluster1.getPosition();
+	Float_t pos2 = cluster2.getPosition();
+	Float_t ph1 = cluster1.getCharge();
+	Float_t ph2 = cluster2.getCharge();
+	if (!settings->diamondPattern.isValidChannelPosition(pos1)){
+		ShortAnalysis_Analyse1Cluster(1);
+		return;
+	}
+	if (!settings->diamondPattern.isValidChannelPosition(pos2)){
+		ShortAnalysis_Analyse1Cluster(0);
+		return;
+	}
+	if (pos1>128||pos1<0||pos2>128||pos2<0){
+		cout<<"\n"<<nEvent<<" "<<pos1<<": "<<ph1<<"\t"<<pos2<<": "<<ph2<<endl;
+		return;
+	}
+	vecPH_Cluster1_ShortAna.push_back(ph1);
+	vecPH_Cluster2_ShortAna.push_back(ph2);
+	vecCh_Cluster1_ShortAna.push_back(pos1);
+	vecCh_Cluster2_ShortAna.push_back(pos2);
+	Int_t pattern1 = settings->diamondPattern.getPatternOfHit(settings->diamondPattern.convertChannelToMetric(pos1));
+	Int_t pattern2 = settings->diamondPattern.getPatternOfHit(settings->diamondPattern.convertChannelToMetric(pos2));
+	Int_t predictedArea = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
+//	cout<<nEvent<<" "<<predictedArea<<" "<<pos1<<"-->"<<pattern1+1<<" "<<pos2<<"-->"<<pattern2+1<<endl;
 
 }
+
+
 
 void TAnalysisOf3dDiamonds::LongAnalysis() {
 
@@ -1298,7 +1399,8 @@ void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
 }
 
 void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
-
+	ShortAnalysis_SaveMeanChargeVector();
+	ShortAnalysis_Save2ClusterPlots();
 	vector<Float_t> xPred;
 	vector<Float_t> yPred;
 	vector<Float_t> charge;
@@ -1389,27 +1491,42 @@ void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
 		 */
 
 	} //End of for loop
-	//For all Diamond hFidCutXvsFidCutYvsMeanCharge
-	//hCombinedMeanCharge = new TCanvas();
-	//hCombinedMeanCharge->cd();
-	/*hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(0));
-	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(1));
-	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(2));
+	TCanvas* cCombinedMeanCharge = new TCanvas();
+	cCombinedMeanCharge->cd();
+
+	// no Fiducial Cuts Drawn
 	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
-	//FidCudBoundMetric->Draw("same"); //To draw the fiducial cut regions
-	hCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn");
-	histSaver->SaveCanvas(hCombinedMeanCharge);
-	settings->getSelectionFidCuts()->drawFiducialCutsToCanvas(hCombinedMeanCharge);
-	hCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectors");
-	histSaver->SaveCanvas(hCombinedMeanCharge);
-	 */
-	for(int i=0;i<7;i++){
-		stringstream cClustersName; cClustersName<<"cFidCutXvsFidCutYClusters"<<i;
-		cClusters.push_back(new TCanvas(cClustersName.str().c_str(),cClustersName.str().c_str()));
-		cClusters.at(i)->cd();
-		hFidCutXvsFidCutYClusters.at(i)->Draw("COLZ");
-		histSaver->SaveCanvas(cClusters.at(i));
+	cCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn");
+	histSaver->SaveCanvas(cCombinedMeanCharge);
+
+	// Selection Fiducial Cuts Drawn
+	settings->getSelectionFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge);
+	cCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectors");
+	histSaver->SaveCanvas(cCombinedMeanCharge);
+
+	// Edge F
+	cCombinedMeanCharge->Clear();
+	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
+	settings->get3dEdgeFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge,true);
+	cCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllEdges");
+	histSaver->SaveCanvas(cCombinedMeanCharge);
+
+	for ( UInt_t i = 0; i < settings->get3dEdgeFidCuts()->getNFidCuts(); i++){
+		cCombinedMeanCharge->Clear();
+		hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
+		settings->get3dEdgeFidCuts()->getFidCut(i+1)->DrawFiducialCutToCanvas(cCombinedMeanCharge,true);
+		TString name = "hFidCutXvsFidCutYvsMeanCharge_";
+		name.Append(settings->getEdgePositionName(i));
+		cCombinedMeanCharge->SetName(name);
+		histSaver->SaveCanvas(cCombinedMeanCharge);
 	}
+
+	for( UInt_t i=0; i < hFidCutXvsFidCutYClusters.size(); i++){
+		if (hFidCutXvsFidCutYClusters[i])
+			hFidCutXvsFidCutYClusters[i]->SetName(TString::Format("hFidCutXvsFidCutYClusters_%d",i));
+		histSaver->SaveHistogram((TH2F*)hFidCutXvsFidCutYClusters[i]);
+	}
+
 
 
 }
@@ -2741,3 +2858,88 @@ float* TAnalysisOf3dDiamonds::VectorToArray(vector<float> nvector){
 	}
 
 }*/
+
+
+
+void TAnalysisOf3dDiamonds::ShortAnalysis_FillEdgeDistributions(Float_t clusterCharge){
+	for(UInt_t i = 0; i < settings->get3dEdgeFidCuts()->getNFidCuts();i++ ){
+		TFiducialCut* fidCut = settings->get3dEdgeFidCuts()->getFidCut(i+1);
+		if(!fidCut)
+			continue;
+		if(fidCut->IsInFiducialCut(fiducialValueX,fiducialValueY)){
+			vecEdgePredX[i].push_back(xPredDet);
+			vecEdgePredY[i].push_back(yPredDet);
+			vecEdgePulseHeight[i].push_back(clusterCharge);
+			//				cout<<nEvent<<": "<<xPredDet<<"/"<<yPredDet<<" --> "<<i<<endl;
+		}
+	}
+
+}
+
+void TAnalysisOf3dDiamonds::ShortAnalysis_SaveEdgeDistributions() {
+}
+
+void TAnalysisOf3dDiamonds::ShortAnalysis_FillMeanChargeVector(
+		Float_t clusterCharge) {
+	vecPredDetX_ShortAna.push_back(xPredDet);
+	vecPredDetY_ShortAna.push_back(yPredDet);
+	vecPulseHeight_ShortAna.push_back(clusterCharge);
+}
+
+void TAnalysisOf3dDiamonds::ShortAnalysis_Save2ClusterPlots() {
+	TH2F * hPH = histSaver->CreateScatterHisto("hPulseHeightComparision2Clusters",vecPH_Cluster2_ShortAna,vecPH_Cluster1_ShortAna);
+	hPH->GetXaxis()->SetTitle("Pulse height cluster no. 1");
+	hPH->GetYaxis()->SetTitle("Pulse height cluster no. 2");
+	histSaver->SaveHistogram(hPH);
+	delete hPH;
+	TH2F* hCh = histSaver->CreateScatterHisto("hChannelComparision2Clusters",vecCh_Cluster2_ShortAna,vecCh_Cluster1_ShortAna,128,128,0,128,0,128);
+	hCh->GetXaxis()->SetTitle("Channel no for cluster no. 1");
+	hCh->GetYaxis()->SetTitle("Channel no for cluster no. 2");
+	histSaver->SaveHistogram(hCh);
+	delete hCh;
+}
+
+void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
+	TH3F* hChargeDistribution = histSaver->Create3DHisto("hChargeDistribution3D",vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna,1024,1024);
+	hChargeDistribution->GetXaxis()->SetTitle("Predicted Hit Position X in Detector / #mum");
+	hChargeDistribution->GetYaxis()->SetTitle("Predicted Hit Position Y in Detector / #mum");
+	hChargeDistribution->GetZaxis()->SetTitle("Pulse Height of Cluster  / ADC");
+	if (!hChargeDistribution)
+		return;
+	cout<<"Create Project3dProfile for "<<hChargeDistribution->GetName()<<"..."<<flush;
+	TH2F* hMeanCharge = (TH2F*)hChargeDistribution->Project3DProfile("yx");
+	cout<<"\t[done]"<<endl;
+	if(!hMeanCharge)
+		return;
+	hMeanCharge->GetXaxis()->SetTitle("Predicted Hit Position X in Detector / #mum");
+	hMeanCharge->GetYaxis()->SetTitle("Predicted Hit Position Y in Detector / #mum");
+	hMeanCharge->GetZaxis()->SetTitle("Avrg. pulse height /ADC");
+	hMeanCharge->SetTitle("Avrg. pulse height in detector system");
+	hMeanCharge->SetName("hAvrgPulseHeigthDetSystem");
+	histSaver->SaveHistogram(hMeanCharge,false);
+	UInt_t det = TPlaneProperties::getDetDiamond();
+	TCanvas *c1 = new TCanvas("cAvrgPulseHeigthDetSystem_MetalizationLayer");
+	c1->cd();
+	hMeanCharge->Draw("colz");
+	settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1);
+	settings->DrawMetallisationGrid(c1,3);
+	histSaver->SaveCanvas(c1);
+	TFiducialCut *fidCut3dWithColumns = settings->get3dMetallisationFidCuts()->getFidCut(3);
+	cout<<"3d FidCut: "<<endl;
+	fidCut3dWithColumns->Print(1);
+	cout<<endl;
+	Float_t xmin = fidCut3dWithColumns->GetXLow();
+	Float_t xmax = fidCut3dWithColumns->GetXHigh();
+	Float_t deltaX = TMath::Abs(.05*(xmax-xmin));
+	Float_t ymin = fidCut3dWithColumns->GetYLow();
+	Float_t ymax = fidCut3dWithColumns->GetYHigh();
+	Float_t deltaY = TMath::Abs(.05*(ymax-ymin));
+	hMeanCharge->GetXaxis()->SetRangeUser(xmin-deltaX,xmax+deltaX);
+	hMeanCharge->GetYaxis()->SetRangeUser(ymin-deltaY,ymax+deltaY);
+	c1->Update();
+	c1->SetName("cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom");
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	if (hChargeDistribution)
+		delete hChargeDistribution;
+}
