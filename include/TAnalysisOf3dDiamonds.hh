@@ -194,8 +194,8 @@ private:
 	TH2D* h3DdetQuarterCellFluctuation;
 	TCanvas* c3DdetQuarterCellFluctuation;
 	TH2D* h3DdetQuarterCellFluctuation1;
-	TCanvas* c3DdetDeltaXChannelAbove1000;
-	TH2D* h3DdetDeltaXChannelAbove1000;
+	//TCanvas* c3DdetDeltaXChannelAbove1000;
+	//TH2D* h3DdetDeltaXChannelAbove1000;
 	vector<TH2D*> hCellsCharge;
 	vector<TH2D*> hCellsEvents;
 	vector<TH2D*> hCellsEventsCheck;
@@ -241,11 +241,9 @@ private:
 
 	vector<TH1F*> hCellsLandau;
 	vector<TH1F*> hCellsClusteSize;
-	vector<Int_t> hCellGrading;
 
 	vector< vector<TH1F*> > hQuarterCellsLandau;
 	vector< vector<TH1F*> > hQuarterCellsClusterSize;
-	vector< vector<Int_t> > hQuarterCellsPassFail;
 
 	TCanvas* cCellsOverlayMeanCharge;
 	TH2D* hCellsOverlayCharge;
@@ -256,8 +254,13 @@ private:
 	TH1F* hCellOverlayNoColumnLandau;
 	TH1F* hCellOverlayColumnLandau;
 
-	TH1F* hCellsHarrisGood;
-	TH1F* hCellsHarrisBad;
+	//TH1F* hCellsHarrisGood;
+	//TH1F* hCellsHarrisBad;
+
+	TCanvas* cCellsLandau2D;
+	TCanvas* cCellsLandau2DHighlightedQuarters;
+	TH2D* hCellsLandau2D;
+	TH2D* hCellsLandau2DQuarterFail;
 
 	//LongAnalysis End
 
@@ -267,10 +270,6 @@ private:
 	//hCellsGoodandBad
 
 	TH1F* hCellsAlexAllQuarters;
-	TCanvas* cCellsLandau2D;
-	TCanvas* cCellsLandau2DHighlightedQuarters;
-	TH2D* hCellsLandau2D;
-	TH2D* hCellsLandau2DQuarterFail;
 	TCanvas* cHarrisGoodandStripNormailsed;
 	TCanvas* cGoodGradedandStripNormailsed;
 	TCanvas* cStripFidCutXFidCutYvsMeanCharge;
