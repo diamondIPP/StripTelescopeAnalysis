@@ -16,7 +16,7 @@ TAnalysisOfAsymmetricEta::TAnalysisOfAsymmetricEta(TSettings *settings) {
 		exit(-1);
 
 	alpha=0;
-	histSaver=new HistogrammSaver();
+	histSaver=new HistogrammSaver(settings);
 	histSaver->SetVerbosity(0);
 	maxTriesPeakfinding = 30;
 	maxTriesAlpha = 120;

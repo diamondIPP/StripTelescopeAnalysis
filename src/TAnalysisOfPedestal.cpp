@@ -26,7 +26,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* newSettings) {
 	settings->goToPedestalTreeDir();
 
 	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings);//->getRunNumber());
-	histSaver=new HistogrammSaver();
+	histSaver=new HistogrammSaver(settings);
 	histSaver->SetOptStat("ormen");
 	histSaver->SetOptFit(111);
 	settings->goToPedestalAnalysisDir();

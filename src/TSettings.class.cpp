@@ -1923,10 +1923,11 @@ bool TSettings::isClusterInDiaDetectorArea(TCluster cluster, Int_t area){
 	if(area<getNDiaDetectorAreas()){
 		int firstClusterChannel = cluster.getFirstHitChannel();
 		int lastClusterChannel = cluster.getLastHitChannel();
+		int cl = cluster.getClusterPosition(lastClusterChannel);
 		int firstAreaChannel = getDiaDetectorArea(area).first;
 		int lastAreaChannel =  getDiaDetectorArea(area).second;
-//		cout<<TString::Format("area: %d/%d %d-%d, channels: %d-%d",area,  getNDiaDetectorAreas(), firstAreaChannel, lastAreaChannel,firstClusterChannel, lastClusterChannel)<<endl;
-		return firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
+		bool retVal = firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
+		return retVal;
 	}
 	return false;
 
@@ -2125,20 +2126,32 @@ TCutG* TSettings::getEdgePosition(UInt_t i) {
 //	}
 	return edgeCut;
 }
+int TSettings::get3DCellNo(int row, int column){
+	if (row<0 || row >= nRows3d||column < 0||column>= nColumns3d){
+		cerr<<"cannot convert "<<row<<column<< " to a cell no.: "<<endl;
+		return -1;
+	}
+	int nCell = row + column * nRows3d;
+	if(verbosity>4) cout<<"column "<<column<<", row "<<row<<" with "<<nRows3d<<" = " <<nCell<<endl;
+	return nCell;
+
+}
 
 int TSettings::get3DCellNo(char row, int column){
 	column --;
 	row=toupper(row);
 	int nRow = row-'A';
-	if (nRow<0 || nRow > 25||column < 0){
-		cerr<<"cannot convert "<<row<<column<< " to a cell no.: "<<nRow<<endl;
+
+	return get3DCellNo(nRow,column);
+}
+
+int TSettings::get3DQuarterNo(int row, int column, int quarter){
+	int cellNo = get3DCellNo(row,column);
+	if (cellNo<0|| quarter <0 || quarter >= getNQuarters3d())
 		return -1;
-	}
-
-	int nCell = column + nRow * nRows3d;
-	if(verbosity>4) cout<<"column "<<column<<", row "<<row<<"="<<nRow<<" * "<<nRows3d<<" = " <<nCell<<endl;
-	return nCell;
-
+	int quarterNo = getNQuarters3d()*cellNo+quarter;
+	cout<<"get3DQuarterNo, "<<row<<" "<<column<<" "<<quarter<<" "<<cellNo<<" "<<quarterNo<<endl;
+	return quarterNo;
 }
 
 /**
@@ -2153,7 +2166,7 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 	nCanvas->cd();
 	//vector<TBox*> Grid;
 	TCutG* gridPoint;
-	cout<<"DiamondPattern: "<<DiamondPattern<<endl;
+//	cout<<"DiamondPattern: "<<DiamondPattern<<endl;
 	UInt_t det = TPlaneProperties::getDetDiamond();
 	Float_t cellwidth = GetCellWidth(det,DiamondPattern-1);
 	Float_t cellheight = GetCellHeight();

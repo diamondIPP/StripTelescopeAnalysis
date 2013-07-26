@@ -25,7 +25,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 	eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(mode),settings->getEtaDistributionPath(),settings);
 	// TODO: load settings!!!
 	
-	histSaver = new HistogrammSaver();
+	histSaver = new HistogrammSaver(settings);
 //	settings->goToTransparentAnalysisDir();
 	histSaver->SetPlotsPath(settings->getTransparentAnalysisDir(mode));
 	histSaver->SetRunNumber(settings->getRunNumber());

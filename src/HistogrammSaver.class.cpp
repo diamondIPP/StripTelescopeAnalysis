@@ -9,7 +9,12 @@
 
 using namespace std;
 
-HistogrammSaver::HistogrammSaver(int verbosity) {
+HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
+	if(!newSettings){
+		cerr<<"[HistogrammSaver::HistogrammSaver]: settings == NULL "<<endl;
+		exit(-1);
+	}
+	this->settings = newSettings;
 	sys=NULL;
 	pt=NULL;
 	this->verbosity=verbosity;
@@ -56,6 +61,7 @@ HistogrammSaver::HistogrammSaver(int verbosity) {
 	gStyle->SetPalette(1); //
 	if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
 	gErrorIgnoreLevel=3001;
+	InitializeGridReferenceDetSpace();
 
 }
 
@@ -71,6 +77,40 @@ HistogrammSaver::~HistogrammSaver() {
 	//	cout<<string1<<endl;
 	this->pt->Delete();
 }
+
+void HistogrammSaver::InitializeGridReferenceDetSpace(){
+	TString nameDet = "hGridRefenrenceDetSpace";
+	TString nameCell = "hGridRefenrenceCellSpace";
+	Float_t xBins = settings->getNColumns3d();
+	TFidCutRegions* metallisationFidCuts = settings->get3dMetallisationFidCuts();
+	metallisationFidCuts->Print(1);
+	TFiducialCut* fidCut = metallisationFidCuts->getFidCut((UInt_t)3);
+	Float_t xLow = fidCut->GetXLow();//getXMetalisationStart3d;
+	Float_t xHigh = fidCut->GetXHigh();//getXMetalisationEnd3d;
+	Float_t yBins = settings->getNRows3d();
+	Float_t yLow = fidCut->GetYLow();
+	Float_t yHigh = fidCut->GetYHigh();//getYMetalisationEnd3d;
+	//	cout<<"nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh"<<endl;
+	//	cout<<nameDet<<" "<<nameDet<<" "<<xBins<<" "<<xLow<<" "<<xHigh<<" "<<yBins<<" "<<yLow<<" "<<yHigh<<endl;
+	hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
+	hGridReferenceCellSpace = new TH2D(nameCell,nameCell,xBins,0,xBins,yBins,0,yBins);
+
+	for(int i=0;i<settings->getNRows3d();i++){
+		hGridReferenceDetSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
+		hGridReferenceCellSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
+	}
+	for(int j=0;j<settings->getNRows3d();j++){
+		hGridReferenceDetSpace->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
+		hGridReferenceCellSpace->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
+	}
+	hGridReferenceDetSpace->SetStats(kFALSE);
+	hGridReferenceDetSpace->SetTickLength(0.0, "X");
+	hGridReferenceDetSpace->SetTickLength(0.0, "Y");
+	hGridReferenceCellSpace->SetStats(kFALSE);
+	hGridReferenceCellSpace->SetTickLength(0.0, "X");
+	hGridReferenceCellSpace->SetTickLength(0.0, "Y");
+}
+
 
 
 void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond, UInt_t verbosity)
@@ -268,6 +308,38 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 	return pt;
 }
 
+void HistogrammSaver::SaveHistogramWithCellGrid(TH2* histo,TH2* histo2) {
+//	cout<<"[HistogrammSaver::SaveHistogramWithCellGrid]\t"<<flush;
+	if (!histo)
+		return;
+	TString name = histo->GetName();
+	if (name.BeginsWith("h"))
+		name.Replace(0,1,"c");
+	else
+		name.Insert(0,"c_");
+	TCanvas* c1 = new TCanvas(name,name);
+	c1->cd();
+	hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
+	hGridReferenceDetSpace->Draw("COL");
+	histo->Draw("sameCOLZAH");
+//	TLegend* leg = 0;
+	if (histo2){
+		histo2->Draw("sameTEXTAH");
+//		if(histo2!=histo){
+//			leg = c1->BuildLegend();
+//			leg->Clear();
+//			leg->AddEntry(histo);
+//			leg->AddEntry(histo2);
+//		}
+	}
+	//hGridReference->Draw("COL");
+	settings->DrawMetallisationGrid(c1, 3);
+//	cout<<c1->GetName()<<endl;
+//	if (leg)
+//		leg->Draw();
+	this->SaveCanvas(c1);
+}
+
 void HistogrammSaver::UpdatePaveText(){
 	pt->Clear();
 	pt->SetTextSize(0.0250);
@@ -421,21 +493,21 @@ void HistogrammSaver::SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue){
 	this->SaveCanvas(c2);
 	delete c2;
 }
-void HistogrammSaver::SaveHistogramLogZ(TH2F* histo){
+void HistogrammSaver::SaveHistogramLogZ(TH2* histo){
 	if(histo==0)return;
 	TString canvasName = "c_";
 	canvasName +=histo->GetName();
 	TCanvas *c1 = new TCanvas(canvasName,canvasName);
 	c1->cd();
 	c1->SetLogz();
-	TH2F* htemp = (TH2F*) histo->Clone();
+	TH2* htemp = (TH2*) histo->Clone();
 	htemp->Draw("colz");
 	this->SaveCanvas(c1);
 	delete htemp;
 	delete c1;
 }
 
-void HistogrammSaver::SaveHistogram(TH2F* histo, bool drawStatBox) {
+void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox) {
 	if (!histo)return;
 	if(histo->GetEntries()==0)return;
 	if (!drawStatBox)
@@ -485,14 +557,14 @@ void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
 //	if(plots_canvas)delete plots_canvas;
 }
 
-void HistogrammSaver::SaveHistogramPDF(TH2F* histo) {
+void HistogrammSaver::SaveHistogramPDF(TH2* histo) {
 	if(histo==0)return;
 	if(histo->GetEntries()==0)return;
 	TCanvas *plots_canvas = new TCanvas(TString::Format("cPdf_%s",histo->GetName()),TString::Format("c_%s",histo->GetName()));
 	plots_canvas->cd();
 	//plots_canvas.cd();
 	//	SetDuckStyle();
-	if(verbosity)cout << "Using SaveHistogrammPDF on TH2F histogram " << histo->GetName() << endl;
+	if(verbosity)cout << "Using SaveHistogrammPDF on TH2 histogram " << histo->GetName() << endl;
 	//histo->Draw();
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
 	gStyle->SetTitleFont(42);
@@ -637,10 +709,10 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 
 }
 
-void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
+void HistogrammSaver::SaveHistogramPNG(TH2* histo) {
 
 	if(!histo){
-		cerr<<"HistogrammSaver::SaveHistogramPNG(TH2F*), histogram ==0"<<endl;
+		cerr<<"HistogrammSaver::SaveHistogramPNG(TH2*), histogram ==0"<<endl;
 				return;
 	}
 	if(histo->GetEntries()==0)return;
@@ -649,7 +721,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	TCanvas *plots_canvas =  new TCanvas(TString::Format("cPng_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
 	plots_canvas->Clear();
 	plots_canvas->cd();
-	TH2F* htemp = (TH2F*)histo->Clone();
+	TH2* htemp = (TH2*)histo->Clone();
 	HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
@@ -665,9 +737,9 @@ void HistogrammSaver::SaveHistogramPNG(TH2F* histo) {
 	if (plots_canvas) delete plots_canvas;
 }
 
-void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
+void HistogrammSaver::SaveHistogramROOT(TH2* histo) {
 	if(!histo){
-		cerr<<"HistogrammSaver::SaveHistogramROOT(TH2F*) histogram == 0"<<endl;
+		cerr<<"HistogrammSaver::SaveHistogramROOT(TH2*) histogram == 0"<<endl;
 		return;
 	}
 	if(histo->GetEntries()==0)return;
@@ -675,7 +747,7 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 	plots_canvas->Clear();
 
 	plots_canvas->cd();
-	TH2F* htemp = (TH2F*)histo->Clone();
+	TH2* htemp = (TH2*)histo->Clone();
 	if(htemp==0)
 		return;
 	htemp->Draw();
@@ -703,7 +775,7 @@ void HistogrammSaver::SaveHistogramROOT(TH2F* histo) {
 
 void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
 	if(!histo){
-			cerr<<"HistogrammSaver::SaveHistogramROOT(TH2F*) histogram == 0"<<endl;
+			cerr<<"HistogrammSaver::SaveHistogramROOT(TH2*) histogram == 0"<<endl;
 			return;
 		}
 	if(histo->GetEntries()==0)return;
@@ -1244,7 +1316,7 @@ std::pair<Float_t, Float_t> HistogrammSaver::OptimizeXRange(TH1F* histo){
 	return std::make_pair(xmin,xmax);
 }
 
-void HistogrammSaver::OptimizeXRange(TH2F* histo){
+void HistogrammSaver::OptimizeXRange(TH2* histo){
 	histo->Draw();
 	TH1F* htemp = (TH1F*)histo->ProjectionX("htemp");
 	std::pair<Float_t,Float_t> range = HistogrammSaver::OptimizeXRange(htemp);
@@ -1255,7 +1327,7 @@ void HistogrammSaver::OptimizeXRange(TH2F* histo){
 }
 
 
-void HistogrammSaver::OptimizeYRange(TH2F* histo){
+void HistogrammSaver::OptimizeYRange(TH2* histo){
 	histo->Draw();
 	TH1F* htemp = (TH1F*)histo->ProjectionY("htemp");
 	std::pair<Float_t,Float_t> range = HistogrammSaver::OptimizeXRange(htemp);
@@ -1265,7 +1337,7 @@ void HistogrammSaver::OptimizeYRange(TH2F* histo){
 	histo->GetYaxis()->SetRangeUser(xmin,xmax);
 }
 
-void HistogrammSaver::OptimizeXYRange(TH2F* histo){
+void HistogrammSaver::OptimizeXYRange(TH2* histo){
 	HistogrammSaver::OptimizeXRange(histo);
 	HistogrammSaver::OptimizeYRange(histo);
 }

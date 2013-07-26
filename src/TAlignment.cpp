@@ -33,7 +33,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 		eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
 //		cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
 	}
-	histSaver = new HistogrammSaver();
+	histSaver = new HistogrammSaver(inputSettings);
 	settings->goToAlignmentDir(mode);
 	histSaver->SetPlotsPath(settings->getAlignmentDir(mode));
 	histSaver->SetRunNumber(runNumber);

@@ -31,7 +31,7 @@ std::pair<Int_t,Int_t> TDiamondPattern::getInterval(UInt_t pattern){
 	Int_t last = -1;
 	if(pattern >= 0 && pattern<getNIntervals()){
 		first= firstChannelOfInterval.at(pattern);
-		last = nChannelsOfInterval.at(pattern) + first -1;
+		last = nChannelsOfInterval.at(pattern) + first;
 	}
 	return make_pair(first,last);
 }
@@ -92,6 +92,7 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 
 	nChannelsOfInterval.push_back(deltaChannels);
 	this->pitchWidth.push_back(pitchWidth);
+	cout<<"added: "<<getInterval(beginOfInterval.size()-1).first<<"-"<<getInterval(beginOfInterval.size()-1).second<<endl;
 	return retVal;
 }
 

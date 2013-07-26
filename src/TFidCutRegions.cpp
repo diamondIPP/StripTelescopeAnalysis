@@ -444,11 +444,18 @@ void TFidCutRegions::createFidCuts(){
 }
 
 TFiducialCut* TFidCutRegions::getFidCut(UInt_t index){
+//	cout<<"Get FidCut: "<< index<<endl;
 	if (index>getNFidCuts()&&index>0)
 		return NULL;
 	if(index==0)
 		return NULL;
-	return fidCuts.at(index-1);
+	index -=1;
+	if(fidCuts.size()>index){
+//		cout<<"return fidcuts at "<<index<<"/"<<fidCuts.size()<<endl;
+		return fidCuts.at(index);
+	}
+	else
+		return 0;
 }
 
 TFiducialCut* TFidCutRegions::getFidCut(std::string describtion){
@@ -581,28 +588,64 @@ TCanvas *TFidCutRegions::getFiducialCutProjectionCanvas(TH1D* hProj,std::vector<
 
 Float_t TFidCutRegions::getXLow(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return xInt.at((i-1)%xInt.size()).first;
+		return getFidCut(i)->GetXLow();
+	if (i == 0){
+		Float_t xmin = 1e9;
+		for(UInt_t k = 0; k < getNFidCuts(); k++){
+//			cout<<"\t"<<xmin<<" -->"<<fidCuts[k]->GetXLow()<<endl;
+			if (xmin > fidCuts[k]->GetXLow() ) xmin = fidCuts[k]->GetXLow();
+		}
+//		cout<<"\t-->"<<xmin<<endl;
+		return xmin;
+	}
 	return 0;
 	return N_INVALID;
 }
 
 Float_t TFidCutRegions::getXHigh(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return xInt.at((i-1)%xInt.size()).second;
+		return getFidCut(i)->GetXHigh();
+	if (i == 0){
+		Float_t xmax = -1e9;
+		for(UInt_t k = 0; k < getNFidCuts(); k++){
+//			cout<<"\t"<<xmax<<" -->"<<fidCuts[k]->GetXHigh()<<endl;
+			if (xmax <  fidCuts[k]->GetXHigh()) xmax = fidCuts[k]->GetXHigh();
+		}
+//		cout<<"\t-->"<<xmax<<endl;
+		return xmax;
+	}
 	return TPlaneProperties::getNChannelsSilicon();
 	return N_INVALID;
 }
 
 Float_t TFidCutRegions::getYLow(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return yInt.at((i-1)%xInt.size()).first;
+		return getFidCut(i)->GetYLow();
+	if (i == 0){
+		Float_t ymin = 1e9;
+		for(UInt_t k = 0; k <getNFidCuts(); k++){
+//			cout<<"\t"<<ymin<<" -->"<<fidCuts[k]->GetYLow()<<endl;
+			if (ymin > fidCuts[k]->GetYLow() ) ymin = fidCuts[k]->GetYLow();
+		}
+//		cout<<"\t-->"<<ymin<<endl;
+		return ymin;
+	}
 	return 0;// TPlaneProperties::getNChannelsSilicon();
 
 	return N_INVALID;
 }
 Float_t TFidCutRegions::getYHigh(UInt_t i) {
 	if(i <= getNFidCuts()&&i>0)
-		return yInt.at((i-1)%xInt.size()).second;
+		return getFidCut(i)->GetYHigh();
+	if (i == 0){
+			Float_t ymax = -1e9;
+			for(UInt_t k = 0; k < getNFidCuts(); k++){
+//				cout<<"\t"<<ymax<<" -->"<<fidCuts[k]->GetYHigh()<<endl;
+				if (ymax < fidCuts[k]->GetYHigh()) ymax = fidCuts[k]->GetYHigh();
+			}
+//			cout<<"\t-->"<<ymax<<endl;
+			return ymax;
+		}
 	return TPlaneProperties::getNChannelsSilicon();
 	return N_INVALID;
 }

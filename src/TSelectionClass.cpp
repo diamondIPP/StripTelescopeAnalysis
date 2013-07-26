@@ -7,13 +7,13 @@
 
 #include "../include/TSelectionClass.hh"
 
-TSelectionClass::TSelectionClass(TSettings* settings) {
+TSelectionClass::TSelectionClass(TSettings* newSettings) {
 	// TODO Auto-generated constructor stub
 	cout<<"\n\n\n**********************************************************"<<endl;
 	cout<<"************TSelectionClass::TSelectionClass**************"<<endl;
 	cout<<"**********************************************************"<<endl;
-	if(settings==0)exit(-1);
-	this->settings=settings;
+	if(newSettings==0)exit(-1);
+	this->settings=newSettings;
 	this->results=0;
 	cout<<settings->getRunNumber()<<endl;
 
@@ -36,7 +36,7 @@ TSelectionClass::TSelectionClass(TSettings* settings) {
 	//settings->getRunNumber());
 	cout<<" DONE"<<endl;
 
-	histSaver=new HistogrammSaver();
+	histSaver=new HistogrammSaver(settings);
 	cout<<"goToSelectionDir"<<endl;
 	settings->goToSelectionDir();
 	stringstream plotsPath;

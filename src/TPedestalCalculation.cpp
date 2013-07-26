@@ -8,14 +8,14 @@
 #include "../include/TPedestalCalculation.hh"
 
 
-TPedestalCalculation::TPedestalCalculation(TSettings *settings){
-	if(settings==0)exit(0);
+TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
+	if(newSettings==0)exit(0);
+	this->settings=newSettings;
 	verbosity = settings->getVerbosity();
 	if(verbosity)cout<<"**********************************************************"<<endl;
 	cout<<"*****TPedestalCalculation::TPedestalCalculation***********"<<endl;
 	if(verbosity)cout<<"**********************************************************"<<endl;
 
-	this->settings=settings;
 	slidingLength=settings->getPedestalSildingLength();//1000;//settings->getSl
 	eventReader=NULL;
 	pedestalTree=NULL;
@@ -24,7 +24,8 @@ TPedestalCalculation::TPedestalCalculation(TSettings *settings){
 	sys = gSystem;
 	settings->goToPedestalTreeDir();
 	eventReader=new TADCEventReader(settings->getRawTreeFilePath(),settings);
-	histSaver = new HistogrammSaver();
+	cout<<"TPedestalCalculation::TPedestalCalculation -> Set HistoSaver: "<<settings <<endl;
+	histSaver = new HistogrammSaver(settings);
 	histSaver->SetPlotsPath(settings->getToPedestalAnalysisDir());
 	histSaver->SetRunNumber(settings->getRunNumber());
 	cout<<eventReader->GetEntries()<<endl;

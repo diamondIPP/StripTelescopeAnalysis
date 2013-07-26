@@ -292,6 +292,7 @@ public:
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
 	bool isClusterInDiaDetectorArea(TCluster cluster, Int_t area);
+	bool isValidCellNo(UInt_t cellNo){return (cellNo<nRows3d*nColumns3d);}
 	int getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verbosity = 0);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
 	bool isMaskedCluster(UInt_t det, TCluster cluster,bool checkAdjacentChannels=true);
@@ -486,8 +487,8 @@ private:
 	int b3dShortAnalysis;
 	int b3dLongAnalysis;
 	int b3dTransparentAnalysis;
-	int nRows3d;
-	int nColumns3d;
+	UInt_t nRows3d;
+	UInt_t nColumns3d;
 	Float_t columnRadius;//in mum
 	vector<Int_t> badCells3d;
 	vector<Int_t> badCells3dnH;
@@ -507,11 +508,11 @@ public:
 	int do3dShortAnalysis() {return b3dShortAnalysis;}
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
 	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
-	void setNRows3d(int nRows){nRows3d=nRows;};
-	int getNRows3d(){return nRows3d;};
-	int getNColumns3d(){return nColumns3d;};
-	int getNQuarters3d(){return 4;}
-	void setNColumns3d(int nColumns){nColumns3d=nColumns;};
+	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
+	UInt_t getNRows3d(){return nRows3d;};
+	UInt_t getNColumns3d(){return nColumns3d;};
+	UInt_t getNQuarters3d(){return 4;}
+	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
 	vector<Int_t> getGoodCells3D(){return goodCells3d;};
 	vector<Int_t> getBadCells3D(){return badCells3d;};
@@ -519,7 +520,9 @@ public:
 	vector<Int_t> getDeadCell3D(){return deadCell3d;}
 	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
+	int get3DQuarterNo(int row, int column, int quarter);
 	int get3DCellNo(char row, int column);
+	int get3DCellNo(int row, int column);
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
 	Int_t getCellNo(Float_t xDet,Float_t yDet);
 	pair<int,int> getCellAndQuarterNo(Float_t xDet, Float_t yDet);

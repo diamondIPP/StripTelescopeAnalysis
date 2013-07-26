@@ -39,7 +39,10 @@
 #include <limits>
 #include "TCutG.h"
 #include "TPaveStats.h"
+#include "TSettings.class.hh"
 #include "TText.h"
+#include "TFidCutRegions.hh"
+#include "TFiducialCut.hh"
 
 //#include <sys/dirent.h>
 #include <sys/stat.h>
@@ -52,8 +55,9 @@ public:
 	enum EnumAxisRange{
 		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
 	};
-	HistogrammSaver(int verbosity=0);
+	HistogrammSaver(TSettings* settings,int verbosity=0);
 	virtual ~HistogrammSaver();
+	void InitializeGridReferenceDetSpace();
 	void SetOptStat(std::string optStat){gStyle->SetOptStat(optStat.c_str());}
 	void SetOptStat(Int_t stat){gStyle->SetOptStat(stat);}
 	void SetOptFit(Int_t fitOpt){gStyle->SetOptFit(fitOpt);}
@@ -66,22 +70,26 @@ public:
 	void SaveCanvasPNG(TCanvas* canvas);
 	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
+	void SaveHistogram(TH2* histo,bool drawStatBox=true);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
-	void SaveHistogramLogZ(TH2F* histo);
-	void SaveHistogram(TH2F* histo,bool drawStatBox=true);
+	void SaveHistogramLogZ(TH2* histo);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPNG(TH1* histo);
-	void SaveHistogramPNG(TH2F* histo);
+	void SaveHistogramPNG(TH2* histo);
 	void SaveGraphPNG(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramFitGaussPNG(TH1* histo);
 	void SaveHistogramROOT(TH1* histo);
-	void SaveHistogramROOT(TH2F* histo);
+	void SaveHistogramROOT(TH2* histo);
 	void SaveHistogramROOT(TH3F* histo);
 	void SaveGraphROOT(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPDF(TH1F* histo);
-	void SaveHistogramPDF(TH2F* histo);
+	void SaveHistogramPDF(TH2* histo);
+
+//	void SaveHistogramWithCellGrid(TH2D* histo){SaveHistogramWithCellGrid(TH2*)histo)};
+//	void SaveHistogramWithCellGrid(TH2* histo){SaveHistogramWithCellGrid(TH2*)histo)}
+	void SaveHistogramWithCellGrid(TH2* histo, TH2* histo2=0);
 	void SetVerbosity(unsigned int i);
 	void SetRunNumber(unsigned int runNumber);
 	void SetNumberOfEvents(unsigned int nEvents);
@@ -92,9 +100,10 @@ public:
 	void SaveStringToFile(std::string name,std::string data);
 	void SetRange(Float_t min,Float_t max);
 	static std::pair<Float_t, Float_t> OptimizeXRange(TH1F* histo);
-	static void OptimizeXRange(TH2F* histo);
-	static void OptimizeYRange(TH2F* histo);
-	static void OptimizeXYRange(TH2F* histo);
+	static void OptimizeXRange(TH2* histo);
+	static void OptimizeYRange(TH2* histo);
+	static void OptimizeXYRange(TH2* histo);
+
 
 	static TH3F* Create3DHisto(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
 			UInt_t nBinsX=128, UInt_t nBinsY=128,UInt_t nBinsZ=128,
@@ -120,6 +129,8 @@ public:
 private:
 	Float_t xRangeMin,xRangeMax;
     TPaveText *pt;
+    TH2D* hGridReferenceDetSpace;
+    TH2D* hGridReferenceCellSpace;
     TDatime dateandtime;
     std::string plots_path;
     unsigned int runNumber;
@@ -129,6 +140,7 @@ private:
     TStyle *currentStyle2D;
     TSystem *sys;
     TFile* histoFile;
+    TSettings* settings;
 };
 
 #endif /* HISTOGRAMMSAVER_CLASS_HH_ */
