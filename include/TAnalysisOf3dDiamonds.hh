@@ -46,29 +46,37 @@ public:
 
 private:
 	bool eventValid();
-	void initialiseShortAnalysisHistos();
 	void createTreeTestHistos();
-	void saveShortAnalysisHistos();
-	void ShortAnalysis();
 
+	void initialiseHistos();
+	void initialiseLongAnalysisHistos();
+	void initialiseShortAnalysisHistos();
 	void initialiseTransparentAnalysisHistos();
-	void TransparentAnalysis();
+
+	void saveHistos();
+	void SaveShortAnalysisHistos();
+	void SaveLongAnalysisHistos();
 	void saveTransparentAnalysisHistos();
+
+	void ShortAnalysis();
+	void LongAnalysis();
+	void TransparentAnalysis();
+
 	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
 
 	float* VectorToArray(vector<float> nvector);
 
+
+
+
+	float* SortArrayBtoS(float* nArray, int nSize);
+	void printArray(float* nArray, int nSize, const std::string& space);
 	//YAlignment
 	void initialise3DGridReference();
 	void initialise3DYAlignmentHistos();
 	void initialise3DOverviewHistos();
 	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
-	void saveLongAnalysisHistos();
-	void LongAnalysis();
-	float* SortArrayBtoS(float* nArray, int nSize);
-	void printArray(float* nArray, int nSize, const std::string& space);
-
 	//new functions
 	void HitandSeedCount(TCluster* nCluster);
 	void ClusterPlots(int nClusters, float nfiducialValueX, float nfiducialValueY);
@@ -76,6 +84,8 @@ private:
 	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
+private:
+	void LongAnalysisSaveCellAndQuaterNumbering();
 private:
 	void ShortAnalysis_Analyse1Cluster(UInt_t clusterNo=0);
 	void ShortAnalysis_Analyse2Cluster();
@@ -185,7 +195,7 @@ private:
 	TCanvas* hOverview;
 	TH2D* hDetXvsDetY3DOverview;
 	TCanvas* cCellNumbering;
-	TH2D* hCellNumbering;
+//	TH2D* hCellNumbering;
 	TCanvas* c3DdetDeltaXChannel;
 	TH2D* h3DdetDeltaXChannel;
 	vector<TH1F*> hCellsDeltaX;
@@ -222,17 +232,9 @@ private:
 	TCanvas* cDetXvsDetY3DMeanCharge;
 	TH2D* hDetXvsDetY3DCharge;
 	TH2D* hDetXvsDetY3DEvents;
-	TH2D* hDetXvsDetY3DMeanCharge;
-
-	TCanvas* cDetXvsDetY3DMeanChargeRebinned;
-	TH2D* hDetXvsDetY3DChargeRebinned;
-	TH2D* hDetXvsDetY3DEventsRebinned;
-	TH2D* hDetXvsDetY3DMeanChargeRebinned;
 	TH1F* hCellMeanCharge;
-	TCanvas* cDetXvsDetY3DMeanChargeRebinnedQuarterCell;
-	TH2D* hDetXvsDetY3DMeanChargeRebinnedQuarterCell;
-	TCanvas* cDetXvsDetY3DRebinnedRMSQuarterCell;
-	TH2D* hDetXvsDetY3DRebinnedRMSQuarterCell;
+	TH2F* hValidEventsFiducialSpace;
+	TH2F* hValidEventsDetSpace;
 
 	vector<TCanvas*> cDeadCellMeanCharge;
 	vector<TH1F*> hDeadCellCharge;
@@ -317,6 +319,9 @@ private:
 	vector<Float_t> vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHitStrip,vecPHDiamondHit3dNoHoles,vecPHDiamondHit3dWithHoles,vecClusterSize,vecChi2Y,vecChi2X,vecClusterSeedSize,vecXPredictedStrip,vecYPredictedStrip;
 	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency,vecXPreditedDetector,vecYPreditedDetector;
 	vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
+private:
+	TH2F* hLongAnalysisInvalidCellNo;
+	TH2F* hLongAnalysisInvalidCluster;
 private:
 	vector <Float_t> vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna;
 	vector <Float_t> vecPH_Cluster1_ShortAna,vecPH_Cluster2_ShortAna,vecCh_Cluster2_ShortAna,vecCh_Cluster1_ShortAna;

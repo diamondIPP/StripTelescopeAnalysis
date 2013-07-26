@@ -25,7 +25,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 	cout<<"Alignment file path is: "<<settings->getAlignmentFilePath()<<endl;
 	cout<<"Eta distribution file path is: "<<settings->getEtaDistributionPath()<<endl;
 	eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);
-	histSaver=new HistogrammSaver();
+	histSaver=new HistogrammSaver(settings);
 	settings->goTo3dDiamondAnalysisDir();
 
 	histSaver->SetPlotsPath(settings->get3dDiamondAnalysisPath());
@@ -73,21 +73,8 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 		pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
 		cout<<channels.first<<"-"<<channels.second<<endl;
 	}
-	// Initialise
-	if(settings->do3dShortAnalysis() == 1){
-		initialiseShortAnalysisHistos();
-	}
-	if(settings->do3dLongAnalysis() == 1){
-		initialise3DGridReference();
-		initialise3DYAlignmentHistos();
-		initialise3DOverviewHistos();
-		initialise3D2DLandauAndClustersizeHistos();
-		initialise3DCellOverlayHistos();
-	}
-	if(settings->do3dTransparentAnalysis() == 1){
-		initialiseTransparentAnalysisHistos();
-		//initialiseTransparentAnalysisHistos();
-	}
+
+	initialiseHistos();
 
 	if(nEvents<=0) nEvents=eventReader->GetEntries();
 	cout<<"Number of Events: "<<eventReader->GetEntries()<<endl;
@@ -117,10 +104,7 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 	cout<<gSystem->pwd()<<" "<<file->GetPath()<<" "<<file->GetName()<<endl;
 	file->Close();
 
-	// Save
-	if(settings->do3dShortAnalysis() == 1){saveShortAnalysisHistos();}
-	if(settings->do3dLongAnalysis() == 1){saveLongAnalysisHistos();}
-	if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
+	saveHistos();
 }
 
 /**
@@ -155,6 +139,8 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 	xPredDet = eventReader->getPositionInDetSystem( subjectDetector, xPredicted, yPredicted);
 	yPredDet = eventReader->getYPositionInDetSystem(subjectDetector, xPredicted, yPredicted);
 	//	cout<<nEvent<<"Valid Track"<<endl;
+	hValidEventsFiducialSpace->Fill(fiducialValueX,fiducialValueY);
+	hValidEventsDetSpace->Fill(xPredDet,yPredDet);
 	return true;
 }
 
@@ -167,69 +153,69 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 	hNumberofClusters->Fill(eventReader->getNDiamondClusters());
 	ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
 	switch (eventReader->getNDiamondClusters()) {
-			case 1:
-				ShortAnalysis_Analyse1Cluster();
-				break;
-			case 2:
-				ShortAnalysis_Analyse2Cluster();
-				break;
-			default:
-				break;
-		}
-//	if(eventReader->getNDiamondClusters()==1){
-//		TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
-//		if(diamondCluster.isSaturatedCluster())
-//			return;
-//
-//		HitandSeedCount(&diamondCluster);
-//		Int_t clusterSize = diamondCluster.size()-2;
-//		vecClusterSize.push_back(clusterSize);
-//
-//		//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-//		//RemoveLumpyClusters(&diamondCluster);
-//
-//		//Edge Finding
-//
-//		Float_t clusterCharge = diamondCluster.getCharge(false);
-////		this->fillEdgeDistributionmakes(clusterCharge);
-//
-//		//Universal PHvsChannel Plot
-//		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
-//
-//			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
-//			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
-//
-//			if((Int_t)diamondCluster.getHighestSignalChannel()<=channels.second&&(Int_t)diamondCluster.getHighestSignalChannel()>=channels.first){
-//
-//				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
-//				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
-//				//if(!settings->getSelectionFidCuts()->getFidCut(i+1)->isInFiducialCut(fiducialValueX,fiducialValueY))
-//				//return;
-//
-//				if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
-//					return;
-//
-//				/*if(HitCount>0||SeedCount>1)
-//					return;
-//				 */
-//
-//				hEventsvsChannel[i]->Fill(diamondCluster.getHighestSignalChannel());
-//				hPHvsChannel[i]->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
-//				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
-//				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
-//				hLandau[i]->Fill(diamondCluster.getCharge(false));
-//				vecPHDiamondHit[i]->push_back(diamondCluster.getCharge(false));
-//				//vecXPredicted.at(i)->push_back(xPredicted);
-//				//vecYPredicted.at(i)->push_back(yPredicted);
-//				hHitandSeedCount[i]->Fill(HitCount,SeedCount);
-//				hChi2XChi2Y[i]->Fill(chi2x, chi2y);
-//				hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
-//				//For hFidCutXvsFidCutYvsMeanCharge
-//				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
-//
-//			}
-//		}		//End of for diamond patterns
-//	}		//End of if clusters = 1
+	case 1:
+		ShortAnalysis_Analyse1Cluster();
+		break;
+	case 2:
+		ShortAnalysis_Analyse2Cluster();
+		break;
+	default:
+		break;
+	}
+	//	if(eventReader->getNDiamondClusters()==1){
+	//		TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
+	//		if(diamondCluster.isSaturatedCluster())
+	//			return;
+	//
+	//		HitandSeedCount(&diamondCluster);
+	//		Int_t clusterSize = diamondCluster.size()-2;
+	//		vecClusterSize.push_back(clusterSize);
+	//
+	//		//hFidCutXvsFidCutYvsCharge.at(1)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+	//		//RemoveLumpyClusters(&diamondCluster);
+	//
+	//		//Edge Finding
+	//
+	//		Float_t clusterCharge = diamondCluster.getCharge(false);
+	////		this->fillEdgeDistributionmakes(clusterCharge);
+	//
+	//		//Universal PHvsChannel Plot
+	//		for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
+	//
+	//			pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
+	//			//cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
+	//
+	//			if((Int_t)diamondCluster.getHighestSignalChannel()<=channels.second&&(Int_t)diamondCluster.getHighestSignalChannel()>=channels.first){
+	//
+	//				hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster.getCharge(false));
+	//				hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
+	//				//if(!settings->getSelectionFidCuts()->getFidCut(i+1)->isInFiducialCut(fiducialValueX,fiducialValueY))
+	//				//return;
+	//
+	//				if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
+	//					return;
+	//
+	//				/*if(HitCount>0||SeedCount>1)
+	//					return;
+	//				 */
+	//
+	//				hEventsvsChannel[i]->Fill(diamondCluster.getHighestSignalChannel());
+	//				hPHvsChannel[i]->Fill(diamondCluster.getCharge(false),diamondCluster.getHighestSignalChannel());
+	//				//hPHvsPredictedChannel.at(i)->Fill(diamondCluster.getCharge(false),positionInDetSystemChannelSpace);
+	//				//hPHvsPredictedXPos.at(i)->Fill(diamondCluster.getCharge(false),xPredicted);
+	//				hLandau[i]->Fill(diamondCluster.getCharge(false));
+	//				vecPHDiamondHit[i]->push_back(diamondCluster.getCharge(false));
+	//				//vecXPredicted.at(i)->push_back(xPredicted);
+	//				//vecYPredicted.at(i)->push_back(yPredicted);
+	//				hHitandSeedCount[i]->Fill(HitCount,SeedCount);
+	//				hChi2XChi2Y[i]->Fill(chi2x, chi2y);
+	//				hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
+	//				//For hFidCutXvsFidCutYvsMeanCharge
+	//				//hFidCutXvsFidCutYvsSeenEvents->Fill(fiducialValueX,fiducialValueY,1);
+	//
+	//			}
+	//		}		//End of for diamond patterns
+	//	}		//End of if clusters = 1
 }
 
 
@@ -238,8 +224,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
 	if(diamondCluster.isSaturatedCluster())
 		return;
 	if( !settings->diamondPattern.isValidCluster(diamondCluster)){
-		cerr <<" Cluster is invalid: ";
-		diamondCluster.Print(1);
+		//		cerr <<" Cluster is invalid: ";
+		//		diamondCluster.Print(1);
 		return;
 	}
 	HitandSeedCount(&diamondCluster);
@@ -319,7 +305,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
 	Int_t pattern1 = settings->diamondPattern.getPatternOfHit(settings->diamondPattern.convertChannelToMetric(pos1));
 	Int_t pattern2 = settings->diamondPattern.getPatternOfHit(settings->diamondPattern.convertChannelToMetric(pos2));
 	Int_t predictedArea = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
-//	cout<<nEvent<<" "<<predictedArea<<" "<<pos1<<"-->"<<pattern1+1<<" "<<pos2<<"-->"<<pattern2+1<<endl;
+	//	cout<<nEvent<<" "<<predictedArea<<" "<<pos1<<"-->"<<pattern1+1<<" "<<pos2<<"-->"<<pattern2+1<<endl;
 
 }
 
@@ -335,43 +321,43 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		return;
 
 	TCluster diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond());
-	if(diamondCluster.isSaturatedCluster())
-		return;
 
-	cout<<"xPredDet, yPredDet"<<xPredDet<<", "<<yPredDet<<endl;
+
+//	cout<<"xPredDet, yPredDet"<<xPredDet<<", "<<yPredDet<<endl;
 	pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
-	cout<<cell.first<<" "<<cell.second<<endl;
+//	cout<<cell.first<<" "<<cell.second<<endl;
 	UInt_t cellNo = cell.first;
-	cout<<"cellNo: "<<cellNo<<endl;
+//	cout<<"cellNo: "<<cellNo<<endl;
 	UInt_t quarterNo = cell.second;
 	Int_t row = cellNo% settings->getNColumns3d();
 	Int_t column = cellNo / settings->getNColumns3d();
-	if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> row "<<row<<", column "<<column<<endl;
-	Float_t cellWidth = 150;
-	Float_t cellHeight = 150;
-	Float_t startOf3dDetectorX = 2365;
-	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
-	Float_t yminus = row*cellHeight;
-
-	Float_t relPosX =xPredDet - xminus;
-	Float_t relPosY = yPredDet - yminus;
+//	if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> row "<<row<<", column "<<column<<endl;
+	if(!settings->isValidCellNo(cellNo)){
+		hLongAnalysisInvalidCellNo->Fill(xPredDet,yPredDet);
+		return;
+	}
+	pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
 	Int_t area3DwithColumns = 2;
 	if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
+		hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
 		return;
 	}
-
+	if( !settings->diamondPattern.isValidCluster(diamondCluster)){
+		hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
+		return;
+	}
+	if(diamondCluster.isSaturatedCluster())
+		return;
 	hDetXvsDetY3DCharge->Fill(xPredDet,yPredDet,diamondCluster.getCharge(false));
 	hDetXvsDetY3DEvents->Fill(xPredDet,yPredDet,1);
-	hDetXvsDetY3DChargeRebinned->Fill(xPredDet,yPredDet,diamondCluster.getCharge(false));
-	hDetXvsDetY3DEventsRebinned->Fill(xPredDet,yPredDet,1);
 
 	for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
 		int relCellY = settings->getDeadCell3D().at(i)-cellNo;
-		cout<<"sqrt(relCellY*relCellY): "<<sqrt(relCellY*relCellY)<<endl;
+//		cout<<"sqrt(relCellY*relCellY): "<<sqrt(relCellY*relCellY)<<endl;
 		if(sqrt(relCellY*relCellY) <= 1){
-			float relY = relPosY + cellHeight*relCellY;
-			cout<<"relY: "<<relY<<endl;
+			float relY = relPos.second + settings->GetCellHeight()*relCellY;
+//			cout<<"relY: "<<relY<<endl;
 			hDeadCellCharge.at(i)->Fill(relY, diamondCluster.getCharge(false));
 			hDeadCellEvents.at(i)->Fill(relY, 1);
 		}
@@ -386,11 +372,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	//				hQuarterCellsLandau[cellNo][quarterNo]->Fill(diamondCluster.getCharge(false));
 	//				hQuarterCellsClusterSize[cellNo][quarterNo]->Fill((diamondCluster.getClusterSize()-2));
 	//		}
-	hCellsOverlayCharge->Fill(relPosX,relPosY,diamondCluster.getCharge(false));
-	hCellsOverlayEvents->Fill(relPosX,relPosY,1);
+	hCellsOverlayCharge->Fill(relPos.first,relPos.second,diamondCluster.getCharge(false));
+	hCellsOverlayEvents->Fill(relPos.first,relPos.second,1);
 
 	hCellOverlayWithColumnLandau->Fill(diamondCluster.getCharge(false));
-	if(!settings->IsWithInTheColumnRadius(relPosX, relPosY))
+	if(!settings->IsWithInTheColumnRadius(relPos.first, relPos.second))
 		hCellOverlayNoColumnLandau->Fill(diamondCluster.getCharge(false));
 	else{
 		hCellOverlayColumnLandau->Fill(diamondCluster.getCharge(false));
@@ -783,17 +769,19 @@ void TAnalysisOf3dDiamonds::initialise3DYAlignmentHistos() {
 };
 
 void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
+	UInt_t nColumns = settings->getNColumns3d();
+	UInt_t nRows = settings->getNRows3d();
+	Int_t nFidCut3DWColumns = 3;
+	Float_t getXMetalisationStart3d = settings->get3dMetallisationFidCuts()->getFidCut(nFidCut3DWColumns)->GetXLow();
+	Float_t getXMetalisationEnd3d = settings->get3dMetallisationFidCuts()->getFidCut(nFidCut3DWColumns)->GetXHigh();
 
-	Float_t getXMetalisationStart3d = settings->get3dMetallisationFidCuts()->getFidCut(3)->GetXLow();
-	Float_t getXMetalisationEnd3d = settings->get3dMetallisationFidCuts()->getFidCut(3)->GetXHigh();
-
-	Float_t getYMetalisationStart3d = settings->get3dMetallisationFidCuts()->getFidCut(3)->GetYLow();
+	Float_t getYMetalisationStart3d = settings->get3dMetallisationFidCuts()->getFidCut(nFidCut3DWColumns)->GetYLow();
 	Float_t getYMetalisationEnd3d = settings->get3dMetallisationFidCuts()->getFidCut(3)->GetYHigh();
 	//hDetXvsDetY3DTotolCharge
 	TString name = "hFidCutXvsFidCutYvsChargeYAlignment";
 	UInt_t factor = 10;
-	UInt_t binsX = settings->getNColumns3d() * (settings->getNQuarters3d()/2) * factor;
-	UInt_t binsY =  settings->getNRows3d() * (settings->getNQuarters3d()/2) * factor;
+	UInt_t binsX = nColumns * (settings->getNQuarters3d()/2) * factor;
+	UInt_t binsY =  nRows * (settings->getNQuarters3d()/2) * factor;
 	hDetXvsDetY3DCharge = new TH2D(name,name,
 			binsX,getXMetalisationStart3d,getXMetalisationEnd3d,
 			binsY,getYMetalisationStart3d,getYMetalisationEnd3d);
@@ -805,23 +793,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 	hDetXvsDetY3DEvents = (TH2D*)hDetXvsDetY3DCharge->Clone("hDetXvsDetY3DvsEvents");
 
 	//hDetXvsDetY3DMeanCharge
-	hDetXvsDetY3DMeanCharge = (TH2D*)hDetXvsDetY3DCharge->Clone("hDetXvsDetY3DMeanCharge");
 
-	//hDetXvsDetY3DChargeRebinned
-	stringstream hDetXvsDetY3DChargeRebinnedName; hDetXvsDetY3DChargeRebinnedName<<"hDetXvsDetY3DChargeRebinned"<<FileNameEnd;
-	hDetXvsDetY3DChargeRebinned = new TH2D(hDetXvsDetY3DChargeRebinnedName.str().c_str(),hDetXvsDetY3DChargeRebinnedName.str().c_str(),
-			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
-			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
-	hDetXvsDetY3DChargeRebinned->GetXaxis()->SetTitle("Xdet (um)");
-	hDetXvsDetY3DChargeRebinned->GetYaxis()->SetTitle("Ydet (um)");
-	hDetXvsDetY3DChargeRebinned->GetZaxis()->SetTitle("Charge ADC");
-
-	//hDetXvsDetY3DRebinnedEvents
-	hDetXvsDetY3DEventsRebinned = (TH2D*)hDetXvsDetY3DChargeRebinned->Clone("hDetXvsDetY3DEventsRebinned");
-
-	//hDetXvsDetY3DRebinnedMeanCharge
-	hDetXvsDetY3DMeanChargeRebinned = (TH2D*)hDetXvsDetY3DChargeRebinned->Clone("hDetXvsDetY3DMeanChargeRebinned");
-	//hDetXvsDetY3DMeanChargeRebinned->SetBins(9,2365,3715,11,0,1650,12,0,1200);
 
 	//hDetXvsDetY3DRebinnedMeanChargeRMS
 	stringstream hDetXvsDetY3DRebinnedRMSName; hDetXvsDetY3DRebinnedRMSName<<"h3DdetRebinnedRMS"<<FileNameEnd;
@@ -848,34 +820,11 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 	hDetXvsDetY3DOverview->GetYaxis()->SetTitle("Ydet (#mum)");
 	//hDetXvsDetY3DOverview->GetZaxis()->SetTitle();
 
-	//hCellNumbering
-	stringstream hCellNumberingName; hCellNumberingName<<"h3DdetCellNumbering"<<FileNameEnd;
-	hCellNumbering = new TH2D(hCellNumberingName.str().c_str(),hCellNumberingName.str().c_str(),
-			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
-			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
-	hCellNumbering->GetXaxis()->SetTitle("Xdet (#mum)");
-	hCellNumbering->GetYaxis()->SetTitle("Ydet (#mum)");
-	//hDetXvsDetY3DOverview->GetZaxis()->SetTitle();
+
 
 	//hCellsMeanClusteSize
 	stringstream hCellsMeanClusteSizeName; hCellsMeanClusteSizeName<<"hCellsMeanClusteSize"<<FileNameEnd;
 	hCellsMeanClusteSize = new TH2D(hCellsMeanClusteSizeName.str().c_str(),hCellsMeanClusteSizeName.str().c_str(),settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
-
-	///// For Quarter Cell /////
-
-	//hDetXvsDetY3DQuarterCellMeanCharge
-	stringstream hDetXvsDetY3DMeanChargeRebinnedQuarterCellName; hDetXvsDetY3DMeanChargeRebinnedQuarterCellName<<"h3DdetQuarterCellMeanCharge"<<FileNameEnd;
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell = new TH2D(hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),hDetXvsDetY3DMeanChargeRebinnedQuarterCellName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetXaxis()->SetTitle("Xdet (#mum)");
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetYaxis()->SetTitle("Ydet (#mum)");
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetZaxis()->SetTitle("Charge ADC");
-
-	//hDetXvsDetY3DQuarterCellRMS
-	stringstream hDetXvsDetY3DRebinnedRMSQuarterCellName; hDetXvsDetY3DRebinnedRMSQuarterCellName<<"hDetXvsDetY3DRebinnedRMSQuarterCell"<<FileNameEnd;
-	hDetXvsDetY3DRebinnedRMSQuarterCell = new TH2D(hDetXvsDetY3DRebinnedRMSQuarterCellName.str().c_str(),hDetXvsDetY3DRebinnedRMSQuarterCellName.str().c_str(),2*settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,2*settings->getNRows3d(),getXMetalisationStart3d,getYMetalisationEnd3d);
-	hDetXvsDetY3DRebinnedRMSQuarterCell->GetXaxis()->SetTitle("Xdet (#mum)");
-	hDetXvsDetY3DRebinnedRMSQuarterCell->GetYaxis()->SetTitle("Ydet (#mum)");
-	hDetXvsDetY3DRebinnedRMSQuarterCell->GetZaxis()->SetTitle("Charge ADC");
 
 	//hQuarterCellsMeanClusteSize
 	stringstream hQuarterCellsMeanClusterSizeName; hQuarterCellsMeanClusterSizeName<<"hQuarterCellsMeanClusterSize"<<FileNameEnd;
@@ -933,11 +882,9 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
 	for(int column=0;column<settings->getNColumns3d();column++){
 		for(int row=0;row<settings->getNRows3d();row++){
-
 			Int_t cell = column*settings->getNRows3d() + row;
-
-			stringstream hCellsLandauName; hCellsLandauName<<"hCellsLandau"<<cell<<FileNameEnd;
-			hCellsLandau.push_back(new TH1F(hCellsLandauName.str().c_str(),hCellsLandauName.str().c_str(),64,0,2800));
+			TString name = TString::Format("hCellsLandau_no%3d",cell);
+			hCellsLandau.push_back(new TH1F(name,name,64,0,2800));
 
 			stringstream hCellsClusteSizeName; hCellsClusteSizeName<<"hCellsClusteSize"<<cell<<FileNameEnd;
 			hCellsClusteSize.push_back(new TH1F(hCellsClusteSizeName.str().c_str(),hCellsClusteSizeName.str().c_str(),64,0,2800));
@@ -1388,7 +1335,7 @@ void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
 	 */
 }
 
-void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
+void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
 	ShortAnalysis_SaveMeanChargeVector();
 	ShortAnalysis_Save2ClusterPlots();
 	vector<Float_t> xPred;
@@ -1422,15 +1369,18 @@ void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
 		hEdgeFittingAvrgCharge->GetXaxis()->SetTitle(title);//"predicted Position X / #mum");
 		histSaver->SaveHistogram(hEdgeFittingAvrgCharge);
 		TH1F* hEdgeFittingAvrgCharge_pfx = (TH1F*)hEdgeFittingAvrgCharge->ProfileX();
-		hEdgeFittingAvrgCharge_pfx->GetYaxis()->SetTitle("avrg. Charge / ADC");
-		TCutG *cut = this->settings->getEdgePosition(i);
-		name = "c";
-		name.Append(hEdgeFittingAvrgCharge_pfx->GetName());
-		TCanvas *c1 = new TCanvas(name,name);
-		hEdgeFittingAvrgCharge_pfx->Draw();
-		if(cut)cut->Draw();
-		histSaver->SaveCanvas(c1);
-		delete c1;
+		if(hEdgeFittingAvrgCharge_pfx){
+			hEdgeFittingAvrgCharge_pfx->GetYaxis()->SetTitle("avrg. Charge / ADC");
+			TCutG *cut = this->settings->getEdgePosition(i);
+			name = "c";
+			name.Append(hEdgeFittingAvrgCharge_pfx->GetName());
+			TCanvas *c1 = new TCanvas(name,name);
+			hEdgeFittingAvrgCharge_pfx->Draw();
+			if(cut)cut->Draw();
+			histSaver->SaveCanvas(c1);
+			delete c1;
+		}
+
 	}
 
 	//	char t; cin>>t;
@@ -1472,7 +1422,7 @@ void TAnalysisOf3dDiamonds::saveShortAnalysisHistos() {
 		/*//hXdetvsYdetvsEvents
 		ptrCanvasXdetvsYdetMeanCharge.push_back(new TCanvas());
 		ptrCanvasXdetvsYdetMeanCharge.at(i)->cd();
-		//*hFidCutXvsFidCutYvsMeanCharge.at(i) = (*hFidCutXvsFidCutYvsCharge.at(i)/(*hFidCutXvsFidCutYvsEvents.at(i)));
+		hFidCutXvsFidCutYvsMeanCharge.at(i) = (*hFidCutXvsFidCutYvsCharge.at(i)/(*hFidCutXvsFidCutYvsEvents.at(i)));
 		hXdetvsYdetvsEvents.at(i)->SetEntries(hXdetvsYdetvsEvents.at(i)->Integral());
 		hXdetvsYdetvsEvents.at(i)->Draw("COLZ");
 		hName  = TString::Format("cXdetvsYdetMeanCharge_%d_%d",channels.first,channels.second);
@@ -1609,19 +1559,56 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 
 }
 
-void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
+void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
+	TString name = "h3DCellNumbering";
+	TH2D* hCellNumbering = new TH2D(name,name,
+			settings->getNColumns3d(),settings->get3dMetallisationFidCuts()->getXLow(3),settings->get3dMetallisationFidCuts()->getXHigh(3),
+			settings->getNRows3d(),settings->get3dMetallisationFidCuts()->getYLow(3),settings->get3dMetallisationFidCuts()->getYHigh(3));
+	hCellNumbering->GetXaxis()->SetTitle("Xdet (#mum)");
+	hCellNumbering->GetYaxis()->SetTitle("Ydet (#mum)");
+
+	name = "hQuarterNumbering";
+	TH2D* hQuarterNumbering  = new TH2D(name,name,
+				settings->getNColumns3d()*2,settings->get3dMetallisationFidCuts()->getXLow(3),settings->get3dMetallisationFidCuts()->getXHigh(3),
+				settings->getNRows3d()*2,settings->get3dMetallisationFidCuts()->getYLow(3),settings->get3dMetallisationFidCuts()->getYHigh(3));
+	hQuarterNumbering->GetXaxis()->SetTitle("Xdet (#mum)");
+	hQuarterNumbering->GetYaxis()->SetTitle("Ydet (#mum)");
+	for(UInt_t column=0;column<settings->getNColumns3d();column++){
+		for(UInt_t row=0;row<settings->getNRows3d();row++){
+			Int_t cell =  settings->get3DCellNo((int)row,(int)column);
+			hCellNumbering->SetBinContent(column+1,row+1,cell);
+			for (UInt_t quarter = 0; quarter < settings->getNQuarters3d();quarter++){
+//				UInt_t quarterNo = settings->get3DQuarterNo(row,column,quarter);
+				UInt_t quarterColumn = quarter/2;
+				UInt_t quarterRow = quarter%2;
+				Int_t binX = 2 * column + quarterColumn;
+				Int_t binY = 2 * row + quarterRow;
+				hQuarterNumbering->SetBinContent(binX+1,binY+1,cell+.1*quarter);
+			}
+		}
+	}
+	histSaver->SaveHistogramWithCellGrid(hCellNumbering,hCellNumbering);
+	histSaver->SaveHistogramWithCellGrid(hQuarterNumbering,hQuarterNumbering);
+}
+
+void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
+	histSaver->SaveHistogram(hLongAnalysisInvalidCellNo);
+	histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
+	LongAnalysisSaveCellAndQuaterNumbering();
 
 	TH1F* hLandauBadCells = (TH1F*)hCellsLandau.at(0)->Clone("hLandauBadCells");
 	hLandauBadCells->SetTitle("Landau of bad cells");
+
+	//hDetXvsDetY3DOverview->GetZaxis()->SetTitle();
 	TH1F* hLandauGoodCells = (TH1F*)hCellsLandau.at(0)->Clone("hLandauGoodCells");
 	hLandauGoodCells->SetTitle("Landau of good cells");
 
 	for(int column=0;column<settings->getNColumns3d();column++){
 		for(int row=0;row<settings->getNRows3d();row++){
-
 			Int_t cell = column*settings->getNRows3d() + row;
-			//hCellNumbering->SetBinContent(column+1,row+1,cell); //This should be a clone of the 2D Cell Mean Charge Plot, Wait till Felix has finished.
-			//histSaver->SaveHistogram(hCellsLandau.at(cell));
+//			hCellNumbering->SetBinContent(column+1,row+1,cell);
+			if(false)//todo settings entry
+				histSaver->SaveHistogram(hCellsLandau.at(cell));
 
 			for(int i=0; i<settings->getBadCells3D().size(); i++)
 				if(cell==settings->getBadCells3D().at(i)){
@@ -1639,17 +1626,6 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 	}
 	histSaver->SaveHistogram(hLandauGoodCells);
 	histSaver->SaveHistogram(hLandauBadCells);
-
-	/*//hCellNumbering
-	cCellNumbering = new TCanvas("cCellNumbering","cCellNumbering");
-	cCellNumbering->cd();
-	hGridReferenceDetSpace->SetTitle("hCellNumbering");		//Set title to require
-	hGridReferenceDetSpace->Draw("COL");
-	hCellNumbering->Draw("sameCOLZAH");
-	hCellNumbering->Draw("sameTEXTAH");
-	settings->DrawMetallisationGrid(cCellNumbering, 3);
-	histSaver->SaveCanvas(cCellNumbering);
-			*/
 
 	vector< vector<Int_t> > hQuarterCellsPassFail;
 	vector<Int_t> hCellGrading;
@@ -1679,10 +1655,35 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 	}
 
 	//For h3DdetMeanCharge
-	cDetXvsDetY3DMeanCharge = new TCanvas("c3DdetMeanCharge","c3DdetMeanCharge");
-	cDetXvsDetY3DMeanCharge->cd();
-	 *hDetXvsDetY3DMeanCharge = (*hDetXvsDetY3DCharge/(*hDetXvsDetY3DEvents));
+//	TString name = "c3DdetMeanCharge";
+//	cDetXvsDetY3DMeanCharge = new TCanvas(name,name);
+//	cDetXvsDetY3DMeanCharge->cd();
+
+	TH2D *hDetXvsDetY3DMeanCharge = (TH2D*)hDetXvsDetY3DCharge->Clone("hDetXvsDetY3DMeanCharge");
+	hDetXvsDetY3DMeanCharge->SetTitle("hDetXvsDetY3DMeanCharge");
+	hDetXvsDetY3DMeanCharge->SetName("hDetXvsDetY3DMeanCharge");
+	*hDetXvsDetY3DMeanCharge = (*hDetXvsDetY3DCharge/(*hDetXvsDetY3DEvents));
 	hDetXvsDetY3DMeanCharge->SetEntries(hDetXvsDetY3DEvents->Integral());
+	histSaver->SaveHistogram(hDetXvsDetY3DMeanCharge);
+	histSaver->SaveHistogramWithCellGrid(hDetXvsDetY3DMeanCharge);
+
+	UInt_t xBins = hDetXvsDetY3DMeanCharge->GetXaxis()->GetNbins();
+	UInt_t yBins = hDetXvsDetY3DMeanCharge->GetYaxis()->GetNbins();
+	UInt_t xRebin = xBins/settings->getNColumns3d()/2;
+	UInt_t yRebin = yBins/settings->getNRows3d()/2;
+
+	TH2F* hDetXvsDetY3DMeanChargeQuarters = (TH2F*)hDetXvsDetY3DMeanCharge->Rebin2D(xRebin,yRebin,"hDetXvsDetY3DMeanChargeQuarters");
+	histSaver->SaveHistogram(hDetXvsDetY3DMeanChargeQuarters);
+	histSaver->SaveHistogramWithCellGrid(hDetXvsDetY3DMeanChargeQuarters);
+	delete hDetXvsDetY3DMeanChargeQuarters;
+
+	TH2D* hDetXvsDetY3DMeanChargeCells = (TH2D*)hDetXvsDetY3DMeanCharge->Rebin2D(xRebin*2,yRebin*2,"hDetXvsDetY3DMeanChargeCells");
+	histSaver->SaveHistogramWithCellGrid(hDetXvsDetY3DMeanChargeCells);
+	histSaver->SaveHistogram(hDetXvsDetY3DMeanChargeCells);
+	delete hDetXvsDetY3DMeanChargeCells;
+
+	delete hDetXvsDetY3DMeanCharge;
+	/*
 	//hDetXvsDetY3DMeanCharge->SetStats(kFALSE);
 	hGridReferenceDetSpace->SetTitle("hDetXvsDetY3DMeanCharge");		//Set title to require
 	hGridReferenceDetSpace->Draw("COL");
@@ -1690,35 +1691,32 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 	//hGridReference->Draw("COL");
 	settings->DrawMetallisationGrid(cDetXvsDetY3DMeanCharge, 3);
 	histSaver->SaveCanvas(cDetXvsDetY3DMeanCharge);
-///*
-//<<<<<<< .mine
+//*/
 	//hCellsLandau2DHighlightedQuarterFail
 	Int_t Ncells = settings->getNColumns3d()*settings->getNRows3d();
-	Int_t xBins = hCellsLandau.at(0)->GetNbinsX();
+	xBins = hCellsLandau.at(0)->GetNbinsX();
 	Float_t xMin = hCellsLandau.at(0)->GetBinLowEdge(1);
 	Float_t xMax = hCellsLandau.at(0)->GetBinLowEdge(xBins) + hCellsLandau.at(0)->GetBinWidth(xBins);
-//=======
 	//RebinnedMeanCharge
-	cDetXvsDetY3DMeanChargeRebinned = new TCanvas("c3DdetMeanChargeRebinned","c3DdetMeanChargeRebinned");
-	cDetXvsDetY3DMeanChargeRebinned->cd();
+//	cDetXvsDetY3DMeanChargeRebinned = new TCanvas("c3DdetMeanChargeRebinned","c3DdetMeanChargeRebinned");
+//	cDetXvsDetY3DMeanChargeRebinned->cd();
 	//hDetXvsDetY3DvsEventsRebinned->Draw("TEXT");
-	 *hDetXvsDetY3DMeanChargeRebinned = (*hDetXvsDetY3DChargeRebinned/(*hDetXvsDetY3DEventsRebinned));
-	hDetXvsDetY3DMeanChargeRebinned->SetEntries(hDetXvsDetY3DEventsRebinned->Integral());
-	hDetXvsDetY3DMeanChargeRebinned->SetStats(kFALSE);
-	hGridReferenceDetSpace->SetTitle("hDetXvsDetY3DMeanChargeRebinned");		//Set title to require
-	hGridReferenceDetSpace->Draw("COL");
-	hDetXvsDetY3DMeanChargeRebinned->Draw("sameCOLZAH");
-	hDetXvsDetY3DEventsRebinned->Draw("sameTEXTAH");
-	//hDetXvsDetY3DvsEventsRebinned->Draw("TEXT");
-	settings->DrawMetallisationGrid(cDetXvsDetY3DMeanChargeRebinned, 3);
-	histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeRebinned);
+//	 *hDetXvsDetY3DMeanChargeRebinned = (*hDetXvsDetY3DChargeRebinned/(*hDetXvsDetY3DEventsRebinned));
+//	hDetXvsDetY3DMeanChargeRebinned->SetEntries(hDetXvsDetY3DEventsRebinned->Integral());
+//	hDetXvsDetY3DMeanChargeRebinned->SetStats(kFALSE);
+//	hGridReferenceDetSpace->SetTitle("hDetXvsDetY3DMeanChargeRebinned");		//Set title to require
+//	hGridReferenceDetSpace->Draw("COL");
+//	hDetXvsDetY3DMeanChargeRebinned->Draw("sameCOLZAH");
+//	hDetXvsDetY3DEventsRebinned->Draw("sameTEXTAH");
+//	//hDetXvsDetY3DvsEventsRebinned->Draw("TEXT");
+//	settings->DrawMetallisationGrid(cDetXvsDetY3DMeanChargeRebinned, 3);
+//	histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeRebinned);
 	/*c3DdetEventsRebinned = new TCanvas("c3DdetEventsRebinned","c3DdetEventsRebinned");
 	//c3DdetEventsRebinned->cd();
 	hDetXvsDetY3DvsEventsRebinned->Draw("sameTEXT");			//("COLZ");
 	//settings->DrawMetallisationGrid();
 	histSaver->SaveCanvas(c3DdetEventsRebinned);
 //	 */
-//>>>>>>> .r774
 
 	//cout<<"Ncells: "<<Ncells<<" xBins: "<<xBins<<" xMin: "<<xMin<<" xMax: "<<xMax<<endl;
 
@@ -1744,7 +1742,6 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 			hHighlightedQuarterFail->SetBinContent(1,cell,hCellGrading.at(cell));
 		}
 	}
-
 	TCanvas* cCellsLandau2DHighlightedQuarterFail = new TCanvas("cCellsLandau2DHighlightedQuarterFail","cCellsLandau2DHighlightedQuarterFail");
 	cCellsLandau2DHighlightedQuarterFail->SetCanvasSize(1500,3000);
 	cCellsLandau2DHighlightedQuarterFail->cd();
@@ -1755,53 +1752,54 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 	//hHighlightedQuarterFail->Draw("COLAH");
 	//hCellsLandau2DHighlightedQuarterFail->Draw("sameCOLZ");
 	histSaver->SaveCanvas(cCellsLandau2DHighlightedQuarterFail);
-
-//<<<<<<< .mine
-	/*
-=======
-				Float_t xBin = 2*column + (quarter/2)+1;
-				Float_t yBin = 2*row +quarter+1-2*(quarter/2);
-				Int_t entry = column*settings->getNRows3d()*4+row*4+quarter;
-				if (entry<hQuaterCellsLandau.size()){
-					Float_t mean = hQuaterCellsLandau.at(entry)->GetMean();
-					Float_t rms = hQuaterCellsLandau.at(entry)->GetRMS();
-					if(hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetNbinsX()>xBin && hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetNbinsY()>yBin)
-						hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetBinContent(xBin,yBin,mean);
-					else
-						cout<<" hDetXvsDetY3DMeanChargeRebinnedQuarterCell, bin does not exist: " << xBin<<"/"<<yBin<<endl;
-					if(hDetXvsDetY3DRebinnedQuarterCellRMS->GetNbinsX()>xBin && hDetXvsDetY3DRebinnedQuarterCellRMS->GetNbinsY()>yBin)
-						hDetXvsDetY3DRebinnedQuarterCellRMS->SetBinContent(xBin, yBin, rms);
-					else
-						cout<<" hDetXvsDetY3DRebinnedQuarterCellRMS, bin does not exist: " << xBin<<"/"<<yBin<<endl;
-					QuaterCellEntrySumAddition = QuaterCellEntrySum;
-					QuaterCellEntrySum = QuaterCellEntrySumAddition + hQuaterCellsLandau.at(entry)->GetEntries();
-					//histSaver->SaveHistogram(hQuaterCellsLandau.at(entry));
-					if(entry<hQuarterCellsClusterSize.size()){
-						cout<<"save: hQuarterCellsClusterSize["<<entry<<"] / "<<hQuarterCellsClusterSize.size()<<endl;
-						cout<<"hQuarterCellsClusterSize: "<<flush<<" "<<hQuarterCellsClusterSize[entry]<<endl;
-						//histSaver->SaveHistogram(hQuarterCellsClusterSize.at(entry));
-					}
-				}
-				else{
-					cout<<"size of hQuaterCellsLandau is to small"<<entry<<"/"<<hQuaterCellsLandau.size()<<endl;
-				}
-			}
-		}
-	}
-	  *//*
-	cout<<"done"<<endl;
-	cout<<"cDetXvsDetY3DMeanChargeRebinnedQuarterCell"<<endl;
-	cDetXvsDetY3DMeanChargeRebinnedQuarterCell = new TCanvas("c3DdetQuarterCellMeanCharge","c3DdetQuarterCellMeanCharge");
-	cDetXvsDetY3DMeanChargeRebinnedQuarterCell->cd();
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetEntries(QuaterCellEntrySum);
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetStats(kFALSE);
-	hGridReferenceDetSpace->SetTitle("h3DdetQuarterCellMeanCharge");		//Set title to require
-	hGridReferenceDetSpace->Draw("COL");
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameCOLZAH");
-	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameTEXTAH");
-	settings->DrawMetallisationGrid(cDetXvsDetY3DMeanChargeRebinnedQuarterCell, 3);
-	histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeRebinnedQuarterCell);
->>>>>>> .r774
+//
+//	int QuaterCellEntrySum = 0;
+//	int QuaterCellEntrySumAddition = 0;
+//	for(int column=0;column<settings->getNColumns3d();column++){
+//		for(int row=0;row<settings->getNRows3d();row++){
+//			for(int quarter=0;quarter<settings->getNQuarters3d();quarter++){	//For each quater cell
+//				Float_t xBin = 2*column + (quarter/2)+1;
+//				Float_t yBin = 2*row +quarter+1-2*(quarter/2);
+//				Int_t entry = column*settings->getNRows3d()*4+row*4+quarter;
+//				if (entry<hQuaterCellsLandau.size()){
+//					Float_t mean = hQuaterCellsLandau.at(entry)->GetMean();
+//					Float_t rms = hQuaterCellsLandau.at(entry)->GetRMS();
+//					if(hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetNbinsX()>xBin && hDetXvsDetY3DMeanChargeRebinnedQuarterCell->GetNbinsY()>yBin)
+//						hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetBinContent(xBin,yBin,mean);
+//					else
+//						cout<<" hDetXvsDetY3DMeanChargeRebinnedQuarterCell, bin does not exist: " << xBin<<"/"<<yBin<<endl;
+//					if(hDetXvsDetY3DRebinnedQuarterCellRMS->GetNbinsX()>xBin && hDetXvsDetY3DRebinnedQuarterCellRMS->GetNbinsY()>yBin)
+//						hDetXvsDetY3DRebinnedQuarterCellRMS->SetBinContent(xBin, yBin, rms);
+//					else
+//						cout<<" hDetXvsDetY3DRebinnedQuarterCellRMS, bin does not exist: " << xBin<<"/"<<yBin<<endl;
+//					QuaterCellEntrySumAddition = QuaterCellEntrySum;
+//					QuaterCellEntrySum = QuaterCellEntrySumAddition + hQuaterCellsLandau.at(entry)->GetEntries();
+//					//histSaver->SaveHistogram(hQuaterCellsLandau.at(entry));
+//					if(entry<hQuarterCellsClusterSize.size()){
+//						cout<<"save: hQuarterCellsClusterSize["<<entry<<"] / "<<hQuarterCellsClusterSize.size()<<endl;
+//						cout<<"hQuarterCellsClusterSize: "<<flush<<" "<<hQuarterCellsClusterSize[entry]<<endl;
+//						//histSaver->SaveHistogram(hQuarterCellsClusterSize.at(entry));
+//					}
+//				}
+//				else{
+//					cout<<"size of hQuaterCellsLandau is to small"<<entry<<"/"<<hQuaterCellsLandau.size()<<endl;
+//				}
+//			}
+//		}
+//	}
+//
+//	cout<<"done"<<endl;
+//	cout<<"cDetXvsDetY3DMeanChargeRebinnedQuarterCell"<<endl;
+//	TCanvas* cDetXvsDetY3DMeanChargeRebinnedQuarterCell = new TCanvas("c3DdetQuarterCellMeanCharge","c3DdetQuarterCellMeanCharge");
+//	cDetXvsDetY3DMeanChargeRebinnedQuarterCell->cd();
+//	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetEntries(QuaterCellEntrySum);
+//	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->SetStats(kFALSE);
+//	hGridReferenceDetSpace->SetTitle("h3DdetQuarterCellMeanCharge");		//Set title to require
+//	hGridReferenceDetSpace->Draw("COL");
+//	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameCOLZAH");
+//	hDetXvsDetY3DMeanChargeRebinnedQuarterCell->Draw("sameTEXTAH");
+//	settings->DrawMetallisationGrid(cDetXvsDetY3DMeanChargeRebinnedQuarterCell, 3);
+//	histSaver->SaveCanvas(cDetXvsDetY3DMeanChargeRebinnedQuarterCell);
 
 	//Cell Overlay
 
@@ -1819,9 +1817,9 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 				//if((i*settings->getNRows3d()+j)==CellsHarris10Bad[k]){
 				if((column*settings->getNRows3d()+row)==settings->getBadCells3D().at(badCell)){
 					Continue = 0;
-					int Entries = hCellsHarris10Bad->GetEntries();;
-					hCellsHarris10Bad->Add(hCellsLandau.at(column*settings->getNRows3d()+row));
-					hCellsHarris10Bad->SetEntries((Entries+hCellsLandau.at(column*settings->getNRows3d()+row)->GetEntries()));
+//					int Entries = hCellsHarris10Bad->GetEntries();;
+//					hCellsHarris10Bad->Add(hCellsLandau.at(column*settings->getNRows3d()+row));
+//					hCellsHarris10Bad->SetEntries((Entries+hCellsLandau.at(column*settings->getNRows3d()+row)->GetEntries()));
 
 					RebinnedQuarterCellFails->SetBinContent(column+1,row+1,4);
 
@@ -1829,9 +1827,9 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 						cout<<"h2DMeanClusterSizeQuarterCell"<<column<<" "<<row<<" "<<badCell<<" "<<l<<endl;
 						//h2DMeanClusterSizeQuarterCell
 						Float_t xBin = 4*4+SortArrayPointer[badCell];
-						Float_t yBin = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+badCell)->GetMean();
-						Float_t zBin = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+badCell)->GetMean();
-						h2DMeanClusterSizeQuarterCell->Fill(xBin,yBin,zBin);
+//						Float_t yBin = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+badCell)->GetMean();
+//						Float_t zBin = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+badCell)->GetMean();
+//						h2DMeanClusterSizeQuarterCell->Fill(xBin,yBin,zBin);
 						//h2DMeanClusterSizeQuarterCellTotal->Fill(4*4+SortArrayPointer[k],hQuaterCellsLandau.at(i*settings->getNRows3d()*4+j*4+k)->GetMean(),1);
 						//h2DMeanClusterSizeQuarterCellEvents->Fill(4*4+SortArrayPointer[k],1);
 
@@ -1883,11 +1881,11 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 								int EventsSum = 0;
 								for(int m=6;m<20;m++){
 									EventsSum = Events;
-									Events = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+k)->GetBinContent(m+1)+EventsSum;
+//									Events = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+k)->GetBinContent(m+1)+EventsSum;
 								}
 							}
 							else{
-								Events = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+k)->GetBinContent(l);
+//								Events = hQuarterCellsClusterSize.at(column*settings->getNRows3d()*4+row*4+k)->GetBinContent(l);
 							}
 							ContentSum = h2DClusterSizeQuarterCell->GetBinContent(4*4+k+1,l-1);	//To fill 4 failed quarters area of plot
 							h2DClusterSizeQuarterCell->SetBinContent(4*4+k+1,l-1,Events+ContentSum);
@@ -1905,9 +1903,9 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 				//hCellsHarrisGoodCells
 				for(int k=0;k<18;k++){
 					if((column*settings->getNRows3d()+row)==settings->getGoodCells3D().at(k)){
-						int Entries = hCellsHarris18Good->GetEntries();
-						hCellsHarris18Good->Add(hCellsLandau.at(column*settings->getNRows3d()+row));
-						hCellsHarris18Good->SetEntries((Entries+hCellsLandau.at(column*settings->getNRows3d()+row)->GetEntries()));
+//						int Entries = hCellsHarris18Good->GetEntries();
+//						hCellsHarris18Good->Add(hCellsLandau.at(column*settings->getNRows3d()+row));
+//						hCellsHarris18Good->SetEntries((Entries+hCellsLandau.at(column*settings->getNRows3d()+row)->GetEntries()));
 					}
 				}
 
@@ -1916,8 +1914,8 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 				float QuarterMeanChargeUnSorted[4];
 				for(int k=0;k<4;k++){
 					SortArrayPointer[k] = k;
-					QuarterMeanCharge[k] = hQuaterCellsLandau.at(column*settings->getNRows3d()*4+row*4+k)->GetMean();
-					QuarterMeanChargeUnSorted[k] = hQuaterCellsLandau.at(column*settings->getNRows3d()*4+row*4+k)->GetMean();
+//					QuarterMeanCharge[k] = hQuaterCellsLandau.at(column*settings->getNRows3d()*4+row*4+k)->GetMean();
+//					QuarterMeanChargeUnSorted[k] = hQuaterCellsLandau.at(column*settings->getNRows3d()*4+row*4+k)->GetMean();
 				}
 				SortArrayBtoS(QuarterMeanCharge, 4);
 				float FlucFail = 0.1;		//If fluctuation greater than this -> Quarter Fails
@@ -2009,14 +2007,14 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 					if(SortArrayPointer[k]>1)
 						hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->SetBinContent((2*column+2),(2*row+1+SortArrayPointer[k]-2),500);
 				}
-					/*else{
+					else{
 						if(k<2)
 							hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->SetBinContent((2*i+1),(2*j+1+k),1000);
 						if(k>1)
 							hDetXvsDetY3DMeanChargeQuarterCellGrading.at(5)->SetBinContent((2*i+2),(2*j+1+k-2),1000);
 					}
 				}
-	    *//*
+
 				for(int k=0;k<4;k++){	//For each Grading
 					if(k==NumberQuarterFails){
 						//For Transparent Analysis
@@ -2147,7 +2145,7 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 	histSaver->SaveCanvas(cCellsOverlayed);
 	//hCellsOverlayed55RMS->Draw("sameTEXT");
 
-	/*hCellsOverlayedEvents->Draw("sameTEXT");
+	hCellsOverlayedEvents->Draw("sameTEXT");
 	 cCellsOverlayed->SetName("cCellsOverlayedMeanChargeWithEntries");
 	 histSaver->SaveCanvas(cCellsOverlayed);
 	histSaver->SaveHistogram(hBinnedMeanCharge);	//*//*
@@ -2693,6 +2691,9 @@ void TAnalysisOf3dDiamonds::saveLongAnalysisHistos() {
 
 
 }
+		}
+	}
+}
 
 float* TAnalysisOf3dDiamonds::SortArrayBtoS(float* nArray, int nSize) {
 
@@ -2861,11 +2862,11 @@ void TAnalysisOf3dDiamonds::createTreeTestHistos() {
  * Cell Labeling
  * 			+-----------+-----------+
  * 			+           +           +
- * 			+     0     +     1     +       ^
+ * 			+     1     +     3     +       ^
  * 			+           +           +     Y |
  * 			+-----------+-----------+       |
  * 			+           +           +       |
- * 			+     2     +     3     +       |
+ * 			+     0     +     2     +       |
  * 			+           +           +       |
  * 			+-----------+-----------+       +-------->
  * 			                                       X
@@ -3017,6 +3018,58 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Save2ClusterPlots() {
 	hCh->GetYaxis()->SetTitle("Channel no for cluster no. 2");
 	histSaver->SaveHistogram(hCh);
 	delete hCh;
+}
+
+void TAnalysisOf3dDiamonds::initialiseHistos() {
+	// Initialise
+	hValidEventsFiducialSpace = new TH2F("hValidEventsFiducialSpace","hValidEventsFiducialSpace",1024,0,256,1024,0,256);
+	hValidEventsFiducialSpace->GetXaxis()->SetTitle("avrg silicon position x /ch");
+	hValidEventsFiducialSpace->GetYaxis()->SetTitle("avrg silicon position y /ch");
+	Float_t xmin = settings->get3dMetallisationFidCuts()->getXLow(0);
+	Float_t xmax = settings->get3dMetallisationFidCuts()->getXHigh(0);
+	Float_t ymin = settings->get3dMetallisationFidCuts()->getYLow(0);
+	Float_t ymax = settings->get3dMetallisationFidCuts()->getYHigh(0);
+	cout<<"RANGE: "<<xmin<<"/"<<xmax<<"\t"<<ymin<<"/"<<ymax<<endl;
+	Float_t deltaX = xmax-xmin;
+	Float_t deltaY = ymax - ymin;
+	xmin = xmin - .2 * deltaX;
+	xmin = xmax + .2 * deltaX;
+	ymin = ymin - .2 * deltaY;
+	ymax = ymax + .2 * deltaY;
+	hValidEventsDetSpace = new TH2F("hValidEventsDetSpace","hValidEventsDetSpace",1024,xmin,xmax,1024,ymin,ymax);
+	hValidEventsDetSpace->GetXaxis()->SetTitle("predicted Hit position x in det space /#mum");
+	hValidEventsDetSpace->GetYaxis()->SetTitle("predicted Hit position y in det space /#mum");
+	if(settings->do3dShortAnalysis() == 1){
+		initialiseShortAnalysisHistos();
+	}
+	if(settings->do3dLongAnalysis() == 1){
+		initialiseLongAnalysisHistos();
+	}
+	if(settings->do3dTransparentAnalysis() == 1){
+		initialiseTransparentAnalysisHistos();
+		//initialiseTransparentAnalysisHistos();
+	}
+}
+
+void TAnalysisOf3dDiamonds::saveHistos() {
+	histSaver->SaveHistogram(hValidEventsDetSpace);
+	histSaver->SaveHistogram(hValidEventsFiducialSpace);
+	// Save
+	if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();}
+	if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
+	if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
+}
+
+void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
+	initialise3DGridReference();
+	initialise3DYAlignmentHistos();
+	initialise3DOverviewHistos();
+	initialise3D2DLandauAndClustersizeHistos();
+	initialise3DCellOverlayHistos();
+	hLongAnalysisInvalidCellNo = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCellNo");
+	hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
+	hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster");
+	hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCluster");
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
