@@ -56,6 +56,7 @@ private:
 	void saveHistos();
 	void SaveShortAnalysisHistos();
 	void SaveLongAnalysisHistos();
+	void SaveLongAnalysisHistos2();
 	void saveTransparentAnalysisHistos();
 
 	void ShortAnalysis();
@@ -94,6 +95,13 @@ private:
 	void ShortAnalysis_SaveEdgeDistributions();
 	void ShortAnalysis_FillMeanChargeVector(Float_t clusterCharge);
 	void ShortAnalysis_SaveMeanChargeVector();
+
+private:
+	void LongAnalysis_SaveGoodAndBadCellLandaus();
+	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
+	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
+	void LongAnalysis_SaveCellsClusterSize2DVsGrading();
+
 private:
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
@@ -246,6 +254,9 @@ private:
 
 	vector< vector<TH1F*> > hQuarterCellsLandau;
 	vector< vector<TH1F*> > hQuarterCellsClusterSize;
+	vector< vector<Int_t> > hQuarterCellsPassFail;
+	vector<Int_t> CellGrading;
+	Float_t hLandauGoodCellsMean;
 
 	TCanvas* cCellsOverlayMeanCharge;
 	TH2D* hCellsOverlayCharge;
