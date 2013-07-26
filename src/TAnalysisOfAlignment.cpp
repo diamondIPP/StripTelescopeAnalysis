@@ -18,7 +18,7 @@ TAnalysisOfAlignment::TAnalysisOfAlignment(TSettings *settings) {
 	sys = gSystem;
 	settings->goToAlignmentRootDir();
 	eventReader=new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(),settings->getEtaDistributionPath(),settings);
-	histSaver=new HistogrammSaver();
+	histSaver=new HistogrammSaver(settings);
 	settings->goToAlignmentAnalysisDir();
 	htmlAlignment=new THTMLAlignment(settings);
 	htmlAlignment->setAlignment(eventReader->getAlignment());

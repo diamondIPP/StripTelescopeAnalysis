@@ -7,9 +7,9 @@
 
 #include "../include/TAnalysisOfSelection.hh"
 
-TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
-	if(settings!=0)
-		this->settings=settings;
+TAnalysisOfSelection::TAnalysisOfSelection(TSettings *newSettings) {
+	if(newSettings!=0)
+		this->settings=newSettings;
 	else exit(0);
 	cout<<"\n\n******Analysis of Selection *******\n"<<endl;
 	//	cout<<settings<<endl;
@@ -22,7 +22,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *settings) {
 	htmlSelection = new THTMLSelectionAnalysis(settings);
 	settings->goToSelectionTreeDir();
 	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
-	histSaver=new HistogrammSaver();
+	histSaver=new HistogrammSaver(settings);
 	settings->goToSelectionAnalysisDir();
 	//	htmlPedestal->setSubdirPath("selectionAnalysis");
 	histSaver->SetPlotsPath(settings->getSelectionAnalysisPath());

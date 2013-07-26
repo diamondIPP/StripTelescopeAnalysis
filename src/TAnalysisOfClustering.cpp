@@ -7,16 +7,16 @@
 
 #include "../include/TAnalysisOfClustering.hh"
 
-TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
+TAnalysisOfClustering::TAnalysisOfClustering(TSettings *newSettings) {
 	cout<<"\n\n\n\n**********************************************************"<<endl;
 	cout<<"**********************************************************"<<endl;
 	cout<<"*********TAnalysisOfClustering::TAnalysisOfClustering*****"<<endl;
 	cout<<"**********************************************************"<<endl;
 	cout<<"**********************************************************\n\n\n"<<endl;
-	if(settings==0)
+	if(newSettings==0)
 		exit(-1);//todo
 		//settings=new TSettings();
-	setSettings(settings);
+	setSettings(newSettings);
 	res = 0;
 	UInt_t runNumber=settings->getRunNumber();
 	sys = gSystem;
@@ -24,7 +24,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *settings) {
 
 	settings->goToClusterTreeDir();
 	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings);
-	histSaver=new HistogrammSaver();
+	histSaver=new HistogrammSaver(settings);
 
 
 	settings->goToClusterAnalysisDir();
