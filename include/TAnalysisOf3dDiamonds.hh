@@ -102,6 +102,7 @@ private:
 	void LongAnalysis_SaveFailedQuarters();
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
 	void LongAnalysis_SaveCellsClusterSize2DVsGrading();
+	void LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
 
 private:
 	TCellAnalysisClass* clusteredAnalysis;
