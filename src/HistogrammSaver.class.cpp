@@ -308,36 +308,83 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 	return pt;
 }
 
+TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
+	if (!histo)
+			return 0;
+	TString name = histo->GetName();
+		if (name.BeginsWith("h"))
+			name.Replace(0,1,"c");
+		else
+			name.Insert(0,"c_");
+		TCanvas* c1 = new TCanvas(name,name);
+		c1->cd();
+		hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
+		hGridReferenceDetSpace->Draw("COL");
+		histo->Draw("sameCOLZAH");
+	//	TLegend* leg = 0;
+		if (histo2){
+			histo2->Draw("sameTEXTAH");
+	//		if(histo2!=histo){
+	//			leg = c1->BuildLegend();
+	//			leg->Clear();
+	//			leg->AddEntry(histo);
+	//			leg->AddEntry(histo2);
+	//		}
+		}
+		//hGridReference->Draw("COL");
+		settings->DrawMetallisationGrid(c1, 3);
+	//	cout<<c1->GetName()<<endl;
+	//	if (leg)
+	//		leg->Draw();
+	return c1;
+}
+
 void HistogrammSaver::SaveHistogramWithCellGrid(TH2* histo,TH2* histo2) {
 //	cout<<"[HistogrammSaver::SaveHistogramWithCellGrid]\t"<<flush;
 	if (!histo)
 		return;
-	TString name = histo->GetName();
-	if (name.BeginsWith("h"))
-		name.Replace(0,1,"c");
-	else
-		name.Insert(0,"c_");
-	TCanvas* c1 = new TCanvas(name,name);
-	c1->cd();
-	hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
-	hGridReferenceDetSpace->Draw("COL");
-	histo->Draw("sameCOLZAH");
-//	TLegend* leg = 0;
-	if (histo2){
-		histo2->Draw("sameTEXTAH");
-//		if(histo2!=histo){
-//			leg = c1->BuildLegend();
-//			leg->Clear();
-//			leg->AddEntry(histo);
-//			leg->AddEntry(histo2);
-//		}
-	}
-	//hGridReference->Draw("COL");
-	settings->DrawMetallisationGrid(c1, 3);
-//	cout<<c1->GetName()<<endl;
-//	if (leg)
-//		leg->Draw();
+	TCanvas *c1 = DrawHistogramWithCellGrid(histo,histo2);
 	this->SaveCanvas(c1);
+}
+
+void HistogrammSaver::DrawFailedQuarters(
+		vector<pair<Int_t, Int_t> > failedQuarters, TCanvas* c1) {
+	UInt_t DiamondPattern = 3;
+	Float_t xStart = settings->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
+	Float_t yStart =settings->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
+	UInt_t det = TPlaneProperties::getDetDiamond();
+	Float_t cellwidth = settings->GetCellWidth(det,DiamondPattern-1);
+	Float_t cellheight = settings->GetCellHeight();
+	TCutG * failedQuarter;
+	int i =0;
+	for (vector<pair<Int_t, Int_t> >::iterator quarter = failedQuarters.begin();
+			quarter != failedQuarters.end(); ++quarter){
+		i++;
+		if(!settings->isValidCellNo((*quarter).first)){
+			cerr<< "Invalid Cell No: " << (*quarter).first<<endl;
+			continue;
+		}
+
+		int column = settings->getColumnOfCell((*quarter).first);
+		int row = settings->getRowOfCell((*quarter).first);
+		float xLow = xStart + (column+.5*((*quarter).second%2))*cellwidth;
+		float yLow = yStart + (row+.5*((*quarter).second/2))*cellheight;
+		float xHigh = xLow+cellwidth/2;
+		float yHigh = yLow+cellheight/2;
+		TString name = c1->GetName();
+		name.Append(TString::Format("_FailedQuarter_%dOf%d",i,(int)failedQuarters.size()));
+		cout<<" DRAW: "<< name<<endl;
+		failedQuarter = new TCutG(name,5);
+		failedQuarter->SetPoint(0,xLow,yLow);
+		failedQuarter->SetPoint(1,xLow,yHigh);
+		failedQuarter->SetPoint(2,xHigh,yHigh);
+		failedQuarter->SetPoint(3,xHigh,yLow);
+		failedQuarter->SetPoint(4,xLow,yLow);
+		failedQuarter->SetFillStyle(1001);
+		failedQuarter->SetLineWidth(0);
+		failedQuarter->SetFillColor(kRed);
+		failedQuarter->Draw("sameF");
+	}
 }
 
 void HistogrammSaver::UpdatePaveText(){

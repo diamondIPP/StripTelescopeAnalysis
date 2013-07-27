@@ -86,9 +86,10 @@ public:
 	void SaveGraphROOT(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPDF(TH1F* histo);
 	void SaveHistogramPDF(TH2* histo);
-
+	void DrawFailedQuarters(vector< pair<Int_t,Int_t> > failedQuarters,TCanvas*c1);
 //	void SaveHistogramWithCellGrid(TH2D* histo){SaveHistogramWithCellGrid(TH2*)histo)};
 //	void SaveHistogramWithCellGrid(TH2* histo){SaveHistogramWithCellGrid(TH2*)histo)}
+	TCanvas* DrawHistogramWithCellGrid(TH2* histo,TH2* histo2=0);
 	void SaveHistogramWithCellGrid(TH2* histo, TH2* histo2=0);
 	void SetVerbosity(unsigned int i);
 	void SetRunNumber(unsigned int runNumber);

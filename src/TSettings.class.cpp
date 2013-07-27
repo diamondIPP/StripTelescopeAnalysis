@@ -2156,6 +2156,7 @@ int TSettings::get3DQuarterNo(int row, int column, int quarter){
 
 /**
  * @todo look at hardcoded numbers
+ * @todo move to histogrammSaver class
  * @param nCanvas
  * @param DiamondPattern 1:Strip, 2:3dnoColumns, 3: 3dwithColumns
  */
