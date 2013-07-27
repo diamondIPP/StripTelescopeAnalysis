@@ -309,8 +309,6 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 }
 
 TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
-	if (!histo)
-			return 0;
 	TString name = histo->GetName();
 		if (name.BeginsWith("h"))
 			name.Replace(0,1,"c");
@@ -320,7 +318,8 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
 		c1->cd();
 		hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
 		hGridReferenceDetSpace->Draw("COL");
-		histo->Draw("sameCOLZAH");
+	    if (histo)
+		    histo->Draw("sameCOLZAH");
 	//	TLegend* leg = 0;
 		if (histo2){
 			histo2->Draw("sameTEXTAH");
