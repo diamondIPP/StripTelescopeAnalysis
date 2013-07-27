@@ -90,7 +90,6 @@ public:
 
 	enumRunDescription getAnalysedDiamond();
 
-
 	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
 private:
 	void goToDir(std::string dir);
