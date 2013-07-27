@@ -365,8 +365,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	if(cellNo < hCellsLandau.size())
 		hCellsLandau.at(cellNo)->Fill(diamondCluster.getCharge(false));
 
-	if(cellNo < hCellsClusteSize.size())
-		hCellsClusteSize.at(cellNo)->Fill((diamondCluster.getClusterSize()-2));
+	if(cellNo < hCellsClusteSize.size()){
+		Int_t ClusterSize = diamondCluster.getClusterSize()-2;
+		Int_t MaxHistoClusterSize = hCellsClusteSize.at(0)->GetNbinsX();
+		if(ClusterSize>MaxHistoClusterSize)		//If ClusterSize is > hCellsClusterSize2D MaxClusterSize then goes into MaxClusterBin.
+			hCellsClusteSize.at(cellNo)->Fill(MaxHistoClusterSize);
+		else
+			hCellsClusteSize.at(cellNo)->Fill(ClusterSize);
+	}
 	//	if(cellNo < hQuarterCellsLandau.size())
 	//		if(quarterNo < hQuarterCellsLandau[cellNo].size()){
 	//				hQuarterCellsLandau[cellNo][quarterNo]->Fill(diamondCluster.getCharge(false));
@@ -887,7 +893,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 			hCellsLandau.push_back(new TH1F(name,name,64,0,2800));
 
 			stringstream hCellsClusteSizeName; hCellsClusteSizeName<<"hCellsClusteSize"<<cell<<FileNameEnd;
-			hCellsClusteSize.push_back(new TH1F(hCellsClusteSizeName.str().c_str(),hCellsClusteSizeName.str().c_str(),64,0,2800));
+			hCellsClusteSize.push_back(new TH1F(hCellsClusteSizeName.str().c_str(),hCellsClusteSizeName.str().c_str(),5,0,5));
 
 			hQuarterCellsLandau.push_back(vector<TH1F*>());
 			hQuarterCellsClusterSize.push_back(vector<TH1F*>());
@@ -1718,17 +1724,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsClusterSize2DVsGrading() {
 
-	Int_t MaxClusterBin = 5;
+	Int_t MaxClusterSize = hCellsClusteSize.at(0)->GetNbinsX();
 	Int_t MaxGradingBin = 5;
 	//hCellsClusterSize2D
-	stringstream h2DClusterSizeName; h2DClusterSizeName<<"h2DClusterSize"<<FileNameEnd;
-	TH2D* hCellsClusterSize2D = new TH2D(h2DClusterSizeName.str().c_str(),h2DClusterSizeName.str().c_str(),MaxGradingBin,0,MaxGradingBin,MaxClusterBin,0,MaxClusterBin);
+	stringstream hCellsClusterSize2DName; hCellsClusterSize2DName<<"hCellsClusterSize2D"<<FileNameEnd;
+	TH2D* hCellsClusterSize2D = new TH2D(hCellsClusterSize2DName.str().c_str(),hCellsClusterSize2DName.str().c_str(),MaxGradingBin,0,MaxGradingBin,MaxClusterSize,0,MaxClusterSize);
 	hCellsClusterSize2D->GetXaxis()->SetTitle("Grading");
 	hCellsClusterSize2D->GetYaxis()->SetTitle("ClusterSize");
 
-	for(int i=0;i<MaxClusterBin;i++){		//Set yAxis BinLabels
+	for(int i=0;i<MaxClusterSize;i++){		//Set yAxis BinLabels
 		stringstream jNumber;
-		if(i==MaxClusterBin-1)
+		if(i==MaxClusterSize-1)
 			jNumber<<"5+";
 		else
 			jNumber<<(i+1);
@@ -1747,24 +1753,21 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsClusterSize2DVsGrading() {
 			Int_t cell = column*settings->getNRows3d() + row;
 			Int_t Grading = CellGrading.at(cell);
 
+			histSaver->SaveHistogram(hCellsClusteSize.at(cell));
+
 			Int_t xBins = hCellsClusteSize.at(0)->GetNbinsX();
 			Int_t NumEvents = 0;
 
-			for(int xBin =1; xBin<xBins; xBin++){
-				if(xBin>=MaxClusterBin)		//All events with clustersize 5 and above are placed in last bin.
-					NumEvents += hCellsClusteSize.at(cell)->GetBinContent(xBin);
-				else
-					NumEvents = hCellsClusteSize.at(cell)->GetBinContent(xBin);
-				Int_t hCellsClusterSize2DBin = MaxClusterBin*Grading + xBin;
-				cout<<"cell: "<<cell<<" Grading: "<<Grading<<" xBin: "<<xBin<<" hCellsClusterSize2DBin: "<<hCellsClusterSize2DBin<<endl;
-				hCellsClusterSize2D->AddBinContent(hCellsClusterSize2DBin,NumEvents);  //Grading+1 so that Grading 0 is placed in bin 1
+			for(int xBin =1; xBin<=xBins; xBin++){
+				NumEvents = hCellsClusteSize.at(cell)->GetBinContent(xBin);
+				hCellsClusterSize2D->Fill(Grading,xBin-2,NumEvents);
 			}
 		}
 	}
 
 	TCanvas* cCellsClusterSize2D = new TCanvas("cCellsClusterSize2D","cCellsClusterSize2D");
 	cCellsClusterSize2D->cd();
-	hCellsClusterSize2D->SetStats(kFALSE);
+	//hCellsClusterSize2D->SetStats(kFALSE);
 	hCellsClusterSize2D->Draw("COLZ");
 	/**h2DClusterSizeClone1 = *h2DClusterSize/(*h2DClusterSizeClone);
 	gStyle->SetPaintTextFormat("3.2g");
