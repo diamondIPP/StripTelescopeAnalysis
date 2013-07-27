@@ -366,8 +366,8 @@ void HistogrammSaver::DrawFailedQuarters(
 
 		int column = settings->getColumnOfCell((*quarter).first);
 		int row = settings->getRowOfCell((*quarter).first);
-		float xLow = xStart + (column+.5*((*quarter).second%2))*cellwidth;
-		float yLow = yStart + (row+.5*((*quarter).second/2))*cellheight;
+		float xLow = xStart + (column+.5*((*quarter).second/2))*cellwidth;
+		float yLow = yStart + (row+.5*((*quarter).second%2))*cellheight;
 		float xHigh = xLow+cellwidth/2;
 		float yHigh = yLow+cellheight/2;
 		TString name = c1->GetName();
