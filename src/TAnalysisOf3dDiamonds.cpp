@@ -1542,6 +1542,16 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
+
+	vector < pair<Int_t,Int_t> > badQuarters;
+	badQuarters.push_back(make_pair(1,1));
+	badQuarters.push_back(make_pair(2,2));
+	badQuarters.push_back(make_pair(3,3));
+	badQuarters.push_back(make_pair(4,0));
+	badQuarters.push_back(make_pair(80,1));
+
+
+
 	TString name = "h3DCellNumbering";
 	TH2D* hCellNumbering = new TH2D(name,name,
 			settings->getNColumns3d(),settings->get3dMetallisationFidCuts()->getXLow(3),settings->get3dMetallisationFidCuts()->getXHigh(3),
@@ -1571,10 +1581,17 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 	}
 	histSaver->SaveHistogramWithCellGrid(hCellNumbering,hCellNumbering);
 	histSaver->SaveHistogramWithCellGrid(hQuarterNumbering,hQuarterNumbering);
+
+	TCanvas* c1 = histSaver->DrawHistogramWithCellGrid(hCellNumbering);
+	histSaver->DrawFailedQuarters(badQuarters,c1);
+	name = c1->GetName();
+	name.Append("_FailedQuarters");
+	c1->SetName(name);
+	histSaver->SaveCanvas(c1);
 }
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
-
+	LongAnalysisSaveCellAndQuaterNumbering();
 	LongAnalysis_SaveGoodAndBadCellLandaus();
 	LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
 	LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
