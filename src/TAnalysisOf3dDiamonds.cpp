@@ -1594,6 +1594,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 	LongAnalysisSaveCellAndQuaterNumbering();
 	LongAnalysis_SaveGoodAndBadCellLandaus();
 	LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
+	LongAnalysis_SaveFailedQuarters();
 	LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
 	LongAnalysis_SaveCellsClusterSize2DVsGrading();
 	histSaver->SaveHistogram(hLongAnalysisInvalidCellNo);
@@ -1635,7 +1636,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradin
 			Int_t cell = column*settings->getNRows3d() + row;
 			Int_t Grading = 0;
 
-			hQuarterCellsPassFail.push_back(vector<Int_t>());
+			vecQuarterCellsPassFail.push_back(vector<Int_t>());
 			//if(hCellsLandau.at(cell)->GetEntries() != 0){
 			for(int quarter=0;quarter<settings->getNQuarters3d();quarter++){
 
@@ -1644,14 +1645,32 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradin
 				Float_t FluctuationFactor = 0.1; //Needs to be added to settings file.
 
 				if(Fluctuation>FluctuationFactor)
-					hQuarterCellsPassFail[cell].push_back(0);
-				else hQuarterCellsPassFail[cell].push_back(1);
-				Grading += hQuarterCellsPassFail[cell].at(quarter);
+					vecQuarterCellsPassFail[cell].push_back(0);
+				else vecQuarterCellsPassFail[cell].push_back(1);
+				Grading += vecQuarterCellsPassFail[cell].at(quarter);
 			}
 			cout<<"Cell: "<<cell<<"  Grading: "<<Grading<<endl;
 			CellGrading.push_back(Grading);
 		}
 	}
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_SaveFailedQuarters(){
+//	cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveFailedQuarters]"<<flush;
+	vector < pair<Int_t,Int_t> > failedQuarters;
+	for (UInt_t cell = 0; cell < vecQuarterCellsPassFail.size();cell++){
+		for(UInt_t quarter = 0; quarter< vecQuarterCellsPassFail[cell].size(); quarter++){
+			if ( vecQuarterCellsPassFail[cell][quarter])
+				failedQuarters.push_back(make_pair((Int_t)cell,(Int_t)quarter));
+		}
+	}
+//	cout<<" with "<<failedQuarters.size()<<" failed quarters"<<endl;
+	TH2F* histo = new TH2F();
+	histo->SetName("hFailedQuarteters");
+	histo->SetTitle("Failed Quarters");
+	TCanvas *c1 = histSaver->DrawHistogramWithCellGrid(histo);
+	histSaver->DrawFailedQuarters(failedQuarters,c1);
+	histSaver->SaveCanvas(c1);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail() {

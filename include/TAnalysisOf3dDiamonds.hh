@@ -99,6 +99,7 @@ private:
 private:
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
+	void LongAnalysis_SaveFailedQuarters();
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
 	void LongAnalysis_SaveCellsClusterSize2DVsGrading();
 
@@ -254,7 +255,7 @@ private:
 
 	vector< vector<TH1F*> > hQuarterCellsLandau;
 	vector< vector<TH1F*> > hQuarterCellsClusterSize;
-	vector< vector<Int_t> > hQuarterCellsPassFail;
+	vector< vector<Int_t> > vecQuarterCellsPassFail;
 	vector<Int_t> CellGrading;
 	Float_t hLandauGoodCellsMean;
 
