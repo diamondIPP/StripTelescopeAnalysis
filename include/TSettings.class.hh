@@ -91,6 +91,8 @@ public:
 	enumRunDescription getAnalysedDiamond();
 
 	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
+	vector< TH1*> sortHistosByPulseHeight(vector<TH1*> vec);
+	static bool SorterForPulseHeightOfHisto(TH1* a, TH1* b);
 private:
 	void goToDir(std::string dir);
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
@@ -510,6 +512,7 @@ public:
 	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
 	UInt_t getNRows3d(){return nRows3d;};
 	UInt_t getNColumns3d(){return nColumns3d;};
+	UInt_t GetNCells3d(){return nRows3d * nColumns3d;};
 	UInt_t getNQuarters3d(){return 4;}
 	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
