@@ -971,18 +971,20 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 
 	//Cell Overlay
 	//hCellsOverlayed
-	TString name = "hCellsOverlayAvrgChargeNoColumn";
+	TString name = "hCellsOverlayAvrgCharge";
 	hCellsOverlayAvrgCharge = new TProfile2D(name,name,
 			30,0,settings->GetCellWidth(subjectDetector,2),
 			30,0,settings->GetCellHeight());
 	hCellsOverlayAvrgCharge->GetXaxis()->SetTitle("rel. x position within a cell /#mum");
 	hCellsOverlayAvrgCharge->GetYaxis()->SetTitle("rel. y position within a cell /#mum");
 	hCellsOverlayAvrgCharge->GetZaxis()->SetTitle("pulse height of cluster /ADC");
-	hCellsOverlayAvrgCharge->SetContour(99);
-
-	name = "hCellsOverlayPulseHeight_noColumnHit";
+//	hCellsOverlayAvrgCharge->SetContour(99);
+	name = "hCellsOverlayAvrgCharge_noColumnHit";
 	hCellsOverlayAvrgChargeNoColumnHit = (TProfile2D*)hCellsOverlayAvrgCharge->Clone(name);
-	hCellsOverlayAvrgChargeNoColumnHit->SetTitle("hCellsOverlayAvrgChargeNoColumnHit");
+	hCellsOverlayAvrgChargeNoColumnHit->SetTitle(name);
+
+	cout<<hCellsOverlayAvrgChargeNoColumnHit<<" "<<hCellsOverlayAvrgCharge<<endl;
+	cout<<" "<<hCellsOverlayAvrgCharge->IsZombie()<<endl;
 
 	//hCellsOverlayedColumnLandau
 	name = "hCellOverlayWithColumnLandau";
@@ -1319,7 +1321,7 @@ void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
 }
 
 void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
-	ShortAnalysis_SaveMeanChargeVector();
+//	ShortAnalysis_SaveMeanChargeVector();
 	ShortAnalysis_Save2ClusterPlots();
 	vector<Float_t> xPred;
 	vector<Float_t> yPred;
@@ -1580,10 +1582,10 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 }
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
+	LongAnalysis_SaveCellsOverlayMeanCharge();
 	LongAnalysisSaveCellAndQuaterNumbering();
 	LongAnalysis_SaveGoodAndBadCellLandaus();
 	LongAnalysis_SaveDeadCellProfile();
-	LongAnalysis_SaveCellsOverlayMeanCharge();
 	LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
 	LongAnalysis_SaveFailedQuarters();
 	LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
@@ -1946,16 +1948,35 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
-		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
-		hCellsOverlayAvrgCharge->SetTitle("Avrg PH - overlayed");
-		hCellsOverlayAvrgCharge->SetContour(99);
-		histSaver->SaveHistogram(hCellsOverlayAvrgCharge);
-		delete hCellsOverlayAvrgCharge ;
-
-		hCellsOverlayAvrgChargeNoColumnHit->SetName("hCellsOverlayAvrgChargeNoColumns");
-		hCellsOverlayAvrgChargeNoColumnHit->SetTitle("Avrg PH - overlayed - no hit in columns");
-		histSaver->SaveHistogram(hCellsOverlayAvrgChargeNoColumnHit);
-		delete hCellsOverlayAvrgChargeNoColumnHit;
+//	return;
+	cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge]"<<endl;
+	cout<<hCellsOverlayAvrgCharge<<endl;
+	if(hCellsOverlayAvrgCharge){
+		cout<<hCellsOverlayAvrgCharge->IsZombie()<<endl;
+		cout<<hCellsOverlayAvrgCharge->GetEntries()<<endl;
+		TString name = "hCellsOverlayAvrgCharge_cl";
+		TH2F* histo = (TH2F*)hCellsOverlayAvrgCharge->Clone(name);
+		cout<<"SAVE"<<endl;
+		histSaver->SaveHistogram(histo);
+		delete histo;
+////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
+//		cout<<"Set Name: "<<hCellsOverlayAvrgCharge<<endl;
+////		hCellsOverlayAvrgCharge->SetTitle("Avrg PH - overlayed");
+//		histSaver->SaveHistogram(hCellsOverlayAvrgCharge);
+//		delete hCellsOverlayAvrgCharge ;
+	}
+	if(hCellsOverlayAvrgChargeNoColumnHit){
+		TString name = "hCellsOverlayAvrgChargeNoColumnHit_cl";
+		TH2F* histo = (TH2F*)hCellsOverlayAvrgChargeNoColumnHit->Clone(name);
+		histo->SetTitle("Avrg PH - overlayed - no hit in columns");
+		cout<<"SAVE"<<endl;
+		histSaver->SaveHistogram(histo);
+		delete histo;
+//		hCellsOverlayAvrgChargeNoColumnHit->SetName("hCellsOverlayAvrgChargeNoColumns");
+//		hCellsOverlayAvrgChargeNoColumnHit->SetTitle("Avrg PH - overlayed - no hit in columns");
+//		histSaver->SaveHistogram(hCellsOverlayAvrgChargeNoColumnHit);
+//		delete hCellsOverlayAvrgChargeNoColumnHit;
+	}
 		//		hCellsOverlayPulseHeight->Project3D("xy");
 
 		/*hCellsOverlayEvents->Draw("sameTEXT");
