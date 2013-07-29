@@ -106,6 +106,8 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 	hGridReferenceDetSpace->SetStats(kFALSE);
 	hGridReferenceDetSpace->SetTickLength(0.0, "X");
 	hGridReferenceDetSpace->SetTickLength(0.0, "Y");
+	hGridReferenceDetSpace->GetXaxis()->SetTitle("Row of Cell");
+	hGridReferenceDetSpace->GetYaxis()->SetTitle("ColumnÊof Cell");
 	hGridReferenceCellSpace->SetStats(kFALSE);
 	hGridReferenceCellSpace->SetTickLength(0.0, "X");
 	hGridReferenceCellSpace->SetTickLength(0.0, "Y");
@@ -395,6 +397,27 @@ TH2D* HistogrammSaver::GetHistoBinedInCells(TString name, Int_t binsPerCellAxis)
 	cout<<"create "<<name<<endl;
 	TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
 	TH2D* histo = new TH2D(name,name,
+			settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
+			settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
+	return histo;
+}
+
+TH3D* HistogrammSaver::Get3dHistoBinedInCells(TString name, UInt_t binsz,
+		Float_t minz, Float_t maxz, Int_t binsPerCellAxis) {
+	cout<<"create "<<name<<endl;
+		TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
+		TH3D* histo = new TH3D(name,name,
+				settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
+				settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh(),
+				binsz, minz,maxz);
+		return histo;
+}
+
+TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
+		Int_t binsPerCellAxis) {
+	cout<<"create "<<name<<endl;
+	TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
+	TProfile2D* histo = new TProfile2D(name,name,
 			settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
 			settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
 	return histo;
