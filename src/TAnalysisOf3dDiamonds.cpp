@@ -1741,9 +1741,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
 	//hCellsLandau2DHighlightedQuarterFail->SetEntries(hCellsLandau2DEntries);
 	hCellsLandau2DHighlightedQuarterFail->SetStats(kFALSE);
 	hHighlightedQuarterFail->SetStats(kFALSE);
-	hCellsLandau2DHighlightedQuarterFailSorted->Draw("COLZ");
+	hCellsLandau2DHighlightedQuarterFail->Draw("COLZ");
 //	hHighlightedQuarterFail->Draw("COLAH");
-	//hCellsLandau2DHighlightedQuarterFail->Draw("sameCOLZ");
+	hCellsLandau2DHighlightedQuarterFail->Draw("sameCOLZ");
 	histSaver->SaveCanvas(cCellsLandau2DHighlightedQuarterFail);
 	delete cCellsLandau2DHighlightedQuarterFail;
 
@@ -1751,11 +1751,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
 	cCellsLandau2DHighlightedQuarterFail->SetCanvasSize(1500,3000);
 	cCellsLandau2DHighlightedQuarterFail->cd();
 	//hCellsLandau2DHighlightedQuarterFail->SetEntries(hCellsLandau2DEntries);
-	hCellsLandau2DHighlightedQuarterFail->SetStats(kFALSE);
-	hHighlightedQuarterFail->SetStats(kFALSE);
-	hCellsLandau2DHighlightedQuarterFail->Draw("COLZ");
-	//hHighlightedQuarterFail->Draw("COLAH");
-	//hCellsLandau2DHighlightedQuarterFail->Draw("sameCOLZ");
+	hCellsLandau2DHighlightedQuarterFailSorted->SetStats(kFALSE);
+	hHighlightedQuarterFailSorted->SetStats(kFALSE);
+	hCellsLandau2DHighlightedQuarterFailSorted->Draw("COLZ");
+	hHighlightedQuarterFailSorted->Draw("COLAHsame");
+	hCellsLandau2DHighlightedQuarterFailSorted->Draw("sameCOLZ");
 	histSaver->SaveCanvas(cCellsLandau2DHighlightedQuarterFail);
 
 }
