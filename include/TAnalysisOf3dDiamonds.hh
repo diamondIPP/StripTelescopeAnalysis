@@ -108,6 +108,7 @@ private:
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
 	void LongAnalysis_SaveCellsClusterSize2DVsGrading();
 	void LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
+	void LongAnalysis_SaveMeanChargePlots();
 
 private:
 	TCellAnalysisClass* clusteredAnalysis;
@@ -287,9 +288,6 @@ private:
 	TCanvas* cHarrisGoodandStripNormailsed;
 	TCanvas* cGoodGradedandStripNormailsed;
 	TCanvas* cStripFidCutXFidCutYvsMeanCharge;
-	TH2D* hStripFidCutXFidCutYvsCharge;
-	TH2D* hStripFidCutXFidCutYvsEvents;
-	TH2D* hStripFidCutXFidCutYvsMeanCharge;
 	vector<TH2D*> hXdetvsYdetvsCharge;
 	vector<TH2D*> hXdetvsYdetvsEvents;
 	vector<TH2D*> hXdetvsYdetvsMeanCharge;
