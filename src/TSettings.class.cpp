@@ -2126,26 +2126,30 @@ TCutG* TSettings::getEdgePosition(UInt_t i) {
 //	}
 	return edgeCut;
 }
-int TSettings::get3DCellNo(int row, int column){
+int TSettings::get3DCellNo(int column, int row){
+	cout<<"[TSettings::get3DCellNo] get3D cell no: "<<column<<" "<<row<<"\t"<<flush;
 	if (row<0 || row >= nRows3d||column < 0||column>= nColumns3d){
 		cerr<<"cannot convert "<<row<<column<< " to a cell no.: "<<endl;
 		return -1;
 	}
 	int nCell = row + column * nRows3d;
-	if(verbosity>4) cout<<"column "<<column<<", row "<<row<<" with "<<nRows3d<<" = " <<nCell<<endl;
+//	if(verbosity>4)
+		cout<<"column "<<column<<", row "<<row<<" with "<<nRows3d<<" = " <<nCell<<endl;
 	return nCell;
 
 }
 
-int TSettings::get3DCellNo(char row, int column){
-	column --;
-	row=toupper(row);
-	int nRow = row-'A';
-
-	return get3DCellNo(nRow,column);
+int TSettings::get3DCellNo(char column, int row){
+	cout<<"[TSettings::get3DCellNo] get3D cell no: "<<column<<""<<row<<"\t"<<flush;
+	row --;
+	column=toupper(column);
+	int nColumn = column-'A';
+	int cell = get3DCellNo(nColumn,row);
+	cout<<"cell: "<<cell<<endl;char t; cin >> t;
+	return cell;
 }
 
-int TSettings::get3DQuarterNo(int row, int column, int quarter){
+int TSettings::get3DQuarterNo( int column, int row,int quarter){
 	int cellNo = get3DCellNo(row,column);
 	if (cellNo<0|| quarter <0 || quarter >= getNQuarters3d())
 		return -1;
