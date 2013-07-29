@@ -364,7 +364,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 			hDeadCellCharge[i]->Fill(relY, diamondCluster.getCharge(false));
 		}
 	}
-	char t; cin>>t;
 	if(cellNo < hCellsLandau.size())
 		hCellsLandau.at(cellNo)->Fill(diamondCluster.getCharge(false));
 
