@@ -114,6 +114,7 @@ private:
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
 	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y,xPredicted,yPredicted,xPredDet,yPredDet;
+	Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax;
 
 	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
@@ -258,6 +259,7 @@ private:
 	vector< vector<TH1F*> > hQuarterCellsLandau;
 	vector< vector<TH1F*> > hQuarterCellsClusterSize;
 	vector< vector<Int_t> > vecQuarterCellsPassFail;
+	vector< vector<Int_t> > vecQuarterCellsFluctuation;
 	vector<Int_t> CellGrading;
 	Float_t hLandauGoodCellsMean;
 
