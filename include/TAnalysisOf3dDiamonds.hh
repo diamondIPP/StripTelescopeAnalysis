@@ -88,6 +88,7 @@ private:
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
 private:
 	void LongAnalysisSaveCellAndQuaterNumbering();
+	void LongAnalysis_FillOverlayedHistos(Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge);
 private:
 	void ShortAnalysis_Analyse1Cluster(UInt_t clusterNo=0);
 	void ShortAnalysis_Analyse2Cluster();
@@ -266,6 +267,8 @@ private:
 	//TCanvas* cCellsOverlayMeanCharge;
 	TH2D* hCellsOverlayCharge;
 	TH2D* hCellsOverlayEvents;
+	TH3D* hCellsOverlayPulseHeight;
+	TH3D* hCellsOverlayPulseHeightNoColumn;
 	TH2D* hCellsOverlayMeanCharge;
 
 	TH1F* hCellOverlayWithColumnLandau;

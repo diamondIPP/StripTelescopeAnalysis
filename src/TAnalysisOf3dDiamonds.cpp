@@ -330,10 +330,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	//	cout<<"cellNo: "<<cellNo<<endl;
 	UInt_t quarterNo = cell.second;
 	//	if(cellNo>=0)cout<<"cell: "<<cellNo<<"--> row "<<row<<", column "<<column<<endl;
-	if(!settings->isValidCellNo(cellNo)){
-		hLongAnalysisInvalidCellNo->Fill(xPredDet,yPredDet);
-		return;
-	}
+
 //	cout<<cellNo<<" "<< flush;
 	pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
@@ -346,6 +343,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
 		return;
 	}
+	if(!settings->isValidCellNo(cellNo)){
+		hLongAnalysisInvalidCellNo->Fill(xPredDet,yPredDet);
+		return;
+	}
+
 	if(diamondCluster.isSaturatedCluster())
 		return;
 	hDetXvsDetY3DCharge->Fill(xPredDet,yPredDet,diamondCluster.getCharge(false));
@@ -356,7 +358,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		//		cout<<"sqrt(relCellY*relCellY): "<<sqrt(relCellY*relCellY)<<endl;
 		if(sqrt(relCellY*relCellY) <= 1){
 			float relY = relPos.second + settings->GetCellHeight()*relCellY;
-			cout<<"relCellY: "<<relCellY<<" relPos.second: "<<relPos.second<<" relY: "<<relY<<endl;
+			if(verbosity) cout<<"DeadCellAnalysis: relCellY: "<<relCellY<<" relPos.second: "<<relPos.second<<" relY: "<<relY<<endl;
 			hDeadCellCharge.at(i)->Fill(relY, diamondCluster.getCharge(false));
 			hDeadCellEvents.at(i)->Fill(relY, 1);
 		}
@@ -387,17 +389,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 				hQuarterCellsClusterSize[cellNo][quarterNo]->Fill(ClusterSize);
 		}
 	}
-
-	cout<<xPredDet<<"/"<<yPredDet<<"--> "<<settings->getCellNo(xPredDet,yPredDet)<<"( "<<cellNo<<")"<<"\t--> "<<relPos.first<<"/"<<relPos.second<<endl;
-	hCellsOverlayCharge->Fill(relPos.first,relPos.second,diamondCluster.getCharge(false));
-	hCellsOverlayEvents->Fill(relPos.first,relPos.second,1);
-
-	hCellOverlayWithColumnLandau->Fill(diamondCluster.getCharge(false));
-	if(!settings->IsWithInTheColumnRadius(relPos.first, relPos.second))
-		hCellOverlayNoColumnLandau->Fill(diamondCluster.getCharge(false));
-	else{
-		hCellOverlayColumnLandau->Fill(diamondCluster.getCharge(false));
-	}
+	LongAnalysis_FillOverlayedHistos(relPos.first,relPos.second,diamondCluster.getCharge(false));
 
 };
 
@@ -1018,7 +1010,11 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 	//hCellsOverlayed
 	hCellsOverlayCharge = new TH2D("OverlayedCharge","OverlayedCharge",30,0,150,30,0,150);
 	hCellsOverlayEvents = new TH2D("OverlayedEvents","OverlayedEvents",30,0,150,30,0,150);
-
+	TString name = "hCellsOverlayMeanCharge";
+	hCellsOverlayPulseHeight = new TH3D(name,name,
+			30,0,settings->GetCellWidth(subjectDetector,2),
+			30,0,settings->GetCellHeight(),
+			100,0,3000);
 	stringstream hCellsOverlayMeanChargeName; hCellsOverlayMeanChargeName<<"hCellsOverlayMeanCharge"<<FileNameEnd;
 	hCellsOverlayMeanCharge = new TH2D(hCellsOverlayMeanChargeName.str().c_str(),hCellsOverlayMeanChargeName.str().c_str(),30,0,150,30,0,150);
 	hCellsOverlayMeanCharge->GetXaxis()->SetTitle("Xdet (um)");
@@ -1835,6 +1831,22 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsClusterSize2DVsGrading() {
 
 }
 
+void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayedHistos(Float_t xRelPosDet,Float_t yRelPosDet,
+		Float_t clusterCharge) {
+	hCellsOverlayCharge->Fill(xRelPosDet,yRelPosDet,clusterCharge);
+	hCellsOverlayEvents->Fill(xRelPosDet,yRelPosDet,1);
+	hCellsOverlayPulseHeight->Fill(xRelPosDet,yRelPosDet,clusterCharge);
+
+	hCellOverlayWithColumnLandau->Fill(clusterCharge);
+	if(settings->IsWithInTheColumnRadius(xRelPosDet, yRelPosDet)){
+		hCellOverlayColumnLandau->Fill(clusterCharge);
+		hCellsOverlayPulseHeightNoColumn->Fill(xRelPosDet,yRelPosDet,clusterCharge);
+	}
+	else{
+		hCellOverlayNoColumnLandau->Fill(clusterCharge);
+	}
+}
+
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading() {
 
 	Int_t MaxClusterSize = hQuarterCellsClusterSize[0].at(0)->GetNbinsX() - 1; 		//Because Cluster Histo starts at 0.
@@ -2005,6 +2017,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
 		hCellsOverlayMeanCharge->Draw("COLZ");
 		histSaver->SaveHistogram(hCellsOverlayMeanCharge);
 		delete hCellsOverlayMeanCharge;
+
+		TH2D* hCellsOverlayAvrgCharge = (TH2D*) hCellsOverlayPulseHeight->Project3DProfile("yx");
+		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
+		hCellsOverlayAvrgCharge->SetTitle("Avrg PH - overlayed");
+		histSaver->SaveHistogram(hCellsOverlayAvrgCharge);
+		delete hCellsOverlayAvrgCharge ;
+
+		hCellsOverlayAvrgCharge= (TH2D*) hCellsOverlayPulseHeightNoColumn->Project3DProfile("yx");
+		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgChargeNoColumns");
+		hCellsOverlayAvrgCharge->SetTitle("Avrg PH - overlayed - no hit in columns");
+		histSaver->SaveHistogram(hCellsOverlayAvrgCharge);
+		delete hCellsOverlayAvrgCharge;
+		//		hCellsOverlayPulseHeight->Project3D("xy");
 
 		/*hCellsOverlayEvents->Draw("sameTEXT");
 		cCellsOverlayMeanCharge->SetName("cCellsOverlayMeanChargeWithEntries");
