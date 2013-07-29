@@ -356,7 +356,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
 		int badcell = settings->getDeadCell3D()[i];
 		int relCellY = badcell-cellNo;
-		cout<<i<<" "<<badcell<<" "<<cellNo<<endl;
+//		cout<<i<<" "<<badcell<<" "<<cellNo<<endl;
 		//		cout<<"sqrt(relCellY*relCellY): "<<sqrt(relCellY*relCellY)<<endl;
 		if(sqrt(relCellY*relCellY) <= 1){
 			float relY = relPos.second + settings->GetCellHeight()*relCellY;
