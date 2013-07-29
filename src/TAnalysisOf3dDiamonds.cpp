@@ -1697,19 +1697,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveFailedQuarters(){
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail() {
 
-	Int_t xBins = hCellsLandau.at(0)->GetNbinsX();
-	Float_t xMin = hCellsLandau.at(0)->GetBinLowEdge(1);
-	Float_t xMax = hCellsLandau.at(0)->GetBinLowEdge(xBins) + hCellsLandau.at(0)->GetBinWidth(xBins);
+	Int_t yBins = hCellsLandau.at(0)->GetNbinsX();
+	Float_t yMin = hCellsLandau.at(0)->GetBinLowEdge(1);
+	Float_t yMax = hCellsLandau.at(0)->GetBinLowEdge(yBins) + hCellsLandau.at(0)->GetBinWidth(yBins);
 
 	TString name = "hCellsLandau2DHighlightedQuarterFail";
-	TH2D* hCellsLandau2DHighlightedQuarterFail = new TH2D(name,name,xBins,xMin,xMax,settings->GetNCells3d(),0,settings->GetNCells3d());
-	hCellsLandau2DHighlightedQuarterFail->GetXaxis()->SetTitle("Charge ADC");
-	hCellsLandau2DHighlightedQuarterFail->GetYaxis()->SetTitle("Cell");
+	TH2D* hCellsLandau2DHighlightedQuarterFail = new TH2D(name,name,settings->GetNCells3d(),0,settings->GetNCells3d(),yBins,yMin,yMax);
+	hCellsLandau2DHighlightedQuarterFail->GetXaxis()->SetTitle("Cell");
+	hCellsLandau2DHighlightedQuarterFail->GetYaxis()->SetTitle("Charge ADC");
 	TH2D* hCellsLandau2DHighlightedQuarterFailSorted = (TH2D*)hCellsLandau2DHighlightedQuarterFail->Clone("hCellsLandau2DHighlightedQuarterFailSorted");
 	vector<TH1F*> hCellLandausSorted = hCellsLandau;
 	sort(hCellLandausSorted.begin(), hCellLandausSorted.end(), TSettings::SorterForPulseHeightOfHisto);
 
-	TH2D* hHighlightedQuarterFail = new TH2D("hHighlightedQuarterFail","",1,xMin,xMax,settings->GetNCells3d(),0,settings->GetNCells3d());
+	TH2D* hHighlightedQuarterFail = new TH2D("hHighlightedQuarterFail","",settings->GetNCells3d(),0,settings->GetNCells3d(),1,yMin,yMax);
 	TH2D* hHighlightedQuarterFailSorted = (TH2D*) hHighlightedQuarterFail->Clone("hHighlightedQuarterFailSorted");
 	//hCellsLandau2DQuarterFail->GetXaxis()->SetTitle("Charge ADC");
 	//hCellsLandau2DQuarterFail->GetYaxis()->SetTitle("Cell");
@@ -1722,21 +1722,21 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
 			cellSorted = atoi(title.c_str());
 		}
 		TString binLabel = TString::Format("%3d",cellSorted);
-		hCellsLandau2DHighlightedQuarterFailSorted->GetYaxis()->SetBinLabel(pos,binLabel);
-		hCellsLandau2DHighlightedQuarterFailSorted->GetYaxis()->SetLabelSize(0.02);
+		hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetBinLabel(pos,binLabel);
+		hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetLabelSize(0.02);
 		binLabel = TString::Format("%3d",pos);
-		hCellsLandau2DHighlightedQuarterFailSorted->GetYaxis()->SetBinLabel(pos,binLabel);
-		hCellsLandau2DHighlightedQuarterFailSorted->GetYaxis()->SetLabelSize(0.02);
+		hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetBinLabel(pos,binLabel);
+		hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetLabelSize(0.02);
 
-		for(int xBin =0; xBin<xBins; xBin++){
-			hCellsLandau2DHighlightedQuarterFail->SetBinContent(xBin,pos,hCellsLandau[pos]->GetBinContent(xBin));
-			hCellsLandau2DHighlightedQuarterFailSorted->SetBinContent(xBin,pos,hCellLandausSorted[pos]->GetBinContent(xBin));
+		for(int yBin =0; yBin<yBins; yBin++){
+			hCellsLandau2DHighlightedQuarterFail->SetBinContent(pos,yBin,hCellsLandau[pos]->GetBinContent(yBin));
+			hCellsLandau2DHighlightedQuarterFailSorted->SetBinContent(pos,yBin,hCellLandausSorted[pos]->GetBinContent(yBin));
 		}
-		hHighlightedQuarterFail->SetBinContent(1,pos,CellGrading.at(pos));
-		hHighlightedQuarterFailSorted->SetBinContent(1,pos,CellGrading.at(cellSorted));
+		hHighlightedQuarterFail->SetBinContent(pos,1,CellGrading.at(pos));
+		hHighlightedQuarterFailSorted->SetBinContent(pos,1,CellGrading.at(cellSorted));
 	}
 
-	TCanvas* cCellsLandau2DHighlightedQuarterFail = new TCanvas("cCellsLandau2DHighlightedQuarterFail","cCellsLandau2DHighlightedQuarterFail",1500,3000);
+	TCanvas* cCellsLandau2DHighlightedQuarterFail = new TCanvas("cCellsLandau2DHighlightedQuarterFail","cCellsLandau2DHighlightedQuarterFail",3000,1500);
 	cCellsLandau2DHighlightedQuarterFail->cd();
 	//hCellsLandau2DHighlightedQuarterFail->SetEntries(hCellsLandau2DEntries);
 	hCellsLandau2DHighlightedQuarterFail->SetStats(kFALSE);
@@ -1747,8 +1747,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
 	histSaver->SaveCanvas(cCellsLandau2DHighlightedQuarterFail);
 	delete cCellsLandau2DHighlightedQuarterFail;
 
-	cCellsLandau2DHighlightedQuarterFail = new TCanvas("cCellsLandau2DHighlightedQuarterFailSorted","cCellsLandau2DHighlightedQuarterFail - sorted");
-	cCellsLandau2DHighlightedQuarterFail->SetCanvasSize(1500,3000);
+	cCellsLandau2DHighlightedQuarterFail = new TCanvas("cCellsLandau2DHighlightedQuarterFailSorted","cCellsLandau2DHighlightedQuarterFail - sorted",3000,1500);
 	cCellsLandau2DHighlightedQuarterFail->cd();
 	//hCellsLandau2DHighlightedQuarterFail->SetEntries(hCellsLandau2DEntries);
 	hCellsLandau2DHighlightedQuarterFailSorted->SetStats(kFALSE);
