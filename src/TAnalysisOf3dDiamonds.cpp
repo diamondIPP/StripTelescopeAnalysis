@@ -357,7 +357,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		//		cout<<"sqrt(relCellY*relCellY): "<<sqrt(relCellY*relCellY)<<endl;
 		if(sqrt(relCellY*relCellY) <= 1){
 			float relY = relPos.second + settings->GetCellHeight()*relCellY;
-			//			cout<<"relY: "<<relY<<endl;
+			cout<<"relCellY: "<<relCellY<<" relPos.second: "<<relPos.second<<" relY: "<<relY<<endl;
 			hDeadCellCharge.at(i)->Fill(relY, diamondCluster.getCharge(false));
 			hDeadCellEvents.at(i)->Fill(relY, 1);
 		}
@@ -389,6 +389,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		}
 	}
 
+	cout<<"relPos.first: "<<relPos.first<<" relPos.second: "<<relPos.second<<endl;
 	hCellsOverlayCharge->Fill(relPos.first,relPos.second,diamondCluster.getCharge(false));
 	hCellsOverlayEvents->Fill(relPos.first,relPos.second,1);
 
@@ -991,7 +992,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 	hCellsOverlayMeanCharge->GetXaxis()->SetTitle("Xdet (um)");
 	hCellsOverlayMeanCharge->GetYaxis()->SetTitle("Ydet (um)");
 	hCellsOverlayMeanCharge->GetZaxis()->SetTitle("Charge ADC");
-	hCellsOverlayMeanCharge->GetZaxis()->SetRangeUser(800,1200);
+	//hCellsOverlayMeanCharge->GetZaxis()->SetRangeUser(800,1200);
 	hCellsOverlayMeanCharge->SetContour(99);
 
 	//hCellsOverlayedColumnLandau
@@ -1611,11 +1612,12 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 	LongAnalysisSaveCellAndQuaterNumbering();
 	LongAnalysis_SaveGoodAndBadCellLandaus();
+	LongAnalysis_SaveDeadCellProfile();
 	LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
 	LongAnalysis_SaveFailedQuarters();
 	LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
-	LongAnalysis_SaveCellsClusterSize2DVsGrading();
-	LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
+	//LongAnalysis_SaveCellsClusterSize2DVsGrading();
+	//LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
 
 	histSaver->SaveHistogram(hLongAnalysisInvalidCellNo);
 	histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
@@ -1933,6 +1935,62 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
 	histSaver->SaveHistogram(hLandauGoodCells);
 	histSaver->SaveHistogram(hLandauBadCells);
 	hLandauGoodCellsMean = hLandauGoodCells->GetMean();
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
+	//hDeadCell
+	//histSaver->SaveHistogram(hDeadCell);
+	//histSaver->SaveHistogram(hDeadCellEvents);
+	/*for(int i=0; i<settings->getDeadCell3D().size(); i++){
+		cDeadCellMeanCharge.push_back(new TCanvas("cDeadCellMeanCharge","cDeadCellMeanCharge"));
+		cDeadCellMeanCharge.at(i)->cd();
+		*hDeadCellMeanCharge.at(i) = (*hDeadCell.at(i)/(*hDeadCellEvents.at(i)));
+		hDeadCellMeanCharge.at(i)->SetEntries(hDeadCellEvents.at(i)->Integral());
+		hDeadCellMeanCharge.at(i)->Draw();
+		Float_t ymax1 = hDeadCellMeanCharge.at(i)->GetMaximum();
+		TLine* CellEdge1 = new TLine(150,0,150,ymax1);
+		TLine* CellEdge2 = new TLine(300,0,300,ymax1);
+		CellEdge1->SetLineWidth(2);		CellEdge2->SetLineWidth(2);
+		CellEdge1->SetLineColor(kRed);	CellEdge2->SetLineColor(kRed);
+		CellEdge1->Draw("same");		CellEdge2->Draw("same");
+		histSaver->SaveCanvas(cDeadCellMeanCharge.at(i));
+	}*/
+
+	vector<TCanvas*> cDeadCellMeanCharge;
+
+	for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
+
+		stringstream cDeadCellMeanChargeName; cDeadCellMeanChargeName<<"cDeadCellMeanCharge"<<i;
+		cDeadCellMeanCharge.push_back(new TCanvas(cDeadCellMeanChargeName.str().c_str(), cDeadCellMeanChargeName.str().c_str()));
+		cDeadCellMeanCharge.at(i)->cd();
+		*hDeadCellMeanCharge.at(i) = *hDeadCellCharge.at(i)/(*hDeadCellEvents.at(i));
+		hDeadCellMeanCharge.at(i)->SetEntries(23);   //hDeadCellEvents.at(i)->Integral());
+		hDeadCellMeanCharge.at(i)->Draw();
+
+		Float_t ymax = hDeadCellMeanCharge.at(i)->GetMaximum();
+		TLine* CellEdge1 = new TLine(150,0,150,ymax);
+		TLine* CellEdge2 = new TLine(300,0,300,ymax);
+		CellEdge1->SetLineWidth(2);		CellEdge2->SetLineWidth(2);
+		CellEdge1->SetLineColor(kRed);	CellEdge2->SetLineColor(kRed);
+		CellEdge1->Draw("same");		CellEdge2->Draw("same");
+		histSaver->SaveCanvas(cDeadCellMeanCharge.at(i));
+
+	}
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
+
+		TCanvas* cCellsOverlayMeanCharge = new TCanvas("cCellsOverlayMeanCharge","cCellsOverlayMeanCharge");
+		cCellsOverlayMeanCharge->cd();
+		*hCellsOverlayMeanCharge = (*hCellsOverlayCharge/(*hCellsOverlayEvents));
+		hCellsOverlayMeanCharge->SetEntries(hCellsOverlayEvents->Integral());
+		hCellsOverlayMeanCharge->Draw("COLZ");
+		histSaver->SaveCanvas(cCellsOverlayMeanCharge);
+
+		/*hCellsOverlayEvents->Draw("sameTEXT");
+		cCellsOverlayMeanCharge->SetName("cCellsOverlayMeanChargeWithEntries");
+		histSaver->SaveCanvas(cCellsOverlayMeanCharge);*/
+
 }
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos2() {
@@ -2718,22 +2776,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos2() {
 	hDetXvsDetY3DOverview->Draw("sameCOLZAH");
 	histSaver->SaveCanvas(hOverview);
 
-	//hDeadCell
-	//histSaver->SaveHistogram(hDeadCell);
-	//histSaver->SaveHistogram(hDeadCellEvents);
-	for(int i=0; i<settings->getDeadCell3D().size(); i++){
-		cDeadCellMeanCharge.push_back(new TCanvas("cDeadCellMeanCharge","cDeadCellMeanCharge"));
-		cDeadCellMeanCharge.at(i)->cd();
-	  *hDeadCellMeanCharge.at(i) = (*hDeadCell.at(i)/(*hDeadCellEvents.at(i)));
-		hDeadCellMeanCharge.at(i)->SetEntries(hDeadCellEvents.at(i)->Integral());
-		hDeadCellMeanCharge.at(i)->Draw();
-		Float_t ymax1 = hDeadCellMeanCharge.at(i)->GetMaximum();
-		TLine* CellEdge1 = new TLine(150,0,150,ymax1);
-		TLine* CellEdge2 = new TLine(300,0,300,ymax1);
-		CellEdge1->SetLineWidth(2);		CellEdge2->SetLineWidth(2);
-		CellEdge1->SetLineColor(kRed);	CellEdge2->SetLineColor(kRed);
-		CellEdge1->Draw("same");		CellEdge2->Draw("same");
-		histSaver->SaveCanvas(cDeadCellMeanCharge.at(i));
+
 	}
 	  */
 

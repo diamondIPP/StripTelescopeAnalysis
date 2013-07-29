@@ -99,6 +99,8 @@ private:
 
 private:
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
+	void LongAnalysis_SaveDeadCellProfile();
+	void LongAnalysis_SaveCellsOverlayMeanCharge();
 	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
 	void LongAnalysis_SaveFailedQuarters();
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
@@ -247,7 +249,7 @@ private:
 	TH2F* hValidEventsFiducialSpace;
 	TH2F* hValidEventsDetSpace;
 
-	vector<TCanvas*> cDeadCellMeanCharge;
+	//vector<TCanvas*> cDeadCellMeanCharge;
 	vector<TH1F*> hDeadCellCharge;
 	vector<TH1F*> hDeadCellEvents;
 	vector<TH1F*> hDeadCellMeanCharge;
@@ -261,7 +263,7 @@ private:
 	vector<Int_t> CellGrading;
 	Float_t hLandauGoodCellsMean;
 
-	TCanvas* cCellsOverlayMeanCharge;
+	//TCanvas* cCellsOverlayMeanCharge;
 	TH2D* hCellsOverlayCharge;
 	TH2D* hCellsOverlayEvents;
 	TH2D* hCellsOverlayMeanCharge;
