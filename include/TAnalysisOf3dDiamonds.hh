@@ -21,6 +21,7 @@
 #include "TH1F.h"
 #include "TH1.h"
 #include "TF1.h"
+#include "TProfile2D.h"
 #include "TCutG.h"
 #include "TGraphErrors.h"
 #include "TMultiGraph.h"
@@ -174,9 +175,6 @@ private:
 	TH2D* hGridReferenceDetSpace;
 	TH2D* hGridReferenceCellSpace;
 	TCanvas* cCombinedMeanChargeYAlignment;
-	TH2D* hFidCutXvsFidCutYvsChargeYAlignment;
-	TH2D* hFidCutXvsFidCutYvsEventsYAlignment;
-	TH2D* hFidCutXvsFidCutYvsMeanChargeYAlignment;
 	TCanvas* c3DdetMeanCharge;
 
 	TCanvas* c3DdetMeanChargeWithMeanClusterSize;
@@ -244,16 +242,14 @@ private:
 	//LongAnalysis
 
 	TCanvas* cDetXvsDetY3DMeanCharge;
-	TH2D* hDetXvsDetY3DCharge;
-	TH2D* hDetXvsDetY3DEvents;
+	TProfile2D* hPulseHeightVsDetectorHitPostionXY;
+//	TH2D* hDetXvsDetY3DEvents;
 	TH1F* hCellMeanCharge;
 	TH2F* hValidEventsFiducialSpace;
 	TH2F* hValidEventsDetSpace;
 
 	//vector<TCanvas*> cDeadCellMeanCharge;
-	vector<TH1F*> hDeadCellCharge;
-	vector<TH1F*> hDeadCellEvents;
-	vector<TH1F*> hDeadCellMeanCharge;
+	vector<TProfile*> hDeadCellCharge;
 
 	vector<TH1F*> hCellsLandau;
 	vector<TH1F*> hCellsClusteSize;
@@ -265,11 +261,8 @@ private:
 	Float_t hLandauGoodCellsMean;
 
 	//TCanvas* cCellsOverlayMeanCharge;
-	TH2D* hCellsOverlayCharge;
-	TH2D* hCellsOverlayEvents;
-	TH3D* hCellsOverlayPulseHeight;
-	TH3D* hCellsOverlayPulseHeightNoColumn;
-	TH2D* hCellsOverlayMeanCharge;
+	TProfile2D* hCellsOverlayAvrgCharge;
+	TProfile2D* hCellsOverlayAvrgChargeNoColumnHit;
 
 	TH1F* hCellOverlayWithColumnLandau;
 	TH1F* hCellOverlayNoColumnLandau;
