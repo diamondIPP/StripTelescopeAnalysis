@@ -522,10 +522,10 @@ public:
 	vector<Int_t> getDeadCell3D(){return deadCell3d;}
 	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
-	int get3DQuarterNo(int row, int column, int quarter);
-	int get3DCellNo(char row, int column);
-	int get3DCellNo(int row, int column);
-	int get3DCellNo(pair<char,int> pos){return get3DCellNo(pos.first,pos.second);};
+	int get3DQuarterNo( int column, int row,int quarter);
+	int get3DCellNo(char column, int row);
+	int get3DCellNo(int column, int row);
+	int get3DCellNo(pair<char,int> pos){return get3DCellNo((char)pos.first,pos.second);};
 	Int_t getCellNo(Float_t xDet,Float_t yDet);
 	pair<int,int> getCellAndQuarterNo(Float_t xDet, Float_t yDet);
 
