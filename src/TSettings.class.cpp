@@ -2345,6 +2345,14 @@ void TSettings::CheckEdgeFidcuialCuts(){
 		}
 	}
 }
+bool TSettings::SorterForPulseHeightOfHisto(TH1* a, TH1* b){
+	    return a->GetMean() > b->GetMean();
+	}
+vector<TH1*> TSettings::sortHistosByPulseHeight(vector<TH1*> vec) {
+	vector<TH1*> newvec = vec;
+	sort(newvec.begin(), newvec.end(), SorterForPulseHeightOfHisto);
+	return newvec;
+}
 
 /**
  * Checks if a relative Cell hit is within the radius of a column
