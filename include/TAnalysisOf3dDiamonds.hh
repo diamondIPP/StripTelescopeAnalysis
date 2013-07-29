@@ -252,6 +252,7 @@ private:
 
 	//vector<TCanvas*> cDeadCellMeanCharge;
 	vector<TProfile*> hDeadCellCharge;
+	vector<TH2D*> hDeadCellPositions;
 
 	vector<TH1F*> hCellsLandau;
 	vector<TH1F*> hCellsClusteSize;

@@ -211,7 +211,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 	//				vecPHDiamondHit[i]->push_back(diamondCluster.getCharge(false));
 	//				//vecXPredicted.at(i)->push_back(xPredicted);
 	//				//vecYPredicted.at(i)->push_back(yPredicted);
-	//				hHitandSeedCount[i]->Fill(HitCount,SeedCount);
 	//				hChi2XChi2Y[i]->Fill(chi2x, chi2y);
 	//				hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
 	//				//For hFidCutXvsFidCutYvsMeanCharge
@@ -366,6 +365,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 			float relY = relPos.second+settings->GetCellHeight() + settings->GetCellHeight()*relCellY;
 			if(verbosity) cout<<"DeadCellAnalysis: relCellY: "<<relCellY<<" relPos.second: "<<relPos.second<<" relY: "<<relY<<endl;
 			hDeadCellCharge[i]->Fill(relY, diamondCluster.getCharge(false));
+			hDeadCellPositions[i]->Fill(xPredDet,yPredDet);
 		}
 	}
 	if(cellNo < hCellsLandau.size())
@@ -596,7 +596,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 	for(UInt_t i=0; i<settings->diamondPattern.getNIntervals(); i++){
 		pair<int,int> channels =settings->diamondPattern.getPatternChannels(i+1);
 		//hLandau
-		TString name = TString::Format("hLandau_ch_%02d_to_%02d",channels.first,channels.second);
+		TString name = TString::Format("hLandau_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
 		if(verbosity>1) cout<<"Create "<<name<<endl;
 		hLandau.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
 		if(hLandau.back()){
@@ -607,14 +607,14 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 			cerr<<"hLandau:'"<<name<<"' wasn't created correctly"<<endl;
 
 		//hPHvsChannel
-		name = TString::Format("hEventsvsChannel_ch_%02d_to_%02d",channels.first,channels.second);
+		name = TString::Format("hEventsvsChannel_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
 		hEventsvsChannel.push_back(new TH1F(name,name,100,0,100));
 		if(hEventsvsChannel.back()){
 			hEventsvsChannel.back()->GetXaxis()->SetTitle("HighestPH [ch]");
 			hEventsvsChannel.back()->GetYaxis()->SetTitle("No. Events");
 		}
 		//hPHvsChannel
-		name = TString::Format("hPHvsChannel_ch_%02d_to_%02d",channels.first,channels.second);
+		name = TString::Format("hPHvsChannel_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
 		hPHvsChannel.push_back(new TH2F(name,name,150,0,2900,100,0,100));
 		if(hPHvsChannel.back()){
 			hPHvsChannel.back()->GetXaxis()->SetTitle("Charge in ADC counts");
@@ -626,10 +626,10 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 		//hPHvsChannel.at(i)->SetMinimum(0);
 
 		//hHitandSeedCount
-		stringstream hHitandSeedCountName; hHitandSeedCountName<<"hHitandSeedCount%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
-		hHitandSeedCount.push_back(new TH2F(hHitandSeedCountName.str().c_str(),hHitandSeedCountName.str().c_str(),10,0,10,10,0,10));
-		hHitandSeedCount.at(i)->GetXaxis()->SetTitle("Hit Count");
-		hHitandSeedCount.at(i)->GetYaxis()->SetTitle("Seed Count");
+		name = TString::Format("hHitandSeedCount_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
+		hHitandSeedCount.push_back(new TH2F(name,name,10,-.5,9.5,10,-.5,9.5));
+		hHitandSeedCount.back()->GetXaxis()->SetTitle("Hit Count");
+		hHitandSeedCount.back()->GetYaxis()->SetTitle("Seed Count");
 
 		//hChi2XChi2Y
 		name = TString::Format("hChi2X_vs_chi2Y_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
@@ -638,14 +638,17 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 		hChi2XChi2Y.back()->GetYaxis()->SetTitle("#chi^{2}_{Y}");
 
 		//hFidCutXvsFidCutY
-		stringstream hFidCutXvsFidCutYName; hFidCutXvsFidCutYName<<"hFidCutXvsFidCutY%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
-		hFidCutXvsFidCutY.push_back(new TH2F(hFidCutXvsFidCutYName.str().c_str(),hFidCutXvsFidCutYName.str().c_str(),160,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),120,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh()));
+		name = TString::Format("hFidCutXvsFidCutY_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
+		hFidCutXvsFidCutY.push_back(new TH2F(name,name,160,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),120,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh()));
 		hFidCutXvsFidCutY.at(i)->GetXaxis()->SetTitle("FidCutX");
 		hFidCutXvsFidCutY.at(i)->GetYaxis()->SetTitle("FidCutY");
 
 		//hFidCutXvsFidCutYvsCharge		For TH2D
-		stringstream hFidCutXvsFidCutYvsChargeName; hFidCutXvsFidCutYvsChargeName<<"hFidCutXvsFidCutYvsCharge%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
-		hFidCutXvsFidCutYvsCharge.push_back(new TH2D(hFidCutXvsFidCutYvsChargeName.str().c_str(),hFidCutXvsFidCutYvsChargeName.str().c_str(),213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh()));
+
+		name = TString::Format("hFidCutXvsFidCutYvsCharge_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
+		hFidCutXvsFidCutYvsCharge.push_back(new TH2D(name,name,
+				213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
+				160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh()));
 		hFidCutXvsFidCutYvsCharge.at(i)->GetXaxis()->SetTitle("FidCutX");
 		hFidCutXvsFidCutYvsCharge.at(i)->GetYaxis()->SetTitle("FidCutY");
 		hFidCutXvsFidCutYvsCharge.at(i)->GetZaxis()->SetTitle("Charge ADC");
@@ -767,6 +770,10 @@ void TAnalysisOf3dDiamonds::initialise3DYAlignmentHistos() {
 		hDeadCellCharge.push_back(new TProfile(name,name,90,0,450));
 		hDeadCellCharge.back()->GetXaxis()->SetTitle("pred hit position y in diamond /#mum	");
 		hDeadCellCharge.back()->GetYaxis()->SetTitle("Mean Charge [ADC]");
+		name = TString::Format("hDeadCell_no_%d_HitPositions",i);
+		hDeadCellPositions.push_back(histSaver->GetHistoBinedInCells(name,30));
+		hDeadCellPositions.back()->GetXaxis()->SetTitle("pred hit position x in diamond /#mum	");
+		hDeadCellPositions.back()->GetYaxis()->SetTitle("pred hit position y in diamond /#mum	");
 	}
 	cout<<"End initialise3DYAlignmentHistos()"<<endl;
 };
@@ -1239,11 +1246,6 @@ void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
 		//hPHvsChannel.at(i)->SetMaximum(3000);
 		//hPHvsChannel.at(i)->SetMinimum(0);
 
-		//hHitandSeedCount
-		stringstream hHitandSeedCountName; hHitandSeedCountName<<"hHitandSeedCount%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
-		hHitandSeedCount.push_back(new TH2F(hHitandSeedCountName.str().c_str(),hHitandSeedCountName.str().c_str(),10,0,10,10,0,10));
-		hHitandSeedCount.at(i)->GetXaxis()->SetTitle("Hit Count");
-		hHitandSeedCount.at(i)->GetYaxis()->SetTitle("Seed Count");
 
 
 		//hFidCutXvsFidCutY
@@ -1321,7 +1323,7 @@ void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
 }
 
 void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
-//	ShortAnalysis_SaveMeanChargeVector();
+	ShortAnalysis_SaveMeanChargeVector();
 	ShortAnalysis_Save2ClusterPlots();
 	vector<Float_t> xPred;
 	vector<Float_t> yPred;
@@ -1482,7 +1484,6 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 		histSaver->SaveHistogram(hLandauTransparent.at(i));
 		histSaver->SaveHistogram(hLandauTransparentBadCellsRemoved.at(i));
 
-		//histSaver->SaveHistogram(hHitandSeedCount.at(i));
 		//histSaver->SaveHistogram(hPHvsChannel.at(i));
 		//histSaver->SaveHistogram(hPHvsPredictedXPos.at(i));
 		//histSaver->SaveHistogram(hChi2XChi2Y.at(i));
@@ -1944,6 +1945,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
 		cellEdges->Draw("same");
 		histSaver->SaveCanvas(c1);
 		delete c1;
+		histSaver->SaveHistogramWithCellGrid(hDeadCellPositions[i]);
+		delete hDeadCellCharge[i];
 	}
 }
 
@@ -3280,18 +3283,21 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
 	hChargeDistribution->GetZaxis()->SetTitle("Pulse Height of Cluster  / ADC");
 	if (!hChargeDistribution)
 		return;
+	else
+		cerr<<" hChargDistribution3D: was not created:"<<endl;
 	cout<<"Create Project3dProfile for "<<hChargeDistribution->GetName()<<"..."<<flush;
 	TH2F* hMeanCharge = (TH2F*)hChargeDistribution->Project3DProfile("yx");
 	cout<<"\t[done]"<<endl;
-	if(!hMeanCharge)
-		return;
+//	if(!hMeanCharge)
+//		return;
+//	else
+//		cerr<<" hChargDistribution3D_pfyx: was not created:"<<endl;
 	hMeanCharge->GetXaxis()->SetTitle("Predicted Hit Position X in Detector /#mum");
 	hMeanCharge->GetYaxis()->SetTitle("Predicted Hit Position Y in Detector /#mum");
 	hMeanCharge->GetZaxis()->SetTitle("Avrg. pulse height /ADC");
 	hMeanCharge->SetTitle("Avrg. pulse height in detector system");
 	hMeanCharge->SetName("hAvrgPulseHeigthDetSystem");
 	histSaver->SaveHistogram(hMeanCharge,false);
-	UInt_t det = TPlaneProperties::getDetDiamond();
 	TCanvas *c1 = new TCanvas("cAvrgPulseHeigthDetSystem_MetalizationLayer");
 	c1->cd();
 	hMeanCharge->Draw("colz");
