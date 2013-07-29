@@ -2257,15 +2257,15 @@ bool TSettings::isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet) {
  */
 Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
 	Int_t DiamondPattern = this->get3dMetallisationFidCuts()->getFidCutRegion(xDet,yDet);
-
 	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
 	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
-	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern);
+	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern-1);
 	Float_t cellHight = GetCellHeight();
 	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
 	Int_t row = (yDet - startOf3dDetectorY)/cellHight;
+
 	Int_t cell = -1;
-	if(column >= 0 && column < this->getNColumns3d() && row >= 0 && row < this->getNRows3d())
+	if(column >= 0 && column < (Int_t) this->getNColumns3d() && row >= 0 && row < (Int_t) this->getNRows3d())
 		cell = column * this->getNRows3d()+row;
 	return cell;
 }
@@ -2286,16 +2286,15 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
 	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern-1);
 	Float_t cellHight = GetCellHeight();
-	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
-	Int_t row = (yDet - startOf3dDetectorY)/cellHight;
+	Int_t cell = getCellNo(xDet,yDet);
+
+	Int_t column = getColumnOfCell(cell);//(xDet-startOf3dDetectorX)/cellWidth;
+	Int_t row = getRowOfCell(cell);//;?(yDet - startOf3dDetectorY)/cellHight;
 
 	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
-	Float_t yminus = row*cellHight;
+	Float_t yminus = startOf3dDetectorY-row*cellHight;
 	Float_t deltaX = xDet - xminus;
 	Float_t deltaY = yDet - yminus;
-	Int_t cell = -1;
-	if(column >= 0 && column < this->getNColumns3d() && row >= 0 && row < this->getNRows3d())
-		cell = column * this->getNRows3d()+row;
 	Int_t quarter = -1;
 	if (deltaY>=0&&deltaX>=0&&deltaX<=cellWidth&&deltaY<=cellHight){
 		int quarterX = deltaX/(cellWidth/2);
@@ -2347,7 +2346,8 @@ void TSettings::CheckEdgeFidcuialCuts(){
 }
 bool TSettings::SorterForPulseHeightOfHisto(TH1* a, TH1* b){
 	    return a->GetMean() > b->GetMean();
-	}
+}
+
 vector<TH1*> TSettings::sortHistosByPulseHeight(vector<TH1*> vec) {
 	vector<TH1*> newvec = vec;
 	sort(newvec.begin(), newvec.end(), SorterForPulseHeightOfHisto);

@@ -308,6 +308,7 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 	return pt;
 }
 
+
 TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
 	TString name = histo->GetName();
 		if (name.BeginsWith("h"))
@@ -384,6 +385,19 @@ void HistogrammSaver::DrawFailedQuarters(
 		failedQuarter->SetFillColor(kRed);
 		failedQuarter->Draw("sameF");
 	}
+}
+
+TH2D* HistogrammSaver::GetHistoBinedInQuarters(TString name) {
+	return GetHistoBinedInCells(name,2);
+}
+
+TH2D* HistogrammSaver::GetHistoBinedInCells(TString name, Int_t binsPerCellAxis) {
+	cout<<"create "<<name<<endl;
+	TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
+	TH2D* histo = new TH2D(name,name,
+			settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
+			settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
+	return histo;
 }
 
 void HistogrammSaver::UpdatePaveText(){
