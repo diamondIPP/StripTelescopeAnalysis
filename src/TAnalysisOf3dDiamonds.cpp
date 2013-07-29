@@ -1953,9 +1953,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
 	for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
 		TString name = TString::Format("cDeadCellMeanCharge_%d",i);
 		c1 = new TCanvas(name,name);
-		hDeadCellsProfileMeanCharge->Draw("same");
 		c1->cd();
-		Float_t ymax = hDeadCellCharge[i]->GetMaximum();
+		if(hDeadCellCharge[i])
+			hDeadCellCharge[i]->Draw("");
+		else
+			cerr<<TString::Format("hDeadCellCharge[%d] invalid ", i)<<endl;
 		TCutG* cellEdges = new TCutG(name,4);
 		cellEdges->SetPoint(0,150,-1e9);
 		cellEdges->SetPoint(1,150,1e9);
