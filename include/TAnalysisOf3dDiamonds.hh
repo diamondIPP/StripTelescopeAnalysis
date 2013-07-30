@@ -54,16 +54,19 @@ private:
 	void initialiseLongAnalysisHistos();
 	void initialiseShortAnalysisHistos();
 	void initialiseTransparentAnalysisHistos();
+	void InitialiseStripAnalysisHistos();
 
 	void saveHistos();
 	void SaveShortAnalysisHistos();
 	void SaveLongAnalysisHistos();
 	void SaveLongAnalysisHistos2();
 	void saveTransparentAnalysisHistos();
+	void SaveStripAnalysisHistos();
 
 	void ShortAnalysis();
 	void LongAnalysis();
 	void TransparentAnalysis();
+	void StripAnalysis();
 
 	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
 
@@ -111,10 +114,11 @@ private:
 	void LongAnalysis_SaveMeanChargePlots();
 
 private:
+	TH1F* hLandauStrip;
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
 	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y,xPredicted,yPredicted,xPredDet,yPredDet;
-	Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax;
+	Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax,PulseHeightMaxMeanCharge,PulseHeightMinMeanCharge;
 
 	string FileNameEnd;
 	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
