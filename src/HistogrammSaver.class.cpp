@@ -85,11 +85,18 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 	TFidCutRegions* metallisationFidCuts = settings->get3dMetallisationFidCuts();
 	metallisationFidCuts->Print(1);
 	TFiducialCut* fidCut = metallisationFidCuts->getFidCut((UInt_t)3);
-	Float_t xLow = fidCut->GetXLow();//getXMetalisationStart3d;
-	Float_t xHigh = fidCut->GetXHigh();//getXMetalisationEnd3d;
-	Float_t yBins = settings->getNRows3d();
-	Float_t yLow = fidCut->GetYLow();
-	Float_t yHigh = fidCut->GetYHigh();//getYMetalisationEnd3d;
+	Float_t xLow = 0;
+	Float_t xHigh = 0;
+	Float_t yBins = 0;
+	Float_t yLow = 0;
+	Float_t yHigh = 0;
+	if(fidCut){
+		 xLow = fidCut->GetXLow();//getXMetalisationStart3d;
+		 xHigh = fidCut->GetXHigh();//getXMetalisationEnd3d;
+		 yBins = settings->getNRows3d();
+		 yLow = fidCut->GetYLow();
+		 yHigh = fidCut->GetYHigh();//getYMetalisationEnd3d;
+	}
 	//	cout<<"nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh"<<endl;
 	//	cout<<nameDet<<" "<<nameDet<<" "<<xBins<<" "<<xLow<<" "<<xHigh<<" "<<yBins<<" "<<yLow<<" "<<yHigh<<endl;
 	hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
