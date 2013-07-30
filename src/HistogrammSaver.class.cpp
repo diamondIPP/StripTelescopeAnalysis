@@ -422,15 +422,16 @@ TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
 			settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
 	return histo;
 }
-
+/*
 TProfile2D* HistogrammSaver::CreateProfile2D(std::string name,
 		std::vector<Float_t> posX, std::vector<Float_t> posY,
 		std::vector<Float_t> posZ, UInt_t nBinsX, UInt_t nBinsY,
 		Float_t minRangeX, Float_t maxRangeX, Float_t minRangeY,
 		Float_t maxRangeY, Float_t minRangeZ, Float_t maxRangeZ,
 		Float_t factor) {
+    return 0;
 }
-
+*/
 void HistogrammSaver::UpdatePaveText(){
 	pt->Clear();
 	pt->SetTextSize(0.0250);
