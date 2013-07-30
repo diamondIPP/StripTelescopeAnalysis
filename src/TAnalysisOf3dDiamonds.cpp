@@ -360,7 +360,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 	for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
 		int badcell = settings->getDeadCell3D()[i];
-		int relCellY = badcell-cellNo;
+		int relCellY = cellNo - badcell;
 		//		cout<<i<<" "<<badcell<<" "<<cellNo<<endl;
 		//		cout<<"sqrt(relCellY*relCellY): "<<sqrt(relCellY*relCellY)<<endl;
 		if(relCellY ==0 || sqrt(relCellY*relCellY) <= 1){
@@ -1623,10 +1623,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradin
 		Int_t Grading = 0;
 		//vecQuarterCellsFluctuation.push_back(vector<Float_t>());
 		//if(hCellsLandau.at(cell)->GetEntries() != 0){
+
+		vector<TH1F*> hQuarterCellsLandausSorted = hQuarterCellsLandau[cell];
+		sort(hQuarterCellsLandausSorted.begin(), hQuarterCellsLandausSorted.end(), TSettings::SorterForPulseHeightOfHisto);
+
 		for(UInt_t quarter=0;quarter<settings->getNQuarters3d();quarter++){
+			cout<<"hQuarterCellsLandausSorted.at(quarter): "<<hQuarterCellsLandausSorted.at(quarter)->GetMean()<<endl;
 			Float_t QuarterMean = hQuarterCellsLandau[cell][quarter]->GetMean();
+			Float_t QuarterHighMean = hQuarterCellsLandausSorted.at(0)->GetMean();
 			int entries = hQuarterCellsLandau[cell][quarter]->GetEntries();
-			Float_t Fluctuation = TMath::Abs((hLandauGoodCellsMean - QuarterMean)/hLandauGoodCellsMean);
+			//Float_t Fluctuation = TMath::Abs((hLandauGoodCellsMean - QuarterMean)/hLandauGoodCellsMean);
+			Float_t Fluctuation = TMath::Abs((QuarterHighMean - QuarterMean)/QuarterHighMean);
 			Float_t FluctuationFactor = 0.1; //Needs to be added to settings file.
 			bool isFailedQuarter = Fluctuation>FluctuationFactor;
 			cout<<TString::Format("%3d - %d: %.1f/%.1f with %3d (%2.1f%%) -->%d",
