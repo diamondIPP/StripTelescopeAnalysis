@@ -168,6 +168,8 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
 	if( !settings->diamondPattern.isValidCluster(diamondCluster)){
 		return;
 	}
+	if (diamondCluster.isSaturatedCluster())
+		return;
 	hLandauStrip->Fill(diamondCluster.getCharge());
 }
 
@@ -1983,7 +1985,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
 				}
 		}
 	}
-	histSaver->SaveHistogram(hLandauGoodCells);
+	Float_t factor = hLandauGoodCells->GetBinContent(hLandauGoodCells->GetMaximumBin());
+	factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
+	histSaver->SaveTwoHistos("hLandauGoodCells",hLandauGoodCells,hLandauStrip,factor);
+	histSaver->SaveTwoHistosNormalized("hLandauGoodCellsNormalized",hLandauGoodCells,hLandauStrip);
 
 	Float_t factor = hLandauBadCells->GetBinContent(hLandauBadCells->GetMaximumBin());
 	factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
@@ -3312,7 +3317,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Save2ClusterPlots() {
 	hCh->Draw("colz");
 	Float_t xmax = hCh->GetZaxis()->GetXmax();
 	Float_t xmin = hCh->GetZaxis()->GetXmin();
-	hCh->GetZaxis()->SetRangeUser(xmin+.1*(xmax-xmin),xmax);
+//	hCh->GetZaxis()->SetRangeUser(xmin+.1*(xmax-xmin),xmax);
 	histSaver->SaveHistogram(hCh,false);
 	delete hCh;
 }
