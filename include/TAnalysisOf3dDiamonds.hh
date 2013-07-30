@@ -107,6 +107,7 @@ private:
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
 	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
+	bool LongAnalysis_IsDeadCell(vector<TH1F*> nhQuarterCellsLandau, Float_t nThreshold);
 	void LongAnalysis_SaveFailedQuarters();
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
 	void LongAnalysis_SaveCellsClusterSize2DVsGrading();

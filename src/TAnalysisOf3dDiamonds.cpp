@@ -1655,26 +1655,55 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradin
 		vector<TH1F*> hQuarterCellsLandausSorted = hQuarterCellsLandau[cell];
 		sort(hQuarterCellsLandausSorted.begin(), hQuarterCellsLandausSorted.end(), TSettings::SorterForPulseHeightOfHisto);
 
-		for(UInt_t quarter=0;quarter<settings->getNQuarters3d();quarter++){
-			cout<<"hQuarterCellsLandausSorted.at(quarter): "<<hQuarterCellsLandausSorted.at(quarter)->GetMean()<<endl;
-			Float_t QuarterMean = hQuarterCellsLandau[cell][quarter]->GetMean();
-			Float_t QuarterHighMean = hQuarterCellsLandausSorted.at(0)->GetMean();
-			int entries = hQuarterCellsLandau[cell][quarter]->GetEntries();
-			//Float_t Fluctuation = TMath::Abs((hLandauGoodCellsMean - QuarterMean)/hLandauGoodCellsMean);
-			Float_t Fluctuation = TMath::Abs((QuarterHighMean - QuarterMean)/QuarterHighMean);
-			Float_t FluctuationFactor = 0.1; //Needs to be added to settings file.
-			bool isFailedQuarter = Fluctuation>FluctuationFactor;
-			cout<<TString::Format("%3d - %d: %.1f/%.1f with %3d (%2.1f%%) -->%d",
-					cell,quarter,QuarterMean,hLandauGoodCellsMean,entries,Fluctuation,isFailedQuarter) <<endl;
-			//vecQuarterCellsFluctuation[cell].push_back(Fluctuation);
-			if(isFailedQuarter)
-				vecQuarterCellsPassFail[cell].push_back(1);
-			else vecQuarterCellsPassFail[cell].push_back(0);
-			Grading += vecQuarterCellsPassFail[cell].at(quarter);
+		Float_t DeadCellThreshold = 700;
+		if(LongAnalysis_IsDeadCell(hQuarterCellsLandau[cell], DeadCellThreshold))
+			CellGrading.push_back(hQuarterCellsLandau[cell].size());
+		else{
+			for(UInt_t quarter=0;quarter<settings->getNQuarters3d();quarter++){
+				cout<<"hQuarterCellsLandausSorted.at(quarter): "<<hQuarterCellsLandausSorted.at(quarter)->GetMean()<<endl;
+				Float_t QuarterMean = hQuarterCellsLandau[cell][quarter]->GetMean();
+				Float_t QuarterHighMean = hQuarterCellsLandausSorted.at(0)->GetMean();
+				int entries = hQuarterCellsLandau[cell][quarter]->GetEntries();
+				//Float_t Fluctuation = TMath::Abs((hLandauGoodCellsMean - QuarterMean)/hLandauGoodCellsMean);
+				Float_t Fluctuation = TMath::Abs((QuarterHighMean - QuarterMean)/QuarterHighMean);
+				Float_t FluctuationFactor = 0.1; //Needs to be added to settings file.
+				bool isFailedQuarter = Fluctuation>FluctuationFactor;
+				cout<<TString::Format("%3d - %d: %.1f/%.1f with %3d (%2.1f%%) -->%d",
+						cell,quarter,QuarterMean,QuarterHighMean,entries,Fluctuation,isFailedQuarter)
+				<<endl;
+				//vecQuarterCellsFluctuation[cell].push_back(Fluctuation);
+				if(isFailedQuarter)
+					vecQuarterCellsPassFail[cell].push_back(1);
+				else vecQuarterCellsPassFail[cell].push_back(0);
+				Grading += vecQuarterCellsPassFail[cell].at(quarter);
+			}
+			cout<<"Cell: "<<cell<<"  Grading: "<<Grading<<endl;
+			CellGrading.push_back(Grading);
 		}
-		cout<<"Cell: "<<cell<<"  Grading: "<<Grading<<endl;
-		CellGrading.push_back(Grading);
 	}
+}
+
+bool TAnalysisOf3dDiamonds::LongAnalysis_IsDeadCell(vector<TH1F*> nhQuarterCellsLandau, Float_t nThreshold){
+
+	Int_t NQuarterLow =0;
+	for(UInt_t quarter=0;quarter<nhQuarterCellsLandau.size();quarter++){
+		Float_t QuarterMean = nhQuarterCellsLandau.at(quarter)->GetMean();
+		if(QuarterMean < nThreshold)
+			NQuarterLow++;
+		cout<<"QuarterMean: "<<QuarterMean<<" NQuarterLow: "<<NQuarterLow<<endl;
+	}
+	if(NQuarterLow == nhQuarterCellsLandau.size()){
+		cout<<"Return True"<<endl;
+		return true;
+	}
+	else{
+		return false;
+		cout<<"Return True"<<endl;
+	}
+	/*Float_t MeanSum = 0;
+	for(UInt_t quarter=0;quarter<nhQuarterCellsLandau.size();quarter++){
+		MeanSum += nhQuarterCellsLandau.at(quarter)->GetMean();
+	}*/
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveFailedQuarters(){
