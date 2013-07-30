@@ -64,6 +64,14 @@ std::string TPlaneProperties::getStringForDetector(int det){
 	return "Invalid";
 }
 
+bool TPlaneProperties::AreAllSiliconPlanes(std::vector<UInt_t> planes) {
+	for(UInt_t i = 0; i< planes.size(); i++){
+		if(isDiamondPlane(planes[i]))
+			return false;
+	}
+	return true;
+}
+
 Float_t TPlaneProperties::GetMinInvalidSignal(UInt_t det){
 	if(isSiliconDetector(det))
 		return -5;

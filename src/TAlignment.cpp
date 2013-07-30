@@ -76,6 +76,8 @@ TAlignment::~TAlignment() {
 //		events.back().Delete();
 		events.pop_back();
 	}
+	while (telescopeAlignmentEvent.size())
+		telescopeAlignmentEvent.pop_back();
 	if(verbosity)cout << "TAlignment deconstructor" << endl;
 	if (results!=0)results->setAlignment(this->align);
 	htmlAlign->setAlignment(align);
@@ -181,67 +183,71 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 	Float_t minEtaDif = settings->getMinimalAbsoluteEtaValue();
 	cout << "CREATING VECTOR OF VALID EVENTS TRANSPARENT..."<<minEtaDif << endl;
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
-			TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
-			if(!settings->useForAlignment(nEvent,nEvents))
-				break;
-			eventReader->LoadEvent(nEvent);
-			nAnalysedEvents++;
-			if (!eventReader->isValidTrack()) {
-				noHitDet++;
+		while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
+			telescopeAlignmentEvent.push_back(1);
+		}
+		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
+		if(!settings->useForAlignment(nEvent,nEvents))
+			break;
+		eventReader->LoadEvent(nEvent);
+		nAnalysedEvents++;
+		if (!eventReader->isValidTrack()) {
+			noHitDet++;
+			continue;
+		}
+		Float_t fidCutX = eventReader->getFiducialValueX();
+		Float_t fidCutY = eventReader->getFiducialValueY();
+		if(!settings->isInAlignmentFiducialRegion(fidCutX,fidCutY)){
+			nNotInFidCut++;
+			continue;
+		}
+
+		//			float fiducialValueX=eventReader->getFiducialValueX();
+		//			float fiducialValueY=eventReader->getFiducialValueY();
+		Int_t subjectPlane = TPlaneProperties::getDiamondPlane();
+		UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
+		vector< UInt_t > refPlanes =  TPlaneProperties::getSiliconPlaneVector();
+		TPositionPrediction* predictedPosition = eventReader->predictPosition(subjectPlane,refPlanes,false);
+		//			cout<<"\n"<<endl;
+		//			predictedPosition->Print(2);
+		Float_t predX = predictedPosition->getPositionX();
+		Float_t predY = predictedPosition->getPositionY();
+		Float_t metricPosInDetSystem = eventReader->getPositionInDetSystem(subjectDetector,predX,predY);
+		Float_t centerPos = settings->convertMetricToChannelSpace(subjectDetector,metricPosInDetSystem);
+		if(centerPos <  0)
+			cout<<nEvent<<" "<<predX<<"/"<<predY<<": "<<metricPosInDetSystem<<" -->"<<centerPos<<endl;
+		//			cout<<nEvent<<" "<<predX<<"/"<<predY<<"\t"<<metricPosInDetSystem<< " - "<< centerPos<<endl;
+		TCluster cluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,centerPos,10);
+		//			cluster.Print(1);
+		TEvent *event = eventReader->getEvent();
+		TEvent* clonedEvent = (TEvent*)event->Clone();
+		TPlane* plane = clonedEvent->getPlanePointer(subjectPlane);
+		//			cout<<"\n\n***\n";
+		//			event->Print(1);
+		vector<TCluster> vecClus(1,cluster);
+		plane->SetXClusters(vecClus);
+		//			cout<<"\n";
+		//			clonedEvent->Print(1);
+		for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
+			Float_t clusPos = eventReader->getCluster(det,0).getPosition();
+			if(clusPos<0||clusPos>=TPlaneProperties::getNChannels(det)||eventReader->getNClusters(det)!=1){
+				cout<<"Do not take event clusPos is not valid...."<<endl;
 				continue;
 			}
-			Float_t fidCutX = eventReader->getFiducialValueX();
-			Float_t fidCutY = eventReader->getFiducialValueY();
-			if(!settings->isInAlignmentFiducialRegion(fidCutX,fidCutY)){
-				nNotInFidCut++;
-				continue;
-			}
+		}
+		Float_t eta = cluster.getEta(true);
+		if (eta<minEtaDif || eta > 1- minEtaDif){
+			nNotGoodEta++;
+			if(clonedEvent) delete clonedEvent;
+			continue;
+		}
+		nCandidates++;
 
-//			float fiducialValueX=eventReader->getFiducialValueX();
-//			float fiducialValueY=eventReader->getFiducialValueY();
-			Int_t subjectPlane = TPlaneProperties::getDiamondPlane();
-			UInt_t subjectDetector = TPlaneProperties::getDetDiamond();
-			vector< UInt_t > refPlanes =  TPlaneProperties::getSiliconPlaneVector();
-			TPositionPrediction* predictedPosition = eventReader->predictPosition(subjectPlane,refPlanes,false);
-//			cout<<"\n"<<endl;
-//			predictedPosition->Print(2);
-			Float_t predX = predictedPosition->getPositionX();
-			Float_t predY = predictedPosition->getPositionY();
-			Float_t metricPosInDetSystem = eventReader->getPositionInDetSystem(subjectDetector,predX,predY);
-			Float_t centerPos = settings->convertMetricToChannelSpace(subjectDetector,metricPosInDetSystem);
-			if(centerPos <  0)
-				cout<<nEvent<<" "<<predX<<"/"<<predY<<": "<<metricPosInDetSystem<<" -->"<<centerPos<<endl;
-//			cout<<nEvent<<" "<<predX<<"/"<<predY<<"\t"<<metricPosInDetSystem<< " - "<< centerPos<<endl;
-			TCluster cluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,centerPos,10);
-//			cluster.Print(1);
-			TEvent *event = eventReader->getEvent();
-			TEvent* clonedEvent = (TEvent*)event->Clone();
-			TPlane* plane = clonedEvent->getPlanePointer(subjectPlane);
-//			cout<<"\n\n***\n";
-//			event->Print(1);
-			vector<TCluster> vecClus(1,cluster);
-			plane->SetXClusters(vecClus);
-//			cout<<"\n";
-//			clonedEvent->Print(1);
-			for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
-				Float_t clusPos = eventReader->getCluster(det,0).getPosition();
-				if(clusPos<0||clusPos>=TPlaneProperties::getNChannels(det)||eventReader->getNClusters(det)!=1){
-					cout<<"Do not take event clusPos is not valid...."<<endl;
-					continue;
-				}
-			}
-			Float_t eta = cluster.getEta(true);
-			if (eta<minEtaDif || eta > 1- minEtaDif){
-				nNotGoodEta++;
-				if(clonedEvent) delete clonedEvent;
-				continue;
-			}
-			nCandidates++;
+		this->events.push_back(*clonedEvent);
+		telescopeAlignmentEvent.push_back(0);
 
-			this->events.push_back(*clonedEvent);
-
-//			if (eventReader->useForAnalysis())
-//				break;
+		//			if (eventReader->useForAnalysis())
+		//				break;
 	}
 
 	cout << "nAnalysedEvents " << setw(7) << nAnalysedEvents << endl;
@@ -269,7 +275,14 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 	int nScreened = 0;
 	int nNotInFidCut=0;
 	cout << "CREATING VECTOR OF VALID EVENTS..." << endl;
+	UInt_t nMaxSiliconEvents = 10000;
+	UInt_t nTelescopeAlignmentEvents = 0;
 	for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
+		while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
+			telescopeAlignmentEvent.push_back(1);
+			nTelescopeAlignmentEvents++;
+		}
+		cout<<TString::Format("\r%6d %6d",(int)events.size(),(int)(events.size()-nTelescopeAlignmentEvents))<<flush;
 		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
 		if(!settings->useForAlignment(nEvent,nEvents))
 			return;
@@ -282,17 +295,21 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 			nScreened++;
 			continue;
 		}
+
+		if (events.size()<nMaxSiliconEvents)
+			this->events.push_back(*eventReader->getEvent());
 		if (eventReader->getNDiamondClusters() != 1) {
 			falseClusterSizeDia++;
-			continue;
-		}
-		if(!eventReader->IsInFiducialCut()){
-			nNotInFidCut++;
 			continue;
 		}
 
 		float fiducialValueX=eventReader->getFiducialValueX();
 		float fiducialValueY=eventReader->getFiducialValueY();
+
+		if(!settings->isInAlignmentFiducialRegion(fiducialValueX,fiducialValueY)){
+			nNotInFidCut++;
+			continue;
+		}
 
 		if(!settings->isInAlignmentFiducialRegion(fiducialValueX,fiducialValueY)){
 			if(verbosity>4)cout<<nEvent<<"\tevent not in correct fiducial region "<<fiducialValueX<<"/"<<fiducialValueY<<"-->"<<settings->getSelectionFidCuts()->getFiducialCutIndex(fiducialValueX,fiducialValueY)<<endl;
@@ -315,28 +332,30 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 					cout<<"Do not take event clusPos is not valid...."<<endl;
 				}
 			}
-			if(bBreak)
+			if(bBreak){
 				continue;
+			}
 			nCandidates++;
-
-			this->events.push_back(*eventReader->getEvent());
+			if (events.size()>=nMaxSiliconEvents)
+				this->events.push_back(*eventReader->getEvent());
+			telescopeAlignmentEvent.push_back(0);
 		}
 		if (eventReader->useForAnalysis()) {
 			cout << "\nFound first Event for Analysis ->BREAK" << endl;
 			break;
 		}
 	}
-	if(verbosity){
+	if(verbosity||true){
 		cout<<"\nCreated Vector of Events with one and only one Hit in Silicon  + one diamond Cluster + in Fiducial Cut Area"<<endl;
 		cout<<"first Event: "<<startEvent<<"\t last Event: "<<nEvent<<"\t total Events: "<<endl;//todo
 		cout<<"Cut Flow:\n";
 		cout<<"\tTotal Events looked at:     "<<setw(7)<<nEvent-startEvent<<"\n";
 		cout<<"\tPlane with no Silicon Hit:   "<<setw(7)<<noHitDet<<"\n";
+		cout<<"\tPlane with no Silicon Hit:   "<<setw(7)<<nTelescopeAlignmentEvents<<"\n";
 		cout<<"\tSil Track not in Fid Cut:    "<<setw(7)<<nNotInFidCut<<"\n";
 		cout<<"\tNo of Diamond Clust. != 1:   "<<setw(7)<<falseClusterSizeDia<<"\n";
 		cout<<"\t                             "<<"-------\n";
 		cout<<"\t                             "<<setw(7)<<nCandidates<<" = "<<(Float_t)nCandidates/(Float_t)(nEvent-startEvent)*100.<<"%\n"<<endl;
-
 	}
 	align->addEventIntervall(startEvent, nEvent);
 	align->setNUsedEvents((UInt_t) events.size());
@@ -770,9 +789,20 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 	Float_t xDelta,xRes,yRes, yDelta,xLabMeasMetric, yLabMeasMetric, xDetMeasuredMetric, yDetMeasuredMetric,  xLabPredictedMetric, yLabPredictedMetric, resxtest, resytest, xPhi,yPhi,chi2x,chi2y;
 	TPositionPrediction* predictedPostionMetric = 0;
 	UInt_t nUsedEvents=0;
-	for (UInt_t nEvent = 0; nEvent < events.size(); nEvent++) {
-		TRawEventSaver::showStatusBar(nEvent, events.size(),100,false,false);
-		myTrack->setEvent(&events.at(nEvent));
+	UInt_t nEvents = events.size();
+	bool isTelescopeAlignment = TPlaneProperties::isSiliconPlane(subjectPlane) && TPlaneProperties::AreAllSiliconPlanes(vecRefPlanes);
+	if (isTelescopeAlignment){
+		cout<<" is Telescope Alignment with "<<nEvents<<endl;
+	}
+	else
+		cout<<" is Diamond Alignment with "<<nEvents<<endl;
+
+	for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
+		TRawEventSaver::showStatusBar(nEvent, nEvents,100,false,false);
+		if(!isTelescopeAlignment && telescopeAlignmentEvent[nEvent])
+			continue;
+//			myTrack->setEvent(&telescopeAlignmentEvent.at(nEvent));
+			myTrack->setEvent(&events.at(nEvent));
 		if (verbosity > 5) cout << "Sil Alignment - Event No.:"<< nEvent << endl;
 		xLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
 		yLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
@@ -897,8 +927,18 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 	Int_t clusterSize;
 	Float_t chi2x,chi2y;
 	Float_t eta;
-	for (UInt_t nEvent = 0; nEvent < events.size(); nEvent++) {
-		TRawEventSaver::showStatusBar(nEvent, events.size());
+	UInt_t nEvents = events.size();
+	bool isTelescopeAlignment = TPlaneProperties::isSiliconPlane(subjectPlane) && TPlaneProperties::AreAllSiliconPlanes(vecRefPlanes);
+	if (isTelescopeAlignment){
+		cout<<" is Telescope Alignment with "<<nEvents<<endl;
+	}
+	else
+		cout<<" is Diamond Alignment with "<<nEvents<<endl;
+
+	for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
+		TRawEventSaver::showStatusBar(nEvent, nEvents);
+		if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent])
+			continue;
 		myTrack->setEvent(&events.at(nEvent));
 		if (verbosity > 3) cout << "Event no.: " << nEvent << endl;
 		predictedPostion = myTrack->predictPosition(subjectPlane, vecRefPlanes, silCalcMode, verbosity > 7);
@@ -921,7 +961,8 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 		eta = events.at(nEvent).getCluster(subjectPlane,cor,0).getEta(true);
 
 		if(verbosity>3)	predictedPostion->Print();
-		if (verbosity > 3) events.at(nEvent).getPlane(subjectPlane).Print();
+		if (verbosity > 3)
+			events.at(nEvent).getPlane(subjectPlane).Print();
 		if (verbosity > 3) cout << "MeasuredChannel: " << myTrack->getXMeasuredClusterPositionChannelSpace(subjectPlane) << "/" << myTrack->getYMeasuredClusterPositionChannelSpace(subjectPlane) << endl;
 		if (verbosity > 3) cout << "MeasuredMetric: " << myTrack->getXMeasuredClusterPositionMetricSpace(subjectPlane) << "/" << myTrack->getYMeasuredClusterPositionMetricSpace(subjectPlane) << endl;
 		if (verbosity > 3) cout << "Observed: " << xPositionObservedMetric << " / " << yPositionObservedMetric << endl;
@@ -1145,12 +1186,16 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 	Float_t xPhi, yPhi;
 	Float_t chi2X, chi2Y;
 	Float_t xPredSigma,yPredSigma;
+	UInt_t subjectPlane = TPlaneProperties::getDiamondPlane();
+	bool isTelescopeAlignment = TPlaneProperties::isSiliconPlane(subjectPlane)&&TPlaneProperties::AreAllSiliconPlanes(vecRefPlanes);
+
 	for (UInt_t nEvent = 0; nEvent < events.size(); nEvent++) {
+		if (!isTelescopeAlignment && telescopeAlignmentEvent[nEvent])
+					continue;
 		TRawEventSaver::showStatusBar(nEvent, events.size());
 		myTrack->setEvent(&events.at(nEvent));
 		Float_t sumDeltaX = 0;
 		Float_t sumDeltaY = 0;
-		UInt_t subjectPlane = 0;
 		predictedPosition = myTrack->predictPosition(subjectPlane, vecRefPlanes, TCluster::corEta, false);
 		chi2X = predictedPosition->getChi2X();
 		chi2Y = predictedPosition->getChi2Y();
@@ -2065,7 +2110,8 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
 
 	vector<UInt_t> vecEventNo[9];
 	cout << "create flattened strip hit histo " << events.size() << endl;
-	for (nEvent = 0; nEvent < this->events.size(); nEvent++) {
+
+	for (nEvent = 0; nEvent < events.size(); nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent, events.size());
 		myTrack->setEvent(&events.at(nEvent));
 
@@ -2073,6 +2119,9 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
 			vector<UInt_t> refPlanes;
 			for (UInt_t refPlane = 0; refPlane < TPlaneProperties::getNSiliconPlanes(); refPlane++)
 				if (subjectPlane != refPlane) refPlanes.push_back(refPlane);
+			bool isTelescopeAlignment = TPlaneProperties::isSiliconPlane(subjectPlane) && TPlaneProperties::AreAllSiliconPlanes(refPlanes);
+			if(!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent])
+				continue;
 			TPositionPrediction* pred = myTrack->predictPosition(subjectPlane, refPlanes, TCluster::corEta, false);
 
 			Float_t predictedStripPositionX = myTrack->getPositionInDetSystem(subjectPlane * 2, pred->getPositionX(), pred->getPositionY());

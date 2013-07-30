@@ -114,10 +114,91 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 }
 
 
+void HistogrammSaver::SaveTwoHistosNormalized(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond, UInt_t verbosity){
 
+	if(!histo1&&!histo2)return;
+	if(!histo1||!histo2){
+		if (histo1) SaveHistogram(histo1);
+		else SaveHistogram(histo2);
+		return;
+	}
+	if (verbosity>2) cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
+	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
+	c1->cd();
+	c1->SetObjectStat(false);
+	Float_t min1 = histo1->GetMinimum();
+	Float_t min2 = histo2->GetMinimum();
+	Float_t min = TMath::Min(min1,min2);
+	Float_t max1 = histo1->GetMaximum();
+	Float_t max2 = histo2->GetMaximum();
+	//	Float_t range1 = max1-min1;
+	//	Float_t range2 = max2-min2;
+	Float_t max = TMath::Max(max1,max2);
+	Float_t range = max - min;
+	Float_t middle = (max+min)/2.;
+	if(min>=0&&(middle - range/2.*1.1)<0)
+		min =0;
+	else
+		min = middle - range/2.*1.1;
+	max = middle + range/2.*1.4;
+	//	int stat = gStyle->GetOptStat();
+	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
+		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
+	if(refactorSecond!=1)histo2->Scale(refactorSecond);
+	if (verbosity>2) cout<<"min: "<<min<<" max: "<<max;
+	if (verbosity>2) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<histo1->GetMaximum()<<"\thisto2:"<<histo2->GetMaximum()<<flush;
+	if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
+	histo1->SetStats(false);
+	histo2->SetStats(false);
+	if(histo1->GetMaximum()>histo2->GetMaximum()){
+		if (verbosity>2) cout<<"\tdraw1-"<<flush;
+		histo1->DrawNormalized("");
+		histo1->GetYaxis()->SetRangeUser(min,max);
+		if (verbosity>2) cout<<"draw2 "<<flush;
+		histo2->DrawNormalized("same");
+		//		histo2->GetYaxis()->SetRangeUser(min,max);
+	}
+	else{
+		if (verbosity>2) cout<<"\tdraw2-"<<flush;
+		histo2->DrawNormalized("");
+		histo2->GetYaxis()->SetRangeUser(min,max);
+		if (verbosity>2) cout<<"draw1 "<<flush;
+		histo1->DrawNormalized("same");
+		//		histo1->GetYaxis()->SetRangeUser(min,max);
+	}
+	c1->Update();
+	TVirtualPad *pad =c1->GetPad(0);
+	if (verbosity>2) cout<<"MIN: "<<min<<"-->";
+	min=(double)(min/refactorSecond);
+	if (verbosity>2) cout<<min<<"\t\tMAX: "<<max<<"--->";
+	max = (double)(max/refactorSecond);
+	if (verbosity>2) cout<<max<<endl;
+	TGaxis *axis = new TGaxis(pad->GetUxmax(),pad->GetUymin(),pad->GetUxmax(), pad->GetUymax(),min,max,510,"+L");
+	axis->SetLineColor(histo2->GetLineColor());
+	axis->SetLabelColor(histo2->GetLineColor());
+	axis->SetTextColor(histo2->GetLineColor());
+	axis->SetTitle(histo2->GetYaxis()->GetTitle());
+	axis->Draw("same");
+	c1->Update();
+	TLegend *leg =new TLegend(0.1,0.75,0.48,0.9);
+	leg->SetFillColor(kWhite);
+	leg->SetHeader("Legend");
+	leg->AddEntry(histo1,histo1->GetName());
+	leg->AddEntry(histo2,histo2->GetName());
+	leg->Draw("same");
+	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.c_str()));
+	pt2->Draw("same");
+	c1->Update();
+	SaveCanvas(c1);
+}
 void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *histo2,double refactorSecond, UInt_t verbosity)
 {
-	if(!histo1||!histo2)return;
+	if(!histo1&&!histo2)return;
+	if(!histo1||!histo2){
+		if (histo1) SaveHistogram(histo1);
+		else SaveHistogram(histo2);
+		return;
+	}
 	if (verbosity>2) cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
 	c1->cd();
@@ -169,12 +250,6 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1F *histo1, TH1F *
 	if (verbosity>2) cout<<min<<"\t\tMAX: "<<max<<"--->";
 	max = (double)(max/refactorSecond);
 	if (verbosity>2) cout<<max<<endl;
-	TGaxis *axis = new TGaxis(pad->GetUxmax(),pad->GetUymin(),pad->GetUxmax(), pad->GetUymax(),min,max,510,"+L");
-	axis->SetLineColor(histo2->GetLineColor());
-	axis->SetLabelColor(histo2->GetLineColor());
-	axis->SetTextColor(histo2->GetLineColor());
-	axis->SetTitle(histo2->GetYaxis()->GetTitle());
-	axis->Draw("same");
 	c1->Update();
 	TLegend *leg =new TLegend(0.1,0.75,0.48,0.9);
 	leg->SetFillColor(kWhite);
@@ -422,16 +497,15 @@ TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
 			settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
 	return histo;
 }
-/*
+
 TProfile2D* HistogrammSaver::CreateProfile2D(std::string name,
 		std::vector<Float_t> posX, std::vector<Float_t> posY,
 		std::vector<Float_t> posZ, UInt_t nBinsX, UInt_t nBinsY,
 		Float_t minRangeX, Float_t maxRangeX, Float_t minRangeY,
 		Float_t maxRangeY, Float_t minRangeZ, Float_t maxRangeZ,
 		Float_t factor) {
-    return 0;
 }
-*/
+
 void HistogrammSaver::UpdatePaveText(){
 	pt->Clear();
 	pt->SetTextSize(0.0250);

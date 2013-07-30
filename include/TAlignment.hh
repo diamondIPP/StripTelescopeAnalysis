@@ -145,6 +145,7 @@ private:
     Float_t res_keep_factor;
 	
 	vector<TEvent> events;
+	vector<bool> telescopeAlignmentEvent;
 	Int_t nAlignmentStep;
     Int_t nAlignSteps;
 

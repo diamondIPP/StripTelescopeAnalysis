@@ -70,6 +70,7 @@ public:
 	void SaveCanvasROOT(TCanvas* canvas);
 	void SaveCanvasPNG(TCanvas* canvas);
 	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
+	void SaveTwoHistosNormalized(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
@@ -106,6 +107,12 @@ public:
 	static void OptimizeYRange(TH2* histo);
 	static void OptimizeXYRange(TH2* histo);
 
+	static TProfile2D* CreateProfile2D(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
+			UInt_t nBinsX=128, UInt_t nBinsY=128,
+			Float_t minRangeX = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeX= std::numeric_limits<float>::infinity(),
+			Float_t minRangeY = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeY= std::numeric_limits<float>::infinity(),
+			Float_t minRangeZ = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeZ= std::numeric_limits<float>::infinity(),
+			Float_t factor = 0.05);
 
 	static TH3F* Create3DHisto(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
 			UInt_t nBinsX=128, UInt_t nBinsY=128,UInt_t nBinsZ=128,
