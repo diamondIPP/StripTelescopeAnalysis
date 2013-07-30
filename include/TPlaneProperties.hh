@@ -44,9 +44,11 @@ public:
 	static std::string getDetectorNameString(UInt_t det);
 	static std::string getStringForDetector(int i);
 	inline static bool isSiliconDetector(UInt_t det){return (det<getNSiliconDetectors());}
+	inline static bool isSiliconPlane(UInt_t plane){return (!isDiamondPlane(plane));}
 	inline static bool isDiamondDetector(UInt_t det){return (det==getDetDiamond());}
 	inline static bool isDiamondPlane(UInt_t plane){return (plane==getDiamondPlane());}
 	inline static bool isSaturated(UInt_t det, Int_t adcValue){return (adcValue>=getMaxSignalHeight(det));}
+	static bool AreAllSiliconPlanes(std::vector<UInt_t> planes);
 	static Float_t GetMinInvalidSignal(UInt_t det);
 	static bool isValidChannel(UInt_t det, UInt_t ch){return (ch>=0&&ch<getNChannels(det));};
     ClassDef(TPlaneProperties,1);
