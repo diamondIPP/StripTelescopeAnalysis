@@ -375,7 +375,7 @@ void HistogrammSaver::DrawFailedQuarters(
 		float yHigh = yLow+cellheight/2;
 		TString name = c1->GetName();
 		name.Append(TString::Format("_FailedQuarter_%dOf%d",i,(int)failedQuarters.size()));
-		cout<<" DRAW: "<< name<<endl;
+//		cout<<" DRAW: "<< name<<endl;
 		failedQuarter = new TCutG(name,5);
 		failedQuarter->SetPoint(0,xLow,yLow);
 		failedQuarter->SetPoint(1,xLow,yHigh);
