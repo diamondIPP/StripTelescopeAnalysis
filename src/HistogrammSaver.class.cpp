@@ -375,7 +375,7 @@ void HistogrammSaver::DrawFailedQuarters(
 		float yHigh = yLow+cellheight/2;
 		TString name = c1->GetName();
 		name.Append(TString::Format("_FailedQuarter_%dOf%d",i,(int)failedQuarters.size()));
-		cout<<" DRAW: "<< name<<endl;
+//		cout<<" DRAW: "<< name<<endl;
 		failedQuarter = new TCutG(name,5);
 		failedQuarter->SetPoint(0,xLow,yLow);
 		failedQuarter->SetPoint(1,xLow,yHigh);
@@ -421,6 +421,14 @@ TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
 			settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
 			settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
 	return histo;
+}
+
+TProfile2D* HistogrammSaver::CreateProfile2D(std::string name,
+		std::vector<Float_t> posX, std::vector<Float_t> posY,
+		std::vector<Float_t> posZ, UInt_t nBinsX, UInt_t nBinsY,
+		Float_t minRangeX, Float_t maxRangeX, Float_t minRangeY,
+		Float_t maxRangeY, Float_t minRangeZ, Float_t maxRangeZ,
+		Float_t factor) {
 }
 
 void HistogrammSaver::UpdatePaveText(){

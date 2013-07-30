@@ -2265,12 +2265,17 @@ Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
 	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
 	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern-1);
 	Float_t cellHight = GetCellHeight();
-	Int_t column = (xDet-startOf3dDetectorX)/cellWidth;
-	Int_t row = (yDet - startOf3dDetectorY)/cellHight;
-
+	Float_t deltaX = xDet-startOf3dDetectorX;
+	Float_t deltaY = yDet - startOf3dDetectorY;
+	Int_t column = (deltaX)/cellWidth;
+	Int_t row = (deltaY)/cellHight;
+	if (verbosity>6)
+		cout<<xDet<<"/"<<yDet<<" --> "<<deltaX<<"/"<<deltaY<<" "<<column<<"/"<<row;
 	Int_t cell = -1;
 	if(column >= 0 && column < (Int_t) this->getNColumns3d() && row >= 0 && row < (Int_t) this->getNRows3d())
-		cell = column * this->getNRows3d()+row;
+		cell = row + column *  this->getNRows3d();
+	if (verbosity>6)
+		cout<<"\t->\t"<<cell<<endl;
 	return cell;
 }
 
@@ -2283,7 +2288,10 @@ Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
 pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 	// i column
 	// j row
-
+	if (verbosity>6){
+		cout<<"\n\n"<<flush;
+		this->get3dMetallisationFidCuts()->Print(1);
+	}
 	Int_t DiamondPattern = this->get3dMetallisationFidCuts()->getFidCutRegion(xDet,yDet);
 
 	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
@@ -2294,12 +2302,19 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 
 	Int_t column = getColumnOfCell(cell);//(xDet-startOf3dDetectorX)/cellWidth;
 	Int_t row = getRowOfCell(cell);//;?(yDet - startOf3dDetectorY)/cellHight;
-
-	Float_t xminus = startOf3dDetectorX+column*cellWidth; //+5;		//2365 is the start of the 3D detector in x
-	Float_t yminus = startOf3dDetectorY-row*cellHight;
-	Float_t deltaX = xDet - xminus;
-	Float_t deltaY = yDet - yminus;
+	Float_t xminus = xDet-startOf3dDetectorX;
+	Float_t yminus = yDet-startOf3dDetectorY;
+	Float_t relX = xminus - column*cellWidth;
+	Float_t relY = yminus - row*cellHight; //+5;		//2365 is the start of the 3D detector in x
+	Float_t deltaX = relX;//xDet - xminus;
+	Float_t deltaY = relY;//yDet - yminus;
 	Int_t quarter = -1;
+	if (verbosity>6){
+		cout<<DiamondPattern<< " "<<startOf3dDetectorX<<"/"<<startOf3dDetectorY<<"\t"<<cellWidth<<"/"<<cellHight<<endl;
+
+		cout<<xminus<<" - "<<column <<" * "<<cellWidth<<" = "<<relX<<endl;
+		cout<<yminus<<" - "<<row <<" * "<<cellHight<<" = "<<relY<<endl;
+	}
 	if (deltaY>=0&&deltaX>=0&&deltaX<=cellWidth&&deltaY<=cellHight){
 		int quarterX = deltaX/(cellWidth/2);
 		int quarterY = deltaY/(cellHight/2);
@@ -2312,6 +2327,9 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 		cout << "\tdeltaX: " << deltaX << ", deltaY: " << deltaY <<endl;
 		cout<<"\t cell: "<< cell << ", quarter: " << quarter <<endl;
 	}
+	if(verbosity>6)
+	cout <<xDet<<"/"<<yDet<<" --> "<<xminus<<"/"<<yminus<<"\t-->"<<
+				cell<<"<=> "<<column<<"/"<<row<<" "<<deltaX<<"/"<<deltaY<<" -->"<<quarter<<endl;
 //	i*11+j
 	return make_pair(cell,quarter);
 }
@@ -2322,13 +2340,17 @@ pair<Float_t, Float_t> TSettings::getRelativePositionInCell(Float_t xPredDet,
 	Int_t DiamondPattern = this->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
 	Float_t startOf3dDetectorX = this->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
 //	Float_t startOf3dDetectorY = this->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
-	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern);
+	Float_t cellWidth = GetCellWidth(TPlaneProperties::getDetDiamond(),DiamondPattern-1);
 	Float_t cellHight = GetCellHeight();
 	Int_t cellNo = getCellNo(xPredDet,yPredDet);
 	Int_t row = getRowOfCell(cellNo);
 	Int_t column = getColumnOfCell(cellNo);
 	Float_t relX = xPredDet - (startOf3dDetectorX+column*cellWidth); //+5;		//2365 is the start of the 3D detector in x
 	Float_t relY = yPredDet - (row*cellHight);
+	if(relX>cellWidth||relY>cellHight||relX<0||relY<0)
+		cerr<<"[TSettings::getRelativePositionInCell] invalid output: "<<
+		TString::Format("%03.1f/%03.1f from %03.1f/%03.1f, with calculated hit in cell %d = %d_%d",
+				relX,relY,xPredDet,yPredDet,cellNo,column,row)<<endl;
 	return make_pair(relX,relY);
 }
 
