@@ -1421,9 +1421,11 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
 		pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
 		TString name = "c_";
 		name.Append(hLandau[i]->GetName());
-		histSaver->SaveTwoHistos((string)name,hLandau[i],hLandauStrip);
+
+		Float_t factor = hLandau[i]->GetBinContent(hLandau[i]->GetMaximumBin());
+		factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
 		name.Append("_normalized");
-		histSaver->SaveTwoHistos((string)name,hLandau[i],hLandauStrip);
+		histSaver->SaveTwoHistosNormalized((string)name,hLandau[i],hLandauStrip);
 
 		Float_t max = hHitandSeedCount[i]->GetBinContent(hHitandSeedCount[i]->GetMaximumBin());
 		hHitandSeedCount[i]->Scale(1./max);
@@ -1464,20 +1466,28 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
 	cCombinedMeanCharge->cd();
 
 	// no Fiducial Cuts Drawn
+	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(0));
+	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(1));
+	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(2));
+	TString name = "hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn";
+	hFidCutXvsFidCutYvsMeanChargeAllDetectors->SetTitle(name);
 	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
-	cCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn");
+	cCombinedMeanCharge->SetName(name);
 	histSaver->SaveCanvas(cCombinedMeanCharge);
 
 	// Selection Fiducial Cuts Drawn
+	name = "hFidCutXvsFidCutYvsMeanChargeAllDetectors";
 	settings->getSelectionFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge);
-	cCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectors");
+	cCombinedMeanCharge->SetName(name);
 	histSaver->SaveCanvas(cCombinedMeanCharge);
 
 	// Edge F
 	cCombinedMeanCharge->Clear();
+	name = "hFidCutXvsFidCutYvsMeanChargeAllEdges";
+	hFidCutXvsFidCutYvsMeanChargeAllDetectors->SetTitle(name);
 	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
 	settings->get3dEdgeFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge,true);
-	cCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllEdges");
+	cCombinedMeanCharge->SetName(name);
 	histSaver->SaveCanvas(cCombinedMeanCharge);
 
 	for ( UInt_t i = 0; i < settings->get3dEdgeFidCuts()->getNFidCuts(); i++){
@@ -1521,7 +1531,9 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 		pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
 		TString name = "c_";
 		name.Append(hLandauTransparent[i]->GetName());
-		histSaver->SaveTwoHistos((string)name,hLandauTransparent[i],hLandauStrip);
+		Float_t factor = hLandauTransparent[i]->GetBinContent(hLandau[i]->GetMaximumBin());
+		factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
+		histSaver->SaveTwoHistos((string)name,hLandauTransparent[i],hLandauStrip,factor);
 		name = "c_";
 		name.Append(hLandauTransparentBadCellsRemoved[i]->GetName());
 		histSaver->SaveTwoHistos((string)name,hLandauTransparentBadCellsRemoved[i],hLandauStrip);
@@ -1569,10 +1581,6 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 	/*//For all Diamond hFidCutXvsFidCutYvsMeanCharge
 	hCombinedMeanCharge = new TCanvas();
 	hCombinedMeanCharge->cd();
-	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(0));
-	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(1));
-	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(2));
-	hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
 	//FidCudBoundMetric->Draw("same"); //To draw the fiducial cut regions
 	hCombinedMeanCharge->SetName("hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn");
 	histSaver->SaveCanvas(hCombinedMeanCharge);
@@ -1976,8 +1984,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
 		}
 	}
 	histSaver->SaveHistogram(hLandauGoodCells);
-	histSaver->SaveTwoHistos("cLandauBadCells",hLandauBadCells,hLandauStrip);
+
+	Float_t factor = hLandauBadCells->GetBinContent(hLandauBadCells->GetMaximumBin());
+	factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
+	histSaver->SaveTwoHistos("cLandauBadCells",hLandauBadCells,hLandauStrip,factor);
 	//Histogram(hLandauBadCells);
+	histSaver->SaveTwoHistosNormalized("cLandauBadCellsNormalized",hLandauBadCells,hLandauStrip);
+
 	hLandauGoodCellsMean = hLandauGoodCells->GetMean();
 }
 
@@ -3410,7 +3423,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
 
 void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
 	TString name = "hLandauStrip";
-	hLandauStrip =  new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMin);
+	hLandauStrip =  new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax);
 	hLandauStrip->GetXaxis()->SetTitle("charge /ADC");
 	hLandauStrip->GetYaxis()->SetTitle("number of entries #");
 	hLandauStrip->SetLineColor(kBlue);
