@@ -442,8 +442,6 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	//	Float_t xPredDet = eventReader->getPositionInDetSystem(subjectDetector, xPredicted, yPredicted);
 	//cout<<"YOffset: "<<settings->get3DYOffset()<<endl;
 
-	vecChi2X.push_back(chi2x);
-	vecChi2Y.push_back(chi2y);
 	//	vecXPredicted.push_back(xPredicted);
 	//	vecYPredicted.push_back(yPredicted);
 	//	vecXPreditedDetector.push_back(Xdet);
@@ -454,6 +452,10 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
 	Int_t DiamondPattern;
 	DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
+	if (DiamondPattern!=3)
+		return;
+	vecChi2X.push_back(chi2x);
+	vecChi2Y.push_back(chi2y);
 	pair<int,int> channels = settings->diamondPattern.getPatternChannels(DiamondPattern);
 
 	//Int_t XdetChannelSpaceInt = settings->convertMetricToChannelSpace(subjectDetector,Xdet)+0.5;
@@ -471,13 +473,16 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 		return;
 	TCluster transparentCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,XdetChannelSpace,clusterSize);
 	Float_t TransparentCharge = getTransparentCharge(DiamondPattern, XdetChannelSpaceInt);
-	//	cout<<TString::Format("%7d: Event in diamond pattern %d:\t %05.1f/%05.1f --> %3d --> %5.1f  ADC counts",nEvent,DiamondPattern,xPredDet,yPredDet,XdetChannelSpaceInt-channels.first,TransparentCharge)<<endl;
+	cout<<TString::Format("%7d: Event in diamond pattern %d:\t %05.1f/%05.1f --> %3d --> %5.1f/%5.1f  ADC counts",
+			nEvent,DiamondPattern,xPredDet,yPredDet,XdetChannelSpaceInt-channels.first,TransparentCharge,transparentCluster.getCharge())<<endl;
 
 	//** WHY?
 	if(TransparentCharge == -9999)
 		return;
 	if (DiamondPattern == 3)
-		cout << TString::Format("%7d: %f - %f = %f\t%d\t%d",nEvent, TransparentCharge, transparentCluster.getCharge(true),TransparentCharge-transparentCluster.getCharge(true),DiamondPattern,settings->isMaskedCluster(subjectDetector,transparentCluster) ) << endl;
+		cout << TString::Format("%7d: %f - %f = %f\t%d\t%d",
+				nEvent, TransparentCharge, transparentCluster.getCharge(true),TransparentCharge-transparentCluster.getCharge(true),
+				DiamondPattern,settings->isMaskedCluster(subjectDetector,transparentCluster) ) << endl;
 
 	hXdetvsYdetvsCharge[DiamondPattern-1]->Fill(xPredDet,yPredDet,TransparentCharge);
 	hXdetvsYdetvsEvents[DiamondPattern-1]->Fill(xPredDet,yPredDet,1);
@@ -1651,36 +1656,56 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 	histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
 }
 
-void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors() {
 
-	cout<<" hLandauGoodCellsMean: "<<hLandauGoodCellsMean<<endl;
-	//	for(UInt_t column=0;column<settings->getNColumns3d();column++){
-	//		for(UInt_t row=0;row<settings->getNRows3d();row++){
+vector<Float_t> TAnalysisOf3dDiamonds::LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus){
+	vector<Float_t> vecFluctuations;
+	Float_t compareQuarterTo;
+	//	if (true){
+	vector<TH1F*> hQuarterCellsLandausSorted = hQuarterLandaus;
+	sort(hQuarterCellsLandausSorted.begin(), hQuarterCellsLandausSorted.end(), TSettings::SorterForPulseHeightOfHisto);
+	compareQuarterTo = hQuarterCellsLandausSorted.at(0)->GetMean();
+	//	}
+	for(UInt_t quarter=0;quarter<settings->getNQuarters3d();quarter++){
+
+		cout<<"hQuarterCellsLandausSorted.at(quarter): "<<hQuarterCellsLandausSorted.at(quarter)->GetMean()<<"\t";
+		Float_t QuarterMean = hQuarterLandaus[quarter]->GetMean();
+		int entries = hQuarterLandaus[quarter]->GetEntries();
+		//Float_t Fluctuation = TMath::Abs((hLandauGoodCellsMean - QuarterMean)/MeanOfLandauGoodCells);
+		Float_t fluctuation = (compareQuarterTo - QuarterMean)/compareQuarterTo;
+		cout<<TString::Format("\t%d: %.1f/%.1f with %3d (%2.1f%%)",
+								quarter,QuarterMean,compareQuarterTo,entries,fluctuation)
+						<<endl;
+		vecFluctuations.push_back(fluctuation);
+	}
+	return vecFluctuations;
+
+}
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp) {
+
+	TString name = TString::Format("hQuarterFailCriteria_%d",quarterFailCriteriaTyp);
+	TH2D* histo = histSaver->GetHistoBinedInCells(name,2);
+	cout<<"LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors"<<endl;
+	cout<<" Criteria: "<<quarterFailCriteriaTyp<<endl;
+	cout<<" Mean of Landau - Good Cells: "<<MeanOfLandauGoodCells<<endl;
+	cout<<" Mean of Landau - Strip:      "<<hLandauStrip->GetMean()<<endl;
+
+	vecQuarterCellsPassFail.clear();
 	vecQuarterCellsPassFail.resize(settings->GetNCells3d());
+	vector<vector<Float_t> > vecQuarterCellsFluctuation;
+	vecQuarterCellsFluctuation.resize(settings->GetNCells3d());;
+	Float_t DeadCellThreshold = 700;
 	for (UInt_t cell = 0; cell < settings->GetNCells3d();cell++){
 		Int_t Grading = 0;
-		//vecQuarterCellsFluctuation.push_back(vector<Float_t>());
-		//if(hCellsLandau.at(cell)->GetEntries() != 0){
-
-		vector<TH1F*> hQuarterCellsLandausSorted = hQuarterCellsLandau[cell];
-		sort(hQuarterCellsLandausSorted.begin(), hQuarterCellsLandausSorted.end(), TSettings::SorterForPulseHeightOfHisto);
-
-		Float_t DeadCellThreshold = 700;
+		vecQuarterCellsFluctuation.at(cell) = LongAnalysis_GradeCellByQuarters(quarterFailCriteriaTyp, hQuarterCellsLandau[cell]);
+		cout<<vecQuarterCellsFluctuation[cell].size()<<endl;
 		if(LongAnalysis_IsDeadCell(hQuarterCellsLandau[cell], DeadCellThreshold))
 			CellGrading.push_back(hQuarterCellsLandau[cell].size());
 		else{
 			for(UInt_t quarter=0;quarter<settings->getNQuarters3d();quarter++){
-				cout<<"hQuarterCellsLandausSorted.at(quarter): "<<hQuarterCellsLandausSorted.at(quarter)->GetMean()<<endl;
-				Float_t QuarterMean = hQuarterCellsLandau[cell][quarter]->GetMean();
-				Float_t QuarterHighMean = hQuarterCellsLandausSorted.at(0)->GetMean();
-				int entries = hQuarterCellsLandau[cell][quarter]->GetEntries();
-				//Float_t Fluctuation = TMath::Abs((hLandauGoodCellsMean - QuarterMean)/hLandauGoodCellsMean);
-				Float_t Fluctuation = TMath::Abs((QuarterHighMean - QuarterMean)/QuarterHighMean);
+				Float_t Fluctuation = vecQuarterCellsFluctuation[cell][quarter];
 				Float_t FluctuationFactor = 0.1; //Needs to be added to settings file.
-				bool isFailedQuarter = Fluctuation>FluctuationFactor;
-				cout<<TString::Format("%3d - %d: %.1f/%.1f with %3d (%2.1f%%) -->%d",
-						cell,quarter,QuarterMean,QuarterHighMean,entries,Fluctuation,isFailedQuarter)
-				<<endl;
+				bool isFailedQuarter = TMath::Abs(Fluctuation)>FluctuationFactor;
+				cout<<TString::Format("%d - %d: %2.1f ==> %d",cell,quarter,100.*Fluctuation,isFailedQuarter);
 				//vecQuarterCellsFluctuation[cell].push_back(Fluctuation);
 				if(isFailedQuarter)
 					vecQuarterCellsPassFail[cell].push_back(1);
@@ -1971,13 +1996,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
 			//hCellNumbering->SetBinContent(column+1,row+1,cell); //This should be a clone of the 2D Cell Mean Charge Plot, Wait till Felix has finished.
 			//histSaver->SaveHistogram(hCellsLandau.at(cell));
 
-			for(int i=0; i<settings->getBadCells3D().size(); i++)
+			for(UInt_t i=0; i<settings->getBadCells3D().size(); i++)
 				if(cell==settings->getBadCells3D().at(i)){
 					Int_t Entries = hLandauBadCells->GetEntries();
 					hLandauBadCells->Add(hCellsLandau.at(cell));	//Not working for some reason, ask Felix
 					hLandauBadCells->SetEntries(Entries+hCellsLandau.at(cell)->GetEntries());
 				}
-			for(int i=0; i<settings->getGoodCells3D().size(); i++)
+			for(UInt_t i=0; i<settings->getGoodCells3D().size(); i++)
 				if(cell==settings->getGoodCells3D().at(i)){
 					Int_t Entries = hLandauGoodCells->GetEntries();
 					hLandauGoodCells->Add(hCellsLandau.at(cell));	//Not working for some reason, ask Felix
@@ -1990,13 +2015,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
 	histSaver->SaveTwoHistos("hLandauGoodCells",hLandauGoodCells,hLandauStrip,factor);
 	histSaver->SaveTwoHistosNormalized("hLandauGoodCellsNormalized",hLandauGoodCells,hLandauStrip);
 
-	Float_t factor = hLandauBadCells->GetBinContent(hLandauBadCells->GetMaximumBin());
+	factor = hLandauBadCells->GetBinContent(hLandauBadCells->GetMaximumBin());
 	factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
 	histSaver->SaveTwoHistos("cLandauBadCells",hLandauBadCells,hLandauStrip,factor);
 	//Histogram(hLandauBadCells);
 	histSaver->SaveTwoHistosNormalized("cLandauBadCellsNormalized",hLandauBadCells,hLandauStrip);
 
-	hLandauGoodCellsMean = hLandauGoodCells->GetMean();
+	MeanOfLandauGoodCells = hLandauGoodCells->GetMean();
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {

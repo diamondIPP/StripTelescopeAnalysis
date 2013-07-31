@@ -106,7 +106,8 @@ private:
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
-	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
+	vector<Float_t> LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> quarterLandaus);
+	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp=0);
 	bool LongAnalysis_IsDeadCell(vector<TH1F*> nhQuarterCellsLandau, Float_t nThreshold);
 	void LongAnalysis_SaveFailedQuarters();
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
@@ -267,7 +268,7 @@ private:
 	vector< vector<Int_t> > vecQuarterCellsPassFail;
 	vector< vector<Int_t> > vecQuarterCellsFluctuation;
 	vector<Int_t> CellGrading;
-	Float_t hLandauGoodCellsMean;
+	Float_t MeanOfLandauGoodCells;
 
 	//TCanvas* cCellsOverlayMeanCharge;
 	TProfile2D* hCellsOverlayAvrgCharge;
