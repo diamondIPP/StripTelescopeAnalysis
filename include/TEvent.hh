@@ -33,7 +33,7 @@ public:
 	TEvent(UInt_t nEvent=0);
 	TEvent(const TEvent& rhs);//copy constructor
 	virtual ~TEvent();
-	TEvent &operator=(const TEvent &src); //class assignment function
+	TEvent& operator=(const TEvent &src); //class assignment function
 	TPlane getPlane(int plane){return planes[plane];};
 	void addPlane(TPlane plane,Int_t pos=-1);
 	UInt_t getNXClusters(UInt_t plane);//
