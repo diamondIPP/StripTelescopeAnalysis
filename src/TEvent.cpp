@@ -35,7 +35,7 @@ TEvent::TEvent(const TEvent& rhs){
  * @param src
  * @return pointer to this TEvent
  */
-TEvent::TEvent &TEvent::operator=(const TEvent::TEvent &src){
+TEvent& TEvent::operator=(const TEvent &src){
 	planes.clear();
 	for(UInt_t i=0;i<src.planes.size();i++)
 		planes.push_back(src.planes.at(i));
