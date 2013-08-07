@@ -1340,16 +1340,28 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 		TF1* fit;
 		if(hClone) {
 			switch(i){
-			case 0: resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
-				gaus1 = resPtr.Get()->GetParams()[2]; break;
-			case 1: resPtr=hClone->Fit("gaus","SQ","",start,end);
-				gaus1 = resPtr.Get()->GetParams()[2]; break;
-			case 2: fit = doDoubleGaussFit(hClone);
-				gaus1 = fit->GetParameter(2);
-				gaus2 = fit->GetParameter(5);
+			case 0: 
+                resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
+                if (resPtr.Get())
+    				gaus1 = resPtr.Get()->GetParams()[2]; 
+                break;
+			case 1: 
+                resPtr=hClone->Fit("gaus","SQ","",start,end);
+                if (resPtr.Get())
+    				gaus1 = resPtr.Get()->GetParams()[2]; 
+                break;
+			case 2: 
+                fit = doDoubleGaussFit(hClone);
+                if (fit){
+    				gaus1 = fit->GetParameter(2);
+	    			gaus2 = fit->GetParameter(5);
+                }
+                
 				break;
-			case 3: resPtr= hClone->Fit("gaus","SQ","",-20,20);
-				gaus1 = fit->GetParameter(2);
+			case 3: 
+                resPtr= hClone->Fit("gaus","SQ","",-20,20);
+                if (resPtr.Get())
+    				gaus1 = fit->GetParameter(2);
 				break;
 			}
 			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){

@@ -95,17 +95,17 @@ private:
     int seedSigma;
     int hitSigma;
     vector<double>vecPHMeans;
-    TH1F *histo_pulseheight_sigma[8];
-	TH1F *histo_pulseheight_sigma_second[8];
-	TH1F *histo_pulseheight_sigma125[8];
-	TH1F *histo_second_biggest_hit_direction[8];
-	TH1F *histo_pulseheight_sigma_second_left[8];
-	TH1F *histo_pulseheight_sigma_second_right[8];
-	TH1F *histo_biggest_hit_map[8];
-	TH1F *histo_pulseheight_left_sigma[8];
-	TH1F *histo_pulseheight_left_sigma_second[8];
-	TH1F *histo_pulseheight_right_sigma[8];
-	TH1F *histo_pulseheight_right_sigma_second[8];
+    TH1F *histo_pulseheight_sigma[9];
+	TH1F *histo_pulseheight_sigma_second[9];
+	TH1F *histo_pulseheight_sigma125[9];
+	TH1F *histo_second_biggest_hit_direction[9];
+	TH1F *histo_pulseheight_sigma_second_left[9];
+	TH1F *histo_pulseheight_sigma_second_right[9];
+	TH1F *histo_biggest_hit_map[9];
+	TH1F *histo_pulseheight_left_sigma[9];
+	TH1F *histo_pulseheight_left_sigma_second[9];
+	TH1F *histo_pulseheight_right_sigma[9];
+	TH1F *histo_pulseheight_right_sigma_second[9];
 	TH1F *histo_H2C_biggestHit;
 	TH2F *histo_CWM_biggestHit;
 private:
