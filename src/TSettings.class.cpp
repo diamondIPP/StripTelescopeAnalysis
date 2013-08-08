@@ -2093,10 +2093,11 @@ Float_t TSettings::convertChannelToMetric(UInt_t det, Float_t channel){
 
 Float_t TSettings::convertMetricToChannelSpace(UInt_t det, Float_t metricValue){
 	Float_t channelPosition  = N_INVALID;
-	channelPosition =  metricValue/this->getSiliconPitchWidth();
 	if(TPlaneProperties::isDiamondDetector(det)){
 			channelPosition = this->diamondPattern.convertMetricToChannel(metricValue);
 	}
+	else
+		channelPosition =  metricValue/this->getSiliconPitchWidth();
 	return channelPosition;
 }
 

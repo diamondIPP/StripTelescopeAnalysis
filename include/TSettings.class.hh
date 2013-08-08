@@ -98,6 +98,7 @@ private:
 	void setVerbosity(int verb){this->verbosity=verb;cout<<"Set Verbosity to: "<<verbosity<<endl;}
 	void checkSettings();
 public:
+	bool IsValidChannel(UInt_t det, UInt_t channel){return TPlaneProperties::IsValidChannel(det,channel);};
 	void setFidCut(TFiducialCut* fidcut);
 	void saveSettings();
 	void loadSettingsFromRootFile();
@@ -163,6 +164,8 @@ public:
 	Float_t getAlignment_training_track_fraction() const;
 	ChannelScreen getDet_channel_screen(int i);
 	bool isDet_channel_screened(UInt_t det,UInt_t ch);
+	bool IsMasked(UInt_t det, UInt_t ch){return isDet_channel_screened(det,ch);}
+	bool IsMasked(UInt_t det, Float_t ch){return (IsMasked(det,(UInt_t)ch)||IsMasked(det,(UInt_t)ch+1));}
 	UInt_t getNoisePlotChannel(){return 48;}//todo: variable in setttings file
 	std::vector<int> getDet_channel_screen_channels(int i) const;
 	std::vector<int> getDet_channel_screen_regions(int i) const;
