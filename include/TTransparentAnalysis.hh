@@ -32,6 +32,7 @@
 #include "TSystem.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TRandom.h"
 #include "TFitResult.h"//TFitResultPtr.h"
 //#include "TGraph.h"
 #include "TF1.h"
@@ -71,6 +72,7 @@ public:
 private:
 	void clearEventVector();
 	void createEventVector(Int_t startEvent = 0);
+	void analyseNonHitEvents();
 	void initHistograms();
 	void fillHistograms();
 	TF1* doGaussFit(TH1F *histo);
@@ -105,6 +107,7 @@ private:
 	// event variables
 	TPositionPrediction* positionPrediction;
 	vector<TCluster> transparentClusters;
+	vector<TCluster> noHitClusters;
 	vector<TEvent* > vecEvents;
 	Float_t predXPosition, predYPosition;
 	Float_t positionInDetSystemMetric,positionInDetSystemChannelSpace, predPerpPosition, predPosition;

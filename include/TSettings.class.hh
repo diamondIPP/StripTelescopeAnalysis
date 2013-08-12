@@ -281,6 +281,7 @@ public:
 	Int_t getVerbosity();
 	bool useForAlignment(UInt_t eventNumber, UInt_t nEvents=0);
 	bool isInAlignmentFiducialRegion(Float_t, Float_t);
+//	bool isInTransparentFiducialRegion(Float_t, Float_t);
 	bool isInRoughFiducialCut(Float_t,Float_t);
 	UInt_t getAlignmentTrainingTrackNumber() const {return alignment_training_track_number;}
 	Float_t getAlignmentPrecisionOffset()const{return alignmentPrecision_Offset;}

@@ -26,25 +26,9 @@ class TCluster :public TObject{
 public:
 	static UInt_t TCLUSTER_REVISION() {return TCLUSTER_REV;};
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5};
+    enum direction_t {left = -1,right = +1};
     TCluster()
-    {
-        numberOfSeeds = 0;
-        numberOfHits = 0;
-        seedSigma = 0;
-        seedSigma = 10;
-        hitSigma = 7;
-        isSaturated = false;
-        isGoldenGate = false;
-        isLumpy = false;
-        verbosity = 0;
-        maximumSignal = 0;
-        charge = 0;
-        revisionNumber=TCLUSTER_REVISION();
-        isChecked = false;
-        hasBadChannel=false;
-        numberOfNoHits=0;
-        nChannels=256;
-
+    {	initialiseNewCluster();
     };
     TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256, float cmNoise=0);
     TCluster(const TCluster& a);//COPY Constructor
@@ -60,11 +44,14 @@ public:
     bool hasSaturatedChannels();
     UInt_t getDetector(){return this->det;}
     TCluster getCrossTalkCorrectedCluster(Float_t alpha);
-    Float_t getCharge(bool useSmallSignals=false);
-    Float_t getCharge(UInt_t clusters,bool useSmallSignals=false);
+    Float_t getCharge(bool cmnCorrected = false,bool useSmallSignals=false);
+    Float_t getCharge(UInt_t clusters,bool cmnCorrected = false,bool useSmallSignals=false);
+    Float_t getCharge(int clusters,bool cmnCorrected = false,bool useSmallSignals=false){return getCharge((UInt_t)clusters,cmnCorrected,useSmallSignals);};
+    Float_t getTransparentCharge(UInt_t channels,bool cmnCorrected, bool useSmallSignals);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
     UInt_t seedSize();
+    void UpdateHighestSignalChannel();
     UInt_t getHighestSignalChannel();
 	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
 	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false);
@@ -113,7 +100,11 @@ public:
 	static Float_t getValueOfHisto(Float_t x, TH1F* histo);
 	UInt_t getEventNumber(){return eventNumber;};
 	bool hasInvalidReadout();
+	bool IsTransparentCluster(){return !(isTransparentCluster<0);}
+	void SetTransparentCluster(Float_t startChannel);
 private:
+	Float_t getChargeStartingAt(UInt_t nChannels,UInt_t startingClusterPos,direction_t direction, bool useCMcorrection, bool useSmallSignals);
+	void initialiseNewCluster();
     void checkForGoldenGate();
     void checkForLumpyCluster();
     UInt_t checkClusterForSize() const;
@@ -149,6 +140,7 @@ private:
     UChar_t det;
     UInt_t eventNumber;
     Float_t cmNoise;
+    Float_t isTransparentCluster;
     ClassDef(TCluster,TCLUSTER_REV);
 };
 #endif /* TCLUSTER_HH_ */

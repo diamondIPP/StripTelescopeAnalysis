@@ -74,7 +74,8 @@ public:
 	void SaveHistogramLandau(TH1F* histo);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
-	void SaveHistogramWithFit(TH1F* histo, TF1* fit, UInt_t verbosity=0);
+	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);
+	void SaveHistogramWithFit(TH1F* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
 	void SaveHistogramLogZ(TH2* histo);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
