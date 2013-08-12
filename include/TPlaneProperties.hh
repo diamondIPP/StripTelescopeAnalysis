@@ -50,7 +50,7 @@ public:
 	inline static bool isSaturated(UInt_t det, Int_t adcValue){return (adcValue>=getMaxSignalHeight(det));}
 	static bool AreAllSiliconPlanes(std::vector<UInt_t> planes);
 	static Float_t GetMinInvalidSignal(UInt_t det);
-	static bool isValidChannel(UInt_t det, UInt_t ch){return (ch>=0&&ch<getNChannels(det));};
+	static bool IsValidChannel(UInt_t det, UInt_t ch){return (ch>=0&&ch<getNChannels(det));};
     ClassDef(TPlaneProperties,1);
 
 };

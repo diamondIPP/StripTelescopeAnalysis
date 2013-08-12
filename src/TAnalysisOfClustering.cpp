@@ -1030,7 +1030,7 @@ void TAnalysisOfClustering::analyseClusterPosition()
 			Int_t leftChannel=-1;
 			Float_t eta= cluster.getEta(leftChannel);
 			Float_t etaCmnCorrected = cluster.getEta(true);
-			Float_t charge = cluster.getCharge(2,true);
+			Float_t charge = cluster.getCharge((UInt_t)2,true,true);
 			if(verbosity>3){
 				cout<<"charge of 2: "<<charge<<"\t"<<flush;
 				cluster.Print();
