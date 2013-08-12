@@ -1456,17 +1456,17 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 			switch(i){
 			case 0: 
                 resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
-                if (resPtr.Get())
+                if (resPtr.Get())//todo check wh neccessary
     				gaus1 = resPtr.Get()->GetParams()[2]; 
                 break;
 			case 1: 
                 resPtr=hClone->Fit("gaus","SQ","",start,end);
-                if (resPtr.Get())
+                if (resPtr.Get())//todo check wh neccessary
     				gaus1 = resPtr.Get()->GetParams()[2]; 
                 break;
 			case 2: 
                 fit = doDoubleGaussFit(hClone);
-                if (fit){
+                if (fit){//todo check wh neccessary
     				gaus1 = fit->GetParameter(2);
 	    			gaus2 = fit->GetParameter(5);
                 }
@@ -1474,7 +1474,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 				break;
 			case 3: 
                 resPtr= hClone->Fit("gaus","SQ","",-20,20);
-                if (resPtr.Get())
+                if (resPtr.Get())//todo check wh neccessary
     				gaus1 = fit->GetParameter(2);
 				break;
 			}

@@ -39,10 +39,10 @@ public:
 	TFiducialCut* getFidCut(UInt_t index);
 	void addFiducialCut(Float_t xLow,Float_t xHigh,Float_t yLow, Float_t yHigh);
 	void addFiducialCut(TFiducialCut* fidCut);
-	Float_t getXLow(UInt_t i);
-	Float_t getYLow(UInt_t i);
-	Float_t getXHigh(UInt_t i);
-	Float_t getYHigh(UInt_t i);
+	Float_t getXLow(UInt_t i=0);
+	Float_t getYLow(UInt_t i=0);
+	Float_t getXHigh(UInt_t i=0);
+	Float_t getYHigh(UInt_t i=0);
 	Float_t getHigh(TPlaneProperties::enumCoordinate cor, UInt_t i);
 	Float_t getLow(TPlaneProperties::enumCoordinate cor, UInt_t i);
 
