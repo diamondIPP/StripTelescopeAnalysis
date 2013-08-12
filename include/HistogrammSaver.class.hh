@@ -69,7 +69,7 @@ public:
 	void SaveCanvas(TCanvas* canvas);
 	void SaveCanvasROOT(TCanvas* canvas);
 	void SaveCanvasPNG(TCanvas* canvas);
-	void SaveTwoHistos(std::string canvasName,TH1F* histo1,TH1F* histo2,double refactorSecond=1, UInt_t verbosity=0);
+	void SaveTwoHistos(std::string canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveTwoHistosNormalized(std::string canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true);

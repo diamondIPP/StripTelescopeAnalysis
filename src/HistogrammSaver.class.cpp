@@ -514,6 +514,7 @@ TProfile2D* HistogrammSaver::CreateProfile2D(std::string name,
 		Float_t minRangeX, Float_t maxRangeX, Float_t minRangeY,
 		Float_t maxRangeY, Float_t minRangeZ, Float_t maxRangeZ,
 		Float_t factor) {
+    return new TProfile2D();//todp
 }
 
 void HistogrammSaver::UpdatePaveText(){
