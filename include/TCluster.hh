@@ -86,7 +86,7 @@ public:
     bool isBadChannelCluster(){return hasBadChannel;}
     bool isScreened();
     bool isScreened(UInt_t cl);
-    Float_t getHighest2Centroid();
+    Float_t getHighest2Centroid(bool useSmallSignals=true);
     void Print(UInt_t level=0);
     static string Intent(UInt_t level);
     Float_t getReversedEta(bool cmnCorrected=false);

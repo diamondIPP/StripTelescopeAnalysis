@@ -248,7 +248,7 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
 		this->clusterChannelScreened.push_back(isScreened);
 	}
 	if(verbosity>2)cout<<flush;
-	UpdateHighestSignalChannel();
+
 }
 
 /**
@@ -262,6 +262,8 @@ Float_t TCluster::getPosition(calculationMode_t mode,TH1F *histo){
 		return this->getHighestSignalChannel();
 	else if(mode==chargeWeighted)
 		return this->getChargeWeightedMean();
+	else if (mode == highest2CentroidNoSmallHits)
+		return this->getHighest2Centroid(false);
 	else if(mode==highest2Centroid)
 		return this->getHighest2Centroid();
 	else if(mode==eta)
@@ -546,7 +548,7 @@ UInt_t TCluster::getHighestHitClusterPosition()
  *
  * @return
  */
-Float_t TCluster::getHighest2Centroid()
+Float_t TCluster::getHighest2Centroid(bool useSmallSignals)
 {
 	if(getClusterSize()==0)return 0;
 	UInt_t maxCh = this->getHighestSignalChannel();
@@ -559,6 +561,10 @@ Float_t TCluster::getHighest2Centroid()
 	Float_t signal=getSignal(clPos);
 	Float_t nextChannelSignal;
 	UInt_t nextChannel;
+	if (this->getSignal(clPos-1)<0 && this->getSignal(clPos+1))
+			return maxCh;
+	if(!useSmallSignals && !isHit(clPos-1) && !isHit(clPos+1))
+		return maxCh;
 	if(this->getSignal(clPos-1)<getSignal(clPos+1)){
 		nextChannel=getChannel(clPos+1);
 		nextChannelSignal=getSignal(clPos+1);
