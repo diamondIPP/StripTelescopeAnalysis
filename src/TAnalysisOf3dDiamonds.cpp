@@ -452,6 +452,8 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
 	Int_t DiamondPattern;
 	DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
+	cout<<"DiamondPattern: "<<DiamondPattern<<endl;
+
 	if (DiamondPattern!=3)
 		return;
 	vecChi2X.push_back(chi2x);
@@ -469,9 +471,10 @@ void TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	if(DiamondPattern == 1)
 		clusterSize = 5;
 	else{clusterSize = 3;}
-	if(!TPlaneProperties::isValidChannel(subjectDetector,XdetChannelSpaceInt))
+	if(!TPlaneProperties::IsValidChannel(subjectDetector,XdetChannelSpaceInt))
 		return;
 	TCluster transparentCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,XdetChannelSpace,clusterSize);
+	transparentCluster.Print();
 	Float_t TransparentCharge = getTransparentCharge(DiamondPattern, XdetChannelSpaceInt);
 	cout<<TString::Format("%7d: Event in diamond pattern %d:\t %05.1f/%05.1f --> %3d --> %5.1f/%5.1f  ADC counts",
 			nEvent,DiamondPattern,xPredDet,yPredDet,XdetChannelSpaceInt-channels.first,TransparentCharge,transparentCluster.getCharge())<<endl;
