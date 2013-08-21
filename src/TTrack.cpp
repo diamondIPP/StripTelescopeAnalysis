@@ -13,7 +13,7 @@
  * @param alignment pointer on current alignment
  */
 TTrack::TTrack(TDetectorAlignment *alignment,TSettings* settings) {
-	verbosity=settings->GetVerbosity();
+	verbosity=settings->getVerbosity();
 	this->alignment = alignment;
 	this->settings = settings;
 	event=NULL;
