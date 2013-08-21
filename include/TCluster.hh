@@ -53,6 +53,7 @@ public:
     UInt_t seedSize();
     void UpdateHighestSignalChannel();
     UInt_t getHighestSignalChannel();
+//    UInt_t GetHighestSignalChannelTransparentCluster();
 	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
 	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false);
     Float_t getChargeWeightedMean(bool useNonHits=false);
@@ -72,6 +73,7 @@ public:
     Float_t getPedestalSigma(UInt_t clusterPos, bool cmnCorrected=false);
     Int_t getAdcValue(UInt_t clusterPos);
     UInt_t getHighestHitClusterPosition();
+//    UInt_t getHighestHitClusterPositionTransparentCluster();
     UInt_t getClusterPosition(UInt_t channelNo);
     UInt_t getChannel(UInt_t clusterPos);
     UInt_t getFirstHitChannel();
@@ -102,6 +104,8 @@ public:
 	bool hasInvalidReadout();
 	bool IsTransparentCluster(){return !(isTransparentCluster<0);}
 	void SetTransparentCluster(Float_t startChannel);
+	void SetTansparentClusterSize(UInt_t size){if(size>0) transparentClusterSize=size;};
+	UInt_t GetTransparentClusterSize(){return transparentClusterSize;}
 private:
 	Float_t getChargeStartingAt(UInt_t nChannels,UInt_t startingClusterPos,direction_t direction, bool useCMcorrection, bool useSmallSignals);
 	void initialiseNewCluster();
@@ -141,6 +145,7 @@ private:
     UInt_t eventNumber;
     Float_t cmNoise;
     Float_t isTransparentCluster;
+    UInt_t transparentClusterSize;
     ClassDef(TCluster,TCLUSTER_REV);
 };
 #endif /* TCLUSTER_HH_ */

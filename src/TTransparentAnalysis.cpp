@@ -244,7 +244,7 @@ bool TTransparentAnalysis::predictPositions(bool savePrediction) {
 bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
 	// get channel and direction for clustering
 	UInt_t centerChannel;
-	if(verbosity>3)
+//	if(verbosity>3)
 		cout<<"\ncheck Pred Region: "<<nEvent<< " "<<det<<" "<<centerPosition<<" "<<clusterSize<<endl;
 	int direction;
 	direction = getSignedChannelNumber(centerPosition);
@@ -259,12 +259,14 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
 		direction *= -1;
 		currentChannel += direction * iChannel;
 		if (currentChannel < 0) {
-			if (verbosity > 5) cout << "\tchannel " << currentChannel << " is not on this detector.." << endl;
+			if (verbosity > 5)
+				cout << "\tchannel " << currentChannel << " is not on this detector.." << endl;
 			regionNotOnPlane++;
 			return false;
 		}
 		if (currentChannel > TPlaneProperties::getNChannels(det)-1) {
-			if (verbosity > 5) cout << "\tchannel " << currentChannel << " is not on this detector.." << endl;
+			if (verbosity > 5)
+				cout << "\tchannel " << currentChannel << " is not on this detector.." << endl;
 			regionNotOnPlane++;
 			return false;
 		}
@@ -384,6 +386,7 @@ void TTransparentAnalysis::fillHistograms() {
 	for (UInt_t clusterSize = 0; clusterSize < maxSize; clusterSize++) {
 		Float_t charge = this->transparentClusters[clusterSize].getCharge();
 		Float_t chargeOfTwo = this->transparentClusters[clusterSize].getCharge(2,false);
+
 		vecVecLandau[clusterSize].push_back(charge);
 		hLandau[clusterSize]->Fill(charge);
 		hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
@@ -1255,6 +1258,14 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 //		cout<<"transparentClusters("<<nEvent<<");"<<endl;
 		for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 			transparentClusters.push_back(this->makeTransparentCluster(this->eventReader, this->settings,subjectDetector, this->positionInDetSystemChannelSpace, clusterSize));
+		}
+		TCluster clus = transparentClusters.back();
+		cout<<nEvent<<endl;
+		for(UInt_t i =0; i< transparentClusters.size(); i++){
+//			transparentClusters.at(i).GetHighestSignalChannelTransparentCluster();
+			Float_t charge1 = transparentClusters.at(i).getCharge(true,true);
+			Float_t charge2 = clus.getTransparentCharge(i+1,true,true);
+			cout<<"\t"<<i<<"\t"<< charge1 <<"\t"<<charge2<<endl;
 		}
 		Float_t pos = positionInDetSystemChannelSpace;
 		Float_t channels = 15;

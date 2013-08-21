@@ -201,29 +201,42 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1 *histo1, TH1 *hi
 		else SaveHistogram(histo2);
 		return;
 	}
+	if(histo1->GetLineColor() == histo2->GetLineColor())
+		histo2->SetLineColor(histo1->GetLineColor()+1);
 	cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	if (verbosity>2) cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
 	c1->cd();
 	c1->SetObjectStat(false);
-	Float_t min1 = histo1->GetMinimum();
-	Float_t min2 = histo2->GetMinimum();
+	Float_t min1 = histo1->GetBinContent(histo1->GetMinimumBin());//GetMinimum();
+	Float_t min2 = histo2->GetBinContent(histo2->GetMinimumBin());
 	Float_t min = TMath::Min(min1,min2);
-	Float_t max1 = histo1->GetMaximum();
-	Float_t max2 = histo2->GetMaximum();
+	Float_t max1 =  histo1->GetBinContent(histo1->GetMaximumBin());//GetMinimum();
+	Float_t max2 = histo2->GetBinContent(histo2->GetMaximumBin());
 	//	Float_t range1 = max1-min1;
 	//	Float_t range2 = max2-min2;
+	Float_t factor = 1.1;
 	Float_t max = TMath::Max(max1,max2);
 	Float_t range = max - min;
 	Float_t middle = (max+min)/2.;
-	if(min>=0&&(middle - range/2.*1.1)<0)
+	if(min>=0&&(middle - range/2.*factor)<0)
 		min =0;
 	else
-		min = middle - range/2.*1.1;
-	max = middle + range/2.*1.4;
+		min = middle - range/2.*factor;
+	max = middle + range/2.*factor;
 	//	int stat = gStyle->GetOptStat();
-	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
+	if(refactorSecond!=1&&histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
 		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
+	histo1->Draw("goff");
+	histo2->Draw("goff");
+	Float_t xmin1 = histo1->GetXaxis()->GetBinLowEdge(histo1->GetXaxis()->GetFirst());
+	Float_t xmin2 = histo2->GetXaxis()->GetBinLowEdge(histo2->GetXaxis()->GetFirst());
+	Float_t xmax1 = histo1->GetXaxis()->GetBinLowEdge(histo1->GetXaxis()->GetLast());
+	Float_t xmax2 = histo2->GetXaxis()->GetBinLowEdge(histo2->GetXaxis()->GetLast());
+	Float_t xmin = TMath::Min(xmin1,xmin2);
+	Float_t xmax = TMath::Max(xmax1,xmax2);
+	histo1->GetXaxis()->SetRangeUser(xmin,xmax);
+	histo2->GetXaxis()->SetRangeUser(xmin,xmax);
 	if(refactorSecond!=1)histo2->Scale(refactorSecond);
 	if (verbosity>2) cout<<"min: "<<min<<" max: "<<max;
 	if (verbosity>2) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<histo1->GetMaximum()<<"\thisto2:"<<histo2->GetMaximum()<<flush;
@@ -467,7 +480,7 @@ void HistogrammSaver::DrawFailedQuarters(
 		failedQuarter->SetPoint(2,xHigh,yHigh);
 		failedQuarter->SetPoint(3,xHigh,yLow);
 		failedQuarter->SetPoint(4,xLow,yLow);
-		failedQuarter->SetFillStyle(1001);
+		failedQuarter->SetFillStyle(3001);
 		failedQuarter->SetLineWidth(0);
 		failedQuarter->SetFillColor(kRed);
 		failedQuarter->Draw("sameF");

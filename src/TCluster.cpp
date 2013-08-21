@@ -47,6 +47,7 @@ void TCluster::initialiseNewCluster(){
     isTransparentCluster = -1;
     cmNoise = 0;
     mode=highest2Centroid;
+    transparentClusterSize =0;
 }
 
 TCluster::TCluster(const TCluster& rhs){
@@ -87,6 +88,7 @@ TCluster::TCluster(const TCluster& rhs){
 	det=rhs.det;
 	eventNumber=rhs.eventNumber;
 	isTransparentCluster=rhs.isTransparentCluster;
+	transparentClusterSize=rhs.transparentClusterSize;
 
 }
 
@@ -118,6 +120,7 @@ TCluster & TCluster::operator =(const TCluster & src)
 	eventNumber=src.eventNumber;
 	cmNoise= src.cmNoise;
 	isTransparentCluster = src.isTransparentCluster;
+	transparentClusterSize = src.transparentClusterSize;
 	for(UInt_t i=0;i<src.clusterChannel.size();i++)
 		clusterChannel.push_back(src.clusterChannel.at(i));
 	for(UInt_t i=0;i<src.clusterSignal.size();i++)
@@ -420,13 +423,42 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries,bool cmnCorrected,bool useSma
 }
 
 
-
+//
+//UInt_t TCluster::GetHighestSignalChannelTransparentCluster(){
+////	if(!IsTransparentCluster())
+////		return getHighestChannelNumber();
+//	if(checkClusterForSize()<10)
+//		return -999;
+//	cout<<checkClusterForSize()<<endl;
+//	Print(1);
+//	cout<<endl;
+//	UInt_t ch = isTransparentCluster+.5;
+//	UInt_t clPosStart = getClusterPosition(ch);
+//	Int_t maxChannel = -1;
+//	Float_t maxSignal = -1e9;
+//	Int_t dir = ch-isTransparentCluster>0?-1:+1;
+//	UInt_t len = TMath::Min(transparentClusterSize,2*this->checkClusterForSize());
+//	cout<<"GetHighestSignalChannelTransparentCluster: "<< ch<<" "<<clPosStart<< " "<< dir<<" "<<len<<endl;
+//	for (UInt_t i = 0; i< len; i++){
+//		Int_t j = (i+1)/2;
+//		dir *=-1;
+//		UInt_t clPos = clPosStart+dir*j;
+//		cout<< i <<" "<<j<<" "<<dir<<" "<<clPos<<endl;
+//		if(getSignal(clPos)>maxSignal){
+//			maxSignal = getSignal(clPos);
+//			maxChannel = getChannel(clPos);
+//		}
+//
+//	}
+//	return -9999;
+//}
 /**
  *
  * @return channel no of highest Signal
  */
 UInt_t TCluster::getHighestSignalChannel()
 {
+//	if(IsTransparentCluster())
 	return maxChannel;
 }
 
@@ -532,11 +564,25 @@ bool TCluster::isScreened(UInt_t cl)
 	}
 
 }
-
+//UInt_t TCluster::getHighestHitClusterPositionTransparentCluster(){
+////	UInt_t maxCh = this->getHighestSignalChannel();
+////
+////	UInt_t clPos;
+////	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
+////	}
+////	if(maxCh==getChannel(clPos))
+////		return clPos;
+////	else
+//		return 9999;
+//}
 
 UInt_t TCluster::getHighestHitClusterPosition()
 {
+//	if(IsTransparentCluster()){
+//		getHighestHitClusterPositionTransparentCluster();
+//	}
 	UInt_t maxCh = this->getHighestSignalChannel();
+
 	UInt_t clPos;
 	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
 	}
@@ -544,7 +590,7 @@ UInt_t TCluster::getHighestHitClusterPosition()
 		return clPos;
 	else return 9999;
 }
-/** hould be the same as getEtaPosition
+/** should be the same as getEtaPosition
  *
  * @return
  */
@@ -684,7 +730,7 @@ Float_t TCluster::getHighestSignal(){
 
 
 UInt_t TCluster::getClusterPosition(UInt_t channelNo){
-	if(channelNo<this->getSmallestChannelNumber()&&channelNo>this->getHighestSignalChannel()){
+	if(channelNo<this->getSmallestChannelNumber()&&channelNo>this->getHighestChannelNumber()){
 		if(verbosity)cout<<"ChannelNo does not match..."<<endl;
 		return 9999;
 	}
@@ -696,7 +742,7 @@ UInt_t TCluster::getClusterPosition(UInt_t channelNo){
 Float_t TCluster::getSignalOfChannel(UInt_t channel, bool cmnCorrected)
 {
 	if(channel<this->getSmallestChannelNumber()&&channel>this->getHighestSignalChannel()) return 0;
-	UInt_t clPos =getClusterPosition(channel);
+	UInt_t clPos = getClusterPosition(channel);
 	if(clPos<getClusterSize()){//TODO
 		Float_t signal = getSignal(clPos,cmnCorrected);
 		//		if (signal>0)
@@ -868,6 +914,8 @@ Float_t TCluster::getEta(Int_t &leftChannel,bool cmnCorrected)
 		leftChannel= getChannel(0);
 		return -1;
 	}
+	if (IsTransparentCluster() && GetTransparentClusterSize() < 2)
+		return -1;
 	UInt_t clPosHighest = getHighestHitClusterPosition();
 	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(clPosHighest);
 	UInt_t leftClPos = 0;
@@ -1044,7 +1092,8 @@ void TCluster::Print(UInt_t level){
 		else
 			cout<<"]"<<flush;
 	}
-	cout<<"\t||"<<this->getHighestSignalChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean()<<" "<<this->getEtaPostion()<<" "<<this->getPositionCorEta();
+	cout<<"\t||"<<flush;
+	cout<<this->getHighestSignalChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean()<<" "<<this->getEtaPostion()<<" "<<this->getPositionCorEta();
 	cout<<" "<<this->getEta()<<" "<<this->getEta(true);
 	cout<<endl;
 }
