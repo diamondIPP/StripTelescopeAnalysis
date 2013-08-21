@@ -90,6 +90,7 @@ private:
 	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
 	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
+	vector<Float_t> LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus);
 private:
 	void LongAnalysisSaveCellAndQuaterNumbering();
 	void LongAnalysis_FillOverlayedHistos(Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge);
@@ -106,14 +107,13 @@ private:
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
-	vector<Float_t> LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> quarterLandaus);
-	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp=0);
-	bool LongAnalysis_IsDeadCell(vector<TH1F*> nhQuarterCellsLandau, Float_t nThreshold);
+	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp = 0);
 	void LongAnalysis_SaveFailedQuarters();
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
 	void LongAnalysis_SaveCellsClusterSize2DVsGrading();
 	void LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
 	void LongAnalysis_SaveMeanChargePlots();
+	bool LongAnalysis_IsDeadCell(vector<TH1F*> nhQuarterCellsLandau, Float_t nThreshold);
 
 private:
 	TH1F* hLandauStrip;
@@ -268,7 +268,7 @@ private:
 	vector< vector<Int_t> > vecQuarterCellsPassFail;
 	vector< vector<Int_t> > vecQuarterCellsFluctuation;
 	vector<Int_t> CellGrading;
-	Float_t MeanOfLandauGoodCells;
+	Float_t hLandauGoodCellsMean;
 
 	//TCanvas* cCellsOverlayMeanCharge;
 	TProfile2D* hCellsOverlayAvrgCharge;
@@ -341,6 +341,19 @@ private:
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;
+	TH2D* hLongAnalysisQuarterFluctuations, MeanOfLandauGoodCells;
+	TH2F* hShortAnalysis2ClusterHitPattern_1stCluster;
+	TH2F* hShortAnalysis2ClusterHitPattern_2ndCluster;
+
+	TH2F* hRelativeChargeTwoClustersX;
+	TH2F* hRelativeChargeTwoClustersY;
+	TProfile2D* hRelativeChargeTwoClustersXY;
+	TProfile2D* hShortAnalysis2TotalChargeXY;
+	TProfile* hRelatviveNumberOfMultipleClusterEvents;
+	TProfile* hRelatviveNumberOfMultipleClusterEventsSamePattern;
+
+	TProfile2D* hTotalAvrgChargeXY;
+	vector<Int_t>vecDeadCells;
 private:
 	vector <Float_t> vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna;
 	vector <Float_t> vecPH_Cluster1_ShortAna,vecPH_Cluster2_ShortAna,vecCh_Cluster2_ShortAna,vecCh_Cluster1_ShortAna;
