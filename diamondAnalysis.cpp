@@ -261,9 +261,8 @@ int main(int argc, char ** argv) {
 			alignment->Align(RunParameters[i].getEvents());
 			delete alignment;
 		}
-
 		//		if(settings->is3dDiamond()){
-		if(true){
+		if(settings->do3dShortAnalysis()||settings->do3dLongAnalysis()||settings->do3dTransparentAnalysis()){
 			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
 			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
 			delete analyse3dDiamond;
