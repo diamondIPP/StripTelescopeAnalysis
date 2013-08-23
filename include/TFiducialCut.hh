@@ -15,7 +15,7 @@
 class TFiducialCut:public TObject {
 	int index;
 	bool active;
-	int x_low, x_high, y_low, y_high;
+	Float_t x_low, x_high, y_low, y_high;
 	TCutG* GetFiducialAreaCut(bool bEmphasis);
 	TString name;
 public:
@@ -27,17 +27,17 @@ public:
 	void SetName(TString name){this->name=name;}
 	TString GetName(){return name;};
 	void SetAllValuesZero();
-	void SetXLow(int xl) {x_low = xl;};
-	void SetXHigh(int xh) {x_high = xh;};
-	void SetYLow(int yl) {y_low = yl;};
-	void SetYHigh(int yh) {y_high = yh;};
+	void SetXLow(Float_t xl) {x_low = xl;};
+	void SetXHigh(Float_t xh) {x_high = xh;};
+	void SetYLow(Float_t yl) {y_low = yl;};
+	void SetYHigh(Float_t yh) {y_high = yh;};
 	void Print(UInt_t i=0);
 	void SetActive(bool i) {active = i;};
 	bool GetActive() {return active;};
-	int GetXLow() {return x_low;};
-	int GetXHigh() {return x_high;};
-	int GetYLow() {return y_low;};
-	int GetYHigh() {return y_high;};
+	Float_t GetXLow() {return x_low;};
+	Float_t GetXHigh() {return x_high;};
+	Float_t GetYLow() {return y_low;};
+	Float_t GetYHigh() {return y_high;};
 	void DrawFiducialCutToCanvas(TCanvas* c1, bool bEmphasis);
 
 	ClassDef(TFiducialCut,1);

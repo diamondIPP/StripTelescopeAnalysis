@@ -659,7 +659,7 @@ Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
 {
 	if(det>=TPlaneProperties::getNDetectors()) return -9999999;
 	if(ch<0||ch>=TPlaneProperties::getNChannels(det)) return 0;
-	Float_t signal =getRawSignal(det,ch,cmnCorrected);
+	Float_t signal = getRawSignal(det,ch,cmnCorrected);
 	if(signal<0)return 0;
 
 	return signal;

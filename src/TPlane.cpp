@@ -88,26 +88,26 @@ void TPlane::setDetectorType(TPlaneProperties::enumDetectorType type)
 }
 
 
-Float_t TPlane::getXPosition(UInt_t cl,TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TPlane::getXPosition(UInt_t cl,bool cmnCorrected,TCluster::calculationMode_t mode,TH1F* histo){
 	if(xClusters.size()>cl)
-		return this->xClusters.at(cl).getPosition(mode,histo);
+		return this->xClusters.at(cl).getPosition(cmnCorrected,mode,histo);
 	else
 		return N_INVALID;
 }
 
-Float_t TPlane::getYPosition(UInt_t cl,TCluster::calculationMode_t mode,TH1F* histo){
+Float_t TPlane::getYPosition(UInt_t cl,bool cmnCorrected,TCluster::calculationMode_t mode,TH1F* histo){
 	if(yClusters.size()>cl)
-		return this->yClusters.at(cl).getPosition(mode,histo);
+		return this->yClusters.at(cl).getPosition(cmnCorrected,mode,histo);
 	else
 		return N_INVALID;
 }
 
-Float_t TPlane::getPosition(TPlaneProperties::enumCoordinate cor, UInt_t cl, TCluster::calculationMode_t mode,TH1F* histo)
+Float_t TPlane::getPosition(TPlaneProperties::enumCoordinate cor, UInt_t cl, bool cmnCorrected,TCluster::calculationMode_t mode,TH1F* histo)
 {
 	if(cor== TPlaneProperties::X_COR)
-		return getXPosition(cl,mode,histo);
+		return getXPosition(cl,cmnCorrected,mode,histo);
 	else if(cor== TPlaneProperties::Y_COR)
-		return getYPosition(cl,mode,histo);
+		return getYPosition(cl,cmnCorrected,mode,histo);
 	else
 		return N_INVALID;
 }

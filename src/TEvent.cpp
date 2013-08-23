@@ -46,16 +46,21 @@ TEvent& TEvent::operator=(const TEvent &src){
 }
 
 void TEvent::addPlane(TPlane plane, Int_t pos){
+//	cout<<"Add plane: "<<pos<<" "<<flush;
 	if(pos==-1)
 		this->planes.push_back(plane);
 	else{
 		if ((int)planes.size()<pos){
+//			cout<<"1"<<endl;
 			planes.resize(pos+1);
 			planes.at(pos)=plane;
 		}
-		else if((int)planes.size()==pos)
+		else if((int)planes.size()==pos){
+//			cout<<"2"<<endl;
 			planes.push_back(plane);
+		}
 		else{
+//			cout<<"3"<<endl;
 			planes.at(pos)=plane;
 		}
 	}
@@ -149,10 +154,10 @@ UInt_t TEvent::getClusterSize(UInt_t plane,TPlaneProperties::enumCoordinate cor,
 	return getCluster(plane,cor,cl).size();
 }
 
-Float_t TEvent::getPosition(UInt_t det, UInt_t cl,TCluster::calculationMode_t mode,TH1F *histo)
+Float_t TEvent::getPosition(UInt_t det, UInt_t cl,bool cmnCorrected,TCluster::calculationMode_t mode,TH1F *histo)
 {
 	TCluster cluster = getCluster(det,cl);
-	return cluster.getPosition(mode,histo);
+	return cluster.getPosition(cmnCorrected,mode,histo);
 }
 
 bool TEvent::hasInvalidReadout(){
