@@ -966,7 +966,7 @@ void TAnalysisOfClustering::compareCentroid_ChargeWeightedMean()
 		check=eventReader->getNClusters(det)==1;
 	if(check==true){
 		TCluster cluster = eventReader->getCluster(8,0);
-		Float_t xCWM=cluster.getChargeWeightedMean();
+		Float_t xCWM=cluster.getChargeWeightedMean(settings->doCommonModeNoiseCorrection());
 		Float_t xHit=(Float_t)cluster.getHighestSignalChannel();
 		Float_t xH2C=(Float_t)cluster.getHighest2Centroid();
 		Float_t delta=xCWM-xHit;
@@ -1050,7 +1050,7 @@ void TAnalysisOfClustering::analyseClusterPosition()
 			hEtaDistributionVsSignalRight[det]->Fill(eta,signalRight);
 			hEtaDistributionVsSignalSum[det]->Fill(eta,signalLeft+signalRight);
 			TH1F *hEtaIntegral=eventReader->getEtaIntegral(det);
-			Float_t posCorEta=  eventReader->getEvent()->getPosition(det,cl,TCluster::corEta,hEtaIntegral);
+			Float_t posCorEta=  eventReader->getEvent()->getPosition(det,cl,settings->doCommonModeNoiseCorrection(),TCluster::corEta,hEtaIntegral);
 			chNo = (UInt_t)(posCorEta+0.5);
 			relPos = posCorEta - chNo;
 			if(verbosity) printf("%5d %3d %5.1f %5.1f\n",nEvent,chNo,posCWM,posCorEta);

@@ -264,8 +264,8 @@ void TSelectionClass::checkSiliconTrackInFiducialCut(){
 	fiducialValueX=0;
 	fiducialValueY=0;
 	for(UInt_t plane=0;plane<4;plane++){
-		fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition();
-		fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition();
+		fiducialValueX+=eventReader->getCluster(plane,TPlaneProperties::X_COR,0).getPosition(settings->doCommonModeNoiseCorrection());
+		fiducialValueY+=eventReader->getCluster(plane,TPlaneProperties::Y_COR,0).getPosition(settings->doCommonModeNoiseCorrection());
 	}
 	fiducialValueX/=4.;
 	fiducialValueY/=4.;

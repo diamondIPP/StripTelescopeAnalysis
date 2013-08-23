@@ -50,18 +50,18 @@ TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt
 	return myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,bPrint);
 }
 
-Float_t TTracking::getXPosition(UInt_t plane)
+Float_t TTracking::getXPosition(UInt_t plane,bool cmnCorrected)
 {
 	if(myTrack==0)
 		return 0;
-	return myTrack->getXPositionMetric(plane);
+	return myTrack->getXPositionMetric(plane,cmnCorrected);
 }
 
-Float_t TTracking::getYPosition(UInt_t plane)
+Float_t TTracking::getYPosition(UInt_t plane,bool cmnCorrected)
 {
 	if(myTrack==0)
 		return 0;
-	return myTrack->getYPositionMetric(plane);
+	return myTrack->getYPositionMetric(plane,cmnCorrected);
 }
 
 Float_t TTracking::getZPosition(UInt_t plane)
@@ -71,11 +71,11 @@ Float_t TTracking::getZPosition(UInt_t plane)
 	return myTrack->getZPosition(plane);
 }
 
-Float_t TTracking::getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,TCluster::calculationMode_t mode)
+Float_t TTracking::getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,bool cmnCorrected, TCluster::calculationMode_t mode)
 {
 	if (myTrack == 0)
 		return 0;
-	return myTrack->getMeasuredClusterPositionMetricSpace(cor,plane,mode);
+	return myTrack->getMeasuredClusterPositionMetricSpace(cor,plane,cmnCorrected,mode);
 }
 
 Float_t TTracking::getYPositionInDetSystem(UInt_t det, Float_t xPredicted,
@@ -139,31 +139,33 @@ bool TTracking::LoadEvent(UInt_t eventNumber){
 	return false;
 }
 
-Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,TCluster::calculationMode_t mode,TH1F* histo){
+Float_t  TTracking::getStripXPositionOfCluster(UInt_t plane,TCluster xCluster, Float_t yPred,bool cmnCorrected,TCluster::calculationMode_t mode,TH1F* histo){
 	if(myTrack==0)
 		return 0;
 	if (histo==0)
 		histo=getEtaIntegral(plane*2);
-	return myTrack->getXPositionInLabFrameStripDetector(plane,xCluster,yPred,mode,histo);
+	return myTrack->getXPositionInLabFrameStripDetector(plane,xCluster,yPred,cmnCorrected,mode,histo);
 }
-Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,TCluster::calculationMode_t mode){
+Float_t  TTracking::getStripXPosition(UInt_t plane,Float_t yPred,bool cmnCorrected,TCluster::calculationMode_t mode){
 	if(myTrack==0)
 		return 0;
 	TH1F* histo=getEtaIntegral(plane*2);
-	return myTrack->getStripXPosition(plane,yPred,mode,histo);
+	return myTrack->getStripXPosition(plane,yPred,cmnCorrected,mode,histo);
 
 }
-Float_t  TTracking::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, TCluster::calculationMode_t mode, TH1F* histo){
+Float_t  TTracking::getPositionOfCluster(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster, bool cmnCorrected, TCluster::calculationMode_t mode, TH1F* histo){
 	if(myTrack==0)
 		return 0;
-	return myTrack->getPostionInLabFrame(cor,plane,xCluster,yCluster,mode,histo);
+	return myTrack->getPostionInLabFrame(cor,plane,xCluster,yCluster,cmnCorrected,mode,histo);
 }
 
 
-Float_t TTracking::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition, TCluster::calculationMode_t mode, TH1F* histo){
+Float_t TTracking::getPositionOfCluster(UInt_t det, TCluster cluster, Float_t predictedPerpPosition,bool cmnCorrected, TCluster::calculationMode_t mode, TH1F* histo){
+	if(mode == TCluster::corEta && histo==0)
+		cout<<"getPositionOfCluster::histo ==0"<<endl;
 	if(myTrack==0)
 		return 0;
-	return myTrack->getPositionOfCluster(det,cluster,predictedPerpPosition,mode,histo);
+	return myTrack->getPositionOfCluster(det,cluster,predictedPerpPosition,cmnCorrected,mode,histo);
 }
 
 /** from the current activated event positionInLabFrame

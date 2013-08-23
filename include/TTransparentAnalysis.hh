@@ -93,7 +93,7 @@ private:
 	static int getSignedChannelNumber(Float_t position);
 	void printEvent();
 	void printCluster(TCluster cluster);
-	Float_t getResidual(TCluster cluster, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
+	Float_t getResidual(TCluster cluster,bool cmnCorrected, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
 	
 	void saveResolutionPlot(TH1F* hRes, UInt_t clusterSize);
 	// run variables
@@ -106,7 +106,7 @@ private:
 	
 	// event variables
 	TPositionPrediction* positionPrediction;
-	vector<TCluster> transparentClusters;
+	TCluster transparentClusters;
 	vector<TCluster> noHitClusters;
 	vector<TEvent* > vecEvents;
 	Float_t predXPosition, predYPosition;
@@ -163,6 +163,8 @@ private:
 	Int_t predChannel;
 	vector< Float_t> vecVecFidCutX;
 	vector< Float_t> vecVecFidCutY;
+	vector< Float_t> vecPredX;
+	vector<Float_t> vecPredY;
 	vector<TH1F*> hEta;
 	vector<TH1F*> hEtaCMNcorrected;
 	vector< vector<Float_t> > vecVecEta;
@@ -183,6 +185,7 @@ private:
 	vector<TH2F*> hResidualVsHitPositionEtaCorrected;
 	TH1F* hLandau2HighestMean;
 	TH1F* hLandau2HighestMP;
+	TH2F* hSelectedTracksAvrgSiliconHitPos;
 	vector<TH1F*> hEtaIntegrals;
 //	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
 	
@@ -213,7 +216,7 @@ private:
 	
 	// results
 	vector<UInt_t> eventNumbers;
-	vector< vector<TCluster> > vecTransparentClusters;
+	vector<TCluster> vecTransparentClusters;
 	vector<Float_t> vecMPLandau;
 	vector<Float_t> vecMPLandau2Highest;
 	vector<Float_t> vecMeanLandau;
@@ -227,6 +230,8 @@ private:
 	
 	vector<Float_t> vecPredictedPosition, vecRelPredictedPosition;
 	vector<Float_t> vecChi2;
+	Float_t predXMin, predXMax, predYMin, predYMax;
+	bool cmCorrected;
 
 
 };

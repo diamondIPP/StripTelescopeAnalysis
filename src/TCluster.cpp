@@ -67,7 +67,7 @@ TCluster::TCluster(const TCluster& rhs){
 		clusterPedSigmaCMN.push_back(rhs.clusterPedSigmaCMN.at(i));
 	}
 	for(UInt_t i=0;i<rhs.clusterChannelScreened.size();i++)
-		clusterChannelScreened.push_back(rhs.clusterChannelScreened.at(i));
+		clusterChannelScreened.push_back(rhs.clusterChannelScreened[i]);
 	this->numberOfSeeds=rhs.numberOfSeeds;
 	numberOfHits=rhs.numberOfHits;
 	numberOfNoHits=rhs.numberOfNoHits;
@@ -159,6 +159,23 @@ void TCluster::SetTransparentCluster(Float_t startChannel) {
 		isTransparentCluster=startChannel;
 	if(startChannel==-1)
 		isTransparentCluster=startChannel;
+}
+
+Int_t TCluster::getTransparentClusterPosition(UInt_t clusterNo) {
+	Int_t startChannel = isTransparentCluster+.5;
+	Int_t clStart = this->getClusterPosition(startChannel);
+	Int_t dir = 1;
+	Int_t dif = (Int_t(clusterNo)+1)/2;
+	if(isTransparentCluster-startChannel>0){
+		if(clusterNo%2==0)
+			dir = -1;
+	}
+	else{
+		if(clusterNo%2==1)
+			dir = -1;
+	}
+	Int_t clusPos = clStart + dir *dif;
+	return clusPos;
 }
 
 /**
@@ -260,24 +277,26 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
  * @param histo needed for eta corrected calculation
  * @return
  */
-Float_t TCluster::getPosition(calculationMode_t mode,TH1F *histo){
+Float_t TCluster::getPosition(bool cmnCorrected, calculationMode_t mode,TH1F *histo){
+	if(mode == TCluster::corEta && histo==0)
+		cout<<"TCluster::getPosition::histo ==0"<<endl;
 	if(mode==maxValue)
 		return this->getHighestSignalChannel();
 	else if(mode==chargeWeighted)
-		return this->getChargeWeightedMean();
+		return this->getChargeWeightedMean(cmnCorrected);
 	else if (mode == highest2CentroidNoSmallHits)
-		return this->getHighest2Centroid(false);
+		return this->getHighest2Centroid(cmnCorrected,false);
 	else if(mode==highest2Centroid)
-		return this->getHighest2Centroid();
+		return this->getHighest2Centroid(cmnCorrected,true);
 	else if(mode==eta)
-		return this->getEtaPostion();
+		return this->getEtaPostion(cmnCorrected);
 	else if(mode == corEta&&histo==0){
 		if(verbosity)cerr<<"mode = cor Eta, but histo =0, "<<endl;
 		//		this->Print();
-		return this->getEtaPostion();
+		return this->getEtaPostion(cmnCorrected);
 	}
 	else if(mode == corEta&&histo!=0)
-		return this->getPositionCorEta(histo);
+		return this->getPositionCorEta(cmnCorrected,histo);
 
 	return 0;//todo;
 }
@@ -317,10 +336,17 @@ bool TCluster::isGoldenGateCluster(){
 }
 
 bool TCluster::hasSaturatedChannels(){
-	for(UInt_t cl=0;cl<this->clusterADC.size();cl++){
-		if (getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
+	if(IsTransparentCluster()){
+		for(UInt_t i=0; i<GetTransparentClusterSize();i++)
+				if (getAdcValue(getTransparentClusterPosition(i))>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
+	}
+	else{
+		for(UInt_t cl=0;cl<this->clusterADC.size();cl++){
+			if (getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
+		}
 	}
 	return false;
+
 	return isSaturated;//todo
 }
 
@@ -358,48 +384,104 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 	return newClus;
 }
 
+bool TCluster::IsValidTransparentClusterPosition(UInt_t clusPos){
 
-Float_t TCluster::getTransparentCharge(UInt_t channels, bool cmnCorrected,
+	Int_t cl1 = this->getTransparentClusterPosition(GetTransparentClusterSize()-1);
+	Int_t cl2 = this->getTransparentClusterPosition(GetTransparentClusterSize()-2);
+	if(cl1<0)
+		cl1 = 0;
+	if(cl2<0)
+		cl2 = 0;
+	if (cl2 > this->clusterADC.size())
+		cl2 = clusterADC.size();
+	if (cl1 > this->clusterADC.size())
+			cl1 = clusterADC.size();
+	if(cl2<cl1){
+		Int_t cl3 = cl2;
+		cl2 = cl1;
+		cl1 = cl3;
+	}
+	if(cl1<=clusPos&&clusPos<=cl2)
+		return true;
+	return false;
+}
+
+TCluster::direction_t TCluster::getDirection(UInt_t clusterPosition){
+
+	if(IsTransparentCluster()){
+		if(!IsValidTransparentClusterPosition(clusterPosition-1))
+			return right;
+		if(!IsValidTransparentClusterPosition(clusterPosition+1))
+			return left;
+		if(getSignal(clusterPosition-1)<getSignal(clusterPosition+1))
+			return right;
+		else
+			return left;
+	}
+	else{
+		if(getSignal(clusterPosition-1)<getSignal(clusterPosition+1))
+			return right;
+		else
+			return left;
+	}
+}
+
+
+Float_t TCluster::getTransparentCharge(UInt_t clusters, bool cmnCorrected,
 		bool useSmallSignals) {
 	if(!IsTransparentCluster())
-		return getCharge(channels,cmnCorrected,useSmallSignals);
-	Int_t channel = (Int_t)(isTransparentCluster+.5);
-	direction_t direction = isTransparentCluster-channel<0?left:right;
-	UInt_t startingClusterPos = getClusterPosition(channel);
+		return getCharge(clusters,cmnCorrected,useSmallSignals);
+//	Int_t channel = (Int_t)(isTransparentCluster+.5);
+//	direction_t direction = isTransparentCluster-channel<0?left:right;
+	UInt_t startingClusterPos = getHighestHitClusterPosition();
+	direction_t direction = getDirection(startingClusterPos);
+	if(clusters> GetTransparentClusterSize())
+		clusters = GetTransparentClusterSize();
 	if(startingClusterPos < checkClusterForSize())
-		return getChargeStartingAt(channels,startingClusterPos,direction,cmnCorrected,useSmallSignals);
+		return getChargeStartingAt(clusters,startingClusterPos,direction,cmnCorrected,useSmallSignals);
 	return 0;
 
 }
 
 Float_t TCluster::getChargeStartingAt(UInt_t nChannels, UInt_t startingClusterPos,direction_t direction,
 		bool useCMcorrection, bool useSmallSignals) {
-	if(verbosity>3)cout<<"getChargeStartingAt "<<startingClusterPos<<" for "<<nChannels<<" channels";
+//	if(verbosity>3)
 	UInt_t size = checkClusterForSize();
 	nChannels = TMath::Min(nChannels,2*size);
+	if(IsTransparentCluster()){
+		nChannels = TMath::Min(nChannels,transparentClusterSize);
+	}
 	if(verbosity>3)cout<<" "<<nChannels<<endl;
 	if(startingClusterPos>=size)
 		return 0;
 	Float_t charge;
 	Float_t clusterCharge = 0;
 	Int_t channel;
+	UInt_t nUsedChannels=0;
 //	getSignal(startingClusterPos,useCMcorrection);
-	for(UInt_t nCl = 0; nCl < nChannels; nCl++){
+
+	for(UInt_t nCl = 0; nUsedChannels < nChannels&& nCl<2*size; nCl++){
 		UInt_t clPos = startingClusterPos;
 		Int_t distance = ((nCl+1)/2);
 		Int_t sign = 1;
 		if((direction==left&&nCl%2==1)||(direction == right && nCl%2 == 0))
 			sign =-1;
 		clPos += sign * distance;
+		channel = getChannel(clPos);
+//		if(nChannels ==7 && eventNumber == 40858)cout<<"\n "<<nUsedChannels<<"/"<<nChannels<<"\t"<<nCl<<" "<<clPos<<":\t"<<channel<<"\t";
+		if(IsTransparentCluster()&&!IsValidTransparentClusterPosition(clPos))
+			continue;
 		if(clPos>= size)
 			continue;
 		charge = 0;
-		channel = getChannel(clPos);
 		if (useSmallSignals|| isHit(clPos))
 			charge = getSignal(clPos,useCMcorrection);
 		clusterCharge+=charge;
+//		cout<<" "<<charge<<" "<<clusterCharge;
+		nUsedChannels ++;
 		if(verbosity>3)cout<<TString::Format("%2d %2d %2d %2d",nCl,sign,distance,clPos)<<"\t"<<channel<<"-->"<<charge<<" "<<clusterCharge<<endl;
 	}
+//	cout<<endl;
 	return clusterCharge;
 }
 
@@ -417,14 +499,15 @@ Float_t TCluster::getCharge(bool cmnCorrected,bool useSmallSignals){
  */
 Float_t TCluster::getCharge(UInt_t nClusterEntries,bool cmnCorrected,bool useSmallSignals){
 	if(nClusterEntries==0)return 0;
-	bool b2ndHighestStripIsBigger = (getHighestSignalChannel()-this->getHighest2Centroid()<0);
-	Float_t clusterCharge = getChargeStartingAt(nClusterEntries,getClusterPosition(getHighestSignalChannel()),b2ndHighestStripIsBigger?right:left,cmnCorrected,useSmallSignals);
+	Int_t clusPosStart = getClusterPosition(getHighestSignalChannel());
+	direction_t dir = getSignal(clusPosStart-1,cmnCorrected)>getSignal(clusPosStart+1,cmnCorrected)?left:right;
+	Float_t clusterCharge = getChargeStartingAt(nClusterEntries,clusPosStart,dir,cmnCorrected,useSmallSignals);
 	return clusterCharge;
 }
 
 
 //
-//UInt_t TCluster::GetHighestSignalChannelTransparentCluster(){
+UInt_t TCluster::GetHighestSignalChannelTransparentCluster(){
 ////	if(!IsTransparentCluster())
 ////		return getHighestChannelNumber();
 //	if(checkClusterForSize()<10)
@@ -432,33 +515,37 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries,bool cmnCorrected,bool useSma
 //	cout<<checkClusterForSize()<<endl;
 //	Print(1);
 //	cout<<endl;
-//	UInt_t ch = isTransparentCluster+.5;
-//	UInt_t clPosStart = getClusterPosition(ch);
-//	Int_t maxChannel = -1;
-//	Float_t maxSignal = -1e9;
-//	Int_t dir = ch-isTransparentCluster>0?-1:+1;
-//	UInt_t len = TMath::Min(transparentClusterSize,2*this->checkClusterForSize());
+	UInt_t ch = isTransparentCluster+.5;
+	UInt_t clPosStart = getClusterPosition(ch);
+	Int_t maxChannel = -1;
+	Float_t maxSignal = -1e9;
+	Int_t dir = ch-isTransparentCluster>0?-1:+1;
+	UInt_t len = TMath::Min(transparentClusterSize,2*this->checkClusterForSize());
 //	cout<<"GetHighestSignalChannelTransparentCluster: "<< ch<<" "<<clPosStart<< " "<< dir<<" "<<len<<endl;
-//	for (UInt_t i = 0; i< len; i++){
+	for (UInt_t i = 0; i< len; i++){
+		UInt_t clPos = getTransparentClusterPosition(i);
 //		Int_t j = (i+1)/2;
 //		dir *=-1;
 //		UInt_t clPos = clPosStart+dir*j;
 //		cout<< i <<" "<<j<<" "<<dir<<" "<<clPos<<endl;
-//		if(getSignal(clPos)>maxSignal){
-//			maxSignal = getSignal(clPos);
-//			maxChannel = getChannel(clPos);
-//		}
-//
-//	}
-//	return -9999;
-//}
+		if(getSignal(clPos)>maxSignal){
+			maxSignal = getSignal(clPos);
+			maxChannel = getChannel(clPos);
+		}
+
+	}
+	return maxChannel;
+	return -9999;
+}
 /**
  *
  * @return channel no of highest Signal
  */
 UInt_t TCluster::getHighestSignalChannel()
 {
-//	if(IsTransparentCluster())
+	if(IsTransparentCluster()){
+		return GetHighestSignalChannelTransparentCluster();
+	}
 	return maxChannel;
 }
 
@@ -477,17 +564,21 @@ void TCluster::UpdateHighestSignalChannel() {
 }
 
 UInt_t TCluster::getClusterSize(){
+	if(IsTransparentCluster())
+		return TMath::Min(transparentClusterSize,checkClusterForSize());
 	return this->checkClusterForSize();
 }
 
-Float_t TCluster::getChargeWeightedMean(bool useNonHits){
+Float_t TCluster::getChargeWeightedMean(bool cmnCorrected, bool useNonHits){
 	Float_t sum=0;
 	Float_t charged=0;
 	for(UInt_t cl=0;cl<this->checkClusterForSize();cl++){
+		if(IsTransparentCluster()&&!IsValidTransparentClusterPosition(cl))
+			continue;
 		if(useNonHits||isHit(cl)||checkClusterForSize()<4){//todo anpassen
 			//todo . take at least second biggest hit for =charge weighted mean
-			sum+=getChannel(cl)*getSignal(cl);//kanalnummer*signalNummer
-			charged+=getSignal(cl);;//signal
+			sum+=getChannel(cl)*getSignal(cl,cmnCorrected);//kanalnummer*signalNummer
+			charged+=getSignal(cl,cmnCorrected);;//signal
 		}
 	}
 	if (charged>0)
@@ -564,23 +655,28 @@ bool TCluster::isScreened(UInt_t cl)
 	}
 
 }
-//UInt_t TCluster::getHighestHitClusterPositionTransparentCluster(){
-////	UInt_t maxCh = this->getHighestSignalChannel();
-////
-////	UInt_t clPos;
-////	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
-////	}
-////	if(maxCh==getChannel(clPos))
-////		return clPos;
-////	else
-//		return 9999;
-//}
+UInt_t TCluster::getHighestHitClusterPositionTransparentCluster(){
+		UInt_t ch = isTransparentCluster+.5;
+		Int_t maxClPos = -1;
+		Float_t maxSignal = -1e9;
+		UInt_t len = TMath::Min(transparentClusterSize,2*this->checkClusterForSize());
+		for (UInt_t i = 0; i< len; i++){
+			UInt_t clPos = getTransparentClusterPosition(i);
+			if(getSignal(clPos)>maxSignal){
+				maxSignal = getSignal(clPos);
+				maxClPos = clPos;
+			}
+
+		}
+		return maxClPos;
+		return -9999;
+}
 
 UInt_t TCluster::getHighestHitClusterPosition()
 {
-//	if(IsTransparentCluster()){
-//		getHighestHitClusterPositionTransparentCluster();
-//	}
+	if(IsTransparentCluster()){
+		return getHighestHitClusterPositionTransparentCluster();
+	}
 	UInt_t maxCh = this->getHighestSignalChannel();
 
 	UInt_t clPos;
@@ -594,31 +690,37 @@ UInt_t TCluster::getHighestHitClusterPosition()
  *
  * @return
  */
-Float_t TCluster::getHighest2Centroid(bool useSmallSignals)
+Float_t TCluster::getHighest2Centroid(bool cmnCorrected, bool useSmallSignals)
 {
 	if(getClusterSize()==0)return 0;
 	UInt_t maxCh = this->getHighestSignalChannel();
-	UInt_t clPos;
-	for(clPos=0;maxCh!=this->getChannel(clPos)&&clPos<size();clPos++){
-	}
+	UInt_t clPos = getClusterPosition(maxCh);
 
 	Float_t retVal;
 	UInt_t channel=getChannel(clPos);
-	Float_t signal=getSignal(clPos);
+	Float_t signal=getSignal(clPos,cmnCorrected);
 	Float_t nextChannelSignal;
 	UInt_t nextChannel;
-	if (this->getSignal(clPos-1)<0 && this->getSignal(clPos+1))
+	Float_t signalLeft = getSignal(clPos-1,cmnCorrected);
+	Float_t signalRight = getSignal(clPos+1,cmnCorrected);
+	if(IsTransparentCluster()){
+		if(!IsValidTransparentClusterPosition(clPos-1))
+			signalLeft=-1;
+		if(!IsValidTransparentClusterPosition(clPos+1))
+			signalRight=-1;
+	}
+	if (signalLeft<0&&signalRight<0)
 			return maxCh;
 	if(!useSmallSignals && !isHit(clPos-1) && !isHit(clPos+1))
 		return maxCh;
-	if(this->getSignal(clPos-1)<getSignal(clPos+1)){
+	if(signalLeft<signalRight){
 		nextChannel=getChannel(clPos+1);
-		nextChannelSignal=getSignal(clPos+1);
+		nextChannelSignal=signalRight;
 		//		cout<<"r"<<flush;
 	}
 	else{
 		nextChannel=getChannel(clPos-1);
-		nextChannelSignal=getSignal(clPos-1);
+		nextChannelSignal=signalLeft;
 		//		cout<<"l"<<flush;
 	}
 	retVal=(channel*signal+nextChannel*nextChannelSignal)/(signal+nextChannelSignal);
@@ -686,10 +788,15 @@ bool TCluster::isHit(UInt_t cl){
 
 UInt_t TCluster::getSmallestChannelNumber()
 {
-	if(clusterChannel.size()>0){
-		return clusterChannel.front();
-	}
-	return 0;
+	if(clusterChannel.size()==0)
+		return 0;
+//	if(IsTransparentCluster()){
+//		Int_t channel1 = getTransparentClusterPosition(transparentClusterSize-1);
+//		Int_t channel1 = getTransparentClusterPosition(transparentClusterSize-2);
+//
+//	}
+
+	return clusterChannel.front();
 }
 
 /**
@@ -699,27 +806,28 @@ UInt_t TCluster::getSmallestChannelNumber()
  */
 UInt_t TCluster::getHighestChannelNumber()
 {
-
-	if(clusterChannel.size()>0){
-		return clusterChannel.back();
-	}
-	return 0;
+	if(clusterChannel.size()==0)
+		return 0;
+//	if(IsTransparentCluster())
+//		return TMath::Max(getChannel(transparentClusterSize-2),getChannel(transparentClusterSize-1));
+	return clusterChannel.back();
 }
 
 
-Float_t TCluster::getHighestSignal(){
-	Float_t signal=0;
+Float_t TCluster::getHighestSignal(bool cmnCorrected){
+	Float_t highestSignal=0;
 	UInt_t highestSignalClusterPos = -1;
 	UInt_t highestSignalChannelPos;
 	for(UInt_t clPos=0;clPos<checkClusterForSize();clPos++){
-		if(getSignal(clPos)>signal){
-			signal=getSignal(clPos);
+		Float_t signal = getSignal(clPos,cmnCorrected);
+		if(signal>highestSignal){
+			highestSignal=signal;
 			highestSignalClusterPos=clPos;
 		}
 	}
 	highestSignalChannelPos=getChannel(highestSignalClusterPos);
-	if(maximumSignal!=signal){
-		cout<<"maximumSignal "<<maximumSignal<<" and highest signal "<<signal<<" does not match... Something is wrong:";
+	if(maximumSignal!=highestSignal){
+		cout<<"maximumSignal "<<maximumSignal<<" and highest signal "<<highestSignal<<" does not match... Something is wrong:";
 		cout<<"highestSignalChannelPos: "<<highestSignalChannelPos<<"\thighesSignalClusterPos: "<<highestSignalClusterPos<<" "<<getHighestHitClusterPosition()<<endl;
 
 	}
@@ -870,28 +978,18 @@ Float_t TCluster::getRightEta(bool cmnCorrected){
  */
 
 Float_t TCluster::getReversedEta(Int_t &rightChannel,bool cmnCorrected){
-	rightChannel = -1;
-	if (checkClusterForSize() < 2) return -1;
-	UInt_t clPosHighest = getHighestHitClusterPosition();
-	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(getHighestHitClusterPosition());
-	UInt_t leftClPos = 0;
-	UInt_t rightClPos = 0;
-	if (clPosHighest < clPos2ndHighest) {
-		leftClPos = clPosHighest;
-		rightClPos = clPos2ndHighest;
+	Int_t leftChannel;
+	Float_t eta = getEta(leftChannel,cmnCorrected);
+	if(eta>=0&&eta<=1){
+		rightChannel = leftChannel+1;
+		return 1-eta;
 	}
-	else {
-		leftClPos = clPos2ndHighest;
-		rightClPos = clPosHighest;
+	else{
+		rightChannel = leftChannel;
 	}
-	rightChannel = this->getChannel(rightClPos);
-	Float_t signalLeft  = getSignal(leftClPos,cmnCorrected);
-	Float_t signalRight = getSignal(rightClPos,cmnCorrected);
-	Float_t sumSignal = (signalLeft+signalRight);
-	if(sumSignal==0)
-		return -1;
-	return signalLeft / sumSignal;
+	return -1;
 }
+
 Float_t TCluster::getReversedEta(bool cmnCorrected){
 	Int_t rightChannel=0;
 	return getReversedEta(rightChannel,cmnCorrected);
@@ -900,6 +998,43 @@ Float_t TCluster::getReversedEta(bool cmnCorrected){
 Float_t TCluster::getEta(bool cmnCorrected){
 	Int_t leftChannel=0;
 	return getEta(leftChannel,cmnCorrected);
+}
+
+
+Float_t  TCluster::getEta(UInt_t clusPos,Int_t &leftChannel,bool cmnCorrected){
+
+	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(clusPos,cmnCorrected);
+	leftChannel = getChannel(clusPos);
+	if(clPos2ndHighest>checkClusterForSize()){
+		return -1;
+	}
+	UInt_t leftClPos = 0;
+	UInt_t rightClPos = 0;
+	if (clusPos < clPos2ndHighest) {
+		leftClPos = clusPos;
+		rightClPos = clPos2ndHighest;
+	}
+	else {
+		leftClPos = clPos2ndHighest;
+		rightClPos = clusPos;
+	}
+	leftChannel = this->getChannel(leftClPos);
+	Float_t signalLeft  = getSignal(leftClPos,cmnCorrected);
+	Float_t signalRight = getSignal(rightClPos,cmnCorrected);
+	if(signalLeft<0||signalRight<0){
+		if(signalRight>signalLeft)
+			leftChannel = this->getChannel(rightClPos);
+		return -1;
+	}
+	Float_t sumSignal = (signalLeft+signalRight);
+	if(sumSignal==0){
+		return -1;
+	}
+
+	Float_t eta = signalRight/sumSignal;
+	if(verbosity&&(eta<0||eta>1))
+		this->Print(1);
+	return eta;
 }
 /**
  * @brief Calculation of Eta of the cluster
@@ -914,47 +1049,54 @@ Float_t TCluster::getEta(Int_t &leftChannel,bool cmnCorrected)
 		leftChannel= getChannel(0);
 		return -1;
 	}
-	if (IsTransparentCluster() && GetTransparentClusterSize() < 2)
-		return -1;
-	UInt_t clPosHighest = getHighestHitClusterPosition();
-	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(clPosHighest);
-	UInt_t leftClPos = 0;
-	UInt_t rightClPos = 0;
-	if (clPosHighest < clPos2ndHighest) {
-		leftClPos = clPosHighest;
-		rightClPos = clPos2ndHighest;
+	if (IsTransparentCluster()){
+		if( GetTransparentClusterSize() < 2){
+			leftChannel = getChannel(getHighestHitClusterPosition());
+			return -1;
+		}
 	}
-	else {
-		leftClPos = clPos2ndHighest;
-		rightClPos = clPosHighest;
-	}
-	leftChannel = this->getChannel(leftClPos);
-	Float_t signalLeft  = getSignal(leftClPos,cmnCorrected);
-	Float_t signalRight = getSignal(rightClPos,cmnCorrected);
-	Float_t sumSignal = (signalLeft+signalRight);
-	if(sumSignal==0)
-		return -1;
-	Float_t eta = signalRight/sumSignal;
-	if(verbosity&&(eta<0||eta>1))
-		this->Print(1);
-	return eta;
+	return getEta(getHighestHitClusterPosition(),leftChannel,cmnCorrected);
+//	UInt_t clPosHighest = getHighestHitClusterPosition();
+//	UInt_t clPos2ndHighest = getHighestSignalNeighbourClusterPosition(clPosHighest);
+//	UInt_t leftClPos = 0;
+//	UInt_t rightClPos = 0;
+//	if (clPosHighest < clPos2ndHighest) {
+//		leftClPos = clPosHighest;
+//		rightClPos = clPos2ndHighest;
+//	}
+//	else {
+//		leftClPos = clPos2ndHighest;
+//		rightClPos = clPosHighest;
+//	}
+//	leftChannel = this->getChannel(leftClPos);
+//	Float_t signalLeft  = getSignal(leftClPos,cmnCorrected);
+//	Float_t signalRight = getSignal(rightClPos,cmnCorrected);
+//	Float_t sumSignal = (signalLeft+signalRight);
+//	if(sumSignal==0)
+//		return -1;
+//	Float_t eta = signalRight/sumSignal;
+//	if(verbosity&&(eta<0||eta>1))
+//		this->Print(1);
+//	return eta;
 }
 
-Float_t TCluster::getEtaPostion(){
+Float_t TCluster::getEtaPostion(bool cmnCorrected){
 	Int_t leftChannel;
-	Float_t eta = getEta(leftChannel);
+	Float_t eta = getEta(leftChannel,cmnCorrected);
 	if(leftChannel==-1)return INVALID_POSITION;
+	if(eta<0)
+		return leftChannel;
 	return eta+leftChannel;
 }
 
-Float_t TCluster::getPositionCorEta(TH1F* histo){
+Float_t TCluster::getPositionCorEta(bool cmnCorrected,TH1F* histo){
 	Int_t leftChannel;
-	Float_t eta = getEta(leftChannel);
+	Float_t eta = getEta(leftChannel,cmnCorrected);
 	if(eta<=0){
-		return getEtaPostion();
+		return getEtaPostion(cmnCorrected);
 	}
 	if(eta>1){
-		return getEtaPostion();
+		return getEtaPostion(cmnCorrected);
 	}
 	Float_t corEta= getValueOfHisto(eta,histo);
 	if(verbosity)	cout<<leftChannel<<" + "<<corEta<<" = "<<leftChannel+corEta;
@@ -991,7 +1133,7 @@ UInt_t TCluster::getLastHitChannel(){
 
 UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected)
 {
-	return getChannel(getHighestSignalNeighbourClusterPosition(getClusterPosition(channelNo)));
+	return getChannel(getHighestSignalNeighbourClusterPosition(getClusterPosition(channelNo),cmnCorrected));
 }
 
 /**
@@ -1007,8 +1149,20 @@ UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnC
 		else if(clPos==0) return clPos+1;
 		else return 9999;
 	}
+	if(IsTransparentCluster()){
+
+		bool valid1 = IsValidTransparentClusterPosition(clPos-1);
+		bool valid2 = IsValidTransparentClusterPosition(clPos+1);
+		if(!valid1&&!valid2)
+			return 9999;
+		else if (!valid1)
+			return clPos+1;
+		else if (!valid2)
+			return clPos-1;
+	}
 	Float_t signalLeft = getSignal(clPos-1,cmnCorrected);
 	Float_t signalRight=getSignal(clPos+1,cmnCorrected);
+
 	if (signalLeft < signalRight){
 		if (signalRight>0)
 			return clPos+1;
@@ -1063,7 +1217,6 @@ bool TCluster::hasInvalidReadout(){
 	for(cl=0;cl<checkClusterForSize()&&!invalidReadout;cl++){
 //		cout<<cl<<" / "<<checkClusterForSize()<<flush;
 		invalidReadout = getSignal(cl)<minInvalidSignal||invalidReadout;
-//		cout<<"."<<flush;
 	}
 //	cout<<" last "<<cl<<"__\t__"<<flush;
 //	if(invalidReadout)
@@ -1076,6 +1229,8 @@ void TCluster::Print(UInt_t level){
 	if(level>10)cout<<"\n";
 	cout<<Intent(level%10)<<"Cluster of Event "<<flush;
 	cout<<eventNumber<<", det "<<(int)det<<" with "<<size()<<"/"<<checkClusterForSize()<<" Ch, CMN "<<cmNoise;
+	if(IsTransparentCluster())
+		cout<<" transCluster @ "<<isTransparentCluster<<" size: "<<GetTransparentClusterSize();
 //	cout<<": "<<getCharge(false,true)<<"/"<<getCharge(true,true)<<"\n\t"<<flush;
 	for(UInt_t cl=0;cl<checkClusterForSize();cl++){
 		if(this->isSeed(cl))
@@ -1093,7 +1248,7 @@ void TCluster::Print(UInt_t level){
 			cout<<"]"<<flush;
 	}
 	cout<<"\t||"<<flush;
-	cout<<this->getHighestSignalChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean()<<" "<<this->getEtaPostion()<<" "<<this->getPositionCorEta();
+	cout<<this->getHighestSignalChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean(true)<<" "<<this->getEtaPostion(false)<<" "<<this->getPositionCorEta(false);
 	cout<<" "<<this->getEta()<<" "<<this->getEta(true);
 	cout<<endl;
 }

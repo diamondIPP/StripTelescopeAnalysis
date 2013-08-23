@@ -45,9 +45,9 @@ public:
 	TCluster getCluster(TPlaneProperties::enumCoordinate cor, UInt_t cl);
 	TCluster getXCluster(UInt_t cl);
 	TCluster getYCluster(UInt_t cl);
-	Float_t getXPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getYPosition(UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
-	Float_t getPosition(TPlaneProperties::enumCoordinate cor, UInt_t cl,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getXPosition(UInt_t cl,bool cmnCorrected,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getYPosition(UInt_t cl,bool cmnCorrected,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
+	Float_t getPosition(TPlaneProperties::enumCoordinate cor, UInt_t cl,bool cmnCorrected,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo=0);
 	UInt_t getNXClusters();
 	UInt_t getNYClusters();
 	bool isValidPlane();

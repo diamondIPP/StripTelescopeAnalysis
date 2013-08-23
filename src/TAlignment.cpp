@@ -229,7 +229,7 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 		//			cout<<"\n";
 		//			clonedEvent->Print(1);
 		for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
-			Float_t clusPos = eventReader->getCluster(det,0).getPosition();
+			Float_t clusPos = eventReader->getCluster(det,0).getPosition(settings->doCommonModeNoiseCorrection());
 			if(clusPos<0||clusPos>=TPlaneProperties::getNChannels(det)||eventReader->getNClusters(det)!=1){
 				cout<<"Do not take event clusPos is not valid...."<<endl;
 				continue;
@@ -326,7 +326,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 		if (eventReader->useForAlignment()) {
 			bool bBreak = false;
 			for(UInt_t det=0;det<TPlaneProperties::getNDetectors()&&!bBreak;det++){
-				Float_t clusPos = eventReader->getCluster(det,0).getPosition();
+				Float_t clusPos = eventReader->getCluster(det,0).getPosition(settings->doCommonModeNoiseCorrection());
 				if(clusPos<0||clusPos>=TPlaneProperties::getNChannels(det)||eventReader->getNClusters(det)!=1){
 					bBreak = true;
 					cout<<"Do not take event clusPos is not valid...."<<endl;
@@ -804,8 +804,8 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 //			myTrack->setEvent(&telescopeAlignmentEvent.at(nEvent));
 			myTrack->setEvent(&events.at(nEvent));
 		if (verbosity > 5) cout << "Sil Alignment - Event No.:"<< nEvent << endl;
-		xLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
-		yLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
+		xLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::X_COR, subjectPlane, settings->doCommonModeNoiseCorrection(),mode,myTrack->getEtaIntegral(subjectPlane*2));
+		yLabMeasMetric = myTrack->getPositionInLabFrame(TPlaneProperties::Y_COR, subjectPlane, settings->doCommonModeNoiseCorrection(),mode,myTrack->getEtaIntegral(subjectPlane*2+1));
 		if(xLabMeasMetric<-400e3||yLabMeasMetric <-400e3)
 			continue;
 		if(verbosity>5) cout<< "\tLabMeasMetric: "<<xLabMeasMetric<<"/"<<yLabMeasMetric<<endl;
@@ -822,8 +822,8 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 		yDelta = yLabMeasMetric - yLabPredictedMetric;    //Y_OBS-Y_Pred
 		resxtest = TMath::Abs(xDelta - resOld.getXMean()) / TMath::Max((Double_t)resOld.getXSigma(),align->getResolution(subjectPlane,cor));
 		resytest = TMath::Abs(yDelta - resOld.getYMean()) / resOld.getYSigma();
-		xDetMeasuredMetric = myTrack->getXMeasuredClusterPositionMetricSpace(subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2));
-		yDetMeasuredMetric = myTrack->getYMeasuredClusterPositionMetricSpace(subjectPlane, mode,myTrack->getEtaIntegral(subjectPlane*2+1));
+		xDetMeasuredMetric = myTrack->getXMeasuredClusterPositionMetricSpace(subjectPlane, settings->doCommonModeNoiseCorrection(),mode,myTrack->getEtaIntegral(subjectPlane*2));
+		yDetMeasuredMetric = myTrack->getYMeasuredClusterPositionMetricSpace(subjectPlane, settings->doCommonModeNoiseCorrection(), mode,myTrack->getEtaIntegral(subjectPlane*2+1));
 		chi2x = predictedPostionMetric->getChi2X();
 		chi2y = predictedPostionMetric->getChi2Y();
 		bool useEvent=false;
@@ -963,8 +963,12 @@ TResidual TAlignment::getStripResidual(TPlaneProperties::enumCoordinate cor, UIn
 		if(verbosity>3)	predictedPostion->Print();
 		if (verbosity > 3)
 			events.at(nEvent).getPlane(subjectPlane).Print();
-		if (verbosity > 3) cout << "MeasuredChannel: " << myTrack->getXMeasuredClusterPositionChannelSpace(subjectPlane) << "/" << myTrack->getYMeasuredClusterPositionChannelSpace(subjectPlane) << endl;
-		if (verbosity > 3) cout << "MeasuredMetric: " << myTrack->getXMeasuredClusterPositionMetricSpace(subjectPlane) << "/" << myTrack->getYMeasuredClusterPositionMetricSpace(subjectPlane) << endl;
+		if (verbosity > 3) cout << "MeasuredChannel: " <<
+				myTrack->getXMeasuredClusterPositionChannelSpace(subjectPlane, settings->doCommonModeNoiseCorrection()) << "/" <<
+				myTrack->getYMeasuredClusterPositionChannelSpace(subjectPlane, settings->doCommonModeNoiseCorrection()) << endl;
+		if (verbosity > 3) cout << "MeasuredMetric: " <<
+				myTrack->getXMeasuredClusterPositionMetricSpace(subjectPlane, settings->doCommonModeNoiseCorrection()) << "/" <<
+				myTrack->getYMeasuredClusterPositionMetricSpace(subjectPlane, settings->doCommonModeNoiseCorrection()) << endl;
 		if (verbosity > 3) cout << "Observed: " << xPositionObservedMetric << " / " << yPositionObservedMetric << endl;
 		if (verbosity > 3) cout << "Predicted: " << xPredictedMetric << "/" << yPredictedMetric << endl;
 		if (verbosity > 3) cout << "Delta:    " << deltaXMetric << " / " << yPositionObservedMetric << endl;
@@ -1208,8 +1212,8 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
 				predictedPosition->Delete();
 				predictedPosition = myTrack->predictPosition(subjectPlane, vecRefPlanes, TCluster::corEta, false);
 			}
-			Float_t deltaX = myTrack->getXPositionMetric(subjectPlane);
-			Float_t deltaY = myTrack->getYPositionMetric(subjectPlane);
+			Float_t deltaX = myTrack->getXPositionMetric(subjectPlane,settings->doCommonModeNoiseCorrection());
+			Float_t deltaY = myTrack->getYPositionMetric(subjectPlane,settings->doCommonModeNoiseCorrection());
 
 			deltaX -= predictedPosition->getPositionX();
 			deltaY -= predictedPosition->getPositionY();

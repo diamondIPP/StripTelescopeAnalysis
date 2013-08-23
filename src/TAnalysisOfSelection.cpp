@@ -1082,7 +1082,7 @@ void TAnalysisOfSelection::analyseEvent()
 	UInt_t clustSize = cluster.size();
 	bool isMasked = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
 	bool isMaskedAdjacentChannels = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,true);
-	Float_t pos = cluster.getPosition(TCluster::maxValue,0);
+	Float_t pos = cluster.getPosition(settings->doCommonModeNoiseCorrection(),TCluster::maxValue,0);
 	Int_t fidRegionIndex = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY)-1;
 	Int_t area = settings->getDiaDetectorAreaOfChannel(pos,0);
 	bool isInOneArea = !(area==-1);
@@ -1109,7 +1109,7 @@ void TAnalysisOfSelection::analyseEvent()
 	hNDiaClusters -> Fill(nDiaClusters);
 	if (nDiaClusters > 1){
 		TCluster cluster2 = eventReader->getCluster(TPlaneProperties::getDetDiamond(),1);
-		Float_t pos2 = cluster2.getPosition(TCluster::maxValue,0);
+		Float_t pos2 = cluster2.getPosition(settings->doCommonModeNoiseCorrection(),TCluster::maxValue,0);
 		Float_t area2 = settings->getDiaDetectorAreaOfChannel(pos2);
 		hTwoClustersArea->Fill(area,area2);
 //		if(verbosity && pos <= 20) {cluster.Print();cluster2.Print();}

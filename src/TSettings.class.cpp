@@ -2361,7 +2361,7 @@ void TSettings::CheckEdgeFidcuialCuts(){
 		vecEdgePositionName.size() != vecEdgePositionType.size() ||
 		vecEdgePositionType.size() < fidCuts3DEdge->size()){
 		cerr<<"sizes for edge fiducial cuts do not agree..."<<
-				TString::Format("%d/%d/%d/%d",vecEdgePositionName.size(),vecEdgePositionType.size(),vecEdgePositionName.size(),fidCuts3DEdge->size());
+				TString::Format("%d/%d/%d/%d",(Int_t)vecEdgePositionName.size(),(Int_t)vecEdgePositionType.size(),(Int_t)vecEdgePositionName.size(),(Int_t)fidCuts3DEdge->size());
 		exit(-1);
 	}
 	else{
