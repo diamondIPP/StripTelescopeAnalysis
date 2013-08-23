@@ -81,15 +81,19 @@ HistogrammSaver::~HistogrammSaver() {
 void HistogrammSaver::InitializeGridReferenceDetSpace(){
 	TString nameDet = "hGridRefenrenceDetSpace";
 	TString nameCell = "hGridRefenrenceCellSpace";
-	Float_t xBins = settings->getNColumns3d();
+	Float_t xBins = 1;
 	TFidCutRegions* metallisationFidCuts = settings->get3dMetallisationFidCuts();
-	metallisationFidCuts->Print(1);
-	TFiducialCut* fidCut = metallisationFidCuts->getFidCut((UInt_t)3);
+	TFiducialCut* fidCut;
+    if (metallisationFidCuts) {
+	    metallisationFidCuts->Print(1);
+        fidCut = metallisationFidCuts->getFidCut((UInt_t)3);
+        xBins = settings->getNColumns3d();
+    }
 	Float_t xLow = 0;
-	Float_t xHigh = 0;
-	Float_t yBins = 0;
+	Float_t xHigh = 1;
+	Float_t yBins = 1;
 	Float_t yLow = 0;
-	Float_t yHigh = 0;
+	Float_t yHigh = 1;
 	if(fidCut){
 		 xLow = fidCut->GetXLow();//getXMetalisationStart3d;
 		 xHigh = fidCut->GetXHigh();//getXMetalisationEnd3d;
@@ -97,14 +101,12 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 		 yLow = fidCut->GetYLow();
 		 yHigh = fidCut->GetYHigh();//getYMetalisationEnd3d;
 	}
-	//	cout<<"nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh"<<endl;
-	//	cout<<nameDet<<" "<<nameDet<<" "<<xBins<<" "<<xLow<<" "<<xHigh<<" "<<yBins<<" "<<yLow<<" "<<yHigh<<endl;
 	hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
 	hGridReferenceCellSpace = new TH2D(nameCell,nameCell,xBins,0,xBins,yBins,0,yBins);
 
 	for(int i=0;i<settings->getNRows3d();i++){
-		hGridReferenceDetSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
-		hGridReferenceCellSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
+		hGridReferenceDetSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));
+		hGridReferenceCellSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));
 	}
 	for(int j=0;j<settings->getNRows3d();j++){
 		hGridReferenceDetSpace->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
