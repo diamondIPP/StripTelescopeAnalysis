@@ -215,7 +215,7 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 			Float_t begin = beginOfInterval[i];
 			Float_t end = endOfInterval[i];
 			begin -= pw/2;
-			end -= pw/2;
+			end += pw/2;
 
 			//			cout<<"look at" <<begin<<"-"<<end<<" "<<pw<<endl;
 			if( begin <= metric && metric <= end ){

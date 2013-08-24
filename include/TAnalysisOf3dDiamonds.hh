@@ -65,7 +65,7 @@ private:
 
 	void ShortAnalysis();
 	void LongAnalysis();
-	void TransparentAnalysis();
+	bool TransparentAnalysis();
 	void StripAnalysis();
 
 	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
@@ -117,6 +117,7 @@ private:
 
 private:
 	TH1F* hLandauStrip;
+	TH2F* hLandauStripFidCutXvsFidCutY;
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
 	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y,xPredicted,yPredicted,xPredDet,yPredDet;
@@ -368,6 +369,11 @@ private:
 	UInt_t subjectPlane;
 
 private:
+	//TransparentAnalysis
+	TCluster transparentCluster;
+	TH2F* hTransparentAnalysisInvalidCluster;
+	TH2F* hTransparentAnalysisValidCluster;
+	TH2F* hTransparentAnalysisValidClusterFidCutXvsFidCutY;
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */
