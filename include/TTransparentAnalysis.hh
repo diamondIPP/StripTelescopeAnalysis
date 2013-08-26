@@ -83,6 +83,7 @@ private:
 	void analyseEtaDistributions();
 	void analyseEtaDistribution(TH1F* hEtaDist);
 	void saveHistograms();
+	void saveLandausVsPositionPlots(UInt_t clusterSize);
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();
@@ -175,6 +176,8 @@ private:
 	
 	vector<TH1F*> hLandau2Highest;
 	vector<TH1F*> hLandau1Highest;
+	vector<TH1F*> hLandau2HighestFixedNoise;
+	vector <TH1F*> hLandauFixedNoise;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
 	vector<TH1F*> hResidualHighestHit;
@@ -191,7 +194,9 @@ private:
 	
 	// fits
 	vector<TF1*> fitLandau;
+	vector<TF1*> fitLandauFixedNoise;
 	vector<TF1*> fitLandau2Highest;
+	vector<TF1*> fitLandau2HighestFixedNoise;
 	vector<TF1*> fitResidualChargeWeighted;
 	vector<TF1*> fitResidualHighest2Centroid;
 	vector<TF1*> fitResidualEtaCorrected;
@@ -232,7 +237,10 @@ private:
 	vector<Float_t> vecChi2;
 	Float_t predXMin, predXMax, predYMin, predYMax;
 	bool cmCorrected;
-
+	vector<Float_t> noiseWidths;
+	vector<Float_t> noiseWidthsCMN;
+	vector<Float_t> noiseWidths2OutOfX;
+	vector<Float_t> noiseWidths2OutOfXCMN;
 
 };
 

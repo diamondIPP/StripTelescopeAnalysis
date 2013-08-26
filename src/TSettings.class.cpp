@@ -1890,7 +1890,7 @@ bool TSettings::isInAlignmentFiducialRegion(Float_t xVal,Float_t yVal){
 	Int_t fidCutRegion = this->getSelectionFidCuts()->getFiducialCutIndex(xVal,yVal);
 	if(verbosity>6)cout<<" isInAlignmentFiducialRegion\t"<<fidCutRegion<<flush;
 	for(UInt_t i=0; i < alignmentFidCuts.size();i++)
-		if(alignmentFidCuts.at(i)==fidCutRegion){
+		if(alignmentFidCuts.at(i)==0 || alignmentFidCuts.at(i)==fidCutRegion){
 			if(verbosity>6)cout<<"\tTrue"<<endl;
 			return true;
 		}
@@ -2201,9 +2201,8 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 		}
 	}		//for Strip structure
 	if(DiamondPattern==2||DiamondPattern==3){
-		for(int column=0;column<getNColumns3d();column++){
-			for(int row=0;row<getNRows3d();row++){
-
+		for(UInt_t column=0;column<getNColumns3d();column++){
+			for(UInt_t row=0;row<getNRows3d();row++){
 				float xLow = get3dMetallisationFidCuts()->getXLow(DiamondPattern) + column*cellwidth;
 				float yLow = get3dMetallisationFidCuts()->getYLow(DiamondPattern) + row*cellheight;
 				float xHigh = xLow+cellwidth;

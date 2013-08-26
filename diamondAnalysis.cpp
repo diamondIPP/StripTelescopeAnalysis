@@ -326,13 +326,21 @@ int main(int argc, char ** argv) {
 		runWatch.Stop();
 		cout<<"needed Time for Run "<<RunParameters[i].getRunNumber()<<":"<<endl;
 		runWatch.Print();
-		if (settings!=NULL){
-			cout<<"delete Settings..."<<endl;
-			delete settings;
-			cout<<"DONE_SETTINGS"<<endl;
-		}
-	}
-	cout<<"DONE with Analysis of all Runs "<<RunParameters.size()<<"from RunList.ini"<<endl;
+   
+        cout<<"needed Time for Run "<<RunParameters[i].getRunNumber()<<":\n\t"<<flush;
+        runWatch.Print();
+        if (settings!=NULL){
+            cout<<"delete Settings..."<<endl;
+            delete settings;
+            cout<<"DONE_SETTINGS"<<endl;
+                                                           
+        }
+        cout<<"DONE with Analysis of Run "<< RunParameters[i].getRunNumber();
+        cout<<": "<<i+1<<"/"<<RunParameters.size()<<endl;
+   }
+   cout<<"DONE with Analysis of all "<<RunParameters.size()<<" Runs from RunList.ini"<<endl;
+   cout<<"total time for all analysis:\n\t"<<flush;
+
 	cout<<"time for all analysis:"<<endl;
 	comulativeWatch.Print();
 	cout<<"DONE_ALL"<<endl;

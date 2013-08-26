@@ -20,8 +20,12 @@ public:
 	LandauGaussFit();
 	virtual ~LandauGaussFit();
 	TF1*  doLandauGaussFit(TH1F* histo,bool verbose=false);
+	TF1*  doLandauGaussFitFixedNoise(TH1F* histo,Float_t noise, bool verbose=false);
 private:
 	TF1* langaufit(TH1F *his, Double_t *fitrange, Double_t *startvalues,
+			Double_t *parlimitslo, Double_t *parlimitshi, Double_t *fitparams,
+			Double_t *fiterrors, Double_t *ChiSqr, Int_t *NDF,bool verbose=false);
+	TF1* langaufitFixedNoise(TH1F *hist,Double_t  *fitrange, Double_t *startvalues,
 			Double_t *parlimitslo, Double_t *parlimitshi, Double_t *fitparams,
 			Double_t *fiterrors, Double_t *ChiSqr, Int_t *NDF,bool verbose=false);
 	Int_t langaupro(Double_t *params, Double_t &maxx, Double_t &FWHM);

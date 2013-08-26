@@ -68,6 +68,9 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
 	results=0;
 	gausFitValuesX.resize(4);
 	gausFitValuesY.resize(4);
+	cout<<"Selection Fidcuts: "<<endl;
+	settings->getSelectionFidCuts()->Print();
+	cout<<"\nAlignment FIdcuts: "<<settings->getAlignmentFidCuts()<<endl;
 
 }
 
@@ -282,7 +285,8 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 			telescopeAlignmentEvent.push_back(1);
 			nTelescopeAlignmentEvents++;
 		}
-		cout<<TString::Format("\r%6d %6d",(int)events.size(),(int)(events.size()-nTelescopeAlignmentEvents))<<flush;
+		if(events.size()%(int)100==0||(nEvent - startEvent)%(int)1000==0)
+			cout<<TString::Format("\r%6d %6d",(int)events.size(),(int)(events.size()-nTelescopeAlignmentEvents))<<flush;
 		TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 1000);
 		if(!settings->useForAlignment(nEvent,nEvents))
 			return;
@@ -340,10 +344,10 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent) {
 				this->events.push_back(*eventReader->getEvent());
 			telescopeAlignmentEvent.push_back(0);
 		}
-		if (eventReader->useForAnalysis()) {
-			cout << "\nFound first Event for Analysis ->BREAK" << endl;
-			break;
-		}
+//		if (eventReader->useForAnalysis()) {
+//			cout << "\nFound first Event for Analysis ->BREAK" << endl;
+//			break;
+//		}
 	}
 	if(verbosity||true){
 		cout<<"\nCreated Vector of Events with one and only one Hit in Silicon  + one diamond Cluster + in Fiducial Cut Area"<<endl;

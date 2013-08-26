@@ -24,14 +24,12 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 	settings->goToAlignmentRootDir();
 	eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(mode),settings->getEtaDistributionPath(),settings);
 	// TODO: load settings!!!
-	
 	histSaver = new HistogrammSaver(settings);
-//	settings->goToTransparentAnalysisDir();
+	//	settings->goToTransparentAnalysisDir();
 	histSaver->SetPlotsPath(settings->getTransparentAnalysisDir(mode));
 	histSaver->SetRunNumber(settings->getRunNumber());
 	htmlTransAna = new THTMLTransparentAnalysis(settings);
 	htmlTransAna->setFileGeneratingPath(settings->getTransparentAnalysisDir(mode));
-	
 	// TODO: move these setting to the proper place
 	subjectDetector = 8;
 	subjectPlane = subjectDetector/2;
@@ -46,7 +44,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 	}
 	clusterCalcMode = TCluster::highest2Centroid;
 	verbosity = settings->getVerbosity();
-	
+
 	initHistograms();
 	cout<<"end initialise"<<endl;
 	positionPrediction = 0;
@@ -60,26 +58,27 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 TTransparentAnalysis::~TTransparentAnalysis() {
 	// TODO Auto-generated destructor stub
 	cout<<"\n\nClosing TTransparentAnalysis"<<endl;
+	analyseNonHitEvents();
 	fitHistograms();
 	saveHistograms();
 	deleteHistograms();
 	deleteFits();
-	
+
 	vector<vector <Float_t> > meanPulseHeights;
 	vector<vector <Float_t> > mpPulseHeights;
 	vector<vector <pair <Float_t,Float_t> > > resolutions;
-	
+
 	mpPulseHeights.push_back(vecMPLandau);
 	mpPulseHeights.push_back(vecMPLandau2Highest);
 	meanPulseHeights.push_back(vecMeanLandau);
-//	this->settings->res
+	//	this->settings->res
 	meanPulseHeights.push_back(vecMeanLandau2Highest);
 	if(results) this->results->setPH_NoutOfN(vecMeanLandau, alignMode);
 	resolutions.push_back(vecResidualChargeWeighted);
 	resolutions.push_back(vecResidualHighest2Centroid);
 	resolutions.push_back(vecResidualEtaCorrected);
 	resolutions.push_back(vecResidualEtaCorrected_2ndGaus);
-	
+
 	htmlTransAna->createPulseHeightPlots(meanPulseHeights, mpPulseHeights);
 	htmlTransAna->createResolutionPlots(resolutions);
 	htmlTransAna->createEtaPlots();
@@ -102,7 +101,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	}
 	predXMin = predYMin = 1e9;
 	predXMax = predYMax = -1e9;
-//	usedForSiliconAlignment = 0;
+	//	usedForSiliconAlignment = 0;
 	if(verbosity>6)cout<<"Current Dir: "<<sys->pwd()<<endl;
 	if (nEvents+startEvent > eventReader->GetEntries()) {
 		cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
@@ -112,7 +111,6 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 	createEventVector(startEvent);
 	cout<<"X: "<<predXMin<<" - "<<predXMax<<endl;
 	cout<<"Y: "<<predYMin<<" - "<<predYMax<<endl;
-	analyseNonHitEvents();
 	this->printCutFlow();
 	createEtaIntegrals();
 	calcEtaCorrectedResiduals();
@@ -137,10 +135,10 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		vecvecResXEtaCorrected[clusterSize].clear();
 		vecvecResXHighestHit[clusterSize].clear();
 	}
-//	vecPredictedPosition.clear();
-//	vecRelPredictedPosition.clear();
-//	vecPredictedChannel.clear();
-//	vecChi2.clear();
+	//	vecPredictedPosition.clear();
+	//	vecRelPredictedPosition.clear();
+	//	vecPredictedChannel.clear();
+	//	vecChi2.clear();
 	UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
 	for (UInt_t iEvent = 0; iEvent < eventNumbers.size(); iEvent++) {
 		TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
@@ -156,7 +154,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 				printCluster(vecTransparentClusters.at(iEvent));
 			}
 
-//			if (clusterSize == 1) printCluster(vecTransparentClusters.at(iEvent).at(clusterSize));
+			//			if (clusterSize == 1) printCluster(vecTransparentClusters.at(iEvent).at(clusterSize));
 			Float_t metricPosInDetSystem = eventReader->getPositionInDetSystem(subjectDetector,predXPosition,predYPosition);
 			Float_t channelPosInDetSystem = settings->convertMetricToChannelSpace(subjectDetector,metricPosInDetSystem);
 
@@ -239,9 +237,9 @@ bool TTransparentAnalysis::predictPositions(bool savePrediction) {
 	//			cout << "clustered analysis strip position:\t" << eventReader->getMeasured(subjectDetectorCoordinate, subjectPlane, clusterCalcMode) << endl;
 	Float_t chi2 = positionPrediction->getChi2();
 	if(savePrediction){
-	vecPredictedPosition.push_back(positionInDetSystemChannelSpace);
-	vecRelPredictedPosition.push_back(positionInDetSystemChannelSpace-(int)(positionInDetSystemChannelSpace));
-	vecChi2.push_back(chi2);}
+		vecPredictedPosition.push_back(positionInDetSystemChannelSpace);
+		vecRelPredictedPosition.push_back(positionInDetSystemChannelSpace-(int)(positionInDetSystemChannelSpace));
+		vecChi2.push_back(chi2);}
 
 	if(chi2>settings->getTransparentChi2())
 		return false;
@@ -258,8 +256,8 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
 	centerChannel = TMath::Abs(direction);
 	if (direction < 0) direction = -1;
 	else direction = 1;
-//	cout<<"\t"<<direction<<" x "<< centerChannel<<endl;
-	
+	//	cout<<"\t"<<direction<<" x "<< centerChannel<<endl;
+
 	// check predicted cluster channels
 	UInt_t currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
@@ -320,6 +318,7 @@ void TTransparentAnalysis::setSettings(TSettings* settings) {
 }
 
 void TTransparentAnalysis::initHistograms() {
+	cout<<"initHistos"<<endl;
 	UInt_t bins=512;
 	vecvecResXChargeWeighted.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecvecResXHighest2Centroid.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
@@ -376,8 +375,8 @@ void TTransparentAnalysis::initHistograms() {
 		hResidualHighestHit.push_back(new TH1F(histNameResidualHighestHit,histNameResidualHighestHit,bins,-2.5*50,2.5*50));
 
 		//		hResidualVsHitPositionChargeWeighted.push_back(new TH2F(nameResVsHitChargeWeighted,nameResVsHitChargeWeighted));
-//		hResidualVsHitPositionEtaCorrected.push_back(new TH2F(nameResVsHitChargeWeighted,nameResVsHitChargeWeighted));
-//		hResidualVsHitPositionHigehest2Centroid.push_back(new TH2F(nameResVsHitChargeWeighted,nameResVsHitChargeWeighted,));
+		//		hResidualVsHitPositionEtaCorrected.push_back(new TH2F(nameResVsHitChargeWeighted,nameResVsHitChargeWeighted));
+		//		hResidualVsHitPositionHigehest2Centroid.push_back(new TH2F(nameResVsHitChargeWeighted,nameResVsHitChargeWeighted,));
 
 	}
 	hLandauMean = new TH1F("hDiaTranspAnaPulseHeightMean","hDiaTranspAnaPulseHeightMean",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
@@ -422,30 +421,30 @@ void TTransparentAnalysis::fillHistograms() {
 				cout<<nEvent<<"errror5: highestSignalClusterPos: "<<highestSignalClusterPos<<endl;
 				this->transparentClusters.Print();
 			}
-//			Float_t leftSig = transparentClusters[clusterSize].getSignal(highestSignalClusterPos-1);
-//			Float_t rightSig= transparentClusters[clusterSize].getSignal(highestSignalClusterPos+1);
+			//			Float_t leftSig = transparentClusters[clusterSize].getSignal(highestSignalClusterPos-1);
+			//			Float_t rightSig= transparentClusters[clusterSize].getSignal(highestSignalClusterPos+1);
 
 		}
-//		if (clusterSize == 1 /* && this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printCluster(this->transparentClusters[clusterSize]);
-//		if (clusterSize > 0 && this->transparentClusters[clusterSize].getEta() < 0) printCluster(this->transparentClusters[clusterSize]);
+		//		if (clusterSize == 1 /* && this->transparentClusters[clusterSize].getCharge() != this->transparentClusters[clusterSize].getCharge(2,false)*/) printCluster(this->transparentClusters[clusterSize]);
+		//		if (clusterSize > 0 && this->transparentClusters[clusterSize].getEta() < 0) printCluster(this->transparentClusters[clusterSize]);
 		// TODO: why is the eta distribution for 2 channel clusters more symmetric than for 3 and more channel clusters?
-//		if (clusterSize == 2 && this->transparentClusters[clusterSize-1].getEta() != this->transparentClusters[clusterSize].getEta()) {
-//			if (this->transparentClusters[clusterSize-1].getHighestSignalChannel()!=this->transparentClusters[clusterSize].getHighestSignalChannel()
-//				&&
-//				this->transparentClusters[clusterSize-1].getHighest2Centroid(cmCorrected)!=this->transparentClusters[clusterSize].getHighest2Centroid(cmCorrected)) {
-//			printCluster(this->transparentClusters[clusterSize-1]);
-//			printCluster(this->transparentClusters[clusterSize]);
-//			}
-//		}
+		//		if (clusterSize == 2 && this->transparentClusters[clusterSize-1].getEta() != this->transparentClusters[clusterSize].getEta()) {
+		//			if (this->transparentClusters[clusterSize-1].getHighestSignalChannel()!=this->transparentClusters[clusterSize].getHighestSignalChannel()
+		//				&&
+		//				this->transparentClusters[clusterSize-1].getHighest2Centroid(cmCorrected)!=this->transparentClusters[clusterSize].getHighest2Centroid(cmCorrected)) {
+		//			printCluster(this->transparentClusters[clusterSize-1]);
+		//			printCluster(this->transparentClusters[clusterSize]);
+		//			}
+		//		}
 		Float_t relPos =this->predPosition-(int)(this->predPosition+.5);
 		Float_t residualCW =this->getResidual(this->transparentClusters,cmCorrected,TCluster::chargeWeighted,hEtaIntegrals[clusterSize]);
 		Float_t residualH2C = this->getResidual(this->transparentClusters,cmCorrected,TCluster::highest2Centroid,hEtaIntegrals[clusterSize]);
 		Float_t resXHighestHit= this->getResidual(this->transparentClusters,cmCorrected,TCluster::maxValue,hEtaIntegrals[clusterSize]);
 
-//		if(hResidualChargeWeightedVsEstimatedHitPosition==0)
-//			hResidualChargeWeightedVsEstimatedHitPosition->Fill(residualCW,relPos,clusterSize);
-//		if(hResidualHighest2CentroidVsEstimatedHitPosition)
-//			hResidualHighest2CentroidVsEstimatedHitPosition>Fill(residualH2C,relPos,clusterSize);
+		//		if(hResidualChargeWeightedVsEstimatedHitPosition==0)
+		//			hResidualChargeWeightedVsEstimatedHitPosition->Fill(residualCW,relPos,clusterSize);
+		//		if(hResidualHighest2CentroidVsEstimatedHitPosition)
+		//			hResidualHighest2CentroidVsEstimatedHitPosition>Fill(residualH2C,relPos,clusterSize);
 		if (clusterSize+1 != transparentClusters.getClusterSize()) {
 			cout << "wrong cluster size!" << endl;
 			cout << "clusterSize+1 = " << clusterSize+1 << "\ttransparentClusters[clusterSize].getClusterSize() = " << transparentClusters.getClusterSize() << endl;
@@ -473,11 +472,11 @@ void TTransparentAnalysis::fillHistograms() {
 	}
 	Float_t eventNo = eventReader->getEvent_number();
 	vectorEventNo.push_back(eventNo);
-//	hPredictedPositionInStrip->Fill();
+	//	hPredictedPositionInStrip->Fill();
 }
 
 TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
-//	TH1* histo = (TH1*)htemp->Clone();
+	//	TH1* histo = (TH1*)htemp->Clone();
 	if (histo->GetEntries()==0) return 0;
 	TF1* histofitx = new TF1("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
 	histofitx->SetLineColor(kBlue);
@@ -535,7 +534,7 @@ void TTransparentAnalysis::createEfficiencyPlots(TH1F *hLandau){
 		hEfficiency->GetXaxis()->SetTitle("PH / adc counts");
 		hEfficiency->GetYaxis()->SetTitle("efficientcy / %");
 	}
-//	TCutG *MP = new TCutG("gMP",1);
+	//	TCutG *MP = new TCutG("gMP",1);
 	histSaver->SaveHistogram(hEfficiency);
 	if(hEfficiency) delete hEfficiency;
 }
@@ -549,41 +548,38 @@ void TTransparentAnalysis::fitHistograms() {
 		createEfficiencyPlots(hLandau1Highest[clusterSize]);
 		vector<Float_t> vecResChargeWeighted = vecvecResXChargeWeighted[clusterSize];
 
-		stringstream name;
-		name <<"hDiaTranspAnaResidualChargeWeightedIn" << clusterSize+1 << "StripsMinusPred";
+		TString name;
+		name = TString::Format("hDiaTranspAnaResidualChargeWeightedIn%02dStripsMinusPred",clusterSize+1);
 		if(hResidualChargeWeighted[clusterSize])
 			delete hResidualChargeWeighted[clusterSize];
-		hResidualChargeWeighted[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecResChargeWeighted,8192,HistogrammSaver::maxWidth,-5000);
+		hResidualChargeWeighted[clusterSize] = histSaver->CreateDistributionHisto((string)name, vecResChargeWeighted,8192,HistogrammSaver::maxWidth,-5000);
 		Float_t plotWidth = 1.5 * settings->getPitchWidth(subjectDetector);
 		hResidualChargeWeighted[clusterSize]->GetXaxis()->SetRangeUser(-plotWidth,plotWidth);
 		hResidualChargeWeighted[clusterSize]->GetXaxis()->SetTitle("Residual, ChargeWeighted / #mum");
 		hResidualChargeWeighted[clusterSize]->GetYaxis()->SetTitle("number of entries #");
 
-		name.str("");name.clear();
-		name <<"hDiaTranspAnaResidualHighest2CentroidIn" << clusterSize+1 << "StripsMinusPred";
+		name = TString::Format("hDiaTranspAnaResidualHighest2CentroidIn%02dStripsMinusPred",clusterSize+1);
 		if(hResidualHighest2Centroid[clusterSize] )
 			delete hResidualHighest2Centroid[clusterSize] ;
-		hResidualHighest2Centroid[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecvecResXHighest2Centroid[clusterSize],8192,HistogrammSaver::maxWidth,-5000);
+		hResidualHighest2Centroid[clusterSize] = histSaver->CreateDistributionHisto((string)name, vecvecResXHighest2Centroid[clusterSize],8192,HistogrammSaver::maxWidth,-5000);
 		plotWidth = 1.5 * settings->getPitchWidth(subjectDetector);
 		hResidualHighest2Centroid[clusterSize]->GetXaxis()->SetRangeUser(-plotWidth,plotWidth);
 		hResidualHighest2Centroid[clusterSize]->GetXaxis()->SetTitle("Residual, highest 2 centroid / #mum");
 		hResidualHighest2Centroid[clusterSize]->GetYaxis()->SetTitle("number of entries #");
 
-		name.str("");name.clear();
-		name <<"hDiaTranspAnaResidualEtaCorrectedIn" << clusterSize+1 << "StripsMinusPred";
+		name=TString::Format("hDiaTranspAnaResidualEtaCorrectedIn%02dStripsMinusPred",clusterSize+1);
 		if(hResidualEtaCorrected[clusterSize])
 			delete hResidualEtaCorrected[clusterSize];
-		hResidualEtaCorrected[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecvecResXEtaCorrected[clusterSize],8192,HistogrammSaver::maxWidth,-5000);
+		hResidualEtaCorrected[clusterSize] = histSaver->CreateDistributionHisto((string)name, vecvecResXEtaCorrected[clusterSize],8192,HistogrammSaver::maxWidth,-5000);
 		plotWidth = settings->getPitchWidth(subjectDetector);
 		hResidualEtaCorrected[clusterSize]->GetXaxis()->SetRangeUser(-plotWidth,plotWidth);
 		hResidualEtaCorrected[clusterSize]->GetXaxis()->SetTitle("Residual #eta corrected / #mum");
 		hResidualEtaCorrected[clusterSize]->GetYaxis()->SetTitle("number of entries #");
 
-		name.str("");name.clear();
-		name <<"hDiaTranspAnaResidualHighestHitIn" << clusterSize+1 << "StripsMinusPred";
+		name=TString::Format("hDiaTranspAnaResidualHighestHitIn%02dStripsMinusPred",clusterSize+1);
 		if(hResidualHighestHit[clusterSize] )
 			delete hResidualHighestHit[clusterSize] ;
-		hResidualHighestHit[clusterSize] = histSaver->CreateDistributionHisto(name.str(), vecvecResXHighestHit[clusterSize],8192,HistogrammSaver::maxWidth,-5000);
+		hResidualHighestHit[clusterSize] = histSaver->CreateDistributionHisto((string)name, vecvecResXHighestHit[clusterSize],8192,HistogrammSaver::maxWidth,-5000);
 		plotWidth = 1.5 * settings->getPitchWidth(subjectDetector);
 		hResidualHighestHit[clusterSize]->GetXaxis()->SetRangeUser(-plotWidth,plotWidth);
 		hResidualHighestHit[clusterSize]->GetXaxis()->SetTitle("Residual, highest Hit / #mum");
@@ -591,12 +587,34 @@ void TTransparentAnalysis::fitHistograms() {
 		//,
 		//,1024,HistogrammSaver::maxWidth,-6000);
 		// fit histograms
-		TF1* fit = landauGauss->doLandauGaussFit(hLandau[clusterSize]);
+		name = hLandau[clusterSize]->GetName();
+		name.Append("_fixedNoise");
+		TH1F* hLandauFixedNoiseFit = (TH1F*) hLandau[clusterSize]->Clone(name);
+		hLandauFixedNoiseFit->SetTitle(name);
+		Float_t noise = cmCorrected?noiseWidthsCMN[clusterSize]:noiseWidths[clusterSize];
+		cout<<"NOISE of "<<clusterSize<<": "<<noise<<endl;
+		TF1* fitFixedNoise = landauGauss->doLandauGaussFitFixedNoise(hLandauFixedNoiseFit,noise,true);
+		//		histSaver->SaveHistogram(hLandauFixedNoiseFit);
+		hLandauFixedNoise.push_back(hLandauFixedNoiseFit);
+		fitLandauFixedNoise.push_back(fitFixedNoise);
+		cout<<"#"<<flush;
+
+		name = hLandau2Highest[clusterSize]->GetName();
+		name.Append("_fixedNoise");
+		TH1F* hLandau2HighestFixedNoiseFit = (TH1F*) hLandau2Highest[clusterSize]->Clone(name);
+		TF1* fit2HighestFixedNoise = landauGauss->doLandauGaussFitFixedNoise(hLandau2HighestFixedNoiseFit,noise,true);
+		//		histSaver->SaveHistogram(hLandau2HighestFixedNoiseFit);
+		hLandau2HighestFixedNoise.push_back(hLandau2HighestFixedNoiseFit);
+		fitLandau2HighestFixedNoise.push_back(fit2HighestFixedNoise);
+		cout<<"$"<<flush;
+
+
+
+		TF1* fit = landauGauss->doLandauGaussFit(hLandau[clusterSize],true);
 		if(fit==0){cout<<"PROBLEM with fit..."<<clusterSize<<endl;}
 		fitLandau.push_back(fit);
-		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLandau2Highest[clusterSize]));
+		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLandau2Highest[clusterSize],true));
 		if(clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1){
-
 			Float_t mean;
 			if(hLandau2Highest[clusterSize]) mean = hLandau2Highest[clusterSize]->GetMean();
 			else mean = -1;
@@ -647,6 +665,7 @@ void TTransparentAnalysis::fitHistograms() {
 			tempPair.first = 0;
 			tempPair.second = 0;
 		}
+		cout<<"%"<<flush;
 		vecResidualHighest2Centroid.push_back(tempPair);
 		if (fitResidualEtaCorrected[clusterSize]!=0) {
 			tempPair.first = fitResidualEtaCorrected[clusterSize]->GetParameter(1);
@@ -671,6 +690,7 @@ void TTransparentAnalysis::fitHistograms() {
 	hLandauMP->Scale(1./hLandauMP->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
 	hLandau2HighestMean->Scale(1./hLandau2HighestMean->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
 	hLandau2HighestMP->Scale(1./hLandau2HighestMP->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
+	cout<<"#"<<endl;
 }
 
 void TTransparentAnalysis::analyseEtaDistribution(TH1F* hEtaDist){
@@ -752,7 +772,7 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 		hDeltaEtaVsResidual->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
 	}
 	if(hDeltaEtaVsResidual)
-	histSaver->SaveHistogram(hDeltaEtaVsResidual,false);
+		histSaver->SaveHistogram(hDeltaEtaVsResidual,false);
 
 	name.str("");name.clear();
 	name<<TString::Format("hEtaOf10_minus_EtaOf2_vs_etaOf10");
@@ -775,14 +795,14 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 	histSaver->SaveHistogram(hEtaBoundedEtaCorrected);
 	if(hEtaBoundedEtaCorrected)delete hEtaBoundedEtaCorrected;
 
-//	name.str("");name.clear();
-//	name<<TString::Format("hEtaOf10_minus_EtaOf2_vs_ResidualEtaCorrectedIn10");
-//	TH2F* hDeltaEtaVsResidual = histSaver->CreateScatterHisto(name.str(),vecDeltaEta,vecRelatedResXEtaCorrected,512,400,-2*pw,2*pw,-1,1);
-//	if(hDeltaEtaVsResidual){
-//		hDeltaEtaVsResidual->GetXaxis()->SetTitle("Residual Eta Correct, 2 of 10 / #mum");
-//		hDeltaEtaVsResidual->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
-//	}
-//	histSaver->SaveHistogram(hDeltaEtaVsResidual,false);
+	//	name.str("");name.clear();
+	//	name<<TString::Format("hEtaOf10_minus_EtaOf2_vs_ResidualEtaCorrectedIn10");
+	//	TH2F* hDeltaEtaVsResidual = histSaver->CreateScatterHisto(name.str(),vecDeltaEta,vecRelatedResXEtaCorrected,512,400,-2*pw,2*pw,-1,1);
+	//	if(hDeltaEtaVsResidual){
+	//		hDeltaEtaVsResidual->GetXaxis()->SetTitle("Residual Eta Correct, 2 of 10 / #mum");
+	//		hDeltaEtaVsResidual->GetYaxis()->SetTitle("#Delta#eta = #eta_{2 of 10} - #eta_{2 of 2}");
+	//	}
+	//	histSaver->SaveHistogram(hDeltaEtaVsResidual,false);
 
 	maxDelta = .199999;
 	bin1 = hDeltaEtaVsResidual->GetYaxis()->FindBin(-maxDelta);
@@ -909,128 +929,187 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 	if(histoRight) delete histoRight;
 
 }
-void TTransparentAnalysis::saveHistograms() {
-	histSaver->SaveHistogram(hSelectedTracksAvrgSiliconHitPos);
-	delete hSelectedTracksAvrgSiliconHitPos;
-	string name;
-	int i = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1;
-	TH2F* htemp=0;
-	TProfile* prof =0;
 
-	name ="hLandauVsFidCutX_ClusterSize10";
-	if(true){
-		htemp = histSaver->CreateScatterHisto(name,vecVecFidCutX,vecVecLandau.at(i),
+void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
+	cout<<"saveLandausVsPositionPlots"<<endl;
+	TString name;
+	TH2F* htemp=0;
+	if(clusterSize-1 < vecVecLandau.size()){
+		name = TString::Format("hLandauVsFidCutX_ClusterSize%02d",clusterSize);
+		htemp = histSaver->CreateScatterHisto((string)name,vecVecFidCutX,vecVecLandau[clusterSize-1],
 				512,512,
 				0,2800,
 				*min_element(vecVecFidCutX.begin(),vecVecFidCutX.end()),
 				*max_element(vecVecFidCutX.begin(),vecVecFidCutX.end()));
 		if(htemp){
-			htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
 			htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position X/ch");
+			histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+			histSaver->SaveHistogram(htemp);
+			if(htemp)delete htemp;
 		}
-		if(htemp) prof = htemp->ProfileY();
-		if(prof){
-			prof->Fit("pol1");
-			histSaver->SaveHistogram(prof);
-			delete prof;
-			prof =0;
-		}
-		histSaver->SaveHistogram(htemp);
-		if(htemp)delete htemp;
 	}
 
-	name = "hLandauVsPredChannel_ClusterSize10";
-	if(true){
-		htemp = histSaver->CreateScatterHisto(name,vecPredictedChannel,vecVecLandau.at(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1),
+	if(clusterSize-1 < vecVecPh2Highest.size() && clusterSize-1>=2){
+		name = TString::Format("hLandauVsFidCutX_2OutOfe%02d",clusterSize);
+		htemp = histSaver->CreateScatterHisto((string)name,vecVecFidCutX,vecVecPh2Highest[clusterSize-1],
+				512,512,
+				0,2800,
+				*min_element(vecVecFidCutX.begin(),vecVecFidCutX.end()),
+				*max_element(vecVecFidCutX.begin(),vecVecFidCutX.end()));
+		if(htemp){
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
+			htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position X/ch");
+			histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+			histSaver->SaveHistogram(htemp);
+			if(htemp)delete htemp;
+		}
+	}
+
+
+	if(clusterSize-1 < vecVecLandau.size()){
+		name = TString::Format("hLandauVsPredChannel_ClusterSize%02d",clusterSize);
+		htemp = histSaver->CreateScatterHisto((string)name,vecPredictedChannel,vecVecLandau[clusterSize-1],
 				512,512,
 				0,2800,
 				*min_element(vecPredictedChannel.begin(),vecPredictedChannel.end()),
 				*max_element(vecPredictedChannel.begin(),vecPredictedChannel.end()));
 		if(htemp){
-			htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
 			htemp->GetYaxis()->SetTitle("predicted channel position (X)/ch");
+
+			histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+			histSaver->SaveHistogram(htemp);
+			if(htemp) delete htemp;
 		}
-		if(htemp) prof = htemp->ProfileY();
-		if(prof){
-			prof->Fit("pol1");
-			histSaver->SaveHistogram(prof);
-			delete prof;
-			prof = 0;
-		}
-		histSaver->SaveHistogram(htemp);
-		if(htemp) delete htemp;
 	}
 
-	name = "hLandauVsFidCutY_ClusterSize10";
-	if(true){
-		htemp = histSaver->CreateScatterHisto(name,
-				vecVecFidCutY,
-				vecVecLandau.at(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1),
+	if(clusterSize-1 < vecVecPh2Highest.size()&& clusterSize-1>=2){
+		name = TString::Format("hLandauVsPredChannel_2OutOf%02d",clusterSize);
+		htemp = histSaver->CreateScatterHisto((string)name,vecPredictedChannel,vecVecPh2Highest[clusterSize-1],
 				512,512,
 				0,2800,
-				*min_element(vecVecFidCutY.begin(),vecVecFidCutY.end()),
-				*max_element(vecVecFidCutY.begin(),vecVecFidCutY.end()));
+				*min_element(vecPredictedChannel.begin(),vecPredictedChannel.end()),
+				*max_element(vecPredictedChannel.begin(),vecPredictedChannel.end()));
 		if(htemp){
-			htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
-			htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");
-		}
-		histSaver->SaveHistogram(htemp);
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height,  2 out of %02d",clusterSize));
+			htemp->GetYaxis()->SetTitle("predicted channel position (X)/ch");
 
-		if(htemp) prof = htemp->ProfileY();
-		if(prof){
-			prof->Fit("pol1");
-			histSaver->SaveHistogram(prof);
-			delete prof;
-			prof = 0;
+			histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+			histSaver->SaveHistogram(htemp);
+			if(htemp) delete htemp;
 		}
-		if (htemp) delete htemp;
 	}
 
-	name ="hLandauVsPredX_ClusterSize10";
-	if(true){
-		htemp = histSaver->CreateScatterHisto(name,vecPredX,vecVecLandau.at(i),
+	if(clusterSize-1<vecVecLandau.size() ) {
+		name = TString::Format("hLandauVsFidCutY_ClusterSize%02d",clusterSize);
+		Float_t miny = *min_element(vecVecFidCutY.begin(),vecVecFidCutY.end() );
+		Float_t maxy = *max_element(vecVecFidCutY.begin(),vecVecFidCutY.end() );
+		htemp = histSaver->CreateScatterHisto((string)name,
+				vecVecFidCutY,vecVecLandau[clusterSize-1],
+				512,512,
+				0,2800,
+				miny,maxy);
+		if(htemp){
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
+			htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");
+			histSaver->SaveHistogram(htemp);
+			histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+			if (htemp) delete htemp;
+		}
+	}
+
+	if(clusterSize-1<vecVecPh2Highest.size() && clusterSize-1>=2) {
+		name = TString::Format("hLandauVsFidCutY_2OutOf%02d",clusterSize);
+		Float_t miny = *min_element(vecVecFidCutY.begin(),vecVecFidCutY.end() );
+		Float_t maxy = *max_element(vecVecFidCutY.begin(),vecVecFidCutY.end() );
+		htemp = histSaver->CreateScatterHisto((string)name,
+				vecVecFidCutY,vecVecPh2Highest[clusterSize-1],
+				512,512,
+				0,2800,
+				miny,maxy);
+		if(htemp){
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
+			htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");
+			histSaver->SaveHistogram(htemp);
+			histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+			if (htemp) delete htemp;
+		}
+	}
+
+	if( clusterSize-1<vecVecLandau.size() ){
+		name =TString::Format("hLandauVsPredX_ClusterSize%02d",clusterSize);
+		htemp = histSaver->CreateScatterHisto((string)name,vecPredX,vecVecLandau[clusterSize-1],
 				512,512,0,2800,
 				*min_element(vecPredX.begin(),vecPredX.end()),
 				*max_element(vecPredX.begin(),vecPredX.end()));
 		if(htemp){
-			htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
 			htemp->GetYaxis()->SetTitle("predicted hit position X /#mum");
+
+			histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+			histSaver->SaveHistogram(htemp);
+			if(htemp)delete htemp;
 		}
-		if(htemp) prof = htemp->ProfileY();
-		if(prof){
-			prof->Fit("pol1");
-			histSaver->SaveHistogram(prof);
-			delete prof;
-			prof =0;
-		}
-		histSaver->SaveHistogram(htemp);
-		if(htemp)delete htemp;
 	}
 
-	name ="hLandauVsPredY_ClusterSize10";
-	if(true){
-		htemp = histSaver->CreateScatterHisto(name,vecPredY,vecVecLandau.at(i),
+	if( clusterSize-1<vecVecPh2Highest.size() && clusterSize-1>=2){
+			name =TString::Format("hLandauVsPredC_2OutOf%02d",clusterSize);
+			htemp = histSaver->CreateScatterHisto((string)name,vecPredX,vecVecPh2Highest[clusterSize-1],
+					512,512,0,2800,
+					*min_element(vecPredX.begin(),vecPredX.end()),
+					*max_element(vecPredX.begin(),vecPredX.end()));
+			if(htemp){
+				htemp->GetXaxis()->SetTitle(TString::Format("pulse height, 2 out of %02d",clusterSize));
+				htemp->GetYaxis()->SetTitle("predicted hit position X /#mum");
+				histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+				histSaver->SaveHistogram(htemp);
+				if(htemp)delete htemp;
+			}
+		}
+
+	if(clusterSize-1<vecVecLandau.size()){
+		name =TString::Format("hLandauVsPredY_ClusterSize%02d",clusterSize);
+		htemp = histSaver->CreateScatterHisto((string)name,vecPredY,vecVecLandau[clusterSize-1],
 				512,512,0,2800,
 				*min_element(vecPredY.begin(),vecPredY.end()),
 				*max_element(vecPredY.begin(),vecPredY.end())
-				);
+		);
 		if(htemp){
-			htemp->GetXaxis()->SetTitle("pulse height, clusterSize 10");
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
 			htemp->GetYaxis()->SetTitle("predicted hit position Y /#mum");
 		}
-		if(htemp) prof = htemp->ProfileY();
-		if(prof){
-			prof->Fit("pol1");
-			histSaver->SaveHistogram(prof);
-			delete prof;
-			prof =0;
-		}
+		histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
 		histSaver->SaveHistogram(htemp);
 		if(htemp)delete htemp;
 	}
 
+	if(clusterSize-1<vecVecPh2Highest.size() && clusterSize-1>=2){
+		name =TString::Format("hLandauVsPredY_2OutOf%02d",clusterSize);
+		htemp = histSaver->CreateScatterHisto((string)name,vecPredY,vecVecPh2Highest[clusterSize-1],
+				512,512,0,2800,
+				*min_element(vecPredY.begin(),vecPredY.end()),
+				*max_element(vecPredY.begin(),vecPredY.end())
+		);
+		if(htemp){
+			htemp->GetXaxis()->SetTitle(TString::Format("pulse height, 2 out of %02d",clusterSize));
+			htemp->GetYaxis()->SetTitle("predicted hit position Y /#mum");
+		}
+		histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+		histSaver->SaveHistogram(htemp);
+		if(htemp)delete htemp;
+	}
+
+}
+
+void TTransparentAnalysis::saveHistograms() {
+	histSaver->SaveHistogram(hSelectedTracksAvrgSiliconHitPos);
+	delete hSelectedTracksAvrgSiliconHitPos;
+	string name;
+	cout<<"&"<<endl;
 	analyseEtaDistributions();
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
+		this->saveLandausVsPositionPlots(clusterSize+1);
 		string name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize+1);
 		TH2F* hLandauVsEventNo = histSaver->CreateScatterHisto(name,vecVecPh2Highest.at(clusterSize),vectorEventNo,100,512,0,nEvents,0,3000);
 		if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize).size()<<endl;
@@ -1040,26 +1119,35 @@ void TTransparentAnalysis::saveHistograms() {
 			histSaver->SaveHistogram(hLandauVsEventNo);
 			TH1F* hProj = (TH1F*)hLandauVsEventNo->ProfileX();
 			if(hProj) hProj->Fit("pol1");
-			histSaver->SaveHistogram(hProj,false,false,false);
+			histSaver->SaveHistogram(hProj,false,false,true);
 			if(hProj) delete hProj;
 			if (hLandauVsEventNo)
 				delete hLandauVsEventNo;
 		}
 		histSaver->SaveHistogram(hEta[clusterSize],0);
 		histSaver->SaveHistogram(hEtaCMNcorrected[clusterSize],0);
-//		if (clusterSize == 0) {
-			histSaver->SaveHistogramLandau(hLandau[clusterSize]);
-			histSaver->SaveHistogramLandau(hLandau2Highest[clusterSize]);
-			histSaver->SaveHistogramLandau(hLandau1Highest[clusterSize]);
-			histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize]);
-			histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize]);
-			histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
-//		}
-//		else {
-//			histSaver->SaveHistogramLandau(hLaundau[clusterSize],fitLandau[clusterSize]);
-//			histSaver->SaveHistogramWithFit(hResidualChargeWeighted[clusterSize],fitResidualChargeWeighted[clusterSize]);
-//			histSaver->SaveHistogramWithFit(hResidualHighest2Centroid[clusterSize],fitResidualHighest2Centroid[clusterSize]);
-//		}
+		//		if (clusterSize == 0) {
+		histSaver->SaveHistogramLandau(hLandau[clusterSize]);
+		histSaver->SaveHistogramLandau(hLandau2Highest[clusterSize]);
+		histSaver->SaveHistogramLandau(hLandauFixedNoise[clusterSize]);
+		histSaver->SaveHistogramLandau(hLandau2HighestFixedNoise[clusterSize]);
+		histSaver->SaveHistogramLandau(hLandau1Highest[clusterSize]);
+		histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize]);
+		histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize]);
+		histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
+		//			TCanvas *c1 = new TCanvas(TString::Format("cLandau_clusterSize%02d_both",clusterSize+1));
+		//			c1->cd();
+		//			hLandau[clusterSize]->Draw();
+		//			fitLandau[clusterSize]->Draw("same");
+		//			fitLandauFixedNoise[clusterSize]->SetLineColor(kRed);
+		//			fitLandauFixedNoise[clusterSize]->Draw("same");
+		//			histSaver->SaveCanvas(c1);
+		////		}
+		//		else {
+		//			histSaver->SaveHistogramLandau(hLaundau[clusterSize],fitLandau[clusterSize]);
+		//			histSaver->SaveHistogramWithFit(hResidualChargeWeighted[clusterSize],fitResidualChargeWeighted[clusterSize]);
+		//			histSaver->SaveHistogramWithFit(hResidualHighest2Centroid[clusterSize],fitResidualHighest2Centroid[clusterSize]);
+		//		}
 		histSaver->SaveHistogramWithFit(hResidualEtaCorrected[clusterSize],fitResidualEtaCorrected[clusterSize]);
 		histSaver->SaveHistogram(hEtaIntegrals[clusterSize],0);
 	}
@@ -1227,7 +1315,7 @@ void TTransparentAnalysis::printCutFlow() {
 	cout << "not in fid cut region \t-" << setw(8) << noFidCutRegion << endl;
 	cout << "used for alignment    \t-" << setw(8) << usedForAlignment << endl;
 	cout << "too high Chi2 value   \t-" << setw(8) << highChi2 <<endl;
-//	cout << "used for si alignment\t-" << setw(8) << usedForSiliconAlignment << endl;
+	//	cout << "used for si alignment\t-" << setw(8) << usedForSiliconAlignment << endl;
 	cout << "region not on plane\t-" << setw(8) << regionNotOnPlane << endl;
 	cout << "screened channel\t-" << setw(8) << screenedChannel << endl;
 	cout << "saturated channel\t-" << setw(8) << saturatedChannel << endl;
@@ -1289,7 +1377,7 @@ void TTransparentAnalysis::printCluster(TCluster cluster) {
 		cout << "\n\teta corrected position (TCluster::corEta): " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,cmCorrected,TCluster::corEta,hEtaIntegrals[cluster.getClusterSize()]);
 		cout << "\n\teta corrected residual (TCluster::corEta): " << getResidual(cluster,cmCorrected,TCluster::corEta,hEtaIntegrals[cluster.getClusterSize()-1]);
 		cout << "\n\teta corrected position (TCluster::eta): " << eventReader->getPositionOfCluster(subjectDetector,cluster,this->predPerpPosition,cmCorrected,TCluster::eta,hEtaIntegrals[cluster.getClusterSize()]);
-//		cout << "\n\teta corrected residual (TCluster::eta): " << getResidual(cluster,TCluster::eta);
+		//		cout << "\n\teta corrected residual (TCluster::eta): " << getResidual(cluster,TCluster::eta);
 	}
 	cout << "\n\t";
 	cluster.Print();
@@ -1343,14 +1431,14 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 			highChi2++;
 			continue;
 		}
-//		cout<<"predRegion("<<nEvent<<");"<<endl;
+		//		cout<<"predRegion("<<nEvent<<");"<<endl;
 
-//		cout<<"add Event"<<nEvent<<endl;
+		//		cout<<"add Event"<<nEvent<<endl;
 		bool predRegion = this->checkPredictedRegion(subjectDetector, this->positionInDetSystemChannelSpace, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 		if (predRegion == false)
 			continue;
 
-//		cout<<"transparentClusters("<<nEvent<<");"<<endl;
+		//		cout<<"transparentClusters("<<nEvent<<");"<<endl;
 		Int_t maxClusSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
 		transparentClusters = this->makeTransparentCluster(eventReader, settings,subjectDetector, positionInDetSystemChannelSpace, maxClusSize);
 
@@ -1360,33 +1448,33 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 		pos +=direction * channels;
 		bool isMasked = settings->IsMasked(subjectDetector,pos);
 		if(isMasked){
-//			cout<<"masked: "<<pos<<endl;
+			//			cout<<"masked: "<<pos<<endl;
 			pos -= 2*direction*channels;
 			isMasked = settings->IsMasked(subjectDetector,pos);
 		}
-//		cout<<"nonHit("<<nEvent<<");"<<endl;
+		//		cout<<"nonHit("<<nEvent<<");"<<endl;
 		if(!isMasked){
-//			cout<<"not masked("<<nEvent<<");"<<endl;
+			//			cout<<"not masked("<<nEvent<<");"<<endl;
 			TCluster noHitCluster = makeTransparentCluster(eventReader,settings,subjectDetector,pos,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
-//			cout<<"123"<<endl;
+			//			cout<<"123"<<endl;
 			Float_t charge =noHitCluster.getCharge(cmCorrected,true);
-//			cout<<"\n"<<nEvent<<" "<<noHitCluster.getCharge(true,true)<<"/"<<noHitCluster.getCharge(false,true);
+			//			cout<<"\n"<<nEvent<<" "<<noHitCluster.getCharge(true,true)<<"/"<<noHitCluster.getCharge(false,true);
 			if(charge==0){
-//				cout<<"$#\n";
+				//				cout<<"$#\n";
 				noHitCluster.Print(11);
 			}
 
 			noHitClusters.push_back(noHitCluster);
-//			cout<<nEvent<<"Non Hit Cluster @ "<<pos <<" from "<<positionInDetSystemChannelSpace<<" "<<direction<<" "<<pos-positionInDetSystemChannelSpace<<endl;
+			//			cout<<nEvent<<"Non Hit Cluster @ "<<pos <<" from "<<positionInDetSystemChannelSpace<<" "<<direction<<" "<<pos-positionInDetSystemChannelSpace<<endl;
 		}
 		else{
-//			cout<<nEvent<<"isMasked: "<< pos <<" from "<<positionInDetSystemChannelSpace<<" "<<direction<<" "<<pos-positionInDetSystemChannelSpace<<endl;
+			//			cout<<nEvent<<"isMasked: "<< pos <<" from "<<positionInDetSystemChannelSpace<<" "<<direction<<" "<<pos-positionInDetSystemChannelSpace<<endl;
 		}
-//		cout<<"analyse("<<nEvent<<");"<<endl;
+		//		cout<<"analyse("<<nEvent<<");"<<endl;
 		nAnalyzedEvents++;
 		this->fillHistograms();
 		if (verbosity > 4) printEvent();
-//		cout<<"push Back("<<nEvent<<");"<<endl;
+		//		cout<<"push Back("<<nEvent<<");"<<endl;
 
 		// save clusters for eta corrected analysis
 		vecTransparentClusters.push_back(transparentClusters);
@@ -1398,7 +1486,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 
 TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize) {
 	// get channel and direction for clustering
-//	cout<<"makeTransparentCluster"<<endl;
+	//	cout<<"makeTransparentCluster"<<endl;
 	if (reader==0){
 		cerr<<" TTransparentAnalysis::makeTransparentCluster TTracking == 0 "<<endl;
 		return TCluster();
@@ -1407,11 +1495,11 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 		cerr<<" TTransparentAnalysis::makeTransparentCluster TSettings == 0 "<<endl;
 		return TCluster();
 	}
-//	cout<<"[TTransparentAnalysis::makeTransparentCluster]\t";
+	//	cout<<"[TTransparentAnalysis::makeTransparentCluster]\t";
 	UInt_t centerChannel;
 	int direction;
 	direction = getSignedChannelNumber(centerPosition);
-//	cout << "centerPosition: " << centerPosition << "\tdirection: " << direction << endl;
+	//	cout << "centerPosition: " << centerPosition << "\tdirection: " << direction << endl;
 	centerChannel = TMath::Abs(direction);
 	if (direction < 0) direction = -1;
 	else direction = 1;
@@ -1421,8 +1509,8 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 	TCluster transparentCluster = TCluster(reader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
 	UInt_t currentChannel = centerChannel;
 	for (UInt_t iChannel = 0; iChannel < clusterSize; iChannel++) {
-//		if( currentChannel < 0 || currentChannel >= TPlaneProperties::getNChannelsDiamond() )
-//			cout<<"\n"<<reader->getEvent_number()<<": Cannot create channel with: det"<<det<<", centerPoisition: "<<centerPosition<< ", direction: "<<direction<<", centerChannel: "<<centerChannel<<" "<<iChannel<<flush;
+		//		if( currentChannel < 0 || currentChannel >= TPlaneProperties::getNChannelsDiamond() )
+		//			cout<<"\n"<<reader->getEvent_number()<<": Cannot create channel with: det"<<det<<", centerPoisition: "<<centerPosition<< ", direction: "<<direction<<", centerChannel: "<<centerChannel<<" "<<iChannel<<flush;
 		direction *= -1;
 		currentChannel += direction * iChannel;
 		Int_t adcValue=reader->getAdcValue(det,currentChannel);
@@ -1437,7 +1525,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 			cout<<"\t cannot add invalid channel"<<currentChannel<<" @ "<<reader->getEvent_number()<<endl;
 		//		transparentCluster.addChannel(currentChannel, reader->getRawSignal(det,currentChannel), reader->getRawSignalInSigma(det,currentChannel), reader->getAdcValue(det,currentChannel), reader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
-//	cout<<"[done]"<<endl;
+	//	cout<<"[done]"<<endl;
 	transparentCluster.UpdateHighestSignalChannel();
 	transparentCluster.SetTransparentCluster(centerPosition);
 	transparentCluster.SetTransparentClusterSize(clusterSize);
@@ -1455,63 +1543,98 @@ void TTransparentAnalysis::clearEventVector() {
 
 void TTransparentAnalysis::analyseNonHitEvents() {
 	cout<<"[TTransparentAnalysis::analyseNonHitEvents] "<<noHitClusters.size()<<endl;
-	TString name = "hNonHitPulseHeightDitribution";
-	TH1F* histo =  new TH1F(name,name,2048,-512,2048);
-	histo->GetXaxis()->SetTitle("PH_{trans Clus - non Hit} / ADC");
-	histo->GetYaxis()->SetTitle("number of entries #");
-	TH1F* histoCMN = (TH1F*)histo->Clone("hNonHitPulseHeightDitributionCMcorrected");
-	histoCMN->SetTitle(histoCMN->GetName());
-	for (UInt_t i = 0; i< noHitClusters.size(); i++){
-		Float_t chargeCMN = noHitClusters[i].getCharge(true,true);
-		Float_t charge = noHitClusters[i].getCharge(false,true);
-		histo->Fill(charge);
-		histoCMN->Fill(chargeCMN);
+	vector <TH1F*> hNonHitNoiseDistributions;
+	vector <TH1F*> hNonHitNoiseDistributionsCMN;
+	vector <TH1F*> hNonHitNoiseDistributions2OutOfX;
+	vector <TH1F*> hNonHitNoiseDistributions2OutOfXCMN;
+	for (UInt_t i = 0; i < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); i++){
+		TString name = TString::Format("hNonHitPulseHeightDitribution_ClusterSize%02d",i+1);
+		TH1F *histo = new TH1F(name,name,1000,-499.5,499.5);
+		histo->GetXaxis()->SetTitle("PH_{trans Clus - non Hit} / ADC");
+		histo->GetYaxis()->SetTitle("number of entries #");
+		hNonHitNoiseDistributions.push_back(histo);
+
+		name = TString::Format("hNonHitPulseHeightDitributionCMN_ClusterSize%02d",i+1);
+		histo = new TH1F(name,name,1000,-499.5,499.5);
+		histo->GetXaxis()->SetTitle("PH_{trans Clus - non Hit} - cm corrected / ADC");
+		histo->GetYaxis()->SetTitle("number of entries #");
+		hNonHitNoiseDistributionsCMN.push_back(histo);
+
+		name = TString::Format("hNonHitPulseHeightDitribution2OutOf%02d",i+1);
+		histo = new TH1F(name,name,1000,-499.5,499.5);
+		histo->GetXaxis()->SetTitle(TString::Format("PH_{trans Clus - non Hit - 2 out of %d }  / ADC",i+1));
+		histo->GetYaxis()->SetTitle("number of entries #");
+		hNonHitNoiseDistributions2OutOfX.push_back(histo);
+
+		name = TString::Format("hNonHitPulseHeightDitribution2OutOf%02d",i+1);
+		histo = new TH1F(name,name,1000,-499.5,499.5);
+		histo->GetXaxis()->SetTitle(TString::Format("PH_{trans Clus - non Hit - 2 out of %d } - cm corrected / ADC",i+1));
+		histo->GetYaxis()->SetTitle("number of entries #");
+		hNonHitNoiseDistributions2OutOfXCMN.push_back(histo);
 	}
-	TF1* fit = new TF1("gausFit","gaus",-500,500);
-	fit->SetLineColor(kBlue);
-	histo->Fit(fit,"QN","",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
-	histo->Draw("goff");
-	Float_t xmin = fit->GetParameter(1)-4*fit->GetParameter(2);
-	Float_t xmax = fit->GetParameter(1)+4*fit->GetParameter(2);
-	histo->GetXaxis()->SetRangeUser(xmin,xmax);
-	histSaver->SaveHistogramWithFit(histo,fit,histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS(),true);
-//	TF1* fitLong = (TF1*)fit->Clone();
-//	fitLong->SetLineStyle(3);
-//	fitLong->SetRange(-500,500);
-//	histo->Fit(fitLong,"Q+","",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()-2*histo->GetRMS());
 
-//	histo->GetXaxis()->SetRangeUser(xmin,xmax);
-//	histSaver->SaveHistogram(histo);
+	for (UInt_t i = 0; i< noHitClusters.size(); i++){
+		for (UInt_t j = 0; j < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); j++){
+			noHitClusters[i].SetTransparentClusterSize(j+1);
+			Float_t chargeCMN = noHitClusters[i].getCharge(true,true);
+			Float_t charge = noHitClusters[i].getCharge(false,true);
+			hNonHitNoiseDistributions[j]->Fill(charge);
+			hNonHitNoiseDistributionsCMN[j]->Fill(chargeCMN);
+			hNonHitNoiseDistributions2OutOfX[j]->Fill(noHitClusters[i].getCharge(2,false,true));
+			hNonHitNoiseDistributions2OutOfXCMN[j]->Fill(noHitClusters[i].getCharge(2,true,true));
+		}
+	}
+	noiseWidths.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	noiseWidthsCMN.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 
-	TF1* fitCMN = new TF1("gausFit","gaus",-500,500);
-	fitCMN->SetLineColor(kBlue);
-	histoCMN->Fit(fitCMN,"QN","",histoCMN->GetMean()-2*histoCMN->GetRMS(),histoCMN->GetMean()+2*histoCMN->GetRMS());
-	histoCMN->Draw("goff");
-	xmin = fitCMN->GetParameter(1)-4*fitCMN->GetParameter(2);
-	xmax = fitCMN->GetParameter(1)+4*fitCMN->GetParameter(2);
-	histoCMN->GetXaxis()->SetRangeUser(xmin,xmax);
-	histSaver->SaveHistogramWithFit(histoCMN,fitCMN,histoCMN->GetMean()-2*histoCMN->GetRMS(),histoCMN->GetMean()+2*histoCMN->GetRMS(),true);
-//
-//	TF1* fitCMN = new TF1("gausFit","gaus",-500,500);
-//	fitCMN->SetLineColor(kBlue);
-//	histoCMN->Fit(fitCMN,"Q","",histoCMN->GetMean()-2*histoCMN->GetRMS(),histoCMN->GetMean()-2*histoCMN->GetRMS());
-//	TF1* fitCMNLong = (TF1*)fitCMN->Clone();
-//	fitCMNLong->SetLineStyle(3);
-//	fitCMNLong->SetRange(-500,500);
-//	histoCMN->Fit(fitCMNLong,"Q+","",histoCMN->GetMean()-2*histoCMN->GetRMS(),histoCMN->GetMean()-2*histoCMN->GetRMS());
-//	histoCMN->Draw("goff");
-//	xmin = fitCMN->GetParameter(1)-4*fitCMN->GetParameter(2);
-//	xmax = fitCMN->GetParameter(1)+4*fitCMN->GetParameter(2);
-//	histoCMN->GetXaxis()->SetRangeUser(xmin,xmax);
-//	histSaver->SaveHistogram(histoCMN);
-	histSaver->SaveTwoHistos("cNonHitPulseHeightDitribution",histo,histoCMN);
+	noiseWidths2OutOfX.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	noiseWidths2OutOfXCMN.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+
+	for (UInt_t j = 0; j < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); j++){
+		for(UInt_t k = 0; k<4;k++){
+
+			TH1F* histo;
+			switch (k) {
+			case 0: histo = hNonHitNoiseDistributions[j];break;
+			case 1: histo = hNonHitNoiseDistributionsCMN[j];break;
+			case 2: histo = hNonHitNoiseDistributions2OutOfX[j];break;
+			case 3: histo = hNonHitNoiseDistributions2OutOfXCMN[j];break;
+			}
+			TString name;
+			name = "fitGaus_";
+			name.Append(histo->GetName());
+			TF1* fit = new TF1(name,"gaus",-500,500);
+			fit->SetLineColor(kBlue);
+			histo->Fit(fit,"Q","",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
+			histo->Draw("goff");
+			Float_t xmin = fit->GetParameter(1)-4*fit->GetParameter(2);
+			Float_t xmax = fit->GetParameter(1)+4*fit->GetParameter(2);
+			histo->GetXaxis()->SetRangeUser(xmin,xmax);
+			histSaver->SaveHistogram(histo);
+			switch(k){
+			case 0: noiseWidths[j] = fit->GetParameter(2);break;
+			case 1: noiseWidthsCMN[j] = fit->GetParameter(2);break;
+			case 2: noiseWidths2OutOfX[j] = fit->GetParameter(2);break;
+			case 3: noiseWidths2OutOfXCMN[j] = fit->GetParameter(2);break;
+			}
+		}
+		cout<<"ClusterSize "<<j<<": "<< noiseWidths[j]<<"/"<<noiseWidthsCMN[j]<<" "<<noiseWidths2OutOfX[j]<<"/"<<noiseWidths2OutOfXCMN[j]<<endl;
+		TString name = TString::Format("cNonHitPulseHeightDitribution_ClusterSize%02d",j+1);
+		histSaver->SaveTwoHistos((string)name,hNonHitNoiseDistributions[j],hNonHitNoiseDistributionsCMN[j]);
+		name = TString::Format("cNonHitPulseHeightDitribution_2OutOf%02d",j+1);
+		histSaver->SaveTwoHistos((string)name,hNonHitNoiseDistributions2OutOfX[j],hNonHitNoiseDistributions2OutOfXCMN[j]);
+		delete hNonHitNoiseDistributions[j];
+		delete hNonHitNoiseDistributionsCMN[j];
+		delete hNonHitNoiseDistributions2OutOfX[j];
+		delete hNonHitNoiseDistributions2OutOfXCMN[j];
+	}
 }
 
 void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	if(!hRes)
 		return;
-//	Float_t mean = hRes->GetMean();
-//	Float_t sigma = hRes->GetRMS();
+	//	Float_t mean = hRes->GetMean();
+	//	Float_t sigma = hRes->GetRMS();
 	TString hName;
 	TFitResultPtr resPtr = hRes->Fit("gaus","NQS");
 	Float_t mean = resPtr.Get()->GetParams()[1];//->Parameter(1);
@@ -1540,27 +1663,27 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 		if(hClone) {
 			switch(i){
 			case 0: 
-                resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
-                if (resPtr.Get())//todo check wh neccessary
-    				gaus1 = resPtr.Get()->GetParams()[2]; 
-                break;
+				resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
+				if (resPtr.Get())//todo check wh neccessary
+					gaus1 = resPtr.Get()->GetParams()[2];
+				break;
 			case 1: 
-                resPtr=hClone->Fit("gaus","SQ","",start,end);
-                if (resPtr.Get())//todo check wh neccessary
-    				gaus1 = resPtr.Get()->GetParams()[2]; 
-                break;
+				resPtr=hClone->Fit("gaus","SQ","",start,end);
+				if (resPtr.Get())//todo check wh neccessary
+					gaus1 = resPtr.Get()->GetParams()[2];
+				break;
 			case 2: 
-                fit = doDoubleGaussFit(hClone);
-                if (fit){//todo check wh neccessary
-    				gaus1 = fit->GetParameter(2);
-	    			gaus2 = fit->GetParameter(5);
-                }
-                
+				fit = doDoubleGaussFit(hClone);
+				if (fit){//todo check wh neccessary
+					gaus1 = fit->GetParameter(2);
+					gaus2 = fit->GetParameter(5);
+				}
+
 				break;
 			case 3: 
-                resPtr= hClone->Fit("gaus","SQ","",-20,20);
-                if (resPtr.Get())//todo check wh neccessary
-    				gaus1 = fit->GetParameter(2);
+				resPtr= hClone->Fit("gaus","SQ","",-20,20);
+				if (resPtr.Get())//todo check wh neccessary
+					gaus1 = fit->GetParameter(2);
 				break;
 			}
 			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
