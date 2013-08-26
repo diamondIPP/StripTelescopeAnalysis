@@ -64,7 +64,7 @@ public:
 	void SetOptFit(Int_t fitOpt){gStyle->SetOptFit(fitOpt);}
 	TPaveText* updateMean(TH1F* histo,Float_t minX = (-1)*std::numeric_limits<float>::infinity(),
 								Float_t maxX =      std::numeric_limits<float>::infinity() );
-	TPaveText* GetUpdatedLandauMeans(TH1F* histo,Float_t mpv);
+	TPaveText* GetUpdatedLandauMeans(TH1F* histo,Float_t mpv, Float_t gSigma=-1);
 	//void SetOptFit(std::string fitOpt){gStyle->SetOptFit(fitOpt.c_str());}
 	void SaveCanvas(TCanvas* canvas);
 	void SaveCanvasROOT(TCanvas* canvas);
@@ -72,6 +72,8 @@ public:
 	void SaveTwoHistos(std::string canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveTwoHistosNormalized(std::string canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
+	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function);
+	void Save1DProfileYWithFitAndInfluence(TH2* histo, TF1* pol);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);

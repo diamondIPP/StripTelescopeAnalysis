@@ -323,6 +323,7 @@ public:
 	vector<int> getstripAnalysisFidCut(){return stripAnalysisFidCut;};//todo: ????
 	vector<int> get3DnHAnalysisFidCut(){return TDnHAnalysisFidCut;};//todo: ????
 	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};//todo: ????
+	TString  getAlignmentFidCuts(){TString output; for (UInt_t i=0;i<alignmentFidCuts.size();i++) output.Append(TString::Format("%d, ",i));return output;}
 private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3DEdge;
@@ -360,6 +361,7 @@ private:
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
 	pair<char,int> ParseCellPosition(std::string value);
 	void LoadDefaultResolutions();
+
 
 private:
 	std::string path;

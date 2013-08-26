@@ -81,19 +81,15 @@ HistogrammSaver::~HistogrammSaver() {
 void HistogrammSaver::InitializeGridReferenceDetSpace(){
 	TString nameDet = "hGridRefenrenceDetSpace";
 	TString nameCell = "hGridRefenrenceCellSpace";
-	Float_t xBins = 1;
+	Float_t xBins = settings->getNColumns3d();
 	TFidCutRegions* metallisationFidCuts = settings->get3dMetallisationFidCuts();
-	TFiducialCut* fidCut;
-    if (metallisationFidCuts) {
-	    metallisationFidCuts->Print(1);
-        fidCut = metallisationFidCuts->getFidCut((UInt_t)3);
-        xBins = settings->getNColumns3d();
-    }
+	if(settings->is3dDiamond())metallisationFidCuts->Print(1);
+	TFiducialCut* fidCut = metallisationFidCuts->getFidCut((UInt_t)3);
 	Float_t xLow = 0;
-	Float_t xHigh = 1;
-	Float_t yBins = 1;
+	Float_t xHigh = 0;
+	Float_t yBins = 0;
 	Float_t yLow = 0;
-	Float_t yHigh = 1;
+	Float_t yHigh = 0;
 	if(fidCut){
 		 xLow = fidCut->GetXLow();//getXMetalisationStart3d;
 		 xHigh = fidCut->GetXHigh();//getXMetalisationEnd3d;
@@ -101,14 +97,16 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 		 yLow = fidCut->GetYLow();
 		 yHigh = fidCut->GetYHigh();//getYMetalisationEnd3d;
 	}
+	//	cout<<"nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh"<<endl;
+	//	cout<<nameDet<<" "<<nameDet<<" "<<xBins<<" "<<xLow<<" "<<xHigh<<" "<<yBins<<" "<<yLow<<" "<<yHigh<<endl;
 	hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
 	hGridReferenceCellSpace = new TH2D(nameCell,nameCell,xBins,0,xBins,yBins,0,yBins);
 
-	for(int i=0;i<settings->getNRows3d();i++){
-		hGridReferenceDetSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));
-		hGridReferenceCellSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));
+	for(UInt_t i=0;i<settings->getNRows3d();i++){
+		hGridReferenceDetSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
+		hGridReferenceCellSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
 	}
-	for(int j=0;j<settings->getNRows3d();j++){
+	for(UInt_t j=0;j<settings->getNRows3d();j++){
 		hGridReferenceDetSpace->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
 		hGridReferenceCellSpace->GetYaxis()->SetBinLabel(j+1,TString::Format("%d",j+1));
 	}
@@ -176,7 +174,7 @@ void HistogrammSaver::SaveTwoHistosNormalized(std::string canvasName, TH1 *histo
 		//		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
-	TVirtualPad *pad =c1->GetPad(0);
+//	TVirtualPad *pad =c1->GetPad(0);
 	if (verbosity>2) cout<<"MIN: "<<min<<"-->";
 	min=(double)(min/refactorSecond);
 	if (verbosity>2) cout<<min<<"\t\tMAX: "<<max<<"--->";
@@ -335,6 +333,8 @@ TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) 
 
 	TF1* fit = 0;
 	fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("Fitfcn_%s",histo->GetName()));
+	if(!fit)
+		(TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("fLangauFixedNoise_%s",histo->GetName()));
 
 	TPaveText* hstat2 = 0;
 	if (hstat) hstat2 = (TPaveText*) hstat->Clone();
@@ -377,7 +377,7 @@ TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) 
 }
 
 
-TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
+TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv,Float_t gSigma){
 	if (!histo)
 		return 0;
 	Float_t minX,maxX;
@@ -400,6 +400,8 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv){
 		minX = mpv*.5;
 	//Add a "fit" to histo
 	TPaveText* pt = updateMean(histo,minX,maxX);
+	if(gSigma>0&&pt)
+		pt->AddText(TString::Format("GSigma  =   %.1f",gSigma));
 	maxX = histo->GetBinLowEdge(histo->GetNbinsX());
 	TF1* fMeanCalculationArea = new TF1("fMeanCalculationArea","pol0",minX,maxX);
 	fMeanCalculationArea->SetLineColor(kGreen);
@@ -594,14 +596,24 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
 
 void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
 	if(histo==0)return;
+	cout<<"Save "<<histo->GetName()<<" "<<histo->GetEntries()<<endl;
 	if(histo->GetEntries()==0)return;
 
+	bool fixedNoise = false;
 	TF1* fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("Fitfcn_%s",histo->GetName()));
+	if(!fit){
+		fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("fLangauFixedNoise_%s",histo->GetName()));
+		fixedNoise = true;
+	}
 	Float_t mpv = histo->GetMean();
-	if(fit)
+	Float_t gSigma = -1;
+	if(fit){
 	 mpv = fit->GetParameter(1);
+	 if(fixedNoise)
+		 gSigma = fit->GetParameter(3);
+	}
 //	cout<<"MPV: "<<mpv<<" mean: "<<histo->GetMean()<<" "<<fit->GetName()<<endl;
-	TPaveText* stats = (TPaveText*) this->GetUpdatedLandauMeans(histo,mpv);
+	TPaveText* stats = (TPaveText*) this->GetUpdatedLandauMeans(histo,mpv,gSigma);
 	TString name = TString::Format("c_%s",histo->GetName());
 	TCanvas *c1 = new TCanvas(name,name);
 	c1->cd();
@@ -748,6 +760,37 @@ void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox) {
 //	histo->SetStats(false);
 	SaveHistogramPNG(histo);
 	SaveHistogramROOT(histo);
+}
+
+void HistogrammSaver:: Save1DProfileYWithFitAndInfluence(TH2* histo, TString function){
+	TString name = "fit_" + (TString)histo->GetName();
+	TF1* fit = new TF1(name,function);
+	return Save1DProfileYWithFitAndInfluence(histo,fit);
+}
+
+void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit){
+	if(!fit)
+		fit = new TF1("fit","pol1");
+	TProfile *prof=0;
+	if(!htemp)
+		return;
+	prof = htemp->ProfileY();
+	if(prof){
+		TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );
+		prof->Fit(fit);
+		Float_t xmin = prof->GetXaxis()->GetXmin();
+		Float_t xmax = prof->GetXaxis()->GetXmax();
+		Float_t ymin = fit->GetMinimum(xmin,xmax);
+		Float_t ymax = fit->GetMaximum(xmin,xmax);
+		TPaveText *text = new TPaveText(.2,.2,.5,.3,"brNDC");
+		text->SetFillColor(0);
+		text->AddText(TString::Format("relative Influence: #frac{#Delta_{y}}{y_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
+		text->Draw("same");
+		SaveCanvas(c1);
+		delete prof;
+		prof = 0;
+	}
+
 }
 
 void HistogrammSaver::SaveCanvas(TCanvas *canvas)
