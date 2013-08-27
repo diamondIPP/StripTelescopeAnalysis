@@ -107,8 +107,10 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 		// Analyse
 
 		//if(settings->do3dTransparentAnalysis() == 1){TransparentAnalysis();}
+		if(settings->do3dTransparentAnalysis()){isTransparentCluster = TransparentAnalysis();}
+		else
+			isTransparentCluster = false;
 		StripAnalysis();
-
 		if(settings->do3dShortAnalysis() == 1){ShortAnalysis();}
 		if(settings->do3dLongAnalysis() == 1){LongAnalysis();}
 
@@ -174,7 +176,7 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
 
 	}
 	else{
-		if(!TransparentAnalysis())
+		if(!isTransparentCluster)
 			return;
 		diamondCluster = transparentCluster;
 	}
@@ -307,7 +309,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
 		ShortAnalysis_FillEdgeDistributions(diamondCluster.getCharge(false));
 	}
 	else{
-		if(!TransparentAnalysis())
+		if(!isTransparentCluster)
 			return;
 		diamondCluster = transparentCluster;
 	}
@@ -442,7 +444,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
 	}
 	else{
-		if(!TransparentAnalysis())
+		if(!isTransparentCluster)
 			return;
 		Int_t DiamondPattern;
 		DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
@@ -593,8 +595,19 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
 	if(transparentCluster.isSaturatedCluster())
 		return false;
+
+	pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
+	transparentCluster.SetTransparentClusterSize(1);
+	Float_t charge1 = transparentCluster.getCharge();
+	if(charge1>700){
+		cout<<"\nnEvent: "<<nEvent<<" "<<cell.first<<"/"<<cell.second<<"\n";
+		for(UInt_t i = 0; i < transparentCluster.size(); i++){
+			transparentCluster.SetTransparentClusterSize(i+1);
+			cout<<"\t"<<i<<"\t"<<transparentCluster.getCharge()<<"\t"<<transparentCluster.getCharge()/charge1<<endl;
+		}
+	}
 	//cout<<"transparentCluster.getCharge(): "<<transparentCluster.getCharge()<<endl;
-	transparentCluster.Print();
+//	transparentCluster.Print();
 	//cout<<"diamondCluster.getHighestSignalChannel(): "<<transparentCluster.getHighestSignalChannel()<<endl;
 	return true;
 
@@ -2548,6 +2561,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 	hValidEventsDetSpace->GetXaxis()->SetTitle("predicted Hit position x in det space /#mum");
 	hValidEventsDetSpace->GetYaxis()->SetTitle("predicted Hit position y in det space /#mum");
 	InitialiseStripAnalysisHistos();
+
 	if(settings->do3dShortAnalysis() == 1){
 		initialiseShortAnalysisHistos();
 	}

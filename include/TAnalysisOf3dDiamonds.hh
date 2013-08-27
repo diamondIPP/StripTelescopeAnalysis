@@ -114,7 +114,8 @@ private:
 	void LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
 	void LongAnalysis_SaveMeanChargePlots();
 	bool LongAnalysis_IsDeadCell(vector<TH1F*> nhQuarterCellsLandau, Float_t nThreshold);
-
+private:
+	bool isTransparentCluster;
 private:
 	TH1F* hLandauStrip;
 	TH2F* hLandauStripFidCutXvsFidCutY;
