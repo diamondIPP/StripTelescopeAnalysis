@@ -227,6 +227,7 @@ bool TTransparentAnalysis::predictPositions(bool savePrediction) {
 	}
 	// TODO: position in det system
 	this->positionInDetSystemMetric = eventReader->getPositionInDetSystem(subjectDetector, this->predXPosition, this->predYPosition);
+	this->positionInDetSystemMetricY = eventReader->getYPositionInDetSystem(subjectDetector,predXPosition,predYPosition);
 	this->positionInDetSystemChannelSpace = settings->convertMetricToChannelSpace(subjectDetector,positionInDetSystemMetric);
 	if(verbosity>5){
 		cout<<"\nEventNo: "<<nEvent<<":\t"<<predPosition<<"/"<<predPerpPosition<<"--->";
@@ -393,6 +394,7 @@ void TTransparentAnalysis::fillHistograms() {
 	vecPredX.push_back(predXPosition);
 	vecPredY.push_back(predYPosition);
 	vecPredictedChannel.push_back(positionInDetSystemChannelSpace);
+	vecPredictedDetectorPositionY.push_back(positionInDetSystemMetricY);
 
 	UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
 	for (UInt_t clusterSize = 0; clusterSize < maxSize; clusterSize++) {
@@ -984,6 +986,7 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
 		}
 	}
 
+
 	if(clusterSize-1 < vecVecPh2Highest.size()&& clusterSize-1>=2){
 		name = TString::Format("hLandauVsPredChannel_2OutOf%02d",clusterSize);
 		htemp = histSaver->CreateScatterHisto((string)name,vecPredictedChannel,vecVecPh2Highest[clusterSize-1],
@@ -1000,6 +1003,40 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
 			if(htemp) delete htemp;
 		}
 	}
+
+	if(clusterSize-1 < vecVecLandau.size()){
+			name = TString::Format("hLandauVsPredDetPosY_ClusterSize%02d",clusterSize);
+			htemp = histSaver->CreateScatterHisto((string)name,vecPredictedDetectorPositionY,vecVecLandau[clusterSize-1],
+					512,512,
+					0,2800,
+					*min_element(vecPredictedChannel.begin(),vecPredictedChannel.end()),
+					*max_element(vecPredictedChannel.begin(),vecPredictedChannel.end()));
+			if(htemp){
+				htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
+				htemp->GetYaxis()->SetTitle("predicted det position (Y)/#mum");
+
+				histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+				histSaver->SaveHistogram(htemp);
+				if(htemp) delete htemp;
+			}
+		}
+
+	if(clusterSize-1 < vecVecPh2Highest.size()){
+			name = TString::Format("hLandauVsPredDetPosY_2OutOf%02d",clusterSize);
+			htemp = histSaver->CreateScatterHisto((string)name,vecPredictedDetectorPositionY,vecVecPh2Highest[clusterSize-1],
+					512,512,
+					0,2800,
+					*min_element(vecPredictedChannel.begin(),vecPredictedChannel.end()),
+					*max_element(vecPredictedChannel.begin(),vecPredictedChannel.end()));
+			if(htemp){
+				htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
+				htemp->GetYaxis()->SetTitle("predicted det position (Y)/#mum");
+
+				histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+				histSaver->SaveHistogram(htemp);
+				if(htemp) delete htemp;
+			}
+		}
 
 	if(clusterSize-1<vecVecLandau.size() ) {
 		name = TString::Format("hLandauVsFidCutY_ClusterSize%02d",clusterSize);
@@ -1054,7 +1091,7 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
 	}
 
 	if( clusterSize-1<vecVecPh2Highest.size() && clusterSize-1>=2){
-			name =TString::Format("hLandauVsPredC_2OutOf%02d",clusterSize);
+			name =TString::Format("hLandauVsPredX_2OutOf%02d",clusterSize);
 			htemp = histSaver->CreateScatterHisto((string)name,vecPredX,vecVecPh2Highest[clusterSize-1],
 					512,512,0,2800,
 					*min_element(vecPredX.begin(),vecPredX.end()),
@@ -1643,6 +1680,9 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	Float_t max = hRes->GetBinContent(hRes->GetMaximumBin());
 	Float_t start = hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/2));
 	Float_t end =  hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1);
+	std::pair<Float_t,Float_t > fwhm = std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/2)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1));
+	std::pair<Float_t,Float_t > fwtm = std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/3)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/3)+1));
+
 	Float_t mean2 = (start+end)/2;
 	Float_t sigma2 = end-mean2;
 	TString hTitle;
@@ -1652,6 +1692,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 		switch (i){
 		case 0: hName.Append("_SingleGausFit");hTitle.Append(" Single Gaus Fit 2x FWHM");break;
 		case 1: hName.Append("_SingleGausFitFWHM");hTitle.Append(" Single Gaus Fit FWHM");break;
+		case 4: hName.Append("_SingleGausFitFWTM");hTitle.Append(" Single Gaus Fit Mean of 2/3");break;
 		case 2: hName.Append("_DoubleGausFit");hTitle.Append(" 2 x Gaus Fit");break;
 		case 3: hName.Append("_FixedGausFit");hTitle.Append(" Single Gaus Fit -20#mum - 20 #mum");break;
 		}
@@ -1668,7 +1709,12 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 					gaus1 = resPtr.Get()->GetParams()[2];
 				break;
 			case 1: 
-				resPtr=hClone->Fit("gaus","SQ","",start,end);
+				resPtr=hClone->Fit("gaus","SQ","",fwhm.first,fwhm.second);
+				if (resPtr.Get())//todo check wh neccessary
+					gaus1 = resPtr.Get()->GetParams()[2];
+				break;
+			case 4:
+				resPtr=hClone->Fit("gaus","SQ","",fwtm.first,fwtm.second);
 				if (resPtr.Get())//todo check wh neccessary
 					gaus1 = resPtr.Get()->GetParams()[2];
 				break;
@@ -1689,6 +1735,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
 				if( i == 0 ) results->setSingleGaussianResolution(gaus1,alignMode);
 				else if (i == 1 ) results->setSingleGaussianShortResolution(gaus1,alignMode);
+				else if (i == 4 ) results->setSingleGaussianFWTMResolution(gaus1,alignMode);
 				else if (i == 2 ) results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
 				else if (i == 3 ) results->setSingleGaussianFixedResolution(gaus1,alignMode);
 			}

@@ -287,6 +287,17 @@ void TResults::setSingleGaussianShortResolution(Float_t gaus,TSettings::alignmen
 	}
 }
 
+void TResults::setSingleGaussianFWTMResolution(Float_t gaus,TSettings::alignmentMode mode){
+	if (mode == TSettings::normalMode){
+		singleGausFWTM_normal = gaus;
+	}
+	else if ( mode == TSettings::transparentMode){
+		singleGausFWTM_trans = gaus;
+	}
+}
+
+
+
 void TResults::setPH_2outOf10(Float_t mean, Float_t mp, Float_t width, Float_t gSigma, TSettings::alignmentMode mode){
 	if (mode == TSettings::normalMode){
 		mean2outOf10_normal = mean;

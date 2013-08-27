@@ -113,12 +113,13 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 	stringstream plots1, plots2, plots3;
 	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 		stringstream histoname1, histoname2, histoname3;
-		histoname1 << "hDiaTranspAnaResidualChargeWeightedIn"<<clusterSize<<"StripsMinusPred";
-		histoname2 << "hDiaTranspAnaResidualHighest2CentroidIn"<<clusterSize<<"StripsMinusPred";
-		histoname3 << "hDiaTranspAnaResidualEtaCorrectedIn"<<clusterSize<<"StripsMinusPred";
-		plots1 << putImage(".",histoname1.str()) << " \n";
-		plots2 << putImage(".",histoname2.str()) << " \n";
-		plots3 << putImage(".",histoname3.str()) << " \n";
+		TString name1,name2,name3;
+		name1 = TString::Format("hDiaTranspAnaResidualChargeWeightedIn%02dStripsMinusPred",clusterSize);
+		name2 = TString::Format("hDiaTranspAnaResidualHighest2CentroidIn%02dStripsMinusPred",clusterSize);
+		name3 = TString::Format("hDiaTranspAnaResidualEtaCorrectedIn%02dStripsMinusPred",clusterSize);
+		plots1 << putImage(".",(string)name1) << " \n";
+		plots2 << putImage(".",(string)name2) << " \n";
+		plots3 << putImage(".",(string)name3) << " \n";
 	}
 	sectionContent << "<h2>Charge weighted position of N strips</h2><br>" << plots1.str();
 	sectionContent << "\n\n<br><br>\n\n";
