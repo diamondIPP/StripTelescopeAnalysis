@@ -121,7 +121,7 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 }
 
 
-void HistogrammSaver::SaveTwoHistosNormalized(std::string canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, UInt_t verbosity){
+void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, UInt_t verbosity){
 	cout<<"Save2HistosNormalized: "<<histo1<<" "<<histo2<<endl;
 	if(!histo1&&!histo2)return;
 	if(!histo1||!histo2){
@@ -130,7 +130,7 @@ void HistogrammSaver::SaveTwoHistosNormalized(std::string canvasName, TH1 *histo
 		return;
 	}
 	cout<<"Save2HistosNormalized: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
-	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
+	TCanvas *c1 = new TCanvas(canvasName,canvasName);
 	c1->cd();
 	c1->SetObjectStat(false);
 	Float_t min1 = histo1->GetMinimum()/histo1->Integral();;
@@ -158,20 +158,28 @@ void HistogrammSaver::SaveTwoHistosNormalized(std::string canvasName, TH1 *histo
 	if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
 	histo1->SetStats(false);
 	histo2->SetStats(false);
+	TH1F* histo1Normalized;
+	TH1F* histo2Normalized;
 	if(max1>max2){
 		if (verbosity>2) cout<<"\tdraw1-"<<flush;
-		histo1 = histo1->DrawNormalized("");
-		histo1->GetYaxis()->SetRangeUser(min,max);
+		histo1Normalized = (TH1F*)((TH1F*)(histo1->Clone()))->DrawNormalized("");
+		if(histo1Normalized)
+			histo1Normalized->GetYaxis()->SetRangeUser(min,max);
+		else
+			histo1->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw2 "<<flush;
-		histo2 = histo2->DrawNormalized("same");
+		histo2Normalized = (TH1F*)((TH1F*)(histo2->Clone()))->DrawNormalized("");
 		//		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
 		if (verbosity>2) cout<<"\tdraw2-"<<flush;
-		histo2 = histo2->DrawNormalized("");
-		histo2->GetYaxis()->SetRangeUser(min,max);
+		histo2Normalized = (TH1F*)((TH1F*)(histo2->Clone()))->DrawNormalized("");
+		if (histo2Normalized)
+			histo2Normalized->GetYaxis()->SetRangeUser(min,max);
+		else
+			histo2->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw1 "<<flush;
-		histo1 = histo1->DrawNormalized("same");
+		histo1Normalized =  (TH1F*)((TH1F*)(histo1->Clone()))->DrawNormalized("same");
 		//		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
@@ -182,18 +190,26 @@ void HistogrammSaver::SaveTwoHistosNormalized(std::string canvasName, TH1 *histo
 	max = (double)(max/refactorSecond);
 	if (verbosity>2) cout<<max<<endl;
 	c1->Update();
-	TLegend *leg =new TLegend(0.1,0.75,0.48,0.9);
+	TLegend *leg =new TLegend(0.52,0.75,0.9,0.9);
 	leg->SetFillColor(kWhite);
 	leg->SetHeader("Legend");
-	leg->AddEntry(histo1,histo1->GetName());
-	leg->AddEntry(histo2,histo2->GetName());
+//	if(histo1Normalized)
+//		leg->AddEntry(histo1Normalized,histo1Normalized->GetName());
+//	else
+		if(histo1&&!histo1->IsZombie())
+		leg->AddEntry(histo1,histo1->GetName());
+//	if(histo2Normalized)
+//		leg->AddEntry(histo2Normalized,histo2Normalized->GetName());
+//	else
+		if(histo2&&!histo2->IsZombie())
+		leg->AddEntry(histo2,histo2->GetName());
 	leg->Draw("same");
-	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.c_str()));
+	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
 	pt2->Draw("same");
 	c1->Update();
 	SaveCanvas(c1);
 }
-void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, UInt_t verbosity)
+void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, UInt_t verbosity)
 {
 	cout<<"Save2Histos: "<<histo1<<" "<<histo2<<endl;
 	if(!histo1&&!histo2)return;
@@ -206,7 +222,7 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1 *histo1, TH1 *hi
 		histo2->SetLineColor(histo1->GetLineColor()+1);
 	cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	if (verbosity>2) cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
-	TCanvas *c1 = new TCanvas(canvasName.c_str(),canvasName.c_str());
+	TCanvas *c1 = new TCanvas(canvasName,canvasName);
 	c1->cd();
 	c1->SetObjectStat(false);
 	Float_t min1 = histo1->GetBinContent(histo1->GetMinimumBin());//GetMinimum();
@@ -280,7 +296,7 @@ void HistogrammSaver::SaveTwoHistos(std::string canvasName, TH1 *histo1, TH1 *hi
 	leg->AddEntry(histo1,histo1->GetName());
 	leg->AddEntry(histo2,histo2->GetName());
 	leg->Draw("same");
-	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.c_str()));
+	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
 	pt2->Draw("same");
 	c1->Update();
 	SaveCanvas(c1);
