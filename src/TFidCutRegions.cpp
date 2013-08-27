@@ -575,6 +575,7 @@ TCanvas *TFidCutRegions::getFiducialCutProjectionCanvas(TH1D* hProj,std::vector<
 		box->SetPoint(4,intervals.at(i).first,0);
 		box->SetFillColor(kRed+i);
 		box->SetFillStyle(3013);
+		box->SetLineColor(hProj->GetLineColor()+1);
 //		box->AddText("");
 //		box->AddText("");
 //		box->AddText(Form("Area\n\n%i",i));

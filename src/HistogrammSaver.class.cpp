@@ -133,11 +133,12 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 	TCanvas *c1 = new TCanvas(canvasName,canvasName);
 	c1->cd();
 	c1->SetObjectStat(false);
-	Float_t min1 = histo1->GetMinimum();
-	Float_t min2 = histo2->GetMinimum();
+	Float_t min1 = histo1->GetMinimum()/histo1->Integral();;
+	Float_t min2 = histo2->GetMinimum()/histo2->Integral();;
 	Float_t min = TMath::Min(min1,min2);
-	Float_t max1 = histo1->GetMaximum();
-	Float_t max2 = histo2->GetMaximum();
+	Float_t max1 = histo1->GetMaximum()/histo1->Integral();
+	Float_t max2 = histo2->GetMaximum()/histo2->Integral();;
+
 	//	Float_t range1 = max1-min1;
 	//	Float_t range2 = max2-min2;
 	Float_t max = TMath::Max(max1,max2);
@@ -149,28 +150,28 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 		min = middle - range/2.*1.1;
 	max = middle + range/2.*1.4;
 	//	int stat = gStyle->GetOptStat();
-	if(histo2->GetMaximum()*refactorSecond>histo1->GetMaximum())
-		refactorSecond=histo2->GetMaximum()/histo1->GetMaximum()*0.5;
+	if(max2*refactorSecond>max1)
+		refactorSecond=max2/max1*0.5;
 	if(refactorSecond!=1)histo2->Scale(refactorSecond);
 	if (verbosity>2) cout<<"min: "<<min<<" max: "<<max;
-	if (verbosity>2) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<histo1->GetMaximum()<<"\thisto2:"<<histo2->GetMaximum()<<flush;
+	if (verbosity>2) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<max1<<"\thisto2:"<<max2<<flush;
 	if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
 	histo1->SetStats(false);
 	histo2->SetStats(false);
-	if(histo1->GetMaximum()>histo2->GetMaximum()){
+	if(max1>max2){
 		if (verbosity>2) cout<<"\tdraw1-"<<flush;
-		histo1->DrawNormalized("");
+		histo1 = histo1->DrawNormalized("");
 		histo1->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw2 "<<flush;
-		histo2->DrawNormalized("same");
+		histo2 = histo2->DrawNormalized("same");
 		//		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
 		if (verbosity>2) cout<<"\tdraw2-"<<flush;
-		histo2->DrawNormalized("");
+		histo2 = histo2->DrawNormalized("");
 		histo2->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw1 "<<flush;
-		histo1->DrawNormalized("same");
+		histo1 = histo1->DrawNormalized("same");
 		//		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
@@ -800,6 +801,7 @@ void HistogrammSaver::SaveCanvas(TCanvas *canvas)
 	SaveCanvasPNG(canvas);
 	SaveCanvasROOT(canvas);
 }
+
 void HistogrammSaver::SaveGraph(TGraph* graph,std::string name,std::string option){
 	if(graph==0)return;
 	if(graph->GetN()==0)return;

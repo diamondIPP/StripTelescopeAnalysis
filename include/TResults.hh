@@ -70,6 +70,7 @@ public:
 	void setDoubleGaussianResolution(Float_t gaus1,Float_t gaus2,TSettings::alignmentMode mode);
 	void setSingleGaussianResolution(Float_t gaus,TSettings::alignmentMode mode);
 	void setSingleGaussianShortResolution(Float_t gaus,TSettings::alignmentMode mode);
+	void setSingleGaussianFWTMResolution(Float_t gaus,TSettings::alignmentMode mode);
 	void setSingleGaussianFixedResolution(Float_t gaus,TSettings::alignmentMode mode);
 	void setSignalFeedOverCorrection(UInt_t det, Float_t correction);
 public:
@@ -133,6 +134,8 @@ private:
 	Float_t singleGausFixed_trans;
 	Float_t singleGausShort_normal;
 	Float_t singleGausShort_trans;
+	Float_t singleGausFWTM_normal;
+	Float_t singleGausFWTM_trans;
 	Float_t singleGaus_normal;
 	Float_t singleGaus_trans;
 	ClassDef(TResults,7);

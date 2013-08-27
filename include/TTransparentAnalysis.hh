@@ -111,7 +111,7 @@ private:
 	vector<TCluster> noHitClusters;
 	vector<TEvent* > vecEvents;
 	Float_t predXPosition, predYPosition;
-	Float_t positionInDetSystemMetric,positionInDetSystemChannelSpace, predPerpPosition, predPosition;
+	Float_t positionInDetSystemMetric,positionInDetSystemChannelSpace, positionInDetSystemMetricY, predPerpPosition, predPosition;
 	
 	// sys variables
     TSystem* sys;
@@ -161,6 +161,7 @@ private:
 	vector<TH1F*> hLandau;
 	vector< vector< Float_t> > vecVecLandau;
 	vector< Float_t> vecPredictedChannel;
+	vector< Float_t> vecPredictedDetectorPositionY;
 	Int_t predChannel;
 	vector< Float_t> vecVecFidCutX;
 	vector< Float_t> vecVecFidCutY;
