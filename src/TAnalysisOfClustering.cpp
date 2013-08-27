@@ -533,7 +533,7 @@ void TAnalysisOfClustering::saveHistos(){
 		histSaver->SaveHistogram(this->hEtaDistributionCMN[det]);
 		if (verbosity) cout<<hEtaDistributionVsCharge[det]->GetName()<<endl;
 		histSaver->SaveHistogram(this->hEtaDistributionVsCharge[det]);
-		for(int area = 0; area < settings->getNDiaDetectorAreas() && TPlaneProperties::isDiamondDetector(det); area++){
+		for(UInt_t area = 0; area < settings->getNDiaDetectorAreas() && TPlaneProperties::isDiamondDetector(det); area++){
 			if (verbosity) cout<< "Save Eta Distributions plots for area "<<area<<endl;
 			TString name = TString::Format("hEtaDistributionVsLeftChannel_%d_Area%d",det,area);
 			TH2F *hEtaDistributionVsLeftChannelArea = (TH2F*)hEtaDistributionVsLeftChannel[det]->Clone();

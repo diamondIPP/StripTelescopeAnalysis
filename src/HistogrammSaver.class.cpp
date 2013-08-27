@@ -158,20 +158,28 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 	if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
 	histo1->SetStats(false);
 	histo2->SetStats(false);
+	TH1F* histo1Normalized;
+	TH1F* histo2Normalized;
 	if(max1>max2){
 		if (verbosity>2) cout<<"\tdraw1-"<<flush;
-		histo1 = histo1->DrawNormalized("");
-		histo1->GetYaxis()->SetRangeUser(min,max);
+		histo1Normalized = (TH1F*)((TH1F*)(histo1->Clone()))->DrawNormalized("");
+		if(histo1Normalized)
+			histo1Normalized->GetYaxis()->SetRangeUser(min,max);
+		else
+			histo1->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw2 "<<flush;
-		histo2 = histo2->DrawNormalized("same");
+		histo2Normalized = (TH1F*)((TH1F*)(histo2->Clone()))->DrawNormalized("");
 		//		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
 		if (verbosity>2) cout<<"\tdraw2-"<<flush;
-		histo2 = histo2->DrawNormalized("");
-		histo2->GetYaxis()->SetRangeUser(min,max);
+		histo2Normalized = (TH1F*)((TH1F*)(histo2->Clone()))->DrawNormalized("");
+		if (histo2Normalized)
+			histo2Normalized->GetYaxis()->SetRangeUser(min,max);
+		else
+			histo2->GetYaxis()->SetRangeUser(min,max);
 		if (verbosity>2) cout<<"draw1 "<<flush;
-		histo1 = histo1->DrawNormalized("same");
+		histo1Normalized =  (TH1F*)((TH1F*)(histo1->Clone()))->DrawNormalized("same");
 		//		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
@@ -185,8 +193,16 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 	TLegend *leg =new TLegend(0.52,0.75,0.9,0.9);
 	leg->SetFillColor(kWhite);
 	leg->SetHeader("Legend");
-	leg->AddEntry(histo1,histo1->GetName());
-	leg->AddEntry(histo2,histo2->GetName());
+//	if(histo1Normalized)
+//		leg->AddEntry(histo1Normalized,histo1Normalized->GetName());
+//	else
+		if(histo1&&!histo1->IsZombie())
+		leg->AddEntry(histo1,histo1->GetName());
+//	if(histo2Normalized)
+//		leg->AddEntry(histo2Normalized,histo2Normalized->GetName());
+//	else
+		if(histo2&&!histo2->IsZombie())
+		leg->AddEntry(histo2,histo2->GetName());
 	leg->Draw("same");
 	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
 	pt2->Draw("same");
