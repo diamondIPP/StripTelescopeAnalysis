@@ -167,8 +167,12 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 void TAnalysisOf3dDiamonds::StripAnalysis() {
 
 	TCluster diamondCluster;
-	if(!settings->do3dTransparentAnalysis())
+	if(!settings->do3dTransparentAnalysis()){
+		if(!eventReader->getNDiamondClusters())
+			return;
 		diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+
+	}
 	else{
 		if(!TransparentAnalysis())
 			return;
@@ -309,7 +313,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
 	}
 
 	Float_t clusterCharge = diamondCluster.getCharge(false);
-	cout<<"ClusterCharge: "<<clusterCharge<<endl;
+//	cout<<"ClusterCharge: "<<clusterCharge<<endl;
 
 	ShortAnalysis_FillMeanChargeVector(clusterCharge);
 	hTotalAvrgChargeXY->Fill(xPredDet,yPredDet,clusterCharge);
@@ -380,8 +384,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
 
 //	cout<<TString::Format("%6d %2d/%2d %4.1f-->%2d %4.1f-->%2d\t\t%6.1f/%6.1f",
 //			nEvent,predictedArea,predictedDetector,pos1,pattern1+1,pos2,pattern2+1,ph1,ph2);
-	if(pos2<85&&pos2>84)
-		cluster2.Print(1);
+//	if(pos2<85&&pos2>84)
+//		cluster2.Print(1);
 	if (!settings->diamondPattern.isValidChannelPosition(pos1)){
 //		cout<<"\tAnalyze 1"<<endl;
 		ShortAnalysis_Analyse1Cluster(1);//todo how can we use them for long analysis
@@ -2508,8 +2512,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Save2ClusterPlots() {
 	hCh->GetXaxis()->SetTitle("Channel no for cluster no. 1");
 	hCh->GetYaxis()->SetTitle("Channel no for cluster no. 2");
 	hCh->Draw("colz");
-	Float_t xmax = hCh->GetZaxis()->GetXmax();
-	Float_t xmin = hCh->GetZaxis()->GetXmin();
+//	Float_t xmax = hCh->GetZaxis()->GetXmax();
+//	Float_t xmin = hCh->GetZaxis()->GetXmin();
 //	hCh->GetZaxis()->SetRangeUser(xmin+.1*(xmax-xmin),xmax);
 	histSaver->SaveHistogram(hCh,false);
 	delete hCh;
