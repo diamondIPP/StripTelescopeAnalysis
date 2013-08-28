@@ -599,7 +599,7 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
 	transparentCluster.SetTransparentClusterSize(1);
 	Float_t charge1 = transparentCluster.getCharge();
-	if(charge1>700){
+	if(cell.first == 36 || cell.first == 37 || cell.first == 47 || cell.first == 48){
 		cout<<"\nnEvent: "<<nEvent<<" "<<cell.first<<"/"<<cell.second<<"\n";
 		for(UInt_t i = 0; i < transparentCluster.size(); i++){
 			transparentCluster.SetTransparentClusterSize(i+1);
@@ -2318,15 +2318,36 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
 	}*/
 
 	//	vector<TCanvas*> cDeadCellMeanCharge;
+	Float_t pw = settings->getPitchWidth(subjectDetector,2);
+	Float_t maxSigma = pw/2;
+	TF1* fitX = new TF1("fit",
+			"[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([5]+[2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[5]-[2]+x)/TMath::Sqrt(2)/[1]))+[4]",
+			0,300);
+	fitX->SetParLimits(0,-500,0);		// Integral
+	fitX->SetParameter(0,-100);			// Integral
+	fitX->SetParLimits(1,0,maxSigma);	// Sigma Gaus
+	fitX->SetParameter(1,2);			// Sigma Gaus
+	fitX->SetParLimits(2,-pw,pw);		// rel. Pos wrt reference
+	fitX->SetParameter(2,0);			// rel. Pos wrt reference
+	fitX->FixParameter(3,pw/2);			// Pitch
+	fitX->SetParLimits(4,100,3000);		// Offset
+	fitX->SetParameter(4,1000);			// Offset
+	fitX->FixParameter(5,1.5*pw);		// Reference position
+	fitX->SetParNames("Integral","#Sigma_{Gaus}","Rel. position wrt reference","Pitch","Offset","Reference input");
+
 	TCanvas *c1;
 	for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
+
+		if(!hDeadCellCharge[i]){
+			cerr<<TString::Format("hDeadCellCharge[%d] invalid ", i)<<endl;
+			continue;
+		}
+		TF1* fit = (TF1*)fitX->Clone(TString::Format("fDeadCell_%d",i));
 		TString name = TString::Format("cDeadCellMeanCharge_%d",i);
 		c1 = new TCanvas(name,name);
 		c1->cd();
-		if(hDeadCellCharge[i])
-			hDeadCellCharge[i]->Draw("");
-		else
-			cerr<<TString::Format("hDeadCellCharge[%d] invalid ", i)<<endl;
+		hDeadCellCharge[i]->Fit(fit);
+		hDeadCellCharge[i]->Draw("");
 		TCutG* cellEdges = new TCutG(name,4);
 		cellEdges->SetPoint(0,150,-1e9);
 		cellEdges->SetPoint(1,150,1e9);
