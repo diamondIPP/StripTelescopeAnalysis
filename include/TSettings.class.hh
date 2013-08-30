@@ -506,6 +506,7 @@ private:
 	vector<Int_t> vecEdgePositionDetector;
 	Float_t cellHeight;
 	void CheckEdgeFidcuialCuts();
+	Float_t minimumEdgeDistance;
 public:
 	Float_t GetCellHeight(){return cellHeight;}
 	Float_t GetCellWidth(int det,int pattern){return getPitchWidth(det,pattern);}
@@ -540,6 +541,10 @@ public:
 	pair<Float_t,Float_t> getRelativePositionInCell(Float_t xPredDet,Float_t yPredDet);
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};
 	bool IsWithInTheColumnRadius(Float_t relCellPosX,Float_t relCellPosY);
+	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY,Float_t minDistanceToEdge);
+	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY){return IsOnTheEdgeOfCell(relCellPosX,relCellPosY,minimumEdgeDistance);}
+	Float_t GetMinimumEdgeDistance(){return minimumEdgeDistance;};
+
 
 	ClassDef(TSettings,6)
 
