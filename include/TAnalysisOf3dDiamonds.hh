@@ -83,17 +83,16 @@ private:
 	void initialise3DOverviewHistos();
 	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
+	void initialiseEdgeFreeHistos();
 	//new functions
 	void HitandSeedCount(TCluster* nCluster);
 	void ClusterPlots(int nClusters, float nfiducialValueX, float nfiducialValueY);
 	void RemoveLumpyClusters(TCluster* nCluster);
 	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
-	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
-	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
+//	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
+//	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
 	vector<Float_t> LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus);
 private:
-	void LongAnalysisSaveCellAndQuaterNumbering();
-	void LongAnalysis_FillOverlayedHistos(Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge);
 private:
 	void ShortAnalysis_Analyse1Cluster(UInt_t clusterNo=0);
 	void ShortAnalysis_Analyse2Cluster();
@@ -104,9 +103,14 @@ private:
 	void ShortAnalysis_SaveMeanChargeVector();
 
 private:
+	void LongAnalysisSaveCellAndQuaterNumbering();
+	void LongAnalysis_FillOverlayedHistos(Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge);
+	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
+
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
+	void LongAnalysis_SaveEdgeFreeHistos();
 	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp = 0);
 	void LongAnalysis_SaveFailedQuarters();
 	void LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
@@ -275,6 +279,8 @@ private:
 	//TCanvas* cCellsOverlayMeanCharge;
 	TProfile2D* hCellsOverlayAvrgCharge;
 	TProfile2D* hCellsOverlayAvrgChargeNoColumnHit;
+	TProfile2D* hPulseHeigthCentralRegion;
+	TProfile2D* hPulseHeigthEdgeRegion;
 
 	TH1F* hCellOverlayWithColumnLandau;
 	TH1F* hCellOverlayNoColumnLandau;
@@ -372,6 +378,7 @@ private:
 private:
 	//TransparentAnalysis
 	TCluster transparentCluster;
+	TCluster realCluster;
 	TH2F* hTransparentAnalysisInvalidCluster;
 	TH2F* hTransparentAnalysisValidCluster;
 	TH2F* hTransparentAnalysisValidClusterFidCutXvsFidCutY;

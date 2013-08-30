@@ -434,14 +434,15 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
 
 void TAnalysisOf3dDiamonds::LongAnalysis() {
 
-	TCluster diamondCluster;
+	TCluster *diamondCluster;
 	if(!settings->do3dTransparentAnalysis()){
 		Float_t maxChi2 = settings->getChi2Cut3D();
 		if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
 			return;
 		if(eventReader->getNDiamondClusters()!=1)
 			return;
-		diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+		realCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+		diamondCluster = &(realCluster);
 	}
 	else{
 		if(!isTransparentCluster)
@@ -451,7 +452,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 		if(DiamondPattern !=3)
 			return;
-		diamondCluster = transparentCluster;
+		diamondCluster = &transparentCluster;
 	}
 
 	//	cout<<"xPredDet, yPredDet"<<xPredDet<<", "<<yPredDet<<endl;
@@ -464,11 +465,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 	if(!settings->do3dTransparentAnalysis()){
 		Int_t area3DwithColumns = 2;
-		if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
+		if (!settings->isClusterInDiaDetectorArea(*diamondCluster,area3DwithColumns)){
 			hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
 			return;
 		}
-		if( !settings->diamondPattern.isValidCluster(diamondCluster)){
+		if( !settings->diamondPattern.isValidCluster(*diamondCluster)){
 			hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
 			return;
 		}
@@ -490,13 +491,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	}*/
 
 
-	/*if(diamondCluster.isSaturatedCluster())
+	/*if(diamondCluster->isSaturatedCluster())
 		return;*/
 
 	//	cout<<cellNo<<" "<< flush;
 	pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
-	Float_t charge = diamondCluster.getCharge(false);
+	Float_t charge = diamondCluster->getCharge(false);
 	hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
 	//	hDetXvsDetY3DEvents->Fill(xPredDet,yPredDet,1);
 
@@ -517,7 +518,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 	//	cout<<cellNo<<"-"<<quarterNo<<endl;
 	if(!settings->do3dTransparentAnalysis()){
 		if(cellNo < hCellsClusteSize.size()){
-			Int_t ClusterSize = diamondCluster.getClusterSize()-2;
+			Int_t ClusterSize = diamondCluster->getClusterSize()-2;
 			Int_t MaxHistoClusterSize = hCellsClusteSize.at(0)->GetNbinsX();
 			if(ClusterSize>MaxHistoClusterSize)		//If ClusterSize is > hCellsClusterSize2D MaxClusterSize then goes into MaxClusterBin.
 				hCellsClusteSize.at(cellNo)->Fill(MaxHistoClusterSize);
@@ -538,7 +539,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		}
 		if(!settings->do3dTransparentAnalysis()){
 			if(quarterNo < hQuarterCellsLandau[cellNo].size()){
-				Int_t ClusterSize = diamondCluster.size()-2;
+				Int_t ClusterSize = diamondCluster->size()-2;
 				Int_t MaxHistoClusterSize = hQuarterCellsClusterSize[0].at(0)->GetNbinsX();
 				if(ClusterSize>MaxHistoClusterSize)		//If ClusterSize is > hCellsClusterSize2D MaxClusterSize then goes into MaxClusterBin.
 					hQuarterCellsClusterSize[cellNo][quarterNo]->Fill(MaxHistoClusterSize);
@@ -551,6 +552,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 		if(verbosity>6) cout <<TString::Format("X%2d-%d,\t%3.1f",cellNo,quarterNo,charge)<<endl;
 	}
 	LongAnalysis_FillOverlayedHistos(relPos.first,relPos.second,charge);
+	LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
 };
 
 bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
@@ -600,10 +602,10 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	transparentCluster.SetTransparentClusterSize(1);
 	Float_t charge1 = transparentCluster.getCharge();
 	if(cell.first == 36 || cell.first == 37 || cell.first == 47 || cell.first == 48){
-		cout<<"\nnEvent: "<<nEvent<<" "<<cell.first<<"/"<<cell.second<<"\n";
+//		cout<<"\nnEvent: "<<nEvent<<" "<<cell.first<<"/"<<cell.second<<"\n";
 		for(UInt_t i = 0; i < transparentCluster.size(); i++){
 			transparentCluster.SetTransparentClusterSize(i+1);
-			cout<<"\t"<<i<<"\t"<<transparentCluster.getCharge()<<"\t"<<transparentCluster.getCharge()/charge1<<endl;
+//			cout<<"\t"<<i<<"\t"<<transparentCluster.getCharge()<<"\t"<<transparentCluster.getCharge()/charge1<<endl;
 		}
 	}
 	//cout<<"transparentCluster.getCharge(): "<<transparentCluster.getCharge()<<endl;
@@ -1172,6 +1174,19 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 	hCellsHarrisBad->SetTitle("hCellsHarrisBad");
 	 */
 };
+
+void TAnalysisOf3dDiamonds::initialiseEdgeFreeHistos(){
+	TString appendix ="";
+	if (settings->do3dTransparentAnalysis())
+		appendix ="_trans";
+	Int_t factor = 2;
+	TString name ="hPulseHeigthCentralRegion";
+	name.Append(appendix);
+	hPulseHeigthCentralRegion = histSaver->GetProfile2dBinedInCells(name,factor);
+	name ="hPulseHeigthEdgeRegion";
+	name.Append(appendix);
+	hPulseHeigthCentralRegion =histSaver->GetProfile2dBinedInCells(name,factor);
+}
 
 void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 
@@ -1884,7 +1899,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 		LongAnalysis_SaveFailedQuarters();
 		LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail();
 	}
-
+	LongAnalysis_SaveEdgeFreeHistos();
 	LongAnalysis_SaveGoodAndBadCellLandaus();
 	LongAnalysis_SaveCellsOverlayMeanCharge();
 	LongAnalysis_SaveMeanChargePlots();
@@ -1963,6 +1978,20 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradin
 			cout<<"Cell: "<<cell<<"  Grading: "<<Grading<<endl;
 			CellGrading.push_back(Grading);
 		}
+	}
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
+
+	histSaver->SaveHistogram(hPulseHeigthCentralRegion);
+	histSaver->SaveHistogram(hPulseHeigthEdgeRegion);
+	if(hPulseHeigthCentralRegion){
+		hPulseHeigthCentralRegion = (TProfile2D*)hPulseHeigthCentralRegion->Rebin(2,(TString)hPulseHeigthCentralRegion->GetName()+"_Cell");
+		histSaver->SaveHistogram(hPulseHeigthCentralRegion);
+	}
+	if(hPulseHeigthEdgeRegion){
+		hPulseHeigthEdgeRegion = (TProfile2D*)hPulseHeigthEdgeRegion->Rebin(2,(TString)hPulseHeigthEdgeRegion->GetName()+"_Cell");
+		histSaver->SaveHistogram(hPulseHeigthEdgeRegion);
 	}
 }
 
@@ -2140,6 +2169,20 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsClusterSize2DVsGrading() {
 	gStyle->SetPaintTextFormat("g");*/
 	histSaver->SaveCanvas(cCellsClusterSize2D);
 
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet,Float_t yPredDet, Float_t charge ){
+	bool isInEdgeRegion = false;
+	Float_t relPosX = xPredDet;
+	Float_t relPosY = yPredDet;
+	if (isInEdgeRegion && settings->IsOnTheEdgeOfCell(relPosX,relPosY,settings->GetMinimumEdgeDistance())){
+		if(hPulseHeigthEdgeRegion)
+			hPulseHeigthCentralRegion->Fill(xPredDet,yPredDet,charge);
+	}
+	else{
+		if(hPulseHeigthCentralRegion)
+			hPulseHeigthCentralRegion->Fill(xPredDet,yPredDet,charge);
+	}
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayedHistos(Float_t xRelPosDet,Float_t yRelPosDet,
@@ -2611,6 +2654,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
 	initialise3DOverviewHistos();
 	initialise3D2DLandauAndClustersizeHistos();
 	initialise3DCellOverlayHistos();
+	initialiseEdgeFreeHistos();
 	hLongAnalysisInvalidCellNo = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCellNo");
 	hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
 	hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster");
