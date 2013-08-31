@@ -1985,6 +1985,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
 
 	histSaver->SaveHistogram(hPulseHeigthCentralRegion);
 	histSaver->SaveHistogram(hPulseHeigthEdgeRegion);
+	TProfile2D* hCompare;
+	hCompare = hPulseHeigthCentralRegion->Clone("hPulseHeigthCompareRegion");
+	hCompare->Divide(hPulseHeigthEdgeRegion);
+	histSaver->SaveHistogram(hPulseHeigthCompareRegion);
+	delete hPulseHeigthCentralRegion;
 	if(hPulseHeigthCentralRegion){
 		hPulseHeigthCentralRegion = (TProfile2D*)hPulseHeigthCentralRegion->Rebin(2,(TString)hPulseHeigthCentralRegion->GetName()+"_Cell");
 		histSaver->SaveHistogram(hPulseHeigthCentralRegion);
@@ -1992,6 +1997,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
 	if(hPulseHeigthEdgeRegion){
 		hPulseHeigthEdgeRegion = (TProfile2D*)hPulseHeigthEdgeRegion->Rebin(2,(TString)hPulseHeigthEdgeRegion->GetName()+"_Cell");
 		histSaver->SaveHistogram(hPulseHeigthEdgeRegion);
+	}
+	if(hPulseHeigthEdgeRegion && hPulseHeigthCentralRegion){
+		hCompare = hPulseHeigthCentralRegion->Clone("hPulseHeigthCompareRegion");
+		hCompare->Divide(hPulseHeigthEdgeRegion);
+		histSaver->SaveHistogram(hPulseHeigthCompareRegion);
 	}
 }
 
@@ -2173,9 +2183,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsClusterSize2DVsGrading() {
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet,Float_t yPredDet, Float_t charge ){
 	bool isInEdgeRegion = false;
+
+	pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 	Float_t relPosX = xPredDet;
 	Float_t relPosY = yPredDet;
-	if (isInEdgeRegion && settings->IsOnTheEdgeOfCell(relPosX,relPosY,settings->GetMinimumEdgeDistance())){
+	isInEdgeRegion =  settings->IsOnTheEdgeOfCell(relPos.first,relPos.second);
+	if (isInEdgeRegion)){
 		if(hPulseHeigthEdgeRegion)
 			hPulseHeigthCentralRegion->Fill(xPredDet,yPredDet,charge);
 	}
