@@ -785,6 +785,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	vecEdgePositionName.push_back("Y_Edge3D");
 	vecEdgePositionName.push_back("X_Edge3D_small");
 	vecEdgePositionName.push_back("Y_Edge3D_small");
+	minimumEdgeDistance = 10;
 //	checkSettings();
 }
 
@@ -2414,4 +2415,16 @@ bool TSettings::IsWithInTheColumnRadius(Float_t relCellPosX, Float_t relCellPosY
 //	cout<<" not in a column"<<endl;
 	return false;
 
+}
+
+bool TSettings::IsOnTheEdgeOfCell(Float_t relCellPosX, Float_t relCellPosY, Float_t minDistanceToEdge) {
+	Float_t cellheight = GetCellHeight();
+	Float_t cellwidth = GetCellWidth(TPlaneProperties::getDetDiamond(),2);
+	Float_t deltaX = TMath::Min(fmod(relCellPosX,cellwidth),fmod(cellwidth-relCellPosX,cellwidth));
+	Float_t deltaY = TMath::Min(fmod(relCellPosY,cellheight),fmod(cellheight-relCellPosY,cellheight));
+	if ( deltaX < minDistanceToEdge )
+		return true;
+	if(deltaY<minDistanceToEdge)
+			return true;
+	return false;
 }
