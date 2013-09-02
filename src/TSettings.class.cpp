@@ -2251,10 +2251,33 @@ bool TSettings::isBadCell(UInt_t nDiamondPattern, Int_t cellNo) {
 	return false;
 }
 
+/**
+ *
+ * @param nDiamondPattern
+ * @param xDet
+ * @param yDet
+ * @return
+ */
 bool TSettings::isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet) {
 	return isBadCell(getCellAndQuarterNo(xDet,yDet).first, nDiamondPattern);
 }
 
+/**
+ *
+ * @param nDiamondPattern
+ * @param cellNo
+ * @return
+ */
+bool TSettings::IsGoodCell(UInt_t nDiamondPattern, Int_t cellNo){
+	if(nDiamondPattern == this->get3dWithHolesDiamondPattern()){
+		for ( UInt_t i=0; i < getGoodCells3D().size(); i++)
+			if ( cellNo == getGoodCells3D().at(i)) {
+				return true;
+			}
+
+	}
+	return false;
+}
 /**
  *
  * @param xDet
@@ -2422,9 +2445,8 @@ bool TSettings::IsOnTheEdgeOfCell(Float_t relCellPosX, Float_t relCellPosY, Floa
 	Float_t cellwidth = GetCellWidth(TPlaneProperties::getDetDiamond(),2);
 	Float_t deltaX = TMath::Min(fmod(relCellPosX,cellwidth),fmod(cellwidth-relCellPosX,cellwidth));
 	Float_t deltaY = TMath::Min(fmod(relCellPosY,cellheight),fmod(cellheight-relCellPosY,cellheight));
-	if ( deltaX < minDistanceToEdge )
-		return true;
-	if(deltaY<minDistanceToEdge)
-			return true;
-	return false;
+	bool retVal = (deltaX < minDistanceToEdge || deltaY<minDistanceToEdge);
+	if(verbosity>8&&( 0<=relCellPosX&&relCellPosX<=cellwidth&&0<=relCellPosY&&relCellPosY<=cellheight))
+	cout<<TString::Format("\tTSettings::IsOnTheEdgeOfCell\t%05.1f/%05.1f, %3.1f, %1d",relCellPosX,relCellPosY,minDistanceToEdge,(int)retVal)<<endl;
+	return retVal;
 }
