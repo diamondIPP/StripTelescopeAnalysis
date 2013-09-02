@@ -217,10 +217,13 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 			begin -= pw/2;
 			end += pw/2;
 
-			//			cout<<"look at" <<begin<<"-"<<end<<" "<<pw<<endl;
+//			if(metric >= 3660 && metric <= 3715)
+//				cout<<metric <<"look at" <<begin<<"-"<<end<<" "<<pw<<endl;
 			if( begin <= metric && metric <= end ){
-				//			cout<<"convert"<<i<<endl;
-				return convertMetricToChannel(metric,i);
+				Float_t retval =convertMetricToChannel(metric,i);
+//				if(metric >= 3660 && metric <= 3715)
+//					cout<<"convert"<<i<<":\t"<<retval<<endl;
+				return retval;
 			}
 		}
 		//		else return N_INVALID;
@@ -234,17 +237,20 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric,UInt_t interval) 
 	Float_t leftPos,rightPos;
 	Int_t firstChannel = firstChannelOfInterval[interval]-1;
 	Int_t lastChannel = firstChannelOfInterval[interval] + nChannelsOfInterval[interval];
-	//	cout<<"[TDiamondPattern::convertMetricToChannel]"<<metric<<" in " << interval <<": "<<firstChannel<<"-"<<lastChannel<<endl;
+//	if(metric >= 3660 && metric <= 3715) cout<<"[TDiamondPattern::convertMetricToChannel]"<<metric<<" in " << interval <<": "<<firstChannel<<"-"<<lastChannel<<endl;
 	for(Int_t ch = firstChannel; ch <= lastChannel;ch++){
-		//		cout<<"check channel "<<ch<<" "<<endl;
-		if(ch == firstChannelOfInterval[interval]-1)
+//		if(metric >= 3660 && metric <= 3715)
+//			cout<<"check channel "<<ch<<" "<<flush;
+		if(ch == firstChannel)
 			leftPos = getChannelToMetric(ch+1) - pitchWidth[interval];
 		else
 			leftPos = getChannelToMetric(ch);
 		if (ch == lastChannel)
-			rightPos = getChannelToMetric(ch-1) + pitchWidth[interval];
+			rightPos = getChannelToMetric(ch) + pitchWidth[interval];
 		else
 			rightPos = getChannelToMetric(ch+1);
+//		if(metric >= 3660 && metric <= 3715)
+//			cout<<" "<<leftPos<<"-"<<rightPos<<endl;
 		if ( leftPos <= metric && metric <= rightPos )
 			return (metric-leftPos)/(rightPos-leftPos)+ch;
 	}

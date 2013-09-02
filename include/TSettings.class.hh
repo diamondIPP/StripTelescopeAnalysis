@@ -529,6 +529,7 @@ public:
 	vector<Int_t> getDeadCell3D(){return deadCell3d;}
 	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
+	bool IsGoodCell(UInt_t nDiamondPattern, Int_t cellNo);
 	int get3DQuarterNo( int column, int row,int quarter);
 	int get3DCellNo(char column, int row);
 	int get3DCellNo(int column, int row);
