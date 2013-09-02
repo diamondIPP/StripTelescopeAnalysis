@@ -118,6 +118,10 @@ private:
 	void LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
 	void LongAnalysis_SaveMeanChargePlots();
 	bool LongAnalysis_IsDeadCell(vector<TH1F*> nhQuarterCellsLandau, Float_t nThreshold);
+	void LongAnalysis_FillRelativeAddedTransparentCharge();
+
+	void LongAnalysis_InitialiseRelativeAddedTransparentCharge();
+	void LongAnalysis_SaveRelativeAddedTransparentCharge();
 private:
 	bool isTransparentCluster;
 private:
@@ -281,6 +285,8 @@ private:
 	TProfile2D* hCellsOverlayAvrgChargeNoColumnHit;
 	TProfile2D* hPulseHeigthCentralRegion;
 	TProfile2D* hPulseHeigthEdgeRegion;
+	TH2F* hEventsCentralRegion;
+	TH2F* hEventsEdgeRegion;
 
 	TH1F* hCellOverlayWithColumnLandau;
 	TH1F* hCellOverlayNoColumnLandau;
@@ -382,6 +388,11 @@ private:
 	TH2F* hTransparentAnalysisInvalidCluster;
 	TH2F* hTransparentAnalysisValidCluster;
 	TH2F* hTransparentAnalysisValidClusterFidCutXvsFidCutY;
+
+	vector<TH1F*> hTransparentAnalysisRelativeAddedCharge;
+	vector<TH1F*> hTransparentAnalysisRelativeAddedChargeGoodCells;
+	vector<TH1F*> hTransparentAnalysisRelativeAddedChargeBadCells;
+	vector<TProfile2D*> hTransparentAnalysisRelativeAddedChargeProfile;
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */
