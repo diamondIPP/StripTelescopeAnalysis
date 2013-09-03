@@ -389,6 +389,16 @@ private:
 	TH2F* hTransparentAnalysisValidCluster;
 	TH2F* hTransparentAnalysisValidClusterFidCutXvsFidCutY;
 
+	vector<TH1F*> hTransparentAnalysisTransparentCharge;
+	vector<TH1F*> hTransparentAnalysisTransparentChargeGoodCells;
+	vector<TH1F*> hTransparentAnalysisTransparentChargeBadCells;
+	vector<TProfile2D*> hTransparentAnalysisTransparentChargeProfile;
+
+	vector<TH1F*> hTransparentAnalysisTransparentAddedCharge;
+	vector<TH1F*> hTransparentAnalysisTransparentAddedChargeGoodCells;
+	vector<TH1F*> hTransparentAnalysisTransparentAddedChargeBadCells;
+	vector<TProfile2D*> hTransparentAnalysisTransparentAddedChargeProfile;
+
 	vector<TH1F*> hTransparentAnalysisRelativeAddedCharge;
 	vector<TH1F*> hTransparentAnalysisRelativeAddedChargeGoodCells;
 	vector<TH1F*> hTransparentAnalysisRelativeAddedChargeBadCells;
