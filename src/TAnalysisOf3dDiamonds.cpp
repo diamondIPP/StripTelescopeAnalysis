@@ -603,7 +603,7 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 		return false;
 	}
 
-	UInt_t  clusSize = transparentCluster.GetTransparentClusterSize()
+	UInt_t  clusSize = transparentCluster.GetTransparentClusterSize();
 //	pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
 //	transparentCluster.SetTransparentClusterSize(1);
 //	Float_t charge1 = transparentCluster.getCharge();
@@ -2991,7 +2991,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitialiseRelativeAddedTransparentCharg
 		hTransparentAnalysisTransparentChargeGoodCells.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
 		name = TString::Format("hTransparentAnalysisTransparentChargeBadCells_%02dvs1",clusterSize);
 		hTransparentAnalysisTransparentChargeBadCells.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
-        name = TString::Format("hTransparentAnalysisTransparentChargeProfile_%02dvs1",clusterSize);
+        name = TString::Format("hTransparentAnalysisTransparentChargeProfile_clusterSize%02d",clusterSize);
         hTransparentAnalysisTransparentChargeProfile.push_back(histSaver->GetProfile2dBinedInCells(name,2));
 
         min = -50;
