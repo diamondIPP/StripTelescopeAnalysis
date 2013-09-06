@@ -3019,7 +3019,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
 	    if(settings->do3dTransparentAnalysis())
 	        histSaver->SaveHistogram(hTransparentAnalysisRelativeAddedChargeGoodCells[i]);
 	    delete hTransparentAnalysisRelativeAddedChargeGoodCells[i];
-	    if(!settings->do3dTransparentAnalysis())
+	    if(settings->do3dTransparentAnalysis())
 	        histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisRelativeAddedChargeProfile[i]);
 	    delete hTransparentAnalysisRelativeAddedChargeProfile[i];
 
@@ -3032,7 +3032,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
 	    if(settings->do3dTransparentAnalysis())
 	        histSaver->SaveHistogram(hTransparentAnalysisTransparentChargeGoodCells[i]);
 	    delete hTransparentAnalysisTransparentChargeGoodCells[i];
-	    if(!settings->do3dTransparentAnalysis())
+	    if(settings->do3dTransparentAnalysis())
 	        histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisTransparentChargeProfile[i]);
 	    delete hTransparentAnalysisTransparentChargeProfile[i];
 
@@ -3045,7 +3045,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
 	    if(settings->do3dTransparentAnalysis())
 	        histSaver->SaveHistogram(hTransparentAnalysisTransparentAddedChargeGoodCells[i]);
 	    delete hTransparentAnalysisTransparentAddedChargeGoodCells[i];
-	    if(!settings->do3dTransparentAnalysis())
+	    if(settings->do3dTransparentAnalysis())
 	        histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisTransparentAddedChargeProfile[i]);
 	    delete hTransparentAnalysisTransparentAddedChargeProfile[i];
 	}
