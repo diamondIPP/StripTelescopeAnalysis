@@ -2556,7 +2556,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
 		cout<<hCellsOverlayAvrgChargeGoodCells->GetEntries()<<endl;
 		TString name = "hCellsOverlayAvrgChargeGoodCells_cl";
 		name.Append(appendix);
-		TH2F* histo = (TH2F*)hCellsOverlayAvrgChargeGoodCells->Clone(name);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeGoodCells->Clone(name);
 		cout<<"SAVE"<<endl;
 		histSaver->SaveHistogram(histo);
 		delete histo;
@@ -2566,7 +2566,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
 		cout<<hCellsOverlayAvrgChargeMinusBadCells->GetEntries()<<endl;
 		TString name = "hCellsOverlayAvrgChargeMinusBadCells_cl";
 		name.Append(appendix);
-		TH2F* histo = (TH2F*)hCellsOverlayAvrgChargeMinusBadCells->Clone(name);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeMinusBadCells->Clone(name);
 		cout<<"SAVE"<<endl;
 		histSaver->SaveHistogram(histo);
 		delete histo;
@@ -2574,7 +2574,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
 	if(hCellsOverlayAvrgChargeNoColumnHit){
 		TString name = "hCellsOverlayAvrgChargeNoColumnHit_cl";
 		name.Append(appendix);
-		TH2F* histo = (TH2F*)hCellsOverlayAvrgChargeNoColumnHit->Clone(name);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeNoColumnHit->Clone(name);
 		histo->SetTitle("Avrg PH - overlayed - no hit in columns");
 		cout<<"SAVE"<<endl;
 		histSaver->SaveHistogram(histo);
