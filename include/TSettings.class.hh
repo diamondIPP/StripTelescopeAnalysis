@@ -353,6 +353,7 @@ private:
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
 	void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
+	void ParseCellArray(string key, string value, vector<int> &vecCells, vector< vector<int> > &PtrvecCells);
 	void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
 	void Parse(std::string key, std::string value, std::vector<int> & vec){ ParseIntArray(key,value,vec);}
 	bool Parse(std::string key, std::string value, bool &output){return ParseBool(key,value,output);}
@@ -500,6 +501,7 @@ private:
 	vector<Int_t> badCells3d;
 	vector<Int_t> badCells3dnH;
 	vector<Int_t> goodCells3d;
+	vector< vector<Int_t> > goodCellRegions3d;
 	vector<Int_t> deadCell3d;
 	vector<TPlaneProperties::enumCoordinate> vecEdgePositionType;
 	vector<TString> vecEdgePositionName;
@@ -523,7 +525,8 @@ public:
 	UInt_t getNQuarters3d(){return 4;}
 	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
-	vector<Int_t> getGoodCells3D(){return goodCells3d;};
+	//vector<Int_t> getGoodCells3D(){return goodCells3d;};		//Changed by Iain 5/9/13
+	vector< vector<Int_t> > getGoodCellRegions3d(){return goodCellRegions3d;}
 	vector<Int_t> getBadCells3D(){return badCells3d;};
 	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
 	vector<Int_t> getDeadCell3D(){return deadCell3d;}

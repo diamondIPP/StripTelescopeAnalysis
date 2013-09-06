@@ -104,7 +104,7 @@ private:
 
 private:
 	void LongAnalysisSaveCellAndQuaterNumbering();
-	void LongAnalysis_FillOverlayedHistos(Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge);
+	void LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
 
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
@@ -261,6 +261,7 @@ private:
 
 	TCanvas* cDetXvsDetY3DMeanCharge;
 	TProfile2D* hPulseHeightVsDetectorHitPostionXY;
+	TProfile2D* hPulseHeightVsDetectorHitPostionXYGoodCells;
 //	TH2D* hDetXvsDetY3DEvents;
 	TH1F* hCellMeanCharge;
 	TH2F* hValidEventsFiducialSpace;
@@ -282,6 +283,8 @@ private:
 
 	//TCanvas* cCellsOverlayMeanCharge;
 	TProfile2D* hCellsOverlayAvrgCharge;
+	TProfile2D* hCellsOverlayAvrgChargeMinusBadCells;
+	TProfile2D* hCellsOverlayAvrgChargeGoodCells;
 	TProfile2D* hCellsOverlayAvrgChargeNoColumnHit;
 	TProfile2D* hPulseHeigthCentralRegion;
 	TProfile2D* hPulseHeigthEdgeRegion;
