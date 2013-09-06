@@ -1228,10 +1228,10 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 
 	//Cell Overlay
 	Double_t xBinEdges[] = {0,5,15,25,35,45,55,65,75,85,95,105,115,125,135,145,150};
-	Int_t  nXbins = sizeof(xBinEdges)/sizeof(Float_t) - 1;
+	Int_t  nXbins = sizeof(xBinEdges)/sizeof(Double_t) - 1;
 
 	Double_t yBinEdges[] = {0,5,15,25,35,45,55,65,75,85,95,105,115,125,135,145,150};
-	Int_t nYbins = sizeof(yBinEdges)/sizeof(Float_t) - 1;
+	Int_t nYbins = sizeof(yBinEdges)/sizeof(Double_t) - 1;
 	//Double_t BinEdges[] = {0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150};
 	//hCellsOverlayed
 	TString name = "hCellsOverlayAvrgCharge";
@@ -1241,7 +1241,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 			30,0,settings->GetCellHeight());*/
 	hCellsOverlayAvrgCharge = new TProfile2D(name,name,
 	        nXbins,xBinEdges,
-	        nXbins,yBinEdges);
+	        nYbins,yBinEdges);
 	hCellsOverlayAvrgCharge->GetXaxis()->SetTitle("rel. x position within a cell /#mum");
 	hCellsOverlayAvrgCharge->GetYaxis()->SetTitle("rel. y position within a cell /#mum");
 	hCellsOverlayAvrgCharge->GetZaxis()->SetTitle("pulse height of cluster /ADC");
