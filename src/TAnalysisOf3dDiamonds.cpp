@@ -603,16 +603,18 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 		return false;
 	}
 
-	pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
-	transparentCluster.SetTransparentClusterSize(1);
-	Float_t charge1 = transparentCluster.getCharge();
-	if(cell.first == 36 || cell.first == 37 || cell.first == 47 || cell.first == 48){
-		//		cout<<"\nnEvent: "<<nEvent<<" "<<cell.first<<"/"<<cell.second<<"\n";
-		for(UInt_t i = 0; i < transparentCluster.size(); i++){
-			transparentCluster.SetTransparentClusterSize(i+1);
-			//			cout<<"\t"<<i<<"\t"<<transparentCluster.getCharge()<<"\t"<<transparentCluster.getCharge()/charge1<<endl;
-		}
-	}
+//	pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
+//	transparentCluster.SetTransparentClusterSize(1);
+//	Float_t charge1 = transparentCluster.getCharge();
+//	if(cell.first == 36 || cell.first == 37 || cell.first == 47 || cell.first == 48){
+//		//		cout<<"\nnEvent: "<<nEvent<<" "<<cell.first<<"/"<<cell.second<<"\n";
+//		for(UInt_t i = 0; i < transparentCluster.size(); i++){
+//			transparentCluster.SetTransparentClusterSize(i+1);
+//			//			cout<<"\t"<<i<<"\t"<<transparentCluster.getCharge()<<"\t"<<transparentCluster.getCharge()/charge1<<endl;
+//		}
+//	}
+	transparentCluster.SetTransparentClusterSize(transparentCluster.size());
+	transparentCluster.SetTransparentClusterSize(transparentCluster.size()+1);
 	//cout<<"transparentCluster.getCharge(): "<<transparentCluster.getCharge()<<endl;
 	//	transparentCluster.Print();
 	//cout<<"diamondCluster.getHighestSignalChannel(): "<<transparentCluster.getHighestSignalChannel()<<endl;
