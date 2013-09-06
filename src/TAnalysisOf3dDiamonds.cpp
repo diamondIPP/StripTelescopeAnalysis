@@ -2541,7 +2541,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
 		cout<<hCellsOverlayAvrgCharge->GetEntries()<<endl;
 		TString name = "hCellsOverlayAvrgCharge_cl";
 		name.Append(appendix);
-		TH2F* histo = (TH2F*)hCellsOverlayAvrgCharge->Clone(name);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgCharge->Clone(name);
 		cout<<"SAVE"<<endl;
 		histSaver->SaveHistogram(histo);
 		delete histo;
