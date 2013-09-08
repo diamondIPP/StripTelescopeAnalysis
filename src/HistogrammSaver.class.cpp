@@ -54,7 +54,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
 				currentStyle2D->SetOptStat("ne");
 				currentStyle2D ->SetPalette(1);
 				currentStyle->cd();
-				gROOT->SetStyle("Plain_RD42");
+//				gROOT->SetStyle("Plain_RD42");
 			}
 		}
 
@@ -769,13 +769,13 @@ void HistogrammSaver::SaveHistogramLogZ(TH2* histo){
 	delete c1;
 }
 
-void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox) {
+void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRange) {
 	if (!histo)return;
 	if(histo->GetEntries()==0)return;
 	if (!drawStatBox)
 			histo->SetStats(false);
 //	histo->SetStats(false);
-	SaveHistogramPNG(histo);
+	SaveHistogramPNG(histo,optimizeRange);
 	SaveHistogramROOT(histo);
 }
 
@@ -1003,7 +1003,7 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 
 }
 
-void HistogrammSaver::SaveHistogramPNG(TH2* histo) {
+void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange) {
 
 	if(!histo){
 		cerr<<"HistogrammSaver::SaveHistogramPNG(TH2*), histogram ==0"<<endl;
@@ -1016,7 +1016,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo) {
 	plots_canvas->Clear();
 	plots_canvas->cd();
 	TH2* htemp = (TH2*)histo->Clone();
-	HistogrammSaver::OptimizeXYRange(htemp);
+	if(optimizeRange) HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));

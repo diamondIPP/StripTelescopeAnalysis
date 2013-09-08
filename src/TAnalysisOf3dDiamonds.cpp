@@ -59,6 +59,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 	PulseHeightMinMeanCharge = 1;
 	PulseHeightMaxMeanCharge = 1500;
 
+	maxClusterSize3d = 5;
 }
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
@@ -591,12 +592,11 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 	//Calculate Transparent charge Felix
 
 	pair<int,int> channels = settings->diamondPattern.getPatternChannels(DiamondPattern);
-	UInt_t clusterSize = 5; //Choose this value. Maybe want it different for strip detector
 
 	//cout<<TString::Format("3DwH Start Channel: %i, Hit Channel Int: %i, Hit Channel Float: %.2f, clusterSize: %i", channels.first, XdetChannelSpaceInt, XdetChannelSpace, clusterSize)<<endl;
 
 	transparentCluster.clear();
-	transparentCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,XdetChannelSpace,clusterSize);
+	transparentCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,XdetChannelSpace,maxClusterSize3d);
 
 	if(transparentCluster.isSaturatedCluster()){
 		if (bOutput) cout<<"SaturatedCluster"<<endl;
@@ -2058,12 +2058,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
 	TString appendix ="";
 	if (settings->do3dTransparentAnalysis())
 		appendix = "_trans";
-	hEventsCentralRegion->Draw("goffcolz");
-
+	hEventsCentralRegion->Draw("colz");
 	hEventsCentralRegion->GetXaxis()->SetRangeUser(0,150);
 	hEventsCentralRegion->GetYaxis()->SetRangeUser(0,150);
-	histSaver->SaveHistogram(hEventsCentralRegion);
-	histSaver->SaveHistogram(hEventsEdgeRegion);
+	histSaver->SaveHistogram(hEventsCentralRegion,true,false);
+	histSaver->SaveHistogram(hEventsEdgeRegion,true,false);
 
 	hPulseHeigthCentralRegion->Sumw2();
 	hPulseHeigthEdgeRegion->Sumw2();
@@ -2965,13 +2964,36 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillRelativeAddedTransparentCharge() {
 	        hTransparentAnalysisTransparentAddedChargeGoodCells[i]->Fill(addedCharge);
 			hTransparentAnalysisRelativeAddedChargeGoodCells[i]->Fill(relCharge);
 		}
+		pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
+	    bool isInEdgeRegion =  settings->IsOnTheEdgeOfCell(relPos.first,relPos.second);
+	    if (!isInEdgeRegion){
+		    hTransparentAnalysisTransparentChargeWithoutEdge[i]->Fill(charge);
+		    hTransparentAnalysisTransparentAddedChargeWithoutEdge[i]->Fill(addedCharge);
+		    hTransparentAnalysisRelativeAddedChargeWithoutEdge[i]->Fill(relCharge);
+
+		    hTransparentAnalysisTransparentChargeProfileWithoutEdge[i]->Fill(xPredDet,yPredDet,charge);
+		    hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge[i]->Fill(xPredDet,yPredDet,addedCharge);
+		    hTransparentAnalysisRelativeAddedChargeProfileWithoutEdge[i]->Fill(xPredDet,yPredDet,relCharge);
+
+		    if (settings->isBadCell(diamondPattern, cell.first)){
+		        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]->Fill(charge);
+		        hTransparentAnalysisTransparentAddedChargeBadCellsWithoutEdge[i]->Fill(addedCharge);
+		        hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge[i]->Fill(relCharge);
+		    }
+
+		    if (settings->IsGoodCell(diamondPattern, cell.first)){
+		        hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i]->Fill(charge);
+		        hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge[i]->Fill(addedCharge);
+		        hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge[i]->Fill(relCharge);
+		    }
+		}
 		//			cout<<"\t"<<i<<"\t"<<transparentCluster.getCharge()<<"\t"<<transparentCluster.getCharge()/charge1<<endl;
 	}
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_InitialiseRelativeAddedTransparentCharge() {
 
-	for(UInt_t i = 0; i<TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);i++){
+	for(UInt_t i = 0; i<maxClusterSize3d;i++){
 		UInt_t clusterSize = i+1;
 		Float_t min = 0;
 		Float_t max = 50;
@@ -2987,11 +3009,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitialiseRelativeAddedTransparentCharg
 		name = TString::Format("hTransparentAnalysisRelativeAddedChargeProfile_%02dvs1",clusterSize);
 		hTransparentAnalysisRelativeAddedChargeProfile.push_back(histSaver->GetProfile2dBinedInCells(name,2));
 
-		name = TString::Format("hTransparentAnalysisTransparentCharge_%02dvs1",clusterSize);
+		name = TString::Format("hTransparentAnalysisTransparentCharge_clusterSize%02d",clusterSize);
 		hTransparentAnalysisTransparentCharge.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
-		name = TString::Format("hTransparentAnalysisTransparentChargeGoodCells_%02dvs1",clusterSize);
+		name = TString::Format("hTransparentAnalysisTransparentChargeGoodCells_clusterSize%02d",clusterSize);
 		hTransparentAnalysisTransparentChargeGoodCells.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
-		name = TString::Format("hTransparentAnalysisTransparentChargeBadCells_%02dvs1",clusterSize);
+		name = TString::Format("hTransparentAnalysisTransparentChargeBadCells_clusterSize%02d",clusterSize);
 		hTransparentAnalysisTransparentChargeBadCells.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
         name = TString::Format("hTransparentAnalysisTransparentChargeProfile_clusterSize%02d",clusterSize);
         hTransparentAnalysisTransparentChargeProfile.push_back(histSaver->GetProfile2dBinedInCells(name,2));
@@ -3007,6 +3029,35 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitialiseRelativeAddedTransparentCharg
         name = TString::Format("hTransparentAnalysisTransparentAddedChargeProfile_%02dvs1",clusterSize);
         hTransparentAnalysisTransparentAddedChargeProfile.push_back(histSaver->GetProfile2dBinedInCells(name,2));
 
+        //without edges
+        name = TString::Format("hTransparentAnalysisRelativeAddedChargeWithoutEdge_%02dvs1",clusterSize);
+        hTransparentAnalysisRelativeAddedChargeWithoutEdge.push_back(new TH1F(name,name,bins,min,max));
+        name = TString::Format("hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge_%02dvs1",clusterSize);
+        hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge.push_back(new TH1F(name,name,bins,min,max));
+        name = TString::Format("hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge_%02dvs1",clusterSize);
+        hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge.push_back(new TH1F(name,name,bins,min,max));
+        name = TString::Format("hTransparentAnalysisRelativeAddedChargeProfileWithoutEdge_%02dvs1",clusterSize);
+        hTransparentAnalysisRelativeAddedChargeProfileWithoutEdge.push_back(histSaver->GetProfile2dBinedInCells(name,2));
+
+        name = TString::Format("hTransparentAnalysisTransparentChargeWithoutEdge_clusterSize%02d",clusterSize);
+        hTransparentAnalysisTransparentChargeWithoutEdge.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
+        name = TString::Format("hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge_clusterSize%02d",clusterSize);
+        hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
+        name = TString::Format("hTransparentAnalysisTransparentChargeBadCellsWithoutEdge_clusterSize%02d",clusterSize);
+        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
+        name = TString::Format("hTransparentAnalysisTransparentChargeProfileWithoutEdge_clusterSize%02d",clusterSize);
+        hTransparentAnalysisTransparentChargeProfileWithoutEdge.push_back(histSaver->GetProfile2dBinedInCells(name,2));
+
+        min = -50;
+        max = 1500;
+        name = TString::Format("hTransparentAnalysisTransparentAddedChargeWithoutEdge_%02dvs%02d",clusterSize,clusterSize-1);
+        hTransparentAnalysisTransparentAddedChargeWithoutEdge.push_back(new TH1F(name,name,bins,min,max));
+        name = TString::Format("hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge_%02dvs%02d",clusterSize,clusterSize-1);
+        hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge.push_back(new TH1F(name,name,bins,min,max));
+        name = TString::Format("hTransparentAnalysisTransparentAddedChargeBadCellsWithoutEdge_%02dvs%02d",clusterSize,clusterSize-1);
+        hTransparentAnalysisTransparentAddedChargeBadCellsWithoutEdge.push_back(new TH1F(name,name,bins,min,max));
+        name = TString::Format("hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge_%02dvs%02d",clusterSize,clusterSize-1);
+        hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge.push_back(histSaver->GetProfile2dBinedInCells(name,2));
 	}
 }
 
@@ -3050,6 +3101,46 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
 	    if(settings->do3dTransparentAnalysis())
 	        histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisTransparentAddedChargeProfile[i]);
 	    delete hTransparentAnalysisTransparentAddedChargeProfile[i];
+
+	    // without edges
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisRelativeAddedChargeWithoutEdge[i]);
+	    delete hTransparentAnalysisRelativeAddedChargeWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge[i]);
+	    delete hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge[i]);
+	    delete hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisRelativeAddedChargeProfileWithoutEdge[i]);
+	    delete hTransparentAnalysisRelativeAddedChargeProfileWithoutEdge[i];
+
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisTransparentChargeWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentChargeWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisTransparentChargeProfileWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentChargeProfileWithoutEdge[i];
+
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisTransparentAddedChargeWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentAddedChargeWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisTransparentAddedChargeBadCellsWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentAddedChargeBadCellsWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogram(hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge[i];
+	    if(settings->do3dTransparentAnalysis())
+	        histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge[i]);
+	    delete hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge[i];
 	}
 	hTransparentAnalysisRelativeAddedCharge.clear();
 	hTransparentAnalysisRelativeAddedChargeBadCells.clear();
@@ -3065,4 +3156,21 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
     hTransparentAnalysisTransparentAddedChargeBadCells.clear();
     hTransparentAnalysisTransparentAddedChargeGoodCells.clear();
     hTransparentAnalysisTransparentAddedChargeProfile.clear();
+
+    // without edge
+
+    hTransparentAnalysisRelativeAddedChargeWithoutEdge.clear();
+    hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge.clear();
+    hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge.clear();
+    hTransparentAnalysisRelativeAddedChargeProfileWithoutEdge.clear();
+
+    hTransparentAnalysisTransparentChargeWithoutEdge.clear();
+    hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge.clear();
+    hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge.clear();
+    hTransparentAnalysisTransparentChargeProfileWithoutEdge.clear();
+
+    hTransparentAnalysisTransparentAddedChargeWithoutEdge.clear();
+    hTransparentAnalysisTransparentAddedChargeBadCellsWithoutEdge.clear();
+    hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge.clear();
+    hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge.clear();
 }
