@@ -1230,10 +1230,12 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 		appendix ="_trans";
 
 	//Cell Overlay
-	Double_t xBinEdges[] = {0,5,15,25,35,45,55,65,75,85,95,105,115,125,135,145,150};
+	//Double_t xBinEdges[] = {0,5,15,25,35,45,55,65,75,85,95,105,115,125,135,145,150};
+	Double_t xBinEdges[] = {0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150};
 	Int_t  nXbins = sizeof(xBinEdges)/sizeof(Double_t) - 1;
 
-	Double_t yBinEdges[] = {0,5,15,25,35,45,55,65,75,85,95,105,115,125,135,145,150};
+	//Double_t yBinEdges[] = {0,5,15,25,35,45,55,65,75,85,95,105,115,125,135,145,150};
+	Double_t yBinEdges[] = {0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150};
 	Int_t nYbins = sizeof(yBinEdges)/sizeof(Double_t) - 1;
 	//Double_t BinEdges[] = {0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150};
 	//hCellsOverlayed
