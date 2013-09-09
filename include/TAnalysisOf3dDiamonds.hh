@@ -285,6 +285,7 @@ private:
 	TProfile2D* hCellsOverlayAvrgCharge;
 	TProfile2D* hCellsOverlayAvrgChargeMinusBadCells;
 	TProfile2D* hCellsOverlayAvrgChargeGoodCells;
+	TProfile2D* hCellsOverlayAvrgChargeBadCells;
 	TProfile2D* hCellsOverlayAvrgChargeNoColumnHit;
 	TProfile2D* hPulseHeigthCentralRegion;
 	TProfile2D* hPulseHeigthEdgeRegion;

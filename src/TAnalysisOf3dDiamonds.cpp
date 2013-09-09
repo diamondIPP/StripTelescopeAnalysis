@@ -1271,12 +1271,18 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
     hCellsOverlayAvrgChargeGoodCells = (TProfile2D*)hCellsOverlayAvrgCharge->Clone(name);
     hCellsOverlayAvrgChargeGoodCells->SetTitle(name);
 
-    //hCellsOverlayedColumnLandau
-    name = "hCellOverlayWithColumnLandau";
-    name.Append(appendix);
-    hCellOverlayWithColumnLandau = new TH1F(name,name,256,0,2800);//todo iain ph
-    hCellOverlayWithColumnLandau->GetXaxis()->SetTitle("charge / ADC");
-    hCellOverlayWithColumnLandau->GetYaxis()->SetTitle("Entries");
+	//hCellsOverlayAvrgChargeBadCells
+	name = "hCellsOverlayAvrgChargeBadCells";
+	name.Append(appendix);
+	hCellsOverlayAvrgChargeBadCells = (TProfile2D*)hCellsOverlayAvrgCharge->Clone(name);
+	hCellsOverlayAvrgChargeBadCells->SetTitle(name);
+
+	//hCellsOverlayedColumnLandau
+	name = "hCellOverlayWithColumnLandau";
+	name.Append(appendix);
+	hCellOverlayWithColumnLandau = new TH1F(name,name,256,0,2800);//todo iain ph
+	hCellOverlayWithColumnLandau->GetXaxis()->SetTitle("charge / ADC");
+	hCellOverlayWithColumnLandau->GetYaxis()->SetTitle("Entries");
 
     //hCellsOverlayedLandauNoColumn
     name = "hCellOverlayNoColumnLandau";
@@ -2318,6 +2324,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_
         hCellsOverlayAvrgChargeMinusBadCells->Fill(xRelPosDet,yRelPosDet,clusterCharge);
     if(settings->IsGoodCell(3, cellNo))
         hCellsOverlayAvrgChargeGoodCells->Fill(xRelPosDet,yRelPosDet,clusterCharge);
+	if(settings->isBadCell(3,cellNo))
+		hCellsOverlayAvrgChargeBadCells->Fill(xRelPosDet,yRelPosDet,clusterCharge);
 
     if(settings->IsWithInTheColumnRadius(xRelPosDet, yRelPosDet)){
         hCellOverlayColumnLandau->Fill(clusterCharge);
@@ -2541,43 +2549,77 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
     if (settings->do3dTransparentAnalysis())
         appendix ="_trans";
 
-    cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge]"<<endl;
-    cout<<hCellsOverlayAvrgCharge<<endl;
-    if(hCellsOverlayAvrgCharge){
-        cout<<hCellsOverlayAvrgCharge->IsZombie()<<endl;
-        cout<<hCellsOverlayAvrgCharge->GetEntries()<<endl;
-        TString name = "hCellsOverlayAvrgCharge_cl";
-        name.Append(appendix);
-        TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgCharge->Clone(name);
-        cout<<"SAVE"<<endl;
-        histSaver->SaveHistogram(histo);
-        delete histo;
-        TH2D* hCellsOverlayAvrgChargeNentries = hCellsOverlayAvrgCharge->ProjectionXY("hCellsOverlayAvrgChargeNentries","b");
-        hCellsOverlayAvrgChargeNentries->Draw("colz");
-        hCellsOverlayAvrgChargeNentries->GetZaxis()->SetTitle("number of entries");
-        histSaver->SaveHistogram(hCellsOverlayAvrgChargeNentries,false,false);
-        delete hCellsOverlayAvrgChargeNentries;
-        ////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
-        //		cout<<"Set Name: "<<hCellsOverlayAvrgCharge<<endl;
-        ////		hCellsOverlayAvrgCharge->SetTitle("Avrg PH - overlayed");
-        //		histSaver->SaveHistogram(hCellsOverlayAvrgCharge);
-        //		delete hCellsOverlayAvrgCharge ;
-    }
-    if(hCellsOverlayAvrgChargeGoodCells){
-        cout<<hCellsOverlayAvrgChargeGoodCells->IsZombie()<<endl;
-        cout<<hCellsOverlayAvrgChargeGoodCells->GetEntries()<<endl;
-        TString name = "hCellsOverlayAvrgChargeGoodCells_cl";
-        name.Append(appendix);
-        TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeGoodCells->Clone(name);
-        cout<<"SAVE"<<endl;
-        histSaver->SaveHistogram(histo);
-        delete histo;
-        TH2D* hCellsOverlayAvrgChargeGoodCellsNentries = hCellsOverlayAvrgChargeGoodCells->ProjectionXY("hCellsOverlayAvrgChargeGoodCellsNentries","b");
-        hCellsOverlayAvrgChargeGoodCellsNentries->Draw("colz");
-        hCellsOverlayAvrgChargeGoodCellsNentries->GetZaxis()->SetTitle("number of entries");
-        histSaver->SaveHistogram(hCellsOverlayAvrgChargeGoodCellsNentries,false,false);
-        delete hCellsOverlayAvrgChargeGoodCellsNentries;
-    }
+	cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge]"<<endl;
+	cout<<hCellsOverlayAvrgCharge<<endl;
+	if(hCellsOverlayAvrgCharge){
+		cout<<hCellsOverlayAvrgCharge->IsZombie()<<endl;
+		cout<<hCellsOverlayAvrgCharge->GetEntries()<<endl;
+		TString name = "hCellsOverlayAvrgCharge_cl";
+		name.Append(appendix);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgCharge->Clone(name);
+		cout<<"SAVE"<<endl;
+		histo->Draw("goffcolz");
+		histo->GetZaxis()->SetRangeUser(700,1200);
+		histSaver->SaveHistogram(histo);
+		delete histo;
+		////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
+		//		cout<<"Set Name: "<<hCellsOverlayAvrgCharge<<endl;
+		////		hCellsOverlayAvrgCharge->SetTitle("Avrg PH - overlayed");
+		//		histSaver->SaveHistogram(hCellsOverlayAvrgCharge);
+		//		delete hCellsOverlayAvrgCharge ;
+	}
+	if(hCellsOverlayAvrgChargeGoodCells){
+		cout<<hCellsOverlayAvrgChargeGoodCells->IsZombie()<<endl;
+		cout<<hCellsOverlayAvrgChargeGoodCells->GetEntries()<<endl;
+		TString name = "hCellsOverlayAvrgChargeGoodCells_cl";
+		name.Append(appendix);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeGoodCells->Clone(name);
+		cout<<"SAVE"<<endl;
+		histo->Draw("goffcolz");
+		histo->GetZaxis()->SetRangeUser(700,1200);
+		histSaver->SaveHistogram(histo);
+		delete histo;
+	}
+	if(hCellsOverlayAvrgChargeBadCells){
+		cout<<hCellsOverlayAvrgChargeBadCells->IsZombie()<<endl;
+		cout<<hCellsOverlayAvrgChargeBadCells->GetEntries()<<endl;
+		TString name = "hCellsOverlayAvrgChargeBadCells_cl";
+		name.Append(appendix);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeBadCells->Clone(name);
+		cout<<"SAVE"<<endl;
+		histo->Draw("goffcolz");
+		histo->GetZaxis()->SetRangeUser(300,1200);
+		histSaver->SaveHistogram(histo);
+		delete histo;
+	}
+	if(hCellsOverlayAvrgChargeMinusBadCells){
+		cout<<hCellsOverlayAvrgChargeMinusBadCells->IsZombie()<<endl;
+		cout<<hCellsOverlayAvrgChargeMinusBadCells->GetEntries()<<endl;
+		TString name = "hCellsOverlayAvrgChargeMinusBadCells_cl";
+		name.Append(appendix);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeMinusBadCells->Clone(name);
+		cout<<"SAVE"<<endl;
+		histo->Draw("goffcolz");
+		histo->GetZaxis()->SetRangeUser(700,1200);
+		histSaver->SaveHistogram(histo);
+		delete histo;
+	}
+	if(hCellsOverlayAvrgChargeNoColumnHit){
+		TString name = "hCellsOverlayAvrgChargeNoColumnHit_cl";
+		name.Append(appendix);
+		TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeNoColumnHit->Clone(name);
+		histo->SetTitle("Avrg PH - overlayed - no hit in columns");
+		cout<<"SAVE"<<endl;
+		histo->Draw("goffcolz");
+		histo->GetZaxis()->SetRangeUser(700,1200);
+		histSaver->SaveHistogram(histo);
+		delete histo;
+		//		hCellsOverlayAvrgChargeNoColumnHit->SetName("hCellsOverlayAvrgChargeNoColumns");
+		//		hCellsOverlayAvrgChargeNoColumnHit->SetTitle("Avrg PH - overlayed - no hit in columns");
+		//		histSaver->SaveHistogram(hCellsOverlayAvrgChargeNoColumnHit);
+		//		delete hCellsOverlayAvrgChargeNoColumnHit;
+	}
+	//		hCellsOverlayPulseHeight->Project3D("xy");
 
     if(hCellsOverlayAvrgChargeMinusBadCells){
         cout<<hCellsOverlayAvrgChargeMinusBadCells->IsZombie()<<endl;
