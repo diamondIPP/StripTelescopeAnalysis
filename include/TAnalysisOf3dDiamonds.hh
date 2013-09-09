@@ -407,6 +407,10 @@ private:
 	vector<TH1F*> hTransparentAnalysisRelativeAddedChargeBadCells;
 	vector<TProfile2D*> hTransparentAnalysisRelativeAddedChargeProfile;
 
+    vector<TH1F*> hTransparentAnalysisRelativeCharge;
+    vector<TH1F*> hTransparentAnalysisRelativeChargeGoodCells;
+    vector<TH1F*> hTransparentAnalysisRelativeChargeBadCells;
+    vector<TProfile2D*> hTransparentAnalysisRelativeChargeProfile;
 
     vector<TH1F*> hTransparentAnalysisTransparentChargeWithoutEdge;
     vector<TH1F*> hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge;
@@ -422,6 +426,13 @@ private:
     vector<TH1F*> hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge;
     vector<TH1F*> hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge;
     vector<TProfile2D*> hTransparentAnalysisRelativeAddedChargeProfileWithoutEdge;
+
+    vector<TH1F*> hTransparentAnalysisTransparentRelativeHitChannel;
+    vector<TH1F*> hTransparentAnalysisTransparentRelativeHitChannelGoodCells;
+    vector<TH1F*> hTransparentAnalysisTransparentRelativeHitChannelBadCells;
+    vector<TProfile2D*> hTransparentAnalysisTransparentRelativeHitChannelProfile;
+
+
     UInt_t maxClusterSize3d;
 };
 
