@@ -2176,17 +2176,26 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
     Int_t yBins = hCellsLandau.at(0)->GetNbinsX();
     Float_t yMin = hCellsLandau.at(0)->GetBinLowEdge(1);
     Float_t yMax = hCellsLandau.at(0)->GetBinLowEdge(yBins) + hCellsLandau.at(0)->GetBinWidth(yBins);
-
+    TString appendix ="";
+    if (settings->do3dTransparentAnalysis())
+        appendix+="_trans";
     TString name = "hCellsLandau2DHighlightedQuarterFail";
+    name.Append(appendix);
     TH2D* hCellsLandau2DHighlightedQuarterFail = new TH2D(name,name,settings->GetNCells3d(),0,settings->GetNCells3d(),yBins,yMin,yMax);
     hCellsLandau2DHighlightedQuarterFail->GetXaxis()->SetTitle("Cell");
     hCellsLandau2DHighlightedQuarterFail->GetYaxis()->SetTitle("Charge ADC");
-    TH2D* hCellsLandau2DHighlightedQuarterFailSorted = (TH2D*)hCellsLandau2DHighlightedQuarterFail->Clone("hCellsLandau2DHighlightedQuarterFailSorted");
+    name ="hCellsLandau2DHighlightedQuarterFailSorted";
+    name.Append(appendix);
+    TH2D* hCellsLandau2DHighlightedQuarterFailSorted = (TH2D*)hCellsLandau2DHighlightedQuarterFail->Clone(name);
     vector<TH1F*> hCellLandausSorted = hCellsLandau;
     sort(hCellLandausSorted.begin(), hCellLandausSorted.end(), TSettings::SorterForPulseHeightOfHisto);
 
-    TH2D* hHighlightedQuarterFail = new TH2D("hHighlightedQuarterFail","",settings->GetNCells3d(),0,settings->GetNCells3d(),1,yMin,yMax);
-    TH2D* hHighlightedQuarterFailSorted = (TH2D*) hHighlightedQuarterFail->Clone("hHighlightedQuarterFailSorted");
+    name = "hHighlightedQuarterFail";
+    name.Append(appendix);
+    TH2D* hHighlightedQuarterFail = new TH2D(name,name,settings->GetNCells3d(),0,settings->GetNCells3d(),1,yMin,yMax);
+    name = "hHighlightedQuarterFailSorted";
+    name.Append(appendix);
+    TH2D* hHighlightedQuarterFailSorted = (TH2D*) hHighlightedQuarterFail->Clone(name);
     //hCellsLandau2DQuarterFail->GetXaxis()->SetTitle("Charge ADC");
     //hCellsLandau2DQuarterFail->GetYaxis()->SetTitle("Cell");
     for (UInt_t pos = 0 ; pos < settings->GetNCells3d(); pos ++){
@@ -2212,7 +2221,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
         hHighlightedQuarterFailSorted->SetBinContent(pos,1,CellGrading.at(cellSorted));
     }
 
-    TCanvas* cCellsLandau2DHighlightedQuarterFail = new TCanvas("cCellsLandau2DHighlightedQuarterFail","cCellsLandau2DHighlightedQuarterFail");
+    name = "cCellsLandau2DHighlightedQuarterFail";
+    name.Append(appendix);
+    TCanvas* cCellsLandau2DHighlightedQuarterFail = new TCanvas(name,name);
     cCellsLandau2DHighlightedQuarterFail->cd();
     //hCellsLandau2DHighlightedQuarterFail->SetEntries(hCellsLandau2DEntries);
     hCellsLandau2DHighlightedQuarterFail->SetStats(kFALSE);
@@ -2223,7 +2234,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
     histSaver->SaveCanvas(cCellsLandau2DHighlightedQuarterFail);
     delete cCellsLandau2DHighlightedQuarterFail;
 
-    cCellsLandau2DHighlightedQuarterFail = new TCanvas("cCellsLandau2DHighlightedQuarterFailSorted","cCellsLandau2DHighlightedQuarterFail - sorted");
+    name = "cCellsLandau2DHighlightedQuarterFailSorted";
+    name.Append(appendix);
+    cCellsLandau2DHighlightedQuarterFail = new TCanvas(name,"cCellsLandau2DHighlightedQuarterFail - sorted"+appendix);
     cCellsLandau2DHighlightedQuarterFail->cd();
     //hCellsLandau2DHighlightedQuarterFail->SetEntries(hCellsLandau2DEntries);
     hCellsLandau2DHighlightedQuarterFailSorted->SetStats(kFALSE);
@@ -2421,61 +2434,85 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading(
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
-
+    cout<<"[TAnalysisOf3dDiamons::LongAnalysis_SaveGoodAndBadCellLandaus]"<<endl;
     TString appendix ="";
     if (settings->do3dTransparentAnalysis())
         appendix ="_trans";
-
-    TString name = "hLandauBadCells";
-    name.Append(appendix);
-    TH1F* hLandauBadCells = (TH1F*)hCellsLandau.at(0)->Clone(name);
-    hLandauBadCells->SetTitle("Landau of bad cells");
-    name = "hLandauGoodCells";
-    name.Append(appendix);
-    TH1F* hLandauGoodCells = (TH1F*)hCellsLandau.at(0)->Clone(name);
-    hLandauGoodCells->SetTitle("Landau of good cells");
+    TList *listGoodCells = new TList;
+    TList *listBadCells = new TList;
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
         for(UInt_t row=0;row<settings->getNRows3d();row++){
             Int_t cell = settings->get3DCellNo((int)column,row);
             //hCellNumbering->SetBinContent(column+1,row+1,cell); //This should be a clone of the 2D Cell Mean Charge Plot, Wait till Felix has finished.
-            //histSaver->SaveHistogram(hCellsLandau.at(cell));
-
+            histSaver->SaveHistogram(hCellsLandau.at(cell));
             for(UInt_t i=0; i<settings->getBadCells3D().size(); i++)
                 if(cell==settings->getBadCells3D().at(i)){
-                    Int_t Entries = hLandauBadCells->GetEntries();
-                    hLandauBadCells->Add(hCellsLandau.at(cell));	//Not working for some reason, ask Felix
-                    hLandauBadCells->SetEntries(Entries+hCellsLandau.at(cell)->GetEntries());
+//                    Int_t Entries = hLandauBadCells->GetEntries();
+//                    hLandauBadCells->Add(hCellsLandau.at(cell),1);	//Not working for some reason, ask Felix
+//                    hLandauBadCells->SetEntries(Entries+hCellsLandau.at(cell)->GetEntries());
+                    listBadCells->Add(hCellsLandau.at(cell));
+//                    cout<<"\tbad"<<endl;
                 }
             for(UInt_t i=0; i<settings->getGoodCellRegions3d().size(); i++){
                 for(UInt_t j=0; j<settings->getGoodCellRegions3d().at(i).size(); j++)
                     if(cell==settings->getGoodCellRegions3d().at(i).at(j)){
-                        Int_t Entries = hLandauGoodCells->GetEntries();
-                        hLandauGoodCells->Add(hCellsLandau.at(cell));	//Not working for some reason, ask Felix
-                        hLandauGoodCells->SetEntries(Entries+hCellsLandau.at(cell)->GetEntries());
+//                        Int_t Entries = hLandauGoodCells->GetEntries();
+//                        hLandauGoodCells->Add(hCellsLandau.at(cell));	//Not working for some reason, ask Felix
+//                        hLandauGoodCells->SetEntries(Entries+hCellsLandau.at(cell)->GetEntries());
+                        listGoodCells->Add(hCellsLandau.at(cell));
+//                        cout<<"\tgood"<<endl;
                     }
             }
         }
     }
+    cout<<"List Good Cells: "<<listGoodCells->GetEntries()<<endl;
+    listGoodCells->Print();
+    cout<<"\nList Bad Cells: "<<listBadCells->GetEntries()<<endl;
+    listBadCells->Print();
+
+    TString name = "hLandauBadCells";
+    name.Append(appendix);
+    TH1F* hLandauBadCells = new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandauBadCells->SetTitle("Landau of bad cells");
+    hLandauBadCells->GetXaxis()->SetTitle("pulse height /adc");
+    hLandauBadCells->GetXaxis()->SetTitle("number of entries #");
+    hLandauBadCells->Reset();
+    hLandauBadCells->Merge(listBadCells);
+    histSaver->SaveHistogram(hLandauBadCells);
+
+    name = "hLandauGoodCells";
+    name.Append(appendix);
+    TH1F* hLandauGoodCells = new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandauGoodCells->SetTitle("Landau of good cells");
+    hLandauGoodCells->GetXaxis()->SetTitle("pulse height /adc");
+    hLandauGoodCells->GetXaxis()->SetTitle("number of entries #");
+    hLandauGoodCells->Reset();
+    hLandauGoodCells->Merge(listGoodCells);
+    histSaver->SaveHistogram(hLandauGoodCells);
+
+
+    cout<<"hLandauGoodCells: "<<hLandauGoodCells->GetEntries()<<endl;
+    cout<<"hLandauStrip:     "<<hLandauStrip->GetEntries()<<endl;
+
     Float_t factor = hLandauGoodCells->GetBinContent(hLandauGoodCells->GetMaximumBin());
     factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
     name = "cLandauGoodCells";
     name.Append(appendix);
-    histSaver->SaveTwoHistos(name,hLandauGoodCells,hLandauStrip,factor);
-    name = "hLandauGoodCellsNormalized";
+    histSaver->SaveTwoHistos(name,hLandauGoodCells,hLandauStrip,factor,"right");
+
+    name = "cLandauGoodCellsNormalized";
     name.Append(appendix);
-    histSaver->SaveTwoHistosNormalized(name,hLandauGoodCells,hLandauStrip);
+    histSaver->SaveTwoHistosNormalized(name,hLandauGoodCells,hLandauStrip,1,"right");
 
     factor = hLandauBadCells->GetBinContent(hLandauBadCells->GetMaximumBin());
     factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
     name = "cLandauBadCells";
     name.Append(appendix);
-    histSaver->SaveTwoHistos(name,hLandauBadCells,hLandauStrip,factor);
-    //Histogram(hLandauBadCells);
+    histSaver->SaveTwoHistos(name,hLandauBadCells,hLandauStrip,factor,"right");
     name = "cLandauBadCellsNormalized";
     name.Append(appendix);
-    histSaver->SaveTwoHistosNormalized(name,hLandauBadCells,hLandauStrip);
-
+    histSaver->SaveTwoHistosNormalized(name,hLandauBadCells,hLandauStrip,1,"right");
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
