@@ -74,6 +74,8 @@ public:
 	void SaveHistogramLandau(TH1F* histo);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TF1* pol);
+    void Save1DProfileXWithFitAndInfluence(TH2* histo, TString function);
+    void Save1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);
@@ -86,7 +88,7 @@ public:
 	void SaveGraphPNG(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramFitGaussPNG(TH1* histo);
 	void SaveHistogramROOT(TH1* histo);
-	void SaveHistogramROOT(TH2* histo);
+	void SaveHistogramROOT(TH2* histo,bool iptimizeRange=true);
 	void SaveHistogramROOT(TH3F* histo);
 	void SaveGraphROOT(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPDF(TH1F* histo);

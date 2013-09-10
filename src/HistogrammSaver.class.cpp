@@ -790,7 +790,7 @@ void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRa
 			histo->SetStats(false);
 //	histo->SetStats(false);
 	SaveHistogramPNG(histo,optimizeRange);
-	SaveHistogramROOT(histo);
+	SaveHistogramROOT(histo,optimizeRange);
 }
 
 void HistogrammSaver:: Save1DProfileYWithFitAndInfluence(TH2* histo, TString function){
@@ -821,6 +821,38 @@ void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit){
 		delete prof;
 		prof = 0;
 	}
+
+}
+
+
+void HistogrammSaver:: Save1DProfileXWithFitAndInfluence(TH2* histo, TString function){
+    TString name = "fit_" + (TString)histo->GetName();
+    TF1* fit = new TF1(name,function);
+    return Save1DProfileXWithFitAndInfluence(histo,fit);
+}
+
+void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit){
+    if(!fit)
+        fit = new TF1("fit","pol1");
+    TProfile *prof=0;
+    if(!htemp)
+        return;
+    prof = htemp->ProfileX();
+    if(prof){
+        TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );
+        prof->Fit(fit);
+        Float_t xmin = prof->GetXaxis()->GetXmin();
+        Float_t xmax = prof->GetXaxis()->GetXmax();
+        Float_t ymin = fit->GetMinimum(xmin,xmax);
+        Float_t ymax = fit->GetMaximum(xmin,xmax);
+        TPaveText *text = new TPaveText(.2,.2,.5,.3,"brNDC");
+        text->SetFillColor(0);
+        text->AddText(TString::Format("relative Influence: #frac{#Delta_{x}}{x_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
+        text->Draw("same");
+        SaveCanvas(c1);
+        delete prof;
+        prof = 0;
+    }
 
 }
 
@@ -1045,7 +1077,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange) {
 	if (plots_canvas) delete plots_canvas;
 }
 
-void HistogrammSaver::SaveHistogramROOT(TH2* histo) {
+void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange) {
 	if(!histo){
 		cerr<<"HistogrammSaver::SaveHistogramROOT(TH2*) histogram == 0"<<endl;
 		return;
@@ -1059,7 +1091,8 @@ void HistogrammSaver::SaveHistogramROOT(TH2* histo) {
 	if(htemp==0)
 		return;
 	htemp->Draw();
-	HistogrammSaver::OptimizeXYRange(htemp);
+	if(optimizeRange)
+	    HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
