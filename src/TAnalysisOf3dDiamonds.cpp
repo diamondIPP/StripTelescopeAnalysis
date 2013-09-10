@@ -3040,6 +3040,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillRelativeAddedTransparentCharge() {
     Float_t charge5 = transparentCluster.getCharge();
     Float_t charge = 0;
     Int_t realHitChannel = (Int_t)(transparentCluster.GetTransparentHitPosition()+.5);
+    pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
+    bool isInEdgeRegion =  settings->IsOnTheEdgeOfCell(relPos.first,relPos.second);
     for(UInt_t i = 0; i < transparentCluster.size(); i++){
         UInt_t clusterSize = i+1;
         transparentCluster.SetTransparentClusterSize(clusterSize);
@@ -3072,14 +3074,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillRelativeAddedTransparentCharge() {
         }
 
         if (settings->IsGoodCell(diamondPattern, cell.first)){
+
             hTransparentAnalysisTransparentChargeGoodCells[i]->Fill(charge);
             hTransparentAnalysisTransparentAddedChargeGoodCells[i]->Fill(addedCharge);
             hTransparentAnalysisRelativeAddedChargeGoodCells[i]->Fill(relAddedCharge);
             hTransparentAnalysisRelativeChargeGoodCells[i]->Fill(relCharge);
             hTransparentAnalysisTransparentRelativeHitChannelGoodCells[i]->Fill(relativeHitChannel-realHitChannel);
         }
-        pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
-        bool isInEdgeRegion =  settings->IsOnTheEdgeOfCell(relPos.first,relPos.second);
         if (!isInEdgeRegion){
             hTransparentAnalysisTransparentChargeWithoutEdge[i]->Fill(charge);
             hTransparentAnalysisTransparentAddedChargeWithoutEdge[i]->Fill(addedCharge);
@@ -3093,12 +3094,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillRelativeAddedTransparentCharge() {
                 hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]->Fill(charge);
                 hTransparentAnalysisTransparentAddedChargeBadCellsWithoutEdge[i]->Fill(addedCharge);
                 hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge[i]->Fill(relAddedCharge);
+
+                if(i==0 && charge < 500)
+                    hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells->Fill(xPredDet,yPredDet);
             }
 
             if (settings->IsGoodCell(diamondPattern, cell.first)){
                 hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i]->Fill(charge);
                 hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge[i]->Fill(addedCharge);
                 hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge[i]->Fill(relAddedCharge);
+                if(i==0 && charge < 500)
+                    hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells->Fill(xPredDet,yPredDet);
             }
         }
         //			cout<<"\t"<<i<<"\t"<<transparentCluster.getCharge()<<"\t"<<transparentCluster.getCharge()/charge1<<endl;
@@ -3197,6 +3203,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitialiseRelativeAddedTransparentCharg
         name = TString::Format("hTransparentAnalysisTransparentRelativeHitPositionProfile_%02d",clusterSize);
         hTransparentAnalysisTransparentRelativeHitChannelProfile.push_back(histSaver->GetProfile2dBinedInCells(name,2));
     }
+
+    TString name = TString::Format("hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells");
+    hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells = histSaver->GetHistoBinedInCells(name,8);
+    hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells->SetTitle("BadCell PH_{1ch}<500ADC");
+    name = TString::Format("hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells");
+    hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells = histSaver->GetHistoBinedInCells(name,8);
+    hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells->SetTitle("GoodCell PH_{1ch}<500ADC");
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
@@ -3293,7 +3306,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
             histSaver->SaveHistogramWithCellGrid(hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge[i]);
         delete hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge[i];
 
-
         if(settings->do3dTransparentAnalysis())
             histSaver->SaveHistogram(hTransparentAnalysisTransparentRelativeHitChannel[i]);
         delete hTransparentAnalysisTransparentRelativeHitChannel[i];
@@ -3308,6 +3320,20 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
         delete hTransparentAnalysisTransparentRelativeHitChannelProfile[i];
 
     }
+
+    if(settings->do3dTransparentAnalysis()){
+        cout<<"hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells: "<<hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells<<endl;
+        histSaver->SaveHistogram(hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells,false,false);
+    }
+    delete hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells;
+
+
+    if(settings->do3dTransparentAnalysis()){
+        cout<<"hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells: "<<hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells<<endl;
+        histSaver->SaveHistogram(hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells,false,false);
+    }
+    delete hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells;
+
     hTransparentAnalysisRelativeAddedCharge.clear();
     hTransparentAnalysisRelativeAddedChargeBadCells.clear();
     hTransparentAnalysisRelativeAddedChargeGoodCells.clear();
@@ -3370,6 +3396,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateRelativeAddedTransparentChargeCom
 
 	if(settings->do3dShortAnalysis()){
 		TString name = TString::Format("hTransparentAnalysisTransparentChargeWithoutEdgeBadCellsComparison_DiamondPattern2_to_ClusterSize1");
+		hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[0]->SetLineColor(kRed);
+        histSaver->SaveTwoHistos((string)name,hLandau[1],hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[0]);
+
+        name = TString::Format("hTransparentAnalysisTransparentChargeWithoutEdgeBadCellsComparison_DiamondPattern2_to_ClusterSize1_normalized");
 		histSaver->SaveTwoHistosNormalized((string)name,hLandau[1],hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[0]);
 	}
 

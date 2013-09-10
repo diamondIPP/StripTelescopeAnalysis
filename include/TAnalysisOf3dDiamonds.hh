@@ -418,6 +418,8 @@ private:
     vector<TH1F*> hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge;
     vector<TH1F*> hTransparentAnalysisTransparentChargeBadCellsWithoutEdge;
     vector<TProfile2D*> hTransparentAnalysisTransparentChargeProfileWithoutEdge;
+    TH2D* hTransparentAnalysisTransparentSmallChargeInFirstChannelBadCells;
+    TH2D* hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells;
 
     vector<TH1F*> hTransparentAnalysisTransparentAddedChargeWithoutEdge;
     vector<TH1F*> hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge;
