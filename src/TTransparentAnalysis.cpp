@@ -1154,7 +1154,7 @@ void TTransparentAnalysis::saveHistograms() {
 			hLandauVsEventNo->GetXaxis()->SetTitle("Event no.");
 			hLandauVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
 			histSaver->SaveHistogram(hLandauVsEventNo);
-			histSaver->Save1DProfileYWithFitAndInfluence(hLandauVsEventNo,"pol1");
+			histSaver->Save1DProfileXWithFitAndInfluence(hLandauVsEventNo,"pol1");
 			if (hLandauVsEventNo)
 				delete hLandauVsEventNo;
 		}
