@@ -54,7 +54,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
 				currentStyle2D->SetOptStat("ne");
 				currentStyle2D ->SetPalette(1);
 				currentStyle->cd();
-				gROOT->SetStyle("Plain_RD42");
+//				gROOT->SetStyle("Plain_RD42");
 			}
 		}
 
@@ -121,8 +121,9 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 }
 
 
-void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, UInt_t verbosity){
+void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, TString position, UInt_t verbosity){
 	cout<<"Save2HistosNormalized: "<<histo1<<" "<<histo2<<endl;
+	bool internalVerbose = false;
 	if(!histo1&&!histo2)return;
 	if(!histo1||!histo2){
 		if (histo1) SaveHistogram(histo1);
@@ -131,6 +132,7 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 	}
 	cout<<"Save2HistosNormalized: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
 	TCanvas *c1 = new TCanvas(canvasName,canvasName);
+	cout<<"new Canvas: "<<c1->GetName()<<endl;
 	c1->cd();
 	c1->SetObjectStat(false);
 	Float_t min1 = histo1->GetMinimum()/histo1->Integral();;
@@ -153,44 +155,49 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 	if(max2*refactorSecond>max1)
 		refactorSecond=max2/max1*0.5;
 	if(refactorSecond!=1)histo2->Scale(refactorSecond);
-	if (verbosity>2) cout<<"min: "<<min<<" max: "<<max;
-	if (verbosity>2) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<max1<<"\thisto2:"<<max2<<flush;
-	if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
+	if (verbosity>2||internalVerbose) cout<<"min: "<<min<<" max: "<<max;
+	if (verbosity>2||internalVerbose) cout<<" refactorSecond:"<<refactorSecond<<"\thisto1:"<<max1<<"\thisto2:"<<max2<<flush;
+	if (verbosity>2||internalVerbose) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
 	histo1->SetStats(false);
 	histo2->SetStats(false);
 	TH1F* histo1Normalized;
 	TH1F* histo2Normalized;
 	if(max1>max2){
-		if (verbosity>2) cout<<"\tdraw1-"<<flush;
+		if (verbosity>2||internalVerbose) cout<<"\tdraw1-"<<flush;
 		histo1Normalized = (TH1F*)((TH1F*)(histo1->Clone()))->DrawNormalized("");
 		if(histo1Normalized)
 			histo1Normalized->GetYaxis()->SetRangeUser(min,max);
 		else
 			histo1->GetYaxis()->SetRangeUser(min,max);
-		if (verbosity>2) cout<<"draw2 "<<flush;
-		histo2Normalized = (TH1F*)((TH1F*)(histo2->Clone()))->DrawNormalized("");
+		if (verbosity>2||internalVerbose) cout<<"draw2 "<<flush;
+		histo2Normalized = (TH1F*)((TH1F*)(histo2->Clone()))->DrawNormalized("same");
 		//		histo2->GetYaxis()->SetRangeUser(min,max);
 	}
 	else{
-		if (verbosity>2) cout<<"\tdraw2-"<<flush;
+		if (verbosity>2||internalVerbose) cout<<"\tdraw2-"<<flush;
 		histo2Normalized = (TH1F*)((TH1F*)(histo2->Clone()))->DrawNormalized("");
 		if (histo2Normalized)
 			histo2Normalized->GetYaxis()->SetRangeUser(min,max);
 		else
 			histo2->GetYaxis()->SetRangeUser(min,max);
-		if (verbosity>2) cout<<"draw1 "<<flush;
+		if (verbosity>2||internalVerbose) cout<<"draw1 "<<flush;
 		histo1Normalized =  (TH1F*)((TH1F*)(histo1->Clone()))->DrawNormalized("same");
 		//		histo1->GetYaxis()->SetRangeUser(min,max);
 	}
 	c1->Update();
 //	TVirtualPad *pad =c1->GetPad(0);
-	if (verbosity>2) cout<<"MIN: "<<min<<"-->";
+	if (verbosity>2||internalVerbose) cout<<"MIN: "<<min<<"-->";
 	min=(double)(min/refactorSecond);
-	if (verbosity>2) cout<<min<<"\t\tMAX: "<<max<<"--->";
+	if (verbosity>2||internalVerbose) cout<<min<<"\t\tMAX: "<<max<<"--->";
 	max = (double)(max/refactorSecond);
-	if (verbosity>2) cout<<max<<endl;
+	if (verbosity>2||internalVerbose) cout<<max<<endl;
 	c1->Update();
-	TLegend *leg =new TLegend(0.52,0.75,0.9,0.9);
+	TLegend *leg;
+	position.ToLower();
+	if (position== "right")
+	    leg = new TLegend(0.52,0.75,0.9,0.95);
+	else
+	 leg =new TLegend(0.1,0.75,0.4,0.9);
 	leg->SetFillColor(kWhite);
 	leg->SetHeader("Legend");
 //	if(histo1Normalized)
@@ -204,12 +211,13 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 		if(histo2&&!histo2->IsZombie())
 		leg->AddEntry(histo2,histo2->GetName());
 	leg->Draw("same");
-	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
-	pt2->Draw("same");
+//	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
+//	pt2->Draw("same");
 	c1->Update();
+	cout<<"Save Canvas "<< c1<<": "<<c1->GetName()<<endl;
 	SaveCanvas(c1);
 }
-void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, UInt_t verbosity)
+void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, TString position, UInt_t verbosity)
 {
 	cout<<"Save2Histos: "<<histo1<<" "<<histo2<<endl;
 	if(!histo1&&!histo2)return;
@@ -290,7 +298,13 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
 	axis->SetTitle(histo2->GetYaxis()->GetTitle());
 	axis->Draw("same");
 	c1->Update();
-	TLegend *leg =new TLegend(0.1,0.75,0.48,0.9);
+	TLegend *leg;
+
+    position.ToLower();
+    if (position== "right")
+        leg = new TLegend(0.52,0.75,0.9,0.95);
+    else
+     leg =new TLegend(0.1,0.75,0.48,0.9);
 	leg->SetFillColor(kWhite);
 	leg->SetHeader("Legend");
 	leg->AddEntry(histo1,histo1->GetName());
@@ -769,13 +783,13 @@ void HistogrammSaver::SaveHistogramLogZ(TH2* histo){
 	delete c1;
 }
 
-void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox) {
+void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRange) {
 	if (!histo)return;
 	if(histo->GetEntries()==0)return;
 	if (!drawStatBox)
 			histo->SetStats(false);
 //	histo->SetStats(false);
-	SaveHistogramPNG(histo);
+	SaveHistogramPNG(histo,optimizeRange);
 	SaveHistogramROOT(histo);
 }
 
@@ -1003,7 +1017,7 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
 
 }
 
-void HistogrammSaver::SaveHistogramPNG(TH2* histo) {
+void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange) {
 
 	if(!histo){
 		cerr<<"HistogrammSaver::SaveHistogramPNG(TH2*), histogram ==0"<<endl;
@@ -1016,7 +1030,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo) {
 	plots_canvas->Clear();
 	plots_canvas->cd();
 	TH2* htemp = (TH2*)histo->Clone();
-	HistogrammSaver::OptimizeXYRange(htemp);
+	if(optimizeRange) HistogrammSaver::OptimizeXYRange(htemp);
 	htemp->Draw("colz");
 
 	TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));

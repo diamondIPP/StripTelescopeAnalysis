@@ -901,7 +901,7 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 	Float_t max = TMath::Max(histoLeft->GetMaximum(),histoRight->GetMaximum());
 	if (histoLeft) histoLeft->SetMaximum(max);
 	if (histoRight) histoRight->SetMaximum(max);
-	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
+	histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.);
 	if(histoLeft) delete histoLeft;
 	if(histoRight) delete histoRight;
 
@@ -926,7 +926,7 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 	name.str("");name.clear();
 	name<<"cSignalOfSignalsAdjacentToEta";
 	if (histoLeft && histoRight)
-		histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.,false);
+		histSaver->SaveTwoHistos(name.str(),histoLeft,histoRight,1.);
 	if(histoLeft) delete histoLeft;
 	if(histoRight) delete histoRight;
 

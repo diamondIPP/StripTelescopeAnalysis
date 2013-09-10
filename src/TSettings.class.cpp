@@ -574,7 +574,7 @@ void TSettings::LoadSettings(){
         }
         if(key == "goodCells3d"){
         	cout<<key<<"="<<value<<endl;
-        	ParseCellArray(key,value,goodCells3d);
+        	ParseCellArray(key,value,goodCells3d,goodCellRegions3d);
         }
 
         if(key == "deadCell3d"){
@@ -868,6 +868,26 @@ void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells){
 		vecCells.push_back(cellNo);
 		if (verbosity) cout<< "add cell "<<cellPosition.first << cellPosition.second<<" --> "<<cellNo<<endl;
 	}
+	//todo@ Felix: Create Print of all cells:
+	cout<<"Cells of key '"<<key<<"': TODO"<<endl;
+//	cout<<"DONE"<<endl;
+//	char t; cin>>t;
+
+}
+
+void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells, vector< vector<int> > &PtrvecCells){
+//	cout << key.c_str() << " = " << value.c_str() << endl;
+	std::vector <std::string> stringArray;
+	ParseStringArray(key, value,stringArray);
+	vecCells.clear();
+	for(UInt_t i=0;i<stringArray.size();i++){
+		string str = stringArray.at(i);
+		pair<char,int> cellPosition = ParseCellPosition(str);
+		int cellNo =get3DCellNo(cellPosition);
+		vecCells.push_back(cellNo);
+		if (verbosity) cout<< "add cell "<<cellPosition.first << cellPosition.second<<" --> "<<cellNo<<endl;
+	}
+	PtrvecCells.push_back(vecCells);
 	//todo@ Felix: Create Print of all cells:
 	cout<<"Cells of key '"<<key<<"': TODO"<<endl;
 //	cout<<"DONE"<<endl;
@@ -2270,11 +2290,16 @@ bool TSettings::isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet) {
  */
 bool TSettings::IsGoodCell(UInt_t nDiamondPattern, Int_t cellNo){
 	if(nDiamondPattern == this->get3dWithHolesDiamondPattern()){
-		for ( UInt_t i=0; i < getGoodCells3D().size(); i++)
+		for ( UInt_t i=0; i < getGoodCellRegions3d().size(); i++){
+			for ( UInt_t j=0; j < getGoodCellRegions3d().at(i).size(); j++)
+				if ( cellNo == getGoodCellRegions3d().at(i).at(j)) {
+					return true;
+				}
+		}
+		/*for ( UInt_t i=0; i < getGoodCells3D().size(); i++)		//Changed by Iain 5/9/13
 			if ( cellNo == getGoodCells3D().at(i)) {
 				return true;
-			}
-
+			}*/
 	}
 	return false;
 }
