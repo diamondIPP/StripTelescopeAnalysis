@@ -122,6 +122,7 @@ private:
 
 	void LongAnalysis_InitialiseRelativeAddedTransparentCharge();
 	void LongAnalysis_SaveRelativeAddedTransparentCharge();
+	void LongAnalysis_CreateRelativeAddedTransparentChargeComparisonPlots();
 private:
 	bool isTransparentCluster;
 private:

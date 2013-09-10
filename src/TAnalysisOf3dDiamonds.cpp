@@ -1981,6 +1981,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     LongAnalysis_SaveGoodAndBadCellLandaus();
     LongAnalysis_SaveCellsOverlayMeanCharge();
     LongAnalysis_SaveMeanChargePlots();
+    LongAnalysis_CreateRelativeAddedTransparentChargeComparisonPlots();
     LongAnalysis_SaveRelativeAddedTransparentCharge();
     //LongAnalysis_SaveCellsClusterSize2DVsGrading();
     //LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
@@ -3344,3 +3345,33 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
     hTransparentAnalysisTransparentAddedChargeGoodCellsWithoutEdge.clear();
     hTransparentAnalysisTransparentAddedChargeProfileWithoutEdge.clear();
 }
+
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateRelativeAddedTransparentChargeComparisonPlots(){
+
+	for(int i=1; i<hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge.size(); i++){
+		TString Histo1Title = TString::Format("Cluster Size %i",i-1);
+		hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i-1]->SetName(Histo1Title);
+		TString Histo2Title = TString::Format("Cluster Size %i",i);
+		hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i]->SetName(Histo2Title);
+
+		TString name = TString::Format("hTransparentAnalysisTransparentChargeGoodCellsWithoutEdgeComparison%i_to_%i",i-1,i);
+		histSaver->SaveTwoHistos((string)name,hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i-1],hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i]);
+	}
+
+	for(int i=1; i<hTransparentAnalysisTransparentChargeBadCellsWithoutEdge.size(); i++){
+		TString Histo1Title = TString::Format("Cluster Size %i",i);
+		hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i-1]->SetName(Histo1Title);
+		TString Histo2Title = TString::Format("Cluster Size %i",i+1);
+		hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]->SetName(Histo2Title);
+
+		TString name = TString::Format("hTransparentAnalysisTransparentChargeBadCellsWithoutEdgeComparison%i_to_%i",i-1,i);
+		histSaver->SaveTwoHistos((string)name,hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i-1],hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]);
+	}
+
+	if(settings->do3dShortAnalysis()){
+		TString name = TString::Format("hTransparentAnalysisTransparentChargeWithoutEdgeBadCellsComparison_DiamondPattern2_to_ClusterSize1");
+		histSaver->SaveTwoHistosNormalized((string)name,hLandau[1],hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[0]);
+	}
+
+}
+
