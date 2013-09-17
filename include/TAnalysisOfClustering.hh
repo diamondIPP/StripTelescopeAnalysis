@@ -57,6 +57,14 @@ private:
 	void savePHHistos();
 
 	void initialiseHistos();
+
+    void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
+    void fillHistograms();
+    void fillPedestalsAndNoiseHistos();
+    void savePedestalHistos();
+    void saveNoiseHistos();
+
+
 	void checkForDeadChannels();
 	void compareCentroid_ChargeWeightedMean();
 	void analyseForSeeds();
@@ -65,6 +73,7 @@ private:
 	void checkForSaturatedChannels();
 	void analyseCluster();
 	void createPHDistribution();
+	void fillRelativeHitPosition();
 
 	void etaInvestigation();
 	void analyseAsymmetricSample();
@@ -131,6 +140,7 @@ private:
 	TH2F *hEtaDistributionVsSignalSum[9];
 	TH2F *hSignalLeftVsSignalRight[9];
 	TH2F *hPHDistribution[9];
+	TH1F *hRelativeHitPosition[9];
 private:
 	UInt_t nMaxClusters;
 	vector < vector <Float_t> > vecvecSignalLeftLeft;
@@ -143,6 +153,10 @@ private:
 	vector < vector <Float_t> > vecvecEta;
 	vector < vector <TCluster> > vecVecClusters;
 	vector<Float_t> vecClusterSize,vecMPV,vecClusterSizeError,vecWidth;
+
+    std::map< UInt_t, TProfile* > hPedestalVsEvenNo;
+    std::map< UInt_t, TProfile* > hNoiseVsEvenNo;
+    TProfile *hCmnVsEventNo;
 	UInt_t nInvalidReadout;
 	TResults* res;
 };

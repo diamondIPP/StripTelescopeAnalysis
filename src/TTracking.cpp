@@ -40,14 +40,14 @@ TTracking::~TTracking() {
 	delete alignmentFile;
 }
 
-TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPrint)
+TPositionPrediction *TTracking::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool cmnCorrection, bool bPrint)
 {
 	if(myTrack==0)
 		return 0;
 	if (this->getEvent() ==0)
 		cerr<<"pEvent pointer is null...."<<endl;
 	myTrack->setEvent(this->getEvent());
-	return myTrack->predictPosition(subjectPlane,vecRefPlanes,TCluster::corEta,bPrint);
+	return myTrack->predictPosition(subjectPlane,vecRefPlanes,cmnCorrection, TCluster::corEta,bPrint);
 }
 
 Float_t TTracking::getXPosition(UInt_t plane,bool cmnCorrected)

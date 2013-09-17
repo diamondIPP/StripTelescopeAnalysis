@@ -44,6 +44,7 @@
 #include "TText.h"
 #include "TFidCutRegions.hh"
 #include "TFiducialCut.hh"
+#include "THStack.h"
 
 //#include <sys/dirent.h>
 #include <sys/stat.h>
@@ -74,8 +75,12 @@ public:
 	void SaveHistogramLandau(TH1F* histo);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TF1* pol);
+    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function);
+    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol);
+    void Save1DProfileXWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
+	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
@@ -86,7 +91,7 @@ public:
 	void SaveGraphPNG(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramFitGaussPNG(TH1* histo);
 	void SaveHistogramROOT(TH1* histo);
-	void SaveHistogramROOT(TH2* histo);
+	void SaveHistogramROOT(TH2* histo,bool iptimizeRange=true);
 	void SaveHistogramROOT(TH3F* histo);
 	void SaveGraphROOT(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramPDF(TH1F* histo);

@@ -286,6 +286,7 @@ public:
 	UInt_t getAlignmentTrainingTrackNumber() const {return alignment_training_track_number;}
 	Float_t getAlignmentPrecisionOffset()const{return alignmentPrecision_Offset;}
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
+	UInt_t getAlignmentEvents(UInt_t nEvents);
 	bool resetAlignment() const{return bResetAlignment;};
 	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	UInt_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}

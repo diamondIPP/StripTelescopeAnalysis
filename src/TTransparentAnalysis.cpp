@@ -99,6 +99,8 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		char t;
 		cin >>t;
 	}
+
+    initPedestalAndNoiseHistos(nEvents);
 	predXMin = predYMin = 1e9;
 	predXMax = predYMax = -1e9;
 	//	usedForSiliconAlignment = 0;
@@ -395,6 +397,7 @@ void TTransparentAnalysis::fillHistograms() {
 	vecPredY.push_back(predYPosition);
 	vecPredictedChannel.push_back(positionInDetSystemChannelSpace);
 	vecPredictedDetectorPositionY.push_back(positionInDetSystemMetricY);
+	fillPedestalsAndNoiseHistos();
 
 	UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
 	for (UInt_t clusterSize = 0; clusterSize < maxSize; clusterSize++) {
@@ -474,6 +477,8 @@ void TTransparentAnalysis::fillHistograms() {
 	}
 	Float_t eventNo = eventReader->getEvent_number();
 	vectorEventNo.push_back(eventNo);
+	Float_t cmn = eventReader->getCMNoise();
+	vectorCMN.push_back(cmn);
 	//	hPredictedPositionInStrip->Fill();
 }
 
@@ -482,7 +487,7 @@ TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
 	if (histo->GetEntries()==0) return 0;
 	TF1* histofitx = new TF1("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
 	histofitx->SetLineColor(kBlue);
-	histo->Fit(histofitx,"rq");
+	histo->Fit(histofitx,"rQ");
 	return histofitx;
 }
 
@@ -1144,6 +1149,8 @@ void TTransparentAnalysis::saveHistograms() {
 	delete hSelectedTracksAvrgSiliconHitPos;
 	string name;
 	cout<<"&"<<endl;
+	savePedestalHistos();
+    saveNoiseHistos();
 	analyseEtaDistributions();
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		this->saveLandausVsPositionPlots(clusterSize+1);
@@ -1662,6 +1669,204 @@ void TTransparentAnalysis::analyseNonHitEvents() {
 		delete hNonHitNoiseDistributions2OutOfX[j];
 		delete hNonHitNoiseDistributions2OutOfXCMN[j];
 	}
+}
+
+void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
+    cout<<"initPedestalHistos"<<endl;
+    UInt_t start = settings->getAlignmentEvents(maxEvents);
+    UInt_t nBins = (maxEvents-start)/1000;
+    for(UInt_t ch = 0; ch< TPlaneProperties::getNChannelsDiamond();ch++){
+        if(settings->IsMasked(subjectDetector,ch))
+            continue;
+        TString name = TString::Format("hPedestalVsEventNo_det_%d_ch_%03d",subjectDetector,ch);
+        TProfile* prof = new TProfile(name,name,nBins,start,maxEvents);
+        prof->GetXaxis()->SetTitle("EventNo");
+        TString title = TString::Format("pedestal_{ch %03d} /ADC",ch);
+        if(settings->doCommonModeNoiseCorrection()) title.Append(" CM corrected");
+        prof->GetYaxis()->SetTitle(title);
+        hPedestalVsEvenNo[ch] = prof;
+
+        //Noise of each channel
+        name = TString::Format("hNoiseVsEventNo_det_%d_ch_%03d",subjectDetector,ch);
+        prof = new TProfile(name,name,nBins,start,maxEvents);
+        prof->GetXaxis()->SetTitle("EventNo");
+        title = TString::Format("noise_{ch %03d} /ADC",ch);
+        if(settings->doCommonModeNoiseCorrection()) title.Append(" CM corrected");
+        prof->GetYaxis()->SetTitle(title);
+        hNoiseVsEvenNo[ch] = prof;
+    }
+    TString name = "hComonModeNoiseVsEventNo";
+    hCmnVsEventNo = new TProfile(name,name,nBins,start,maxEvents);
+    hCmnVsEventNo->GetXaxis()->SetTitle("EventNo");
+    hCmnVsEventNo->GetYaxis()->SetTitle("common mode noise /ADC");
+}
+
+void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
+    std::map<UInt_t,TProfile*>::iterator it;
+    for(it=hPedestalVsEvenNo.begin(); it!=hPedestalVsEvenNo.end(); it++){
+        UInt_t channel = (*it).first;
+        Float_t pedestal = eventReader->getPedestalMean(subjectDetector,channel,settings->doCommonModeNoiseCorrection());
+        (*it).second->Fill(nEvent,pedestal);
+    }
+    for(it=hNoiseVsEvenNo.begin(); it!=hNoiseVsEvenNo.end(); it++){
+        UInt_t channel = (*it).first;
+        Float_t noise = eventReader->getPedestalSigma(subjectDetector,channel,settings->doCommonModeNoiseCorrection());
+        (*it).second->Fill(nEvent,noise);
+    }
+    hCmnVsEventNo->Fill(nEvent,eventReader->getCMNoise());
+}
+
+void TTransparentAnalysis::saveNoiseHistos() {
+    THStack* stack = new THStack("hNoisesVsEventNo","Noises vs Event No");
+       TH1F* hNoiseSlopesVsChannel = new TH1F("hNoiseSlopesVsChannel","slope of hNoiseVsEventNo for each ch",128,0,128);
+       hNoiseSlopesVsChannel->GetXaxis()->SetTitle("channel no");
+       hNoiseSlopesVsChannel->GetYaxis()->SetTitle("slope m = ADC/Event");
+       UInt_t color = 0;
+       std::map<UInt_t,TProfile*>::iterator it;
+       TF1* pol1 = new TF1("pol1_fit","pol1",0,5e6);
+       pol1->SetLineColor(kBlue);
+       pol1->SetLineWidth(1);
+       Double_t minStack = 1e9;
+       Double_t maxStack = -1e9;
+       vector<Float_t> vecCh;
+       vector<Float_t> vecSlope;
+       for(it=hNoiseVsEvenNo.begin(); it!=hNoiseVsEvenNo.end(); it++){
+           TProfile* prof = (*it).second;
+           if(!prof) continue;
+           TF1* fit = (TF1*)pol1->Clone(prof->GetName()+(TString)"_fit");
+           if((*it).first%5==0){
+               TProfile* prof2 =(TProfile*)prof->Clone();
+               prof2->SetTitle(TString::Format("Channel %3d",(*it).first));
+               prof2->SetLineColor(color);
+               prof2->SetMarkerColor(color);
+               stack->Add(prof2);
+               minStack = TMath::Min( minStack, prof->GetBinContent(prof->GetMinimumBin()));
+               maxStack = TMath::Max( maxStack, prof->GetBinContent(prof->GetMaximumBin()));
+               color++;
+           }
+           histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+           hNoiseSlopesVsChannel->SetBinContent((hNoiseSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
+           vecCh.push_back((*it).first);
+           vecSlope.push_back(fit->GetParameter(1));
+           delete prof;
+           (*it).second= 0;
+           hNoiseVsEvenNo.erase(it);
+       }
+       TGraph graph = histSaver->CreateDipendencyGraph("gNoiseSlopeVsChannel",vecSlope,vecCh);
+       graph.Draw("AP");
+       graph.GetXaxis()->SetTitle("channel");
+       graph.GetYaxis()->SetTitle("Noise slope for channel");
+       histSaver->SaveGraph(&graph,"gNoiseSlopeVsChannel","ABP");
+
+       TH1F* hSlopes = histSaver->CreateDistributionHisto("hNoiseSlopes",vecSlope,10);
+       hSlopes->GetXaxis()->SetTitle("Noise slope ADC/Event");
+       hSlopes->GetYaxis()->SetTitle("number of entries #");
+       histSaver->SaveHistogram(hSlopes);
+       delete hSlopes;
+       if(hCmnVsEventNo) {
+           cout<<"save "<<hCmnVsEventNo->GetName()<<endl;
+           TF1* fit = (TF1*)pol1->Clone(hCmnVsEventNo->GetName()+(TString)"_fit");
+               histSaver->Save1DProfileXWithFitAndInfluence(hCmnVsEventNo,fit,true);
+           delete hCmnVsEventNo;
+           hCmnVsEventNo=0;
+       }
+       if(color!=0){
+           cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
+           stack->Draw("goff");
+           stack->SetObjectStat(false);
+           if(stack->GetXaxis()){
+               stack->GetXaxis()->SetTitle("Event No");
+               cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
+           }
+           if(stack->GetYaxis()){
+               stack->GetYaxis()->SetTitle("Noise /ADC");
+               cout<<"Set range"<<endl;
+               stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
+               cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
+           }
+           stack->SetMinimum(minStack*.98);
+           stack->SetMaximum(maxStack*1.05);
+           stack->SetObjectStat(false);
+       }
+       histSaver->SaveStack(stack,"nostack",true);
+       cout<<"hNoiseSlopesVsChannel:MIN: "<<hNoiseSlopesVsChannel->GetBinContent(hNoiseSlopesVsChannel->GetMinimumBin())<<endl;
+       hNoiseSlopesVsChannel->SetMinimum(hNoiseSlopesVsChannel->GetBinContent(hNoiseSlopesVsChannel->GetMinimumBin()));
+       histSaver->SaveHistogram(hNoiseSlopesVsChannel,false,false);
+       delete hNoiseSlopesVsChannel;
+       delete stack;
+}
+
+void TTransparentAnalysis::savePedestalHistos() {
+    THStack* stack = new THStack("hPedestalsVsEventNo","pedestals vs Event No");
+    TH1F* hPedestalSlopesVsChannel = new TH1F("hPedestalSlopesVsChannel","slope of hPedestalVsEventNo for each ch",128,0,128);
+    hPedestalSlopesVsChannel->GetXaxis()->SetTitle("channel no");
+    hPedestalSlopesVsChannel->GetYaxis()->SetTitle("slope m = ADC/Event");
+    UInt_t color = 0;
+    std::map<UInt_t,TProfile*>::iterator it;
+    TF1* pol1 = new TF1("pol1_fit","pol1",0,5e6);
+    pol1->SetLineColor(kBlue);
+    pol1->SetLineWidth(1);
+    Double_t minStack = 1e9;
+    Double_t maxStack = -1e9;
+    vector<Float_t> vecCh;
+    vector<Float_t> vecSlope;
+    for(it=hPedestalVsEvenNo.begin(); it!=hPedestalVsEvenNo.end(); it++){
+        TProfile* prof = (*it).second;
+        if(!prof) continue;
+        TF1* fit = (TF1*)pol1->Clone(prof->GetName()+(TString)"_fit");
+        if((*it).first%5==0){
+            TProfile* prof2 =(TProfile*)prof->Clone();
+            prof2->SetTitle(TString::Format("Channel %3d",(*it).first));
+            prof2->SetLineColor(color);
+            prof2->SetMarkerColor(color);
+            stack->Add(prof2);
+            minStack = TMath::Min( minStack, prof->GetBinContent(prof->GetMinimumBin()));
+            maxStack = TMath::Max( maxStack, prof->GetBinContent(prof->GetMaximumBin()));
+            color++;
+        }
+        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        hPedestalSlopesVsChannel->SetBinContent((hPedestalSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
+        vecCh.push_back((*it).first);
+        vecSlope.push_back(fit->GetParameter(1));
+        delete prof;
+        (*it).second= 0;
+        hPedestalVsEvenNo.erase(it);
+    }
+    TGraph graph = histSaver->CreateDipendencyGraph("gPedestalSlopeVsChannel",vecSlope,vecCh);
+    graph.Draw("AP");
+    graph.GetXaxis()->SetTitle("channel");
+    graph.GetYaxis()->SetTitle("pedestal slope for channel");
+    histSaver->SaveGraph(&graph,"gPedestalSlopeVsChannel","ABP");
+
+    TH1F* hSlopes = histSaver->CreateDistributionHisto("hPedestalSlopes",vecSlope,10);
+    hSlopes->GetXaxis()->SetTitle("pedestal slope ADC/Event");
+    hSlopes->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hSlopes);
+    delete hSlopes;
+    if(color!=0){
+        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
+        stack->Draw("goff");
+        stack->SetObjectStat(false);
+        if(stack->GetXaxis()){
+            stack->GetXaxis()->SetTitle("Event No");
+            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
+        }
+        if(stack->GetYaxis()){
+            stack->GetYaxis()->SetTitle("Pedestal /ADC");
+            cout<<"Set range"<<endl;
+            stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
+            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
+        }
+        stack->SetMinimum(minStack*.98);
+        stack->SetMaximum(maxStack*1.05);
+        stack->SetObjectStat(false);
+    }
+    histSaver->SaveStack(stack,"nostack",true);
+    cout<<"hPedestalSlopesVsChannel:MIN: "<<hPedestalSlopesVsChannel->GetBinContent(hPedestalSlopesVsChannel->GetMinimumBin())<<endl;
+    hPedestalSlopesVsChannel->SetMinimum(hPedestalSlopesVsChannel->GetBinContent(hPedestalSlopesVsChannel->GetMinimumBin()));
+    histSaver->SaveHistogram(hPedestalSlopesVsChannel,false,false);
+    delete hPedestalSlopesVsChannel;
+    delete stack;
 }
 
 void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {

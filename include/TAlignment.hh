@@ -28,6 +28,7 @@
 #include "TROOT.h"
 #include "TFitResultPtr.h"
 #include "TFitResult.h"
+#include "THStack.h"
 
 
 #include "TRawEventSaver.hh"
@@ -65,15 +66,16 @@ class TAlignment {
 private:
 	enum resCalcMode  { normalCalcMode,chi2CalcMode,resolutionCalcMode};
 	enum resolutionUpdateMode {normalMode=1,resolutionMode=2,noUpdate=0};
+	enum alignmentMode {singleStrip,doubleStrip};
 public:
 	enum enumDetectorsToAlign {diaAlignment,silAlignment,bothAlignment};
 public:
 	TAlignment(TSettings* settings,TSettings::alignmentMode mode = TSettings::normalMode);
 	virtual ~TAlignment();
 	int Align(UInt_t nEvents=0,UInt_t startEvent=0,enumDetectorsToAlign detAlign=bothAlignment);
-	int AlignSilicon(UInt_t nEvents=0,UInt_t startEvent=0);
-	int AlignDiamond(UInt_t nEvents=0,UInt_t startEvent=0);
-	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
+	int AlignSilicon(UInt_t nEvents=0,UInt_t startEvent=0){ return Align(nEvents,startEvent,silAlignment);}
+	int AlignDiamond(UInt_t nEvents=0,UInt_t startEvent=0){ return Align(nEvents,startEvent,diaAlignment);}
+	void createEventVectors(UInt_t nEvents=0, UInt_t startEvent=0,enumDetectorsToAlign detAlign=bothAlignment);
 	void createTransparentEventVectors(UInt_t nEvents=0, UInt_t startEvent=0);
 	void setSettings(TSettings* settings);
 	void PrintEvents(UInt_t maxEvent=0,UInt_t startEvent=0);
@@ -116,15 +118,30 @@ private:
 	TResidual CheckStripDetectorAlignment(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,vector<UInt_t> vecRefPlanes, bool bAlign=false,bool bPlot=false,TResidual res=TResidual(true));
 	TResidual CheckStripDetectorAlignmentChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bAlign, bool bPlot, Float_t maxChi2);
 
-	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
-	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
-	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
-//	TResidual getStripResidualChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool plot=false,Float_t maxChi2=1000,TCluster::calculationMode_t mode=TCluster::maxValue);
+	TString GetReferencePlaneString( vector<UInt_t> *vecRefPlanes);
+	TResidual Residual(alignmentMode aligning, TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false, bool plot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
+	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, UInt_t refPlane1, UInt_t refPlane2,bool bPlot=false,TResidual res=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10);
+	TResidual getResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes, bool bPlot=false,TResidual resOld=TResidual(true),TCluster::calculationMode_t mode=TCluster::highest2Centroid,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10){
+        return Residual(doubleStrip,cor,subjectPlane,vecRefPlanes,false,bPlot,resOld,mode,calcMode,maxChi2);
+    };
+	/**
+	 * @brief creates element TResidual to adjust the alignment
+	 *
+	 * creates a vector of pedicted X positions, predicted Y positions, delta X and delta Y
+	 * and use the function calculateResidual to get the residual with this vectors
+	 * @param   cor coordindate for which the residual is calculated
+	 * @param   subjectPlane plane for which the residual should be calculated
+	 * @param   refPlane1 first reference plane
+	 * @param   refPlane2 second reference plane
+	 * @param   bPlot   variable to create plots or not
+	 *
+	 * @return
+	 */
+	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool bPlot=false,TResidual resOld=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10){
+	    return Residual(singleStrip,cor,subjectPlane,vecRefPlanes,bAlign,bPlot,resOld,mode,calcMode,maxChi2);
+	}
 
-//	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY) {return calculateResidual(cor,xPred,deltaX,yPred,deltaY,TResidual(true));};
-//	TResidual calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY,TResidual res);
 
-//	TResidual calculateResidualWithChi2(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> refPlane,Float_t maxChi2=10,bool bAlign=false,bool plot=false);
 	TTracking* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
@@ -157,19 +174,38 @@ private:
     bool bPlotAll;
     TSettings::alignmentMode mode;
 private:
+    TString GetPlotPreName(UInt_t subjectPlane);
+    TString GetPlotPostName(bool bChi2);
+
+    Float_t CreateSigmaOfPredictionXPlots(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot);
+    void CreateDistributionPlotDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, Float_t xPredictionSigma);
+    void CreateScatterPlotPredYvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateScatterPlotPredXvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateScatterPlotMeasXvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+
+
+    void CreateScatterPlotEtaVsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot);
+
+    void CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
+    void CreateRelHitPosXMeasDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
+    void CreateRelHitPosMeasXPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
+    void CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
+
+    void CreateRelHitPosVsChi2Plots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString);
     TResidual resPlane1,resPlane2,resPlane3;
     TResults* results;
 	std::vector<TResidual> vecRes103;
-	vector<Float_t> vecXPred;
-	vector<Float_t> vecYPred;
-	vector<Float_t> vecXObs;
-	vector<Float_t> vecYObs;
-	vector<Float_t> vecXDelta;
-	vector<Float_t> vecYDelta;
+	vector<Float_t> vecXLabPredMetric;
+	vector<Float_t> vecYLabPredMetric;
+	vector<Float_t> vecXDetPredMetric,vecYDetPredMetric;
+	vector<Float_t> vecXLabMeasMetric;
+	vector<Float_t> vecYLabMeasMetric;
+	vector<Float_t> vecXLabDeltaMetric;
+	vector<Float_t> vecYLabDeltaMetric;
 	vector <Float_t> vecXPullDist;
 	vector <Float_t> vecYPullDist;
-	vector<Float_t> vecXMeasured;
-	vector<Float_t> vecYMeasured;
+	vector<Float_t> vecXDetMeasMetric;
+	vector<Float_t> vecYDetMeasMetric;
 	vector<Float_t> vecXChi2;
 	vector<Float_t> vecYChi2;
 	vector<Float_t> vecXPhi;
@@ -184,6 +220,11 @@ private:
 	vector<Float_t > trackResValuesY;
 	vector<pair<Float_t,Float_t> > gausFitValuesX;
 	vector<pair<Float_t,Float_t> > gausFitValuesY;
+	vector<Float_t> vecXDetRelHitPosPredMetricAll;
+	vector<Float_t> vecXDetRelHitPosMeasMetricAll;
+    vector<Float_t> vecDeltaXMetricAll;
+    vector<Float_t> vecDeltaYMetricAll;
+	vector<Float_t> vecUsedEventAll;
 	TCluster::calculationMode_t getClusterCalcMode(Int_t plane){return TPlaneProperties::isDiamondPlane(plane)?diaCalcMode:silCalcMode;}
 };
 

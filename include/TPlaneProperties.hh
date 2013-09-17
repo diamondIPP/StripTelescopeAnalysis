@@ -23,6 +23,7 @@ public:
 	enum enumDetectorType{kUndefined = 0, kSilicon = 1, kDiamond =2};
 	TPlaneProperties();
 	virtual ~TPlaneProperties();
+	inline static UInt_t getDetNo(enumCoordinate cor, UInt_t plane){return 2*plane+cor==Y_COR?1:0;}
 	inline static Double_t getStripDistance(){return 50.;};//strip distance in mum
 	inline static UInt_t getNChannelsSilicon(){return 256;};
 	inline static UInt_t getNChannelsDiamond(){return 128;};
