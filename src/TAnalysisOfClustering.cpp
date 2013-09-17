@@ -62,6 +62,8 @@ void TAnalysisOfClustering::setSettings(TSettings* settings){
 
 void TAnalysisOfClustering::doAnalysis(int nEvents)
 {
+
+    initPedestalAndNoiseHistos(nEvents);
     cout<<"analyze clustering results..."<<endl;
     //	eventReader->checkADC();
     if(nEvents==0) nEvents=eventReader->GetEntries();
@@ -152,7 +154,7 @@ void TAnalysisOfClustering::checkForSaturatedChannels()
 
 void TAnalysisOfClustering::initPedestalAndNoiseHistos(UInt_t maxEvents) {
     cout<<"initPedestalHistos"<<endl;
-    UInt_t start = settings->getAlignmentEvents(maxEvents);
+    UInt_t start = 0;
     UInt_t nBins = (maxEvents-start)/1000;
     UInt_t diaDet = TPlaneProperties::getDetDiamond();
     for(UInt_t ch = 0; ch< TPlaneProperties::getNChannelsDiamond();ch++){
@@ -173,7 +175,18 @@ void TAnalysisOfClustering::initPedestalAndNoiseHistos(UInt_t maxEvents) {
         title = TString::Format("noise_{ch %03d} /ADC",ch);
         if(settings->doCommonModeNoiseCorrection()) title.Append(" CM corrected");
         prof->GetYaxis()->SetTitle(title);
+        title =  TString::Format("noise of ch %03d vs. EvenNot",ch);
+        if(settings->doCommonModeNoiseCorrection()) title.Append(" CM corrected");
         hNoiseVsEvenNo[ch] = prof;
+
+        // raw ADC of each channel: hRawAdcVsEvenNo
+        name = TString::Format("hADCVsEventNo_det_%d_ch_%03d",diaDet,ch);
+        prof = new TProfile(name,name,nBins,start,maxEvents);
+        prof->GetXaxis()->SetTitle("EventNo");
+        title = TString::Format("raw ADC_{ch %03d} /ADC",ch);
+        prof->GetYaxis()->SetTitle(title);
+        title =  TString::Format("raw ADC of ch %03d vs. EvenNot",ch);
+        hADCVsEvenNo[ch] = prof;
     }
     TString name = "hComonModeNoiseVsEventNo";
     hCmnVsEventNo = new TProfile(name,name,nBins,start,maxEvents);
@@ -194,7 +207,94 @@ void TAnalysisOfClustering::fillPedestalsAndNoiseHistos() {
         Float_t noise = eventReader->getPedestalSigma(diaDet,channel,settings->doCommonModeNoiseCorrection());
         (*it).second->Fill(nEvent,noise);
     }
+    //hRawAdcVsEvenNo
+
+    for(it=hADCVsEvenNo.begin(); it!=hADCVsEvenNo.end(); it++){
+        UInt_t channel = (*it).first;
+        Float_t adc = eventReader->getAdcValue(diaDet,channel);
+        (*it).second->Fill(nEvent,adc);
+    }
     hCmnVsEventNo->Fill(nEvent,eventReader->getCMNoise());
+}
+
+void TAnalysisOfClustering::saveADCHistos() {
+    THStack* stack = new THStack("hADCsVsEventNo","ADCs vs Event No");
+    TH1F* hADCSlopesVsChannel = new TH1F("hADCSlopesVsChannel","slope of hADCVsEventNo for each ch",128,0,128);
+    hADCSlopesVsChannel->GetXaxis()->SetTitle("channel no");
+    hADCSlopesVsChannel->GetYaxis()->SetTitle("slope m = ADC/Event");
+    UInt_t color = 0;
+    std::map<UInt_t,TProfile*>::iterator it;
+    TF1* pol1 = new TF1("pol1_fit","pol1",0,5e6);
+    pol1->SetLineColor(kBlue);
+    pol1->SetLineWidth(1);
+    Double_t minStack = 1e9;
+    Double_t maxStack = -1e9;
+    vector<Float_t> vecCh;
+    vector<Float_t> vecSlope;
+    for(it=hADCVsEvenNo.begin(); it!=hADCVsEvenNo.end(); it++){
+        TProfile* prof = (*it).second;
+        if(!prof) continue;
+        TF1* fit = (TF1*)pol1->Clone(prof->GetName()+(TString)"_fit");
+        if((*it).first%5==0){
+            TProfile* prof2 =(TProfile*)prof->Clone();
+            prof2->SetTitle(TString::Format("Channel %3d",(*it).first));
+            prof2->SetLineColor(color);
+            prof2->SetMarkerColor(color);
+            stack->Add(prof2);
+            minStack = TMath::Min( minStack, prof->GetBinContent(prof->GetMinimumBin()));
+            maxStack = TMath::Max( maxStack, prof->GetBinContent(prof->GetMaximumBin()));
+            color++;
+        }
+        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        hADCSlopesVsChannel->SetBinContent((hADCSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
+        vecCh.push_back((*it).first);
+        vecSlope.push_back(fit->GetParameter(1));
+        delete prof;
+        (*it).second= 0;
+        hADCVsEvenNo.erase(it);
+    }
+    TGraph graph = histSaver->CreateDipendencyGraph("gADCSlopeVsChannel",vecSlope,vecCh);
+    graph.Draw("AP");
+    graph.GetXaxis()->SetTitle("channel");
+    graph.GetYaxis()->SetTitle("ADC slope for channel");
+    histSaver->SaveGraph(&graph,"gADCSlopeVsChannel","ABP");
+
+    TH1F* hSlopes = histSaver->CreateDistributionHisto("hADCSlopes",vecSlope,10);
+    hSlopes->GetXaxis()->SetTitle("ADC slope ADC/Event");
+    hSlopes->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hSlopes);
+    delete hSlopes;
+    if(hCmnVsEventNo) {
+        cout<<"save "<<hCmnVsEventNo->GetName()<<endl;
+        TF1* fit = (TF1*)pol1->Clone(hCmnVsEventNo->GetName()+(TString)"_fit");
+        histSaver->Save1DProfileXWithFitAndInfluence(hCmnVsEventNo,fit,true);
+        delete hCmnVsEventNo;
+        hCmnVsEventNo=0;
+    }
+    if(color!=0){
+        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
+        stack->Draw("goff");
+        stack->SetObjectStat(false);
+        if(stack->GetXaxis()){
+            stack->GetXaxis()->SetTitle("Event No");
+            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
+        }
+        if(stack->GetYaxis()){
+            stack->GetYaxis()->SetTitle("ADC /ADC");
+            cout<<"Set range"<<endl;
+            stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
+            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
+        }
+        stack->SetMinimum(minStack*.98);
+        stack->SetMaximum(maxStack*1.05);
+        stack->SetObjectStat(false);
+    }
+    histSaver->SaveStack(stack,"nostack",true);
+    cout<<"hADCSlopesVsChannel:MIN: "<<hADCSlopesVsChannel->GetBinContent(hADCSlopesVsChannel->GetMinimumBin())<<endl;
+    hADCSlopesVsChannel->SetMinimum(hADCSlopesVsChannel->GetBinContent(hADCSlopesVsChannel->GetMinimumBin()));
+    histSaver->SaveHistogram(hADCSlopesVsChannel,false,false);
+    delete hADCSlopesVsChannel;
+    delete stack;
 }
 
 void TAnalysisOfClustering::saveNoiseHistos() {
@@ -353,7 +453,6 @@ void TAnalysisOfClustering::savePedestalHistos() {
 
 void TAnalysisOfClustering::initialiseHistos()
 {
-    initPedestalAndNoiseHistos();
     if(verbosity>3)cout<<"1"<<endl;
     {
         stringstream histoName;
@@ -668,6 +767,7 @@ void TAnalysisOfClustering::saveHistos(){
     //	char t; cin>>t;
     savePedestalHistos();
     saveNoiseHistos();
+    saveADCHistos();
     if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
     histSaver->SaveHistogram(histo_CWM_biggestHit);
     histo_CWM_biggestHit->Delete();

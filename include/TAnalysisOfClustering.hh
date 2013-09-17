@@ -63,6 +63,7 @@ private:
     void fillPedestalsAndNoiseHistos();
     void savePedestalHistos();
     void saveNoiseHistos();
+    void saveADCHistos();
 
 
 	void checkForDeadChannels();
@@ -156,6 +157,7 @@ private:
 
     std::map< UInt_t, TProfile* > hPedestalVsEvenNo;
     std::map< UInt_t, TProfile* > hNoiseVsEvenNo;
+    std::map< UInt_t, TProfile* > hADCVsEvenNo;
     TProfile *hCmnVsEventNo;
 	UInt_t nInvalidReadout;
 	TResults* res;
