@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <cstring>
 #include <deque>
+#include <map>
 
 
 //ROOT Class Headers
@@ -74,7 +75,11 @@ private:
 	void createEventVector(Int_t startEvent = 0);
 	void analyseNonHitEvents();
 	void initHistograms();
+	void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
 	void fillHistograms();
+	void fillPedestalsAndNoiseHistos();
+	void savePedestalHistos();
+    void saveNoiseHistos();
 	TF1* doGaussFit(TH1F *histo);
 	TF1* doDoubleGaussFit(TH1F *histo);
 	void createEtaIntegrals();
@@ -232,6 +237,7 @@ private:
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected;
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected_2ndGaus;
 	vector<Float_t> vectorEventNo;
+	vector<Float_t> vectorCMN;
 	vector< vector<Float_t> > vecVecPh2Highest;
 	
 	vector<Float_t> vecPredictedPosition, vecRelPredictedPosition;
@@ -242,6 +248,10 @@ private:
 	vector<Float_t> noiseWidthsCMN;
 	vector<Float_t> noiseWidths2OutOfX;
 	vector<Float_t> noiseWidths2OutOfXCMN;
+
+	std::map< UInt_t, TProfile* > hPedestalVsEvenNo;
+    std::map< UInt_t, TProfile* > hNoiseVsEvenNo;
+	TProfile* hCmnVsEventNo;
 
 };
 

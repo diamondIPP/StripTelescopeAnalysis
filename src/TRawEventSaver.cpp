@@ -147,7 +147,7 @@ void TRawEventSaver::showStatusBar(int nEvent,int nEvents,int updateIntervall,bo
 	int percentageLength=50;
 	if(nEvent%(int)updateIntervall==0||nEvent>=nEvents-1||show){
 		double percentage = (double)(nEvent)/(double)nEvents*(double)100;
-		cout<<"\rfinished with "<<setw(8)<<nEvent<<" of "<<setw(10)<<nEvents<<": "<<setw(6)<<std::setprecision(2)<<fixed<<percentage<<"%\t\tSTATUS:\t\t";
+		cout<<TString::Format("\rfinished with %8d of %10d: %6.2f%\%\t\tSTATUS:\t\t",nEvent,nEvents,percentage);
 		for(int i=0;i<percentageLength;i++)
 			if (i*10<percentage*(double)percentageLength/(double)10)cout<<"%";
 			else cout<<"_";

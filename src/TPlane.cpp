@@ -33,6 +33,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
  * @param rhs
  */
 TPlane::TPlane(const TPlane& rhs){
+
 	this->verbosity=rhs.verbosity;
 	this->xClusters.clear();
 	this->yClusters.clear();
@@ -57,7 +58,9 @@ TPlane::~TPlane() {
  * Class Assignment function
  */
 TPlane& TPlane::operator =(const TPlane &src){
-
+    if (this == &src)
+        return *this;
+    TPlane::operator=(src);
 	type=src.type;
 	planeNo=src.planeNo;
 	verbosity=src.verbosity;
@@ -152,7 +155,7 @@ TCluster TPlane::getCluster(TPlaneProperties::enumCoordinate cor, UInt_t cl){
 	if(cor==TPlaneProperties::Y_COR)
 		return (getYCluster(cl));
 	else{
-		cerr<<"Coordinate is neither X nor Y< return empty cluster"<<endl;
+		cerr<<"Plane "<<planeNo<<": Coordinate is neither X nor Y< return empty cluster "<<cor<<endl;
 		return (TCluster());
 	}
 }

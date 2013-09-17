@@ -37,6 +37,9 @@
 class TResidual {
 public:
 	TResidual(bool bTest=false);
+	bool operator==(TResidual& rhs)const;
+    bool operator!=(TResidual& rhs)const{return  !(*this == rhs);};
+
 	void calculateResidual(TPlaneProperties::enumCoordinate cor,vector<Float_t>*xPred,vector<Float_t>* deltaX,vector<Float_t>* yPred,vector<Float_t>* deltaY);
 	virtual ~TResidual();
 	void Print(UInt_t level=0);
@@ -72,6 +75,7 @@ public:
 	void setResKeepFactor(Float_t resKeepFactor){res_keep_factor=resKeepFactor;};
 	void clear();
 	void setVerbosity(Int_t verb){if(verb>=0)verbosity=verb;}
+	bool isEqual(TResidual  compareTo);
 private:
 	Float_t resXMean, resXSigma,resYMean,resYSigma;
 	Float_t sumRx;
@@ -87,5 +91,4 @@ private:
 	UInt_t verbosity;
 	bool bTestResidual;
 };
-
 #endif /* TRESIDUAL_HH_ */

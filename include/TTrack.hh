@@ -79,7 +79,7 @@ public:
 	Float_t getMeasuredClusterPositionMetricSpace(TPlaneProperties::enumCoordinate cor,UInt_t plane,bool cmnCorrected,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo =0);
 	Float_t getMeasuredClusterPositionMetricSpace(UInt_t det,bool cmnCorrected,TCluster::calculationMode_t mode=TCluster::highest2Centroid,TH1F* histo =0);
 	UInt_t getClusterSize(UInt_t det, UInt_t cluster){return event->getClusterSize(det,cluster);};
-	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,TCluster::calculationMode_t mode=TCluster::highest2Centroid,bool bPrint=false);
+	TPositionPrediction* predictPosition(UInt_t subjectPlane,vector<UInt_t> vecRefPlanes,bool cmnCorrection, TCluster::calculationMode_t mode=TCluster::highest2Centroid,bool bPrint=false);
 	std::pair<Float_t, Float_t> getPredictedHitPosition(Float_t zPos, Float_t m, Float_t b, Float_t sigma_z,Float_t sigma_m, Float_t sigma_b);
 	vector<Float_t> getSiXPositions();
 	vector<Float_t> getSiYPositions();
@@ -99,6 +99,8 @@ public:
     Float_t inMetricDetectorSpace(UInt_t det,Float_t clusterPosition);
     Float_t inChannelDetectorSpace(UInt_t det,Float_t metricDetectorPosition);
     Float_t calculateTrackResolution(Float_t zPosPrediction,vector<Float_t> zPos, vector<Float_t> resolutions);
+
+    Float_t getRelativeHitPosition(UInt_t det, Float_t hitPosDetMetric);
 private:
     map<UInt_t , TH1F*> histoMap;
     //	void setPositions(TEvent event);

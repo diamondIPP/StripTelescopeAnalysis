@@ -106,6 +106,8 @@ Float_t TTrack::inChannelDetectorSpace(UInt_t det, Float_t metricPosition){
 Float_t TTrack::getPostionInLabFrame(TPlaneProperties::enumCoordinate cor,UInt_t plane,TCluster xCluster,TCluster yCluster,bool cmnCorrected, TCluster::calculationMode_t mode,TH1F* histo){
 	if(xCluster.size()<=0||yCluster.size()<=0)
 		return N_INVALID;
+	if(TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+	    cerr<<"Silicon Plane "<<plane<<" but wrong mode or histo==0: "<<mode<<" "<<histo<<endl;
 	Float_t xOffMeas = this->getXOffset(plane);
 	Float_t yOffMeas = this->getYOffset(plane);
 	Float_t xPhiOff = this->getPhiXOffset(plane);
@@ -330,8 +332,10 @@ std::pair<Float_t, Float_t> TTrack::getPredictedHitPosition(Float_t zPos,Float_t
  * @param bPrint show output?
  * @return PositionPrediction object which contains all Informations of the prediction.
  */
-TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,TCluster::calculationMode_t mode,bool bPrint)
+TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool cmnCorrection, TCluster::calculationMode_t mode,bool bPrint)
 {
+    if(mode!=TCluster::corEta)
+            cout<<"[TTrack::predictPosition] strange mode: "<<mode<<endl;
 	Float_t zPosSubjectPlane = getZPosition(subjectPlane);
 	Float_t sigma_z= alignment->getZResolution(subjectPlane);//todo
 	linFitX->ClearPoints();
@@ -347,9 +351,11 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		return prediction;
 	}
 	if(vecRefPlanes.size()==1){
-		if(verbosity>3)	cout<<"TTrack::predictPosition with 1 refPlane"<<endl;
+		if(verbosity>10||bPrint)	cout<<"TTrack::predictPosition with 1 refPlane"<<endl;
 		//todo anpassen so dass sigmas da drin reinkommen...
-		TPositionPrediction *prediction=new TPositionPrediction(zPosSubjectPlane,sigma_z,getXPositionMetric(vecRefPlanes.at(0),mode), 0.,0.,getYPositionMetric(vecRefPlanes.at(0),mode),0.,0.,0,0);
+		TPositionPrediction *prediction=new TPositionPrediction(zPosSubjectPlane,sigma_z,
+		        getXPositionMetric(vecRefPlanes.at(0),cmnCorrection,mode), 0.,0.,
+		        getYPositionMetric(vecRefPlanes.at(0),cmnCorrection,mode),0.,0.,0,0);
 		return prediction;
 	}
 	vector<Double_t> zPosVec;//todo add xsigma ysigma
@@ -360,9 +366,9 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		zPosVec.clear();
 		Float_t zPos = alignment->GetZOffset(plane)-zPosSubjectPlane;
 		zPosVec.push_back(zPos);
-		Float_t xPos = (Double_t)getXPositionMetric(plane,mode);
-		Float_t yPos = (Double_t)getYPositionMetric(plane,mode);
-		if((xPos==-1||yPos==-1)&&verbosity){
+		Float_t xPos = (Double_t)getXPositionMetric(plane,cmnCorrection,mode,getEtaIntegral(pl*2));
+		Float_t yPos = (Double_t)getYPositionMetric(plane,cmnCorrection,mode,getEtaIntegral(pl*2+1));
+		if((xPos==-1||yPos==-1)&&(verbosity||bPrint)){
 			cout<<"Problem with Plane "<<plane<<" "<<xPos<<" "<<yPos<<endl;
 			event->Print(1);
 		}
@@ -372,7 +378,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		linFitY->AddPoint(&zPosVec.at(0),yPos,yRes);//todo anpassen des sigma 0.001
 		if(xPos==-1||yPos==-1)
 			lastPredictionValid = false;
-		if(verbosity>3||bPrint)
+		if(verbosity>10||bPrint)
 			cout<<"\tAdd in Plane "<<plane<<"  "<<xPos<<"+/-"<<alignment->getXResolution(plane)<<" / "<<yPos<<"+/-"<<alignment->getYResolution(plane)<<" / "<<getZPosition(plane)<<endl;
 	}
 	linFitX->Eval();
@@ -391,7 +397,7 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	Float_t sigma_by = linFitY->GetParError(0);
 	Float_t xChi2 = linFitX->GetChisquare()/(linFitX->GetNpoints()-linFitX->GetNumberFreeParameters());
 	Float_t yChi2 = linFitY->GetChisquare()/(linFitY->GetNpoints()-linFitY->GetNumberFreeParameters());
-	if(verbosity>4){
+	if(verbosity>10){
 			cout<<"\tParameters:\n\t mx: "<<mx<<" +/- "<<sigma_mx<<"\tbx: "<<bx<<" +/- "<<sigma_bx<<"\tzPos:"<<zPos<<endl;
 			cout<<"\t my: "<<my<<" +/- "<<sigma_my<<"\tby: "<<by<<" +/- "<<sigma_by<<"\tzPos:"<<zPos<<endl;
 			cout<<"\tNDFx: "<<linFitX->GetNumberFreeParameters()<<"\t"<<"\tNDFy: "<<linFitY->GetNumberFreeParameters()<<endl;
@@ -410,9 +416,9 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	zPos=zPosSubjectPlane;
 	TPositionPrediction* prediction=new TPositionPrediction(zPos,sigma_z,xprediction.first,xprediction.second,xChi2,yprediction.first,yprediction.second,yChi2,xPhi,yPhi);
 	if(!lastPredictionValid)prediction->setValid(false);
-	if(verbosity>3||bPrint)	cout<<"\tPrediction of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes for ZPosition: "<<zPos<<endl;
-	if(verbosity>3||bPrint)	cout<<"\t X: "<<xprediction.first<<" +/- "<<xprediction.second<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
-	if(verbosity>3||bPrint)	cout<<"\t Y: "<<yprediction.first<<" +/- "<<yprediction.second<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
+	if(verbosity>10||bPrint)	cout<<"\tPrediction of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes for ZPosition: "<<zPos<<endl;
+	if(verbosity>10||bPrint)	cout<<"\t X: "<<xprediction.first<<" +/- "<<xprediction.second<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
+	if(verbosity>10||bPrint)	cout<<"\t Y: "<<yprediction.first<<" +/- "<<yprediction.second<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
 	return prediction;
 }
 
@@ -491,6 +497,8 @@ Float_t TTrack::getMeasuredClusterPositionChannelSpace(TPlaneProperties::enumCoo
 		return N_INVALID;
 	if(cor==TPlaneProperties::XY_COR&&(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1))
 		return N_INVALID;
+	if (TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+	    cout<<"[TTrack::getMeasuredClusterPositionChannelSpace] "<<mode<<" "<<histo<<endl;
 	if(cor==TPlaneProperties::X_COR&&event->getNXClusters(plane)==1)
 		return event->getPlane(plane).getXPosition(0,cmnCorrected,mode,histo);
 	if(cor==TPlaneProperties::Y_COR&&event->getNYClusters(plane)==1)
@@ -661,3 +669,13 @@ TH1F *TTrack::getEtaIntegral(UInt_t det)
 		return 0;
 }
 
+Float_t TTrack::getRelativeHitPosition(UInt_t det, Float_t hitPosDetMetric) {
+    if(TPlaneProperties::isSiliconDetector(det))
+        return fmod(hitPosDetMetric,settings->getSiliconPitchWidth());
+    else if(TPlaneProperties::isDiamondDetector(det)){
+//      cout<<"validPAttern  TTrack::inChannelDetectorSpace "<<det<<" "<<metricPosition<<": "<<flush;
+//      cout<<settings->diamondPattern.hasInvalidIntervals()<<endl;
+       return  settings->diamondPattern.convertMetricToRelativeMetric(hitPosDetMetric);
+    }
+    return N_INVALID;
+}

@@ -231,6 +231,63 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 	return N_INVALID;
 }
 
+
+Float_t TDiamondPattern::convertMetricToRelativeMetric(Float_t metric,UInt_t interval){
+    if (interval>=getNIntervals())
+        return N_INVALID;
+    Float_t leftPos,rightPos;
+    Int_t firstChannel = firstChannelOfInterval[interval]-1;
+    Int_t lastChannel = firstChannelOfInterval[interval] + nChannelsOfInterval[interval];
+//  if(metric >= 3660 && metric <= 3715) cout<<"[TDiamondPattern::convertMetricToChannel]"<<metric<<" in " << interval <<": "<<firstChannel<<"-"<<lastChannel<<endl;
+    for(Int_t ch = firstChannel; ch <= lastChannel;ch++){
+//      if(metric >= 3660 && metric <= 3715)
+//          cout<<"check channel "<<ch<<" "<<flush;
+        if(ch == firstChannel)
+            leftPos = getChannelToMetric(ch+1) - pitchWidth[interval];
+        else
+            leftPos = getChannelToMetric(ch);
+        if (ch == lastChannel)
+            rightPos = getChannelToMetric(ch) + pitchWidth[interval];
+        else
+            rightPos = getChannelToMetric(ch+1);
+//      if(metric >= 3660 && metric <= 3715)
+//          cout<<" "<<leftPos<<"-"<<rightPos<<endl;
+        if ( leftPos <= metric && metric <= rightPos ){
+            if(metric-leftPos < rightPos-metric)
+                return metric - leftPos;
+            else
+                return metric - rightPos;
+        }
+    }
+    return N_INVALID;
+
+}
+Float_t TDiamondPattern::convertMetricToRelativeMetric(Float_t metric) {
+    if(verbosity>5)
+        cout<<"[TDiamondPattern::convertMetricToRelativeMetric]"<<metric<<endl;
+    if(hasInvalidIntervals()){
+        if(verbosity)
+            cout<<" TDiamondPattern::convertMetricToRelativeMetric "<<metric<<" INVALID INTERVALS"<<endl;
+        return N_INVALID;
+    }
+    for(UInt_t i = 0; i < getNIntervals();i++){
+        if(i<beginOfInterval.size() && i < endOfInterval.size() && i < pitchWidth.size()){
+            Float_t pw = pitchWidth[i];
+            Float_t begin = beginOfInterval[i];
+            Float_t end = endOfInterval[i];
+            begin -= pw/2;
+            end += pw/2;
+
+            if( begin <= metric && metric <= end ){
+                Float_t retval = convertMetricToRelativeMetric(metric,i);
+                return retval;
+            }
+        }
+        //      else return N_INVALID;
+    }
+    return N_INVALID;
+}
+
 Float_t TDiamondPattern::convertMetricToChannel(Float_t metric,UInt_t interval) {
 	if (interval>=getNIntervals())
 		return N_INVALID;

@@ -647,7 +647,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	//default pedestal settings
 	fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
 	dia_input = 0; // 1 for 2006 and 0 for the rest
-	DO_CMC = 0;
+	DO_CMC = 1;
 	CMN_cut = 4;  //Should be less than or equal to CMN_coor_high
 	Iter_Size = 500; //buffer size
 	Taylor_speed_throttle = 1000; //# of events to recalculate RMS the old way; set to 1 to disable
@@ -1904,6 +1904,12 @@ bool TSettings::useForAlignment(UInt_t eventNumber, UInt_t nEvents) {
 		return fraction<=getAlignment_training_track_fraction();
 	}
 	return false;
+}
+
+UInt_t TSettings::getAlignmentEvents(UInt_t nEvents){
+    if(getTrainingMethod()==enumEvents)
+        return getAlignmentTrainingTrackNumber();
+   return getAlignment_training_track_fraction()*nEvents;
 }
 
 bool TSettings::isInAlignmentFiducialRegion(Float_t xVal,Float_t yVal){

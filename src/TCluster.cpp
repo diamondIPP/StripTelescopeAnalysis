@@ -279,7 +279,7 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
  */
 Float_t TCluster::getPosition(bool cmnCorrected, calculationMode_t mode,TH1F *histo){
 	if(mode == TCluster::corEta && histo==0)
-		cout<<"TCluster::getPosition::histo ==0"<<endl;
+		cout<<"TCluster::getPosition::histo == 0"<<endl;
 	if(mode==maxValue)
 		return this->getHighestSignalChannel();
 	else if(mode==chargeWeighted)
@@ -479,7 +479,7 @@ Float_t TCluster::getChargeStartingAt(UInt_t nChannels, UInt_t startingClusterPo
 		clusterCharge+=charge;
 //		cout<<" "<<charge<<" "<<clusterCharge;
 		nUsedChannels ++;
-		if(verbosity>3)cout<<TString::Format("%2d %2d %2d %2d",nCl,sign,distance,clPos)<<"\t"<<channel<<"-->"<<charge<<" "<<clusterCharge<<endl;
+//		if(verbosity>3)cout<<TString::Format("%2d %2d %2d %2d",nCl,sign,distance,clPos)<<"\t"<<channel<<"-->"<<charge<<" "<<clusterCharge<<endl;
 	}
 //	cout<<endl;
 	return clusterCharge;

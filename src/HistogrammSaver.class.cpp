@@ -808,7 +808,7 @@ void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit){
 	prof = htemp->ProfileY();
 	if(prof){
 		TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );
-		prof->Fit(fit);
+		prof->Fit(fit,"Q");
 		Float_t xmin = prof->GetXaxis()->GetXmin();
 		Float_t xmax = prof->GetXaxis()->GetXmax();
 		Float_t ymin = fit->GetMinimum(xmin,xmax);
@@ -825,13 +825,13 @@ void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit){
 }
 
 
-void HistogrammSaver:: Save1DProfileXWithFitAndInfluence(TH2* histo, TString function){
+void HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function){
     TString name = "fit_" + (TString)histo->GetName();
     TF1* fit = new TF1(name,function);
-    return Save1DProfileXWithFitAndInfluence(histo,fit);
+    return CreateAndSave1DProfileXWithFitAndInfluence(histo,fit);
 }
 
-void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit){
+void HistogrammSaver::CreateAndSave1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit){
     if(!fit)
         fit = new TF1("fit","pol1");
     TProfile *prof=0;
@@ -839,21 +839,48 @@ void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit){
         return;
     prof = htemp->ProfileX();
     if(prof){
-        TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );
-        prof->Fit(fit);
+        Save1DProfileXWithFitAndInfluence(prof,fit);
+        delete prof;
+        prof = 0;
+    }
+}
+
+void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TProfile *prof, TF1* fit, bool drawStatBox){
+    if (!prof) return;
+    TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );
+    c1->cd();
+    if (!drawStatBox)
+        prof->SetStats(false);
+    TPaveText *text;
+    if(fit){
+        prof->Fit(fit,"Q");
         Float_t xmin = prof->GetXaxis()->GetXmin();
         Float_t xmax = prof->GetXaxis()->GetXmax();
         Float_t ymin = fit->GetMinimum(xmin,xmax);
         Float_t ymax = fit->GetMaximum(xmin,xmax);
-        TPaveText *text = new TPaveText(.2,.2,.5,.3,"brNDC");
+        text = new TPaveText(.2,.2,.5,.3,"brNDC");
         text->SetFillColor(0);
         text->AddText(TString::Format("relative Influence: #frac{#Delta_{x}}{x_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
-        text->Draw("same");
-        SaveCanvas(c1);
-        delete prof;
-        prof = 0;
     }
-
+    prof->Draw();
+    Float_t xmin = prof->GetXaxis()->GetXmin();
+    Float_t xmax = prof->GetXaxis()->GetXmax();
+    Float_t ymin = prof->GetBinContent(prof->GetMinimumBin());
+    Double_t ymax = prof->GetBinContent(prof->GetMaximumBin());
+    ymax = TMath::Max(prof->GetYaxis()->GetXmax(),ymax);
+    Float_t delta = ymax-ymin;
+    ymax = (delta)*1.35+ymin;
+    ymin = ymin - .05*delta;
+    cout<<xmin<<"-"<<xmax<<" "<<ymin<<"-"<<ymax<<endl;
+    TH1 *frame1 = gPad->DrawFrame(xmin,ymin,xmax,ymax);
+    frame1->SetTitle(prof->GetTitle());
+    frame1->GetXaxis()->SetTitle(prof->GetXaxis()->GetTitle());
+    frame1->GetYaxis()->SetTitle(prof->GetYaxis()->GetTitle());
+    frame1->Draw();
+    prof->Draw("sames");
+    if(fit)fit->Draw("same");
+    if(text)    text->Draw("same");
+    SaveCanvas(c1);
 }
 
 void HistogrammSaver::SaveCanvas(TCanvas *canvas)
@@ -1434,7 +1461,7 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	histo->GetYaxis()->SetTitle("Y-Position");
 
 	//set xrange
-	TH1D* hProj=histo->ProjectionX();
+	TH1D* hProj=histo->ProjectionX(histo->GetName()+(TString)"__px");
 	int binxMin=0;
 	for(binxMin=0;binxMin<hProj->GetNbinsX();binxMin++)if(hProj->GetBinContent(binxMin))break;
 	int binxMax;
@@ -1443,7 +1470,7 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
 	delete hProj;
 
 	//set yRange
-	hProj=histo->ProjectionY();
+	hProj=histo->ProjectionY(histo->GetName()+(TString)"__py");
 	int binyMin=0;
 	for(binyMin=0;binyMin<hProj->GetNbinsX();binyMin++)if(hProj->GetBinContent(binyMin))break;
 	int binyMax;
@@ -1464,8 +1491,9 @@ TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Floa
 	//cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
 	ULong_t size = TMath::Min(maxSize,(ULong_t)vecY.size());
 	TGraph hGraph = TGraph(size,&vecX.at(0),&vecY.at(0));
-	hGraph.GetXaxis()->SetName("PredictedPosition");
-	hGraph.GetYaxis()->SetName("Delta");
+	hGraph.Draw("AP");
+	hGraph.GetXaxis()->SetName("X axis");
+	hGraph.GetYaxis()->SetName("y axis");
 	hGraph.SetTitle(name.c_str());
 	return hGraph;
 }
@@ -1681,4 +1709,41 @@ void HistogrammSaver::OptimizeYRange(TH2* histo){
 void HistogrammSaver::OptimizeXYRange(TH2* histo){
 	HistogrammSaver::OptimizeXRange(histo);
 	HistogrammSaver::OptimizeYRange(histo);
+}
+
+void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLegend) {
+    if (!stack) return;
+    TString name = stack->GetName();
+    TString xTitle = "";
+    if(stack->GetXaxis()) xTitle = stack->GetXaxis()->GetTitle();
+    TString yTitle = "";
+    if(stack->GetYaxis()) yTitle =stack->GetYaxis()->GetTitle();
+    cout<<"xTitle: '"<<xTitle<<"'  yTitle: '"<<yTitle<<"'"<<endl;
+    if(name.First('h')==0)
+        name.Replace(0,1,'c');
+    else
+        name.Insert(0,"c_");
+    TCanvas *c1 = new TCanvas(name);
+    c1->cd();
+    c1->SetObjectStat(0);
+    stack->Draw();
+    cout<<"SaveStack: Xaxis: ";
+    stack->GetXaxis()->SetTitle(xTitle);
+    cout<<stack->GetXaxis()->GetTitle();
+    cout<<endl;
+    cout<<"SaveStack: Yaxis: ";
+    stack->GetYaxis()->SetTitle(yTitle);
+    cout<<stack->GetYaxis()->GetTitle();
+    cout<<endl;
+    if(drawOption=="")
+        stack->Draw();
+    else
+        stack->Draw(drawOption);
+    if (bDrawLegend){
+        TLegend* leg = c1->BuildLegend(.5,.6,.95,98);
+//        leg->SetFillColor(kWhite);
+        leg->Draw();
+    }
+    stack->Write(stack->GetName()+(TString)".root");
+    SaveCanvas(c1);
 }

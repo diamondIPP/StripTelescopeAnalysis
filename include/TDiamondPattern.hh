@@ -36,6 +36,8 @@ public:
 	Float_t convertChannelToMetric(Float_t channel);
 	Int_t convertMetricToIntChannel(Float_t metric){return (Int_t)(convertMetricToChannel(metric)+.5);}
 	Float_t convertMetricToChannel(Float_t metric);
+    Float_t convertMetricToRelativeMetric(Float_t metric);
+    Float_t convertMetricToRelativeMetric(Float_t metric,UInt_t i);
 	Float_t getChannel(Float_t metric){return convertMetricToChannel(metric);}
 	Int_t getPatternOfHit(Float_t metric);
 	Float_t convertMetricToChannel(Float_t metric,UInt_t interval);
