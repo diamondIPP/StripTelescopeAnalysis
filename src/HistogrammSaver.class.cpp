@@ -783,6 +783,17 @@ void HistogrammSaver::SaveHistogramLogZ(TH2* histo){
 	delete c1;
 }
 
+
+void HistogrammSaver::SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox){
+    TString name = prof->GetName();
+    if (name.First('h')==0)name[0]='c';
+    TCanvas *c1 = new TCanvas(name);
+    if (!drawStatBox)
+        c1->SetObjectStat(false);
+    prof->Draw("colz");
+    prof->Draw("TEXTsame");
+    SaveCanvas(c1);
+}
 void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRange) {
 	if (!histo)return;
 	if(histo->GetEntries()==0)return;
@@ -871,7 +882,7 @@ void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TProfile *prof, TF1* fit
     Float_t delta = ymax-ymin;
     ymax = (delta)*1.35+ymin;
     ymin = ymin - .05*delta;
-    cout<<xmin<<"-"<<xmax<<" "<<ymin<<"-"<<ymax<<endl;
+//    cout<<xmin<<"-"<<xmax<<" "<<ymin<<"-"<<ymax<<endl;
     TH1 *frame1 = gPad->DrawFrame(xmin,ymin,xmax,ymax);
     frame1->SetTitle(prof->GetTitle());
     frame1->GetXaxis()->SetTitle(prof->GetXaxis()->GetTitle());

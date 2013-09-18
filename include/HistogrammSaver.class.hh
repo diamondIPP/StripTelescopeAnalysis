@@ -80,6 +80,7 @@ public:
     void Save1DProfileXWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
+	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
 	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);

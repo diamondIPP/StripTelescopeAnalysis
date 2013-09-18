@@ -251,8 +251,19 @@ private:
 
 	std::map< UInt_t, TProfile* > hPedestalVsEvenNo;
     std::map< UInt_t, TProfile* > hNoiseVsEvenNo;
+
 	TProfile* hCmnVsEventNo;
 
+	vector<TProfile2D*> vecPHVsEventNo_Areas;
+	vector<TProfile2D*> vecPH2HighestVsEventNo_Areas;
+	UInt_t GetHitArea();
+	void initDividedAreaAxis(TAxis *axis);
+	TString GetNameOfArea(UInt_t x,UInt_t y);
+	void initPHvsEventNoAreaPlots(UInt_t nStart = 0, UInt_t nEnd = 1e6);
+	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo);
+	void savePHvsEventNoAreaPlots();
+	UInt_t xDivisions;
+	UInt_t yDivisions;
 };
 
 
