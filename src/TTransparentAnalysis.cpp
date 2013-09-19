@@ -1996,11 +1996,14 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
         TProfile2D * prof2d = vecPHVsEventNo_Areas[i];
         if (!prof2d) continue;
         prof2d->Draw();
+        TProfile* prof = histSaver->GetProfileX(prof2d);
+        histSaver->Save1DProfileXWithFitAndInfluence(prof,0,false);
         histSaver->SaveProfile2DWithEntriesAsText(prof2d,true);//,false);
         TF1* pol1Fit = new TF1("pol1Fit","pol1",prof2d->GetXaxis()->GetXmin(),prof2d->GetXaxis()->GetXmax());
         vector<TProfile*> vecStack;
         for(int y = 0; y< prof2d->GetYaxis()->GetNbins();y++){
-            TProfile *prof = prof2d->ProfileX(prof2d->GetName()+(TString)"_"+GetNameOfArea(y%xDivisions,y/xDivisions),y+1,y+1);
+            TString name = prof2d->GetName()+(TString)"_"+GetNameOfArea(y%xDivisions,y/xDivisions);
+            prof = histSaver->GetProfileX(prof2d,name,y+1,y+1);
             prof->Draw();
             prof->SetLineColor(y);
             prof->SetMarkerColor(y);
@@ -2081,6 +2084,5 @@ UInt_t TTransparentAnalysis::GetHitArea(){
     Float_t relY = (yVal-fidcut->GetYLow())/(fidcut->GetYHigh()-fidcut->GetYLow());
     Int_t x = relX*xDivisions;
     Int_t y = relY*yDivisions;
-    cout<<"relX: "<<relX<<"->"<<x<<"\trelY: "<<relY<<"->"<<y<<"\t "<<x+xDivisions*y<<endl;
     return x+xDivisions*y;
 }
