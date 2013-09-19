@@ -82,6 +82,8 @@ public:
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
 	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
 	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false);
+	TProfile* GetProfileX(TProfile2D* prof,TString name ="_pfx",Int_t firstybin = 1, Int_t lastybin = -1);
+    TProfile* GetProfileY(TProfile2D* prof,TString name ="_pfy",Int_t firstxbin = 1, Int_t lastxbin = -1);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);
 	void SaveHistogramWithFit(TH1F* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
