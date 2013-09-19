@@ -53,6 +53,8 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 	gRandom->SetSeed(1);
 	cmCorrected  = false;
 	if(verbosity>5) settings->diamondPattern.Print();
+	xDivisions = 3;
+	yDivisions = 3;
 }
 
 TTransparentAnalysis::~TTransparentAnalysis() {
@@ -99,8 +101,6 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		char t;
 		cin >>t;
 	}
-
-    initPedestalAndNoiseHistos(nEvents);
 	predXMin = predYMin = 1e9;
 	predXMax = predYMax = -1e9;
 	//	usedForSiliconAlignment = 0;
@@ -109,6 +109,19 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
 		cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
 		nEvents = eventReader->GetEntries()-startEvent;
 	}
+	if(settings->getAlignmentEvents(nEvents)>startEvent){
+	    cout<<"startEvent:      "<<startEvent<<endl;
+	    cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
+	    UInt_t newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
+	    cout<<"newstartEvent: "<<newstartEvent<<endl;
+	    cout<<"nEvents: "<<nEvents<<endl;
+	    nEvents -= newstartEvent-startEvent;
+	    startEvent = newstartEvent;
+	    cout<<"\nnEvents = "<<nEvents<<endl;
+	    cout<<"startEvent= "<<startEvent<<endl;
+	}
+    initPedestalAndNoiseHistos(nEvents+startEvent);
+    initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
 	this->nEvents = nEvents;
 	createEventVector(startEvent);
 	cout<<"X: "<<predXMin<<" - "<<predXMax<<endl;
@@ -398,13 +411,15 @@ void TTransparentAnalysis::fillHistograms() {
 	vecPredictedChannel.push_back(positionInDetSystemChannelSpace);
 	vecPredictedDetectorPositionY.push_back(positionInDetSystemMetricY);
 	fillPedestalsAndNoiseHistos();
-
+	UInt_t area = GetHitArea();
 	UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
 	for (UInt_t clusterSize = 0; clusterSize < maxSize; clusterSize++) {
 		transparentClusters.SetTransparentClusterSize(clusterSize+1);
 		Float_t charge = this->transparentClusters.getCharge(cmCorrected);
 
 		Float_t chargeOfTwo = this->transparentClusters.getCharge(2,cmCorrected);
+
+	    fillPHvsEventNoAreaPlots(area,clusterSize+1,charge,chargeOfTwo);
 		vecVecLandau[clusterSize].push_back(charge);
 		hLandau[clusterSize]->Fill(charge);
 		hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
@@ -1152,6 +1167,7 @@ void TTransparentAnalysis::saveHistograms() {
 	savePedestalHistos();
     saveNoiseHistos();
 	analyseEtaDistributions();
+	savePHvsEventNoAreaPlots();
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		this->saveLandausVsPositionPlots(clusterSize+1);
 		string name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize+1);
@@ -1562,8 +1578,8 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 		bool isScreened = set->isDet_channel_screened(det,currentChannel);
 		if (TPlaneProperties::IsValidChannel(det,currentChannel))
 			transparentCluster.addChannel(currentChannel,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
-		else
-			cout<<"\t cannot add invalid channel"<<currentChannel<<" @ "<<reader->getEvent_number()<<endl;
+//		else
+//			cout<<"\t cannot add invalid channel"<<currentChannel<<" @ "<<reader->getEvent_number()<<endl;
 		//		transparentCluster.addChannel(currentChannel, reader->getRawSignal(det,currentChannel), reader->getRawSignalInSigma(det,currentChannel), reader->getAdcValue(det,currentChannel), reader->isSaturated(det,currentChannel), settings->isDet_channel_screened(det,currentChannel));
 	}
 	//	cout<<"[done]"<<endl;
@@ -1946,4 +1962,127 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 			delete hClone;
 		}
 	}
+}
+
+void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
+    cout<<"initPHvsEventNoAreaPlots"<<endl;
+    for (UInt_t i = 0; i< TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); i++){
+        TString name = TString::Format("hPHvsEventNoArea_clusterSize_%02d",i+1);
+        TString title = TString::Format("ph vs eventNo, clustersize %d",i+1);
+        UInt_t nBins = (nEnd-nStart)/10000;
+        if((nEnd-nStart)%10000!=0)nBins++;
+        if (nBins==0)nBins=1;
+        UInt_t yBins = xDivisions*yDivisions;
+        TProfile2D* prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);
+        prof->Draw();
+        prof->GetXaxis()->SetTitle("event no");
+        initDividedAreaAxis(prof->GetYaxis());
+        prof->GetZaxis()->SetTitle(TString::Format("avrg. pulse height, cl size %d",i+1));
+        vecPHVsEventNo_Areas.push_back(prof);
+        name = TString::Format("hPHvsEventNo2HighestArea_clusterSize_%02d",i+1);
+        title = TString::Format("ph vs eventNo 2Highest, clustersize %d",i+1);
+        prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);
+        prof->GetXaxis()->SetTitle("event no");
+        initDividedAreaAxis(prof->GetYaxis());
+        prof->GetZaxis()->SetTitle(TString::Format("avrg. pulse height 2 out of %d",i+1));
+        vecPH2HighestVsEventNo_Areas.push_back(prof);
+    }
+}
+
+
+void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
+    cout<<"[TTransparentAnalysis::savePHvsEventNoAreaPlots] "<<endl;
+    for (UInt_t i = 0; i< vecPHVsEventNo_Areas.size(); i++){
+        TProfile2D * prof2d = vecPHVsEventNo_Areas[i];
+        if (!prof2d) continue;
+        prof2d->Draw();
+        TProfile* prof = histSaver->GetProfileX(prof2d);
+        histSaver->Save1DProfileXWithFitAndInfluence(prof,0,false);
+        histSaver->SaveProfile2DWithEntriesAsText(prof2d,true);//,false);
+        TF1* pol1Fit = new TF1("pol1Fit","pol1",prof2d->GetXaxis()->GetXmin(),prof2d->GetXaxis()->GetXmax());
+        vector<TProfile*> vecStack;
+        for(int y = 0; y< prof2d->GetYaxis()->GetNbins();y++){
+            TString name = prof2d->GetName()+(TString)"_"+GetNameOfArea(y%xDivisions,y/xDivisions);
+            prof = histSaver->GetProfileX(prof2d,name,y+1,y+1);
+            prof->Draw();
+            prof->SetLineColor(y);
+            prof->SetMarkerColor(y);
+            TF1* fit = (TF1*) pol1Fit->Clone(prof->GetName()+(TString)"_fit");
+            cout<<"Save: "<<prof->GetName()<<endl;
+            histSaver->Save1DProfileXWithFitAndInfluence(prof,fit);
+            vecStack.push_back(prof);
+        }
+        THStack* stack = new THStack("hPHvsEventNoAllAreas","Ph vs EventNo, All Areas");
+        bool foundOneHisto = false;
+        for(UInt_t i = 0; i< vecStack.size();i++){
+            if(!vecStack[i]) continue;
+            foundOneHisto = true;
+            stack->Add(vecStack[i]);
+        }
+        if(foundOneHisto){
+            stack->Draw();
+            if(stack->GetXaxis())stack->GetXaxis()->SetTitle("Event No.");
+            if(stack->GetYaxis())stack->GetYaxis()->SetTitle("avrg PH");
+            cout<<"Save: "<<stack->GetName()<<endl;
+            histSaver->SaveStack(stack);
+        }
+        delete stack;
+        for(UInt_t i = 0; i< vecStack.size();i++){
+            delete vecStack[i];
+            vecStack[i]=0;
+        }
+    }
+//    char t; cin>>t;
+}
+
+TString TTransparentAnalysis::GetNameOfArea(UInt_t x,UInt_t y){
+
+    vector<TString> xDirString;
+    xDirString.push_back("Left");
+    xDirString.push_back("Middle");
+    xDirString.push_back("Right");
+    vector<TString> yDirString;
+    yDirString.push_back("lower");
+    yDirString.push_back("middle");
+    yDirString.push_back("upper");
+    if(x<xDirString.size() && yDirString.size())
+    return yDirString[y]+(TString)"_"+xDirString[x];
+
+    return "unkown area";
+}
+void TTransparentAnalysis::initDividedAreaAxis(TAxis* axis){
+    if (!axis) return;
+    Int_t bins = xDivisions*yDivisions;
+    if (axis->GetNbins() != bins ){
+        cerr<<"divided area axis has wrong number of bins: "<<axis->GetNbins()<<"/"<<bins<<endl;
+        return;
+    }
+    for (UInt_t y = 0; y < yDivisions; y++)
+    for (UInt_t x = 0; x < xDivisions; x++){
+        axis->SetBinLabel(x+xDivisions*y+1, GetNameOfArea(x,y));
+    }
+
+}
+
+void TTransparentAnalysis::fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo) {
+
+    UInt_t i = clusterSize -1;
+    if (i < vecPHVsEventNo_Areas.size())
+        vecPHVsEventNo_Areas[i]->Fill(nEvent,area,charge);
+    if (i < vecPH2HighestVsEventNo_Areas.size())
+        vecPH2HighestVsEventNo_Areas[i]->Fill(nEvent,area,chargeOfTwo);
+}
+
+
+
+UInt_t TTransparentAnalysis::GetHitArea(){
+    Float_t xVal = eventReader->getFiducialValueX();
+    Float_t yVal = eventReader->getFiducialValueY();
+    Int_t nFidCut = settings->getSelectionFidCuts()->getFidCutRegion(xVal,yVal);
+    TFiducialCut* fidcut = settings->getSelectionFidCuts()->getFidCut(nFidCut);
+    Float_t relX = (xVal-fidcut->GetXLow())/(fidcut->GetXHigh()-fidcut->GetXLow());
+    Float_t relY = (yVal-fidcut->GetYLow())/(fidcut->GetYHigh()-fidcut->GetYLow());
+    Int_t x = relX*xDivisions;
+    Int_t y = relY*yDivisions;
+    return x+xDivisions*y;
 }
