@@ -83,6 +83,8 @@ private:
 	void initialise3DOverviewHistos();
 	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
+	void initialise3DCellCentralColumnOverlayHistos();
+	void initialise3DOffsetOverlayHistos();
 	void initialiseEdgeFreeHistos();
 	//new functions
 	void HitandSeedCount(TCluster* nCluster);
@@ -104,12 +106,17 @@ private:
 
 private:
 	void LongAnalysisSaveCellAndQuaterNumbering();
-	void LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge);
+	void LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge,Float_t ClusterSize);
+	void LongAnalysis_FillOverlayCentralColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster diamondCluster);
+	void LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster diamondCluster);
+	void LongAnalysis_FillOverlayOffsetHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
 
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
+	void LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge();
+	void LongAnalysis_SaveCellsOverlayOffsetMeanCharge();
 	void LongAnalysis_SaveEdgeFreeHistos();
 	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp = 0);
 	void LongAnalysis_SaveFailedQuarters();
@@ -283,19 +290,33 @@ private:
 	Float_t hLandauGoodCellsMean;
 
 	//TCanvas* cCellsOverlayMeanCharge;
-	TProfile2D* hCellsOverlayAvrgCharge;
-	TProfile2D* hCellsOverlayAvrgChargeMinusBadCells;
-	TProfile2D* hCellsOverlayAvrgChargeGoodCells;
-	TProfile2D* hCellsOverlayAvrgChargeBadCells;
-	TProfile2D* hCellsOverlayAvrgChargeNoColumnHit;
+	vector<TProfile2D*> hCellsOverlayAvrgCharge;
+	vector<TProfile2D*> hCellsOverlayAvrgChargeMinusBadCells;
+	vector<TProfile2D*> hCellsOverlayAvrgChargeGoodCells;
+	vector<TProfile2D*> hCellsOverlayAvrgChargeBadCells;
+	vector<TProfile2D*> hCellsOverlayAvrgChargeNoColumnHit;
+	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgCharge;
+	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCells;
+	vector<TH2F*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents;
+	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut;
+	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis;
+	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeGoodCells;
+	vector<TProfile2D*> hCellsOffsetOverlayAvrgCharge;
+	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCells;
+	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeGoodCells;
 	TProfile2D* hPulseHeigthCentralRegion;
 	TProfile2D* hPulseHeigthEdgeRegion;
 	TH2F* hEventsCentralRegion;
 	TH2F* hEventsEdgeRegion;
 
-	TH1F* hCellOverlayWithColumnLandau;
-	TH1F* hCellOverlayNoColumnLandau;
-	TH1F* hCellOverlayColumnLandau;
+	vector<TH1F*> hCellOverlayWithColumnLandau;
+	vector<TH1F*> hCellOverlayNoColumnLandau;
+	vector<TH1F*> hCellOverlayColumnLandau;
+
+	vector<TH1F*> hCellsCentralColumnOverlayLandau;
+	vector<TH1F*> hCellsCentralColumnOverlayLandauMinusBadCells;
+	vector<TH1F*> hCellsCentralColumnOverlayLandauMinusBadCellsOffsetAnalysis;
+	vector<TH1F*> hCellsCentralColumnOverlayLandauGoodCells;
 
 	//TH1F* hCellsHarrisGood;
 	//TH1F* hCellsHarrisBad;

@@ -766,6 +766,16 @@ void TSettings::DefaultLoadDefaultSettings(){
 	yOffset3D = 3890;
 	cellHeight = 150;
 	columnRadius = 5;//#mum
+	MaxOverlayClusterSize = 3;
+	CentralColumnOverlayXLow = 70;
+	CentralColumnOverlayXHigh = 80;
+	CentralColumnOverlayYLow = 70;
+	CentralColumnOverlayYHigh = 80;
+	CentralColumnOverlayXBins = 5;
+	CentralColumnOverlayYBins = 5;
+	OverlayOffsetX = 37.5;
+	OverlayOffsetY = 37.5;
+	OverlayColumnPulseHeightCut = 500;
 
 //	vecEdgePositions.push_back(3715);
 //	vecEdgePositions.push_back(1370);
