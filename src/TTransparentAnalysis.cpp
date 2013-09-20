@@ -952,6 +952,32 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 
 }
 
+void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
+    if (clusterSize==0)
+        return;
+    cout<<"SaveLandauVsEventNoPlots "<<clusterSize<<endl;
+    TString name;
+    TH2F* hLandauVsEventNo=0;
+    if(clusterSize-1 < vecVecPh2Highest.size()){
+        name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
+        hLandauVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,100,512,0,nEvents,0,3000);
+
+        if(vectorEventNo.size()!=vecVecPh2Highest.at(clusterSize-1).size())
+            cerr<<"[TTransparentAnalysis::SaveLandauVsEventNoPlots]: Sizes of vectors are different for clusterSize "<<clusterSize<<endl;
+
+        if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize-1).size()<<endl;
+
+        if(hLandauVsEventNo){
+            hLandauVsEventNo->GetXaxis()->SetTitle("Event no.");
+            hLandauVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
+            histSaver->SaveHistogram(hLandauVsEventNo);
+            histSaver->Save1DProfileYWithFitAndInfluence(hLandauVsEventNo,"pol1");
+            if (hLandauVsEventNo)
+                delete hLandauVsEventNo;
+        }
+    }
+}
+
 void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
 	cout<<"saveLandausVsPositionPlots"<<endl;
 	TString name;
@@ -1170,17 +1196,7 @@ void TTransparentAnalysis::saveHistograms() {
 	savePHvsEventNoAreaPlots();
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		this->saveLandausVsPositionPlots(clusterSize+1);
-		string name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize+1);
-		TH2F* hLandauVsEventNo = histSaver->CreateScatterHisto(name,vecVecPh2Highest.at(clusterSize),vectorEventNo,100,512,0,nEvents,0,3000);
-		if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize).size()<<endl;
-		if(hLandauVsEventNo){
-			hLandauVsEventNo->GetXaxis()->SetTitle("Event no.");
-			hLandauVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
-			histSaver->SaveHistogram(hLandauVsEventNo);
-			histSaver->Save1DProfileYWithFitAndInfluence(hLandauVsEventNo,"pol1");
-			if (hLandauVsEventNo)
-				delete hLandauVsEventNo;
-		}
+		this->SaveLandauVsEventNoPlots(clusterSize+1);
 		histSaver->SaveHistogram(hEta[clusterSize],0);
 		histSaver->SaveHistogram(hEtaCMNcorrected[clusterSize],0);
 		//		if (clusterSize == 0) {
@@ -1966,11 +1982,12 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 
 void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
     cout<<"initPHvsEventNoAreaPlots"<<endl;
+    Int_t nentriesPerBin = 20000;
     for (UInt_t i = 0; i< TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); i++){
         TString name = TString::Format("hPHvsEventNoArea_clusterSize_%02d",i+1);
         TString title = TString::Format("ph vs eventNo, clustersize %d",i+1);
-        UInt_t nBins = (nEnd-nStart)/10000;
-        if((nEnd-nStart)%10000!=0)nBins++;
+        UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
+        if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
         if (nBins==0)nBins=1;
         UInt_t yBins = xDivisions*yDivisions;
         TProfile2D* prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);

@@ -89,6 +89,7 @@ private:
 	void analyseEtaDistribution(TH1F* hEtaDist);
 	void saveHistograms();
 	void saveLandausVsPositionPlots(UInt_t clusterSize);
+	void SaveLandauVsEventNoPlots(UInt_t clusterSize);
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();

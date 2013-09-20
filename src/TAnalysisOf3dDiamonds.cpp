@@ -2567,26 +2567,22 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistos(Int_t ce
 void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,
         Float_t clusterCharge, Float_t ClusterSize, TCluster diamondCluster) {
 
-	diamondCluster.SetTransparentClusterSize(3);
+	diamondCluster.SetTransparentClusterSize(5);
 	Int_t ClusterStart = diamondCluster.getFirstHitChannel();
 	Int_t ClusterEnd = diamondCluster.getLastHitChannel();
-	cout<<"ClusterStart: "<<ClusterStart<<" ClusterEnd: "<<ClusterEnd<<endl;
+	cout<<"\nClusterStart: "<<ClusterStart<<" ClusterEnd: "<<ClusterEnd<<endl;
 	pair<int,int> channels = settings->diamondPattern.getPatternChannels(3);
-	cout<<"3D Channels: "<<channels.first<<" - "<<channels.second<<endl;
-
+//	cout<<"\n3D Channels: "<<channels.first<<" - "<<channels.second<<endl;
+	Float_t ghostHit;
+	do{
+	    ghostHit = gRandom->Uniform(channels.first,channels.second);
+	}
+	while(ClusterStart<=ghostHit&&ghostHit<=ClusterEnd);
+	ghostHit-=.5;
+	cout<<"new Ghost Hit at "<<ghostHit<<endl;
 	TCluster GhostCluster;
-	cout<<(ClusterStart -1 - channels.first)<<endl;
-	if((ClusterStart -1 - channels.first)>2){
-		GhostCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,ClusterStart -3,ClusterSize);
-	}
-	if((ClusterStart -1 - channels.first)==2){
-		GhostCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,ClusterStart -3,ClusterSize);
-	}
-	if((ClusterStart -1 - channels.first)<2){
-		GhostCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,ClusterEnd +3,ClusterSize);
-	}
-	for(int clusPos=0; clusPos<GhostCluster.GetTransparentClusterSize(); clusPos++)
-		cout<<"Channel: "<<GhostCluster.getChannel(clusPos)<<endl;
+	GhostCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,ghostHit,ClusterSize);
+	GhostCluster.Print(1);
 
 	diamondCluster.SetTransparentClusterSize(ClusterSize);
 

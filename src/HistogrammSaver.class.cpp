@@ -850,9 +850,57 @@ TProfile* HistogrammSaver::GetProfileX(TProfile2D* prof2d, TString name, Int_t f
     return prof;
     }
 
-    TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof,TString name,Int_t firstxbin, Int_t lastxbin){
-        return 0;
+TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t firstxbin, Int_t lastxbin){
+    if(!prof2d) return 0;
+    if(lastxbin==-1) lastxbin = prof2d->GetXaxis()->GetNbins();
+    cout<<"[HistogrammSaver::GetProfileY] "<<prof2d->GetName()<<" "<<firstxbin<<"-"<<lastxbin<<endl;
+    if(name=="_pfy"||name =="")
+        name = prof2d->GetName()+(TString)"_pfy";
+    TString title = prof2d->GetTitle() + (TString)" profile Y";
+    UInt_t binsX = prof2d->GetYaxis()->GetNbins();
+    Float_t xLow = prof2d->GetYaxis()->GetXmin();
+    Float_t xHigh = prof2d->GetYaxis()->GetXmax();
+    TProfile* prof = new TProfile(name,title,binsX,xLow,xHigh);
+    cout<<"new Prof: "<<prof->GetName()<<endl;
+    prof->Draw("goff");
+    if(prof->GetXaxis())
+        prof->GetXaxis()->SetTitle(prof2d->GetYaxis()->GetTitle());
+    if (prof2d->GetZaxis()) title= prof2d->GetZaxis()->GetTitle();
+    else title = "";
+    if(firstxbin!=1||lastxbin!= prof2d->GetXaxis()->GetNbins())
+        title.Append(TString::Format(" yrange: %f - %f",prof2d->GetYaxis()->GetBinLowEdge(firstxbin),prof2d->GetYaxis()->GetBinLowEdge(lastxbin)));
+    if(prof->GetZaxis()) prof->GetYaxis()->SetTitle(title);
+    cout<<"xaxis: "<<prof->GetXaxis()->GetTitle()<<endl;
+    cout<<"yaxis: "<<prof->GetYaxis()->GetTitle()<<endl;
+    Int_t firstybin = 1;
+    Int_t lastybin = prof2d->GetXaxis()->GetNbins();
+    for(Int_t binx = firstybin; binx <= lastybin; binx++){
+        name = prof->GetName()+TString::Format("_binx%d:",binx);
+        TProfile* profyBin = new TProfile(name,title,binsX,xLow,xHigh);
+        cout<<"new ybin: "<<binx<<" "<<prof->GetName()<<": "<<endl;
+        profyBin->Reset();
+        Int_t nEntries =0;
+        for(Int_t biny = firstxbin; biny <= lastxbin; biny++){
+            Int_t bin2d = prof2d->GetBin(binx,biny);
+            (*profyBin)[biny] = (*prof2d)[bin2d];    // copy bin y values
+            (*profyBin->GetSumw2())[biny] =  (*prof2d->GetSumw2())[bin2d];   // copy bin y*y values
+            profyBin->SetBinEntries(biny, prof2d->GetBinEntries(bin2d) );    // copy bin entries
+            nEntries+=prof2d->GetBinEntries(bin2d);
+            // copy (if needed) bin sum of weight square
+            if ( prof2d->GetBinSumw2()->fN > bin2d ) {
+                profyBin->Sumw2();
+                (*profyBin->GetBinSumw2())[biny] = (*prof2d->GetBinSumw2())[bin2d];
+            }
+        }
+        profyBin->SetEntries(nEntries);
+        prof->Add(profyBin);
+        cout<<""<<profyBin->GetEntries()<<" ---> "<<prof->GetEntries()<<endl;
+        delete profyBin;
     }
+    cout<<" final profile: "<<prof->GetEntries()<<"/"<<prof2d->GetEntries()<<endl;
+    //    char t; cin>>t;
+    return prof;
+}
 
     void HistogrammSaver::SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox){
         TString name = prof->GetName();
