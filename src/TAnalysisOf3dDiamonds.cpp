@@ -1231,7 +1231,9 @@ void TAnalysisOf3dDiamonds::initialiseEdgeFreeHistos(){
 }
 
 void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
-
+    TH1F* hLandau = new TH1F("hLandau","hLandau",PulseHeightBins, PulseHeightMin,PulseHeightMax);
+    hLandau->GetXaxis()->SetTitle("pulse height of cluster /ADC");
+    hLandau->GetYaxis()->SetTitle("number of entries #");
 	Int_t MaxOverlayClusterSize = settings->getMaxOverlayClusterSize();
 	for(Int_t ClusterSize = 0; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
 		TString appendix = TString::Format("_ClusterSize%i", ClusterSize);
@@ -1273,6 +1275,12 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 		name.Append(appendix);
 		hCellsOverlayAvrgChargeMinusBadCells.push_back((TProfile2D*)hCellsOverlayAvrgCharge.at(0)->Clone(name));
 		hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->SetTitle(name);
+
+		name = TString::Format( "hCellLandauChargeMinusBadCells_clustersize%0d",ClusterSize+1);
+		name.Append(appendix);
+		hCellsLandauMinusBadCells.push_back((TH1F*)hLandau->Clone(name));
+		hCellsLandauMinusBadCells.back()->SetTitle(name);
+
 
 		//hCellsOverlayAvrgChargeGoodCells
 		name = "hCellsOverlayAvrgChargeGoodCells";
@@ -2513,8 +2521,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_
     hCellsOverlayAvrgCharge.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
     hCellOverlayWithColumnLandau.at(ClusterSize)->Fill(clusterCharge);
 
-    if(!settings->isBadCell(3,cellNo))
+    if(!settings->isBadCell(3,cellNo)){
         hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
+        hCellsLandauMinusBadCells.at(ClusterSize)->Fill(clusterCharge);
+    }
     if(settings->IsGoodCell(3, cellNo))
         hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
 	if(settings->isBadCell(3,cellNo))
@@ -2905,6 +2915,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
 			histSaver->SaveHistogram(histo);
 			delete histo;
 		}
+        if(hCellsLandauMinusBadCells.at(ClusterSize)){
+            histSaver->SaveHistogram(hCellsLandauMinusBadCells[ClusterSize]);
+            if(ClusterSize+1!=3)delete hCellsLandauMinusBadCells[ClusterSize];
+
+        }
 		if(hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)){
 			cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->IsZombie()<<endl;
 			cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetEntries()<<endl;
@@ -2915,7 +2930,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
 			histo->Draw("goffcolz");
 			histo->GetZaxis()->SetRangeUser(700,1200);
 			histSaver->SaveHistogram(histo);
-			delete histo;
+			if(ClusterSize+1!=3)delete histo;
+		}
+		if(ClusterSize+1==3){
+		    TProfile2D* prof = hCellsOverlayAvrgChargeMinusBadCells[ClusterSize];
+		    DoMonteCarloOfAvrgChargePerBinInOverlay(prof,hCellsLandauMinusBadCells[ClusterSize]);
+		    delete hCellsLandauMinusBadCells[ClusterSize];
 		}
 		if(hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)){
 			TString name = "hCellsOverlayAvrgChargeNoColumnHit_cl";
@@ -3935,3 +3955,44 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateRelativeAddedTransparentChargeCom
 
 }
 
+void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
+        TProfile2D* profOverlay, TH1F* hLandauOfOverlay) {
+    if(!profOverlay || !hLandauOfOverlay){
+        cerr<<"[TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay] one of the histograms is not defined! ";
+        cout<<profOverlay<<" "<<hLandauOfOverlay<<endl;
+    }
+    TH2D* hBinContents = histSaver->GetBinContentHisto(profOverlay);
+    histSaver->SaveHistogram(hBinContents,false,false,(TString)"colzText");
+    TString name = profOverlay->GetName()+(TString)"_Entries";
+    Int_t max = hBinContents->GetBinContent(hBinContents->GetMaximumBin())+1;
+    Int_t min = hBinContents->GetBinContent(hBinContents->GetMinimumBin())+1;
+    max -=5;
+    min -=5;
+    Int_t bins = max-min;
+    TH1F* hEntries = new TH1F(name,name,bins,min,max);
+    for(Int_t binx = 1;binx < hBinContents->GetNbinsX();binx++)
+    for(Int_t biny = 1;biny < hBinContents->GetNbinsY();biny++){
+        Int_t bin = hBinContents->GetBin(binx,biny);
+        hEntries->Fill(hBinContents->GetBinContent(bin));
+    }
+    histSaver->SaveHistogram(hEntries);
+    name = "hMonteCarloAvrgChargePerBin";
+    TH1D* hMonteCarloAvrgChargePerBin = new TH1D(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    for(UInt_t nMC = 0; nMC < 1e6; nMC++){
+        Int_t entries = hEntries->GetRandom();
+        Float_t mean = 0;
+        for(Int_t entry =0; entry < entries; entry++){
+            mean += hLandauOfOverlay->GetRandom();
+        }
+        mean /= (Float_t)entries;
+        cout<<TString::Format("%6d --> %6.1f (%d)",nMC,mean,entries)<<endl;;
+        hMonteCarloAvrgChargePerBin->Fill(mean);
+    }
+    hMonteCarloAvrgChargePerBin->GetXaxis()->SetTitle("mean charge per bin_{MonteCarlo}");
+    hMonteCarloAvrgChargePerBin->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hMonteCarloAvrgChargePerBin);
+    delete hMonteCarloAvrgChargePerBin;
+    delete hBinContents;
+    delete hEntries;
+
+}

@@ -959,15 +959,19 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
     TString name;
     TH2F* hLandauVsEventNo=0;
     if(clusterSize-1 < vecVecPh2Highest.size()){
+
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
         hLandauVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,100,512,0,nEvents,0,3000);
-
+        cout<<"Save "<<name<<" "<<hLandauVsEventNo;
+        if(hLandauVsEventNo) cout<<" "<<hLandauVsEventNo->GetEntries();
+        cout<<endl;
         if(vectorEventNo.size()!=vecVecPh2Highest.at(clusterSize-1).size())
             cerr<<"[TTransparentAnalysis::SaveLandauVsEventNoPlots]: Sizes of vectors are different for clusterSize "<<clusterSize<<endl;
 
         if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize-1).size()<<endl;
 
         if(hLandauVsEventNo){
+
             hLandauVsEventNo->GetXaxis()->SetTitle("Event no.");
             hLandauVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
             histSaver->SaveHistogram(hLandauVsEventNo);
@@ -999,7 +1003,7 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
 	}
 
 	if(clusterSize-1 < vecVecPh2Highest.size() && clusterSize-1>=2){
-		name = TString::Format("hLandauVsFidCutX_2OutOfe%02d",clusterSize);
+		name = TString::Format("hLandauVsFidCutX_2OutOf%02d",clusterSize);
 		htemp = histSaver->CreateScatterHisto((string)name,vecVecFidCutX,vecVecPh2Highest[clusterSize-1],
 				512,512,
 				0,2800,

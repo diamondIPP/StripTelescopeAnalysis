@@ -909,17 +909,18 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         if (!drawStatBox)
             c1->SetObjectStat(false);
         prof->Draw("colz");
-        prof->Draw("TEXTsame");
+        TH2D* histo = prof->ProjectionXY(prof->GetName()+(TString)"_binEntries","B");
+        histo->Draw("TEXTsame");
         SaveCanvas(c1);
     }
-    void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRange) {
+    void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRange,TString drawOption) {
         if (!histo)return;
         if(histo->GetEntries()==0)return;
         if (!drawStatBox)
             histo->SetStats(false);
         //	histo->SetStats(false);
-        SaveHistogramPNG(histo,optimizeRange);
-        SaveHistogramROOT(histo,optimizeRange);
+        SaveHistogramPNG(histo,optimizeRange,drawOption);
+        SaveHistogramROOT(histo,optimizeRange,drawOption);
     }
 
     void HistogrammSaver:: Save1DProfileYWithFitAndInfluence(TH2* histo, TString function){
@@ -1205,7 +1206,7 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
 
     }
 
-    void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange) {
+    void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange,TString drawOption) {
 
         if(!histo){
             cerr<<"HistogrammSaver::SaveHistogramPNG(TH2*), histogram ==0"<<endl;
@@ -1219,7 +1220,7 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         plots_canvas->cd();
         TH2* htemp = (TH2*)histo->Clone();
         if(optimizeRange) HistogrammSaver::OptimizeXYRange(htemp);
-        htemp->Draw("colz");
+        htemp->Draw(drawOption);
 
         TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));
         pt2->Draw();
@@ -1233,7 +1234,7 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         if (plots_canvas) delete plots_canvas;
     }
 
-    void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange) {
+    void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange,TString drawOption) {
         if(!histo){
             cerr<<"HistogrammSaver::SaveHistogramROOT(TH2*) histogram == 0"<<endl;
             return;
@@ -1249,7 +1250,7 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         htemp->Draw();
         if(optimizeRange)
             HistogrammSaver::OptimizeXYRange(htemp);
-        htemp->Draw("colz");
+        htemp->Draw(drawOption);
 
         TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
         pt2->Draw();
@@ -1875,4 +1876,12 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         }
         stack->Write(stack->GetName()+(TString)".root");
         SaveCanvas(c1);
-    }
+}
+
+TH2D* HistogrammSaver::GetBinContentHisto(TProfile2D* prof) {
+    if(!prof) return 0;
+    TString name = prof->GetName() + (TString)"_binEntries";
+    TH2D* histo = prof->ProjectionXY(name,"B");
+    histo->GetZaxis()->SetTitle("number of entries #");
+    return histo;
+}

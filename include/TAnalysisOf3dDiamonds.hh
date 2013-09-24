@@ -130,6 +130,8 @@ private:
 	void LongAnalysis_InitialiseRelativeAddedTransparentCharge();
 	void LongAnalysis_SaveRelativeAddedTransparentCharge();
 	void LongAnalysis_CreateRelativeAddedTransparentChargeComparisonPlots();
+
+	void DoMonteCarloOfAvrgChargePerBinInOverlay(TProfile2D* profOverlay,TH1F* hLandauOfOverlay);
 private:
 	bool isTransparentCluster;
 private:
@@ -292,6 +294,7 @@ private:
 	//TCanvas* cCellsOverlayMeanCharge;
 	vector<TProfile2D*> hCellsOverlayAvrgCharge;
 	vector<TProfile2D*> hCellsOverlayAvrgChargeMinusBadCells;
+    vector<TH1F*> hCellsLandauMinusBadCells;
 	vector<TProfile2D*> hCellsOverlayAvrgChargeGoodCells;
 	vector<TProfile2D*> hCellsOverlayAvrgChargeBadCells;
 	vector<TProfile2D*> hCellsOverlayAvrgChargeNoColumnHit;
