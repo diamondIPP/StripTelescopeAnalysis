@@ -108,7 +108,7 @@ private:
 	void MakeGhostCluster(TCluster *diamondCluster,Int_t clusterSize);
 	void LongAnalysisSaveCellAndQuaterNumbering();
 	void LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge,Float_t ClusterSize);
-	void LongAnalysis_FillOverlayCentralColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster diamondCluster);
+	void LongAnalysis_FillOverlayCentralColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_FillOverlayOffsetHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);

@@ -564,9 +564,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     	diamondCluster.SetTransparentClusterSize(ClusterSize);
     	Float_t charge = diamondCluster.getCharge(false);
     	LongAnalysis_FillOverlayedHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize);
-    	LongAnalysis_FillOverlayCentralColumnHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize, diamondCluster);
+    	LongAnalysis_FillOverlayCentralColumnHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize, &diamondCluster);
     	LongAnalysis_FillOverlayOffsetHistos(cellNo,relPos.first,relPos.second,charge,ClusterSize);
-        LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(cellNo,relPos.first,relPos.second, ClusterSize, &diamondCluster);
 
     }
     LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
@@ -2555,7 +2554,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,
-        Float_t clusterCharge, Float_t ClusterSize, TCluster diamondCluster) {
+        Float_t clusterCharge, Float_t ClusterSize, TCluster *diamondCluster) {
 
 	Float_t CentralColumnXLow = settings->getCentralColumnOverlayXLow();
 	Float_t CentralColumnXHigh = settings->getCentralColumnOverlayXHigh();
@@ -2584,6 +2583,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistos(Int_t ce
 			hCellsCentralColumnOverlayLandauGoodCells.at(ClusterSize)->Fill(clusterCharge);
 		}
 
+        LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(cellNo,xRelPosDet,yRelPosDet, ClusterSize, diamondCluster);
 	}
 
 }
