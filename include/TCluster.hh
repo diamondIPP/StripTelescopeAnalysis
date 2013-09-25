@@ -25,7 +25,7 @@ using namespace std;
 class TCluster :public TObject{
 public:
 	static UInt_t TCLUSTER_REVISION() {return TCLUSTER_REV;};
-    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid =3,eta=4,corEta=5, highest2CentroidNoSmallHits=6};
+    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid = 3,eta=4,corEta=5, highest2CentroidNoSmallHits=6};
     enum direction_t {left = -1,right = +1};
     TCluster()
     {	initialiseNewCluster();

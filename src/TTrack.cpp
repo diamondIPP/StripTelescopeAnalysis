@@ -56,15 +56,21 @@ UInt_t TTrack::getNClusters(int det) {
 }
 
 Float_t TTrack::getXMeasuredClusterPositionMetricSpace(UInt_t plane,bool cmnCorrected, TCluster::calculationMode_t mode, TH1F* histo) {
+    if (verbosity>6&&TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+        cout<<"[TTrack::getXMeasuredClusterPositionMetricSpace] "<<mode<<" "<<histo<<endl;
 	return this->getMeasuredClusterPositionMetricSpace(plane*2,cmnCorrected,mode,histo);
 }
 
 Float_t TTrack::getYMeasuredClusterPositionMetricSpace(UInt_t plane,bool cmnCorrected, TCluster::calculationMode_t mode, TH1F* histo) {
-	return this->getMeasuredClusterPositionMetricSpace(plane*2+1,cmnCorrected,mode,histo);
+    if (verbosity>6&&TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+            cout<<"[TTrack::getYMeasuredClusterPositionMetricSpace] "<<mode<<" "<<histo<<endl;
+    return this->getMeasuredClusterPositionMetricSpace(plane*2+1,cmnCorrected,mode,histo);
 }
 
 Float_t TTrack::getMeasuredClusterPositionMetricSpace(TPlaneProperties::enumCoordinate cor, UInt_t plane,bool cmnCorrected, TCluster::calculationMode_t mode, TH1F* histo) {
-	if (cor==TPlaneProperties::X_COR)
+    if (verbosity>6&&TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+            cout<<"[TTrack::getMeasuredClusterPositionMetricSpace_COR_PLANE] cor"<<cor<<" plane "<<plane<<" "<<mode<<" "<<histo<<endl;
+    if (cor==TPlaneProperties::X_COR)
 		return getMeasuredClusterPositionMetricSpace(plane*2,cmnCorrected,mode,histo);
 	else if (cor==TPlaneProperties::Y_COR)
 		return getMeasuredClusterPositionMetricSpace(plane*2+1,cmnCorrected,mode,histo);
@@ -72,6 +78,10 @@ Float_t TTrack::getMeasuredClusterPositionMetricSpace(TPlaneProperties::enumCoor
 }
 
 Float_t TTrack::getMeasuredClusterPositionMetricSpace(UInt_t det,bool cmnCorrected, TCluster::calculationMode_t mode, TH1F* histo) {
+
+    if (verbosity>6&&TPlaneProperties::isSiliconDetector(det) && (mode != TCluster::corEta||histo==0))
+        cout<<"[TTrack::getMeasuredClusterPositionMetricSpace_DET] det "<<det<<" "<<mode<<" "<<histo<<endl;
+
 	return inMetricDetectorSpace(det,this->getMeasuredClusterPositionChannelSpace(det,cmnCorrected,mode,histo));
 }
 
@@ -450,12 +460,17 @@ void TTrack::setDetectorAlignment(TDetectorAlignment *alignment)
 
 Float_t TTrack::getXMeasuredClusterPositionChannelSpace(UInt_t plane,bool cmnCorrected,TCluster::calculationMode_t mode,TH1F* histo)
 {
+    if (verbosity>6&&TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+            cout<<"[TTrack::getXMeasuredClusterPositionChannelSpace] "<<mode<<" "<<histo<<endl;
+
 	return getMeasuredClusterPositionChannelSpace
 			(TPlaneProperties::X_COR,plane,cmnCorrected,mode,histo);
 }
 
 Float_t TTrack::getYMeasuredClusterPositionChannelSpace(UInt_t plane,bool cmnCorrected,TCluster::calculationMode_t mode,TH1F* histo)
 {
+    if (verbosity>6&&TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+            cout<<"[TTrack::getYMeasuredClusterPositionChannelSpace] "<<mode<<" "<<histo<<endl;
 	return getMeasuredClusterPositionChannelSpace(TPlaneProperties::Y_COR,plane,cmnCorrected,mode,histo);
 }
 /**
@@ -497,8 +512,8 @@ Float_t TTrack::getMeasuredClusterPositionChannelSpace(TPlaneProperties::enumCoo
 		return N_INVALID;
 	if(cor==TPlaneProperties::XY_COR&&(event->getNXClusters(plane)!=1||event->getNYClusters(plane)!=1))
 		return N_INVALID;
-	if (TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
-	    cout<<"[TTrack::getMeasuredClusterPositionChannelSpace] "<<mode<<" "<<histo<<endl;
+	if (verbosity>6&&TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+	    cout<<"[TTrack::getMeasuredClusterPositionChannelSpace] COR/Plane "<<mode<<" "<<histo<<endl;
 	if(cor==TPlaneProperties::X_COR&&event->getNXClusters(plane)==1)
 		return event->getPlane(plane).getXPosition(0,cmnCorrected,mode,histo);
 	if(cor==TPlaneProperties::Y_COR&&event->getNYClusters(plane)==1)
@@ -514,6 +529,8 @@ Float_t TTrack::getMeasuredClusterPositionChannelSpace(TPlaneProperties::enumCoo
 
 Float_t TTrack::getMeasuredClusterPositionChannelSpace(UInt_t det,bool cmnCorrected,TCluster::calculationMode_t mode,TH1F* histo)
 {
+    if (verbosity>6&&TPlaneProperties::isSiliconDetector(det) && (mode != TCluster::corEta||histo==0))
+        cout<<"[TTrack::getMeasuredClusterPositionChannelSpace] DET"<<det<<" "<<mode<<" "<<histo<<endl;
 	if (det%2==0)
 		return getMeasuredClusterPositionChannelSpace(TPlaneProperties::X_COR,det/2,cmnCorrected,mode,histo);
 	else

@@ -162,6 +162,8 @@ private:
     Float_t res_keep_factor;
 	
 	vector<TEvent> events;
+	vector <Float_t> fiducialValueX;
+    vector <Float_t> fiducialValueY;
 	vector<bool> telescopeAlignmentEvent;
 	Int_t nAlignmentStep;
     Int_t nAlignSteps;
@@ -179,11 +181,20 @@ private:
 
     Float_t CreateSigmaOfPredictionXPlots(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot);
     void CreateDistributionPlotDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, Float_t xPredictionSigma);
+    void CreateDistributionPlotDeltaY(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, Float_t yPredictionSigma);
+
+    void CreateScatterPlotObsXvsObsY(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateAngularDistributionPlot(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+
+    void CreateScatterPlotPredXvsDeltaY(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateScatterPlotPredYvsDeltaY(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotPredYvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotPredXvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+
     void CreateScatterPlotMeasXvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
-
-
+    void CreateFidValueXVsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateFidValueYVsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    Float_t CreateSigmaOfPredictionYPlots(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotEtaVsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot);
 
     void CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
@@ -191,7 +202,13 @@ private:
     void CreateRelHitPosMeasXPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
     void CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
 
+    void CreateScatterPlotDeltaXvsChi2X(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateScatterPlotDeltaYvsChi2Y(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+
     void CreateRelHitPosVsChi2Plots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString);
+    void CreateChi2DistributionPlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString);
+
+
     TResidual resPlane1,resPlane2,resPlane3;
     TResults* results;
 	std::vector<TResidual> vecRes103;
@@ -214,6 +231,8 @@ private:
 	vector<Float_t> vecXResPrediction;
 	vector<Float_t> vecYResPrediction;
 	vector<Float_t> vecClusterSize;
+	vector<Float_t> vecXFidValue;
+	vector<Float_t> vecYFidValue;
 	vector<pair<Float_t,Float_t> > pullValuesX;
 	vector<pair<Float_t,Float_t> > pullValuesY;
 	vector<Float_t > trackResValuesX;
