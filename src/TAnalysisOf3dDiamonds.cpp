@@ -566,7 +566,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     	LongAnalysis_FillOverlayedHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize);
     	LongAnalysis_FillOverlayCentralColumnHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize, diamondCluster);
     	LongAnalysis_FillOverlayOffsetHistos(cellNo,relPos.first,relPos.second,charge,ClusterSize);
-        LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(cellNo,relPos.first,relPos.second,charge, ClusterSize, &diamondCluster);
+        LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(cellNo,relPos.first,relPos.second, ClusterSize, &diamondCluster);
 
     }
     LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
@@ -1450,7 +1450,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellCentralColumnOverlayHistos() {
 		hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->SetTitle(name);
 
 		name = (TString)"hLandauMinusBadCellsOffsetAnalysis" + appendix;
-		hLandauMinusBadCellsOffsetAnalysis.push_back(new TH1F(name,name,2* PulseHeightBins,-1.*PulseHeightMax,PulseHeightMax));
+		hLandauMinusBadCellsOffsetAnalysis.push_back(new TH1F(name,name,200,-200,200));
 		hLandauMinusBadCellsOffsetAnalysis.back()->GetXaxis()->SetTitle("pulse height /ADC");
 		hLandauMinusBadCellsOffsetAnalysis.back()->GetYaxis()->SetTitle("number of Entries #");
 
@@ -2603,8 +2603,8 @@ void TAnalysisOf3dDiamonds::MakeGhostCluster(TCluster *diamondCluster, Int_t Clu
     GhostCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,ghostHit,ClusterSize);
     if(verbosity>5) GhostCluster.Print(1);
 }
-void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,
-        Float_t clusterCharge, Float_t ClusterSize, TCluster *diamondCluster) {
+
+void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet, Float_t ClusterSize, TCluster *diamondCluster) {
 
     diamondCluster->SetTransparentClusterSize(5);
 //    MakeGhostCluster(diamondCluster,5);
@@ -2614,7 +2614,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAna
 	Float_t GhostClusterCharge = GhostCluster.getCharge(false);
 	hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,GhostClusterCharge);
 	hCellsCentralColumnOverlayLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(GhostClusterCharge);
-    hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(GhostClusterCharge);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayOffsetHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,
