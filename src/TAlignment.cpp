@@ -598,11 +598,9 @@ void TAlignment::AlignDiamondPlane() {
     bool diaAlignmentDone = false;
     settings->diamondPattern.hasInvalidIntervals();
     for (nDiaAlignmentStep = 0; (nDiaAlignmentStep < nDiaAlignSteps) && (!diaAlignmentDone||nDiaAlignmentStep<2)	 ; nDiaAlignmentStep++) {
-        cout << "\n\n " << nDiaAlignmentStep << " of " << nDiaAlignSteps << " Steps..." << endl;
-        settings->diamondPattern.hasInvalidIntervals();
+        cout << "\n\n ****" << nDiaAlignmentStep << " of " << nDiaAlignSteps << " Steps..." << endl;
         //do Alignment using the resDia Residual
         alignStripDetector(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, false||bPlotAll, resDia);
-        settings->diamondPattern.hasInvalidIntervals();
         //creating new Residual resDia
         resDia = CheckStripDetectorAlignment(TPlaneProperties::X_COR, diaPlane, vecRefPlanes);
         //check if this was the alignment has changed less than certain values read from the settings file
@@ -618,7 +616,6 @@ void TAlignment::AlignDiamondPlane() {
         if(verbosity||diaAlignmentDone)
             cout<<align->GetLastXOffset(TPlaneProperties::getDiamondPlane())<<" "<<
             align->GetLastPhiXOffset(TPlaneProperties::getDiamondPlane())*1000<<" mrad"<<endl;
-        settings->diamondPattern.hasInvalidIntervals();
     }
     cout<<"\n\n\nCheckStripDetectorAlignment"<<endl;
     nDiaAlignmentStep = nDiaAlignSteps;
@@ -920,7 +917,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             else if(cor==TPlaneProperties::X_COR)        useEvent = chi2x < maxChi2;
             else if(cor==TPlaneProperties::Y_COR)   useEvent = chi2y < maxChi2;
         }
-
+        if(isStripAlignment)
+            useEvent = useEvent && !telescopeAlignmentEvent[nEvent];
         if(isStripAlignment&& false){
             cout<<TString::Format("%6d %6.1f - %6.1f = % 6.2f,",nEvent,xLabMeasuredMetric,xLabPredictedMetric,xDelta);
             cout<<TString::Format("  %6.2f",xDetMeasuredMetric);
@@ -963,7 +961,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             vecYResPrediction.push_back(yPredSigma);
             vecXChi2.push_back(chi2x);
             vecYChi2.push_back(chi2y);
-            int det = subjectPlane*2+cor==TPlaneProperties::X_COR?0:1;
+//            int det = subjectPlane*2+cor==TPlaneProperties::X_COR?0:1;
             vecEta.push_back(eta);
             vecClusterSize.push_back(clusterSize);
             nUsedEvents++;
@@ -999,6 +997,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     res.setVerbosity(verbosity>4?verbosity-4:0);
     res.setResKeepFactor(res_keep_factor);
     res.calculateResidual(cor, &vecXLabPredMetric, &vecXLabDeltaMetric, &vecYLabPredMetric, &vecYLabDeltaMetric);
+    if(isStripAlignment)
+        res.Print();
     if(isStripAlignment&& calcMode == chi2CalcMode && bAlign){
         align->setNDiamondAlignmentEvents((UInt_t) vecXLabDeltaMetric.size());
         align->setDiaChi2(settings->getAlignment_chi2());
@@ -1713,10 +1713,9 @@ void TAlignment::CreateScatterPlotEtaVsDeltaX(
 void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot){
     if(cor==TPlaneProperties::Y_COR)
         return;
-    cout<<"[CreateRelHitPosXPredDetMetricVsUseEventPlot] subjectPlane:"<<subjectPlane<<" "<<vecXDetRelHitPosPredMetricAll.size()<<"/"<<vecUsedEventAll.size()<<endl;
-
-    TString histName = preName;
-    histName.Append(TString::Format("_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_%d_with_",subjectPlane)+refPlaneString+postName);
+    if(verbosity)
+        cout<<"[CreateRelHitPosXPredDetMetricVsUseEventPlot] subjectPlane:"<<subjectPlane<<" "<<vecXDetRelHitPosPredMetricAll.size()<<"/"<<vecUsedEventAll.size()<<endl;
+    TString histName = preName + TString::Format("_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
     if(vecXDetRelHitPosPredMetricAll.size()==0 ||(vecXDetRelHitPosPredMetricAll.size()!=vecUsedEventAll.size())){
         cout<<histName<< "\t number of entries: "<<vecXDetRelHitPosPredMetricAll.size()<<"/"<<vecUsedEventAll.size()<<endl;
         return;
