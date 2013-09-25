@@ -964,7 +964,6 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             vecXChi2.push_back(chi2x);
             vecYChi2.push_back(chi2y);
             int det = subjectPlane*2+cor==TPlaneProperties::X_COR?0:1;
-            vecClusterSize.push_back(myTrack->getClusterSize(det,0));
             vecEta.push_back(eta);
             vecClusterSize.push_back(clusterSize);
             nUsedEvents++;
@@ -983,7 +982,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     }
 
     cout<<"using "<<vecXLabDeltaMetric.size() <<"/"<<nUsedEvents<<" Events, of "<<nUsedEvents+nNotUsedEvents<<" "<<(Float_t)nUsedEvents/(Float_t)(nUsedEvents+nNotUsedEvents)*100.<<endl;
-    //    if (verbosity > 2)
+    if (verbosity > 2)
     cout << vecXLabDeltaMetric.size() << " " << vecYLabDeltaMetric.size() << " " << vecXLabPredMetric.size() << " " << vecYLabPredMetric.size() << endl;
 
     if(nUsedEvents==0){
@@ -992,9 +991,9 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         cerr<< "cannot calculate Residual/Alignment for 0 Events. BREAK!"<<endl;
         exit(-1);
     }
-    //    if (verbosity > 2)
-    cout << vecXLabDeltaMetric.size() << " " << vecYLabDeltaMetric.size() << " " << vecXLabPredMetric.size() << " " << vecYLabPredMetric.size()
-                                                                                                                    <<" "<<vecXDetMeasMetric.size()<<" "<<vecYDetMeasMetric.size()<< endl;
+    if (verbosity > 2)
+        cout << vecXLabDeltaMetric.size() << " " << vecYLabDeltaMetric.size() << " " << vecXLabPredMetric.size() << " "
+             << vecYLabPredMetric.size()  <<" "<<vecXDetMeasMetric.size()<<" "<<vecYDetMeasMetric.size()<< endl;
     //first estimate residuals widths
     TResidual res;
     res.setVerbosity(verbosity>4?verbosity-4:0);
@@ -2115,7 +2114,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
                 int subjectDet = subjectPlane*2;
                 Float_t channelPos = myTrack->inChannelDetectorSpace(subjectDet,xPositionMeasuredMetric);
                 Float_t relPos = channelPos-(int)(channelPos+.5);
-                if(subjectPlane == 4)cout<<i<<" "<<xPositionMeasuredMetric<<"-->"<<channelPos<<" "<<relPos<<"\n";
+                if(subjectPlane == 4 && verbosity > 6)cout<<i<<" "<<xPositionMeasuredMetric<<"-->"<<channelPos<<" "<<relPos<<"\n";
                 vecRelPos.push_back(relPos);
             }
 
@@ -2364,8 +2363,8 @@ void TAlignment::CreateDistributionPlotDeltaY(
             gausFitValuesY.at(subjectPlane)= make_pair(mean,yRes);
             if (bUpdateResolution&&histo->GetEntries()>0 && yRes > 0) {
                 cout << "\n\nset Y-Resolution via Gaus-Fit: " << yRes*100 << " with " << vecYLabDeltaMetric.size() << " Events" << endl;
-                cout << "yRes: "<<yRes*100<<endl;
-                cout << "yPre: "<<yPredictionSigma*100<<endl;
+//                cout << "yRes: "<<yRes*100<<endl;
+//                cout << "yPre: "<<yPredictionSigma*100<<endl;
                 Float_t yres2 =yRes;
                 if(yRes>yPredictionSigma){
                     yres2 = yRes*yRes-yPredictionSigma*yPredictionSigma;

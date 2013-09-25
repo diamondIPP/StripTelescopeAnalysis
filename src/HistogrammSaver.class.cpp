@@ -1848,7 +1848,7 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         if(stack->GetXaxis()) xTitle = stack->GetXaxis()->GetTitle();
         TString yTitle = "";
         if(stack->GetYaxis()) yTitle =stack->GetYaxis()->GetTitle();
-        cout<<"xTitle: '"<<xTitle<<"'  yTitle: '"<<yTitle<<"'"<<endl;
+        if(verbosity>6)cout<<"xTitle: '"<<xTitle<<"'  yTitle: '"<<yTitle<<"'"<<endl;
         if(name.First('h')==0)
             name.Replace(0,1,'c');
         else
@@ -1857,14 +1857,14 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         c1->cd();
         c1->SetObjectStat(0);
         stack->Draw();
-        cout<<"SaveStack: Xaxis: ";
+        if(verbosity>6)cout<<"SaveStack: Xaxis: ";
         stack->GetXaxis()->SetTitle(xTitle);
-        cout<<stack->GetXaxis()->GetTitle();
-        cout<<endl;
-        cout<<"SaveStack: Yaxis: ";
+        if(verbosity>6)cout<<stack->GetXaxis()->GetTitle();
+        if(verbosity>6)cout<<endl;
+        if(verbosity>6)cout<<"SaveStack: Yaxis: ";
         stack->GetYaxis()->SetTitle(yTitle);
-        cout<<stack->GetYaxis()->GetTitle();
-        cout<<endl;
+        if(verbosity>6)cout<<stack->GetYaxis()->GetTitle();
+        if(verbosity>6)cout<<endl;
         if(drawOption=="")
             stack->Draw();
         else
