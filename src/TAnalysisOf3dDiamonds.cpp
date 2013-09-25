@@ -1439,6 +1439,11 @@ void TAnalysisOf3dDiamonds::initialise3DCellCentralColumnOverlayHistos() {
 		hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.push_back((TProfile2D*)hCellsCentralColumnOverlayAvrgCharge.at(0)->Clone(name));
 		hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->SetTitle(name);
 
+		name = (TString)"hLandauMinusBadCellsOffsetAnalysis" + appendix;
+		hLandauMinusBadCellsOffsetAnalysis.push_back(new TH1F(name,name,2* PulseHeightBins,-1.*PulseHeightMax,PulseHeightMax));
+		hLandauMinusBadCellsOffsetAnalysis.back()->GetXaxis()->SetTitle("pulse height /ADC");
+		hLandauMinusBadCellsOffsetAnalysis.back()->GetYaxis()->SetTitle("number of Entries #");
+
 		//hCellsOverlayAvrgChargeGoodCells
 		name = "hCellsCentralColumnOverlayAvrgChargeGoodCells";
 		name.Append(appendix);
@@ -2599,7 +2604,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAna
 	Float_t GhostClusterCharge = GhostCluster.getCharge(false);
 	hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,GhostClusterCharge);
 	hCellsCentralColumnOverlayLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(GhostClusterCharge);
-
+	hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(GhostClusterCharge);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayOffsetHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,
@@ -3100,6 +3105,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
 			histo->GetZaxis()->SetRangeUser(0,1200);
 			histSaver->SaveHistogram(histo);
 			delete histo;
+
+		}
+		if (hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)){
+		    cout<<hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->GetName()<<endl;
+		    histSaver->SaveHistogram(hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize));
+		    delete hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize);
 
 		}
 

@@ -303,6 +303,7 @@ private:
 	vector<TH2F*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents;
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut;
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis;
+	vector<TH1F* > hLandauMinusBadCellsOffsetAnalysis;
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeGoodCells;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgCharge;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCells;
