@@ -1449,7 +1449,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellCentralColumnOverlayHistos() {
 		hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->SetTitle(name);
 
 		name = (TString)"hLandauMinusBadCellsOffsetAnalysis" + appendix;
-		hLandauMinusBadCellsOffsetAnalysis.push_back(new TH1F(name,name,200,-200,200));
+		hLandauMinusBadCellsOffsetAnalysis.push_back(new TH1F(name,name,100,-50,50));
 		hLandauMinusBadCellsOffsetAnalysis.back()->GetXaxis()->SetTitle("pulse height /ADC");
 		hLandauMinusBadCellsOffsetAnalysis.back()->GetYaxis()->SetTitle("number of Entries #");
 
@@ -3988,6 +3988,7 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
     Int_t min = hBinContents->GetBinContent(hBinContents->GetMinimumBin())+1;
     max -=5;
     min -=5;
+    Float_t cut = 500;
     Int_t bins = max-min;
     TH1F* hEntries = new TH1F(name,name,bins,min,max);
     for(Int_t binx = 1;binx < hBinContents->GetNbinsX();binx++)
@@ -3997,14 +3998,33 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
     }
     histSaver->SaveHistogram(hEntries);
     name = "hMonteCarloAvrgChargePerBin";
-    TH1D* hMonteCarloAvrgChargePerBin = new TH1D(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    TH1D* hMonteCarloAvrgChargePerBin = new TH1D(name,name,PulseHeightBins,PulseHeightMinMeanCharge-100,PulseHeightMaxMeanCharge+100);
+
+    name =TString::Format("hMonteCarloNBelowCut_%d",(int)cut);;
+    TH1D* hNumberOfEntriesBelowCut = new TH1D(name,name,100,0,200);
+    hNumberOfEntriesBelowCut->GetXaxis()->SetTitle(TString::Format("number of  entries below %.f",cut));
+    hNumberOfEntriesBelowCut->GetYaxis()->SetTitle("number of  entries #");
+
+    name =TString::Format("hMonteCarloRelativeBelowCut_%d",(int)cut);;
+    TH1D* hRelativeNumberBelowCut = new TH1D(name,name,100,0,1);
+    hRelativeNumberBelowCut->GetXaxis()->SetTitle(TString::Format("rel. number of  entries below %.f",cut));
+    hRelativeNumberBelowCut->GetYaxis()->SetTitle("number of  entries #");
+    Float_t mean =0;
+    Int_t entries = 0;
+    int nBelowCut = 0;
     for(UInt_t nMC = 0; nMC < 1e6; nMC++){
-        Int_t entries = hEntries->GetRandom();
-        Float_t mean = 0;
+        entries = hEntries->GetRandom();
+        mean = 0;
+        nBelowCut = 0;
         for(Int_t entry =0; entry < entries; entry++){
-            mean += hLandauOfOverlay->GetRandom();
+            Float_t charge =  hLandauOfOverlay->GetRandom();
+            mean += charge;
+            if(charge<cut)
+                nBelowCut ++;
         }
         mean /= (Float_t)entries;
+        hNumberOfEntriesBelowCut->Fill(nBelowCut);
+        hNumberOfEntriesBelowCut->Fill((Float_t)nBelowCut/(Float_t)entries);
         cout<<TString::Format("%6d --> %6.1f (%d)",nMC,mean,entries)<<endl;;
         hMonteCarloAvrgChargePerBin->Fill(mean);
     }
