@@ -2591,7 +2591,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistos(Int_t ce
 void TAnalysisOf3dDiamonds::MakeGhostCluster(TCluster *diamondCluster, Int_t ClusterSize){
     Int_t ClusterStart = diamondCluster->getFirstHitChannel();
     Int_t ClusterEnd = diamondCluster->getLastHitChannel();
-    cout<<"\nClusterStart: "<<ClusterStart<<" ClusterEnd: "<<ClusterEnd<<endl;
+    if(verbosity>5)cout<<"\nClusterStart: "<<ClusterStart<<" ClusterEnd: "<<ClusterEnd<<endl;
     pair<int,int> channels = settings->diamondPattern.getPatternChannels(3);
     Float_t ghostHit;
     do{
@@ -2599,18 +2599,18 @@ void TAnalysisOf3dDiamonds::MakeGhostCluster(TCluster *diamondCluster, Int_t Clu
     }
     while(ClusterStart<=ghostHit&&ghostHit<=ClusterEnd);
     ghostHit-=.5;
-    cout<<"new Ghost Hit at "<<ghostHit<<endl;
+    if(verbosity>5)cout<<"new Ghost Hit at "<<ghostHit<<endl;
     GhostCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,ghostHit,ClusterSize);
-//    GhostCluster.Print(1);
+    if(verbosity>5) GhostCluster.Print(1);
 }
 void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,
         Float_t clusterCharge, Float_t ClusterSize, TCluster *diamondCluster) {
 
     diamondCluster->SetTransparentClusterSize(5);
-    MakeGhostCluster(diamondCluster,5);
+//    MakeGhostCluster(diamondCluster,5);
 
 	diamondCluster->SetTransparentClusterSize(ClusterSize);
-
+	GhostCluster.SetTransparentClusterSize(ClusterSize);
 	Float_t GhostClusterCharge = GhostCluster.getCharge(false);
 	hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,GhostClusterCharge);
 	hCellsCentralColumnOverlayLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(GhostClusterCharge);
