@@ -57,6 +57,7 @@
 #include "TClustering.hh"
 #include "TResults.hh"
 #include "TAnalysisOfSelection.hh"
+#include "TAnalysisOfClustering.hh"
 #include "TSpectrum.h"
 
 using namespace std;

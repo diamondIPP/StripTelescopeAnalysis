@@ -1769,7 +1769,7 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
 void TAlignment::CreateRelHitPosXMeasDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot){
     if (cor == TPlaneProperties::Y_COR)
         return;
-    cout<<"[CreateRelHitPosMeasDetMetricVsUseEventPlot]"<<vecXDetRelHitPosMeasMetricAll.size()<<"/"<<vecUsedEventAll.size()<<endl;
+//    cout<<"[CreateRelHitPosMeasDetMetricVsUseEventPlot]"<<vecXDetRelHitPosMeasMetricAll.size()<<"/"<<vecUsedEventAll.size()<<endl;
     if(vecXDetRelHitPosPredMetricAll.size()==0)
         return;
     TString corName =TPlaneProperties::X_COR;

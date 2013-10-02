@@ -218,12 +218,12 @@ void TAnalysisOfClustering::fillPedestalsAndNoiseHistos() {
 }
 
 void TAnalysisOfClustering::saveADCHistos() {
-    saveVariableVsEventNoPlots(hADCVsEvenNo,"ADC",&vecRawADCSlope);
+    saveVariableVsEventNoPlots(settings,histSaver,hADCVsEvenNo,"ADC",&vecRawADCSlope,&vecCh);
     return;
 }
 
 void TAnalysisOfClustering::saveNoiseHistos() {
-    saveVariableVsEventNoPlots(hNoiseVsEvenNo,"Noise",&vecNoiseSlope);
+    saveVariableVsEventNoPlots(settings,histSaver,hNoiseVsEvenNo,"Noise",&vecNoiseSlope,&vecCh);
     return;
 }
 
@@ -253,7 +253,8 @@ void TAnalysisOfClustering::analysisSlopes(){
     delete hADCSlopes;
 }
 
-void TAnalysisOfClustering::saveVariableVsEventNoPlots(std::map<UInt_t,TProfile*> mProf, TString nameOfVariable,vector <Float_t>* vec){
+void TAnalysisOfClustering::saveVariableVsEventNoPlots(TSettings* settings,HistogrammSaver*histSaver, std::map<UInt_t,TProfile*> mProf,
+                    TString nameOfVariable,vector <Float_t>* vec, vector<Float_t> *vecCh){
     TString name = (TString)"stack"+nameOfVariable+(TString)"VsEventNo";
     THStack * stack = new THStack(name,name);
     name = (TString)"h"+nameOfVariable+(TString)"SlopesVsChannel";
@@ -308,8 +309,8 @@ void TAnalysisOfClustering::saveVariableVsEventNoPlots(std::map<UInt_t,TProfile*
 
         histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
         hVariableSlopesVsChannel->SetBinContent(hVariableSlopesVsChannel->FindBin(channel),fit->GetParameter(1));
-        if ((int)vecCh.size()<=i){
-            vecCh.push_back(channel);
+        if ((int)vecCh->size()<=i){
+            vecCh->push_back(channel);
             i++;
         }
 //        else if(vecCh.at(i)!=channel){
@@ -334,7 +335,7 @@ void TAnalysisOfClustering::saveVariableVsEventNoPlots(std::map<UInt_t,TProfile*
     }
     histSaver->SaveHistogram(hRelVariableVsEventNo,true);
     name = (TString)"g"+nameOfVariable+(TString)"SlopeVsChannel";
-    TGraph graph = histSaver->CreateDipendencyGraph((string)name,*vec,vecCh);
+    TGraph graph = histSaver->CreateDipendencyGraph((string)name,*vec,*vecCh);
     graph.Draw("AP");
     graph.GetXaxis()->SetTitle("channel");
     graph.GetYaxis()->SetTitle(nameOfVariable+ (TString)" slope for channel");
@@ -368,7 +369,7 @@ void TAnalysisOfClustering::saveVariableVsEventNoPlots(std::map<UInt_t,TProfile*
 }
 
 void TAnalysisOfClustering::savePedestalHistos() {
-    saveVariableVsEventNoPlots(hPedestalVsEvenNo,"Pedestal",&vecPedestalSlope);
+    saveVariableVsEventNoPlots(settings,histSaver,hPedestalVsEvenNo,"Pedestal",&vecPedestalSlope,&vecCh);
     return;
 }
 

@@ -61,7 +61,9 @@ private:
     void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
     void fillHistograms();
     void fillPedestalsAndNoiseHistos();
-    void saveVariableVsEventNoPlots(std::map<UInt_t,TProfile*> mProf, TString nameOfVariable,vector <Float_t>* vec);
+public:
+    static void saveVariableVsEventNoPlots(TSettings* settings,HistogrammSaver*histSaver, std::map<UInt_t,TProfile*> mProf, TString nameOfVariable,vector <Float_t>* vec, vector<Float_t> *vecCh);
+private:
     void savePedestalHistos();
     void saveNoiseHistos();
     void saveADCHistos();

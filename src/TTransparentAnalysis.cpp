@@ -1708,15 +1708,12 @@ void TTransparentAnalysis::analyseNonHitEvents() {
 }
 
 void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
-    cout<<"initPedestalHistos\n"<<flush;
+    cout<<"initPedestalHistos"<<flush;
     UInt_t start = settings->getAlignmentEvents(maxEvents);
     UInt_t nBins = (maxEvents-start)/1000;
     for(UInt_t ch = 0; ch< TPlaneProperties::getNChannelsDiamond();ch++){
-        cout<<"ch "<<ch<<flush;
-
         if(settings->IsMasked(subjectDetector,ch))
             continue;
-
         TString name = TString::Format("hPedestalVsEventNo_det_%d_ch_%03d",subjectDetector,ch);
         TProfile* prof = new TProfile(name,name,nBins,start,maxEvents);
         prof->GetXaxis()->SetTitle("EventNo");
@@ -1733,7 +1730,6 @@ void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
         if(settings->doCommonModeNoiseCorrection()) title.Append(" CM corrected");
         prof->GetYaxis()->SetTitle(title);
         hNoiseVsEvenNo[ch] = prof;
-        cout<<"\r"<<flush;
     }
     TString name = "hComonModeNoiseVsEventNo";
     hCmnVsEventNo = new TProfile(name,name,nBins,start,maxEvents);
@@ -1758,6 +1754,10 @@ void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
 }
 
 void TTransparentAnalysis::saveNoiseHistos() {
+    vector<Float_t> vecCh;
+    vector<Float_t> vecSlope;
+    TAnalysisOfClustering::saveVariableVsEventNoPlots(settings,histSaver,hNoiseVsEvenNo,"Noise",&vecSlope,&vecCh);
+    return;
     THStack* stack = new THStack("hNoisesVsEventNo","Noises vs Event No");
        TH1F* hNoiseSlopesVsChannel = new TH1F("hNoiseSlopesVsChannel","slope of hNoiseVsEventNo for each ch",128,0,128);
        hNoiseSlopesVsChannel->GetXaxis()->SetTitle("channel no");
@@ -1769,8 +1769,6 @@ void TTransparentAnalysis::saveNoiseHistos() {
        pol1->SetLineWidth(1);
        Double_t minStack = 1e9;
        Double_t maxStack = -1e9;
-       vector<Float_t> vecCh;
-       vector<Float_t> vecSlope;
        for(it=hNoiseVsEvenNo.begin(); it!=hNoiseVsEvenNo.end(); it++){
            TProfile* prof = (*it).second;
            if(!prof) continue;
@@ -1838,6 +1836,11 @@ void TTransparentAnalysis::saveNoiseHistos() {
 }
 
 void TTransparentAnalysis::savePedestalHistos() {
+
+    vector<Float_t> vecCh;
+    vector<Float_t> vecPed;
+    TAnalysisOfClustering::saveVariableVsEventNoPlots(settings,histSaver,hPedestalVsEvenNo,"Pedestal",&vecPed,&vecCh);
+    return;
     THStack* stack = new THStack("hPedestalsVsEventNo","pedestals vs Event No");
     TH1F* hPedestalSlopesVsChannel = new TH1F("hPedestalSlopesVsChannel","slope of hPedestalVsEventNo for each ch",128,0,128);
     hPedestalSlopesVsChannel->GetXaxis()->SetTitle("channel no");
@@ -1849,8 +1852,6 @@ void TTransparentAnalysis::savePedestalHistos() {
     pol1->SetLineWidth(1);
     Double_t minStack = 1e9;
     Double_t maxStack = -1e9;
-    vector<Float_t> vecCh;
-    vector<Float_t> vecSlope;
     for(it=hPedestalVsEvenNo.begin(); it!=hPedestalVsEvenNo.end(); it++){
         TProfile* prof = (*it).second;
         if(!prof) continue;
@@ -1868,18 +1869,18 @@ void TTransparentAnalysis::savePedestalHistos() {
         histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
         hPedestalSlopesVsChannel->SetBinContent((hPedestalSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
         vecCh.push_back((*it).first);
-        vecSlope.push_back(fit->GetParameter(1));
+        vecPed.push_back(fit->GetParameter(1));
         delete prof;
         (*it).second= 0;
         hPedestalVsEvenNo.erase(it);
     }
-    TGraph graph = histSaver->CreateDipendencyGraph("gPedestalSlopeVsChannel",vecSlope,vecCh);
+    TGraph graph = histSaver->CreateDipendencyGraph("gPedestalSlopeVsChannel",vecPed,vecCh);
     graph.Draw("AP");
     graph.GetXaxis()->SetTitle("channel");
     graph.GetYaxis()->SetTitle("pedestal slope for channel");
     histSaver->SaveGraph(&graph,"gPedestalSlopeVsChannel","ABP");
 
-    TH1F* hSlopes = histSaver->CreateDistributionHisto("hPedestalSlopes",vecSlope,10);
+    TH1F* hSlopes = histSaver->CreateDistributionHisto("hPedestalSlopes",vecPed,10);
     hSlopes->GetXaxis()->SetTitle("pedestal slope ADC/Event");
     hSlopes->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hSlopes);

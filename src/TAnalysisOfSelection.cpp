@@ -1352,6 +1352,7 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
     THStack* stack = new THStack(name,"Ph vs EventNo, All Areas X");
     for (UInt_t x = 0; x < xDivisions; x++){
         TF1* fit= (TF1*)pol1Fit->Clone();
+        fit->SetLineColor(settings->GetColor(x));
         TProfile* prof = hPHVsEventNo_AreasX[x];
         cout<<"save: "<<prof->GetName()<<endl;
         histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
@@ -1373,6 +1374,7 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
     stack = new THStack(name,"Ph vs EventNo, All Areas Y");
     for(UInt_t y = 0; y< yDivisions; y++){
         TF1* fit= (TF1*)pol1Fit->Clone();
+        fit->SetLineColor(settings->GetColor(y));
         TProfile* prof = hPHVsEventNo_AreasY[y];
         cout<<"save: "<<prof->GetName()<<endl;
         histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
