@@ -14,12 +14,13 @@ TSelectionClass::TSelectionClass(TSettings* newSettings) {
 	cout<<"**********************************************************"<<endl;
 	if(newSettings==0)exit(-1);
 	this->settings=newSettings;
+    verbosity=settings->getVerbosity();
 	this->results=0;
-	cout<<settings->getRunNumber()<<endl;
+	if(verbosity)cout<<settings->getRunNumber()<<endl;
 
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-	cout<<"goToClusterTree"<<endl;
+	if(verbosity)cout<<"goToClusterTree"<<endl;
 	settings->goToClusterTreeDir();
 	fiducialCuts=0;
 	createdNewTree=false;
@@ -28,33 +29,31 @@ TSelectionClass::TSelectionClass(TSettings* newSettings) {
 	selectionFile=NULL;
 	settings->goToSelectionTreeDir();
 	htmlSelection = new THTMLSelection(settings);
-	cout<<"OPEN TADCEventReader"<<flush;
-	cout<<"\ngoToSelectionTreeDir"<<endl;
+	if(verbosity)cout<<"OPEN TADCEventReader"<<flush;
+	if(verbosity)cout<<"\ngoToSelectionTreeDir"<<endl;
 	settings->goToSelectionTreeDir();
-	cout<<"open Tree:"<<endl;
+	if(verbosity)cout<<"open Tree:"<<endl;
 	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings);
 	//settings->getRunNumber());
-	cout<<" DONE"<<endl;
+	if(verbosity)cout<<" DONE"<<endl;
 
 	histSaver=new HistogrammSaver(settings);
-	cout<<"goToSelectionDir"<<endl;
+	if(verbosity)cout<<"goToSelectionDir"<<endl;
 	settings->goToSelectionDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(settings->getRunNumber());
 	htmlSelection->setFileGeneratingPath(sys->pwd());
-	cout<<"goToSelectionTREEDir"<<endl;
+	if(verbosity)cout<<"goToSelectionTREEDir"<<endl;
 	settings->goToSelectionTreeDir();
-	cout<<"HISTSAVER:"<<sys->pwd()<<endl;
-	verbosity=settings->getVerbosity();
+	if(verbosity)cout<<"HISTSAVER:"<<sys->pwd()<<endl;
 
 	createdTree=false;
-	cout<<"Fiducial Cut:\n\n\tAccept following Range in Silicon Planes: "<<endl;
+	cout<<"\nFiducial Cut:\n\tAccept following Range in Silicon Planes: "<<endl;
 	cout<<"\t\tX: "<<settings->getSi_avg_fidcut_xlow()<<"/"<<settings->getSi_avg_fidcut_xhigh()<<endl;
 	cout<<"\t\tY: "<<settings->getSi_avg_fidcut_ylow()<<"/"<<settings->getSi_avg_fidcut_yhigh()<<endl;
-	cout<<"\t\t"<<settings->getSelectionFidCuts()<<endl;
-	cout<<" for Alignment use "<<settings->getAlignment_training_track_fraction()*100<<" % of the events." <<endl;
+	cout<<"for Alignment use "<<settings->getAlignment_training_track_fraction()*100<<" % of the events." <<endl;
 	nUseForAlignment=0;
 	nUseForAnalysis=0;
 	nUseForSiliconAlignment=0;
@@ -75,29 +74,29 @@ TSelectionClass::~TSelectionClass() {
 	selectionFile->cd();
 	if(selectionTree!=NULL&&this->createdTree){
 		saveHistos();
-		cout<<"CLOSING TREE"<<endl;
+		if(verbosity)cout<<"CLOSING TREE"<<endl;
 		settings->goToAlignmentRootDir();
-		cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<settings->getClusterTreeFilePath()<<endl;
+		if(verbosity)cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<settings->getClusterTreeFilePath()<<endl;
 		selectionTree->AddFriend("clusterTree",settings->getClusterTreeFilePath().c_str());
 
-		cout<<"\t"<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
+		if(verbosity)cout<<"\t"<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
 
-		cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
+		if(verbosity)cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 
-		cout<<"\n\n\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
+		if(verbosity)cout<<"\n\n\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
 		selectionFile->cd();
-		cout<<"\t"<<"WRITE TREE: "<<flush;
+		if(verbosity)cout<<"\t"<<"WRITE TREE: "<<flush;
 		int retVal = selectionTree->Write();
-		cout<<retVal<<endl;
+		if(verbosity)cout<<retVal<<endl;
 		htmlSelection->generateHTMLFile();
 	}
 	selectionFile->Close();
 	delete eventReader;
 	delete histSaver;
 	delete htmlSelection;
-	cout<<"goToOutputDir"<<endl;
+	if(verbosity)cout<<"goToOutputDir"<<endl;
 	settings->goToOutputDir();
 }
 
@@ -109,15 +108,16 @@ void TSelectionClass::MakeSelection()
 
 
 void TSelectionClass::MakeSelection(UInt_t nEvents)
-{cout<<"Make Selection"<<endl;
-if(nEvents==0)
+{if(nEvents==0)
 	this->nEvents=eventReader->GetEntries();
 else if(nEvents>eventReader->GetEntries()){
 	cerr<<"nEvents is bigger than entries in eventReader tree: \""<<eventReader->getTree()->GetName()<<"\""<<endl;
 }
 else
 	this->nEvents=nEvents;
-cout<<"goToSelectionTreeDir"<<endl;
+
+if(verbosity)cout<<"Make Selection"<<endl;
+if(verbosity)cout<<"goToSelectionTreeDir"<<endl;
 settings->goToSelectionTreeDir();
 histSaver->SetNumberOfEvents(this->nEvents);
 createdTree=createSelectionTree(nEvents);
@@ -160,40 +160,40 @@ createCutFlowDiagramm();
 bool TSelectionClass::createSelectionTree(int nEvents)
 {
 
-	cout<<"TSelectionClass::checkTree"<<endl;
+    if(verbosity)cout<<"TSelectionClass::checkTree"<<endl;
 	bool createdNewFile=false;
 	bool createdNewTree=false;
-	cout<<"\tgoToSelection Tree:"<<endl;
+	if(verbosity)cout<<"\tgoToSelection Tree:"<<endl;
 	settings->goToSelectionTreeDir();
 	selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"READ");
 	if(selectionFile->IsZombie()){
-		cout<<"\tselectionfile does not exist, create new one..."<<endl;
+	    if(verbosity)cout<<"\tselectionfile does not exist, create new one..."<<endl;
 		createdNewFile =true;
 		selectionFile= new TFile(settings->getSelectionTreeFilePath().c_str(),"CREATE");
-		cout<<"DONE"<<flush;
+		if(verbosity)cout<<"DONE"<<flush;
 		selectionFile->cd();
 	}
 	else{
 		createdNewFile=false;
-		cout<<"\tFile exists"<<endl;
+		if(verbosity)cout<<"\tFile exists"<<endl;
 	}
 	selectionFile->cd();
-	cout<<"\tget Tree"<<endl;
+	if(verbosity)cout<<"\tget Tree"<<endl;
 	stringstream treeDescription;
 	treeDescription<<"Selection Data of run "<<settings->getRunNumber();
-	cout<<"\tget Tree2"<<endl;
+	if(verbosity)cout<<"\tget Tree2"<<endl;
 	selectionFile->GetObject("selectionTree",selectionTree);
-	cout<<"\tcheck Selection Tree:"<<selectionTree<<endl;
-	cout<<sys->pwd()<<endl;
+	if(verbosity)cout<<"\tcheck Selection Tree:"<<selectionTree<<endl;
+	if(verbosity)cout<<sys->pwd()<<endl;
 	if(selectionTree!=NULL){
-		cout<<"\tFile and Tree Exists... \t"<<selectionTree->GetEntries()<<" Events\t"<<flush;
+	    if(verbosity)cout<<"\tFile and Tree Exists... \t"<<selectionTree->GetEntries()<<" Events\t"<<flush;
 		if(selectionTree->GetEntries()>=nEvents){
 			createdNewTree=false;
 			selectionTree->GetEvent(0);
 			return false;
 		}
 		else{
-			cout<<"\tselectionTree.events !- nEvents"<<flush;
+		    if(verbosity)cout<<"\tselectionTree.events !- nEvents"<<flush;
 			selectionTree->Delete();
 			selectionTree=NULL;
 		}
@@ -201,14 +201,14 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 
 	if(selectionTree==NULL){
 		this->nEvents=nEvents;
-		cout<<"selectionTree does not exists, close file"<<endl;
+		if(verbosity)cout<<"selectionTree does not exists, close file"<<endl;
 		delete selectionFile;
-		cout<<"."<<endl;
+		if(verbosity)cout<<"."<<endl;
 		selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"RECREATE");
 		selectionFile->cd();
-		cout<<"."<<endl;
+		if(verbosity)cout<<"."<<endl;
 		this->selectionTree=new TTree("selectionTree",treeDescription.str().c_str());
-		cout<<"."<<endl;
+		if(verbosity)cout<<"."<<endl;
 		createdNewTree=true;
 		cout<<"\n***************************************************************\n";
 		cout<<"there exists no tree:\'selectionTree\"\tcreate new one."<<selectionTree<<"\n";

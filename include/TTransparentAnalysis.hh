@@ -257,9 +257,13 @@ private:
 
 	vector<TProfile2D*> vecPHVsEventNo_Areas;
 	vector<TProfile2D*> vecPH2HighestVsEventNo_Areas;
-	UInt_t GetHitArea();
+public:
+	static UInt_t GetHitArea(TSettings* set, Float_t xVal, Float_t yVal,UInt_t xDivisions,UInt_t yDivisions);
+private:
 	void initDividedAreaAxis(TAxis *axis);
-	TString GetNameOfArea(UInt_t x,UInt_t y);
+public:
+	static TString GetNameOfArea(UInt_t x,UInt_t y);
+private:
 	void initPHvsEventNoAreaPlots(UInt_t nStart = 0, UInt_t nEnd = 1e6);
 	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo);
 	void savePHvsEventNoAreaPlots();

@@ -32,6 +32,7 @@
 #include "LandauGaussFit.hh"
 #include "THTMLLandaus.hh"
 #include "THTMLSelectionAnalysis.hh"
+#include "TTransparentAnalysis.hh"
 
 #include "TADCEventReader.hh"
 #include "TSettings.class.hh"
@@ -47,6 +48,10 @@ private:
 	void saveHistos();
 	void saveFidCutHistos();
 	void saveDiamondAreaHistos();
+	void initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd);
+	void initDividedAreaAxis(TAxis* axis);
+	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t charge, UInt_t chargeOfTwo);
+	void savePHvsEventNoAreaPlots();
 private:
 	Int_t verbosity;
 	TSettings *settings;
@@ -95,6 +100,12 @@ private:
 	vector<Float_t> vecHighestSignal;
 	vector<Float_t> vecClusterCharge;
 	vector<Float_t> vecTest;
+
+
+    UInt_t xDivisions;
+    UInt_t yDivisions;
+    TProfile2D* hPHVsEventNo_Areas;
+    TProfile2D* hPH2HighestVsEventNo_Areas;
 };
 
 #endif /* TANALYSISOFSELECTION_HH_ */

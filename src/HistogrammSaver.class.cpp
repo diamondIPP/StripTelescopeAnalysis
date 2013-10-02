@@ -70,7 +70,8 @@ HistogrammSaver::~HistogrammSaver() {
     //	TString string1 = sys->GetFromPipe(".! mkdir root-Files");
     //	cout<<string1<<endl;
     stringstream test;
-    test<< "mv -f "<<plots_path<<"/*.root "<<plots_path<<"/root/";
+    test << "find "<<plots_path<<" -iname \"*.root\" -d 1 -exec mv -v {} "<<plots_path<<"/root/ \\;";
+//    test<< "mv -f -E ignore -I "<<plots_path<<"/*.root "<<plots_path<<"/root/";
     //cout<<"\""<<test.str()<<"\""<<endl;
     system(test.str().c_str());//t.str();//<<"\""<<endl;
     //	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
@@ -645,7 +646,11 @@ void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
     }
     //	cout<<"MPV: "<<mpv<<" mean: "<<histo->GetMean()<<" "<<fit->GetName()<<endl;
     TPaveText* stats = (TPaveText*) this->GetUpdatedLandauMeans(histo,mpv,gSigma);
-    TString name = TString::Format("c_%s",histo->GetName());
+    TString name = histo->GetName();
+    if (name.First('h')==0)
+        name.Replace(0,1,"c");
+    else
+        name = TString::Format("c_%s",histo->GetName());
     TCanvas *c1 = new TCanvas(name,name);
     c1->cd();
     histo->Draw();
@@ -684,7 +689,12 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
     if(histo->GetEntries()==0)return;
     if(fit==0) SaveHistogram(histo);
     if (verbosity>0) cout<<"Save Histogram With Fit:"<<histo->GetTitle()<<endl;
-    TCanvas *plots_canvas =  new TCanvas( TString::Format("c_%s", histo->GetName() ) , TString::Format("c_%s", histo->GetName() ) );
+    TString name = histo->GetName();
+    if (name.First('h') == 0)
+        name.Replace(0,1,"c");
+    else
+        name = (TString)"c_"+name;
+    TCanvas *plots_canvas =  new TCanvas(name,name );
     plots_canvas->Clear();
     plots_canvas->cd();
     TH1F *htemp = (TH1F*)histo->Clone();
@@ -719,7 +729,12 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
     if(histo->GetEntries()==0)return;
     if(fit==0) SaveHistogram(histo);
     if (verbosity>0) cout<<"Save Histogram With Fit:"<<histo->GetTitle()<<endl;
-    TCanvas *plots_canvas =  new TCanvas( TString::Format("c_%s", histo->GetName() ) , TString::Format("c_%s", histo->GetName() ) );
+    TString name = histo->GetName();
+    if (name.First('h') == 0)
+        name.Replace(0,1,"c");
+    else
+        name = (TString)"c_"+name;
+    TCanvas *plots_canvas =  new TCanvas(name,name );
     plots_canvas->Clear();
     plots_canvas->cd();
     //	TH1F *htemp = (TH1F*)histo->Clone();
@@ -976,6 +991,7 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
     }
 
     void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TProfile *prof, TF1* fit, bool drawStatBox){
+        if(prof==0) return;
         if (!prof) return;
         TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );
         c1->cd();
@@ -1310,8 +1326,12 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         //	TCanvas *plots_canvas = ((TCanvas *)(gROOT->GetListOfCanvases()->FindObject("plots_canvas")));
         //	if (plots_canvas) plots_canvas->Clear();
         //	else plots_canvas = new TCanvas("plots_canvas", "plots_canvas");
-
-        TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", name.c_str()), TString::Format("c_%s", name.c_str()));
+        TString cName = name;//histo->GetName();
+//        if (cName.First('h') == 0)
+//            cName.Replace(0,1,"c");
+//        else
+//            cName = (TString)"c_"+cName;
+        TCanvas *plots_canvas =  new TCanvas(cName,cName );
         plots_canvas->Clear();
 
         plots_canvas->cd();

@@ -56,6 +56,7 @@ public:
 	bool isValidChannelPosition(Float_t channel);
 	bool isValidCluster(TCluster cluster);
 	UInt_t getNIntervals();//{return nChannelsOfInterval.size();}
+	std::pair<Int_t, Int_t> getTotalInterval();
 private:
 //	UInt_t getNIntervals();//
 	Float_t getChannelToMetric(UInt_t ch);

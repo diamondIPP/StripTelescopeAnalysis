@@ -46,9 +46,9 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 
 TClustering::~TClustering() {
 	clusterFile->cd();
-	clusterFile->GetListOfKeys()->Print();
 
-	if(clusterTree!=NULL&&this->createdTree){
+    if(clusterTree!=NULL&&this->createdTree){
+        clusterFile->GetListOfKeys()->Print();
 
 		cout<<"Invalid readouts: "<<nInvalidReadout<<endl;
 		if(verbosity)cout<<"CLOSING TREE"<<endl;

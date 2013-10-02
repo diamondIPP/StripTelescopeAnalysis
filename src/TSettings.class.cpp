@@ -998,7 +998,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
 	}
 	else
 		cout<<"vecEntries.size(): "<<vecEntries.size()<<endl;
-	if (verbosity>5&&verbosity%2==1){
+	if ((verbosity>5&&verbosity%2==1)||(key=="diamondPattern"&&false)){
 		cout<<"Press a key and enter: "<<flush;
 		char t;
 		cin>>t;
@@ -2479,6 +2479,12 @@ bool TSettings::IsWithInTheColumnRadius(Float_t relCellPosX, Float_t relCellPosY
 //	cout<<" not in a column"<<endl;
 	return false;
 
+}
+
+UInt_t TSettings::GetColor(int no) {
+    UInt_t colors[]={kBlack,kOrange,kBlue,kRed,kSpring+5,kGreen+2,kTeal,kViolet,kAzure+10,kCyan-5};
+    Int_t nColors =11;
+    return colors[no%nColors];
 }
 
 bool TSettings::IsOnTheEdgeOfCell(Float_t relCellPosX, Float_t relCellPosY, Float_t minDistanceToEdge) {

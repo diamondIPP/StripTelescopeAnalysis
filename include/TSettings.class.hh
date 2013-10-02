@@ -43,6 +43,7 @@ private:
 	std::string outputDir;
 	std::string inputDir;
 public:
+	static UInt_t GetColor(int no);
 	static bool existsDirectory(std::string dir);
 	TSettings(TRunInfo* runInfo);
 	TSettings(UInt_t runNumber=0);

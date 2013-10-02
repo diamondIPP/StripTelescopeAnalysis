@@ -18,7 +18,7 @@ THTMLSelection::THTMLSelection(TSettings *settings):THTMLGenerator(settings) {
 
 THTMLSelection::~THTMLSelection() {
 	// TODO Auto-generated destructor stub
-	cout<<"Delete HTMLSelection"<<endl;
+	if(settings->getVerbosity()) cout<<"Delete HTMLSelection"<<endl;
 }
 
 void THTMLSelection::createCutFlowTable(std::vector<int> vecCutFlow	)

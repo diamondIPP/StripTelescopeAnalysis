@@ -411,7 +411,7 @@ void TTransparentAnalysis::fillHistograms() {
 	vecPredictedChannel.push_back(positionInDetSystemChannelSpace);
 	vecPredictedDetectorPositionY.push_back(positionInDetSystemMetricY);
 	fillPedestalsAndNoiseHistos();
-	UInt_t area = GetHitArea();
+	UInt_t area = GetHitArea(settings,eventReader->getFiducialValueX(),eventReader->getFiducialValueY(),xDivisions,yDivisions);
 	UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
 	for (UInt_t clusterSize = 0; clusterSize < maxSize; clusterSize++) {
 		transparentClusters.SetTransparentClusterSize(clusterSize+1);
@@ -2096,11 +2096,9 @@ void TTransparentAnalysis::fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterS
 
 
 
-UInt_t TTransparentAnalysis::GetHitArea(){
-    Float_t xVal = eventReader->getFiducialValueX();
-    Float_t yVal = eventReader->getFiducialValueY();
-    Int_t nFidCut = settings->getSelectionFidCuts()->getFidCutRegion(xVal,yVal);
-    TFiducialCut* fidcut = settings->getSelectionFidCuts()->getFidCut(nFidCut);
+UInt_t TTransparentAnalysis::GetHitArea(TSettings* set,Float_t xVal,Float_t yVal,UInt_t xDivisions,UInt_t yDivisions){
+    Int_t nFidCut = set->getSelectionFidCuts()->getFidCutRegion(xVal,yVal);
+    TFiducialCut* fidcut = set->getSelectionFidCuts()->getFidCut(nFidCut);
     Float_t relX = (xVal-fidcut->GetXLow())/(fidcut->GetXHigh()-fidcut->GetXLow());
     Float_t relY = (yVal-fidcut->GetYLow())/(fidcut->GetYHigh()-fidcut->GetYLow());
     Int_t x = relX*xDivisions;

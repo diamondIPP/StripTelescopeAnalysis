@@ -11,11 +11,9 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *newSettings) {
 	if(newSettings!=0)
 		this->settings=newSettings;
 	else exit(0);
-	cout<<"\n\n******Analysis of Selection *******\n"<<endl;
-	//	cout<<settings<<endl;
-	//	settings->PrintPatterns();
-	//	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
-	//	char t;cin >>t;
+    cout<<"\n\n\n**********************************************************"<<endl;
+    cout<<"*****************Analysis of Selection *******************"<<endl;
+    cout<<"**********************************************************"<<endl;
 	verbosity = settings->getVerbosity();
 	UInt_t runNumber=settings->getRunNumber();
 	htmlLandau=new THTMLLandaus(settings);
@@ -32,7 +30,12 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *newSettings) {
 	settings->goToSelectionTreeDir();
 	initialiseHistos();
 
-	cout<<"end initialise"<<endl;
+	if (verbosity) cout<<"end initialise"<<endl;
+    xDivisions = 3;
+    yDivisions = 3;
+
+    if (verbosity)
+        settings->diamondPattern.showPatterns();
 }
 
 TAnalysisOfSelection::~TAnalysisOfSelection() {
@@ -52,12 +55,12 @@ TAnalysisOfSelection::~TAnalysisOfSelection() {
 
 void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 {
-	settings->diamondPattern.showPatterns();
+    initPHvsEventNoAreaPlots(0,nEvents);
 	cout<<"analyze selection data..."<<endl;
 	if(nEvents<=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
-//		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
+	    TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
 		eventReader->LoadEvent(nEvent);
 		analyseEvent();
 	}
@@ -238,7 +241,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 
 		cout <<" Area: " << area << ", ch: : "<< chLow <<" - "<< chHigh <<endl;
 
-		TString name = TString::Format("hEtaVsLeftChannelNoArea%d_ch_%d-%d",area,chLow,chHigh);
+		TString name = TString::Format("hEtaVsLeftChannelNoArea%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<"save: "<<name<<endl;
 		TH2F* hEtaVsLeftChannelNoArea = (TH2F*)hEtaVsLeftChannelNo->Clone(name);
 		hEtaVsLeftChannelNoArea->SetTitle(name);
@@ -249,7 +252,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 
 		Int_t minBin = hClusterSizeVsChannelPos->GetYaxis()->FindBin(chLow);
 		Int_t maxBin = hClusterSizeVsChannelPos->GetYaxis()->FindBin(chHigh);
-		name = TString::Format("hEta_Area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hEta_Area_%d_ch_%d_%d",area,chLow,chHigh);
 		TH1F* hEtaArea = (TH1F*)hEtaVsLeftChannelNo->ProjectionX(name,minBin,maxBin);
 		if(!hEtaArea){
 			cout<<"Projection does not work: "<<name;
@@ -265,7 +268,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 
 
 
-		name = TString::Format("hEtaCMNcorrectedVsLeftChannelNoArea%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hEtaCMNcorrectedVsLeftChannelNoArea%d_ch_%d_%d",area,chLow,chHigh);
 		TH2F* hEtaCMNcorrectedVsLeftChannelNoArea = (TH2F*)hEtaCMNcorrectedVsLeftChannelNo->Clone(name);
 		if(hEtaCMNcorrectedVsLeftChannelNoArea){
 			hEtaCMNcorrectedVsLeftChannelNoArea->SetTitle(name);
@@ -273,7 +276,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		}
 		minBin = hEtaCMNcorrectedVsLeftChannelNoArea->GetYaxis()->FindBin(chLow);
 		maxBin = hEtaCMNcorrectedVsLeftChannelNoArea->GetYaxis()->FindBin(chHigh);
-		name = TString::Format("hEtaCMNcorrected_Area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hEtaCMNcorrected_Area_%d_ch_%d_%d",area,chLow,chHigh);
 		TH1F* hEtaCMNcorrectedArea = (TH1F*)hEtaCMNcorrectedVsLeftChannelNoArea->ProjectionX(name,minBin,maxBin);
 		if(!hEtaCMNcorrectedArea){
 			cout<<"Projection does not work: "<<name;
@@ -292,7 +295,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 
 		//		delete hEtaCMNcorrectedVsLeftChannelNoArea;
 		//2d area channel vs cluster size
-		name = TString::Format("hClusterSizeVsChannelPos_Area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hClusterSizeVsChannelPos_Area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* hClusterSizeVsChannelPosArea = (TH2F*)hClusterSizeVsChannelPos->Clone(name);
 		if(hClusterSizeVsChannelPosArea){
@@ -306,7 +309,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		Float_t yMin = hClusterSizeVsChannelPos->GetYaxis()->GetXmin();
 		int binMax = hClusterSizeVsChannelPos->GetYaxis()->FindBin(yMax);
 		int binMin = hClusterSizeVsChannelPos->GetYaxis()->FindBin(yMin);
-		name = TString::Format("hClusterSize_Area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hClusterSize_Area_%d_ch_%d_%d",area,chLow,chHigh);
 		TH1F* hClusterSizeVsChannelPosAreaProjection = (TH1F*)hClusterSizeVsChannelPos->ProjectionX(name,binMin,binMax);
 		if(hClusterSizeVsChannelPosAreaProjection){
 			hClusterSizeVsChannelPosAreaProjection->SetTitle(name);
@@ -317,23 +320,36 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		if(hClusterSizeVsChannelPosAreaProjection)delete hClusterSizeVsChannelPosAreaProjection;
 
 		// 2d area clusterSize 1or 2 normal
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2Darea = (TH2F*)histoLandauDistribution2D->Clone(name);
 		if(histoLandauDistribution2Darea){
 			histoLandauDistribution2Darea->SetTitle(name);
 			histoLandauDistribution2Darea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+			name = name + (TString)"_pfx";
+			TProfile *prof = histoLandauDistribution2Darea->ProfileY(name);
+			prof->GetXaxis()->SetRangeUser(chLow,chHigh);
+			TF1* fit = new TF1("fit","pol1",chLow,chHigh);
+			histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+			if (prof) delete prof;
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2Darea);
 		if(histoLandauDistribution2Darea)delete histoLandauDistribution2Darea;
 
 		// 2d area clusterSize 1or 2 noBorderSeeds
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2DNoBorderSeedarea = (TH2F*)histoLandauDistribution2DNoBorderSeed->Clone(name);
 		if(histoLandauDistribution2DNoBorderSeedarea){
 		histoLandauDistribution2DNoBorderSeedarea->SetTitle(name);
 		histoLandauDistribution2DNoBorderSeedarea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+
+        name = name + (TString)"_pfx";
+        TProfile *prof = histoLandauDistribution2DNoBorderSeedarea->ProfileY(name);
+        prof->GetXaxis()->SetRangeUser(chLow,chHigh);
+        TF1* fit = new TF1("fit","pol1",chLow,chHigh);
+        histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+        if (prof) delete prof;
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderSeedarea);
 		if(histoLandauDistribution2DNoBorderSeedarea)
@@ -341,20 +357,27 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 
 
 		// 2d area clusterSize 1or 2 noBorderHits
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 
 
 		TH2F* histoLandauDistribution2DNoBorderHitarea = (TH2F*)histoLandauDistribution2DNoBorderHit->Clone(name);
 		histoLandauDistribution2DNoBorderHitarea->SetTitle(name);
 		histoLandauDistribution2DNoBorderHitarea->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+
+
+        name = name + (TString)"_pfx";
+        TProfile *prof = histoLandauDistribution2DNoBorderHitarea->ProfileY(name);
+        prof->GetXaxis()->SetRangeUser(chLow,chHigh);
+        TF1* fit = new TF1("fit","pol1",chLow,chHigh);
+        histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+        if (prof) delete prof;
+
 		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderHitarea);
 		Int_t firstBin = histoLandauDistribution2DNoBorderHitarea->GetYaxis()->GetFirst();
 		Int_t lastBin = histoLandauDistribution2DNoBorderHitarea->GetYaxis()->GetLast();
 		vector<TH1F*> vecHistos;
 		Double_t max =0;
-		UInt_t colors[]={kBlack,kOrange,kBlue,kRed,kSpring+5,kGreen+2,kTeal,kViolet,kAzure+10,kCyan-5};
-		Int_t nColors =11;
 		int k = 0;
 		THStack* stack = new THStack("hStack",TString::Format("Charge of Cluster per Channel - Area %d",area));
 		for(Int_t bin = firstBin;bin<lastBin;bin++){
@@ -375,7 +398,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			histo->Rebin();
 			histo->GetXaxis()->SetTitle("Charge of Cluster");
 			histo->GetYaxis()->SetTitle("number of entries #");
-			histo->SetLineColor(colors[k%nColors]);
+			histo->SetLineColor(settings->GetColor(k));
 			k++;
 			max = TMath::Max(max,histo->GetBinContent(histo->GetMaximumBin()));
 			vecHistos.push_back(histo);
@@ -398,7 +421,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		//		delete histoLandauDistribution2DNoBorderSeedarea;
 
 		// 2d area clusterSize 1 or 2 unmasked
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_unmasked_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		UInt_t binLow=0;
 		UInt_t binHigh=-1;
@@ -406,37 +429,60 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		if(histoLandauDistribution2DareaUnmasked){
 			histoLandauDistribution2DareaUnmasked->SetTitle(name);
 			histoLandauDistribution2DareaUnmasked->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
-			binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chLow);
+
+
+	        name = name + (TString)"_pfx";
+	        TProfile *prof = histoLandauDistribution2DareaUnmasked->ProfileY(name);
+	        prof->GetXaxis()->SetRangeUser(chLow,chHigh);
+	        TF1* fit = new TF1("fit","pol1",chLow,chHigh);
+	        histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+	        if (prof) delete prof;
+
+            binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chLow);
 			binHigh = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chHigh);
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmasked);
+
 		if(histoLandauDistribution2DareaUnmasked)delete histoLandauDistribution2DareaUnmasked;
 
 		// 2d area clusterSize 1or 2 unmasked noBorderSeed
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderSeed_unmasked_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2DareaUnmaskedNoBorderSeed = (TH2F*)histoLandauDistribution2DNoBorderSeed_unmasked->Clone(name);
 		if(histoLandauDistribution2DareaUnmaskedNoBorderSeed){
 			histoLandauDistribution2DareaUnmaskedNoBorderSeed->SetTitle(name);
 			histoLandauDistribution2DareaUnmaskedNoBorderSeed->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+
+
+            name = name + (TString)"_pfx";
+            TProfile *prof = histoLandauDistribution2DareaUnmaskedNoBorderSeed->ProfileY(name);
+            prof->GetXaxis()->SetRangeUser(chLow,chHigh);
+            TF1* fit = new TF1("fit","pol1",chLow,chHigh);
+            histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+            if (prof) delete prof;
+
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderSeed);
 		if(histoLandauDistribution2DareaUnmaskedNoBorderSeed) delete histoLandauDistribution2DareaUnmaskedNoBorderSeed;
 
 		// 2d area clusterSize 1or 2 unmasked noBorderSeed
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_unmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_2D_noBorderHit_unmasked_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH2F* histoLandauDistribution2DareaUnmaskedNoBorderHit = (TH2F*)histoLandauDistribution2DNoBorderHit_unmasked->Clone(name);
 		if(histoLandauDistribution2DareaUnmaskedNoBorderHit){
 			histoLandauDistribution2DareaUnmaskedNoBorderHit->SetTitle(name);
 			histoLandauDistribution2DareaUnmaskedNoBorderHit->GetYaxis()->SetRangeUser(chLow-1,chHigh+1);
+            name = name + (TString)"_pfx";
+            TProfile *prof = histoLandauDistribution2DareaUnmaskedNoBorderHit->ProfileY(name);
+            prof->GetXaxis()->SetRangeUser(chLow,chHigh);
+            TF1* fit = new TF1("fit","pol1",chLow,chHigh);
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderHit);
 		if(histoLandauDistribution2DareaUnmaskedNoBorderHit)delete histoLandauDistribution2DareaUnmaskedNoBorderHit;
 
 		LandauGaussFit landaugaus;
 		/******* PROJECTIONS ******/
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		TH1F* hProjection = (TH1F*)histoLandauDistribution2D->ProjectionX(name,binLow,binHigh);
 		if(hProjection){
@@ -449,7 +495,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		}
 		hProjection=0;
 
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeed_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeed_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderSeed->ProjectionX(name,binLow,binHigh);
 		if(hProjection){
@@ -462,7 +508,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		}
 		hProjection=0;
 
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHit_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHit_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderHit->ProjectionX(name,binLow,binHigh);
 		if(hProjection){
@@ -476,7 +522,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		hProjection=0;
 
 		//unmasked projections
-		name = TString::Format("hChargeOfCluster_ClusterSizeUnmasked_1_2_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSizeUnmasked_1_2_area_%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<name<<endl;
 		hProjection = (TH1F*)histoLandauDistribution2D_unmasked->ProjectionX(name,binLow,binHigh);
 		if(hProjection){
@@ -489,7 +535,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		}
 		hProjection=0;
 
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeedUnmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderSeedUnmasked_area_%d_ch_%d_%d",area,chLow,chHigh);
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderSeed_unmasked->ProjectionX(name,binLow,binHigh);
 		if(hProjection){
 			hProjection->SetTitle(name);
@@ -501,7 +547,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		}
 		hProjection=0;
 
-		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHitUnmasked_area_%d_ch_%d-%d",area,chLow,chHigh);
+		name = TString::Format("hChargeOfCluster_ClusterSize_1_2_NoBorderHitUnmasked_area_%d_ch_%d_%d",area,chLow,chHigh);
 		hProjection = (TH1F*)histoLandauDistribution2DNoBorderHit_unmasked->ProjectionX(name,binLow,binHigh);
 		if(hProjection){
 			hProjection->SetTitle(name);
@@ -604,6 +650,7 @@ void TAnalysisOfSelection::saveHistos()
 {
 	TH1F *histo=0;
 	cout<<"\n\nSAVE HISTOGRAMS!!!!!"<<endl;
+	savePHvsEventNoAreaPlots();
 	saveDiamondAreaHistos();
 	saveFidCutHistos();
 	//	cout<<"AREAS: "<<settings->getNDiaDetectorAreas()<<endl;
@@ -1104,6 +1151,10 @@ void TAnalysisOfSelection::analyseEvent()
 
 	if(!eventReader->isInOneFiducialArea())
 		return;
+	Int_t hitArea = TTransparentAnalysis::GetHitArea(settings,fiducialValueX,fiducialValueY,xDivisions,yDivisions);
+	Float_t charge1 = cluster.getCharge(settings->doCommonModeNoiseCorrection());
+	Float_t charge2 = cluster.getCharge(2,settings->doCommonModeNoiseCorrection());
+	        fillPHvsEventNoAreaPlots(hitArea,charge1,charge2);
 //	if(fidRegionIndex>0) cout<<"FidRegion: "<<fidRegionIndex<<" "<<endl;
 	hFidCut->Fill(fiducialValueX,fiducialValueY);
 	hNDiaClusters -> Fill(nDiaClusters);
@@ -1192,10 +1243,133 @@ void TAnalysisOfSelection::analyseEvent()
 }
 
 
+void TAnalysisOfSelection::initDividedAreaAxis(TAxis* axis){
+    if (!axis) return;
+    Int_t bins = xDivisions*yDivisions;
+    if (axis->GetNbins() != bins ){
+        cerr<<"divided area axis has wrong number of bins: "<<axis->GetNbins()<<"/"<<bins<<endl;
+        return;
+    }
+    for (UInt_t y = 0; y < yDivisions; y++)
+    for (UInt_t x = 0; x < xDivisions; x++){
+        axis->SetBinLabel(x+xDivisions*y+1, TTransparentAnalysis::GetNameOfArea(x,y));
+    }
+}
+
+
+void TAnalysisOfSelection::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
+    if(verbosity) cout<<"initPHvsEventNoAreaPlots"<<endl;
+    Int_t nentriesPerBin = 20000;
+//    Int_t subjectDetector = TPlaneProperties::getDetDiamond();
+    TString name = TString::Format("hPHvsEventNoArea");
+    TString title = TString::Format("ph vs eventNo");
+    UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
+    if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
+    if (nBins==0)nBins=1;
+    UInt_t yBins = xDivisions*yDivisions;
+    TProfile2D* prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);
+    prof->Draw();
+    prof->GetXaxis()->SetTitle("event no");
+    initDividedAreaAxis(prof->GetYaxis());
+    prof->GetZaxis()->SetTitle(TString::Format("avrg. pulse height"));
+    hPHVsEventNo_Areas = prof;
+    name = TString::Format("hPHvsEventNo2HighestArea");
+    title = TString::Format("ph vs eventNo 2Highest");
+    prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);
+    prof->GetXaxis()->SetTitle("event no");
+    initDividedAreaAxis(prof->GetYaxis());
+    prof->GetZaxis()->SetTitle(TString::Format("avrg. pulse height 2 higehest"));
+    hPH2HighestVsEventNo_Areas = prof;
+}
+
+void TAnalysisOfSelection::fillPHvsEventNoAreaPlots(UInt_t area, UInt_t charge, UInt_t chargeOfTwo) {
+    hPHVsEventNo_Areas->Fill(nEvent,area,charge);
+    hPH2HighestVsEventNo_Areas->Fill(nEvent,area,chargeOfTwo);
+}
 
 
 
+void TAnalysisOfSelection::savePHvsEventNoAreaPlots() {
+    cout<<"[TAnalysisOfSelection::savePHvsEventNoAreaPlots] "<<endl;
+    TProfile2D * prof2d = hPHVsEventNo_Areas;
+    if (!prof2d)return;
+    prof2d->Draw();
+    TProfile* prof = histSaver->GetProfileX(prof2d);
+    TF1* pol1Fit = new TF1("pol1Fit","pol1",prof2d->GetXaxis()->GetXmin(),prof2d->GetXaxis()->GetXmax());
+    pol1Fit->SetLineWidth(1);
+    pol1Fit->SetLineStyle(2);
+    histSaver->Save1DProfileXWithFitAndInfluence(prof,(TF1*)pol1Fit->Clone(),true);
+    histSaver->SaveProfile2DWithEntriesAsText(prof2d,true);//,false);
+    vector<TProfile*> vecStack;
+    Int_t bins = prof2d->GetYaxis()->GetNbins();
+    Float_t min = prof2d->GetYaxis()->GetXmin();
+    Float_t max = prof2d->GetYaxis()->GetXmax();
+    TProfile* hPHVsEventNo_AreasX [xDivisions];
+    TProfile* hPHVsEventNo_AreasY [yDivisions];
+    for (UInt_t x = 0; x < xDivisions; x++){
+        TString name = prof2d->GetName()+TString::Format("_X%d",x);
+        hPHVsEventNo_AreasX[x] = new TProfile(name,name,bins,min,max);
+    }
+    for(UInt_t y = 0; y< yDivisions; y++){
+        TString name = prof2d->GetName()+TString::Format("_Y%d",y);
+        hPHVsEventNo_AreasY[y] = new TProfile(name,name,bins,min,max);
+    }
 
 
+    for(int y = 0; y< prof2d->GetYaxis()->GetNbins();y++){
+        TString name = prof2d->GetName()+(TString)"_"+TTransparentAnalysis::GetNameOfArea(y%xDivisions,y/xDivisions);
+        prof = histSaver->GetProfileX(prof2d,name,y+1,y+1);
+        prof->Draw();
+        prof->SetLineColor(settings->GetColor(y));
+        prof->SetMarkerColor(settings->GetColor(y));
+        prof->Sumw2();
+        TF1* fit = (TF1*) pol1Fit->Clone(prof->GetName()+(TString)"_fit");
+        fit->SetLineColor(settings->GetColor(y));
+        cout<<"Save: "<<prof->GetName()<<" "<<y<<" "<<prof->GetEntries()<< endl;
+        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit);
+        vecStack.push_back(prof);
+        TProfile* profX = hPHVsEventNo_AreasX[y%xDivisions];
+        TProfile* profY = hPHVsEventNo_AreasY[y/xDivisions];
+        cout<<profX->GetNbinsX()<<"/"<<prof->GetNbinsX()<<" "<<profX->GetNbinsY()<<"/"<<prof->GetNbinsY()<<" "<<profX->GetNbinsZ()<<"/"<<prof->GetNbinsZ()<<" "<<endl;
+        profX->Add(prof);
+        profY->Add(prof);
+        cout<<"hPHVsEventNo_AreasX: "<<y%xDivisions<<" "<<profX->GetEntries()<<endl;
+        cout<<"hPHVsEventNo_AreasY: "<<y/xDivisions<<" "<<profY->GetEntries()<<endl;
+    }
+//    char t; cin>>t;
+    for (UInt_t x = 0; x < xDivisions; x++){
+        histSaver->Save1DProfileXWithFitAndInfluence(hPHVsEventNo_AreasX[x],(TF1*)pol1Fit,true);
+        delete hPHVsEventNo_AreasX[x];
+    }
+    for(UInt_t y = 0; y< yDivisions; y++){
+        histSaver->Save1DProfileXWithFitAndInfluence(hPHVsEventNo_AreasY[y],(TF1*)pol1Fit,true);
+        delete hPHVsEventNo_AreasY[y];
+    }
+    THStack* stack = new THStack("hStackPHvsEventNoAllAreas","Ph vs EventNo, All Areas");
+    bool foundOneHisto = false;
+    for(UInt_t i = 0; i< vecStack.size();i++){
+        if(!vecStack[i]) continue;
+        foundOneHisto = true;
+        vecStack[i]->SetLineColor(settings->GetColor(i));
+        stack->Add(vecStack[i]);
+    }
+    if(foundOneHisto){
+        stack->Draw();
 
-
+        if(stack->GetXaxis())stack->GetXaxis()->SetTitle("Event No.");
+        cout<<"Save: "<<stack->GetName()<<endl;
+        Float_t min = stack->GetMinimum("nostack");
+        Float_t max = stack->GetMaximum("nostack");
+        if(stack->GetYaxis()){
+            stack->GetYaxis()->SetTitle("avrg PH");
+            stack->GetYaxis()->SetRangeUser(min-.1*(max-min),max+.1*(max-min));
+        }
+        histSaver->SaveStack(stack,"nostack",true);
+    }
+    delete stack;
+    for(UInt_t i = 0; i< vecStack.size();i++){
+        delete vecStack[i];
+        vecStack[i]=0;
+    }
+//    char t; cin>>t;
+}

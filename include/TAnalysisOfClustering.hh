@@ -61,9 +61,11 @@ private:
     void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
     void fillHistograms();
     void fillPedestalsAndNoiseHistos();
+    void saveVariableVsEventNoPlots(std::map<UInt_t,TProfile*> mProf, TString nameOfVariable,vector <Float_t>* vec);
     void savePedestalHistos();
     void saveNoiseHistos();
     void saveADCHistos();
+    void analysisSlopes();
 
 
 	void checkForDeadChannels();
@@ -79,6 +81,7 @@ private:
 	void etaInvestigation();
 	void analyseAsymmetricSample();
 	void fillClusterVector();
+	void fillClusterHitPositions();
 	void saveEtaInvestigationHistos();
 	void saveEtaDividedHistos(TH3F* h3DLeft,TH3F* h3DRight, TH2F* h2DLeft, TH2F* h2DRight,string name_comparision, Float_t etaWidth=.1);
 	void saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision);
@@ -94,6 +97,8 @@ private:
 	TH1F* hNumberOfClusters[9];
 	TH1F* hClusterSize[9];
 	TH1F* hClusterSeedSize[9];
+	TH1F* hClusterPos[9];
+	TH1F* hClusterPosCMN[9];
 	TH2F* hBiggestHitVsClusterSize[9];
 	vector <double>vecClusterSizes,vecClusterSeedSizes,vecNumberOfClusters;
 	TADCEventReader* eventReader;
@@ -118,6 +123,12 @@ private:
 	TH1F *histo_pulseheight_right_sigma_second[9];
 	TH1F *histo_H2C_biggestHit;
 	TH2F *histo_CWM_biggestHit;
+
+	TH1F* hADCSlopes, hPedestalSlopes, hNoiseSlopes;
+    vector<Float_t> vecCh;
+    vector<Float_t> vecPedestalSlope;
+    vector<Float_t> vecRawADCSlope;
+    vector<Float_t> vecNoiseSlope;
 private:
 	THTMLCluster *htmlClus;
 	TH1F *h2ndBiggestHitSignal[9];
@@ -130,6 +141,7 @@ private:
 	TH2F *hRelativeClusterPositionCorEta[9];
 	TH2F *hRelativeClusterPositionEta[9];
 	TH1F *hClusterPosition[9];
+	TH1F* hClusterPositionActiveChannels;
 	TH1F *hEtaDistribution[9];
 	TH1F *hEtaDistributionCMN[9];
 	TH2F* hEtaDistributionVsLeftChannel[9];

@@ -26,15 +26,6 @@ void TDiamondPattern::loadStandardPitchWidthSettings() {
 	bLoadedStandardPitchWidthSettings=true;
 }
 
-std::pair<Int_t,Int_t> TDiamondPattern::getInterval(UInt_t pattern){
-	Int_t first = -1;
-	Int_t last = -1;
-	if(pattern >= 0 && pattern<getNIntervals()){
-		first= firstChannelOfInterval.at(pattern);
-		last = nChannelsOfInterval.at(pattern) + first;
-	}
-	return make_pair(first,last);
-}
 
 void TDiamondPattern::loadPitchWidthSettings(Float_t pitchWidth) {
 	resetPattern();
@@ -326,6 +317,30 @@ Float_t TDiamondPattern::getPitchWidth(UInt_t area){
 	else
 		return this->standardPW;
 }
+
+
+std::pair<Int_t,Int_t> TDiamondPattern::getInterval(UInt_t pattern){
+    Int_t first = -1;
+    Int_t last = -1;
+    if(pattern >= 0 && pattern<getNIntervals()){
+        first= firstChannelOfInterval.at(pattern);
+        last = nChannelsOfInterval.at(pattern) + first;
+    }
+    return make_pair(first,last);
+}
+std::pair<Int_t, Int_t> TDiamondPattern::getTotalInterval(){
+
+    Int_t first = TPlaneProperties::getNChannelsDiamond();
+    Int_t last = 0;
+    for (UInt_t area = 0; area < getNIntervals();area ++){
+        pair<Int_t,Int_t> pattern  = getInterval(area);
+        if(pattern.first < first) first = pattern.first;
+        if(pattern.second > last) last = pattern.second;
+    }
+
+    return make_pair(first,last);
+}
+
 
 std::pair<int,int> TDiamondPattern::getPatternChannels(UInt_t pattern){
 	int firstChannel=-1;
