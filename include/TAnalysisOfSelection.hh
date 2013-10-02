@@ -42,6 +42,7 @@ public:
 	TAnalysisOfSelection(TSettings *settings);
 	virtual ~TAnalysisOfSelection();
 	void	doAnalysis(UInt_t nEvents=0);
+    static void savePHvsEventNoAreaPlots(HistogrammSaver* histSaver, TSettings* settings, TProfile2D* prof2D,UInt_t xDivisions, UInt_t yDivisions);
 private:
 	void analyseEvent();
 	void initialiseHistos();
@@ -51,7 +52,6 @@ private:
 	void initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd);
 	void initDividedAreaAxis(TAxis* axis);
 	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t charge, UInt_t chargeOfTwo);
-	void savePHvsEventNoAreaPlots();
 private:
 	Int_t verbosity;
 	TSettings *settings;

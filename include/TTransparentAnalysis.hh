@@ -56,6 +56,7 @@
 #include "LandauGaussFit.hh"
 #include "TClustering.hh"
 #include "TResults.hh"
+#include "TAnalysisOfSelection.hh"
 #include "TSpectrum.h"
 
 using namespace std;
@@ -262,7 +263,7 @@ public:
 private:
 	void initDividedAreaAxis(TAxis *axis);
 public:
-	static TString GetNameOfArea(UInt_t x,UInt_t y);
+	static TString GetNameOfArea(Int_t x,Int_t y);
 private:
 	void initPHvsEventNoAreaPlots(UInt_t nStart = 0, UInt_t nEnd = 1e6);
 	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo);
