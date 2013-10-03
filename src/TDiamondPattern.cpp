@@ -366,3 +366,13 @@ Int_t TDiamondPattern::getClusterPattern(TCluster* cluster) {
     }
     return -1;
 }
+
+Int_t TDiamondPattern::getPatternOfChannel(Int_t ch) {
+    for(UInt_t i = 0; i< getNPatterns();i++){
+        pair<int,int> channels = getPatternChannels(i+1);
+        if(verbosity>7)cout<<channels.first<<"<="<<ch<<"<="<<channels.second<<endl;
+        if(channels.first<=ch&&ch<=channels.second)
+            return i+1;
+    }
+    return -1;
+}

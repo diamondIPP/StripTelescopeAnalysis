@@ -65,6 +65,7 @@ private:
     void analyseBiggestHit(UInt_t det,bool CMN_corrected=false);
     void findBiggestSignalInDet(UInt_t det, UInt_t ch);
 private:
+    map<Int_t,TH1F*> hBiggestSignalInSigmaDiaPattern;
 	TResults *res;
 	TH1F *hSaturatedChannels[9];
 	TH1F *hSeedMap[9];

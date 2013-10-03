@@ -79,7 +79,7 @@ public:
     void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
     void Save1DProfileXWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true,TString drawOption ="colz");
-	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
+	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true,TString drawOption ="");
 	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
 	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false);
 	TProfile* GetProfileX(TProfile2D* prof,TString name ="_pfx",Int_t firstybin = 1, Int_t lastybin = -1);
@@ -90,7 +90,7 @@ public:
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
 	void SaveHistogramLogZ(TH2* histo);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
-	void SaveHistogramPNG(TH1* histo);
+	void SaveHistogramPNG(TH1* histo,TString drawOption="");
 	void SaveHistogramPNG(TH2* histo,bool optimizeRange=true,TString drawOption ="colz");
 	void SaveGraphPNG(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramFitGaussPNG(TH1* histo);

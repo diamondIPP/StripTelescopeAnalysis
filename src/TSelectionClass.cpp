@@ -352,9 +352,10 @@ void TSelectionClass::fillHitOccupancyPlots(){
 		return;
 	hFiducialCutSilicon->Fill(fiducialValueX,fiducialValueY);
 	//	if((isValidSiliconTrack||isSiliconTrackNotFiducialCut)&&nDiamondClusters>0)
+
+    FillHitOccupancyPlotsSamePattern();
 	if(!atLeastOneValidDiamondCluster)
 		return;
-	FillHitOccupancyPlotsSamePattern();
 	hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(!oneAndOnlyOneDiamondCluster)
 		return;
@@ -504,17 +505,17 @@ void TSelectionClass::initialiseHistos()
 	}
 
     name = "hDiamondPatternFiducialPattern";
-    hDiamondPatternFiducialPattern = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0,settings->diamondPattern.getNPatterns()+1);
+    hDiamondPatternFiducialPattern = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0.5,settings->diamondPattern.getNPatterns()+1.5);
     hDiamondPatternFiducialPattern->GetXaxis()->SetTitle("pattern");
     hDiamondPatternFiducialPattern->GetYaxis()->SetTitle("number of correct patterns");
 
     name = "hDiamondPatternFiducialPatternNoMapping";
-    hDiamondPatternFiducialPatternNoMapping = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0,settings->diamondPattern.getNPatterns()+1);
+    hDiamondPatternFiducialPatternNoMapping = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0.5,settings->diamondPattern.getNPatterns()+1.5);
     hDiamondPatternFiducialPatternNoMapping->GetXaxis()->SetTitle("pattern selectionCut");
     hDiamondPatternFiducialPatternNoMapping->GetYaxis()->SetTitle("number of no mapping found");
 
     name = "pDiamondPatternFiducialPatternProfile";
-    pDiamondPatternFiducialPatternProfile = new TProfile(name,name,settings->diamondPattern.getNPatterns()+1,0,settings->diamondPattern.getNPatterns());
+    pDiamondPatternFiducialPatternProfile = new TProfile(name,name,settings->diamondPattern.getNPatterns()+1,05,settings->diamondPattern.getNPatterns()+1.5);
     pDiamondPatternFiducialPatternProfile->GetXaxis()->SetTitle("pattern selectionCut");
     pDiamondPatternFiducialPatternProfile->GetYaxis()->SetTitle("rel. number of mappings found");
 
@@ -731,8 +732,8 @@ void TSelectionClass::FillHitOccupancyPlotsSamePattern() {
             pDiamondPatternFiducialPatternProfile->Fill(selectionPattern,1);
         }
     }
-    if(!mappingFound){
-        pDiamondPatternFiducialPatternProfile->Fill(selectionPattern,1);
+    if(!mappingFound&& selectionPattern>0){
+        pDiamondPatternFiducialPatternProfile->Fill(selectionPattern,0);
         hDiamondPatternFiducialPatternNoMapping->Fill(selectionPattern);
     }
 }

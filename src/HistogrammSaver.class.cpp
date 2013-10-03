@@ -665,7 +665,7 @@ void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
  * *********************************************************
  * *********************************************************
  */
-void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange,bool drawStatBox) {
+void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange,bool drawStatBox,TString drawOption) {
     if(histo==0)return;
     if(histo->GetEntries()==0)return;
     if (!drawStatBox)
@@ -679,7 +679,7 @@ void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange,b
     }
     //create PNG
     if (fitGauss) SaveHistogramFitGaussPNG(histo);
-    else SaveHistogramPNG(histo);
+    else SaveHistogramPNG(histo,drawOption);
     //create ROOT
     SaveHistogramROOT(histo);
 }
@@ -1081,7 +1081,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2* histo) {
     //pt->SetTextSize(runNumber0.1);
 }
 
-void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
+void HistogrammSaver::SaveHistogramPNG(TH1* histo,TString drawOption) {
     if(histo==0)return;
     if(!histo){
         cout<<"Histogram is not existing..."<<endl;
@@ -1097,9 +1097,16 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo) {
     if(htemp==0)return;
     TCanvas *plots_canvas = new TCanvas(TString::Format("cPng_%s",histo->GetName()),TString::Format("c_%s",histo->GetName()));
     plots_canvas->cd();
-
-    htemp->SetMinimum(0.);
+    htemp->SetMinimum(0);
     htemp->Draw();
+    drawOption.ToLower();
+    if(drawOption.Contains("logx"))
+        plots_canvas->SetLogx();
+    if(drawOption.Contains("logy")){
+        htemp->SetMinimum(1e-5);
+        plots_canvas->SetLogy();
+        cout<<"Draw " <<histo->GetName()<<" logy"<<endl;
+    }
     TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
     pt2->Draw();
     ostringstream plot_filename;

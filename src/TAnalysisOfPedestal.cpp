@@ -277,6 +277,12 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 	if(!CMN_corrected){
 		vecBiggestHitChannel[det].push_back(biggestHitChannel);
 		vecBiggestSignalInSigma[det].push_back(biggestSignalInSigma);
+		if(TPlaneProperties::isDiamondDetector(det)){
+		    Int_t pattern = settings->diamondPattern.getPatternOfChannel(biggestHitChannel);
+		    if (pattern!=-1)
+		        if (hBiggestSignalInSigmaDiaPattern.count(pattern)>0)
+		            hBiggestSignalInSigmaDiaPattern[pattern]->Fill(biggestSignalInSigma);
+		}
 		vecBiggestSignal[det].push_back(bigSignal);
 		vecBiggestAdjacentSignal[det].push_back(biggestAdjacentSignal);
 		if(biggestAdjacentHitChannel!=-9999){
@@ -319,6 +325,13 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
+    for(UInt_t i=0;i < settings->diamondPattern.getNIntervals();i++){
+        TString name = TString::Format("hBiggestSignalInSigmaDiaPattern_%d",i+1);
+        TH1F* histo = new TH1F(name,name,196*2,4,200);
+        histo->GetXaxis()->SetTitle("biggest hit in sigma");
+        histo->GetYaxis()->SetTitle("number of entries #");
+        hBiggestSignalInSigmaDiaPattern[i+1] = histo;
+    }
 	hCMNoiseDistribution= new TH1F("hCMNoiseDistribution","hCMNoiseDistribution",512,-20,20);
 	hCMNoiseDistribution->GetXaxis()->SetTitle("Common Mode Noise [ADC]");
 	hCMNoiseDistribution->GetYaxis()->SetTitle("number of entries [#]");
@@ -455,20 +468,24 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 		Float_t max=0;
 		Float_t mean=0;
 		Float_t sigma=0;
+		Int_t entries = 0;
 
 		//Find max mean and sigma
 		for(UInt_t i=0;i<vecBiggestSignalInSigma[det].size();i++){
+		    if(vecBiggestSignalInSigma[det][i]<4)
+		        continue;
+		    entries ++;
 			mean+=vecBiggestSignalInSigma[det][i];
 			sigma+=vecBiggestSignalInSigma[det][i]*vecBiggestSignalInSigma[det][i];
 			if (vecBiggestSignalInSigma[det][i]>max)
 				max = vecBiggestSignalInSigma[det][i];
 		}
-		mean/=(Float_t)vecBiggestSignalInSigma[det].size();
-		sigma=TMath::Sqrt(sigma/(Float_t)vecBiggestSignalInSigma[det].size()-mean*mean);
-		cout<< "Mean: "<<mean<<" +/- "<<sigma<<"\tMaximum SNR: "<<max<<endl;
+		mean/=entries;//(Float_t)vecBiggestSignalInSigma[det].size();
+		sigma=TMath::Sqrt(sigma/entries-mean*mean);
+		cout<< "Mean: "<<mean<<" +/- "<<sigma<<"\tMaximum SNR: "<<max<<" "<<entries<<endl;
 		//define xrange and nbins
 		Float_t xRangeMax = TMath::Min(mean+3*sigma,max);
-		Float_t xRangeMin = 0;
+		Float_t xRangeMin = 4;
 		xMinBiggest = xRangeMin;
 		xMaxBiggest = xRangeMax;
 		UInt_t nbins = 512;
@@ -795,6 +812,12 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 
 
 void TAnalysisOfPedestal::saveHistos(){
+    map<Int_t,TH1F*>::iterator it;
+    for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++){
+        histSaver->SaveHistogram((*it).second,false,true,true);
+        delete (*it).second;
+    }
+
 	createPedestalMeanHistos();
 	savePHinSigmaHistos();
 	for (int det=0;det<9;det++){
