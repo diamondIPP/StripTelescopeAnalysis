@@ -126,6 +126,7 @@ this->setBranchAdressess();
 createFiducialCut();
 hFiducialCutSilicon->Reset();
 hFiducialCutSiliconDiamondHit->Reset();
+hFiducialCutSiliconOneAndOnlyOneDiamondHit->Reset();
 hAnalysisFraction->Reset();
 hSelectedEvents->Reset();
 nUseForAlignment=0;
@@ -353,9 +354,11 @@ void TSelectionClass::fillHitOccupancyPlots(){
 	//	if((isValidSiliconTrack||isSiliconTrackNotFiducialCut)&&nDiamondClusters>0)
 	if(!atLeastOneValidDiamondCluster)
 		return;
+	FillHitOccupancyPlotsSamePattern();
 	hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(!oneAndOnlyOneDiamondCluster)
 		return;
+	hFiducialCutSiliconOneAndOnlyOneDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(!IsInFiducialCut)
 		return;
 	hAnalysisFraction->Fill(nEvent);
@@ -464,21 +467,23 @@ void TSelectionClass::setBranchAdressess(){
 
 void TSelectionClass::initialiseHistos()
 {
-	std::string name = "hFidCutSilicon_OneAndOnlyOneCluster";
-	hFiducialCutSilicon = new TH2F(name.c_str(),name.c_str(),512,0,256,512,0,256);
+	TString name = "hFidCutSilicon_OneAndOnlyOneCluster";
+	hFiducialCutSilicon = new TH2F(name,name,512,0,256,512,0,256);
 	hFiducialCutSilicon->GetYaxis()->SetTitle("yCoordinate in Channels");
 	hFiducialCutSilicon->GetXaxis()->SetTitle("xCoordinate in Channels");
 
-	std::string name2 = "hFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster";
-	hFiducialCutSiliconDiamondHit = new TH2F(name2.c_str(),name2.c_str(),512,0,256,512,0,256);
-	hFiducialCutSiliconDiamondHit->GetYaxis()->SetTitle("yCoordinate in Channels");
-	hFiducialCutSiliconDiamondHit->GetXaxis()->SetTitle("xCoordinate in Channels");
+	name = "hFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster";
+	hFiducialCutSiliconDiamondHit = (TH2F*)hFiducialCutSilicon->Clone(name);
+	hFiducialCutSiliconDiamondHit->SetTitle(name);
 
+	name = "hFiducialCutSiliconOneAndOnlyOneDiamondHit";
+	hFiducialCutSiliconOneAndOnlyOneDiamondHit = (TH2F*)hFiducialCutSilicon->Clone(name);
+	hFiducialCutSiliconOneAndOnlyOneDiamondHit->SetTitle(name);
 
-	std::string name3 = "hSelectedEventsValidSiliconTrackInFidCutAndOneDiamondHit";
-	hSelectedEvents = new TH2F("hSelectedEvents",name3.c_str(),512,0,256,512,0,256);
-	hSelectedEvents->GetYaxis()->SetTitle("yCoordinate in Channels");
-	hSelectedEvents->GetXaxis()->SetTitle("xCoordinate in Channels");
+	name = "hSelectedEvents";
+	TString title  = "ValidSiliconTrackInFidCutAndOneAndOnlyOneDiamondHit";
+	hSelectedEvents = (TH2F*)hFiducialCutSilicon->Clone(name);
+	hSelectedEvents->SetTitle(title);
 
 	int nEvents= eventReader->GetEntries();
 	int i=nEvents/1000;
@@ -488,6 +493,33 @@ void TSelectionClass::initialiseHistos()
 	hAnalysisFraction->SetTitle("Fraction of Events for Analysis");
 	hAnalysisFraction->GetXaxis()->SetTitle("event no");
 	hAnalysisFraction->GetYaxis()->SetTitle("fraction of daimond + silicon hit events (%)");
+
+	UInt_t area =  settings->getSelectionFidCuts()->getNFidCuts();
+	area = TMath::Max(area,settings->diamondPattern.getNPatterns());
+	for(UInt_t i =0;i <area; i++){
+	    name = TString::Format("hFiducialCutSiliconDiamondHitSamePattern_%d",i+1);
+	    TH2F* histo= (TH2F*)hFiducialCutSilicon->Clone(name);
+	    histo->SetTitle(name);
+	    mapFiducialCutSiliconDiamondHitSamePattern[i+1] =histo;
+	}
+
+    name = "hDiamondPatternFiducialPattern";
+    hDiamondPatternFiducialPattern = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0,settings->diamondPattern.getNPatterns()+1);
+    hDiamondPatternFiducialPattern->GetXaxis()->SetTitle("pattern");
+    hDiamondPatternFiducialPattern->GetYaxis()->SetTitle("number of correct patterns");
+
+    name = "hDiamondPatternFiducialPatternNoMapping";
+    hDiamondPatternFiducialPatternNoMapping = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0,settings->diamondPattern.getNPatterns()+1);
+    hDiamondPatternFiducialPatternNoMapping->GetXaxis()->SetTitle("pattern selectionCut");
+    hDiamondPatternFiducialPatternNoMapping->GetYaxis()->SetTitle("number of no mapping found");
+
+    name = "pDiamondPatternFiducialPatternProfile";
+    pDiamondPatternFiducialPatternProfile = new TProfile(name,name,settings->diamondPattern.getNPatterns()+1,0,settings->diamondPattern.getNPatterns());
+    pDiamondPatternFiducialPatternProfile->GetXaxis()->SetTitle("pattern selectionCut");
+    pDiamondPatternFiducialPatternProfile->GetYaxis()->SetTitle("rel. number of mappings found");
+
+
+
 }
 
 
@@ -605,55 +637,104 @@ bool TSelectionClass::isSaturated(UInt_t det,UInt_t cl)
 void TSelectionClass::saveHistos()
 {
 	cout<<"save Histo: "<<hFiducialCutSilicon->GetTitle()<<endl;
-	std::string name = "c";
-	name.append(hFiducialCutSilicon->GetName());
+	TString name = hFiducialCutSilicon->GetName();
+	name.Insert(0,"c");
 	TCanvas *c1= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSilicon);
-	c1->SetName(name.c_str());
-	/*new TCanvas(name.c_str(),hFiducialCutSilicon->GetTitle());
-	c1->cd();
-	hFiducialCutSilicon->Draw("colz");
-	double xLow = settings->getSi_avg_fidcut_xlow();
-	double xHigh = settings->getSi_avg_fidcut_xhigh();
-	double yLow = settings->getSi_avg_fidcut_ylow();
-	double yHigh = settings->getSi_avg_fidcut_yhigh();
-	TLine* lXlower = new TLine(xLow,yLow,xLow,yHigh);
-	TLine* lXhigher = new TLine(xHigh,yLow,xHigh,yHigh);
-	TLine* lYlower = new TLine(xLow,yLow,xHigh,yLow);
-	TLine* lYhigher = new TLine(xLow,yHigh,xHigh,yHigh);
-	lXlower->Draw();
-	lXhigher->Draw();
-	lYlower->Draw();
-	lYhigher->Draw();*/
+	c1->SetName(name);
 	histSaver->SaveCanvas(c1);
-	std::string name2 = "c";
-	name2.append(hFiducialCutSiliconDiamondHit->GetName());
-	TCanvas *c2= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit,true);
-	c2->SetName(name2.c_str());
-	histSaver->SaveCanvas(c2);
+	delete c1;
+	c1 = 0;
+    delete hFiducialCutSilicon;
 
-	std::string name3 = "c";
-	name3.append(hSelectedEvents->GetName());
-	TCanvas *c3= fiducialCuts->getAllFiducialCutsCanvas(hSelectedEvents,true);
-	c3->SetName(name3.c_str());
-	histSaver->SaveCanvas(c3);
+	name = hFiducialCutSiliconDiamondHit->GetName();
+	name.Insert(0,"c");
+	c1 = fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit,true);
+	c1->SetName(name);
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	c1=0;
+    delete hFiducialCutSiliconDiamondHit;
 
-	//   new TCanvas(name2.c_str(),hFiducialCutSiliconDiamondHit->GetTitle());
-	/*c2->cd();
-	hFiducialCutSiliconDiamondHit->Draw("colz");
-	lXlower->Draw();
-	lXhigher->Draw();
-	lYlower->Draw();
-	lYhigher->Draw();*/
+	name = "c";
+	name.Append(hFiducialCutSiliconOneAndOnlyOneDiamondHit->GetName());
+	c1= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconOneAndOnlyOneDiamondHit,true);
+	c1->SetName(name);
+	histSaver->SaveCanvas(c1);
+    delete c1;
+    c1=0;
+    delete hFiducialCutSiliconOneAndOnlyOneDiamondHit;
 
-	//	histSaver->SaveHistogram(hFiducialCutSilicon);
-	delete hFiducialCutSilicon;
-	delete hFiducialCutSiliconDiamondHit;
-	delete hSelectedEvents;
+	name = "c";
+	name.Append(hSelectedEvents->GetName());
+	c1 = fiducialCuts->getAllFiducialCutsCanvas(hSelectedEvents,true);
+	c1->SetName(name);
+	histSaver->SaveCanvas(c1);
+    delete c1;
+    c1=0;
+    delete hSelectedEvents;
+
+    map<Int_t,TH2F*>::iterator it;
+    for (it = mapFiducialCutSiliconDiamondHitSamePattern.begin(); it!=mapFiducialCutSiliconDiamondHitSamePattern.end(); it++){
+        TH2F* histo = (*it).second;
+        name = histo->GetName();
+        name.Replace(0,1,"c");
+        c1 = fiducialCuts->getAllFiducialCutsCanvas(histo,true);
+        c1->SetName(name);
+        histSaver->SaveCanvas(c1);
+        delete c1;
+        c1=0;
+        delete histo;
+    }
 	hAnalysisFraction->Scale(.1);
 	hAnalysisFraction->SetStats(false);
 	//	hAnalysisFraction->GetYaxis()->SetRangeUser(0,100);
 	histSaver->SaveHistogram(hAnalysisFraction);
 	delete hAnalysisFraction;
+
+
+    histSaver->SaveHistogram(hDiamondPatternFiducialPattern);
+
+    histSaver->SaveHistogram(hDiamondPatternFiducialPatternNoMapping);
+    name = "stackPatternMapping";
+    hDiamondPatternFiducialPattern->SetLineColor(kGreen);
+    hDiamondPatternFiducialPatternNoMapping->SetLineColor(kRed);
+    THStack *stack = new THStack(name,name);
+    stack->Add(hDiamondPatternFiducialPattern);
+    stack->Add(hDiamondPatternFiducialPatternNoMapping);
+    stack->Draw();
+    if(stack->GetXaxis()) stack->GetXaxis()->SetTitle("pattern no.");
+    if(stack->GetYaxis()) stack->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveStack(stack,"hist",true);
+    if(stack) delete stack;
+    histSaver->SaveHistogram(pDiamondPatternFiducialPatternProfile);
+    if(hDiamondPatternFiducialPatternNoMapping) delete hDiamondPatternFiducialPatternNoMapping;
+    if(hDiamondPatternFiducialPattern) delete hDiamondPatternFiducialPattern;
+    if (pDiamondPatternFiducialPatternProfile) delete pDiamondPatternFiducialPatternProfile;
+}
+
+void TSelectionClass::FillHitOccupancyPlotsSamePattern() {
+    UInt_t diamondDet = TPlaneProperties::getDetDiamond();
+    Int_t selectionPattern = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
+    if(verbosity>4) cout<<"\n";
+    if(verbosity>4) settings->diamondPattern.showPatterns();
+    bool mappingFound = false;
+    for(UInt_t cl = 0; cl< nDiamondClusters;cl++){
+        if(verbosity>4)cout<<"Cluster: "<<cl+1<<"/"<<nDiamondClusters<<endl;
+        TCluster cluster = eventReader->getCluster(diamondDet,cl);
+        if(verbosity>4)cluster.Print();
+        Int_t diamondPattern = settings->diamondPattern.getClusterPattern(&cluster);
+        if(verbosity>4)cout<<"selectionPattern: "<<selectionPattern<<"\tdiamondPattern: "<<diamondPattern<<endl;
+        if(selectionPattern == diamondPattern && diamondPattern!=-1){
+            mappingFound = true;
+            mapFiducialCutSiliconDiamondHitSamePattern[diamondPattern]->Fill(fiducialValueX,fiducialValueY);
+            hDiamondPatternFiducialPattern->Fill(selectionPattern);
+            pDiamondPatternFiducialPatternProfile->Fill(selectionPattern,1);
+        }
+    }
+    if(!mappingFound){
+        pDiamondPatternFiducialPatternProfile->Fill(selectionPattern,1);
+        hDiamondPatternFiducialPatternNoMapping->Fill(selectionPattern);
+    }
 }
 
 void TSelectionClass::createFiducialCut(){

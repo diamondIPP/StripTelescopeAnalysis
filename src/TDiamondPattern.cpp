@@ -353,3 +353,16 @@ std::pair<int,int> TDiamondPattern::getPatternChannels(UInt_t pattern){
 	}
 	return make_pair(firstChannel,lastChannel);
 }
+
+Int_t TDiamondPattern::getClusterPattern(TCluster* cluster) {
+    Int_t first = cluster->getFirstHitChannel();
+    Int_t last = cluster->getLastHitChannel();
+    if(verbosity>7)cout<<"first: "<<first<<" - last: "<<last<<endl;
+    for(UInt_t i = 0; i< getNPatterns();i++){
+        pair<int,int> channels = getPatternChannels(i+1);
+        if(verbosity>7)cout<<channels.first<<"<="<<first<<" "<<last<<"<="<<channels.second<<endl;
+        if(channels.first<=first&&last<=channels.second)
+            return i+1;
+    }
+    return -1;
+}

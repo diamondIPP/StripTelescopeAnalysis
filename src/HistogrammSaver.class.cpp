@@ -938,45 +938,31 @@ void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRa
     SaveHistogramROOT(histo,optimizeRange,drawOption);
 }
 
-void HistogrammSaver:: Save1DProfileYWithFitAndInfluence(TH2* histo, TString function){
+void HistogrammSaver:: Save1DProfileYWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox){
     TString name = "fit_" + (TString)histo->GetName();
     TF1* fit = new TF1(name,function);
-    return Save1DProfileYWithFitAndInfluence(histo,fit);
+    return Save1DProfileYWithFitAndInfluence(histo,fit,drawStatbox);
 }
 
-void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit){
+void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit, bool drawStatbox){
     if(!fit)
         fit = new TF1("fit","pol1");
     TProfile *prof=0;
     if(!htemp)
         return;
     prof = htemp->ProfileY();
-    if(prof){
-        TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );
-        prof->Fit(fit,"Q");
-        Float_t xmin = prof->GetXaxis()->GetXmin();
-        Float_t xmax = prof->GetXaxis()->GetXmax();
-        Float_t ymin = fit->GetMinimum(xmin,xmax);
-        Float_t ymax = fit->GetMaximum(xmin,xmax);
-        TPaveText *text = new TPaveText(.2,.2,.5,.3,"brNDC");
-        text->SetFillColor(0);
-        text->AddText(TString::Format("relative Influence: #frac{#Delta_{y}}{y_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
-        text->Draw("same");
-        SaveCanvas(c1);
-        delete prof;
-        prof = 0;
-    }
-
+    Save1DProfileXWithFitAndInfluence(prof,fit,drawStatbox);
+    if(prof) delete prof;
 }
 
 
-void HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function){
+void HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox){
     TString name = "fit_" + (TString)histo->GetName();
     TF1* fit = new TF1(name,function);
-    return CreateAndSave1DProfileXWithFitAndInfluence(histo,fit);
+    return CreateAndSave1DProfileXWithFitAndInfluence(histo,fit,drawStatbox);
 }
 
-void HistogrammSaver::CreateAndSave1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit){
+void HistogrammSaver::CreateAndSave1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit, bool drawStatbox){
     if(!fit)
         fit = new TF1("fit","pol1");
     TProfile *prof=0;
@@ -984,7 +970,7 @@ void HistogrammSaver::CreateAndSave1DProfileXWithFitAndInfluence(TH2* htemp,TF1*
         return;
     prof = htemp->ProfileX();
     if(prof){
-        Save1DProfileXWithFitAndInfluence(prof,fit);
+        Save1DProfileXWithFitAndInfluence(prof,fit,drawStatbox);
         delete prof;
         prof = 0;
     }

@@ -957,27 +957,26 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
         return;
     cout<<"SaveLandauVsEventNoPlots "<<clusterSize<<endl;
     TString name;
-    TH2F* hLandauVsEventNo=0;
+    TH2F* hLandau2OutOfXVsEventNo=0;
     if(clusterSize-1 < vecVecPh2Highest.size()){
-
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
-        hLandauVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,100,512,0,nEvents,0,3000);
-        cout<<"Save "<<name<<" "<<hLandauVsEventNo;
-        if(hLandauVsEventNo) cout<<" "<<hLandauVsEventNo->GetEntries();
+        hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,100,512,0,nEvents,0,3000);
+        cout<<"Save "<<name<<" "<<hLandau2OutOfXVsEventNo;
+        if(hLandau2OutOfXVsEventNo) cout<<" "<<hLandau2OutOfXVsEventNo->GetEntries();
         cout<<endl;
         if(vectorEventNo.size()!=vecVecPh2Highest.at(clusterSize-1).size())
             cerr<<"[TTransparentAnalysis::SaveLandauVsEventNoPlots]: Sizes of vectors are different for clusterSize "<<clusterSize<<endl;
 
         if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize-1).size()<<endl;
 
-        if(hLandauVsEventNo){
+        if(hLandau2OutOfXVsEventNo){
 
-            hLandauVsEventNo->GetXaxis()->SetTitle("Event no.");
-            hLandauVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
-            histSaver->SaveHistogram(hLandauVsEventNo);
-            histSaver->Save1DProfileYWithFitAndInfluence(hLandauVsEventNo,"pol1");
-            if (hLandauVsEventNo)
-                delete hLandauVsEventNo;
+            hLandau2OutOfXVsEventNo->GetXaxis()->SetTitle("Event no.");
+            hLandau2OutOfXVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
+            histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
+            histSaver->Save1DProfileYWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
+            if (hLandau2OutOfXVsEventNo)
+                delete hLandau2OutOfXVsEventNo;
         }
     }
 }

@@ -53,6 +53,7 @@ private:
 	void checkDiamondTrack();
 	void doEventCounting();
 	void fillHitOccupancyPlots();
+	void FillHitOccupancyPlotsSamePattern();
 	bool atLeastOneValidDiamondCluster;
 	bool oneAndOnlyOneDiamondCluster;
 	bool hasBigDiamondCluster;
@@ -112,6 +113,11 @@ private:
 private:
 	TH2F *hFiducialCutSilicon;
 	TH2F *hFiducialCutSiliconDiamondHit;
+	map<Int_t,TH2F*> mapFiducialCutSiliconDiamondHitSamePattern;
+	TH1F* hDiamondPatternFiducialPattern;
+	TH1F* hDiamondPatternFiducialPatternNoMapping;
+	TProfile* pDiamondPatternFiducialPatternProfile;
+    TH2F *hFiducialCutSiliconOneAndOnlyOneDiamondHit;
 	TH2F *hSelectedEvents;
 };
 

@@ -4001,7 +4001,7 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
     TH1D* hMonteCarloAvrgChargePerBin = new TH1D(name,name,PulseHeightBins,PulseHeightMinMeanCharge-100,PulseHeightMaxMeanCharge+100);
 
     name =TString::Format("hMonteCarloNBelowCut_%d",(int)cut);;
-    TH1D* hNumberOfEntriesBelowCut = new TH1D(name,name,100,0,200);
+    TH1D* hNumberOfEntriesBelowCut = new TH1D(name,name,100,0,100);
     hNumberOfEntriesBelowCut->GetXaxis()->SetTitle(TString::Format("number of  entries below %.f",cut));
     hNumberOfEntriesBelowCut->GetYaxis()->SetTitle("number of  entries #");
 
@@ -4024,13 +4024,15 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
         }
         mean /= (Float_t)entries;
         hNumberOfEntriesBelowCut->Fill(nBelowCut);
-        hNumberOfEntriesBelowCut->Fill((Float_t)nBelowCut/(Float_t)entries);
+        hRelativeNumberBelowCut->Fill((Float_t)nBelowCut/(Float_t)entries);
         cout<<TString::Format("%6d --> %6.1f (%d)",nMC,mean,entries)<<endl;;
         hMonteCarloAvrgChargePerBin->Fill(mean);
     }
     hMonteCarloAvrgChargePerBin->GetXaxis()->SetTitle("mean charge per bin_{MonteCarlo}");
     hMonteCarloAvrgChargePerBin->GetYaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hMonteCarloAvrgChargePerBin);
+    histSaver->SaveHistogram(hMonteCarloAvrgChargePerBin,false,true,true);
+    histSaver->SaveHistogram(hNumberOfEntriesBelowCut,false,true,true);
+    histSaver->SaveHistogram(hRelativeNumberBelowCut,false,true,true);
     delete hMonteCarloAvrgChargePerBin;
     delete hBinContents;
     delete hEntries;

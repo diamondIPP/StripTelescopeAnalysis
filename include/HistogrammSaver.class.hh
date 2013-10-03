@@ -73,10 +73,10 @@ public:
 	void SaveTwoHistos(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "left", UInt_t verbosity=0);
 	void SaveTwoHistosNormalized(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "right", UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
-	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function);
-	void Save1DProfileYWithFitAndInfluence(TH2* histo, TF1* pol);
-    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function);
-    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol);
+	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
+	void Save1DProfileYWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
+    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
+    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
     void Save1DProfileXWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true,TString drawOption ="colz");
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true);
