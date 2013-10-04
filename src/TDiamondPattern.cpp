@@ -95,10 +95,10 @@ bool TDiamondPattern::isValidChannelPosition(Float_t channel) {
 	return false;
 }
 
-bool TDiamondPattern::isValidCluster(TCluster cluster) {
-	for (UInt_t cl = 0; cl < cluster.size(); cl ++)
-		if (cluster.isHit(cl)||cluster.isSeed(cl))
-			if ( !isValidChannelPosition( cluster.getChannel(cl) ) )
+bool TDiamondPattern::isValidCluster(TCluster* cluster) {
+	for (UInt_t cl = 0; cl < cluster->size(); cl ++)
+		if (cluster->isHit(cl)||cluster->isSeed(cl))
+			if ( !isValidChannelPosition( cluster->getChannel(cl) ) )
 				return false;
 	return true;
 }

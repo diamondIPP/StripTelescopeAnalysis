@@ -1888,18 +1888,18 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
     Double_t ymin = 0;
     Double_t ymax = stack->GetMaximum();
     if(stack->GetYaxis()){
-        cout<<"Setting y axis range"<<stack->GetYaxis()<<endl;
+        if(verbosity>6)cout<<"Setting y axis range"<<stack->GetYaxis()<<endl;
         Double_t min = stack->GetYaxis()->GetXmin();
         Double_t max = stack->GetYaxis()->GetXmax();
-        cout<<min<<" "<<max<<endl;
+        if(verbosity>6)cout<<min<<" "<<max<<endl;
         min = TMath::Max(min,stack->GetMinimum(drawOption));
         max = TMath::Max(max,stack->GetMaximum(drawOption));
-        cout<<min<<" "<<max<<endl;
+        if(verbosity>6)cout<<min<<" "<<max<<endl;
         Float_t delta = max-min;
 
-        cout<<delta<<endl;
+        if(verbosity>6)cout<<delta<<endl;
         stack->GetYaxis()->SetRange(min - .1*delta, max +.2*delta );
-        cout<<"set"<<endl;
+        if(verbosity>6)cout<<"set"<<endl;
         c1->Update();
         ymin = min;
         ymax = max;

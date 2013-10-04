@@ -167,7 +167,6 @@ bool TAnalysisOf3dDiamonds::eventValid(){
 
 void TAnalysisOf3dDiamonds::StripAnalysis() {
 
-    TCluster diamondCluster;
     if(!settings->do3dTransparentAnalysis()){
         if(!eventReader->getNDiamondClusters())
             return;
@@ -191,10 +190,10 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     //	UInt_t diamond = TPlaneProperties::getDetDiamond();
     //TCluster diamondCluster = eventReader->getCluster(diamond,0);
     int areaStripDetector = 0;
-    if (!settings->isClusterInDiaDetectorArea(diamondCluster,areaStripDetector) ){
+    if (!settings->isClusterInDiaDetectorArea(&diamondCluster,areaStripDetector) ){
         return;
     }
-    if( !settings->diamondPattern.isValidCluster(diamondCluster)){
+    if( !settings->diamondPattern.isValidCluster(&diamondCluster)){
         return;
     }
     if (diamondCluster.isSaturatedCluster())
@@ -291,12 +290,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
 
-    TCluster diamondCluster;
     if(!settings->do3dTransparentAnalysis()){
         diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),clusterNo);
         if(diamondCluster.isSaturatedCluster())
             return;
-        if( !settings->diamondPattern.isValidCluster(diamondCluster)){
+        if( !settings->diamondPattern.isValidCluster(&diamondCluster)){
             //		cerr <<" Cluster is invalid: ";
             //		diamondCluster.Print(1);
             return;
@@ -433,14 +431,17 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
 
 void TAnalysisOf3dDiamonds::LongAnalysis() {
 
-    TCluster diamondCluster;
     if(!settings->do3dTransparentAnalysis()){
         Float_t maxChi2 = settings->getChi2Cut3D();
         if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
             return;
         if(eventReader->getNDiamondClusters()!=1)
             return;
+        if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
+            cout<<"getCluster "<<flush;
         diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+        if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
+        cout<<"."<<endl;
     }
     else{
         if(!isTransparentCluster)
@@ -463,15 +464,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     if(!settings->do3dTransparentAnalysis()){
         Int_t area3DwithColumns = 2;
-        if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
+        if (!settings->isClusterInDiaDetectorArea(&diamondCluster,area3DwithColumns)){
             hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
             return;
         }
-        if( !settings->diamondPattern.isValidCluster(diamondCluster)){
+        if( !settings->diamondPattern.isValidCluster(&diamondCluster)){
             hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
             return;
         }
     }
+    if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
+        cout<<"cluster checked"<<endl;
     Int_t area3DwithColumns = 2;
 
     /*if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
@@ -502,8 +505,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         hPulseHeightVsDetectorHitPostionXYGoodCells->Fill(xPredDet,yPredDet,charge);
 
     if(!settings->isBadCell(3,cellNo)){
+        if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
+                cout<<"make ghost cluster"<<endl;
         MakeGhostCluster(&diamondCluster,5);
-        for(int i= 0; i< hLandauMinusBadCellsOffsetAnalysis.size();i++){
+        for(UInt_t i= 0; i< hLandauMinusBadCellsOffsetAnalysis.size();i++){
             GhostCluster.SetTransparentClusterSize(i+1);
             hLandauMinusBadCellsOffsetAnalysis.at(i)->Fill(GhostCluster.getCharge(false));
         }}
@@ -533,6 +538,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
                 hCellsClusteSize.at(cellNo)->Fill(ClusterSize);
         }
     }
+    if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
+            cout<<"QuarterCellLandaus"<<endl;
     if  (cellNo < hQuarterCellsLandau.size()){
         UInt_t size = hQuarterCellsLandau[cellNo].size();
         if(quarterNo < size){
@@ -3279,7 +3286,8 @@ void TAnalysisOf3dDiamonds::HitandSeedCount(TCluster* nCluster) {
 }
 
 void TAnalysisOf3dDiamonds::ClusterPlots(int nClusters, float nfiducialValueX, float nfiducialValueY) {
-
+    if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
+        cout<<"ClusterPlots: "<<nClusters<<endl;
     if(nClusters==0){
         if(hFidCutXvsFidCutYClusters[0])
             hFidCutXvsFidCutYClusters.at(0)->Fill(nfiducialValueX,nfiducialValueY,1);

@@ -68,6 +68,8 @@ private:
 	bool TransparentAnalysis();
 	void StripAnalysis();
 
+    TCluster diamondCluster;
+
 	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
 
 	float* VectorToArray(vector<float> nvector);

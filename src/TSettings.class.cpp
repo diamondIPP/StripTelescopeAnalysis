@@ -1957,11 +1957,11 @@ bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
 }
 
 
-bool TSettings::isClusterInDiaDetectorArea(TCluster cluster, Int_t area){
+bool TSettings::isClusterInDiaDetectorArea(TCluster* cluster, Int_t area){
 	if(area<getNDiaDetectorAreas()){
-		int firstClusterChannel = cluster.getFirstHitChannel();
-		int lastClusterChannel = cluster.getLastHitChannel();
-		int cl = cluster.getClusterPosition(lastClusterChannel);
+		int firstClusterChannel = cluster->getFirstHitChannel();
+		int lastClusterChannel = cluster->getLastHitChannel();
+		int cl = cluster->getClusterPosition(lastClusterChannel);
 		int firstAreaChannel = getDiaDetectorArea(area).first;
 		int lastAreaChannel =  getDiaDetectorArea(area).second;
 		bool retVal = firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
