@@ -145,6 +145,8 @@ void TAnalysisOfPedestal::analyseEvent(){
 		analyseBiggestHit(det,false);
 		analyseBiggestHit(det,true);
 	}
+	for(int i = 0; i< settings->diamondPattern.getNPatterns();i++)
+	    findBiggestSignalInDia(i+1);
 }
 
 void TAnalysisOfPedestal::checkForDeadChannels(UInt_t det,UInt_t ch)
@@ -220,6 +222,80 @@ void TAnalysisOfPedestal::findBiggestSignalInDet(UInt_t det,UInt_t ch){
 	}
 }
 
+
+void TAnalysisOfPedestal::findBiggestSignalInDia(UInt_t area) {
+    UInt_t det = TPlaneProperties::getDetDiamond();
+    if (area > settings->diamondPattern.getNPatterns()||area == 0)
+        return;
+    pair<int,int> pattern = settings->diamondPattern.getPatternChannels(area);
+    Float_t maxSignal = -1e9;
+    Float_t maxSignalCMN = -1e9;
+    Float_t adjacentSignal = 0;
+    Float_t adjacentSignalCMN = 0;
+    if (pattern.second-pattern.first<3)
+        return;
+    int ch = pattern.first;
+    Float_t leftSignal = 0;
+    Float_t leftSignalCMN = 0;
+    Float_t signal = eventReader->getSignal(det,ch, false);
+    Float_t signalCMN = eventReader->getSignal(det,ch, true);
+    Float_t rightSignal = eventReader->getSignal(det,ch+1, false);
+    Float_t rightSignalCMN = eventReader->getSignal(det,ch+1, true);
+    Int_t channel = -1;
+    Int_t channelCMN = -1;
+    Int_t adjacentChannel = -1;
+    Int_t adjacentChannelCMN = -1;
+    ch++;
+    for(;ch<=pattern.second;ch++){
+        if(signal>maxSignal){
+            maxSignal = signal;
+            adjacentSignal = TMath::Max(leftSignal,rightSignal);
+            if(leftSignal==rightSignal)adjacentChannel=-1;
+            else adjacentChannel = leftSignal>rightSignal?ch-1:ch+1;
+            channel  = ch;
+        }
+        if (signalCMN > maxSignalCMN){
+            adjacentSignalCMN = TMath::Max(leftSignalCMN,rightSignalCMN);
+            if(leftSignalCMN==rightSignalCMN)adjacentChannelCMN=-1;
+            else adjacentChannelCMN = leftSignalCMN>rightSignalCMN?ch-1:ch+1;
+            maxSignalCMN = signalCMN;
+            channelCMN = ch;
+        }
+        signal = rightSignal;
+        rightSignal = eventReader->getSignal(det,ch+1,false);
+        signalCMN = rightSignalCMN;
+        rightSignalCMN = eventReader->getSignal(det,ch+1,true);
+    }
+    Float_t snr = maxSignal / eventReader->getPedestalSigma(det,channel,false);
+    Float_t snrCMN = maxSignalCMN / eventReader->getPedestalSigma(det,channelCMN,true);
+//    cout<<nEvent<<" Pattern: "<<area <<" "<<maxSignal<<"-"<<adjacentSignal<<" / "<<maxSignalCMN<<"-"<<adjacentSignalCMN<<" / "<<endl;
+//    cout<<"\t"<<channel<<" "<<eventReader->getSignal(det,channel-1, false)<<"-"
+//                            <<eventReader->getSignal(det,channel, false)<<"-"
+//                            <<eventReader->getSignal(det,channel+1, false)<<" --> "<<snr<<endl;
+//    cout<<"\t"<<channelCMN<<" "<<eventReader->getSignal(det,channelCMN-1, true)<<"-"
+//                                <<eventReader->getSignal(det,channelCMN, true)<<"-"
+//                                <<eventReader->getSignal(det,channelCMN+1, true)<<" --> "<<snrCMN<<endl;
+    if (hBiggestSignalInSigmaDiaPattern.count(area)){
+        if(snr>3){
+            hBiggestSignalInSigmaDiaPattern[area]->Fill(snr);
+            if(adjacentChannel!=-1)
+                hBiggestAdjacentSignalInSigmaDiaPattern[area]->Fill(adjacentSignal/eventReader->getPedestalSigma(det,adjacentChannel,false));
+        }
+    }
+    else
+        cout<<"hBiggestSignalInSigmaDiaPattern "<<area<<" doesn't exist"<<endl;
+    if (hBiggestSignalInSigmaDiaPatternCMN.count(area)){
+        if (snrCMN>3){
+            hBiggestSignalInSigmaDiaPatternCMN[area]->Fill(snrCMN);
+            if(adjacentChannelCMN != -1)
+                hBiggestAdjacentSignalInSigmaDiaPatternCMN[area]->Fill(adjacentSignalCMN/eventReader->getPedestalSigma(det,adjacentChannelCMN,true));
+        }
+    }
+    else
+        cout<<"hBiggestSignalInSigmaDiaPatternCMN "<<area<<" doesn't exist"<<endl;
+}
+
+
 /**
  * create vector with biggest and biggest adjacent hit with PH in Sigma
  */
@@ -277,12 +353,12 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 	if(!CMN_corrected){
 		vecBiggestHitChannel[det].push_back(biggestHitChannel);
 		vecBiggestSignalInSigma[det].push_back(biggestSignalInSigma);
-		if(TPlaneProperties::isDiamondDetector(det)){
-		    Int_t pattern = settings->diamondPattern.getPatternOfChannel(biggestHitChannel);
-		    if (pattern!=-1)
-		        if (hBiggestSignalInSigmaDiaPattern.count(pattern)>0)
-		            hBiggestSignalInSigmaDiaPattern[pattern]->Fill(biggestSignalInSigma);
-		}
+//		if(TPlaneProperties::isDiamondDetector(det)){
+//		    Int_t pattern = settings->diamondPattern.getPatternOfChannel(biggestHitChannel);
+//		    if (pattern!=-1)
+//		        if (hBiggestSignalInSigmaDiaPattern.count(pattern)>0)
+//		            hBiggestSignalInSigmaDiaPattern[pattern]->Fill(biggestSignalInSigma);
+//		}
 		vecBiggestSignal[det].push_back(bigSignal);
 		vecBiggestAdjacentSignal[det].push_back(biggestAdjacentSignal);
 		if(biggestAdjacentHitChannel!=-9999){
@@ -331,7 +407,28 @@ void TAnalysisOfPedestal::initialiseHistos()
         histo->GetXaxis()->SetTitle("biggest hit in sigma");
         histo->GetYaxis()->SetTitle("number of entries #");
         hBiggestSignalInSigmaDiaPattern[i+1] = histo;
+
+        name = TString::Format("hBiggestSignalInSigmaDiaPatternCMN_%d",i+1);
+        histo = new TH1F(name,name,196*2,4,200);
+        histo->GetXaxis()->SetTitle("biggest hit in sigma cmn");
+        histo->GetYaxis()->SetTitle("number of entries #");
+        hBiggestSignalInSigmaDiaPatternCMN[i+1] = histo;
+
+        name = TString::Format("hBiggestAdjacentSignalInSigmaDiaPattern_%d",i+1);
+        histo = new TH1F(name,name,196*2,4,200);
+        histo->GetXaxis()->SetTitle("biggest hit in sigma");
+        histo->GetYaxis()->SetTitle("number of entries #");
+        hBiggestAdjacentSignalInSigmaDiaPattern[i+1] = histo;
+
+        name = TString::Format("hBiggestAdjacentSignalInSigmaDiaPatternCMN_%d",i+1);
+        histo = new TH1F(name,name,196*2,4,200);
+        histo->GetXaxis()->SetTitle("biggest adjacent hit in sigma cmn");
+        histo->GetYaxis()->SetTitle("number of entries #");
+        hBiggestAdjacentSignalInSigmaDiaPatternCMN[i+1] = histo;
     }
+    map<Int_t,TH1F*>::iterator it;
+    for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++)
+        cout<<(*it).first<<": "<<(*it).second->GetName()<<endl;
 	hCMNoiseDistribution= new TH1F("hCMNoiseDistribution","hCMNoiseDistribution",512,-20,20);
 	hCMNoiseDistribution->GetXaxis()->SetTitle("Common Mode Noise [ADC]");
 	hCMNoiseDistribution->GetYaxis()->SetTitle("number of entries [#]");
@@ -817,6 +914,18 @@ void TAnalysisOfPedestal::saveHistos(){
         histSaver->SaveHistogram((*it).second,false,true,true);
         delete (*it).second;
     }
+    for(it=hBiggestSignalInSigmaDiaPatternCMN.begin();it!=hBiggestSignalInSigmaDiaPatternCMN.end();it++){
+        histSaver->SaveHistogram((*it).second,false,true,true);
+        delete (*it).second;
+    }
+    for(it=hBiggestAdjacentSignalInSigmaDiaPattern.begin();it!=hBiggestAdjacentSignalInSigmaDiaPattern.end();it++){
+        histSaver->SaveHistogram((*it).second,false,true,true);
+        delete (*it).second;
+    }
+    for(it=hBiggestAdjacentSignalInSigmaDiaPatternCMN.begin();it!=hBiggestAdjacentSignalInSigmaDiaPatternCMN.end();it++){
+        histSaver->SaveHistogram((*it).second,false,true,true);
+        delete (*it).second;
+    }
 
 	createPedestalMeanHistos();
 	savePHinSigmaHistos();
@@ -1225,5 +1334,4 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 		vecEventNo.push_back(nEvent);
 	}
 }
-
 
