@@ -94,7 +94,7 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     if(nEvents<=0) nEvents=eventReader->GetEntries();
     cout<<"Number of Events: "<<eventReader->GetEntries()<<endl;
     histSaver->SetNumberOfEvents(nEvents);
-    settings->diamondPattern.Print();
+    if(verbosity>5)settings->diamondPattern.Print();
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
         eventReader->LoadEvent(nEvent);
@@ -1088,7 +1088,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     }
     else
         cerr<<name<<" ist not created correctly"<<endl;
-    cout<<"#(#"<<endl;
+    if(verbosity>3)cout<<"#(#"<<endl;
 
     //hDetXvsDetY3DMeanChargeQuarterCellGradingLandau
     for(int k=0;k<5;k++){
@@ -1276,8 +1276,8 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 		hCellsOverlayAvrgChargeNoColumnHit.push_back((TProfile2D*)hCellsOverlayAvrgCharge.at(0)->Clone(name));
 		hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)->SetTitle(name);
 
-		cout<<hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)<<" "<<hCellsOverlayAvrgCharge.at(ClusterSize)<<endl;
-		cout<<" "<<hCellsOverlayAvrgCharge.at(ClusterSize)->IsZombie()<<endl;
+		if(verbosity>3)cout<<hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)<<" "<<hCellsOverlayAvrgCharge.at(ClusterSize)<<endl;
+		if(verbosity>3)cout<<" "<<hCellsOverlayAvrgCharge.at(ClusterSize)->IsZombie()<<endl;
 
 		//hCellsOverlayAvrgChargeMinusBadCells
 		name = "hCellsOverlayAvrgChargeMinusBadCells";
@@ -1388,7 +1388,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 	} //End of for ClusterSize
 
 
-    cout<<"End initialise3DCellOverlayHistos()"<<endl;
+	if(verbosity>3)cout<<"End initialise3DCellOverlayHistos()"<<endl;
 }
 
 void TAnalysisOf3dDiamonds::initialise3DCellCentralColumnOverlayHistos() {
@@ -1488,7 +1488,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellCentralColumnOverlayHistos() {
 
 	} //End of for ClusterSize
 
-    cout<<"End initialise3DCellCentralColumnOverlayHistos()"<<endl;
+	if(verbosity>3)cout<<"End initialise3DCellCentralColumnOverlayHistos()"<<endl;
 }
 
 void TAnalysisOf3dDiamonds::initialise3DOffsetOverlayHistos() {
@@ -1559,7 +1559,7 @@ void TAnalysisOf3dDiamonds::initialise3DOffsetOverlayHistos() {
 
 	} // End of for ClusterSize
 
-    cout<<"End initialise3DCellCentralColumnOverlayHistos()"<<endl;
+	if(verbosity>3)cout<<"End initialise3DCellCentralColumnOverlayHistos()"<<endl;
 }
 
 void TAnalysisOf3dDiamonds::initialise3D2DLandauAndClustersizeHistos() {
@@ -1781,7 +1781,7 @@ void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
         Float_t xHigh = settings->get3dMetallisationFidCuts()->getXHigh(DiamondPattern);
         Float_t yLow = settings->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
         Float_t yHigh = settings->get3dMetallisationFidCuts()->getYHigh(DiamondPattern);
-        cout<<"("<<xLow<<"-"<<xHigh<<", "<<yLow<<"-"<<yHigh<<")"<<endl;
+        if(verbosity>3)cout<<"("<<xLow<<"-"<<xHigh<<", "<<yLow<<"-"<<yHigh<<")"<<endl;
         Float_t xDiv = (xHigh - xLow)/5;
         Float_t yDiv = (yHigh - yLow)/5;
         stringstream hXdetvsYdetvsChargeName; hXdetvsYdetvsChargeName<<"hXdetvsYdetvsCharge%%"<<channels.first<<"-"<<channels.second<<"%%"<<FileNameEnd;
@@ -1923,7 +1923,7 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
                 extension = "_all";
             name = hShortAnalysis2ClusterHitPattern_1stCluster->GetName();
             name.Append(extension);
-            cout<<name<<endl;
+            if(verbosity>3) cout<<name<<endl;
             if(i==0)
                 histo1st_py= hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionY(name);
             else{
@@ -1932,7 +1932,7 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
             }
             name = hShortAnalysis2ClusterHitPattern_2ndCluster->GetName();
             name.Append(extension);
-            cout<<name<<endl;
+            if(verbosity>3)cout<<name<<endl;
 
             if(i==0)
                 histo2nd_py = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionY(name);
@@ -2201,11 +2201,11 @@ vector<Float_t> TAnalysisOf3dDiamonds::LongAnalysis_GradeCellByQuarters(int quar
     //	}
     for(UInt_t quarter=0;quarter<settings->getNQuarters3d();quarter++){
 
-        cout<<"hQuarterCellsLandausSorted.at(quarter): "<<hQuarterCellsLandausSorted.at(quarter)->GetMean()<<"\t";
+        if(verbosity>3)cout<<"hQuarterCellsLandausSorted.at(quarter): "<<hQuarterCellsLandausSorted.at(quarter)->GetMean()<<"\t";
         Float_t QuarterMean = hQuarterLandaus[quarter]->GetMean();
         int entries = hQuarterLandaus[quarter]->GetEntries();
         Float_t fluctuation = (compareQuarterTo - QuarterMean)/compareQuarterTo;
-        cout<<TString::Format("\t%d: %.1f/%.1f with %3d (%2.1f%%)",
+        if(verbosity>3)cout<<TString::Format("\t%d: %.1f/%.1f with %3d (%2.1f%%)",
                 quarter,QuarterMean,compareQuarterTo,entries,fluctuation)
         <<endl;
         vecFluctuations.push_back(fluctuation);

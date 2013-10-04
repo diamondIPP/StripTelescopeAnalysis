@@ -246,7 +246,13 @@ void TAnalysisOfPedestal::findBiggestSignalInDia(UInt_t area) {
     Int_t adjacentChannel = -1;
     Int_t adjacentChannelCMN = -1;
     ch++;
+    Float_t max =0;
+//    for(int i = 0; i< TPlaneProperties::getNChannels(det);i++)
+//        max = TMath::Max(max,eventReader->getSignal(det,i,false));
+//    cout<<nEvent<<": "<<max<<endl;
     for(;ch<=pattern.second;ch++){
+//        if(area==1)
+//            cout<<"\t"<<area<<"-"<<ch<<"\t"<<signal<<" "<<maxSignal<<endl;
         if(signal>maxSignal){
             maxSignal = signal;
             adjacentSignal = TMath::Max(leftSignal,rightSignal);
@@ -268,7 +274,10 @@ void TAnalysisOfPedestal::findBiggestSignalInDia(UInt_t area) {
     }
     Float_t snr = maxSignal / eventReader->getPedestalSigma(det,channel,false);
     Float_t snrCMN = maxSignalCMN / eventReader->getPedestalSigma(det,channelCMN,true);
-//    cout<<nEvent<<" Pattern: "<<area <<" "<<maxSignal<<"-"<<adjacentSignal<<" / "<<maxSignalCMN<<"-"<<adjacentSignalCMN<<" / "<<endl;
+//    if(area ==1 && maxSignal>0){
+//    cout<<TString::Format("%d-%7d %6.1f/%5.1f \t %6.1f/%5.1f ",area,nEvent,maxSignal,adjacentSignal,maxSignalCMN,adjacentSignalCMN)<<"";
+//    if(maxSignal>100) cout<<"\t*****";
+//    cout<<endl;}
 //    cout<<"\t"<<channel<<" "<<eventReader->getSignal(det,channel-1, false)<<"-"
 //                            <<eventReader->getSignal(det,channel, false)<<"-"
 //                            <<eventReader->getSignal(det,channel+1, false)<<" --> "<<snr<<endl;
@@ -276,6 +285,7 @@ void TAnalysisOfPedestal::findBiggestSignalInDia(UInt_t area) {
 //                                <<eventReader->getSignal(det,channelCMN, true)<<"-"
 //                                <<eventReader->getSignal(det,channelCMN+1, true)<<" --> "<<snrCMN<<endl;
     if (hBiggestSignalInSigmaDiaPattern.count(area)){
+//        cout<<hBiggestSignalInSigmaDiaPattern[area]->GetName()<<endl;
         if(snr>3){
             hBiggestSignalInSigmaDiaPattern[area]->Fill(snr);
             if(adjacentChannel!=-1)
@@ -402,7 +412,8 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 void TAnalysisOfPedestal::initialiseHistos()
 {
     for(UInt_t i=0;i < settings->diamondPattern.getNIntervals();i++){
-        TString name = TString::Format("hBiggestSignalInSigmaDiaPattern_%d",i+1);
+        pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
+        TString name = TString::Format("hBiggestSignalInSigmaDiaPattern_%d_ch_%d_%d",i+1,channels.first,channels.second);
         TH1F* histo = new TH1F(name,name,196*2,4,200);
         histo->GetXaxis()->SetTitle("biggest hit in sigma");
         histo->GetYaxis()->SetTitle("number of entries #");
@@ -1347,7 +1358,6 @@ void TAnalysisOfPedestal::SetYRangeForSignalInSigmaPlot(TH1F* histo) {
     Double_t max = 1e20;
     while(!minFound&&bin<histo->GetNbinsX()){
         content= histo->GetBinContent(bin);
-        cout<<"content: "<<content<<endl;
         if(content>max)
             minFound = true;
         else max = content;
