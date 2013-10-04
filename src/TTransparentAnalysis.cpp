@@ -970,7 +970,6 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
         if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize-1).size()<<endl;
 
         if(hLandau2OutOfXVsEventNo){
-
             hLandau2OutOfXVsEventNo->GetXaxis()->SetTitle("Event no.");
             hLandau2OutOfXVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);

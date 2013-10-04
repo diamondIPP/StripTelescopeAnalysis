@@ -65,6 +65,7 @@ private:
     void analyseBiggestHit(UInt_t det,bool CMN_corrected=false);
     void findBiggestSignalInDet(UInt_t det, UInt_t ch);
     void findBiggestSignalInDia(UInt_t pattern);//, UInt_t ch);
+    void SetYRangeForSignalInSigmaPlot(TH1F* histo);
 private:
     map<Int_t,TH1F*> hBiggestSignalInSigmaDiaPattern;
     map<Int_t,TH1F*> hBiggestSignalInSigmaDiaPatternCMN;

@@ -911,19 +911,23 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 void TAnalysisOfPedestal::saveHistos(){
     map<Int_t,TH1F*>::iterator it;
     for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++){
-        histSaver->SaveHistogram((*it).second,false,true,true);
+        SetYRangeForSignalInSigmaPlot((*it).second);
+        histSaver->SaveHistogram((*it).second,false,false,true);
         delete (*it).second;
     }
     for(it=hBiggestSignalInSigmaDiaPatternCMN.begin();it!=hBiggestSignalInSigmaDiaPatternCMN.end();it++){
-        histSaver->SaveHistogram((*it).second,false,true,true);
+        SetYRangeForSignalInSigmaPlot((*it).second);
+        histSaver->SaveHistogram((*it).second,false,false,true);
         delete (*it).second;
     }
     for(it=hBiggestAdjacentSignalInSigmaDiaPattern.begin();it!=hBiggestAdjacentSignalInSigmaDiaPattern.end();it++){
-        histSaver->SaveHistogram((*it).second,false,true,true);
+        SetYRangeForSignalInSigmaPlot((*it).second);
+        histSaver->SaveHistogram((*it).second,false,false,true);
         delete (*it).second;
     }
     for(it=hBiggestAdjacentSignalInSigmaDiaPatternCMN.begin();it!=hBiggestAdjacentSignalInSigmaDiaPatternCMN.end();it++){
-        histSaver->SaveHistogram((*it).second,false,true,true);
+        SetYRangeForSignalInSigmaPlot((*it).second);
+        histSaver->SaveHistogram((*it).second,false,false,true);
         delete (*it).second;
     }
 
@@ -1335,3 +1339,28 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 	}
 }
 
+void TAnalysisOfPedestal::SetYRangeForSignalInSigmaPlot(TH1F* histo) {
+    if (!histo) return;
+    bool minFound=false;
+    Int_t bin =1;
+    Double_t content;
+    Double_t max = 1e20;
+    while(!minFound&&bin<histo->GetNbinsX()){
+        content= histo->GetBinContent(bin);
+        cout<<"content: "<<content<<endl;
+        if(content>max)
+            minFound = true;
+        else max = content;
+        bin++;
+    }
+    Int_t startbin = bin;
+    max = content;
+    for(;bin<histo->GetNbinsX();bin++){
+        content = histo->GetBinContent(bin);
+        if(content>max)max = content;
+    }
+    max *=1.1;
+    histo->GetYaxis()->SetRangeUser(0,max);
+
+
+}
