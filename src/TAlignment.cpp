@@ -282,8 +282,9 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
     cout << "CREATING VECTOR OF VALID EVENTS..." << endl;
     UInt_t nMaxSiliconEvents = 10000;
     UInt_t nTelescopeAlignmentEvents = 0;
+    cout<<"DO Alignment: "<<detAlign<<endl;
     for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
-        while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
+            while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
             telescopeAlignmentEvent.push_back(1);
             nTelescopeAlignmentEvents++;
         }
@@ -423,7 +424,8 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
     }
     if (false)
         UpdateResolutions(test1,test2);
-    if (events.size() == 0) createEventVectors(nEvents, startEvent,diaAlignment);
+
+    if (events.size() == 0) createEventVectors(nEvents, startEvent,detToAlign);
 
     myTrack->setDetectorAlignment(align);
 

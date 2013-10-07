@@ -68,7 +68,7 @@ private:
 	enum resolutionUpdateMode {normalMode=1,resolutionMode=2,noUpdate=0};
 	enum alignmentMode {singleStrip,doubleStrip};
 public:
-	enum enumDetectorsToAlign {diaAlignment,silAlignment,bothAlignment};
+	enum enumDetectorsToAlign {diaAlignment=0,silAlignment=1,bothAlignment=2};
 public:
 	TAlignment(TSettings* settings,TSettings::alignmentMode mode = TSettings::normalMode);
 	virtual ~TAlignment();
