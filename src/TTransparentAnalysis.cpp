@@ -1991,12 +1991,24 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
     cout<<"initPHvsEventNoAreaPlots"<<flush;
     Int_t nentriesPerBin = 20000;
+    UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
+    if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
+    if (nBins==0)nBins=1;
+
+    TString name ="hPHVsEventNo_clustersize10";
+    TString title = "PH_{clustersize = 10} vs eventNo";
+    hPHVsEventNo = new TH2D(name,title,nBins,nStart,nEnd,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector));
+    hPHVsEventNo->GetXaxis()->SetTitle("event no.");
+    hPHVsEventNo->GetXaxis()->SetTitle("pulse height");
+
+    name ="hPHVsEventNo_2outOf10";
+    title = "PH_{2 out of 10} vs eventNo";
+    hPH2OutOf10VsEventNo= new TH2D(name,title,nBins,nStart,nEnd,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector));
+    hPHVsEventNo->GetXaxis()->SetTitle("event no.");
+    hPHVsEventNo->GetXaxis()->SetTitle("pulse height");
     for (UInt_t i = 0; i< TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); i++){
-        TString name = TString::Format("hPHvsEventNoArea_clusterSize_%02d",i+1);
-        TString title = TString::Format("ph vs eventNo, clustersize %d",i+1);
-        UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
-        if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
-        if (nBins==0)nBins=1;
+        name = TString::Format("hPHvsEventNoArea_clusterSize_%02d",i+1);
+        title = TString::Format("ph vs eventNo, clustersize %d",i+1);
         UInt_t yBins = xDivisions*yDivisions;
         TProfile2D* prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);
         prof->Draw();
@@ -2018,6 +2030,12 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
 
 void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     cout<<"[TTransparentAnalysis::savePHvsEventNoAreaPlots] "<<endl;
+    histSaver->SaveHistogram(hPH2OutOf10VsEventNo);
+    histSaver->Save1DProfileYWithFitAndInfluence(hPH2OutOf10VsEventNo,"pol1",true);
+    delete hPH2OutOf10VsEventNo;
+    histSaver->SaveHistogram(hPHVsEventNo);
+    histSaver->Save1DProfileYWithFitAndInfluence(hPHVsEventNo,"pol1",true);
+    delete hPHVsEventNo;
     for (UInt_t i = 0; i< vecPHVsEventNo_Areas.size(); i++){
         TProfile2D * prof2d = vecPHVsEventNo_Areas[i];
         if (!prof2d) continue;
@@ -2096,7 +2114,10 @@ void TTransparentAnalysis::initDividedAreaAxis(TAxis* axis){
 }
 
 void TTransparentAnalysis::fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo) {
-
+    if(clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)){
+        hPH2OutOf10VsEventNo->Fill(nEvent,chargeOfTwo);
+        hPHVsEventNo->Fill(nEvent,charge);
+    }
     UInt_t i = clusterSize -1;
     if (i < vecPHVsEventNo_Areas.size())
         vecPHVsEventNo_Areas[i]->Fill(nEvent,area,charge);

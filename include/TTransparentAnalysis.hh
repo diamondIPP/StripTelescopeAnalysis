@@ -268,6 +268,8 @@ public:
 private:
 	void initPHvsEventNoAreaPlots(UInt_t nStart = 0, UInt_t nEnd = 1e6);
 	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo);
+	TH2D* hPHVsEventNo;
+	TH2D* hPH2OutOf10VsEventNo;
 	void savePHvsEventNoAreaPlots();
 	UInt_t xDivisions;
 	UInt_t yDivisions;
