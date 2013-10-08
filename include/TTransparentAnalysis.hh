@@ -56,6 +56,8 @@
 #include "LandauGaussFit.hh"
 #include "TClustering.hh"
 #include "TResults.hh"
+#include "TAnalysisOfSelection.hh"
+#include "TAnalysisOfClustering.hh"
 #include "TSpectrum.h"
 
 using namespace std;
@@ -89,6 +91,7 @@ private:
 	void analyseEtaDistribution(TH1F* hEtaDist);
 	void saveHistograms();
 	void saveLandausVsPositionPlots(UInt_t clusterSize);
+	void SaveLandauVsEventNoPlots(UInt_t clusterSize);
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();
@@ -256,11 +259,17 @@ private:
 
 	vector<TProfile2D*> vecPHVsEventNo_Areas;
 	vector<TProfile2D*> vecPH2HighestVsEventNo_Areas;
-	UInt_t GetHitArea();
+public:
+	static UInt_t GetHitArea(TSettings* set, Float_t xVal, Float_t yVal,UInt_t xDivisions,UInt_t yDivisions);
+private:
 	void initDividedAreaAxis(TAxis *axis);
-	TString GetNameOfArea(UInt_t x,UInt_t y);
+public:
+	static TString GetNameOfArea(Int_t x,Int_t y);
+private:
 	void initPHvsEventNoAreaPlots(UInt_t nStart = 0, UInt_t nEnd = 1e6);
 	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo);
+	TH2D* hPHVsEventNo;
+	TH2D* hPH2OutOf10VsEventNo;
 	void savePHvsEventNoAreaPlots();
 	UInt_t xDivisions;
 	UInt_t yDivisions;

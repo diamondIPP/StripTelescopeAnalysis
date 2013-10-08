@@ -155,7 +155,7 @@ void TAnalysisOfClustering::checkForSaturatedChannels()
 void TAnalysisOfClustering::initPedestalAndNoiseHistos(UInt_t maxEvents) {
     cout<<"initPedestalHistos"<<endl;
     UInt_t start = 0;
-    UInt_t nBins = (maxEvents-start)/1000;
+    UInt_t nBins = (maxEvents-start)/10000;
     UInt_t diaDet = TPlaneProperties::getDetDiamond();
     for(UInt_t ch = 0; ch< TPlaneProperties::getNChannelsDiamond();ch++){
         if(settings->IsMasked(diaDet,ch))
@@ -218,90 +218,49 @@ void TAnalysisOfClustering::fillPedestalsAndNoiseHistos() {
 }
 
 void TAnalysisOfClustering::saveADCHistos() {
-    THStack* stack = new THStack("hADCsVsEventNo","ADCs vs Event No");
-    TH1F* hADCSlopesVsChannel = new TH1F("hADCSlopesVsChannel","slope of hADCVsEventNo for each ch",128,0,128);
-    hADCSlopesVsChannel->GetXaxis()->SetTitle("channel no");
-    hADCSlopesVsChannel->GetYaxis()->SetTitle("slope m = ADC/Event");
-    UInt_t color = 0;
-    std::map<UInt_t,TProfile*>::iterator it;
-    TF1* pol1 = new TF1("pol1_fit","pol1",0,5e6);
-    pol1->SetLineColor(kBlue);
-    pol1->SetLineWidth(1);
-    Double_t minStack = 1e9;
-    Double_t maxStack = -1e9;
-    vector<Float_t> vecCh;
-    vector<Float_t> vecSlope;
-    for(it=hADCVsEvenNo.begin(); it!=hADCVsEvenNo.end(); it++){
-        TProfile* prof = (*it).second;
-        if(!prof) continue;
-        TF1* fit = (TF1*)pol1->Clone(prof->GetName()+(TString)"_fit");
-        if((*it).first%5==0){
-            TProfile* prof2 =(TProfile*)prof->Clone();
-            prof2->SetTitle(TString::Format("Channel %3d",(*it).first));
-            prof2->SetLineColor(color);
-            prof2->SetMarkerColor(color);
-            stack->Add(prof2);
-            minStack = TMath::Min( minStack, prof->GetBinContent(prof->GetMinimumBin()));
-            maxStack = TMath::Max( maxStack, prof->GetBinContent(prof->GetMaximumBin()));
-            color++;
-        }
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
-        hADCSlopesVsChannel->SetBinContent((hADCSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
-        vecCh.push_back((*it).first);
-        vecSlope.push_back(fit->GetParameter(1));
-        delete prof;
-        (*it).second= 0;
-        hADCVsEvenNo.erase(it);
-    }
-    TGraph graph = histSaver->CreateDipendencyGraph("gADCSlopeVsChannel",vecSlope,vecCh);
-    graph.Draw("AP");
-    graph.GetXaxis()->SetTitle("channel");
-    graph.GetYaxis()->SetTitle("ADC slope for channel");
-    histSaver->SaveGraph(&graph,"gADCSlopeVsChannel","ABP");
-
-    TH1F* hSlopes = histSaver->CreateDistributionHisto("hADCSlopes",vecSlope,10);
-    hSlopes->GetXaxis()->SetTitle("ADC slope ADC/Event");
-    hSlopes->GetYaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hSlopes);
-    delete hSlopes;
-    if(hCmnVsEventNo) {
-        cout<<"save "<<hCmnVsEventNo->GetName()<<endl;
-        TF1* fit = (TF1*)pol1->Clone(hCmnVsEventNo->GetName()+(TString)"_fit");
-        histSaver->Save1DProfileXWithFitAndInfluence(hCmnVsEventNo,fit,true);
-        delete hCmnVsEventNo;
-        hCmnVsEventNo=0;
-    }
-    if(color!=0){
-        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
-        stack->Draw("goff");
-        stack->SetObjectStat(false);
-        if(stack->GetXaxis()){
-            stack->GetXaxis()->SetTitle("Event No");
-            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
-        }
-        if(stack->GetYaxis()){
-            stack->GetYaxis()->SetTitle("ADC /ADC");
-            cout<<"Set range"<<endl;
-            stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
-            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
-        }
-        stack->SetMinimum(minStack*.98);
-        stack->SetMaximum(maxStack*1.05);
-        stack->SetObjectStat(false);
-    }
-    histSaver->SaveStack(stack,"nostack",true);
-    cout<<"hADCSlopesVsChannel:MIN: "<<hADCSlopesVsChannel->GetBinContent(hADCSlopesVsChannel->GetMinimumBin())<<endl;
-    hADCSlopesVsChannel->SetMinimum(hADCSlopesVsChannel->GetBinContent(hADCSlopesVsChannel->GetMinimumBin()));
-    histSaver->SaveHistogram(hADCSlopesVsChannel,false,false);
-    delete hADCSlopesVsChannel;
-    delete stack;
+    saveVariableVsEventNoPlots(settings,histSaver,hADCVsEvenNo,"ADC",&vecRawADCSlope,&vecCh);
+    return;
 }
 
 void TAnalysisOfClustering::saveNoiseHistos() {
-    THStack* stack = new THStack("hNoisesVsEventNo","Noises vs Event No");
-    TH1F* hNoiseSlopesVsChannel = new TH1F("hNoiseSlopesVsChannel","slope of hNoiseVsEventNo for each ch",128,0,128);
-    hNoiseSlopesVsChannel->GetXaxis()->SetTitle("channel no");
-    hNoiseSlopesVsChannel->GetYaxis()->SetTitle("slope m = ADC/Event");
+    saveVariableVsEventNoPlots(settings,histSaver,hNoiseVsEvenNo,"Noise",&vecNoiseSlope,&vecCh);
+    return;
+}
+
+void TAnalysisOfClustering::analysisSlopes(){
+    TH1F* hPedestalSlopes = histSaver->CreateDistributionHisto("hPedestalSlopes",vecPedestalSlope,10);
+    hPedestalSlopes->GetXaxis()->SetTitle("pedestal slope ADC/Event");
+    hPedestalSlopes->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hPedestalSlopes);
+
+    TH1F* hNoiseSlopes = histSaver->CreateDistributionHisto("hNoiseSlopes",vecNoiseSlope,10);
+    hNoiseSlopes->GetXaxis()->SetTitle("noise slope ADC/Event");
+    hNoiseSlopes->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hNoiseSlopes);
+
+    TH1F* hADCSlopes = histSaver->CreateDistributionHisto("hADCSlopes",vecRawADCSlope,10);
+    hADCSlopes->GetXaxis()->SetTitle("raw ADC slope ADC/Event");
+    hADCSlopes->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hADCSlopes);
+
+    TGraph gPedestalSlopeVsRawADCSlope = histSaver->CreateDipendencyGraph("gPedestalSlopeVsRawADCSlope",vecPedestalSlope,vecRawADCSlope);
+    gPedestalSlopeVsRawADCSlope.GetXaxis()->SetTitle("slope of raw adc");
+    gPedestalSlopeVsRawADCSlope.GetYaxis()->SetTitle("slope of pedestal");
+    histSaver->SaveGraph(&gPedestalSlopeVsRawADCSlope,"gPedestalSlopeVsRawADCSlope");
+
+    delete hNoiseSlopes;
+    delete hPedestalSlopes;
+    delete hADCSlopes;
+}
+
+void TAnalysisOfClustering::saveVariableVsEventNoPlots(TSettings* settings,HistogrammSaver*histSaver, std::map<UInt_t,TProfile*> mProf,
+                    TString nameOfVariable,vector <Float_t>* vec, vector<Float_t> *vecCh){
+    TString name = (TString)"stack"+nameOfVariable+(TString)"VsEventNo";
+    THStack * stack = new THStack(name,name);
+    name = (TString)"h"+nameOfVariable+(TString)"SlopesVsChannel";
+    TH1F* hVariableSlopesVsChannel = new TH1F(name,name,128,0,128);
+    hVariableSlopesVsChannel->GetXaxis()->SetTitle("channel no");
+    hVariableSlopesVsChannel->GetYaxis()->SetTitle("slope m = ADC/Event");
     UInt_t color = 0;
     std::map<UInt_t,TProfile*>::iterator it;
     TF1* pol1 = new TF1("pol1_fit","pol1",0,5e6);
@@ -309,15 +268,35 @@ void TAnalysisOfClustering::saveNoiseHistos() {
     pol1->SetLineWidth(1);
     Double_t minStack = 1e9;
     Double_t maxStack = -1e9;
-    vector<Float_t> vecCh;
-    vector<Float_t> vecSlope;
-    for(it=hNoiseVsEvenNo.begin(); it!=hNoiseVsEvenNo.end(); it++){
+    name = (TString)"hRel"+nameOfVariable+(TString)"PedestalVsEventNo";
+    it=mProf.begin();
+    if(it==mProf.end()){
+        cerr<<"Profile Map is empty..."<<endl;
+        return;
+    }
+    TProfile* prof = (*it).second;
+    if(!prof){
+        cerr<<"Profile of iterator "<< (*it).first <<" is nullpointer"<<endl;
+        return;
+    }
+    Float_t maxEvents =prof->GetXaxis()->GetXmax();
+    Float_t start =prof->GetXaxis()->GetXmin();
+    UInt_t nBins =prof->GetXaxis()->GetNbins();
+    TH2D* hRelVariableVsEventNo = new TH2D(name,name,nBins,start,maxEvents,128,0,128);
+    hRelVariableVsEventNo->GetXaxis()->SetTitle("Event No.");
+    hRelVariableVsEventNo->GetYaxis()->SetTitle("channel No.");
+    hRelVariableVsEventNo->GetZaxis()->SetTitle("relative change to pedestal_{0} in percent %% ");
+    int i = 0;
+    //Loop over all Histograms in Map
+    for(it=mProf.begin(); it!=mProf.end(); it++){
         TProfile* prof = (*it).second;
+        UInt_t channel = (*it).first;
         if(!prof) continue;
         TF1* fit = (TF1*)pol1->Clone(prof->GetName()+(TString)"_fit");
-        if((*it).first%5==0){
+
+        if(channel%5==0){//add clone to stack if channel no % 5 ==0
             TProfile* prof2 =(TProfile*)prof->Clone();
-            prof2->SetTitle(TString::Format("Channel %3d",(*it).first));
+            prof2->SetTitle(TString::Format("Channel %3d",channel));
             prof2->SetLineColor(color);
             prof2->SetMarkerColor(color);
             stack->Add(prof2);
@@ -325,32 +304,44 @@ void TAnalysisOfClustering::saveNoiseHistos() {
             maxStack = TMath::Max( maxStack, prof->GetBinContent(prof->GetMaximumBin()));
             color++;
         }
+
+        TProfile * prof3 = (TProfile*)prof->Clone();
+
         histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
-        hNoiseSlopesVsChannel->SetBinContent((hNoiseSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
-        vecCh.push_back((*it).first);
-        vecSlope.push_back(fit->GetParameter(1));
+        hVariableSlopesVsChannel->SetBinContent(hVariableSlopesVsChannel->FindBin(channel),fit->GetParameter(1));
+        if ((int)vecCh->size()<=i){
+            vecCh->push_back(channel);
+            i++;
+        }
+//        else if(vecCh.at(i)!=channel){
+//            cerr<<"something is wrong: channel: "<<channel<<" vecChannel @ "<<i<<": "<<vecCh.at(i)<<endl;
+//            return;
+//        }
+        vec->push_back(fit->GetParameter(1));
+        Float_t firstVarableValue = prof3->GetBinContent(1);
+        cout<<channel<<" first"<<nameOfVariable<<"Value: "<<firstVarableValue<<endl;
+        prof3->Scale(1./firstVarableValue);
+        for(Int_t binx = 1;binx <= prof3->GetNbinsX();binx++){
+            Float_t content = prof3->GetBinContent(binx);
+            content = (content-1.)*100;
+            Int_t bin = hRelVariableVsEventNo->GetBin(binx,channel+1);
+            //            cout<<"Fill: "<<channel<<" "<<binx<<" "<<content<<endl;
+            hRelVariableVsEventNo->SetBinContent(bin,content);
+        }
+        delete prof3;
         delete prof;
         (*it).second= 0;
-        hNoiseVsEvenNo.erase(it);
+        mProf.erase(it);
     }
-    TGraph graph = histSaver->CreateDipendencyGraph("gNoiseSlopeVsChannel",vecSlope,vecCh);
+    histSaver->SaveHistogram(hRelVariableVsEventNo,true);
+    name = (TString)"g"+nameOfVariable+(TString)"SlopeVsChannel";
+    TGraph graph = histSaver->CreateDipendencyGraph((string)name,*vec,*vecCh);
     graph.Draw("AP");
     graph.GetXaxis()->SetTitle("channel");
-    graph.GetYaxis()->SetTitle("Noise slope for channel");
-    histSaver->SaveGraph(&graph,"gNoiseSlopeVsChannel","ABP");
+    graph.GetYaxis()->SetTitle(nameOfVariable+ (TString)" slope for channel");
+    histSaver->SaveGraph(&graph,(string)name,"ABP");
 
-    TH1F* hSlopes = histSaver->CreateDistributionHisto("hNoiseSlopes",vecSlope,10);
-    hSlopes->GetXaxis()->SetTitle("Noise slope ADC/Event");
-    hSlopes->GetYaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hSlopes);
-    delete hSlopes;
-    if(hCmnVsEventNo) {
-        cout<<"save "<<hCmnVsEventNo->GetName()<<endl;
-        TF1* fit = (TF1*)pol1->Clone(hCmnVsEventNo->GetName()+(TString)"_fit");
-        histSaver->Save1DProfileXWithFitAndInfluence(hCmnVsEventNo,fit,true);
-        delete hCmnVsEventNo;
-        hCmnVsEventNo=0;
-    }
+
     if(color!=0){
         cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
         stack->Draw("goff");
@@ -360,7 +351,7 @@ void TAnalysisOfClustering::saveNoiseHistos() {
             cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
         }
         if(stack->GetYaxis()){
-            stack->GetYaxis()->SetTitle("Noise /ADC");
+            stack->GetYaxis()->SetTitle(nameOfVariable+ (TString)" /ADC");
             cout<<"Set range"<<endl;
             stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
             cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
@@ -370,83 +361,16 @@ void TAnalysisOfClustering::saveNoiseHistos() {
         stack->SetObjectStat(false);
     }
     histSaver->SaveStack(stack,"nostack",true);
-    cout<<"hNoiseSlopesVsChannel:MIN: "<<hNoiseSlopesVsChannel->GetBinContent(hNoiseSlopesVsChannel->GetMinimumBin())<<endl;
-    hNoiseSlopesVsChannel->SetMinimum(hNoiseSlopesVsChannel->GetBinContent(hNoiseSlopesVsChannel->GetMinimumBin()));
-    histSaver->SaveHistogram(hNoiseSlopesVsChannel,false,false);
-    delete hNoiseSlopesVsChannel;
+    cout<<"h"<<nameOfVariable<<"SlopesVsChannel:MIN: "<<hVariableSlopesVsChannel->GetBinContent(hVariableSlopesVsChannel->GetMinimumBin())<<endl;
+    hVariableSlopesVsChannel->SetMinimum(hVariableSlopesVsChannel->GetBinContent(hVariableSlopesVsChannel->GetMinimumBin()));
+    histSaver->SaveHistogram(hVariableSlopesVsChannel,false,false);
+    delete hVariableSlopesVsChannel;
     delete stack;
 }
-void TAnalysisOfClustering::savePedestalHistos() {
-    THStack* stack = new THStack("hPedestalsVsEventNo","pedestals vs Event No");
-    TH1F* hPedestalSlopesVsChannel = new TH1F("hPedestalSlopesVsChannel","slope of hPedestalVsEventNo for each ch",128,0,128);
-    hPedestalSlopesVsChannel->GetXaxis()->SetTitle("channel no");
-    hPedestalSlopesVsChannel->GetYaxis()->SetTitle("slope m = ADC/Event");
-    UInt_t color = 0;
-    std::map<UInt_t,TProfile*>::iterator it;
-    TF1* pol1 = new TF1("pol1_fit","pol1",0,5e6);
-    pol1->SetLineColor(kBlue);
-    pol1->SetLineWidth(1);
-    Double_t minStack = 1e9;
-    Double_t maxStack = -1e9;
-    vector<Float_t> vecCh;
-    vector<Float_t> vecSlope;
-    for(it=hPedestalVsEvenNo.begin(); it!=hPedestalVsEvenNo.end(); it++){
-        TProfile* prof = (*it).second;
-        if(!prof) continue;
-        TF1* fit = (TF1*)pol1->Clone(prof->GetName()+(TString)"_fit");
-        if((*it).first%5==0){
-            TProfile* prof2 =(TProfile*)prof->Clone();
-            prof2->SetTitle(TString::Format("Channel %3d",(*it).first));
-            prof2->SetLineColor(color);
-            prof2->SetMarkerColor(color);
-            stack->Add(prof2);
-            minStack = TMath::Min( minStack, prof->GetBinContent(prof->GetMinimumBin()));
-            maxStack = TMath::Max( maxStack, prof->GetBinContent(prof->GetMaximumBin()));
-            color++;
-        }
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
-        hPedestalSlopesVsChannel->SetBinContent((hPedestalSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
-        vecCh.push_back((*it).first);
-        vecSlope.push_back(fit->GetParameter(1));
-        delete prof;
-        (*it).second= 0;
-        hPedestalVsEvenNo.erase(it);
-    }
-    TGraph graph = histSaver->CreateDipendencyGraph("gPedestalSlopeVsChannel",vecSlope,vecCh);
-    graph.Draw("AP");
-    graph.GetXaxis()->SetTitle("channel");
-    graph.GetYaxis()->SetTitle("pedestal slope for channel");
-    histSaver->SaveGraph(&graph,"gPedestalSlopeVsChannel","ABP");
 
-    TH1F* hSlopes = histSaver->CreateDistributionHisto("hPedestalSlopes",vecSlope,10);
-    hSlopes->GetXaxis()->SetTitle("pedestal slope ADC/Event");
-    hSlopes->GetYaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hSlopes);
-    delete hSlopes;
-    if(color!=0){
-        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
-        stack->Draw("goff");
-        stack->SetObjectStat(false);
-        if(stack->GetXaxis()){
-            stack->GetXaxis()->SetTitle("Event No");
-            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
-        }
-        if(stack->GetYaxis()){
-            stack->GetYaxis()->SetTitle("Pedestal /ADC");
-            cout<<"Set range"<<endl;
-            stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
-            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
-        }
-        stack->SetMinimum(minStack*.98);
-        stack->SetMaximum(maxStack*1.05);
-        stack->SetObjectStat(false);
-    }
-    histSaver->SaveStack(stack,"nostack",true);
-    cout<<"hPedestalSlopesVsChannel:MIN: "<<hPedestalSlopesVsChannel->GetBinContent(hPedestalSlopesVsChannel->GetMinimumBin())<<endl;
-    hPedestalSlopesVsChannel->SetMinimum(hPedestalSlopesVsChannel->GetBinContent(hPedestalSlopesVsChannel->GetMinimumBin()));
-    histSaver->SaveHistogram(hPedestalSlopesVsChannel,false,false);
-    delete hPedestalSlopesVsChannel;
-    delete stack;
+void TAnalysisOfClustering::savePedestalHistos() {
+    saveVariableVsEventNoPlots(settings,histSaver,hPedestalVsEvenNo,"Pedestal",&vecPedestalSlope,&vecCh);
+    return;
 }
 
 ///***
@@ -473,82 +397,95 @@ void TAnalysisOfClustering::initialiseHistos()
     vecvecEta.resize(nDet);
 
     for(UInt_t det=0;det<9;det++){
-        stringstream histName;
-        histName<<"hClusterPositionRelativeToNextIntegerCWM_"<<TPlaneProperties::getStringForDetector(det);
-        if (verbosity>2) cout<<histName.str()<<endl;
-        hRelativeClusterPositionCWM[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,1024,-.5,.5);
-        histName.str("");
-        histName.clear();
-        histName<<"hClusterPositionRelativeToNextIntegerCorEta_"<<TPlaneProperties::getStringForDetector(det);
-        if (verbosity>2) cout<<histName.str()<<endl;
-        hRelativeClusterPositionCorEta[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,512,-.5,.5);
-        histName.str("");
-        histName.clear();
-        histName<<"hClusterPositionRelativeToNextIntegerEta_"<<TPlaneProperties::getStringForDetector(det);
-        if (verbosity>2) cout<<histName.str()<<endl;
-        hRelativeClusterPositionEta[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,TPlaneProperties::getNChannels(det)-1,512,-.5,.5);
-        histName.str("");
-        histName.clear();
-        histName<<"hAbsoluteClusterPostion_"<<TPlaneProperties::getStringForDetector(det);;
-        if (verbosity>2) cout<<histName.str()<<endl;
-        hClusterPosition[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),4096,0,TPlaneProperties::getNChannels(det)-1);
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistribution_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
+        TString name = "hClusterPositionRelativeToNextIntegerCWM_"+(TString)TPlaneProperties::getStringForDetector(det);
+        if (verbosity>2) cout<<name<<endl;
+        if(TPlaneProperties::isDiamondDetector(det)){
+            pair<Int_t,Int_t> pattern = settings->diamondPattern.getTotalInterval();
+            hRelativeClusterPositionCWM[det]=new TH2F(name,name,pattern.second-pattern.first,pattern.first,pattern.second,1024,-.5,.5);
+        }
+        else
+            hRelativeClusterPositionCWM[det]=new TH2F(name,name,256,0,TPlaneProperties::getNChannels(det)-1,1024,-.5,.5);
+
+        name = "hClusterPositionRelativeToNextIntegerCorEta_"+ (TString)TPlaneProperties::getStringForDetector(det);
+        if (verbosity>2) cout<<name<<endl;
+        if(TPlaneProperties::isDiamondDetector(det)){
+            pair<Int_t,Int_t> pattern = settings->diamondPattern.getTotalInterval();
+            hRelativeClusterPositionCorEta[det]=new TH2F(name,name,pattern.second-pattern.first,pattern.first,pattern.second,1024,-.5,.5);
+        }
+        else
+            hRelativeClusterPositionCorEta[det]=new TH2F(name,name,256,0,TPlaneProperties::getNChannels(det)-1,1024,-.5,.5);
+
+        name = "hClusterPositionRelativeToNextIntegerEta_"+(TString)TPlaneProperties::getStringForDetector(det);
+        if (verbosity>2) cout<<name<<endl;
+        if(TPlaneProperties::isDiamondDetector(det)){
+            pair<Int_t,Int_t> pattern = settings->diamondPattern.getTotalInterval();
+            hRelativeClusterPositionEta[det]=new TH2F(name,name,pattern.second-pattern.first,pattern.first,pattern.second,1024,-.5,.5);
+        }
+        else
+            hRelativeClusterPositionEta[det]=new TH2F(name,name,256,0,TPlaneProperties::getNChannels(det)-1,1024,-.5,.5);
+
+        name = "hAbsoluteClusterPostion_"+(TString)TPlaneProperties::getStringForDetector(det);;
+        if (verbosity>2) cout<<name<<endl;
+        hClusterPosition[det]=new TH1F(name,name,TPlaneProperties::getNChannels(det)*16,0,TPlaneProperties::getNChannels(det)-1);
+
+        if(TPlaneProperties::isDiamondDetector(det)){
+            name = "hAbsoluteClusterPostionActiveChannels_"+(TString)TPlaneProperties::getStringForDetector(det);
+            if (verbosity>2) cout<<name<<endl;
+            Float_t min = settings->diamondPattern.getTotalInterval().first;
+            Float_t max = settings->diamondPattern.getTotalInterval().second;
+            Int_t bins = (max - min)*20;
+            hClusterPositionActiveChannels=new TH1F(name,name, bins, min,max);
+        }
+
+        name = "hEtaDistribution_"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hEtaDistribution[det]=new TH1F(name,name,1024,0,1);
         hEtaDistribution[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistribution[det]->GetYaxis()->SetTitle("number of entries");
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistributionCMN_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionCMN[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
+
+        name = "hEtaDistributionCMN_"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hEtaDistributionCMN[det]=new TH1F(name,name,1024,0,1);
         hEtaDistributionCMN[det]->GetXaxis()->SetTitle("#eta_{CMN-corrected}");
         hEtaDistributionCMN[det]->GetYaxis()->SetTitle("number of entries");
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistributionVsLeftChannel_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsLeftChannel[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,1,256,0,255);
+
+        name = "hEtaDistributionVsLeftChannel_"+ (TString) TPlaneProperties::getStringForDetector(det);
+        if(TPlaneProperties::isDiamondDetector(det)){
+            pair<Int_t,Int_t> pattern = settings->diamondPattern.getTotalInterval();
+            hEtaDistributionVsLeftChannel[det] = new TH2F(name,name,256,0,1,pattern.second-pattern.first,pattern.first,pattern.second);
+        }
+        else
+            hEtaDistributionVsLeftChannel[det] = new TH2F(name,name,256,0,1,256,0,255);
         hEtaDistributionVsLeftChannel[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistributionVsLeftChannel[det]->GetYaxis()->SetTitle("left channel of #eta position");
         hEtaDistributionVsLeftChannel[det]->GetZaxis()->SetTitle("number of entries #");
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistributionVsClusterSize_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsClusterSize[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),256,0,1,10,-.5,9.5);
+
+        name = "hEtaDistributionVsClusterSize_"+ (TString) TPlaneProperties::getStringForDetector(det);
+
+        hEtaDistributionVsClusterSize[det] = new TH2F(name,name,256,0,1,10,-.5,9.5);
         hEtaDistributionVsClusterSize[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistributionVsClusterSize[det]->GetYaxis()->SetTitle("ClusterSize");
         hEtaDistributionVsClusterSize[det]->GetZaxis()->SetTitle("number of entries #");
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistributionVsCharge_"<<TPlaneProperties::getStringForDetector(det);
+
+        name = "hEtaDistributionVsCharge_"+ (TString) TPlaneProperties::getStringForDetector(det);
         Int_t maxCharge = TPlaneProperties::isDiamondDetector(det)?4096:512;
-        hEtaDistributionVsCharge[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),512,0,1,512,0,maxCharge);
+        hEtaDistributionVsCharge[det] = new TH2F(name,name,512,0,1,512,0,maxCharge);
         hEtaDistributionVsCharge[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistributionVsCharge[det]->GetYaxis()->SetTitle("Charge of two highest Channels /ADC counts");
         hEtaDistributionVsCharge[det]->GetYaxis()->SetTitle("number of entries");
 
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistribution5Percent_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistribution5Percent[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistributionVsSignalLeft_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalLeft[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistributionVsSignalRight_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalRight[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
-        histName.str("");
-        histName.clear();
-        histName<<"hEtaDistributionVsSignalSum_"<<TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalSum[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)*2);
-        histName.str("");
-        histName.clear();
-        histName<<"hSignalLeftVsSignalRight"<<TPlaneProperties::getStringForDetector(det);
-        hSignalLeftVsSignalRight[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
+        name = "hEtaDistribution5Percent_"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hEtaDistribution5Percent[det]=new TH1F(name,name,1024,0,1);
 
+        name = "hEtaDistributionVsSignalLeft_"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hEtaDistributionVsSignalLeft[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
 
+        name = "hEtaDistributionVsSignalRight_"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hEtaDistributionVsSignalRight[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
+
+        name = "hEtaDistributionVsSignalSum_"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hEtaDistributionVsSignalSum[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)*2);
+
+        name = "hSignalLeftVsSignalRight"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hSignalLeftVsSignalRight[det]=new TH2F(name,name,128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
     }
     //	for(int det = 0; det < 9; det++){
     //	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -605,21 +542,25 @@ void TAnalysisOfClustering::initialiseHistos()
         hChannelBiggestHit[det]=new TH1F(histoName.str().c_str(),histoName.str().c_str(),256,0,255);
     }
     for(int det=0;det<9;det++){
-        stringstream histoName;
-        histoName<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-        hClusterSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
+        Float_t seed = settings->getClusterSeedFactor(det,0);
+        Float_t hit = settings->getClusterHitFactor(det,0);
+        TString name = TString::Format("hClusterSize_Seed%d_Hit%d_",(int)seed,(int)hit)+(TString)TPlaneProperties::getStringForDetector(det);
+        hClusterSize[det]= new TH1F(name,name,10,-0.5,10.5);
         hClusterSize[det]->GetXaxis()->SetTitle("Number of Seeds and Hits in Cluster");
         hClusterSize[det]->GetYaxis()->SetTitle("Entries #");
-        histoName.str("");
-        histoName.clear();
-        histoName<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-        hClusterSeedSize[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
+        name = TString::Format("hClusterSeedSize_Seed%d_Hit%d_",(int)seed,(int)hit)+(TString)TPlaneProperties::getStringForDetector(det);
+        hClusterSeedSize[det]= new TH1F(name,name,10,-0.5,10.5);
         hClusterSeedSize[det]->GetXaxis()->SetTitle("Number of Seeds in Cluster");
         hClusterSeedSize[det]->GetYaxis()->SetTitle("Entries #");
-        histoName.str("");
-        histoName.clear();
-        histoName<<"NumberOfClusters_"<<TPlaneProperties::getStringForDetector(det);
-        hNumberOfClusters[det]= new TH1F(histoName.str().c_str(),histoName.str().c_str(),10,-0.5,10.5);
+        name = (TString)"NumberOfClusters_"+(TString)TPlaneProperties::getStringForDetector(det);
+        hNumberOfClusters[det]= new TH1F(name,name,10,-0.5,10.5);
+        name = (TString)"hClusterPos_"+(TString)TPlaneProperties::getStringForDetector(det);
+        Int_t min = 0;
+        Int_t max = TPlaneProperties::getNChannels(det);
+        Int_t bins = max-min;
+        hClusterPos[det] = new TH1F(name,name,bins,min,max);
+        name = (TString)"hClusterPosCMN_"+(TString)TPlaneProperties::getStringForDetector(det);
+        hClusterPosCMN[det] = new TH1F(name,name,bins,min,max);
     }
     if(verbosity>3)cout<<"10"<<endl;
     for (int det = 0; det < 9; det++) {
@@ -768,6 +709,7 @@ void TAnalysisOfClustering::saveHistos(){
     savePedestalHistos();
     saveNoiseHistos();
     saveADCHistos();
+    analysisSlopes();
     if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
     histSaver->SaveHistogram(histo_CWM_biggestHit);
     histo_CWM_biggestHit->Delete();
@@ -829,10 +771,16 @@ void TAnalysisOfClustering::saveHistos(){
         vecClusterSizes.push_back(hClusterSize[det]->GetMean());
         vecClusterSeedSizes.push_back(hClusterSeedSize[det]->GetMean());
         vecNumberOfClusters.push_back(hNumberOfClusters[det]->GetMean());
+        histSaver->SaveHistogram(hClusterPos[det]);
+        histSaver->SaveHistogram(hClusterPosCMN[det]);
+        delete hClusterPosCMN[det];
+        delete hClusterPos[det];
         delete hClusterSize[det];
         delete hClusterSeedSize[det];
         delete hNumberOfClusters[det];
     }
+    histSaver->SaveHistogram(hClusterPositionActiveChannels);
+    delete hClusterPositionActiveChannels;
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
         if (verbosity>2) cout<<"Print : "<<hClusterPosition[det]->GetTitle()<< " "<<hClusterPosition[det]->GetEntries()<<endl;
         histSaver->SaveHistogram(this->hClusterPosition[det]);
@@ -912,7 +860,7 @@ void TAnalysisOfClustering::saveHistos(){
     if (verbosity)  cout<<"Save PH Histos"<<endl;
     savePHHistos();
     if (verbosity)  cout<<"Save Asymmetric Eta Sample analysis"<<endl;
-    analyseAsymmetricSample();
+//    analyseAsymmetricSample();
     //    for (int det = 0; det < 9; det++) {
     //		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
     //        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
@@ -943,6 +891,12 @@ void TAnalysisOfClustering::saveHistos(){
     //		delete histo_pulseheight_right_sigma_second[det];
     //    }
     //	saveEtaInvestigationHistos();
+}
+
+void TAnalysisOfClustering::fillClusterHitPositions() {
+    for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++){
+    }
+
 }
 
 void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision){
@@ -1319,6 +1273,8 @@ void TAnalysisOfClustering::analyseClusterPosition()
             Int_t chNo = (Int_t)(posCWM+0.5);
             Float_t relPos = posCWM - chNo;
             hClusterPosition[det]->Fill(posCWM);
+            if(TPlaneProperties::isDiamondDetector(det))
+                hClusterPositionActiveChannels->Fill(posCWM);
             hRelativeClusterPositionCWM[det]->Fill(chNo+0.5,relPos);
             //			Float_t eta =
             TCluster cluster = eventReader->getCluster(det,cl);
@@ -1402,6 +1358,10 @@ void TAnalysisOfClustering::analyseCluster()
             Float_t biggestSignal = eventReader->getCluster(det,cl).getHighestSignal();
             clSize=clSize>8?8:clSize;
             hBiggestHitVsClusterSize[det]->Fill(biggestSignal,clSize);
+            Float_t pos = eventReader->getCluster(det,cl).getPosition(false,TCluster::highest2Centroid);
+            Float_t posCMN = eventReader->getCluster(det,cl).getPosition(true,TCluster::highest2Centroid);
+            hClusterPos[det]->Fill(pos);
+            hClusterPosCMN[det]->Fill(posCMN);
         }
     }
 

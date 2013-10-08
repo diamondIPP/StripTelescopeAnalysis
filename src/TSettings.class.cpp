@@ -766,6 +766,16 @@ void TSettings::DefaultLoadDefaultSettings(){
 	yOffset3D = 3890;
 	cellHeight = 150;
 	columnRadius = 5;//#mum
+	MaxOverlayClusterSize = 3;
+	CentralColumnOverlayXLow = 70;
+	CentralColumnOverlayXHigh = 80;
+	CentralColumnOverlayYLow = 70;
+	CentralColumnOverlayYHigh = 80;
+	CentralColumnOverlayXBins = 5;
+	CentralColumnOverlayYBins = 5;
+	OverlayOffsetX = 37.5;
+	OverlayOffsetY = 37.5;
+	OverlayColumnPulseHeightCut = 500;
 
 //	vecEdgePositions.push_back(3715);
 //	vecEdgePositions.push_back(1370);
@@ -988,7 +998,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
 	}
 	else
 		cout<<"vecEntries.size(): "<<vecEntries.size()<<endl;
-	if (verbosity>5&&verbosity%2==1){
+	if ((verbosity>5&&verbosity%2==1)||(key=="diamondPattern"&&false)){
 		cout<<"Press a key and enter: "<<flush;
 		char t;
 		cin>>t;
@@ -1947,11 +1957,11 @@ bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
 }
 
 
-bool TSettings::isClusterInDiaDetectorArea(TCluster cluster, Int_t area){
+bool TSettings::isClusterInDiaDetectorArea(TCluster* cluster, Int_t area){
 	if(area<getNDiaDetectorAreas()){
-		int firstClusterChannel = cluster.getFirstHitChannel();
-		int lastClusterChannel = cluster.getLastHitChannel();
-		int cl = cluster.getClusterPosition(lastClusterChannel);
+		int firstClusterChannel = cluster->getFirstHitChannel();
+		int lastClusterChannel = cluster->getLastHitChannel();
+		int cl = cluster->getClusterPosition(lastClusterChannel);
 		int firstAreaChannel = getDiaDetectorArea(area).first;
 		int lastAreaChannel =  getDiaDetectorArea(area).second;
 		bool retVal = firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
@@ -2469,6 +2479,12 @@ bool TSettings::IsWithInTheColumnRadius(Float_t relCellPosX, Float_t relCellPosY
 //	cout<<" not in a column"<<endl;
 	return false;
 
+}
+
+UInt_t TSettings::GetColor(int no) {
+    UInt_t colors[]={kBlack,kOrange,kBlue,kRed,kSpring+5,kGreen+2,kTeal,kViolet,kAzure+10,kCyan-5};
+    Int_t nColors =11;
+    return colors[no%nColors];
 }
 
 bool TSettings::IsOnTheEdgeOfCell(Float_t relCellPosX, Float_t relCellPosY, Float_t minDistanceToEdge) {

@@ -54,8 +54,11 @@ public:
 	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);//{return getPatternChannels(pattern);}
 	bool hasInvalidIntervals();
 	bool isValidChannelPosition(Float_t channel);
-	bool isValidCluster(TCluster cluster);
+	bool isValidCluster(TCluster* cluster);
+	Int_t getClusterPattern(TCluster *cluster);
+	Int_t getPatternOfChannel(Int_t ch);
 	UInt_t getNIntervals();//{return nChannelsOfInterval.size();}
+	std::pair<Int_t, Int_t> getTotalInterval();
 private:
 //	UInt_t getNIntervals();//
 	Float_t getChannelToMetric(UInt_t ch);

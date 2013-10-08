@@ -82,7 +82,8 @@ void TResidual::Print(UInt_t level){
  */
 void TResidual::addDataPoint(Float_t deltaX, Float_t predX, Float_t deltaY, Float_t predY)
 {
-    if(verbosity>4)cout<<"Add DataPoint no "<<setw(4)<<nUsedTracks+1<<": "<<setprecision(2)<<deltaX<<" @ "<<setprecision(2)<<predX<<"\t"<<setprecision(2)<<deltaY<<" @ "<<setprecision(2)<<predY<<endl;
+    if(verbosity>4)
+        cout<<TString::Format("Add DataPoint no %4d: %6.2f @ %7.2f \t%6.2f @ %7.2f ",nUsedTracks+1,deltaX,predX,deltaY,predY)<<endl;
     this->resYMean += deltaY;
     this->resYSigma += deltaY*deltaY;
     this->resXMean += deltaX;

@@ -18,7 +18,7 @@ THTMLSelection::THTMLSelection(TSettings *settings):THTMLGenerator(settings) {
 
 THTMLSelection::~THTMLSelection() {
 	// TODO Auto-generated destructor stub
-	cout<<"Delete HTMLSelection"<<endl;
+	if(settings->getVerbosity()) cout<<"Delete HTMLSelection"<<endl;
 }
 
 void THTMLSelection::createCutFlowTable(std::vector<int> vecCutFlow	)
@@ -38,7 +38,7 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<(putImage(this->path,(string)"chFidCutSilicon_OneAndOnlyOneCluster","png",50));
 	sectionContent<<"</p>\n";
 	sectionContent<<"<br>\n";
-	sectionContent<<"<h3>Fiducial Cut - valid Silicon Track && one Diamond Cluster</h3>\n";
+	sectionContent<<"<h3>Fiducial Cut - valid Silicon Track && at least one Diamond Cluster</h3>\n";
 	sectionContent<<"<p>\n";
 	sectionContent<<"The next plot shows the mean position of the clusters in each silicon plane with one and only one\n";
 	sectionContent<<"cluster in the diamond detector. With this condition you can see the needed fiducial cuts to calculate\n";
@@ -47,6 +47,14 @@ void THTMLSelection::createFiducialCuts()
 
 	sectionContent<<putImage(this->path,(string)"chProjX","png",49)<<" \n";
 	sectionContent<<putImage(this->path,(string)"chProjY","png",49)<<"<br>\n";
+
+    sectionContent<<"<h3>Fiducial Cut - valid Silicon Track && exactly one Diamond Cluster</h3>\n";
+    sectionContent<<"<p>\n";
+    sectionContent<<"The next plot shows the mean position of the clusters in each silicon plane with one and only one\n";
+    sectionContent<<"cluster in the diamond detector. With this condition you can see the needed fiducial cuts to calculate\n";
+    sectionContent<<"efficency in the diamond detector.<br>\n";
+    sectionContent<<(putImage(this->path,(string)"chFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster","png",50))<<"<br>\n";
+
 	sectionContent<<putImage(this->path,(string)"chSelectedEvents","png",50)<<" \n";
 
 	sectionContent<<"</p>\n";

@@ -24,11 +24,11 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	sys = gSystem;
 	settings->goToPedestalTreeDir();
 	eventReader=new TADCEventReader(settings->getRawTreeFilePath(),settings);
-	cout<<"TPedestalCalculation::TPedestalCalculation -> Set HistoSaver: "<<settings <<endl;
+	if(verbosity)cout<<"TPedestalCalculation::TPedestalCalculation -> Set HistoSaver: "<<settings <<endl;
 	histSaver = new HistogrammSaver(settings);
 	histSaver->SetPlotsPath(settings->getToPedestalAnalysisDir());
 	histSaver->SetRunNumber(settings->getRunNumber());
-	cout<<eventReader->GetEntries()<<endl;
+	if(verbosity)cout<<eventReader->GetEntries()<<endl;
 	MAXSDETSIGMA=settings->getSi_Pedestal_Hit_Factor();
 	MAXDIASIGMA=settings->getDi_Pedestal_Hit_Factor();
 	if(verbosity)cout<<"Pedestal Hit Factor Silicon: "<<MAXSDETSIGMA<<"\nPedestal Hit Factor Diamond: "<<MAXDIASIGMA<<endl;

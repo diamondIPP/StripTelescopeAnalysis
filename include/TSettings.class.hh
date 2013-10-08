@@ -43,6 +43,7 @@ private:
 	std::string outputDir;
 	std::string inputDir;
 public:
+	static UInt_t GetColor(int no);
 	static bool existsDirectory(std::string dir);
 	TSettings(TRunInfo* runInfo);
 	TSettings(UInt_t runNumber=0);
@@ -297,7 +298,7 @@ public:
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
-	bool isClusterInDiaDetectorArea(TCluster cluster, Int_t area);
+	bool isClusterInDiaDetectorArea(TCluster *cluster, Int_t area);
 	bool isValidCellNo(UInt_t cellNo){return (cellNo<nRows3d*nColumns3d);}
 	int getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verbosity = 0);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
@@ -499,6 +500,16 @@ private:
 	UInt_t nRows3d;
 	UInt_t nColumns3d;
 	Float_t columnRadius;//in mum
+	Int_t MaxOverlayClusterSize;
+	Float_t CentralColumnOverlayXLow;
+	Float_t CentralColumnOverlayXHigh;
+	Float_t CentralColumnOverlayYLow;
+	Float_t CentralColumnOverlayYHigh;
+	Float_t CentralColumnOverlayXBins;
+	Float_t CentralColumnOverlayYBins;
+	Float_t OverlayOffsetX;
+	Float_t OverlayOffsetY;
+	Float_t OverlayColumnPulseHeightCut;
 	vector<Int_t> badCells3d;
 	vector<Int_t> badCells3dnH;
 	vector<Int_t> goodCells3d;
@@ -540,6 +551,18 @@ public:
 	int get3DCellNo(pair<char,int> pos){return get3DCellNo((char)pos.first,pos.second);};
 	Int_t getCellNo(Float_t xDet,Float_t yDet);
 	pair<int,int> getCellAndQuarterNo(Float_t xDet, Float_t yDet);
+
+	Int_t getMaxOverlayClusterSize(){return MaxOverlayClusterSize;}
+	Float_t getCentralColumnOverlayXLow(){return CentralColumnOverlayXLow;}
+	Float_t getCentralColumnOverlayXHigh(){return CentralColumnOverlayXHigh;}
+	Float_t getCentralColumnOverlayYLow(){return CentralColumnOverlayYLow;}
+	Float_t getCentralColumnOverlayYHigh(){return CentralColumnOverlayYHigh;}
+	Float_t getCentralColumnOverlayXBins(){return CentralColumnOverlayXBins;}
+	Float_t getCentralColumnOverlayYBins(){return CentralColumnOverlayYBins;}
+
+	Float_t getOverlayOffsetX(){return OverlayOffsetX;}
+	Float_t getOverlayOffsetY(){return OverlayOffsetY;}
+	Float_t getOverlayColumnPulseHeightCut(){return OverlayColumnPulseHeightCut;}
 
 	inline Int_t getRowOfCell(Int_t cellNo){return cellNo % getNRows3d();}
 	inline Int_t getColumnOfCell(Int_t cellNo){return cellNo / getNRows3d();}

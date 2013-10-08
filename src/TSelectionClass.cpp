@@ -14,12 +14,13 @@ TSelectionClass::TSelectionClass(TSettings* newSettings) {
 	cout<<"**********************************************************"<<endl;
 	if(newSettings==0)exit(-1);
 	this->settings=newSettings;
+    verbosity=settings->getVerbosity();
 	this->results=0;
-	cout<<settings->getRunNumber()<<endl;
+	if(verbosity)cout<<settings->getRunNumber()<<endl;
 
 	// TODO Auto-generated constructor stub
 	sys = gSystem;
-	cout<<"goToClusterTree"<<endl;
+	if(verbosity)cout<<"goToClusterTree"<<endl;
 	settings->goToClusterTreeDir();
 	fiducialCuts=0;
 	createdNewTree=false;
@@ -28,33 +29,31 @@ TSelectionClass::TSelectionClass(TSettings* newSettings) {
 	selectionFile=NULL;
 	settings->goToSelectionTreeDir();
 	htmlSelection = new THTMLSelection(settings);
-	cout<<"OPEN TADCEventReader"<<flush;
-	cout<<"\ngoToSelectionTreeDir"<<endl;
+	if(verbosity)cout<<"OPEN TADCEventReader"<<flush;
+	if(verbosity)cout<<"\ngoToSelectionTreeDir"<<endl;
 	settings->goToSelectionTreeDir();
-	cout<<"open Tree:"<<endl;
+	if(verbosity)cout<<"open Tree:"<<endl;
 	eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings);
 	//settings->getRunNumber());
-	cout<<" DONE"<<endl;
+	if(verbosity)cout<<" DONE"<<endl;
 
 	histSaver=new HistogrammSaver(settings);
-	cout<<"goToSelectionDir"<<endl;
+	if(verbosity)cout<<"goToSelectionDir"<<endl;
 	settings->goToSelectionDir();
 	stringstream plotsPath;
 	plotsPath<<sys->pwd()<<"/";
 	histSaver->SetPlotsPath(plotsPath.str().c_str());
 	histSaver->SetRunNumber(settings->getRunNumber());
 	htmlSelection->setFileGeneratingPath(sys->pwd());
-	cout<<"goToSelectionTREEDir"<<endl;
+	if(verbosity)cout<<"goToSelectionTREEDir"<<endl;
 	settings->goToSelectionTreeDir();
-	cout<<"HISTSAVER:"<<sys->pwd()<<endl;
-	verbosity=settings->getVerbosity();
+	if(verbosity)cout<<"HISTSAVER:"<<sys->pwd()<<endl;
 
 	createdTree=false;
-	cout<<"Fiducial Cut:\n\n\tAccept following Range in Silicon Planes: "<<endl;
+	cout<<"\nFiducial Cut:\n\tAccept following Range in Silicon Planes: "<<endl;
 	cout<<"\t\tX: "<<settings->getSi_avg_fidcut_xlow()<<"/"<<settings->getSi_avg_fidcut_xhigh()<<endl;
 	cout<<"\t\tY: "<<settings->getSi_avg_fidcut_ylow()<<"/"<<settings->getSi_avg_fidcut_yhigh()<<endl;
-	cout<<"\t\t"<<settings->getSelectionFidCuts()<<endl;
-	cout<<" for Alignment use "<<settings->getAlignment_training_track_fraction()*100<<" % of the events." <<endl;
+	cout<<"for Alignment use "<<settings->getAlignment_training_track_fraction()*100<<" % of the events." <<endl;
 	nUseForAlignment=0;
 	nUseForAnalysis=0;
 	nUseForSiliconAlignment=0;
@@ -75,29 +74,29 @@ TSelectionClass::~TSelectionClass() {
 	selectionFile->cd();
 	if(selectionTree!=NULL&&this->createdTree){
 		saveHistos();
-		cout<<"CLOSING TREE"<<endl;
+		if(verbosity)cout<<"CLOSING TREE"<<endl;
 		settings->goToAlignmentRootDir();
-		cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<settings->getClusterTreeFilePath()<<endl;
+		if(verbosity)cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<settings->getClusterTreeFilePath()<<endl;
 		selectionTree->AddFriend("clusterTree",settings->getClusterTreeFilePath().c_str());
 
-		cout<<"\t"<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
+		if(verbosity)cout<<"\t"<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
 
-		cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
+		if(verbosity)cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
 		selectionTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
 
-		cout<<"\n\n\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
+		if(verbosity)cout<<"\n\n\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
 		selectionFile->cd();
-		cout<<"\t"<<"WRITE TREE: "<<flush;
+		if(verbosity)cout<<"\t"<<"WRITE TREE: "<<flush;
 		int retVal = selectionTree->Write();
-		cout<<retVal<<endl;
+		if(verbosity)cout<<retVal<<endl;
 		htmlSelection->generateHTMLFile();
 	}
 	selectionFile->Close();
 	delete eventReader;
 	delete histSaver;
 	delete htmlSelection;
-	cout<<"goToOutputDir"<<endl;
+	if(verbosity)cout<<"goToOutputDir"<<endl;
 	settings->goToOutputDir();
 }
 
@@ -109,15 +108,16 @@ void TSelectionClass::MakeSelection()
 
 
 void TSelectionClass::MakeSelection(UInt_t nEvents)
-{cout<<"Make Selection"<<endl;
-if(nEvents==0)
+{if(nEvents==0)
 	this->nEvents=eventReader->GetEntries();
 else if(nEvents>eventReader->GetEntries()){
 	cerr<<"nEvents is bigger than entries in eventReader tree: \""<<eventReader->getTree()->GetName()<<"\""<<endl;
 }
 else
 	this->nEvents=nEvents;
-cout<<"goToSelectionTreeDir"<<endl;
+
+if(verbosity)cout<<"Make Selection"<<endl;
+if(verbosity)cout<<"goToSelectionTreeDir"<<endl;
 settings->goToSelectionTreeDir();
 histSaver->SetNumberOfEvents(this->nEvents);
 createdTree=createSelectionTree(nEvents);
@@ -126,6 +126,7 @@ this->setBranchAdressess();
 createFiducialCut();
 hFiducialCutSilicon->Reset();
 hFiducialCutSiliconDiamondHit->Reset();
+hFiducialCutSiliconOneAndOnlyOneDiamondHit->Reset();
 hAnalysisFraction->Reset();
 hSelectedEvents->Reset();
 nUseForAlignment=0;
@@ -160,40 +161,40 @@ createCutFlowDiagramm();
 bool TSelectionClass::createSelectionTree(int nEvents)
 {
 
-	cout<<"TSelectionClass::checkTree"<<endl;
+    if(verbosity)cout<<"TSelectionClass::checkTree"<<endl;
 	bool createdNewFile=false;
 	bool createdNewTree=false;
-	cout<<"\tgoToSelection Tree:"<<endl;
+	if(verbosity)cout<<"\tgoToSelection Tree:"<<endl;
 	settings->goToSelectionTreeDir();
 	selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"READ");
 	if(selectionFile->IsZombie()){
-		cout<<"\tselectionfile does not exist, create new one..."<<endl;
+	    if(verbosity)cout<<"\tselectionfile does not exist, create new one..."<<endl;
 		createdNewFile =true;
 		selectionFile= new TFile(settings->getSelectionTreeFilePath().c_str(),"CREATE");
-		cout<<"DONE"<<flush;
+		if(verbosity)cout<<"DONE"<<flush;
 		selectionFile->cd();
 	}
 	else{
 		createdNewFile=false;
-		cout<<"\tFile exists"<<endl;
+		if(verbosity)cout<<"\tFile exists"<<endl;
 	}
 	selectionFile->cd();
-	cout<<"\tget Tree"<<endl;
+	if(verbosity)cout<<"\tget Tree"<<endl;
 	stringstream treeDescription;
 	treeDescription<<"Selection Data of run "<<settings->getRunNumber();
-	cout<<"\tget Tree2"<<endl;
+	if(verbosity)cout<<"\tget Tree2"<<endl;
 	selectionFile->GetObject("selectionTree",selectionTree);
-	cout<<"\tcheck Selection Tree:"<<selectionTree<<endl;
-	cout<<sys->pwd()<<endl;
+	if(verbosity)cout<<"\tcheck Selection Tree:"<<selectionTree<<endl;
+	if(verbosity)cout<<sys->pwd()<<endl;
 	if(selectionTree!=NULL){
-		cout<<"\tFile and Tree Exists... \t"<<selectionTree->GetEntries()<<" Events\t"<<flush;
+	    if(verbosity)cout<<"\tFile and Tree Exists... \t"<<selectionTree->GetEntries()<<" Events\t"<<flush;
 		if(selectionTree->GetEntries()>=nEvents){
 			createdNewTree=false;
 			selectionTree->GetEvent(0);
 			return false;
 		}
 		else{
-			cout<<"\tselectionTree.events !- nEvents"<<flush;
+		    if(verbosity)cout<<"\tselectionTree.events !- nEvents"<<flush;
 			selectionTree->Delete();
 			selectionTree=NULL;
 		}
@@ -201,14 +202,14 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 
 	if(selectionTree==NULL){
 		this->nEvents=nEvents;
-		cout<<"selectionTree does not exists, close file"<<endl;
+		if(verbosity)cout<<"selectionTree does not exists, close file"<<endl;
 		delete selectionFile;
-		cout<<"."<<endl;
+		if(verbosity)cout<<"."<<endl;
 		selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"RECREATE");
 		selectionFile->cd();
-		cout<<"."<<endl;
+		if(verbosity)cout<<"."<<endl;
 		this->selectionTree=new TTree("selectionTree",treeDescription.str().c_str());
-		cout<<"."<<endl;
+		if(verbosity)cout<<"."<<endl;
 		createdNewTree=true;
 		cout<<"\n***************************************************************\n";
 		cout<<"there exists no tree:\'selectionTree\"\tcreate new one."<<selectionTree<<"\n";
@@ -351,11 +352,14 @@ void TSelectionClass::fillHitOccupancyPlots(){
 		return;
 	hFiducialCutSilicon->Fill(fiducialValueX,fiducialValueY);
 	//	if((isValidSiliconTrack||isSiliconTrackNotFiducialCut)&&nDiamondClusters>0)
+
+    FillHitOccupancyPlotsSamePattern();
 	if(!atLeastOneValidDiamondCluster)
 		return;
 	hFiducialCutSiliconDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(!oneAndOnlyOneDiamondCluster)
 		return;
+	hFiducialCutSiliconOneAndOnlyOneDiamondHit->Fill(fiducialValueX,fiducialValueY);
 	if(!IsInFiducialCut)
 		return;
 	hAnalysisFraction->Fill(nEvent);
@@ -464,21 +468,23 @@ void TSelectionClass::setBranchAdressess(){
 
 void TSelectionClass::initialiseHistos()
 {
-	std::string name = "hFidCutSilicon_OneAndOnlyOneCluster";
-	hFiducialCutSilicon = new TH2F(name.c_str(),name.c_str(),512,0,256,512,0,256);
+	TString name = "hFidCutSilicon_OneAndOnlyOneCluster";
+	hFiducialCutSilicon = new TH2F(name,name,512,0,256,512,0,256);
 	hFiducialCutSilicon->GetYaxis()->SetTitle("yCoordinate in Channels");
 	hFiducialCutSilicon->GetXaxis()->SetTitle("xCoordinate in Channels");
 
-	std::string name2 = "hFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster";
-	hFiducialCutSiliconDiamondHit = new TH2F(name2.c_str(),name2.c_str(),512,0,256,512,0,256);
-	hFiducialCutSiliconDiamondHit->GetYaxis()->SetTitle("yCoordinate in Channels");
-	hFiducialCutSiliconDiamondHit->GetXaxis()->SetTitle("xCoordinate in Channels");
+	name = "hFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster";
+	hFiducialCutSiliconDiamondHit = (TH2F*)hFiducialCutSilicon->Clone(name);
+	hFiducialCutSiliconDiamondHit->SetTitle(name);
 
+	name = "hFiducialCutSiliconOneAndOnlyOneDiamondHit";
+	hFiducialCutSiliconOneAndOnlyOneDiamondHit = (TH2F*)hFiducialCutSilicon->Clone(name);
+	hFiducialCutSiliconOneAndOnlyOneDiamondHit->SetTitle(name);
 
-	std::string name3 = "hSelectedEventsValidSiliconTrackInFidCutAndOneDiamondHit";
-	hSelectedEvents = new TH2F("hSelectedEvents",name3.c_str(),512,0,256,512,0,256);
-	hSelectedEvents->GetYaxis()->SetTitle("yCoordinate in Channels");
-	hSelectedEvents->GetXaxis()->SetTitle("xCoordinate in Channels");
+	name = "hSelectedEvents";
+	TString title  = "ValidSiliconTrackInFidCutAndOneAndOnlyOneDiamondHit";
+	hSelectedEvents = (TH2F*)hFiducialCutSilicon->Clone(name);
+	hSelectedEvents->SetTitle(title);
 
 	int nEvents= eventReader->GetEntries();
 	int i=nEvents/1000;
@@ -488,6 +494,33 @@ void TSelectionClass::initialiseHistos()
 	hAnalysisFraction->SetTitle("Fraction of Events for Analysis");
 	hAnalysisFraction->GetXaxis()->SetTitle("event no");
 	hAnalysisFraction->GetYaxis()->SetTitle("fraction of daimond + silicon hit events (%)");
+
+	UInt_t area =  settings->getSelectionFidCuts()->getNFidCuts();
+	area = TMath::Max(area,settings->diamondPattern.getNPatterns());
+	for(UInt_t i =0;i <area; i++){
+	    name = TString::Format("hFiducialCutSiliconDiamondHitSamePattern_%d",i+1);
+	    TH2F* histo= (TH2F*)hFiducialCutSilicon->Clone(name);
+	    histo->SetTitle(name);
+	    mapFiducialCutSiliconDiamondHitSamePattern[i+1] =histo;
+	}
+
+    name = "hDiamondPatternFiducialPattern";
+    hDiamondPatternFiducialPattern = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0.5,settings->diamondPattern.getNPatterns()+1.5);
+    hDiamondPatternFiducialPattern->GetXaxis()->SetTitle("pattern");
+    hDiamondPatternFiducialPattern->GetYaxis()->SetTitle("number of correct patterns");
+
+    name = "hDiamondPatternFiducialPatternNoMapping";
+    hDiamondPatternFiducialPatternNoMapping = new TH1F(name,name,settings->diamondPattern.getNPatterns()+1,0.5,settings->diamondPattern.getNPatterns()+1.5);
+    hDiamondPatternFiducialPatternNoMapping->GetXaxis()->SetTitle("pattern selectionCut");
+    hDiamondPatternFiducialPatternNoMapping->GetYaxis()->SetTitle("number of no mapping found");
+
+    name = "pDiamondPatternFiducialPatternProfile";
+    pDiamondPatternFiducialPatternProfile = new TProfile(name,name,settings->diamondPattern.getNPatterns()+1,05,settings->diamondPattern.getNPatterns()+1.5);
+    pDiamondPatternFiducialPatternProfile->GetXaxis()->SetTitle("pattern selectionCut");
+    pDiamondPatternFiducialPatternProfile->GetYaxis()->SetTitle("rel. number of mappings found");
+
+
+
 }
 
 
@@ -605,55 +638,104 @@ bool TSelectionClass::isSaturated(UInt_t det,UInt_t cl)
 void TSelectionClass::saveHistos()
 {
 	cout<<"save Histo: "<<hFiducialCutSilicon->GetTitle()<<endl;
-	std::string name = "c";
-	name.append(hFiducialCutSilicon->GetName());
+	TString name = hFiducialCutSilicon->GetName();
+	name.Insert(0,"c");
 	TCanvas *c1= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSilicon);
-	c1->SetName(name.c_str());
-	/*new TCanvas(name.c_str(),hFiducialCutSilicon->GetTitle());
-	c1->cd();
-	hFiducialCutSilicon->Draw("colz");
-	double xLow = settings->getSi_avg_fidcut_xlow();
-	double xHigh = settings->getSi_avg_fidcut_xhigh();
-	double yLow = settings->getSi_avg_fidcut_ylow();
-	double yHigh = settings->getSi_avg_fidcut_yhigh();
-	TLine* lXlower = new TLine(xLow,yLow,xLow,yHigh);
-	TLine* lXhigher = new TLine(xHigh,yLow,xHigh,yHigh);
-	TLine* lYlower = new TLine(xLow,yLow,xHigh,yLow);
-	TLine* lYhigher = new TLine(xLow,yHigh,xHigh,yHigh);
-	lXlower->Draw();
-	lXhigher->Draw();
-	lYlower->Draw();
-	lYhigher->Draw();*/
+	c1->SetName(name);
 	histSaver->SaveCanvas(c1);
-	std::string name2 = "c";
-	name2.append(hFiducialCutSiliconDiamondHit->GetName());
-	TCanvas *c2= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit,true);
-	c2->SetName(name2.c_str());
-	histSaver->SaveCanvas(c2);
+	delete c1;
+	c1 = 0;
+    delete hFiducialCutSilicon;
 
-	std::string name3 = "c";
-	name3.append(hSelectedEvents->GetName());
-	TCanvas *c3= fiducialCuts->getAllFiducialCutsCanvas(hSelectedEvents,true);
-	c3->SetName(name3.c_str());
-	histSaver->SaveCanvas(c3);
+	name = hFiducialCutSiliconDiamondHit->GetName();
+	name.Insert(0,"c");
+	c1 = fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit,true);
+	c1->SetName(name);
+	histSaver->SaveCanvas(c1);
+	delete c1;
+	c1=0;
+    delete hFiducialCutSiliconDiamondHit;
 
-	//   new TCanvas(name2.c_str(),hFiducialCutSiliconDiamondHit->GetTitle());
-	/*c2->cd();
-	hFiducialCutSiliconDiamondHit->Draw("colz");
-	lXlower->Draw();
-	lXhigher->Draw();
-	lYlower->Draw();
-	lYhigher->Draw();*/
+	name = "c";
+	name.Append(hFiducialCutSiliconOneAndOnlyOneDiamondHit->GetName());
+	c1= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconOneAndOnlyOneDiamondHit,true);
+	c1->SetName(name);
+	histSaver->SaveCanvas(c1);
+    delete c1;
+    c1=0;
+    delete hFiducialCutSiliconOneAndOnlyOneDiamondHit;
 
-	//	histSaver->SaveHistogram(hFiducialCutSilicon);
-	delete hFiducialCutSilicon;
-	delete hFiducialCutSiliconDiamondHit;
-	delete hSelectedEvents;
+	name = "c";
+	name.Append(hSelectedEvents->GetName());
+	c1 = fiducialCuts->getAllFiducialCutsCanvas(hSelectedEvents,true);
+	c1->SetName(name);
+	histSaver->SaveCanvas(c1);
+    delete c1;
+    c1=0;
+    delete hSelectedEvents;
+
+    map<Int_t,TH2F*>::iterator it;
+    for (it = mapFiducialCutSiliconDiamondHitSamePattern.begin(); it!=mapFiducialCutSiliconDiamondHitSamePattern.end(); it++){
+        TH2F* histo = (*it).second;
+        name = histo->GetName();
+        name.Replace(0,1,"c");
+        c1 = fiducialCuts->getAllFiducialCutsCanvas(histo,true);
+        c1->SetName(name);
+        histSaver->SaveCanvas(c1);
+        delete c1;
+        c1=0;
+        delete histo;
+    }
 	hAnalysisFraction->Scale(.1);
 	hAnalysisFraction->SetStats(false);
 	//	hAnalysisFraction->GetYaxis()->SetRangeUser(0,100);
 	histSaver->SaveHistogram(hAnalysisFraction);
 	delete hAnalysisFraction;
+
+
+    histSaver->SaveHistogram(hDiamondPatternFiducialPattern);
+
+    histSaver->SaveHistogram(hDiamondPatternFiducialPatternNoMapping);
+    name = "stackPatternMapping";
+    hDiamondPatternFiducialPattern->SetLineColor(kGreen);
+    hDiamondPatternFiducialPatternNoMapping->SetLineColor(kRed);
+    THStack *stack = new THStack(name,name);
+    stack->Add(hDiamondPatternFiducialPattern);
+    stack->Add(hDiamondPatternFiducialPatternNoMapping);
+    stack->Draw();
+    if(stack->GetXaxis()) stack->GetXaxis()->SetTitle("pattern no.");
+    if(stack->GetYaxis()) stack->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveStack(stack,"hist",true);
+    if(stack) delete stack;
+    histSaver->SaveHistogram(pDiamondPatternFiducialPatternProfile);
+    if(hDiamondPatternFiducialPatternNoMapping) delete hDiamondPatternFiducialPatternNoMapping;
+    if(hDiamondPatternFiducialPattern) delete hDiamondPatternFiducialPattern;
+    if (pDiamondPatternFiducialPatternProfile) delete pDiamondPatternFiducialPatternProfile;
+}
+
+void TSelectionClass::FillHitOccupancyPlotsSamePattern() {
+    UInt_t diamondDet = TPlaneProperties::getDetDiamond();
+    Int_t selectionPattern = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
+    if(verbosity>4) cout<<"\n";
+    if(verbosity>4) settings->diamondPattern.showPatterns();
+    bool mappingFound = false;
+    for(UInt_t cl = 0; cl< nDiamondClusters;cl++){
+        if(verbosity>4)cout<<"Cluster: "<<cl+1<<"/"<<nDiamondClusters<<endl;
+        TCluster cluster = eventReader->getCluster(diamondDet,cl);
+        if(verbosity>4)cluster.Print();
+        Int_t diamondPattern = settings->diamondPattern.getClusterPattern(&cluster);
+        if(verbosity>4)cout<<"selectionPattern: "<<selectionPattern<<"\tdiamondPattern: "<<diamondPattern<<endl;
+        if(selectionPattern == diamondPattern && diamondPattern!=-1){
+            mappingFound = true;
+            mapFiducialCutSiliconDiamondHitSamePattern[diamondPattern]->Fill(fiducialValueX,fiducialValueY);
+            hDiamondPatternFiducialPattern->Fill(selectionPattern);
+            pDiamondPatternFiducialPatternProfile->Fill(selectionPattern,1);
+        }
+    }
+    if(!mappingFound&& selectionPattern>0){
+        pDiamondPatternFiducialPatternProfile->Fill(selectionPattern,0);
+        hDiamondPatternFiducialPatternNoMapping->Fill(selectionPattern);
+    }
 }
 
 void TSelectionClass::createFiducialCut(){

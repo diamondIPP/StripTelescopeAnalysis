@@ -75,7 +75,13 @@ Float_t TTracking::getMeasuredPositionMetricSpace(TPlaneProperties::enumCoordina
 {
 	if (myTrack == 0)
 		return 0;
-	return myTrack->getMeasuredClusterPositionMetricSpace(cor,plane,cmnCorrected,mode);
+	if (cor == TPlaneProperties::XY_COR)
+	    cerr << " COR is CY but want to get measured Position!!! ERROR!"<<endl;
+	Int_t det = plane*2+cor==TPlaneProperties::X_COR?0:1;
+	TH1F* histo = myTrack->getEtaIntegral(det);
+	if (verbosity>6&&TPlaneProperties::isSiliconPlane(plane) && (mode != TCluster::corEta||histo==0))
+	        cout<<"[TTracking::getMeasuredPositionMetricSpace] "<<mode<<" "<<histo<<endl;
+	return myTrack->getMeasuredClusterPositionMetricSpace(cor,plane,cmnCorrected,mode,histo);
 }
 
 Float_t TTracking::getYPositionInDetSystem(UInt_t det, Float_t xPredicted,

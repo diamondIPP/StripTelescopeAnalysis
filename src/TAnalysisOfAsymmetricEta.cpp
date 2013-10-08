@@ -450,7 +450,7 @@ bool TAnalysisOfAsymmetricEta::checkBadConvergence(UInt_t nTries){
 }
 
 void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TH2F* histoNoCor, TString startname, Float_t alpha){
-	histSaver->SaveHistogram(hAsymmetricEta2D);
+	histSaver->SaveHistogram(hAsymmetricEta2D,false);
 	//	TString name = "hAsymmetricEtaFinal_";
 	int maxDia =(int)settings->getNDiamonds()+2;
 	if(TPlaneProperties::isSiliconDetector(this->det))

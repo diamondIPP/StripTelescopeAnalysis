@@ -74,7 +74,7 @@ void ChannelScreen::PrintScreenedChannels() {
 		if(channel_switch[i]==0) screenedChannels.push_back(i);
 	std::cout<<"\nThere are "<<screenedChannels.size()<<" channels screened in detector "<<det<<": "<<std::endl;
 	if(screenedChannels.size()){
-		for(int i=0; i<screenedChannels.size(); i++){
+		for(UInt_t i=0; i<screenedChannels.size(); i++){
 			std::cout<<screenedChannels.at(i)<<", ";
 		}
 		std::cout<<std::endl;

@@ -26,15 +26,6 @@ void TDiamondPattern::loadStandardPitchWidthSettings() {
 	bLoadedStandardPitchWidthSettings=true;
 }
 
-std::pair<Int_t,Int_t> TDiamondPattern::getInterval(UInt_t pattern){
-	Int_t first = -1;
-	Int_t last = -1;
-	if(pattern >= 0 && pattern<getNIntervals()){
-		first= firstChannelOfInterval.at(pattern);
-		last = nChannelsOfInterval.at(pattern) + first;
-	}
-	return make_pair(first,last);
-}
 
 void TDiamondPattern::loadPitchWidthSettings(Float_t pitchWidth) {
 	resetPattern();
@@ -104,10 +95,10 @@ bool TDiamondPattern::isValidChannelPosition(Float_t channel) {
 	return false;
 }
 
-bool TDiamondPattern::isValidCluster(TCluster cluster) {
-	for (UInt_t cl = 0; cl < cluster.size(); cl ++)
-		if (cluster.isHit(cl)||cluster.isSeed(cl))
-			if ( !isValidChannelPosition( cluster.getChannel(cl) ) )
+bool TDiamondPattern::isValidCluster(TCluster* cluster) {
+	for (UInt_t cl = 0; cl < cluster->size(); cl ++)
+		if (cluster->isHit(cl)||cluster->isSeed(cl))
+			if ( !isValidChannelPosition( cluster->getChannel(cl) ) )
 				return false;
 	return true;
 }
@@ -327,6 +318,30 @@ Float_t TDiamondPattern::getPitchWidth(UInt_t area){
 		return this->standardPW;
 }
 
+
+std::pair<Int_t,Int_t> TDiamondPattern::getInterval(UInt_t pattern){
+    Int_t first = -1;
+    Int_t last = -1;
+    if(pattern >= 0 && pattern<getNIntervals()){
+        first= firstChannelOfInterval.at(pattern);
+        last = nChannelsOfInterval.at(pattern) + first;
+    }
+    return make_pair(first,last);
+}
+std::pair<Int_t, Int_t> TDiamondPattern::getTotalInterval(){
+
+    Int_t first = TPlaneProperties::getNChannelsDiamond();
+    Int_t last = 0;
+    for (UInt_t area = 0; area < getNIntervals();area ++){
+        pair<Int_t,Int_t> pattern  = getInterval(area);
+        if(pattern.first < first) first = pattern.first;
+        if(pattern.second > last) last = pattern.second;
+    }
+
+    return make_pair(first,last);
+}
+
+
 std::pair<int,int> TDiamondPattern::getPatternChannels(UInt_t pattern){
 	int firstChannel=-1;
 	int lastChannel=-1;
@@ -337,4 +352,27 @@ std::pair<int,int> TDiamondPattern::getPatternChannels(UInt_t pattern){
 		lastChannel+=firstChannel;
 	}
 	return make_pair(firstChannel,lastChannel);
+}
+
+Int_t TDiamondPattern::getClusterPattern(TCluster* cluster) {
+    Int_t first = cluster->getFirstHitChannel();
+    Int_t last = cluster->getLastHitChannel();
+    if(verbosity>7)cout<<"first: "<<first<<" - last: "<<last<<endl;
+    for(UInt_t i = 0; i< getNPatterns();i++){
+        pair<int,int> channels = getPatternChannels(i+1);
+        if(verbosity>7)cout<<channels.first<<"<="<<first<<" "<<last<<"<="<<channels.second<<endl;
+        if(channels.first<=first&&last<=channels.second)
+            return i+1;
+    }
+    return -1;
+}
+
+Int_t TDiamondPattern::getPatternOfChannel(Int_t ch) {
+    for(UInt_t i = 0; i< getNPatterns();i++){
+        pair<int,int> channels = getPatternChannels(i+1);
+        if(verbosity>7)cout<<channels.first<<"<="<<ch<<"<="<<channels.second<<endl;
+        if(channels.first<=ch&&ch<=channels.second)
+            return i+1;
+    }
+    return -1;
 }
