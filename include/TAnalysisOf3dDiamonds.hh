@@ -37,6 +37,7 @@
 #include "TCluster.hh"
 #include "TCellAnalysisClass.hh"
 #include "TTransparentAnalysis.hh"
+#include "THStack.h"
 
 using namespace std;
 
@@ -86,7 +87,10 @@ private:
 	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
 	void initialise3DCellCentralColumnOverlayHistos();
+	void initialise3DCellBiasColumnOverlayHistos();
+	void initialise3DCellOverlayIndividualBinHistos();
 	void initialise3DOffsetOverlayHistos();
+	void initialise3DOffsetAlignmentOverlayHistos();
 	void initialiseEdgeFreeHistos();
 	//new functions
 	void HitandSeedCount(TCluster* nCluster);
@@ -110,8 +114,11 @@ private:
 	void MakeGhostCluster(TCluster *diamondCluster,Int_t clusterSize);
 	void LongAnalysisSaveCellAndQuaterNumbering();
 	void LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge,Float_t ClusterSize);
+	void LongAnalysis_Fill3DCellOverlayIndividualBinHistos(Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillOverlayCentralColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet, Float_t ClusterSize, TCluster* diamondCluster);
+	void LongAnalysis_FillOverlayBiasColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster* diamondCluster);
+	void LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(Float_t xRelPosDet,Float_t yRelPosDet, Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillOverlayOffsetHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
 
@@ -119,6 +126,10 @@ private:
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
 	void LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge();
+	void LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge();
+	void LongAnalysis_SaveCellsOverlayBiasColumnAndCentralColumnStack();
+	void LongAnalysis_Save3DCellOverlayIndividualBinHistos();
+	void LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignment();
 	void LongAnalysis_SaveCellsOverlayOffsetMeanCharge();
 	void LongAnalysis_SaveEdgeFreeHistos();
 	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp = 0);
@@ -304,6 +315,7 @@ private:
 	vector<TProfile2D*> hCellsOverlayAvrgChargeNoColumnHit;
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgCharge;
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCells;
+	TProfile2D* hCellsCentralColumnOverlayShiftedAvrgChargeMinusBadCells;
 	vector<TH2F*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents;
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut;
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis;
@@ -311,11 +323,20 @@ private:
 	vector<TProfile2D*> hCellsCentralColumnOverlayAvrgChargeGoodCells;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgCharge;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCells;
+	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment;
+	TProfile2D* hCellsOffsetOverlayUnEvenBinningAvrgChargeMinusBadCells;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeGoodCells;
 	TProfile2D* hPulseHeigthCentralRegion;
 	TProfile2D* hPulseHeigthEdgeRegion;
 	TH2F* hEventsCentralRegion;
 	TH2F* hEventsEdgeRegion;
+
+	TProfile2D* hCellsBiasColumnOverlayAvrgCharge;
+	TProfile2D* hCellsBiasColumnOverlayAvrgChargeMinusBadCells;
+	TProfile2D* hCellsBiasColumnOverlayShiftedAvrgChargeMinusBadCells;
+	TH1F* hCellsBiasColumnOverlayLandauMinusBadCells;
+	TH2F* hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents;
+	TProfile2D* hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut;
 
 	vector<TH1F*> hCellOverlayWithColumnLandau;
 	vector<TH1F*> hCellOverlayNoColumnLandau;
@@ -464,6 +485,20 @@ private:
     vector<TH1F*> hTransparentAnalysisTransparentRelativeHitChannelGoodCells;
     vector<TH1F*> hTransparentAnalysisTransparentRelativeHitChannelBadCells;
     vector<TProfile2D*> hTransparentAnalysisTransparentRelativeHitChannelProfile;
+
+    vector<TProfile2D*> VecOverlayCellBinHistos;
+    vector<TH1F*> VecOverlayCellBinLandaus;
+    TH1F* hOverlayCellBinHits;
+    TH1F* hOverlayCellBinHitsBelowCut;
+    TH1F* hOverlayCellOffsetBinHits;
+    TH1F* hOverlayCellOffsetBinHitsBelowCut;
+    vector<TH1F*> hOverlayCellOffsetAlignmentBinHits;
+    vector<TH1F*> hOverlayCellOffsetAlignmentBinHitsBelowCut;
+    TH1F* hOverlayCellUnEvenBinningBinHits;
+    TH1F* hOverlayCellUnEvenBinningBinHitsBelowCut;
+
+    vector<Float_t> ShiftX;
+    vector<Float_t> ShiftY;
 
 
     UInt_t maxClusterSize3d;

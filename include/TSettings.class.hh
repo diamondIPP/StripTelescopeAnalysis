@@ -507,6 +507,10 @@ private:
 	Float_t CentralColumnOverlayYHigh;
 	Float_t CentralColumnOverlayXBins;
 	Float_t CentralColumnOverlayYBins;
+	Float_t BiasColumnOverlayXLow;
+	Float_t BiasColumnOverlayXHigh;
+	Float_t BiasColumnOverlayYLow;
+	Float_t BiasColumnOverlayYHigh;
 	Float_t OverlayOffsetX;
 	Float_t OverlayOffsetY;
 	Float_t OverlayColumnPulseHeightCut;
@@ -559,6 +563,11 @@ public:
 	Float_t getCentralColumnOverlayYHigh(){return CentralColumnOverlayYHigh;}
 	Float_t getCentralColumnOverlayXBins(){return CentralColumnOverlayXBins;}
 	Float_t getCentralColumnOverlayYBins(){return CentralColumnOverlayYBins;}
+
+	Float_t getBiasColumnOverlayXLow(){return BiasColumnOverlayXLow;}
+		Float_t getBiasColumnOverlayXHigh(){return BiasColumnOverlayXHigh;}
+		Float_t getBiasColumnOverlayYLow(){return BiasColumnOverlayYLow;}
+		Float_t getBiasColumnOverlayYHigh(){return BiasColumnOverlayYHigh;}
 
 	Float_t getOverlayOffsetX(){return OverlayOffsetX;}
 	Float_t getOverlayOffsetY(){return OverlayOffsetY;}

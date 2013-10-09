@@ -760,7 +760,11 @@ void TSettings::DefaultLoadDefaultSettings(){
 	LoadDefaultResolutions();
 
 
-
+	OverlayOffsetX = 30;
+	OverlayOffsetY = 30;
+	//OverlayOffsetX = 37.5;
+	//OverlayOffsetY = 37.5;
+	OverlayColumnPulseHeightCut = 500;
 	nRows3d = 11;
 	nColumns3d = 9;
 	yOffset3D = 3890;
@@ -773,9 +777,10 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CentralColumnOverlayYHigh = 80;
 	CentralColumnOverlayXBins = 5;
 	CentralColumnOverlayYBins = 5;
-	OverlayOffsetX = 37.5;
-	OverlayOffsetY = 37.5;
-	OverlayColumnPulseHeightCut = 500;
+	BiasColumnOverlayXLow = -5 + OverlayOffsetX;
+	BiasColumnOverlayXHigh = 5 + OverlayOffsetX;
+	BiasColumnOverlayYLow = -5 + OverlayOffsetY;
+	BiasColumnOverlayYHigh = 5 + OverlayOffsetY;
 
 //	vecEdgePositions.push_back(3715);
 //	vecEdgePositions.push_back(1370);
