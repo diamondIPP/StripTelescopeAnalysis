@@ -1208,11 +1208,13 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     ostringstream histo_filename;
     plots_filename << plots_path<<"/" << htemp->GetName() << ".root";
     histo_filename << plots_path << "histograms.root";
-    TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
+    TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("croot_%s", htemp->GetName()));
     plots_canvas->cd();
     TH1* histo = (TH1*)htemp->Clone();
+    if(!histo)
+        return;
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptRoot_%s",htemp->GetName()));
+    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptcRoot_%s",htemp->GetName()));
 
     plots_canvas->Clear();
     plots_canvas->cd();
@@ -1225,11 +1227,17 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     plots_canvas->Write(plots_filename.str().c_str());
     plots_canvas->Write(plots_filename.str().c_str());
     TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+    if(!f)
+        return;
+    f->cd();
     TCanvas *plots_canvas2 = (TCanvas*) plots_canvas->Clone(TString::Format("cc_%s",htemp->GetName()));
+    if(!plots_canvas2)
+        return;
     //add to histograms.root
     f->cd();
     plots_canvas2->Write();
-    f->Close();
+    if (f && !f->IsZombie() && f->IsOpen())
+        f->Close();
     //	if(plots_canvas)delete plots_canvas;
 
 }
