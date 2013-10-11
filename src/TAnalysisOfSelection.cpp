@@ -1293,6 +1293,8 @@ void TAnalysisOfSelection::fillPHvsEventNoAreaPlots(UInt_t area, UInt_t charge, 
 void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,TSettings* settings,TProfile2D * prof2d,UInt_t xDivisions, UInt_t yDivisions) {
     cout<<"[TAnalysisOfSelection::savePHvsEventNoAreaPlots] "<<endl;
     if (!prof2d)return;
+    if(xDivisions == 0 || yDivisions ==0 )
+        return
     prof2d->Draw();
     TProfile* prof = histSaver->GetProfileX(prof2d);
     TF1* pol1Fit = new TF1("pol1Fit","pol1",prof2d->GetXaxis()->GetXmin(),prof2d->GetXaxis()->GetXmax());

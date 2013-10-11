@@ -958,6 +958,8 @@ void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit, boo
 
 void HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox){
     TString name = "fit_" + (TString)histo->GetName();
+    if (function=="")
+        function="pol1";
     TF1* fit = new TF1(name,function);
     return CreateAndSave1DProfileXWithFitAndInfluence(histo,fit,drawStatbox);
 }
@@ -983,33 +985,50 @@ void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TProfile *prof, TF1* fit
     c1->cd();
     if (!drawStatBox)
         prof->SetStats(false);
-    TPaveText *text;
-    if(fit){
+    TPaveText *text = 0;
+    prof->Draw("");
+    if(fit && !fit->IsZombie()&& prof){
         prof->Fit(fit,"Q");
+        if (prof->GetXaxis() && prof->GetYaxis()){
+            Float_t xmin = prof->GetXaxis()->GetXmin();
+            Float_t xmax = prof->GetXaxis()->GetXmax();
+            Float_t ymin = fit->GetMinimum(xmin,xmax);
+            Float_t ymax = fit->GetMaximum(xmin,xmax);
+            text = new TPaveText(.2,.2,.5,.3,"brNDC");
+            text->SetFillColor(0);
+            text->AddText(TString::Format("relative Influence: #frac{#Delta_{x}}{x_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
+        }
+    }
+    prof->Draw("");
+    if ( prof->GetXaxis() &&  prof->GetYaxis() && prof){
         Float_t xmin = prof->GetXaxis()->GetXmin();
         Float_t xmax = prof->GetXaxis()->GetXmax();
-        Float_t ymin = fit->GetMinimum(xmin,xmax);
-        Float_t ymax = fit->GetMaximum(xmin,xmax);
-        text = new TPaveText(.2,.2,.5,.3,"brNDC");
-        text->SetFillColor(0);
-        text->AddText(TString::Format("relative Influence: #frac{#Delta_{x}}{x_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
+        Float_t ymin = prof->GetBinContent(prof->GetMinimumBin())-1.5*prof->GetBinError(prof->GetMinimumBin());
+        Double_t ymax = prof->GetBinContent(prof->GetMaximumBin())+1.5*prof->GetBinError(prof->GetMaximumBin());
+        ymax = TMath::Max(prof->GetYaxis()->GetXmax(),ymax);
+        Float_t delta = ymax-ymin;
+        ymax = (delta)*1.35+ymin;
+        ymin = ymin - .05*delta;
+        if(xmax<xmin){
+            Float_t b = xmax;
+            xmax = xmin;
+            xmin = b;
+        }
+        if(ymax<ymin){
+            Float_t b = ymax;
+            ymax = ymin;
+            ymin = b;
+        }
+        //    cout<<xmin<<"-"<<xmax<<" "<<ymin<<"-"<<ymax<<endl;
+        TH1 *frame1 = gPad->DrawFrame(xmin,ymin,xmax,ymax);
+        frame1->SetTitle(prof->GetTitle());
+        frame1->GetXaxis()->SetTitle(prof->GetXaxis()->GetTitle());
+        frame1->GetYaxis()->SetTitle(prof->GetYaxis()->GetTitle());
+        frame1->Draw();
+        prof->Draw("sames");
     }
-    prof->Draw();
-    Float_t xmin = prof->GetXaxis()->GetXmin();
-    Float_t xmax = prof->GetXaxis()->GetXmax();
-    Float_t ymin = prof->GetBinContent(prof->GetMinimumBin())-1.5*prof->GetBinError(prof->GetMinimumBin());
-    Double_t ymax = prof->GetBinContent(prof->GetMaximumBin())+1.5*prof->GetBinError(prof->GetMaximumBin());
-    ymax = TMath::Max(prof->GetYaxis()->GetXmax(),ymax);
-    Float_t delta = ymax-ymin;
-    ymax = (delta)*1.35+ymin;
-    ymin = ymin - .05*delta;
-    //    cout<<xmin<<"-"<<xmax<<" "<<ymin<<"-"<<ymax<<endl;
-    TH1 *frame1 = gPad->DrawFrame(xmin,ymin,xmax,ymax);
-    frame1->SetTitle(prof->GetTitle());
-    frame1->GetXaxis()->SetTitle(prof->GetXaxis()->GetTitle());
-    frame1->GetYaxis()->SetTitle(prof->GetYaxis()->GetTitle());
-    frame1->Draw();
-    prof->Draw("sames");
+    else if (prof)
+        prof->Draw("");
     if(fit)fit->Draw("same");
     if(text)    text->Draw("same");
     SaveCanvas(c1);
