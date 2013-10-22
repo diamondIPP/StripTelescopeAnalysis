@@ -973,7 +973,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             hLandau2OutOfXVsEventNo->GetXaxis()->SetTitle("Event no.");
             hLandau2OutOfXVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
-            histSaver->Save1DProfileYWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
+            histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
             if (hLandau2OutOfXVsEventNo)
                 delete hLandau2OutOfXVsEventNo;
         }
@@ -2031,10 +2031,10 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
 void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     cout<<"[TTransparentAnalysis::savePHvsEventNoAreaPlots] "<<endl;
     histSaver->SaveHistogram(hPH2OutOf10VsEventNo);
-    histSaver->Save1DProfileYWithFitAndInfluence(hPH2OutOf10VsEventNo,"pol1",true);
+    histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hPH2OutOf10VsEventNo,"pol1",true);
     delete hPH2OutOf10VsEventNo;
     histSaver->SaveHistogram(hPHVsEventNo);
-    histSaver->Save1DProfileYWithFitAndInfluence(hPHVsEventNo,"pol1",true);
+    histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hPHVsEventNo,"pol1",true);
     delete hPHVsEventNo;
     for (UInt_t i = 0; i< vecPHVsEventNo_Areas.size(); i++){
         TProfile2D * prof2d = vecPHVsEventNo_Areas[i];
