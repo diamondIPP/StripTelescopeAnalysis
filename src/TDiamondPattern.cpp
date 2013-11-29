@@ -103,6 +103,14 @@ bool TDiamondPattern::isValidCluster(TCluster* cluster) {
 	return true;
 }
 
+bool TDiamondPattern::isValidCluster(TCluster cluster) {
+	for (UInt_t cl = 0; cl < cluster.size(); cl ++)
+		if (cluster.isHit(cl)||cluster.isSeed(cl))
+			if ( !isValidChannelPosition( cluster.getChannel(cl) ) )
+				return false;
+	return true;
+}
+
 void TDiamondPattern::initialiseVector() {
 	for (UInt_t i=0;i<channelToMetricConversion.size();i++)
 		channelToMetricConversion[i] = N_INVALID;

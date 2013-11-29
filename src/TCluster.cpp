@@ -99,6 +99,17 @@ TCluster::TCluster(const TCluster& rhs){
  */
 TCluster & TCluster::operator =(const TCluster & src)
 {
+	//To clear and empty all vectors.
+	clusterChannel.clear();clusterChannel.empty();
+	clusterSignal.clear();clusterSignal.empty();
+	clusterADC.clear();clusterADC.empty();
+	clusterSignalInSigma.clear();clusterSignalInSigma.empty();
+	clusterPedMean.clear();clusterPedMean.empty();
+	clusterPedSigma.clear();clusterPedSigma.empty();
+	clusterPedMeanCMN.clear();clusterPedMeanCMN.empty();
+	clusterPedSigmaCMN.clear();clusterPedSigmaCMN.empty();
+	clusterChannelScreened.clear();clusterChannelScreened.empty();
+
 	hitSigma = src.hitSigma;
 	seedSigma= src.seedSigma;
 	isSaturated= src.isSaturated;
@@ -112,15 +123,19 @@ TCluster & TCluster::operator =(const TCluster & src)
 	numberOfSeeds=src.numberOfSeeds;
 	verbosity=src.verbosity;
 	charge=src.charge;
+	//printf("srcCharge: %f, CopiedCharge: %f \n",src.charge,charge);
 	maxChannel=src.maxChannel;
 	maximumSignal=src.maximumSignal;
 	revisionNumber=src.revisionNumber;
 	nChannels=src.nChannels;
 	det=src.det;
 	eventNumber=src.eventNumber;
+	//printf("srceventNumber: %f, CopiedeventNumber: %f \n",src.eventNumber,eventNumber);
 	cmNoise= src.cmNoise;
 	isTransparentCluster = src.isTransparentCluster;
+	//printf("srcisTransparentCluster: %f, CopiedisTransparentCluster: %f \n",src.isTransparentCluster,isTransparentCluster);
 	transparentClusterSize = src.transparentClusterSize;
+	//printf("srcClusterSize: %i, CopiedClusterSize: %i \n",src.transparentClusterSize,transparentClusterSize);
 	for(UInt_t i=0;i<src.clusterChannel.size();i++)
 		clusterChannel.push_back(src.clusterChannel.at(i));
 	for(UInt_t i=0;i<src.clusterSignal.size();i++)

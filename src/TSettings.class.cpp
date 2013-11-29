@@ -1962,14 +1962,37 @@ bool TSettings::isInDiaDetectorArea(Int_t ch,Int_t area){
 }
 
 
+bool TSettings::isClusterInDiaDetectorArea(TCluster cluster, Int_t area){
+	if(area<getNDiaDetectorAreas()){
+		/*
+		for(int i=0; i<cluster.size(); i++)
+			cout<<"channel: "<<cluster.getChannel(i)<<endl;
+		 */
+		int firstClusterChannel = cluster.getFirstHitChannel();
+		int lastClusterChannel = cluster.getLastHitChannel();
+		int cl = cluster.getClusterPosition(lastClusterChannel);
+		int firstAreaChannel = getDiaDetectorArea(area).first;
+		int lastAreaChannel =  getDiaDetectorArea(area).second;
+		bool retVal = firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
+		//printf("Detector channels: %i - %i. Cluster channels: %i - %i.",firstAreaChannel,lastAreaChannel,firstClusterChannel,lastClusterChannel);
+		return retVal;
+	}
+	return false;
+
+}
+
 bool TSettings::isClusterInDiaDetectorArea(TCluster* cluster, Int_t area){
 	if(area<getNDiaDetectorAreas()){
+		/*	for(int i=0; i<cluster->size(); i++)
+			cout<<"channel: "<<cluster->getChannel(i)<<endl;
+		 */
 		int firstClusterChannel = cluster->getFirstHitChannel();
 		int lastClusterChannel = cluster->getLastHitChannel();
 		int cl = cluster->getClusterPosition(lastClusterChannel);
 		int firstAreaChannel = getDiaDetectorArea(area).first;
 		int lastAreaChannel =  getDiaDetectorArea(area).second;
 		bool retVal = firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
+		//printf("Detector channels: %i - %i. Cluster channels: %i - %i.",firstAreaChannel,lastAreaChannel,firstClusterChannel,lastClusterChannel);
 		return retVal;
 	}
 	return false;

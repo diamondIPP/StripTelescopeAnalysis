@@ -55,6 +55,7 @@ public:
 	bool hasInvalidIntervals();
 	bool isValidChannelPosition(Float_t channel);
 	bool isValidCluster(TCluster* cluster);
+	bool isValidCluster(TCluster cluster);
 	Int_t getClusterPattern(TCluster *cluster);
 	Int_t getPatternOfChannel(Int_t ch);
 	UInt_t getNIntervals();//{return nChannelsOfInterval.size();}

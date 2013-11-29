@@ -130,6 +130,8 @@ private:
 	void LongAnalysis_SaveCellsOverlayBiasColumnAndCentralColumnStack();
 	void LongAnalysis_Save3DCellOverlayIndividualBinHistos();
 	void LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignment();
+	Float_t LongAnalysis_CalculateRMS(vector<Float_t>* nVector);
+	void LongAnalysis_Fill2DCellHitsBelowCutRelative(TH1F* nHisto, Int_t Alignment);
 	void LongAnalysis_SaveCellsOverlayOffsetMeanCharge();
 	void LongAnalysis_SaveEdgeFreeHistos();
 	void LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp = 0);
@@ -324,6 +326,7 @@ private:
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgCharge;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCells;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment;
+	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut;
 	TProfile2D* hCellsOffsetOverlayUnEvenBinningAvrgChargeMinusBadCells;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeGoodCells;
 	TProfile2D* hPulseHeigthCentralRegion;
