@@ -1880,9 +1880,9 @@ void TAnalysisOf3dDiamonds::initialise3DOffsetAlignmentOverlayHistos() {
 			Float_t OffsetY = settings->getOverlayOffsetY() + ShiftY.at(j);
 			Int_t Shift = i*ShiftY.size() + j;
 
-			TString appendix = TString::Format("_ShiftX%.1f_ShiftY%.1f",ShiftX[i],ShiftY[j]);
+			TString appendix = TString::Format("Alignment%i_ShiftX%.1f_ShiftY%.1f",Shift,ShiftX[i],ShiftY[j]);
 			if (settings->do3dTransparentAnalysis())
-				appendix = TString::Format("_ShiftX%.1f_ShiftY%.1f_trans",ShiftX[i],ShiftY[j]);
+				appendix = TString::Format("Alignment%i_ShiftX%.1f_ShiftY%.1f_trans",Shift,ShiftX[i],ShiftY[j]);
 
 			Double_t xBinEdges[] = {0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150};
 			Int_t  nXbins = sizeof(xBinEdges)/sizeof(Double_t) - 1;
@@ -4158,7 +4158,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
 
 	vector<TH1F*> hOverlayCellOffsetAlignmentBinHitsBelowCutRelative;
 	vector<TCanvas*> cOverlayCellOffsetAlignmentBinHitsBelowCutRelative;
-	vector<Float_t> RelativeBinEntriesBelowCut;
+	vector<Float_t> RelativeBinEntriesBelowCutVec;
 
 	Int_t Alignments = ShiftX.size()*ShiftY.size();
 	//hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut
@@ -4192,22 +4192,35 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
 	hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentToTalBiasEntriesBelowCut->GetXaxis()->SetTitle("Alignment");
 	hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentToTalBiasEntriesBelowCut->GetYaxis()->SetTitle("Total Events Below Cut");
 
+	//hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut
+	name = "hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut";
+	name.Append(appendix);
+	TH1F* hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut = new TH1F(name,name,
+			Alignments,0,Alignments);
+	hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut->GetXaxis()->SetTitle("Alignment");
+	hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut->GetYaxis()->SetTitle("Relative Events Below Cut");
+
 	/*cout<<"hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.size(): "<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.size()<<endl;
 	cout<<"hOverlayCellOffsetAlignmentBinHits.size(): "<<hOverlayCellOffsetAlignmentBinHits.size()<<endl;
 	cout<<"hOverlayCellOffsetAlignmentBinHitsBelowCut.size(): "<<hOverlayCellOffsetAlignmentBinHitsBelowCut.size()<<endl;*/
 
 	//for(int Alignment=0; Alignment<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.size(); Alignment++){
 
-	Int_t TotalBiasEntriesBelowCut=0;
+	Float_t TotalBiasEntries=0;
+	Float_t TotalBiasEntriesBelowCut=0;
+	Float_t RelativeBiasEntriesBelowCut=0;
 
 	for(int i=0; i<ShiftX.size(); i++){
 		Float_t OffsetX = settings->getOverlayOffsetX() + ShiftX[i];
 		for(int j=0; j<ShiftY.size(); j++){
 			Float_t OffsetY = settings->getOverlayOffsetY() + ShiftY[j];
 			Int_t Alignment = i*ShiftY.size() + j;
+			TotalBiasEntries=0;
+			TotalBiasEntriesBelowCut=0;
+			RelativeBiasEntriesBelowCut=0;
 
 			cout<<"Alignment: "<<Alignment<<endl;
-			cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)<<endl;
+			//cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)<<endl;
 
 			if(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)){
 				cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)->IsZombie()<<endl;
@@ -4248,53 +4261,47 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
 			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetXaxis()->SetBinLabel(Alignment,Binlabel);
 			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetXaxis()->SetLabelSize(0.035);
 
-			Float_t BinEntries = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetBinContent(33);
-			RelativeBinEntriesBelowCut.push_back(BinEntries);
-			TotalBiasEntriesBelowCut += hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment)->GetBinContent(33);
-			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->Fill(Alignment,1,BinEntries);
-			TLine* Bias01LowerEdge = new TLine(32,0,32,BinEntries);
-			TLine* Bias01UpperEdge = new TLine(33,0,33,BinEntries);
-			BinEntries = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetBinContent(34);
-			RelativeBinEntriesBelowCut.push_back(BinEntries);
-			TotalBiasEntriesBelowCut += hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment)->GetBinContent(34);
-			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->Fill(Alignment,2,BinEntries);
-			TLine* Bias02LowerEdge = new TLine(33,0,33,BinEntries);
-			TLine* Bias02UpperEdge = new TLine(34,0,34,BinEntries);
+			vector<float> BiasColumnBinsVec;
+			float BiasColumnBins[4] = {33,34,48,49};
 
-			BinEntries = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetBinContent(161);
-			TLine* ReadoutLowerEdge = new TLine(160,0,160,BinEntries);
-			TLine* ReadoutUpperEdge = new TLine(161,0,161,BinEntries);
+			for(int i=0;i<4;i++){
+				BiasColumnBinsVec.push_back(BiasColumnBins[i]);
+			}
 
-			BinEntries = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetBinContent(48);
-			RelativeBinEntriesBelowCut.push_back(BinEntries);
-			TotalBiasEntriesBelowCut += hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment)->GetBinContent(48);
-			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->Fill(Alignment,3,BinEntries);
-			TLine* Bias03LowerEdge = new TLine(47,0,47,BinEntries);
-			TLine* Bias03UpperEdge = new TLine(48,0,48,BinEntries);
-			BinEntries = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetBinContent(49);
-			RelativeBinEntriesBelowCut.push_back(BinEntries);
-			TotalBiasEntriesBelowCut += hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment)->GetBinContent(49);
-			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->Fill(Alignment,4,BinEntries);
-			TLine* Bias04LowerEdge = new TLine(48,0,48,BinEntries);
-			TLine* Bias04UpperEdge = new TLine(49,0,49,BinEntries);
+			RelativeBinEntriesBelowCutVec.empty(); RelativeBinEntriesBelowCutVec.clear();
+			for(int BiasColumn =0; BiasColumn<BiasColumnBinsVec.size(); BiasColumn++){
+				int BiasColumnBin = BiasColumnBinsVec.at(BiasColumn);
 
-			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentToTalBiasEntriesBelowCut->Fill(Alignment,TotalBiasEntriesBelowCut);
-			Float_t RMS = LongAnalysis_CalculateRMS(&RelativeBinEntriesBelowCut);
-			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCutRMS->Fill(Alignment,RMS);
+				Float_t BinEntries = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetBinContent(BiasColumnBin);
 
-			Bias01LowerEdge->SetLineWidth(.2);
-			Bias01LowerEdge->SetLineColor(kRed);
-			Bias01LowerEdge->Draw("same");
-			Bias01UpperEdge->SetLineWidth(.2);
-			Bias01UpperEdge->SetLineColor(kRed);
-			Bias01UpperEdge->Draw("same");
+				RelativeBinEntriesBelowCutVec.push_back(BinEntries);
+				TotalBiasEntriesBelowCut += hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment)->GetBinContent(BiasColumnBin);
+				TotalBiasEntries += hOverlayCellOffsetAlignmentBinHits.at(Alignment)->GetBinContent(BiasColumnBin);
 
-			Bias02LowerEdge->SetLineWidth(.2);
-			Bias02LowerEdge->SetLineColor(kRed);
-			Bias02LowerEdge->Draw("same");
-			Bias02UpperEdge->SetLineWidth(.2);
-			Bias02UpperEdge->SetLineColor(kRed);
-			Bias02UpperEdge->Draw("same");
+				hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->Fill(Alignment,BiasColumn+1,BinEntries);
+
+				Double_t LowEdge = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetXaxis()->GetBinLowEdge(BiasColumnBin);
+				Double_t UpperEdge = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetXaxis()->GetBinUpEdge(BiasColumnBin);
+				TLine* BiasLowerEdge = new TLine(LowEdge,0,LowEdge,BinEntries);
+				TLine* BiasUpperEdge = new TLine(UpperEdge,0,UpperEdge,BinEntries);
+
+				//TLine* BiasLowerEdge = new TLine(LowEdge,0,LowEdge,.5);
+				//TLine* BiasUpperEdge = new TLine(UpperEdge,0,UpperEdge,.5);
+
+				BiasLowerEdge->SetLineWidth(.2);
+				BiasLowerEdge->SetLineColor(kRed);
+				BiasLowerEdge->Draw("same");
+				BiasUpperEdge->SetLineWidth(.2);
+				BiasUpperEdge->SetLineColor(kRed);
+				BiasUpperEdge->Draw("same");
+			}
+
+			Float_t BinEntries = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetBinContent(161);
+			Double_t LowEdge = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetXaxis()->GetBinLowEdge(161);
+			Double_t UpperEdge = hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment)->GetXaxis()->GetBinUpEdge(161);
+
+			TLine* ReadoutLowerEdge = new TLine(LowEdge,0,LowEdge,BinEntries);
+			TLine* ReadoutUpperEdge = new TLine(UpperEdge,0,UpperEdge,BinEntries);
 
 			ReadoutLowerEdge->SetLineWidth(.2);
 			ReadoutLowerEdge->SetLineColor(kGreen);
@@ -4303,19 +4310,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
 			ReadoutUpperEdge->SetLineColor(kGreen);
 			ReadoutUpperEdge->Draw("same");
 
-			Bias03LowerEdge->SetLineWidth(.2);
-			Bias03LowerEdge->SetLineColor(kRed);
-			Bias03LowerEdge->Draw("same");
-			Bias03UpperEdge->SetLineWidth(.2);
-			Bias03UpperEdge->SetLineColor(kRed);
-			Bias03UpperEdge->Draw("same");
-
-			Bias04LowerEdge->SetLineWidth(.2);
-			Bias04LowerEdge->SetLineColor(kRed);
-			Bias04LowerEdge->Draw("same");
-			Bias04UpperEdge->SetLineWidth(.2);
-			Bias04UpperEdge->SetLineColor(kRed);
-			Bias04UpperEdge->Draw("same");
+			RelativeBiasEntriesBelowCut = TotalBiasEntriesBelowCut/TotalBiasEntries;
+			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentToTalBiasEntriesBelowCut->Fill(Alignment,TotalBiasEntriesBelowCut);
+			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut->Fill(Alignment,RelativeBiasEntriesBelowCut);
+			Float_t RMS = LongAnalysis_CalculateRMS(&RelativeBinEntriesBelowCutVec);
+			hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCutRMS->Fill(Alignment,RMS);
 
 			histSaver->SaveCanvas(cOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment));
 			LongAnalysis_Fill2DCellHitsBelowCutRelative(hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment), Alignment);
@@ -4339,16 +4338,18 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
 	}
 
 	histSaver->SaveHistogram(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentToTalBiasEntriesBelowCut);
+	histSaver->SaveHistogram(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut);
 	histSaver->SaveHistogram(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCutRMS);
 
 }
 
 Float_t TAnalysisOf3dDiamonds::LongAnalysis_CalculateRMS(vector<Float_t>* nVector){
 
+	printf("RelativeEntries: 1: %f, 2: %f, 3: %f, 4: %f", nVector->at(0), nVector->at(1), nVector->at(2), nVector->at(3));
 	Float_t SumSquares = 0;
 
 	for(int i=0; i<nVector->size(); i++){
-		SumSquares += nVector->at(i);
+		SumSquares += (nVector->at(i))*(nVector->at(i));
 	}
 
 	SumSquares /= nVector->size();
@@ -4363,15 +4364,37 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill2DCellHitsBelowCutRelative(TH1F* nH
 	Int_t NYBins = hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->GetYaxis()->GetNbins();
 	Int_t NBins = NXBins*NYBins;
 
-	for(int Bin=0; Bin<NBins; Bin++){
+	printf("NXBins: %i, NYBins: %i, NBins: %i \n", NXBins, NYBins, NBins);
+
+	/*for(int Bin=0; Bin<NBins; Bin++){
 		Float_t BinEntries = nHisto->GetBinContent(Bin);
+		cout<<"Bin Entries: "<<BinEntries<<endl;
 		hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->SetBinContent(Bin,BinEntries);
+	}*/
+
+	for(int BinX=0; BinX<NXBins; BinX++){
+		for(int BinY=0; BinY<NYBins; BinY++){
+			int Bin = BinX*NYBins+(BinY+1);
+			//int Bin = (BinX+1)*(BinY+1)-1;
+			//if(Bin == 33 || Bin == 34 || Bin == 48 || Bin == 49 || Bin == 161){
+				float BinWidth = settings->getPitchWidth(subjectDetector,2)/NXBins;
+				//cout<<"BinWidth: "<<BinWidth<<endl;
+				float FillX = BinWidth*BinX + BinWidth/2;
+				float FillY = BinWidth*BinY + BinWidth/2;
+				Float_t BinEntries = nHisto->GetBinContent(Bin);
+				//Float_t BinEntries = 1;
+				//cout<<"Bin Entries: "<<BinEntries<<endl;
+				hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->Fill(FillX,FillY,BinEntries);
+			//}
+			//hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->SetBinContent(Bin,BinEntries);
+		}
 	}
 
 	TString name = TString::Format("c_%s",hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->GetName());
 	TCanvas* c1 = new TCanvas(name,name);
 	c1->cd();
-	hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->Draw("colz");
+	hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->Draw("TEXTcolz");
+	hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->GetZaxis()->SetRangeUser(0.05,0.3);
 	TCutG* BiasEdges = new TCutG("Bias",5);
 	BiasEdges->SetPoint(0,20,20);
 	BiasEdges->SetPoint(1,20,40);
