@@ -186,6 +186,7 @@ int main(int argc, char ** argv) {
 		TSettings *settings = 0;
 		cout<<"settings"<<endl;
 		settings = new TSettings((TRunInfo*)&RunParameters[i]);
+        cout<<settings->diamondPattern.hasInvalidIntervals()<<endl;
 
 		TResults *currentResults =new TResults(settings);
 		currentResults->Print();
@@ -258,7 +259,7 @@ int main(int argc, char ** argv) {
 			TAlignment *alignment = new TAlignment(settings);
 			//			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
-			alignment->Align(RunParameters[i].getEvents(),0,settings->getAlignmentMode());
+			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::enumDetectorsToAlign(settings->getAlignmentMode()));
 			delete alignment;
 		}
 		//		if(settings->is3dDiamond()){

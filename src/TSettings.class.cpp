@@ -512,7 +512,8 @@ void TSettings::LoadSettings(){
 		if(key == "diamondPattern") ParsePattern(key,value);
 		if(key == "yOffset3D")ParseFloat(key,value,yOffset3D);
 		if(key == "TransparentAlignment") ParseBool(key,value,bTransparentAlignment);
-		if(key == "AlignmentMode")Parse(key,value,alignmentMode)
+		if(key == "AlignmentMode") Parse(key,value,detectorsToAlign);
+		if(key == "DetectorsToAlign") Parse(key,value,detectorsToAlign);
 		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -655,7 +656,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CMN_corr_high=7;
 	CMN_corr_low=3;
 	bDoAllAlignmentPlots = false;
-	alignmentMode = 2;
+	detectorsToAlign = 2;
 
 
 	res_keep_factor=2;

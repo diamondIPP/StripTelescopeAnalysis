@@ -14,6 +14,7 @@ TSelectionClass::TSelectionClass(TSettings* newSettings) {
 	cout<<"**********************************************************"<<endl;
 	if(newSettings==0)exit(-1);
 	this->settings=newSettings;
+    settings->diamondPattern.getNPatterns();
     verbosity=settings->getVerbosity();
 	this->results=0;
 	if(verbosity)cout<<settings->getRunNumber()<<endl;
