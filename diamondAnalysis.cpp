@@ -258,7 +258,7 @@ int main(int argc, char ** argv) {
 			TAlignment *alignment = new TAlignment(settings);
 			//			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
-			alignment->Align(RunParameters[i].getEvents());
+			alignment->Align(RunParameters[i].getEvents(),0,settings->getAlignmentMode());
 			delete alignment;
 		}
 		//		if(settings->is3dDiamond()){

@@ -111,6 +111,7 @@ public:
 	bool is3dDiamond(){return b3dDiamond;};
 	bool b3dDiamond;
 	bool doTransparentAlignmnet()const {return bTransparentAlignment;}
+	int getAlignmentMode()const {return alignmentMode;}
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
@@ -375,6 +376,7 @@ private:
 private:
 	bool bUseUserResolutionInput;
 	bool bTransparentAlignment;
+	int alignmentMode
 	bool bAsymmetricSample;
 	Float_t chi2Cut3D;
 	Float_t transparentChi2;

@@ -796,7 +796,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         cout << "TAlignment::get";
         if(isStripAlignment)cout<<"Strip";
         cout<<"Residual of Plane " << subjectPlane << TPlaneProperties::getCoordinateString(cor);
-        cout << " with " << refPlaneString << ", plotting: " << bPlot<< "using "<<events.size()<<" Events\t" << resOld.isTestResidual();
+        cout << " with " << refPlaneString << ", plotting: " << bPlot<< ", using "<<events.size()<<" Events\t" << resOld.isTestResidual();
         cout<<"\tvalidPatternStrip: "<<mode<<"-"<<calcMode<<" "<<endl;
         if(verbosity>0&&resOld.isTestResidual())resOld.Print(1);
 
