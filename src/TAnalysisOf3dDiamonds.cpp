@@ -601,22 +601,33 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
 
     //cout<<"Transparent Cluster Channels: "<<diamondCluster.getFirstHitChannel()<<" - "<<diamondCluster.getLastHitChannel()<<endl;
+    Int_t StartClusterSize;
+    Int_t MaxOverlayClusterSize;
     if(settings->do3dTransparentAnalysis()){
-    	Int_t MaxOverlayClusterSize = 3;
-    	for(Int_t ClusterSize = 1; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
-    		//cout<<"DiamondCLusterSize: "<<diamondCluster.getClusterSize()<<endl;
-    		diamondCluster.SetTransparentClusterSize(ClusterSize);
-    		Float_t charge = diamondCluster.getCharge(false);
-    		LongAnalysis_FillOverlayedHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize);
-    		LongAnalysis_FillOverlayCentralColumnHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize, &diamondCluster);
-    		LongAnalysis_FillOverlayBiasColumnHistos(cellNo,relPos.first,relPos.second,diamondCluster.getCharge(false), ClusterSize, &diamondCluster);
-    		//cout<<"After Fill Bias Column"<<endl;
-    		//LongAnalysis_FillOverlayOffsetHistos(cellNo,relPos.first,relPos.second,diamondCluster.getCharge(false),ClusterSize);
-
-    		//to check
-    		//LongAnalysis_FillOverlayOffsetHistos(cellNo,relPos.first,relPos.second,charge,ClusterSize);
-    	}
+    	StartClusterSize = 1;
+    	MaxOverlayClusterSize = 3;
     }
+    else{
+    	StartClusterSize = 3;
+    	MaxOverlayClusterSize = 3;
+    }
+
+    for(Int_t ClusterSize = StartClusterSize; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
+    	//cout<<"DiamondCLusterSize: "<<diamondCluster.getClusterSize()<<endl;
+    	if(settings->do3dTransparentAnalysis()){
+    		diamondCluster.SetTransparentClusterSize(ClusterSize);
+    	}
+    	Float_t charge = diamondCluster.getCharge(false);
+    	LongAnalysis_FillOverlayedHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize);
+    	LongAnalysis_FillOverlayCentralColumnHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize, &diamondCluster);
+    	LongAnalysis_FillOverlayBiasColumnHistos(cellNo,relPos.first,relPos.second,diamondCluster.getCharge(false), ClusterSize, &diamondCluster);
+    	//cout<<"After Fill Bias Column"<<endl;
+    	//LongAnalysis_FillOverlayOffsetHistos(cellNo,relPos.first,relPos.second,diamondCluster.getCharge(false),ClusterSize);
+
+    	//to check
+    	//LongAnalysis_FillOverlayOffsetHistos(cellNo,relPos.first,relPos.second,charge,ClusterSize);
+    }
+
     LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
     LongAnalysis_FillRelativeAddedTransparentCharge();
 };

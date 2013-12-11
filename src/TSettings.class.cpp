@@ -780,10 +780,10 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CentralColumnOverlayYHigh = 80;
 	CentralColumnOverlayXBins = 5;
 	CentralColumnOverlayYBins = 5;
-	BiasColumnOverlayXLow = -5 + OverlayOffsetX;
-	BiasColumnOverlayXHigh = 5 + OverlayOffsetX;
-	BiasColumnOverlayYLow = -5 + OverlayOffsetY;
-	BiasColumnOverlayYHigh = 5 + OverlayOffsetY;
+	BiasColumnOverlayXLow = -10 + OverlayOffsetX;
+	BiasColumnOverlayXHigh = 10 + OverlayOffsetX;
+	BiasColumnOverlayYLow = -10 + OverlayOffsetY;
+	BiasColumnOverlayYHigh = 10 + OverlayOffsetY;
 
 //	vecEdgePositions.push_back(3715);
 //	vecEdgePositions.push_back(1370);
