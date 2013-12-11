@@ -306,6 +306,7 @@ private:
 	vector< vector<Int_t> > vecQuarterCellsPassFail;
 	vector< vector<Int_t> > vecQuarterCellsFluctuation;
 	vector<Int_t> CellGrading;
+	vector<Int_t> HighlightGrading;
 	Float_t hLandauGoodCellsMean;
 
 	//TCanvas* cCellsOverlayMeanCharge;

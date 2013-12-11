@@ -238,6 +238,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
         ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
 
         Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
+        if(predictedDetector !=1 && predictedDetector !=2 && predictedDetector !=3)
+        	return;
 
         switch (eventReader->getNDiamondClusters()) {
             case 1:
@@ -351,8 +353,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
             if(!settings->do3dTransparentAnalysis()){
                 /*if(!settings->getSelectionFidCuts()->getFidCut(i+1)->IsInFiducialCut(fiducialValueX,fiducialValueY))
 								return;*/
-                if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
-                    return;
+                /*if(RemoveEdgeHits(&diamondCluster,channels)==1)		//If cluster has hit in edge channel remove.
+                    return;*/
             }
             if(!settings->getSelectionFidCuts()->getFidCut(i+1)->IsInFiducialCut(fiducialValueX,fiducialValueY))
                 return;
@@ -456,12 +458,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     if(!settings->do3dTransparentAnalysis()){
         Float_t maxChi2 = settings->getChi2Cut3D();
         if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
-            return;
+        	return;
+        Int_t DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
+        if(DiamondPattern !=3)
+        	return;
         if(eventReader->getNDiamondClusters()!=1)
             return;
         if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
             cout<<"getCluster "<<flush;
         diamondCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
+        if(diamondCluster.isSaturatedCluster())
+        	return;
         if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
         cout<<"."<<endl;
     }
@@ -475,7 +482,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             return;
         diamondCluster = transparentCluster;
     }
-    cout<<"Cluster Formed."<<endl;
+    //cout<<"Cluster Formed."<<endl;
 
     //	cout<<"xPredDet, yPredDet"<<xPredDet<<", "<<yPredDet<<endl;
     pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
@@ -2648,6 +2655,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradin
             cout<<"Cell: "<<cell<<"  Grading: "<<Grading<<endl;
             CellGrading.push_back(Grading);
         }
+        if(settings->isBadCell(3,cell))
+        	HighlightGrading.push_back(2);
+        else
+        	HighlightGrading.push_back(0);
     }
 }
 
@@ -2808,8 +2819,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
             hCellsLandau2DHighlightedQuarterFail->SetBinContent(pos,yBin,hCellsLandau[pos]->GetBinContent(yBin));
             hCellsLandau2DHighlightedQuarterFailSorted->SetBinContent(pos,yBin,hCellLandausSorted[pos]->GetBinContent(yBin));
         }
-        hHighlightedQuarterFail->SetBinContent(pos,1,CellGrading.at(pos));
-        hHighlightedQuarterFailSorted->SetBinContent(pos,1,CellGrading.at(cellSorted));
+        hHighlightedQuarterFail->SetBinContent(pos,1,HighlightGrading.at(pos));
+        hHighlightedQuarterFailSorted->SetBinContent(pos,1,HighlightGrading.at(cellSorted));
     }
 
     name = "cCellsLandau2DHighlightedQuarterFail";
