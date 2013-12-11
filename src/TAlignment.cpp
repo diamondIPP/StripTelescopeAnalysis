@@ -835,9 +835,9 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             continue;
         //        cout<<"get Event"<<endl;
         myTrack->setEvent(&events.at(nEvent));
-        if (verbosity > 8) cout << "Event no.: " << nEvent << endl;
+        if (verbosity > 8||isStripAlignment) cout << "Event no.: " << nEvent << endl;
 
-        if (verbosity > 5) cout<<"Predict Position: "<<endl;
+        if (verbosity > 5||isStripAlignment) cout<<"Predict Position: "<<endl;
         //        cout<<"\tpredict pos"<<endl;
         predictedPostionMetric = myTrack->predictPosition(subjectPlane, vecRefPlanes, cmnCorrected, silCalcMode, verbosity >10);
         xLabPredictedMetric=predictedPostionMetric->getPositionX();
@@ -845,7 +845,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         xDetPredictedMetric =myTrack->getPositionInDetSystem(2*subjectPlane,xLabPredictedMetric,yLabPredictedMetric);;
         yDetPredictedMetric =myTrack->getPositionInDetSystem(2*subjectPlane+1,xLabPredictedMetric,yLabPredictedMetric);;
 
-        if(verbosity>6) predictedPostionMetric->Print(1);
+        if(verbosity>6||isStripAlignment) predictedPostionMetric->Print(1);
 
         xPredSigma = predictedPostionMetric->getSigmaX();
         yPredSigma = predictedPostionMetric->getSigmaY();
@@ -921,7 +921,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         }
         if(isStripAlignment)
             useEvent = useEvent && !telescopeAlignmentEvent[nEvent];
-        if(isStripAlignment&& false){
+        if(isStripAlignment&& true){
             cout<<TString::Format("%6d %6.1f - %6.1f = % 6.2f,",nEvent,xLabMeasuredMetric,xLabPredictedMetric,xDelta);
             cout<<TString::Format("  %6.2f",xDetMeasuredMetric);
             cout<<TString::Format("   %5.2f, %5.2f  %6.2f",predHitPosDetCh,channelPosXMeas,channelPosXMeas-predHitPosDetCh);

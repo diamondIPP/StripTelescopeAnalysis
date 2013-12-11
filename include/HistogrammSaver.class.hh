@@ -119,7 +119,7 @@ public:
 	static void OptimizeYRange(TH2* histo);
 	static void OptimizeXYRange(TH2* histo);
 
-	static TProfile2D* CreateProfile2D(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
+	static TProfile2D* CreateProfile2D(TString name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
 			UInt_t nBinsX=128, UInt_t nBinsY=128,
 			Float_t minRangeX = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeX= std::numeric_limits<float>::infinity(),
 			Float_t minRangeY = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeY= std::numeric_limits<float>::infinity(),

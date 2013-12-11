@@ -557,13 +557,90 @@ TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
     return histo;
 }
 
-TProfile2D* HistogrammSaver::CreateProfile2D(std::string name,
+TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
         std::vector<Float_t> posX, std::vector<Float_t> posY,
         std::vector<Float_t> posZ, UInt_t nBinsX, UInt_t nBinsY,
         Float_t minRangeX, Float_t maxRangeX, Float_t minRangeY,
         Float_t maxRangeY, Float_t minRangeZ, Float_t maxRangeZ,
         Float_t factor) {
-    return new TProfile2D();//todp
+    if(posX.size()!=posY.size()||posX.size()==0) {
+          cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
+          return new TProfile2D(name,name,2,0,1,2,0,1);
+      }
+      cout<<"CreateProfile2D "<<name<<endl;
+      cout<<TString::Format("maxRange:\nX: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minRangeX,maxRangeX,minRangeY,maxRangeY,minRangeZ,maxRangeZ)<<endl;
+      Float_t maxX = posX.at(0);
+      Float_t maxY = posY.at(0);
+      Float_t maxZ = posZ.at(0);
+      Float_t minX = posY.at(0);
+      Float_t minY = posY.at(0);
+      Float_t minZ = posZ.at(0);
+      //  cout<<" Create Histo: '"<<name<<"' - Range ("<<minRangeX<<"-"<<maxRangeX<<"),  ("
+      //          <<minRangeY<<"-"<<maxRangeY<<"), ("<<minRangeZ<<"-"<<maxRangeZ<<")"<<endl;
+      for(UInt_t i=0;i<posX.size();i++){
+          if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
+              continue;
+          if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
+              continue;
+          if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
+              continue;
+          if(posX.at(i)>maxX)maxX=posX.at(i);
+          else if(posX.at(i)<minX)minX=posX.at(i);
+          if(posY.at(i)>maxY)maxY=posY.at(i);
+          else if(posY.at(i)<minY)minY=posY.at(i);
+          if(posZ.at(i)>maxZ)maxZ=posZ.at(i);
+          else if(posZ.at(i)<minZ)minZ=posZ.at(i);
+      }
+      //  cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
+      Float_t factorX = factor;
+      Float_t factorY = factor;
+      Float_t factorZ = factor;
+      Float_t deltaXMax = maxRangeX - minRangeX;
+      Float_t deltaYMax = maxRangeY - minRangeY;
+      Float_t deltaZMax = maxRangeZ - minRangeZ;
+      Float_t maxDiff = 0.02;
+      if ( TMath::Abs(maxRangeX-maxX)/deltaXMax <= maxDiff && TMath::Abs(minRangeX - minX)/deltaXMax <= maxDiff ) {
+          factorX = 0;
+          maxX = maxRangeX;
+          minX = minRangeX;
+      }
+      if ( TMath::Abs(maxRangeY-maxY)/deltaYMax <= maxDiff && TMath::Abs(minRangeY - minY)/deltaYMax <= maxDiff ) {
+          factorY = 0;
+          minY = minRangeY;
+          maxY = maxRangeY;
+      }
+      if ( TMath::Abs(maxRangeZ-maxZ)/deltaZMax <= maxDiff && TMath::Abs(minRangeZ - minZ)/deltaZMax <= maxDiff ) {
+          factorZ = 0;
+          minZ = minRangeZ;
+          maxZ = maxRangeZ;
+      }
+      Float_t deltaX=maxX-minX;
+      Float_t deltaY=maxY-minY;
+      Float_t deltaZ=maxZ-minZ;
+      //  cout<<"\t"<<deltaX<<" "<<deltaY<<" "<<deltaZ<<endl;
+      //  cout<<"\t"<<factorX<<" "<<factorY<<" "<<factorZ<<endl;
+      minX = minX-factorX*deltaX;
+      maxX = maxX+factorX*deltaX;
+      minY = minY-factorY*deltaY;
+      maxY = maxY+factorY*deltaY;
+      minZ = minZ-factorZ*deltaZ;
+      maxZ = maxZ+factorZ*deltaZ;
+      cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
+      //  char t; cin>>t;
+      TProfile2D* histo = new TProfile2D(name,name,
+              nBinsX,minX,maxX,
+              nBinsY,minY,maxY,
+                     minZ,maxZ);
+      for(UInt_t i=0;i<posX.size();i++){
+          if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
+              continue;
+          if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
+              continue;
+          if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
+              continue;
+          histo->Fill(posX.at(i),posY.at(i),posZ.at(i));
+      }
+    return histo;
 }
 
 void HistogrammSaver::UpdatePaveText(){
@@ -958,6 +1035,8 @@ void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit, boo
 
 void HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox){
     TString name = "fit_" + (TString)histo->GetName();
+    if (function=="")
+        function="pol1";
     TF1* fit = new TF1(name,function);
     return CreateAndSave1DProfileXWithFitAndInfluence(histo,fit,drawStatbox);
 }
@@ -983,33 +1062,50 @@ void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TProfile *prof, TF1* fit
     c1->cd();
     if (!drawStatBox)
         prof->SetStats(false);
-    TPaveText *text;
-    if(fit){
+    TPaveText *text = 0;
+    prof->Draw("");
+    if(fit && !fit->IsZombie()&& prof){
         prof->Fit(fit,"Q");
+        if (prof->GetXaxis() && prof->GetYaxis()){
+            Float_t xmin = prof->GetXaxis()->GetXmin();
+            Float_t xmax = prof->GetXaxis()->GetXmax();
+            Float_t ymin = fit->GetMinimum(xmin,xmax);
+            Float_t ymax = fit->GetMaximum(xmin,xmax);
+            text = new TPaveText(.2,.2,.5,.3,"brNDC");
+            text->SetFillColor(0);
+            text->AddText(TString::Format("relative Influence: #frac{#Delta_{x}}{x_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
+        }
+    }
+    prof->Draw("");
+    if ( prof->GetXaxis() &&  prof->GetYaxis() && prof){
         Float_t xmin = prof->GetXaxis()->GetXmin();
         Float_t xmax = prof->GetXaxis()->GetXmax();
-        Float_t ymin = fit->GetMinimum(xmin,xmax);
-        Float_t ymax = fit->GetMaximum(xmin,xmax);
-        text = new TPaveText(.2,.2,.5,.3,"brNDC");
-        text->SetFillColor(0);
-        text->AddText(TString::Format("relative Influence: #frac{#Delta_{x}}{x_{max}} = %2.2f %%",(ymax-ymin)/ymax*100));
+        Float_t ymin = prof->GetBinContent(prof->GetMinimumBin())-1.5*prof->GetBinError(prof->GetMinimumBin());
+        Double_t ymax = prof->GetBinContent(prof->GetMaximumBin())+1.5*prof->GetBinError(prof->GetMaximumBin());
+        ymax = TMath::Max(prof->GetYaxis()->GetXmax(),ymax);
+        Float_t delta = ymax-ymin;
+        ymax = (delta)*1.35+ymin;
+        ymin = ymin - .05*delta;
+        if(xmax<xmin){
+            Float_t b = xmax;
+            xmax = xmin;
+            xmin = b;
+        }
+        if(ymax<ymin){
+            Float_t b = ymax;
+            ymax = ymin;
+            ymin = b;
+        }
+        //    cout<<xmin<<"-"<<xmax<<" "<<ymin<<"-"<<ymax<<endl;
+        TH1 *frame1 = gPad->DrawFrame(xmin,ymin,xmax,ymax);
+        frame1->SetTitle(prof->GetTitle());
+        frame1->GetXaxis()->SetTitle(prof->GetXaxis()->GetTitle());
+        frame1->GetYaxis()->SetTitle(prof->GetYaxis()->GetTitle());
+        frame1->Draw();
+        prof->Draw("sames");
     }
-    prof->Draw();
-    Float_t xmin = prof->GetXaxis()->GetXmin();
-    Float_t xmax = prof->GetXaxis()->GetXmax();
-    Float_t ymin = prof->GetBinContent(prof->GetMinimumBin())-1.5*prof->GetBinError(prof->GetMinimumBin());
-    Double_t ymax = prof->GetBinContent(prof->GetMaximumBin())+1.5*prof->GetBinError(prof->GetMaximumBin());
-    ymax = TMath::Max(prof->GetYaxis()->GetXmax(),ymax);
-    Float_t delta = ymax-ymin;
-    ymax = (delta)*1.35+ymin;
-    ymin = ymin - .05*delta;
-    //    cout<<xmin<<"-"<<xmax<<" "<<ymin<<"-"<<ymax<<endl;
-    TH1 *frame1 = gPad->DrawFrame(xmin,ymin,xmax,ymax);
-    frame1->SetTitle(prof->GetTitle());
-    frame1->GetXaxis()->SetTitle(prof->GetXaxis()->GetTitle());
-    frame1->GetYaxis()->SetTitle(prof->GetYaxis()->GetTitle());
-    frame1->Draw();
-    prof->Draw("sames");
+    else if (prof)
+        prof->Draw("");
     if(fit)fit->Draw("same");
     if(text)    text->Draw("same");
     SaveCanvas(c1);
@@ -1189,11 +1285,13 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     ostringstream histo_filename;
     plots_filename << plots_path<<"/" << htemp->GetName() << ".root";
     histo_filename << plots_path << "histograms.root";
-    TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("c_%s", htemp->GetName()));
+    TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("croot_%s", htemp->GetName()));
     plots_canvas->cd();
     TH1* histo = (TH1*)htemp->Clone();
+    if(!histo)
+        return;
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptRoot_%s",htemp->GetName()));
+    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptcRoot_%s",htemp->GetName()));
 
     plots_canvas->Clear();
     plots_canvas->cd();
@@ -1206,11 +1304,17 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     plots_canvas->Write(plots_filename.str().c_str());
     plots_canvas->Write(plots_filename.str().c_str());
     TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+    if(!f)
+        return;
+    f->cd();
     TCanvas *plots_canvas2 = (TCanvas*) plots_canvas->Clone(TString::Format("cc_%s",htemp->GetName()));
+    if(!plots_canvas2)
+        return;
     //add to histograms.root
     f->cd();
     plots_canvas2->Write();
-    f->Close();
+    if (f && !f->IsZombie() && f->IsOpen())
+        f->Close();
     //	if(plots_canvas)delete plots_canvas;
 
 }
@@ -1904,7 +2008,7 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
         ymin = min;
         ymax = max;
     }
-    cout<<"draw"<<endl;
+    if(verbosity>6)   cout<<"draw"<<endl;
     c1->Clear();
     Double_t delta = ymax-ymin;
     ymin = ymin - .1 *(delta);

@@ -404,7 +404,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
     if(pattern2<0)pattern2=-2;
     pattern1++;
     pattern2++;
-
     //	cout<<TString::Format("%6d %2d/%2d %4.1f-->%2d %4.1f-->%2d\t\t%6.1f/%6.1f",
     //			nEvent,predictedArea,predictedDetector,pos1,pattern1+1,pos2,pattern2+1,ph1,ph2);
     //	if(pos2<85&&pos2>84)
@@ -424,6 +423,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
         //		cout<<"\n"<<nEvent<<" "<<pos1<<": "<<ph1<<"\t"<<pos2<<": "<<ph2<<endl;
         return;
     }
+    ShortAnalysis_FillMeanChargeVector(ph1+ph2);
 
     Int_t delta1 = pattern1 - predictedDetector;
     Int_t delta2 = pattern2 - predictedDetector;
@@ -482,7 +482,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             return;
         diamondCluster = transparentCluster;
     }
-    //cout<<"Cluster Formed."<<endl;
+    if(verbosity>5)cout<<"Cluster Formed."<<endl;
 
     //	cout<<"xPredDet, yPredDet"<<xPredDet<<", "<<yPredDet<<endl;
     pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
@@ -3002,7 +3002,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistos(Int_t ce
 				//To THStack column Histos, shift histo low edge back to (0,0).
 				Float_t XShift = hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetXaxis()->GetBinLowEdge(1);
 				Float_t YShift = hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetYaxis()->GetBinLowEdge(1);
-				cout<<"XShift: "<<XShift<<" YShift: "<<YShift<<endl;
+				if(verbosity>5)cout<<"XShift: "<<XShift<<" YShift: "<<YShift<<endl;
 				Float_t xRelPosDetOffsetShifted = xRelPosDet - XShift;
 				Float_t yRelPosDetOffsetShifted = yRelPosDet - YShift;
 				hCellsBiasColumnOverlayShiftedAvrgChargeMinusBadCells->Fill(xRelPosDetOffsetShifted,yRelPosDetOffsetShifted,clusterCharge);
@@ -3053,7 +3053,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayBiasColumnHistos(Int_t cellN
 				//To THStack column Histos, shift histo low edge back to (0,0).
 				Float_t XShift = hCellsBiasColumnOverlayAvrgChargeMinusBadCells->GetXaxis()->GetBinLowEdge(1);
 				Float_t YShift = hCellsBiasColumnOverlayAvrgChargeMinusBadCells->GetYaxis()->GetBinLowEdge(1);
-				cout<<"XShift: "<<XShift<<" YShift: "<<YShift<<endl;
+				if(verbosity>5)cout<<"XShift: "<<XShift<<" YShift: "<<YShift<<endl;
 				Float_t xRelPosDetOffsetShifted = fmod(xRelPosDet+OffsetX,pw) - XShift;
 				Float_t yRelPosDetOffsetShifted = fmod(yRelPosDet+OffsetY,pw) - YShift;
 				hCellsBiasColumnOverlayShiftedAvrgChargeMinusBadCells->Fill(xRelPosDetOffsetShifted,yRelPosDetOffsetShifted,clusterCharge);
@@ -4753,6 +4753,11 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     TString appendix ="";
+    cout<<"SaveMeanChargeVector"<<endl;
+    cout<<"vecPredDetX_ShortAna    "<<vecPredDetX_ShortAna.size()<<endl;
+    cout<<"vecPredDetY_ShortAna    "<<vecPredDetY_ShortAna.size()<<endl;
+    cout<<"vecPulseHeight_ShortAna "<<vecPulseHeight_ShortAna.size()<<endl;
+
     if (settings->do3dTransparentAnalysis())
 
         cout<<"Create Project3dProfile for hChargeDistribution3D ..."<<flush;
@@ -4760,6 +4765,13 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     if (!hMeanCharge){
         cerr<<" hChargDistribution3D: was not created:"<<endl;
         return;
+    }
+    else if (hMeanCharge->GetEntries() == 0){
+        cerr<<" hChargDistribution3D: number of entries is 0"<<endl;
+        for (int i = 0; i<vecPredDetX_ShortAna.size()&&i<100;i++)
+            cout<<TString::Format("%3d %5.1f/%5.1f --> %6.1f",i,vecPredDetX_ShortAna.at(i),vecPredDetY_ShortAna.at(i),vecPulseHeight_ShortAna.at(i))<<endl;
+        return;
+
     }
     hMeanCharge->GetXaxis()->SetTitle("Predicted Hit Position X in Detector /#mum");
     hMeanCharge->GetYaxis()->SetTitle("Predicted Hit Position Y in Detector /#mum");
@@ -5303,3 +5315,4 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
     delete hEntries;
 
 }
+
