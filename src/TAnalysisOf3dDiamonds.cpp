@@ -4943,7 +4943,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillGoodCellsLandaus(Float_t charge) {
     if(validClusteredAnalysis)
         mapClusteredAnalysis[nEvent] = clusteredCluster;
     if (validTransparentAnalysis)
-        mapClusteredAnalysis[nEvent] = transparentCluster;
+        mapTransparentAnalysis[nEvent] = transparentCluster;
 
     if((validClusteredAnalysis&&!validTransparentAnalysis ) || (!validClusteredAnalysis&&validTransparentAnalysis)){
         cout<<nEvent <<"\tTransparent: "<<validTransparentAnalysis<<"\tClustered: "<<validClusteredAnalysis<<endl;
@@ -5072,21 +5072,49 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
     map<Int_t,TCluster>::iterator itClustered = mapClusteredAnalysis.begin();
     map<Int_t,TCluster>::iterator itTransparent = mapTransparentAnalysis.begin();
     bool endLoop = false;
+    bool endClustered;
+    bool endTransparent;
+    Int_t nSameEvents = 0;
+    Int_t nOnlyClustered = 0;
+    Int_t nOnlyTransparent = 0;
+    endClustered =  itClustered== mapClusteredAnalysis.end();
+    endTransparent = itTransparent== mapTransparentAnalysis.end();
     while (!endLoop){
         if (itClustered->first == itTransparent->first){
             cout<<itClustered->first<<" both"<<endl;
+            Float_t clusteredCharge = itClustered->second.getCharge();
+            Float_t transparentCharge = itTransparent->second.getCharge();
+            nSameEvents ++;
             if( itClustered != mapClusteredAnalysis.end()) itClustered++;
             if(itTransparent != mapTransparentAnalysis.end()) itTransparent++;
+
         }
         else if (itClustered->first < itTransparent->first){
-            cout<<itClustered->first<< "only in Clustered Analysis"<<endl;
-            if( itClustered != mapClusteredAnalysis.end()) itClustered++;
+            if(!endClustered){
+                cout<<itClustered->first<< "only in Clustered Analysis"<<endl;
+                nOnlyClustered++;
+                itClustered++;
+            }
+            else{nOnlyTransparent++;
+            cout<<itTransparent->first<< "only in Transparent Analysis"<<endl;
+            itTransparent++;
+            }
         }
         else if (itClustered->first > itTransparent->first){
-            cout<<itTransparent->first<< "only in Transparent Analysis"<<endl;
-            if(itTransparent != mapTransparentAnalysis.end()) itTransparent++;
+            if (!endTransparent){
+                nOnlyTransparent++;
+                cout<<itTransparent->first<< "only in Transparent Analysis"<<endl;
+                itTransparent++;
+            }
+            else{
+                cout<<itClustered->first<< "only in Clustered Analysis"<<endl;
+                nOnlyClustered++;
+                itClustered++;
+            }
         }
-        endLoop = itClustered== mapClusteredAnalysis.end() && itTransparent == mapTransparentAnalysis.end();
+        endClustered =  itClustered== mapClusteredAnalysis.end();
+        endTransparent = itTransparent== mapTransparentAnalysis.end();
+        endLoop = endClustered && endTransparent;
     }
 
 }
