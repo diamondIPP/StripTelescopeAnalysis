@@ -4945,7 +4945,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillGoodCellsLandaus(Float_t charge) {
     if (validTransparentAnalysis)
         mapTransparentAnalysis[nEvent] = transparentCluster;
 
-    if((validClusteredAnalysis&&!validTransparentAnalysis ) || (!validClusteredAnalysis&&validTransparentAnalysis)){
+    if(verbosity>4 && (validClusteredAnalysis&&!validTransparentAnalysis ) || (!validClusteredAnalysis&&validTransparentAnalysis))){
         cout<<nEvent <<"\tTransparent: "<<validTransparentAnalysis<<"\tClustered: "<<validClusteredAnalysis<<endl;
     }
     if(validClusteredAnalysis&&validTransparentAnalysis){
