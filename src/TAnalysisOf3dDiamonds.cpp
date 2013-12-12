@@ -5083,8 +5083,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
         if (itClustered->first == itTransparent->first){
             Float_t clusteredCharge = itClustered->second.getCharge();
             Float_t transparentCharge = itTransparent->second.getCharge();
-            Float_t ratio = clusteredCharge/transparentCharge*100;
-            cout<<itClustered->first<<" both\t"<<ratio<<" %"<<endl;
+            Float_t ratio = clusteredCharge/transparentCharge;
+            cout<<itClustered->first<<" both\t"<<(ratio-1.)*100<<" %"<<endl;
+            if( ratio-1 < -.1 || ratio-1 >.1){
+                cout<<"\tClustered\n\t";
+                itClustered->second.Print(2);
+                cout<<"\tTransparent\n\t";
+                itTransparent->second.Print(2);
+            }
             nSameEvents ++;
             if( itClustered != mapClusteredAnalysis.end()) itClustered++;
             if(itTransparent != mapTransparentAnalysis.end()) itTransparent++;
