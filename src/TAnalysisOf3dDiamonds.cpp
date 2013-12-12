@@ -4945,7 +4945,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillGoodCellsLandaus(Float_t charge) {
     if (validTransparentAnalysis)
         mapTransparentAnalysis[nEvent] = transparentCluster;
 
-    if(verbosity>4 && (validClusteredAnalysis&&!validTransparentAnalysis ) || (!validClusteredAnalysis&&validTransparentAnalysis))){
+    if(verbosity>4 && ((validClusteredAnalysis&&!validTransparentAnalysis ) || (!validClusteredAnalysis&&validTransparentAnalysis))){
         cout<<nEvent <<"\tTransparent: "<<validTransparentAnalysis<<"\tClustered: "<<validClusteredAnalysis<<endl;
     }
     if(validClusteredAnalysis&&validTransparentAnalysis){
@@ -5065,10 +5065,10 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
 
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps(){
+    cout<<"\n\n[LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps]"<<endl;
     cout<<"Clustered Analysis:  "<<mapClusteredAnalysis.size()<<endl;
     cout<<"TransparentAnalysis: "<<mapTransparentAnalysis.size()<<endl;
-    char t ;
-    cin>>t;
+
     map<Int_t,TCluster>::iterator itClustered = mapClusteredAnalysis.begin();
     map<Int_t,TCluster>::iterator itTransparent = mapTransparentAnalysis.begin();
     bool endLoop = false;
@@ -5081,9 +5081,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
     endTransparent = itTransparent== mapTransparentAnalysis.end();
     while (!endLoop){
         if (itClustered->first == itTransparent->first){
-            cout<<itClustered->first<<" both"<<endl;
             Float_t clusteredCharge = itClustered->second.getCharge();
             Float_t transparentCharge = itTransparent->second.getCharge();
+            Float_t ratio = clusteredCharge/transparentCharge*100;
+            cout<<itClustered->first<<" both\t"<<ratio<<" %"<<endl;
             nSameEvents ++;
             if( itClustered != mapClusteredAnalysis.end()) itClustered++;
             if(itTransparent != mapTransparentAnalysis.end()) itTransparent++;
@@ -5116,6 +5117,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
         endTransparent = itTransparent== mapTransparentAnalysis.end();
         endLoop = endClustered && endTransparent;
     }
+    cout<<"Same Events:      "<<nSameEvents<<endl;
+    cout<<"Only Clustered:   "<<nOnlyClustered<<endl;
+    cout<<"Only Transparent: "<<nOnlyTransparent<<endl;
+    char t ;
+    cin>>t;
 
 }
 
