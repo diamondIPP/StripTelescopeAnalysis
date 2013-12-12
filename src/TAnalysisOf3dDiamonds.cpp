@@ -2230,6 +2230,7 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 }
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
+    LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps();
     //	LongAnalysis_SaveCellsOverlayMeanCharge();
     if(!settings->do3dTransparentAnalysis()){
         LongAnalysisSaveCellAndQuaterNumbering();
@@ -4939,6 +4940,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitGoodCellsLandaus() {
 void TAnalysisOf3dDiamonds::LongAnalysis_FillGoodCellsLandaus(Float_t charge) {
     if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)!=3)
             return;
+    if(validClusteredAnalysis)
+        mapClusteredAnalysis[nEvent] = clusteredCluster;
+    if (validTransparentAnalysis)
+        mapClusteredAnalysis[nEvent] = transparentCluster;
 
     if((validClusteredAnalysis&&!validTransparentAnalysis ) || (!validClusteredAnalysis&&validTransparentAnalysis)){
         cout<<nEvent <<"\tTransparent: "<<validTransparentAnalysis<<"\tClustered: "<<validClusteredAnalysis<<endl;
@@ -4947,12 +4952,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillGoodCellsLandaus(Float_t charge) {
         Float_t clusteredCharge = clusteredCluster.getCharge();
         Float_t transparentCharge = transparentCluster.getCharge();
         Float_t chargeFraction = clusteredCharge/transparentCharge;
-        cout<<"\n\n"<<nEvent<<" Fraction: "<<chargeFraction<<"\t"<<clusteredCharge<<"/"<<transparentCharge<<endl;
-        if(chargeFraction<.95||chargeFraction>1.05){
-            cout<<"  Clustered: "<<endl;
-            clusteredCluster.Print(2);
-            cout<<"   Transparent: "<<endl;
-            transparentCluster.Print(2);
+        if(verbosity>4){
+            cout<<"\n\n"<<nEvent<<" Fraction: "<<chargeFraction<<"\t"<<clusteredCharge<<"/"<<transparentCharge<<endl;
+            if(chargeFraction<.95||chargeFraction>1.05){
+                cout<<"  Clustered: "<<endl;
+                clusteredCluster.Print(2);
+                cout<<"   Transparent: "<<endl;
+                transparentCluster.Print(2);
+            }
         }
 
     }
@@ -5053,6 +5060,34 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
     delete hMonteCarloAvrgChargePerBin;
     delete hBinContents;
     delete hEntries;
+
+}
+
+
+void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps(){
+    cout<<"Clustered Analysis:  "<<mapClusteredAnalysis.size()<<endl;
+    cout<<"TransparentAnalysis: "<<mapTransparentAnalysis.size()<<endl;
+    char t ;
+    cin>>t;
+    map<Int_t,TCluster>::iterator itClustered = mapClusteredAnalysis.begin();
+    map<Int_t,TCluster>::iterator itTransparent = mapTransparentAnalysis.begin();
+    bool endLoop = false;
+    while (!endLoop){
+        if (itClustered->first == itTransparent->first){
+            cout<<itClustered->first<<" both"<<endl;
+            if( itClustered != mapClusteredAnalysis.end()) itClustered++;
+            if(itTransparent != mapTransparentAnalysis.end()) itTransparent++;
+        }
+        else if (itClustered->first < itTransparent->first){
+            cout<<itClustered->first<< "only in Clustered Analysis"<<endl;
+            if( itClustered != mapClusteredAnalysis.end()) itClustered++;
+        }
+        else if (itClustered->first > itTransparent->first){
+            cout<<itTransparent->first<< "only in Transparent Analysis"<<endl;
+            if(itTransparent != mapTransparentAnalysis.end()) itTransparent++;
+        }
+        endLoop = itClustered== mapClusteredAnalysis.end() && itTransparent == mapTransparentAnalysis.end();
+    }
 
 }
 

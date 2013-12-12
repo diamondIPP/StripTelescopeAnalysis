@@ -154,6 +154,8 @@ private:
 	void LongAnalysis_SaveRelativeAddedTransparentCharge();
 	void LongAnalysis_CreateRelativeAddedTransparentChargeComparisonPlots();
 
+	void LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps();
+
 	void DoMonteCarloOfAvrgChargePerBinInOverlay(TProfile2D* profOverlay,TH1F* hLandauOfOverlay);
 private:
 	bool isTransparentCluster;
@@ -452,7 +454,6 @@ private:
 
 private:
 	//TransparentAnalysis
-	TCluster realCluster;
 	TH2F* hTransparentAnalysisInvalidCluster;
 	TH2F* hTransparentAnalysisValidCluster;
 	TH2F* hTransparentAnalysisValidClusterFidCutXvsFidCutY;
