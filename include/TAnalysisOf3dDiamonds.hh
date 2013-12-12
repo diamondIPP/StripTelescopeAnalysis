@@ -69,8 +69,13 @@ private:
 	bool TransparentAnalysis();
 	void StripAnalysis();
 
-    TCluster diamondCluster;
-
+    TCluster *diamondCluster;
+    TCluster transparentCluster;
+    TCluster clusteredCluster;
+    bool validClusteredAnalysis;
+    bool validTransparentAnalysis;
+    void LongAnalysis_checkClusteredAnalysis();
+    void LongAnalysis_checkTransparentAnalysis();
 	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
 
 	float* VectorToArray(vector<float> nvector);
@@ -84,7 +89,6 @@ private:
 	void initialise3DGridReference();
 	void initialise3DYAlignmentHistos();
 	void initialise3DOverviewHistos();
-	void initialise3D2DLandauAndClustersizeHistos();
 	void initialise3DCellOverlayHistos();
 	void initialise3DCellCentralColumnOverlayHistos();
 	void initialise3DCellBiasColumnOverlayHistos();
@@ -123,6 +127,9 @@ private:
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
 
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
+	void LongAnalysis_InitGoodCellsLandaus();
+	void LongAnalysis_FillGoodCellsLandaus(Float_t charge);
+	void LongAnalysis_SaveGoodCellsLandaus();
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
 	void LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge();
@@ -289,6 +296,9 @@ private:
 	TCanvas* cDetXvsDetY3DMeanCharge;
 	TProfile2D* hPulseHeightVsDetectorHitPostionXY;
 	TProfile2D* hPulseHeightVsDetectorHitPostionXYGoodCells;
+	TH1F* hLandauGoodCellsWithoutEdges;
+	TH1F* hLandauGoodCellsWithoutColumns;
+	TH1F* hLandauGoodCells;
 //	TH2D* hDetXvsDetY3DEvents;
 	TH1F* hCellMeanCharge;
 	TH2F* hValidEventsFiducialSpace;
@@ -442,7 +452,6 @@ private:
 
 private:
 	//TransparentAnalysis
-	TCluster transparentCluster;
 	TCluster realCluster;
 	TH2F* hTransparentAnalysisInvalidCluster;
 	TH2F* hTransparentAnalysisValidCluster;
@@ -506,6 +515,9 @@ private:
 
 
     UInt_t maxClusterSize3d;
+
+    map<Int_t, TCluster> mapClusteredAnalysis;
+    map<Int_t, TCluster> mapTransparentAnalysis;
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */

@@ -131,7 +131,7 @@ void TResults::openResults(TSettings *settings){
 		while ((key=(TKey*)next())) {
 			TString className = key->GetClassName();
 			if (className.Contains("TResults")){
-				if (foundResult = true && oldResults){
+				if (foundResult == true && oldResults){
 					cout <<" found a second Results key in the file..."<<oldResults->GetName()<<" "<<key->GetName()<<endl;
 				}
 				else{
