@@ -34,7 +34,7 @@ LD              := g++
 LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib $(DEBUG) $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
 
-LIBFILES3D		:=  TAnalysisOf3dDiamonds.o TCellAnalysisClass.o
+LIBFILES3D		:=  TAnalysisOf3dDiamonds.o TCellAnalysisClass.o TAnalysisOfAnalysisDifferences.o
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
 LIBFILES		+=  TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o 

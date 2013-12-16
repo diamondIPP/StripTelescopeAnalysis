@@ -24,7 +24,7 @@
 using namespace std;
 class TCluster :public TObject{
 public:
-	static UInt_t TCLUSTER_REVISION() {return TCLUSTER_REV;};
+    static UInt_t TCLUSTER_REVISION() {return TCLUSTER_REV;};
     enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid = 3,eta=4,corEta=5, highest2CentroidNoSmallHits=6};
     enum direction_t {left = -1,right = +1};
     TCluster()
@@ -36,7 +36,7 @@ public:
     TCluster &operator=(const TCluster &src); //class assignment function
 
     void addChannel(UInt_t channel, Float_t pedMean, Float_t pedSigma, Float_t pedMeanCMN, Float_t pedSigmaCMN, Int_t adcValue, bool bSaturated,bool isScreened);
-//    void addChannel(UInt_t channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
+    //    void addChannel(UInt_t channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
     Float_t getPosition(bool cmnCorrected, calculationMode_t mode=highest2Centroid,TH1F *histo=0);
     void clear();
     bool isLumpyCluster();
@@ -44,9 +44,16 @@ public:
     bool hasSaturatedChannels();
     UInt_t getDetector(){return this->det;}
     TCluster getCrossTalkCorrectedCluster(Float_t alpha);
+
     Float_t getCharge(bool cmnCorrected = false,bool useSmallSignals=false);
     Float_t getCharge(UInt_t clusters,bool cmnCorrected = false,bool useSmallSignals=false);
     Float_t getCharge(int clusters,bool cmnCorrected = false,bool useSmallSignals=false){return getCharge((UInt_t)clusters,cmnCorrected,useSmallSignals);};
+
+
+    Float_t getPositiveCharge(bool cmnCorrected = false,bool useSmallSignals=false);
+    Float_t getPositiveCharge(int clusters,bool cmnCorrected = false,bool useSmallSignals=false){return getPositiveCharge((UInt_t)clusters,cmnCorrected,useSmallSignals);};
+    Float_t getPositiveCharge(UInt_t clusters,bool cmnCorrected = false,bool useSmallSignals=false);
+
     Float_t getTransparentCharge(UInt_t clusters,bool cmnCorrected, bool useSmallSignals);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
@@ -54,8 +61,8 @@ public:
     void UpdateHighestSignalChannel();
     UInt_t getHighestSignalChannel();
     UInt_t GetHighestSignalChannelTransparentCluster();
-	UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
-	UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false);
+    UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
+    UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false);
     Float_t getChargeWeightedMean(bool cmnCorrected, bool useNonHits=false);
     Float_t getEtaPostion(bool cmnCorrected=false);
     Float_t getPositionCorEta(bool cmnCorrected,TH1F* histo=0);
@@ -78,8 +85,8 @@ public:
     UInt_t getChannel(UInt_t clusterPos);
     UInt_t getFirstHitChannel();
     UInt_t getLastHitChannel();
-//    Float_t getPedestalSigma(UInt_t clusterPos);
-//    Float_t getPedestalMean(UInt_t clusterPos);
+    //    Float_t getPedestalSigma(UInt_t clusterPos);
+    //    Float_t getPedestalMean(UInt_t clusterPos);
     int getHitSigma() const;
     int getSeedSigma() const;
     void setHitSigma(int hitSigma);
@@ -93,27 +100,27 @@ public:
     static string Intent(UInt_t level);
     Float_t getReversedEta(bool cmnCorrected=false);
     Float_t getReversedEta(Int_t &rightChannel,bool cmnCorrected=false);
-	Float_t getEta(bool cmnCorrected=false);
-	Float_t getEta(Int_t &leftChannel,bool cmnCorrected=false);
-	Float_t getEta(UInt_t clusPos,Int_t &leftChannel,bool cmnCorrected=false);
-	UInt_t getClusterSize();
-	void setVerbosity(UInt_t verbosity){this->verbosity=verbosity;};
-	Float_t getLeftEta(bool cmnCorrected=false);
-	Float_t getRightEta(bool cmnCorrected=false);
-	static Float_t getValueOfHisto(Float_t x, TH1F* histo);
-	UInt_t getEventNumber(){return eventNumber;};
-	bool hasInvalidReadout();
-	bool IsTransparentCluster(){return !(isTransparentCluster<0);}
-	Float_t GetTransparentHitPosition(){return isTransparentCluster;}
-	void SetTransparentCluster(Float_t startChannel);
-	void SetTransparentClusterSize(UInt_t size){if(size>0) transparentClusterSize=TMath::Min(size,checkClusterForSize());};
-	UInt_t GetTransparentClusterSize(){return transparentClusterSize;}
-	Int_t getTransparentClusterPosition(UInt_t clusterNo=0);
+    Float_t getEta(bool cmnCorrected=false);
+    Float_t getEta(Int_t &leftChannel,bool cmnCorrected=false);
+    Float_t getEta(UInt_t clusPos,Int_t &leftChannel,bool cmnCorrected=false);
+    UInt_t getClusterSize();
+    void setVerbosity(UInt_t verbosity){this->verbosity=verbosity;};
+    Float_t getLeftEta(bool cmnCorrected=false);
+    Float_t getRightEta(bool cmnCorrected=false);
+    static Float_t getValueOfHisto(Float_t x, TH1F* histo);
+    UInt_t getEventNumber(){return eventNumber;};
+    bool hasInvalidReadout();
+    bool IsTransparentCluster(){return !(isTransparentCluster<0);}
+    Float_t GetTransparentHitPosition(){return isTransparentCluster;}
+    void SetTransparentCluster(Float_t startChannel);
+    void SetTransparentClusterSize(UInt_t size){if(size>0) transparentClusterSize=TMath::Min(size,checkClusterForSize());};
+    UInt_t GetTransparentClusterSize(){return transparentClusterSize;}
+    Int_t getTransparentClusterPosition(UInt_t clusterNo=0);
 private:
-	bool IsValidTransparentClusterPosition(UInt_t clusterPosition);
-	direction_t getDirection(UInt_t clusterPosition);
-	Float_t getChargeStartingAt(UInt_t nChannels,UInt_t startingClusterPos,direction_t direction, bool useCMcorrection, bool useSmallSignals);
-	void initialiseNewCluster();
+    bool IsValidTransparentClusterPosition(UInt_t clusterPosition);
+    direction_t getDirection(UInt_t clusterPosition);
+    Float_t getChargeStartingAt(UInt_t nChannels,UInt_t startingClusterPos,direction_t direction, bool noNegativeCharge, bool useCMcorrection, bool useSmallSignals);
+    void initialiseNewCluster();
     void checkForGoldenGate();
     void checkForLumpyCluster();
     UInt_t checkClusterForSize() const;

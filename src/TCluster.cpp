@@ -453,13 +453,13 @@ Float_t TCluster::getTransparentCharge(UInt_t clusters, bool cmnCorrected,
 	if(clusters> GetTransparentClusterSize())
 		clusters = GetTransparentClusterSize();
 	if(startingClusterPos < checkClusterForSize())
-		return getChargeStartingAt(clusters,startingClusterPos,direction,cmnCorrected,useSmallSignals);
+		return getChargeStartingAt(clusters,startingClusterPos,direction,false,cmnCorrected,useSmallSignals);
 	return 0;
 
 }
 
 Float_t TCluster::getChargeStartingAt(UInt_t nChannels, UInt_t startingClusterPos,direction_t direction,
-		bool useCMcorrection, bool useSmallSignals) {
+        bool noNegativeCharge, bool useCMcorrection, bool useSmallSignals) {
 //	if(verbosity>3)
 	UInt_t size = checkClusterForSize();
 	nChannels = TMath::Min(nChannels,2*size);
@@ -473,6 +473,8 @@ Float_t TCluster::getChargeStartingAt(UInt_t nChannels, UInt_t startingClusterPo
 	Float_t clusterCharge = 0;
 	Int_t channel;
 	UInt_t nUsedChannels=0;
+	bool useEvenClusterPos =  true;
+	bool useOddClusterPos = true;
 //	getSignal(startingClusterPos,useCMcorrection);
 
 	for(UInt_t nCl = 0; nUsedChannels < nChannels&& nCl<2*size; nCl++){
@@ -491,6 +493,17 @@ Float_t TCluster::getChargeStartingAt(UInt_t nChannels, UInt_t startingClusterPo
 		charge = 0;
 		if (useSmallSignals|| isHit(clPos))
 			charge = getSignal(clPos,useCMcorrection);
+		if(charge < 0 && noNegativeCharge){
+		    if(clPos%2==0)
+		        useEvenClusterPos = false;
+		    else
+		        useOddClusterPos = false;
+		    charge = 0;
+		}
+		if(noNegativeCharge && !useOddClusterPos && clPos%2==1)
+		    charge = 0;
+		if(noNegativeCharge && !useEvenClusterPos && clPos%2==0)
+		    charge =0;
 		clusterCharge+=charge;
 //		cout<<" "<<charge<<" "<<clusterCharge;
 		nUsedChannels ++;
@@ -507,6 +520,12 @@ Float_t TCluster::getCharge(bool cmnCorrected,bool useSmallSignals){
 	//	return charge;
 }
 
+Float_t TCluster::getPositiveCharge(bool cmnCorrected,bool useSmallSignals){
+//  cout<<"getCHarge"<<endl;
+    //  if(useSmallSignals)
+    return getPositiveCharge(1000,cmnCorrected,useSmallSignals);
+    //  return charge;
+}
 /**
  * @param nClusterEntries
  * @param useSmallSignals
@@ -516,7 +535,7 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries,bool cmnCorrected,bool useSma
 	if(nClusterEntries==0)return 0;
 	Int_t clusPosStart = getClusterPosition(getHighestSignalChannel());
 	direction_t dir = getSignal(clusPosStart-1,cmnCorrected)>getSignal(clusPosStart+1,cmnCorrected)?left:right;
-	Float_t clusterCharge = getChargeStartingAt(nClusterEntries,clusPosStart,dir,cmnCorrected,useSmallSignals);
+	Float_t clusterCharge = getChargeStartingAt(nClusterEntries,clusPosStart,dir,false,cmnCorrected,useSmallSignals);
 	return clusterCharge;
 }
 
@@ -1266,4 +1285,13 @@ void TCluster::Print(UInt_t level){
 	cout<<this->getHighestSignalChannel()<<" "<<flush<<this->getHighest2Centroid()<<" "<<this->getChargeWeightedMean(true)<<" "<<this->getEtaPostion(false)<<" "<<this->getPositionCorEta(false);
 	cout<<" "<<this->getEta()<<" "<<this->getEta(true);
 	cout<<endl;
+}
+
+Float_t TCluster::getPositiveCharge(UInt_t nClusterEntries, bool cmnCorrected,
+        bool useSmallSignals) {
+    if(nClusterEntries==0)return 0;
+    Int_t clusPosStart = getClusterPosition(getHighestSignalChannel());
+    direction_t dir = getSignal(clusPosStart-1,cmnCorrected)>getSignal(clusPosStart+1,cmnCorrected)?left:right;
+    Float_t clusterCharge = getChargeStartingAt(nClusterEntries,clusPosStart,dir,true,cmnCorrected,useSmallSignals);
+    return clusterCharge;
 }

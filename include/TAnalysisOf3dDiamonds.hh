@@ -29,6 +29,7 @@
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
 #include "THTMLPedestal.hh"
+#include "TAnalysisOfAnalysisDifferences.hh"
 #include "LandauGaussFit.hh"
 
 #include "TADCEventReader.hh"
@@ -76,17 +77,8 @@ private:
     bool validTransparentAnalysis;
     void LongAnalysis_checkClusteredAnalysis();
     void LongAnalysis_checkTransparentAnalysis();
-	Float_t getTransparentCharge(Int_t nDiamondPattern, Int_t nChannelHit);
 
-	float* VectorToArray(vector<float> nvector);
-
-
-
-
-	float* SortArrayBtoS(float* nArray, int nSize);
-	void printArray(float* nArray, int nSize, const std::string& space);
 	//YAlignment
-	void initialise3DGridReference();
 	void initialise3DYAlignmentHistos();
 	void initialise3DOverviewHistos();
 	void initialise3DCellOverlayHistos();
@@ -123,7 +115,6 @@ private:
 	void LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_FillOverlayBiasColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(Float_t xRelPosDet,Float_t yRelPosDet, Float_t clusterCharge, Float_t ClusterSize);
-	void LongAnalysis_FillOverlayOffsetHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
 
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
@@ -159,6 +150,7 @@ private:
 	void DoMonteCarloOfAvrgChargePerBinInOverlay(TProfile2D* profOverlay,TH1F* hLandauOfOverlay);
 private:
 	bool isTransparentCluster;
+	bool useCMN;
 private:
     TCluster GhostCluster;
 	TH1F* hLandauStrip;
@@ -225,9 +217,6 @@ private:
 	/////////////
 	//For YAlignment Histos
 	/////////////
-	TCanvas* hGridReferenceCanvas;
-	TH2D* hGridReferenceDetSpace;
-	TH2D* hGridReferenceCellSpace;
 	TCanvas* cCombinedMeanChargeYAlignment;
 	TCanvas* c3DdetMeanCharge;
 
@@ -519,6 +508,7 @@ private:
 
     map<Int_t, TCluster> mapClusteredAnalysis;
     map<Int_t, TCluster> mapTransparentAnalysis;
+    map<Int_t, pair<Float_t,Float_t> > mapPredictedPositions;
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */
