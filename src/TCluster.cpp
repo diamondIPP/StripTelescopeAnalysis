@@ -1295,3 +1295,27 @@ Float_t TCluster::getPositiveCharge(UInt_t nClusterEntries, bool cmnCorrected,
     Float_t clusterCharge = getChargeStartingAt(nClusterEntries,clusPosStart,dir,true,cmnCorrected,useSmallSignals);
     return clusterCharge;
 }
+
+bool TCluster::hasNegativeCharge(Float_t& charge, Int_t pos, bool cmnCorrected) {
+    Float_t oldCharge = 0;
+    Float_t currentCharge;
+    for(UInt_t i = 1; i<= this->size();i++){
+        currentCharge = this->getCharge(i,cmnCorrected);
+        charge = currentCharge - oldCharge;
+        if (charge < 0){
+            if( i+1<this->size() && this->getCharge(i+1,cmnCorrected)-currentCharge > charge){
+                pos = i;
+                //               cout << "found negative charge at "<< pos<<": "<<charge<<endl;
+                return true;
+            }else{
+                pos = i+1;
+                charge =  this->getCharge(i+1,cmnCorrected)-currentCharge;
+                //               cout << "found negative charge at "<< pos<<": "<<charge<<endl;
+                return true;
+            }
+
+        }
+        oldCharge = currentCharge;
+    }
+    return false;
+}

@@ -16,10 +16,12 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
     transparentMap = 0;
     clusteredMap = 0;
     predictedPositions = 0;
+    stripHisto = 0;
     verbosity =settings->getVerbosity();
 }
 
 TAnalysisOfAnalysisDifferences::~TAnalysisOfAnalysisDifferences() {
+    delete stripHisto;
     // TODO Auto-generated destructor stub
 }
 
@@ -138,17 +140,19 @@ void TAnalysisOfAnalysisDifferences::LoopOverBothMaps(){
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
-
     if(itPredicted->first != itTransparent->first || itPredicted->first != itClustered->first)
         cout<<"predicted,transparent and clustered iterator do not agree"<<itPredicted->first<<" "<<itTransparent->first<<" "<<itClustered->first<<endl;
     Float_t clusteredCharge = itClustered->second.getCharge(true);
     itTransparent->second.SetTransparentClusterSize(3);
     Float_t transparentCharge = itTransparent->second.getCharge(true);
+    Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
+    mapHistos["hTransparentPulseHeight"]->Fill(posCharge);
+    mapHistos["hClusteredPulseHeight"]->Fill(clusteredCharge);
     Int_t eventNo = itClustered->first;
     mapHistos["hChargeDifference"]->Fill(transparentCharge-clusteredCharge);
     Int_t pos = 0;
     Float_t charge = 0;
-    if (hasNegativeCharge(itTransparent,pos,charge)){
+    if (itTransparent->second.hasNegativeCharge(charge,pos,true)){
         //        cout<<itTransparent->first<<" "<<pos<<" "<<charge<<endl;
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
         mapHistos["hNegativeCharge"]->Fill(charge);
@@ -164,7 +168,6 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
         }
         //        cout<<"FILL "<<charge<<" "<<pos<<endl;
     }
-    Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
     mapHistos["hPositive_Minus_Negative_TransparentCharge"]->Fill(posCharge-transparentCharge);
     if ( posCharge - clusteredCharge < 0 ){
         cout<<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
@@ -185,6 +188,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
         cout<<"\n";
     }
     nSameEvents ++;
+    mapHistos["hGoodCellsEventTypes"]->Fill(0);
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyTransparentEvent() {
@@ -195,8 +199,10 @@ void TAnalysisOfAnalysisDifferences::AnalyseOnlyTransparentEvent() {
     if(itPredicted->first != itTransparent->first)
         cout<<"predicted and clusterer iterator do not agree"<<itPredicted->first<<" "<<itTransparent->first<<endl;
     mapHistos["hOnlyTranspClusterCharge"]->Fill(itTransparent->second.getPositiveCharge());
-    mapHistos["hOnlyTranspClusterPosition"]->Fill(itPredicted->second.first,itPredicted->second.second);
 
+    mapHistos["hTransparentPulseHeight"]->Fill(itTransparent->second.getPositiveCharge());
+    mapHistos["hOnlyTranspClusterPosition"]->Fill(itPredicted->second.first,itPredicted->second.second);
+    mapHistos["hGoodCellsEventTypes"]->Fill(1);
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyClusteredEvent() {
@@ -205,19 +211,71 @@ void TAnalysisOfAnalysisDifferences::AnalyseOnlyClusteredEvent() {
     nOnlyClustered++;
     if(itPredicted->first != itClustered->first)
         cout<<"predicted and clusterer iterator do not agree"<<itPredicted->first<<" "<<itClustered->first<<endl;
+
+    mapHistos["hClusteredPulseHeight"]->Fill(itClustered->second.getPositiveCharge());
     mapHistos["hOnlyClusteredClusterCharge"]->Fill(itClustered->second.getPositiveCharge());
     mapHistos["hOnlyClusteredClusterPosition"]->Fill(itPredicted->second.first,itPredicted->second.second);
-
+    mapHistos["hGoodCellsEventTypes"]->Fill(-1);
 }
 
 void TAnalysisOfAnalysisDifferences::InitHistograms() {
     this->InitSameHistos();
     this->InitTransparentHistos();
     this->InitClusteredHistos();
+    TH1* histo;
+    Int_t bins = stripHisto?stripHisto->GetNbinsX():256;
+    Int_t xmin = stripHisto?stripHisto->GetXaxis()->GetXmin():1;
+    Int_t xmax = stripHisto?stripHisto->GetXaxis()->GetXmax():2800;
+    TString name = "hTransparentPulseHeight";
 
+    histo = new TH1F(name,name,bins,xmin,xmax);
+    histo->GetXaxis()->SetTitle("PH /ADC");
+    histo->GetYaxis()->SetTitle("No of entries #");
+    mapHistos[name] = histo;
+
+    name = "hClusteredPulseHeight";
+    histo = (TH1F*) histo->Clone(name);
+    histo->SetLineColor(kBlue);
+    mapHistos[name] = histo;
+
+    name = "hGoodCellsEventTypes";
+    histo = new TH1F(name,name,3,-1.5,1.5);
+    histo->GetXaxis()->SetBinLabel(1,"Only Clustered");
+    histo->GetXaxis()->SetBinLabel(2,"Same ");
+    histo->GetXaxis()->SetBinLabel(3,"Only transparent");
+    mapHistos[name] = histo;
 }
 
 void TAnalysisOfAnalysisDifferences::SaveHistograms() {
+    cout<<"Save"<<endl;
+    TH1F* histo1 = (TH1F*)mapHistos["hClusteredPulseHeight"]->Clone();
+    cout<<"Save1"<<endl;
+    TH1F* histo2 = (TH1F*)mapHistos["hTransparentPulseHeight"]->Clone();
+    cout<<"Save2"<<endl;
+    histSaver->SaveTwoHistos("cComparisionPulseHeights",histo1,histo2);
+    cout<<"Save3"<<endl;
+    histSaver->SaveTwoHistosNormalized("cComparisionPulseHeightsNormalized",histo1,histo2);
+    TString name = "cComparisionPulseHeight";
+    TCanvas *c1 = new TCanvas(name,name);
+    cout<<"Save4"<<endl;
+    histo1->Draw();
+    histo2->Draw("same");
+    if(stripHisto){
+        Float_t scale = histo2->GetBinContent(histo2->GetMaximumBin());
+        scale /= stripHisto->GetBinContent(stripHisto->GetMaximumBin());
+        stripHisto->Scale(scale);
+        stripHisto->SetLineColor(kGreen);
+        stripHisto->Draw("same");
+        stripHisto->SetTitle("Strip");
+    }
+    histo1->SetTitle("Clustered");
+    histo2->SetTitle("Tranparent");
+    TLegend* leg = c1->BuildLegend();
+    leg->SetFillColor(kWhite);
+    leg->Draw();
+    cout<<"Save5"<<endl;
+    histSaver->SaveCanvas(c1);
+    cout<<"Save6"<<endl;
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
     for(it;it!=mapHistos.end();it++){
         TString className = it->second->ClassName();
@@ -243,34 +301,6 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     }
 }
 
-bool TAnalysisOfAnalysisDifferences::hasNegativeCharge(
-        std::map<Int_t, TCluster>::iterator it, Int_t& pos, Float_t& charge) {
-    TCluster* clus = &it->second;
-    Float_t predPos  = clus->GetTransparentHitPosition();
-    if (predPos<0)
-        return false;
-    Float_t oldCharge = 0;
-    Float_t currentCharge;
-    for(UInt_t i = 1; i<= clus->size();i++){
-        currentCharge = clus->getCharge(i,true);
-        charge = currentCharge - oldCharge;
-        if (charge < 0){
-            if( i+1<clus->size() && clus->getCharge(i+1,true)-currentCharge > charge){
-                pos = i;
-                //               cout << "found negative charge at "<< pos<<": "<<charge<<endl;
-                return true;
-            }else{
-                pos = i+1;
-                charge =  clus->getCharge(i+1,true)-currentCharge;
-                //               cout << "found negative charge at "<< pos<<": "<<charge<<endl;
-                return true;
-            }
-
-        }
-        oldCharge = currentCharge;
-    }
-
-}
 
 void TAnalysisOfAnalysisDifferences::InitTransparentHistos() {
     TH1* histo;

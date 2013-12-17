@@ -438,11 +438,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         diamondCluster = &transparentCluster;
 
     }
+//    if (settings->do3dTransparentAnalysis() && !validTransparentAnalysis)
+//        return;
     if(verbosity>5)cout<<"Cluster Formed."<<endl;
 
     pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
     UInt_t cellNo = cell.first;
     UInt_t quarterNo = cell.second;
+
+    Float_t charge;
+    Int_t pos;
+    if (diamondCluster->hasNegativeCharge(charge,pos,useCMN))
+        if(charge<-50)
+            hNegativeChargePosition->Fill(xPredDet,yPredDet);
 
     if(!settings->do3dTransparentAnalysis()){
         Int_t area3DwithColumns = 2;
@@ -459,7 +467,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
-    Float_t charge = diamondCluster->getPositiveCharge(false);
+    charge = diamondCluster->getPositiveCharge(false);
     hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
     //	hDetXvsDetY3DEvents->Fill(xPredDet,yPredDet,1);
     //analyse Good Cells
@@ -2210,6 +2218,10 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 
     histSaver->SaveHistogram(hLongAnalysisInvalidCellNo);
     histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
+    histSaver->SaveHistogram(hNegativeChargePosition);
+    hNegativeChargePosition->SetTitle(hNegativeChargePosition->GetTitle() +(TString)"_grid");
+    histSaver->SaveHistogramWithCellGrid(hNegativeChargePosition);
+    histSaver->SaveHistogram(hNegativeChargePosition);
 }
 
 vector<Float_t> TAnalysisOf3dDiamonds::LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus){
@@ -4328,6 +4340,8 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
     hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster");
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCluster");
+
+    hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells",4);
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
@@ -4968,6 +4982,7 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps(){
     TAnalysisOfAnalysisDifferences* differences = new TAnalysisOfAnalysisDifferences(settings,histSaver);
+    differences->setStripHistogram(this->hLandauStrip);
     differences->setClusteredMap(&mapClusteredAnalysis);
     differences->setTransparentMap(&mapTransparentAnalysis);
     differences->setPredictedPositions(&mapPredictedPositions);

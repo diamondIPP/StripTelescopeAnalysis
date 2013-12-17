@@ -12,6 +12,7 @@
 #include "HistogrammSaver.class.hh"
 #include "TH1F.h"
 #include "TH1.h"
+#include "TLegend.h"
 #include "TString.h"
 #include <map>
 using namespace std;
@@ -28,6 +29,7 @@ public:
     void setTransparentMap( std::map<Int_t, TCluster>* transparentMap);
     std::map<Int_t,std::pair<Float_t,Float_t> >* getPredictedPositions() const;
     void setPredictedPositions( std::map<Int_t, pair<Float_t, Float_t> >* predictedPositionMap);
+    void setStripHistogram(TH1F* histo){this->stripHisto = (TH1F*)histo->Clone();}
 
 private:
     void InitHistograms();
@@ -40,9 +42,10 @@ private:
     void AnalyseSameEvent();
     void AnalyseOnlyTransparentEvent();
     void AnalyseOnlyClusteredEvent();
-    bool hasNegativeCharge(std::map<Int_t,TCluster>::iterator it,Int_t &pos,Float_t& charge);
+//    bool hasNegativeCharge(std::map<Int_t,TCluster>::iterator it,Int_t &pos,Float_t& charge);
 
 private:
+    TH1F* stripHisto;
     TSettings *settings;
     Int_t verbosity;
     HistogrammSaver *histSaver;
