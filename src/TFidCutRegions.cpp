@@ -96,8 +96,8 @@ void TFidCutRegions::Print(int intend)
 		fidCuts.at(i)->Print(intend+1);
 	}
 	cout<<TCluster::Intent(intend)<<"Range to plot all Fiducial Cuts:"<<endl;
-	cout<<TCluster::Intent(intend)<<"\tX: "<<getMinFiducialX()<<"-"<<getMaxFiducialX()<<endl;
-	cout<<TCluster::Intent(intend)<<"\tY: "<<getMinFiducialY()<<"-"<<getMaxFiducialY()<<endl;
+	cout<<TCluster::Intent(intend)<<"\tX: "<<TString::Format("%.1f - %.1f",getMinFiducialX(),getMaxFiducialX())<<endl;
+	cout<<TCluster::Intent(intend)<<"\tY: "<<TString::Format("%.1f - %.1f",getMinFiducialY(),getMaxFiducialY())<<endl;
 
 	if(verbosity >3 &&verbosity%2==1){
 		cout<<"Done\nPress a key...\t"<<flush;

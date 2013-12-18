@@ -60,6 +60,7 @@ public:
 	Int_t getPatternOfChannel(Int_t ch);
 	UInt_t getNIntervals();//{return nChannelsOfInterval.size();}
 	std::pair<Int_t, Int_t> getTotalInterval();
+	void setVerbosity(UInt_t verb){verbosity=verb;};
 private:
 //	UInt_t getNIntervals();//
 	Float_t getChannelToMetric(UInt_t ch);

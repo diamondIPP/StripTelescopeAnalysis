@@ -215,7 +215,11 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 			Float_t end = endOfInterval[i];
 			begin -= pw/2;
 			end += pw/2;
-
+			if(verbosity>5){
+			    TString output = TString::Format("\tIs %7.1f in [%7.1f,%7.1f]? ",metric,begin,end);
+			    cout<<output<<endl;
+//			    cout<<"\t Is: "<<metric <<" in ["<<begin<<","<<end<<"]\t"<<metric-begin<<" "<<end-metric<<endl;
+			}
 //			if(metric >= 3660 && metric <= 3715)
 //				cout<<metric <<"look at" <<begin<<"-"<<end<<" "<<pw<<endl;
 			if( begin <= metric && metric <= end ){

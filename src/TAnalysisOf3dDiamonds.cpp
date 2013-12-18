@@ -405,17 +405,35 @@ void TAnalysisOf3dDiamonds::LongAnalysis_checkClusteredAnalysis(){
         validClusteredAnalysis = false;
         return;
     }
-    if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
-        cout<<"."<<endl;
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_checkTransparentAnalysis(){
     if(!isTransparentCluster){
+        if(validClusteredAnalysis){
+            cout<<"\n"<<nEvent<<"\tvalid clustered analysis, but invalid transparentAnalysis: "<<xPredDet<<"/"<<yPredDet<<endl;
+            cout<<"\tpattern: "<<settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)<<endl;
+            settings->get3dMetallisationFidCuts()->Print(4);
+            cout<<"bla"<<endl;
+            cout<<"\tXdetChannelsSpaceInt"<<flush;
+            cout<<settings->diamondPattern.convertMetricToIntChannel(xPredDet);
+            if(settings->diamondPattern.convertMetricToIntChannel(xPredDet)<0){
+                settings->diamondPattern.setVerbosity(8);
+                cout<<"\t"<<settings->diamondPattern.convertMetricToIntChannel(xPredDet);
+                settings->diamondPattern.setVerbosity(0);
+            }
+            cout<<"\t"<<"isSaturated:"<<transparentCluster.isSaturatedCluster()<<endl;
+        }
+
         validTransparentAnalysis = false;
         return;
     }
     Int_t DiamondPattern;
     DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
+    if (validClusteredAnalysis && DiamondPattern!=3){
+        cout<<"\n"<<nEvent<<"\tvalid clustered analysis, but invalid transparentAnalysis: "<<xPredDet<<"/"<<yPredDet<<" "<<DiamondPattern<<endl;
+        settings->get3dMetallisationFidCuts()->Print(1);
+    }
+
     if(DiamondPattern !=3){
         validTransparentAnalysis = false;
     }
