@@ -18,6 +18,7 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
     predictedPositions = 0;
     stripHisto = 0;
     verbosity =settings->getVerbosity();
+    negChargeCut = -50;
 }
 
 TAnalysisOfAnalysisDifferences::~TAnalysisOfAnalysisDifferences() {
@@ -156,7 +157,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     if (hasNegativeCharge){
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
         mapHistos["hNegativeCharge"]->Fill(charge);
-        if(charge<-50){
+        if(charge<negChargeCut){
             if(predictedPositions->count(eventNo)){
                 Float_t xPredDet = predictedPositions->at(eventNo).first;
                 Float_t yPredDet = predictedPositions->at(eventNo).second;
@@ -164,7 +165,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
             }
         }
     }
-    if(hasNegativeCharge && charge < -50)
+    if(hasNegativeCharge && charge < negChargeCut)
         mapHistos["hHasNegativeCharge_PulseHeight"]->Fill(posCharge);
     else
         mapHistos["hNoNegativeCharge_PulseHeight"]->Fill(posCharge);
@@ -311,6 +312,16 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     if(hs1->GetYaxis())hs1->GetYaxis()->SetTitle("number of entries");
     histSaver->SaveStack(hs1,"nostack",true,false);
 
+    name = "stack_NoNegativeCharge_PulseHeight_Comparision_normalized";
+    THStack *hs2 = new THStack(name,name);
+    hs2->Add(mapHistos["hNoNegativeCharge_PulseHeight"]->DrawNormalized("goff"));
+    if(stripHisto)hs2->Add(stripHisto->DrawNormalized("goff"));
+    hs2->Draw("");
+    if(hs2->GetXaxis())hs2->GetXaxis()->SetTitle("pulse height/ADC");
+    if(hs2->GetYaxis())hs2->GetYaxis()->SetTitle("number of entries - normalized");
+    histSaver->SaveStack(hs2,"nostack",true,false);
+
+
     name = "stackPulseHeights_GoodCells";
     THStack *hs = new THStack(name,name);
     hs->Add((TH1F*)mapHistos["hHasNegativeCharge_PulseHeight"]->Clone());
@@ -332,6 +343,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
 
     delete hs;
     delete hs1;
+    delete hs2;
     delete histo1;
     delete histo2;
 

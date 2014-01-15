@@ -309,13 +309,14 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
                 return;
 
             //hTransparentAnalysisValidClusterFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
-            hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,diamondCluster->getPositiveCharge(false));
+            Float_t charge = diamondCluster->getPositiveCharge(false);
+            hFidCutXvsFidCutYvsCharge.at(i)->Fill(fiducialValueX,fiducialValueY,charge);
             hFidCutXvsFidCutYvsEvents.at(i)->Fill(fiducialValueX,fiducialValueY,1);
 
             hEventsvsChannel[i]->Fill(diamondCluster->getHighestSignalChannel());
-            hPHvsChannel[i]->Fill(diamondCluster->getPositiveCharge(false),diamondCluster->getHighestSignalChannel());
-            hLandau[i]->Fill(diamondCluster->getPositiveCharge(false));
-            vecPHDiamondHit[i]->push_back(diamondCluster->getPositiveCharge(false));
+            hPHvsChannel[i]->Fill(charge,diamondCluster->getHighestSignalChannel());
+            hLandau[i]->Fill(charge);
+            vecPHDiamondHit[i]->push_back(charge);
             hFidCutXvsFidCutY[i]->Fill(fiducialValueX,fiducialValueY);
 
             if(!settings->do3dTransparentAnalysis()){

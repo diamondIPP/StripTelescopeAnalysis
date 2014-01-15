@@ -48,6 +48,7 @@ private:
     TH1F* stripHisto;
     TSettings *settings;
     Int_t verbosity;
+    Float_t negChargeCut;
     HistogrammSaver *histSaver;
     std::map<Int_t,TCluster>* transparentMap;
     std::map<Int_t,TCluster>* clusteredMap;
