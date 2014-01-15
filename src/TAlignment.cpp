@@ -788,8 +788,9 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     cout<<"\n\n[TAlignment::Residual]"<<endl;
     TString refPlaneString = GetReferencePlaneString(&vecRefPlanes);
 
-    bool isStripAlignment = aligning == singleStrip;
-    cout<<"isSingle Strip Alignment: "<<isStripAlignment<<endl;
+    bool isStripAlignment = (aligning == singleStrip);
+    if(isStripAlignment)
+    cout<<"isSingle Strip Alignment. "<<endl;
     //    char t; cin>>t;
 
     if (verbosity){

@@ -704,7 +704,7 @@ void TAnalysisOfClustering::saveEtaIntegrals(){
 
 
 void TAnalysisOfClustering::saveHistos(){
-    //	analyseAsymmetricSample2();
+//    	analyseAsymmetricSample2();
     //	char t; cin>>t;
     savePedestalHistos();
     saveNoiseHistos();
@@ -860,7 +860,7 @@ void TAnalysisOfClustering::saveHistos(){
     if (verbosity)  cout<<"Save PH Histos"<<endl;
     savePHHistos();
     if (verbosity)  cout<<"Save Asymmetric Eta Sample analysis"<<endl;
-//    analyseAsymmetricSample();
+    analyseAsymmetricSample();
     //    for (int det = 0; det < 9; det++) {
     //		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
     //        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
@@ -1579,18 +1579,23 @@ void TAnalysisOfClustering::savePHHistos()
             stringstream histName;
             //    		string name = (string)hPHDistribution[det]->GetTitle();
             //    		name = name.substr(0,histName.str().size()-6);
+            TString hname = "hPulseHeightDistribution_";
             histName<<"hPulseHeightDistribution_";
             if(nClusters==0)
-                histName<<"allClusterSizes";
+                hname += (TString) "allClusterSizes_";
             else
-                histName<<"nClusters"<<nClusters;
-            histName<<"_"<<TPlaneProperties::getStringForDetector(det);
-            TObject *htemp2 = (TObject*)gROOT->FindObject(histName.str().c_str());
+                hname += TString::Format("nClusters%d_",nClusters);
+
+            hname+=(TString)TPlaneProperties::getStringForDetector(det);
+            TObject *htemp2 = (TObject*)gROOT->FindObject(hname);
             if(htemp2!=0)delete htemp2;
 
             //CREATE HTEMP and ReBin it if necessary
             TH1F *htemp;
-            htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
+            if (nClusters = 0)
+                htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname);//,nClusters+1,nClusters+1);
+            else
+                htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname,nClusters+1,nClusters+1);
             if(htemp==0) continue;
 
             //adjust binning if necessary

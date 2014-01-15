@@ -6,6 +6,8 @@
  */
 
 #include "../include/TResidual.hh"
+using namespace std;
+
 /**
  * calculating offset and Slope with
  * with method of minimum least square
@@ -23,7 +25,6 @@
  */
 
 
-using namespace std;
 /** Constructor of TResidual
  * initialise all the variables
  */
@@ -53,7 +54,7 @@ void TResidual::resetResidual(){
     sumVRx=0;
     sumVRy=0;
     nUsedTracks=0;
-    verbosity=0;
+    verbosity=4;
 }
 
 /** Prints the results of the ResidualCalulation

@@ -564,82 +564,82 @@ TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
         Float_t maxRangeY, Float_t minRangeZ, Float_t maxRangeZ,
         Float_t factor) {
     if(posX.size()!=posY.size()||posX.size()==0) {
-          cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
-          return new TProfile2D(name,name,2,0,1,2,0,1);
-      }
-      cout<<"CreateProfile2D "<<name<<endl;
-      cout<<TString::Format("maxRange:\nX: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minRangeX,maxRangeX,minRangeY,maxRangeY,minRangeZ,maxRangeZ)<<endl;
-      Float_t maxX = posX.at(0);
-      Float_t maxY = posY.at(0);
-      Float_t maxZ = posZ.at(0);
-      Float_t minX = posY.at(0);
-      Float_t minY = posY.at(0);
-      Float_t minZ = posZ.at(0);
-      //  cout<<" Create Histo: '"<<name<<"' - Range ("<<minRangeX<<"-"<<maxRangeX<<"),  ("
-      //          <<minRangeY<<"-"<<maxRangeY<<"), ("<<minRangeZ<<"-"<<maxRangeZ<<")"<<endl;
-      for(UInt_t i=0;i<posX.size();i++){
-          if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
-              continue;
-          if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
-              continue;
-          if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
-              continue;
-          if(posX.at(i)>maxX)maxX=posX.at(i);
-          else if(posX.at(i)<minX)minX=posX.at(i);
-          if(posY.at(i)>maxY)maxY=posY.at(i);
-          else if(posY.at(i)<minY)minY=posY.at(i);
-          if(posZ.at(i)>maxZ)maxZ=posZ.at(i);
-          else if(posZ.at(i)<minZ)minZ=posZ.at(i);
-      }
-      //  cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
-      Float_t factorX = factor;
-      Float_t factorY = factor;
-      Float_t factorZ = factor;
-      Float_t deltaXMax = maxRangeX - minRangeX;
-      Float_t deltaYMax = maxRangeY - minRangeY;
-      Float_t deltaZMax = maxRangeZ - minRangeZ;
-      Float_t maxDiff = 0.02;
-      if ( TMath::Abs(maxRangeX-maxX)/deltaXMax <= maxDiff && TMath::Abs(minRangeX - minX)/deltaXMax <= maxDiff ) {
-          factorX = 0;
-          maxX = maxRangeX;
-          minX = minRangeX;
-      }
-      if ( TMath::Abs(maxRangeY-maxY)/deltaYMax <= maxDiff && TMath::Abs(minRangeY - minY)/deltaYMax <= maxDiff ) {
-          factorY = 0;
-          minY = minRangeY;
-          maxY = maxRangeY;
-      }
-      if ( TMath::Abs(maxRangeZ-maxZ)/deltaZMax <= maxDiff && TMath::Abs(minRangeZ - minZ)/deltaZMax <= maxDiff ) {
-          factorZ = 0;
-          minZ = minRangeZ;
-          maxZ = maxRangeZ;
-      }
-      Float_t deltaX=maxX-minX;
-      Float_t deltaY=maxY-minY;
-      Float_t deltaZ=maxZ-minZ;
-      //  cout<<"\t"<<deltaX<<" "<<deltaY<<" "<<deltaZ<<endl;
-      //  cout<<"\t"<<factorX<<" "<<factorY<<" "<<factorZ<<endl;
-      minX = minX-factorX*deltaX;
-      maxX = maxX+factorX*deltaX;
-      minY = minY-factorY*deltaY;
-      maxY = maxY+factorY*deltaY;
-      minZ = minZ-factorZ*deltaZ;
-      maxZ = maxZ+factorZ*deltaZ;
-      cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
-      //  char t; cin>>t;
-      TProfile2D* histo = new TProfile2D(name,name,
-              nBinsX,minX,maxX,
-              nBinsY,minY,maxY,
-                     minZ,maxZ);
-      for(UInt_t i=0;i<posX.size();i++){
-          if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
-              continue;
-          if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
-              continue;
-          if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
-              continue;
-          histo->Fill(posX.at(i),posY.at(i),posZ.at(i));
-      }
+        cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
+        return new TProfile2D(name,name,2,0,1,2,0,1);
+    }
+    cout<<"CreateProfile2D "<<name<<endl;
+    cout<<TString::Format("maxRange:\nX: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minRangeX,maxRangeX,minRangeY,maxRangeY,minRangeZ,maxRangeZ)<<endl;
+    Float_t maxX = posX.at(0);
+    Float_t maxY = posY.at(0);
+    Float_t maxZ = posZ.at(0);
+    Float_t minX = posY.at(0);
+    Float_t minY = posY.at(0);
+    Float_t minZ = posZ.at(0);
+    //  cout<<" Create Histo: '"<<name<<"' - Range ("<<minRangeX<<"-"<<maxRangeX<<"),  ("
+    //          <<minRangeY<<"-"<<maxRangeY<<"), ("<<minRangeZ<<"-"<<maxRangeZ<<")"<<endl;
+    for(UInt_t i=0;i<posX.size();i++){
+        if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
+            continue;
+        if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
+            continue;
+        if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
+            continue;
+        if(posX.at(i)>maxX)maxX=posX.at(i);
+        else if(posX.at(i)<minX)minX=posX.at(i);
+        if(posY.at(i)>maxY)maxY=posY.at(i);
+        else if(posY.at(i)<minY)minY=posY.at(i);
+        if(posZ.at(i)>maxZ)maxZ=posZ.at(i);
+        else if(posZ.at(i)<minZ)minZ=posZ.at(i);
+    }
+    //  cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
+    Float_t factorX = factor;
+    Float_t factorY = factor;
+    Float_t factorZ = factor;
+    Float_t deltaXMax = maxRangeX - minRangeX;
+    Float_t deltaYMax = maxRangeY - minRangeY;
+    Float_t deltaZMax = maxRangeZ - minRangeZ;
+    Float_t maxDiff = 0.02;
+    if ( TMath::Abs(maxRangeX-maxX)/deltaXMax <= maxDiff && TMath::Abs(minRangeX - minX)/deltaXMax <= maxDiff ) {
+        factorX = 0;
+        maxX = maxRangeX;
+        minX = minRangeX;
+    }
+    if ( TMath::Abs(maxRangeY-maxY)/deltaYMax <= maxDiff && TMath::Abs(minRangeY - minY)/deltaYMax <= maxDiff ) {
+        factorY = 0;
+        minY = minRangeY;
+        maxY = maxRangeY;
+    }
+    if ( TMath::Abs(maxRangeZ-maxZ)/deltaZMax <= maxDiff && TMath::Abs(minRangeZ - minZ)/deltaZMax <= maxDiff ) {
+        factorZ = 0;
+        minZ = minRangeZ;
+        maxZ = maxRangeZ;
+    }
+    Float_t deltaX=maxX-minX;
+    Float_t deltaY=maxY-minY;
+    Float_t deltaZ=maxZ-minZ;
+    //  cout<<"\t"<<deltaX<<" "<<deltaY<<" "<<deltaZ<<endl;
+    //  cout<<"\t"<<factorX<<" "<<factorY<<" "<<factorZ<<endl;
+    minX = minX-factorX*deltaX;
+    maxX = maxX+factorX*deltaX;
+    minY = minY-factorY*deltaY;
+    maxY = maxY+factorY*deltaY;
+    minZ = minZ-factorZ*deltaZ;
+    maxZ = maxZ+factorZ*deltaZ;
+    cout<<TString::Format("X: [%f,%f],\tY: [%f,%f],\tZ: [%f,%f]",minX,maxX,minY,maxY,minZ,maxZ)<<endl;
+    //  char t; cin>>t;
+    TProfile2D* histo = new TProfile2D(name,name,
+            nBinsX,minX,maxX,
+            nBinsY,minY,maxY,
+            minZ,maxZ);
+    for(UInt_t i=0;i<posX.size();i++){
+        if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
+            continue;
+        if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
+            continue;
+        if (posZ.at(i)<minRangeZ||posZ.at(i)>maxRangeZ)
+            continue;
+        histo->Fill(posX.at(i),posY.at(i),posZ.at(i));
+    }
     return histo;
 }
 
@@ -1958,7 +1958,7 @@ void HistogrammSaver::OptimizeXYRange(TH2* histo){
     HistogrammSaver::OptimizeYRange(histo);
 }
 
-void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLegend) {
+void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLegend,bool bDrawOnCanvas) {
     if (!stack) return;
     TString name = stack->GetName();
     TString xTitle = "";
@@ -2013,23 +2013,38 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
     Double_t delta = ymax-ymin;
     ymin = ymin - .1 *(delta);
     ymax = ymax + .3*delta;
-    c1->DrawFrame(xmin,ymin,xmax,ymax,stack->GetTitle());
-    if(drawOption=="")
+    if(bDrawOnCanvas){
+        c1->DrawFrame(xmin,ymin,xmax,ymax,stack->GetTitle());
+        if(drawOption=="")
             stack->Draw("same");
         else
-            stack->Draw(drawOption+(TString)"same");
-    c1->Update();
+            stack->Draw(drawOption+(TString)" same");
+        c1->Update();
+    }
+    else{
+        if(drawOption=="")
+            stack->Draw("");
+        else
+            stack->Draw(drawOption);
+    }
     if (bDrawLegend){
         TLegend* leg = c1->BuildLegend();
         leg->SetX1NDC(0.45);
         leg->SetX2NDC(0.9);
         leg->SetY1NDC(0.74);
         leg->SetY2NDC(0.999);
-//        leg->AddEntry(stack);
+        //        leg->AddEntry(stack);
         if(leg) leg->SetFillColor(kWhite);
         if(leg) leg->Draw();
     }
-    stack->Write(stack->GetName()+(TString)".root");
+    /*
+    ostringstream plot_filename;
+    plot_filename << plots_path << canvas->GetName()<<".root";
+    //*/
+    TString fileName = (TString)plots_path+stack->GetName()+(TString)".root";
+    stack->SaveAs(fileName);
+    stack->Write();
+    c1->Modified();
     SaveCanvas(c1);
 }
 

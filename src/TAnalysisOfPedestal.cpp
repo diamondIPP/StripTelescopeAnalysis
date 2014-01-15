@@ -540,11 +540,10 @@ void TAnalysisOfPedestal::initialiseHistos()
 		histoName << "hPulseHeightSecondBiggestHitChannelInSigmaRight" << TPlaneProperties::getStringForDetector(det) ;
 		histo_pulseheight_sigma_second_right[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
 
-		histoName.str("");
-		histoName << "hBiggestHitMap"<< TPlaneProperties::getStringForDetector(det);
-		hBiggestHitChannelMap[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),TPlaneProperties::getNChannels(det),0.,TPlaneProperties::getNChannels(det)-1);
-		histoName << "_CMNcorrected";
-		hBiggestHitChannelMapCMN[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),TPlaneProperties::getNChannels(det),0.,TPlaneProperties::getNChannels(det)-1);
+		TString hName = (TString)"hBiggestHitMap"+ (TString)TPlaneProperties::getStringForDetector(det);
+		hBiggestHitChannelMap[det] = new TH1F(hName,hName,TPlaneProperties::getNChannels(det),-.5,TPlaneProperties::getNChannels(det)-.5);
+		hName += (TString)"_CMNcorrected";
+		hBiggestHitChannelMapCMN[det] = new TH1F(hName,hName,TPlaneProperties::getNChannels(det),-.5,TPlaneProperties::getNChannels(det)-.5);
 
 		histoName.str("");
 		histoName << "hPulseHeightLeftChipBiggestHitChannelInSigma" << TPlaneProperties::getStringForDetector(det);
@@ -1065,6 +1064,22 @@ void TAnalysisOfPedestal::saveHistos(){
 		//		cout << "saving histogram " << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogram(this->hBiggestHitChannelMap[det]);
 		histSaver->SaveHistogram(this->hBiggestHitChannelMapCMN[det]);
+		if(TPlaneProperties::isDiamondDetector(det)){
+		    for (int pattern = 0; pattern < settings->getNDiaDetectorAreas();pattern++){
+		        pair<Int_t,Int_t> area = settings->getDiaDetectorArea(pattern);
+		        hBiggestHitChannelMap[det]->GetXaxis()->SetRangeUser(area.first-1,area.second+1);
+		        TString name = hBiggestHitChannelMap[det]->GetName();
+		        hBiggestHitChannelMap[det]->SetName(name+TString::Format("_pattern%d",pattern));
+		        histSaver->SaveHistogram(hBiggestHitChannelMap[det],false,false,true);
+		        hBiggestHitChannelMap[det]->SetName(name);
+		        //***
+		        hBiggestHitChannelMapCMN[det]->GetXaxis()->SetRangeUser(area.first-1,area.second+1);
+		        name = hBiggestHitChannelMapCMN[det]->GetName();
+		        hBiggestHitChannelMapCMN[det]->SetName(name+TString::Format("_pattern%d",pattern));
+		        histSaver->SaveHistogram(hBiggestHitChannelMapCMN[det],false,false,true);
+		        hBiggestHitChannelMapCMN[det]->SetName(name);
+		    }
+		}
 		//		cout << "saving histogram " << this->histo_pulseheight_left_sigma[det]->GetName() << ".." << endl;
 		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma[det]);
 		//		cout << "saving histogram " << this->histo_pulseheight_left_sigma_second[det]->GetName() << ".." << endl;

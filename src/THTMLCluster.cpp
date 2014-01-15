@@ -124,9 +124,9 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	output2<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"_Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
+		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"_Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
 		output2<<putImage(path.str(),name2.str());
 	}
 	output<<"\n<br\n\t";

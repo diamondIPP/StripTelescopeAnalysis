@@ -81,7 +81,7 @@ public:
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true,TString drawOption ="colz");
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true,TString drawOption ="");
 	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
-	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false);
+	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false,bool bDrawOnCanvas = true);
 	TProfile* GetProfileX(TProfile2D* prof,TString name ="_pfx",Int_t firstybin = 1, Int_t lastybin = -1);
     TProfile* GetProfileY(TProfile2D* prof,TString name ="_pfy",Int_t firstxbin = 1, Int_t lastxbin = -1);
     TH2D* GetBinContentHisto(TProfile2D* prof);

@@ -152,8 +152,8 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     mapHistos["hChargeDifference"]->Fill(transparentCharge-clusteredCharge);
     Int_t pos = 0;
     Float_t charge = 0;
-    if (itTransparent->second.hasNegativeCharge(charge,pos,true)){
-        //        cout<<itTransparent->first<<" "<<pos<<" "<<charge<<endl;
+    bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(charge,pos,true);
+    if (hasNegativeCharge){
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
         mapHistos["hNegativeCharge"]->Fill(charge);
         if(charge<-50){
@@ -162,12 +162,12 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
                 Float_t yPredDet = predictedPositions->at(eventNo).second;
                 mapHistos["hNegativeChargeAbove50_Position"]->Fill(xPredDet,yPredDet);
             }
-            else{
-                cerr<<"cannot find "<<eventNo<<endl;
-            }
         }
-        //        cout<<"FILL "<<charge<<" "<<pos<<endl;
     }
+    if(hasNegativeCharge && charge < -50)
+        mapHistos["hHasNegativeCharge_PulseHeight"]->Fill(posCharge);
+    else
+        mapHistos["hNoNegativeCharge_PulseHeight"]->Fill(posCharge);
     mapHistos["hPositive_Minus_Negative_TransparentCharge"]->Fill(posCharge-transparentCharge);
     if ( posCharge - clusteredCharge < 0 ){
         cout<<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
@@ -226,8 +226,8 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     Int_t bins = stripHisto?stripHisto->GetNbinsX():256;
     Int_t xmin = stripHisto?stripHisto->GetXaxis()->GetXmin():1;
     Int_t xmax = stripHisto?stripHisto->GetXaxis()->GetXmax():2800;
-    TString name = "hTransparentPulseHeight";
 
+    TString name = "hTransparentPulseHeight";
     histo = new TH1F(name,name,bins,xmin,xmax);
     histo->GetXaxis()->SetTitle("PH /ADC");
     histo->GetYaxis()->SetTitle("No of entries #");
@@ -244,20 +244,29 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     histo->GetXaxis()->SetBinLabel(2,"Same ");
     histo->GetXaxis()->SetBinLabel(3,"Only transparent");
     mapHistos[name] = histo;
+
+    name ="hHasNegativeCharge_PulseHeight";
+    histo = new TH1F(name,name,bins,xmin,xmax);
+    histo->GetXaxis()->SetTitle("PH /ADC");
+    histo->GetYaxis()->SetTitle("No of entries #");
+    histo->SetLineColor(kRed);
+    mapHistos[name] = histo;
+
+    name ="hNoNegativeCharge_PulseHeight";
+    histo = new TH1F(name,name,bins,xmin,xmax);
+    histo->GetXaxis()->SetTitle("PH /ADC");
+    histo->GetYaxis()->SetTitle("No of entries #");
+    histo->SetLineColor(kBlue);
+    mapHistos[name] = histo;
 }
 
 void TAnalysisOfAnalysisDifferences::SaveHistograms() {
-    cout<<"Save"<<endl;
     TH1F* histo1 = (TH1F*)mapHistos["hClusteredPulseHeight"]->Clone();
-    cout<<"Save1"<<endl;
     TH1F* histo2 = (TH1F*)mapHistos["hTransparentPulseHeight"]->Clone();
-    cout<<"Save2"<<endl;
     histSaver->SaveTwoHistos("cComparisionPulseHeights",histo1,histo2);
-    cout<<"Save3"<<endl;
     histSaver->SaveTwoHistosNormalized("cComparisionPulseHeightsNormalized",histo1,histo2);
     TString name = "cComparisionPulseHeight";
     TCanvas *c1 = new TCanvas(name,name);
-    cout<<"Save4"<<endl;
     histo1->Draw();
     histo2->Draw("same");
     if(stripHisto){
@@ -273,16 +282,66 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     TLegend* leg = c1->BuildLegend();
     leg->SetFillColor(kWhite);
     leg->Draw();
-    cout<<"Save5"<<endl;
     histSaver->SaveCanvas(c1);
     cout<<"Save6"<<endl;
+
+
+    name = "cNoNegativeCharge_PulseHeight_Comparision";
+    c1->SetTitle(name);
+    c1->SetName(name);
+    c1->Clear();
+    mapHistos["hNoNegativeCharge_PulseHeight"]->Draw();
+//    if(histo2){
+//        histo2->SetLineColor(kRed);
+//        histo2->Draw("same");
+//    }
+    if(stripHisto)
+        stripHisto->Draw("same");
+    leg = c1->BuildLegend();
+    leg->SetFillColor(kWhite);
+    leg->Draw();
+    histSaver->SaveCanvas(c1);
+
+    name = "stack_NoNegativeCharge_PulseHeight_Comparision";
+    THStack *hs1 = new THStack(name,name);
+    hs1->Add(mapHistos["hNoNegativeCharge_PulseHeight"]);
+    if(stripHisto)hs1->Add(stripHisto);
+    hs1->Draw("");
+    if(hs1->GetXaxis())hs1->GetXaxis()->SetTitle("pulse height/ADC");
+    if(hs1->GetYaxis())hs1->GetYaxis()->SetTitle("number of entries");
+    histSaver->SaveStack(hs1,"nostack",true,false);
+
+    name = "stackPulseHeights_GoodCells";
+    THStack *hs = new THStack(name,name);
+    hs->Add((TH1F*)mapHistos["hHasNegativeCharge_PulseHeight"]->Clone());
+    hs->Add((TH1F*)mapHistos["hNoNegativeCharge_PulseHeight"]->Clone());
+    hs->Draw("");
+    if(hs->GetXaxis())hs->GetXaxis()->SetTitle("pulse height /ADC");
+    if(hs->GetYaxis())hs->GetYaxis()->SetTitle("number of entries");
+    histSaver->SaveStack(hs,"",true,false);
+
+    name = "stackPulseHeights_GoodCells";
+    hs->SetTitle(name);
+    hs->SetName(name);
+    histSaver->SaveStack(hs,"",true,false);
+
+    name = "stackPulseHeights_GoodCells_nostack";
+    hs->SetTitle(name);
+    hs->SetName(name);
+    histSaver->SaveStack(hs,"nostack",true,false);
+
+    delete hs;
+    delete hs1;
+    delete histo1;
+    delete histo2;
+
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
     for(it;it!=mapHistos.end();it++){
         TString className = it->second->ClassName();
         if( it->first == "hNegativeChargeAbove50_Position"||
                 it->first == "hOnlyTranspClusterPosition" ||
                 it->first == "hOnlyClusteredClusterPosition"){
-            TString name = "c";
+            name = "c";
             name.Append(it->first);
             histSaver->SaveHistogramWithCellGrid((TH2*)it->second);
             TCanvas *c1 = new TCanvas(name,name);
@@ -341,7 +400,7 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     mapHistos[name] = histo;
 
     name = "hNegativeCharge";
-    histo = new TH1F(name,name,512,-512,0);
+    histo = new TH1F(name,name,256,-256,0);
     histo->GetXaxis()->SetTitle("first neg. Charge in transparent Cluster /adc");
     mapHistos[name] = histo;
 
