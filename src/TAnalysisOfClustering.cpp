@@ -1592,7 +1592,7 @@ void TAnalysisOfClustering::savePHHistos()
 
             //CREATE HTEMP and ReBin it if necessary
             TH1F *htemp;
-            if (nClusters = 0)
+            if (nClusters == 0)
                 htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname);//,nClusters+1,nClusters+1);
             else
                 htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname,nClusters+1,nClusters+1);
@@ -1603,7 +1603,7 @@ void TAnalysisOfClustering::savePHHistos()
             UInt_t maximumEntries = htemp->GetMaximum();
             UInt_t nSteps =4;
             UInt_t nStep = 0;
-            while((maximumEntries<50&&maximumEntries<entries*0.8)&&nStep<nSteps){
+            while((maximumEntries<50&&maximumEntries<entries*0.7)&&nStep<nSteps){
                 htemp->Rebin(2);
                 entries = htemp->GetEntries();
                 maximumEntries = htemp->GetMaximum();
