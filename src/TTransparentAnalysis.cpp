@@ -973,7 +973,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             hLandau2OutOfXVsEventNo->GetXaxis()->SetTitle("Event no.");
             hLandau2OutOfXVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
-            histSaver->Save1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
+            histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
             if (hLandau2OutOfXVsEventNo)
                 delete hLandau2OutOfXVsEventNo;
         }
