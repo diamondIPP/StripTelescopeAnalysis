@@ -86,7 +86,7 @@ void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
 	}
 	sectionContent<<createTable(vecTable);
 	sectionContent<<"\n\n<br><br>\n\n";
-	sectionContent<<this->putImagesOfAllDetectors(path,"c_hPulseHeightDistribution_allClusterSizes_");
+	sectionContent<<this->putImagesOfAllDetectors(path,"cPulseHeightDistribution_allClusterSizes_");
 	addSection("Pulse Height Distribution",sectionContent.str());
 }
 
@@ -123,27 +123,37 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	output<<"\n\t";
 	output2<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"_Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"_Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output2<<putImage(path.str(),name2.str());
+		Int_t seed = settings->getClusterSeedFactor(det,0);
+		Int_t hit =settings->getClusterHitFactor(det,0);
+		TString name =TString::Format("hClusterSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((string)TPlaneProperties::getStringForDetector(det));
+//		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"_Hit"<<<<"_"<<;
+		output<<putImage(path.str(),(string)name);
+		name = TString::Format("hClusterSeedSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((string)TPlaneProperties::getStringForDetector(det));
+		output2<<putImage(path.str(),(string)name);
 	}
 	output<<"\n<br\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output2<<putImage(path.str(),name2.str());
+        Int_t seed = settings->getClusterSeedFactor(det,0);
+        Int_t hit =settings->getClusterHitFactor(det,0);
+        TString name =TString::Format("hClusterSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((TString)TPlaneProperties::getStringForDetector(det));
+        output<<putImage(path.str(),(string)name);
+        name = TString::Format("hClusterSeedSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((TString)TPlaneProperties::getStringForDetector(det));
+        output2<<putImage(path.str(),(string)name);
 	}
 	output<<"\n<br>\n\t";
 	output2<<"\n<br>\n\t";
-	stringstream name,name2;
-	name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
-	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
-	output<<putImage(path.str(),name.str());
-	output2<<putImage(path.str(),name2.str());
+	Int_t seed = settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0);
+	Int_t hit = settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0);
+	TString name = TString::Format("hClusterSize_Seed%d_Hit%d_",seed,hit);
+	name.Append((TString)TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond()));
+	output<<putImage(path.str(),(string)name);
+
+//	name<<"hClusterSize_Seed"<<seed<<"-Hit"<<hit<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+//	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name = TString::Format("hClusterSeedSize_Seed%d_Hit%d_",seed,hit);
+	name.Append((TString)TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond()));
+	output2<<putImage(path.str(),(string)name);
+
 	sectionContent<<output.str()<<"\n<br>\n";
 	sectionContent<<output2.str()<<"\n<br>\n";
 
