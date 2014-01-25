@@ -265,5 +265,5 @@ string THTMLGenerator::cleanFileName(string fileName) {
 //        fileName.replace("//","");
 //    }
 
-    return fileName
+    return fileName;
 }
