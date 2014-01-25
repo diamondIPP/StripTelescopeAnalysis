@@ -69,6 +69,7 @@ void THTMLGenerator::generatorHTMLHeader()
 			<< "<a href=\""<<correctionPath<<"/selections/selection.html\">Selection</a>||"
 			<< "<a href=\""<<correctionPath<<"/alignment/alignment.html\">Alignment</a>||"
 			<< "<a href=\""<<correctionPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
+            << "<a href=\""<<correctionPath<<"/selectionAnalysis/selectionAnalysis.html\">selAnalysis</a>||"
 			<< "<a href=\""<<correctionPath<<"/transparentAnalysis/transparentAnalysis.html\">TransparentAnalysis</a>||"
 			//				<< "<a href=\"d8.html\">Diamond</a>||"
 			//				<< "<a href=\"d0.html\">D0X</a>||"
@@ -259,3 +260,10 @@ std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string
 	return (output.str());
 }
 
+string THTMLGenerator::cleanFileName(string fileName) {
+//    while (fileName.find("//") !=fileName.end){
+//        fileName.replace("//","");
+//    }
+
+    return fileName
+}

@@ -34,6 +34,7 @@ public:
 	void setTitle(string newTitle){if(verbosity)cout<<"HTML:SetTitle:"<<newTitle<<endl;this->title.assign(newTitle);};
 	virtual void createContent(){};
 public:
+	string cleanFileName(string fileName);
 //	template <typename T1, typename T2>
 //	string combineToString(T1 a, T2 b){
 //	    stringstream output;
