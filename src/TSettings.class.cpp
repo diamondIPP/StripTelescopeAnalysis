@@ -804,6 +804,9 @@ void TSettings::DefaultLoadDefaultSettings(){
 	vecEdgePositionName.push_back("X_Edge3D_small");
 	vecEdgePositionName.push_back("Y_Edge3D_small");
 	minimumEdgeDistance = 10;
+	repeaterCardNo = -1;
+	diamondName = "UNKOWN";
+	voltage = 0;
 //	checkSettings();
 }
 

@@ -116,6 +116,7 @@ public:
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
 	std::string getRunDescription() const {return runDescription;};
+	Int_t getRepeaterCard(){return repeaterCardNo;}
 	Float_t getPHinSigmaPlotFactor() const{return 0.8;}
 	Float_t getClusterSeedFactor(UInt_t det,UInt_t ch);
 	Float_t getClusterHitFactor(UInt_t det,UInt_t ch);
@@ -328,7 +329,12 @@ public:
 	vector<int> get3DnHAnalysisFidCut(){return TDnHAnalysisFidCut;};//todo: ????
 	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};//todo: ????
 	TString  getAlignmentFidCuts(){TString output; for (UInt_t i=0;i<alignmentFidCuts.size();i++) output.Append(TString::Format("%d, ",i));return output;}
+	TString getDiamond(){return diamondName;}
+	Int_t getVoltage(){return voltage;}
 private:
+
+	TString diamondName;
+	Int_t voltage;
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3DEdge;
 	TFidCutRegions* fidCuts3DMetallisation;
@@ -528,6 +534,7 @@ private:
 	Float_t cellHeight;
 	void CheckEdgeFidcuialCuts();
 	Float_t minimumEdgeDistance;
+	Int_t repeaterCardNo;
 public:
 	Float_t GetCellHeight(){return cellHeight;}
 	Float_t GetCellWidth(int det,int pattern){return getPitchWidth(det,pattern);}

@@ -157,6 +157,10 @@ private:
     Float_t singleGausFWTM_trans;
     Float_t singleGaus_normal;
     Float_t singleGaus_trans;
+
+    Int_t repeaterCard;
+    Int_t voltage;
+    TString diamondName;
     std::set<Int_t> maskedChannels;
     ClassDef(TResults,7);
 };

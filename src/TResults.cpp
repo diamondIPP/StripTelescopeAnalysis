@@ -97,7 +97,8 @@ void TResults::inheritOldResults(const TResults & rhs)
     mp_clustered_trans = rhs.mp_clustered_trans;
     width_clustered_trans = rhs.width_clustered_trans;
     gSigma_clustered_trans = rhs.gSigma_clustered_trans;
-
+    repeaterCard = rhs.repeaterCard;
+    maskedChannels.clear();
     for (set<Int_t>::iterator it = rhs.maskedChannels.begin(); it !=  rhs.maskedChannels.end();it++)
         maskedChannels.insert(*it);
 //    std::sort(maskedChannels.begin(),maskedChannels.end());
@@ -105,6 +106,7 @@ void TResults::inheritOldResults(const TResults & rhs)
 }
 
 void TResults::initialiseResults(){
+    repeaterCard = -1;
     runnumber = -1;
     seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
     hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
@@ -234,6 +236,9 @@ void TResults::setResultsFromSettings(TSettings* settings){
     for (UInt_t ch=0; ch< TPlaneProperties::getNChannels(diaDet);ch++)
         if (settings->IsMasked(diaDet,ch))
             maskedChannels.insert(ch);
+    repeaterCard = settings->getRepeaterCard();
+    diamondName = settings->getDiamond();
+    voltage = settings->getVoltage();
 //    std::sort(maskedChannels.begin(),maskedChannels.end());
     //	cout<<runDescription<<endl;
     //	char t;
@@ -510,9 +515,13 @@ void TResults::createOutputResultFile(){
     std::map<TString,TString> results;
     results["RunNo"] = TString::Format("%7d\t",runnumber);
     results["descr."] = runDescription;
-    results["dia"] = "UNKOWN";
+    results["dia"] = diamondName;
+    results["RepeaterCardNo"] = TString::Format("%d",repeaterCard);
     results["corrected"] = TString::Format("%d",(runnumber>1e5));
-    results["Voltage"] = "UNKOWN";
+    if (voltage == 0)
+        results["Voltage"] = "UNKOWN";
+    else
+        results["Voltage"] = TString::Format("%+d",voltage);
     results["SVN_REV"] = SVN_REV;
     results["lastUpdate"] = lastUpdate.AsString();
     results["maskedChannels"] = getMaskedChannels();
