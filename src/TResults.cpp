@@ -43,6 +43,9 @@ TResults::TResults(TSettings *settings) {
 TResults::~TResults() {
     // TODO Auto-generated destructor stub
     cout<<"delete Results of run "<<runnumber<<endl;
+
+    createOutputTextFile();
+    createOutputResultFile();
 }
 
 TResults::TResults(const   TResults& rhs){//copy constructor
@@ -65,7 +68,9 @@ void TResults::inheritOldResults(const TResults & rhs)
     this->noise.clear();
     for(UInt_t det=0;det<rhs.noise.size();det++)this->noise.push_back(rhs.noise[det]);
     signalFeedOverCorrection.clear();
-    for(UInt_t det=0;det<rhs.signalFeedOverCorrection.size();det++)signalFeedOverCorrection.push_back(signalFeedOverCorrection[det]);
+    for(UInt_t det=0;det<rhs.signalFeedOverCorrection.size();det++)
+        signalFeedOverCorrection.push_back(signalFeedOverCorrection[det]<-1?-1:signalFeedOverCorrection[det]);
+
     diaCMCNoise = rhs.diaCMCNoise;
     CMN = rhs.CMN;
     mean2outOf10_normal = rhs.mean2outOf10_normal;
@@ -82,17 +87,25 @@ void TResults::inheritOldResults(const TResults & rhs)
     gSigma2outOf10_normal = rhs.gSigma2outOf10_normal;
     gSigma2outOf10_trans = rhs.gSigma2outOf10_trans;
     this->lastUpdate = rhs.lastUpdate;
-    mean_clustered = rhs.mean_clustered;
-    mp_clustered = rhs.mp_clustered;
-    width_clusterd = rhs.width_clusterd;
-    gSigma_clustered = rhs.gSigma_clustered;
-    for (UInt_t i = 0; i< rhs.maskedChannels.size();i++)
-        maskedChannels.push_back(rhs.maskedChannels[i]);
-    std::sort(maskedChannels.begin(),maskedChannels.end());
+
+    mean_clustered_normal = rhs.mean_clustered_normal;
+    mp_clustered_normal = rhs.mp_clustered_normal;
+    width_clustered_normal = rhs.width_clustered_normal;
+    gSigma_clustered_normal = rhs.gSigma_clustered_normal;
+
+    mean_clustered_trans = rhs.mean_clustered_trans;
+    mp_clustered_trans = rhs.mp_clustered_trans;
+    width_clustered_trans = rhs.width_clustered_trans;
+    gSigma_clustered_trans = rhs.gSigma_clustered_trans;
+
+    for (set<Int_t>::iterator it = rhs.maskedChannels.begin(); it !=  rhs.maskedChannels.end();it++)
+        maskedChannels.insert(*it);
+//    std::sort(maskedChannels.begin(),maskedChannels.end());
 
 }
 
 void TResults::initialiseResults(){
+    runnumber = -1;
     seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
     hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
     noise.resize(TPlaneProperties::getNDetectors(),-1);
@@ -102,16 +115,35 @@ void TResults::initialiseResults(){
     doubleGaus2_normal = -1;
     doubleGaus1_trans = -1;
     doubleGaus2_trans = -1;
+    singleGausFWTM_normal = -1;
+    singleGausFWTM_trans = -1;
 
     singleGausShort_normal = -1;
     singleGausShort_trans = -1;
     singleGaus_normal = -1;
     singleGaus_trans = -1;
-    signalFeedOverCorrection.resize(TPlaneProperties::getNDetectors(),-100);
-    mean_clustered = -1;
-    mp_clustered = -1;
-    width_clusterd = -1;
-    gSigma_clustered = -1;
+    signalFeedOverCorrection.resize(TPlaneProperties::getNDetectors(),-1.0);
+
+    mean_clustered_normal = -1;
+    mp_clustered_normal = -1;
+    width_clustered_normal = -1;
+    gSigma_clustered_normal = -1;
+
+    mean_clustered_trans = -1;
+    mp_clustered_trans = -1;
+    width_clustered_trans = -1;
+    gSigma_clustered_trans = -1;
+
+    diaCMCNoise = -1;
+    CMN = -1;
+    nAllEvents = -1;
+    nNoSiliconHit = -1;
+    nOneAndOnlyOneSiliconNotFiducialCut = -1;
+    nValidSiliconTrack =-1;
+    nNoDiamondHit =-1;
+    nExactlyOneDiamondHit =-1;
+    nUseForAlignment =-1;
+    nUseForAnalysis = -1;
     maskedChannels.clear();
 }
 
@@ -177,9 +209,11 @@ void TResults::openResults(TSettings *settings){
 
 TString TResults::getMaskedChannels() {
     TString output = "[";
-    for (UInt_t i  = 0; i< maskedChannels.size();i++){
-        output.Append(TString::Format("%d, ",maskedChannels.at(i)));
-    }
+//    for (UInt_t i  = 0; i< maskedChannels.size();i++){
+
+    for (set<Int_t>::iterator it = maskedChannels.begin(); it !=  maskedChannels.end();it++)
+        output.Append(TString::Format("%d, ",*it));
+//    }
     output = output.Strip(TString::kBoth,' ');
     output = output.Strip(TString::kBoth,',');
     output.Append("]");
@@ -187,6 +221,7 @@ TString TResults::getMaskedChannels() {
 }
 
 void TResults::setResultsFromSettings(TSettings* settings){
+    updated();;
     //	cout<<"setResultsFromSettings"<<endl;
     hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
     seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
@@ -198,15 +233,15 @@ void TResults::setResultsFromSettings(TSettings* settings){
     UInt_t diaDet = TPlaneProperties::getDetDiamond();
     for (UInt_t ch=0; ch< TPlaneProperties::getNChannels(diaDet);ch++)
         if (settings->IsMasked(diaDet,ch))
-            maskedChannels.push_back(ch);
-    std::sort(maskedChannels.begin(),maskedChannels.end());
+            maskedChannels.insert(ch);
+//    std::sort(maskedChannels.begin(),maskedChannels.end());
     //	cout<<runDescription<<endl;
     //	char t;
     //	cin>>t;
 }
 
 void TResults::saveResults(TString name){
-    lastUpdate=TDatime();
+    updated();;
     //	std::stringstream fileName;
     //	fileName<<path<<"/"<<runnumber<<"/Results."<<runnumber<<".root";
     //	cout<<"save File:"<<fileName.str()<<endl;
@@ -222,6 +257,8 @@ void TResults::saveResults(TString name){
     //	TFile *file =  new TFile(name.Append(".bak"),"RECREATE");
     //	this->Write();
     //	file->Close();
+    createOutputTextFile();
+    createOutputResultFile();
 }
 
 void TResults::Print(){
@@ -245,15 +282,17 @@ void TResults::Print(){
 }
 
 void TResults::setSignalFeedOverCorrection(UInt_t det, Float_t correction){
+    updated();;
     if(det>=TPlaneProperties::getNDetectors())
         return;
     if(signalFeedOverCorrection.size() <= det)
-        signalFeedOverCorrection.resize(det+1 , -100);
+        signalFeedOverCorrection.resize(det+1 , -1);
     signalFeedOverCorrection[det] = correction;
     cout<<"Set Results: signal feed over correction of det "<<det<<": "<<correction*100<<" %"<<endl;
 }
 
 void TResults::setNoise(UInt_t det,Float_t detNoise){
+    updated();;
     if(det>=TPlaneProperties::getNDetectors())
         return;
     if(noise.size()<=det)
@@ -265,6 +304,7 @@ void TResults::setNoise(UInt_t det,Float_t detNoise){
 
 void TResults::setAlignment(TDetectorAlignment* newAlignment)
 {
+    updated();;
     this->alignment= *newAlignment;
     cout<<"TResults:SetAlignment"<<endl;
 }
@@ -275,11 +315,13 @@ int TResults::getRunNumber() const {
 }
 
 void TResults::setRunNumber(UInt_t runNumber) {
+    updated();;
     this->runnumber = runNumber;
 }
 
 
 void TResults::setDoubleGaussianResolution(Float_t gaus1,Float_t gaus2, TSettings::alignmentMode mode){
+    updated();;
     if (gaus2 > gaus1){
         Float_t val = gaus1;
         gaus1 = gaus2;
@@ -296,6 +338,7 @@ void TResults::setDoubleGaussianResolution(Float_t gaus1,Float_t gaus2, TSetting
 }
 
 void TResults::setSingleGaussianFixedResolution(Float_t gaus,TSettings::alignmentMode mode){
+    updated();;
     if (mode == TSettings::normalMode){
         singleGausFixed_normal = gaus;
     }
@@ -305,6 +348,7 @@ void TResults::setSingleGaussianFixedResolution(Float_t gaus,TSettings::alignmen
 }
 
 void TResults::setSingleGaussianResolution(Float_t gaus,TSettings::alignmentMode mode){
+    updated();;
     if (mode == TSettings::normalMode){
         singleGaus_normal = gaus;
     }
@@ -313,6 +357,7 @@ void TResults::setSingleGaussianResolution(Float_t gaus,TSettings::alignmentMode
     }
 }
 void TResults::setSingleGaussianShortResolution(Float_t gaus,TSettings::alignmentMode mode){
+    updated();;
     if (mode == TSettings::normalMode){
         singleGausShort_normal = gaus;
     }
@@ -322,6 +367,7 @@ void TResults::setSingleGaussianShortResolution(Float_t gaus,TSettings::alignmen
 }
 
 void TResults::setSingleGaussianFWTMResolution(Float_t gaus,TSettings::alignmentMode mode){
+    updated();;
     if (mode == TSettings::normalMode){
         singleGausFWTM_normal = gaus;
     }
@@ -331,8 +377,28 @@ void TResults::setSingleGaussianFWTMResolution(Float_t gaus,TSettings::alignment
 }
 
 
+void TResults::setPH_clustered(Float_t mean, Float_t mp, Float_t width,
+        Float_t gSigma, TSettings::alignmentMode mode) {
+    updated();;
+    cout<<"SET PH_clustered "<<mean<<" "<<mp<<" "<<width<<" "<<gSigma<<" "<<mode<<endl;
+    if (mode == TSettings::transparentMode){
+        mean_clustered_trans = mean;
+        mp_clustered_trans = mp;
+        width_clustered_trans = width;
+        gSigma_clustered_trans = gSigma;
+        cout<<"SET PH_clustered "<<mean_clustered_trans<<" "<<mp_clustered_trans<<" "<<width_clustered_trans<<" "<<gSigma_clustered_trans<<endl;
+    }
+    else{
+        mean_clustered_normal = mean;
+        mp_clustered_normal = mp;
+        width_clustered_normal = width;
+        gSigma_clustered_normal = gSigma;
+        cout<<"SET PH_clustered "<<mean_clustered_normal<<" "<<mp_clustered_normal<<" "<<width_clustered_normal<<" "<<gSigma_clustered_normal<<endl;
+    }
+}
 
 void TResults::setPH_2outOf10(Float_t mean, Float_t mp, Float_t width, Float_t gSigma, TSettings::alignmentMode mode){
+    updated();;
     if (mode == TSettings::normalMode){
         mean2outOf10_normal = mean;
         mp2outOf10_normal = mp;
@@ -348,6 +414,7 @@ void TResults::setPH_2outOf10(Float_t mean, Float_t mp, Float_t width, Float_t g
 }
 
 void TResults::setPH_NoutOfN(vector<Float_t> vecPHNoutOfN, TSettings::alignmentMode mode){
+    updated();;
     if(meanNoutOfN_trans.size()<vecPHNoutOfN.size())
         meanNoutOfN_trans.resize(vecPHNoutOfN.size(),-1);
     if(meanNoutOfN_normal.size()<vecPHNoutOfN.size())
@@ -365,6 +432,7 @@ void TResults::setPH_NoutOfN(vector<Float_t> vecPHNoutOfN, TSettings::alignmentM
 }
 
 void TResults::setCMN(Float_t cmn){
+    updated();;
     this->CMN = cmn;
 }
 
@@ -396,17 +464,15 @@ std::pair<Float_t, Float_t> TResults::getAvergSiliconCorrection(){
     sigma2 = sigma2 - mean * mean;
     mean/=100.;
     sigma2/=100;
+    if(mean>100 || mean < -100){
+        mean = -1;
+        sigma2 = -1;
+    }
+
     cout << "avrg Sil Feed over correction: " << mean*100 << " +/- " << sigma2*100 <<" % in "<< nSilDetectors<< " Dectectors." << endl;
     return make_pair(mean,sigma2);
 }
 
-void TResults::setPH_clustered(Float_t mean, Float_t mp, Float_t width,
-        Float_t gSigma) {
-    mean_clustered = mean;
-    mp_clustered = mp;
-    width_clusterd = width;
-    gSigma_clustered = gSigma;
-}
 
 string TResults::emptyString(UInt_t nChars,char character){
     string str = "";
@@ -416,10 +482,19 @@ string TResults::emptyString(UInt_t nChars,char character){
 
 string TResults::createSection(TString sectionName,map<TString, TString> results) {
     stringstream output;
-    output <<"["<<sectionName<<"]\n\n";
+    output <<"["<<sectionName<<"]\n";
     map<TString,TString>::iterator it;
-    for (it = results.begin();it!=results.end();it++)
-        output<<it->first<<":\t"<<it->second<<"\n";
+    Int_t length1 = 0;
+    Int_t length2 = 0;
+    for (it = results.begin();it!=results.end();it++){
+        length1 = TMath::Max(it->first.Length(),length1);
+        length2 = TMath::Max(it->second.Length(),length2);
+    }
+    for (it = results.begin();it!=results.end();it++){
+        Int_t nChars1 = length1 - (it->first.Length());
+        Int_t nChars2 = length2 - (it->second.Length());
+        output<<it->first.Strip(TString::kBoth)<<":"<<emptyString(nChars1)<<"\t"<<it->second.Strip(TString::kBoth)<<"\n";
+    }
     output<<"\n";
     return output.str();
 }
@@ -444,11 +519,11 @@ void TResults::createOutputResultFile(){
     myfile << createSection("RunInfo",results);
 
     results.clear();
-    results["avrgNoise_sil"] = TString::Format("%5.2f\t",getAvrgSilNoise().first);
-    results["sigNoise_sil"] = TString::Format("%5.2f\t",getAvrgSilNoise().second);
-    results["Noise_dia"] = TString::Format("%5.2f\t",noise[det]);
-    results["CMC_Noise_dia"] = TString::Format("%6.2f\t",diaCMCNoise);
-    results["CM_Noise_dia"] = TString::Format("%5.2f\t",CMN);
+    results["avrgNoise_sil"] =  TString::Format("%6.2f\t",getAvrgSilNoise().first);
+    results["sigNoise_sil"] =   TString::Format("%6.2f\t",getAvrgSilNoise().second);
+    results["Noise_dia"] =      TString::Format("%6.2f\t",noise[det]);
+    results["CMC_Noise_dia"] =  TString::Format("%6.2f\t",diaCMCNoise);
+    results["CM_Noise_dia"] =   TString::Format("%6.2f\t",CMN);
     myfile << createSection("Noise",results);
 
     results.clear();
@@ -458,39 +533,46 @@ void TResults::createOutputResultFile(){
     myfile << createSection("Feed_Through_Correction",results);
 
     results.clear();
-    results["mean2outOf10_normal"] = TString::Format("%+7.2f\t",mean2outOf10_normal);;
-    results["mp2outOf10_normal"] = TString::Format("%+7.2f\t",mp2outOf10_normal);
-    results ["width2outOf10_normal"] = TString::Format("%+7.2f\t",width2outOf10_normal);
+    results["mean2outOf10_clustered"] =     TString::Format("%+7.2f\t",mean_clustered_normal);;
+    results["mp2outOf10_clustered"] =       TString::Format("%+7.2f\t",mp_clustered_normal);
+    results ["width2outOf10_clustered"] =   TString::Format("%+7.2f\t",width_clustered_normal);
+    results ["gSigma2outOf10_clustered"] =  TString::Format("%+7.2f\t",gSigma_clustered_normal);
+    myfile << createSection("Landau_clustered",results);
+
+    results.clear();
+    results["mean2outOf10_normal"] =    TString::Format("%+7.2f\t",mean2outOf10_normal);;
+    results["mp2outOf10_normal"] =      TString::Format("%+7.2f\t",mp2outOf10_normal);
+    results ["width2outOf10_normal"] =  TString::Format("%+7.2f\t",width2outOf10_normal);
     results ["gSigma2outOf10_normal"] = TString::Format("%+7.2f\t",gSigma2outOf10_normal);
-    results["m2/2_normal"] = TString::Format("%+7.2f\t",meanNoutOfN_normal[1]);
-    results ["m4/4_normal"] = TString::Format("%+7.2f\t",meanNoutOfN_normal[3]);
+    results["m2/2_normal"] =            TString::Format("%+7.2f\t",meanNoutOfN_normal[1]);
+    results ["m4/4_normal"] =           TString::Format("%+7.2f\t",meanNoutOfN_normal[3]);
     myfile << createSection("Landau_normal",results);
 
     results.clear();
-    results["mean2outOf10_trans"] = TString::Format("%+7.2f\t",mean2outOf10_trans);;
-    results["mp2outOf10_trans"] = TString::Format("%+7.2f\t",mp2outOf10_trans);
-    results ["width2outOf10_trans"] = TString::Format("%+7.2f\t",width2outOf10_trans);
-    results ["gSigma2outOf10_trans"] = TString::Format("%+7.2f\t",gSigma2outOf10_trans);
-    results["m2/2_trans"] = TString::Format("%+7.2f\t",meanNoutOfN_trans[1]);
-    results ["m4/4_trans"] = TString::Format("%+7.2f\t",meanNoutOfN_trans[3]);
+    results["mean2outOf10_trans"] =     TString::Format("%+7.2f\t",mean2outOf10_trans);;
+    results["mp2outOf10_trans"] =       TString::Format("%+7.2f\t",mp2outOf10_trans);
+    results ["width2outOf10_trans"] =   TString::Format("%+7.2f\t",width2outOf10_trans);
+    results ["gSigma2outOf10_trans"] =  TString::Format("%+7.2f\t",gSigma2outOf10_trans);
+    results["m2/2_trans"] =             TString::Format("%+7.2f\t",meanNoutOfN_trans[1]);
+    results ["m4/4_trans"] =            TString::Format("%+7.2f\t",meanNoutOfN_trans[3]);
     myfile << createSection("Landau_trans",results);
 
     results.clear();
     results["singleGausFixed_normal"] = TString::Format("%8.2f\t",singleGausFixed_normal);
     results["singleGausShort_normal"] = TString::Format("%8.2f\t",singleGausShort_normal);
-    results["singleGaus_normal"] = TString::Format("%8.2f\t",singleGaus_normal);
-    results["singleGausFWTM_normal"] = TString::Format("%8.2f\t",singleGausFWTM_normal);
-    results["doubleGaus1_normal"] = TString::Format("%8.2f\t",doubleGaus1_normal);
-    results["doubleGaus2_normal"] = TString::Format("%8.2f\t",doubleGaus2_normal);
+    results["singleGaus_normal"] =      TString::Format("%8.2f\t",singleGaus_normal);
+    results["singleGausFWTM_normal"] =  TString::Format("%8.2f\t",singleGausFWTM_normal);
+    results["doubleGaus1_normal"] =     TString::Format("%8.2f\t",doubleGaus1_normal);
+    results["doubleGaus2_normal"] =     TString::Format("%8.2f\t",doubleGaus2_normal);
     myfile << createSection("Resolution_normal",results);
 
     results.clear();
-    results["singleGausFixed_trans"] = TString::Format("%8.2f\t",singleGausFixed_trans);
-    results["singleGausShort_trans"] = TString::Format("%8.2f\t",singleGausShort_trans);
-    results["singleGaus_trans"] = TString::Format("%8.2f\t",singleGaus_trans);
-    results["singleGausFWTM_trans"] = TString::Format("%8.2f\t",singleGausFWTM_trans);
-    results["doubleGaus1_trans"] = TString::Format("%8.2f\t",doubleGaus1_trans);
-    results["doubleGaus2_trans"] = TString::Format("%8.2f\t",doubleGaus2_trans);
+    results["singleGausFixed_trans"] =  TString::Format("%8.2f\t",singleGausFixed_trans);
+    results["singleGausShort_trans"] =  TString::Format("%8.2f\t",singleGausShort_trans);
+    results["singleGaus_trans"] =       TString::Format("%8.2f\t",singleGaus_trans);
+    results["singleGausFWTM_trans"] =   TString::Format("%8.2f\t",singleGausFWTM_trans);
+    results["doubleGaus1_trans"] =      TString::Format("%8.2f\t",doubleGaus1_trans);
+    results["doubleGaus2_trans"] =      TString::Format("%8.2f\t",doubleGaus2_trans);
     myfile << createSection("Resolution_trans",results);
 
     myfile.close();
@@ -503,8 +585,8 @@ void TResults::createOutputTextFile(){
     std::stringstream resultStream;
     std::stringstream header1Stream;
     std::stringstream header2Stream;
-    header1Stream <<"#"<<emptyString(6)<<"\t";
-    header2Stream <<"#"<<emptyString(6)<<"\t";
+    header1Stream <<"#RunNo"<<emptyString(1)<<"\t";
+    header2Stream <<"#RunNo"<<emptyString(1)<<"\t";
     resultStream << TString::Format("%7d\t",runnumber);
 
     header1Stream <<emptyString(TMath::Max((Int_t)runDescription.Length(),6))<<"\t";
@@ -512,7 +594,7 @@ void TResults::createOutputTextFile(){
     resultStream << runDescription <<emptyString(6-runDescription.Length()>0?6-runDescription.Length():0)<<"\t";
 
     header1Stream <<"Noise\t";
-    header2Stream <<emptyString(5)<<"\t";
+    header2Stream <<"Noise"<<"\t";
     resultStream << TString::Format("%5.2f\t",noise[det]);
 
     header1Stream <<emptyString(6)<<"\t";
@@ -534,6 +616,22 @@ void TResults::createOutputTextFile(){
     header1Stream <<emptyString(6)<<"\t";
     header2Stream <<"CorDia\t";
     resultStream << TString::Format("%+6.2f\t",getAvergDiamondCorrection()*100);
+
+    header1Stream <<"clust. \t";
+    header2Stream <<"m_clus \t";
+    resultStream << TString::Format("%+7.2f\t",mean_clustered_normal);
+
+    header1Stream <<"       \t";
+    header2Stream <<"mp_clus\t";
+    resultStream << TString::Format("%+7.2f\t",mp_clustered_normal);
+
+    header1Stream <<"       \t";
+    header2Stream <<"w_clus \t";
+    resultStream << TString::Format("%+7.2f\t",width_clustered_normal);
+
+    header1Stream <<"       \t";
+    header2Stream <<"gs_clus\t";
+    resultStream << TString::Format("%+7.2f\t",gSigma_clustered_normal);
 
     header1Stream <<"normal \t";
     header2Stream <<"m2/10  \t";

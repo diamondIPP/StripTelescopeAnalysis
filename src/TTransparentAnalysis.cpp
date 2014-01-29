@@ -1859,20 +1859,30 @@ void TTransparentAnalysis::saveClusteredHistos(){
         TH1F* hLandau_Clustered = (TH1F*)hLandauVsEventNo_Clustered->ProjectionY(name);
         hLandau_Clustered->SetTitle(name);
         TF1* fit = landauGauss->doLandauGaussFit(hLandau_Clustered,true);Float_t mean;
-        if(hLandau_Clustered) mean = hLandau_Clustered->GetMean();
+        if(hLandau_Clustered)
+            mean = hLandau_Clustered->GetMean();
         else mean = -1;
-        Float_t mp;
-        if(fit) mp = fit->GetParameter(1);
-        else mp = -1;
-        Float_t width;
-        if (fit) width = fit->GetParameter(0);
-        else width = -1;
-        Float_t gSigma;
-        if (fit) gSigma = fit->GetParameter(3);
-        else gSigma = -1;
-        if(results){
-            results->setPH_clustered(mean,mp,width,gSigma);
+        Float_t mp,width,gSigma;
+        if(fit){
+            cout<<"READ FIT Clustered"<<endl;
+            mp = fit->GetParameter(1);
+            width = fit->GetParameter(0);
+            gSigma = fit->GetParameter(3);
         }
+        else {
+            cout<<"CANNOT READ FIT Clustered"<<endl;
+            mp = -1;
+            width = -1;
+            gSigma = -1;
+        }
+        if(results){
+            cout<<"SAVE PH clustered"<<mean<<" "<<mp<<" "<<width<<" "<<gSigma<<endl;
+            results->setPH_clustered(mean,mp,width,gSigma,alignMode);
+        }
+        else
+            cout<<" CANNOT SAVE PH clustered - results: "<<results<<endl;
+        char t;
+        cin >>t;
         histSaver->SaveHistogramLandau(hLandau_Clustered);
         delete hLandau_Clustered;
         histSaver->SaveHistogram(hLandauVsEventNo_Clustered);
@@ -1889,9 +1899,9 @@ void TTransparentAnalysis::saveClusteredHistos(){
     if(hLandauVsClusterSize_Clustered){
         for (UInt_t i = 0; i < hLandauVsClusterSize_Clustered->GetNbinsX();i++){
             TString name = hLandauVsClusterSize_Clustered->GetName();
-            name.Append(TString::Format("clusterSize_%d",i));
+            name.Append(TString::Format("_clusterSize_%d",i));
             TH1F* hProjection = (TH1F*)hLandauVsClusterSize_Clustered->ProjectionX(name,i,i);
-            histSaver->SaveHistogram(hProjection);
+            histSaver->SaveHistogramLandau(hProjection);
             delete hProjection;
         }
         histSaver->SaveHistogram(hLandauVsClusterSize_Clustered);
@@ -2106,24 +2116,29 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
     Float_t min = 0;
     Float_t max = settings->getPulse_height_max(subjectDetector);
     Int_t bins = settings->getPulse_height_num_bins();
+    cout<<"[TTransparentAnalysis::initClusteredHistos] "<<startEvent<<" - "<<maxEvents<<"-> "<<nBins<<"/\t" <<min<<"-"<<max<<": "<<bins<<endl;
     TString name ="hLandauVsEventNo_Clustered";
+    cout<<"create \""<<name<<"\""<<endl;
     hLandauVsEventNo_Clustered = new TH2F(name,name,nBins,startEvent,maxEvents,bins,min,max);
     hLandauVsEventNo_Clustered->GetXaxis()->SetTitle("EventNo.");
     hLandauVsEventNo_Clustered->GetYaxis()->SetTitle("Pulse Height_{clustered} /ADC");
-    hLandauVsClusterSize_Clustered->GetZaxis()->SetTitle("number of entries #");
+    hLandauVsEventNo_Clustered->GetZaxis()->SetTitle("number of entries #");
 
     name = "hClusterSize_Clustered";
+    cout<<"create "<<name<<endl;
     hClusterSize_Clustered = new TH1F(name,name,10,-.5,9.5);
     hClusterSize_Clustered->GetXaxis()->SetTitle("cluster Size_{clustered}");
     hClusterSize_Clustered->GetYaxis()->SetTitle("no of entries #");
 
     name ="hLandauVsClusterSize_Clustered";
+    cout<<"create "<<name<<endl;
     hLandauVsClusterSize_Clustered = new TH2F(name,name,bins,min,max,10,-.5,9.5);
     hLandauVsClusterSize_Clustered->GetXaxis()->SetTitle("Pulse Height_{clustered} /ADC");
     hLandauVsClusterSize_Clustered->GetYaxis()->SetTitle("cluster Size_{clustered}");
     hLandauVsClusterSize_Clustered->GetZaxis()->SetTitle("no of entries #");
 
     name = "hNClusteres_Clustered";
+    cout<<"create "<<name<<endl;
     hNClusteres_Clustered = new TH1F(name,name,10,-.5,9.5);
     hNClusteres_Clustered->GetXaxis()->SetTitle("No of clusteres_{clustered}");
     hNClusteres_Clustered->GetYaxis()->SetTitle("number of entries");

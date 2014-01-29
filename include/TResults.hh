@@ -15,6 +15,7 @@
 #include <string>
 #include <iostream>
 #include <string>
+#include <set>
 #include <cstring>
 //#include "TIter.h"
 #include "TKey.h"
@@ -33,6 +34,7 @@ public:
     TResults(const   TResults& rhs);//copy constructor
     //  TResults &operator=(const   TResults &src); //class assignment function
     virtual ~TResults();
+    void createResultFiles(){createOutputTextFile();createOutputResultFile();}
     void saveResults(TString name);
     void openResults(TSettings *Settings);
     void Print();
@@ -73,7 +75,8 @@ public:
     void setSingleGaussianFWTMResolution(Float_t gaus,TSettings::alignmentMode mode);
     void setSingleGaussianFixedResolution(Float_t gaus,TSettings::alignmentMode mode);
     void setSignalFeedOverCorrection(UInt_t det, Float_t correction);
-    void setPH_clustered(Float_t mean,Float_t mp,Float_t width,Float_t gSigma);
+    void setPH_clustered(Float_t mean,Float_t mp,Float_t width,Float_t gSigma, TSettings::alignmentMode mode);
+    void updated(){lastUpdate=TDatime();}
 public:
     TString getMaskedChannels();
     void initialiseResults();
@@ -116,11 +119,15 @@ private:
     UInt_t nUseForAlignment;
     UInt_t nUseForAnalysis;
 
-    Float_t mean_clustered;
-    Float_t mp_clustered;
-    Float_t width_clusterd;
-    Float_t gSigma_clustered;
+    Float_t mean_clustered_normal;
+    Float_t mp_clustered_normal;
+    Float_t width_clustered_normal;
+    Float_t gSigma_clustered_normal;
 
+    Float_t mean_clustered_trans;
+    Float_t mp_clustered_trans;
+    Float_t width_clustered_trans;
+    Float_t gSigma_clustered_trans;
 
     Float_t mean2outOf10_normal;
     Float_t mp2outOf10_normal;
@@ -150,7 +157,7 @@ private:
     Float_t singleGausFWTM_trans;
     Float_t singleGaus_normal;
     Float_t singleGaus_trans;
-    vector<Int_t> maskedChannels;
+    std::set<Int_t> maskedChannels;
     ClassDef(TResults,7);
 };
 

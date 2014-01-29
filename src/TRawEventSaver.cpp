@@ -119,9 +119,8 @@ void TRawEventSaver::loadEvent(){
 			//if(det==8)cout<<Det_ADC[det][ch]<<"\t"<<flush;
 		}
 	}
-	for(UInt_t ch=0;ch<TPlaneProperties::getNChannelsDiamond();ch++){
+	for(UInt_t ch=0;ch<TPlaneProperties::getNChannelsDiamond();ch++)
 		Dia_ADC[ch]=0;
-	}
 	for(UInt_t vaChNo=0;vaChNo<TPlaneProperties::getNChannelsDiamond();vaChNo++){
 		//cout<<"Load diamond: "<<ch<<" -> "<<settings->getDetChannelNo(ch)<<endl;
 		UInt_t detChNo= settings->getDetChannelNo(vaChNo);

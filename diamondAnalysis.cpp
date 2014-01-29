@@ -246,12 +246,14 @@ int main(int argc, char ** argv) {
 		selectionClass->SetResults(currentResults);
 		selectionClass->MakeSelection(RunParameters[i].getEvents());
 		delete selectionClass;
+		currentResults->createResultFiles();
 
 		if(RunParameters[i].doSelectionAnalysis()){
 			sys->cd(currentDir.c_str());
 			TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
 			analysisSelection->doAnalysis(RunParameters[i].getEvents());
 			delete analysisSelection;
+			currentResults->createResultFiles();
 		}
 
 		if (DO_ALIGNMENT){
@@ -261,12 +263,14 @@ int main(int argc, char ** argv) {
 			//alignment->PrintEvents(1511,1501);
 			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::enumDetectorsToAlign(settings->getAlignmentMode()));
 			delete alignment;
+			currentResults->createResultFiles();
 		}
 		//		if(settings->is3dDiamond()){
 		if(settings->do3dShortAnalysis()||settings->do3dLongAnalysis()||settings->do3dTransparentAnalysis()){
 			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
 			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
 			delete analyse3dDiamond;
+			currentResults->createResultFiles();
 		}
 
 		if(DO_ALIGNMENTANALYSIS){
@@ -275,6 +279,7 @@ int main(int argc, char ** argv) {
 			anaAlignment=new TAnalysisOfAlignment(settings);
 			anaAlignment->doAnalysis(RunParameters[i].getEvents());
 			delete anaAlignment;
+			currentResults->createResultFiles();
 		}
 
 		if (DO_TRANSPARENT_ANALYSIS) {
@@ -283,6 +288,7 @@ int main(int argc, char ** argv) {
 			transpAna->setResults(currentResults);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
+			currentResults->createResultFiles();
 		}
 
 		if (settings && settings->doTransparentAlignmnet()){
@@ -293,12 +299,14 @@ int main(int argc, char ** argv) {
 			//alignment->PrintEvents(1511,1501);
 			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::diaAlignment);
 			delete alignment;
+			currentResults->createResultFiles();
 
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings,TSettings::transparentMode);
 			transpAna->setResults(currentResults);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
+			currentResults->createResultFiles();
 		}
 		cout<<"PRINT RESULTS"<<endl;
 		currentResults->Print();
