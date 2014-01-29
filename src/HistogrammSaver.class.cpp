@@ -1028,7 +1028,7 @@ void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit, boo
     if(!htemp)
         return;
     prof = htemp->ProfileY();
-    Save1DProfileXWithFitAndInfluence(prof,fit,drawStatbox);
+    Save1DProfileWithFitAndInfluence(prof,fit,drawStatbox);
     if(prof) delete prof;
 }
 
@@ -1049,13 +1049,13 @@ void HistogrammSaver::CreateAndSave1DProfileXWithFitAndInfluence(TH2* htemp,TF1*
         return;
     prof = htemp->ProfileX();
     if(prof){
-        Save1DProfileXWithFitAndInfluence(prof,fit,drawStatbox);
+        Save1DProfileWithFitAndInfluence(prof,fit,drawStatbox);
         delete prof;
         prof = 0;
     }
 }
 
-void HistogrammSaver::Save1DProfileXWithFitAndInfluence(TProfile *prof, TF1* fit, bool drawStatBox){
+void HistogrammSaver::Save1DProfileWithFitAndInfluence(TProfile *prof, TF1* fit, bool drawStatBox){
     if(prof==0) return;
     if (!prof) return;
     TCanvas* c1 = new TCanvas( (TString)("c_"+(TString)prof->GetName()) );

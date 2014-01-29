@@ -78,8 +78,11 @@ private:
 	void analyseNonHitEvents();
 	void initHistograms();
 	void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
+	void initClusteredHistos(UInt_t startEvent = 1e5, UInt_t maxEvents=1e6);
 	void fillHistograms();
+	void fillClusteredHistos();
 	void fillPedestalsAndNoiseHistos();
+	void saveClusteredHistos();
 	void savePedestalHistos();
     void saveNoiseHistos();
 	TF1* doGaussFit(TH1F *histo);
@@ -259,6 +262,13 @@ private:
 
 	vector<TProfile2D*> vecPHVsEventNo_Areas;
 	vector<TProfile2D*> vecPH2HighestVsEventNo_Areas;
+
+
+	TH2F* hLandauVsEventNo_Clustered;
+	TH1F* hClusterSize_Clustered;
+	TH2F* hLandauVsClusterSize_Clustered;
+	TH1F* hNClusteres_Clustered;
+
 public:
 	static UInt_t GetHitArea(TSettings* set, Float_t xVal, Float_t yVal,UInt_t xDivisions,UInt_t yDivisions);
 private:

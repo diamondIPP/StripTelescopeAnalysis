@@ -330,7 +330,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 			TProfile *prof = histoLandauDistribution2Darea->ProfileY(name);
 			prof->GetXaxis()->SetRangeUser(chLow,chHigh);
 			TF1* fit = new TF1("fit","pol1",chLow,chHigh);
-			histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+			histSaver->Save1DProfileWithFitAndInfluence(prof, fit,true);
 			if (prof) delete prof;
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2Darea);
@@ -348,7 +348,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
         TProfile *prof = histoLandauDistribution2DNoBorderSeedarea->ProfileY(name);
         prof->GetXaxis()->SetRangeUser(chLow,chHigh);
         TF1* fit = new TF1("fit","pol1",chLow,chHigh);
-        histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof, fit,true);
         if (prof) delete prof;
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderSeedarea);
@@ -370,7 +370,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
         TProfile *prof = histoLandauDistribution2DNoBorderHitarea->ProfileY(name);
         prof->GetXaxis()->SetRangeUser(chLow,chHigh);
         TF1* fit = new TF1("fit","pol1",chLow,chHigh);
-        histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof, fit,true);
         if (prof) delete prof;
 
 		histSaver->SaveHistogram(histoLandauDistribution2DNoBorderHitarea);
@@ -435,7 +435,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 	        TProfile *prof = histoLandauDistribution2DareaUnmasked->ProfileY(name);
 	        prof->GetXaxis()->SetRangeUser(chLow,chHigh);
 	        TF1* fit = new TF1("fit","pol1",chLow,chHigh);
-	        histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+	        histSaver->Save1DProfileWithFitAndInfluence(prof, fit,true);
 	        if (prof) delete prof;
 
             binLow = histoLandauDistribution2DareaUnmasked->GetYaxis()->FindBin(chLow);
@@ -458,7 +458,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
             TProfile *prof = histoLandauDistribution2DareaUnmaskedNoBorderSeed->ProfileY(name);
             prof->GetXaxis()->SetRangeUser(chLow,chHigh);
             TF1* fit = new TF1("fit","pol1",chLow,chHigh);
-            histSaver->Save1DProfileXWithFitAndInfluence(prof, fit,true);
+            histSaver->Save1DProfileWithFitAndInfluence(prof, fit,true);
             if (prof) delete prof;
 
 		}
@@ -476,7 +476,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
             TProfile *prof = histoLandauDistribution2DareaUnmaskedNoBorderHit->ProfileY(name);
             prof->GetXaxis()->SetRangeUser(chLow,chHigh);
             TF1* fit = new TF1("fit","pol1",chLow,chHigh);
-            histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+            histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
 		}
 		histSaver->SaveHistogram(histoLandauDistribution2DareaUnmaskedNoBorderHit);
 		if(histoLandauDistribution2DareaUnmaskedNoBorderHit)delete histoLandauDistribution2DareaUnmaskedNoBorderHit;
@@ -1300,7 +1300,7 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
     TF1* pol1Fit = new TF1("pol1Fit","pol1",prof2d->GetXaxis()->GetXmin(),prof2d->GetXaxis()->GetXmax());
     pol1Fit->SetLineWidth(1);
     pol1Fit->SetLineStyle(2);
-    histSaver->Save1DProfileXWithFitAndInfluence(prof,(TF1*)pol1Fit->Clone(),true);
+    histSaver->Save1DProfileWithFitAndInfluence(prof,(TF1*)pol1Fit->Clone(),true);
     histSaver->SaveProfile2DWithEntriesAsText(prof2d,true);//,false);
     vector<TProfile*> vecStack;
     Int_t bins = prof2d->GetXaxis()->GetNbins();
@@ -1333,13 +1333,13 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
         fit->SetLineColor(settings->GetColor(y));
         prof->SetTitle((TString)"Ph vs EventNo, " + TTransparentAnalysis::GetNameOfArea(y%xDivisions,y/xDivisions));
         cout<<"Save: "<<prof->GetName()<<" "<<y<<" "<<prof->GetEntries()<< endl;
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit);
+        histSaver->Save1DProfileWithFitAndInfluence(prof,fit);
         TString title = (TString)"Ph vs EventNo, ";
         title.Append(TString::Format(", slope: %6.1f adc/1M, X",fit->GetParameter(1)*1.e6));
         title.Append(TTransparentAnalysis::GetNameOfArea(y%xDivisions,y/xDivisions));
         prof->SetTitle(title);
         cout<<"save: "<<prof->GetName()<<endl;
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         vecStack.push_back(prof);
         TProfile* profX = hPHVsEventNo_AreasX[y%xDivisions];
         TProfile* profY = hPHVsEventNo_AreasY[y/xDivisions];
@@ -1357,13 +1357,13 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
         fit->SetLineColor(settings->GetColor(x));
         TProfile* prof = hPHVsEventNo_AreasX[x];
         cout<<"save: "<<prof->GetName()<<endl;
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         TString title = (TString)"Ph vs EventNo, ";
         title.Append(TString::Format(", slope: %6.1f adc/1M, X",fit->GetParameter(1)*1.e6));
         title.Append(TTransparentAnalysis::GetNameOfArea(x,-1));
         prof->SetTitle(title);
         cout<<"save: "<<prof->GetName()<<endl;
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         prof->SetLineColor(settings->GetColor(x));
         prof->SetMarkerColor(settings->GetColor(x));
         if(stack)stack->Add((TProfile*)prof->Clone());
@@ -1379,13 +1379,13 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
         fit->SetLineColor(settings->GetColor(y));
         TProfile* prof = hPHVsEventNo_AreasY[y];
         cout<<"save: "<<prof->GetName()<<endl;
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         TString title = (TString)"Ph vs EventNo, ";
         title.Append(TString::Format(", slope: %6.1f adc/1M, y",fit->GetParameter(1)*1.e6));
         title.Append(TTransparentAnalysis::GetNameOfArea(-1,y));
         prof->SetTitle(title);
         cout<<"save: "<<prof->GetName()<<endl;
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         prof->SetLineColor(settings->GetColor(y));
         prof->SetMarkerColor(settings->GetColor(y));
         if(stack)stack->Add((TProfile*)prof->Clone());
