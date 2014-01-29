@@ -73,7 +73,7 @@ public:
     void setSingleGaussianFWTMResolution(Float_t gaus,TSettings::alignmentMode mode);
     void setSingleGaussianFixedResolution(Float_t gaus,TSettings::alignmentMode mode);
     void setSignalFeedOverCorrection(UInt_t det, Float_t correction);
-    string emptyString(UInt_t nChars,char character=' ');
+    void setPH_clustered(Float_t mean,Float_t mp,Float_t width,Float_t gSigma);
 public:
     TString getMaskedChannels();
     void initialiseResults();
@@ -86,6 +86,7 @@ public:
     string createSection(TString sectionName,map<TString,TString> results);
     void setResultsFromSettings(TSettings * settings);
 private:
+    string emptyString(UInt_t nChars,char character=' ');
     TString rootFileName;
     TString runDescription;
     TDetectorAlignment alignment;

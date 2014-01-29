@@ -176,12 +176,13 @@ void TResults::openResults(TSettings *settings){
 }
 
 TString TResults::getMaskedChannels() {
-    TString output = "";
+    TString output = "[";
     for (UInt_t i  = 0; i< maskedChannels.size();i++){
         output.Append(TString::Format("%d, ",maskedChannels.at(i)));
     }
     output = output.Strip(TString::kBoth,' ');
     output = output.Strip(TString::kBoth,',');
+    output.Append("]");
     return output;
 }
 
@@ -399,6 +400,14 @@ std::pair<Float_t, Float_t> TResults::getAvergSiliconCorrection(){
     return make_pair(mean,sigma2);
 }
 
+void TResults::setPH_clustered(Float_t mean, Float_t mp, Float_t width,
+        Float_t gSigma) {
+    mean_clustered = mean;
+    mp_clustered = mp;
+    width_clusterd = width;
+    gSigma_clustered = gSigma;
+}
+
 string TResults::emptyString(UInt_t nChars,char character){
     string str = "";
     str.resize(nChars,character);
@@ -431,6 +440,7 @@ void TResults::createOutputResultFile(){
     results["Voltage"] = "UNKOWN";
     results["SVN_REV"] = SVN_REV;
     results["lastUpdate"] = lastUpdate.AsString();
+    results["maskedChannels"] = getMaskedChannels();
     myfile << createSection("RunInfo",results);
 
     results.clear();

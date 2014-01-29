@@ -1858,7 +1858,22 @@ void TTransparentAnalysis::saveClusteredHistos(){
         TString name = "hLandau_Clustered";
         TH1F* hLandau_Clustered = (TH1F*)hLandauVsEventNo_Clustered->ProjectionY(name);
         hLandau_Clustered->SetTitle(name);
-        histSaver->SaveHistogram(hLandau_Clustered);
+        TF1* fit = landauGauss->doLandauGaussFit(hLandau_Clustered,true);Float_t mean;
+        if(hLandau_Clustered) mean = hLandau_Clustered->GetMean();
+        else mean = -1;
+        Float_t mp;
+        if(fit) mp = fit->GetParameter(1);
+        else mp = -1;
+        Float_t width;
+        if (fit) width = fit->GetParameter(0);
+        else width = -1;
+        Float_t gSigma;
+        if (fit) gSigma = fit->GetParameter(3);
+        else gSigma = -1;
+        if(results){
+            results->setPH_clustered(mean,mp,width,gSigma);
+        }
+        histSaver->SaveHistogramLandau(hLandau_Clustered);
         delete hLandau_Clustered;
         histSaver->SaveHistogram(hLandauVsEventNo_Clustered);
         histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandauVsEventNo_Clustered,"pol1");
