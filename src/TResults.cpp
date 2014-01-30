@@ -99,8 +99,14 @@ void TResults::inheritOldResults(const TResults & rhs)
     gSigma_clustered_trans = rhs.gSigma_clustered_trans;
     repeaterCard = rhs.repeaterCard;
     maskedChannels.clear();
-    for (set<Int_t>::iterator it = rhs.maskedChannels.begin(); it !=  rhs.maskedChannels.end();it++)
+    for (set<Int_t>::const_iterator it = rhs.maskedChannels.begin(); it !=  rhs.maskedChannels.end();it++)
         maskedChannels.insert(*it);
+    for (map<TString,Int_t>::const_iterator it = rhs.resultsMap_Int.begin(); it!=rhs.resultsMap_Int.end();it++)
+        resultsMap_Int[it->first] = it->second;
+    for (map<TString,Float_t>::const_iterator it = rhs.resultsMap_Float.begin(); it!=rhs.resultsMap_Float.end();it++)
+        resultsMap_Float[it->first] = it->second;
+    for (map<TString,TString>::const_iterator it = rhs.resultsMap_String.begin(); it!=rhs.resultsMap_String.end();it++)
+        resultsMap_String[it->first] = it->second;
 //    std::sort(maskedChannels.begin(),maskedChannels.end());
 
 }
@@ -147,6 +153,9 @@ void TResults::initialiseResults(){
     nUseForAlignment =-1;
     nUseForAnalysis = -1;
     maskedChannels.clear();
+    resultsMap_Int.clear();
+    resultsMap_Float.clear();
+    resultsMap_String.clear();
 }
 
 

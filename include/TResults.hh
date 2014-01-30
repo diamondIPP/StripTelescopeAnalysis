@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include <map>
 #include <cstring>
 //#include "TIter.h"
 #include "TKey.h"
@@ -162,6 +163,10 @@ private:
     Int_t voltage;
     TString diamondName;
     std::set<Int_t> maskedChannels;
+    std::map<TString,Float_t> resultsMap_Float;
+    std::map<TString,Int_t> resultsMap_Int;
+    std::map<TString,TString> resultsMap_String;
+
     ClassDef(TResults,7);
 };
 
