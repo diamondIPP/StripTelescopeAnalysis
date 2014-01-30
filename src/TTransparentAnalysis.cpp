@@ -1881,8 +1881,8 @@ void TTransparentAnalysis::saveClusteredHistos(){
         }
         else
             cout<<" CANNOT SAVE PH clustered - results: "<<results<<endl;
-        char t;
-        cin >>t;
+        //char t;
+        //cin >>t;
         histSaver->SaveHistogramLandau(hLandau_Clustered);
         delete hLandau_Clustered;
         histSaver->SaveHistogram(hLandauVsEventNo_Clustered);
