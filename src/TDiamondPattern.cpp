@@ -388,3 +388,17 @@ Int_t TDiamondPattern::getPatternOfChannel(Int_t ch) {
     }
     return -1;
 }
+
+std::pair<Int_t, Int_t> TDiamondPattern::getIntervalOfDiamond(TString runDesc) {
+    Int_t pattern = 0;
+    runDesc.ToLower();
+    runDesc = runDesc.Strip(TString::kBoth);
+    runDesc = runDesc.Strip(TString::kBoth,'\t');
+    if (runDesc.Contains("left") || runDesc.EqualTo("1"))
+        pattern = 1;
+    else if (runDesc.Contains("right") || runDesc.EqualTo("0"))
+        pattern = 2;
+    if (pattern == 0)
+        return getTotalInterval();
+    return getInterval(pattern);
+}

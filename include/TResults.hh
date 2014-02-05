@@ -16,7 +16,6 @@
 #include <iostream>
 #include <string>
 #include <set>
-#include <map>
 #include <cstring>
 //#include "TIter.h"
 #include "TKey.h"
@@ -78,8 +77,10 @@ public:
     void setSignalFeedOverCorrection(UInt_t det, Float_t correction);
     void setPH_clustered(Float_t mean,Float_t mp,Float_t width,Float_t gSigma, TSettings::alignmentMode mode);
     void updated(){lastUpdate=TDatime();}
+    TString getChannelsStringList(std::set<Int_t> channelSet);
 public:
     TString getMaskedChannels();
+
     void initialiseResults();
     void inheritOldResults(const TResults & rhs);
     void setPH_2outOf10(Float_t Mean, Float_t MP, Float_t width, Float_t gSigma,TSettings::alignmentMode mode);
@@ -162,11 +163,14 @@ private:
     Int_t repeaterCard;
     Int_t voltage;
     TString diamondName;
+    std::pair<Int_t,Int_t> diamondChannels;
     std::set<Int_t> maskedChannels;
-    std::map<TString,Float_t> resultsMap_Float;
-    std::map<TString,Int_t> resultsMap_Int;
-    std::map<TString,TString> resultsMap_String;
+    std::set<Int_t> noisyChannels;
+    std::set<Int_t> notConnectedChannels;
 
+    std::map<TString,Int_t> IntegerMap;
+    std::map<TString, Float_t> FloatMap;
+    std::map<TString, TString> StringMap;
     ClassDef(TResults,7);
 };
 

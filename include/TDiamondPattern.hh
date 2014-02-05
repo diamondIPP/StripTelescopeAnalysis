@@ -52,6 +52,7 @@ public:
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
 	std::pair<int,int> getPatternChannels(UInt_t pattern);
 	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);//{return getPatternChannels(pattern);}
+	std::pair<Int_t,Int_t> getIntervalOfDiamond(TString runDesc);
 	bool hasInvalidIntervals();
 	bool isValidChannelPosition(Float_t channel);
 	bool isValidCluster(TCluster* cluster);

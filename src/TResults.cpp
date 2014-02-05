@@ -99,16 +99,28 @@ void TResults::inheritOldResults(const TResults & rhs)
     gSigma_clustered_trans = rhs.gSigma_clustered_trans;
     repeaterCard = rhs.repeaterCard;
     maskedChannels.clear();
-    for (set<Int_t>::const_iterator it = rhs.maskedChannels.begin(); it !=  rhs.maskedChannels.end();it++)
+    for (set<Int_t>::iterator it = rhs.maskedChannels.begin(); it !=  rhs.maskedChannels.end();it++)
         maskedChannels.insert(*it);
-    for (map<TString,Int_t>::const_iterator it = rhs.resultsMap_Int.begin(); it!=rhs.resultsMap_Int.end();it++)
-        resultsMap_Int[it->first] = it->second;
-    for (map<TString,Float_t>::const_iterator it = rhs.resultsMap_Float.begin(); it!=rhs.resultsMap_Float.end();it++)
-        resultsMap_Float[it->first] = it->second;
-    for (map<TString,TString>::const_iterator it = rhs.resultsMap_String.begin(); it!=rhs.resultsMap_String.end();it++)
-        resultsMap_String[it->first] = it->second;
+
+    noisyChannels.clear();
+    for (set<Int_t>::iterator it = rhs.noisyChannels.begin(); it !=  rhs.noisyChannels.end();it++)
+        noisyChannels.insert(*it);;
+    notConnectedChannels.clear();
+    for (set<Int_t>::iterator it = rhs.notConnectedChannels.begin(); it !=  rhs.notConnectedChannels.end();it++)
+        notConnectedChannels.insert(*it);;
 //    std::sort(maskedChannels.begin(),maskedChannels.end());
 
+    IntegerMap.clear();
+    for(map<TString,Int_t>::const_iterator it = rhs.IntegerMap.begin();it!=rhs.IntegerMap.end();it++)
+        IntegerMap[it->first] = it->second;
+
+    FloatMap.clear();
+    for(map<TString,Float_t>::const_iterator it = rhs.FloatMap.begin();it!=rhs.FloatMap.end();it++)
+        FloatMap[it->first] = it->second;
+
+    StringMap.clear();
+    for(map<TString,TString>::const_iterator it = rhs.StringMap.begin();it!=rhs.StringMap.end();it++)
+        StringMap[it->first] = it->second;
 }
 
 void TResults::initialiseResults(){
@@ -153,9 +165,8 @@ void TResults::initialiseResults(){
     nUseForAlignment =-1;
     nUseForAnalysis = -1;
     maskedChannels.clear();
-    resultsMap_Int.clear();
-    resultsMap_Float.clear();
-    resultsMap_String.clear();
+    noisyChannels.clear();
+    notConnectedChannels.clear();
 }
 
 
@@ -217,19 +228,32 @@ void TResults::openResults(TSettings *settings){
     }
     Print();
 }
-
-TString TResults::getMaskedChannels() {
+TString TResults::getChannelsStringList(std::set<Int_t> channelSet){
     TString output = "[";
-//    for (UInt_t i  = 0; i< maskedChannels.size();i++){
-
-    for (set<Int_t>::iterator it = maskedChannels.begin(); it !=  maskedChannels.end();it++)
-        output.Append(TString::Format("%d, ",*it));
-//    }
-    output = output.Strip(TString::kBoth,' ');
-    output = output.Strip(TString::kBoth,',');
-    output.Append("]");
-    return output;
+    for (set<Int_t>::iterator it = channelSet.begin(); it !=  channelSet.end();it++)
+            output.Append(TString::Format("%d, ",*it));
+    //    }
+        output = output.Strip(TString::kBoth,' ');
+        output = output.Strip(TString::kBoth,',');
+        output.Append("]");
+        return output;
 }
+TString TResults::getMaskedChannels() {
+    return getChannelsStringList(maskedChannels);
+}
+
+//TString TResults::getMaskedChannels() {
+//    TString output = "[";
+////    for (UInt_t i  = 0; i< maskedChannels.size();i++){
+//
+//    for (set<Int_t>::iterator it = maskedChannels.begin(); it !=  maskedChannels.end();it++)
+//        output.Append(TString::Format("%d, ",*it));
+////    }
+//    output = output.Strip(TString::kBoth,' ');
+//    output = output.Strip(TString::kBoth,',');
+//    output.Append("]");
+//    return output;
+//}
 
 void TResults::setResultsFromSettings(TSettings* settings){
     updated();;
@@ -242,9 +266,15 @@ void TResults::setResultsFromSettings(TSettings* settings){
     }
     runDescription = settings->getRunDescription();
     UInt_t diaDet = TPlaneProperties::getDetDiamond();
-    for (UInt_t ch=0; ch< TPlaneProperties::getNChannels(diaDet);ch++)
+    for (UInt_t ch=0; ch< TPlaneProperties::getNChannels(diaDet);ch++){
         if (settings->IsMasked(diaDet,ch))
             maskedChannels.insert(ch);
+        if (settings->IsNoisyChannel(ch))
+            noisyChannels.insert(ch);
+        if (settings->IsNotConnectedChannel(ch))
+            notConnectedChannels.insert(ch);
+    }
+    diamondChannels = settings->diamondPattern.getIntervalOfDiamond(settings->getRunDescription());
     repeaterCard = settings->getRepeaterCard();
     diamondName = settings->getDiamond();
     voltage = settings->getVoltage();
@@ -533,7 +563,10 @@ void TResults::createOutputResultFile(){
         results["Voltage"] = TString::Format("%+d",voltage);
     results["SVN_REV"] = SVN_REV;
     results["lastUpdate"] = lastUpdate.AsString();
-    results["maskedChannels"] = getMaskedChannels();
+    results["maskedChannels"] =  getChannelsStringList(maskedChannels);
+    results["noisyChannels"] = getChannelsStringList(noisyChannels);
+    results["notConnectedChannels"] = getChannelsStringList(notConnectedChannels);
+    results["channels_diamond"] = TString::Format("%d - %d ",diamondChannels.first,diamondChannels.second);
     myfile << createSection("RunInfo",results);
 
     results.clear();
@@ -592,6 +625,15 @@ void TResults::createOutputResultFile(){
     results["doubleGaus1_trans"] =      TString::Format("%8.2f\t",doubleGaus1_trans);
     results["doubleGaus2_trans"] =      TString::Format("%8.2f\t",doubleGaus2_trans);
     myfile << createSection("Resolution_trans",results);
+
+    results.clear();
+    for (std::map<TString, Int_t>::iterator it = IntegerMap.begin();it!=IntegerMap.end();it++)
+        results[it->first] = TString::Format("%d",it->second);
+    for (std::map<TString, Float_t>::iterator it = FloatMap.begin();it!=FloatMap.end();it++)
+        results[it->first] = TString::Format("%f",it->second);
+    for (std::map<TString, TString>::iterator it = StringMap.begin();it!=StringMap.end();it++)
+        results[it->first] = it->second;
+    myfile << createSection("additional",results);
 
     myfile.close();
 }

@@ -458,16 +458,9 @@ void TSettings::LoadSettings(){
 		if(key == "D3X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[6]);
 		if(key == "D3Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[7]);
 		if(key == "Dia_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[8]);
-		if(key == "D0X_channel_screen_regions")  ParseScreenedChannelArray(key,value,Det_channel_screen_regions[0]);
-		if(key == "D0Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[1]);
-		if(key == "D1X_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[2]);
-		if(key == "D1Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[3]);
-		if(key == "D2X_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[4]);
-		if(key == "D2Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[5]);
-		if(key == "D3X_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[6]);
-		if(key == "D3Y_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[7]);
-		if(key == "Dia_channel_screen_regions") ParseScreenedChannelArray(key,value,Det_channel_screen_regions[8]);
-		if(key == "chi2Cut3D") ParseFloat(key,value,chi2Cut3D);
+		if(key == "Dia_channel_not_connected")  ParseScreenedChannelArray(key,value,Dia_channel_not_connected);
+        if(key == "Dia_channel_noisy")          ParseScreenedChannelArray(key,value,Dia_channel_noisy);
+		if(key == "chi2Cut3D")                  ParseFloat(key,value,chi2Cut3D);
 		if(key == "si_avg_fidcut_xlow") {ParseFloat(key,value,si_avg_fidcut_xlow);};
 		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
 		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
@@ -514,6 +507,9 @@ void TSettings::LoadSettings(){
 		if(key == "TransparentAlignment") ParseBool(key,value,bTransparentAlignment);
 		if(key == "AlignmentMode") Parse(key,value,detectorsToAlign);
 		if(key == "DetectorsToAlign") Parse(key,value,detectorsToAlign);
+		if(key == "repeaterCardNo") {Parse(key,value,repeaterCardNo);cout<<"repeaterCardNo = "<<repeaterCardNo<<endl;}
+		if(key == "voltage") {Parse(key,value,voltage);cout<<"voltage = "<<voltage<<endl;}
+		if(key == "diamondName") {Parse(key,value,diamondName);cout<<"diamondName = "<<diamondName<<endl;char t; cin >>t;}
 		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -606,7 +602,10 @@ void TSettings::LoadSettings(){
 	for(int det=0; det<9; det++) {
 		Det_channel_screen[det].setDetectorNumber(det);
 		this->Det_channel_screen[det].ScreenChannels(this->getDet_channel_screen_channels(det));
-		//this->getDet_channel_screen(det).ScreenRegions(this->getDet_channel_screen_regions(det));
+		if (TPlaneProperties::isDiamondDetector(det)){
+		    this->Det_channel_screen[det].ScreenChannels(this->getDiaChannelNoisy());
+		    this->Det_channel_screen[det].ScreenChannels(this->getDiaChannelNotConnected());
+		}
 //		cout<<"Detector "<<det<<" screened channels: ";
 		this->getDet_channel_screen(det).PrintScreenedChannels();
 //		cout<<endl;
@@ -807,6 +806,10 @@ void TSettings::DefaultLoadDefaultSettings(){
 	repeaterCardNo = -1;
 	diamondName = "UNKOWN";
 	voltage = 0;
+	for (UInt_t det=0; det < TPlaneProperties::getNDetectors(); det++)
+	    Det_channel_screen_channels[det].clear();
+	Dia_channel_noisy.clear();
+	Dia_channel_not_connected.clear();
 //	checkSettings();
 }
 
@@ -860,6 +863,23 @@ bool TSettings::ParseBool(string key, string value, bool &output){
 	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
 	output = (bool)strtod(value.c_str(),0);
 	return true;
+}
+
+
+
+bool TSettings::ParseTString(std::string key, std::string value,
+        TString& output) {
+    output = (TString)value.c_str();
+    output = output.Strip(TString::kBoth);
+    return true;
+}
+
+bool TSettings::ParseString(std::string key, std::string value,
+        string& output) {
+    TString ret;
+    bool retVal = ParseTString(key,value,ret);
+    output = (string)ret;
+    return retVal;
 }
 
 
@@ -1796,10 +1816,6 @@ vector<int> TSettings::getDet_channel_screen_channels(int i) const
 	return Det_channel_screen_channels[i];
 }
 
-vector<int> TSettings::getDet_channel_screen_regions(int i) const
-{
-	return Det_channel_screen_regions[i];
-}
 
 void TSettings::setAlignment_training_track_fraction(Float_t alignment_training_track_fraction)
 {
@@ -1817,10 +1833,6 @@ void TSettings::setDet_channel_screen_channels(int i, vector<int> Det_channel_sc
 	this->Det_channel_screen_channels[i] = Det_channel_screen_channels;
 }
 
-void TSettings::setDet_channel_screen_regions(int i, vector<int> Det_channel_screen_regions)
-{
-	this->Det_channel_screen_regions[i] = Det_channel_screen_regions;
-}
 bool TSettings::getAlternativeClustering() const
 {
 	return AlternativeClustering;
@@ -2531,3 +2543,18 @@ bool TSettings::IsOnTheEdgeOfCell(Float_t relCellPosX, Float_t relCellPosY, Floa
 	cout<<TString::Format("\tTSettings::IsOnTheEdgeOfCell\t%05.1f/%05.1f, %3.1f, %1d",relCellPosX,relCellPosY,minDistanceToEdge,(int)retVal)<<endl;
 	return retVal;
 }
+
+bool TSettings::IsNotConnectedChannel(Int_t ch) {
+    for (UInt_t i = 0; i < Dia_channel_noisy.size();i++)
+        if (Dia_channel_noisy[i] == ch)
+            return true;
+    return false;
+}
+
+bool TSettings::IsNoisyChannel(Int_t ch) {
+    for (UInt_t i = 0; i < Dia_channel_not_connected.size();i++)
+            if (Dia_channel_not_connected[i] == ch)
+                return true;
+        return false;
+}
+

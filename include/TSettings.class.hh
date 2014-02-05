@@ -171,7 +171,6 @@ public:
 	bool IsMasked(UInt_t det, Float_t ch){return (IsMasked(det,(UInt_t)ch)||IsMasked(det,(UInt_t)ch+1));}
 	UInt_t getNoisePlotChannel(){return 48;}//todo: variable in setttings file
 	std::vector<int> getDet_channel_screen_channels(int i) const;
-	std::vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
 	Float_t getAutoFidCutPercentage() const{return 0.4;};//todo in settingsfile adden
@@ -225,7 +224,6 @@ public:
 	void setSnr_plots_enable(Int_t snr_plots_enable);
 	void setDet_channel_screen(int i,ChannelScreen Det_channel_screen);
 	void setDet_channel_screen_channels(int i,std::vector<int> Det_channel_screen_channels);
-	void setDet_channel_screen_regions(int i,std::vector<int> Det_channel_screen_regions);
 	void setAlternativeClustering(bool AlternativeClustering);
 	void setUseAutoFidCut(bool UseAutoFidCut);
 	void setSingle_channel_analysis_enable(bool singleChannelAnalysisEnable);
@@ -331,6 +329,10 @@ public:
 	TString  getAlignmentFidCuts(){TString output; for (UInt_t i=0;i<alignmentFidCuts.size();i++) output.Append(TString::Format("%d, ",i));return output;}
 	TString getDiamond(){return diamondName;}
 	Int_t getVoltage(){return voltage;}
+    const std::vector<int>& getDiaChannelNoisy() const {return Dia_channel_noisy;}
+    const std::vector<int>& getDiaChannelNotConnected() const {return Dia_channel_not_connected;}
+    bool IsNotConnectedChannel(Int_t ch);
+    bool IsNoisyChannel(Int_t ch);
 private:
 
 	TString diamondName;
@@ -362,6 +364,8 @@ private:
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
+	bool ParseTString(std::string key, std::string value, TString &output);
+    bool ParseString(std::string key, std::string value, string &output);
 	void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
 	void ParseCellArray(string key, string value, vector<int> &vecCells, vector< vector<int> > &PtrvecCells);
 	void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
@@ -370,6 +374,8 @@ private:
 	bool Parse(std::string key, std::string value, int &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, UInt_t &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
+	bool Parse(std::string key, std::string value, TString &output){return ParseTString(key,value,output);}
+	bool Parse(std::string key, std::string value, string &output){return ParseString(key,value,output);}
 	pair<char,int> ParseCellPosition(std::string value);
 	void LoadDefaultResolutions();
 
@@ -442,7 +448,8 @@ private:
 	UInt_t alignment_training_track_number;
 	enumAlignmentTrainingMethod trainingMethod;
 	std::vector<int> Det_channel_screen_channels[9];
-	std::vector<int> Det_channel_screen_regions[9];
+	std::vector<int> Dia_channel_not_connected;
+	std::vector<int> Dia_channel_noisy;
 	ChannelScreen Det_channel_screen[9];
 	bool dia_x_aligned;
 	bool eta_correction;
