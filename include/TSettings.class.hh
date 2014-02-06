@@ -49,6 +49,8 @@ public:
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	virtual ~TSettings();
+    TString GetCurrentBegin(){return currentBegin;}
+    TString GetCurrentEnd(){return currentEnd;}
 	std::string getAbsoluteOuputPath(bool withRunDescribtion=0);
 	std::string getAbsoluteInputPath(){return inputDir;};//todo
 	std::string getRawTreeFilePath();
@@ -488,6 +490,8 @@ private:
 	TChannelMapping *diamondMapping;
 	Float_t pitchWidthSil;
 	Float_t pitchWidthDia;
+    TString currentBegin;
+    TString currentEnd;
 private:
 	//Filter tracks not in good fiducial region w/o bad strips
 	Int_t align_sil_fid_xlow;

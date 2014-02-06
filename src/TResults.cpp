@@ -278,6 +278,8 @@ void TResults::setResultsFromSettings(TSettings* settings){
     repeaterCard = settings->getRepeaterCard();
     diamondName = settings->getDiamond();
     voltage = settings->getVoltage();
+    StringMap["currentBegin"] = settings->GetCurrentBegin();
+    StringMap["currentEnd"] = settings->GetCurrentEnd();
 //    std::sort(maskedChannels.begin(),maskedChannels.end());
     //	cout<<runDescription<<endl;
     //	char t;
@@ -567,6 +569,14 @@ void TResults::createOutputResultFile(){
     results["noisyChannels"] = getChannelsStringList(noisyChannels);
     results["notConnectedChannels"] = getChannelsStringList(notConnectedChannels);
     results["channels_diamond"] = TString::Format("%d - %d ",diamondChannels.first,diamondChannels.second);
+    if (StringMap.count("currentBegin"))
+        results["currentBegin"] = StringMap["currentBegin"];
+    else
+        results["currentBegin"] = "??";
+    if (StringMap.count("currentEnd"))
+        results["currentEnd"] = StringMap["currentEnd"];
+    else
+        results["currentEnd"] = "??";
     myfile << createSection("RunInfo",results);
 
     results.clear();

@@ -509,7 +509,9 @@ void TSettings::LoadSettings(){
 		if(key == "DetectorsToAlign") Parse(key,value,detectorsToAlign);
 		if(key == "repeaterCardNo") {Parse(key,value,repeaterCardNo);cout<<"repeaterCardNo = "<<repeaterCardNo<<endl;}
 		if(key == "voltage") {Parse(key,value,voltage);cout<<"voltage = "<<voltage<<endl;}
-		if(key == "diamondName") {Parse(key,value,diamondName);cout<<"diamondName = "<<diamondName<<endl;char t; cin >>t;}
+		if(key == "diamondName") {Parse(key,value,diamondName);cout<<"diamondName = "<<diamondName<<endl;}
+        if(key == "currentBegin"){Parse(key,value,currentBegin);}
+        if(key == "currentEnd"){Parse(key,value,currentEnd);}
 		if(key == "diamondMapping") {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -804,7 +806,9 @@ void TSettings::DefaultLoadDefaultSettings(){
 	vecEdgePositionName.push_back("Y_Edge3D_small");
 	minimumEdgeDistance = 10;
 	repeaterCardNo = -1;
-	diamondName = "UNKOWN";
+	diamondName = "??";
+    currentBegin ="??";
+    currentEnd = "??";
 	voltage = 0;
 	for (UInt_t det=0; det < TPlaneProperties::getNDetectors(); det++)
 	    Det_channel_screen_channels[det].clear();
