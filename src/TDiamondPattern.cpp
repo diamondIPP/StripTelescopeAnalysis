@@ -84,6 +84,7 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 	nChannelsOfInterval.push_back(deltaChannels);
 	this->pitchWidth.push_back(pitchWidth);
 	cout<<"added: "<<getInterval(beginOfInterval.size()-1).first<<"-"<<getInterval(beginOfInterval.size()-1).second<<endl;
+    this->hasInvalidIntervals();
 	return retVal;
 }
 
@@ -151,7 +152,7 @@ bool TDiamondPattern::hasInvalidIntervals(){
 	if(!retVal){
 		cerr << " ERROR!! *********************************"<<endl;
 		cout <<"hasInvalidIntervals! "<< nChannelsOfInterval.size() << " " << beginOfInterval.size() << " " << endOfInterval.size() << " " << firstChannelOfInterval.size() <<endl;
-		//		this->Print();
+		this->Print();
 		exit(-1);
 	}
 
