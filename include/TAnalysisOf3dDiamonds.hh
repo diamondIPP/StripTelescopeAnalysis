@@ -98,6 +98,7 @@ private:
 	vector<Float_t> LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus);
 private:
 private:
+	void ShortAnalysis_FillEdgeAlignmentHistos();
 	void ShortAnalysis_Analyse1Cluster(UInt_t clusterNo=0);
 	void ShortAnalysis_Analyse2Cluster();
 	void ShortAnalysis_Save2ClusterPlots();
@@ -172,6 +173,7 @@ private:
 	TH1F* hLandauCluster1;
 	TH1F* hLandauCluster2;
 	TH1F* hLandauDoubleCombined;
+	TProfile2D* hFidCutsVsMeanCharge;
 
 	//vector<TH3F*> hFidCutXvsFidCutYvsCharge;
 	//For hFidCutXvsFidCutYvsMeanCharge

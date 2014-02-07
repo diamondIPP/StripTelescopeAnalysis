@@ -123,7 +123,7 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
 
 
 void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, TString position, UInt_t verbosity){
-    cout<<"Save2HistosNormalized: "<<histo1<<" "<<histo2<<endl;
+//    cout<<"Save2HistosNormalized: "<<histo1<<" "<<histo2<<endl;
     bool internalVerbose = false;
     if(!histo1&&!histo2)return;
     if(!histo1||!histo2){
@@ -220,7 +220,7 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
 }
 void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, TString position, UInt_t verbosity)
 {
-    cout<<"Save2Histos: "<<histo1<<" "<<histo2<<endl;
+//    cout<<"Save2Histos: "<<histo1<<" "<<histo2<<endl;
     if(!histo1&&!histo2)return;
     if(!histo1||!histo2){
         if (histo1) SaveHistogram(histo1);

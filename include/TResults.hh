@@ -78,6 +78,7 @@ public:
     void setPH_clustered(Float_t mean,Float_t mp,Float_t width,Float_t gSigma, TSettings::alignmentMode mode);
     void updated(){lastUpdate=TDatime();}
     TString getChannelsStringList(std::set<Int_t> channelSet);
+    void writeFiles(){createOutputResultFile();createOutputTextFile();};
 public:
     TString getMaskedChannels();
 

@@ -44,8 +44,7 @@ TResults::~TResults() {
     // TODO Auto-generated destructor stub
     cout<<"delete Results of run "<<runnumber<<endl;
 
-    createOutputTextFile();
-    createOutputResultFile();
+    writeFiles();
 }
 
 TResults::TResults(const   TResults& rhs){//copy constructor
@@ -303,8 +302,7 @@ void TResults::saveResults(TString name){
     //	TFile *file =  new TFile(name.Append(".bak"),"RECREATE");
     //	this->Write();
     //	file->Close();
-    createOutputTextFile();
-    createOutputResultFile();
+    writeFiles();
 }
 
 void TResults::Print(){
@@ -323,8 +321,7 @@ void TResults::Print(){
             << "\tmp2outOf10_normal     = " << mp2outOf10_normal << "\n"
             << "\tgSigma2outOf10_normal = " << gSigma2outOf10_normal<<endl;
     cout<<"DONE"<<endl;
-    createOutputTextFile();
-    createOutputResultFile();
+    writeFiles();
 }
 
 void TResults::setSignalFeedOverCorrection(UInt_t det, Float_t correction){
@@ -432,15 +429,16 @@ void TResults::setPH_clustered(Float_t mean, Float_t mp, Float_t width,
         mp_clustered_trans = mp;
         width_clustered_trans = width;
         gSigma_clustered_trans = gSigma;
-        cout<<"SET PH_clustered "<<mean_clustered_trans<<" "<<mp_clustered_trans<<" "<<width_clustered_trans<<" "<<gSigma_clustered_trans<<endl;
+        cout<<"SET PH_clustered trans. "<<mean_clustered_trans<<" "<<mp_clustered_trans<<" "<<width_clustered_trans<<" "<<gSigma_clustered_trans<<endl;
     }
     else{
         mean_clustered_normal = mean;
         mp_clustered_normal = mp;
         width_clustered_normal = width;
         gSigma_clustered_normal = gSigma;
-        cout<<"SET PH_clustered "<<mean_clustered_normal<<" "<<mp_clustered_normal<<" "<<width_clustered_normal<<" "<<gSigma_clustered_normal<<endl;
+        cout<<"SET PH_clustered norm. "<<mean_clustered_normal<<" "<<mp_clustered_normal<<" "<<width_clustered_normal<<" "<<gSigma_clustered_normal<<endl;
     }
+    writeFiles();
 }
 
 void TResults::setPH_2outOf10(Float_t mean, Float_t mp, Float_t width, Float_t gSigma, TSettings::alignmentMode mode){

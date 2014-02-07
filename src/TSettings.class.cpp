@@ -2404,7 +2404,7 @@ Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
 pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 	// i column
 	// j row
-	if (verbosity>6){
+	if (verbosity>>10){
 		cout<<"\n\n"<<flush;
 		this->get3dMetallisationFidCuts()->Print(1);
 	}
@@ -2425,7 +2425,7 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 	Float_t deltaX = relX;//xDet - xminus;
 	Float_t deltaY = relY;//yDet - yminus;
 	Int_t quarter = -1;
-	if (verbosity>6){
+	if (verbosity>10){
 		cout<<DiamondPattern<< " "<<startOf3dDetectorX<<"/"<<startOf3dDetectorY<<"\t"<<cellWidth<<"/"<<cellHight<<endl;
 
 		cout<<xminus<<" - "<<column <<" * "<<cellWidth<<" = "<<relX<<endl;
@@ -2435,15 +2435,15 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 		int quarterX = deltaX/(cellWidth/2);
 		int quarterY = deltaY/(cellHight/2);
 		quarter = quarterX +quarterY*2;
-		if(verbosity>4)cout << "\t"<<deltaX <<"/"<<deltaY << " "<<quarterX<< "/"<<quarterY<<" "<<cellWidth<<"/"<<cellHight<<endl;
+		if(verbosity>10)cout << "\t"<<deltaX <<"/"<<deltaY << " "<<quarterX<< "/"<<quarterY<<" "<<cellWidth<<"/"<<cellHight<<endl;
 	}
-	if(verbosity>4 && column >= 0 && row >= 0){
+	if(verbosity>10 && column >= 0 && row >= 0){
 		cout<<" TAnalysisOf3dDiamonds::getCellNo " << xDet <<"/"<<yDet<<endl;
 		cout << "\tcolumn: " << column << ", row: " << row << endl;
 		cout << "\tdeltaX: " << deltaX << ", deltaY: " << deltaY <<endl;
 		cout<<"\t cell: "<< cell << ", quarter: " << quarter <<endl;
 	}
-	if(verbosity>6)
+	if(verbosity>10)
 	cout <<xDet<<"/"<<yDet<<" --> "<<xminus<<"/"<<yminus<<"\t-->"<<
 				cell<<"<=> "<<column<<"/"<<row<<" "<<deltaX<<"/"<<deltaY<<" -->"<<quarter<<endl;
 //	i*11+j
