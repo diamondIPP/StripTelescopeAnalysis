@@ -491,14 +491,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     Int_t area3DwithColumns = 2;
     Int_t area3DwithoutColumns =1;
-    if(settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithoutColumns)){
-        hLandau3DWithoutColumns->Fill(diamondCluster->getPositiveCharge());
-        hLandau3DWithoutColumnsFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
-    }
-    if(settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
-        hLandau3DWithColumns->Fill(diamondCluster->getPositiveCharge());
-        hLandau3DWithColumnsFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
-    }
     if(!settings->do3dTransparentAnalysis()){
         if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
             hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
@@ -2271,8 +2263,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     if (settings->do3dTransparentAnalysis())
         appendix = "_trans";
     TH1F* hStrip = (TH1F*)hLandauStrip->Clone();
-    histSaver->SaveHistogramLandau(hLandau3DWithColumns);
-    histSaver->SaveHistogramLandau(hLandau3DWithoutColumns);
+    histSaver->SaveHistogram(hLandau3DWithColumns);
+    histSaver->SaveHistogram(hLandau3DWithoutColumns);
     histSaver->SaveHistogram(hLandau3DWithColumnsFidCutXvsFidCutY);
     histSaver->SaveHistogram(hLandau3DWithoutColumnsFidCutXvsFidCutY);
 
@@ -4343,6 +4335,17 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_FillMeanChargeVector(
     vecPredDetX_ShortAna.push_back(xPredDet);
     vecPredDetY_ShortAna.push_back(yPredDet);
     vecPulseHeight_ShortAna.push_back(clusterCharge);
+
+    Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
+    if (predictedDetector == 2){
+        hLandau3DWithoutColumns->Fill(clusterCharge);
+        hLandau3DWithoutColumnsFidCutXvsFidCutY->Fill(fiducialValueX,fiducialValueY);
+    }
+    else if (predictedDetector == 3){
+        hLandau3DWithColumns->Fill(clusterCharge);
+        hLandau3DWithColumnsFidCutXvsFidCutY->Fill(fiducialValueX,fiducialValueY);
+    }
+
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_Save2ClusterPlots() {
