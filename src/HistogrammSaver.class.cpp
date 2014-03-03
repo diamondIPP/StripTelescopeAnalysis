@@ -30,13 +30,21 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
     currentStyle=gROOT->GetStyle("Plain_RD42");
     if(currentStyle!=0)
         currentStyle->cd();
-    else if(gStyle!=0)
+    bool paperMode = settings->IsPaperMode();
+    if(gStyle!=0)
         if(!gStyle->IsZombie()){
+
             if((string)gStyle->GetName()!="Plain_RD42"){
                 gROOT->SetStyle("Plain"); //General style (see TStyle)
+
                 //	    gStyle->SetOptStat(221111111); //Stat options to be displayed			without under- and overflow use gStyle->SetOptStat(1110);
-                if(gStyle->GetOptStat()!=221111111)
-                    gStyle->SetOptStat("nemr");//KSiou
+                if(gStyle->GetOptStat()!=221111111){
+                    if(paperMode)
+                        gStyle->SetOptStat("emr");
+                    else
+                        gStyle->SetOptStat("nemr");//KSiou
+                }
+
                 if(gStyle->GetOptFit()!=1111){
                     gStyle->SetOptFit(1111);  //Fit options to be displayed
                     gStyle->SetStatH(0.12); //Sets Height of Stats Box
@@ -57,7 +65,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
                 //				gROOT->SetStyle("Plain_RD42");
             }
         }
-
+    if (paperMode) gStyle->SetOptTitle(false);
     gStyle->SetPalette(1); //
     if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
     gErrorIgnoreLevel=3001;
@@ -431,16 +439,16 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv,Float_
     else
         minX = mpv*.5;
     //Add a "fit" to histo
-    TPaveText* pt = updateMean(histo,minX,maxX);
-    if(gSigma>0&&pt)
-        pt->AddText(TString::Format("GSigma  =   %.1f",gSigma));
+    TPaveText* ptMean = updateMean(histo,minX,maxX);
+    if(gSigma>0&&ptMean)
+        ptMean->AddText(TString::Format("GSigma  =   %.1f",gSigma));
     maxX = histo->GetBinLowEdge(histo->GetNbinsX());
     TF1* fMeanCalculationArea = new TF1("fMeanCalculationArea","pol0",minX,maxX);
     fMeanCalculationArea->SetLineColor(kGreen);
     fMeanCalculationArea->FixParameter(0,0);
     fMeanCalculationArea->SetLineWidth(5);
     histo->Fit(fMeanCalculationArea,"Q+","",minX,maxX);
-    return pt;
+    return ptMean;
 }
 
 
@@ -644,16 +652,19 @@ TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
 }
 
 void HistogrammSaver::UpdatePaveText(){
+
     pt->Clear();
     pt->SetTextSize(0.0250);
     std::ostringstream svnRev_label;
-    svnRev_label<<"SVN-Rev: "<<SVN_REV;
-    pt->AddText(svnRev_label.str().c_str());
+    if (!settings->IsPaperMode()){
+        svnRev_label<<"SVN-Rev: "<<SVN_REV;
+        pt->AddText(svnRev_label.str().c_str());
+    }
     std::ostringstream run_number_label;
     run_number_label << "Run " <<runNumber;
     pt->AddText(run_number_label.str().c_str());
     std::ostringstream pthresh2;
-    pthresh2 << nEvents << " Events in Data Set";
+    pthresh2 <<"with "<< nEvents << " Events";
     pt->AddText(pthresh2.str().c_str());
     pt->AddText(dateandtime.AsSQLString());
     pt->SetBorderSize(0); //Set Border to Zero

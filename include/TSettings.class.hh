@@ -492,6 +492,7 @@ private:
 	Float_t pitchWidthDia;
     TString currentBegin;
     TString currentEnd;
+    bool bPaperMode;
 private:
 	//Filter tracks not in good fiducial region w/o bad strips
 	Int_t align_sil_fid_xlow;
@@ -602,7 +603,7 @@ public:
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY,Float_t minDistanceToEdge);
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY){return IsOnTheEdgeOfCell(relCellPosX,relCellPosY,minimumEdgeDistance);}
 	Float_t GetMinimumEdgeDistance(){return minimumEdgeDistance;};
-
+	bool IsPaperMode(){return bPaperMode;}
 
 	ClassDef(TSettings,6)
 

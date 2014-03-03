@@ -342,6 +342,10 @@ void TSettings::SetFileName(string newFileName){
 		fidCutsSelection->Print();
 	}
 }
+bool startsWith(const string& haystack, const string& needle) {
+    return needle.length() <= haystack.length()
+        && equal(needle.begin(), needle.end(), haystack.begin());
+}
 
 void TSettings::LoadSettings(){
 	if (getVerbosity())
@@ -366,11 +370,14 @@ void TSettings::LoadSettings(){
 		if ((line.substr(0, 1) == ";") || (line.substr(0, 1) == "#") || (line.substr(0, 1) == "/") || line.empty()) {
 			continue;
 		}
+		if(line.find_first_of('[')!= string::npos && line.find_last_of(']')!= string::npos)
+		    continue;
 
 		//find the index of first '=' character on the line
 		string::size_type offsetl = line.find_first_of('=');
 		string::size_type offsetr = line.find_first_of('=');
-
+		if (offsetl == string::npos)
+		    continue;
 		//extract the key (LHS of the ini line)
 		string key = line.substr(0, offsetl);
 
@@ -395,28 +402,28 @@ void TSettings::LoadSettings(){
 		}
 
 		//cant switch on strings so use if statements
-		if(key == "asymmetricSample") Parse(key,value,bAsymmetricSample);
-		if(key == "SaveAllFilesSwitch") Parse(key,value,SaveAllFilesSwitch);
-		if(key == "siliconAlignmentSteps")Parse(key,value,siliconAlignmentSteps);
-		if(key == "ClosePlotsOnSave") Parse(key,value,ClosePlotsOnSave);
-		if(key == "IndexProduceSwitch")Parse(key,value,IndexProduceSwitch);
-		if(key == "snr_plots_enable") Parse(key,value,snr_plots_enable);
-		if(key == "fix_dia_noise") Parse(key,value,fix_dia_noise);
-		if(key == "single_channel_analysis_channels") Parse(key, value,single_channel_analysis_channels);
-		if(key == "single_channel_analysis_enable") Parse(key,value,single_channel_analysis_enable);
-		if(key == "single_channel_analysis_eventwindow") Parse(key,value,single_channel_analysis_eventwindow);
-		if(key == "CMN_corr_low") Parse(key,value,CMN_corr_low);
-		if(key == "CMN_corr_high")Parse(key,value,CMN_corr_high);
-		if(key == "resetAlignment")Parse(key,value,bResetAlignment);
-		if(key == "CMN_cut")Parse(key,value,CMN_cut);
-		if(key == "DO_CMC")Parse(key,value,DO_CMC);
-		if(key == "CMN_cut") Parse(key,value,CMN_cut);
-		if(key == "Iter_Size")Parse(key,value,Iter_Size);
-		if(key == "Taylor_speed_throttle") Parse(key,value,Taylor_speed_throttle);
-		if(key == "dia_input") Parse(key,value,dia_input);
-		if(key == "alignment_training_track_fraction") Parse(key,value,alignment_training_track_fraction);
-		if(key == "alignment_training_track_number") Parse(key,value,alignment_training_track_number);
-		if(key == "alignment_training_method"){
+		if (startsWith(key,"assymetricSample")) Parse(key,value,bAsymmetricSample);
+		if (startsWith(key,"SaveAllFilesSwitch")) Parse(key,value,SaveAllFilesSwitch);
+		if (startsWith(key,"siliconAlignmentSteps"))Parse(key,value,siliconAlignmentSteps);
+		if (startsWith(key,"ClosePlotsOnSave")) Parse(key,value,ClosePlotsOnSave);
+		if (startsWith(key,"IndexProduceSwitch"))Parse(key,value,IndexProduceSwitch);
+		if (startsWith(key,"snr_plots_enable")) Parse(key,value,snr_plots_enable);
+		if (startsWith(key,"fix_dia_noise")) Parse(key,value,fix_dia_noise);
+		if (startsWith(key,"single_channel_analysis_channels")) Parse(key, value,single_channel_analysis_channels);
+		if (startsWith(key,"single_channel_analysis_enable")) Parse(key,value,single_channel_analysis_enable);
+		if (startsWith(key,"single_channel_analysis_eventwindow")) Parse(key,value,single_channel_analysis_eventwindow);
+		if (startsWith(key,"CMN_corr_low")) Parse(key,value,CMN_corr_low);
+		if (startsWith(key,"CMN_corr_high"))Parse(key,value,CMN_corr_high);
+		if (startsWith(key,"resetAlignment"))Parse(key,value,bResetAlignment);
+		if (startsWith(key,"CMN_cut")) Parse(key,value,CMN_cut);
+		if (startsWith(key,"DO_CMC")) Parse(key,value,DO_CMC);
+		if (startsWith(key,"CMN_cut")) Parse(key,value,CMN_cut);
+		if (startsWith(key,"Iter_Size"))Parse(key,value,Iter_Size);
+		if (startsWith(key,"Taylor_speed_throttle")) Parse(key,value,Taylor_speed_throttle);
+		if (startsWith(key,"dia_input")) Parse(key,value,dia_input);
+		if (startsWith(key,"alignment_training_track_fraction")) Parse(key,value,alignment_training_track_fraction);
+		if (startsWith(key,"alignment_training_track_number")) Parse(key,value,alignment_training_track_number);
+		if (startsWith(key,"alignment_training_method")){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			int method = (int)strtod(value.c_str(),0);
 			if(method >=0&&method<=2 )
@@ -424,7 +431,7 @@ void TSettings::LoadSettings(){
 			else
 				cerr<<"Not a valid Input for alignment Training Method : "<<method<<endl;
 		}
-		if(key == "alignment_training_fidcuts") {
+		if (startsWith(key,"alignment_training_fidcuts")) {
 			ParseIntArray(key,value,alignmentFidCuts);
 			if(verbosity){
 				for(UInt_t i = 0; i<alignmentFidCuts.size();i++){
@@ -432,87 +439,88 @@ void TSettings::LoadSettings(){
 				}
 			}
 		}
-		if (key == "res_keep_factor") {ParseFloat(key,value,res_keep_factor);}
-		if (key == "MinimalAbsoluteEtaValue") ParseFloat(key,value,minAbsEtaVal);
-		if(key == "Si_Pedestal_Hit_Factor") ParseFloat(key,value,Si_Pedestal_Hit_Factor);
-		if(key == "Di_Pedestal_Hit_Factor") ParseFloat(key,value,Di_Pedestal_Hit_Factor);
-		if(key == "Si_Cluster_Seed_Factor") ParseFloat(key,value,Si_Cluster_Seed_Factor);
-		if(key == "Di_Cluster_Seed_Factor") ParseFloat(key,value,Di_Cluster_Seed_Factor);
-		if(key == "Si_Cluster_Hit_Factor") ParseFloat(key,value,Si_Cluster_Hit_Factor);
-		if(key == "Di_Cluster_Hit_Factor") ParseFloat(key,value,Di_Cluster_Hit_Factor);
-		if(key == "eta_lowq_slice_low") ParseFloat(key,value,eta_lowq_slice_low);
-		if(key == "eta_lowq_slice_hi") ParseFloat(key,value,eta_lowq_slice_hi);
-		if(key == "eta_hiq_slice_low") ParseFloat(key,value,eta_hiq_slice_low);
-		if(key == "eta_hiq_slice_hi") ParseFloat(key,value,eta_hiq_slice_hi);
-		if(key == "etavsq_n_landau_slices") ParseInt(key,value,etavsq_n_landau_slices);
-		if(key == "alignment_x_offsets") ParseFloatArray(key,value,alignment_x_offsets);
-		if(key == "alignment_y_offsets") ParseFloatArray(key, value,alignment_y_offsets);
-		if(key == "alignment_phi_offsets") ParseFloatArray(key,value,alignment_phi_offsets);
-		if(key == "alignment_z_offsets") ParseFloatArray(key,value,alignment_z_offsets);
-		if(key == "D0X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[0]);
-		if(key == "D0Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[1]);
-		if(key == "D1X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[2]);
-		if(key == "D1Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[3]);
-		if(key == "D2X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[4]);
-		if(key == "D2Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[5]);
-		if(key == "D3X_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[6]);
-		if(key == "D3Y_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[7]);
-		if(key == "Dia_channel_screen_channels") ParseScreenedChannelArray(key,value,Det_channel_screen_channels[8]);
-		if(key == "Dia_channel_not_connected")  ParseScreenedChannelArray(key,value,Dia_channel_not_connected);
-        if(key == "Dia_channel_noisy")          ParseScreenedChannelArray(key,value,Dia_channel_noisy);
-		if(key == "chi2Cut3D")                  ParseFloat(key,value,chi2Cut3D);
-		if(key == "si_avg_fidcut_xlow") {ParseFloat(key,value,si_avg_fidcut_xlow);};
-		if(key == "si_avg_fidcut_xhigh") ParseFloat(key,value,si_avg_fidcut_xhigh);
-		if(key == "si_avg_fidcut_ylow") ParseFloat(key,value,si_avg_fidcut_ylow);
-		if(key == "si_avg_fidcut_yhigh") ParseFloat(key,value,si_avg_fidcut_yhigh);
+		if (startsWith(key,"res_keep_factor")) {ParseFloat(key,value,res_keep_factor);}
+		if (startsWith(key,"MinimalAbsoluteEtaValue")) ParseFloat(key,value,minAbsEtaVal);
+		if (startsWith(key,"Si_Pedestal_Hit_Factor")) ParseFloat(key,value,Si_Pedestal_Hit_Factor);
+		if (startsWith(key,"Di_Pedestal_Hit_Factor")) ParseFloat(key,value,Di_Pedestal_Hit_Factor);
+		if (startsWith(key,"Si_Cluster_Seed_Factor")) ParseFloat(key,value,Si_Cluster_Seed_Factor);
+		if (startsWith(key,"Di_Cluster_Seed_Factor")) ParseFloat(key,value,Di_Cluster_Seed_Factor);
+		if (startsWith(key,"Si_Cluster_Hit_Factor")) ParseFloat(key,value,Si_Cluster_Hit_Factor);
+		if (startsWith(key,"Di_Cluster_Hit_Factor")) ParseFloat(key,value,Di_Cluster_Hit_Factor);
+		if (startsWith(key,"eta_lowq_slice_low")) ParseFloat(key,value,eta_lowq_slice_low);
+		if (startsWith(key,"eta_lowq_slice_hi")) ParseFloat(key,value,eta_lowq_slice_hi);
+		if (startsWith(key,"eta_hiq_slice_low")) ParseFloat(key,value,eta_hiq_slice_low);
+		if (startsWith(key,"eta_hiq_slice_hi")) ParseFloat(key,value,eta_hiq_slice_hi);
+		if (startsWith(key,"etavsq_n_landau_slices")) ParseInt(key,value,etavsq_n_landau_slices);
+		if (startsWith(key,"alignment_x_offsets")) ParseFloatArray(key,value,alignment_x_offsets);
+		if (startsWith(key,"alignment_y_offsets")) ParseFloatArray(key, value,alignment_y_offsets);
+		if (startsWith(key,"alignment_phi_offsets")) ParseFloatArray(key,value,alignment_phi_offsets);
+		if (startsWith(key,"alignment_z_offsets")) ParseFloatArray(key,value,alignment_z_offsets);
+		if (startsWith(key,"D0X_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[0]);
+		if (startsWith(key,"D0Y_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[1]);
+		if (startsWith(key,"D1X_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[2]);
+		if (startsWith(key,"D1Y_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[3]);
+		if (startsWith(key,"D2X_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[4]);
+		if (startsWith(key,"D2Y_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[5]);
+		if (startsWith(key,"D3X_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[6]);
+		if (startsWith(key,"D3Y_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[7]);
+		if (startsWith(key,"Dia_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[8]);
+		if (startsWith(key,"Dia_channel_not_connected"))  ParseScreenedChannelArray(key,value,Dia_channel_not_connected);
+        if (startsWith(key,"Dia_channel_noisy"))          ParseScreenedChannelArray(key,value,Dia_channel_noisy);
+		if (startsWith(key,"chi2Cut3D"))                  ParseFloat(key,value,chi2Cut3D);
+		if (startsWith(key,"si_avg_fidcut_xlow")) {ParseFloat(key,value,si_avg_fidcut_xlow);};
+		if (startsWith(key,"si_avg_fidcut_xhigh")) ParseFloat(key,value,si_avg_fidcut_xhigh);
+		if (startsWith(key,"si_avg_fidcut_ylow")) ParseFloat(key,value,si_avg_fidcut_ylow);
+		if (startsWith(key,"si_avg_fidcut_yhigh")) ParseFloat(key,value,si_avg_fidcut_yhigh);
 
-		if(key == "selectionFidCut") {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
-		if(key == "3dMetallisationFidCut"){if (!fidCuts3DMetallisation) fidCuts3DMetallisation=new TFidCutRegions();ParseFidCut(key,value,fidCuts3DMetallisation,isStandard3dMetallisationFidCut);}
-		if(key == "3dEdgeFidCut"){if (!fidCuts3DEdge) fidCuts3DEdge =new TFidCutRegions();ParseFidCut(key,value,fidCuts3DEdge,isStandard3dEdgeFidCut);}
+		if (startsWith(key,"selectionFidCut")) {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCut(key,value,fidCutsSelection,isStandardSelectionFidCut);}
+		if (startsWith(key,"3dMetallisationFidCut")){if (!fidCuts3DMetallisation) fidCuts3DMetallisation=new TFidCutRegions();ParseFidCut(key,value,fidCuts3DMetallisation,isStandard3dMetallisationFidCut);}
+		if (startsWith(key,"3dEdgeFidCut")){if (!fidCuts3DEdge) fidCuts3DEdge =new TFidCutRegions();ParseFidCut(key,value,fidCuts3DEdge,isStandard3dEdgeFidCut);}
 
-		if(key == "pulse_height_num_bins") ParseInt(key,value,pulse_height_num_bins);
-		if(key == "pulse_height_si_max") ParseFloat(key,value,pulse_height_si_max);
-		if(key == "pulse_height_di_max")  ParseFloat(key,value,pulse_height_di_max);
-		if(key == "snr_distribution_si_max")  Parse(key,value,snr_distribution_si_max);
-		if(key == "snr_distribution_di_max")  Parse(key,value,snr_distribution_di_max);
-		if (key == "alignment_chi2") Parse(key,value,alignment_chi2);
-		if (key == "UseAutoFidCut") Parse(key,value,UseAutoFidCut);
-		if (key == "nDiamonds")this->setNDiamonds(ParseInt(key,value));
-		if (key == "AlternativeClustering") Parse(key,value,AlternativeClustering);
-		if(key == "store_threshold") Parse(key,value,store_threshold);
-		if(key == "plotChannel_on") Parse(key,value,plotChannel_on);
-		if(key == "SingleChannel2000plots") Parse(key,value,SingleChannel2000plots);
-		if(key == "makeDiamondPlots")  Parse(key,value,makeDiamondPlots);
-		if(key == "alignmentPrecision_Offset") Parse(key,value,alignmentPrecision_Offset);
-		if(key == "alignmentPrecision_Angle") Parse(key,value,alignmentPrecision_Angle);
-		if(key == "makeHits2D")  Parse(key,value,makeHits2D);
-		if(key == "makeNoise2D")  Parse(key,value,makeNoise2D);
-		if(key == "makePullDist")  Parse(key,value,makePullDist);
-		if(key == "makePedRMSTree")  Parse(key,value,makePedRMSTree);
-		if(key == "eventPrintHex")  Parse(key,value,eventPrintHex);
-		if(key == "plottedChannel")  Parse(key,value,plottedChannel);
-		if(key == "high_rms_cut")  Parse(key,value,high_rms_cut);
-		if(key == "rms_cut")  Parse(key,value,rms_cut);
-		if(key == "zoomDiamondPlots")  Parse(key,value,zoomDiamondPlots);
-		if(key == "singleTrack2D")  Parse(key,value,singleTrack2D);
-		if(key == "singleTrack2DmaxClusterSize")  Parse(key,value,singleTrack2DmaxClusterSize);
-		if(key == "maxNoise2D")  Parse(key,value,maxNoise2D);
-		if(key == "clusterHitFactors") ParseFloatArray(key, value,clusterHitFactors);
-		if(key == "clusterSeedFactors") ParseFloatArray(key, value,clusterSeedFactors);
-		if(key == "doAllAlignmentPlots") Parse(key,value,bDoAllAlignmentPlots);
-		if(key == "pitchWidthDia") Parse(key,value,pitchWidthDia);
-		if(key == "pitchWidthSil") Parse(key,value,pitchWidthSil);
-		if(key == "diamondPattern") ParsePattern(key,value);
-		if(key == "yOffset3D")ParseFloat(key,value,yOffset3D);
-		if(key == "TransparentAlignment") ParseBool(key,value,bTransparentAlignment);
-		if(key == "AlignmentMode") Parse(key,value,detectorsToAlign);
-		if(key == "DetectorsToAlign") Parse(key,value,detectorsToAlign);
-		if(key == "repeaterCardNo") {Parse(key,value,repeaterCardNo);cout<<"repeaterCardNo = "<<repeaterCardNo<<endl;}
-		if(key == "voltage") {Parse(key,value,voltage);cout<<"voltage = "<<voltage<<endl;}
-		if(key == "diamondName") {Parse(key,value,diamondName);cout<<"diamondName = "<<diamondName<<endl;}
-        if(key == "currentBegin"){Parse(key,value,currentBegin);}
-        if(key == "currentEnd"){Parse(key,value,currentEnd);}
-		if(key == "diamondMapping") {
+		if (startsWith(key,"pulse_height_num_bins")) ParseInt(key,value,pulse_height_num_bins);
+		if (startsWith(key,"pulse_height_si_max")) ParseFloat(key,value,pulse_height_si_max);
+		if (startsWith(key,"pulse_height_di_max"))  ParseFloat(key,value,pulse_height_di_max);
+		if (startsWith(key,"snr_distribution_si_max"))  Parse(key,value,snr_distribution_si_max);
+		if (startsWith(key,"snr_distribution_di_max"))  Parse(key,value,snr_distribution_di_max);
+		if (startsWith(key,"alignment_chi2")) Parse(key,value,alignment_chi2);
+		if (startsWith(key,"UseAutoFidCut")) Parse(key,value,UseAutoFidCut);
+		if (startsWith(key,"nDiamonds")) this->setNDiamonds(ParseInt(key,value));
+		if (startsWith(key,"AlternativeClustering")) Parse(key,value,AlternativeClustering);
+		if (startsWith(key,"store_threshold")) Parse(key,value,store_threshold);
+		if (startsWith(key,"plotChannel_on")) Parse(key,value,plotChannel_on);
+		if (startsWith(key,"SingleChannel2000plots")) Parse(key,value,SingleChannel2000plots);
+		if (startsWith(key,"makeDiamondPlots"))  Parse(key,value,makeDiamondPlots);
+		if (startsWith(key,"alignmentPrecision_Offset")) Parse(key,value,alignmentPrecision_Offset);
+		if (startsWith(key,"alignmentPrecision_Angle")) Parse(key,value,alignmentPrecision_Angle);
+		if (startsWith(key,"makeHits2D"))  Parse(key,value,makeHits2D);
+		if (startsWith(key,"makeNoise2D"))  Parse(key,value,makeNoise2D);
+		if (startsWith(key,"makePullDist"))  Parse(key,value,makePullDist);
+		if (startsWith(key,"makePedRMSTree"))  Parse(key,value,makePedRMSTree);
+		if (startsWith(key,"eventPrintHex"))  Parse(key,value,eventPrintHex);
+		if (startsWith(key,"plottedChannel"))  Parse(key,value,plottedChannel);
+		if (startsWith(key,"high_rms_cut"))  Parse(key,value,high_rms_cut);
+		if (startsWith(key,"rms_cut"))  Parse(key,value,rms_cut);
+		if (startsWith(key,"zoomDiamondPlots"))  Parse(key,value,zoomDiamondPlots);
+		if (startsWith(key,"singleTrack2D"))  Parse(key,value,singleTrack2D);
+		if (startsWith(key,"singleTrack2DmaxClusterSize"))  Parse(key,value,singleTrack2DmaxClusterSize);
+		if (startsWith(key,"maxNoise2D"))  Parse(key,value,maxNoise2D);
+		if (startsWith(key,"clusterHitFactors")) ParseFloatArray(key, value,clusterHitFactors);
+		if (startsWith(key,"clusterSeedFactors")) ParseFloatArray(key, value,clusterSeedFactors);
+		if (startsWith(key,"doAllAlignmentPlots")) Parse(key,value,bDoAllAlignmentPlots);
+		if (startsWith(key,"pitchWidthDia")) Parse(key,value,pitchWidthDia);
+		if (startsWith(key,"pitchWidthSil")) Parse(key,value,pitchWidthSil);
+		if (startsWith(key,"diamondPattern")) ParsePattern(key,value);
+		if (startsWith(key,"yOffset3D")) ParseFloat(key,value,yOffset3D);
+		if (startsWith(key,"TransparentAlignment")) ParseBool(key,value,bTransparentAlignment);
+		if (startsWith(key,"AlignmentMode")) Parse(key,value,detectorsToAlign);
+		if (startsWith(key,"DetectorsToAlign")) Parse(key,value,detectorsToAlign);
+		if (startsWith(key,"repeaterCardNo")) {Parse(key,value,repeaterCardNo);cout<<"repeaterCardNo = "<<repeaterCardNo<<endl;}
+		if (startsWith(key,"paperMode")) {Parse(key,value,bPaperMode);cout<<"Activate PaperMode: "<<bPaperMode<<endl;}
+		if (startsWith(key,"voltage")) {Parse(key,value,voltage);cout<<"voltage = "<<voltage<<endl;}
+		if (startsWith(key,"diamondName")) {Parse(key,value,diamondName);cout<<"diamondName = "<<diamondName<<endl;}
+        if (startsWith(key,"currentBegin")){Parse(key,value,currentBegin);}
+        if (startsWith(key,"currentEnd")){Parse(key,value,currentEnd);}
+		if (startsWith(key,"diamondMapping")) {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
 			ParseIntArray(key, value,vecDiaMapping);
@@ -523,7 +531,7 @@ void TSettings::LoadSettings(){
 			cout<<diamondMapping<<endl;
 			getDetChannelNo(0);
 		}
-		if(key == "Dia_DetectorChannels") {
+		if (startsWith(key,"Dia_DetectorChannels")) {
 			cout<<key<<" = "<<value.c_str()<<endl;
 //			vector<string> vecDetectorChannelString;
 //			ParseStringArray(key, value,vecDetectorChannelString);
@@ -538,7 +546,7 @@ void TSettings::LoadSettings(){
 				}
 			}
 		}
-		if(key == "Dia_ClusterSeedFactors"){
+		if (startsWith(key,"Dia_ClusterSeedFactors")){
 			ParseFloatArray(key, value,vecClusterSeedFactorsDia);
 			if((Int_t)vecClusterSeedFactorsDia.size()!=getNDiaDetectorAreas()){
 				cerr<<"The number of defined ClusterSeedFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
@@ -549,7 +557,7 @@ void TSettings::LoadSettings(){
 			for(UInt_t i=0;i<vecClusterSeedFactorsDia.size();i++)
 				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterSeedFactorsDia.at(i)<<endl;
 		}
-		if(key == "Dia_ClusterHitFactors"){
+		if (startsWith(key,"Dia_ClusterHitFactors")){
 			ParseFloatArray(key, value,vecClusterHitFactorsDia);
 			if((Int_t)vecClusterHitFactorsDia.size()!=getNDiaDetectorAreas()){
 				cerr<<"The number of defined ClusterHitFactors for the diamond Areas does not fit with the number of defined areas:\t"<<flush;
@@ -560,35 +568,35 @@ void TSettings::LoadSettings(){
 			for(UInt_t i=0;i<vecClusterHitFactorsDia.size();i++)
 				cout<<i<<"\t"<<getDiaDetectorArea(i).first<<"-"<<getDiaDetectorArea(i).second<<": "<<vecClusterHitFactorsDia.at(i)<<endl;
 		}
-        if(key == "is3dDiamond"){
+        if (startsWith(key,"is3dDiamond")){
            cout<<key<<" =" <<value.c_str()<<endl;
            b3dDiamond = (bool)strtod(value.c_str(),0);
         }
-        if(key == "badCells3d"){
+        if (startsWith(key,"badCells3d")){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,badCells3d);
         }
-        if(key == "badCells3dnH"){
+        if (startsWith(key,"badCells3dnH")){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,badCells3dnH);
         }
-        if(key == "goodCells3d"){
+        if (startsWith(key,"goodCells3d")){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,goodCells3d,goodCellRegions3d);
         }
 
-        if(key == "deadCell3d"){
+        if (startsWith(key,"deadCell3d")){
         	cout<<key<<"="<<value<<endl;
         	ParseCellArray(key,value,deadCell3d);
         }
 
-        if(key == "nColumns3d") Parse(key,value,nColumns3d);
-        if(key == "nRows3d") Parse(key,value,nRows3d);
-        if(key == "3dShortAnalysis") Parse(key,value,b3dShortAnalysis);
-        if(key == "3dLongAnalysis") Parse(key,value,b3dLongAnalysis);
-        if(key == "3dTransparentAnalysis") Parse(key,value,b3dTransparentAnalysis);
-        if(key == "3dColumnRadius") Parse(key,value,columnRadius);
-        /*if(key == "store_threshold") {//TODO It's needed in settings reader
+        if (startsWith(key,"nColumns3d")) Parse(key,value,nColumns3d);
+        if (startsWith(key,"nRows3d")) Parse(key,value,nRows3d);
+        if (startsWith(key,"3dShortAnalysis")) Parse(key,value,b3dShortAnalysis);
+        if (startsWith(key,"3dLongAnalysis")) Parse(key,value,b3dLongAnalysis);
+        if (startsWith(key,"3dTransparentAnalysis")) Parse(key,value,b3dTransparentAnalysis);
+        if (startsWith(key,"3dColumnRadius")) Parse(key,value,columnRadius);
+        /*if (startsWith(key,"store_threshold")) {//TODO It's needed in settings reader
 	         cout << key.c_str() << " = " << value.c_str() << endl;
 	        store_threshold = (float)strtod(value.c_str(),0);
 	      }*/
@@ -806,6 +814,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	vecEdgePositionName.push_back("Y_Edge3D_small");
 	minimumEdgeDistance = 10;
 	repeaterCardNo = -1;
+	bPaperMode = false;
 	diamondName = "??";
     currentBegin ="??";
     currentEnd = "??";

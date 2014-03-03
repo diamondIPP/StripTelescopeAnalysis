@@ -39,6 +39,7 @@
 #include "TCellAnalysisClass.hh"
 #include "TTransparentAnalysis.hh"
 #include "THStack.h"
+#include "TPaletteAxis.h"
 
 using namespace std;
 
@@ -118,6 +119,7 @@ private:
 	void LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(Float_t xRelPosDet,Float_t yRelPosDet, Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
 
+	void LongAnalysis_SaveRawPulseHeightPlots();
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_InitGoodCellsLandaus();
 	void LongAnalysis_FillGoodCellsLandaus(Float_t charge);
@@ -155,7 +157,11 @@ private:
 private:
     TCluster GhostCluster;
 	TH1F* hLandauStrip;
+	TH1F* hLandau3DWithColumns;
+	TH1F* hLandau3DWithoutColumns;
 	TH2F* hLandauStripFidCutXvsFidCutY;
+	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
+	TH2F* hLandau3DWithoutColumnsFidCutXvsFidCutY;
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
 	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y,xPredicted,yPredicted,xPredDet,yPredDet;
