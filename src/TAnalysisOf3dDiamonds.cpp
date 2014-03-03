@@ -4405,6 +4405,21 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hLandau3DWithoutColumns->GetXaxis()->SetTitle("charge / ADC");
     hLandau3DWithoutColumns->GetYaxis()->SetTitle("number of entries #");
     hLandau3DWithoutColumns->SetLineColor(kRed);
+
+    name = "hLandau3DWithColumnsFidCutXvsFidCutY";
+    hLandau3DWithColumnsFidCutXvsFidCutY = new TH2F(name,name,
+            213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
+            160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
+    hLandau3DWithColumnsFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
+    hLandau3DWithColumnsFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
+
+    name = "hLandau3DWithoutColumnsFidCutXvsFidCutY";
+    hLandau3DWithoutColumnsFidCutXvsFidCutY = new TH2F(name,name,
+            213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
+            160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
+    hLandau3DWithoutColumnsFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
+    hLandau3DWithoutColumnsFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
+
     if(settings->do3dShortAnalysis() == 1){
         initialiseShortAnalysisHistos();
     }
