@@ -29,7 +29,7 @@ public:
     void setTransparentMap( std::map<Int_t, TCluster>* transparentMap);
     std::map<Int_t,std::pair<Float_t,Float_t> >* getPredictedPositions() const;
     void setPredictedPositions( std::map<Int_t, pair<Float_t, Float_t> >* predictedPositionMap);
-    void setStripHistogram(TH1F* histo){this->stripHisto = (TH1F*)histo->Clone();}
+    void setStripHistogram(TH1F* histo);
 
 private:
     void InitHistograms();

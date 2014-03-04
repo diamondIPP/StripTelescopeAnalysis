@@ -159,6 +159,7 @@ private:
 	TH1F* hLandauStrip;
 	TH1F* hLandau3DWithColumns;
 	TH1F* hLandau3DWithoutColumns;
+    TH1F* hLandau3DWithoutColumns_subset;
 	TH2F* hLandauStripFidCutXvsFidCutY;
 	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
 	TH2F* hLandau3DWithoutColumnsFidCutXvsFidCutY;

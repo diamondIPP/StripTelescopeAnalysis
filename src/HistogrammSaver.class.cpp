@@ -122,8 +122,8 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
     hGridReferenceDetSpace->SetStats(kFALSE);
     hGridReferenceDetSpace->SetTickLength(0.0, "X");
     hGridReferenceDetSpace->SetTickLength(0.0, "Y");
-    hGridReferenceDetSpace->GetXaxis()->SetTitle("Row of Cell");
-    hGridReferenceDetSpace->GetYaxis()->SetTitle("Column of Cell");
+    hGridReferenceDetSpace->GetXaxis()->SetTitle("row of cell");
+    hGridReferenceDetSpace->GetYaxis()->SetTitle("column of cell");
     hGridReferenceCellSpace->SetStats(kFALSE);
     hGridReferenceCellSpace->SetTickLength(0.0, "X");
     hGridReferenceCellSpace->SetTickLength(0.0, "Y");
@@ -460,8 +460,10 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
         name.Insert(0,"c_");
     TCanvas* c1 = new TCanvas(name,name);
     c1->cd();
+    c1->SetRightMargin(.15);
     hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
     hGridReferenceDetSpace->Draw("COL");
+    histo->GetZaxis()->SetLabelOffset(1.2);
     if (histo)
         histo->Draw("sameCOLZAH");
     //	TLegend* leg = 0;
@@ -1024,6 +1026,83 @@ void HistogrammSaver::SaveHistogram(TH2* histo, bool drawStatBox,bool optimizeRa
     //	histo->SetStats(false);
     SaveHistogramPNG(histo,optimizeRange,drawOption);
     SaveHistogramROOT(histo,optimizeRange,drawOption);
+}
+
+void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
+    std::pair<Float_t,Float_t> readoutColumn = make_pair(75.,75.);
+    std::pair<Float_t,Float_t> biasColumn = make_pair(0,0);
+    if (!histo)return;
+    if(histo->GetEntries()==0)return;
+    Int_t style = gStyle->GetOptStat();
+    if (settings->IsPaperMode())
+        gStyle->SetOptStat("e");
+    else
+        gStyle->SetOptStat("ne");
+    TString name = histo->GetName();
+    if(name.First('h')==0)
+        name.Replace(0,1,'c');
+    else
+        name.Insert(0,"c_");
+    TCanvas *c1 = new TCanvas(name);
+    c1->SetRightMargin(.15);
+    histo->Draw("colz");
+    histo->GetZaxis()->SetTitleOffset(1.2);
+    TH1F* frame = c1->DrawFrame(0,0,150,150,histo->GetTitle());
+    frame->GetXaxis()->SetTitle(histo->GetXaxis()->GetTitle());
+    frame->GetYaxis()->SetTitle(histo->GetYaxis()->GetTitle());
+    histo->Draw(drawOption+" same");
+    vector<TMarker *> markers;
+    vector<TCutG*> cells;
+
+
+    markers.push_back(new TMarker(readoutColumn.first,readoutColumn.second,20));
+    markers.back()->SetMarkerColor(kBlack);
+    markers.back()->Draw();
+    cells.push_back(GetCutGofBin("readoutBin",histo,readoutColumn.first,readoutColumn.second));
+    if(cells.back()) cells.back()->SetLineColor(kBlack);
+    if(cells.back()) cells.back()->Draw();
+    for (Int_t i = 0; i < 4; i++){
+        Float_t x = biasColumn.first;
+        Float_t y = biasColumn.second;
+        x+= settings->GetCellHeight()*(i%2);
+        y+= settings->GetCellHeight()*(i/2);
+        markers.push_back(new TMarker(x,y,20));
+        markers.back()->SetMarkerColor(kRed+2);
+        markers.back()->Draw();
+        cells.push_back(GetCutGofBin(TString::Format("biasBin_%d",i),histo,x,y));
+        if(cells.back()) cells.back()->SetLineColor(kRed+2);
+        if(cells.back()) cells.back()->SetLineWidth(2);
+        if(cells.back()) cells.back()->Draw();
+    }
+
+    c1->Update();
+    SaveCanvas(c1);
+    delete c1;
+}
+TCutG* HistogrammSaver::GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y){
+    if (!histo)return 0;
+    Int_t bin = histo->FindBin(x,y);
+    Int_t binx,biny,binz;
+    histo->GetBinXYZ(bin,binx,biny,binz);
+    Float_t xlow = histo->GetXaxis()->GetBinLowEdge(binx);
+    Float_t xup = histo->GetXaxis()->GetBinUpEdge(binx);
+    Float_t ylow = histo->GetYaxis()->GetBinLowEdge(biny);
+    Float_t yup = histo->GetYaxis()->GetBinUpEdge(biny);
+    while (xup > histo->GetXaxis()->GetXmax()){
+        Float_t delta = xup-xlow;
+        xup = xlow;
+        xlow = xup -delta;
+    }
+    while (yup > histo->GetYaxis()->GetXmax()){
+        Float_t delta = yup-ylow;
+        yup = ylow;
+        ylow = yup -delta;
+    }
+    Float_t xx[] = {xlow,xup,xup,xlow,xlow};
+    Float_t yy[] = {ylow,ylow,yup,yup,ylow};
+    TCutG * cut = new TCutG(name,5,xx,yy);
+    cut->SetLineWidth(3);
+    return cut;
 }
 
 void HistogrammSaver:: Save1DProfileYWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox){
@@ -1969,14 +2048,9 @@ void HistogrammSaver::OptimizeXYRange(TH2* histo){
     HistogrammSaver::OptimizeYRange(histo);
 }
 
-void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLegend,bool bDrawOnCanvas) {
+void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLegend,bool bDrawOnCanvas,TString xTitle,TString yTitle) {
     if (!stack) return;
     TString name = stack->GetName();
-    TString xTitle = "";
-    if(stack->GetXaxis()) xTitle = stack->GetXaxis()->GetTitle();
-    TString yTitle = "";
-    if(stack->GetYaxis()) yTitle =stack->GetYaxis()->GetTitle();
-    if(verbosity>6)cout<<"xTitle: '"<<xTitle<<"'  yTitle: '"<<yTitle<<"'"<<endl;
     if(name.First('h')==0)
         name.Replace(0,1,'c');
     else
@@ -1985,6 +2059,12 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
     c1->cd();
     c1->SetObjectStat(0);
     stack->Draw();
+    if (xTitle=="")
+        if(stack->GetXaxis()) xTitle = stack->GetXaxis()->GetTitle();
+    if (yTitle=="")
+        if(stack->GetYaxis()) yTitle = stack->GetYaxis()->GetTitle();
+    if(verbosity>6)cout<<"xTitle: '"<<xTitle<<"'  yTitle: '"<<yTitle<<"'"<<endl;
+
     if(verbosity>6)cout<<"SaveStack: Xaxis: ";
     stack->GetXaxis()->SetTitle(xTitle);
     if(verbosity>6)cout<<stack->GetXaxis()->GetTitle();
@@ -2025,7 +2105,9 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
     ymin = ymin - .1 *(delta);
     ymax = ymax + .3*delta;
     if(bDrawOnCanvas){
-        c1->DrawFrame(xmin,ymin,xmax,ymax,stack->GetTitle());
+        TH1F* frame = c1->DrawFrame(xmin,ymin,xmax,ymax,stack->GetTitle());
+        frame->GetXaxis()->SetTitle(xTitle);
+        frame->GetYaxis()->SetTitle(yTitle);
         if(drawOption=="")
             stack->Draw("same");
         else
@@ -2038,6 +2120,9 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
         else
             stack->Draw(drawOption);
     }
+    stack->GetXaxis()->SetTitle(xTitle);
+    stack->GetYaxis()->SetTitle(yTitle);
+    c1->Update();
     if (bDrawLegend){
         TLegend* leg = c1->BuildLegend();
         leg->SetX1NDC(0.45);

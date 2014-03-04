@@ -45,6 +45,7 @@
 #include "TFidCutRegions.hh"
 #include "TFiducialCut.hh"
 #include "THStack.h"
+#include "TMarker.h"
 
 //#include <sys/dirent.h>
 #include <sys/stat.h>
@@ -79,9 +80,10 @@ public:
     void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
     void Save1DProfileWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true,TString drawOption ="colz");
+	void SaveOverlay(TH2* histo,TString drawOption ="colz");
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true,TString drawOption ="");
 	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
-	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false,bool bDrawOnCanvas = true);
+	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false,bool bDrawOnCanvas = true,TString xTitle ="",TString yTitle="");
 	TProfile* GetProfileX(TProfile2D* prof,TString name ="_pfx",Int_t firstybin = 1, Int_t lastybin = -1);
     TProfile* GetProfileY(TProfile2D* prof,TString name ="_pfy",Int_t firstxbin = 1, Int_t lastxbin = -1);
     TH2D* GetBinContentHisto(TProfile2D* prof);
@@ -151,6 +153,7 @@ public:
 	TH2D* GetHistoBinedInCells(TString name,Int_t binsPerCellAxis=1);
 	TProfile2D* GetProfile2dBinedInCells(TString name,Int_t binsPerCellAxis=1);
 	TH3D* Get3dHistoBinedInCells(TString name,UInt_t binsz, Float_t minz,Float_t maxz, Int_t binsPerCellAxis=1);
+	TCutG* GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y);
 private:
 	Float_t xRangeMin,xRangeMax;
     TPaveText *pt;
