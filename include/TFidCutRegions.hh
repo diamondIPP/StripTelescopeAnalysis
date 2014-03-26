@@ -60,8 +60,18 @@ public:
 	Float_t getMinFiducialY(UInt_t index = 0);
 	void DrawFiducialCutsToCanvas(TCanvas* c1,bool DrawLegend=false);
 	TCutG* getFiducialAreaCut(UInt_t nFidCut);
+	TCutG* getCutG(TString name, Float_t xLow,Float_t yLow, Float_t xHigh, Float_t yHigh);
 	void Reset();
 	UInt_t size(){return getNFidCuts();}
+	Float_t getAddionalCutXHigh() const {return addionalCut_xHigh;}
+	void setAddionalCutXHigh(Float_t addionalCutXHigh) { addionalCut_xHigh = addionalCutXHigh; }
+	Float_t getAddionalCutXLow() const { return addionalCut_xLow; }
+	void setAddionalCutXLow(Float_t addionalCutXLow) { addionalCut_xLow = addionalCutXLow; }
+	Float_t getAddionalCutYHigh() const { return addionalCut_yHigh; }
+	void setAddionalCutYHigh(Float_t addionalCutYHigh) { addionalCut_yHigh = addionalCutYHigh; }
+	Float_t getAddionalCutYLow() const { return addionalCut_yLow; }
+	void setAddionalCutYLow(Float_t addionalCutYLow) { addionalCut_yLow = addionalCutYLow; }
+
 private:
 	std::string name;
 	void initVariables();
@@ -78,7 +88,12 @@ private:
 	std::string runDescription;
 	TH2F* hEventScatterPlot;
 	UInt_t verbosity;
-    ClassDef(TFidCutRegions,1);
+	Float_t addionalCut_xLow;
+	Float_t addionalCut_xHigh;
+	Float_t addionalCut_yLow;
+	Float_t addionalCut_yHigh;
+
+    ClassDef(TFidCutRegions,1)
 };
 
 #endif /* TFIDCUTREGIONS_HH_ */

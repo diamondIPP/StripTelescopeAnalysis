@@ -330,13 +330,13 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     TH1F* histo3 = (TH1F*)mapHistos["hNoNegativeCharge_PulseHeight"]->Clone();
     Float_t scale = histo3->GetBinContent(histo3->GetMaximumBin());
     histo3->Scale(1./scale);
-    histo3->SetTitle("charge - 3D w Columns");
+    histo3->SetTitle("Pulse Height - 3D");
     TH1F* histo4 =0;
     if (stripHisto){
         histo4 = (TH1F*)stripHisto->Clone();
         scale = histo4->GetBinContent(histo4->GetMaximumBin());
         histo4->Scale(1./scale);
-        histo4->SetTitle("charge - Strip");
+        histo4->SetTitle("Pulse Height - Strip");
     }
 
     hs3->Add(histo3);

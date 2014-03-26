@@ -60,6 +60,7 @@ public:
 	};
 	HistogrammSaver(TSettings* settings,int verbosity=0);
 	virtual ~HistogrammSaver();
+	void SetPaperPlotStyle();
 	void InitializeGridReferenceDetSpace();
 	void SetOptStat(std::string optStat){gStyle->SetOptStat(optStat.c_str());}
 	void SetOptStat(Int_t stat){gStyle->SetOptStat(stat);}

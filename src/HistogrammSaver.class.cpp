@@ -65,8 +65,9 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
                 //				gROOT->SetStyle("Plain_RD42");
             }
         }
-    if (paperMode) gStyle->SetOptTitle(false);
+//    if (paperMode) gStyle->SetOptTitle(false);
     gStyle->SetPalette(1); //
+    SetPaperPlotStyle();
     if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
     gErrorIgnoreLevel=3001;
     InitializeGridReferenceDetSpace();
@@ -84,7 +85,156 @@ HistogrammSaver::~HistogrammSaver() {
     system(test.str().c_str());//t.str();//<<"\""<<endl;
     //	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
     //	cout<<string1<<endl;
-    this->pt->Delete();
+    if (pt) this->pt->Delete();
+}
+
+void HistogrammSaver::SetPaperPlotStyle(){
+    if (!settings->IsPaperMode())
+        return;
+    cout<<"SET PAPER PLOT STYLE!"<<endl;
+//    if (!gStyle)
+//      gStyle = new TStyle("gStyle","Style for P-TDR");
+      // For the canvas:
+      gStyle->SetCanvasBorderMode(0);
+      gStyle->SetCanvasColor(kWhite);
+      gStyle->SetCanvasDefH(800); //Height of canvas
+      gStyle->SetCanvasDefW(800); //Width of canvas
+      gStyle->SetCanvasDefX(0);   //POsition on screen
+      gStyle->SetCanvasDefY(0);
+
+      // For the Pad:
+      gStyle->SetPadBorderMode(0);
+      // gStyle->SetPadBorderSize(Width_t size = 1);
+      gStyle->SetPadColor(kWhite);
+      gStyle->SetPadGridX(false);
+      gStyle->SetPadGridY(false);
+      gStyle->SetGridColor(0);
+      gStyle->SetGridStyle(3);
+      gStyle->SetGridWidth(1);
+
+      // For the frame:
+      gStyle->SetFrameBorderMode(0);
+      gStyle->SetFrameBorderSize(1);
+      gStyle->SetFrameFillColor(0);
+      gStyle->SetFrameFillStyle(0);
+      gStyle->SetFrameLineColor(1);
+      gStyle->SetFrameLineStyle(1);
+      gStyle->SetFrameLineWidth(1);
+
+      // For the histo:
+//      gStyle->SetHistFillColor(63);
+      gStyle->SetHistFillStyle(0);
+      gStyle->SetHistLineColor(1);
+      gStyle->SetHistLineStyle(0);
+      gStyle->SetHistLineWidth(2);
+      // gStyle->SetLegoInnerR(Float_t rad = 0.5);
+      // gStyle->SetNumberContours(Int_t number = 20);
+
+    //  gStyle->SetEndErrorSize(0);
+      gStyle->SetErrorX(0.);
+    //  gStyle->SetErrorMarker(20);
+
+      gStyle->SetMarkerStyle(20);
+
+      //For the fit/function:
+      gStyle->SetOptFit(1);
+      gStyle->SetFitFormat("5.4g");
+      gStyle->SetFuncColor(2);
+      gStyle->SetFuncStyle(1);
+      gStyle->SetFuncWidth(1);
+
+      //For the date:
+      gStyle->SetOptDate(0);
+      // gStyle->SetDateX(Float_t x = 0.01);
+      // gStyle->SetDateY(Float_t y = 0.01);
+
+      // For the statistics box:
+      gStyle->SetOptFile(0);
+      gStyle->SetOptStat(0); // To display the mean and RMS:   SetOptStat("mr");
+      gStyle->SetStatColor(kWhite);
+      gStyle->SetStatFont(42);
+      gStyle->SetStatFontSize(0.025);
+      gStyle->SetStatTextColor(1);
+      gStyle->SetStatFormat("6.4g");
+      gStyle->SetStatBorderSize(1);
+      gStyle->SetStatH(0.1);
+      gStyle->SetStatW(0.15);
+      // gStyle->SetStatStyle(Style_t style = 1001);
+      // gStyle->SetStatX(Float_t x = 0);
+      // gStyle->SetStatY(Float_t y = 0);
+
+      // Margins:
+      gStyle->SetPadTopMargin(0.05);
+      gStyle->SetPadBottomMargin(0.13);
+      gStyle->SetPadLeftMargin(0.13);
+      gStyle->SetPadRightMargin(0.05);
+
+      // For the Global title:
+
+      //  gStyle->SetOptTitle(0);
+      gStyle->SetTitleFont(42);
+      gStyle->SetTitleColor(kBlack);
+      gStyle->SetTitleTextColor(1);
+      gStyle->SetTitleFillColor(10);
+      gStyle->SetTitleFontSize(0.05);
+      gStyle->SetOptTitle(0);
+      // gStyle->SetTitleH(0); // Set the height of the title box
+      // gStyle->SetTitleW(0); // Set the width of the title box
+      // gStyle->SetTitleX(0); // Set the position of the title box
+      // gStyle->SetTitleY(0.985); // Set the position of the title box
+      // gStyle->SetTitleStyle(Style_t style = 1001);
+      // gStyle->SetTitleBorderSize(2);
+
+      // For the axis titles:
+
+      gStyle->SetTitleColor(kBlack, "XYZ");
+      gStyle->SetTitleFont(42, "XYZ");
+      gStyle->SetTitleSize(0.04, "XYZ");
+      // gStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
+      // gStyle->SetTitleYSize(Float_t size = 0.02);
+      gStyle->SetTitleXOffset(1);
+      gStyle->SetTitleYOffset(1.15);
+      gStyle->SetTitleOffset(1.1, "Z"); // Another way to set the Offset
+
+      // For the axis labels:
+
+      gStyle->SetLabelColor(kBlack, "XYZ");
+      gStyle->SetLabelFont(42, "XYZ");
+      gStyle->SetLabelOffset(0.007, "XYZ");
+      gStyle->SetLabelSize(0.03, "XYZ");
+
+      // For the axis:
+
+      gStyle->SetAxisColor(1, "XYZ");
+      gStyle->SetStripDecimals(kTRUE);
+      gStyle->SetTickLength(0.03, "XYZ");
+      gStyle->SetNdivisions(510, "XYZ");
+      gStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
+      gStyle->SetPadTickY(1);
+
+      // Change for log plots:
+      gStyle->SetOptLogx(0);
+      gStyle->SetOptLogy(0);
+      gStyle->SetOptLogz(0);
+
+      //Legend
+      gStyle->SetLegendFont(42);
+
+      // Postscript options:
+      // gStyle->SetPaperSize(15.,15.);
+      // gStyle->SetLineScalePS(Float_t scale = 3);
+      // gStyle->SetLineStyleString(Int_t i, const char* text);
+      // gStyle->SetHeaderPS(const char* header);
+      // gStyle->SetTitlePS(const char* pstitle);
+
+      // gStyle->SetBarOffset(Float_t baroff = 0.5);
+      // gStyle->SetBarWidth(Float_t barwidth = 0.5);
+      // gStyle->SetPaintTextFormat(const char* format = "g");
+      // gStyle->SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
+      // gStyle->SetTimeOffset(Double_t toffset);
+      // gStyle->SetHistMinimumZero(kTRUE);
+
+      gStyle->cd();
 }
 
 void HistogrammSaver::InitializeGridReferenceDetSpace(){
@@ -221,7 +371,7 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
         leg->AddEntry(histo2,histo2->GetName());
     leg->Draw("same");
     //	TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
-    //	pt2->Draw("same");
+    //	if(!settings->IsPaperMode()) pt2->Draw("same");
     c1->Update();
     cout<<"Save Canvas "<< c1<<": "<<c1->GetName()<<endl;
     SaveCanvas(c1);
@@ -319,8 +469,14 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
     leg->AddEntry(histo1,histo1->GetName());
     leg->AddEntry(histo2,histo2->GetName());
     leg->Draw("same");
-    TPaveText* pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
-    pt2->Draw("same");
+    if(settings->IsPaperMode()){
+
+    }
+    else{
+        TPaveText* pt2 = 0;
+        if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvasName.Data()));
+        if(pt2 && !settings->IsPaperMode()) pt2->Draw("same");
+    }
     c1->Update();
     SaveCanvas(c1);
 }
@@ -370,18 +526,20 @@ TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) 
     Int_t bin2 = histo->FindLastBinAbove(maxY/2);
     Float_t fwhm = histo->GetBinCenter(bin2) - histo->GetBinCenter(bin1);
     TPaveStats* hstat = (TPaveStats*)histo->GetListOfFunctions()->FindObject("stats");
+    cout<<"Got stats" <<hstat<<endl;
+    if (!hstat)
+        histo->GetListOfFunctions()->Print();
 
     TF1* fit = 0;
     fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("Fitfcn_%s",histo->GetName()));
     if(!fit)
-        (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("fLangauFixedNoise_%s",histo->GetName()));
+        fit = (TF1*)histo->GetListOfFunctions()->FindObject(TString::Format("fLangauFixedNoise_%s",histo->GetName()));
 
     TPaveText* hstat2 = 0;
     if (hstat) hstat2 = (TPaveText*) hstat->Clone();
     else
         histo->GetListOfFunctions()->Print();
     if(hstat2){
-
         TText * text = hstat2->AddText("");
         text->SetTextSize(0);
         text = hstat2->AddText(TString::Format("Mean_{> %.1f}  =   %.1f",minX,mean));
@@ -654,14 +812,20 @@ TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
 }
 
 void HistogrammSaver::UpdatePaveText(){
-
+    if (!pt)
+        return;
+    if (settings->IsPaperMode()){
+        delete pt;
+        pt =0;
+        return;
+    }
+        ;
     pt->Clear();
+    if (settings->IsPaperMode())
+        return;
     pt->SetTextSize(0.0250);
     std::ostringstream svnRev_label;
-    if (!settings->IsPaperMode()){
-        svnRev_label<<"SVN-Rev: "<<SVN_REV;
-        pt->AddText(svnRev_label.str().c_str());
-    }
+   pt->AddText(svnRev_label.str().c_str());
     std::ostringstream run_number_label;
     run_number_label << "Run " <<runNumber;
     pt->AddText(run_number_label.str().c_str());
@@ -713,6 +877,8 @@ void HistogrammSaver::SetStyle(TStyle newStyle){
     delete currentStyle;
     currentStyle = new TStyle(newStyle);
     currentStyle->cd();
+    SetPaperPlotStyle();
+
 }
 
 
@@ -744,7 +910,7 @@ void HistogrammSaver::SaveHistogramLandau(TH1F* histo){
     TCanvas *c1 = new TCanvas(name,name);
     c1->cd();
     histo->Draw();
-    stats->Draw();
+    if(stats)stats->Draw();
     //	cout<<"Saving: "<<c1->GetName()<<endl;
     SaveCanvas(c1);
     //create ROOT
@@ -789,12 +955,13 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
     plots_canvas->cd();
     TH1F *htemp = (TH1F*)histo->Clone();
     TF1* fittemp = (TF1*)fit->Clone();
-    TPaveText * pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+    TPaveText * pt2 = 0;
+    if(pt) pt2 =(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
 
     htemp->Draw();
     fittemp->SetLineColor(kRed);
     fittemp->Draw("same");
-    pt2->Draw();
+    if(pt2 && ! settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     ostringstream histo_filename;
     histo_filename << plots_path << "histograms.root";
@@ -828,7 +995,8 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
     plots_canvas->Clear();
     plots_canvas->cd();
     //	TH1F *htemp = (TH1F*)histo->Clone();
-    TPaveText * pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+    TPaveText * pt2 = 0;
+    if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
     if(verbosity){
         cout<<"Fitting: "<<fit->GetName()<<" "<<xmin<<" - "<<xmax<<endl;
         histo->Fit(fit,"","",xmin,xmax);
@@ -840,7 +1008,7 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
     //	fittemp->SetLineColor(kRed);
     fit->SetLineStyle(3);
     fit->Draw("same");
-    pt2->Draw();
+    if(pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     ostringstream histo_filename;
     histo_filename << plots_path << "histograms.root";
@@ -1056,10 +1224,11 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
 
 
     markers.push_back(new TMarker(readoutColumn.first,readoutColumn.second,20));
-    markers.back()->SetMarkerColor(kBlack);
+    markers.back()->SetMarkerColor(kPink);
+    markers.back()->SetMarkerSize(1.5);
     markers.back()->Draw();
     cells.push_back(GetCutGofBin("readoutBin",histo,readoutColumn.first,readoutColumn.second));
-    if(cells.back()) cells.back()->SetLineColor(kBlack);
+    if(cells.back()) cells.back()->SetLineColor(kPink);
     if(cells.back()) cells.back()->Draw();
     for (Int_t i = 0; i < 4; i++){
         Float_t x = biasColumn.first;
@@ -1067,11 +1236,11 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
         x+= settings->GetCellHeight()*(i%2);
         y+= settings->GetCellHeight()*(i/2);
         markers.push_back(new TMarker(x,y,20));
-        markers.back()->SetMarkerColor(kRed+2);
+        markers.back()->SetMarkerColor(kRed);
+        markers.back()->SetMarkerSize(1.5);
         markers.back()->Draw();
         cells.push_back(GetCutGofBin(TString::Format("biasBin_%d",i),histo,x,y));
-        if(cells.back()) cells.back()->SetLineColor(kRed+2);
-        if(cells.back()) cells.back()->SetLineWidth(2);
+        if(cells.back()) cells.back()->SetLineColor(kRed);
         if(cells.back()) cells.back()->Draw();
     }
 
@@ -1234,8 +1403,9 @@ void HistogrammSaver::SaveHistogramPDF(TH1F* histo) {
     Float_t xmax = histo->GetXaxis()->GetBinLowEdge(maxBinX+1);
     histo->GetXaxis()->SetRangeUser(xmin,xmax);
     histo->Draw();
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
-    pt2->Draw();
+    TPaveText *pt2=0;
+    if(pt)pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+    if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".pdf";
     plots_canvas->Print(plot_filename.str().c_str());
@@ -1251,15 +1421,16 @@ void HistogrammSaver::SaveHistogramPDF(TH2* histo) {
     //	SetDuckStyle();
     if(verbosity)cout << "Using SaveHistogrammPDF on TH2 histogram " << histo->GetName() << endl;
     //histo->Draw();
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+    TPaveText *pt2=0;
+    if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
     gStyle->SetTitleFont(42);
     gStyle->SetMarkerSize(0);
-    pt2->SetTextSize(0.0250);
-    pt2->SetTextColor(kBlack);
+    if (pt2) pt2->SetTextSize(0.0250);
+    if (pt2) pt2->SetTextColor(kBlack);
     histo->SetTitleFont(42);
     histo->UseCurrentStyle();
     histo->Draw("colz");
-    pt2->Draw();
+    if(pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".pdf";
     plots_canvas->Print(plot_filename.str().c_str());
@@ -1293,8 +1464,9 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo,TString drawOption) {
         plots_canvas->SetLogy();
         cout<<"Draw " <<histo->GetName()<<" logy"<<endl;
     }
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
-    pt2->Draw();
+    TPaveText *pt2=0;
+    if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+    if(pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
@@ -1310,8 +1482,9 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
     TCanvas* plots_canvas=(TCanvas*)canvas->Clone();
     plots_canvas->cd();
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
-    pt2->Draw();
+    TPaveText *pt2=0;
+    if(pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
+    if(pt2 && !settings->IsPaperMode()) pt2->Draw();
 
     TFile f(plot_filename.str().c_str(),"UPDATE");
     canvas->Write();
@@ -1322,8 +1495,9 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
     if(canvas==0)
         return;
     canvas->cd();
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
-    pt2->Draw();
+    TPaveText *pt2=0;
+    if(pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
+    if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     plot_filename << plots_path << canvas->GetName()<<".png";
     canvas->Print(plot_filename.str().c_str());
@@ -1337,8 +1511,9 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
     plots_canvas.cd();
     graph->Draw(option.c_str());
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",graph->GetName()));
-    pt2->Draw();
+    TPaveText *pt2 = 0;
+    if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",graph->GetName()));
+    if(pt2 && !settings->IsPaperMode()) pt2->Draw();
 
     ostringstream plot_filename;
     plot_filename << plots_path << name << ".png";
@@ -1359,8 +1534,9 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
     plots_canvas.cd();
     histo->Draw();
     histofitx.Draw("same");
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",htemp->GetName()));
-    pt2->Draw();
+    TPaveText *pt2=0;
+    if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",htemp->GetName()));
+    if (pt2 && !settings->IsPaperMode()) pt2->Draw();
 
     ostringstream plot_filename;
     plot_filename << plots_path << htemp->GetName() << ".png";
@@ -1381,12 +1557,13 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     if(!histo)
         return;
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptcRoot_%s",htemp->GetName()));
+    TPaveText *pt2 = 0;
+    if(pt) pt2 = (TPaveText*)pt->Clone(TString::Format("ptcRoot_%s",htemp->GetName()));
 
     plots_canvas->Clear();
     plots_canvas->cd();
     histo->Draw();
-    pt2->Draw();
+    if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     plots_canvas->Draw();
     histo->Draw();
 
@@ -1425,8 +1602,9 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange,TString dra
     if(optimizeRange) HistogrammSaver::OptimizeXYRange(htemp);
     htemp->Draw(drawOption);
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));
-    pt2->Draw();
+    TPaveText *pt2=0;
+    if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("ptPng_%s",histo->GetName()));
+    if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
@@ -1455,8 +1633,9 @@ void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange,TString dr
         HistogrammSaver::OptimizeXYRange(htemp);
     htemp->Draw(drawOption);
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
-    pt2->Draw();
+    TPaveText *pt2 = 0;
+    if (pt) (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
+    if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".root";
     plots_canvas->Print(plot_filename.str().c_str());
@@ -1525,8 +1704,9 @@ void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string o
     TGraph* gTemp = (TGraph*)graph->Clone();
     gTemp->Draw(option.c_str());
 
-    TPaveText *pt2=(TPaveText*)pt->Clone(TString::Format("pt_%s",graph->GetName()));
-    pt2->Draw();
+    TPaveText *pt2=0;
+    if(pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",graph->GetName()));
+    if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     plot_filename << plots_path << name<< ".root";
     plots_canvas->Print(plot_filename.str().c_str());
@@ -2058,6 +2238,8 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
     TCanvas *c1 = new TCanvas(name);
     c1->cd();
     c1->SetObjectStat(0);
+    stack->SetObjectStat(false);
+    c1->Clear();
     stack->Draw();
     if (xTitle=="")
         if(stack->GetXaxis()) xTitle = stack->GetXaxis()->GetTitle();
@@ -2094,13 +2276,13 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
 
         if(verbosity>6)cout<<delta<<endl;
         stack->GetYaxis()->SetRange(min - .1*delta, max +.2*delta );
+        stack->GetYaxis()->SetTitle(yTitle);
         if(verbosity>6)cout<<"set"<<endl;
         c1->Update();
         ymin = min;
         ymax = max;
     }
     if(verbosity>6)   cout<<"draw"<<endl;
-    c1->Clear();
     Double_t delta = ymax-ymin;
     ymin = ymin - .1 *(delta);
     ymax = ymax + .3*delta;
@@ -2108,10 +2290,14 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
         TH1F* frame = c1->DrawFrame(xmin,ymin,xmax,ymax,stack->GetTitle());
         frame->GetXaxis()->SetTitle(xTitle);
         frame->GetYaxis()->SetTitle(yTitle);
+        c1->Update();
+        gPad->Update();
         if(drawOption=="")
             stack->Draw("same");
-        else
-            stack->Draw(drawOption+(TString)" same");
+        else{
+            drawOption=(TString)"same "+drawOption;
+            stack->Draw(drawOption);
+        }
         c1->Update();
     }
     else{

@@ -16,9 +16,9 @@ class TFiducialCut:public TObject {
 	int index;
 	bool active;
 	Float_t x_low, x_high, y_low, y_high;
-	TCutG* GetFiducialAreaCut(bool bEmphasis);
 	TString name;
 public:
+    TCutG* GetFiducialAreaCut(bool bEmphasis=false);
 	TFiducialCut(int i,Float_t xLow,Float_t xHigh,Float_t yLow,Float_t yHigh);
 	TFiducialCut(int i = 0);
 	bool IsInFiducialCut(Float_t xVal, Float_t yVal)const {
@@ -38,6 +38,7 @@ public:
 	Float_t GetXHigh() {return x_high;};
 	Float_t GetYLow() {return y_low;};
 	Float_t GetYHigh() {return y_high;};
+	void SetAllValues(Float_t xLow,Float_t xHigh, Float_t yLow, Float_t yHigh);
 	void DrawFiducialCutToCanvas(TCanvas* c1, bool bEmphasis);
 
 	ClassDef(TFiducialCut,1);

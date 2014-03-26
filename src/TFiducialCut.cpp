@@ -73,3 +73,11 @@ void TFiducialCut::DrawFiducialCutToCanvas(TCanvas* c1,bool bEmphasis=false) {
 		cut->Draw("same");
 
 }
+
+void TFiducialCut::SetAllValues(Float_t xLow, Float_t xHigh, Float_t yLow,
+        Float_t yHigh) {
+    this->SetXLow(xLow);
+    this->SetXHigh(xHigh);
+    this->SetYLow(yLow);
+    this->SetYHigh(yHigh);
+}

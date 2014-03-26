@@ -33,7 +33,6 @@
 #include "TRunInfo.hh"
 #include <string>
 #include <sys/stat.h>
-
 class TSettings:public TObject {
 public:
 	enum alignmentMode {normalMode=0,transparentMode=1};
@@ -356,7 +355,8 @@ private:
 	void ParseIntArray(std::string key, std::string value, std::vector<int> & vec);
 	void ParseRegionArray(std::string key, std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
 	void ParsePattern(std::string key, std::string value);
-	void ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut);
+    void ParseFidCut(std::string key, std::string value, TFiducialCut* fidcut);
+	void ParseFidCutRegion(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut);
 	void ParseScreenedChannelArray(std::string key, std::string value, std::vector<int> & vec);
 	std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
 	bool ParseFloat(std::string key, std::string value,float  &output);
@@ -492,6 +492,7 @@ private:
 	Float_t pitchWidthDia;
     TString currentBegin;
     TString currentEnd;
+    Int_t repeaterCardNo;
     bool bPaperMode;
 private:
 	//Filter tracks not in good fiducial region w/o bad strips
@@ -546,8 +547,8 @@ private:
 	Float_t cellHeight;
 	void CheckEdgeFidcuialCuts();
 	Float_t minimumEdgeDistance;
-	Int_t repeaterCardNo;
 public:
+    TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
 	Float_t GetCellWidth(int det,int pattern){return getPitchWidth(det,pattern);}
 	TString getEdgePositionName(UInt_t i){if(i<vecEdgePositionName.size()) return vecEdgePositionName[i];return "";}//todo make it safe
