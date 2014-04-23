@@ -1498,6 +1498,11 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 	eventNumbers.clear();
 	vecEvents.clear();
 	settings->getSelectionFidCuts()->Print(1);
+	settings->getSelectionFidCuts()->setRunDescription(settings->getRunDescription());
+	cout<<"Rundes: "<<settings->getRunDescription()<<"\tIndex: "<<settings->getSelectionFidCuts()->getActiveIndex()<<endl;
+	cot<<"Press a key to continue: "<<flush;
+	char t;
+	cin>>t;
 	cout<<"Creating  Event Vector "<<endl;
 	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
@@ -1515,7 +1520,9 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 		}
 		Float_t fiducialValueX = eventReader->getFiducialValueX();
 		Float_t fiducialValueY = eventReader->getFiducialValueY();
-		if (!settings->getSelectionFidCuts()->IsInFiducialCut(fiducialValueX,fiducialValueY)){
+		Int_t region = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
+		cout<<""
+		if (!settings->getSelectionFidCuts()->IsInFiducialCut(fiducialValueX,fiducialValueY)) {
 			noFidCutRegion++;
 			continue;
 		}
