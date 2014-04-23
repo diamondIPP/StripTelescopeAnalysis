@@ -71,7 +71,7 @@ public:
 	void setAddionalCutYHigh(Float_t addionalCutYHigh) { addionalCut_yHigh = addionalCutYHigh; }
 	Float_t getAddionalCutYLow() const { return addionalCut_yLow; }
 	void setAddionalCutYLow(Float_t addionalCutYLow) { addionalCut_yLow = addionalCutYLow; }
-
+	UInt_t getActiveIndex(){return index;}
 private:
 	std::string name;
 	void initVariables();
