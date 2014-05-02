@@ -1997,21 +1997,25 @@ void TTransparentAnalysis::savePedestalHistos() {
     delete stack;
 }
 std::pair<Float_t,Float_t >  TTransparentAnalysis::getFWCrossingPoint(TH1F* hRes,Float_t cM){
-   Int_t startbin = hRes->FindFirstBinAbove(cM);
-   Float_t x1 = hRes->GetBinCenter(hRes->FindFirstBinAbove(cM));
-   Float_t x2 = hRes->GetBinCenter(hRes->FindFirstBinAbove(cM)-1);
-   Float_t y1 =  hRes->GetBinContent(hRes->FindFirstBinAbove(cM));
-   Float_t y2 = hRes->GetBinContent(hRes->FindFirstBinAbove(cM)-1);
+   Int_t firstBin = hRes->FindFirstBinAbove(cM);
+   Float_t x1 = hRes->GetBinCenter(firstBin);
+   Float_t y1 = hRes->GetBinContent(firstBin);
+   Float_t x2 = hRes->GetBinCenter(firstBin-1);
+   Float_t y2 = hRes->GetBinContent(firstBin-1);
    Float_t m = (y2-y1)/(x2-x1);
-   Float_t start = 1./m*(cM-y1)-x1;
-   cout<<"START: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<start<<endl;
-   x1 = hRes->GetBinCenter(hRes->FindLastBinAbove(cM));
-   x2 = hRes->GetBinCenter(hRes->FindLastBinAbove(cM)+1);
-   y1 = hRes->GetBinContent(hRes->FindLastBinAbove(cM));
-   y2 = hRes->GetBinContent(hRes->FindLastBinAbove(cM)+1);
-   Float_t end = 1./m*(cM-y1)-x1;
-   cout<<"End: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<end<<endl;
-   char t; cin>>t;
+   Float_t b = y1-m*x1;
+   Float_t start = (cM-b)/m;
+   cout<<"START["<<cM<<"]: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<start<<endl;
+   Int_t lastBin = hRes->FindLastBinAbove(cM);
+   x1 = hRes->GetBinCenter(lastBin);
+   y1 = hRes->GetBinContent(lastBin);
+   x2 = hRes->GetBinCenter(lastBin+1);
+   y2 = hRes->GetBinContent(lastBin+1);
+   m = (y2-y1)/(x2-x1);
+   b = y1-m*x1;
+   Float_t end = (cM-b)/m;
+   cout<<"End[\"<<cM<<\"]: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<end<<endl;
+//   char t; cin>>t;
    return std::make_pair(start,end);
 }
 
