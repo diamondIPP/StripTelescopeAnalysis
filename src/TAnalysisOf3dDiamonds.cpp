@@ -476,6 +476,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         diamondCluster = &transparentCluster;
 
     }
+    LongAnalysis_FillResolutionPlots();
 //    if (settings->do3dTransparentAnalysis() && !validTransparentAnalysis)
 //        return;
     if(verbosity>5)cout<<"Cluster Formed."<<endl;
@@ -595,6 +596,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
     LongAnalysis_FillRelativeAddedTransparentCharge();
+    if(settings->do3dTransparentAnalysis())
+        LongAnalysis_FillResolutionPlots();
 };
 
 bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
@@ -614,10 +617,8 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
         return false;
     }
 
-
     Int_t XdetChannelSpaceInt =  settings->diamondPattern.convertMetricToIntChannel(xPredDet);
     Float_t XdetChannelSpace = settings->diamondPattern.convertMetricToChannel(xPredDet);
-
 
     if(XdetChannelSpaceInt<0){	//Returns -9998 when hit in channel 93.
         if (bOutput) cout<<" invalid XdetChannelInSpaceInt"<<endl;
@@ -628,11 +629,9 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
     hTransparentAnalysisValidClusterFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
 
     //Fill fiducial plot here.
-
     //Calculate Transparent charge Felix
 
     pair<int,int> channels = settings->diamondPattern.getPatternChannels(DiamondPattern);
-
     //cout<<TString::Format("3DwH Start Channel: %i, Hit Channel Int: %i, Hit Channel Float: %.2f, clusterSize: %i", channels.first, XdetChannelSpaceInt, XdetChannelSpace, clusterSize)<<endl;
 
     transparentCluster.clear();
@@ -647,7 +646,6 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
     if (bOutput) cout<<"Valid Cluster"<<endl;
     return true;
-
 
 
 }
@@ -1814,6 +1812,7 @@ void TAnalysisOf3dDiamonds::initialise3DOffsetAlignmentOverlayHistos() {
 
 void TAnalysisOf3dDiamonds::initialiseTransparentAnalysisHistos() {
 
+    LongAnalysis_InitResolutionPlots();
     hTransparentAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hTransparentAnalysisInvalidCluster");
     hTransparentAnalysisInvalidCluster->SetTitle("hTransparentAnalysisInvalidCluster");
 
@@ -2181,6 +2180,7 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 
+    LongAnalysis_CreateResolutionPlots();
     TCanvas* cTransparentAnalysisInvalidCluster = new TCanvas("cTransparentAnalysisInvalidCluster", "cTransparentAnalysisInvalidCluster");
     cTransparentAnalysisInvalidCluster->cd();
     hTransparentAnalysisInvalidCluster->Draw();
@@ -2287,6 +2287,107 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     hNegativeChargePosition->SetTitle(hNegativeChargePosition->GetTitle() +(TString)"_grid");
     histSaver->SaveHistogramWithCellGrid(hNegativeChargePosition);
     histSaver->SaveHistogram(hNegativeChargePosition);
+}
+
+
+
+void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
+    UInt_t nCells = 99;
+    UInt_t nBins = 512;
+    Float_t minX = - 2*settings->GetCellWidth(subjectDetector,2);
+    Float_t maxX = 2*settings->GetCellWidth(subjectDetector,2);
+    for (UInt_t cell = 0; cell <nCells;cell++){
+        TString name = TString::Format("hResolution_CellNo_%d_maxValue",cell);
+        TString title = TString::Format("hResolution_CellNo_%d_maxValue",cell);;
+        TH1F* histo = new TH1F(name,title,nBins,minX,maxX);
+        histo->GetXaxis()->SetTitle("Residual / #mum");
+        vecHResolutionPerCell_maxValue.push_back(histo);
+        /*******/
+        name = TString::Format("hResolution_CellNo_%d_chargeWeighted",cell);
+        title = TString::Format("hResolution_CellNo_%d_chargeWeighted",cell);;
+        histo = new TH1F(name,title,nBins,minX,maxX);
+        histo->GetXaxis()->SetTitle("Residual / #mum");
+        vecHResolutionPerCell_chargeWeighted.push_back(histo);
+        /*******/
+        name = TString::Format("hResolution_CellNo_%d_highest2Centroid",cell);
+        title = TString::Format("hResolution_CellNo_%d_highest2Centroid",cell);;
+        histo = new TH1F(name,title,nBins,minX,maxX);
+        histo->GetXaxis()->SetTitle("Residual / #mum");
+        vecHResolutionPerCell_highest2Centroid.push_back(histo);
+    }
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
+    UInt_t cellNo = settings->getCellNo(xPredDet,yPredDet);
+    diamondCluster->SetTransparentClusterSize(3);
+    Float_t predPos = diamondCluster->GetTransparentHitPosition();
+    Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
+    Float_t delta = pos - predPos;
+    if (cellNo< vecHResolutionPerCell_maxValue.size()){
+        TH1F* histo  = vecHResolutionPerCell_maxValue.at(cellNo);
+        if (histo);
+            histo->Fill(delta);
+    }
+    /*********/
+    pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
+    delta = pos - predPos;
+    if (cellNo< vecHResolutionPerCell_chargeWeighted.size()){
+        TH1F* histo  = vecHResolutionPerCell_chargeWeighted.at(cellNo);
+        if (histo);
+            histo->Fill(delta);
+    }
+    /*********/
+        pos = diamondCluster->getPosition(useCMN,TCluster::highest2Centroid);
+        delta = pos - predPos;
+        if (cellNo< vecHResolutionPerCell_highest2Centroid.size()){
+            TH1F* histo  = vecHResolutionPerCell_highest2Centroid.at(cellNo);
+            if (histo);
+                histo->Fill(delta);
+        }
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec,TString kind){
+    UInt_t nBins = 512;
+    Float_t minX = - 2*settings->GetCellWidth(subjectDetector,2);
+    Float_t maxX = 2*settings->GetCellWidth(subjectDetector,2);
+    TString name = "hResolutionGoodCells_"+kind;
+    TH1F* hResolutionGoodCells = new TH1F(name,name,nBins,minX,maxX);
+    name = "hResolutionBadCells_"+kind;
+    TH1F* hResolutionBadCells = new TH1F(name,name,nBins,minX,maxX);
+    name = "hResolutionAllCells_";
+    TH1F* hResolutionAllCells = new TH1F(name,name,nBins,minX,maxX);
+    name = "hResolutionAllCells_"+kind;
+    TH1F* hResolutionAllButBadCells = new TH1F(name,name,nBins,minX,maxX);
+    for(UInt_t cell=0;cell< vec->size();cell++){
+        TH1F* histo = vec->at(cell);
+        if (!histo)
+            continue;
+        if (settings->IsGoodCell(2,cell))
+            hResolutionGoodCells->Add(histo);
+        if (settings->isBadCell(2,cell))
+            hResolutionBadCells->Add(histo);
+        else
+            hResolutionAllButBadCells->Add(histo);
+        hResolutionAllCells->Add(histo);
+        histSaver->SaveHistogram(histo);
+        vec->at(cell)= 0;
+        delete histo;
+    }
+
+    histSaver->SaveHistogram(hResolutionGoodCells);
+    histSaver->SaveHistogram(hResolutionBadCells);
+    histSaver->SaveHistogram(hResolutionAllCells);
+    histSaver->SaveHistogram(hResolutionAllButBadCells);
+    delete hResolutionGoodCells;
+    delete hResolutionBadCells;
+    delete hResolutionAllCells;
+    delete hResolutionAllButBadCells;
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid,"highest2Centroid");
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue,"maxValue");
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
@@ -4651,10 +4752,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     name = "hPulseHeightVsDetectorHitPostionXY_rebinned";
     name.Append(appendix);
     TProfile2D* profRebinned = (TProfile2D*)hPulseHeightVsDetectorHitPostionXY->Rebin2D(2,2,name);
+
     profRebinned->Draw();
     profRebinned->Draw("colz");
 //    profRebinned->GetZaxis()->SetTitleOffset(1.1);
     histSaver->SaveHistogram(profRebinned);
+    TCanvas *c1 =histSaver->DrawHistogramWithCellGrid(profRebinned);
+
     histSaver->SaveHistogramWithCellGrid(profRebinned);
     delete profRebinned;
 

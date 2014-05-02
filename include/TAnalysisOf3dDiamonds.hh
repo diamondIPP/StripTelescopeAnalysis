@@ -118,7 +118,10 @@ private:
 	void LongAnalysis_FillOverlayBiasColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(Float_t xRelPosDet,Float_t yRelPosDet, Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
-
+	void LongAnalysis_FillResolutionPlots();
+	void LongAnalysis_InitResolutionPlots();
+	void LongAnalysis_CreateResolutionPlots();
+	void LongAnalysis_CreateResolutionPlots(vector<TH1F*> *vec,TString kind);
 	void LongAnalysis_SaveRawPulseHeightPlots();
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_InitGoodCellsLandaus();
@@ -423,6 +426,9 @@ private:
 	vector<Float_t> vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHitStrip,vecPHDiamondHit3dNoHoles,vecPHDiamondHit3dWithHoles,vecClusterSize,vecChi2Y,vecChi2X,vecClusterSeedSize,vecXPredictedStrip,vecYPredictedStrip;
 	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency,vecXPreditedDetector,vecYPreditedDetector;
 	vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
+	vector<TH1F*> vecHResolutionPerCell_maxValue;
+	vector<TH1F*> vecHResolutionPerCell_chargeWeighted;
+	vector<TH1F*> vecHResolutionPerCell_highest2Centroid;
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;
