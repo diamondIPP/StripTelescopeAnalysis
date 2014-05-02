@@ -79,6 +79,9 @@ public:
     void updated(){lastUpdate=TDatime();}
     TString getChannelsStringList(std::set<Int_t> channelSet);
     void writeFiles(){createOutputResultFile();createOutputTextFile();};
+    void setFloatValue(TString section, TString key, Float_t value);
+    void setIntValue(TString section, TString key, Int_t value);
+    void setStringValue(TString section, TString key, TString value);
 public:
     TString getMaskedChannels();
 

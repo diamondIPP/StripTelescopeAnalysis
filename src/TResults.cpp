@@ -814,3 +814,15 @@ std::pair<Float_t,Float_t> TResults::getAvrgSilNoise() {
     Float_t sigma = TMath::Sqrt(mean2-mean*mean);
     return make_pair(mean,sigma);
 }
+
+void TResults::setFloatValue(TString section, TString key, Float_t value) {
+    FloatMap[section+(TString)"_"+key] = value;
+}
+
+void TResults::setIntValue(TString section, TString key, Int_t value) {
+    FloatMap[section+(TString)"_"+key] = value;
+}
+
+void TResults::setStringValue(TString section, TString key, TString value) {
+    FloatMap[section+(TString)"_"+key] = value;
+}

@@ -2003,6 +2003,9 @@ void TTransparentAnalysis::savePedestalHistos() {
 void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	if(!hRes)
 		return;
+	TString section = "Resolution";
+	if(alignMode==TSettings::transparentMode)
+	    section+"Trans";
 	//	Float_t mean = hRes->GetMean();
 	//	Float_t sigma = hRes->GetRMS();
 	TString hName;
@@ -2015,12 +2018,15 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	Float_t end =  hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1);
 	std::pair<Float_t,Float_t > fwhm = std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/2)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1));
 	std::pair<Float_t,Float_t > fwtm = std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/3)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/3)+1));
-
+	results->setFloatValue(section,"FWHM_width",fwhm.second-fwhm.first);
+	results->setFloatValue(section,"FWHM_mean",(fwhm.second+fwhm.first)/2.));
+	results->setFloatValue(section,"FWTM_width",fwtm.second-fwtm.first);
+    results->setFloatValue(section,"FWTM_mean",(fwtm.second+fwtm.first)/2.));
 	Float_t mean2 = (start+end)/2;
 	Float_t sigma2 = end-mean2;
 	TString hTitle;
 	hTitle = hRes->GetTitle();
-	for(int i=0;i<4;i++){
+	for(int i=0;i<5;i++){
 		hName = hRes->GetName();
 		switch (i){
 		case 0: hName.Append("_SingleGausFit");hTitle.Append(" Single Gaus Fit 2x FWHM");break;
@@ -2046,11 +2052,6 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 				if (resPtr.Get())//todo check wh neccessary
 					gaus1 = resPtr.Get()->GetParams()[2];
 				break;
-			case 4:
-				resPtr=hClone->Fit("gaus","SQ","",fwtm.first,fwtm.second);
-				if (resPtr.Get())//todo check wh neccessary
-					gaus1 = resPtr.Get()->GetParams()[2];
-				break;
 			case 2: 
 				fit = doDoubleGaussFit(hClone);
 				if (fit){//todo check wh neccessary
@@ -2064,11 +2065,19 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 				if (resPtr.Get())//todo check wh neccessary
 					gaus1 = fit->GetParameter(2);
 				break;
+            case 4:
+                resPtr=hClone->Fit("gaus","SQ","",fwtm.first,fwtm.second);
+                if (resPtr.Get())//todo check wh neccessary
+                    gaus1 = resPtr.Get()->GetParams()[2];
+                break;
 			}
 			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
 				if( i == 0 ) results->setSingleGaussianResolution(gaus1,alignMode);
 				else if (i == 1 ) results->setSingleGaussianShortResolution(gaus1,alignMode);
-				else if (i == 4 ) results->setSingleGaussianFWTMResolution(gaus1,alignMode);
+				else if (i == 4 ) {
+				    results->setSingleGaussianFWTMResolution(gaus1,alignMode);
+				    results->setFloatValue("Resolution","FWTM_Fit",gaus1);
+				}
 				else if (i == 2 ) results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
 				else if (i == 3 ) results->setSingleGaussianFixedResolution(gaus1,alignMode);
 			}
