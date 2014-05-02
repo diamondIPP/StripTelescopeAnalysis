@@ -2319,6 +2319,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     UInt_t cellNo = settings->getCellNo(xPredDet,yPredDet);
+    Float_t cellWidth = settings->GetCellWidth(subjectDetector,2);
     diamondCluster->SetTransparentClusterSize(3);
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
@@ -2326,7 +2327,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     if (cellNo< vecHResolutionPerCell_maxValue.size()){
         TH1F* histo  = vecHResolutionPerCell_maxValue.at(cellNo);
         if (histo);
-            histo->Fill(delta);
+            histo->Fill(delta*cellWidth);
     }
     /*********/
     pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
@@ -2334,7 +2335,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     if (cellNo< vecHResolutionPerCell_chargeWeighted.size()){
         TH1F* histo  = vecHResolutionPerCell_chargeWeighted.at(cellNo);
         if (histo);
-            histo->Fill(delta);
+            histo->Fill(delta*cellWidth);
     }
     /*********/
         pos = diamondCluster->getPosition(useCMN,TCluster::highest2Centroid);
@@ -2342,9 +2343,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
         if (cellNo< vecHResolutionPerCell_highest2Centroid.size()){
             TH1F* histo  = vecHResolutionPerCell_highest2Centroid.at(cellNo);
             if (histo);
-                histo->Fill(delta);
+                histo->Fill(delta*cellWidth);
         }
-     if (cellNo<99){
+     if (cellNo<99&&false){
 
          cout<<"POS: "<<predPos<<" / "<<pos<<endl;
          diamondCluster->Print();
