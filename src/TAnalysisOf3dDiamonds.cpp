@@ -2293,24 +2293,24 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     UInt_t nCells = 99;
-    UInt_t nBins = 512;
+    UInt_t nBins = 256;
     Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
     for (UInt_t cell = 0; cell <nCells;cell++){
-        TString name = TString::Format("hResolution_CellNo_%d_maxValue",cell);
-        TString title = TString::Format("hResolution_CellNo_%d_maxValue",cell);;
+        TString name = TString::Format("hResolution_CellNo_%02d_maxValue",cell);
+        TString title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
         TH1F* histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_maxValue.push_back(histo);
         /*******/
-        name = TString::Format("hResolution_CellNo_%d_chargeWeighted",cell);
-        title = TString::Format("hResolution_CellNo_%d_chargeWeighted",cell);;
+        name = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);
+        title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_chargeWeighted.push_back(histo);
         /*******/
-        name = TString::Format("hResolution_CellNo_%d_highest2Centroid",cell);
-        title = TString::Format("hResolution_CellNo_%d_highest2Centroid",cell);;
+        name = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);
+        title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_highest2Centroid.push_back(histo);
@@ -2345,7 +2345,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             if (histo);
                 histo->Fill(delta*cellWidth);
         }
-     if (cellNo<99&&false){
+     if (cellNo<99&&false   ){
 
          cout<<"POS: "<<predPos<<" / "<<pos<<endl;
          diamondCluster->Print();
@@ -2353,24 +2353,28 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec,TString kind){
-    UInt_t nBins = 512;
+    UInt_t nBins = 256;
     Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX =settings->GetCellWidth(subjectDetector,2);
     TString name = "hResolutionGoodCells_"+kind;
     TH1F* hResolutionGoodCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionGoodCells->GetXaxis()->SetTitle("Residual / #mum");
     name = "hResolutionBadCells_"+kind;
     TH1F* hResolutionBadCells = new TH1F(name,name,nBins,minX,maxX);
-    name = "hResolutionAllCells_";
-    TH1F* hResolutionAllCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionBadCells->GetXaxis()->SetTitle("Residual / #mum");
     name = "hResolutionAllCells_"+kind;
+    TH1F* hResolutionAllCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionAllCells->GetXaxis()->SetTitle("Residual / #mum");
+    name = "hResolutionAllButBadCells_"+kind;
     TH1F* hResolutionAllButBadCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH1F* histo = vec->at(cell);
         if (!histo)
             continue;
-        if (settings->IsGoodCell(2,cell))
+        if (settings->IsGoodCell(3,cell))
             hResolutionGoodCells->Add(histo);
-        if (settings->isBadCell(2,cell))
+        if (settings->isBadCell(3,cell))
             hResolutionBadCells->Add(histo);
         else
             hResolutionAllButBadCells->Add(histo);
