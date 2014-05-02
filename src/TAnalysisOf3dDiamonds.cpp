@@ -2294,8 +2294,8 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     UInt_t nCells = 99;
     UInt_t nBins = 512;
-    Float_t minX = - 2*settings->GetCellWidth(subjectDetector,2);
-    Float_t maxX = 2*settings->GetCellWidth(subjectDetector,2);
+    Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
+    Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
     for (UInt_t cell = 0; cell <nCells;cell++){
         TString name = TString::Format("hResolution_CellNo_%d_maxValue",cell);
         TString title = TString::Format("hResolution_CellNo_%d_maxValue",cell);;
@@ -2344,12 +2344,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             if (histo);
                 histo->Fill(delta);
         }
+     if (cellNo<99){
+
+         cout<<"POS: "<<predPos<<" / "<<pos<<endl;
+         diamondCluster->Print();
+     }
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec,TString kind){
     UInt_t nBins = 512;
-    Float_t minX = - 2*settings->GetCellWidth(subjectDetector,2);
-    Float_t maxX = 2*settings->GetCellWidth(subjectDetector,2);
+    Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
+    Float_t maxX =settings->GetCellWidth(subjectDetector,2);
     TString name = "hResolutionGoodCells_"+kind;
     TH1F* hResolutionGoodCells = new TH1F(name,name,nBins,minX,maxX);
     name = "hResolutionBadCells_"+kind;

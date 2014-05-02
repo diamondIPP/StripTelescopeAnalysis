@@ -106,7 +106,7 @@ private:
 	void printEvent();
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster,bool cmnCorrected, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
-	
+	std::pair<Float_t,Float_t >  getFWCrossingPoint(TH1F* hRes,Float_t crossingPoint);
 	void saveResolutionPlot(TH1F* hRes, UInt_t clusterSize);
 	// run variables
 	UInt_t subjectDetector, subjectPlane;

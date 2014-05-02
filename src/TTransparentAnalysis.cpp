@@ -2006,13 +2006,13 @@ std::pair<Float_t,Float_t >  TTransparentAnalysis::getFWCrossingPoint(TH1F* hRes
    Float_t y1 =  hRes->GetBinContent(hRes->FindFirstBinAbove(cM));
    Float_t y2 = hRes->GetBinContent(hRes->FindFirstBinAbove(cM)-1);
    Float_t m = (y2-y1)/(x2-x1);
-   Float_t start = 1./m.*(cM-y1)-x1;
+   Float_t start = 1./m*(cM-y1)-x1;
    cout<<"START: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<start<<endl;
    x1 = hRes->GetBinCenter(hRes->FindLastBinAbove(cM));
    x2 = hRes->GetBinCenter(hRes->FindLastBinAbove(cM)+1);
    y1 = hRes->GetBinContent(hRes->FindLastBinAbove(cM));
    y2 = hRes->GetBinContent(hRes->FindLastBinAbove(cM)+1);
-   Float_t end = 1./m.*(cM-y1)-x1;
+   Float_t end = 1./m*(cM-y1)-x1;
    cout<<"End: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<end<<endl;
    char t; cin>>t;
    return std::make_pair(start,end);
@@ -2034,10 +2034,9 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	Float_t max = hRes->GetBinContent(hRes->GetMaximumBin());
 	Float_t start = hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/2));
 	Float_t end =  hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1);
-	getFWCrossingPoint(hRes,max/2);
-	std::pair<Float_t,Float_t > fwhm = getFWCrossingPoint(hRes,max/2);
+	std::pair<Float_t,Float_t > fwhm = getFWCrossingPoint(hRes,max/2.);
 	//std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/2)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1));
-	std::pair<Float_t,Float_t > fwtm = getFWCrossingPoint(hRes,max/3);
+	std::pair<Float_t,Float_t > fwtm = getFWCrossingPoint(hRes,max/3.);
 	//std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/3)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/3)+1));
 	results->setFloatValue(section,"FWHM_width",fwhm.second-fwhm.first);
 	results->setFloatValue(section,"FWHM_mean",(fwhm.second+fwhm.first)/2.);
