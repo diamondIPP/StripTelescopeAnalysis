@@ -1500,9 +1500,6 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 	settings->getSelectionFidCuts()->Print(1);
 	settings->getSelectionFidCuts()->setRunDescription(settings->getRunDescription());
 	cout<<"Rundes: "<<settings->getRunDescription()<<"\tIndex: "<<settings->getSelectionFidCuts()->getActiveIndex()<<endl;
-	cout<<"Press a key to continue: "<<flush;
-	char t;
-	cin>>t;
 	cout<<"Creating  Event Vector "<<endl;
 	for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
 		TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
