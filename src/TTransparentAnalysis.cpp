@@ -2019,9 +2019,9 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
 	std::pair<Float_t,Float_t > fwhm = std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/2)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/2)+1));
 	std::pair<Float_t,Float_t > fwtm = std::make_pair(hRes->GetBinLowEdge(hRes->FindFirstBinAbove(max/3)),hRes->GetBinLowEdge(hRes->FindLastBinAbove(max/3)+1));
 	results->setFloatValue(section,"FWHM_width",fwhm.second-fwhm.first);
-	results->setFloatValue(section,"FWHM_mean",(fwhm.second+fwhm.first)/2.));
+	results->setFloatValue(section,"FWHM_mean",(fwhm.second+fwhm.first)/2.);
 	results->setFloatValue(section,"FWTM_width",fwtm.second-fwtm.first);
-    results->setFloatValue(section,"FWTM_mean",(fwtm.second+fwtm.first)/2.));
+    results->setFloatValue(section,"FWTM_mean",(fwtm.second+fwtm.first)/2.);
 	Float_t mean2 = (start+end)/2;
 	Float_t sigma2 = end-mean2;
 	TString hTitle;

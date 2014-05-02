@@ -820,9 +820,9 @@ void TResults::setFloatValue(TString section, TString key, Float_t value) {
 }
 
 void TResults::setIntValue(TString section, TString key, Int_t value) {
-    FloatMap[section+(TString)"_"+key] = value;
+    IntegerMap[section+(TString)"_"+key] = value;
 }
 
 void TResults::setStringValue(TString section, TString key, TString value) {
-    FloatMap[section+(TString)"_"+key] = value;
+    StringMap[section+(TString)"_"+key] = value;
 }

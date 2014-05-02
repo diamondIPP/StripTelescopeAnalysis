@@ -359,7 +359,7 @@ TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 	cout<<TString::Format("X: %.1f-%.1f, Y: %.1f-%.1f",xLow,xHigh,yLow,yHigh);
 	TString name = TString::Format("fidCut_%d",nFidCut);
 
-    TCutG* fidCut = fidCuts.at(nFidCut)->GetFiducialAreaCut();
+    TCutG* fidCut = fidCuts.at(nFidCut)->GetFiducialAreaCut(true);
     fidCut->SetName(name);
 	TCutG * pt = 0;
 	if (fidCut) pt = fidCut;
