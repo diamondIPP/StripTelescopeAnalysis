@@ -2122,7 +2122,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 				else if (i == 1 ){
 				    results->setSingleGaussianShortResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FWHM_Fit",gaus1);
-                    results->setFloatValue(section,"FWHM_Mean",mean1);
+                    results->setFloatValue(section,"FWHM_FitMean",mean1);
 				}
 				else if (i == 2 ){
 				    results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
@@ -2139,7 +2139,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                 else if (i == 4 ) {
                     results->setSingleGaussianFWTMResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FWTM_Fit",gaus1);
-                    results->setFloatValue(section,"FWTM_Mean",mean1);
+                    results->setFloatValue(section,"FWTM_FitMean",mean1);
                 }
 			}
 
