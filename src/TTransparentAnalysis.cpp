@@ -2172,11 +2172,11 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                     results->setFloatValue(section,"FWHM_FitMean",mean1);
                 }
                 else if (i == 2 ){
-                    results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
+                    results->setDoubleGaussianResolution(gaus1,gaus3,alignMode);
                     results->setFloatValue(section,"DoubleGaus_Fit1",gaus1);
-                    results->setFloatValue(section,"DoubleGaus_Fit2",gaus2);
+                    results->setFloatValue(section,"DoubleGaus_Fit2",gaus3);
                     results->setFloatValue(section,"DoubleGaus_Mean1",mean1);
-                    results->setFloatValue(section,"DoubleGaus_Mean2",mean2);
+                    results->setFloatValue(section,"DoubleGaus_Mean2",mean3);
                 }
                 else if (i == 3 ) {
                     results->setSingleGaussianFixedResolution(gaus1,alignMode);
