@@ -2094,14 +2094,27 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                 break;
 			}
 			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
-				if( i == 0 ) results->setSingleGaussianResolution(gaus1,alignMode);
-				else if (i == 1 ) results->setSingleGaussianShortResolution(gaus1,alignMode);
-				else if (i == 4 ) {
-				    results->setSingleGaussianFWTMResolution(gaus1,alignMode);
-				    results->setFloatValue("Resolution","FWTM_Fit",gaus1);
+				if( i == 0 ) {
+				    results->setSingleGaussianResolution(gaus1,alignMode);
+                    results->setFloatValue(section,"SingleGaus_Fit",gaus1);
 				}
-				else if (i == 2 ) results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
-				else if (i == 3 ) results->setSingleGaussianFixedResolution(gaus1,alignMode);
+				else if (i == 1 ){
+				    results->setSingleGaussianShortResolution(gaus1,alignMode);
+                    results->setFloatValue(section,"FWHM_Fit",gaus1);
+				}
+				else if (i == 2 ){
+				    results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
+                    results->setFloatValue(section,"DoubleGaus_Fit1",gaus1);
+                    results->setFloatValue(section,"DoubleGaus_Fit2",gaus2);
+				}
+				else if (i == 3 ) {
+				    results->setSingleGaussianFixedResolution(gaus1,alignMode);
+                    results->setFloatValue(section,"FixedGaus_Fit",gaus1);
+				}
+                else if (i == 4 ) {
+                    results->setSingleGaussianFWTMResolution(gaus1,alignMode);
+                    results->setFloatValue(section,"FWTM_Fit",gaus1);
+                }
 			}
 
 			histSaver->SaveHistogram(hClone);
