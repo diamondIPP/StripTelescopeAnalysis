@@ -109,10 +109,11 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
         nEvents = eventReader->GetEntries()-startEvent;
     }
+    UInt_t newstartEvent =0
     if(settings->getAlignmentEvents(nEvents)>startEvent){
         cout<<"startEvent:      "<<startEvent<<endl;
         cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
-        UInt_t newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
+        newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
         cout<<"newstartEvent: "<<newstartEvent<<endl;
         cout<<"nEvents: "<<nEvents<<endl;
         nEvents -= newstartEvent-startEvent;
@@ -127,6 +128,8 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     createEventVector(startEvent);
     cout<<"X: "<<predXMin<<" - "<<predXMax<<endl;
     cout<<"Y: "<<predYMin<<" - "<<predYMax<<endl;
+
+    usedForAlignment += newstartEvent;
     this->printCutFlow();
     createEtaIntegrals();
     calcEtaCorrectedResiduals();
@@ -1446,15 +1449,15 @@ void TTransparentAnalysis::printCutFlow() {
     TString section = "CutFlowTransparentAnalysis";
     if(alignMode == TSettings::transparentMode)
         section+="Trans";
-    results->setFloatValue(section,"nEvents",nEvents);
-    results->setFloatValue(section,"noValidTrack",noValidTrack);
-    results->setFloatValue(section,"noFidCutRegion",noFidCutRegion);
-    results->setFloatValue(section,"usedForAlignment",usedForAlignment);
-    results->setFloatValue(section,"highChi2",highChi2);
-    results->setFloatValue(section,"regionNotOnPlane",regionNotOnPlane);
-    results->setFloatValue(section,"screenedChannel",screenedChannel);
-    results->setFloatValue(section,"saturatedChannel",saturatedChannel);
-    results->setFloatValue(section,"nAnalyzedEvents",nAnalyzedEvents);
+    results->setIntValue(section,"nEvents",nEvents);
+    results->setIntValue(section,"noValidTrack",noValidTrack);
+    results->setIntValue(section,"noFidCutRegion",noFidCutRegion);
+    results->setIntValue(section,"usedForAlignment",usedForAlignment);
+    results->setIntValue(section,"highChi2",highChi2);
+    results->setIntValue(section,"regionNotOnPlane",regionNotOnPlane);
+    results->setIntValue(section,"screenedChannel",screenedChannel);
+    results->setIntValue(section,"saturatedChannel",saturatedChannel);
+    results->setIntValue(section,"nAnalyzedEvents",nAnalyzedEvents);
 }
 
 void TTransparentAnalysis::printEvent() {
