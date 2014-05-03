@@ -109,7 +109,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
         nEvents = eventReader->GetEntries()-startEvent;
     }
-    UInt_t newstartEvent =0;
+    UInt_t newstartEvent = 0;
     if(settings->getAlignmentEvents(nEvents)>startEvent){
         cout<<"startEvent:      "<<startEvent<<endl;
         cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
@@ -998,30 +998,32 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
             TProfile* prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
             if (prof){
-                TF1* fit = prof->GetFunction((TString)"fit_"+hLandau2OutOfXVsEventNo->GetName());
+                if (clusterSize==vecVecPh2Highest.size()){
+                    TF1* fit = prof->GetFunction((TString)"fit_"+hLandau2OutOfXVsEventNo->GetName());
 
-                Float_t value1 = 0;
-                for (int i = 0; i < prof->GetNbinsX() && value1 ==0;i++)
-                    value1 = prof->GetBinContent(i);
+                    Float_t value1 = 0;
+                    for (int i = 0; i < prof->GetNbinsX() && value1 ==0;i++)
+                        value1 = prof->GetBinContent(i);
 
-                Float_t value2 = 0;
-                for (int i = prof->GetNbinsX(); i>0 && value2 ==0;i--)
-                    value2 = prof->GetBinContent(i);
-                TString key = TString::Format("DeltaLandauClusterSize%02d",clusterSize);
-                results->setFloatValue(section,key,(value2-value1));
-                key = TString::Format("LandauClusterBeginSize%02d",clusterSize);
-                results->setFloatValue(section,key,(value1));
-                key = TString::Format("LandauClusterEndSize%02d",clusterSize);
-                results->setFloatValue(section,key,(value2));
-                key = TString::Format("LandauClusterNEventsSize%02d",clusterSize);
-                results->setIntValue(section,key,vectorEventNo.back() - vectorEventNo.front());
-                if (fit){
-                    key = TString::Format("LandauClusterFitOffsetSize%02d",clusterSize);
-                    results->setFloatValue(section,key,fit->GetParameter(0));
-                    key = TString::Format("LandauClusterFitSlopeSize%02d",clusterSize);
-                    results->setFloatValue(section,key,fit->GetParameter(1));
-
+                    Float_t value2 = 0;
+                    for (int i = prof->GetNbinsX(); i>0 && value2 ==0;i--)
+                        value2 = prof->GetBinContent(i);
+                    TString key = TString::Format("DeltaLandauClusterSize%02d",clusterSize);
+                    results->setFloatValue(section,key,(value2-value1));
+                    key = TString::Format("LandauClusterBeginSize%02d",clusterSize);
+                    results->setFloatValue(section,key,(value1));
+                    key = TString::Format("LandauClusterEndSize%02d",clusterSize);
+                    results->setFloatValue(section,key,(value2));
+                    key = TString::Format("LandauClusterNEventsSize%02d",clusterSize);
+                    results->setIntValue(section,key,vectorEventNo.back() - vectorEventNo.front());
+                    if (fit){
+                        key = TString::Format("LandauClusterFitOffsetSize%02d",clusterSize);
+                        results->setFloatValue(section,key,fit->GetParameter(0));
+                        key = TString::Format("LandauClusterFitSlopeSize%02d",clusterSize);
+                        results->setFloatValue(section,key,fit->GetParameter(1));
+                    }
                 }
+                delete prof;
             }
             if (hLandau2OutOfXVsEventNo)
                 delete hLandau2OutOfXVsEventNo;

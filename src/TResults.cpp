@@ -120,6 +120,13 @@ void TResults::inheritOldResults(const TResults & rhs)
     StringMap.clear();
     for(map<TString,TString>::const_iterator it = rhs.StringMap.begin();it!=rhs.StringMap.end();it++)
         StringMap[it->first] = it->second;
+
+    keyList.clear();
+    for(map<TString,map<TString,TString> >::const_iterator it1 = rhs.keyList.begin();it1!=rhs.keyList.end();it1++){
+        keyList[it1->first] = map<TString,TString>();
+        for (map<TString,TString>::const_iterator it2 = it1->second.begin();it2!=it1->second.end();it2++)
+            keyList[it1->first][it2->first] = it2->second;
+    }
 }
 
 void TResults::initialiseResults(){
