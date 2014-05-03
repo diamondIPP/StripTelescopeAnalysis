@@ -2084,9 +2084,17 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 				fit = doDoubleGaussFit(hClone);
 				if (fit){//todo check wh neccessary
 					gaus1 = fit->GetParameter(2);
+                    gaus2 = fit->GetParameter(5);
                     mean1 = fit->GetParameter(1);
-					gaus2 = fit->GetParameter(5);
 					mean2 = fit->GetParameter(4);
+					if(gaus1<gaus2){
+					    Float_t gaus = gaus1;
+					    gaus1 = gaus2;
+					    gaus2 = gaus;
+					    gaus = mean1;
+					    mean1 = mean2;
+					    mean2 = gaus;
+					}
 				}
 
 				break;
@@ -2109,24 +2117,29 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 				if( i == 0 ) {
 				    results->setSingleGaussianResolution(gaus1,alignMode);
                     results->setFloatValue(section,"SingleGaus_Fit",gaus1);
+                    results->setFloatValue(section,"SingleGaus_Mean",mean1);
 				}
 				else if (i == 1 ){
 				    results->setSingleGaussianShortResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FWHM_Fit",gaus1);
+                    results->setFloatValue(section,"FWHM_Mean",mean1);
 				}
 				else if (i == 2 ){
 				    results->setDoubleGaussianResolution(gaus1,gaus2,alignMode);
                     results->setFloatValue(section,"DoubleGaus_Fit1",gaus1);
                     results->setFloatValue(section,"DoubleGaus_Fit2",gaus2);
+                    results->setFloatValue(section,"DoubleGaus_Mean1",mean1);
+                    results->setFloatValue(section,"DoubleGaus_Mean2",mean2);
 				}
 				else if (i == 3 ) {
 				    results->setSingleGaussianFixedResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FixedGaus_Fit",gaus1);
-                    results->setFloatValue(section,"FixedGaus_Fit",gaus1);
+                    results->setFloatValue(section,"FixedGaus_Mean",mean1);
 				}
                 else if (i == 4 ) {
                     results->setSingleGaussianFWTMResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FWTM_Fit",gaus1);
+                    results->setFloatValue(section,"FWTM_Mean",mean1);
                 }
 			}
 
