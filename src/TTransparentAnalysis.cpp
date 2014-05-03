@@ -2061,36 +2061,48 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 		hClone->SetTitle(hTitle);
 		Float_t gaus1=-1;
 		Float_t gaus2=-1;
+		Float_t mean1 = -9999;
+		Float_t mean2 = -9999;
 		TF1* fit;
 		if(hClone) {
 			switch(i){
 			case 0: 
 				resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
-				if (resPtr.Get())//todo check wh neccessary
+				if (resPtr.Get()){//todo check wh neccessary
 					gaus1 = resPtr.Get()->GetParams()[2];
+					mean1 = resPtr.Get()->GetParams()[1];
+				}
 				break;
 			case 1: 
 				resPtr=hClone->Fit("gaus","SQ","",fwhm.first,fwhm.second);
-				if (resPtr.Get())//todo check wh neccessary
+				if (resPtr.Get()){//todo check wh neccessary
 					gaus1 = resPtr.Get()->GetParams()[2];
+                    mean1 = resPtr.Get()->GetParams()[1];
+				}
 				break;
 			case 2: 
 				fit = doDoubleGaussFit(hClone);
 				if (fit){//todo check wh neccessary
 					gaus1 = fit->GetParameter(2);
+                    mean1 = fit->GetParameter(1);
 					gaus2 = fit->GetParameter(5);
+					mean2 = fit->GetParameter(4);
 				}
 
 				break;
 			case 3: 
 				resPtr= hClone->Fit("gaus","SQ","",-20,20);
-				if (resPtr.Get())//todo check wh neccessary
+				if (resPtr.Get()){//todo check wh neccessary
 					gaus1 = fit->GetParameter(2);
+                    mean1 = fit->GetParameter(1);
+				}
 				break;
             case 4:
                 resPtr=hClone->Fit("gaus","SQ","",fwtm.first,fwtm.second);
-                if (resPtr.Get())//todo check wh neccessary
+                if (resPtr.Get()){//todo check wh neccessary
                     gaus1 = resPtr.Get()->GetParams()[2];
+                    mean1 = resPtr.Get()->GetParams()[1];
+                }
                 break;
 			}
 			if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
