@@ -976,6 +976,9 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
     cout<<"SaveLandauVsEventNoPlots "<<clusterSize<<endl;
     TString name;
     TH2F* hLandau2OutOfXVsEventNo=0;
+    TString section = "TimeDependence";
+    if (alignMode == TSettings::transparentMode)
+        section+="Trans";
     if(clusterSize-1 < vecVecPh2Highest.size()){
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
         hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,100,512,0,nEvents,0,3000);
@@ -986,12 +989,37 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             cerr<<"[TTransparentAnalysis::SaveLandauVsEventNoPlots]: Sizes of vectors are different for clusterSize "<<clusterSize<<endl;
 
         if (verbosity>3) cout<< name <<": "<<vectorEventNo.size()<<" "<<vecVecPh2Highest.at(clusterSize-1).size()<<endl;
-
         if(hLandau2OutOfXVsEventNo){
             hLandau2OutOfXVsEventNo->GetXaxis()->SetTitle("Event no.");
             hLandau2OutOfXVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
-            histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
+            TProfile* prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
+            if (prof){
+                TF1* fit = prof->GetFunction((TString)"fit_"+hLandau2OutOfXVsEventNo->GetName());
+
+                Float_t value1 = 0;
+                for (int i = 0; i < prof->GetNbinsX() && value1 ==0;i++)
+                    value1 = prof->GetBinContent(i);
+
+                Float_t value2 = 0;
+                for (int i = prof->GetNbinsX(); i>0 && value2 ==0;i--)
+                    value2 = prof->GetBinContent(i);
+                TString key = TString::Format("DeltaLandauClusterSize%02d",clusterSize);
+                results->setFloatValue(section,key,(value2-value1));
+                key = TString::Format("LandauClusterBeginSize%02d",clusterSize);
+                results->setFloatValue(section,key,(value1));
+                key = TString::Format("LandauClusterEndSize%02d",clusterSize);
+                results->setFloatValue(section,key,(value2));
+                key = TString::Format("LandauClusterNEventsSize%02d",clusterSize);
+                results->setIntValue(section,key,vectorEventNo.back() - vectorEventNo.front());
+                if (fit){
+                    key = TString::Format("LandauClusterFitOffsetSize%02d",clusterSize);
+                    results->setFloatValue(section,key,fit->GetParameter(0));
+                    key = TString::Format("LandauClusterFitSlopeSize%02d",clusterSize);
+                    results->setFloatValue(section,key,fit->GetParameter(1));
+
+                }
+            }
             if (hLandau2OutOfXVsEventNo)
                 delete hLandau2OutOfXVsEventNo;
         }
@@ -1415,6 +1443,18 @@ void TTransparentAnalysis::printCutFlow() {
 	cout << "saturated channel\t-" << setw(8) << saturatedChannel << endl;
 	cout << "\t\t\t---------" << endl;
 	cout << "total analyzed events\t " << setw(8) << nAnalyzedEvents << endl;
+	TString section = "CutFlowTransparentAnalysis";
+	if(alignMode == TSettings::transparentMode)
+	    section+="Trans";
+	results->setFloatValue(section,"nEvents",nEvents);
+	results->setFloatValue(section,"noValidTrack",noValidTrack);
+    results->setFloatValue(section,"noFidCutRegion",noFidCutRegion);
+    results->setFloatValue(section,"usedForAlignment",usedForAlignment);
+    results->setFloatValue(section,"highChi2",highChi2);
+    results->setFloatValue(section,"regionNotOnPlane",regionNotOnPlane);
+    results->setFloatValue(section,"screenedChannel",screenedChannel);
+    results->setFloatValue(section,"saturatedChannel",saturatedChannel);
+    results->setFloatValue(section,"nAnalyzedEvents",nAnalyzedEvents);
 }
 
 void TTransparentAnalysis::printEvent() {

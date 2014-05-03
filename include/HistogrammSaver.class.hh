@@ -77,8 +77,8 @@ public:
 	void SaveHistogramLandau(TH1F* histo);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
-    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
-    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
+    TProfile* CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
+    TProfile* CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
     void Save1DProfileWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true,TString drawOption ="colz");
 	void SaveOverlay(TH2* histo,TString drawOption ="colz");

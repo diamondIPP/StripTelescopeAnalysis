@@ -1292,7 +1292,7 @@ void HistogrammSaver::Save1DProfileYWithFitAndInfluence(TH2* htemp,TF1* fit, boo
 }
 
 
-void HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox){
+TProfile* HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox){
     TString name = "fit_" + (TString)histo->GetName();
     if (function=="")
         function="pol1";
@@ -1300,18 +1300,17 @@ void HistogrammSaver:: CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TS
     return CreateAndSave1DProfileXWithFitAndInfluence(histo,fit,drawStatbox);
 }
 
-void HistogrammSaver::CreateAndSave1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit, bool drawStatbox){
+TProfile* HistogrammSaver::CreateAndSave1DProfileXWithFitAndInfluence(TH2* htemp,TF1* fit, bool drawStatbox){
     if(!fit)
         fit = new TF1("fit","pol1");
     TProfile *prof=0;
     if(!htemp)
-        return;
+        return prof;
     prof = htemp->ProfileX();
     if(prof){
         Save1DProfileWithFitAndInfluence(prof,fit,drawStatbox);
-        delete prof;
-        prof = 0;
     }
+    return prof;
 }
 
 void HistogrammSaver::Save1DProfileWithFitAndInfluence(TProfile *prof, TF1* fit, bool drawStatBox){
