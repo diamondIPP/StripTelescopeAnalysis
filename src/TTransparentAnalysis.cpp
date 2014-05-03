@@ -677,7 +677,7 @@ void TTransparentAnalysis::fitHistograms() {
 		fitResidualHighest2Centroid.push_back(doGaussFit(hResidualHighest2Centroid[clusterSize]));
 		fitResidualEtaCorrected.push_back(doDoubleGaussFit(hResidualEtaCorrected[clusterSize]));
 		if(clusterSize+1 >= TPlaneProperties::getMaxTransparentClusterSize(subjectDetector))
-			saveResolutionPlot(hResidualEtaCorrected[clusterSize],clusterSize);
+			saveResolutionPlot(hResidualEtaCorrected[clusterSize],clusterSize,"Normal");
 		// save fit parameters
 		vecMPLandau.push_back(fitLandau[clusterSize]->GetParameter(1));
 		vecMPLandau2Highest.push_back(fitLandau2Highest[clusterSize]->GetParameter(1));
@@ -1307,7 +1307,7 @@ void TTransparentAnalysis::saveHistograms() {
 				TH1F* hProj = (TH1F*)hist->ProjectionX(hname,minBin,maxBin);
 				if (hProj) hProj->SetTitle(title);
 				if (hProj) cout<<hProj->GetEntries()<<"/"<<	hist->GetEntries()<<endl;
-				saveResolutionPlot(hProj,i);
+				saveResolutionPlot(hProj,i,"SmallEtaRange");
 				if (hProj) delete hProj;
 
 			}
@@ -2019,10 +2019,11 @@ std::pair<Float_t,Float_t >  TTransparentAnalysis::getFWCrossingPoint(TH1F* hRes
    return std::make_pair(start,end);
 }
 
-void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize) {
+void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TString additionalInformation) {
 	if(!hRes)
 		return;
 	TString section = "Resolution";
+	section+=additionalInformation;
 	if(alignMode==TSettings::transparentMode)
 	    section+"Trans";
 	//	Float_t mean = hRes->GetMean();
