@@ -109,7 +109,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
         nEvents = eventReader->GetEntries()-startEvent;
     }
-    UInt_t newstartEvent =0
+    UInt_t newstartEvent =0;
     if(settings->getAlignmentEvents(nEvents)>startEvent){
         cout<<"startEvent:      "<<startEvent<<endl;
         cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
