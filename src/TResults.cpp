@@ -634,6 +634,29 @@ void TResults::createOutputResultFile(){
     results["doubleGaus2_trans"] =      TString::Format("%8.2f\t",doubleGaus2_trans);
     myfile << createSection("Resolution_trans",results);
 
+
+    for (std::map<TString,map<TString,TString> >::iterator it = keyList.begin();it!=keyList.end();it++){
+        results.clear();
+        TString section = it->first;
+        for (std::map<TString,TString>::iterator it2 = it->second.begin();it2!=it->second.end();it2++){
+            TString key = it2->first;
+            TString mapKey = section+(TString)"_"+key;
+            TString type = it2->second;
+            TString answer;
+            if (type=="Float"){
+                answer = TString::Format("%f",FloatMap[mapKey]);
+            }
+            else if(type=="Int"){
+                answer = TString::Format("%d",IntegerMap[mapKey]);
+            }
+            else if(type == "String"){
+                answer = StringMap[mapKey];
+            }
+            results[it2->first] = answer;
+        }
+        myfile << createSection(section,results);
+    }
+
     results.clear();
     for (std::map<TString, Int_t>::iterator it = IntegerMap.begin();it!=IntegerMap.end();it++)
         results[it->first] = TString::Format("%d",it->second);
@@ -642,9 +665,9 @@ void TResults::createOutputResultFile(){
     for (std::map<TString, TString>::iterator it = StringMap.begin();it!=StringMap.end();it++)
         results[it->first] = it->second;
     myfile << createSection("additional",results);
-
     myfile.close();
 }
+
 void TResults::createOutputTextFile(){
     //	cout<<"CREATE OUPTUT TEXT FILE"<<endl;
     ofstream myfile;
@@ -815,14 +838,25 @@ std::pair<Float_t,Float_t> TResults::getAvrgSilNoise() {
     return make_pair(mean,sigma);
 }
 
+
 void TResults::setFloatValue(TString section, TString key, Float_t value) {
     FloatMap[section+(TString)"_"+key] = value;
+    addKey(section,key,"Float");
 }
 
 void TResults::setIntValue(TString section, TString key, Int_t value) {
     IntegerMap[section+(TString)"_"+key] = value;
+    addKey(section,key,"Int");
 }
 
 void TResults::setStringValue(TString section, TString key, TString value) {
     StringMap[section+(TString)"_"+key] = value;
+    addKey(section,key,"String");
+}
+
+void TResults::addKey(TString section, TString key, TString type) {
+    cout<<"addKey: "<<section<<" - "<<key<<": "<<type<<endl;
+    if(keyList.count(section) ==  0)
+        keyList[section] = map<TString,TString>();
+    keyList[section][key] = type;
 }

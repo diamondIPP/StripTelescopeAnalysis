@@ -95,6 +95,7 @@ public:
     string createSection(TString sectionName,map<TString,TString> results);
     void setResultsFromSettings(TSettings * settings);
 private:
+    void addKey(TString section, TString key,TString type);
     string emptyString(UInt_t nChars,char character=' ');
     TString rootFileName;
     TString runDescription;
@@ -175,6 +176,7 @@ private:
     std::map<TString,Int_t> IntegerMap;
     std::map<TString, Float_t> FloatMap;
     std::map<TString, TString> StringMap;
+    std::map<TString,std::map<TString,TString> > keyList;
     ClassDef(TResults,7);
 };
 

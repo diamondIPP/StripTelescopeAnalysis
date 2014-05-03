@@ -2110,6 +2110,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 				else if (i == 3 ) {
 				    results->setSingleGaussianFixedResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FixedGaus_Fit",gaus1);
+                    results->setFloatValue(section,"FixedGaus_Fit",gaus1);
 				}
                 else if (i == 4 ) {
                     results->setSingleGaussianFWTMResolution(gaus1,alignMode);
