@@ -2069,7 +2069,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
     TString section = "Resolution";
     section+=additionalInformation;
     if(alignMode==TSettings::transparentMode)
-        section+"Trans";
+        section+="Trans";
     //	Float_t mean = hRes->GetMean();
     //	Float_t sigma = hRes->GetRMS();
     TString hName;
