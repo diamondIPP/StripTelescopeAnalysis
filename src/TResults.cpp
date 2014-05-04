@@ -59,7 +59,7 @@ TResults::TResults(const   TResults& rhs){//copy constructor
 
 void TResults::inheritOldResults(const TResults & rhs)
 {
-    cout<<"InheritOldResults"<endl;
+    cout<<"InheritOldResults"<<endl;
     this->seedSigma.clear();
     for(UInt_t det=0;det<rhs.seedSigma.size();det++)this->seedSigma.push_back(rhs.seedSigma[det]);
     this->hitSigma.clear();
@@ -129,28 +129,29 @@ void TResults::inheritOldResults(const TResults & rhs)
 
     cout<<"rhs.keyList.size(): "<<rhs.keyList.size()<<endl;
     int i =0;
-    for (outer_map::const_iterator it = rhs.keyList.begin(); it !=  rhs.keyList.end();  ++it)
-    {
+    map<TString, map<TString,TString> >::const_iterator it1;
+    int k = 0;
+    for(it1 = rhs.keyList.begin();it1!=rhs.keyList.end()&&i<rhs.keyList.size();it1++){
         cout<<i<<endl;
-        TString section = it->first;
+        TString section = it1->first;
         cout<<"Create Section:\t\""<<section<<"\""<<endl;
         cout<<section.IsAlnum()<<" "<<section.IsAscii()<<endl;
         i++;
-        inner_map &innerMap = it->second;
-        int size = it->second.size();
         if (!section.IsAscii()){cout<<"continue"<<endl; continue;}
-        keyList[section] = map<TString,TString>();
-        int j =0;
-        for (inner_map::const_iterator jt = innerMap.begin(); jt != innerMap.end(); ++jt)
-        {
-                TString key = jt->first;
+            keyList[section] = map<TString,TString>();
+            map<TString,TString>::const_iterator it2;
+            int size = it1->second.size();
+            int j =0;
+            for (it2 = (it1->second).begin(); it2!=(it1->second).end() && j < size;it2++){
+                TString key = it2->first;
                 cout<<"Add "<<section<<"\t\t\""<<key<<"\""<<endl;
                 if (!key.IsAscii()){cout<<"continue"<<endl; continue;}
-                keyList[section][key] = jt->second;
+                keyList[section][key] = it2->second;
                 j++;
-            /* ... */
+                k++;
+            }
         }
-    }
+    cout<<"added "<<k<< " keys in "<< i << " section..."<<endl;
 }
 
 void TResults::initialiseResults(){
