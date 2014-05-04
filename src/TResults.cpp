@@ -666,11 +666,14 @@ void TResults::createOutputResultFile(){
 
     results.clear();
     for (std::map<TString, Int_t>::iterator it = IntegerMap.begin();it!=IntegerMap.end();it++)
-        results[it->first] = TString::Format("%d",it->second);
+        if(it->first.First('_')<=0)
+            results[it->first] = TString::Format("%d",it->second);
     for (std::map<TString, Float_t>::iterator it = FloatMap.begin();it!=FloatMap.end();it++)
-        results[it->first] = TString::Format("%f",it->second);
+        if(it->first.First('_')<=0)
+            results[it->first] = TString::Format("%f",it->second);
     for (std::map<TString, TString>::iterator it = StringMap.begin();it!=StringMap.end();it++)
-        results[it->first] = it->second;
+        if(it->first.First('_')<=0)
+            results[it->first] = it->second;
     myfile << createSection("additional",results);
     myfile.close();
 }

@@ -980,8 +980,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
     TString name;
     TH2F* hLandau2OutOfXVsEventNo=0;
     TString section = "TimeDependence";
-    if (alignMode == TSettings::transparentMode)
-        section+="Trans";
+
     if(clusterSize-1 < vecVecPh2Highest.size()){
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
         hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,100,512,0,nEvents,0,3000);
@@ -998,7 +997,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
             TProfile* prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
             if (prof){
-                if (clusterSize==vecVecPh2Highest.size()){
+                if (clusterSize==vecVecPh2Highest.size() &&  alignMode == TSettings::normalMode){
                     TF1* fit = prof->GetFunction((TString)"fit_"+hLandau2OutOfXVsEventNo->GetName());
 
                     Float_t value1 = 0;
@@ -1450,7 +1449,7 @@ void TTransparentAnalysis::printCutFlow() {
     cout << "total analyzed events\t " << setw(8) << nAnalyzedEvents << endl;
     TString section = "CutFlowTransparentAnalysis";
     if(alignMode == TSettings::transparentMode)
-        section+="Trans";
+        return;
     results->setIntValue(section,"nEvents",nEvents);
     results->setIntValue(section,"noValidTrack",noValidTrack);
     results->setIntValue(section,"noFidCutRegion",noFidCutRegion);
