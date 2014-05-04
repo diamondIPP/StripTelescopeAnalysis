@@ -14,6 +14,10 @@
 #pragma link C++ class vector<Float_t>+;
 
 #pragma link C++ class map<UInt_t,UInt_t>+;
+#pragma link C++ class map<TString,Float_t>+;
+#pragma link C++ class map<TString,Int_t>+
+#pragma link C++ class map<TString,TString>+;
+#pragma link C++ class map<TString, map<TString,TString> >+;
 
 #pragma link C++ class pair< unsigned short, float>+;
 #pragma link C++ class pair< UShort_t, Float_t>+;
