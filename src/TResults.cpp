@@ -125,12 +125,13 @@ void TResults::inheritOldResults(const TResults & rhs)
     keyList.clear();
     for(map<TString, map<TString,TString> >::const_iterator it1 = rhs.keyList.begin();it1!=rhs.keyList.end();it1++){
         TString section = it1->first;
-        cout<<"Create Section "<<section<<endl;
+        cout<<"Create Section:\t\""<<section<<"\""<<endl;
+        cout<<section.IsAlnum()<<" "<<section.IsAscii()<<endl;
         keyList[section] = map<TString,TString>();
         map<TString,TString>::const_iterator it2;
         for (it2 = (it1->second).begin(); it2!=(it1->second).end();it2++){
-            cout<<"Add "<<section<<"-"<<key<<endl;
             TString key = it2->first;
+            cout<<"Add "<<section<<"\t\t\""<<key<<"\""<<endl;
             keyList[section][key] = it2->second;
         }
     }
