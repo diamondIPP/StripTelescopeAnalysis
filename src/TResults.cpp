@@ -127,9 +127,12 @@ void TResults::inheritOldResults(const TResults & rhs)
         TString section = it1->first;
         cout<<"Create Section:\t\""<<section<<"\""<<endl;
         cout<<section.IsAlnum()<<" "<<section.IsAscii()<<endl;
+        if (!section.IsAscii())
+            continue;
         keyList[section] = map<TString,TString>();
         map<TString,TString>::const_iterator it2;
         for (it2 = (it1->second).begin(); it2!=(it1->second).end();it2++){
+            if (!section.IsAscii()) continue;
             TString key = it2->first;
             cout<<"Add "<<section<<"\t\t\""<<key<<"\""<<endl;
             keyList[section][key] = it2->second;
