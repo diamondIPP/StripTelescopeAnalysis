@@ -59,7 +59,7 @@ TResults::TResults(const   TResults& rhs){//copy constructor
 
 void TResults::inheritOldResults(const TResults & rhs)
 {
-
+    cout<<"InheritOldResults"<endl;
     this->seedSigma.clear();
     for(UInt_t det=0;det<rhs.seedSigma.size();det++)this->seedSigma.push_back(rhs.seedSigma[det]);
     this->hitSigma.clear();
@@ -110,14 +110,17 @@ void TResults::inheritOldResults(const TResults & rhs)
 //    std::sort(maskedChannels.begin(),maskedChannels.end());
 
     IntegerMap.clear();
+    cout<<"IntegerMap.size() "<<rhs.IntegerMap.size()<<endl;
     for(map<TString,Int_t>::const_iterator it = rhs.IntegerMap.begin();it!=rhs.IntegerMap.end();it++)
         IntegerMap[it->first] = it->second;
 
     FloatMap.clear();
+    cout<<"FloatMap.size(): "<<rhs.FloatMap.size()<<endl;
     for(map<TString,Float_t>::const_iterator it = rhs.FloatMap.begin();it!=rhs.FloatMap.end();it++)
         FloatMap[it->first] = it->second;
 
     StringMap.clear();
+    cout<<"FloatMap.size()"<<rhs.FloatMap.size()<<endl;
     for(map<TString,TString>::const_iterator it = rhs.StringMap.begin();it!=rhs.StringMap.end();it++)
         StringMap[it->first] = it->second;
 
