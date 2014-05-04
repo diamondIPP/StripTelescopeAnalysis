@@ -26,6 +26,8 @@
 #include "TDetectorAlignment.hh"
 #include <TDatime.h>
 
+typedef std::map<TString, TString> inner_map;
+typedef std::map<TString, inner_map> outer_map;
 
 class TResults: public TNamed {
 public:
@@ -176,7 +178,7 @@ private:
     std::map<TString,Int_t> IntegerMap;
     std::map<TString, Float_t> FloatMap;
     std::map<TString, TString> StringMap;
-    std::map<TString,std::map<TString,TString> > keyList;
+    outer_map keyList;
     ClassDef(TResults,7);
 };
 
