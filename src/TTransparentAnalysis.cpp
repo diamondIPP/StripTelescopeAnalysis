@@ -526,7 +526,29 @@ TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
     histo->Fit(histofitx,"rQ");
     return histofitx;
 }
-
+TF1* TTransparentAnalysis::doFixedDoubleGaussFit(TH1F *histo){
+    if (!histo)return 0;
+    if (histo->GetEntries()==0) return 0;
+    Float_t mean = histo->GetMean();
+    Float_t sigma = histo->GetRMS();
+    Float_t max = histo->GetBinContent(histo->GetMaximumBin());
+    Float_t pw = settings->getPitchWidth(subjectDetector);
+    int nSigmas = 4;
+    Float_t xmin = TMath::Min(-pw,mean-nSigmas*sigma);
+    Float_t xmax = TMath::Max(pw,mean+nSigmas*sigma);
+    TF1* histofitx = new TF1("fFixedDoubleGaus","[0]*exp(-0.5*((x-[1])/[2])**2) + [3]*exp(-0.5*((x-[1])/[4])**2)",xmin,xmax);
+    histofitx->SetParLimits(0,max/10,max);
+    histofitx->SetParLimits(1,mean-2*sigma,mean+2*sigma);
+    histofitx->SetParLimits(2,sigma/10,2*sigma);
+    histofitx->SetParLimits(3,max/20,max/2);
+    histofitx->SetParLimits(4,sigma/10,4*sigma);
+    histofitx->SetParameters(.75*max,mean,sigma/5,.1*max,mean,sigma/4);
+    histofitx->SetParNames("C_{0}","#mu","#sigma_{0}","C_{1}","#sigma_{1}");
+    histofitx->SetLineColor(kBlue);
+    histofitx->SetNpx(1000);
+    histo->Fit(histofitx,"rq");
+    return histofitx;
+}
 TF1* TTransparentAnalysis::doDoubleGaussFit(TH1F *histo){
     if (!histo)return 0;
     if (histo->GetEntries()==0) return 0;
@@ -2072,7 +2094,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
         section+="Trans";
     //	Float_t mean = hRes->GetMean();
     //	Float_t sigma = hRes->GetRMS();
-    TString hName;
+
     TFitResultPtr resPtr = hRes->Fit("gaus","NQS");
     Float_t mean = resPtr.Get()->GetParams()[1];//->Parameter(1);
     Float_t sigma = resPtr.Get()->GetParams()[2];//Parameter(2);
@@ -2097,16 +2119,19 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
     Float_t mean2 = (start+end)/2;
     Float_t sigma2 = end-mean2;
     if (sigma2 <0) sigma2*=-1;
-    TString hTitle;
-    hTitle = hRes->GetTitle();
+
+    TString realName = hRes->GetName();
+    TString realTitle = hRes->GetTitle();
     for(int i=0;i<5;i++){
-        hName = hRes->GetName();
+        TString hName = realName;
+        TString hTitle = realTitle;
         switch (i){
             case 0: hName.Append("_SingleGausFit");hTitle.Append(" Single Gaus Fit 2x FWHM");break;
             case 1: hName.Append("_SingleGausFitFWHM");hTitle.Append(" Single Gaus Fit FWHM");break;
             case 2: hName.Append("_DoubleGausFit");hTitle.Append(" 2 x Gaus Fit");break;
-            case 3: hName.Append("_FixedGausFit");hTitle.Append(" Single Gaus Fit -20#mum - 20 #mum");break;
-            case 4: hName.Append("_SingleGausFitFWTM");hTitle.Append(" Single Gaus Fit Mean of 2/3");break;
+            case 3: hName.Append("_FixedGausFit");hTitle.Append(" Single Gaus Fit [20#mum - 20 #mum]");break;
+            case 4: hName.Append("_SingleGausFitFWTM");hTitle.Append(" Single Gaus Fit FW 1/3 Maximum");break;
+            case 5: hName.Append("_FixedDoubleGausFit");hTitle.Append(" 2 x Gaus Fit, same mean");break;
         }
         TH1F* hClone = (TH1F*)hRes->Clone(hName);
         hClone->SetTitle(hTitle);
@@ -2163,6 +2188,23 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                         mean1 = resPtr.Get()->GetParams()[1];
                     }
                     break;
+                case 5:
+                    fit = doFixedDoubleGaussFit(hClone);
+                    if (fit){//todo check wh neccessary
+                        gaus1 = fit->GetParameter(2);
+                        gaus3 = fit->GetParameter(4);
+                        mean1 = fit->GetParameter(1);
+                        if(gaus1<gaus3){
+                            Float_t gaus = gaus1;
+                            gaus1 = gaus3;
+                            gaus3 = gaus;
+                            gaus = mean1;
+                            mean1 = mean3;
+                            mean3 = gaus;
+                        }
+                    }
+
+                    break;
             }
             if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
                 if( i == 0 ) {
@@ -2191,6 +2233,11 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                     results->setSingleGaussianFWTMResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FWTM_Fit",gaus1);
                     results->setFloatValue(section,"FWTM_FitMean",mean1);
+                }
+                else if (i == 5){
+                    results->setFloatValue(section,"FixedDoubleGaus_Fit1",gaus1);
+                    results->setFloatValue(section,"FixedDoubleGaus_Fit2",gaus3);
+                    results->setFloatValue(section,"FixedDoubleGaus_Mean",mean1);
                 }
             }
 

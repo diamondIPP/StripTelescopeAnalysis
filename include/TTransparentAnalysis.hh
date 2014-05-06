@@ -87,6 +87,7 @@ private:
     void saveNoiseHistos();
 	TF1* doGaussFit(TH1F *histo);
 	TF1* doDoubleGaussFit(TH1F *histo);
+	TF1* doFixedDoubleGaussFit(TH1F* histo);
 	void createEtaIntegrals();
 	void fitHistograms();
 	void createEfficiencyPlots(TH1F* hLandauDistribution);
