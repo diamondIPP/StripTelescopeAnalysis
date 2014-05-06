@@ -2122,7 +2122,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 
     TString realName = hRes->GetName();
     TString realTitle = hRes->GetTitle();
-    for(int i=0;i<5;i++){
+    for(int i=0;i<6;i++){
         TString hName = realName;
         TString hTitle = realTitle;
         switch (i){
