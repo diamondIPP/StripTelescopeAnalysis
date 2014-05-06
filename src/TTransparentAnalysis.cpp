@@ -101,6 +101,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         char t;
         cin >>t;
     }
+    histSaver->SetNumberOfEvents(nEvents);
     predXMin = predYMin = 1e9;
     predXMax = predYMax = -1e9;
     //	usedForSiliconAlignment = 0;
