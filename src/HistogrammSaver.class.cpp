@@ -940,6 +940,31 @@ void HistogrammSaver::SaveHistogram(TH1* histo, bool fitGauss,bool adjustRange,b
     SaveHistogramROOT(histo);
 }
 
+void HistogrammSaver::SaveHistogramWithExtendedFit(TH1* histo,TF1* fit, Float_t minX,Float_t maxX){
+    if(histo==0)return;
+    if(histo->GetEntries()==0)return;
+    if (fit==0) return SaveHistogram(histo);
+    TF1* fitExtended = (TF1*)fit->Clone();
+    if(minX>maxX){
+        Float_t temp = minX;
+        minX = maxX;
+        maxX = temp;
+    }
+    fitExtended->SetRange(minX,maxX);
+    if(fitExtended->GetLineWidth()>1)
+        fitExtended->SetLineWidth(fitExtended->GetLineWidth()-1);
+    fitExtended->SetLineStyle(2);
+    TString name = histo->GetName();
+    name.Replace(0,1,'c');
+    TCanvas* c1 = new TCanvas(name,name);
+    c1->cd();
+    TH1F *htemp = (TH1F*)histo->Clone();
+    htemp->Draw();
+    fitExtended->Draw("same");
+    SaveCanvas(c1);
+    delete c1;
+}
+
 void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosity){
     if(histo==0)return;
     if(histo->GetEntries()==0)return;

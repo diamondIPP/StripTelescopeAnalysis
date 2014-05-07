@@ -519,13 +519,58 @@ void TTransparentAnalysis::fillHistograms() {
     //	hPredictedPositionInStrip->Fill();
 }
 
-TF1* TTransparentAnalysis::doGaussFit(TH1F *histo) {
+
+Float_t TTransparentAnalysis::GetFractionOutsideNSigma(TH1* histo, Float_t mean,Float_t sigma, Int_t nSigma){
+    Int_t entries = histo->GetEntries();
+    Int_t entriesNSigma = 0;
+    Int_t minBin = histo->GetXaxis()->FindBin(mean-nSigma*sigma);
+    Int_t maxBin = histo->GetXaxis()->FindBin(mean+nSigma*sigma);
+    for(Int_t bin = minBin; bin <= maxBin; bin++)
+        entriesNSigma += histo->GetBinContent(bin);
+    return (Float_t)entriesNSigma/(Float_t)entries;
+}
+TF1* TTransparentAnalysis::doGaussFit(TH1F *histo,Float_t xmin, Float_t xmax) {
     //	TH1* histo = (TH1*)htemp->Clone();
     if (histo->GetEntries()==0) return 0;
-    TF1* histofitx = new TF1("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
+    TF1* histofitx = 0;
+    if (xmax<= xmin)
+        histofitx = new TF1("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
+    else
+        histofitx = new TF1("histofitx","gaus",xmin,xmax);
     histofitx->SetLineColor(kBlue);
     histo->Fit(histofitx,"rQ");
     return histofitx;
+}
+
+TF1* TTransparentAnalysis::doGaussPlusStepFunction(TH1F* histo){
+    if (!histo)return 0;
+      if (histo->GetEntries()==0) return 0;
+      Float_t mean = histo->GetMean();
+      Float_t sigma = histo->GetRMS();
+      Float_t max = histo->GetBinContent(histo->GetMaximumBin());
+      Float_t pw = settings->getPitchWidth(subjectDetector);
+      int nSigmas = 2;
+      Float_t xmin = TMath::Min(-pw,mean-nSigmas*sigma);
+      Float_t xmax = TMath::Max(pw,mean+nSigmas*sigma);
+      TF1* histofitx = new TF1("fGausPlusStepFunction",
+              "[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1])) + gaus(4)",xmin,xmax);
+
+      histofitx->SetParNames("Integral","sigma of Gaus","position","StripPitch","C_{Gauss}","#mu_{Gauss}","#sigma_{Gauss}");
+      histofitx->SetParameter(0,0.1);//
+      histofitx->SetParLimits(1,0,2*histo->GetRMS());//sigma of Gaus in background
+      histofitx->SetParameter(1,0.1);//
+      histofitx->SetParameter(2,histo->GetMean());//Position of background
+      histofitx->FixParameter(3,settings->getDiamondPitchWidth()/2);//fixed pitch
+
+      histofitx->SetParameter(4,1);//C_{Gauss}
+      histofitx->SetParameter(5,histo->GetMean());//mu_{Gauss}
+      histofitx->SetParLimits(5,-2*histo->GetMean(),2*histo->GetMean());//mu_{Gauss}
+      histofitx->SetParameter(6,histo->GetRMS()/2.);//sigma_{Gauss}
+      histofitx->SetParLimits(6,0,2*histo->GetRMS());
+      histofitx->SetLineColor(kBlue);
+      histofitx->SetNpx(5000);
+      histo->Fit(histofitx,"rq");
+      return histofitx;
 }
 TF1* TTransparentAnalysis::doFixedDoubleGaussFit(TH1F *histo){
     if (!histo)return 0;
@@ -2117,22 +2162,28 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
         start = end;
         end = fwhm.first;
     }
+    Float_t rms = hRes->GetRMS();
+    results->setFloatValue(section,"HistoRMS",rms);
+    results->setFloatValue(section,"HistoMean",hRes->GetMean());
     Float_t mean2 = (start+end)/2;
     Float_t sigma2 = end-mean2;
     if (sigma2 <0) sigma2*=-1;
 
     TString realName = hRes->GetName();
     TString realTitle = hRes->GetTitle();
-    for(int i=0;i<6;i++){
+    for(int i=0;i<8;i++){
         TString hName = realName;
         TString hTitle = realTitle;
         switch (i){
-            case 0: hName.Append("_SingleGausFit");hTitle.Append(" Single Gaus Fit 2x FWHM");break;
-            case 1: hName.Append("_SingleGausFitFWHM");hTitle.Append(" Single Gaus Fit FWHM");break;
-            case 2: hName.Append("_DoubleGausFit");hTitle.Append(" 2 x Gaus Fit");break;
-            case 3: hName.Append("_FixedGausFit");hTitle.Append(" Single Gaus Fit [20#mum - 20 #mum]");break;
-            case 4: hName.Append("_SingleGausFitFWTM");hTitle.Append(" Single Gaus Fit FW 1/3 Maximum");break;
-            case 5: hName.Append("_FixedDoubleGausFit");hTitle.Append(" 2 x Gaus Fit, same mean");break;
+            case 0: hName.Append("_SingleGausFit");hTitle.Append(" Single Gauss Fit 2x FWHM");break;
+            case 1: hName.Append("_SingleGausFitFWHM");hTitle.Append(" Single Gauss Fit FWHM");break;
+            case 2: hName.Append("_DoubleGausFit");hTitle.Append(" 2 x Gauss Fit");break;
+            case 3: hName.Append("_FixedGausFit");hTitle.Append(" Single Gauss Fit [20#mum - 20 #mum]");break;
+            case 4: hName.Append("_SingleGausFitFWTM");hTitle.Append(" Single Gauss Fit FW 1/3 Maximum");break;
+            case 5: hName.Append("_FixedDoubleGausFit");hTitle.Append(" 2 x Gauss Fit, same mean");break;
+            case 6: hName.Append("_FWHMsigma");hTitle.Append(" Gauss with #sigma_{FWHM}");break;
+            case 7: hName.Append("_FWTMsigma");hTitle.Append(" Gauss with #sigma_{FWTM}");break;
+            case 8: hName.Append("_RMSsigma");hTitle.Append(" Gauss with #sigma_{RMS}");break;
         }
         TH1F* hClone = (TH1F*)hRes->Clone(hName);
         hClone->SetTitle(hTitle);
@@ -2140,26 +2191,33 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
         Float_t gaus3=-1;
         Float_t mean1 = -9999;
         Float_t mean3 = -9999;
-        TF1* fit;
+        TF1* fit;;
+        Float_t sigmaFWTM =-1;
+        Float_t sigmaFWHM =-1;
         if(hClone) {
+            Float_t Fraction2Sigmas = -1;
             switch(i){
-                case 0:
-                    resPtr=hClone->Fit("gaus","SQ","",mean2-2*sigma2,mean2+2*sigma2);
-                    if (resPtr.Get()){//todo check wh neccessary
-                        gaus1 = resPtr.Get()->GetParams()[2];
-                        mean1 = resPtr.Get()->GetParams()[1];
-                    }
-                    break;
-                case 1:
-                    resPtr=hClone->Fit("gaus","SQ","",fwhm.first,fwhm.second);
-                    if (resPtr.Get()){//todo check wh neccessary
-                        gaus1 = resPtr.Get()->GetParams()[2];
-                        mean1 = resPtr.Get()->GetParams()[1];
-                    }
-                    break;
-                case 2:
-                    fit = doDoubleGaussFit(hClone);
+                case 0://GaussFit
+                    fit = doGaussFit(hClone,mean2-2*sigma2,mean2+2*sigma2);
                     if (fit){//todo check wh neccessary
+                        gaus1 = fit->GetParameter(2);
+                        mean1 = fit->GetParameter(1);
+                        Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
+                    }
+                    break;
+
+                case 1://GausFitFWHM
+                    fit = doGaussFit(hClone,fwhm.first,fwhm.second);
+                    if (fit){//todo check wh neccessary
+                        gaus1 = fit->GetParameter(2);
+                        mean1 = fit->GetParameter(1);
+                        Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
+                    }
+                    break;
+
+                case 2://DoubleGaussFit
+                    fit = doDoubleGaussFit(hClone);
+                    if (fit){
                         gaus1 = fit->GetParameter(2);
                         gaus3 = fit->GetParameter(5);
                         mean1 = fit->GetParameter(1);
@@ -2173,25 +2231,29 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                             mean3 = gaus;
                         }
                     }
-
                     break;
-                case 3:
-                    resPtr= hClone->Fit("gaus","SQ","",-20,20);
-                    if (resPtr.Get()){//todo check wh neccessary
+
+                case 3://FixedGaussFit
+                    fit = doGaussFit(hClone,-20,20);
+                    if (fit){
                         gaus1 = fit->GetParameter(2);
                         mean1 = fit->GetParameter(1);
+                        Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
                     }
                     break;
-                case 4:
-                    resPtr=hClone->Fit("gaus","SQ","",fwtm.first,fwtm.second);
-                    if (resPtr.Get()){//todo check wh neccessary
-                        gaus1 = resPtr.Get()->GetParams()[2];
-                        mean1 = resPtr.Get()->GetParams()[1];
+
+                case 4://GaussFit FWTrdMean
+                    fit = doGaussFit(hClone,fwtm.first,fwtm.second);
+                    if (fit){
+                        gaus1 = fit->GetParameter(2);
+                        mean1 = fit->GetParameter(1);
+                        Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
                     }
                     break;
-                case 5:
+
+                case 5://FixedDoubleGaussFit
                     fit = doFixedDoubleGaussFit(hClone);
-                    if (fit){//todo check wh neccessary
+                    if (fit){
                         gaus1 = fit->GetParameter(2);
                         gaus3 = fit->GetParameter(4);
                         mean1 = fit->GetParameter(1);
@@ -2204,19 +2266,55 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                             mean3 = gaus;
                         }
                     }
+                    break;
 
+                case 6://GaussFit sigmaFWHM
+                    fit = new TF1("histofitx","gaus",-20,20);
+                    sigmaFWHM = (end-start);
+                    sigmaFWHM = sigmaFWHM/(2*TMath::Sqrt(2*TMath::Log(2)));
+                    fit->FixParameter(2,sigmaFWHM);
+                    fit->SetLineColor(kBlue);
+                    hClone->Fit(fit,"rQ");
+                    gaus1 = fit->GetParameter(2);
+                    mean1 = fit->GetParameter(1);
+                    Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
+                    break;
+
+                case 7://GaussFit sigmaFWTM
+                    fit = new TF1("histofitx","gaus",-20,20);
+                    sigmaFWTM = (fwtm.second-fwtm.first);
+                    sigmaFWTM = sigmaFWTM/(2*TMath::Sqrt(2*TMath::Log(3)));
+                    fit->FixParameter(2,sigmaFWTM);
+                    fit->SetLineColor(kBlue);
+                    hClone->Fit(fit,"rQ");
+                    gaus1 = fit->GetParameter(2);
+                    mean1 = fit->GetParameter(1);
+                    Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
+                    break;
+
+                case 8://GaussFit sigmaRMS
+                    fit = new TF1("histofitx","gaus",-20,20);
+                    fit->FixParameter(2,rms);
+                    fit->SetLineColor(kBlue);
+                    hClone->Fit(fit,"rQ");
+                    gaus1 = fit->GetParameter(2);
+                    mean1 = fit->GetParameter(1);
+                    Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
                     break;
             }
+
             if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
                 if( i == 0 ) {
                     results->setSingleGaussianResolution(gaus1,alignMode);
                     results->setFloatValue(section,"SingleGaus_Fit",gaus1);
                     results->setFloatValue(section,"SingleGaus_Mean",mean1);
+                    results->setFloatValue(section,"SingleGaus_Fraction2Sigma",Fraction2Sigmas);
                 }
                 else if (i == 1 ){
                     results->setSingleGaussianShortResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FWHM_Fit",gaus1);
                     results->setFloatValue(section,"FWHM_FitMean",mean1);
+                    results->setFloatValue(section,"FWHM_Fraction2Sigma",Fraction2Sigmas);
                 }
                 else if (i == 2 ){
                     results->setDoubleGaussianResolution(gaus1,gaus3,alignMode);
@@ -2229,20 +2327,28 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                     results->setSingleGaussianFixedResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FixedGaus_Fit",gaus1);
                     results->setFloatValue(section,"FixedGaus_Mean",mean1);
+                    results->setFloatValue(section,"FixedGaus_Fraction2Sigma",Fraction2Sigmas);
                 }
                 else if (i == 4 ) {
                     results->setSingleGaussianFWTMResolution(gaus1,alignMode);
                     results->setFloatValue(section,"FWTM_Fit",gaus1);
                     results->setFloatValue(section,"FWTM_FitMean",mean1);
+                    results->setFloatValue(section,"FWTM_Fraction2Sigma",Fraction2Sigmas);
                 }
                 else if (i == 5){
                     results->setFloatValue(section,"FixedDoubleGaus_Fit1",gaus1);
                     results->setFloatValue(section,"FixedDoubleGaus_Fit2",gaus3);
                     results->setFloatValue(section,"FixedDoubleGaus_Mean",mean1);
                 }
-            }
+                else if (i==6){
+                    results->setFloatValue(section,"FWHMsigma_Fraction2Sigma",Fraction2Sigmas);
 
-            histSaver->SaveHistogram(hClone);
+                }
+                else if(i==7){
+                    results->setFloatValue(section,"FWTMsigma_Fraction2Sigma",Fraction2Sigmas);
+                }
+            }
+            histSaver->SaveHistogramWithExtendedFit(hClone,fit,-30,30);
             delete hClone;
         }
     }

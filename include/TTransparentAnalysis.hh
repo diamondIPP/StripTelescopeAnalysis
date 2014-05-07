@@ -85,9 +85,11 @@ private:
 	void saveClusteredHistos();
 	void savePedestalHistos();
     void saveNoiseHistos();
-	TF1* doGaussFit(TH1F *histo);
+    Float_t GetFractionOutsideNSigma(TH1* hRes,Float_t mean, Float_t sigma,Int_t nSigma=2);
+	TF1* doGaussFit(TH1F *histo,Float_t xmin =0,Float_t xmax=0);
 	TF1* doDoubleGaussFit(TH1F *histo);
 	TF1* doFixedDoubleGaussFit(TH1F* histo);
+	TF1* doGaussPlusStepFunction(TH1F* histo);
 	void createEtaIntegrals();
 	void fitHistograms();
 	void createEfficiencyPlots(TH1F* hLandauDistribution);
