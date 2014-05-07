@@ -2171,7 +2171,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 
     TString realName = hRes->GetName();
     TString realTitle = hRes->GetTitle();
-    for(int i=0;i<8;i++){
+    for(int i=0;i<10;i++){
         TString hName = realName;
         TString hTitle = realTitle;
         switch (i){
@@ -2184,6 +2184,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
             case 6: hName.Append("_FWHMsigma");hTitle.Append(" Gauss with #sigma_{FWHM}");break;
             case 7: hName.Append("_FWTMsigma");hTitle.Append(" Gauss with #sigma_{FWTM}");break;
             case 8: hName.Append("_RMSsigma");hTitle.Append(" Gauss with #sigma_{RMS}");break;
+            case 8: hName.Append("_GausPlusBackground");hTitle.Append(" Gauss + Gauss convoluted step function");break;
         }
         TH1F* hClone = (TH1F*)hRes->Clone(hName);
         hClone->SetTitle(hTitle);
@@ -2301,6 +2302,11 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                     mean1 = fit->GetParameter(1);
                     Fraction2Sigmas = GetFractionOutsideNSigma(hClone,mean1,gaus1);
                     break;
+
+                case 9:
+                    fit = doGaussPlusStepFunction(hClone);
+                    break;
+
             }
 
             if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
@@ -2346,6 +2352,9 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                 }
                 else if(i==7){
                     results->setFloatValue(section,"FWTMsigma_Fraction2Sigma",Fraction2Sigmas);
+                }
+                else if(i==8){
+                    results->setFloatValue(section,"RMS_Fraction2Sigma",Fraction2Sigmas);
                 }
             }
             histSaver->SaveHistogramWithExtendedFit(hClone,fit,-30,30);
