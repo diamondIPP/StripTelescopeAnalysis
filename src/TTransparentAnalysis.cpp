@@ -1702,13 +1702,15 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
     settings->getSelectionFidCuts()->setRunDescription(settings->getRunDescription());
     cout<<"Rundes: "<<settings->getRunDescription()<<"\tIndex: "<<settings->getSelectionFidCuts()->getActiveIndex()<<endl;
     cout<<"Creating  Event Vector "<<endl;
-    for (nEvent = startEvent; nEvent < nEvents+startEvent; nEvent++) {
-        TRawEventSaver::showStatusBar(nEvent,nEvents+startEvent,100);
+    for (nEvent = startEvent; nEvent < nEvents; nEvent++) {
+        TRawEventSaver::showStatusBar(nEvent,nEvents,100);
         //		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
         if (settings->useForAlignment(nEvent,nEvents)){
             usedForAlignment++;
             continue;
         }
+        if(nEvent>eventReader->GetEntries())
+            break;
         eventReader->LoadEvent(nEvent);
         if (eventReader->isValidTrack() == 0) {
             //		if (eventReader->useForAnalysis() == 0) {
