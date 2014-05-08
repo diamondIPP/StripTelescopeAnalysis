@@ -1041,6 +1041,83 @@ void TTransparentAnalysis::analyseEtaDistributions(){
 
 }
 
+void TTransparentAnalysis::AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo){
+    if (!hLandauVsEventNo)
+           return;
+       TString name = hLandauVsEventNo->GetName();
+       name+="_MaxBinPos";
+       TString title = hLandauVsEventNo->GetTitle();
+       title+=" Max Bin Position";
+       Float_t xmin =hLandauVsEventNo->GetXaxis()->GetXmin();//GetBinLowEdge(hLandauVsEventNo->GetXaxis()->GetFirst());
+       Float_t xmax =hLandauVsEventNo->GetXaxis()->GetXmax();//GetBinUpEdge(hLandauVsEventNo->GetXaxis()->GetLast());
+       Int_t minBin = hLandauVsEventNo->GetXaxis()->GetFirst();
+       Int_t maxBin = hLandauVsEventNo->GetXaxis()->GetLast();
+       Int_t nBins = hLandauVsEventNo->GetXaxis()->GetNbins();
+       TH1F* hMaxBinPosition = new TH1F(name,title,nBins,xmin,xmax);
+       nBins = 5;
+       for(Int_t bin = minBin;bin <= maxBin;bin++){
+           TH1D* histo =  hLandauVsEventNo->ProjectionY("_py",bin,bin+nBins);
+           Float_t maxPos =  histo->GetBinCenter(histo->GetMaximumBin());
+           Float_t pos = hLandauVsEventNo->GetXaxis()->GetBinCenter(bin);
+           cout<<bin <<" "<<pos<<" - "<<maxPos<<endl;
+           hMaxBinPosition->Fill(pos,maxPos);
+           delete histo;
+       }
+       hMaxBinPosition->GetXaxis()->SetRange(minBin,maxBin);
+       xmin=hLandauVsEventNo->GetXaxis()->GetBinLowEdge(hLandauVsEventNo->GetXaxis()->GetFirst());
+       xmax=hLandauVsEventNo->GetXaxis()->GetBinUpEdge(hLandauVsEventNo->GetXaxis()->GetLast());
+       TF1* fit = new TF1("fit","pol1",xmin,xmax);
+       fit->SetLineColor(kBlue);
+       fit->SetLineWidth(1);
+       hMaxBinPosition->Fit(fit,"Q");
+       results->setFloatValue("TimeDependence","MaxBinPosOffset",fit->GetParameter(0));
+       results->setFloatValue("TimeDependence","MaxBinPosSlope",fit->GetParameter(1));
+       histSaver->SaveHistogram(hMaxBinPosition);
+       delete hMaxBinPosition;
+}
+
+void TTransparentAnalysis::AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo){
+    TF1* fLandau = new TF1("fitLandau","landau",0,3000);
+    TObjArray* objArray = new    TObjArray();
+    objArray->SetOwner(kTRUE);
+    hLandauVsEventNo->FitSlicesY(fLandau,0,-1,30,"QNRG5S",objArray);
+    TString name = (TString)"c_"+hLandauVsEventNo->GetName()+(TString)"_LandauFitSlices";
+    TCanvas *c1 = new TCanvas(name,name);
+    c1->Divide(2,2);
+    TH1D* hMP = (TH1D*)objArray->At(1);
+
+    Float_t xmin=hLandauVsEventNo->GetXaxis()->GetBinLowEdge(hLandauVsEventNo->GetXaxis()->GetFirst());
+    Float_t xmax=hLandauVsEventNo->GetXaxis()->GetBinUpEdge(hLandauVsEventNo->GetXaxis()->GetLast());
+    TF1* fit = new TF1("fit","pol1",xmin,xmax);
+    fit->SetLineColor(kBlue);
+    fit->SetLineWidth(1);
+
+    if(hMP)
+        hMP->Fit(fit,"Q");
+
+    for (UInt_t i =0; i<objArray->GetEntries();i++){
+        c1->cd(i+1);
+        TH1D* histo = (TH1D*)objArray->At(i);
+        histo->GetXaxis()->SetRangeUser(xmin,xmax);
+        Float_t max = histo->GetBinContent(histo->GetMaximumBin());
+        Float_t min = histo->GetBinContent(histo->GetMinimumBin());
+        histo->GetYaxis()->SetRangeUser(min-(max-min)*.1,max+(max-min)*.5);
+        histo->Draw();
+    }
+    histSaver->SaveHistogram(hMP);
+    results->setFloatValue("TimeDependence","LandauFitSlicesMPOffset",fit->GetParameter(0));
+    results->setFloatValue("TimeDependence","LandauFitSlicesMPSlope",fit->GetParameter(1));
+    histSaver->SaveCanvas(c1);
+
+}
+
+void TTransparentAnalysis::AnalyzeLandauVsEventNo(TH2* hLandauVsEventNo){
+    if (!hLandauVsEventNo)
+        return;
+    AnalyzeLandauVsEventNoMaxBin(hLandauVsEventNo);
+    AnalyzeLandauVsEventNoFitSlices(hLandauVsEventNo);
+}
+
 void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
     if (clusterSize==0)
         return;
@@ -1091,6 +1168,9 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
                     }
                 }
                 delete prof;
+            }
+            if (clusterSize==vecVecPh2Highest.size() &&  alignMode == TSettings::normalMode){
+                AnalyzeLandauVsEventNo(hLandau2OutOfXVsEventNo);
             }
             if (hLandau2OutOfXVsEventNo)
                 delete hLandau2OutOfXVsEventNo;
@@ -2184,7 +2264,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
             case 6: hName.Append("_FWHMsigma");hTitle.Append(" Gauss with #sigma_{FWHM}");break;
             case 7: hName.Append("_FWTMsigma");hTitle.Append(" Gauss with #sigma_{FWTM}");break;
             case 8: hName.Append("_RMSsigma");hTitle.Append(" Gauss with #sigma_{RMS}");break;
-            case 8: hName.Append("_GausPlusBackground");hTitle.Append(" Gauss + Gauss convoluted step function");break;
+            case 9: hName.Append("_GausPlusBackground");hTitle.Append(" Gauss + Gauss convoluted step function");break;
         }
         TH1F* hClone = (TH1F*)hRes->Clone(hName);
         hClone->SetTitle(hTitle);

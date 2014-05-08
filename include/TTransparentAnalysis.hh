@@ -41,6 +41,7 @@
 #include "TPaveText.h"
 #include "TList.h"
 #include "TPolyMarker.h"
+#include "TObjArray.h"
 //#include "FidCutRegion.hh"
 
 #include "TSettings.class.hh"
@@ -59,6 +60,7 @@
 #include "TAnalysisOfSelection.hh"
 #include "TAnalysisOfClustering.hh"
 #include "TSpectrum.h"
+
 
 using namespace std;
 
@@ -98,6 +100,9 @@ private:
 	void saveHistograms();
 	void saveLandausVsPositionPlots(UInt_t clusterSize);
 	void SaveLandauVsEventNoPlots(UInt_t clusterSize);
+	void AnalyzeLandauVsEventNo(TH2* hLandauVsEventNo);
+    void AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo);
+    void AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo);
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();
