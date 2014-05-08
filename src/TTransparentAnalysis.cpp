@@ -1136,7 +1136,6 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
 
     if(clusterSize-1 < vecVecPh2Highest.size()){
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
-        vectorEventNo.back() - vectorEventNo.front()
         hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,nEvents/1e4,512,0,nEvents,0,3000);
         cout<<"Save "<<name<<" "<<hLandau2OutOfXVsEventNo;
         if(hLandau2OutOfXVsEventNo) cout<<" "<<hLandau2OutOfXVsEventNo->GetEntries();
@@ -1150,7 +1149,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             hLandau2OutOfXVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
             TProfile* prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
-            prof->Rebin(2);
+//            prof->Rebin(2);
             if (prof){
                 if (clusterSize==vecVecPh2Highest.size() &&  alignMode == TSettings::normalMode){
                     TF1* fit = prof->GetFunction((TString)"fit_"+hLandau2OutOfXVsEventNo->GetName());
@@ -1964,6 +1963,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
     results->setFloatValue("TransparentNoise","NoiseCMNVsClusterSizeOffset",fit->GetParameter(0));
     results->setFloatValue("TransparentNoise","NoiseCMNVsClusterSizeSlope",fit->GetParameter(1));
     histSaver->SaveHistogram(hTransparentNoiseCMN);
+    histSaver->SaveTwoHistos("cTransparentNoises",hTransparentNoise,hTransparentNoiseCMN);
     delete hTransparentNoise;
     delete hTransparentNoiseCMN;
 
