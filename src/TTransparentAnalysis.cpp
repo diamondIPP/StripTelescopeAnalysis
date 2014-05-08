@@ -2033,6 +2033,7 @@ void TTransparentAnalysis::saveNoiseHistos() {
     pol1->SetLineWidth(1);
     Double_t minStack = 1e9;
     Double_t maxStack = -1e9;
+    vector<Float_t> noiseSlopes;
     for(it=hNoiseVsEvenNo.begin(); it!=hNoiseVsEvenNo.end(); it++){
         TProfile* prof = (*it).second;
         if(!prof) continue;
@@ -2048,13 +2049,29 @@ void TTransparentAnalysis::saveNoiseHistos() {
             color++;
         }
         histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
-        hNoiseSlopesVsChannel->SetBinContent((hNoiseSlopesVsChannel->FindBin((*it).first)),fit->GetParameter(1));
+        Float_t slope = fit->GetParameter(1);
+        if (!settings->IsMasked(subjectDetector,(*it).first))
+            noiseSlopes.push_back(slope*1e6);
+        hNoiseSlopesVsChannel->SetBinContent((hNoiseSlopesVsChannel->FindBin((*it).first)),slope);
         vecCh.push_back((*it).first);
-        vecSlope.push_back(fit->GetParameter(1));
+        vecSlope.push_back(slope);
         delete prof;
         (*it).second= 0;
         hNoiseVsEvenNo.erase(it);
     }
+    TH1F* dist = histSaver->CreateDistributionHisto("hNoiseSlopesNonMasked",noiseSlopes,20);
+    if (dist){
+        dist->SetName("hNoiseSlopesNonMasked");
+        dist->SetTitle("Slope of Noise per non masked channel ");
+        dist->Draw("goff");
+        dist->GetXaxis()->SetTitle("Noise slope ADC/1M events");
+        dist->GetYaxis()->SetTitle("number of entries #");
+        results->setFloatValue("TimeDependence","SlopeOfNoiseMean",dist->GetMean());
+        results->setFloatValue("TimeDependence","SlopeOfNoiseRMS",dist->GetRMS());
+        histSaver->SaveHistogram(dist);
+        delete dist;
+    }
+
     TGraph graph = histSaver->CreateDipendencyGraph("gNoiseSlopeVsChannel",vecSlope,vecCh);
     graph.Draw("AP");
     graph.GetXaxis()->SetTitle("channel");
@@ -2066,6 +2083,7 @@ void TTransparentAnalysis::saveNoiseHistos() {
     hSlopes->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hSlopes);
     delete hSlopes;
+
     if(hCmnVsEventNo) {
         cout<<"save "<<hCmnVsEventNo->GetName()<<endl;
         TF1* fit = (TF1*)pol1->Clone(hCmnVsEventNo->GetName()+(TString)"_fit");
