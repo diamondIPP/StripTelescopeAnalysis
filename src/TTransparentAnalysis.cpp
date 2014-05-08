@@ -1910,17 +1910,19 @@ void TTransparentAnalysis::analyseNonHitEvents() {
             Float_t xmax = fit->GetParameter(1)+4*fit->GetParameter(2);
             histo->GetXaxis()->SetRangeUser(xmin,xmax);
             histSaver->SaveHistogram(histo);
+            Float_t sigma;
             switch(k){
                 case 0:
                     noiseWidths[j] = fit->GetParameter(2);
-                    Float_t sigma = fit->GetParameter(2)/TMath::Sqrt(j+1);
+                     sigma = fit->GetParameter(2)/TMath::Sqrt(j+1);
                     results->setFloatValue("TransparentNoise",TString::Format("NoiseClusterSize%02d",j+1),sigma);
                     hTransparentNoise->SetBinContent(j+1,sigma);
                     hTransparentNoise->SetBinError(j+1,fit->GetParError(2)/TMath::Sqrt(j+1));
                     break;
                 case 1:
                     noiseWidthsCMN[j] = fit->GetParameter(2);
-                    results->setFloatValue("TransparentNoise",TString::Format("NoiseClusterSize%02d",j+1),fit->GetParameter(2)/TMath::Sqrt(j+1));
+                    sigma = fit->GetParameter(2)/TMath::Sqrt(j+1);
+                    results->setFloatValue("TransparentNoise",TString::Format("NoiseClusterSize%02d",j+1),sigma);
                     hTransparentNoiseCMN->SetBinContent(j+1,sigma);
                     hTransparentNoiseCMN->SetBinError(j+1,fit->GetParError(2)/TMath::Sqrt(j+1));
                     break;
