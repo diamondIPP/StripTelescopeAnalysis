@@ -1054,12 +1054,14 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo){
        Int_t maxBin = hLandauVsEventNo->GetXaxis()->GetLast();
        Int_t nBins = hLandauVsEventNo->GetXaxis()->GetNbins();
        TH1F* hMaxBinPosition = new TH1F(name,title,nBins,xmin,xmax);
+       hMaxBinPosition->SetMarkerStyle(2);
        nBins = 5;
        for(Int_t bin = minBin;bin <= maxBin;bin++){
            TH1D* histo =  hLandauVsEventNo->ProjectionY("_py",bin,bin+nBins);
-           Float_t maxPos =  histo->GetBinCenter(histo->GetMaximumBin());
+           Float_t max = histo->GetMaximumBin();
+           Float_t maxPos =  histo->GetBinCenter(max);
            Float_t pos = hLandauVsEventNo->GetXaxis()->GetBinCenter(bin);
-           cout<<bin <<" "<<pos<<" - "<<maxPos<<endl;
+           cout<<bin <<" "<<pos<<" - "<<maxPos<<" "<<max<<endl;
            hMaxBinPosition->Fill(pos,maxPos);
            delete histo;
        }
@@ -1072,7 +1074,7 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo){
        hMaxBinPosition->Fit(fit,"Q");
        results->setFloatValue("TimeDependence","MaxBinPosOffset",fit->GetParameter(0));
        results->setFloatValue("TimeDependence","MaxBinPosSlope",fit->GetParameter(1));
-       histSaver->SaveHistogram(hMaxBinPosition);
+       histSaver->SaveHistogram(hMaxBinPosition,false,false,true,"PE");
        delete hMaxBinPosition;
 }
 
