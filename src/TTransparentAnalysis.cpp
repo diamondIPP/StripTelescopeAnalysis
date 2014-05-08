@@ -2393,7 +2393,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
                     break;
 
             }
-
+            Fraction2Sigmas*=100.;
             if ( clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1 && results ){
                 if( i == 0 ) {
                     results->setSingleGaussianResolution(gaus1,alignMode);
