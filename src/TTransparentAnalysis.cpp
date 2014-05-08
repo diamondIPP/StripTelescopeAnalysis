@@ -1110,6 +1110,7 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo
     histSaver->SaveCanvas(c1);
     delete c1;
     hMP->SetName("hLandauVsEventNo_FitSlices_MP");
+    hMP->GetYaxis()->SetRangeUser(0,hMP->GetBinContent(hMP->GetMaximumBin()*1.4));
     histSaver->SaveHistogram(hMP);
     results->setFloatValue("TimeDependence","LandauFitSlicesMPOffset",fit->GetParameter(0));
     results->setFloatValue("TimeDependence","LandauFitSlicesMPSlope",fit->GetParameter(1)*1e6);
@@ -1146,6 +1147,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             hLandau2OutOfXVsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
             histSaver->SaveHistogram(hLandau2OutOfXVsEventNo);
             TProfile* prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandau2OutOfXVsEventNo,"pol1");
+            prof->Rebin(2);
             if (prof){
                 if (clusterSize==vecVecPh2Highest.size() &&  alignMode == TSettings::normalMode){
                     TF1* fit = prof->GetFunction((TString)"fit_"+hLandau2OutOfXVsEventNo->GetName());
@@ -1940,9 +1942,22 @@ void TTransparentAnalysis::analyseNonHitEvents() {
         delete hNonHitNoiseDistributions2OutOfX[j];
         delete hNonHitNoiseDistributions2OutOfXCMN[j];
     }
+    hTransparentNoiseCMN->Draw("goff");
+    hTransparentNoiseCMN->GetYaxis()->SetRangeUser(0,1.4*hTransparentNoiseCMN->GetBinContent(hTransparentNoiseCMN->GetMaximumBin()));
+    hTransparentNoise->GetYaxis()->SetRangeUser(0,1.4*hTransparentNoise->GetBinContent(hTransparentNoise->GetMaximumBin()));
+
+    Float_t minY = hTransparentNoise->GetBinContent(hTransparentNoise->GetMinimumBin());
+    Float_t maxY = hTransparentNoise->GetBinContent(hTransparentNoise->GetMaximumBin());
+    hTransparentNoise->GetYaxis()->SetRangeUser(minY-(maxY-minY)*.2,maxY+(maxY-minY)*.3);
     histSaver->SaveHistogram(hTransparentNoise);
     TF1* fit = new TF1("fit","pol1",0,10);
+    fit->SetLineColor(kBlue);
+    fit->SetLineWidth(1);
+    fit->SetLineStyle(2);
     hTransparentNoiseCMN->Fit(fit);
+    minY = hTransparentNoiseCMN->GetBinContent(hTransparentNoiseCMN->GetMinimumBin());
+    maxY = hTransparentNoiseCMN->GetBinContent(hTransparentNoiseCMN->GetMaximumBin());
+    hTransparentNoiseCMN->GetYaxis()->SetRangeUser(minY-(maxY-minY)*.2,maxY+(maxY-minY)*.3);
     results->setFloatValue("TransparentNoise","NoiseCMNVsClusterSizeOffset",fit->GetParameter(0));
     results->setFloatValue("TransparentNoise","NoiseCMNVsClusterSizeSlope",fit->GetParameter(1));
     histSaver->SaveHistogram(hTransparentNoiseCMN);
