@@ -1884,10 +1884,14 @@ void TTransparentAnalysis::analyseNonHitEvents() {
 
     noiseWidths2OutOfX.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
     noiseWidths2OutOfXCMN.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
-
+    TH1F *hTransparentNoise = new TH1F("hTransparentNoise","hTransparentNoise",10,.5,10.5);;
+    TH1F *hTransparentNoiseCMN = new TH1F("hTransparentNoiseCMN","hTransparentNoiseCMN",10,.5,10.5);
+    hTransparentNoise->GetXaxis()->SetTitle("ClusterSize");
+    hTransparentNoiseCMN->GetXaxis()->SetTitle("ClusterSize");
+    hTransparentNoise->GetYaxis()->SetTitle("#sigma_{Noise}");
+    hTransparentNoiseCMN->GetYaxis()->SetTitle("#sigma_{Noise - CM corrected}");
     for (UInt_t j = 0; j < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); j++){
         for(UInt_t k = 0; k<4;k++){
-
             TH1F* histo;
             switch (k) {
                 case 0: histo = hNonHitNoiseDistributions[j];break;
@@ -1907,8 +1911,19 @@ void TTransparentAnalysis::analyseNonHitEvents() {
             histo->GetXaxis()->SetRangeUser(xmin,xmax);
             histSaver->SaveHistogram(histo);
             switch(k){
-                case 0: noiseWidths[j] = fit->GetParameter(2);break;
-                case 1: noiseWidthsCMN[j] = fit->GetParameter(2);break;
+                case 0:
+                    noiseWidths[j] = fit->GetParameter(2);
+                    Float_t sigma = fit->GetParameter(2)/TMath::Sqrt(j+1);
+                    results->setFloatValue("TransparentNoise",TString::Format("NoiseClusterSize%02d",j+1),sigma);
+                    hTransparentNoise->SetBinContent(j+1,sigma);
+                    hTransparentNoise->SetBinError(j+1,fit->GetParError(2)/TMath::Sqrt(j+1));
+                    break;
+                case 1:
+                    noiseWidthsCMN[j] = fit->GetParameter(2);
+                    results->setFloatValue("TransparentNoise",TString::Format("NoiseClusterSize%02d",j+1),fit->GetParameter(2)/TMath::Sqrt(j+1));
+                    hTransparentNoiseCMN->SetBinContent(j+1,sigma);
+                    hTransparentNoiseCMN->SetBinError(j+1,fit->GetParError(2)/TMath::Sqrt(j+1));
+                    break;
                 case 2: noiseWidths2OutOfX[j] = fit->GetParameter(2);break;
                 case 3: noiseWidths2OutOfXCMN[j] = fit->GetParameter(2);break;
             }
@@ -1923,6 +1938,15 @@ void TTransparentAnalysis::analyseNonHitEvents() {
         delete hNonHitNoiseDistributions2OutOfX[j];
         delete hNonHitNoiseDistributions2OutOfXCMN[j];
     }
+    histSaver->SaveHistogram(hTransparentNoise);
+    TF1* fit = new TF1("fit","pol1",0,10);
+    hTransparentNoiseCMN->Fit(fit);
+    results->setFloatValue("TransparentNoise","NoiseCMNVsClusterSizeOffset",fit->GetParameter(0));
+    results->setFloatValue("TransparentNoise","NoiseCMNVsClusterSizeSlope",fit->GetParameter(1));
+    histSaver->SaveHistogram(hTransparentNoiseCMN);
+    delete hTransparentNoise;
+    delete hTransparentNoiseCMN;
+
 }
 
 void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
