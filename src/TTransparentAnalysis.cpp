@@ -101,7 +101,6 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         char t;
         cin >>t;
     }
-    histSaver->SetNumberOfEvents(nEvents);
     predXMin = predYMin = 1e9;
     predXMax = predYMax = -1e9;
     //	usedForSiliconAlignment = 0;
@@ -110,6 +109,8 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         cout << "only "<<eventReader->GetEntries()<<" in tree!\n";
         nEvents = eventReader->GetEntries()-startEvent;
     }
+    this->nEvents =nEvents+startEvent;
+    histSaver->SetNumberOfEvents(nEvents);
     UInt_t newstartEvent = 0;
     if(settings->getAlignmentEvents(nEvents)>startEvent){
         cout<<"startEvent:      "<<startEvent<<endl;
@@ -125,12 +126,13 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
-    this->nEvents = nEvents;
+
     createEventVector(startEvent);
     cout<<"X: "<<predXMin<<" - "<<predXMax<<endl;
     cout<<"Y: "<<predYMin<<" - "<<predYMax<<endl;
 
     usedForAlignment += newstartEvent;
+
     this->printCutFlow();
     createEtaIntegrals();
     calcEtaCorrectedResiduals();
@@ -1134,7 +1136,8 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
 
     if(clusterSize-1 < vecVecPh2Highest.size()){
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
-        hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,100,512,0,nEvents,0,3000);
+        vectorEventNo.back() - vectorEventNo.front()
+        hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,nEvents/1e4,512,0,nEvents,0,3000);
         cout<<"Save "<<name<<" "<<hLandau2OutOfXVsEventNo;
         if(hLandau2OutOfXVsEventNo) cout<<" "<<hLandau2OutOfXVsEventNo->GetEntries();
         cout<<endl;
