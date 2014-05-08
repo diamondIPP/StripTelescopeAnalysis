@@ -1073,7 +1073,7 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo){
        fit->SetLineWidth(1);
        hMaxBinPosition->Fit(fit,"Q");
        results->setFloatValue("TimeDependence","MaxBinPosOffset",fit->GetParameter(0));
-       results->setFloatValue("TimeDependence","MaxBinPosSlope",fit->GetParameter(1));
+       results->setFloatValue("TimeDependence","MaxBinPosSlope",fit->GetParameter(1)*1e6);
        histSaver->SaveHistogram(hMaxBinPosition,false,false,true,"PE");
        delete hMaxBinPosition;
 }
@@ -1084,8 +1084,7 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo
     objArray->SetOwner(kTRUE);
     hLandauVsEventNo->FitSlicesY(fLandau,0,-1,30,"QNRG5S",objArray);
     TString name = (TString)"c_"+hLandauVsEventNo->GetName()+(TString)"_LandauFitSlices";
-    TCanvas *c1 = new TCanvas(name,name);
-    c1->Divide(2,2);
+
     TH1D* hMP = (TH1D*)objArray->At(1);
 
     Float_t xmin=hLandauVsEventNo->GetXaxis()->GetBinLowEdge(hLandauVsEventNo->GetXaxis()->GetFirst());
@@ -1096,7 +1095,8 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo
 
     if(hMP)
         hMP->Fit(fit,"Q");
-
+    TCanvas *c1 = new TCanvas(name,name);
+    c1->Divide(2,2);
     for (UInt_t i =0; i<objArray->GetEntries();i++){
         c1->cd(i+1);
         TH1D* histo = (TH1D*)objArray->At(i);
@@ -1104,12 +1104,15 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo
         Float_t max = histo->GetBinContent(histo->GetMaximumBin());
         Float_t min = histo->GetBinContent(histo->GetMinimumBin());
         histo->GetYaxis()->SetRangeUser(min-(max-min)*.1,max+(max-min)*.5);
+        c1->cd(i+1);
         histo->Draw();
     }
+    histSaver->SaveCanvas(c1);
+    delete c1;
+    hMP->SetName("hLandauVsEventNo_FitSlices_MP");
     histSaver->SaveHistogram(hMP);
     results->setFloatValue("TimeDependence","LandauFitSlicesMPOffset",fit->GetParameter(0));
-    results->setFloatValue("TimeDependence","LandauFitSlicesMPSlope",fit->GetParameter(1));
-    histSaver->SaveCanvas(c1);
+    results->setFloatValue("TimeDependence","LandauFitSlicesMPSlope",fit->GetParameter(1)*1e6);
 
 }
 
@@ -1166,7 +1169,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
                         key = TString::Format("LandauClusterFitOffsetSize%02d",clusterSize);
                         results->setFloatValue(section,key,fit->GetParameter(0));
                         key = TString::Format("LandauClusterFitSlopeSize%02d",clusterSize);
-                        results->setFloatValue(section,key,fit->GetParameter(1));
+                        results->setFloatValue(section,key,fit->GetParameter(1)*1e6);
                     }
                 }
                 delete prof;

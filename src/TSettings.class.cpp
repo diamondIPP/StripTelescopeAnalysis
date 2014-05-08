@@ -676,7 +676,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	//default clustering settings
 	snr_plots_enable = 0;
-	bTransparentAlignment=false;
+	bTransparentAlignment=true;
 
 	Di_Cluster_Seed_Factor = 10;
 	Di_Cluster_Hit_Factor = 7;
