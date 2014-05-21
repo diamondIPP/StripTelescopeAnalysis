@@ -245,7 +245,8 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 }
 
 pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float meanCMN, float sigmaCMN, int iterations, float maxSigma) {
-	diaSUMCmn[ch]=0;
+	cout<<"calculateFirstPedestalDiaCMN "<<ch<<" "<<meanCMN<< " "<< sigmaCMN<< " "<<iterations<< " "<<maxSigma<<endl;
+    diaSUMCmn[ch]=0;
 	diaSUM2Cmn[ch]=0;
 	diaEventsInSumCMN[ch]=0;
 	//  if(ch==7)cout<<"calcFirstPedCMN:"<<ch<<" "<<meanCMN<<" "<<sigmaCMN<<" "<<diaEventsInSumCMN[ch]<<endl;
