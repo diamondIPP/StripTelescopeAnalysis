@@ -94,6 +94,12 @@ private:
     TH1F *hBiggestSignalInSigmaCMN[9];
 	TH1F *hBiggestAdjacentSignalInSigma[9];
 	TH1F *hBiggestAdjacentSignalInSigmaCMN[9];
+	TH1F* hRelCmnUncertainty;
+	TH1F* hCmnNUsedChannels;
+	TH1F* hNewComonModeNoise;
+	TH2F* hCmnChannelWeight;
+	TH2F* hCmnNewVsNUsedChannels;
+
 	TH1F *histo_pulseheight_sigma125[9];
 	TH1F *hHitOrderMap[9];
 	TH1F *histo_pulseheight_sigma_second_left[9];

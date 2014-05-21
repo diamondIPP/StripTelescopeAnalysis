@@ -413,6 +413,12 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
+    hRelCmnUncertainty = new TH1F("hRelCmnUncertainty","hRelCmnUncertainty",512,-200,+200);
+    Int_t nChannels = TPlaneProperties::getNChannelsDiamond();
+    hCmnNUsedChannels = new TH1F("hCmnNUsedChannels","hCmnNUsedChannels",nChannels,0,nChannels-1);
+    hNewComonModeNoise = new TH1F("hNewComonModeNoise","hNewComonModeNoise",512,-30,30);
+    hCmnChannelWeight = new TH2F("hCmnChannelWeight","hCmnChannelWeight",nChannels,0,nChannels-1,512,-100,+100);
+    hCmnNewVsNUsedChannels = new TH2F("hCmnNewVsNUsedChannels","hCmnNewVsNUsedChannels",512,-30,30,nChannels,0,nChannels-1);
     for(UInt_t i=0;i < settings->diamondPattern.getNIntervals();i++){
         pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
         TString name = TString::Format("hBiggestSignalInSigmaDiaPattern_%d_ch_%d_%d",i+1,channels.first,channels.second);
@@ -921,6 +927,13 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 
 
 void TAnalysisOfPedestal::saveHistos(){
+
+    histSaver->SaveHistogram(hRelCmnUncertainty);
+    histSaver->SaveHistogram(hCmnNUsedChannels);
+    histSaver->SaveHistogram(hNewComonModeNoise);
+    histSaver->SaveHistogram(hCmnChannelWeight);
+    histSaver->SaveHistogram(hCmnNewVsNUsedChannels);
+
     map<Int_t,TH1F*>::iterator it;
     for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++){
         SetYRangeForSignalInSigmaPlot((*it).second);
@@ -1397,7 +1410,9 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
     Float_t maxVal =TPlaneProperties::getMaxSignalHeightDiamond();
     Float_t cmNoise = 0;
     UInt_t nCmNoiseEvents =0;
+    vector<Float_t> channelWeight;
     for (UInt_t ch = 0; ch < TPlaneProperties::getNChannelsDiamond();ch++){
+        channelWeight.push_back(0);
         Float_t adc = eventReader->getAdcValue(det,ch);
         bool masked = settings->IsMasked(det,ch);
         Float_t mean = eventReader->getPedestalMean(det,ch,false);
@@ -1419,12 +1434,23 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         }
         if(verbosity>10||(verbosity>4&&nEvent==0))cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
         cmNoise+=signal;
+        channelWeight.back() = signal;
         nCmNoiseEvents++;
     }
+
     cmNoise = cmNoise/(Float_t)nCmNoiseEvents;
-    cout<<TString::Format("%7d - %3d %+6.2f +6.2f - %5.1f",nEvent,nCmNoiseEvents,cmNoise,cmn,(cmNoise-cmn)/cmn*100.);
+    Float_t relChange = (cmNoise-cmn)/cmn*100.;
+    if (verbosity>6||(TMath::Abs(relChange)>100. && verbosity>1))
+        cout<<TString::Format("%7d - %3d %+6.2f %+6.2f - %6.1f",nEvent,nCmNoiseEvents,cmNoise,cmn,(cmNoise-cmn)/cmn*100.);
     if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
     //    hCommonModeNoise->Fill(cmNoise,true);
+    hRelCmnUncertainty->Fill(relChange);
 
+    hCmnNUsedChannels->Fill(nCmNoiseEvents);
+    hNewComonModeNoise->Fill(cmNoise);
+    hCmnNewVsNUsedChannels->Fill(cmNoise,nCmNoiseEvents);
+    for (UInt_t ch =0;ch< channelWeight.size();ch++)
+        if (channelWeight.at(ch)!=0)
+            hCmnChannelWeight->Fill(ch,channelWeight.at(ch)/cmNoise*100.);
 
 }
