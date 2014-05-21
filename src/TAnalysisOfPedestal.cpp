@@ -1422,7 +1422,7 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         nCmNoiseEvents++;
     }
     cmNoise = cmNoise/(Float_t)nCmNoiseEvents;
-    cout<<TString::Format("%7d - %+6.2f +6.2f - %5.1f",nEvent,cmNoise,cmn,(cmNoise-cmn)/cmn*100.);
+    cout<<TString::Format("%7d - %3d %+6.2f +6.2f - %5.1f",nEvent,nCmNoiseEvents,cmNoise,cmn,(cmNoise-cmn)/cmn*100.);
     if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
     //    hCommonModeNoise->Fill(cmNoise,true);
 
