@@ -1443,9 +1443,9 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         channelWeight.push_back(0);
         Float_t adc = eventReader->getAdcValue(det,ch);
         bool masked = settings->IsMasked(det,ch);
-        Float_t mean = eventReader->getPedestalMean(det,ch,false);
-        Float_t signal = eventReader->getRawSignal(det,ch,false);
-        Float_t noise = eventReader->getPedestalSigma(det,ch,false);
+        Float_t mean = eventReader->getPedestalMean(det,ch,true);
+        Float_t signal = eventReader->getRawSignal(det,ch,true);
+        Float_t noise = eventReader->getPedestalSigma(det,ch,true);
         if (adc-mean != signal)
             cout<<"ERROR wrong signal calculation: "<<adc-mean<<"/"<<signal<<endl;
         Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);

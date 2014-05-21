@@ -425,7 +425,7 @@ void TPedestalCalculation::doCmNoiseCalculation()
 
 	UInt_t nCmNoiseEvents=0;
 	Float_t maxVal = TPlaneProperties::getMaxSignalHeightDiamond();
-	UInt_t det = TPlaneProperties::getNDetectors();
+	UInt_t det = TPlaneProperties::getDetDiamond();
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 	    /*
         Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);
@@ -498,6 +498,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 		//		eventReader->LoadEvent(nEvent);
 		doCmNoiseCalculation();
 		cmnValues.push_back(cmNoise);
+
 		for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 			Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);;
 			adc -=cmNoise;
