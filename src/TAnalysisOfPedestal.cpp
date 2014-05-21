@@ -1510,8 +1510,8 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
 
     cmNoise = cmNoise/(Float_t)nCmNoiseEvents;
     Float_t relChange = (cmNoise-cmn)/cmn*100.;
-    if (verbosity>6||(TMath::Abs(relChange)>100. && verbosity>1)||true)
-        cout<<TString::Format("%7d - %3d %+6.2f %+6.2f - %6.1f",nEvent,nCmNoiseEvents,cmNoise,cmn,relChange);
+    if (verbosity>6||(TMath::Abs(relChange)>100. && verbosity>1)||false)
+        cout<<TString::Format("%7d - %3d %+6.2f %+6.2f - %6.1f",nEvent,nCmNoiseEvents,cmNoise,cmn,relChange)<<endl;
     if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
     //    hCommonModeNoise->Fill(cmNoise,true);
     hRelCmnUncertainty->Fill(relChange);
@@ -1525,7 +1525,7 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
             hCmnChannelWeightVsChannel->Fill(ch,weight);
             hCmnFractionVsChannel->Fill(ch,channelWeight.at(ch));
             hCmnChannelWeight->Fill(weight);
-            cout<<nEvent<<"/"<<ch <<" weight: \t"<<channelWeight.at(ch)<< "\t"<<cmNoise<<"\t"<<weight<<endl;
+            //cout<<nEvent<<"/"<<ch <<" weight: \t"<<channelWeight.at(ch)<< "\t"<<cmNoise<<"\t"<<weight<<endl;
         }
     hCmnVsNewCmn->Fill(cmn,cmNoise);
     hNewCmnVsEventNo->Fill(nEvent,cmNoise);

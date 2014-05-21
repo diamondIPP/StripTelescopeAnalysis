@@ -255,7 +255,7 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 		Float_t adc = adcQueue.at(nEvent);
 		Float_t lowLimit = getLowLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 		Float_t highLimit = getHighLimitPedestal(meanCMN,sigmaCMN,maxSigma);
-		cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl;
+		if(ch ==0) cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl;
 		if(   (adc >= lowLimit)	&& (adc <= highLimit) ){
 			diaEventUsedCMN[ch].push_back(true);
 			diaSUMCmn[ch]+=adc;
@@ -455,7 +455,7 @@ void TPedestalCalculation::doCmNoiseCalculation()
             continue;
         }
         if (masked){
-            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" Is Masked "<<endl;
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<det<<"/"<<ch <<" Is Masked "<<settings->isDet_channel_screened(det,ch)<<endl;
             continue;
         }
 
@@ -481,7 +481,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 		//		eventReader->LoadEvent(nEvent);
 		doCmNoiseCalculation();
 		cmnValues.push_back(cmNoise);
-
+        cout<<cmNoise<<endl;
 		for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 			Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);;
 			adc -=cmNoise;
@@ -498,6 +498,8 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 
 		}
 	}
+    char t;
+    cin>>t;
 	if(verbosity)cout<<"update first Pedestal Calculation"<<endl;
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalMeanStartValues[ch],7,MAXDIASIGMA);
