@@ -1732,7 +1732,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
     eventNumbers.clear();
     vecEvents.clear();
     settings->getSelectionFidCuts()->Print(1);
-    settings->getSelectionFidCuts()->setRunDescription(settings->getRunDescription());
+    settings->getSelectionFidCuts()->setRunDescription(settings->getRunDescription(),settings->getNDiamonds());
     cout<<"Rundes: "<<settings->getRunDescription()<<"\tIndex: "<<settings->getSelectionFidCuts()->getActiveIndex()<<endl;
     cout<<"Creating  Event Vector "<<endl;
     for (nEvent = startEvent; nEvent < nEvents; nEvent++) {

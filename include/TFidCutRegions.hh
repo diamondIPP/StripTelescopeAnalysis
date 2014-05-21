@@ -47,7 +47,7 @@ public:
 	Float_t getLow(TPlaneProperties::enumCoordinate cor, UInt_t i);
 
 	void Print(int intend = 0);
-	void setRunDescription(std::string runDes);
+	void setRunDescription(std::string runDes,Int_t nDiamonds =0);
 	Int_t getFiducialCutIndex(Float_t xVal, Float_t yVal);
 	bool IsInFiducialCut(Float_t xVal,Float_t yVal);
 	int getFidCutRegion(Float_t xVal,Float_t yVal);

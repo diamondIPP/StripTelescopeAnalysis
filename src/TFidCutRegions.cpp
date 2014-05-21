@@ -113,7 +113,7 @@ void TFidCutRegions::Print(int intend)
 }
 
 
-void TFidCutRegions::setRunDescription(std::string runDes)
+void TFidCutRegions::setRunDescription(std::string runDes,int nDiamonds)
 {
 	index=0;
 	this->runDescription=runDes;
@@ -146,6 +146,11 @@ void TFidCutRegions::setRunDescription(std::string runDes)
 	cout<<" runDescription is :"<<runDescription<<" ==> index: "<<index<<endl;
 	if(index!=0){
 		if(index>fidCuts.size()){
+            if (fidCuts.size()<nDiamonds && nDiamonds!=0){
+                index=0;
+                return;
+            }
+
 			cerr<<"the set index ( "<<index<<") is not possible. There are only "<<fidCuts.size()<< " possible Fidcuts..."<<endl;
 			cerr<<"Please enter a valid index. Use a number between 0 [all],1(left) - "<<fidCuts.size()+1<<endl;
 			unsigned int newIndex=0;
