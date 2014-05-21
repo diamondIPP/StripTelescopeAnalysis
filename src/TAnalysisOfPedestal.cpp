@@ -949,7 +949,7 @@ void TAnalysisOfPedestal::saveHistos(){
         Float_t mean = hNewComonModeNoise->GetMean();
         Float_t rms = hNewComonModeNoise->GetRMS();
         prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
-        histSaver->SaveHistogram(prof);
+        histSaver->SaveHistogram(prof,false,false,false);
         delete prof;
         prof=0;
     }
@@ -962,7 +962,7 @@ void TAnalysisOfPedestal::saveHistos(){
         Float_t mean = hNewComonModeNoise->GetMean();
         Float_t rms = hNewComonModeNoise->GetRMS();
         prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
-        histSaver->SaveHistogram(prof);
+        histSaver->SaveHistogram(prof,false,false,false);
         delete prof;
         prof=0;
     }
@@ -977,7 +977,7 @@ void TAnalysisOfPedestal::saveHistos(){
     delete hCmnUsedChannels;
     prof = hCmnChannelWeightVsChannel->ProfileX();
     if (prof){
-        histSaver->SaveHistogram(prof);
+        histSaver->SaveHistogram(prof,false,false,false);
         delete prof;
         prof=0;
     }
@@ -986,7 +986,7 @@ void TAnalysisOfPedestal::saveHistos(){
 
     prof = hCmnFractionVsChannel->ProfileX();
     if (prof){
-        histSaver->SaveHistogram(prof);
+        histSaver->SaveHistogram(prof,false,false,false);
         delete prof;
         prof=0;
     }
