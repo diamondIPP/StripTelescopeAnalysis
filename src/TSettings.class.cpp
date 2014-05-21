@@ -27,6 +27,7 @@ TSettings::TSettings(TRunInfo *runInfo)
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
 	setRunDescription(runInfo->getRunDescription());
+	nEvents = runInfo->getEvents();
 	stringstream fileNameStr;
 	fileNameStr<<path<<"/"<<runInfo->getRunSettingsDir()<<"/settings."<<runInfo->getRunNumber();
 	if (runInfo->getRunDescription().at(0)!='0')

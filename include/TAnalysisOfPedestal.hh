@@ -99,6 +99,8 @@ private:
 	TH1F* hNewComonModeNoise;
 	TH2F* hCmnChannelWeight;
 	TH2F* hCmnNewVsNUsedChannels;
+	TH2F* hCmnVsNewCmn;
+	TH2F* hNewCmnVsEventNo;
 
 	TH1F *histo_pulseheight_sigma125[9];
 	TH1F *hHitOrderMap[9];

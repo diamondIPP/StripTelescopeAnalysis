@@ -334,6 +334,7 @@ public:
     const std::vector<int>& getDiaChannelNotConnected() const {return Dia_channel_not_connected;}
     bool IsNotConnectedChannel(Int_t ch);
     bool IsNoisyChannel(Int_t ch);
+    UInt_t getNEvents(){return nEvents;};
 private:
 
 	TString diamondName;
@@ -509,6 +510,7 @@ private:
 	Float_t diaOffsetMetricSpace;
 	Float_t diaStartingChannel;
 private:
+	Int_t nEvents;
 	Float_t yOffset3D;
 //	vector<int> xEdgeFicucialRegion;
 //	vector<int> yEdgeFicucialRegion;
