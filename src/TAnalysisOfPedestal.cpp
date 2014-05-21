@@ -1444,7 +1444,7 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         Float_t adc = eventReader->getAdcValue(det,ch);
         bool masked = settings->IsMasked(det,ch);
         Float_t mean = eventReader->getPedestalMean(det,ch,true);
-        Float_t signal = eventReader->getRawSignal(det,ch,true);
+        Float_t signal = adc - mean;
         Float_t noise = eventReader->getPedestalSigma(det,ch,true);
         if (adc-mean != signal)
             cout<<"ERROR wrong signal calculation: "<<adc-mean<<"/"<<signal<<endl;
@@ -1461,7 +1461,7 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
             continue;
         }
 
-        if (settings->IsMasked(det,ch)){
+        if (masked){
             if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" Is Masked "<<endl;
             continue;
         }
