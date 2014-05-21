@@ -413,9 +413,10 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
-    hRelCmnUncertainty = new TH1F("FhRelCmnUncertainty","hRelCmnUncertainty",512,-200,+200);
+    hRelCmnUncertainty = new TH1F("hRelCmnUncertainty","hRelCmnUncertainty",512,-200,+200);
     Int_t nChannels = TPlaneProperties::getNChannelsDiamond();
     hCmnNUsedChannels = new TH1F("hCmnNUsedChannels","hCmnNUsedChannels",nChannels,0,nChannels-1);
+    hCmnUsedChannels = new TH1F("hCmnUsedChannels","hCmnUsedChannels",nChannels,0,nChannels-1);
     hNewComonModeNoise = new TH1F("hNewComonModeNoise","hNewComonModeNoise",512,-30,30);
     hCmnChannelWeight = new TH1F("hCmnChannelWeight","hCmnChannelWeight",512,-1000,+1000);
 
@@ -424,7 +425,7 @@ void TAnalysisOfPedestal::initialiseHistos()
     hCmnVsNewCmn = new TH2F("hCmnVsNewCmn","hCmnVsNewCmn",512,-30,30,512,-30,30);
     Float_t xmax = settings->getNEvents();
     Int_t nbins = xmax/1e4;
-    hNewCmnVsEventNo = new TH2F("hCmnVsEventNo","hCmnVsEventNo",nbins,0,xmax,512,-30,30);
+    hNewCmnVsEventNo = new TH2F("hNewCmnVsEventNo","hNewCmnVsEventNo",nbins,0,xmax,512,-30,30);
     for(UInt_t i=0;i < settings->diamondPattern.getNIntervals();i++){
         pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
         TString name = TString::Format("hBiggestSignalInSigmaDiaPattern_%d_ch_%d_%d",i+1,channels.first,channels.second);
@@ -938,17 +939,28 @@ void TAnalysisOfPedestal::saveHistos(){
     delete hRelCmnUncertainty;
     histSaver->SaveHistogram(hCmnNUsedChannels);
     delete hCmnNUsedChannels;
-    histSaver->SaveHistogram(hNewComonModeNoise);
-    delete hNewComonModeNoise;
     histSaver->SaveHistogram(hCmnChannelWeight);
     delete hCmnChannelWeight;
     histSaver->SaveHistogram(hNewCmnVsEventNo);
-    histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hNewCmnVsEventNo,0,false);
+    TProfile *prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hNewCmnVsEventNo,0,false);
+    Float_t mean = hNewComonModeNoise->GetMean();
+    Float_t rms = hNewComonModeNoise->GetRMS();
+    if (prof){
+        prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
+        histSaver->SaveHistogram(prof);
+        delete prof;
+    }
+    histSaver->SaveHistogram(hNewComonModeNoise);
+    delete hNewComonModeNoise;
     delete hNewCmnVsEventNo;
     histSaver->SaveHistogram(hCmnVsNewCmn);
     delete hCmnVsNewCmn;
     histSaver->SaveHistogram(hCmnNewVsNUsedChannels);
     delete hCmnNewVsNUsedChannels;
+    histSaver->SaveHistogram(hCmnUsedChannels);
+    delete hCmnUsedChannels;
+    histSaver->SaveHistogram(hCmnChannelWeightVsChannel);
+    delete hCmnChannelWeightVsChannel;
 
     map<Int_t,TH1F*>::iterator it;
     for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++){
@@ -1458,12 +1470,13 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         cmNoise+=signal;
         channelWeight.back() = signal;
         nCmNoiseEvents++;
+        hCmnUsedChannels->Fill(ch);
     }
 
     cmNoise = cmNoise/(Float_t)nCmNoiseEvents;
     Float_t relChange = (cmNoise-cmn)/cmn*100.;
-    if (verbosity>6||(TMath::Abs(relChange)>100. && verbosity>1))
-        cout<<TString::Format("%7d - %3d %+6.2f %+6.2f - %6.1f",nEvent,nCmNoiseEvents,cmNoise,cmn,(cmNoise-cmn)/cmn*100.);
+    if (verbosity>6||(TMath::Abs(relChange)>100. && verbosity>1)||true)
+        cout<<TString::Format("%7d - %3d %+6.2f %+6.2f - %6.1f",nEvent,nCmNoiseEvents,cmNoise,cmn,relChange);
     if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
     //    hCommonModeNoise->Fill(cmNoise,true);
     hRelCmnUncertainty->Fill(relChange);

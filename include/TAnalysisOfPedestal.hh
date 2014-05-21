@@ -96,6 +96,7 @@ private:
 	TH1F *hBiggestAdjacentSignalInSigmaCMN[9];
 	TH1F* hRelCmnUncertainty;
 	TH1F* hCmnNUsedChannels;
+	TH1F* hCmnUsedChannels;
 	TH1F* hNewComonModeNoise;
 	TH1F* hCmnChannelWeight;
     TH2F* hCmnChannelWeightVsChannel;
