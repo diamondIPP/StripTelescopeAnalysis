@@ -100,6 +100,7 @@ private:
 	TH1F* hNewComonModeNoise;
 	TH1F* hCmnChannelWeight;
     TH2F* hCmnChannelWeightVsChannel;
+    TH2F* hCmnFractionVsChannel;
 	TH2F* hCmnNewVsNUsedChannels;
 	TH2F* hCmnVsNewCmn;
 	TH2F* hNewCmnVsEventNo;

@@ -421,11 +421,12 @@ void TAnalysisOfPedestal::initialiseHistos()
     hCmnChannelWeight = new TH1F("hCmnChannelWeight","hCmnChannelWeight",512,-1000,+1000);
 
     hCmnChannelWeightVsChannel = new TH2F("hCmnChannelWeightVsChannel","hCmnChannelWeightVsChannel",nChannels,0,nChannels-1,512,-1000,+1000);
+    hCmnFractionVsChannel = new TH2F("hCmnFractionVsChannel","hCmnFractionVsChannel",nChannels,0,nChannels-1,512,-100,+100);
     hCmnNewVsNUsedChannels = new TH2F("hCmnNewVsNUsedChannels","hCmnNewVsNUsedChannels",512,-30,30,nChannels,0,nChannels-1);
     hCmnVsNewCmn = new TH2F("hCmnVsNewCmn","hCmnVsNewCmn",512,-30,30,512,-30,30);
     Float_t xmax = settings->getNEvents();
     Int_t nbins = xmax/1e4;
-    hNewCmnVsEventNo = new TH2F("hNewCmnVsEventNo","hNewCmnVsEventNo",nbins,0,xmax,512,-30,30);
+    hNewCmnVsEventNo = new TH2F("hNewCmnVsEventNo","hNewCmnVsEventNo",nbins*10,0,xmax,512,-30,30);
     for(UInt_t i=0;i < settings->diamondPattern.getNIntervals();i++){
         pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
         TString name = TString::Format("hBiggestSignalInSigmaDiaPattern_%d_ch_%d_%d",i+1,channels.first,channels.second);
@@ -941,14 +942,29 @@ void TAnalysisOfPedestal::saveHistos(){
     delete hCmnNUsedChannels;
     histSaver->SaveHistogram(hCmnChannelWeight);
     delete hCmnChannelWeight;
+    hNewCmnVsEventNo->GetXaxis()->SetRangeUser(0,settings->getNEvents()/10.);
     histSaver->SaveHistogram(hNewCmnVsEventNo);
-    TProfile *prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hNewCmnVsEventNo,0,false);
-    Float_t mean = hNewComonModeNoise->GetMean();
-    Float_t rms = hNewComonModeNoise->GetRMS();
+    TProfile *prof = hNewCmnVsEventNo->ProfileX();
     if (prof){
+        Float_t mean = hNewComonModeNoise->GetMean();
+        Float_t rms = hNewComonModeNoise->GetRMS();
         prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
         histSaver->SaveHistogram(prof);
         delete prof;
+        prof=0;
+    }
+    hNewCmnVsEventNo->GetXaxis()->SetRangeUser(0,settings->getNEvents());
+    hNewCmnVsEventNo->SetName("hNewCmnVsEventNo_all");
+    histSaver->SaveHistogram(hNewCmnVsEventNo);
+
+    prof = hNewCmnVsEventNo->ProfileX();
+    if (prof){
+        Float_t mean = hNewComonModeNoise->GetMean();
+        Float_t rms = hNewComonModeNoise->GetRMS();
+        prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
+        histSaver->SaveHistogram(prof);
+        delete prof;
+        prof=0;
     }
     histSaver->SaveHistogram(hNewComonModeNoise);
     delete hNewComonModeNoise;
@@ -959,8 +975,23 @@ void TAnalysisOfPedestal::saveHistos(){
     delete hCmnNewVsNUsedChannels;
     histSaver->SaveHistogram(hCmnUsedChannels);
     delete hCmnUsedChannels;
+    prof = hCmnChannelWeightVsChannel->ProfileX();
+    if (prof){
+        histSaver->SaveHistogram(prof);
+        delete prof;
+        prof=0;
+    }
     histSaver->SaveHistogram(hCmnChannelWeightVsChannel);
     delete hCmnChannelWeightVsChannel;
+
+    prof = hCmnFractionVsChannel->ProfileX();
+    if (prof){
+        histSaver->SaveHistogram(prof);
+        delete prof;
+        prof=0;
+    }
+    histSaver->SaveHistogram(hCmnFractionVsChannel);
+    delete hCmnFractionVsChannel;
 
     map<Int_t,TH1F*>::iterator it;
     for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++){
@@ -1492,6 +1523,7 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         if (channelWeight.at(ch)!=0){
             Float_t weight = channelWeight.at(ch)/cmNoise*100.;
             hCmnChannelWeightVsChannel->Fill(ch,weight);
+            hCmnFractionVsChannel->Fill(ch,channelWeight.at(ch));
             hCmnChannelWeight->Fill(weight);
             cout<<nEvent<<"/"<<ch <<" weight: \t"<<channelWeight.at(ch)<< "\t"<<cmNoise<<"\t"<<weight<<endl;
         }
