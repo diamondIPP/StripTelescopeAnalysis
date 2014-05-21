@@ -498,8 +498,6 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 
 		}
 	}
-    char t;
-    cin>>t;
 	if(verbosity)cout<<"update first Pedestal Calculation"<<endl;
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalMeanStartValues[ch],7,MAXDIASIGMA);
