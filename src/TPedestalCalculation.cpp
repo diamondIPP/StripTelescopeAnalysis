@@ -433,17 +433,19 @@ void TPedestalCalculation::doCmNoiseCalculation()
 		}
 
 		Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);
+        bool masked = settings->IsMasked(det,ch);
 		Float_t mean =  (nEvent<slidingLength)?diaPedestalMeanStartValues[ch]:diaPedestalMeanCMN[ch];
+        Float_t signal = adc-mean;
 		Float_t sigma = (nEvent<slidingLength)?diaPedestalSigmaStartValues[ch]:diaPedestalSigmaCMN[ch];
-		Float_t signal = adc-mean;
-		Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);
-		/*if(snr<0||snr>settings->getDi_Pedestal_Hit_Factor()||adc>=maxVal||adc<0||signal>maxVal)//settings->isDet_channel_screened(TPlaneProperties::getDetDiamond(),ch))
-			continue;
-		if(snr!=snr||adc!=adc||signal!=signal)
-			continue;*/
+		if(sigma<=0) {
+		    if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" sigma < 0 : "<<sigma<<endl;
+		    continue;
+		}
+		Float_t snr = TMath::Abs(signal/sigma);
 
         if(snr!=snr||adc!=adc||signal!=signal)
             continue;
+
         if(adc>=maxVal || adc<0||signal>maxVal){
             if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" invalid adc/signal: "<<adc<<"/"<<signal<<endl;
             continue;
@@ -452,7 +454,7 @@ void TPedestalCalculation::doCmNoiseCalculation()
             if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" snr over cut: "<<snr<<endl;
             continue;
         }
-        if (settings->IsMasked(det,ch)){
+        if (masked){
             if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" Is Masked "<<endl;
             continue;
         }

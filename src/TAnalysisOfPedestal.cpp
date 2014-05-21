@@ -1441,17 +1441,21 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
     vector<Float_t> channelWeight;
     for (UInt_t ch = 0; ch < TPlaneProperties::getNChannelsDiamond();ch++){
         channelWeight.push_back(0);
-        Float_t adc = eventReader->getAdcValue(det,ch);
+
+        Float_t adc = eventReader->getDia_ADC(ch);
         bool masked = settings->IsMasked(det,ch);
         Float_t mean = eventReader->getPedestalMean(det,ch,true);
         Float_t signal = adc - mean;
-        Float_t noise = eventReader->getPedestalSigma(det,ch,true);
-        if (adc-mean != signal)
-            cout<<"ERROR wrong signal calculation: "<<adc-mean<<"/"<<signal<<endl;
-        Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);
+        Float_t sigma = eventReader->getPedestalSigma(det,ch,true);
+        if(sigma<=0) {
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" sigma < 0 : "<<sigma<<endl;
+            continue;
+        }
+        Float_t snr = TMath::Abs(signal/sigma);
 
         if(snr!=snr||adc!=adc||signal!=signal)
             continue;
+
         if(adc>=maxVal || adc<0||signal>maxVal){
             if(verbosity>7)cout<<"cannot use "<<nEvent<<"/"<<ch<<" invalid adc/signal: "<<adc<<"/"<<signal<<endl;
             continue;
