@@ -1410,11 +1410,11 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         if(snr!=snr||adc!=adc||signal!=signal)
             continue;
         if(adc>=maxVal || adc<0||signal>maxVal){
-            cout<<"cannot use "<<nEvent<<"/"<<ch<<" invalid adc/signal: "<<adc<<"/"<<signal<<endl;
+            if(verbosity>7)cout<<"cannot use "<<nEvent<<"/"<<ch<<" invalid adc/signal: "<<adc<<"/"<<signal<<endl;
             continue;
         }
         if (TMath::Abs(snr)>settings->getCMN_cut()){
-            cout<<"cannot use "<<nEvent<<"/"<<ch <<" snr over cut: "<<snr<<endl;
+            if(verbosity>7)cout<<"cannot use "<<nEvent<<"/"<<ch <<" snr over cut: "<<snr<<endl;
             continue;
         }
         if(verbosity>10||(verbosity>4&&nEvent==0))cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
@@ -1422,7 +1422,7 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
         nCmNoiseEvents++;
     }
     cmNoise = cmNoise/(Float_t)nCmNoiseEvents;
-    cout<<TString::Format("%7d - %+6.2 +6.2f - %5.1f",nEvent,cmNoise,cmn,(cmNoise-cmn)/cmn*100.);
+    cout<<TString::Format("%7d - %+6.2f +6.2f - %5.1f",nEvent,cmNoise,cmn,(cmNoise-cmn)/cmn*100.);
     if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
     //    hCommonModeNoise->Fill(cmNoise,true);
 
