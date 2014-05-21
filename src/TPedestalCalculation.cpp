@@ -422,7 +422,27 @@ void TPedestalCalculation::doCmNoiseCalculation()
 
 	UInt_t nCmNoiseEvents=0;
 	Float_t maxVal = TPlaneProperties::getMaxSignalHeightDiamond();
-	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
+	UInt_t det = TPlaneProperties::getNDetectors();
+	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
+	    /*
+        Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);
+
+        if(snr!=snr||adc!=adc||signal!=signal)
+            continue;
+        if(adc>=maxVal || adc<0||signal>maxVal){
+            if(verbosity>7)cout<<"cannot use "<<nEvent<<"/"<<ch<<" invalid adc/signal: "<<adc<<"/"<<signal<<endl;
+            continue;
+        }
+        if (TMath::Abs(snr)>settings->getCMN_cut()){
+            if(verbosity>7)cout<<"cannot use "<<nEvent<<"/"<<ch <<" snr over cut: "<<snr<<endl;
+            continue;
+        }
+        if(verbosity>10||(verbosity>4&&nEvent==0))cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
+        cmNoise+=signal;
+        channelWeight.back() = signal;
+        nCmNoiseEvents++;
+    }
+	     */
 		if(nEvent>this->diaAdcValues[ch].size()&&nEvent<slidingLength){
 			cerr<<"diaADCValues["<<ch<<"].size() = "<<diaAdcValues[ch].size()<<" < "<<nEvent<<"  --> BREAK"<<endl;
 			exit(-1);
@@ -433,10 +453,26 @@ void TPedestalCalculation::doCmNoiseCalculation()
 		Float_t sigma = (nEvent<slidingLength)?diaPedestalSigmaStartValues[ch]:diaPedestalSigmaCMN[ch];
 		Float_t signal = adc-mean;
 		Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);
-		if(snr<0||snr>settings->getDi_Pedestal_Hit_Factor()||adc>=maxVal||adc<0||signal>maxVal)//settings->isDet_channel_screened(TPlaneProperties::getDetDiamond(),ch))
+		/*if(snr<0||snr>settings->getDi_Pedestal_Hit_Factor()||adc>=maxVal||adc<0||signal>maxVal)//settings->isDet_channel_screened(TPlaneProperties::getDetDiamond(),ch))
 			continue;
 		if(snr!=snr||adc!=adc||signal!=signal)
-			continue;
+			continue;*/
+
+        if(snr!=snr||adc!=adc||signal!=signal)
+            continue;
+        if(adc>=maxVal || adc<0||signal>maxVal){
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" invalid adc/signal: "<<adc<<"/"<<signal<<endl;
+            continue;
+        }
+        if (TMath::Abs(snr)>settings->getCMN_cut()){
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" snr over cut: "<<snr<<endl;
+            continue;
+        }
+        if (settings->IsMasked(det,ch)){
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" Is Masked "<<endl;
+            continue;
+        }
+
 		if(verbosity>10||(verbosity>4&&nEvent==0))cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
 		cmNoise+=signal;
 		nCmNoiseEvents++;

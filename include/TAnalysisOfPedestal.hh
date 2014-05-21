@@ -97,7 +97,8 @@ private:
 	TH1F* hRelCmnUncertainty;
 	TH1F* hCmnNUsedChannels;
 	TH1F* hNewComonModeNoise;
-	TH2F* hCmnChannelWeight;
+	TH1F* hCmnChannelWeight;
+    TH2F* hCmnChannelWeightVsChannel;
 	TH2F* hCmnNewVsNUsedChannels;
 	TH2F* hCmnVsNewCmn;
 	TH2F* hNewCmnVsEventNo;

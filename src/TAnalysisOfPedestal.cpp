@@ -413,11 +413,13 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
-    hRelCmnUncertainty = new TH1F("hRelCmnUncertainty","hRelCmnUncertainty",512,-200,+200);
+    hRelCmnUncertainty = new TH1F("FhRelCmnUncertainty","hRelCmnUncertainty",512,-200,+200);
     Int_t nChannels = TPlaneProperties::getNChannelsDiamond();
     hCmnNUsedChannels = new TH1F("hCmnNUsedChannels","hCmnNUsedChannels",nChannels,0,nChannels-1);
     hNewComonModeNoise = new TH1F("hNewComonModeNoise","hNewComonModeNoise",512,-30,30);
-    hCmnChannelWeight = new TH2F("hCmnChannelWeight","hCmnChannelWeight",nChannels,0,nChannels-1,512,-100,+100);
+    hCmnChannelWeight = new TH1F("hCmnChannelWeight","hCmnChannelWeight",512,-1000,+1000);
+
+    hCmnChannelWeightVsChannel = new TH2F("hCmnChannelWeightVsChannel","hCmnChannelWeightVsChannel",nChannels,0,nChannels-1,512,-1000,+1000);
     hCmnNewVsNUsedChannels = new TH2F("hCmnNewVsNUsedChannels","hCmnNewVsNUsedChannels",512,-30,30,nChannels,0,nChannels-1);
     hCmnVsNewCmn = new TH2F("hCmnVsNewCmn","hCmnVsNewCmn",512,-30,30,512,-30,30);
     Float_t xmax = settings->getNEvents();
@@ -941,7 +943,7 @@ void TAnalysisOfPedestal::saveHistos(){
     histSaver->SaveHistogram(hCmnChannelWeight);
     delete hCmnChannelWeight;
     histSaver->SaveHistogram(hNewCmnVsEventNo);
-    histSaver->Save1DProfileYWithFitAndInfluence(hNewCmnVsEventNo,0,false);
+    histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hNewCmnVsEventNo,0,false);
     delete hNewCmnVsEventNo;
     histSaver->SaveHistogram(hCmnVsNewCmn);
     delete hCmnVsNewCmn;
@@ -1446,6 +1448,12 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
             if(verbosity>7)cout<<"cannot use "<<nEvent<<"/"<<ch <<" snr over cut: "<<snr<<endl;
             continue;
         }
+
+        if (settings->IsMasked(det,ch)){
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" Is Masked "<<endl;
+            continue;
+        }
+
         if(verbosity>10||(verbosity>4&&nEvent==0))cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
         cmNoise+=signal;
         channelWeight.back() = signal;
@@ -1464,8 +1472,12 @@ void TAnalysisOfPedestal::checkCommonModeNoise(){
     hNewComonModeNoise->Fill(cmNoise);
     hCmnNewVsNUsedChannels->Fill(cmNoise,nCmNoiseEvents);
     for (UInt_t ch =0;ch< channelWeight.size();ch++)
-        if (channelWeight.at(ch)!=0)
-            hCmnChannelWeight->Fill(ch,channelWeight.at(ch)/cmNoise*100.);
+        if (channelWeight.at(ch)!=0){
+            Float_t weight = channelWeight.at(ch)/cmNoise*100.;
+            hCmnChannelWeightVsChannel->Fill(ch,weight);
+            hCmnChannelWeight->Fill(weight);
+            cout<<nEvent<<"/"<<ch <<" weight: \t"<<channelWeight.at(ch)<< "\t"<<cmNoise<<"\t"<<weight<<endl;
+        }
     hCmnVsNewCmn->Fill(cmn,cmNoise);
     hNewCmnVsEventNo->Fill(nEvent,cmNoise);
 }
