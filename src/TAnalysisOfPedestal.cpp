@@ -959,9 +959,9 @@ void TAnalysisOfPedestal::saveHistos(){
 
     prof = hNewCmnVsEventNo->ProfileX();
     if (prof){
-        Float_t mean = hNewComonModeNoise->GetMean();
-        Float_t rms = hNewComonModeNoise->GetRMS();
-        prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
+//        Float_t mean = hNewComonModeNoise->GetMean();
+//        Float_t rms = hNewComonModeNoise->GetRMS();
+//        prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
         histSaver->SaveHistogram(prof,false,false,false);
         delete prof;
         prof=0;
