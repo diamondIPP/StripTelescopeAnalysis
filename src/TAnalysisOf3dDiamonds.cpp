@@ -4768,7 +4768,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
 //    profRebinned->GetZaxis()->SetTitleOffset(1.1);
     histSaver->SaveHistogram(profRebinned);
     TCanvas *c1 =histSaver->DrawHistogramWithCellGrid(profRebinned);
-
+    c1->SetName("cProfRebinned");
+    histSaver->DrawGoodCellsRegion(c1);
+    histSaver->SaveCanvas(c1);
     histSaver->SaveHistogramWithCellGrid(profRebinned);
     delete profRebinned;
 
