@@ -319,7 +319,7 @@ void TAnalysisOfClustering::saveVariableVsEventNoPlots(TSettings* settings,Histo
 //        }
         vec->push_back(fit->GetParameter(1));
         Float_t firstVarableValue = prof3->GetBinContent(1);
-        cout<<channel<<" first"<<nameOfVariable<<"Value: "<<firstVarableValue<<endl;
+        if (false) cout<<channel<<" first"<<nameOfVariable<<"Value: "<<firstVarableValue<<endl;
         prof3->Scale(1./firstVarableValue);
         for(Int_t binx = 1;binx <= prof3->GetNbinsX();binx++){
             Float_t content = prof3->GetBinContent(binx);
