@@ -33,6 +33,7 @@
 #include "TSystem.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TProfile2D.h"
 #include "TRandom.h"
 #include "TFitResult.h"//TFitResultPtr.h"
 //#include "TGraph.h"
@@ -79,6 +80,7 @@ private:
 	void createEventVector(Int_t startEvent = 0);
 	void analyseNonHitEvents();
 	void initHistograms();
+	void initHistograms2();
 	void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
 	void initClusteredHistos(UInt_t startEvent = 1e5, UInt_t maxEvents=1e6);
 	void fillHistograms();
@@ -178,6 +180,7 @@ private:
 	Float_t inf;
 	// histograms
 	vector<TH1F*> hLandau;
+	vector<TProfile2D*> hLandau2HighestProfile2D;
 	vector< vector< Float_t> > vecVecLandau;
 	vector< Float_t> vecPredictedChannel;
 	vector< Float_t> vecPredictedDetectorPositionY;
@@ -276,6 +279,8 @@ private:
 	TH1F* hClusterSize_Clustered;
 	TH2F* hLandauVsClusterSize_Clustered;
 	TH1F* hNClusteres_Clustered;
+
+	Float_t minX,maxX,minY,maxY;
 
 public:
 	static UInt_t GetHitArea(TSettings* set, Float_t xVal, Float_t yVal,UInt_t xDivisions,UInt_t yDivisions);
