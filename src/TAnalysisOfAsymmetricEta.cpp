@@ -50,12 +50,30 @@ void TAnalysisOfAsymmetricEta::FillEtaDistribution(TH2F* histo, Float_t correcti
 		TCluster  clus = clusters.at(i);
 		if(clus.getClusterSize()>=settings->getMaxAllowedClustersize(det))
 			continue;
+		if (settings->isMaskedCluster(det,clus))
+		    continue;
 		TCluster newClus = clus.getCrossTalkCorrectedCluster(correctionAlpha);
-		Int_t leftChannel;
+		Int_t leftChannel,oldChannel;
 		Float_t newEta = newClus.getEta(leftChannel);
 		Int_t nDia = settings->getDiaDetectorAreaOfChannel(leftChannel)+1;
+		Float_t oldEta = clus.getEta(oldChannel);
+		Int_t oldDia = settings->getDiaDetectorAreaOfChannel(oldChannel)+1;
+//		if (det >=8 && leftChannel!=oldChannel){
+		if (det >=8 && false)
+		    if (newClus.getHighestChannelNumber() == clus.getHighestChannelNumber()){}
+		    else if(nDia==oldDia){}
+		    else{
+		    cout<<"\n\n"<<i<<" nDia: "<<nDia<<"/"<<oldDia<<" Channel: "<<leftChannel<<"/"<<oldChannel<<" eta: "<<newEta<<"/"<<oldEta<<endl;
+		    newClus.Print();
+		    clus.Print();
+		}
+
 		if(newEta>0&&newEta<1){
 			histo->Fill(newEta,nDia);
+			if (nDia==0){
+			    cout<<"\n\n"<<i<<" nDia: "<<nDia<<"/"<<oldDia<<" Channel: "<<leftChannel<<"/"<<oldChannel<<" eta: "<<newEta<<"/"<<oldEta<<endl;
+			               newClus.Print();
+			}
 			//				cout<<i<<" nDia: "<<nDia<<" eta: "<<newEta<<endl;
 		}
 	}
