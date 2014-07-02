@@ -98,6 +98,8 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 
 void TAnalysisOfPedestal::analyseEvent(){
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
+
+        TString name = "hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
         if(det==TPlaneProperties::getDetDiamond()){
             cmn = eventReader->getCMNoise();
             checkCommonModeNoise();
@@ -108,6 +110,9 @@ void TAnalysisOfPedestal::analyseEvent(){
         biggestHitChannelCMN =-1;
         for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
             adc = eventReader->getAdcValue(det,ch);
+            if (hHistoMap.count(name))
+                if(hHistoMap[name])
+                    ((TProfile2D*)hHistoMap[name])->Fill(nEvent,ch,adc);
             isSaturated = eventReader->isSaturated(det,ch);
 
             pedestal = eventReader->getPedestalMean(det,ch,false);
@@ -413,6 +418,7 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 
 void TAnalysisOfPedestal::initialiseHistos()
 {
+
     hRelCmnUncertainty = new TH1F("hRelCmnUncertainty","hRelCmnUncertainty",512,-200,+200);
     Int_t nChannels = TPlaneProperties::getNChannelsDiamond();
     hCmnNUsedChannels = new TH1F("hCmnNUsedChannels","hCmnNUsedChannels",nChannels,0,nChannels-1);
@@ -460,6 +466,14 @@ void TAnalysisOfPedestal::initialiseHistos()
     hCMNoiseDistribution->GetXaxis()->SetTitle("Common Mode Noise [ADC]");
     hCMNoiseDistribution->GetYaxis()->SetTitle("number of entries [#]");
     for (UInt_t det =0;det<TPlaneProperties::getNDetectors();det++){
+        TString name = "hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
+        Int_t ybins = TPlaneProperties::getNChannels(det);
+        Float_t yend = ybins -1;
+        Float_t ystart = 0;
+        Float_t xstart =0;
+        Float_t xend = settings->getNEvents();
+        Int_t xbins = xend/1000;
+        hHistoMap[name] = new TProfile2D(name,name,xbins,xstart,xend,ybins,ystart,yend);
         stringstream histoName,histoTitle,xTitle,yTitle;
         histoName<<"hNoiseDistributionOfAllNonHitChannels_"<<TPlaneProperties::getStringForDetector(det);
         histoTitle<<"Noise Distribution  of all non hit channels in Plane"<<TPlaneProperties::getStringForDetector(det);
@@ -935,7 +949,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
 
 
 void TAnalysisOfPedestal::saveHistos(){
-
+    saveAdcVsEventProfiles();
     histSaver->SaveHistogram(hRelCmnUncertainty);
     delete hRelCmnUncertainty;
     histSaver->SaveHistogram(hCmnNUsedChannels);
@@ -946,9 +960,12 @@ void TAnalysisOfPedestal::saveHistos(){
     histSaver->SaveHistogram(hNewCmnVsEventNo);
     TProfile *prof = hNewCmnVsEventNo->ProfileX();
     if (prof){
-        Float_t mean = hNewComonModeNoise->GetMean();
-        Float_t rms = hNewComonModeNoise->GetRMS();
-        prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
+        Float_t mean =hNewCmnVsEventNo->GetMean(2);
+        Float_t rms = hNewCmnVsEventNo->GetRMS(2);
+        Float_t xmin = mean - 3 * rms;
+        Float_t xmax = mean + 3 * rms;
+        prof->GetYaxis()->SetRangeUser(xmin,xmax);
+        cout<<"Set Range: "<<xmin<<"-"<<xmax<<endl;
         histSaver->SaveHistogram(prof,false,false,false);
         delete prof;
         prof=0;
@@ -959,9 +976,9 @@ void TAnalysisOfPedestal::saveHistos(){
 
     prof = hNewCmnVsEventNo->ProfileX();
     if (prof){
-//        Float_t mean = hNewComonModeNoise->GetMean();
-//        Float_t rms = hNewComonModeNoise->GetRMS();
-//        prof->GetYaxis()->SetRangeUser(mean-2*rms, mean+2*rms);
+        Float_t mean =hNewCmnVsEventNo->GetMean(2);
+        Float_t rms = hNewCmnVsEventNo->GetRMS(2);
+        prof->GetYaxis()->SetRangeUser(mean-3*rms, mean+3*rms);
         histSaver->SaveHistogram(prof,false,false,false);
         delete prof;
         prof=0;
@@ -1402,7 +1419,6 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
         nSumNoise=0;
         cmNoise = eventReader->getCMNoise();
         vecCMNoise.push_back(cmNoise);
-        vecEventNo.push_back(nEvent);
         hCMNoiseDistribution->Fill(cmNoise);
     }
     if(settings->isDet_channel_screened(det,ch))
@@ -1435,8 +1451,196 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
         vecAvrgPedCMN.push_back(sumPedCMN/(float)nSumPedCMN);
         vecAvrgSigma.push_back(sumNoise/(float)nSumNoise);
         vecAvrgSigmaCMN.push_back(sumNoiseCMN/(float)nSumNoiseCMN);
-        vecEventNo.push_back(nEvent);
+        if(ch==0) vecEventNo.push_back(nEvent);
     }
+}
+
+void TAnalysisOfPedestal::saveAdcVsEventProfiles() {
+    cout<<"TAnalysisOfPedestal::saveAdcVsEventProfiles"<<endl;
+    for(UInt_t det =0; det<TPlaneProperties::getNDetectors();det++){
+        cout<<"\tDetector: "<<det<<endl;
+        TString name = (TString)"hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
+        if (!hHistoMap.count(name))
+            continue;
+        if(!hHistoMap[name])
+            continue;
+        TProfile2D* prof2d = (TProfile2D*) hHistoMap[name];
+        prof2d->GetXaxis()->SetTitle("EventNo.");
+        prof2d->GetYaxis()->SetTitle("Channel");
+        prof2d->GetZaxis()->SetTitle("avrg adc. /1k events");
+        histSaver->SaveHistogram(prof2d,false,false);
+        if (TPlaneProperties::isSiliconDetector(det))
+            continue;
+        TF1* fit = new TF1("pol1fit","pol1",0,1e7);
+        fit->SetLineWidth(1);
+        fit->SetLineColor(kBlue);
+        fit->SetLineStyle(2);
+        TString name2 =name + (TString)"_ADCRatio";
+        TH1F* hADCRatio = new TH1F(name2,name2, 512,0,2);
+        hADCRatio->GetXaxis()->SetTitle("ratio adc/adc0");
+        name2 =name + (TString)"_ADCRatio_Par0";
+        TH1F* hADC_Fit_Par0 = new TH1F(name2,name2, 512,0,2);
+        name2 =name + (TString)"_ADCRatio_Par1";
+        TH1F* hADC_Fit_Par1 = new TH1F(name2,name2, 512,0,2);
+        name2 =name + (TString)"_ADCRatio_ParChi2";
+        TH1F* hADC_Fit_Chi2 = new TH1F(name2,name2, 80,0,40);
+        vector<TH1F*>  vecADCPeakPositions;
+        name2 =(TString)"hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
+        name2+=TString::Format("PeakPosition_SlidingWindow");
+        TH1F* hPeakPos= new TH1F(name2,name2,prof2d->GetNbinsX(),0,prof2d->GetNbinsX()*1000);
+        Int_t nChannels=0;
+        for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++){
+            TRawEventSaver::showStatusBar(ch,TPlaneProperties::getNChannels(det),1,1,0);
+            if(settings->IsMasked(det,ch))
+                continue;
+            name = (TString)"hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
+            name += TString::Format("_ch%03d",ch);
+            TH1D* prof = prof2d->ProjectionX(name,ch+1,ch+1);
+            Float_t mean = 0;
+            Int_t nAvrg = TMath::Min(7,prof->GetNbinsX());
+            for(UInt_t i=1;i<=nAvrg;i++)mean+=prof->GetBinContent(i);
+            TH1F* histo1 = doSlidingWindowAnalysis(prof,nAvrg);
+            histo1->SetLineColor(kBlack);
+            TH1F* histo3 = doSlidingWindowAnalysis(prof,10);
+            histo3->SetLineColor(kRed);
+            TH1F* histo4 = doSlidingWindowAnalysis(prof,15);
+            mean/=nAvrg;
+            prof->Scale(1./mean);
+            histo4->SetLineColor(kGreen);
+            histSaver->SaveHistogram(histo1,false,false,true,"PL");
+            TCanvas* c1 = new TCanvas((TString)"c_"+histo1->GetName());
+            int nPeaks = histo1->ShowPeaks(5,"",.1);
+            histo4->Draw("PL");
+            histo3->Draw("PLsame");
+            histo1->Draw("PLsame");
+            TLegend* leg = c1->BuildLegend();
+            leg->SetFillColor(kWhite);
+            histSaver->SaveCanvas(c1);
+            TList *functions = histo1->GetListOfFunctions();
+            TPolyMarker *pm = (TPolyMarker*)functions->FindObject("TPolyMarker");
+            if (pm){
+                for (Int_t i =0; i<TMath::Min(nPeaks,4);i++){
+                    Float_t position = pm->GetX()[i];
+                    if(vecADCPeakPositions.size()<=i){
+                        TString name2 =(TString)"hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
+                        name2+=TString::Format("PeakPosition_SlidingWindow_PeakNo%d",i+1);
+                        vecADCPeakPositions.push_back( new TH1F(name2,name2,prof2d->GetNbinsX(),0,prof2d->GetNbinsX()*1000));
+                    }
+                    vecADCPeakPositions[i]->Fill(position);
+                    hPeakPos->Fill(position);
+                }
+            }
+            delete c1;
+            if (fit)
+                prof->Fit(fit,"Q");
+            Float_t adc0 = prof->GetBinContent(1);
+            for (UInt_t bin =1;bin <= prof->GetNbinsX();bin++){
+                Float_t adc = prof->GetBinContent(bin);
+                Float_t ratio = adc/adc0;
+                hADCRatio->Fill(ratio);
+            }
+            if(fit){
+                hADC_Fit_Par0->Fill(fit->GetParameter(0));
+                hADC_Fit_Par1->Fill(fit->GetParameter(1));
+                Float_t chi2 = fit->GetChisquare()/fit->GetNDF();
+//                cout<<det<<" "<<ch<<" "<<chi2<<endl;
+                hADC_Fit_Chi2->Fill(chi2);
+            }
+            histSaver->SaveHistogram(prof,false,true,true);
+            delete prof;
+            nChannels++;
+        } //for loop ch
+        TCanvas* c1 = new TCanvas((TString)"c_ADCProfile_PeakPostions");
+        for(UInt_t i =0; i< vecADCPeakPositions.size();i++){
+            vecADCPeakPositions.at(i)->SetLineColor(i+1);
+            if(i==0)
+                vecADCPeakPositions.at(i)->Draw();
+            else
+                vecADCPeakPositions.at(i)->Draw("same");
+        }
+        histSaver->SaveHistogram(hPeakPos);
+        Int_t nWindow = 1;
+        Int_t nCandidates = 0;
+        Int_t entries=0;
+        for(UInt_t bin = 1; bin <= 2*nWindow+1 && bin <= hPeakPos->GetNbinsX();bin++)
+            entries+=hPeakPos->GetBinContent(bin);
+        bool counted = false;
+        for(UInt_t bin=nWindow; bin<=hPeakPos->GetNbinsX()-nWindow;bin++){
+            if(entries>.8*nChannels){
+                cout<<"FOUND a Problematic candiate at bin"<<bin<<" --"<<hPeakPos->GetBinCenter(bin)<<endl;
+                if(!counted)
+                    nCandidates++;
+                counted=true;
+            }
+            else
+                counted = false;
+            entries += hPeakPos->GetBinContent(bin+nWindow);
+            entries -= hPeakPos->GetBinContent(bin-nWindow-1);
+        }
+        res->setIntValue("RunInfo","ProblematicAdcSteps",nCandidates);
+        cout<<"\nThere are "<<nCandidates<<" candidates for adc jumps.";
+        if (verbosity%2==1){
+            cout<<"Press a key and enter"<<endl;
+            char t; cin>>t;
+        }
+
+        delete hPeakPos;
+        histSaver->SaveCanvas(c1);
+        delete c1;
+        vecADCPeakPositions.clear();
+        hADCRatio->GetXaxis()->SetTitle("avrg adc / adc_{0}");
+        hADCRatio->GetYaxis()->SetTitle("no. of entries");
+        hADC_Fit_Par0->GetXaxis()->SetTitle("avrg adc fit par0");
+        hADC_Fit_Par0->GetYaxis()->SetTitle("no of entries");
+        hADC_Fit_Par1->GetXaxis()->SetTitle("avrg adc fit par1");
+        hADC_Fit_Par1->GetYaxis()->SetTitle("no of entries");
+        hADC_Fit_Chi2->GetXaxis()->SetTitle("avrg adc fit #chi^2");
+        hADC_Fit_Chi2->GetYaxis()->SetTitle("no of entries");
+        histSaver->SaveHistogram(hADCRatio,false,true,true);
+        histSaver->SaveHistogram(hADC_Fit_Par0,false,true,true);
+        histSaver->SaveHistogram(hADC_Fit_Par1,false,true,true);
+        histSaver->SaveHistogram(hADC_Fit_Chi2);
+        delete hADCRatio;
+        delete hADC_Fit_Chi2;
+        delete hADC_Fit_Par0;
+        delete hADC_Fit_Par1;
+        delete fit;
+    }//for loop det
+}
+
+
+
+TH1F* TAnalysisOfPedestal::doSlidingWindowAnalysis(TH1D* histo,Int_t nAvrg,bool absolute) {
+    if (!histo)
+        return 0;
+//    cout<<"do Sliding Window for '"<<histo->GetName()<<"'"<<endl;
+    TString name  = histo->GetName()+TString::Format("_SlidingWindow_%dAvrg",nAvrg);
+    TH1F* retHisto = (TH1F*)histo->Clone(name);
+    retHisto->Reset();
+    retHisto->SetTitle(name);
+    Float_t meanPre=0;
+    Float_t meanPast=0;
+    Float_t max = -1e9;
+    Float_t min = +1e9;
+    for(UInt_t bin = 1; bin <= nAvrg&& bin+nAvrg <=histo->GetNbinsX(); bin++){
+        meanPre+=histo->GetBinContent(bin);
+        meanPast+=histo->GetBinContent(bin+nAvrg+1);
+    }
+    Float_t value = (meanPast-meanPre);
+    if(absolute)    value = TMath::Abs(value);
+    retHisto->SetBinContent(nAvrg+1,value);
+    cout<< nAvrg+1<<"\t"<<retHisto->GetBinCenter(nAvrg+1)<< "\t"<<value;
+
+    for (UInt_t bin = 2+nAvrg; bin <= histo->GetNbinsX()-nAvrg-1;bin++){
+        meanPre -=  histo->GetBinContent(bin-nAvrg-1);
+        meanPre +=  histo->GetBinContent(bin);
+        meanPast -= histo->GetBinContent(bin);
+        meanPast +=histo->GetBinContent(bin+nAvrg+1);
+        value = (meanPast-meanPre);
+        if(absolute)    value = TMath::Abs(value);
+        retHisto->SetBinContent(bin-1,value);
+    }
+    return retHisto;
 }
 
 void TAnalysisOfPedestal::SetYRangeForSignalInSigmaPlot(TH1F* histo) {

@@ -25,6 +25,7 @@
 #include <deque>
 #include <algorithm>
 #include <set>
+#include <deque>
 
 #include "TSystem.h"
 #include "TH1F.h"
@@ -33,6 +34,7 @@
 #include "TGraphErrors.h"
 #include "TStopwatch.h"
 #include "TMultiGraph.h"
+#include "TPolyMarker.h"
 
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
@@ -55,6 +57,8 @@ private:
 
 	void initialiseHistos();
 	void saveHistos();
+	void saveAdcVsEventProfiles();
+	TH1F* doSlidingWindowAnalysis(TH1D* histo,Int_t nAvrg,bool absolute=true);
 	void savePHinSigmaHistos();
 	Float_t findYPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
 	void createPedestalMeanHistos();
@@ -130,6 +134,7 @@ private:
 	vector <Float_t> upperSeedCutValuesCMN;
 	vector <Float_t> lowerSeedCutValuesCMN;
 	vector <Float_t> eventNumbers;
+	std::map<TString,TH1*> hHistoMap;
 private:
 	Float_t numberOfSeeds;
 	Float_t sumPed;
