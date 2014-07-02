@@ -179,7 +179,7 @@ private:
     std::map<TString, Float_t> FloatMap;
     std::map<TString, TString> StringMap;
     outer_map keyList;
-    ClassDef(TResults,7);
+    ClassDef(TResults,8);
 };
 
 #endif /* TRESULTS_HH_ */
