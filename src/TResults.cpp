@@ -339,7 +339,7 @@ void TResults::saveResults(TString name){
 
 void TResults::Print(){
     //	getLastUpdateDate().Print();
-    //	cout<<"\t"<<ÊgetLastUpdateDate().AsString()<<endl;
+    //	cout<<"\t"<<ï¿½getLastUpdateDate().AsString()<<endl;
     cout<<getLastUpdateDate().AsString()<<endl;
     cout<<"\tdet\tseed  \thit  \tnoise"<<endl;
     for(UInt_t det=0; det<TPlaneProperties::getNDetectors();det++){
@@ -363,7 +363,7 @@ void TResults::setSignalFeedOverCorrection(UInt_t det, Float_t correction){
     if(signalFeedOverCorrection.size() <= det)
         signalFeedOverCorrection.resize(det+1 , -1);
     signalFeedOverCorrection[det] = correction;
-    cout<<"Set Results: signal feed over correction of det "<<det<<": "<<correction*100<<" %"<<endl;
+    if (false) cout<<"Set Results: signal feed over correction of det "<<det<<": "<<correction*100<<" %"<<endl;
 }
 
 void TResults::setNoise(UInt_t det,Float_t detNoise){
@@ -373,7 +373,7 @@ void TResults::setNoise(UInt_t det,Float_t detNoise){
     if(noise.size()<=det)
         noise.resize(det+1,0);
     noise[det]=detNoise;
-    cout<<"Set Results: Noise of det "<<det<<": "<<detNoise<<endl;
+    if (false) cout<<"Set Results: Noise of det "<<det<<": "<<detNoise<<endl;
 }
 
 
@@ -381,7 +381,7 @@ void TResults::setAlignment(TDetectorAlignment* newAlignment)
 {
     updated();;
     this->alignment= *newAlignment;
-    cout<<"TResults:SetAlignment"<<endl;
+    if (false) cout<<"TResults:SetAlignment"<<endl;
 }
 
 
@@ -455,20 +455,20 @@ void TResults::setSingleGaussianFWTMResolution(Float_t gaus,TSettings::alignment
 void TResults::setPH_clustered(Float_t mean, Float_t mp, Float_t width,
         Float_t gSigma, TSettings::alignmentMode mode) {
     updated();;
-    cout<<"SET PH_clustered "<<mean<<" "<<mp<<" "<<width<<" "<<gSigma<<" "<<mode<<endl;
+    if (false) cout<<"SET PH_clustered "<<mean<<" "<<mp<<" "<<width<<" "<<gSigma<<" "<<mode<<endl;
     if (mode == TSettings::transparentMode){
         mean_clustered_trans = mean;
         mp_clustered_trans = mp;
         width_clustered_trans = width;
         gSigma_clustered_trans = gSigma;
-        cout<<"SET PH_clustered trans. "<<mean_clustered_trans<<" "<<mp_clustered_trans<<" "<<width_clustered_trans<<" "<<gSigma_clustered_trans<<endl;
+        if (false) cout<<"SET PH_clustered trans. "<<mean_clustered_trans<<" "<<mp_clustered_trans<<" "<<width_clustered_trans<<" "<<gSigma_clustered_trans<<endl;
     }
     else{
         mean_clustered_normal = mean;
         mp_clustered_normal = mp;
         width_clustered_normal = width;
         gSigma_clustered_normal = gSigma;
-        cout<<"SET PH_clustered norm. "<<mean_clustered_normal<<" "<<mp_clustered_normal<<" "<<width_clustered_normal<<" "<<gSigma_clustered_normal<<endl;
+        if (false) cout<<"SET PH_clustered norm. "<<mean_clustered_normal<<" "<<mp_clustered_normal<<" "<<width_clustered_normal<<" "<<gSigma_clustered_normal<<endl;
     }
     writeFiles();
 }
@@ -545,7 +545,7 @@ std::pair<Float_t, Float_t> TResults::getAvergSiliconCorrection(){
         sigma2 = -1;
     }
 
-    cout << "avrg Sil Feed over correction: " << mean*100 << " +/- " << sigma2*100 <<" % in "<< nSilDetectors<< " Dectectors." << endl;
+    if (false) cout << "avrg Sil Feed over correction: " << mean*100 << " +/- " << sigma2*100 <<" % in "<< nSilDetectors<< " Dectectors." << endl;
     return make_pair(mean,sigma2);
 }
 
@@ -890,7 +890,7 @@ void TResults::setStringValue(TString section, TString key, TString value) {
 }
 
 void TResults::addKey(TString section, TString key, TString type) {
-    cout<<"addKey: "<<section<<" - "<<key<<": "<<type<<endl;
+    if (false) cout <<"addKey: "<<section<<" - "<<key<<": "<<type<<endl;
     if(keyList.count(section) ==  0)
         keyList[section] = map<TString,TString>();
     keyList[section][key] = type;
