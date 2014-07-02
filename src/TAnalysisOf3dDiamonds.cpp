@@ -2383,10 +2383,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
         vec->at(cell)= 0;
         delete histo;
     }
-
-    histSaver->SaveHistogram(hResolutionGoodCells);
+    hResolutionGoodCells->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hResolutionGoodCells,false,false,false);
+    hResolutionBadCells->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionBadCells);
+    hResolutionAllCells->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionAllCells);
+    hResolutionAllButBadCells->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionAllButBadCells);
     delete hResolutionGoodCells;
     delete hResolutionBadCells;
