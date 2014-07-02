@@ -192,19 +192,21 @@ std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > c
 }
 
 
-std::string THTMLGenerator::putImage(std::string path, TString name, std::string type,int percent)
+std::string THTMLGenerator::putImage(std::string path, TString name, std::string type,int percent,bool highlighted)
 {
 	std::string stringname;
 	stringname.append(name);
 	return putImage(path,stringname,type,percent);
 }
-std::string THTMLGenerator::putImage(std::string path, std::string name, std::string type,int percent)
+std::string THTMLGenerator::putImage(std::string path, std::string name, std::string type,int percent,bool highlighted)
 {
 	stringstream imageLink;
 	imageLink<<path<<"//"<<name<<"."<<type;
 	stringstream output;
-	output<<"<img src=\""<<imageLink.str()<<"\" width=\""<<percent<<"%\" alt=\""<<name<<"\">\n";
-
+	output<<"<img src=\""<<imageLink.str()<<"\" width=\""<<percent<<"%\" alt=\""<<name<<"\"";
+	if (highlighted)
+	    output << " border=\"4\" ";
+	output <<">\n";
 	return (putLink(imageLink.str(),output.str()));
 }
 std::string THTMLGenerator::putLink(std::string link,std::string content){
