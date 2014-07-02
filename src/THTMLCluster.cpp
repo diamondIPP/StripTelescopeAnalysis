@@ -66,6 +66,13 @@ void THTMLCluster::createEtaDistributions()
 	sectionContent.clear();
 	sectionContent.str("");
 	sectionContent<<putImagesOfAllDetectors(path,"c_hAsymmetricEtaFinal_","All");
+	sectionContent<<"\n<br>\n\t";
+	Int_t nDias = settings->getNDiamonds();
+	for ( Int_t dia=0; dia<=nDias; dia++ ){
+	    TString name =TString::Format("c_hAsymmetricEtaFinal_DiaArea%d",dia);
+	    bool highlighted = (dia ==  settings->getAnalysedDiamond()+1);
+	    sectionContent<<putImageOfPath((string)name,"png",20,highlighted );
+	}
 	this->addSection("Cross Talk Corrected Eta Distributions",sectionContent.str());
 }
 
