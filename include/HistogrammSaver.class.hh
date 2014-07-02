@@ -58,6 +58,7 @@ public:
 	enum EnumAxisRange{
 		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
 	};
+	TFile* GetFilePointer(TString name, TString option="UPDATE");
 	HistogrammSaver(TSettings* settings,int verbosity=0);
 	virtual ~HistogrammSaver();
 	void SetPaperPlotStyle();
@@ -69,9 +70,9 @@ public:
 								Float_t maxX =      std::numeric_limits<float>::infinity() );
 	TPaveText* GetUpdatedLandauMeans(TH1F* histo,Float_t mpv, Float_t gSigma=-1);
 	//void SetOptFit(std::string fitOpt){gStyle->SetOptFit(fitOpt.c_str());}
-	void SaveCanvas(TCanvas* canvas);
-	void SaveCanvasROOT(TCanvas* canvas);
-	void SaveCanvasPNG(TCanvas* canvas);
+	void SaveCanvas(TCanvas* canvas,TString name="");
+	void SaveCanvasROOT(TCanvas* canvas,TString name="");
+	void SaveCanvasPNG(TCanvas* canvas,TString name ="");
 	void SaveTwoHistos(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "left", UInt_t verbosity=0);
 	void SaveTwoHistosNormalized(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "right", UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
@@ -94,7 +95,7 @@ public:
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
 	void SaveHistogramLogZ(TH2* histo);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
-	void SaveHistogramPNG(TH1* histo,TString drawOption="");
+	void SaveHistogramPNG(TH1* histo,TString drawOption="",bool optimizedRange = false);
 	void SaveHistogramPNG(TH2* histo,bool optimizeRange=true,TString drawOption ="colz");
 	void SaveGraphPNG(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramFitGaussPNG(TH1* histo);
@@ -108,6 +109,7 @@ public:
 //	void SaveHistogramWithCellGrid(TH2D* histo){SaveHistogramWithCellGrid(TH2*)histo)};
 //	void SaveHistogramWithCellGrid(TH2* histo){SaveHistogramWithCellGrid(TH2*)histo)}
 	TCanvas* DrawHistogramWithCellGrid(TH2* histo,TH2* histo2=0);
+	void DrawGoodCellsRegion(TCanvas* c1);
 	void SaveHistogramWithCellGrid(TH2* histo, TH2* histo2=0);
 	void SetVerbosity(unsigned int i);
 	void SetRunNumber(unsigned int runNumber);

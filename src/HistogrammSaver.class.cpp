@@ -526,7 +526,8 @@ TPaveText* HistogrammSaver::updateMean(TH1F* histo, Float_t minX, Float_t maxX) 
     Int_t bin2 = histo->FindLastBinAbove(maxY/2);
     Float_t fwhm = histo->GetBinCenter(bin2) - histo->GetBinCenter(bin1);
     TPaveStats* hstat = (TPaveStats*)histo->GetListOfFunctions()->FindObject("stats");
-    cout<<"Got stats" <<hstat<<endl;
+    if (verbosity)
+        cout<<"Got stats" <<hstat<<endl;
     if (!hstat)
         histo->GetListOfFunctions()->Print();
 
@@ -621,9 +622,12 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     c1->SetRightMargin(.15);
     hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
     hGridReferenceDetSpace->Draw("COL");
-    histo->GetZaxis()->SetLabelOffset(1.2);
-    if (histo)
-        histo->Draw("sameCOLZAH");
+    histo->GetZaxis()->SetTitleOffset(1.3);
+    histo->GetZaxis()->SetLabelOffset(0);
+    if (histo){
+        histo->Draw("sameCOLZ");
+        hGridReferenceDetSpace->Draw("sameCOL");
+    }
     //	TLegend* leg = 0;
     if (histo2){
         histo2->Draw("sameTEXTAH");
@@ -636,6 +640,14 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     }
     //hGridReference->Draw("COL");
     settings->DrawMetallisationGrid(c1, 3);
+    name.Replace(0,1,"f");
+    TFile *f = GetFilePointer(name,"RECREATE");
+    f->cd();
+    histo->Clone()->Write();
+    hGridReferenceDetSpace->Clone()->Write();
+    if(histo2)
+        histo2->Clone()->Write();
+    delete f;
     //	cout<<c1->GetName()<<endl;
     //	if (leg)
     //		leg->Draw();
@@ -811,6 +823,62 @@ TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
     return histo;
 }
 
+TFile* HistogrammSaver::GetFilePointer(TString name, TString option) {
+    TString path = (TString)plots_path;
+    path+=(TString)name;
+    if (!name.Contains(".root"))
+        path.Append((TString)".root");
+    TFile* file = new TFile(name,option);
+    return file;
+}
+
+void HistogrammSaver::DrawGoodCellsRegion(TCanvas* c1) {
+    if (!c1)
+        return;
+    cout<<"HistogrammSaver::DrawGoodCellsRegion"<<endl;
+    std::vector< std::vector<Int_t> > goodCellRegions = settings->getGoodCellRegions3d();
+    Float_t xmin = 1e9;
+    Float_t xmax = -1e9;
+    Float_t ymin = 1e9;
+    Float_t ymax = -1e9;
+    for (UInt_t region = 0; region < goodCellRegions.size();region++){
+        for (UInt_t cell =0; cell< goodCellRegions.at(region).size();cell++){
+            Int_t cellNo = goodCellRegions.at(region).at(cell);
+            Int_t row = settings->getRowOfCell(cellNo);
+            Int_t column = settings->getColumnOfCell(cellNo);
+            TString name = TString::Format("gGoodCell_%d_%d",region,cellNo);
+            Int_t oldVerbose = verbosity;
+            verbosity=10;
+            cout<<region<<" "<<cell<<" "<<cellNo<<": "<<row<<" "<<column<<endl;
+            Float_t x = hGridReferenceDetSpace->GetXaxis()->GetBinCenter(column+1);
+            Float_t y = hGridReferenceDetSpace->GetYaxis()->GetBinCenter(row+1);
+            TCutG* gCell = this->GetCutGofBin(name,hGridReferenceDetSpace,x,y);
+            verbosity = oldVerbose;
+            gCell->SetLineColor(kCyan+2);
+            gCell->SetLineWidth(4);
+            for (UInt_t i =0; i< gCell->GetN();i++){
+                cout<<"\t"<<gCell->GetX()[i]<<" / "<<gCell->GetY()[i]<<endl;
+                if(gCell->GetX()[i]<xmin) xmin = gCell->GetX()[i];
+                if(gCell->GetX()[i]>xmax) xmax = gCell->GetX()[i];
+                if(gCell->GetY()[i]<ymin) ymin = gCell->GetY()[i];
+                if(gCell->GetY()[i]>ymax) ymax = gCell->GetY()[i];
+
+            }
+            gCell->Draw("same");
+        }
+
+        Float_t xx[] = {xmin,xmax,xmax,xmin,xmin};
+        Float_t yy[] = {ymin,ymin,ymax,ymax,ymin};
+        TString name = TString::Format("gGoodCellRegion_%d",region);
+        TCutG * cut = new TCutG(name,5,xx,yy);
+        cut->SetLineColor(kRed+2);
+        cut->SetLineWidth(4);
+        cut->Draw("same");
+    }
+    cout<<"Press a key and enter."<<endl;
+    char t; cin>>t;
+}
+
 void HistogrammSaver::UpdatePaveText(){
     if (!pt)
         return;
@@ -966,6 +1034,7 @@ void HistogrammSaver::SaveHistogramWithExtendedFit(TH1* histo,TF1* fit, Float_t 
 }
 
 void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosity){
+    return SaveHistogramWithFit(histo,fit,1,-1,verbosity);
     if(histo==0)return;
     if(histo->GetEntries()==0)return;
     if(fit==0) SaveHistogram(histo);
@@ -992,17 +1061,15 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
     histo_filename << plots_path << "histograms.root";
     plot_filename << plots_path << histo->GetName() << ".root";
     plots_canvas->Print(plot_filename.str().c_str());
-    TFile f(histo_filename.str().c_str(),"UPDATE");
-    f.cd();
+    TFile *f = GetFilePointer(histo_filename.str().c_str(),"UPDATE");
+    f->cd();
     ((TH1F*)histo->Clone())->Write();
     ((TF1*)fit->Clone())->Write();
     plots_canvas->Write();
-    plot_filename.clear();
-    plot_filename.str("");
-    plot_filename.clear();
+    SaveCanvas(plots_canvas);
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
-    f.Close();
+    f->Close();
     //	if(plots_canvas)delete plots_canvas;
 }
 
@@ -1022,12 +1089,22 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
     //	TH1F *htemp = (TH1F*)histo->Clone();
     TPaveText * pt2 = 0;
     if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
-    if(verbosity){
-        cout<<"Fitting: "<<fit->GetName()<<" "<<xmin<<" - "<<xmax<<endl;
-        histo->Fit(fit,"","",xmin,xmax);
+    if (xmin<xmax){
+        if(verbosity){
+            cout<<"Fitting: "<<fit->GetName()<<" "<<xmin<<" - "<<xmax<<endl;
+            histo->Fit(fit,"","",xmin,xmax);
+        }
+        else
+            histo->Fit(fit,"Q+","",xmin,xmax);
     }
-    else
-        histo->Fit(fit,"Q+","",xmin,xmax);
+    else{//xmin>xmax ==> fitting wiout range
+        if(verbosity){
+            cout<<"Fitting: "<<fit->GetName()<<endl;
+            histo->Fit(fit);
+        }
+        else
+            histo->Fit(fit,"Q+");
+    }
     histo->Draw();
     //	TF1* fittemp = (TF1*)fit->Clone();
     //	fittemp->SetLineColor(kRed);
@@ -1036,20 +1113,19 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
     if(pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     ostringstream histo_filename;
-    histo_filename << plots_path << "histograms.root";
-    plot_filename << plots_path << histo->GetName() << ".root";
-    plots_canvas->Print(plot_filename.str().c_str());
-    TFile f(histo_filename.str().c_str(),"UPDATE");
-    f.cd();
+
+    TString path = (TString)plots_path + histo->GetName() +(TString)".root";
+    plots_canvas->Print(path);
+    path = (TString)plots_path + (TString)"histograms.root";
+    TFile* f = this->GetFilePointer("histograms.root","UPDATE");
+    f->cd();
     ((TH1F*)histo->Clone())->Write();
     ((TF1*)fit->Clone())->Write();
     plots_canvas->Write();
-    plot_filename.clear();
-    plot_filename.str("");
-    plot_filename.clear();
-    plot_filename << plots_path << histo->GetName() << ".png";
-    plots_canvas->Print(plot_filename.str().c_str());
-    f.Close();
+    path = (TString)plots_path + histo->GetName() +(TString)".png";
+    plots_canvas->Print(path);
+    f->Close();
+    delete f;
     //	if(plots_canvas)delete plots_canvas;
 }
 
@@ -1275,13 +1351,18 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
 }
 TCutG* HistogrammSaver::GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y){
     if (!histo)return 0;
+
     Int_t bin = histo->FindBin(x,y);
     Int_t binx,biny,binz;
     histo->GetBinXYZ(bin,binx,biny,binz);
+    if(verbosity>5)
+        cout<<"HistogramSaver::GetCutGofBin \""<<name<<"\" "<<x<<" "<<y<<"->"<<bin<<": "<<binx<<"/"<<biny<<"/"<<binz<<endl;
     Float_t xlow = histo->GetXaxis()->GetBinLowEdge(binx);
     Float_t xup = histo->GetXaxis()->GetBinUpEdge(binx);
     Float_t ylow = histo->GetYaxis()->GetBinLowEdge(biny);
     Float_t yup = histo->GetYaxis()->GetBinUpEdge(biny);
+    if(verbosity>5)
+        cout<<"X:"<<xlow<<"-"<<xup<<"\tY:"<<ylow<<"-"<<yup<<endl;
     while (xup > histo->GetXaxis()->GetXmax()){
         Float_t delta = xup-xlow;
         xup = xlow;
@@ -1292,6 +1373,9 @@ TCutG* HistogrammSaver::GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t 
         yup = ylow;
         ylow = yup -delta;
     }
+    if(verbosity>5)
+        cout<<"X:"<<xlow<<"-"<<xup<<"\tY:"<<ylow<<"-"<<yup<<endl;
+
     Float_t xx[] = {xlow,xup,xup,xlow,xlow};
     Float_t yy[] = {ylow,ylow,yup,yup,ylow};
     TCutG * cut = new TCutG(name,5,xx,yy);
@@ -1394,12 +1478,12 @@ void HistogrammSaver::Save1DProfileWithFitAndInfluence(TProfile *prof, TF1* fit,
     SaveCanvas(c1);
 }
 
-void HistogrammSaver::SaveCanvas(TCanvas *canvas)
+void HistogrammSaver::SaveCanvas(TCanvas *canvas,TString name)
 {
     if(canvas==0)
         return;
-    SaveCanvasPNG(canvas);
-    SaveCanvasROOT(canvas);
+    SaveCanvasPNG(canvas,name);
+    SaveCanvasROOT(canvas,name);
 }
 
 void HistogrammSaver::SaveGraph(TGraph* graph,std::string name,std::string option){
@@ -1462,7 +1546,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2* histo) {
     //pt->SetTextSize(runNumber0.1);
 }
 
-void HistogrammSaver::SaveHistogramPNG(TH1* histo,TString drawOption) {
+void HistogrammSaver::SaveHistogramPNG(TH1* histo,TString drawOption,bool optimizedRange) {
     if(histo==0)return;
     if(!histo){
         cout<<"Histogram is not existing..."<<endl;
@@ -1478,16 +1562,20 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo,TString drawOption) {
     if(htemp==0)return;
     TCanvas *plots_canvas = new TCanvas(TString::Format("cPng_%s",histo->GetName()),TString::Format("c_%s",histo->GetName()));
     plots_canvas->cd();
-    htemp->SetMinimum(0);
-    htemp->Draw();
     drawOption.ToLower();
-    if(drawOption.Contains("logx"))
-        plots_canvas->SetLogx();
     if(drawOption.Contains("logy")){
         htemp->SetMinimum(1e-5);
         plots_canvas->SetLogy();
         cout<<"Draw " <<histo->GetName()<<" logy"<<endl;
+        drawOption.Remove(drawOption.Index("logy"),4);
     }
+    if(drawOption.Contains("logx")){
+        cout<<"Draw " <<histo->GetName()<<" logx"<<endl;
+        plots_canvas->SetLogx();
+        drawOption.Remove(drawOption.Index("logx"),4);
+    }
+    if (optimizedRange)    htemp->SetMinimum(0);
+    htemp->Draw(drawOption);
     TPaveText *pt2=0;
     if (pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
     if(pt2 && !settings->IsPaperMode()) pt2->Draw();
@@ -1497,12 +1585,14 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo,TString drawOption) {
     //	if(plots_canvas)delete plots_canvas;
 }
 
-void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
+void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas,TString name)
 {
     if(!canvas)
         return;
+    if (name=="")
+        name = canvas->GetName();
     ostringstream plot_filename;
-    plot_filename << plots_path << canvas->GetName()<<".root";
+    plot_filename << plots_path << name <<".root";
     TCanvas* plots_canvas=(TCanvas*)canvas->Clone();
     plots_canvas->cd();
 
@@ -1514,16 +1604,18 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas)
     canvas->Write();
 }
 
-void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas)
+void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, TString name)
 {
     if(canvas==0)
         return;
+    if (name=="")
+        name = canvas->GetName();
     canvas->cd();
     TPaveText *pt2=0;
     if(pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
     if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
-    plot_filename << plots_path << canvas->GetName()<<".png";
+    plot_filename << plots_path << name<<".png";
     canvas->Print(plot_filename.str().c_str());
 }
 
@@ -1594,7 +1686,7 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     //write to own root File
     plots_canvas->Write(plots_filename.str().c_str());
     plots_canvas->Write(plots_filename.str().c_str());
-    TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+    TFile *f = GetFilePointer("histograms.root");
     if(!f)
         return;
     f->cd();
@@ -1664,9 +1756,7 @@ void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange,TString dr
     plot_filename << plots_path << histo->GetName() << ".root";
     plots_canvas->Print(plot_filename.str().c_str());
 
-    stringstream histo_filename;
-    histo_filename << plots_path << "histograms.root";
-    TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+    TFile *f = this->GetFilePointer("histograms.root","UPDATE");
     f->cd();
     plots_canvas->Write();
     f->Close();
@@ -1698,7 +1788,7 @@ void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
     htemp->Print(plot_filename.str().c_str());
     stringstream histo_filename;
     histo_filename << plots_path << "histograms.root";
-    TFile *f = new TFile(histo_filename.str().c_str(),"UPDATE");
+    TFile *f = GetFilePointer("histograms.root","UPDATE");
     f->cd();
     htemp->Write();
     f->Close();
