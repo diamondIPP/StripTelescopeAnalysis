@@ -291,7 +291,7 @@ int main(int argc, char ** argv) {
 			currentResults->createResultFiles();
 		}
 
-		if (settings && settings->doTransparentAlignmnet()){
+		if ((DO_TRANSPARENT_ANALYSIS||DO_ALIGNMENT) && settings && settings->doTransparentAlignment()){
 			sys->cd(currentDir.c_str());
 			TAlignment *alignment = new TAlignment(settings,TSettings::transparentMode);
 			alignment->createTransparentEventVectors(RunParameters[i].getEvents());
