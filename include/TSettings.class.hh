@@ -111,7 +111,7 @@ public:
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
 	bool is3dDiamond(){return b3dDiamond;};
 	bool b3dDiamond;
-	bool doTransparentAlignmnet()const {return bTransparentAlignment;}
+	bool doTransparentAlignment()const {return bTransparentAlignment;}
 	int getAlignmentMode()const {return detectorsToAlign;}
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
