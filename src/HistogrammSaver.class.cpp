@@ -850,33 +850,38 @@ void HistogrammSaver::DrawGoodCellsRegion(TCanvas* c1) {
             Int_t oldVerbose = verbosity;
             verbosity=10;
             cout<<region<<" "<<cell<<" "<<cellNo<<": "<<row<<" "<<column<<endl;
-            Float_t x = hGridReferenceDetSpace->GetXaxis()->GetBinCenter(column+1);
-            Float_t y = hGridReferenceDetSpace->GetYaxis()->GetBinCenter(row+1);
-            TCutG* gCell = this->GetCutGofBin(name,hGridReferenceDetSpace,x,y);
-            verbosity = oldVerbose;
-            gCell->SetLineColor(kCyan+2);
-            gCell->SetLineWidth(4);
-            for (UInt_t i =0; i< gCell->GetN();i++){
-                cout<<"\t"<<gCell->GetX()[i]<<" / "<<gCell->GetY()[i]<<endl;
-                if(gCell->GetX()[i]<xmin) xmin = gCell->GetX()[i];
-                if(gCell->GetX()[i]>xmax) xmax = gCell->GetX()[i];
-                if(gCell->GetY()[i]<ymin) ymin = gCell->GetY()[i];
-                if(gCell->GetY()[i]>ymax) ymax = gCell->GetY()[i];
-
-            }
-            gCell->Draw("same");
+            Float_t xx1[]={ hGridReferenceDetSpace->GetXaxis()->GetBinLowEdge(column+1),hGridReferenceDetSpace->GetXaxis()->GetBinUpEdge(column+1)};
+            Float_t yy1[]={ hGridReferenceDetSpace->GetYaxis()->GetBinLowEdge(row+1),hGridReferenceDetSpace->GetYaxis()->GetBinUpEdge(row+1)};
+            if (xx1[0]<xmin) xmin=xx1[0];
+            if (xx1[1]>xmax) xmax=xx1[1];
+            if (yy1[0]<ymin) ymin=yy1[0];
+            if (yy1[1]>ymax) ymax=yy1[1];
+//            Float_t x = hGridReferenceDetSpace->GetXaxis()->GetBinCenter(column+1);
+//            Float_t y = hGridReferenceDetSpace->GetYaxis()->GetBinCenter(row+1);
+//            TCutG* gCell = this->GetCutGofBin(name,hGridReferenceDetSpace,x,y);
+//            verbosity = oldVerbose;
+//            gCell->SetLineColor(kCyan+2);
+//            gCell->SetLineWidth(4);
+//            for (UInt_t i =0; i< gCell->GetN();i++){
+//                cout<<"\t"<<gCell->GetX()[i]<<" / "<<gCell->GetY()[i]<<endl;
+//                if(gCell->GetX()[i]<xmin) xmin = gCell->GetX()[i];
+//                if(gCell->GetX()[i]>xmax) xmax = gCell->GetX()[i];
+//                if(gCell->GetY()[i]<ymin) ymin = gCell->GetY()[i];
+//                if(gCell->GetY()[i]>ymax) ymax = gCell->GetY()[i];
+//
+//            }
+////            gCell->Draw("same");
+//            delete gCell;
         }
-
+//        ymax = ymax-.03*(ymax-ymin);
         Float_t xx[] = {xmin,xmax,xmax,xmin,xmin};
         Float_t yy[] = {ymin,ymin,ymax,ymax,ymin};
         TString name = TString::Format("gGoodCellRegion_%d",region);
         TCutG * cut = new TCutG(name,5,xx,yy);
-        cut->SetLineColor(kRed+2);
-        cut->SetLineWidth(4);
+        cut->SetLineColor(kMagenta);
+        cut->SetLineWidth(6);
         cut->Draw("same");
     }
-    cout<<"Press a key and enter."<<endl;
-    char t; cin>>t;
 }
 
 void HistogrammSaver::UpdatePaveText(){
@@ -1111,8 +1116,6 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
     fit->SetLineStyle(3);
     fit->Draw("same");
     if(pt2 && !settings->IsPaperMode()) pt2->Draw();
-    ostringstream plot_filename;
-    ostringstream histo_filename;
 
     TString path = (TString)plots_path + histo->GetName() +(TString)".root";
     plots_canvas->Print(path);
