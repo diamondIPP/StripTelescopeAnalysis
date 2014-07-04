@@ -983,7 +983,10 @@ void TAnalysisOfPedestal::saveHistos(){
         delete prof;
         prof=0;
     }
-    histSaver->SaveHistogram(hNewComonModeNoise);
+    TF1* fit= new TF1("fGauss_CMN","gaus",-30,30);
+    histSaver->SaveHistogramWithFit(hNewComonModeNoise,fit);
+    res->setFloatValue("Noise","CMN_Pos",fit->GetParameter(1));
+    res->setFloatValue("Noise","CMN_Sigma",fit->GetParameter(2));
     delete hNewComonModeNoise;
     delete hNewCmnVsEventNo;
     histSaver->SaveHistogram(hCmnVsNewCmn);
@@ -1493,9 +1496,9 @@ void TAnalysisOfPedestal::saveAdcVsEventProfiles() {
             TRawEventSaver::showStatusBar(ch,TPlaneProperties::getNChannels(det),1,1,0);
             if(settings->IsMasked(det,ch))
                 continue;
-            name = (TString)"hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
-            name += TString::Format("_ch%03d",ch);
-            TH1D* prof = prof2d->ProjectionX(name,ch+1,ch+1);
+            TString name1 = name;
+            name1 += TString::Format("_ch%03d",ch);
+            TH1D* prof = prof2d->ProjectionX(name1,ch+1,ch+1);
             Float_t mean = 0;
             Int_t nAvrg = TMath::Min(7,prof->GetNbinsX());
             for(UInt_t i=1;i<=nAvrg;i++)mean+=prof->GetBinContent(i);
@@ -1543,7 +1546,7 @@ void TAnalysisOfPedestal::saveAdcVsEventProfiles() {
                 hADC_Fit_Par0->Fill(fit->GetParameter(0));
                 hADC_Fit_Par1->Fill(fit->GetParameter(1));
                 Float_t chi2 = fit->GetChisquare()/fit->GetNDF();
-//                cout<<det<<" "<<ch<<" "<<chi2<<endl;
+                //                cout<<det<<" "<<ch<<" "<<chi2<<endl;
                 hADC_Fit_Chi2->Fill(chi2);
             }
             histSaver->SaveHistogram(prof,false,true,true);
@@ -1605,6 +1608,25 @@ void TAnalysisOfPedestal::saveAdcVsEventProfiles() {
         delete hADC_Fit_Par0;
         delete hADC_Fit_Par1;
         delete fit;
+        Float_t adc,adc0;
+        for(UInt_t binY = 1; binY <= prof2d->GetNbinsY();binY++){
+            for(UInt_t binX=1; binX<=prof2d->GetNbinsX();binX++){
+                adc=prof2d->GetBinContent(binX,binY);
+                if (binX==1)
+                    if (adc)
+                        adc0 = adc;
+                    else
+                        adc0=1;
+                prof2d->SetBinContent(binX,binY,adc/adc0);
+            }
+        }
+        prof2d->SetName(prof2d->GetName()+(TString)"_rescaledChannels");
+        histSaver->SaveHistogram(prof2d);
+        cout<<"delete "<<name<<flush;
+        delete hHistoMap[name];
+        cout<<"."<<flush;
+        hHistoMap.erase(name);
+        cout<<" done."<<endl;
     }//for loop det
 }
 
@@ -1613,7 +1635,7 @@ void TAnalysisOfPedestal::saveAdcVsEventProfiles() {
 TH1F* TAnalysisOfPedestal::doSlidingWindowAnalysis(TH1D* histo,Int_t nAvrg,bool absolute) {
     if (!histo)
         return 0;
-//    cout<<"do Sliding Window for '"<<histo->GetName()<<"'"<<endl;
+    //    cout<<"do Sliding Window for '"<<histo->GetName()<<"'"<<endl;
     TString name  = histo->GetName()+TString::Format("_SlidingWindow_%dAvrg",nAvrg);
     TH1F* retHisto = (TH1F*)histo->Clone(name);
     retHisto->Reset();
