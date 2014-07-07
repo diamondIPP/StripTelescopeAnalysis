@@ -814,7 +814,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
                                 if(biggestSNR<adjacentSNR){
                                     if(TMath::Abs(adjacentSNR/biggestSNR) > 1.05){
                                         if(!settings->isDet_channel_screened(det,biggestCh)&&!settings->isDet_channel_screened(det,adjacentCh)){
-                                            cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
+                                            if(verbosity) cout<<"Error3:"<<i<<" "<<det<< " "<<setw(3)<<biggestCh<<" "<<biggestSNR<<"@"<<biggestCh<<" "<<" - "<<adjacentSNR<<"@"<<adjacentCh<<endl;
                                             invalidBiggestHitChannels.at(det).insert(biggestCh);
                                         }
                                     }
