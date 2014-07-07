@@ -260,7 +260,7 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     name ="hNoNegativeCharge_PulseHeight";
     histo = new TH1F(name,name,bins,xmin,xmax);
     histo->GetXaxis()->SetTitle("charge / ADC");
-    histo->GetYaxis()->SetTitle("no of entries #");
+    histo->GetYaxis()->SetTitle("entries a.u.");
     histo->SetLineColor(kBlack);
     mapHistos[name] = histo;
 }
@@ -295,13 +295,17 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     c1->SetTitle(name);
     c1->SetName(name);
     c1->Clear();
+    mapHistos["hNoNegativeCharge_PulseHeight"]->SetTitle("3D");
     mapHistos["hNoNegativeCharge_PulseHeight"]->Draw();
 //    if(histo2){
 //        histo2->SetLineColor(kRed);
 //        histo2->Draw("same");
 //    }
-    if(stripHisto)
+    if(stripHisto){
+        stripHisto->SetTitle("Strip");
+        stripHisto->SetLineStyle(2);
         stripHisto->Draw("same");
+    }
     leg = c1->BuildLegend();
     leg->SetFillColor(kWhite);
     leg->Draw();

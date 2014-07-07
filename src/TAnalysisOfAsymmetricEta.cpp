@@ -68,6 +68,7 @@ void TAnalysisOfAsymmetricEta::FillEtaDistribution(TH2F* histo, Float_t correcti
 		    clus.Print();
 		}
 
+        if (verbosity>4)
 		if(newEta>0&&newEta<1){
 			histo->Fill(newEta,nDia);
 			if (nDia==0){

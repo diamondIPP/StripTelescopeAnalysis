@@ -54,19 +54,18 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
                 //	    gStyle->SetPadRightMargin(0.15);
                 if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
                 //gStyle->SetTitleColor(19,"");
-                gStyle->SetPalette(1); //
-                gStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+                gStyle->SetPalette(55);
                 currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
-                currentStyle->SetPalette(1);
+                currentStyle->SetPalette(55);
                 currentStyle2D= (TStyle*)currentStyle->Clone("Plain_RD42_2D");
                 currentStyle2D->SetOptStat("ne");
-                currentStyle2D ->SetPalette(1);
+                currentStyle2D ->SetPalette(55);
                 currentStyle->cd();
                 //				gROOT->SetStyle("Plain_RD42");
             }
         }
 //    if (paperMode) gStyle->SetOptTitle(false);
-    gStyle->SetPalette(1); //
+    gStyle->SetPalette(55); //
     SetPaperPlotStyle();
     if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
     gErrorIgnoreLevel=3001;
@@ -201,7 +200,7 @@ void HistogrammSaver::SetPaperPlotStyle(){
       gStyle->SetLabelColor(kBlack, "XYZ");
       gStyle->SetLabelFont(42, "XYZ");
       gStyle->SetLabelOffset(0.007, "XYZ");
-      gStyle->SetLabelSize(0.03, "XYZ");
+      gStyle->SetLabelSize(0.045, "XYZ");
 
       // For the axis:
 
@@ -878,8 +877,8 @@ void HistogrammSaver::DrawGoodCellsRegion(TCanvas* c1) {
         Float_t yy[] = {ymin,ymin,ymax,ymax,ymin};
         TString name = TString::Format("gGoodCellRegion_%d",region);
         TCutG * cut = new TCutG(name,5,xx,yy);
-        cut->SetLineColor(kMagenta);
-        cut->SetLineWidth(6);
+        cut->SetLineColor(kRed);
+        cut->SetLineWidth(7);
         cut->Draw("same");
     }
 }
@@ -1913,7 +1912,7 @@ void HistogrammSaver::SetDuckStyle() {
     DuckStyle->SetStatX(0.9);
     DuckStyle->SetStatY(0.97);
     DuckStyle->SetTitleOffset(1.0,"Y");
-    DuckStyle->SetPalette(1); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+    DuckStyle->SetPalette(55); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
     DuckStyle->SetCanvasBorderMode(0);
     DuckStyle->SetTitleFont(42,"XYZ");
     DuckStyle->SetTitleFontSize(0.038);
@@ -1942,7 +1941,7 @@ void HistogrammSaver::SetDuckStyle() {
     //	gStyle->SetTextSize(0.01);
     DuckStyle->SetLabelFont(42,"XYZ");
     DuckStyle->SetLabelColor(kBlack,"XYZ");
-    DuckStyle->SetLabelSize(0.025,"XYZ");
+    DuckStyle->SetLabelSize(0.04,"XYZ");
     //DuckStyle->SetTitleOffset(1.8, "Y"); // Another way to set the Offset
     //	gStyle->SetTitleOffset(1.2, "X"); // Another way to set the Offset
     DuckStyle->SetTitleOffset(1.2,"X");

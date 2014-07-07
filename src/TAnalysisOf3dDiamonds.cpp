@@ -695,9 +695,9 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     name.Append(appendix);
     hTotalAvrgChargeXY = new TProfile2D(name,name, xmax/10.,0,xmax,ymax/10.,0,ymax);
     hTotalAvrgChargeXY->Draw();
-    hTotalAvrgChargeXY->GetXaxis()->SetTitle("pred. 	det hit position X / #mum");
-    hTotalAvrgChargeXY->GetYaxis()->SetTitle("pred. det hit position Y / #mum");
-    hTotalAvrgChargeXY->GetZaxis()->SetTitle("total charge in event / ADC");
+    hTotalAvrgChargeXY->GetXaxis()->SetTitle("#it{y} position/ #mum");
+    hTotalAvrgChargeXY->GetYaxis()->SetTitle("#it{y} position / #mum");
+    hTotalAvrgChargeXY->GetZaxis()->SetTitle("avrg signal / ADC");
     hTotalAvrgChargeXY->GetZaxis()->SetTitleOffset(1.2);
 
     name = "hRelatviveNumberOfMultipleClusterEvents";
@@ -1184,9 +1184,9 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
         hCellsOverlayAvrgCharge.push_back(new TProfile2D(name,name,
                 nXbins,xBinEdges,
                 nYbins,yBinEdges));
-        hCellsOverlayAvrgCharge.at(ClusterSize)->GetXaxis()->SetTitle("rel. x position within a cell / #mum");
-        hCellsOverlayAvrgCharge.at(ClusterSize)->GetYaxis()->SetTitle("rel. y position within a cell / #mum");
-        hCellsOverlayAvrgCharge.at(ClusterSize)->GetZaxis()->SetTitle("pulse height of cluster /ADC");
+        hCellsOverlayAvrgCharge.at(ClusterSize)->GetXaxis()->SetTitle("#it{x} position within a cell / #mum");
+        hCellsOverlayAvrgCharge.at(ClusterSize)->GetYaxis()->SetTitle("#it{y} position within a cell / #mum");
+        hCellsOverlayAvrgCharge.at(ClusterSize)->GetZaxis()->SetTitle("pulse height of cluster / ADC");
         //	hCellsOverlayAvrgCharge->SetContour(99);
         name = "hCellsOverlayAvrgCharge_noColumnHit";
         name.Append(appendix);
@@ -2293,7 +2293,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     UInt_t nCells = 99;
-    UInt_t nBins = 256;
+    UInt_t nBins = 256/2;
     Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
     for (UInt_t cell = 0; cell <nCells;cell++){
@@ -2408,12 +2408,16 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     if (settings->do3dTransparentAnalysis())
         appendix = "_trans";
     TH1F* hStrip = (TH1F*)hLandauStrip->Clone();
+    hStrip->SetLineStyle(2);
     histSaver->SaveHistogram(hLandau3DWithColumns);
     histSaver->SaveHistogram(hLandau3DWithoutColumns);
     histSaver->SaveHistogram(hLandau3DWithoutColumns_subset);
     histSaver->SaveHistogram(hLandau3DWithColumnsFidCutXvsFidCutY);
     histSaver->SaveHistogram(hLandau3DWithoutColumnsFidCutXvsFidCutY);
 
+    hLandau3DWithColumns->SetTitle("3D");
+    hLandau3DWithoutColumns->SetTitle("3D Phantom");
+    hLandau3DWithoutColumns_subset->SetTitle("3D Phantom, central Region");
     TString name = "sAllPulseHeigthDistributions";
     name.Append(appendix);
     THStack sAllPulseHeigthDistributions(name,name);
@@ -2435,7 +2439,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
 
     max = hStrip->GetBinContent(hStrip->GetMaximumBin());
     hStrip->Scale(1./max);
-    hStrip->SetTitle("Pulse Height, Strip Detector");
+    hStrip->SetTitle("Strip");
 
     name = "sAllPulseHeigthDistributions_scaled";
     name.Append(appendix);
@@ -2447,8 +2451,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     sAllPulseHeigthDistributions_normalized.Draw("");
     gPad->Update();;
     if(sAllPulseHeigthDistributions_normalized.GetXaxis()) sAllPulseHeigthDistributions_normalized.GetXaxis()->SetTitle("charge / ADC");
-    if(sAllPulseHeigthDistributions_normalized.GetYaxis()) sAllPulseHeigthDistributions_normalized.GetYaxis()->SetTitle("rel. no of entries");
-    histSaver->SaveStack(&sAllPulseHeigthDistributions_normalized,"nostack",true,false,"charge / ADC","rel. no of entries");
+    if(sAllPulseHeigthDistributions_normalized.GetYaxis()) sAllPulseHeigthDistributions_normalized.GetYaxis()->SetTitle("entries a.u.");
+    histSaver->SaveStack(&sAllPulseHeigthDistributions_normalized,"nostack",true,false,"charge / ADC","entries a.u.");
 
     name = "ccAllPulseHeigthDistributions";
     TCanvas *c1 = new TCanvas(name,name);
