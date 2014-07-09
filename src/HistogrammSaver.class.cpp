@@ -54,18 +54,18 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
                 //	    gStyle->SetPadRightMargin(0.15);
                 if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
                 //gStyle->SetTitleColor(19,"");
-                gStyle->SetPalette(55);
+                gStyle->SetPalette(53);
                 currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
-                currentStyle->SetPalette(55);
+                currentStyle->SetPalette(53);
                 currentStyle2D= (TStyle*)currentStyle->Clone("Plain_RD42_2D");
                 currentStyle2D->SetOptStat("ne");
-                currentStyle2D ->SetPalette(55);
+                currentStyle2D ->SetPalette(53);
                 currentStyle->cd();
                 //				gROOT->SetStyle("Plain_RD42");
             }
         }
 //    if (paperMode) gStyle->SetOptTitle(false);
-    gStyle->SetPalette(55); //
+    gStyle->SetPalette(53); //
     SetPaperPlotStyle();
     if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
     gErrorIgnoreLevel=3001;
@@ -96,8 +96,8 @@ void HistogrammSaver::SetPaperPlotStyle(){
       // For the canvas:
       gStyle->SetCanvasBorderMode(0);
       gStyle->SetCanvasColor(kWhite);
-      gStyle->SetCanvasDefH(800); //Height of canvas
-      gStyle->SetCanvasDefW(800); //Width of canvas
+      gStyle->SetCanvasDefH(1000); //Height of canvas
+      gStyle->SetCanvasDefW(1000); //Width of canvas
       gStyle->SetCanvasDefX(0);   //POsition on screen
       gStyle->SetCanvasDefY(0);
 
@@ -163,10 +163,10 @@ void HistogrammSaver::SetPaperPlotStyle(){
       // gStyle->SetStatY(Float_t y = 0);
 
       // Margins:
-      gStyle->SetPadTopMargin(0.05);
+      gStyle->SetPadTopMargin(0.13);
       gStyle->SetPadBottomMargin(0.13);
       gStyle->SetPadLeftMargin(0.13);
-      gStyle->SetPadRightMargin(0.05);
+      gStyle->SetPadRightMargin(0.13);
 
       // For the Global title:
 
@@ -192,14 +192,15 @@ void HistogrammSaver::SetPaperPlotStyle(){
       // gStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
       // gStyle->SetTitleYSize(Float_t size = 0.02);
       gStyle->SetTitleXOffset(1);
-      gStyle->SetTitleYOffset(1.15);
-      gStyle->SetTitleOffset(1.1, "Z"); // Another way to set the Offset
+      gStyle->SetTitleYOffset(1.25);
+      gStyle->SetTitleOffset(1.2, "Z"); // Another way to set the Offset
 
       // For the axis labels:
 
       gStyle->SetLabelColor(kBlack, "XYZ");
       gStyle->SetLabelFont(42, "XYZ");
-      gStyle->SetLabelOffset(0.007, "XYZ");
+      gStyle->SetLabelOffset(0.010, "XYZ");
+      gStyle->SetLabelOffset(0.015, "Z");
       gStyle->SetLabelSize(0.045, "XYZ");
 
       // For the axis:
@@ -624,6 +625,7 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     histo->GetZaxis()->SetTitleOffset(1.3);
     histo->GetZaxis()->SetLabelOffset(0);
     if (histo){
+        histo->SetContour(100);
         histo->Draw("sameCOLZ");
         hGridReferenceDetSpace->Draw("sameCOL");
     }
@@ -877,7 +879,7 @@ void HistogrammSaver::DrawGoodCellsRegion(TCanvas* c1) {
         Float_t yy[] = {ymin,ymin,ymax,ymax,ymin};
         TString name = TString::Format("gGoodCellRegion_%d",region);
         TCutG * cut = new TCutG(name,5,xx,yy);
-        cut->SetLineColor(kRed);
+        cut->SetLineColor(kGreen);
         cut->SetLineWidth(7);
         cut->Draw("same");
     }
@@ -1284,6 +1286,7 @@ void HistogrammSaver::SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool draw
     TCanvas *c1 = new TCanvas(name);
     if (!drawStatBox)
         c1->SetObjectStat(false);
+    prof->SetContour(100);
     prof->Draw("colz");
     TH2D* histo = prof->ProjectionXY(prof->GetName()+(TString)"_binEntries","B");
     histo->Draw("TEXTsame");
@@ -1316,6 +1319,7 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
         name.Insert(0,"c_");
     TCanvas *c1 = new TCanvas(name);
     c1->SetRightMargin(.15);
+    histo->SetContour(100);
     histo->Draw("colz");
     histo->GetZaxis()->SetTitleOffset(1.2);
     TH1F* frame = c1->DrawFrame(0,0,150,150,histo->GetTitle());
@@ -1339,11 +1343,11 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
         x+= settings->GetCellHeight()*(i%2);
         y+= settings->GetCellHeight()*(i/2);
         markers.push_back(new TMarker(x,y,20));
-        markers.back()->SetMarkerColor(kRed);
+        markers.back()->SetMarkerColor(kGreen);
         markers.back()->SetMarkerSize(1.5);
         markers.back()->Draw();
         cells.push_back(GetCutGofBin(TString::Format("biasBin_%d",i),histo,x,y));
-        if(cells.back()) cells.back()->SetLineColor(kRed);
+        if(cells.back()) cells.back()->SetLineColor(kGreen);
         if(cells.back()) cells.back()->Draw();
     }
 
@@ -1539,6 +1543,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2* histo) {
     if (pt2) pt2->SetTextColor(kBlack);
     histo->SetTitleFont(42);
     histo->UseCurrentStyle();
+    histo->SetContour(100);
     histo->Draw("colz");
     if(pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
@@ -1912,7 +1917,7 @@ void HistogrammSaver::SetDuckStyle() {
     DuckStyle->SetStatX(0.9);
     DuckStyle->SetStatY(0.97);
     DuckStyle->SetTitleOffset(1.0,"Y");
-    DuckStyle->SetPalette(55); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+    DuckStyle->SetPalette(53); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
     DuckStyle->SetCanvasBorderMode(0);
     DuckStyle->SetTitleFont(42,"XYZ");
     DuckStyle->SetTitleFontSize(0.038);

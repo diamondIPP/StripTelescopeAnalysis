@@ -1617,7 +1617,9 @@ void TAnalysisOfPedestal::saveAdcVsEventProfiles() {
                         adc0 = adc;
                     else
                         adc0=1;
-                prof2d->SetBinContent(binX,binY,adc/adc0);
+                Int_t bin = prof2d->GetBin(binX,binY);
+                prof2d->SetBinContent(bin,adc/adc0);
+                prof2d->SetBinEntries(bin,1);
             }
         }
         prof2d->SetName(prof2d->GetName()+(TString)"_rescaledChannels");

@@ -695,7 +695,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     name.Append(appendix);
     hTotalAvrgChargeXY = new TProfile2D(name,name, xmax/10.,0,xmax,ymax/10.,0,ymax);
     hTotalAvrgChargeXY->Draw();
-    hTotalAvrgChargeXY->GetXaxis()->SetTitle("#it{y} position/ #mum");
+    hTotalAvrgChargeXY->GetXaxis()->SetTitle("#it{x} position / #mum");
     hTotalAvrgChargeXY->GetYaxis()->SetTitle("#it{y} position / #mum");
     hTotalAvrgChargeXY->GetZaxis()->SetTitle("avrg signal / ADC");
     hTotalAvrgChargeXY->GetZaxis()->SetTitleOffset(1.2);
@@ -944,8 +944,8 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     if(verbosity>1) cout<<"Create "<<name<<endl;
     UInt_t factor = 10* (settings->getNQuarters3d()/2);
     hPulseHeightVsDetectorHitPostionXY = histSaver->GetProfile2dBinedInCells(name,factor);
-    hPulseHeightVsDetectorHitPostionXY->GetXaxis()->SetTitle("predicted x position in detector / #mum");
-    hPulseHeightVsDetectorHitPostionXY->GetYaxis()->SetTitle("predicted y position in detector / #mum");
+    hPulseHeightVsDetectorHitPostionXY->GetXaxis()->SetTitle("#it{x} / #mum");
+    hPulseHeightVsDetectorHitPostionXY->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetTitle("charge / ADC");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
 
@@ -955,8 +955,8 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     if(verbosity>1) cout<<"Create "<<name<<endl;
     factor = 10* (settings->getNQuarters3d()/2);
     hPulseHeightVsDetectorHitPostionXYGoodCells = histSaver->GetProfile2dBinedInCells(name,factor);
-    hPulseHeightVsDetectorHitPostionXYGoodCells->GetXaxis()->SetTitle("predicted x position in detector / #mum");
-    hPulseHeightVsDetectorHitPostionXYGoodCells->GetYaxis()->SetTitle("predicted y position in detector / #mum");
+    hPulseHeightVsDetectorHitPostionXYGoodCells->GetXaxis()->SetTitle("#it{x} / #mum");
+    hPulseHeightVsDetectorHitPostionXYGoodCells->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetTitle("charge /ADC");
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
 
@@ -2293,7 +2293,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     UInt_t nCells = 99;
-    UInt_t nBins = 256/2;
+    UInt_t nBins = 128;
     Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
     for (UInt_t cell = 0; cell <nCells;cell++){
@@ -2353,7 +2353,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec,TString kind){
-    UInt_t nBins = 256;
+    UInt_t nBins = 128;
     Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX =settings->GetCellWidth(subjectDetector,2);
     TString name = "hResolutionGoodCells_"+kind;
@@ -4562,18 +4562,18 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     name = "hValidEventsDetSpace";
     name.Append(appendix);
     hValidEventsDetSpace = new TH2F(name,name,1024,xmin,xmax,1024,ymin,ymax);
-    hValidEventsDetSpace->GetXaxis()->SetTitle("predicted Hit position x in det space / #mum");
-    hValidEventsDetSpace->GetYaxis()->SetTitle("predicted Hit position y in det space / #mum");
+    hValidEventsDetSpace->GetXaxis()->SetTitle("#it{X} / #mum");
+    hValidEventsDetSpace->GetYaxis()->SetTitle("#it{Y} / #mum");
     InitialiseStripAnalysisHistos();
     name = "hLandau3D";
     name.Append(appendix);
-    hLandau3DWithColumns = new TH1F(name,"Pulse Height, 3D",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DWithColumns = new TH1F(name,"3D",PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandau3DWithColumns->GetXaxis()->SetTitle("charge / ADC");
     hLandau3DWithColumns->GetYaxis()->SetTitle("number of entries #");
     hLandau3DWithColumns->SetLineColor(kBlack);
     name = "hLandau3DWO";
     name.Append(appendix);
-    hLandau3DWithoutColumns = new TH1F(name,"Pulse Height, 3DnH",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DWithoutColumns = new TH1F(name,"3D Phantom",PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandau3DWithoutColumns->GetXaxis()->SetTitle("charge / ADC");
     hLandau3DWithoutColumns->GetYaxis()->SetTitle("number of entries #");
     hLandau3DWithoutColumns->SetLineColor(kRed);
@@ -4581,7 +4581,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 
     name = "hLandau3DWO_subset";
     name.Append(appendix);
-    hLandau3DWithoutColumns_subset = new TH1F(name,"Pulse Height, 3DnH, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DWithoutColumns_subset = new TH1F(name,"3D Phantom, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandau3DWithoutColumns_subset->GetXaxis()->SetTitle("charge / ADC");
     hLandau3DWithoutColumns_subset->GetYaxis()->SetTitle("number of entries #");
     hLandau3DWithoutColumns_subset->SetLineColor(kRed);
@@ -4667,9 +4667,10 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
         return;
 
     }
-    hMeanCharge->GetXaxis()->SetTitle("Predicted Hit Position X in Detector / #mum");
-    hMeanCharge->GetYaxis()->SetTitle("Predicted Hit Position Y in Detector / #mum");
-    hMeanCharge->GetYaxis()->SetTitleOffset(1.2);
+    hMeanCharge->GetXaxis()->SetTitle("#it{X} / #mum");
+    hMeanCharge->GetYaxis()->SetTitle("#it{Y}/ #mum");
+    hMeanCharge->GetYaxis()->SetTitleOffset(1.4);
+    hMeanCharge->GetZaxis()->SetTitleOffset(1.3);
     cout<<"\t[done]"<<endl;
     //	if(!hMeanCharge)
     //		return;

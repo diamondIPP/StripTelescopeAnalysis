@@ -56,7 +56,7 @@ public:
 
     Float_t getTransparentCharge(UInt_t clusters,bool cmnCorrected, bool useSmallSignals);
 
-    bool hasNegativeCharge(Float_t &charge, Int_t clPos,bool cmnCorrected = false);
+    bool hasNegativeCharge(Float_t &charge, Int_t &clPos,bool cmnCorrected = false);
     void setPositionCalulation(calculationMode_t mode);
     UInt_t size();
     UInt_t seedSize();

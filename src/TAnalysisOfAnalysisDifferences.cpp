@@ -106,7 +106,6 @@ void TAnalysisOfAnalysisDifferences::LoopOverBothMaps(){
     cout<<itPredicted->first<<endl;
     while (!endLoop){
         UpdatePredictedPosition();
-
         if (itClustered->first == itTransparent->first){
             AnalyseSameEvent();
             if( itClustered != clusteredMap->end()) itClustered++;
@@ -158,7 +157,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     Int_t pos = 0;
     Float_t charge = 0;
     bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(charge,pos,true);
+    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
     if (hasNegativeCharge){
+
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
         mapHistos["hNegativeCharge"]->Fill(charge);
         if(charge<negChargeCut){
@@ -334,13 +335,13 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     TH1F* histo3 = (TH1F*)mapHistos["hNoNegativeCharge_PulseHeight"]->Clone();
     Float_t scale = histo3->GetBinContent(histo3->GetMaximumBin());
     histo3->Scale(1./scale);
-    histo3->SetTitle("Pulse Height - 3D");
+    histo3->SetTitle("3D");
     TH1F* histo4 =0;
     if (stripHisto){
         histo4 = (TH1F*)stripHisto->Clone();
         scale = histo4->GetBinContent(histo4->GetMaximumBin());
         histo4->Scale(1./scale);
-        histo4->SetTitle("Pulse Height - Strip");
+        histo4->SetTitle("Strip");
     }
 
     hs3->Add(histo3);
