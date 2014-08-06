@@ -608,7 +608,7 @@ public:
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY){return IsOnTheEdgeOfCell(relCellPosX,relCellPosY,minimumEdgeDistance);}
 	Float_t GetMinimumEdgeDistance(){return minimumEdgeDistance;};
 	bool IsPaperMode(){return bPaperMode;}
-	Float_t getAdcToElectronConversion();
+	Float_t getAdcToElectronConversion(){return 1;}
 
 	ClassDef(TSettings,6)
 
