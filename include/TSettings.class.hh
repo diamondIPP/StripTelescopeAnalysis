@@ -549,6 +549,7 @@ private:
 	Float_t cellHeight;
 	void CheckEdgeFidcuialCuts();
 	Float_t minimumEdgeDistance;
+	Float_t adcToElectronConversion;
 public:
     TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
@@ -607,6 +608,7 @@ public:
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY){return IsOnTheEdgeOfCell(relCellPosX,relCellPosY,minimumEdgeDistance);}
 	Float_t GetMinimumEdgeDistance(){return minimumEdgeDistance;};
 	bool IsPaperMode(){return bPaperMode;}
+	Float_t getAdcToElectronConversion();
 
 	ClassDef(TSettings,6)
 

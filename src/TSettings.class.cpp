@@ -518,6 +518,8 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"diamondName")) {Parse(key,value,diamondName);cout<<"diamondName = "<<diamondName<<endl;}
         if (TPlaneProperties::startsWith(key,"currentBegin")){Parse(key,value,currentBegin);}
         if (TPlaneProperties::startsWith(key,"currentEnd")){Parse(key,value,currentEnd);}
+        if (TPlaneProperties::startsWith(key,"adcToElectron")){Parse(key,value,adcToElectronConversion);}
+        //if adcToElectronConversion.
 		if (TPlaneProperties::startsWith(key,"diamondMapping")) {
 			cout<<key<<" = "<<value.c_str()<<endl;
 			std::vector<int>vecDiaMapping;
@@ -821,6 +823,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	    Det_channel_screen_channels[det].clear();
 	Dia_channel_noisy.clear();
 	Dia_channel_not_connected.clear();
+	adcToElectronConversion= 1;
 //	checkSettings();
 }
 

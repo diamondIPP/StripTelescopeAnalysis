@@ -4,16 +4,6 @@
  *  Created on: Nov 20, 2012
  *      Author: bachmair,iain
  */
-//Plots to not be plotted by transparent Analysis:
-/*c2ClusterAnalysis_ClusterPatterns_trans.png
-cRelativeChargeTwoClustersXY_trans.png
-cShortAnalysis2TotalChargeXY_trans.png
-cTotalAvrgChargeXY_trans.png ???
-c_pfx.png ???
-h2ClusterAnalysis_ClusterPatterns_all.png
-h2ClusterAnalysis_ClusterPatterns_pattern1.png
-h2ClusterAnalysis_ClusterPatterns_pattern2.png
-h2ClusterAnalysis_ClusterPatterns_pattern3.png*/
 
 #include "../include/TAnalysisOf3dDiamonds.hh"
 
@@ -40,9 +30,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
     histSaver->SetPlotsPath(settings->get3dDiamondAnalysisPath());
     histSaver->SetRunNumber(runNumber);
-    //htmlLandau->setFileGeneratingPath(settings->getSelectionAnalysisPath());//todo Write html3dDiamond
     settings->goTo3dDiamondTreeDir();
-    //initialiseHistos();
     clusteredAnalysis = new TCellAnalysisClass(settings);
     cout<<"end initialise"<<endl;
     vecEdgePredX.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
@@ -1955,6 +1943,12 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
     centralRegion->SetLineColor(kRed);
     centralRegion->Draw("same");
     histSaver->SaveCanvas(c1);
+    if(settings->getAdcToElectronConversion()!=1){
+    	name.Append("_electrons");
+    	c1->SetName(name);
+    hTotalAvrgChargeXY->Scale("");
+    }
+
     delete c1;
 
     if (settings->IsPaperMode())

@@ -444,6 +444,7 @@ private:
 	TProfile* hRelatviveNumberOfMultipleClusterEventsSamePattern;
 
 	TProfile2D* hTotalAvrgChargeXY;
+	TProfile2D* hTotalAvrgChargeXY_electrons;
 	vector<Int_t>vecDeadCells;
 private:
 	vector <Float_t> vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna;

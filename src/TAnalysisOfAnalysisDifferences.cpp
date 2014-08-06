@@ -354,8 +354,6 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
 
 
 
-
-
     name = "stackPulseHeights_GoodCells";
     THStack *hs = new THStack(name,name);
     hs->Add((TH1F*)mapHistos["hHasNegativeCharge_PulseHeight"]->Clone());

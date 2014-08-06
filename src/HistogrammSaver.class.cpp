@@ -164,9 +164,9 @@ void HistogrammSaver::SetPaperPlotStyle(){
 
       // Margins:
       gStyle->SetPadTopMargin(0.13);
-      gStyle->SetPadBottomMargin(0.13);
+      gStyle->SetPadBottomMargin(0.2);
       gStyle->SetPadLeftMargin(0.13);
-      gStyle->SetPadRightMargin(0.13);
+      gStyle->SetPadRightMargin(0.2);
 
       // For the Global title:
 
@@ -191,9 +191,9 @@ void HistogrammSaver::SetPaperPlotStyle(){
       gStyle->SetTitleSize(0.04, "XYZ");
       // gStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
       // gStyle->SetTitleYSize(Float_t size = 0.02);
-      gStyle->SetTitleXOffset(1);
-      gStyle->SetTitleYOffset(1.25);
-      gStyle->SetTitleOffset(1.2, "Z"); // Another way to set the Offset
+      gStyle->SetTitleXOffset(1.1);
+      gStyle->SetTitleYOffset(1.3);
+      gStyle->SetTitleOffset(1.4, "Z"); // Another way to set the Offset
 
       // For the axis labels:
 
@@ -879,7 +879,7 @@ void HistogrammSaver::DrawGoodCellsRegion(TCanvas* c1) {
         Float_t yy[] = {ymin,ymin,ymax,ymax,ymin};
         TString name = TString::Format("gGoodCellRegion_%d",region);
         TCutG * cut = new TCutG(name,5,xx,yy);
-        cut->SetLineColor(kGreen);
+        cut->SetLineColor(kBlack);
         cut->SetLineWidth(7);
         cut->Draw("same");
     }
@@ -1335,7 +1335,8 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     markers.back()->SetMarkerSize(1.5);
     markers.back()->Draw();
     cells.push_back(GetCutGofBin("readoutBin",histo,readoutColumn.first,readoutColumn.second));
-    if(cells.back()) cells.back()->SetLineColor(kPink);
+    if(cells.back()) cells.back()->SetLineColor(kBlack);
+    if(cells.back()) cells.back()->SetLineWidth(7);
     if(cells.back()) cells.back()->Draw();
     for (Int_t i = 0; i < 4; i++){
         Float_t x = biasColumn.first;
@@ -1343,11 +1344,12 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
         x+= settings->GetCellHeight()*(i%2);
         y+= settings->GetCellHeight()*(i/2);
         markers.push_back(new TMarker(x,y,20));
-        markers.back()->SetMarkerColor(kGreen);
+        markers.back()->SetMarkerColor(kBlack);
         markers.back()->SetMarkerSize(1.5);
         markers.back()->Draw();
         cells.push_back(GetCutGofBin(TString::Format("biasBin_%d",i),histo,x,y));
-        if(cells.back()) cells.back()->SetLineColor(kGreen);
+        if(cells.back()) cells.back()->SetLineColor(kBlack);
+        if(cells.back()) cells.back()->SetLineWidth(7);
         if(cells.back()) cells.back()->Draw();
     }
 
