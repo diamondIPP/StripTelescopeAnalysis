@@ -1943,11 +1943,6 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
     centralRegion->SetLineColor(kRed);
     centralRegion->Draw("same");
     histSaver->SaveCanvas(c1);
-    if(settings->getAdcToElectronConversion()!=1){
-    	name.Append("_electrons");
-    	c1->SetName(name);
-    hTotalAvrgChargeXY->Scale("");
-    }
 
     delete c1;
 
