@@ -3,6 +3,7 @@
  *
  *  Created on: 29.07.2011
  *      Author: Felix Bachmair
+ *
  */
 
 #include "HistogrammSaver.class.hh"
@@ -14,6 +15,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
         cerr<<"[HistogrammSaver::HistogrammSaver]: settings == NULL "<<endl;
         exit(-1);
     }
+
     this->settings = newSettings;
     sys=NULL;
     pt=NULL;
@@ -1064,13 +1066,16 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
     if(pt2 && ! settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
     ostringstream histo_filename;
-    histo_filename << plots_path << "histograms.root";
     plot_filename << plots_path << histo->GetName() << ".root";
     plots_canvas->Print(plot_filename.str().c_str());
-    TFile *f = GetFilePointer(histo_filename.str().c_str(),"UPDATE");
+    TString rootFileName = (TString)plots_path+(TString)"/histograms.root";
+    TFile *f = GetFilePointer(rootFileName,"UPDATE");
     f->cd();
-    ((TH1F*)histo->Clone())->Write();
-    ((TF1*)fit->Clone())->Write();
+    TH1F* h_clone = (TH1F*)histo->Clone();
+    h_clone->SetDirectory(f);
+    h_clone->Write();
+    TF1* f_clone = (TF1*)fit->Clone();
+    f_clone->Write();
     plots_canvas->Write();
     SaveCanvas(plots_canvas);
     plot_filename << plots_path << histo->GetName() << ".png";
@@ -1120,10 +1125,12 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
 
     TString path = (TString)plots_path + histo->GetName() +(TString)".root";
     plots_canvas->Print(path);
-    path = (TString)plots_path + (TString)"histograms.root";
-    TFile* f = this->GetFilePointer("histograms.root","UPDATE");
+    TString rootFileName = (TString)plots_path + (TString)"histograms.root";
+    TFile* f = this->GetFilePointer(rootFileName,"UPDATE");
     f->cd();
-    ((TH1F*)histo->Clone())->Write();
+    TH1F* h_clone =(TH1F*)histo->Clone();
+    h_clone->SetDirectory(f);
+    h_clone->Write();
     ((TF1*)fit->Clone())->Write();
     plots_canvas->Write();
     path = (TString)plots_path + histo->GetName() +(TString)".png";
@@ -1673,9 +1680,7 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     //	if(htemp->GetEntries()==0)return;
 
     ostringstream plots_filename;
-    ostringstream histo_filename;
     plots_filename << plots_path<<"/" << htemp->GetName() << ".root";
-    histo_filename << plots_path << "histograms.root";
     TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("croot_%s", htemp->GetName()));
     plots_canvas->cd();
     TH1* histo = (TH1*)htemp->Clone();
@@ -1695,7 +1700,8 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     //write to own root File
     plots_canvas->Write(plots_filename.str().c_str());
     plots_canvas->Write(plots_filename.str().c_str());
-    TFile *f = GetFilePointer("histograms.root");
+    TString rootFileName = (TString)plots_path + (TString)"/histograms.root";
+    TFile *f = GetFilePointer(rootFileName);
     if(!f)
         return;
     f->cd();
@@ -1705,6 +1711,10 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     //add to histograms.root
     f->cd();
     plots_canvas2->Write();
+    TH1* h_clone = (TH1*)htemp->Clone();
+    h_clone->SetDirectory(f);
+    h_clone->Write();
+
     if (f && !f->IsZombie() && f->IsOpen())
         f->Close();
     //	if(plots_canvas)delete plots_canvas;
@@ -1764,8 +1774,8 @@ void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange,TString dr
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".root";
     plots_canvas->Print(plot_filename.str().c_str());
-
-    TFile *f = this->GetFilePointer("histograms.root","UPDATE");
+    TString rootFileName = (TString)plots_path + (TString)"/histograms.root";
+    TFile *f = this->GetFilePointer(rootFileName,"UPDATE");
     f->cd();
     plots_canvas->Write();
     f->Close();
@@ -1796,8 +1806,8 @@ void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
     plot_filename<< plots_path << histo->GetName() << ".root";
     htemp->Print(plot_filename.str().c_str());
     stringstream histo_filename;
-    histo_filename << plots_path << "histograms.root";
-    TFile *f = GetFilePointer("histograms.root","UPDATE");
+    TString rootFileName = (TString)plots_path+(TString)"/histograms.root";
+    TFile *f = GetFilePointer(rootFileName,"UPDATE");
     f->cd();
     htemp->Write();
     f->Close();

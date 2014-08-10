@@ -55,6 +55,21 @@ void THTMLCluster::createEtaDistributions()
 
 	//	sectionContent<<"<h2>Eta Distributions </h2>\n";
 	sectionContent<<putImagesOfAllDetectors(path,"hEtaDistribution_");
+
+	sectionContent<<"\n<br>\n\t";
+	Int_t nDias = settings->getNDiamonds();
+	for ( Int_t dia=0; dia<=nDias; dia++ ){
+	    TString name =TString::Format("c_hEtaDistribution_Dia_Area%d",dia);
+	    bool highlighted;
+	    if (settings->getNDiamonds() ==2)
+	    	highlighted = (dia ==  settings->getAnalysedDiamond());
+	    else
+	    	highlighted = (dia ==  settings->getAnalysedDiamond()+1);
+	    sectionContent<<putImageOfPath((string)name,"png",20,highlighted );
+	}
+	sectionContent<<"\n<br>\n";
+	sectionContent<<putImageOfPath("hEtaDistributionDia","png",20,false);
+
 	this->addSection("Eta Distributions",sectionContent.str());
 	sectionContent.clear();
 	sectionContent.str("");
@@ -67,12 +82,17 @@ void THTMLCluster::createEtaDistributions()
 	sectionContent.str("");
 	sectionContent<<putImagesOfAllDetectors(path,"c_hAsymmetricEtaFinal_","All");
 	sectionContent<<"\n<br>\n\t";
-	Int_t nDias = settings->getNDiamonds();
 	for ( Int_t dia=0; dia<=nDias; dia++ ){
 	    TString name =TString::Format("c_hAsymmetricEtaFinal_DiaArea%d",dia);
-	    bool highlighted = (dia ==  settings->getAnalysedDiamond()+1);
+	    bool highlighted;
+	    if (settings->getNDiamonds() ==2)
+	    	highlighted = (dia ==  settings->getAnalysedDiamond());
+	    else
+	    	highlighted = (dia ==  settings->getAnalysedDiamond()+1);
 	    sectionContent<<putImageOfPath((string)name,"png",20,highlighted );
 	}
+	sectionContent<<"\n<br>\n";
+	sectionContent<<putImageOfPath("hEtaDistributionDia","png",20,false);
 	this->addSection("Cross Talk Corrected Eta Distributions",sectionContent.str());
 }
 

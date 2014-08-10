@@ -54,6 +54,7 @@ private:
 	void analyseEvent();
 	void saveHistos();
 	void saveEtaIntegrals();
+	void saveEtaPerArea();
 	void savePHHistos();
 
 	void initialiseHistos();
@@ -156,6 +157,7 @@ private:
 	TH2F *hSignalLeftVsSignalRight[9];
 	TH2F *hPHDistribution[9];
 	TH1F *hRelativeHitPosition[9];
+	TH2F* hEtaDistributionDia;
 private:
 	UInt_t nMaxClusters;
 	vector < vector <Float_t> > vecvecSignalLeftLeft;
