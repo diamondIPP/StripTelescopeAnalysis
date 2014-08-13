@@ -92,7 +92,7 @@ void THTMLCluster::createEtaDistributions()
 	    sectionContent<<putImageOfPath((string)name,"png",20,highlighted );
 	}
 	sectionContent<<"\n<br>\n";
-	sectionContent<<putImageOfPath("hEtaDistributionDia","png",20,false);
+	sectionContent<<putImageOfPath("hAsymmetricEtaFinal_Dia","png",20,false);
 	this->addSection("Cross Talk Corrected Eta Distributions",sectionContent.str());
 }
 

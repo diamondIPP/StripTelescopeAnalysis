@@ -1264,6 +1264,28 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
             htemp = 0;
         }
     }
+    if(clusterSize-1 < vecVecLandau.size()&& vecPredictedChannel.size()>2){
+    	name = TString::Format("hLandauVsPredRelChannel_2OutOf%02d",clusterSize);
+    	vector<Float_t> relPredChannel;
+    	for (UInt_t i = 0; i< vecPredictedChannel.size();i++)
+    		relPredChannel.push_back(vecPredictedChannel[i] -(int)(vecPredictedChannel[i]+.5));
+    	Float_t min = -.6;
+    	Float_t max = +.6;
+    	if(min<max)
+    		htemp = histSaver->CreateScatterHisto((string)name,relPredChannel,vecVecPh2Highest[clusterSize-1],
+    				512,64,
+    				0,2800,
+    				min,max);
+    	if(htemp){
+    		htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
+    		htemp->GetYaxis()->SetTitle("rel. predicted channel position (X)/ch");
+
+    		histSaver->Save1DProfileYWithFitAndInfluence(htemp,"pol1");
+    		histSaver->SaveHistogram(htemp);
+    		if(htemp) delete htemp;
+    		htemp = 0;
+    	}
+    }
 
 
     if(clusterSize-1 < vecVecPh2Highest.size()&& clusterSize-1>=2&& vecPredictedChannel.size()>2){
