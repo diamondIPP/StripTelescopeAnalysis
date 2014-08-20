@@ -1183,7 +1183,10 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
                     key = TString::Format("LandauClusterEndSize%02d",clusterSize);
                     results->setFloatValue(section,key,(value2));
                     key = TString::Format("LandauClusterNEventsSize%02d",clusterSize);
-                    results->setIntValue(section,key,vectorEventNo.back() - vectorEventNo.front());
+                    Int_t value = -1;
+                    if (vectorEventNo.size()>0)
+                    	value = (Int_t)(vectorEventNo.back() - vectorEventNo.front());
+					results->setIntValue(section,key,value);
                     if (fit){
                         key = TString::Format("LandauClusterFitOffsetSize%02d",clusterSize);
                         results->setFloatValue(section,key,fit->GetParameter(0));
