@@ -88,6 +88,19 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 	//Swaping Endianness and then Outputing the Event Trailer data
 	uendian_swap(rzEvent.Eor);
 
+	if(false){
+		cout << "\nEVENT:   "<<EventNumber<<"\nHeader dump:" << endl;
+		cout << "EvTrig:    " << rzEvent.EvTrig << endl;
+		cout << "EvNo:      " << rzEvent.EvNo << endl;
+		cout << "EvPos:     " << rzEvent.EvPos << endl;
+		cout << "EvTag:     " << rzEvent.EvTag << endl;
+		cout << "EvDate:    " << std::bitset<32>(rzEvent.EvTime) << endl;
+		cout << "TrigCnt:   " << rzEvent.TrigCnt << endl;
+		cout << "EvVmeTime: " << std::bitset<32>(rzEvent.EvVmeTime) << endl;
+		cout << "EvNetTime: " << std::bitset<32>(rzEvent.EvNetTime) << endl;
+		cout << "MeasNo:    " << rzEvent.MeasNo << endl;
+		cout << "EvInMeasNo:" << rzEvent.EvInMeasNo << endl;
+	}
 	//Reading out Event Header Data to Screen
 	if(verbose) {
 		cout << "Header dump:" << endl;

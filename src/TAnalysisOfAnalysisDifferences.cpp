@@ -7,7 +7,7 @@
 
 #include "../include/TAnalysisOfAnalysisDifferences.hh"
 
-TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settings,HistogrammSaver* histSaver) {
+TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settings,HistogrammSaver* histSaver,TString extension) {
     // TODO Auto-generated constructor stub
     this->settings = settings;
     this->histSaver = histSaver;
@@ -19,6 +19,8 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
     stripHisto = 0;
     verbosity =settings->getVerbosity();
     negChargeCut = -50;
+    this->extension = "_"+extension;
+
 }
 
 TAnalysisOfAnalysisDifferences::~TAnalysisOfAnalysisDifferences() {
@@ -157,10 +159,10 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     Int_t pos = 0;
     Float_t charge = 0;
     bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(charge,pos,true);
-    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
+//    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
     if (hasNegativeCharge){
-
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
+		mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,pos);
         mapHistos["hNegativeCharge"]->Fill(charge);
         if(charge<negChargeCut){
             if(predictedPositions->count(eventNo)){
@@ -170,6 +172,8 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
             }
         }
     }
+    else
+    	mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,-1);
     if(hasNegativeCharge && charge < negChargeCut)
         mapHistos["hHasNegativeCharge_PulseHeight"]->Fill(posCharge);
     else
@@ -209,6 +213,15 @@ void TAnalysisOfAnalysisDifferences::AnalyseOnlyTransparentEvent() {
     mapHistos["hTransparentPulseHeight"]->Fill(itTransparent->second.getPositiveCharge());
     mapHistos["hOnlyTranspClusterPosition"]->Fill(itPredicted->second.first,itPredicted->second.second);
     mapHistos["hGoodCellsEventTypes"]->Fill(1);
+    Int_t pos = 0;
+	Float_t charge = 0;
+    bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(charge,pos,true);
+	if (hasNegativeCharge){
+		mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,pos);
+	}
+	else
+		mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,-1);
+
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyClusteredEvent() {
@@ -234,32 +247,32 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     Int_t xmax = stripHisto?stripHisto->GetXaxis()->GetXmax():2800;
 
     TString name = "hTransparentPulseHeight";
-    histo = new TH1F(name,name,bins,xmin,xmax);
+    histo = new TH1F(name+extension,name+extension,bins,xmin,xmax);
     histo->GetXaxis()->SetTitle("Charge / ADC");
     histo->GetYaxis()->SetTitle("no of entries #");
     mapHistos[name] = histo;
 
     name = "hClusteredPulseHeight";
-    histo = (TH1F*) histo->Clone(name);
+    histo = (TH1F*) histo->Clone(name+extension);
     histo->SetLineColor(kBlack);
     mapHistos[name] = histo;
 
     name = "hGoodCellsEventTypes";
-    histo = new TH1F(name,name,3,-1.5,1.5);
+    histo = new TH1F(name+extension,name+extension,3,-1.5,1.5);
     histo->GetXaxis()->SetBinLabel(1,"Only Clustered");
     histo->GetXaxis()->SetBinLabel(2,"Same ");
     histo->GetXaxis()->SetBinLabel(3,"Only transparent");
     mapHistos[name] = histo;
 
     name ="hHasNegativeCharge_PulseHeight";
-    histo = new TH1F(name,name,bins,xmin,xmax);
+    histo = new TH1F(name+extension,name+extension,bins,xmin,xmax);
     histo->GetXaxis()->SetTitle("charge / ADC");
     histo->GetYaxis()->SetTitle("no of entries #");
     histo->SetLineColor(kGreen);
     mapHistos[name] = histo;
 
     name ="hNoNegativeCharge_PulseHeight";
-    histo = new TH1F(name,name,bins,xmin,xmax);
+    histo = new TH1F(name+extension,name+extension,bins,xmin,xmax);
     histo->GetXaxis()->SetTitle("charge / ADC");
     histo->GetYaxis()->SetTitle("entries a.u.");
     histo->SetLineColor(kBlack);
@@ -408,11 +421,17 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
 void TAnalysisOfAnalysisDifferences::InitTransparentHistos() {
     TH1* histo;
     TString name = "hOnlyTranspClusterCharge";
-    histo = new TH1F(name,name,256,0,2048);
+    histo = new TH1F(name+extension,name+extension,256,0,2048);
     mapHistos[name] = histo;
 
     name = "hOnlyTranspClusterPosition";
-    histo = histSaver->GetHistoBinedInCells(name,4);
+    histo = histSaver->GetHistoBinedInCells(name+extension,4);
+    mapHistos[name] = histo;
+
+    name = "hNegativeChargePositionTransparent";
+    histo = new TH2F(name+extension,name+extension,512,-512,0,6,-.5,5.5);
+    histo->GetXaxis()->SetTitle("first neg. Charge in transparent Cluster / ADC");
+    histo->GetYaxis()->SetTitle("position of negative charge in transp. cluster");
     mapHistos[name] = histo;
 
 }
@@ -420,7 +439,7 @@ void TAnalysisOfAnalysisDifferences::InitTransparentHistos() {
 void TAnalysisOfAnalysisDifferences::InitClusteredHistos() {
     TH1* histo;
     TString name = "hOnlyClusteredClusterCharge";
-    histo = new TH1F(name,name,256,0,2048);
+    histo = new TH1F(name+extension,name+extension,256,0,2048);
     mapHistos[name] = histo;
 
     name = "hOnlyClusteredClusterPosition";
@@ -432,31 +451,31 @@ void TAnalysisOfAnalysisDifferences::InitClusteredHistos() {
 void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     TH1* histo;
     TString name = "hChargeDifference";
-    histo = new TH1F(name,name,1024,-512,512);
+    histo = new TH1F(name+extension,name+extension,1024,-512,512);
     histo->GetXaxis()->SetTitle("charge difference_{trans-clus} / ADC");
     histo->GetYaxis()->SetTitle("no of entries #");
     mapHistos[name] = histo;
 
     name = "hNegativeChargePosition";
-    histo = new TH2F(name,name,512,-512,0,6,-.5,5.5);
+    histo = new TH2F(name+extension,name+extension,512,-512,0,6,-.5,5.5);
     histo->GetXaxis()->SetTitle("first neg. Charge in transparent Cluster / ADC");
     histo->GetYaxis()->SetTitle("position of negative charge in transp. cluster");
     mapHistos[name] = histo;
 
     name = "hNegativeCharge";
-    histo = new TH1F(name,name,256,-256,0);
+    histo = new TH1F(name+extension,name+extension,256,-256,0);
     histo->GetXaxis()->SetTitle("first neg. Charge in transparent Cluster / ADC");
     mapHistos[name] = histo;
 
     name = "hNegativeChargeAbove50_Position";
-    histo = histSaver->GetHistoBinedInCells(name,4);
+    histo = histSaver->GetHistoBinedInCells(name+extension,4);
     mapHistos[name] = histo;
 
     name = "hPositive_Minus_Negative_TransparentCharge";
-    mapHistos[name] = new TH1F(name,name,1024,-64,512-64);
+    mapHistos[name] = new TH1F(name+extension,name+extension,1024,-64,512-64);
 
     name = "hPositiveTransparentCharge_Minus_ClusteredCharge";
-    mapHistos[name] = new TH1F(name,name,512,-128,128);
+    mapHistos[name] = new TH1F(name+extension,name+extension,512,-128,128);
 
 }
 

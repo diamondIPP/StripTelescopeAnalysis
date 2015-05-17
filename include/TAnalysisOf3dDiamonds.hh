@@ -524,9 +524,14 @@ private:
 
     UInt_t maxClusterSize3d;
 
-    map<Int_t, TCluster> mapClusteredAnalysis;
-    map<Int_t, TCluster> mapTransparentAnalysis;
-    map<Int_t, pair<Float_t,Float_t> > mapPredictedPositions;
+    map<Int_t, TCluster> mapClusteredAnalysisGoodCells;
+    map<Int_t, TCluster> mapTransparentAnalysisGoodCells;
+    map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsGoodCells;
+
+
+    map<Int_t, TCluster> mapClusteredAnalysisAllCells;
+    map<Int_t, TCluster> mapTransparentAnalysisAllCells;
+    map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsAllCells;
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */

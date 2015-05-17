@@ -122,6 +122,8 @@ private:
 	TH1F *hAllAdcNoise[9];
 	TH1F *hDiaAllAdcNoise;
 	TH1F *hDiaAllAdcNoiseCMN;
+	TH2F *hDiaAllAdcNoiseChannel;
+	TH2F *hDiaAllAdcNoiseCMNChannel;
 	vector <Float_t> adcValues;
 	vector <Float_t> pedestalValues;
 	vector <Float_t> upperHitCutValues;

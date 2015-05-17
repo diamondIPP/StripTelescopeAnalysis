@@ -1337,7 +1337,6 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected)
                 hasNegCharge =  true;
                 negCharge = charge;
             }
-
         }
         oldCharge = currentCharge;
     }

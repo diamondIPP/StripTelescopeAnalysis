@@ -491,15 +491,33 @@ void TAnalysisOfPedestal::initialiseHistos()
             hAllAdcNoise[det]->GetYaxis()->SetTitle(yTitle.str().c_str());
         }
         else{
-            hDiaAllAdcNoise= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
+        	TString hName= histoName.str();
+        	TString hTitle= histoTitle.str();
+            hDiaAllAdcNoise= new TH1F(hName,hTitle,nBins,(-1)*width,width);
             hDiaAllAdcNoise->GetXaxis()->SetTitle(xTitle.str().c_str());
             hDiaAllAdcNoise->GetYaxis()->SetTitle(yTitle.str().c_str());
-            histoName<<"_CMNcorrected";
-            histoTitle<<" - CMN corrected";
-            hDiaAllAdcNoiseCMN = new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);
+
+            hDiaAllAdcNoiseChannel = new TH2F(hName+"Channel",hTitle+" Channel",
+            	TPlaneProperties::getNChannels(det),0,TPlaneProperties::getNChannels(det),
+            	nBins,(-1)*width,width);
+            hDiaAllAdcNoiseChannel->GetYaxis()->SetTitle(xTitle.str().c_str());
+            hDiaAllAdcNoiseChannel->GetZaxis()->SetTitle(yTitle.str().c_str());
+            hDiaAllAdcNoiseChannel->GetYaxis()->SetTitle("Channel no.");
+
+            TString extName = "_CMNcorrected";
+            TString extTitle = " CMN corrected";
+            hDiaAllAdcNoiseCMN = new TH1F(hName+extName,
+            		hTitle+"_CMNcorrected",nBins,(-1)*width,width);
             xTitle<<" -  CMN corrected";
             hDiaAllAdcNoiseCMN->GetXaxis()->SetTitle(xTitle.str().c_str());
             hDiaAllAdcNoiseCMN->GetYaxis()->SetTitle(yTitle.str().c_str());
+
+            hDiaAllAdcNoiseCMNChannel = new TH2F(hName+"Channel"+extName,hTitle+" Channel"+extTitle,
+                        	TPlaneProperties::getNChannels(det),0,TPlaneProperties::getNChannels(det),
+                        	nBins,(-1)*width,width);
+            hDiaAllAdcNoiseCMNChannel->GetYaxis()->SetTitle("Channel no.");
+            hDiaAllAdcNoiseCMNChannel->GetYaxis()->SetTitle(xTitle.str().c_str());
+            hDiaAllAdcNoiseCMNChannel->GetZaxis()->SetTitle(yTitle.str().c_str());
         }
     }
 
@@ -1218,6 +1236,29 @@ void TAnalysisOfPedestal::saveHistos(){
     hDiaAllAdcNoiseCMN->Fit(&histofitAllNoiseCMN,"rq");
     //    if(res!=0)res->SetNoise(TPlaneProperties::getDetDiamond(),histofitx.GetParameter(2));
     histSaver->SaveHistogram(hDiaAllAdcNoiseCMN,true);
+    histSaver->SaveHistogram(hDiaAllAdcNoiseCMNChannel,true);
+    histSaver->SaveHistogram(hDiaAllAdcNoiseChannel,true);
+    THStack *hstack = new THStack("hStackNoise","Noise per Area;Noise / ADC; no. of entries");
+    for (UInt_t area = 0; area<settings->getNDiaDetectorAreas();area++){
+    	TString ext = TString::Format("_area%d",area);
+    	TString hname = TString::Format("hDiaAllAdcNoiseCMN_area%d",area);
+    	TString htitle = TString::Format("Noise - CM corrected - Area %d",area);
+    	Int_t binlow = settings->getDiaDetectorArea(area).first;
+    	binlow = hDiaAllAdcNoiseCMNChannel->GetXaxis()->FindBin(binlow);
+    	Int_t binhigh = settings->getDiaDetectorArea(area).second;
+    	binhigh= hDiaAllAdcNoiseCMNChannel->GetXaxis()->FindBin(binhigh);
+    	TH1D* hNoiseProjection = hDiaAllAdcNoiseCMNChannel->ProjectionY(hname,binlow,binhigh);
+    	Float_t mean = hNoiseProjection->GetMean();
+    	Float_t sigma = hNoiseProjection->GetRMS();
+    	TF1* fGaus = new TF1((TString)"fGaus"+ext,"gaus",mean-2*sigma,mean+2*sigma);
+    	hNoiseProjection->Fit(fGaus,"Q","",mean-sigma,mean+sigma);
+    	histSaver->SaveHistogram(hNoiseProjection);
+    	hstack->Add(hNoiseProjection);
+    }
+    if (settings->getNDiaDetectorAreas())
+    	histSaver->SaveStack(hstack,"nostack",true,true,"Noise / ADC","no of entries");
+    if (hstack)
+    	delete hstack;
 
     Float_t noiseCMC = histofitAllNoiseCMN.GetParameter(2);
     for(Int_t ntries=0;hCMNoiseDistribution->GetBinContent(hCMNoiseDistribution->GetMaximumBin())<.05*hCMNoiseDistribution->GetEntries()&&ntries<2;ntries++)
@@ -1436,6 +1477,8 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 
             hDiaAllAdcNoise->Fill(noise);
             hDiaAllAdcNoiseCMN->Fill(noiseCMN);
+            hDiaAllAdcNoiseChannel->Fill(ch,noise);
+            hDiaAllAdcNoiseCMNChannel->Fill(ch,noiseCMN);
             sumPed += pedestal;
             sumPedCMN+=pedestalCMN;
             nSumPed++;

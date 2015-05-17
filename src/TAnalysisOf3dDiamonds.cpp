@@ -500,6 +500,16 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     if(settings->IsGoodCell(3,cellNo)){
         this->LongAnalysis_FillGoodCellsLandaus(charge);
     }
+    ///*
+     if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)==3){
+
+    	 mapPredictedPositionsAllCells[nEvent] = make_pair(xPredDet,yPredDet);
+    	 if(validClusteredAnalysis)
+    		 mapClusteredAnalysisAllCells[nEvent] = clusteredCluster;
+    	 if (validTransparentAnalysis)
+    		 mapTransparentAnalysisAllCells[nEvent] = transparentCluster;
+     }
+     //*/
 
     for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
         int badcell = settings->getDeadCell3D()[i];
@@ -4613,7 +4623,12 @@ void TAnalysisOf3dDiamonds::saveHistos() {
 }
 
 void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
-    mapPredictedPositions.clear();
+    mapPredictedPositionsGoodCells.clear();
+    mapClusteredAnalysisGoodCells.clear();
+    mapTransparentAnalysisGoodCells.clear();
+    mapPredictedPositionsAllCells.clear();
+    mapClusteredAnalysisAllCells.clear();
+    mapTransparentAnalysisAllCells.clear();
     initialise3DYAlignmentHistos();
     initialise3DOverviewHistos();
     initialise3DCellOverlayHistos();
@@ -5200,11 +5215,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitGoodCellsLandaus() {
 void TAnalysisOf3dDiamonds::LongAnalysis_FillGoodCellsLandaus(Float_t charge) {
     if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)!=3)
         return;
-    mapPredictedPositions[nEvent] = make_pair(xPredDet,yPredDet);
+    mapPredictedPositionsGoodCells[nEvent] = make_pair(xPredDet,yPredDet);
     if(validClusteredAnalysis)
-        mapClusteredAnalysis[nEvent] = clusteredCluster;
+        mapClusteredAnalysisGoodCells[nEvent] = clusteredCluster;
     if (validTransparentAnalysis)
-        mapTransparentAnalysis[nEvent] = transparentCluster;
+        mapTransparentAnalysisGoodCells[nEvent] = transparentCluster;
 
     hPulseHeightVsDetectorHitPostionXYGoodCells->Fill(xPredDet,yPredDet,charge);
     hLandauGoodCells->Fill(charge);
@@ -5310,11 +5325,19 @@ void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
 void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps(){
     if ( !settings->do3dTransparentAnalysis())
         return;
-    TAnalysisOfAnalysisDifferences* differences = new TAnalysisOfAnalysisDifferences(settings,histSaver);
+    TAnalysisOfAnalysisDifferences* differences = new TAnalysisOfAnalysisDifferences(settings,histSaver,"good");
     differences->setStripHistogram(this->hLandauStrip);
-    differences->setClusteredMap(&mapClusteredAnalysis);
-    differences->setTransparentMap(&mapTransparentAnalysis);
-    differences->setPredictedPositions(&mapPredictedPositions);
+    differences->setClusteredMap(&mapClusteredAnalysisGoodCells);
+    differences->setTransparentMap(&mapTransparentAnalysisGoodCells);
+    differences->setPredictedPositions(&mapPredictedPositionsGoodCells);
+    differences->Analysis();
+    delete differences;
+
+    differences = new TAnalysisOfAnalysisDifferences(settings,histSaver,"all");
+    differences->setStripHistogram(this->hLandauStrip);
+    differences->setClusteredMap(&mapClusteredAnalysisAllCells);
+    differences->setTransparentMap(&mapTransparentAnalysisAllCells);
+    differences->setPredictedPositions(&mapPredictedPositionsAllCells);
     differences->Analysis();
     delete differences;
 

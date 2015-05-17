@@ -18,7 +18,7 @@
 using namespace std;
 class TAnalysisOfAnalysisDifferences {
 public:
-    TAnalysisOfAnalysisDifferences(TSettings* settings,HistogrammSaver* histSaver);
+    TAnalysisOfAnalysisDifferences(TSettings* settings,HistogrammSaver* histSaver,TString extension="");
     void Analysis();
 //    void SetTransparentMap(std::map<Int_t,TCluster>* transparentMap);
 //    void SetClusteredMap(std::map<Int_t,TCluster>* clusteredMap);
@@ -55,7 +55,7 @@ private:
     map<Int_t,pair<Float_t, Float_t> > *predictedPositions;
 
 private:
-
+    TString extension;
     Int_t nSameEvents;
     Int_t nOnlyClustered;
     Int_t nOnlyTransparent;
