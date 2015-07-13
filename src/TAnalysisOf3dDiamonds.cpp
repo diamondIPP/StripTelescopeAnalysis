@@ -2182,13 +2182,13 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
     LongAnalysis_CreateResolutionPlots();
     TCanvas* cTransparentAnalysisInvalidCluster = new TCanvas("cTransparentAnalysisInvalidCluster", "cTransparentAnalysisInvalidCluster");
     cTransparentAnalysisInvalidCluster->cd();
-    hTransparentAnalysisInvalidCluster->Draw();
+    hTransparentAnalysisInvalidCluster->Draw("colz");
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(cTransparentAnalysisInvalidCluster);
     histSaver->SaveCanvas(cTransparentAnalysisInvalidCluster);
 
     TCanvas* cTransparentAnalysisValidCluster = new TCanvas("cTransparentAnalysisValidCluster", "cTransparentAnalysisValidCluster");
     cTransparentAnalysisValidCluster->cd();
-    hTransparentAnalysisValidCluster->Draw();
+    hTransparentAnalysisValidCluster->Draw("colz");
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(cTransparentAnalysisValidCluster);
     histSaver->SaveCanvas(cTransparentAnalysisValidCluster);
 
@@ -2367,6 +2367,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     name = "hResolutionAllButBadCells_"+kind;
     TH1F* hResolutionAllButBadCells = new TH1F(name,name,nBins,minX,maxX);
     hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
+    string plots_path = histSaver->GetPlotsPath();
+    histSaver->SetPlotsPath(plots_path+(string)"/resolution/");
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH1F* histo = vec->at(cell);
         if (!histo)
@@ -2382,6 +2384,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
         vec->at(cell)= 0;
         delete histo;
     }
+    histSaver->SetPlotsPath(plots_path);
     hResolutionGoodCells->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionGoodCells,false,false,false);
     hResolutionBadCells->GetYaxis()->SetTitle("number of entries #");
@@ -3157,6 +3160,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
         appendix ="_trans";
     TList *listGoodCells = new TList;
     TList *listBadCells = new TList;
+    string plots_path = histSaver->GetPlotsPath();
+    histSaver->SetPlotsPath(plots_path+(string)"/CellLandaus/");
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
         for(UInt_t row=0;row<settings->getNRows3d();row++){
@@ -3183,6 +3188,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
             }
         }
     }
+    histSaver->SetPlotsPath(plots_path);
     cout<<"List Good Cells: "<<listGoodCells->GetEntries()<<endl;
     listGoodCells->Print();
     cout<<"\nList Bad Cells: "<<listBadCells->GetEntries()<<endl;
@@ -4097,6 +4103,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
     Float_t TotalBiasEntriesBelowCut=0;
     Float_t RelativeBiasEntriesBelowCut=0;
 
+    string plots_path = histSaver->GetPlotsPath();
+    histSaver->SetPlotsPath(plots_path+(string)"/OverlayAlignment/");
     for(int i=0; i<ShiftX.size(); i++){
         Float_t OffsetX = settings->getOverlayOffsetX() + ShiftX[i];
         for(int j=0; j<ShiftY.size(); j++){
@@ -4209,6 +4217,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
         } //End of for Alignment for i
     } //End of for Alignment for j
 
+    histSaver->SetPlotsPath(plots_path);
     //hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetXaxis()->CenterLabels();
 
     if(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut){
@@ -4547,6 +4556,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hValidEventsFiducialSpace = new TH2F(name,name,1024,0,256,1024,0,256);
     hValidEventsFiducialSpace->GetXaxis()->SetTitle("avrg silicon position x /ch");
     hValidEventsFiducialSpace->GetYaxis()->SetTitle("avrg silicon position y /ch");
+    hValidEventsFiducialSpace->GetZaxis()->SetTitle("number of entries #");
     Float_t xmin = settings->get3dMetallisationFidCuts()->getXLow(0);
     Float_t xmax = settings->get3dMetallisationFidCuts()->getXHigh(0);
     Float_t ymin = settings->get3dMetallisationFidCuts()->getYLow(0);
@@ -4563,6 +4573,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hValidEventsDetSpace = new TH2F(name,name,1024,xmin,xmax,1024,ymin,ymax);
     hValidEventsDetSpace->GetXaxis()->SetTitle("#it{X} / #mum");
     hValidEventsDetSpace->GetYaxis()->SetTitle("#it{Y} / #mum");
+    hValidEventsDetSpace->GetZaxis()->SetTitle("number of entries #");
     InitialiseStripAnalysisHistos();
     name = "hLandau3D";
     name.Append(appendix);
@@ -5153,13 +5164,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateRelativeAddedTransparentChargeComparisonPlots(){
 
     for(int i=1; i<hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge.size(); i++){
-        TString Histo1Title = TString::Format("Cluster Size %i",i-1);
+        TString Histo1Title = TString::Format("RelativeAddedTransparentCharge_Cluster Size %i",i-1);
         hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i-1]->SetTitle(Histo1Title);
-        TString name1 = TString::Format("Landau_GoodCellsWithoutEges_ClusterSize_%d",i-1);
+        TString name1 = TString::Format("RelativeAddedTransparentCharge_Landau_GoodCellsWithoutEges_ClusterSize_%d",i-1);
         hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i-1]->SetName(name1);
-        TString Histo2Title = TString::Format("Cluster Size %i",i);
+        TString Histo2Title = TString::Format("RelativeAddedTransparentCharge_Cluster Size %i",i);
         hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i]->SetTitle(Histo2Title);
-        TString name2 = TString::Format("Landau_GoodCellsWithoutEges_ClusterSize_%d",i);
+        TString name2 = TString::Format("RelativeAddedTransparentCharge_Landau_GoodCellsWithoutEges_ClusterSize_%d",i);
         hTransparentAnalysisTransparentChargeGoodCellsWithoutEdge[i]->SetName(name2);
 
         TString name = TString::Format("hTransparentAnalysisTransparentChargeGoodCellsWithoutEdgeComparison%i_to_%i",i-1,i);
@@ -5167,10 +5178,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateRelativeAddedTransparentChargeCom
     }
 
     for(int i=1; i<hTransparentAnalysisTransparentChargeBadCellsWithoutEdge.size(); i++){
-        TString Histo1Title = TString::Format("Cluster Size %i",i);
-        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i-1]->SetName(Histo1Title);
-        TString Histo2Title = TString::Format("Cluster Size %i",i+1);
-        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]->SetName(Histo2Title);
+        TString hString = TString::Format("Cluster Size %i/%i",i,i);
+        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i-1]->SetTitle(hString);
+        hString = TString::Format("TransparentChargeBadCells_ClusterSize_%i_%i",i,i);
+        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i-1]->SetName(hString);
+        hString = TString::Format("Cluster Size %i/%i",i,i+1);
+        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]->SetTitle(hString);
+        hString = TString::Format("TransparentChargeBadCells_ClusterSize_%i_%i",i,i+1);
+        hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]->SetName(hString);
 
         TString name = TString::Format("hTransparentAnalysisTransparentChargeBadCellsWithoutEdgeComparison%i_to_%i",i-1,i);
         histSaver->SaveTwoHistos((string)name,hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i-1],hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[i]);
@@ -5340,6 +5355,4 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
     differences->setPredictedPositions(&mapPredictedPositionsAllCells);
     differences->Analysis();
     delete differences;
-
 }
-
