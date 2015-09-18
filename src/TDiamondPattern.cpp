@@ -399,6 +399,7 @@ std::pair<Int_t, Int_t> TDiamondPattern::getIntervalOfDiamond(TString runDesc) {
         pattern = 1;
     else if (runDesc.Contains("right") || runDesc.EqualTo("0"))
         pattern = 2;
+    std::cout<<"Pattern of \'"<<runDesc<<"\": "<<pattern<<std::endl;
     if (pattern == 0)
         return getTotalInterval();
     return getInterval(pattern);
