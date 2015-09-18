@@ -59,6 +59,7 @@ public:
 		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
 	};
 	TFile* GetFilePointer(TString name, TString option="UPDATE");
+	TString GetROOTFileName(TString name="histograms");
 	HistogrammSaver(TSettings* settings,int verbosity=0);
 	virtual ~HistogrammSaver();
 	void SetPaperPlotStyle();
@@ -150,7 +151,7 @@ public:
 	static Float_t GetMean(std::vector<Float_t> vec);
 	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
 	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
-	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
+//	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
 	static TGraphErrors CreateErrorGraph(std::string name,std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey);
 	static void CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto);
 	TH2D* GetHistoBinedInQuarters(TString name);

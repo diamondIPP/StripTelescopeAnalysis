@@ -644,7 +644,7 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     //hGridReference->Draw("COL");
     settings->DrawMetallisationGrid(c1, 3);
     name.Replace(0,1,"f");
-    TFile *f = GetFilePointer(name,"RECREATE");
+    TFile *f = GetFilePointer(GetROOTFileName(name),"RECREATE");
     f->cd();
     histo->Clone()->Write();
     hGridReferenceDetSpace->Clone()->Write();
@@ -826,12 +826,23 @@ TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
     return histo;
 }
 
-TFile* HistogrammSaver::GetFilePointer(TString name, TString option) {
+TString HistogrammSaver::GetROOTFileName(TString name){
+    if (name.Contains("/"))
+        name = name(name.Last('/')+1,name.Length());
     TString path = (TString)plots_path;
+    if (name == "")
+        name="histograms";
     path+=(TString)name;
-    if (!name.Contains(".root"))
-        path.Append((TString)".root");
-    TFile* file = new TFile(name,option);
+    TString appendix = TString::Format(".%d.root",runNumber);
+    if (!path.EndsWith(appendix))
+        path.Append(appendix);
+    return path;
+}
+
+TFile* HistogrammSaver::GetFilePointer(TString name, TString option) {
+    TFile* file = new TFile(GetROOTFileName(name),option);
+    if (!file and option.Contains("UPDATE"))
+        file = new TFile(GetROOTFileName(name),"RECREATE");
     return file;
 }
 
@@ -1065,10 +1076,8 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
     fittemp->Draw("same");
     if(pt2 && ! settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
-    ostringstream histo_filename;
-    plot_filename << plots_path << histo->GetName() << ".root";
-    plots_canvas->Print(plot_filename.str().c_str());
-    TString rootFileName = (TString)plots_path+(TString)"/histograms.root";
+    plots_canvas->Print(GetROOTFileName(histo->GetName()));
+    TString rootFileName = GetROOTFileName();
     TFile *f = GetFilePointer(rootFileName,"UPDATE");
     f->cd();
     TH1F* h_clone = (TH1F*)histo->Clone();
@@ -1123,9 +1132,9 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Flo
     fit->Draw("same");
     if(pt2 && !settings->IsPaperMode()) pt2->Draw();
 
-    TString path = (TString)plots_path + histo->GetName() +(TString)".root";
+    TString path = GetROOTFileName(histo->GetName());
     plots_canvas->Print(path);
-    TString rootFileName = (TString)plots_path + (TString)"histograms.root";
+    TString rootFileName = GetROOTFileName();
     TFile* f = this->GetFilePointer(rootFileName,"UPDATE");
     f->cd();
     TH1F* h_clone =(TH1F*)histo->Clone();
@@ -1607,8 +1616,6 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas,TString name)
         return;
     if (name=="")
         name = canvas->GetName();
-    ostringstream plot_filename;
-    plot_filename << plots_path << name <<".root";
     TCanvas* plots_canvas=(TCanvas*)canvas->Clone();
     plots_canvas->cd();
 
@@ -1616,7 +1623,7 @@ void HistogrammSaver::SaveCanvasROOT(TCanvas *canvas,TString name)
     if(pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",canvas->GetName()));
     if(pt2 && !settings->IsPaperMode()) pt2->Draw();
 
-    TFile f(plot_filename.str().c_str(),"UPDATE");
+    TFile f(GetROOTFileName(name),"UPDATE");
     canvas->Write();
 }
 
@@ -1679,8 +1686,8 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     if(!htemp)return;
     //	if(htemp->GetEntries()==0)return;
 
-    ostringstream plots_filename;
-    plots_filename << plots_path<<"/" << htemp->GetName() << ".root";
+//    ostringstream plots_filename;
+//    plots_filename << plots_path<<"/" << htemp->GetName() << "."<<runNumber<<".root";
     TCanvas *plots_canvas =  new TCanvas(TString::Format("c_%s", htemp->GetName()), TString::Format("croot_%s", htemp->GetName()));
     plots_canvas->cd();
     TH1* histo = (TH1*)htemp->Clone();
@@ -1698,10 +1705,9 @@ void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
     histo->Draw();
 
     //write to own root File
-    plots_canvas->Write(plots_filename.str().c_str());
-    plots_canvas->Write(plots_filename.str().c_str());
-    TString rootFileName = (TString)plots_path + (TString)"/histograms.root";
-    TFile *f = GetFilePointer(rootFileName);
+    plots_canvas->Write(GetROOTFileName(htemp->GetName()));
+//    plots_canvas->Write(plots_filename.str().c_str());
+    TFile *f = GetFilePointer(GetROOTFileName());
     if(!f)
         return;
     f->cd();
@@ -1772,9 +1778,9 @@ void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange,TString dr
     if (pt) (TPaveText*)pt->Clone(TString::Format("pt_%s",histo->GetName()));
     if (pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;
-    plot_filename << plots_path << histo->GetName() << ".root";
-    plots_canvas->Print(plot_filename.str().c_str());
-    TString rootFileName = (TString)plots_path + (TString)"/histograms.root";
+    plot_filename << plots_path << histo->GetName() << "."<<runNumber<<".root";
+    plots_canvas->Print(GetROOTFileName(histo->GetName()));
+    TString rootFileName = GetROOTFileName();
     TFile *f = this->GetFilePointer(rootFileName,"UPDATE");
     f->cd();
     plots_canvas->Write();
@@ -1796,17 +1802,12 @@ void HistogrammSaver::SaveHistogramROOT(TH3F* histo){
     if(htemp==0)
         return;
     htemp->Draw();
-    TString name = histo->GetName();
-    string fileName = plots_path.c_str();
-    fileName.append(name);
-    fileName.append(".root");
-    htemp->Write(fileName.c_str());
+    TString fileName = GetROOTFileName(histo->GetName());
+    htemp->Write(fileName);
     htemp->Write();
-    stringstream plot_filename;
-    plot_filename<< plots_path << histo->GetName() << ".root";
-    htemp->Print(plot_filename.str().c_str());
+    htemp->Print(GetROOTFileName(histo->GetName()));
     stringstream histo_filename;
-    TString rootFileName = (TString)plots_path+(TString)"/histograms.root";
+    TString rootFileName = GetROOTFileName();
     TFile *f = GetFilePointer(rootFileName,"UPDATE");
     f->cd();
     htemp->Write();
@@ -1840,9 +1841,7 @@ void HistogrammSaver::SaveGraphROOT(TGraph* graph,std::string name,std::string o
     TPaveText *pt2=0;
     if(pt) pt2 = (TPaveText*)pt->Clone(TString::Format("pt_%s",graph->GetName()));
     if (pt2 && !settings->IsPaperMode()) pt2->Draw();
-    ostringstream plot_filename;
-    plot_filename << plots_path << name<< ".root";
-    plots_canvas->Print(plot_filename.str().c_str());
+    plots_canvas->Print(GetROOTFileName(name));
     //	if(plots_canvas)	delete plots_canvas;
 }
 
@@ -1852,26 +1851,26 @@ void HistogrammSaver::SetVerbosity(unsigned int i)
     if(verbosity) cout<<"HistogrammSaver::Set Verbosity ON"<<endl;
 }
 
-
-void HistogrammSaver::SaveCanvasRoot(TCanvas *canvas, string location, string file_name)
-{
-    if(canvas==0)
-        return;
-    char loc[500];
-    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
-    char rt[] = ".root";
-    char *rtloc = loc;
-    //Saving .root file
-    strcat(rtloc,file_name.c_str());
-    strcat(rtloc,rt);
-    char const *rt_file = &rtloc[0];
-    TObjArray list(0);
-    list.Add(canvas);
-    TFile f(rt_file,"recreate");
-    list.Write();
-    f.Close();
-    cout << ".root file was created at: " << rt_file << endl;
-}
+//
+//void HistogrammSaver::SaveCanvasRoot(TCanvas *canvas, string location, string file_name)
+//{
+//    if(canvas==0)
+//        return;
+//    char loc[500];
+//    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
+//    char rt[] = ".root";
+//    char *rtloc = loc;
+//    //Saving .root file
+//    strcat(rtloc,file_name.c_str());
+//    strcat(rtloc,rt);
+//    char const *rt_file = &rtloc[0];
+//    TObjArray list(0);
+//    list.Add(canvas);
+//    TFile f(rt_file,"recreate");
+//    list.Write();
+//    f.Close();
+//    cout << ".root file was created at: " << rt_file << endl;
+//}
 
 //void SaveCanvasC(TCanvas *canvas, char* location, char* file_name);
 void SaveCanvasC(TCanvas *canvas, string location, string file_name)
@@ -2456,8 +2455,7 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
     ostringstream plot_filename;
     plot_filename << plots_path << canvas->GetName()<<".root";
     //*/
-    TString fileName = (TString)plots_path+stack->GetName()+(TString)".root";
-    stack->SaveAs(fileName);
+    stack->SaveAs(GetROOTFileName(stack->GetName()));
     stack->Write();
     c1->Modified();
     SaveCanvas(c1);
