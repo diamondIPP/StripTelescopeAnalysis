@@ -128,6 +128,26 @@ void TAnalysisOfSelection::initialiseHistos()
 	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
 
+	hOneClusterHitChannel = new TH1F("hOneClusterHitChannel","hOneClusterHitChannel",128,0,128);
+	hOneClusterHitChannel->GetXaxis()->SetTitle("Diamond Cluster Channel no");
+	hOneClusterHitChannel->GetYaxis()->SetTitle("Number of entries");
+
+	hOneClusterHitChannelVsArea = new TH2F("hOneClusterHitChannelVsArea","hOneClusterHitChannelVsArea",128,0,128,
+	        settings->getNDiaDetectorAreas(),0,settings->getNDiaDetectorAreas());
+	hOneClusterHitChannelVsArea->GetXaxis()->SetTitle("Diamond Cluster Channel no");
+	hOneClusterHitChannelVsArea->GetYaxis()->SetTitle("Area no");
+
+	hOneClusterHitChannelVsFiducialArea = new TH2F("hOneClusterHitChannelVsFiducialArea","hOneClusterHitChannelVsArea",128,0,128,
+	        settings->getSelectionFidCuts()->getNFidCuts()+2,-1, settings->getSelectionFidCuts()->getNFidCuts()+1);
+	hOneClusterHitChannelVsFiducialArea->GetXaxis()->SetTitle("Diamond Cluster Channel no");
+	hOneClusterHitChannelVsFiducialArea->GetYaxis()->SetTitle("Fiducial Area");
+
+	hOneClusterHitChannelAreaVsFiducialArea = new TH2F("hOneClusterHitChannelAreaVsFiducialArea","hOneClusterHitChannelVsArea",
+	        settings->getNDiaDetectorAreas()+1,-1,settings->getNDiaDetectorAreas(),
+            settings->getSelectionFidCuts()->getNFidCuts()+2,-1, settings->getSelectionFidCuts()->getNFidCuts()+1);
+	hOneClusterHitChannelAreaVsFiducialArea->GetXaxis()->SetTitle("areas");
+	hOneClusterHitChannelAreaVsFiducialArea->GetYaxis()->SetTitle("Fiducial Area");
+
 	hFidCut= new TH2F("hFidCut","hFidCut",256*4,0,255,256*4,0,255);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
@@ -1066,6 +1086,23 @@ void TAnalysisOfSelection::saveHistos()
 		delete c1;
 		delete hValidSiliconAndOneDiamondHitInSameAreaAndFidCut;
 	}
+	if (hOneClusterHitChannelVsArea){
+        histSaver->SaveHistogram(hOneClusterHitChannelVsArea);
+        delete hOneClusterHitChannelVsArea;
+	}
+	if (hOneClusterHitChannel){
+        histSaver->SaveHistogram(hOneClusterHitChannel);
+        delete hOneClusterHitChannel;
+	}
+	if (hOneClusterHitChannelVsFiducialArea){
+        histSaver->SaveHistogram(hOneClusterHitChannelVsFiducialArea);
+        delete hOneClusterHitChannelVsFiducialArea;
+	}
+	if (hOneClusterHitChannelAreaVsFiducialArea){
+	    histSaver->SaveHistogram(hOneClusterHitChannelAreaVsFiducialArea);
+	    delete hOneClusterHitChannelAreaVsFiducialArea;
+	}
+
 
 	if(hFidCut){
 		c1 = settings->getSelectionFidCuts()->getAllFiducialCutsCanvas(hFidCut,true);
@@ -1148,11 +1185,16 @@ void TAnalysisOfSelection::analyseEvent()
 			hValidSiliconAndOneDiamondHitInOneArea->Fill(fiducialValueX,fiducialValueY);
 		if (area==fidRegionIndex)
 			hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->Fill(fiducialValueX,fiducialValueY);
+		hOneClusterHitChannel->Fill(pos);
+		hOneClusterHitChannelVsArea->Fill(pos,area);
 	}
-
+	Int_t fiducial_area = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
+	hOneClusterHitChannelVsFiducialArea->Fill(pos,fiducial_area);
+	hOneClusterHitChannelAreaVsFiducialArea->Fill(area,fiducial_area);
 	if(!eventReader->isInOneFiducialArea())
 		return;
 	Int_t hitArea = TTransparentAnalysis::GetHitArea(settings,fiducialValueX,fiducialValueY,xDivisions,yDivisions);
+
 	Float_t charge1 = cluster.getCharge(settings->doCommonModeNoiseCorrection());
 	Float_t charge2 = cluster.getCharge(2,settings->doCommonModeNoiseCorrection());
 	        fillPHvsEventNoAreaPlots(hitArea,charge1,charge2);

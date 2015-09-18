@@ -90,6 +90,10 @@ private:
 	TH3F* hChargeVsFidCut;
 	TH2F* hFidCutXvsChannelPos;
 	TH2F* hClusterSizeVsChannelPos;
+	TH1F* hOneClusterHitChannel;
+	TH2F* hOneClusterHitChannelVsArea;
+	TH2F* hOneClusterHitChannelVsFiducialArea;
+	TH2F* hOneClusterHitChannelAreaVsFiducialArea;
 	THTMLLandaus *htmlLandau;
 	THTMLSelectionAnalysis *htmlSelection;
 	vector<Float_t> vecEta;
