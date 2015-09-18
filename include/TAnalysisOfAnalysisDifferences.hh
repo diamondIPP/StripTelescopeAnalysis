@@ -30,8 +30,11 @@ public:
     std::map<Int_t,std::pair<Float_t,Float_t> >* getPredictedPositions() const;
     void setPredictedPositions( std::map<Int_t, pair<Float_t, Float_t> >* predictedPositionMap);
     void setStripHistogram(TH1F* histo);
-
+    void setNegativeChargeCut(Float_t value){negChargeCut = value;}
+    Float_t getNegativeChargeCut(){return negChargeCut;}
+    void set3DPhantomLandau(TH1F* hPhantomLandau);
 private:
+    TH1F* hPhantomLandau;
     void InitHistograms();
     void InitTransparentHistos();
     void InitClusteredHistos();
