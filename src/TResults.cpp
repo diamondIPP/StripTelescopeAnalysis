@@ -305,7 +305,9 @@ void TResults::setResultsFromSettings(TSettings* settings){
         if (settings->IsNotConnectedChannel(ch))
             notConnectedChannels.insert(ch);
     }
-    diamondChannels = settings->diamondPattern.getIntervalOfDiamond(settings->getRunDescription());
+    std::string rundes = settings->getRunDescription();
+    std::cout<<"get diamondChannels: "<<rundes<<std::endl;
+    diamondChannels = settings->diamondPattern.getIntervalOfDiamond(rundes);
     repeaterCard = settings->getRepeaterCard();
     diamondName = settings->getDiamond();
     voltage = settings->getVoltage();
