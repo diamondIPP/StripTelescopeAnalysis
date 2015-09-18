@@ -464,7 +464,9 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"Dia_channel_screen_channels")) ParseScreenedChannelArray(key,value,Det_channel_screen_channels[8]);
 		if (TPlaneProperties::startsWith(key,"Dia_channel_not_connected"))  ParseScreenedChannelArray(key,value,Dia_channel_not_connected);
         if (TPlaneProperties::startsWith(key,"Dia_channel_noisy"))          ParseScreenedChannelArray(key,value,Dia_channel_noisy);
-		if (TPlaneProperties::startsWith(key,"chi2Cut3D"))                  ParseFloat(key,value,chi2Cut3D);
+		if (TPlaneProperties::startsWith(key,"chi2Cut3D"))    ParseFloat(key,value,chi2Cut3D);
+		if (TPlaneProperties::startsWith(key,"chi2Cut3D_X"))  ParseFloat(key,value,chi2Cut3D_X);
+		if (TPlaneProperties::startsWith(key,"chi2Cut3D_Y"))  ParseFloat(key,value,chi2Cut3D_Y);
 		if (TPlaneProperties::startsWith(key,"si_avg_fidcut_xlow")) {ParseFloat(key,value,si_avg_fidcut_xlow);};
 		if (TPlaneProperties::startsWith(key,"si_avg_fidcut_xhigh")) ParseFloat(key,value,si_avg_fidcut_xhigh);
 		if (TPlaneProperties::startsWith(key,"si_avg_fidcut_ylow")) ParseFloat(key,value,si_avg_fidcut_ylow);
@@ -473,6 +475,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"selectionFidCut")) {if (!fidCutsSelection) fidCutsSelection=new TFidCutRegions();ParseFidCutRegion(key,value,fidCutsSelection,isStandardSelectionFidCut);}
 		if (TPlaneProperties::startsWith(key,"3dMetallisationFidCut")){if (!fidCuts3DMetallisation) fidCuts3DMetallisation=new TFidCutRegions();ParseFidCutRegion(key,value,fidCuts3DMetallisation,isStandard3dMetallisationFidCut);}
 		if (TPlaneProperties::startsWith(key,"3dEdgeFidCut")){if (!fidCuts3DEdge) fidCuts3DEdge =new TFidCutRegions();ParseFidCutRegion(key,value,fidCuts3DEdge,isStandard3dEdgeFidCut);}
+		if(TPlaneProperties::startsWith(key,"3DOverlayRange")){ParseFloatPair(key,value,OverlayRange3d);}
 		if (TPlaneProperties::startsWith(key,"centralRegion3DnH")){ParseFidCut(key,value,centralRegion3DnH);}
 		    //if (!fidCuts3DEdge) fidCuts3DEdge =new TFidCutRegions();ParseFidCut(key,value,fidCuts3DEdge,isStandard3dEdgeFidCut);}
 		if (TPlaneProperties::startsWith(key,"pulse_height_num_bins")) ParseInt(key,value,pulse_height_num_bins);
@@ -519,6 +522,7 @@ void TSettings::LoadSettings(){
         if (TPlaneProperties::startsWith(key,"currentBegin")){Parse(key,value,currentBegin);}
         if (TPlaneProperties::startsWith(key,"currentEnd")){Parse(key,value,currentEnd);}
         if (TPlaneProperties::startsWith(key,"adcToElectron")){Parse(key,value,adcToElectronConversion);}
+        if (TPlaneProperties::startsWith(key,"negativeChargeCut")){Parse(key,value,negativeChargeCut);}
         //if adcToElectronConversion.
 		if (TPlaneProperties::startsWith(key,"diamondMapping")) {
 			cout<<key<<" = "<<value.c_str()<<endl;
@@ -766,6 +770,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	isStandardSelectionFidCut=true;
 	isStandardArea = true;
 	chi2Cut3D=4.0;
+	chi2Cut3D_X = 5;
+	chi2Cut3D_Y = 20;
 	bAsymmetricSample=false;
 	minAbsEtaVal = .2;
 	bUseUserResolutionInput = false;
@@ -824,6 +830,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	Dia_channel_noisy.clear();
 	Dia_channel_not_connected.clear();
 	adcToElectronConversion= 1;
+	OverlayRange3d = make_pair((float)700.,(float)1200.);
+	negativeChargeCut = -50.;
 //	checkSettings();
 }
 
@@ -948,6 +956,17 @@ void TSettings::ParseCellArray(string key, string value, vector<int> &vecCells, 
 //	cout<<"DONE"<<endl;
 //	char t; cin>>t;
 
+}
+
+void TSettings::ParseFloatPair(string key, string value, std::pair<float,float> &p){
+    vector<float> vec;
+    ParseFloatArray(key,value,vec);
+    if (vec.size()!=2){
+        cerr<<"Cannot convert FloatPair "<<key<<" from \""<<value<<"\", size is not correct:"<<vec.size()<<endl;
+        exit(-1);
+    }
+    p.first = vec.at(0);
+    p.second = vec.at(1);
 }
 
 void TSettings::ParseFloatArray(string key, string value, vector<float> &vec) {

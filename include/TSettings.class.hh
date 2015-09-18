@@ -71,6 +71,8 @@ public:
 	void goToOutputDir();
 	void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
 	void goToAlignmentRootDir(alignmentMode mode = normalMode){goToDir(this->getAbsoluteOuputPath(false));}
+	Float_t getNegativeChargeCut(){return negativeChargeCut;}
+	void setNegativeChargeCut(Float_t value){negativeChargeCut  = value;}
 
 
 	void goTo3dDiamondTreeDir();
@@ -315,6 +317,8 @@ public:
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);
 	Float_t getChi2Cut3D(){return chi2Cut3D;}
+	Float_t getChi2Cut3D_X(){return chi2Cut3D;}
+	Float_t getChi2Cut3D_Y(){return chi2Cut3D;}
 	Float_t getMinimalAbsoluteEtaValue(){return minAbsEtaVal;}
 	void setMinimalAbsoluteEtaValue(Float_t minAbsEtaVal) {this->minAbsEtaVal = minAbsEtaVal;}
 	bool isUseUserResolutionInput() const {return bUseUserResolutionInput;}
@@ -335,6 +339,7 @@ public:
     bool IsNotConnectedChannel(Int_t ch);
     bool IsNoisyChannel(Int_t ch);
     UInt_t getNEvents(){return nEvents;};
+    const std::pair<float,float> get3DOverlayRange(){return OverlayRange3d;}
 private:
 
 	TString diamondName;
@@ -342,6 +347,7 @@ private:
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3DEdge;
 	TFidCutRegions* fidCuts3DMetallisation;
+	std::pair<float,float> OverlayRange3d;
 protected:
 	float store_threshold;
 private:
@@ -353,6 +359,7 @@ private:
 	void DefaultLoadDefaultSettings();
 	void ParseStringArray(std::string key, std::string value, std::vector<std::string> &vec);
 	void ParseFloatArray(std::string key, std::string value, std::vector<float> & vec);
+	void ParseFloatPair(std::string key, std::string value, std::pair<float,float> & p);
 	void ParseIntArray(std::string key, std::string value, std::vector<int> & vec);
 	void ParseRegionArray(std::string key, std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
 	void ParsePattern(std::string key, std::string value);
@@ -394,6 +401,8 @@ private:
 	int detectorsToAlign;
 	bool bAsymmetricSample;
 	Float_t chi2Cut3D;
+	Float_t chi2Cut3D_X;
+	Float_t chi2Cut3D_Y;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
 	bool bResetAlignment;
@@ -475,7 +484,7 @@ private:
 	Float_t rms_sigma_difference_cut;
 	Int_t high_rms_cut; //cut on absolute rms value instead of comparing to Gaussian
 	Float_t rms_cut; //value to use if high_rms_cut
-
+	Float_t negativeChargeCut;
 	Int_t zoomDiamondPlots; //zoom in on DC_Pedestal (100 event / window)
 
 	Int_t singleTrack2D; //plot single tracks only in 2D hits histogram
