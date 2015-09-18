@@ -31,6 +31,8 @@
 #include "THTMLPedestal.hh"
 #include "TAnalysisOfAnalysisDifferences.hh"
 #include "LandauGaussFit.hh"
+#include "TAvrgChargePerBinMonteCarlo.hh"
+//#include "TAnalysisOf3D_LongAnalysis.hh"
 
 #include "TADCEventReader.hh"
 #include "TTracking.hh"
@@ -50,6 +52,7 @@ public:
 	void	doAnalysis(UInt_t nEvents=0);
 
 private:
+	void init_vectors();
 	bool eventValid();
 	void createTreeTestHistos();
 
@@ -163,6 +166,7 @@ private:
 	TH1F* hLandau3DWithColumns;
 	TH1F* hLandau3DWithoutColumns;
     TH1F* hLandau3DWithoutColumns_subset;
+    TH1F* hLandau3DWithoutColumns_subset_no_negative;
 	TH2F* hLandauStripFidCutXvsFidCutY;
 	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
 	TH2F* hLandau3DWithoutColumnsFidCutXvsFidCutY;
@@ -308,6 +312,7 @@ private:
 	TH2F* hValidEventsDetSpace;
 
 	TH2D* hNegativeChargePosition;
+	TH1F* hNegativeCharges;
 
 	//vector<TCanvas*> cDeadCellMeanCharge;
 	vector<TProfile*> hDeadCellCharge;
