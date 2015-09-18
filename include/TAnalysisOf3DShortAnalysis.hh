@@ -26,6 +26,9 @@
 #include "TGraphErrors.h"
 #include "TMultiGraph.h"
 #include "TStopwatch.h"
+#include "THStack.h"
+#include "TPaletteAxis.h"
+#include "TTracking.hh"
 
 #include "HistogrammSaver.class.hh"
 #include "TSettings.class.hh"
@@ -36,15 +39,15 @@ class TAnalysisOf3DShortAnalysis {
         virtual ~TAnalysisOf3DShortAnalysis();
         void addEvent(TCluster* cluster, Float_t x_pred, Float_t y_pred, Float_t x_fid, Float_t y_fid, Float_t chi2x, Float_t chi2y);
         void initHistos();
-        void saveHistos();
+        void saveHistos(TH1F* hLandauStrip);
         void SetEventReader(TTracking* eventReader);
     private:
         Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax,PulseHeightMaxMeanCharge,PulseHeightMinMeanCharge;
-        vector <Float_t> vecPredDetX,vecPredDetY,vecPulseHeight;
+        vector <Float_t> vecPredDetX,vecPredDetY,vecPulseHeight,vecClusterSize;
         vector <Float_t> vecPH_Cluster1,vecPH_Cluster2,vecCh_Cluster2,vecCh_Cluster1;
         Float_t xPred,yPred;
         Float_t xFid,yFid;
-        Float_t xCi2, yChi2;
+        Float_t xChi2, yChi2;
 
         TH1F* hLandau3DWithoutColumns;
         TH2F* hLandau3DWithoutColumnsFidCutXvsFidCutY;
@@ -57,13 +60,14 @@ class TAnalysisOf3DShortAnalysis {
         int HitCount, SeedCount;
         vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
         int verbosity;
+        bool isTransparentCluster;
     private:
         void FillEdgeAlignmentHistos();
         void HitandSeedCount(TCluster* nCluster);//
         void Analyse1Cluster(UInt_t clusterNo=0);//
         void Analyse2Cluster(); //
 
-        void ClusterPlots(int nClusters, float nfiducialValueX, float nfiducialValueY);//exists
+        void ClusterPlots(int nClusters);//, float nfiducialValueX, float nfiducialValueY);//exists
         void FillEdgeDistributions(Float_t clusterCharge);//exists
         void FillMeanChargeVector(Float_t clusterCharge);//exists
         void SaveMeanChargeVector(); // exists
