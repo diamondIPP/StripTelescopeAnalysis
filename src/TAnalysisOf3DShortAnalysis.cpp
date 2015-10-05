@@ -159,7 +159,7 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
     hLandauDoubleCombined->GetXaxis()->SetTitle("Number of Clusters");
     hLandauDoubleCombined->GetYaxis()->SetTitle("Number of Entries #");
 
-    cout<<"loop over patterns"<<endl;
+    if(verbosity) cout<<"loop over patterns"<<endl;
     for(UInt_t i=0; i<settings->diamondPattern.getNIntervals(); i++){
         if(verbosity) cout<<"Loop: "<<i<<" "<<settings->diamondPattern.getNIntervals()<<endl;
         pair<int,int> channels =settings->diamondPattern.getPatternChannels(i+1);
