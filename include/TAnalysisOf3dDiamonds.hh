@@ -42,6 +42,7 @@
 #include "TTransparentAnalysis.hh"
 #include "THStack.h"
 #include "TPaletteAxis.h"
+#include "TAnalysisOf3DShortAnalysis.hh"
 
 using namespace std;
 
@@ -58,18 +59,15 @@ private:
 
 	void initialiseHistos();
 	void initialiseLongAnalysisHistos();
-	void initialiseShortAnalysisHistos();
 	void initialiseTransparentAnalysisHistos();
 	void InitialiseStripAnalysisHistos();
 
 	void saveHistos();
-	void SaveShortAnalysisHistos();
 	void SaveLongAnalysisHistos();
 	void SaveLongAnalysisHistos2();
 	void saveTransparentAnalysisHistos();
 	void SaveStripAnalysisHistos();
 
-	void ShortAnalysis();
 	void LongAnalysis();
 	bool TransparentAnalysis();
 	void StripAnalysis();
@@ -93,24 +91,13 @@ private:
 	void initialise3DOffsetAlignmentOverlayHistos();
 	void initialiseEdgeFreeHistos();
 	//new functions
-	void HitandSeedCount(TCluster* nCluster);
-	void ClusterPlots(int nClusters, float nfiducialValueX, float nfiducialValueY);
 	void RemoveLumpyClusters(TCluster* nCluster);
 	int RemoveEdgeHits(TCluster* nCluster, pair<int,int> nDetector);
 //	int RemoveClustersWithHitOutside3D(TCluster* nCluster);
 //	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
 	vector<Float_t> LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus);
 private:
-private:
-	void ShortAnalysis_FillEdgeAlignmentHistos();
-	void ShortAnalysis_Analyse1Cluster(UInt_t clusterNo=0);
-	void ShortAnalysis_Analyse2Cluster();
-	void ShortAnalysis_Save2ClusterPlots();
-	void ShortAnalysis_FillEdgeDistributions(Float_t clusterCharge);
-	void ShortAnalysis_SaveEdgeDistributions();
-	void ShortAnalysis_FillMeanChargeVector(Float_t clusterCharge);
-	void ShortAnalysis_SaveMeanChargeVector();
-
+	TAnalysisOf3DShortAnalysis *shortAnalysis;
 private:
 	void MakeGhostCluster(TCluster *diamondCluster,Int_t clusterSize);
 	void LongAnalysisSaveCellAndQuaterNumbering();
@@ -176,34 +163,19 @@ private:
 	Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax,PulseHeightMaxMeanCharge,PulseHeightMinMeanCharge;
 
 	string FileNameEnd;
-	vector<TH2F*> hPHvsPredictedChannel, hPHvsChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit, hHitandSeedCount, hChi2XChi2Y, hFidCutXvsFidCutY;
-	vector<TH1F*>hEventsvsChannel;
-	TH1F* hEventsvsChannelCombined;
-	TH1F* hNumberofClusters;
-	TH1F* hDoubleClusterPos;
+	vector<TH2F*> hPHvsPredictedChannel, hPHvsPredictedXPos, hPredictedPositionDiamondHit;
 	TCanvas* cDoubleCluster;
-	TH1F* hDoubleClusterPos0;
-	TH1F* hDoubleClusterPos1;
-	TH1F* hLandauCluster1;
-	TH1F* hLandauCluster2;
-	TH1F* hLandauDoubleCombined;
-	TProfile2D* hFidCutsVsMeanCharge;
 
-	//vector<TH3F*> hFidCutXvsFidCutYvsCharge;
 	//For hFidCutXvsFidCutYvsMeanCharge
 	vector<TCanvas*> ptrCanvas, ptrCanvasEvents, ptrCanvasMean;
-	vector<TH2D*> hFidCutXvsFidCutYvsCharge, hFidCutXvsFidCutYvsEvents, hFidCutXvsFidCutYvsMeanCharge;
-	TH2D* hFidCutXvsFidCutYvsMeanChargeAllDetectors;
 	//For XPosvsYPosvsMeanCharge
 	TH2D* hXPosvsYPosvsCharge;
 	TH2D* hXPosvsYPosvsEvents;
 	TH2D* hXPosvsYPosvsMeanCharge;
 	TH2D* hFidCutXvsFidCutYvsPredictedEvents;
 	TH2D* hFidCutXvsFidCutYvsSeenEvents;
-	vector<TH2D*> hFidCutXvsFidCutYClusters;
 	TH2D* hEfficiency;
 	//TH3F* hFidCutXvsFidCutYvsCharge;
-	vector<TH1F*> hLandau;
 	vector<TH1F*> hLandauTransparent;
 	vector<TH1F*> hLandauTransparentBadCellsRemoved;
 	TH2D* hCellOverlayvsCharge;
@@ -281,8 +253,6 @@ private:
 	vector<TH2D*> hCellsEvents;
 	vector<TH2D*> hCellsEventsCheck;
 	TH1F* hTransparentCharge3D;
-	vector<TH1F*> hCellTransparentLandau;
-	vector<TH1F*> hQuarterCellGradedTransparentLandau;
 	vector<TCanvas*> cCellsTransparentHitPositionCellGraded;
 	vector<TH2D*> hCellsTransparentHitPosition;
 	vector<TH2D*> hCellsTransparentHitPositionCellGraded;
@@ -390,9 +360,6 @@ private:
 	TCanvas* cHarrisGoodandStripNormailsed;
 	TCanvas* cGoodGradedandStripNormailsed;
 	TCanvas* cStripFidCutXFidCutYvsMeanCharge;
-	vector<TH2D*> hXdetvsYdetvsCharge;
-	vector<TH2D*> hXdetvsYdetvsEvents;
-	vector<TH2D*> hXdetvsYdetvsMeanCharge;
 	vector<TCanvas*> ptrCanvasXdetvsYdetMeanCharge;
 	//Removed Columns
 	TH2D* hCellsColumnCheck55;
@@ -438,17 +405,7 @@ private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;
 	TH2D* hLongAnalysisQuarterFluctuations, MeanOfLandauGoodCells;
-	TH2F* hShortAnalysis2ClusterHitPattern_1stCluster;
-	TH2F* hShortAnalysis2ClusterHitPattern_2ndCluster;
 
-	TH2F* hRelativeChargeTwoClustersX;
-	TH2F* hRelativeChargeTwoClustersY;
-	TProfile2D* hRelativeChargeTwoClustersXY;
-	TProfile2D* hShortAnalysis2TotalChargeXY;
-	TProfile* hRelatviveNumberOfMultipleClusterEvents;
-	TProfile* hRelatviveNumberOfMultipleClusterEventsSamePattern;
-
-	TProfile2D* hTotalAvrgChargeXY;
 	TProfile2D* hTotalAvrgChargeXY_electrons;
 	vector<Int_t>vecDeadCells;
 private:

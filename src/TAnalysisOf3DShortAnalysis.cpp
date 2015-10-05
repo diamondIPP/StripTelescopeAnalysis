@@ -12,14 +12,27 @@ TAnalysisOf3DShortAnalysis::TAnalysisOf3DShortAnalysis(TSettings *settings,Histo
     this->settings = settings;
     this->histSaver = histSaver;
     useCMN = true;
-    verbosity = settings->getVerbosity();
+    verbosity = 10;//settings->getVerbosity();
+
+    PulseHeightBins = 256;
+    PulseHeightMin = 1;
+    PulseHeightMax = 2800;
+    PulseHeightMinMeanCharge = 1;
+    PulseHeightMaxMeanCharge = 1500;
+//    histos = new THistogramManager(histSaver);
+
+    vecEdgePredX.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
+    vecEdgePredY.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
+    vecEdgePulseHeight.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
+
 }
 
 TAnalysisOf3DShortAnalysis::~TAnalysisOf3DShortAnalysis() {
     // TODO Auto-generated destructor stub
+//    delete histos;
 }
 
-void TAnalysisOf3DShortAnalysis::SetEventReader(TTracking* eventReader) {
+void TAnalysisOf3DShortAnalysis::setEventReader(TTracking* eventReader) {
     this->eventReader = eventReader;
 }
 
@@ -33,6 +46,7 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
     name.Append(appendix);
     Float_t xmax = settings->get3dMetallisationFidCuts()->getXHigh();
     Float_t ymax = settings->get3dMetallisationFidCuts()->getYHigh();
+    //histos->addHistogram("TH1F",name,name+TString(";X;rel. ph: ph_{clus1}/ph_{clus2}"),"",1024,0,xmax,100,0,20);
     hRelativeChargeTwoClustersX = new TH2F(name,name,1024,0,xmax,100,0,20);
     hRelativeChargeTwoClustersX->GetXaxis()->SetTitle("X");
     hRelativeChargeTwoClustersX->GetYaxis()->SetTitle("rel. ph: ph_{clus1}/ph_{clus2}");
@@ -147,7 +161,7 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
 
     cout<<"loop over patterns"<<endl;
     for(UInt_t i=0; i<settings->diamondPattern.getNIntervals(); i++){
-        if(verbosity) cout<<"Loop: "<<i<<endl;
+        if(verbosity) cout<<"Loop: "<<i<<" "<<settings->diamondPattern.getNIntervals()<<endl;
         pair<int,int> channels =settings->diamondPattern.getPatternChannels(i+1);
         //hLandau
         name = TString::Format("hLandau_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
@@ -257,11 +271,12 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
         name.Append(appendix);
         hXdetvsYdetvsMeanCharge.push_back((TH2D*)hXdetvsYdetvsCharge.at(i)->Clone(name));
     }
-
+    cout<<"DONE"<<endl;
     //hFidCutXvsFidCutYvsMeanChargeAllDetectors
     hFidCutXvsFidCutYvsMeanChargeAllDetectors = (TH2D*)hFidCutXvsFidCutYvsCharge.at(0)->Clone("hFidCutXvsFidCutYvsMeanChargeAllDetectors");
 
     for(int i=0;i<7;i++){
+        cout<<" "<<i<<"/7"<<endl;
         //hFidCutXvsFidCutYClusters For TH2D    {0,1,1_1Seed,2_FirstCluster,2_SecondCluster,3}
         name = TString::Format("hFidCutXvsFidCutYClusters%i",i);
         name.Append(appendix);
@@ -280,12 +295,71 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
     hShortAnalysis2ClusterHitPattern_1stCluster->GetXaxis()->SetTitle("predicteded hit pattern");
     hShortAnalysis2ClusterHitPattern_1stCluster->GetYaxis()->SetTitle("cluster_{1}-hit-pattern - predicted-hit-pattern");
 
+
+    cout<<"hShortAnalysis2ClusterHitPattern_2ndCluster"<<endl;
     name = "hShortAnalysis2ClusterHitPattern_2ndCluster";
     name.Append(appendix);
     hShortAnalysis2ClusterHitPattern_2ndCluster = (TH2F*)hShortAnalysis2ClusterHitPattern_1stCluster->Clone(name);
     hShortAnalysis2ClusterHitPattern_2ndCluster->SetTitle(name);
     hShortAnalysis2ClusterHitPattern_2ndCluster->GetYaxis()->SetTitle("cluster_{2}-hit-pattern - predicted-hit-pattern");
 
+    cout<<"Landau"<<endl;
+    name = "hLandau3D";
+    name.Append(appendix);
+    hLandau3DWithColumns = new TH1F(name,"3D",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DWithColumns->GetXaxis()->SetTitle("charge / ADC");
+    hLandau3DWithColumns->GetYaxis()->SetTitle("number of entries #");
+    hLandau3DWithColumns->SetLineColor(kBlack);
+
+    cout<<"hLandau3DWO"<<endl;
+    name = "hLandau3DWO";
+    name.Append(appendix);
+    cout<<0<<endl;
+    cout<<PulseHeightBins<< " "<<PulseHeightMin<<" "<<PulseHeightMax<<" "<<name<<endl;
+    hLandau3DWithoutColumns = new TH1F(name,"3D Phantom",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    cout<<1<<endl;
+    hLandau3DWithoutColumns->GetXaxis()->SetTitle("charge / ADC");
+    cout<<2<<endl;
+    hLandau3DWithoutColumns->GetYaxis()->SetTitle("number of entries #");
+    cout<<3<<endl;
+    hLandau3DWithoutColumns->SetLineColor(kRed);
+    cout<<4<<endl;
+    hLandau3DWithoutColumns->SetLineStyle(7);
+
+    cout<<"end hLandau3DWO"<<endl;
+
+    cout<<"begin hLandau3DWO_subset"<<endl;
+    TString name2="hLandau3DWO_subset";
+    name2.Append(appendix);
+    name = "hLandau3DWO_subset";
+    cout<<0<<endl;
+    name.Append(appendix);
+    hLandau3DWithoutColumns_subset = new TH1F(name,"3D Phantom, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    cout<<1<<endl;
+    hLandau3DWithoutColumns_subset->GetXaxis()->SetTitle("charge / ADC");
+    cout<<2<<endl;
+    hLandau3DWithoutColumns_subset->GetYaxis()->SetTitle("number of entries #");
+    cout<<3<<endl;
+    hLandau3DWithoutColumns_subset->SetLineColor(kRed);
+    cout<<4<<endl;
+    hLandau3DWithoutColumns_subset->SetLineWidth(2);
+    cout<<"end init"<<endl;
+
+
+    name = "hLandau3DWithoutColumnsFidCutXvsFidCutY";
+    hLandau3DWithoutColumnsFidCutXvsFidCutY = new TH2F(name,name,
+            213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
+            160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
+    hLandau3DWithoutColumnsFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
+    hLandau3DWithoutColumnsFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
+
+
+    name = "hLandau3DWithColumnsFidCutXvsFidCutY";
+    hLandau3DWithColumnsFidCutXvsFidCutY = new TH2F(name,name,
+            213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
+            160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
+    hLandau3DWithColumnsFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
+    hLandau3DWithColumnsFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
 }
 
 void TAnalysisOf3DShortAnalysis::addEvent(TCluster* cluster, Float_t x_pred, Float_t y_pred,
@@ -296,7 +370,6 @@ void TAnalysisOf3DShortAnalysis::addEvent(TCluster* cluster, Float_t x_pred, Flo
     yFid = y_fid;
     xChi2 = chi2x;
     yChi2 = chi2y;
-
     if(!settings->do3dTransparentAnalysis()){
         if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
             return;
@@ -427,7 +500,7 @@ void TAnalysisOf3DShortAnalysis::Analyse1Cluster(UInt_t clusterNo){
     else{
         if(!isTransparentCluster)
             return;
-        diamondCluster =& transparentCluster;
+        diamondCluster = transparentCluster;
     }
     //Edge Finding
     //    ShortAnalysis_FillEdgeDistributions(diamondCluster->getPositiveCharge(false));
@@ -454,7 +527,7 @@ void TAnalysisOf3DShortAnalysis::Analyse1Cluster(UInt_t clusterNo){
             hEventsvsChannel[i]->Fill(diamondCluster->getHighestSignalChannel());
             hPHvsChannel[i]->Fill(charge,diamondCluster->getHighestSignalChannel());
             hLandau[i]->Fill(charge);
-//            vecPHDiamondHit[i]->push_back(charge);
+            //            vecPHDiamondHit[i]->push_back(charge);
             hFidCutXvsFidCutY[i]->Fill(xFid,yFid);
 
             if(!settings->do3dTransparentAnalysis()){
@@ -548,237 +621,237 @@ void TAnalysisOf3DShortAnalysis::FillEdgeDistributions(Float_t clusterCharge){
 
 void TAnalysisOf3DShortAnalysis::saveHistos(TH1F* hLandauStrip) {
     TString appendix ="";
-       if (settings->do3dTransparentAnalysis())
-           appendix ="_trans";
+    if (settings->do3dTransparentAnalysis())
+        appendix ="_trans";
 
-       SaveMeanChargeVector();
-       Save2ClusterPlots();
-       vector<Float_t> xPred;
-       vector<Float_t> yPred;
-       vector<Float_t> charge;
-       histSaver->SaveHistogram(hRelativeChargeTwoClustersX);
-       histSaver->SaveHistogram(hRelativeChargeTwoClustersY);
-       histSaver->SaveHistogram(hFidCutsVsMeanCharge);
-       TString name = "cRelativeChargeTwoClustersXY";
-       name.Append(appendix);
-       TCanvas *c1 = new TCanvas(name,name);
-       c1->cd();
-       hRelativeChargeTwoClustersXY->Draw("colz");
-       hRelativeChargeTwoClustersXY->GetZaxis()->SetRangeUser(0,20);
-       settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
-       histSaver->SaveCanvas(c1);
-       delete c1;
+    SaveMeanChargeVector();
+    Save2ClusterPlots();
+    vector<Float_t> xPred;
+    vector<Float_t> yPred;
+    vector<Float_t> charge;
+    histSaver->SaveHistogram(hRelativeChargeTwoClustersX);
+    histSaver->SaveHistogram(hRelativeChargeTwoClustersY);
+    histSaver->SaveHistogram(hFidCutsVsMeanCharge);
+    TString name = "cRelativeChargeTwoClustersXY";
+    name.Append(appendix);
+    TCanvas *c1 = new TCanvas(name,name);
+    c1->cd();
+    hRelativeChargeTwoClustersXY->Draw("colz");
+    hRelativeChargeTwoClustersXY->GetZaxis()->SetRangeUser(0,20);
+    settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
+    histSaver->SaveCanvas(c1);
+    delete c1;
 
-       name = "cShortAnalysis2TotalChargeXY";
-       name.Append(appendix);
-       c1 = new TCanvas(name,name);
-       c1->cd();
-       hShortAnalysis2TotalChargeXY->Draw("colz");
-       hShortAnalysis2TotalChargeXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-       settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
-       histSaver->SaveCanvas(c1);
-       delete c1;
+    name = "cShortAnalysis2TotalChargeXY";
+    name.Append(appendix);
+    c1 = new TCanvas(name,name);
+    c1->cd();
+    hShortAnalysis2TotalChargeXY->Draw("colz");
+    hShortAnalysis2TotalChargeXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
+    histSaver->SaveCanvas(c1);
+    delete c1;
 
-       histSaver->SaveHistogram(hRelatviveNumberOfMultipleClusterEventsSamePattern);
-       histSaver->SaveHistogram(hRelatviveNumberOfMultipleClusterEvents);
-       if(hRelatviveNumberOfMultipleClusterEventsSamePattern) delete hRelatviveNumberOfMultipleClusterEventsSamePattern;
-       if(hRelatviveNumberOfMultipleClusterEvents) delete hRelatviveNumberOfMultipleClusterEvents;
+    histSaver->SaveHistogram(hRelatviveNumberOfMultipleClusterEventsSamePattern);
+    histSaver->SaveHistogram(hRelatviveNumberOfMultipleClusterEvents);
+    if(hRelatviveNumberOfMultipleClusterEventsSamePattern) delete hRelatviveNumberOfMultipleClusterEventsSamePattern;
+    if(hRelatviveNumberOfMultipleClusterEvents) delete hRelatviveNumberOfMultipleClusterEvents;
 
-       name = "cTotalAvrgChargeXY";
-       name.Append(appendix);
-       if (settings->IsPaperMode())
-           gStyle->SetCanvasDefW(gStyle->GetCanvasDefH()*2);
-       c1 = new TCanvas(name,name);
-       c1->cd();
-       c1->SetRightMargin(.2);
-       c1->SetObjectStat(false);
-       hTotalAvrgChargeXY->Draw("colz");
-   //    hTotalAvrgChargeXY->GetZaxis()->SetTitleOffset(1.2);
-       Float_t xmin = hTotalAvrgChargeXY->GetXaxis()->GetXmin();
-       Float_t xmax = hTotalAvrgChargeXY->GetXaxis()->GetXmax();
-       Float_t deltax = xmax - xmin;
-       Float_t ymin = hTotalAvrgChargeXY->GetYaxis()->GetXmin();
-       Float_t ymax = hTotalAvrgChargeXY->GetYaxis()->GetXmax();
-       Float_t deltay = ymax-ymin;
-       xmin = xmin -.05*deltax;
-       xmax = xmax +.05*deltax;
-       ymin = ymin -.05*deltay;
-       ymax = ymax +.05*deltay;
-       TH1F* histo = c1->DrawFrame(xmin,ymin,xmax,ymax, hTotalAvrgChargeXY->GetTitle());
-       histo->GetXaxis()->SetTitle(hTotalAvrgChargeXY->GetXaxis()->GetTitle());
-       histo->GetYaxis()->SetTitle(hTotalAvrgChargeXY->GetYaxis()->GetTitle());
-       hTotalAvrgChargeXY->SetObjectStat(false);
-       hTotalAvrgChargeXY->Draw("colz same");
-       hTotalAvrgChargeXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-       gPad->Update();
-       c1->Update();
-       settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
-       TCutG* centralRegion = settings->centralRegion3DnH->GetFiducialAreaCut();
-       centralRegion->SetLineColor(kRed);
-       centralRegion->Draw("same");
-       histSaver->SaveCanvas(c1);
+    name = "cTotalAvrgChargeXY";
+    name.Append(appendix);
+    if (settings->IsPaperMode())
+        gStyle->SetCanvasDefW(gStyle->GetCanvasDefH()*2);
+    c1 = new TCanvas(name,name);
+    c1->cd();
+    c1->SetRightMargin(.2);
+    c1->SetObjectStat(false);
+    hTotalAvrgChargeXY->Draw("colz");
+    //    hTotalAvrgChargeXY->GetZaxis()->SetTitleOffset(1.2);
+    Float_t xmin = hTotalAvrgChargeXY->GetXaxis()->GetXmin();
+    Float_t xmax = hTotalAvrgChargeXY->GetXaxis()->GetXmax();
+    Float_t deltax = xmax - xmin;
+    Float_t ymin = hTotalAvrgChargeXY->GetYaxis()->GetXmin();
+    Float_t ymax = hTotalAvrgChargeXY->GetYaxis()->GetXmax();
+    Float_t deltay = ymax-ymin;
+    xmin = xmin -.05*deltax;
+    xmax = xmax +.05*deltax;
+    ymin = ymin -.05*deltay;
+    ymax = ymax +.05*deltay;
+    TH1F* histo = c1->DrawFrame(xmin,ymin,xmax,ymax, hTotalAvrgChargeXY->GetTitle());
+    histo->GetXaxis()->SetTitle(hTotalAvrgChargeXY->GetXaxis()->GetTitle());
+    histo->GetYaxis()->SetTitle(hTotalAvrgChargeXY->GetYaxis()->GetTitle());
+    hTotalAvrgChargeXY->SetObjectStat(false);
+    hTotalAvrgChargeXY->Draw("colz same");
+    hTotalAvrgChargeXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    gPad->Update();
+    c1->Update();
+    settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
+    TCutG* centralRegion = settings->centralRegion3DnH->GetFiducialAreaCut();
+    centralRegion->SetLineColor(kRed);
+    centralRegion->Draw("same");
+    histSaver->SaveCanvas(c1);
 
-       delete c1;
+    delete c1;
 
-       if (settings->IsPaperMode())
-           gStyle->SetCanvasDefW(gStyle->GetCanvasDefH());
+    if (settings->IsPaperMode())
+        gStyle->SetCanvasDefW(gStyle->GetCanvasDefH());
 
-       for(UInt_t i = 0; i < vecEdgePredX.size(); i++){
-           xPred.insert(  xPred.end(), vecEdgePredX[i].begin(), vecEdgePredX[i].end());
-           yPred.insert(  yPred.end(), vecEdgePredY[i].begin(), vecEdgePredY[i].end());
-           charge.insert(charge.end(), vecEdgePulseHeight[i].begin(), vecEdgePulseHeight[i].end());
-       }
-   //    SaveEdgeFittingDistributions();
-       //a.end(), b.begin(), b.end());
-       histSaver->SaveHistogram(histSaver->CreateScatterHisto("hEdgeFittingPredictedPosition",yPred,xPred),false);
-       TH3F* hEdgeFittingCharge = histSaver->Create3DHisto("hEdgeFittingCharge",xPred,yPred,charge);
-       TH2F* hEdgeFittingAvrgCharge = (TH2F*) hEdgeFittingCharge->Project3DProfile("yx");
-       hEdgeFittingAvrgCharge->SetName("hEdgeFittingAvrgCharge");
-       hEdgeFittingAvrgCharge->SetTitle("hEdgeFittingAvrgCharge");
-       histSaver->SaveHistogram(hEdgeFittingAvrgCharge);
-       cout<<"vecEdgePredX: "<<vecEdgePredX.size()<<endl;
-       if(verbosity%2==1){char t; cin>>t;}
-       for(int i = 0; i < vecEdgePredX.size(); i++){
-           cout<<"Edge no"<<i<<" "<<vecEdgePredX[i].size()<<" "<<vecEdgePredY[i].size()<<" "<<vecEdgePulseHeight[i].size()<<" "<<endl;
-           name = "hEdgeFittingAvrgCharge_";
-           name.Append(settings->getEdgePositionName(i));
-           TH2F* hEdgeFittingAvrgCharge;
-           if(settings->getEdgePositionType(i) == TPlaneProperties::X_COR)
-               hEdgeFittingAvrgCharge = histSaver->CreateScatterHisto((string)name,vecEdgePulseHeight[i],vecEdgePredX[i],200);
-           else
-               hEdgeFittingAvrgCharge = histSaver->CreateScatterHisto((string)name,vecEdgePulseHeight[i],vecEdgePredY[i],200);
+    for(UInt_t i = 0; i < vecEdgePredX.size(); i++){
+        xPred.insert(  xPred.end(), vecEdgePredX[i].begin(), vecEdgePredX[i].end());
+        yPred.insert(  yPred.end(), vecEdgePredY[i].begin(), vecEdgePredY[i].end());
+        charge.insert(charge.end(), vecEdgePulseHeight[i].begin(), vecEdgePulseHeight[i].end());
+    }
+    //    SaveEdgeFittingDistributions();
+    //a.end(), b.begin(), b.end());
+    histSaver->SaveHistogram(histSaver->CreateScatterHisto("hEdgeFittingPredictedPosition",yPred,xPred),false);
+    TH3F* hEdgeFittingCharge = histSaver->Create3DHisto("hEdgeFittingCharge",xPred,yPred,charge);
+    TH2F* hEdgeFittingAvrgCharge = (TH2F*) hEdgeFittingCharge->Project3DProfile("yx");
+    hEdgeFittingAvrgCharge->SetName("hEdgeFittingAvrgCharge");
+    hEdgeFittingAvrgCharge->SetTitle("hEdgeFittingAvrgCharge");
+    histSaver->SaveHistogram(hEdgeFittingAvrgCharge);
+    cout<<"vecEdgePredX: "<<vecEdgePredX.size()<<endl;
+    if(verbosity%2==1){char t; cin>>t;}
+    for(int i = 0; i < vecEdgePredX.size(); i++){
+        cout<<"Edge no"<<i<<" "<<vecEdgePredX[i].size()<<" "<<vecEdgePredY[i].size()<<" "<<vecEdgePulseHeight[i].size()<<" "<<endl;
+        name = "hEdgeFittingAvrgCharge_";
+        name.Append(settings->getEdgePositionName(i));
+        TH2F* hEdgeFittingAvrgCharge;
+        if(settings->getEdgePositionType(i) == TPlaneProperties::X_COR)
+            hEdgeFittingAvrgCharge = histSaver->CreateScatterHisto((string)name,vecEdgePulseHeight[i],vecEdgePredX[i],200);
+        else
+            hEdgeFittingAvrgCharge = histSaver->CreateScatterHisto((string)name,vecEdgePulseHeight[i],vecEdgePredY[i],200);
 
-           hEdgeFittingAvrgCharge->GetYaxis()->SetTitle("Pulse Height /ADC");
-           TString title = "predicted Position ";
-           title.Append(TPlaneProperties::getCoordinateString(settings->getEdgePositionType(i)).c_str());
-           title.Append(" / #mum");
-           hEdgeFittingAvrgCharge->GetXaxis()->SetTitle(title);//"predicted Position X / #mum");
-           histSaver->SaveHistogram(hEdgeFittingAvrgCharge);
-           TH1F* hEdgeFittingAvrgCharge_pfx = (TH1F*)hEdgeFittingAvrgCharge->ProfileX();
-           if(hEdgeFittingAvrgCharge_pfx){
-               hEdgeFittingAvrgCharge_pfx->GetYaxis()->SetTitle("avrg. Charge / ADC");
-               TCutG *cut = this->settings->getEdgePosition(i);
-               name = "c";
-               name.Append(hEdgeFittingAvrgCharge_pfx->GetName());
-               TCanvas *c1 = new TCanvas(name,name);
-               hEdgeFittingAvrgCharge_pfx->Draw();
-               if(cut)cut->Draw();
-               histSaver->SaveCanvas(c1);
-               cout<<"Saved "<<c1->GetName()<<endl;
-               delete c1;
-           }
-           else
-               cout<<" Cannot create ProfileX" << endl;
-           TH1D* histo1st_py;
-           TH1D* histo2nd_py;
-           histSaver->SaveHistogram(hShortAnalysis2ClusterHitPattern_1stCluster);
-           histSaver->SaveHistogram(hShortAnalysis2ClusterHitPattern_2ndCluster);
-           for(int i = 0; i <=hShortAnalysis2ClusterHitPattern_1stCluster->GetNbinsX();i++){
-               TString extension = TString::Format("_pattern%d",i);
-               if (i==0)
-                   extension = "_all";
-               name = hShortAnalysis2ClusterHitPattern_1stCluster->GetName();
-               name.Append(extension);
-               if(verbosity>3) cout<<name<<endl;
-               if(i==0)
-                   histo1st_py= hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionY(name);
-               else{
-                   //              int bin = hShortAnalysis2ClusterHitPattern_1stCluster->GetYaxis()
-                   histo1st_py= hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionY(name,i,i);
-               }
-               name = hShortAnalysis2ClusterHitPattern_2ndCluster->GetName();
-               name.Append(extension);
-               if(verbosity>3)cout<<name<<endl;
+        hEdgeFittingAvrgCharge->GetYaxis()->SetTitle("Pulse Height /ADC");
+        TString title = "predicted Position ";
+        title.Append(TPlaneProperties::getCoordinateString(settings->getEdgePositionType(i)).c_str());
+        title.Append(" / #mum");
+        hEdgeFittingAvrgCharge->GetXaxis()->SetTitle(title);//"predicted Position X / #mum");
+        histSaver->SaveHistogram(hEdgeFittingAvrgCharge);
+        TH1F* hEdgeFittingAvrgCharge_pfx = (TH1F*)hEdgeFittingAvrgCharge->ProfileX();
+        if(hEdgeFittingAvrgCharge_pfx){
+            hEdgeFittingAvrgCharge_pfx->GetYaxis()->SetTitle("avrg. Charge / ADC");
+            TCutG *cut = this->settings->getEdgePosition(i);
+            name = "c";
+            name.Append(hEdgeFittingAvrgCharge_pfx->GetName());
+            TCanvas *c1 = new TCanvas(name,name);
+            hEdgeFittingAvrgCharge_pfx->Draw();
+            if(cut)cut->Draw();
+            histSaver->SaveCanvas(c1);
+            cout<<"Saved "<<c1->GetName()<<endl;
+            delete c1;
+        }
+        else
+            cout<<" Cannot create ProfileX" << endl;
+        TH1D* histo1st_py;
+        TH1D* histo2nd_py;
+        histSaver->SaveHistogram(hShortAnalysis2ClusterHitPattern_1stCluster);
+        histSaver->SaveHistogram(hShortAnalysis2ClusterHitPattern_2ndCluster);
+        for(int i = 0; i <=hShortAnalysis2ClusterHitPattern_1stCluster->GetNbinsX();i++){
+            TString extension = TString::Format("_pattern%d",i);
+            if (i==0)
+                extension = "_all";
+            name = hShortAnalysis2ClusterHitPattern_1stCluster->GetName();
+            name.Append(extension);
+            if(verbosity>3) cout<<name<<endl;
+            if(i==0)
+                histo1st_py= hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionY(name);
+            else{
+                //              int bin = hShortAnalysis2ClusterHitPattern_1stCluster->GetYaxis()
+                histo1st_py= hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionY(name,i,i);
+            }
+            name = hShortAnalysis2ClusterHitPattern_2ndCluster->GetName();
+            name.Append(extension);
+            if(verbosity>3)cout<<name<<endl;
 
-               if(i==0)
-                   histo2nd_py = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionY(name);
-               else
-                   histo2nd_py = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionY(name,i,i);
-               name = "h2ClusterAnalysis_ClusterPatterns";
-               name.Append(extension);
-               histSaver->SaveTwoHistos((string)name,histo1st_py,histo2nd_py);
-               histSaver->SaveHistogram(histo1st_py);
-               histSaver->SaveHistogram(histo2nd_py);
-               delete histo1st_py;
-               delete histo2nd_py;
-           }
-           name = "c2ClusterAnalysis_ClusterPatterns";
-           name.Append(appendix);
-           TH1D* histo1st_px = hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionX();//name);
-           TH1D* histo2nd_px = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionX();//name);
-           histSaver->SaveTwoHistos((string)name,histo1st_px,histo2nd_px);
-           histSaver->SaveHistogram(histo1st_px);
-           histSaver->SaveHistogram(histo2nd_px);
-           //      if(histo1st_px) delete histo1st_px;
-           //      if(histo2nd_px) delete histo2nd_px;
-       }
+            if(i==0)
+                histo2nd_py = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionY(name);
+            else
+                histo2nd_py = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionY(name,i,i);
+            name = "h2ClusterAnalysis_ClusterPatterns";
+            name.Append(extension);
+            histSaver->SaveTwoHistos((string)name,histo1st_py,histo2nd_py);
+            histSaver->SaveHistogram(histo1st_py);
+            histSaver->SaveHistogram(histo2nd_py);
+            delete histo1st_py;
+            delete histo2nd_py;
+        }
+        name = "c2ClusterAnalysis_ClusterPatterns";
+        name.Append(appendix);
+        TH1D* histo1st_px = hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionX();//name);
+        TH1D* histo2nd_px = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionX();//name);
+        histSaver->SaveTwoHistos((string)name,histo1st_px,histo2nd_px);
+        histSaver->SaveHistogram(histo1st_px);
+        histSaver->SaveHistogram(histo2nd_px);
+        //      if(histo1st_px) delete histo1st_px;
+        //      if(histo2nd_px) delete histo2nd_px;
+    }
 
-       //  char t; cin>>t;
-       //hNumberofClusters
-       histSaver->SaveHistogram(hNumberofClusters);
-       for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
-           hEventsvsChannelCombined->Add(hEventsvsChannel.at(i));
-       }
-       histSaver->SaveHistogram(hEventsvsChannelCombined);
-       //  vector<TH1*> hLandauSorted;
+    //  char t; cin>>t;
+    //hNumberofClusters
+    histSaver->SaveHistogram(hNumberofClusters);
+    for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
+        hEventsvsChannelCombined->Add(hEventsvsChannel.at(i));
+    }
+    histSaver->SaveHistogram(hEventsvsChannelCombined);
+    //  vector<TH1*> hLandauSorted;
 
-       for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
+    for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
 
-           pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
-           name = "c_";
-           name.Append(hLandau[i]->GetName());
+        pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
+        name = "c_";
+        name.Append(hLandau[i]->GetName());
 
-           Float_t factor = hLandau[i]->GetBinContent(hLandau[i]->GetMaximumBin());
-           factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
-           name.Append("_normalized");
-           histSaver->SaveTwoHistosNormalized((string)name,hLandau[i],hLandauStrip);
+        Float_t factor = hLandau[i]->GetBinContent(hLandau[i]->GetMaximumBin());
+        factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
+        name.Append("_normalized");
+        histSaver->SaveTwoHistosNormalized((string)name,hLandau[i],hLandauStrip);
 
-           Float_t max = hHitandSeedCount[i]->GetBinContent(hHitandSeedCount[i]->GetMaximumBin());
-           hHitandSeedCount[i]->Scale(1./max);
-           histSaver->SaveHistogram(hHitandSeedCount[i]);
+        Float_t max = hHitandSeedCount[i]->GetBinContent(hHitandSeedCount[i]->GetMaximumBin());
+        hHitandSeedCount[i]->Scale(1./max);
+        histSaver->SaveHistogram(hHitandSeedCount[i]);
 
-           name = "c_"+(TString)hPHvsChannel[i]->GetName();
-           TCanvas *c1 = new TCanvas(name,name);
-           name = "h"+(TString)hPHvsChannel[i]->GetName();
+        name = "c_"+(TString)hPHvsChannel[i]->GetName();
+        TCanvas *c1 = new TCanvas(name,name);
+        name = "h"+(TString)hPHvsChannel[i]->GetName();
 
-           Int_t min = channels.first-1;
-           max = channels.second+1;
-           Int_t bins = max-min;
-           TH2F* histo = new TH2F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax,bins,min,max);
-           c1->cd();
-           histo->Draw();
-           hPHvsChannel[i]->Draw("goff");
-           hPHvsChannel[i]->GetXaxis()->SetRangeUser(PulseHeightMin,PulseHeightMax);
-           hPHvsChannel[i]->GetXaxis()->SetLimits(PulseHeightMin,PulseHeightMax);
-           //hPHvsChannel[i]->GetXaxis()->SetRange(PulseHeightMin,PulseHeightMax);
-           hPHvsChannel[i]->GetXaxis()->SetRangeUser(PulseHeightMin,PulseHeightMax);
-           hPHvsChannel[i]->Draw("colzsame");
-           histSaver->SaveCanvas(c1);
-           histSaver->SaveHistogram(hPHvsChannel[i]);
-           //histSaver->SaveHistogram(hPHvsPredictedXPos.at(i));
-           Float_t maxChi2 = 12;
-           hChi2XChi2Y[i]->Draw("colz");
-           hChi2XChi2Y[i]->GetXaxis()->SetRangeUser(0,maxChi2);
-           hChi2XChi2Y[i]->GetYaxis()->SetRangeUser(0,maxChi2);
-           histSaver->SaveHistogram(hChi2XChi2Y[i]);
-           histSaver->SaveHistogram(hFidCutXvsFidCutY.at(i));
-           //histSaver->SaveHistogram(hPHvsPredictedChannel.at(i));
-           //histSaver->SaveHistogram(hFidCutXvsFidCutYvsCharge.at(i));
+        Int_t min = channels.first-1;
+        max = channels.second+1;
+        Int_t bins = max-min;
+        TH2F* histo = new TH2F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax,bins,min,max);
+        c1->cd();
+        histo->Draw();
+        hPHvsChannel[i]->Draw("goff");
+        hPHvsChannel[i]->GetXaxis()->SetRangeUser(PulseHeightMin,PulseHeightMax);
+        hPHvsChannel[i]->GetXaxis()->SetLimits(PulseHeightMin,PulseHeightMax);
+        //hPHvsChannel[i]->GetXaxis()->SetRange(PulseHeightMin,PulseHeightMax);
+        hPHvsChannel[i]->GetXaxis()->SetRangeUser(PulseHeightMin,PulseHeightMax);
+        hPHvsChannel[i]->Draw("colzsame");
+        histSaver->SaveCanvas(c1);
+        histSaver->SaveHistogram(hPHvsChannel[i]);
+        //histSaver->SaveHistogram(hPHvsPredictedXPos.at(i));
+        Float_t maxChi2 = 12;
+        hChi2XChi2Y[i]->Draw("colz");
+        hChi2XChi2Y[i]->GetXaxis()->SetRangeUser(0,maxChi2);
+        hChi2XChi2Y[i]->GetYaxis()->SetRangeUser(0,maxChi2);
+        histSaver->SaveHistogram(hChi2XChi2Y[i]);
+        histSaver->SaveHistogram(hFidCutXvsFidCutY.at(i));
+        //histSaver->SaveHistogram(hPHvsPredictedChannel.at(i));
+        //histSaver->SaveHistogram(hFidCutXvsFidCutYvsCharge.at(i));
 
-           //hFidCutXvsFidCutYvsMeanCharge
-//           ptrCanvasMean.at(i)->cd();
-           TCanvas *cc = new TCanvas();
-           *hFidCutXvsFidCutYvsMeanCharge.at(i) = (*hFidCutXvsFidCutYvsCharge.at(i)/(*hFidCutXvsFidCutYvsEvents.at(i)));
-           hFidCutXvsFidCutYvsMeanCharge.at(i)->SetEntries(hFidCutXvsFidCutYvsEvents.at(i)->Integral());
-           hFidCutXvsFidCutYvsMeanCharge.at(i)->Draw("COLZ");
-           hFidCutXvsFidCutYvsMeanCharge.at(i)->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-           TString hName  = TString::Format("cFidCutXvsFidCutYvsMeanCharge_%d_%d",channels.first,channels.second);
-           hName.Append(appendix);
-           cc->SetName(hName);
-           histSaver->SaveCanvas(cc);
-           delete cc;
+        //hFidCutXvsFidCutYvsMeanCharge
+        //           ptrCanvasMean.at(i)->cd();
+        TCanvas *cc = new TCanvas();
+        *hFidCutXvsFidCutYvsMeanCharge.at(i) = (*hFidCutXvsFidCutYvsCharge.at(i)/(*hFidCutXvsFidCutYvsEvents.at(i)));
+        hFidCutXvsFidCutYvsMeanCharge.at(i)->SetEntries(hFidCutXvsFidCutYvsEvents.at(i)->Integral());
+        hFidCutXvsFidCutYvsMeanCharge.at(i)->Draw("COLZ");
+        hFidCutXvsFidCutYvsMeanCharge.at(i)->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+        TString hName  = TString::Format("cFidCutXvsFidCutYvsMeanCharge_%d_%d",channels.first,channels.second);
+        hName.Append(appendix);
+        cc->SetName(hName);
+        histSaver->SaveCanvas(cc);
+        delete cc;
 
-           /*//hXdetvsYdetvsEvents
+        /*//hXdetvsYdetvsEvents
            ptrCanvasXdetvsYdetMeanCharge.push_back(new TCanvas());
            ptrCanvasXdetvsYdetMeanCharge.at(i)->cd();
            hFidCutXvsFidCutYvsMeanCharge.at(i) = (*hFidCutXvsFidCutYvsCharge.at(i)/(*hFidCutXvsFidCutYvsEvents.at(i)));
@@ -787,59 +860,70 @@ void TAnalysisOf3DShortAnalysis::saveHistos(TH1F* hLandauStrip) {
            hName  = TString::Format("cXdetvsYdetMeanCharge_%d_%d",channels.first,channels.second);
            ptrCanvasXdetvsYdetMeanCharge.at(i)->SetName(hName);
            histSaver->SaveCanvas(ptrCanvasXdetvsYdetMeanCharge[i]);
-            */
+         */
 
-       } //End of for loop
-       TCanvas* cCombinedMeanCharge = new TCanvas();
-       cCombinedMeanCharge->cd();
+    } //End of for loop
+    TCanvas* cCombinedMeanCharge = new TCanvas();
+    cCombinedMeanCharge->cd();
 
-       // no Fiducial Cuts Drawn
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(0));
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(1));
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(2));
-       name = "hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn";
-       name.Append(appendix);
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->SetTitle(name);
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-       cCombinedMeanCharge->SetName(name);
-       histSaver->SaveCanvas(cCombinedMeanCharge);
+    // no Fiducial Cuts Drawn
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(0));
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(1));
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->Add(hFidCutXvsFidCutYvsMeanCharge.at(2));
+    name = "hFidCutXvsFidCutYvsMeanChargeAllDetectorsNoFidDrawn";
+    name.Append(appendix);
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->SetTitle(name);
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    cCombinedMeanCharge->SetName(name);
+    histSaver->SaveCanvas(cCombinedMeanCharge);
 
-       // Selection Fiducial Cuts Drawn
-       name = "hFidCutXvsFidCutYvsMeanChargeAllDetectors";
-       name.Append(appendix);
-       settings->getSelectionFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge);
-       cCombinedMeanCharge->SetName(name);
-       histSaver->SaveCanvas(cCombinedMeanCharge);
+    // Selection Fiducial Cuts Drawn
+    name = "hFidCutXvsFidCutYvsMeanChargeAllDetectors";
+    name.Append(appendix);
+    settings->getSelectionFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge);
+    cCombinedMeanCharge->SetName(name);
+    histSaver->SaveCanvas(cCombinedMeanCharge);
 
-       // Edge F
-       cCombinedMeanCharge->Clear();
-       name = "hFidCutXvsFidCutYvsMeanChargeAllEdges";
-       name.Append(appendix);
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->SetTitle(name);
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
-       hFidCutXvsFidCutYvsMeanChargeAllDetectors->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    // Edge F
+    cCombinedMeanCharge->Clear();
+    name = "hFidCutXvsFidCutYvsMeanChargeAllEdges";
+    name.Append(appendix);
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->SetTitle(name);
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
+    hFidCutXvsFidCutYvsMeanChargeAllDetectors->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
 
-       settings->get3dEdgeFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge,true);
-       cCombinedMeanCharge->SetName(name);
-       histSaver->SaveCanvas(cCombinedMeanCharge);
+    settings->get3dEdgeFidCuts()->DrawFiducialCutsToCanvas(cCombinedMeanCharge,true);
+    cCombinedMeanCharge->SetName(name);
+    histSaver->SaveCanvas(cCombinedMeanCharge);
 
-       for ( UInt_t i = 0; i < settings->get3dEdgeFidCuts()->getNFidCuts(); i++){
-           cCombinedMeanCharge->Clear();
-           hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
-           settings->get3dEdgeFidCuts()->getFidCut(i+1)->DrawFiducialCutToCanvas(cCombinedMeanCharge,true);
-           TString name = "hFidCutXvsFidCutYvsMeanCharge_";
-           name.Append(settings->getEdgePositionName(i));
-           name.Append(appendix);
-           cCombinedMeanCharge->SetName(name);
-           histSaver->SaveCanvas(cCombinedMeanCharge);
-       }
+    for ( UInt_t i = 0; i < settings->get3dEdgeFidCuts()->getNFidCuts(); i++){
+        cCombinedMeanCharge->Clear();
+        hFidCutXvsFidCutYvsMeanChargeAllDetectors->Draw("COLZ");
+        settings->get3dEdgeFidCuts()->getFidCut(i+1)->DrawFiducialCutToCanvas(cCombinedMeanCharge,true);
+        TString name = "hFidCutXvsFidCutYvsMeanCharge_";
+        name.Append(settings->getEdgePositionName(i));
+        name.Append(appendix);
+        cCombinedMeanCharge->SetName(name);
+        histSaver->SaveCanvas(cCombinedMeanCharge);
+    }
 
-       for( UInt_t i=0; i < hFidCutXvsFidCutYClusters.size(); i++){
-           if (hFidCutXvsFidCutYClusters[i])
-               hFidCutXvsFidCutYClusters[i]->SetName(TString::Format("hFidCutXvsFidCutYClusters_%d",i));
-           histSaver->SaveHistogram((TH2F*)hFidCutXvsFidCutYClusters[i]);
-       }
+    for( UInt_t i=0; i < hFidCutXvsFidCutYClusters.size(); i++){
+        if (hFidCutXvsFidCutYClusters[i])
+            hFidCutXvsFidCutYClusters[i]->SetName(TString::Format("hFidCutXvsFidCutYClusters_%d",i));
+        histSaver->SaveHistogram((TH2F*)hFidCutXvsFidCutYClusters[i]);
+    }
+
+
+    //TODO FIX ME
+    //       if(settings->do3dShortAnalysis()){
+    //           TString name = TString::Format("hTransparentAnalysisTransparentChargeWithoutEdgeBadCellsComparison_DiamondPattern2_to_ClusterSize1");
+    //           hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[0]->SetLineColor(kRed);
+    //           histSaver->SaveTwoHistos((string)name,hLandau[1],hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[0]);
+    //
+    //           name = TString::Format("hTransparentAnalysisTransparentChargeWithoutEdgeBadCellsComparison_DiamondPattern2_to_ClusterSize1_normalized");
+    //           histSaver->SaveTwoHistosNormalized((string)name,hLandau[1],hTransparentAnalysisTransparentChargeBadCellsWithoutEdge[0]);
+    //       }
 
 }
 

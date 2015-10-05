@@ -30,6 +30,7 @@
 #include "TPaletteAxis.h"
 #include "TTracking.hh"
 
+//#include "THistogramManager.hh"
 #include "HistogrammSaver.class.hh"
 #include "TSettings.class.hh"
 
@@ -40,8 +41,12 @@ class TAnalysisOf3DShortAnalysis {
         void addEvent(TCluster* cluster, Float_t x_pred, Float_t y_pred, Float_t x_fid, Float_t y_fid, Float_t chi2x, Float_t chi2y);
         void initHistos();
         void saveHistos(TH1F* hLandauStrip);
-        void SetEventReader(TTracking* eventReader);
+        void setEventReader(TTracking* eventReader);
+        void setTransparentCluster(bool isTransparentCluster, TCluster* transparentCluster){
+            this->isTransparentCluster=isTransparentCluster;this->transparentCluster=transparentCluster;}
+        void setDiamondCluster(TCluster* diamondCluster){this->diamondCluster=diamondCluster;}
     private:
+//        THistogramManager histos;
         Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax,PulseHeightMaxMeanCharge,PulseHeightMinMeanCharge;
         vector <Float_t> vecPredDetX,vecPredDetY,vecPulseHeight,vecClusterSize;
         vector <Float_t> vecPH_Cluster1,vecPH_Cluster2,vecCh_Cluster2,vecCh_Cluster1;
@@ -54,13 +59,11 @@ class TAnalysisOf3DShortAnalysis {
         TH1F* hLandau3DWithoutColumns_subset;
         TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
         TH1F* hLandau3DWithColumns;
-        TCluster transparentCluster;
+        TCluster *transparentCluster;
         TCluster clusteredCluster;
         TCluster *diamondCluster;
-        int HitCount, SeedCount;
         vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
         int verbosity;
-        bool isTransparentCluster;
     private:
         void FillEdgeAlignmentHistos();
         void HitandSeedCount(TCluster* nCluster);//
@@ -73,7 +76,9 @@ class TAnalysisOf3DShortAnalysis {
         void SaveMeanChargeVector(); // exists
         void SaveEdgeDistributions(); //missing
         void Save2ClusterPlots(); //exists
+        bool isTransparentCluster;
         bool useCMN;
+        int HitCount, SeedCount;
         TTracking* eventReader;
         HistogrammSaver* histSaver;
         TSettings* settings;
