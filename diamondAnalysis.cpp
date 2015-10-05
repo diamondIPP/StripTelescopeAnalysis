@@ -158,6 +158,11 @@ int main(int argc, char ** argv) {
 		if (i+1 < RunParameters.size()) cout << ", ";
 	}
 	cout << " will be analysed.." << endl;
+	int bufsize = 300;
+	char buf[bufsize];
+	readlink("/proc/self/exe", buf, bufsize);
+	TString path = buf;
+	path = path(0,path.Last('/'));
 
 	if (!RunListOK) return 0;
 
@@ -346,6 +351,19 @@ int main(int argc, char ** argv) {
         }
         cout<<"DONE with Analysis of Run "<< RunParameters[i].getRunNumber();
         cout<<": "<<i+1<<"/"<<RunParameters.size()<<endl;
+        cout<<RunParameters[i].getOutputDir()<<endl;
+        cout<<"Bla"<<std::endl;
+
+        //settings->getAbsoluteOuputPath(true)<<"\""<<std::endl;
+        //find /scratch/analysis/output/1* -type d -exec cp -v /scratch/analysis/output/index.php {}
+        TString out_path = RunParameters[i].getOutputDir();
+        cout<<out_path<<endl;
+        out_path =out_path+TString::Format("/%d",RunParameters[i].nRunNumber);
+        cout<<out_path<<endl;
+        cout<<endl;
+        TString cmd = TString("find ")+path+ TString(" -type d -exec cp -v ")+out_path+TString("/index.php {} \\;");
+        cout<<"Copying indexfile into all subdirectories: "<<cmd<<endl;
+        system(cmd);
    }
    cout<<"DONE with Analysis of all "<<RunParameters.size()<<" Runs from RunList.ini"<<endl;
    cout<<"total time for all analysis:\n\t"<<flush;
