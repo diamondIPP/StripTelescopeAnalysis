@@ -7,7 +7,7 @@
 
 #include <TAnalysisOf3DShortAnalysis.hh>
 
-TAnalysisOf3DShortAnalysis::TAnalysisOf3DShortAnalysis(TSettings *settings,HistogrammSaver *histSaver) {
+TAnalysisOf3DShortAnalysis::TAnalysisOf3DShortAnalysis(TSettings *settings,HistogrammSaver *histSaver,bool bTransAna) {
     // TODO Auto-generated constructor stub
     this->settings = settings;
     this->histSaver = histSaver;
@@ -25,6 +25,11 @@ TAnalysisOf3DShortAnalysis::TAnalysisOf3DShortAnalysis(TSettings *settings,Histo
     vecEdgePredY.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
     vecEdgePulseHeight.resize(settings->get3dEdgeFidCuts()->getNFidCuts());
 
+    this->bTransAna = bTransAna;
+    if (this->bTransAna)
+        appendix ="_trans";
+    else
+        appendix ="";
 }
 
 TAnalysisOf3DShortAnalysis::~TAnalysisOf3DShortAnalysis() {
@@ -37,9 +42,6 @@ void TAnalysisOf3DShortAnalysis::setEventReader(TTracking* eventReader) {
 }
 
 void TAnalysisOf3DShortAnalysis::initHistos() {
-    TString appendix ="";
-    if (settings->do3dTransparentAnalysis())
-        appendix ="_trans";
     cout<<"[TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos()]"<<endl;
     //Universal histograms
     TString name = "hRelativeChargeTwoClustersX";
@@ -314,16 +316,11 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
     cout<<"hLandau3DWO"<<endl;
     name = "hLandau3DWO";
     name.Append(appendix);
-    cout<<0<<endl;
     cout<<PulseHeightBins<< " "<<PulseHeightMin<<" "<<PulseHeightMax<<" "<<name<<endl;
     hLandau3DWithoutColumns = new TH1F(name,"3D Phantom",PulseHeightBins,PulseHeightMin,PulseHeightMax);
-    cout<<1<<endl;
     hLandau3DWithoutColumns->GetXaxis()->SetTitle("charge / ADC");
-    cout<<2<<endl;
     hLandau3DWithoutColumns->GetYaxis()->SetTitle("number of entries #");
-    cout<<3<<endl;
     hLandau3DWithoutColumns->SetLineColor(kRed);
-    cout<<4<<endl;
     hLandau3DWithoutColumns->SetLineStyle(7);
 
     cout<<"end hLandau3DWO"<<endl;
@@ -332,16 +329,11 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
     TString name2="hLandau3DWO_subset";
     name2.Append(appendix);
     name = "hLandau3DWO_subset";
-    cout<<0<<endl;
     name.Append(appendix);
     hLandau3DWithoutColumns_subset = new TH1F(name,"3D Phantom, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
-    cout<<1<<endl;
     hLandau3DWithoutColumns_subset->GetXaxis()->SetTitle("charge / ADC");
-    cout<<2<<endl;
     hLandau3DWithoutColumns_subset->GetYaxis()->SetTitle("number of entries #");
-    cout<<3<<endl;
     hLandau3DWithoutColumns_subset->SetLineColor(kRed);
-    cout<<4<<endl;
     hLandau3DWithoutColumns_subset->SetLineWidth(2);
     cout<<"end init"<<endl;
 
@@ -370,7 +362,7 @@ void TAnalysisOf3DShortAnalysis::addEvent(TCluster* cluster, Float_t x_pred, Flo
     yFid = y_fid;
     xChi2 = chi2x;
     yChi2 = chi2y;
-    if(!settings->do3dTransparentAnalysis()){
+    if(!bTransAna){
         if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
             return;
 
@@ -483,7 +475,7 @@ void TAnalysisOf3DShortAnalysis::HitandSeedCount(TCluster* nCluster) {
 }
 
 void TAnalysisOf3DShortAnalysis::Analyse1Cluster(UInt_t clusterNo){
-    if(!settings->do3dTransparentAnalysis()){
+    if(!bTransAna){
         clusteredCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),clusterNo);
         diamondCluster = &clusteredCluster;
         if(diamondCluster->isSaturatedCluster())
@@ -515,7 +507,7 @@ void TAnalysisOf3DShortAnalysis::Analyse1Cluster(UInt_t clusterNo){
 
         if(HighestSignalChannel<=channels.second && HighestSignalChannel>=channels.first){
 
-            if(!settings->do3dTransparentAnalysis()){
+            if(!bTransAna){
             }
             if(!settings->getSelectionFidCuts()->getFidCut(i+1)->IsInFiducialCut(xFid,yFid))
                 return;
@@ -530,7 +522,7 @@ void TAnalysisOf3DShortAnalysis::Analyse1Cluster(UInt_t clusterNo){
             //            vecPHDiamondHit[i]->push_back(charge);
             hFidCutXvsFidCutY[i]->Fill(xFid,yFid);
 
-            if(!settings->do3dTransparentAnalysis()){
+            if(!bTransAna){
                 hHitandSeedCount[i]->Fill(HitCount,SeedCount);
                 hChi2XChi2Y[i]->Fill(xChi2, yChi2);
             }
@@ -620,10 +612,6 @@ void TAnalysisOf3DShortAnalysis::FillEdgeDistributions(Float_t clusterCharge){
 }
 
 void TAnalysisOf3DShortAnalysis::saveHistos(TH1F* hLandauStrip) {
-    TString appendix ="";
-    if (settings->do3dTransparentAnalysis())
-        appendix ="_trans";
-
     SaveMeanChargeVector();
     Save2ClusterPlots();
     vector<Float_t> xPred;
@@ -928,13 +916,12 @@ void TAnalysisOf3DShortAnalysis::saveHistos(TH1F* hLandauStrip) {
 }
 
 void TAnalysisOf3DShortAnalysis::SaveMeanChargeVector() {
-    TString appendix ="";
     cout<<"SaveMeanChargeVector"<<endl;
     cout<<"vecPredDetX_ShortAna    "<<vecPredDetX.size()<<endl;
     cout<<"vecPredDetY_ShortAna    "<<vecPredDetY.size()<<endl;
     cout<<"vecPulseHeight_ShortAna "<<vecPulseHeight.size()<<endl;
 
-    if (settings->do3dTransparentAnalysis())
+    if (bTransAna)
         cout<<"Create Project3dProfile for hChargeDistribution3D ..."<<flush;
 
     TProfile2D* hMeanCharge = histSaver->CreateProfile2D("hChargeDistribution3D",vecPredDetX,vecPredDetY,vecPulseHeight,1024,1024);

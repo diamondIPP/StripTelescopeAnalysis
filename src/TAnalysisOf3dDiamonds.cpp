@@ -49,8 +49,19 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
     maxClusterSize3d = 5;
     useCMN = true;
-    shortAnalysis = new TAnalysisOf3DShortAnalysis(settings,histSaver);
+    shortAnalysis = new TAnalysisOf3DShortAnalysis(settings,histSaver,false);
     shortAnalysis->setEventReader(eventReader);
+    shortAnaTrans = new TAnalysisOf3DShortAnalysis(settings,histSaver,true);
+    shortAnaTrans->setEventReader(eventReader);
+    longAnalysis = new TAnalysisOf3DLongAnalysis(settings,histSaver,false);
+    longAnalysis->setEventReader(eventReader);
+    longAnaTrans = new TAnalysisOf3DLongAnalysis(settings,histSaver,false);
+    longAnaTrans->setEventReader(eventReader);
+
+    stripAnalysis = new TAnalysisOf3DStrip(settings,histSaver,false);
+    stripAnaTrans = new TAnalysisOf3DStrip(settings,histSaver,true);
+    stripAnalysis->setEventReader(eventReader);
+    stripAnaTrans->setEventReader(eventReader);
 }
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
@@ -59,6 +70,8 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
     if(histSaver!=0)   delete histSaver;
     //if(htmlLandau!=0)  delete htmlLandau;
     settings->goToOutputDir();
+//    delete stripAnalysis;
+//    delete stripAnaTrans;
 }
 
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
@@ -93,24 +106,38 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
         else
             isTransparentCluster = false;
         shortAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
-        StripAnalysis();
+        shortAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
+        longAnalysis->setEventNo(nEvent);
+        longAnaTrans->setEventNo(nEvent);
+
+        stripAnalysis->setEventNo(nEvent);
+        stripAnaTrans->setEventNo(nEvent);
+        longAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
+        longAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
+        stripAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
+        stripAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
+        stripAnalysis->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
+        stripAnaTrans->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
         if(settings->do3dShortAnalysis() == 1){
             shortAnalysis->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
+            shortAnaTrans->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
         }
         if(settings->do3dLongAnalysis() == 1){
+            longAnalysis->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
+            longAnaTrans->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
             LongAnalysis();
         }
     }
     cout<< "ENTRIES: "<<clusteredAnalysis->getEntries()<<endl;
     createTreeTestHistos();
     clusteredAnalysis->cellAnalysisTree->SaveAs("analysis3d.root");
-    TFile *file = new TFile("analysis3d-2.root","RECREATE");
-    file->cd();
-    TTree* tree = (TTree*)clusteredAnalysis->cellAnalysisTree->Clone("analysisTree");
-    tree->Write();
-    cout<<"tree: "<<tree->GetEntries()<<endl;
-    cout<<gSystem->pwd()<<" "<<file->GetPath()<<" "<<file->GetName()<<endl;
-    file->Close();
+//    TFile *file = new TFile("analysis3d-2.root","RECREATE");
+//    file->cd();
+//    TTree* tree = (TTree*)clusteredAnalysis->cellAnalysisTree->Clone("analysisTree");
+//    tree->Write();
+//    cout<<"tree: "<<tree->GetEntries()<<endl;
+//    cout<<gSystem->pwd()<<" "<<file->GetPath()<<" "<<file->GetName()<<endl;
+//    file->Close();
     saveHistos();
 }
 
@@ -162,47 +189,6 @@ bool TAnalysisOf3dDiamonds::eventValid(){
     return true;
 }
 
-/**
- * Analysis of events with hit in strip detector.
- * Checks if chi2 cut is fullfilled.
- * checks if right selection/area is hitted
- * checks if only one cluster exists
- * checks if is valid Cluster
- * checks that cluster is not saturated
- */
-void TAnalysisOf3dDiamonds::StripAnalysis() {
-    if(!settings->do3dTransparentAnalysis()){
-        if(!eventReader->getNDiamondClusters())
-            return;
-        clusteredCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
-        diamondCluster = &clusteredCluster;
-
-    }
-    else{
-        if(!isTransparentCluster)
-            return;
-        diamondCluster = & transparentCluster;
-    }
-    shortAnalysis->setDiamondCluster(diamondCluster);
-    if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
-        return;
-    Int_t stripDetector = 1;
-    if(settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY)!=stripDetector)
-        return;
-    if(eventReader->getNDiamondClusters()!=1)
-        return;
-    int areaStripDetector = 0;
-    if (!settings->isClusterInDiaDetectorArea(diamondCluster,areaStripDetector) ){
-        return;
-    }
-    if( !settings->diamondPattern.isValidCluster(diamondCluster)){
-        return;
-    }
-    if (diamondCluster->isSaturatedCluster())
-        return;
-    hLandauStrip->Fill(diamondCluster->getPositiveCharge());
-    hLandauStripFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
-}
 
 void TAnalysisOf3dDiamonds::LongAnalysis_checkClusteredAnalysis(){
 
@@ -296,6 +282,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     }
     shortAnalysis->setDiamondCluster(diamondCluster);
+    shortAnaTrans->setDiamondCluster(diamondCluster);
     //if (nEvent>=10000) cout<<nEvent<<"Print 6.3"<<endl;
     LongAnalysis_FillResolutionPlots();
 //    if (settings->do3dTransparentAnalysis() && !validTransparentAnalysis)
@@ -336,9 +323,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
     //	hDetXvsDetY3DEvents->Fill(xPredDet,yPredDet,1);
     //analyse Good Cells
-    if(settings->IsGoodCell(3,cellNo)){
-        this->LongAnalysis_FillGoodCellsLandaus(charge);
-    }
     ///*
     //if (nEvent>=10000) cout<<nEvent<<"Print 6.9"<<endl;
      if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)==3){
@@ -1515,6 +1499,9 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 }
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
+    cout<<"Save SaveLongAnalysisHistos"<<std::endl;
+    longAnalysis->saveHistos(stripAnalysis->getLandau(),hLandau3DWithoutColumns_subset_no_negative);
+    longAnaTrans->saveHistos(stripAnaTrans->getLandau(),hLandau3DWithoutColumns_subset_no_negative);
     LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps();
     //	LongAnalysis_SaveCellsOverlayMeanCharge();
     if(!settings->do3dTransparentAnalysis()){
@@ -1671,9 +1658,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     TString appendix ="";
-    if (settings->do3dTransparentAnalysis())
+    TH1F* hStrip;
+    if (settings->do3dTransparentAnalysis()){
         appendix = "_trans";
-    TH1F* hStrip = (TH1F*)hLandauStrip->Clone();
+        hStrip = (TH1F*)stripAnaTrans->getLandau()->Clone();
+    }
+    else
+        hStrip = (TH1F*)stripAnalysis->getLandau()->Clone();
     hStrip->SetLineStyle(2);
     histSaver->SaveHistogram(hLandau3DWithColumns);
     histSaver->SaveHistogram(hLandau3DWithoutColumns);
@@ -1687,7 +1678,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     TString name = "sAllPulseHeigthDistributions";
     name.Append(appendix);
     THStack sAllPulseHeigthDistributions(name,name);
-    sAllPulseHeigthDistributions.Add(hLandauStrip);
+    sAllPulseHeigthDistributions.Add(hStrip);
     sAllPulseHeigthDistributions.Add(hLandau3DWithColumns);
     sAllPulseHeigthDistributions.Add(hLandau3DWithoutColumns);
     sAllPulseHeigthDistributions.Add(hLandau3DWithoutColumns_subset);
@@ -1770,7 +1761,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradin
     hLongAnalysisQuarterFluctuations = histSaver->GetHistoBinedInCells(name,2);
     cout<<"LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors"<<endl;
     cout<<" Criteria: "<<quarterFailCriteriaTyp<<endl;
-    cout << " Mean of Landau - Strip:      " << (hLandauStrip->GetMean()) <<endl;
+    cout << " Mean of Landau - Strip:      " << (stripAnaTrans->getLandau()->GetMean())
+            <<" / "<< (stripAnalysis->getLandau()->GetMean()) <<endl;
     vecQuarterCellsPassFail.clear();
     vecQuarterCellsPassFail.resize(settings->GetNCells3d());
     vector<vector<Float_t> > vecQuarterCellsFluctuation;
@@ -2495,28 +2487,32 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
     hLandauGoodCells->Merge(listGoodCells);
     //    histSaver->SaveHistogram(hLandauGoodCells);
 
-
+    TH1F* hStrip;
+    if (settings->do3dTransparentAnalysis())
+        hStrip = stripAnaTrans->getLandau();
+    else
+        hStrip = stripAnalysis->getLandau();
     cout<<"hLandauGoodCells: "<<hLandauGoodCells->GetEntries()<<endl;
-    cout<<"hLandauStrip:     "<<hLandauStrip->GetEntries()<<endl;
+    cout<<"hLandauStrip:     "<<hStrip->GetEntries()<<endl;
 
     Float_t factor = hLandauGoodCells->GetBinContent(hLandauGoodCells->GetMaximumBin());
-    factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
+    factor/= (Float_t) hStrip->GetBinContent(hStrip->GetMaximumBin());
     name = "cLandauGoodCells";
     name.Append(appendix);
-    histSaver->SaveTwoHistos(name,hLandauGoodCells,hLandauStrip,factor,"right");
+    histSaver->SaveTwoHistos(name,hLandauGoodCells,hStrip,factor,"right");
 
     name = "cLandauGoodCellsNormalized";
     name.Append(appendix);
-    histSaver->SaveTwoHistosNormalized(name,hLandauGoodCells,hLandauStrip,1,"right");
+    histSaver->SaveTwoHistosNormalized(name,hLandauGoodCells,hStrip,1,"right");
 
     factor = hLandauBadCells->GetBinContent(hLandauBadCells->GetMaximumBin());
-    factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
+    factor/= (Float_t) hStrip->GetBinContent(hStrip->GetMaximumBin());
     name = "cLandauBadCells";
     name.Append(appendix);
-    histSaver->SaveTwoHistos(name,hLandauBadCells,hLandauStrip,factor,"right");
+    histSaver->SaveTwoHistos(name,hLandauBadCells,hStrip,factor,"right");
     name = "cLandauBadCellsNormalized";
     name.Append(appendix);
-    histSaver->SaveTwoHistosNormalized(name,hLandauBadCells,hLandauStrip,1,"right");
+    histSaver->SaveTwoHistosNormalized(name,hLandauBadCells,hStrip,1,"right");
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
@@ -3606,7 +3602,8 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hValidEventsDetSpace->GetXaxis()->SetTitle("#it{X} / #mum");
     hValidEventsDetSpace->GetYaxis()->SetTitle("#it{Y} / #mum");
     hValidEventsDetSpace->GetZaxis()->SetTitle("number of entries #");
-    InitialiseStripAnalysisHistos();
+    stripAnalysis->initHistos();
+    stripAnaTrans->initHistos();
     name = "hLandau3D";
     name.Append(appendix);
     hLandau3DWithColumns = new TH1F(name,"3D",PulseHeightBins,PulseHeightMin,PulseHeightMax);
@@ -3645,9 +3642,12 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 
     if(settings->do3dShortAnalysis() == 1){
         shortAnalysis->initHistos();
+        shortAnaTrans->initHistos();
     }
     if(settings->do3dLongAnalysis() == 1){
         initialiseLongAnalysisHistos();
+        longAnalysis->initHistos();
+        longAnaTrans->initHistos();
     }
     if(settings->do3dTransparentAnalysis() == 1){
         initialiseTransparentAnalysisHistos();
@@ -3661,10 +3661,12 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     }
     histSaver->SaveHistogram(hValidEventsDetSpace);
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
-    SaveStripAnalysisHistos();
+    stripAnalysis->saveHistos();
+    stripAnaTrans->saveHistos();
     // Save
     if(settings->do3dShortAnalysis() == 1){
-        shortAnalysis->saveHistos(hLandauStrip);
+        shortAnalysis->saveHistos(stripAnalysis->getLandau());
+        shortAnaTrans->saveHistos(stripAnaTrans->getLandau());
     }
     if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
 }
@@ -3701,31 +3703,6 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
         appendix ="_trans";
     name.Append(appendix);
     hNegativeCharges = new TH1F(name,name,8192,-4096,4096);
-}
-
-void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
-    TString appendix ="";
-    if (settings->do3dTransparentAnalysis())
-        appendix ="_trans";
-    TString name = "hLandauStrip";
-    name.Append(appendix);
-    hLandauStrip =  new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax);
-    hLandauStrip->GetXaxis()->SetTitle("charge / ADC");
-    hLandauStrip->GetYaxis()->SetTitle("number of entries #");
-    hLandauStrip->SetLineColor(kBlue);
-
-    name = "hLandauStripFidCutXvsFidCutY";
-    hLandauStripFidCutXvsFidCutY = new TH2F(name,name,
-            213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
-            160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
-    hLandauStripFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
-    hLandauStripFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
-    hLandauStripFidCutXvsFidCutY->GetZaxis()->SetTitle("Charge ADC");
-}
-
-void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
-    histSaver->SaveHistogram(hLandauStrip);
-    histSaver->SaveHistogram(hLandauStripFidCutXvsFidCutY);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
@@ -4231,7 +4208,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
     if ( !settings->do3dTransparentAnalysis())
         return;
     TAnalysisOfAnalysisDifferences* differences = new TAnalysisOfAnalysisDifferences(settings,histSaver,"good");
-    differences->setStripHistogram(this->hLandauStrip);
+    differences->setStripHistogram(stripAnaTrans->getLandau());
     differences->setClusteredMap(&mapClusteredAnalysisGoodCells);
     differences->setTransparentMap(&mapTransparentAnalysisGoodCells);
     differences->setPredictedPositions(&mapPredictedPositionsGoodCells);
@@ -4240,7 +4217,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
     delete differences;
 
     differences = new TAnalysisOfAnalysisDifferences(settings,histSaver,"all");
-    differences->setStripHistogram(this->hLandauStrip);
+    differences->setStripHistogram(stripAnaTrans->getLandau());
     differences->setClusteredMap(&mapClusteredAnalysisAllCells);
     differences->setTransparentMap(&mapTransparentAnalysisAllCells);
     differences->setPredictedPositions(&mapPredictedPositionsAllCells);

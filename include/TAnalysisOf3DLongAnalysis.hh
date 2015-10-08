@@ -27,19 +27,68 @@
 #include "TMultiGraph.h"
 #include "TStopwatch.h"
 
+#include "TTracking.hh"
 #include "HistogrammSaver.class.hh"
 #include "TSettings.class.hh"
+#include "TAnalysisOf3DResolutionStudies.hh"
+#include "TAnalysisOf3DGoodCellsLandau.hh"
 
-class TAnalysisOf3D_LongAnalysis {
+class TAnalysisOf3DLongAnalysis {
     public:
-        TAnalysisOf3D_LongAnalysis(TSettings *settings,HistogrammSaver *histSaver);
-        virtual ~TAnalysisOf3D_LongAnalysis();
-        void addEvent(TCluster* cluster, Float_t x_pred, Float_t y_pred, Float_t x_fid, Float_t y_fid);
+        TAnalysisOf3DLongAnalysis(TSettings *settings,HistogrammSaver *histSaver,bool bTransAna);
+        virtual ~TAnalysisOf3DLongAnalysis();
+        void addEvent(TCluster* cluster, Float_t x_pred, Float_t y_pred, Float_t x_fid, Float_t y_fid,Float_t chi2x, Float_t chi2y);
         void initHistos();
-        void saveHistos();
+        void saveHistos(TH1F* hLandauStrip,TH1F* hLandauPhantom);
+        void setEventReader(TTracking* eventReader){this->eventReader = eventReader;}
+        void setTransparentCluster(bool isTransparentCluster, TCluster* transparentCluster);
+        void setDiamondCluster(TCluster* diamondCluster){this->diamondCluster=diamondCluster;}
+        void setEventNo(UInt_t nEvent){this->nEvent=nEvent;}
     private:
+        void checkClusteredAnalysis();
+        void checkTransparentAnalysis();
+        void FillResolutionPlots();
+    private:
+        TAnalysisOf3DResolutionStudies* resolutionStudy;
+        TAnalysisOf3DGoodCellsLandau* goodCellsLandau;
+        vector<TH1F*> vecHResolutionPerCell_maxValue;
+        vector<TH1F*> vecHResolutionPerCell_chargeWeighted;
+        vector<TH1F*> vecHResolutionPerCell_highest2Centroid;
+        map<Int_t, TCluster> mapClusteredAnalysisGoodCells;
+        map<Int_t, TCluster> mapTransparentAnalysisGoodCells;
+        map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsGoodCells;
+        map<Int_t, TCluster> mapClusteredAnalysisAllCells;
+        map<Int_t, TCluster> mapTransparentAnalysisAllCells;
+        map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsAllCells;
+        TH2D* hNegativeChargePosition;
+        TH1F* hNegativeCharges;
+        TH2F* hInvalidCellNo;
+        TH2F* hInvalidCluster;
+        TH2F* hValidEventsDetSpace;
+        TProfile2D* hPulseHeightVsDetectorHitPostionXY;
+        TH1F* hLandauGoodCellsWithoutEdges;
+        TH1F* hLandauGoodCellsWithoutColumns;
+        TH1F* hLandauGoodCells;
+
+    private:
+        UInt_t nEvent;
+        Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax,PulseHeightMaxMeanCharge,PulseHeightMinMeanCharge;
+        UInt_t subjectDetector;
+        UInt_t subjectPlane;
+        bool useCMN;
+        bool isTransparentCluster;
+        Int_t verbosity;
+        Float_t chi2x, chi2y, predx, predy, fidx,fidy;
         HistogrammSaver* histSaver;
         TSettings* settings;
+        bool bTransAna;
+        TString appendix;
+        TTracking* eventReader;
+        TCluster *transparentCluster;
+        TCluster clusteredCluster;
+        TCluster *diamondCluster;
+        bool validClusteredAnalysis;
+        bool validTransparentAnalysis;
 
 };
 

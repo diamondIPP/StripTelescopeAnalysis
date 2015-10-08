@@ -361,7 +361,7 @@ int main(int argc, char ** argv) {
         out_path =out_path+TString::Format("/%d",RunParameters[i].nRunNumber);
         cout<<out_path<<endl;
         cout<<endl;
-        TString cmd = TString("find ")+path+ TString(" -type d -exec cp -v ")+out_path+TString("/index.php {} \\;");
+        TString cmd = TString("find ")+out_path+ TString(" -type d -exec cp ")+path+TString("/index.php {} \\;");
         cout<<"Copying indexfile into all subdirectories: "<<cmd<<endl;
         system(cmd);
    }

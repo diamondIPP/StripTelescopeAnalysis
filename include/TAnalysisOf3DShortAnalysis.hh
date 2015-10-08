@@ -36,7 +36,7 @@
 
 class TAnalysisOf3DShortAnalysis {
     public:
-        TAnalysisOf3DShortAnalysis(TSettings *settings,HistogrammSaver *histSaver);
+        TAnalysisOf3DShortAnalysis(TSettings *settings,HistogrammSaver *histSaver,bool bTransAna=false);
         virtual ~TAnalysisOf3DShortAnalysis();
         void addEvent(TCluster* cluster, Float_t x_pred, Float_t y_pred, Float_t x_fid, Float_t y_fid, Float_t chi2x, Float_t chi2y);
         void initHistos();
@@ -46,6 +46,7 @@ class TAnalysisOf3DShortAnalysis {
             this->isTransparentCluster=isTransparentCluster;this->transparentCluster=transparentCluster;}
         void setDiamondCluster(TCluster* diamondCluster){this->diamondCluster=diamondCluster;}
     private:
+        bool bTransAna;
 //        THistogramManager histos;
         Int_t PulseHeightBins, PulseHeightMin, PulseHeightMax,PulseHeightMaxMeanCharge,PulseHeightMinMeanCharge;
         vector <Float_t> vecPredDetX,vecPredDetY,vecPulseHeight,vecClusterSize;
@@ -53,6 +54,7 @@ class TAnalysisOf3DShortAnalysis {
         Float_t xPred,yPred;
         Float_t xFid,yFid;
         Float_t xChi2, yChi2;
+        TString appendix;
 
         TH1F* hLandau3DWithoutColumns;
         TH2F* hLandau3DWithoutColumnsFidCutXvsFidCutY;

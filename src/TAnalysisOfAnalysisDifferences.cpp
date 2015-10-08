@@ -21,7 +21,6 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
     negChargeCut = settings->getNegativeChargeCut();
     this->extension = "_"+extension;
     hPhantomLandau = 0;
-
 }
 
 TAnalysisOfAnalysisDifferences::~TAnalysisOfAnalysisDifferences() {
@@ -227,8 +226,10 @@ void TAnalysisOfAnalysisDifferences::AnalyseOnlyTransparentEvent() {
 
 void TAnalysisOfAnalysisDifferences::set3DPhantomLandau(TH1F* hPhantomLandau) {
     this->hPhantomLandau = hPhantomLandau;
-    hPhantomLandau->SetName("hPhantom");
-    hPhantomLandau->SetTitle("Phantom");
+    if (!this->hPhantomLandau)
+        return;
+    this->hPhantomLandau->SetName("hPhantom");
+    this->hPhantomLandau->SetTitle("Phantom");
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyClusteredEvent() {
@@ -359,7 +360,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     hs2->Draw("");
     if(hs2->GetXaxis())hs2->GetXaxis()->SetTitle("charge / ADC");
     if(hs2->GetYaxis())hs2->GetYaxis()->SetTitle("number of entries - normalized");
-    histSaver->SaveStack(hs2,"nostack",true,false);
+//    histSaver->SaveStack(hs2,"nostack",true,false);
 
     name = "stack_NoNegativeCharge_PulseHeight_Comparision_scaled"+extension;
     THStack *hs3 = new THStack(name,name);

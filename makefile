@@ -32,7 +32,8 @@ LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib $(DEBUG) $(LLABLDFLAGS) -fPIC -Wall -
 
 
 LIBFILES3D		:=  TAnalysisOf3dDiamonds.o TCellAnalysisClass.o TAnalysisOfAnalysisDifferences.o TAvrgChargePerBinMonteCarlo.o
-LIBFILES3D		+=  TAnalysisOf3DShortAnalysis.o
+LIBFILES3D		+=  TAnalysisOf3DShortAnalysis.o TAnalysisOf3DLongAnalysis.o TAnalysisOf3DResolutionStudies.o TAnalysisOf3DGoodCellsLandau.o
+LIBFILES3D		+=  TAnalysisOf3DStripAnalysis.o
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
 LIBFILES		+=  TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o 
@@ -69,13 +70,15 @@ all: diamondAnalysis
 #		
 #        #
         
-$(PROGS): $(LIBFILES)
+        
+$(PROGS): $(LIBFILES)  diamondAnalysis.cpp diamondAnalysis.h
         #
         # linking $@
         #
-        # Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
-		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
-		@echo  "\n\nPlease do: export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:~/lib"
+        # Please do: export LD_LIBRARY_PATH+=:~/lib
+		#$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
+		$(LD) $(LIBFILES) $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
+		@echo  "Please do: export LD_LIBRARY_PATH+=:~/lib"
 
 
 libTEvent.so: $(ROOTLIBFILES)	

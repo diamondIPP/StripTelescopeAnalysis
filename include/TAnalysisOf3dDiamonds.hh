@@ -32,7 +32,6 @@
 #include "TAnalysisOfAnalysisDifferences.hh"
 #include "LandauGaussFit.hh"
 #include "TAvrgChargePerBinMonteCarlo.hh"
-//#include "TAnalysisOf3D_LongAnalysis.hh"
 
 #include "TADCEventReader.hh"
 #include "TTracking.hh"
@@ -43,6 +42,8 @@
 #include "THStack.h"
 #include "TPaletteAxis.h"
 #include "TAnalysisOf3DShortAnalysis.hh"
+#include "TAnalysisOf3DLongAnalysis.hh"
+#include "TAnalysisOf3DStripAnalysis.hh"
 
 using namespace std;
 
@@ -60,17 +61,14 @@ private:
 	void initialiseHistos();
 	void initialiseLongAnalysisHistos();
 	void initialiseTransparentAnalysisHistos();
-	void InitialiseStripAnalysisHistos();
 
 	void saveHistos();
 	void SaveLongAnalysisHistos();
 	void SaveLongAnalysisHistos2();
 	void saveTransparentAnalysisHistos();
-	void SaveStripAnalysisHistos();
 
 	void LongAnalysis();
 	bool TransparentAnalysis();
-	void StripAnalysis();
 
     TCluster *diamondCluster;
     TCluster transparentCluster;
@@ -97,7 +95,12 @@ private:
 //	int RemoveEdgeClusters(TCluster* nCluster,  int nDetector);
 	vector<Float_t> LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus);
 private:
-	TAnalysisOf3DShortAnalysis *shortAnalysis;
+	TAnalysisOf3DShortAnalysis* shortAnalysis;
+	TAnalysisOf3DShortAnalysis* shortAnaTrans;
+    TAnalysisOf3DLongAnalysis* longAnalysis;
+    TAnalysisOf3DLongAnalysis* longAnaTrans;
+    TAnalysisOf3DStrip* stripAnalysis;
+    TAnalysisOf3DStrip* stripAnaTrans;
 private:
 	void MakeGhostCluster(TCluster *diamondCluster,Int_t clusterSize);
 	void LongAnalysisSaveCellAndQuaterNumbering();
@@ -111,12 +114,12 @@ private:
 	void LongAnalysis_FillResolutionPlots();
 	void LongAnalysis_InitResolutionPlots();
 	void LongAnalysis_CreateResolutionPlots();
+	void LongAnalysis_SaveGoodCellsLandaus();
+	void LongAnalysis_InitGoodCellsLandaus();
+	void LongAnalysis_FillGoodCellsLandaus(Float_t charge);
 	void LongAnalysis_CreateResolutionPlots(vector<TH1F*> *vec,TString kind);
 	void LongAnalysis_SaveRawPulseHeightPlots();
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
-	void LongAnalysis_InitGoodCellsLandaus();
-	void LongAnalysis_FillGoodCellsLandaus(Float_t charge);
-	void LongAnalysis_SaveGoodCellsLandaus();
 	void LongAnalysis_SaveDeadCellProfile();
 	void LongAnalysis_SaveCellsOverlayMeanCharge();
 	void LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge();
@@ -149,12 +152,10 @@ private:
 	bool useCMN;
 private:
     TCluster GhostCluster;
-	TH1F* hLandauStrip;
 	TH1F* hLandau3DWithColumns;
 	TH1F* hLandau3DWithoutColumns;
     TH1F* hLandau3DWithoutColumns_subset;
     TH1F* hLandau3DWithoutColumns_subset_no_negative;
-	TH2F* hLandauStripFidCutXvsFidCutY;
 	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
 	TH2F* hLandau3DWithoutColumnsFidCutXvsFidCutY;
 	TCellAnalysisClass* clusteredAnalysis;
@@ -483,13 +484,11 @@ private:
     vector<Float_t> ShiftX;
     vector<Float_t> ShiftY;
 
-
     UInt_t maxClusterSize3d;
 
     map<Int_t, TCluster> mapClusteredAnalysisGoodCells;
     map<Int_t, TCluster> mapTransparentAnalysisGoodCells;
     map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsGoodCells;
-
 
     map<Int_t, TCluster> mapClusteredAnalysisAllCells;
     map<Int_t, TCluster> mapTransparentAnalysisAllCells;
