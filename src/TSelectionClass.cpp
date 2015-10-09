@@ -642,6 +642,12 @@ void TSelectionClass::saveHistos()
 	TString name = hFiducialCutSilicon->GetName();
 	name.Insert(0,"c");
 	TCanvas *c1= fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSilicon);
+	TH1F* hProjection = hFiducialCutSilicon->ProjectionX(hFiducialCutSilicon->GetTitle()+"_px");
+	histSaver->SaveHistogram(hProjection);
+	delete hProjection;
+	hProjection = hFiducialCutSilicon->ProjectionY(hFiducialCutSilicon->GetTitle()+"_py");
+	histSaver->SaveHistogram(hProjection);
+	delete hProjection;
 	c1->SetName(name);
 	histSaver->SaveCanvas(c1);
 	delete c1;
