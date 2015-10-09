@@ -80,7 +80,7 @@ HistogrammSaver::~HistogrammSaver() {
     //	TString string1 = sys->GetFromPipe(".! mkdir root-Files");
     //	cout<<string1<<endl;
     stringstream test;
-    test << "find "<<plots_path<<" -maxdepth 1 -iname \"*.root\" -exec mv {} "<<plots_path<<"/root/  \\;";
+    test << "find "<<plots_path<<" -maxdepth 1 -iname \"*.root\" -exec mv -f {} "<<plots_path<<"/root/  \\;";
     //    test<< "mv -f -E ignore -I "<<plots_path<<"/*.root "<<plots_path<<"/root/";
     cout<<"Execute: \""<<test.str()<<"\""<<endl;
     system(test.str().c_str());//t.str();//<<"\""<<endl;
