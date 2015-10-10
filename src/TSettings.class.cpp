@@ -420,6 +420,8 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"dia_input")) Parse(key,value,dia_input);
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_fraction")) Parse(key,value,alignment_training_track_fraction);
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_number")) Parse(key,value,alignment_training_track_number);
+        if (TPlaneProperties::startsWith(key,"RerunSelection")) Parse(key,value,bRerunSelection);
+		//bRerunSelection
 		if (TPlaneProperties::startsWith(key,"alignment_training_method")){
 			cout << key.c_str() << " = " << value.c_str() << endl;
 			int method = (int)strtod(value.c_str(),0);
@@ -832,6 +834,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	adcToElectronConversion= 1;
 	OverlayRange3d = make_pair((float)700.,(float)1200.);
 	negativeChargeCut = -50.;
+	bRerunSelection = false;
 //	checkSettings();
 }
 
@@ -2070,19 +2073,28 @@ bool TSettings::isClusterInDiaDetectorArea(TCluster cluster, Int_t area){
 }
 
 bool TSettings::isClusterInDiaDetectorArea(TCluster* cluster, Int_t area){
+    if (cluster->getClusterSize()==0)
+        return false;
+    if(verbosity>7) cout<<"TSettings::isClusterInDiaDetectorArea"<<flush;
 	if(area<getNDiaDetectorAreas()){
+	    if(verbosity>7) cout<<"."<<cluster->getClusterSize()<<"."<<flush;
 		/*	for(int i=0; i<cluster->size(); i++)
 			cout<<"channel: "<<cluster->getChannel(i)<<endl;
 		 */
 		int firstClusterChannel = cluster->getFirstHitChannel();
+		if(verbosity>7) cout<<"."<<flush;
 		int lastClusterChannel = cluster->getLastHitChannel();
+		if(verbosity>7) cout<<"."<<flush;
 		int cl = cluster->getClusterPosition(lastClusterChannel);
 		int firstAreaChannel = getDiaDetectorArea(area).first;
 		int lastAreaChannel =  getDiaDetectorArea(area).second;
+		if(verbosity>7) cout<<"."<<flush;
 		bool retVal = firstAreaChannel <=  firstClusterChannel && lastClusterChannel <= lastAreaChannel;
 		//printf("Detector channels: %i - %i. Cluster channels: %i - %i.",firstAreaChannel,lastAreaChannel,firstClusterChannel,lastClusterChannel);
+		if(verbosity>7)cout<<"true"<<endl;
 		return retVal;
 	}
+	if(verbosity>7)cout<<"false"<<endl;
 	return false;
 
 }

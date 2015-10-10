@@ -340,6 +340,7 @@ public:
     bool IsNoisyChannel(Int_t ch);
     UInt_t getNEvents(){return nEvents;};
     const std::pair<float,float> get3DOverlayRange(){return OverlayRange3d;}
+    bool RerunSelection(){return bRerunSelection;}
 private:
 
 	TString diamondName;
@@ -396,6 +397,7 @@ private:
 	TSystem *sys;
 	TFile *settingsFile;
 private:
+	bool bRerunSelection;
 	bool bUseUserResolutionInput;
 	bool bTransparentAlignment;
 	int detectorsToAlign;
