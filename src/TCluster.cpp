@@ -1161,13 +1161,16 @@ UInt_t TCluster::getChannel(UInt_t clusterPos)
 UInt_t TCluster::getFirstHitChannel(){
 	UInt_t cl = 0;
 	UInt_t size =  this->getClusterSize();
+	if (size==0) return -1;
 	while (!isHit(cl) && cl < size)
 		cl++;
 	return getChannel(cl);
 }
 
 UInt_t TCluster::getLastHitChannel(){
+    if (this->getClusterSize()) return -1;
 	UInt_t cl = this->getClusterSize()-1;
+
 	while ( !isHit(cl) && cl >= 0)
 		cl--;
 	return getChannel(cl);
