@@ -1257,6 +1257,12 @@ void TAlignment::SetResolutionsWithUserInput() {
     for(int i=0;i<4;i++)
         cout<<"\t"<<setw(5)<<i<<"\t"<<setw(5)<<gausFitValuesX.at(i).second<<"\t"<<setw(5)<<gausFitValuesY.at(i).second<<endl;
     cout<<endl;
+    cout<<"UserInput: "<<settings->isUseUserResolutionInput()<<endl;
+    if (!settings->isUseUserResolutionInput()){
+        LoadResolutionFromSettingsFile();
+        return;
+    }
+
     cout<<"Please enter the resolutions of each plane:"<<endl;
     for(int i=0;i<4;i++){
         inputResolution(i,TPlaneProperties::X_COR);
