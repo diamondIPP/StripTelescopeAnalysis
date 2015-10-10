@@ -105,28 +105,31 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
         }
         else
             isTransparentCluster = false;
-        shortAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
-        shortAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
-        longAnalysis->setEventNo(nEvent);
-        longAnaTrans->setEventNo(nEvent);
-
+        if (verbosity > 3) cout<<"stripAna"<<endl;
         stripAnalysis->setEventNo(nEvent);
         stripAnaTrans->setEventNo(nEvent);
-        longAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
-        longAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
         stripAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
         stripAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
         stripAnalysis->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
         stripAnaTrans->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
         if(settings->do3dShortAnalysis() == 1){
+            if (verbosity > 3) cout<<"shortAna"<<endl;
+            shortAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
+            shortAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
             shortAnalysis->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
             shortAnaTrans->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
         }
         if(settings->do3dLongAnalysis() == 1){
+            if (verbosity > 3) cout<<"longAna"<<endl;
+            longAnalysis->setEventNo(nEvent);
+            longAnaTrans->setEventNo(nEvent);
+            longAnalysis->setTransparentCluster(isTransparentCluster,&transparentCluster);
+            longAnaTrans->setTransparentCluster(isTransparentCluster,&transparentCluster);
             longAnalysis->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
             longAnaTrans->addEvent(diamondCluster,xPredDet,yPredDet,fiducialValueX,fiducialValueY,chi2x,chi2y);
             LongAnalysis();
         }
+        if (verbosity > 3) cout<<"done"<<endl;
     }
     cout<< "ENTRIES: "<<clusteredAnalysis->getEntries()<<endl;
     createTreeTestHistos();
