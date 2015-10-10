@@ -35,9 +35,16 @@ void THTMLSelection::createFiducialCuts()
 	sectionContent<<"To find good values for the fiducial cut. The mean position of all silicon planes is calculated\n ";
 	sectionContent<<"and plotted in the next plot. To be able to calculate this mean position one and only one Cluster\n";
 	sectionContent<<"in each detector is required.<br>\n";
-	sectionContent<<(putImage(this->path,(string)"chFidCutSilicon_OneAndOnlyOneCluster","png",50));
+	sectionContent<<(putImage(this->path,(string)"chFidCutSilicon_OneAndOnlyOneCluster","png",50))<<"\n";
+	sectionContent<<(putImage(this->path,(string)"hFidCutSilicon_OneAndOnlyOneCluster_px","png",24))<<"\n";
+	sectionContent<<(putImage(this->path,(string)"hFidCutSilicon_OneAndOnlyOneCluster_py","png",24))<<"\n";
 	sectionContent<<"</p>\n";
 	sectionContent<<"<br>\n";
+    sectionContent<<(putImage(this->path,(string)"chFidCutSilicon_OneAndOnlyOneCluster_RoughCut","png",50))<<"\n";
+    sectionContent<<(putImage(this->path,(string)"hFidCutSilicon_OneAndOnlyOneCluster_RoughCut_px","png",24))<<"\n";
+    sectionContent<<(putImage(this->path,(string)"hFidCutSilicon_OneAndOnlyOneCluster_RoughCut_py","png",24))<<"\n";
+    sectionContent<<"</p>\n";
+    sectionContent<<"<br>\n";
 	sectionContent<<"<h3>Fiducial Cut - valid Silicon Track && at least one Diamond Cluster</h3>\n";
 	sectionContent<<"<p>\n";
 	sectionContent<<"The next plot shows the mean position of the clusters in each silicon plane with one and only one\n";
@@ -55,7 +62,8 @@ void THTMLSelection::createFiducialCuts()
     sectionContent<<"efficency in the diamond detector.<br>\n";
     sectionContent<<(putImage(this->path,(string)"chFidCutSilicon_OneAndOnlyOneCluster_DiamondCluster","png",50))<<"<br>\n";
 
-	sectionContent<<putImage(this->path,(string)"chSelectedEvents","png",50)<<" \n";
+	sectionContent<<putImage(this->path,(string)"chSelectedEvents","png",50)<<" <br>\n";
+	sectionContent<<putImage(this->path,(string)"hSiliconEventsInCutRegions","png",50)<<" \n";
 
 	sectionContent<<"</p>\n";
 	this->addSection("Fiducial Cut",sectionContent.str());
@@ -80,7 +88,8 @@ void THTMLSelection::createCutFlowGraph(std::string content)
 	sectionContent<<" - notExactlyOneDiamondCluster (blue), means that it has a valid silicon Track but there is not exactly one Cluster in the diamond detector<br>\n";
 	sectionContent<<" - useForAlignment (yellow) are Events which have a valid Sil Track and have one and only one Cluster in the diamond hit. With the training track fraction they are choosen for Alignment<br>\n";
 	sectionContent<<" - useForAnalysis (pink) are Events which have a valid Sil Track and have one and only one Cluster in the diamond hit. With the training track fraction they are choosen for Analysis<br>\n";
-	sectionContent<<putImage(this->path,(string)"cMainCutFlow","png",50)<<"<br>\n";
+	sectionContent<<putImage(this->path,(string)"cMainCutFlow","png",50);
+	sectionContent<<"<br>\n";
 	sectionContent<<"</p>\n";
 	sectionContent<<"<h4>Diamond Cuts</h4>\n";
 	sectionContent<<"<p>\n";
