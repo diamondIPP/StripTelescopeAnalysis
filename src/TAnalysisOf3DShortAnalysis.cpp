@@ -273,7 +273,7 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
         name.Append(appendix);
         hXdetvsYdetvsMeanCharge.push_back((TH2D*)hXdetvsYdetvsCharge.at(i)->Clone(name));
     }
-    cout<<"DONE"<<endl;
+    if(verbosity>2) cout<<"DONE"<<endl;
     //hFidCutXvsFidCutYvsMeanChargeAllDetectors
     hFidCutXvsFidCutYvsMeanChargeAllDetectors = (TH2D*)hFidCutXvsFidCutYvsCharge.at(0)->Clone("hFidCutXvsFidCutYvsMeanChargeAllDetectors");
 
