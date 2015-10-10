@@ -44,6 +44,8 @@ TAnalysisOf3DStrip::~TAnalysisOf3DStrip() {
  */
 void TAnalysisOf3DStrip::addEvent(TCluster* cluster, Float_t x_pred, Float_t y_pred,
         Float_t x_fid, Float_t y_fid, Float_t chi2x, Float_t chi2y) {
+    if (verbosity)
+        cout<<"TAnalysisOf3DStrip::addEvent"<<endl;
     predx = x_pred;
     predy = y_pred;
     fidx = x_fid;
@@ -85,22 +87,33 @@ void TAnalysisOf3DStrip::saveHistos() {
 }
 
 void TAnalysisOf3DStrip::fillPlots() {
+    if (verbosity>5)
+        cout<<"TAnalysisOf3DStrip::fillPlots"<<flush;
     if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
         return;
     Int_t stripDetector = 1;
+    if (verbosity>7)cout<<"1 "<<flush;
     if(settings->getSelectionFidCuts()->getFidCutRegion(fidx,fidy)!=stripDetector)
         return;
+    if (verbosity>7)cout<<"2 "<<flush;
     if(eventReader->getNDiamondClusters()!=1)
         return;
+    if (verbosity>7)cout<<"3 "<<flush;
     int areaStripDetector = 0;
     if (!settings->isClusterInDiaDetectorArea(diamondCluster,areaStripDetector) ){
+        if (verbosity>7)cout<<"3.1"<<flush;
         return;
     }
+    if (verbosity>7) cout<<"3.2"<<flush;
     if( !settings->diamondPattern.isValidCluster(diamondCluster)){
+        if (verbosity>7)cout<<"4.1"<<flush;
         return;
     }
+    if (verbosity>7)cout<<"4"<<flush;
     if (diamondCluster->isSaturatedCluster())
         return;
+    if (verbosity>7)cout<<"4"<<flush;
     hLandauStrip->Fill(diamondCluster->getPositiveCharge());
     hLandauStripFidCutXvsFidCutY->Fill(fidx, fidy);
+    if (verbosity>5) cout<<"done"<<flush;
 }
