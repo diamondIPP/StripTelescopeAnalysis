@@ -103,6 +103,7 @@ private:
 	UInt_t nUseForSiliconAlignment;
 	UInt_t nUseForAnalysis;
 	UInt_t nNoValidSiliconTrack;
+	vector<UInt_t> vSiliconEventsInFidCutRegions;
 	UInt_t nValidSiliconAndDiamondCluster;
 	UInt_t nValidDiamondTrack;
 	UInt_t nValidSiliconTrack;
@@ -112,6 +113,7 @@ private:
 
 private:
 	TH2F *hFiducialCutSilicon;
+	TH2F* hFiducialCutSiliconRoughCut;
 	TH2F *hFiducialCutSiliconDiamondHit;
 	map<Int_t,TH2F*> mapFiducialCutSiliconDiamondHitSamePattern;
 	TH1F* hDiamondPatternFiducialPattern;
