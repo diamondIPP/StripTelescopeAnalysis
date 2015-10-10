@@ -81,9 +81,11 @@ void TAnalysisOfAnalysisDifferences::Analysis() {
     nSameEvents = 0;
     nOnlyClustered = 0;
     nOnlyTransparent = 0;
-
     LoopOverBothMaps();
+
+//    cout<<"Save histos, Key Press:"<<flush; cin >>t;
     SaveHistograms();
+
     cout<<"\nSame Events:      "<<nSameEvents<<endl;
     cout<<"Only Clustered:   "<<nOnlyClustered<<endl;
     cout<<"Only Transparent: "<<nOnlyTransparent<<endl;
@@ -104,10 +106,12 @@ void TAnalysisOfAnalysisDifferences::LoopOverBothMaps(){
     bool endTransparent;
     endClustered =  itClustered== clusteredMap->end();
     endTransparent = itTransparent== transparentMap->end();
-    cout<<"loop over events"<<endl;
-    cout<<itPredicted->first<<endl;
+    cout<<"loop over events: "<<itPredicted->first<<endl;
+//    char t; cout<<"Key Press:"<<flush; cin >>t;
     while (!endLoop){
+        cout<<"TAnalysisOfAnalysisDifferences::looping"<<flush;
         UpdatePredictedPosition();
+
         if (itClustered->first == itTransparent->first){
             AnalyseSameEvent();
             if( itClustered != clusteredMap->end()) itClustered++;
@@ -138,6 +142,7 @@ void TAnalysisOfAnalysisDifferences::LoopOverBothMaps(){
         endTransparent = itTransparent== transparentMap->end();
         endLoop = endClustered && endTransparent;
     }
+    cout<<"done with looping"<<endl;
     if(verbosity%2==1){
         char t;
         cout<<"Press a key and enter"<<endl;
@@ -146,6 +151,14 @@ void TAnalysisOfAnalysisDifferences::LoopOverBothMaps(){
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
+
+    if (itClustered->second.getClusterSize()==0 ||
+        itTransparent->second.getClusterSize()==0){
+        cout<<"invalid cluster size"<<endl;
+        return;
+    }
+
+
     if(itPredicted->first != itTransparent->first || itPredicted->first != itClustered->first)
         cout<<"predicted,transparent and clustered iterator do not agree"<<itPredicted->first<<" "<<itTransparent->first<<" "<<itClustered->first<<endl;
     Float_t clusteredCharge = itClustered->second.getCharge(true);
@@ -180,7 +193,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
         mapHistos["hNoNegativeCharge_PulseHeight"]->Fill(posCharge);
     mapHistos["hPositive_Minus_Negative_TransparentCharge"]->Fill(posCharge-transparentCharge);
     if ( posCharge - clusteredCharge < 0 ){
-        cout<<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
+        cout<<"posCharge - clusteredCharge" <<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\t\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
         cout<<"\tclustered: ";
         itClustered->second.Print(2);
         cout<<"\ttransparent: ";
@@ -202,6 +215,12 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyTransparentEvent() {
+
+    if (itTransparent->second.getClusterSize()==0){
+        cout<<"invalid cluster size"<<endl;
+        return;
+    }
+
     nOnlyTransparent++;
     if( verbosity>3)
         cout<<itTransparent->first<< " only in Transparent Analysis"<<endl;
@@ -233,6 +252,12 @@ void TAnalysisOfAnalysisDifferences::set3DPhantomLandau(TH1F* hPhantomLandau) {
 }
 
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyClusteredEvent() {
+
+    if (itClustered->second.getClusterSize()==0){
+        cout<<"invalid cluster size"<<endl;
+        return;
+    }
+
     if( verbosity>3)
         cout<<itClustered->first<< " only in Clustered Analysis"<<endl;
     nOnlyClustered++;
@@ -417,6 +442,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     delete histo2;
 
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
+    cout<<"[TAnalysisOfAnalysisDifferences]Save Histos it map "<<mapHistos.size()<<endl;
     for(it;it!=mapHistos.end();it++){
         TString className = it->second->ClassName();
         if( it->first == "hNegativeChargeAbove50_Position"||
@@ -513,8 +539,10 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
 }
 
 void TAnalysisOfAnalysisDifferences::UpdatePredictedPosition() {
-
-    while (itClustered->first > itPredicted->first && itTransparent->first > itPredicted->first && itPredicted!= predictedPositions->end()){
+    cout<<"UPDATE Postion"<<endl;
+    while (itClustered->first > itPredicted->first &&
+            itTransparent->first > itPredicted->first &&
+            itPredicted!= predictedPositions->end()){
         Int_t clustered = itClustered->first;;
         Int_t transparent = itTransparent->first;
         Int_t predicted = itPredicted->first;
