@@ -2061,6 +2061,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     TString preName  = GetPlotPreName(subjectPlane);;
     TString postName = GetPlotPostName(bChi2);
     bool isSiliconPostAlignment = (subjectPlane!=4)&&(nAlignmentStep == nAlignSteps);
+    isSiliconPostAlignment  = isSiliconPostAlignment  || ((subjectPlane==4) && nDiaAlignSteps == nDiaAlignSteps);
 
     stringstream histName;
     if(verbosity){cout << "\nCreatePlots with " << preName << " " << (subjectPlane!=4?nAlignmentStep:nDiaAlignmentStep) <<" Step" << flush;
