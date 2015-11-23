@@ -155,6 +155,7 @@ private:
 	TH2F *hEtaDistributionVsSignalLeft[9];
 	TH2F *hEtaDistributionVsSignalSum[9];
 	TH2F *hSignalLeftVsSignalRight[9];
+	TH2F *hDeltaLeftRightVsMaximum[9];
 	TH2F *hPHDistribution[9];
 	TH1F *hRelativeHitPosition[9];
 	TH2F* hEtaDistributionDia;
