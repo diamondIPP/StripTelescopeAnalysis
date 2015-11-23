@@ -717,12 +717,6 @@ void TAnalysisOfClustering::saveHistos(){
 	//    	analyseAsymmetricSample2();
 	//	char t; cin>>t;
 
-	if (verbosity)  cout<<"Save Asymmetric Eta Sample analysis"<<endl;
-	analyseAsymmetricSample();
-	savePedestalHistos();
-	saveNoiseHistos();
-	saveADCHistos();
-	analysisSlopes();
 	if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
 	histSaver->SaveHistogram(histo_CWM_biggestHit);
 	histo_CWM_biggestHit->Delete();
@@ -875,12 +869,20 @@ void TAnalysisOfClustering::saveHistos(){
 		    hDeltaLeftRightVsMaximum[det]->GetXaxis()->SetTitle("S_{Right} - S_{Left} / ADC");
 		    hDeltaLeftRightVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
 		    histSaver->SaveHistogram(this->hDeltaLeftRightVsMaximum[det]);
+		    histSaver->Save1DProfileWithFitAndInfluence(hDeltaLeftRightVsMaximum[det],0,false);
 		    delete hDeltaLeftRightVsMaximum[det];
 		    hDeltaLeftRightVsMaximum[det]=0;
 		}
 	}
 	if (verbosity)  cout<<"Save PH Histos"<<endl;
 	savePHHistos();
+
+    if (verbosity)  cout<<"Save Asymmetric Eta Sample analysis"<<endl;
+    analyseAsymmetricSample();
+    savePedestalHistos();
+    saveNoiseHistos();
+    saveADCHistos();
+    analysisSlopes();
 	//    for (int det = 0; det < 9; det++) {
 	//		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
 	//        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
@@ -1411,7 +1413,12 @@ void TAnalysisOfClustering::analyseClusterPosition()
 					Float_t S_M = cluster.getSignal(highestClPos);
 					Float_t S_R = cluster.getSignal(highestClPos+1);
 					Float_t S_L = cluster.getSignal(highestClPos-1);
+//					cluster.Print();
+//					cout<<"Cluster: "<<S_L<<"-"<<S_M<<"-"<<S_R<<endl;
+
 					hDeltaLeftRightVsMaximum[det]->Fill(S_R-S_L,S_M);
+					if (cluster.isSaturatedCluster())
+					    return;
 					if(verbosity>3){
 						cout<<"charge of 2: "<<charge<<"\t"<<flush;
 						cluster.Print();
@@ -1698,10 +1705,10 @@ void TAnalysisOfClustering::savePHHistos()
 
 			//CREATE HTEMP and ReBin it if necessary
 			TH1F *htemp;
-			if (nClusters == 0)
-				htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname);//,nClusters+1,nClusters+1);
-			else
-				htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname,nClusters+1,nClusters+1);
+//			if (nClusters == 0)
+//				htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname);//,nClusters+1,nClusters+1);
+//			else
+            htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname,nClusters+1,nClusters+1);
 			if(htemp==0) continue;
 
 			//adjust binning if necessary
