@@ -493,8 +493,8 @@ void TAnalysisOfClustering::initialiseHistos()
 
         name = "hDeltaLeftRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
         hDeltaLeftRightVsMaximum[det]=new TH2F(name,name,
-                128,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
-                128,0,TPlaneProperties::getMaxSignalHeight(det));
+                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
+                512,0,TPlaneProperties::getMaxSignalHeight(det));
     }
     //	for(int det = 0; det < 9; det++){
     //	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -716,7 +716,7 @@ void TAnalysisOfClustering::saveEtaIntegrals(){
 void TAnalysisOfClustering::saveHistos(){
     //    	analyseAsymmetricSample2();
     //	char t; cin>>t;
-
+    cout<<"1"<<flush;
     if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
     histSaver->SaveHistogram(histo_CWM_biggestHit);
     histo_CWM_biggestHit->Delete();
@@ -737,7 +737,7 @@ void TAnalysisOfClustering::saveHistos(){
         histSaver->SaveHistogram(hDeltaLeftRightHitOverLeftAndRight[det]);
         histSaver->SaveHistogram(hSignal2ndHighestOverSignalHighestRatio[det]);
     }
-
+    cout<<2<<flush;
     for (int det=0;det<9;det++){
         if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
         histSaver->SaveHistogram(hSaturatedChannels[det]);
@@ -748,6 +748,7 @@ void TAnalysisOfClustering::saveHistos(){
         histSaver->SaveHistogram(hSeedMap[det]);
         hSeedMap[det]->Delete();
     }
+    cout<<3<<flush;
     for (int det=0;det<9;det++){
         if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
         histSaver->SaveHistogram(hSeedMap2[det]);
@@ -869,7 +870,7 @@ void TAnalysisOfClustering::saveHistos(){
             hDeltaLeftRightVsMaximum[det]->GetXaxis()->SetTitle("S_{Right} - S_{Left} / ADC");
             hDeltaLeftRightVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
             histSaver->SaveHistogram(this->hDeltaLeftRightVsMaximum[det]);
-            histSaver->Save1DProfileWithFitAndInfluence(hDeltaLeftRightVsMaximum[det],0,false);
+            histSaver->Save1DProfileYWithFitAndInfluence(hDeltaLeftRightVsMaximum[det],0,false);
             delete hDeltaLeftRightVsMaximum[det];
             hDeltaLeftRightVsMaximum[det]=0;
         }
