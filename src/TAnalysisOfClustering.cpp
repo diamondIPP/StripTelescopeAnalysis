@@ -307,7 +307,7 @@ void TAnalysisOfClustering::saveVariableVsEventNoPlots(TSettings* settings,Histo
 
         TProfile * prof3 = (TProfile*)prof->Clone();
 
-        histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
+        histSaver->Save1DProfileYWithFitAndInfluence(prof,fit,true);
         hVariableSlopesVsChannel->SetBinContent(hVariableSlopesVsChannel->FindBin(channel),fit->GetParameter(1));
         if ((int)vecCh->size()<=i){
             vecCh->push_back(channel);
