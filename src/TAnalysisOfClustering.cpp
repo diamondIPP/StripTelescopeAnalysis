@@ -490,6 +490,11 @@ void TAnalysisOfClustering::initialiseHistos()
 
 		name = "hSignalLeftVsSignalRight"+ (TString) TPlaneProperties::getStringForDetector(det);
 		hSignalLeftVsSignalRight[det]=new TH2F(name,name,128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
+
+		name = "hDeltaLeftRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
+		hDeltaLeftRightVsMaximum[det]=new TH2F(name,name,
+		                                                128,0,TPlaneProperties::getMaxSignalHeight(det),
+		                                                128,0,TPlaneProperties::getMaxSignalHeight(det));
 	}
 	//	for(int det = 0; det < 9; det++){
 	//	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -866,6 +871,13 @@ void TAnalysisOfClustering::saveHistos(){
 		if (verbosity)  cout<<"Save "<< hSignalLeftVsSignalRight[det]->GetName() << endl;
 		histSaver->SaveHistogram(this->hSignalLeftVsSignalRight[det]);
 		if(hEtaDistribution[det])delete hEtaDistribution[det];
+		if(hDeltaLeftRightVsMaximum[det]){
+		    hDeltaLeftRightVsMaximum[det]->GetXaxis()->SetTitle("S_{Right} - S_{Left} / ADC");
+		    hDeltaLeftRightVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
+		    histSaver->SaveHistogram(this->hDeltaLeftRightVsMaximum[det]);
+		    delete hDeltaLeftRightVsMaximum[det];
+		    hDeltaLeftRightVsMaximum[det]=0;
+		}
 	}
 	if (verbosity)  cout<<"Save PH Histos"<<endl;
 	savePHHistos();
@@ -1396,6 +1408,10 @@ void TAnalysisOfClustering::analyseClusterPosition()
 					Float_t eta= cluster.getEta(leftChannel);
 					Float_t etaCmnCorrected = cluster.getEta(true);
 					Float_t charge = cluster.getCharge((UInt_t)2,true,true);
+					Float_t S_M = cluster.getSignal(highestClPos);
+					Float_t S_R = cluster.getSignal(highestClPos+1);
+					Float_t S_L = cluster.getSignal(highestClPos-1);
+					hDeltaLeftRightVsMaximum[det]->Fill(S_R-S_L,S_M);
 					if(verbosity>3){
 						cout<<"charge of 2: "<<charge<<"\t"<<flush;
 						cluster.Print();
@@ -1409,28 +1425,28 @@ void TAnalysisOfClustering::analyseClusterPosition()
 						if(eta>0&&eta<1){
 							hEtaDistributionDia->Fill(eta,nDia);
 						}
-						if(hEtaDistributionCMN[det])hEtaDistributionCMN[det]->Fill(etaCmnCorrected);
-						if(hEtaDistributionVsLeftChannel[det]) hEtaDistributionVsLeftChannel[det]->Fill(eta,leftChannel);
-						if(hEtaDistributionVsClusterSize[det]) hEtaDistributionVsClusterSize[det]->Fill(eta,clusterSize);
-						if(hEtaDistributionVsCharge[det]) hEtaDistributionVsCharge[det]->Fill(eta,charge);
-						hEtaDistribution5Percent[det]->Fill(eta2);
-						hSignalLeftVsSignalRight[det]->Fill(signalRight,signalLeft);
-
-						//			cout<<nextHighestClPos<<"<"<<highestClPos<<"\t"<<signalLeft<<" < "<<signalRight<<"\t"<<eta<<endl;
-						hEtaDistributionVsSignalLeft[det]->Fill(eta,signalLeft);
-						hEtaDistributionVsSignalRight[det]->Fill(eta,signalRight);
-						hEtaDistributionVsSignalSum[det]->Fill(eta,signalLeft+signalRight);
-						TH1F *hEtaIntegral=eventReader->getEtaIntegral(det);
-						Float_t posCorEta=  eventReader->getEvent()->getPosition(det,cl,settings->doCommonModeNoiseCorrection(),TCluster::corEta,hEtaIntegral);
-						chNo = (UInt_t)(posCorEta+0.5);
-						relPos = posCorEta - chNo;
-						if(verbosity>6) printf("%5d %3d %5.1f %5.1f\n",nEvent,chNo,posCWM,posCorEta);
-						hRelativeClusterPositionCorEta[det]->Fill(chNo+0.5,relPos);
-						Float_t posEta=  eventReader->getEvent()->getPosition(det,cl,TCluster::eta);
-						chNo = (UInt_t)(posEta+0.5);
-						relPos = posEta - chNo;
-						hRelativeClusterPositionEta[det]->Fill(chNo+0.5,relPos);
 					}
+					if(hEtaDistributionCMN[det])hEtaDistributionCMN[det]->Fill(etaCmnCorrected);
+					if(hEtaDistributionVsLeftChannel[det]) hEtaDistributionVsLeftChannel[det]->Fill(eta,leftChannel);
+					if(hEtaDistributionVsClusterSize[det]) hEtaDistributionVsClusterSize[det]->Fill(eta,clusterSize);
+					if(hEtaDistributionVsCharge[det]) hEtaDistributionVsCharge[det]->Fill(eta,charge);
+					hEtaDistribution5Percent[det]->Fill(eta2);
+					hSignalLeftVsSignalRight[det]->Fill(signalRight,signalLeft);
+
+					//			cout<<nextHighestClPos<<"<"<<highestClPos<<"\t"<<signalLeft<<" < "<<signalRight<<"\t"<<eta<<endl;
+					hEtaDistributionVsSignalLeft[det]->Fill(eta,signalLeft);
+					hEtaDistributionVsSignalRight[det]->Fill(eta,signalRight);
+					hEtaDistributionVsSignalSum[det]->Fill(eta,signalLeft+signalRight);
+					TH1F *hEtaIntegral=eventReader->getEtaIntegral(det);
+					Float_t posCorEta=  eventReader->getEvent()->getPosition(det,cl,settings->doCommonModeNoiseCorrection(),TCluster::corEta,hEtaIntegral);
+					chNo = (UInt_t)(posCorEta+0.5);
+					relPos = posCorEta - chNo;
+					if(verbosity>6) printf("%5d %3d %5.1f %5.1f\n",nEvent,chNo,posCWM,posCorEta);
+					hRelativeClusterPositionCorEta[det]->Fill(chNo+0.5,relPos);
+					Float_t posEta=  eventReader->getEvent()->getPosition(det,cl,TCluster::eta);
+					chNo = (UInt_t)(posEta+0.5);
+					relPos = posEta - chNo;
+					hRelativeClusterPositionEta[det]->Fill(chNo+0.5,relPos);
 		}
 	}
 }
