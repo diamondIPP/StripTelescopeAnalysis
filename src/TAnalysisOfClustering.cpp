@@ -495,6 +495,17 @@ void TAnalysisOfClustering::initialiseHistos()
         hDeltaLeftRightVsMaximum[det]=new TH2F(name,name,
                 1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
                 256,0,TPlaneProperties::getMaxSignalHeight(det));
+//        hLeftVsMaximum[det]
+
+        name = "hLeftVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hLeftVsMaximum[det]=new TH2F(name,name,
+                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
+                256,0,TPlaneProperties::getMaxSignalHeight(det));
+
+        name = "hRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hRightVsMaximum[det]=new TH2F(name,name,
+                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
+                256,0,TPlaneProperties::getMaxSignalHeight(det));
     }
     //	for(int det = 0; det < 9; det++){
     //	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -879,6 +890,39 @@ void TAnalysisOfClustering::saveHistos(){
             delete hDeltaLeftRightVsMaximum[det];
             hDeltaLeftRightVsMaximum[det]=0;
         }
+        TProfile* profRight = 0;
+        TProfile *profLeft = 0;
+        if(hLeftVsMaximum[det]){
+            hLeftVsMaximum[det]->GetXaxis()->SetTitle("S_{Left} / ADC");
+            hLeftVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
+            histSaver->SaveHistogram(this->hLeftVsMaximum[det]);
+            profLeft = hLeftVsMaximum[det]->ProfileY();
+            if (TPlaneProperties::isDiamondDetector(det))
+                profLeft->GetYaxis()->SetRangeUser(-500,500);
+            else
+                profLeft->GetYaxis()->SetRangeUser(-100,100);
+            histSaver->SaveHistogram(profLeft,false,false,false);
+            delete hLeftVsMaximum[det];
+            hLeftVsMaximum[det]=0;
+        }
+        if(hRightVsMaximum[det]){
+            hRightVsMaximum[det]->GetXaxis()->SetTitle("S_{Right} / ADC");
+            hRightVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
+            histSaver->SaveHistogram(this->hRightVsMaximum[det]);
+            profRight = hRightVsMaximum[det]->ProfileY();
+            if (TPlaneProperties::isDiamondDetector(det))
+                profRight->GetYaxis()->SetRangeUser(-500,500);
+            else
+                profRight->GetYaxis()->SetRangeUser(-100,100);
+            hRightVsMaximum->SaveHistogram(profRight,false,false,false);
+            delete hRightVsMaximum[det];
+            hRightVsMaximum[det]=0;
+        }
+        if (profLeft && profRight){
+            histSaver->SaveTwoHistos("LeftRight_Vs_Maximum_profile",profLeft,profRight);
+        }
+        if (profLeft) delete profLeft;
+        if (profRight) delete profRight;
     }
     if (verbosity)  cout<<"Save PH Histos"<<endl;
     savePHHistos();
@@ -1425,6 +1469,8 @@ void TAnalysisOfClustering::analyseClusterPosition()
             //					cout<<"Cluster: "<<S_L<<"-"<<S_M<<"-"<<S_R<<endl;
 
             hDeltaLeftRightVsMaximum[det]->Fill(S_R-S_L,S_M);
+            hLeftVsMaximum[det]->Fill(S_L,S_M);
+            hRightVsMaximum[det]->Fill(S_R,S_M);
             if (cluster.isSaturatedCluster())
                 return;
             if(verbosity>3){
