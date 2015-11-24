@@ -494,7 +494,7 @@ void TAnalysisOfClustering::initialiseHistos()
         name = "hDeltaLeftRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
         hDeltaLeftRightVsMaximum[det]=new TH2F(name,name,
                 1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
-                512,0,TPlaneProperties::getMaxSignalHeight(det));
+                256,0,TPlaneProperties::getMaxSignalHeight(det));
     }
     //	for(int det = 0; det < 9; det++){
     //	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -870,7 +870,12 @@ void TAnalysisOfClustering::saveHistos(){
             hDeltaLeftRightVsMaximum[det]->GetXaxis()->SetTitle("S_{Right} - S_{Left} / ADC");
             hDeltaLeftRightVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
             histSaver->SaveHistogram(this->hDeltaLeftRightVsMaximum[det]);
-            histSaver->Save1DProfileYWithFitAndInfluence(hDeltaLeftRightVsMaximum[det],0,false);
+            TProfile* prof = hDeltaLeftRightVsMaximum[det]->ProfileY();
+            if (TPlaneProperties::isDiamondDetector(det))
+                prof->GetYaxis()->SetRangeUser(-500,500);
+            else
+                prof->GetYaxis()->SetRangeUser(-100,100);
+            histSaver->SaveHistogram(prof,false,false,false);(hDeltaLeftRightVsMaximum[det],0,false);
             delete hDeltaLeftRightVsMaximum[det];
             hDeltaLeftRightVsMaximum[det]=0;
         }
