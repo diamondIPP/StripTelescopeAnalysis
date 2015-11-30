@@ -670,6 +670,10 @@ void TAnalysisOfClustering::initialiseHistos()
             max = 4098;
         else max = 512;
         hPHDistribution[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),512,0,max,10,-.5,9.5);
+        histName.str("");
+        histName<<"hPHDistIncreasingClustersize_"<<TPlaneProperties::getStringForDetector(det);
+        hPHDistIncreasingClustersize[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),
+                                                    512,0,max,4,1,4);
 
     }
 
@@ -1738,6 +1742,7 @@ void TAnalysisOfClustering::savePHHistos()
 {
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
         histSaver->SaveHistogram(hPHDistribution[det]);
+        histSaver->SaveHistogram(hPHDistIncreasingClustersize[det]);
         vecClusterSize.clear();
         vecMPV.clear();
         vecClusterSizeError.clear();
@@ -1811,6 +1816,23 @@ void TAnalysisOfClustering::savePHHistos()
             histSaver->SaveGraph(&graph,histTitle.str());
         }
         delete hPHDistribution[det];
+        vector<TH1F*> vhtemps;
+        TString hname = "hStackPHDist_ClusterSize";
+        hname += TPlaneProperties::getStringForDetector(det);
+        THStack* stack = new THStack(hname,hname);
+        for (UInt_t cl = 1; cl < 5; cl++){
+             hname = TString::Format("hPHDist_Cl%d_",cl);
+            hname += TPlaneProperties::getStringForDetector(det);
+            TH1F* htemp = hPHDistIncreasingClustersize[det]->ProjectionX(hname,cl,cl);
+            vhtemps.push_back(htemp);
+            histSaver->SaveHistogram(htemp);
+            stack->Add(htemp);
+        }
+        histSaver->SaveStack(stack,"nostack",true,true,"Cluster Signal / ADC","number of entries");
+        delete stack;
+        for (UInt_t i = 0; i < vhtemps.size(); i++)
+            delete vhtemps[i];
+        delete hPHDistIncreasingClustersize[det];
     }
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
         histSaver->SaveHistogram(hBiggestHitVsClusterSize[det]);
@@ -1837,6 +1859,10 @@ void TAnalysisOfClustering::createPHDistribution(){
         hPHDistribution[det]->Fill(charge,0);
         hPHDistribution[det]->Fill(charge,nClusterSize);
         //		cout<<"Fill PH histo with "<<charge<<" and Clustersize "<<nClusterSize<<endl;
+        for (UInt_t cl = 1; cl < 5; cl++){
+            charge = eventReader->getCluster(det,0).getCharge(cl,true,true);
+            hPHDistIncreasingClustersize[det]->Fill(charge,cl);
+        }
     }
 }
 

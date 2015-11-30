@@ -159,6 +159,7 @@ private:
 	TH2F *hRightVsMaximum[9];
 	TH2F *hLeftVsMaximum[9];
 	TH2F *hPHDistribution[9];
+	TH2F* hPHDistIncreasingClustersize[9];
 	TH1F *hRelativeHitPosition[9];
 	TH2F* hEtaDistributionDia;
 private:
