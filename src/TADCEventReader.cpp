@@ -21,7 +21,6 @@ TADCEventReader::TADCEventReader(string FileName,TSettings* settings) {
 
 void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 	verbosity=verb;
-	TPlaneProperties::getNSiliconDetectors()
 	for (UInt_t i = 0; i < TPlaneProperties::getNSiliconDetectors() * 2; i++)
 	    cmn_det[i] = 0;
 	if(verbosity>3)cout<<"new TADCEventReader: \n\tpathName:"<<FileName<<"\n\tRunNumber: "<<runNumber<<endl;
