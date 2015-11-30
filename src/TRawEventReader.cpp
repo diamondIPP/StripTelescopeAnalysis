@@ -147,7 +147,8 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 		D1Y.ADC_values[i]=rzEvent.Input[4*i+2+1024];
 		D2Y.ADC_values[i]=rzEvent.Input[4*i+1+1024];
 		D3Y.ADC_values[i]=rzEvent.Input[4*i+1024];
-
+	}
+	for (int i=0; i<128;i++){
 		Dia0.ADC_values[i]=rzEvent.RD42[i*2+1];
 		Dia1.ADC_values[i]=rzEvent.RD42[i*2];
 		//if(i<20)cout<<rzEvent.RD42[i*2]<<" "<<Dia0.ADC_values[i]<<"  ";

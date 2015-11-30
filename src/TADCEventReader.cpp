@@ -21,7 +21,9 @@ TADCEventReader::TADCEventReader(string FileName,TSettings* settings) {
 
 void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 	verbosity=verb;
-
+	TPlaneProperties::getNSiliconDetectors()
+	for (UInt_t i = 0; i < TPlaneProperties::getNSiliconDetectors() * 2; i++)
+	    cmn_det[i] = 0;
 	if(verbosity>3)cout<<"new TADCEventReader: \n\tpathName:"<<FileName<<"\n\tRunNumber: "<<runNumber<<endl;
 	pEvent=NULL;//new TEvent();
 	current_event = 0;
@@ -809,4 +811,9 @@ void TADCEventReader::setEtaDistributionPath(std::string path)
 	etaDistributionPath=path;
 }
 
-
+inline Float_t TADCEventReader::getCMNoise(UInt_t det, UInt_t ch) const {
+    int i = ch>=TPlaneProperties::getNChannels(det);
+    if (TPlaneProperties::isSiliconDetector(det))
+        return cmn_det[det*2+i];
+    return cmNoise;
+}

@@ -1854,12 +1854,12 @@ void TAnalysisOfClustering::createPHDistribution(){
         if(!isValid)
             continue;
         UInt_t nClusterSize = eventReader->getClusterSize(det,0);
-        Float_t charge = eventReader->getCluster(det,0).getCharge(true);
+        Float_t charge = eventReader->getCluster(det,0).getCharge(TPlaneProperties::isDiamondDetector(det));
 
         hPHDistribution[det]->Fill(charge,0);
         hPHDistribution[det]->Fill(charge,nClusterSize);
         //		cout<<"Fill PH histo with "<<charge<<" and Clustersize "<<nClusterSize<<endl;
-        for (UInt_t cl = 1; cl < 5; cl++){
+        for (UInt_t cl = 1; cl <= 5; cl++){
             charge = eventReader->getCluster(det,0).getCharge(cl,TPlaneProperties::isDiamondDetector(det),true);
             hPHDistIncreasingClustersize[det]->Fill(charge,cl);
         }

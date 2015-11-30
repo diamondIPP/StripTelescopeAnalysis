@@ -101,7 +101,7 @@ void TAnalysisOfPedestal::analyseEvent(){
 
         TString name = "hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
         if(det==TPlaneProperties::getDetDiamond()){
-            cmn = eventReader->getCMNoise();
+            cmn = eventReader->getCMNoise(det,0);
             checkCommonModeNoise();
         }
         biggestSignal = -999;
@@ -109,6 +109,7 @@ void TAnalysisOfPedestal::analyseEvent(){
         biggestSignalCMN = -999;
         biggestHitChannelCMN =-1;
         for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
+            cmn = eventReader->getCMNoise(det,ch);
             adc = eventReader->getAdcValue(det,ch);
             if (hHistoMap.count(name))
                 if(hHistoMap[name])
@@ -1461,10 +1462,11 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
         nSumPedCMN=0;
         nSumNoiseCMN=0;
         nSumNoise=0;
-        cmNoise = eventReader->getCMNoise();
         vecCMNoise.push_back(cmNoise);
         hCMNoiseDistribution->Fill(cmNoise);
     }
+    cmNoise = eventReader->getCMNoise(det,ch);
+
     if(settings->isDet_channel_screened(det,ch))
         return;
     if(snr<settings->getClusterHitFactor(det,ch)){

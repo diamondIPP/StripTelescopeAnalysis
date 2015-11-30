@@ -33,7 +33,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	MAXDIASIGMA=settings->getDi_Pedestal_Hit_Factor();
 	if(verbosity)cout<<"Pedestal Hit Factor Silicon: "<<MAXSDETSIGMA<<"\nPedestal Hit Factor Diamond: "<<MAXDIASIGMA<<endl;
 	hCommonModeNoise = new TH1F("hCommonModeNoise","hCommonModeNoise",512,-32,32);
-	doCMNCorrection= settings->doCommonModeNoiseCorrection();
+	doCMNCorrection= true;//settings->doCommonModeNoiseCorrection();
 	if(verbosity)cout<<"DO Common Mode Noise Correction: ";
 	if(doCMNCorrection){
 		if(verbosity)cout<<"TRUE "<<endl;}
@@ -41,6 +41,8 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	//char t; cin >>t;//test
 	printChannel=1;
 	//settings->doCommonModeNoiseCorrection();
+	for (UInt_t i = 0; i < 8*2; i ++)
+	    cmn_sil[i] = 0;
 }
 
 TPedestalCalculation::~TPedestalCalculation() {
@@ -587,6 +589,7 @@ void TPedestalCalculation::updateDiamondPedestals(){
 void TPedestalCalculation::setBranchAdresses(){
 	pedestalTree->Branch("PedestalMean",&pedestalMean,"PedestalMean[8][256]/F");
 	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestaSigma[8][256]/F");
+	pedestalTree->Branch("cmn_sil",&cmn_sil,"cmn_sil[8]/F");
 
 	pedestalTree->Branch("diaPedestalMean",&diaPedestalMean,"diaPedestalMean[128]/F");
 	pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestaSigma[128]/F");
@@ -613,6 +616,16 @@ void TPedestalCalculation::printDiamond(UInt_t nChannel){
 
 Float_t TPedestalCalculation::getLowLimitPedestal(Float_t pedMean,Float_t pedSigma, Float_t maxSigma) {
 	return pedMean - TMath::Max(pedSigma*maxSigma,(Float_t)1.0);
+}
+
+void TPedestalCalculation::calculateCommonModeDet(int det) {
+}
+
+Float_t TPedestalCalculation::GetCommonModeNoise(int det, int ch) {
+    if (TPlaneProperties::isDiamondDetector(det))
+        return cmNoise;
+    int  i = ch>=(TPlaneProperties::getNChannels(det)/2)?1:0;
+    return cmn_sil[det*2+i];
 }
 
 Float_t TPedestalCalculation::getHighLimitPedestal(Float_t pedMean,Float_t pedSigma, Float_t maxSigma) {

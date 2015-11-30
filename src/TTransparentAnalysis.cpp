@@ -531,7 +531,7 @@ void TTransparentAnalysis::fillHistograms() {
     }
     Float_t eventNo = eventReader->getEvent_number();
     vectorEventNo.push_back(eventNo);
-    Float_t cmn = eventReader->getCMNoise();
+    Float_t cmn = eventReader->getCMNoise(subjectDetector,0);
     vectorCMN.push_back(cmn);
     //	hPredictedPositionInStrip->Fill();
 }
@@ -1895,7 +1895,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
     centerChannel = TMath::Abs(direction);
     if (direction < 0) direction = -1;
     else direction = 1;
-    Float_t cmNoise = reader->getCMNoise();
+    Float_t cmNoise = reader->getCMNoise(det,centerChannel);
 
     // make cluster
     TCluster transparentCluster = TCluster(reader->getEvent_number(), det, -99, -99, TPlaneProperties::getNChannels(det),cmNoise);
@@ -2109,7 +2109,7 @@ void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
         Float_t noise = eventReader->getPedestalSigma(subjectDetector,channel,settings->doCommonModeNoiseCorrection());
         (*it).second->Fill(nEvent,noise);
     }
-    hCmnVsEventNo->Fill(nEvent,eventReader->getCMNoise());
+    hCmnVsEventNo->Fill(nEvent,eventReader->getCMNoise(subjectDetector,0));
 }
 
 void TTransparentAnalysis::saveNoiseHistos() {
