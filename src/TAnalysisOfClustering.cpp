@@ -1816,14 +1816,14 @@ void TAnalysisOfClustering::savePHHistos()
             histSaver->SaveGraph(&graph,histTitle.str());
         }
         delete hPHDistribution[det];
-        vector<TH1F*> vhtemps;
+        vector<TH1D*> vhtemps;
         TString hname = "hStackPHDist_ClusterSize";
         hname += TPlaneProperties::getStringForDetector(det);
         THStack* stack = new THStack(hname,hname);
         for (UInt_t cl = 1; cl < 5; cl++){
              hname = TString::Format("hPHDist_Cl%d_",cl);
             hname += TPlaneProperties::getStringForDetector(det);
-            TH1F* htemp = hPHDistIncreasingClustersize[det]->ProjectionX(hname,cl,cl);
+            TH1D* htemp = hPHDistIncreasingClustersize[det]->ProjectionX(hname,cl,cl);
             vhtemps.push_back(htemp);
             histSaver->SaveHistogram(htemp);
             stack->Add(htemp);
