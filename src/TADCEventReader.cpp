@@ -810,7 +810,7 @@ void TADCEventReader::setEtaDistributionPath(std::string path)
 	etaDistributionPath=path;
 }
 
-inline Float_t TADCEventReader::getCMNoise(UInt_t det, UInt_t ch) const {
+Float_t TADCEventReader::getCMNoise(UInt_t det, UInt_t ch) const {
     int i = ch>=TPlaneProperties::getNChannels(det);
     if (TPlaneProperties::isSiliconDetector(det))
         return cmn_det[det*2+i];
