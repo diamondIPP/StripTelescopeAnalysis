@@ -318,7 +318,7 @@ void TAnalysisOfPedestal::findBiggestSignalInDia(UInt_t area) {
  * create vector with biggest and biggest adjacent hit with PH in Sigma
  */
 void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
-    if(CMN_corrected&&TPlaneProperties::getDetDiamond()!=det)
+    if (CMN_corrected&&TPlaneProperties::getDetDiamond()!=det)
         return;
     Int_t bigHit;
     Float_t bigSignal;
@@ -367,6 +367,10 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 
     Float_t biggestSignalInSigma = eventReader->getSignalInSigma(det,bigHit,CMN_corrected);
     Float_t biggestAdjacentSignalInSigma =biggestAdjacentHitChannel>=0&&biggestAdjacentHitChannel< (Int_t)TPlaneProperties::getNChannels(det)? eventReader->getSignalInSigma(det,biggestAdjacentHitChannel,CMN_corrected):0;
+    if (hitOrder == -1)
+        hLeftVsRightSignal[det]->Fill(biggestAdjacentSignal,bigSignal);
+    else if (hitOrder == 1)
+        hLeftVsRightSignal[det]->Fill(bigSignal,biggestAdjacentSignal);
 
     if(!CMN_corrected){
         vecBiggestHitChannel[det].push_back(biggestHitChannel);
@@ -570,7 +574,6 @@ void TAnalysisOfPedestal::initialiseHistos()
 
         stringstream histoName;
 
-
         histoName.str("");
         histoName << "hPulseHeight_BiggestAdjacentInSigma_" << TPlaneProperties::getStringForDetector(det);
         hBiggestAdjacentSignalInSigma[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
@@ -609,6 +612,18 @@ void TAnalysisOfPedestal::initialiseHistos()
         histoName.str("");
         histoName << "PulseHeight" << TPlaneProperties::getStringForDetector(det) << "RightChipSecondBiggestHitChannelInSigma";
         histo_pulseheight_right_sigma_second[det] = new TH1F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max);
+
+        histoName.str("");
+        //hLeftVsRightSignal
+        max = TPlaneProperties::getMaxSignalHeight(det);
+        if (max >1000)
+            nbins = max/4;
+        else
+            nbins = max;
+        histoName << "hLeftVsRightSignal_" << TPlaneProperties::getStringForDetector(det);
+        hLeftVsRightSignal[det] = new TH2F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max,nbins,min,max);
+        histoName << "_CMNcorrected";
+        hLeftVsRightSignalCMN[det] = new TH2F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max,nbins,min,max);
     }
 
 }
@@ -1175,6 +1190,8 @@ void TAnalysisOfPedestal::saveHistos(){
         //		cout << "saving histogram " << this->histo_second_biggest_hit_direction[det]->GetName() << ".." << endl;
         histSaver->SaveHistogram(this->hHitOrderMap[det]);
         //		cout << "saving histogram " << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
+        histSaver->SaveHistogram(hLeftVsRightSignal[det]);
+        histSaver->SaveHistogram(hLeftVsRightSignalCMN[det]);
         histSaver->SaveHistogram(this->hBiggestHitChannelMap[det]);
         histSaver->SaveHistogram(this->hBiggestHitChannelMapCMN[det]);
         if(TPlaneProperties::isDiamondDetector(det)){
@@ -1204,6 +1221,8 @@ void TAnalysisOfPedestal::saveHistos(){
 
         //		delete histo_pulseheight_sigma125[det];
         delete hHitOrderMap[det];
+        delete hLeftVsRightSignal[det];
+        delete hLeftVsRightSignalCMN[det];
         delete hBiggestHitChannelMap[det];
         delete hBiggestHitChannelMapCMN[det];
         delete histo_pulseheight_left_sigma[det];
