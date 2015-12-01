@@ -367,10 +367,22 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
 
     Float_t biggestSignalInSigma = eventReader->getSignalInSigma(det,bigHit,CMN_corrected);
     Float_t biggestAdjacentSignalInSigma =biggestAdjacentHitChannel>=0&&biggestAdjacentHitChannel< (Int_t)TPlaneProperties::getNChannels(det)? eventReader->getSignalInSigma(det,biggestAdjacentHitChannel,CMN_corrected):0;
-    if (hitOrder == -1)
-        hLeftVsRightSignal[det]->Fill(biggestAdjacentSignal,bigSignal);
-    else if (hitOrder == 1)
-        hLeftVsRightSignal[det]->Fill(bigSignal,biggestAdjacentSignal);
+    Float_t S_L,S_R,eta,Q;
+
+    if (hitOrder == -1){
+        S_L = biggestAdjacentSignal;
+        S_R = bigSignal;
+    }
+    else if (hitOrder == 1){
+        S_L = bigSignal;
+        S_R = biggestAdjacentSignal;
+    }
+    if (hitOrder != 0){
+        Q = S_R+S_L
+        eta = S_R/(Q);
+        hLeftVsRightSignal[det]->Fill(S_L,S_R);
+        hEtaVsCharge[det]->Fill(eta,Q);
+    }
 
     if(!CMN_corrected){
         vecBiggestHitChannel[det].push_back(biggestHitChannel);
@@ -624,6 +636,9 @@ void TAnalysisOfPedestal::initialiseHistos()
         hLeftVsRightSignal[det] = new TH2F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max,nbins,min,max);
         histoName << "_CMNcorrected";
         hLeftVsRightSignalCMN[det] = new TH2F(histoName.str().c_str(),histoName.str().c_str(),nbins,min,max,nbins,min,max);
+        histoName.str("");
+        histoName <<"hEtaVsCharge_" << TPlaneProperties::getStringForDetector(det);
+        hEtaVsCharge[det] = new TH2F(histoName.str().c_str(),histoName.str().c_str(),nbins,0,1,nbins,min,max);
     }
 
 }
@@ -1191,6 +1206,8 @@ void TAnalysisOfPedestal::saveHistos(){
         histSaver->SaveHistogram(this->hHitOrderMap[det]);
         //		cout << "saving histogram " << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
         histSaver->SaveHistogram(hLeftVsRightSignal[det]);
+        histSaver->SaveHistogram(hEtaVsCharge[det]);
+        histSaver->SaveHistogram(hEtaVsCharge[det]->ProjectionX());
         histSaver->SaveHistogram(hLeftVsRightSignalCMN[det]);
         histSaver->SaveHistogram(this->hBiggestHitChannelMap[det]);
         histSaver->SaveHistogram(this->hBiggestHitChannelMapCMN[det]);

@@ -126,6 +126,7 @@ private:
 	TH2F *hDiaAllAdcNoiseCMNChannel;
 	TH2F *hLeftVsRightSignal[9];
 	TH2F *hLeftVsRightSignalCMN[9];
+	TH2F *hEtaVsCharge[9];
 	vector <Float_t> adcValues;
 	vector <Float_t> pedestalValues;
 	vector <Float_t> upperHitCutValues;
