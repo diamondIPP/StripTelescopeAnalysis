@@ -1217,7 +1217,7 @@ void TAnalysisOfPedestal::saveHistos(){
         //		cout << "saving histogram " << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
         histSaver->SaveHistogram(hLeftVsRightSignal[det]);
         histSaver->SaveHistogram(hEtaVsCharge[det]);
-        TH2D* hpx = hEtaVsCharge[det]->ProjectionX();
+        TH1D* hpx = hEtaVsCharge[det]->ProjectionX();
         histSaver->SaveHistogram(hpx);
         delete hpx;
         histSaver->SaveHistogram(hEtaVsSNR[det]);
