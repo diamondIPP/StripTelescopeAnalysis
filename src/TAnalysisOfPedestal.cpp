@@ -368,6 +368,7 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
     Float_t biggestSignalInSigma = eventReader->getSignalInSigma(det,bigHit,CMN_corrected);
     Float_t biggestAdjacentSignalInSigma =biggestAdjacentHitChannel>=0&&biggestAdjacentHitChannel< (Int_t)TPlaneProperties::getNChannels(det)? eventReader->getSignalInSigma(det,biggestAdjacentHitChannel,CMN_corrected):0;
     Float_t S_L,S_R,eta,Q;
+    Float_t SNR = biggestSignalInSigma;
 
     if (hitOrder == -1){
         S_L = biggestAdjacentSignal;
@@ -382,6 +383,7 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
         eta = S_R/(Q);
         hLeftVsRightSignal[det]->Fill(S_L,S_R);
         hEtaVsCharge[det]->Fill(eta,Q);
+        hEtaVsSNR[det]->Fill(eta,SNR);
     }
 
     if(!CMN_corrected){
@@ -639,6 +641,14 @@ void TAnalysisOfPedestal::initialiseHistos()
         histoName.str("");
         histoName <<"hEtaVsCharge_" << TPlaneProperties::getStringForDetector(det);
         hEtaVsCharge[det] = new TH2F(histoName.str().c_str(),histoName.str().c_str(),nbins,0,1,nbins,min,max);
+        hEtaVsCharge[det]->GetXaxis()->SetTitle("#eta = S_R/(S_L+S_R)");
+        hEtaVsCharge[det]->GetYaxis()->SetTitle("Cluster Charge Q=S_L+S_R");
+        histoName.str("");
+        histoName <<"hEtaVsSNR_" << TPlaneProperties::getStringForDetector(det);
+        max = 400;
+        hEtaVsSNR[det] = new TH2F(histoName.str().c_str(),histoName.str().c_str(),nbins,0,1,nbins,min,max);
+        hEtaVsSNR[det]->GetXaxis()->SetTitle("#eta = S_R/(S_L+S_R)");
+        hEtaVsSNR[det]->GetYaxis()->SetTitle("SNR of biggest hit");
     }
 
 }
@@ -1207,7 +1217,15 @@ void TAnalysisOfPedestal::saveHistos(){
         //		cout << "saving histogram " << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
         histSaver->SaveHistogram(hLeftVsRightSignal[det]);
         histSaver->SaveHistogram(hEtaVsCharge[det]);
-        histSaver->SaveHistogram(hEtaVsCharge[det]->ProjectionX());
+        TH2D* hpx = hEtaVsCharge[det]->ProjectionX();
+        histSaver->SaveHistogram(hpx);
+        delete hpx;
+        histSaver->SaveHistogram(hEtaVsSNR[det]);
+        Int_t ybin = hEtaVsSNR[det]->GetYaxis()->FindBin(settings->getClusterSeedFactor(det,0));
+        hpx =  hEtaVsSNR[det]->ProjectionX("",ybin);
+        histSaver->SaveHistogram(hpx);
+        delete hpx;
+
         histSaver->SaveHistogram(hLeftVsRightSignalCMN[det]);
         histSaver->SaveHistogram(this->hBiggestHitChannelMap[det]);
         histSaver->SaveHistogram(this->hBiggestHitChannelMapCMN[det]);
