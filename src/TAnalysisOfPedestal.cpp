@@ -378,7 +378,7 @@ void TAnalysisOfPedestal::analyseBiggestHit(UInt_t det,bool CMN_corrected) {
         S_R = biggestAdjacentSignal;
     }
     if (hitOrder != 0){
-        Q = S_R+S_L
+        Q = S_R+S_L;
         eta = S_R/(Q);
         hLeftVsRightSignal[det]->Fill(S_L,S_R);
         hEtaVsCharge[det]->Fill(eta,Q);
