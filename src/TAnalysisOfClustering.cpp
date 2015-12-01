@@ -891,6 +891,7 @@ void TAnalysisOfClustering::saveHistos(){
             else
                 prof->GetYaxis()->SetRangeUser(-100,100);
             histSaver->SaveHistogram(prof,false,false,false);(hDeltaLeftRightVsMaximum[det],0,false);
+
             delete hDeltaLeftRightVsMaximum[det];
             hDeltaLeftRightVsMaximum[det]=0;
         }
@@ -918,7 +919,7 @@ void TAnalysisOfClustering::saveHistos(){
                 profRight->GetYaxis()->SetRangeUser(-500,500);
             else
                 profRight->GetYaxis()->SetRangeUser(-100,100);
-            hRightVsMaximum->SaveHistogram(profRight,false,false,false);
+            histSaver->SaveHistogram(profRight,false,false,false);
             delete hRightVsMaximum[det];
             hRightVsMaximum[det]=0;
         }
