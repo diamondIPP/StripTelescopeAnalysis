@@ -201,6 +201,7 @@ private:
     void CreateRelHitPosXMeasDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
     void CreateRelHitPosMeasXPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
     void CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
+    void CreateResidualVsAngle(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot);
 
     void CreateScatterPlotDeltaXvsChi2X(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotDeltaYvsChi2Y(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);

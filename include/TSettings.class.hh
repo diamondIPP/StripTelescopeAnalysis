@@ -115,6 +115,7 @@ public:
 	bool b3dDiamond;
 	bool doTransparentAlignment()const {return bTransparentAlignment;}
 	int getAlignmentMode()const {return detectorsToAlign;}
+	int getDetectorsToAlign()const{return detectorsToAlign;}
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};

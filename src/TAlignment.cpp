@@ -1740,7 +1740,7 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
         delete histo;
     }
     vector<Float_t> relHitPosUsed,relHitPosNotUsed;
-    for(UInt_t i=0;i<vecXDetRelHitPosPredMetricAll.size()&&vecUsedEventAll.size();i++){
+    for(UInt_t i=0;i<vecXDetRelHitPosPredMetricAll.size()&& i < vecUsedEventAll.size();i++){
         if(vecUsedEventAll[i])
             relHitPosUsed.push_back(vecXDetRelHitPosPredMetricAll[i]);
         else
@@ -1752,14 +1752,15 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
     if(hProjNotUsed) hProjNotUsed->SetLineColor(kRed);
 
     TString name = preName+(TString)("_StackRelHitPosXPred_")+refPlaneString+postName;
-    THStack* stack = new THStack(name,TString::Format("Rel. pred. hit pos X,plane %d /#mum",subjectPlane));
+    THStack* stack = new THStack(name,TString::Format(";Rel. pred. hit pos X,plane %d /#mum;number of entries",subjectPlane));
     if(hProjUsed)
         stack->Add(hProjUsed);
     if(hProjNotUsed)
         stack->Add(hProjNotUsed);
-    stack->Draw("goff");
+    stack->Draw("nostack");
     if(hProjNotUsed||hProjUsed)
-        stack->GetXaxis()->SetTitle("rel pred hit pos /#mum");
+        if (stack->GetXaxis())
+            stack->GetXaxis()->SetTitle("rel pred hit pos /#mum");
 
     stack->SetName(name+(TString)("_noStack"));
     histSaver->SaveStack(stack,"nostack");
@@ -1981,36 +1982,45 @@ void TAlignment::CreateScatterPlotPredYvsDeltaY(
 }
 
 void TAlignment::CreateRelHitPosVsChi2Plots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString){
+    if (cor == TPlaneProperties::XY_COR){
+        CreateRelHitPosVsChi2Plots(TPlaneProperties::X_COR,subjectPlane,preName,postName,refPlaneString);
+        CreateRelHitPosVsChi2Plots(TPlaneProperties::Y_COR,subjectPlane,preName,postName,refPlaneString);
+        return;
+    }
     vector<Float_t> vecRelPos;
     TString histName;
-    if(cor == TPlaneProperties::Y_COR || cor == TPlaneProperties::XY_COR){
-        vecRelPos.clear();
-        for(UInt_t i = 0; i < vecYLabPredMetric.size(); i++){
-            Float_t yPred = vecYLabPredMetric.at(i);
-            int subjectDet = subjectPlane*2+1;
-            Float_t channelPos = myTrack->inChannelDetectorSpace(subjectDet,yPred);
-            Float_t relPos = channelPos-(int)(channelPos+.5);
-            //                cout<<i<<" "<<yPred<<"-->"<<channelPos<<" "<<relPos<<"\n";
-            vecRelPos.push_back(relPos);
-        }
+    vecRelPos.clear();
+    vector<Float_t> *v;
+    if(cor == TPlaneProperties::Y_COR)
+        v = &vecYLabPredMetric;
+    else
+        v = &vecXLabPredMetric;
 
-        histName = preName + TString::Format("_RelHitPosY_Plane_%d_with_",subjectPlane) + refPlaneString+postName;
-        TH1F* histo = histSaver->CreateDistributionHisto((string)histName, vecRelPos, 512);
-        if(histo){
-            histo->GetXaxis()->SetTitle("relative Hit Position / ch");
-            histo->GetYaxis()->SetTitle("number of entries");
-            histSaver->SaveHistogram(histo);
-            delete histo;
-        }
+    for(UInt_t i = 0; i < v->size(); i++){
+        Float_t yPred = v->at(i);
+        int subjectDet = subjectPlane*2+1;
+        Float_t channelPos = myTrack->inChannelDetectorSpace(subjectDet,yPred);
+        Float_t relPos = channelPos-(int)(channelPos+.5);
+        vecRelPos.push_back(relPos);
+    }
+
+    histName = preName +TString("_RelHitPos")+(TString)TPlaneProperties::getCoordinateString(cor)+  TString::Format("_Plane_%d_with_",subjectPlane) + refPlaneString+postName;
+    TH1F* histo = histSaver->CreateDistributionHisto((string)histName, vecRelPos, 512);
+    if(histo){
+        histo->GetXaxis()->SetTitle("relative Hit Position / ch");
+        histo->GetYaxis()->SetTitle("number of entries");
+        histSaver->SaveHistogram(histo);
+        delete histo;
     }
 
     histName = preName + (TString)"_relHitPos"+(TString)TPlaneProperties::getCoordinateString(cor);
     histName.Append(TString::Format("vsChi2X_Plane_%d_with",subjectPlane)+refPlaneString+postName);
+    TString yTitle = TString("relative Hit Position") +(TString)TPlaneProperties::getCoordinateString(cor) + TString(" / ch");
 
     TH2F* hist = histSaver->CreateScatterHisto((string)histName, vecRelPos,vecXChi2);
     if(hist){
-        hist->GetXaxis()->SetTitle("relative Hit Position / ch");
-        hist->GetYaxis()->SetTitle("#Chi^{2}_{X}");
+        hist->GetYaxis()->SetTitle(yTitle);
+        hist->GetXaxis()->SetTitle("#chi^{2}_{X}");
         hist->GetZaxis()->SetTitle("number of entries #");
         histSaver->SaveHistogram(hist);
         if(hist)delete hist;
@@ -2019,12 +2029,55 @@ void TAlignment::CreateRelHitPosVsChi2Plots(TPlaneProperties::enumCoordinate cor
     histName.Append(TString::Format("vsChi2Y_Plane_%d_with",subjectPlane)+refPlaneString+postName);
     hist = histSaver->CreateScatterHisto((string)histName, vecRelPos,vecYChi2);
     if(hist){
-        hist->GetXaxis()->SetTitle("relative Hit Position / ch");
-        hist->GetYaxis()->SetTitle("#Chi^{2}_{Y}");
+        hist->GetYaxis()->SetTitle(yTitle);
+        hist->GetXaxis()->SetTitle("#chi^{2}_{Y}");
         hist->GetZaxis()->SetTitle("number of entries #");
         histSaver->SaveHistogram(hist);
         if(hist)delete hist;
     }
+}
+
+void TAlignment::CreateResidualVsAngle(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot){
+    if(!bPlot)  return;
+
+    TString histName = preName + TString::Format("_DeltaX_Vs_PhiX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+    TH2F* hist = histSaver->CreateScatterHisto(histName,this->vecXLabDeltaMetric,this->vecXPhi);
+     if(hist){
+         hist->GetYaxis()->SetTitle("Angle #Phi_X");
+         hist->GetXaxis()->SetTitle("Delta X");
+         hist->GetZaxis()->SetTitle("number of entries");
+         histSaver->SaveHistogram(hist);
+         delete hist;
+     }
+     histName = preName + TString::Format("_DeltaX_Vs_PhiY_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+     hist = histSaver->CreateScatterHisto(histName,this->vecXLabDeltaMetric,this->vecYPhi);
+     if(hist){
+         hist->GetYaxis()->SetTitle("Angle #Phi_Y");
+         hist->GetXaxis()->SetTitle("Delta X");
+         hist->GetZaxis()->SetTitle("number of entries");
+         histSaver->SaveHistogram(hist);
+         delete hist;
+     }
+
+     histName = preName + TString::Format("_DeltaY_Vs_PhiX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+     hist = histSaver->CreateScatterHisto(histName,this->vecYLabDeltaMetric,this->vecXPhi);
+     if(hist){
+         hist->GetYaxis()->SetTitle("Angle #PhiX");
+         hist->GetXaxis()->SetTitle("Delta Y");
+         hist->GetZaxis()->SetTitle("number of entries");
+         histSaver->SaveHistogram(hist);
+         delete hist;
+     }
+
+     histName = preName + TString::Format("_DeltaY_Vs_PhiY_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+     hist = histSaver->CreateScatterHisto(histName,this->vecYLabDeltaMetric,this->vecYPhi);
+     if(hist){
+         hist->GetYaxis()->SetTitle("Angle #Phi_Y");
+         hist->GetXaxis()->SetTitle("Delta Y");
+         hist->GetZaxis()->SetTitle("number of entries");
+         histSaver->SaveHistogram(hist);
+         delete hist;
+     }
 }
 
 void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot){
@@ -2083,6 +2136,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateScatterPlotEtaVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosMeasXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosPredXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
+    CreateResidualVsAngle(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     CreateFidValueXVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     Float_t yPredictionSigma = CreateSigmaOfPredictionYPlots(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     CreateDistributionPlotDeltaY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,yPredictionSigma);

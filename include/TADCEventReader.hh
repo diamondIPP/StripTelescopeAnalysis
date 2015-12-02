@@ -44,7 +44,7 @@ public:
 	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);
 	Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected=false);
 	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected=false);
-	 Float_t getCMNoise(UInt_t det=8,UInt_t ch=0) const;
+	Float_t getCMNoise(UInt_t det=8,UInt_t ch=0) const;
 	inline bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
 	UInt_t getCurrent_event() const;
 	UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
