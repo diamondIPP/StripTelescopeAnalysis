@@ -4610,6 +4610,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
 //    palette->SetY2NDC(0.7);
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1);
     settings->DrawMetallisationGrid(c1,3);
+    hMeanCharge->Draw("colz same");
     histSaver->SaveCanvas(c1);
     c1->Clear();
 

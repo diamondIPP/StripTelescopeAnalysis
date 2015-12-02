@@ -428,7 +428,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	if(!lastPredictionValid)prediction->setValid(false);
 	if(verbosity>10||bPrint)	cout<<"\tPrediction of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes for ZPosition: "<<zPos<<endl;
 	if(verbosity>10||bPrint)	cout<<"\t X: "<<xprediction.first<<" +/- "<<xprediction.second<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
-	if(verbosity>10||bPrint)	cout<<"\t Y: "<<yprediction.first<<" +/- "<<yprediction.second<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
+	if(verbosity>10||bPrint)	cout<<"\t Y: "<<yprediction.first<<" +/- "<<yprediction.second<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n";
+    if(verbosity>10||bPrint)	cout<<"\t PhiX: "<<xPhi<<"  PhiY:"<<yPhi<<"\tm:"<<mx<<"/"<<my<<"  b:"<<bx<<"/"<<by<<"\n"<<endl;
 	return prediction;
 }
 
