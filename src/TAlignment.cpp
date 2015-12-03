@@ -2444,12 +2444,13 @@ void TAlignment::CreateDistributionPlotDeltaY(
 
 
     if (subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {        //DistributionPlot DeltaY
-       TString name = preName + TString::Format("_Distribution_DeltaY_Plane_%d_with_",subjectPlane) + refPlaneString + postName;
-       TString xTitle = "Delta Y /#mum";
-       TString yTitle = "number fo entries #";
+        TString name = preName + TString::Format("_Distribution_DeltaY_Plane_%d_with_",subjectPlane) + refPlaneString + postName;
+        TString xTitle = "Delta Y /#mum";
+        TString yTitle = "number fo entries #";
         if(verbosity>3)cout<<"Save: "<<name<<flush;
 
         TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto((string)name, vecYLabDeltaMetric, 512, HistogrammSaver::threeSigma);
+        bool verb = name.BeginsWith("hSilicon_PostAlignment_Distribution_DeltaY_Plane_0");
         if(!histo)
             cerr<<"Could not CreateDistributionHisto: "<<name<<endl;
         else{
@@ -2459,6 +2460,12 @@ void TAlignment::CreateDistributionPlotDeltaY(
             Float_t sigma = histo->GetRMS();
             Float_t fitWidth = sigma *1.5;
             Float_t mean = histo->GetMean();
+            if (verb){
+                cout<<"Title: "<<title<<endl;
+                cout<<"mean "<<mean<<endl;
+                cout<<"sigma "<<sigma<<endl;
+                cout<<"fitWidth "<<fitWidth<<endl;
+            }
             TF1* fitGausY = new TF1("fitGausY", "gaus", mean-fitWidth, mean+fitWidth);
             fitGausY->SetParameter(1,mean);
             fitGausY->SetParameter(2,sigma);
@@ -2477,8 +2484,8 @@ void TAlignment::CreateDistributionPlotDeltaY(
             gausFitValuesY.at(subjectPlane)= make_pair(mean,yRes);
             if (bUpdateResolution&&histo->GetEntries()>0 && yRes > 0) {
                 cout << "\n\nset Y-Resolution via Gaus-Fit: " << yRes*100 << " with " << vecYLabDeltaMetric.size() << " Events" << endl;
-//                cout << "yRes: "<<yRes*100<<endl;
-//                cout << "yPre: "<<yPredictionSigma*100<<endl;
+                //                cout << "yRes: "<<yRes*100<<endl;
+                //                cout << "yPre: "<<yPredictionSigma*100<<endl;
                 Float_t yres2 =yRes;
                 if(yRes>yPredictionSigma){
                     yres2 = yRes*yRes-yPredictionSigma*yPredictionSigma;
@@ -2491,9 +2498,29 @@ void TAlignment::CreateDistributionPlotDeltaY(
                 cout<< "yDet: "<<yres2*100<<" = sqrt( "<<yRes*100<<"^2 + "<<yPredictionSigma*100<<"^2)"<<endl;
                 align->setYResolution(yres2, subjectPlane);
                 align->setYMean(mean,subjectPlane);
-                histo->GetXaxis()->SetRangeUser(mean-4 * yRes,mean +4 * yRes);
+                Float_t xmin = mean - 4 * yRes;
+                Float_t xmax = mean + 4 * yRes;
+                Int_t binLow = histo->GetXaxis()->FindBin(xmin);
+                Int_t binUp  = histo->GetXaxis()->FindBin(xmax);
+                if (binUp-binLow>5)
+                    histo->GetXaxis()->SetRangeUser(mean-4 * yRes,mean +4 * yRes);
+                if (verb){
+                    cout<<"mean "<<mean<<endl;
+                    cout<<"yRes "<<yRes<<endl;
+                    cout<<"yres2 "<<yres2<<endl;
+                    cout<<"yPredictionSigma "<<yPredictionSigma<<endl;
+                    cout<<"xmin "<<xmin<<endl;
+                    cout<<"xmax "<<xmax<<endl;
+                    cout<<"binLow "<<binLow<<endl;
+                    cout<<"binUp "<<binUp<<endl;
+                }
+
             }
             if (bPlot) histSaver->SaveHistogram(histo);
+            if (verb){
+                std::cout<<"Press a key"<<endl;
+                char t; cin >>t;
+            }
             if(verbosity>3)cout<<" DONE"<<endl;
             delete fitGausY;
             delete histo;
