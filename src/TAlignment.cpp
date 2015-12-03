@@ -1990,14 +1990,18 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, bool isSiliconPostAlignment) {
+    TString name = preName + TString::Format("_ScatterPlot_XPred_vs_DeltaY_Plane_%d_with_",subjectPlane )+refPlaneString+postName;
+    bool verb = name.BeginsWith("hSilicon_PostAlignment_ScatterPlot_XPred_vs_DeltaY_Plane_1");
     if (bPlot && subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //ScatterPlot DeltaY vs Xpred
-        TString name = preName + TString::Format("_ScatterPlot_XPred_vs_DeltaY_Plane_%d_with_",subjectPlane )+refPlaneString+postName;
+
         TString xTitle = "X predicted /#mum";
         TString yTitle = "Delta Y /#mum";
         if(verbosity>3) cout<<"Save: "<<name<<" "<<flush;
         TH2F *histo = histSaver->CreateScatterHisto((string)name, vecYLabDeltaMetric,  vecXLabPredMetric, 256);
         if(!histo)
             cerr<<"Could not create "<<name<<endl;
+        else if (histo->GetEntries()==0)
+            cerr<<"histo has 0 entries"<<vecYLabDeltaMetric.size()<<"/"<<vecXLabPredMetric.size()<<endl;
         else{
             histo->GetXaxis()->SetTitle(xTitle);
             histo->GetYaxis()->SetTitle(yTitle);
@@ -2012,6 +2016,11 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
         graph.GetYaxis()->SetTitle(yTitle);
         histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
         if(verbosity>3)cout<<" DONE"<<endl;
+    }
+    if(verb){
+        cout<<"[CreateScatterPlotPredXvsDeltaY] Pres a key"<<endl;
+        char t;
+        cin>>t;
     }
 }
 
@@ -2437,8 +2446,7 @@ void TAlignment::clearMeasuredVectors() {
 
 }
 
-void TAlignment::
-(
+void TAlignment::CreateDistributionPlotDeltaY(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, Float_t yPredictionSigma) {
