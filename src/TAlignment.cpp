@@ -773,12 +773,19 @@ TResidual TAlignment::getResidual(TPlaneProperties::enumCoordinate cor, UInt_t s
 }
 
 TString TAlignment::GetReferencePlaneString(vector<UInt_t> *vecRefPlanes){
+    if (verbosity){
+        cout<<"Ref Planes: [";
+        for(UInt_t refPlane1=0;refPlane1<vecRefPlanes->size();refPlane1++){
+            cout<<" "<<vecRefPlanes->at(refPlane1);
+        }
+        cout<<"]"<<endl;
+    }
     for(UInt_t refPlane1=0;refPlane1<vecRefPlanes->size()-1;refPlane1++){
         for(UInt_t refPlane2=refPlane1+1;refPlane2<vecRefPlanes->size();refPlane2++){
             if(vecRefPlanes->at(refPlane1)==vecRefPlanes->at(refPlane2)){
-                cout<<" Removing "<<refPlane1<<" "<<refPlane2<<":"<< vecRefPlanes->at(refPlane1)<<" from"<<vecRefPlanes->size()<<"-";
+                if (verbosity>1) cout<<" Removing "<<refPlane1<<" "<<refPlane2<<":"<< vecRefPlanes->at(refPlane1)<<" from"<<vecRefPlanes->size()<<"-";
                 vecRefPlanes->erase(vecRefPlanes->begin()+refPlane1);
-                cout<<vecRefPlanes->size()<<endl;
+                if (verbosity>1) cout<<vecRefPlanes->size()<<endl;
             }
         }
     }
@@ -1486,7 +1493,7 @@ void TAlignment::CreateDistributionPlotDeltaX(
 
     TString histName = preName;
     histName.Append(TString::Format("_Distribution_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName);
-    cout<<histName<<endl;
+    if (verbosity >4) cout<<histName<<endl;
     TH1F* histo = 0;
 
     if(TPlaneProperties::isDiamondPlane(subjectPlane)&&(nDiaAlignmentStep == nDiaAlignSteps)){
@@ -1735,7 +1742,7 @@ void TAlignment::CreateScatterPlotEtaVsDeltaX(
 void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot){
     if(cor==TPlaneProperties::Y_COR)
         return;
-    if(verbosity)
+    if(verbosity>2)
         cout<<"[CreateRelHitPosXPredDetMetricVsUseEventPlot] subjectPlane:"<<subjectPlane<<" "<<vecXDetRelHitPosPredMetricAll.size()<<"/"<<vecUsedEventAll.size()<<endl;
     TString histName = preName + TString::Format("_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
     if(vecXDetRelHitPosPredMetricAll.size()==0 ||(vecXDetRelHitPosPredMetricAll.size()!=vecUsedEventAll.size())){
@@ -2128,6 +2135,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     TString postName = GetPlotPostName(bChi2);
     bool isSiliconPostAlignment = (subjectPlane!=4)&&(nAlignmentStep == nAlignSteps);
     isSiliconPostAlignment  = isSiliconPostAlignment  || ((subjectPlane==4) && nDiaAlignSteps == nDiaAlignmentStep);
+    if (verbosity>2){
     std::cout << "Create Plots: pre:\""<<preName<<"\"  post\""<<postName<<"\"" << endl;
     std::cout << "   Update Resolution: "<<bUpdateResolution << endl;
     std::cout << "   SubjectPlane "<<subjectPlane << endl;
@@ -2136,13 +2144,15 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     std::cout << "   nDiaAlignSteps: " << nDiaAlignSteps << endl;
     std::cout << "   nDiaAlignmentStep " << nDiaAlignmentStep << endl;
     std::cout << "   IsSiliconPostAlignment: "<<isSiliconPostAlignment << endl;;
+    }
 
     stringstream histName;
-    if(verbosity){cout << "\nCreatePlots with " << preName << " " << (subjectPlane!=4?nAlignmentStep:nDiaAlignmentStep) <<" Step" << flush;
-    if (bUpdateResolution)
-        cout << "\twith Alignment Resolution Update\n" << endl;
-    else
-        cout << endl;
+    if(verbosity<=2){
+        cout << "\nCreatePlots with " << preName << " " << (subjectPlane!=4?nAlignmentStep:nDiaAlignmentStep) <<" Step" << flush;
+        if (bUpdateResolution )
+            cout << "\twith Alignment Resolution Update\n" << endl;
+        else
+            cout << endl;
     }
 
     CreateRelHitPosXPredDetMetricVsUseEventPlot( cor,subjectPlane,preName,postName,refPlaneString,bPlot);
