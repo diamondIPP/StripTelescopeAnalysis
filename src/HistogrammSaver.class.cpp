@@ -2210,12 +2210,23 @@ Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
 }
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax, Float_t factor)
 {
-    int verbosity = 0;
+
+    TString hName = name;
+    bool verb = hName.BeginsWith("hSilicon_PostAlignment_Distribution_DeltaY_Plane_0");
+    int verbosity = verb*6;
     //	Float_t factor = 0.05;//5% bigger INtervall...
     if(vec.size()==0)
         return new TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
-    Float_t max = vec.at(0);
-    Float_t min = vec.at(0);
+    std::vector<Float_t>vec2 = vec;
+    std::sort (vec2.begin(), vec2.end())
+    int entries = vec2.size();
+    int low = entries *.05;
+    int up = entries *.95;
+    if (verbosity>3)
+        cout<<"Kicking out max and mins: "<<entries<<" "<<low<<"-"<<up<<"\tLOW: "<<
+            vec2.at(0)<<"->"<<vec2.at(low)<<"\tUP: "<<vec2.at(up)<<"<--"<<vec2.at(entries-1)<<endl;
+    Float_t max = vec.at(low);
+    Float_t min = vec.at(low);
     if(verbosity>3)cout<<"Create Histo "<<name<<", mode "<<range<<" "<<flush;
     if (range==maxWidth){
         for(UInt_t i=0;i<vec.size();i++){
@@ -2235,8 +2246,8 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
         Float_t  mean2 =0;
         Float_t sigma2 = 0;
         int n=0;
-        for(UInt_t i=0;i<vec.size();i++){
-            Float_t x = vec.at(i);
+        for(UInt_t i=low;i<=up && i < entries;i++){
+            Float_t x = vec2.at(i);
             if(x<xmin||x>xmax)
                 continue;
             mean2+=x;
@@ -2245,15 +2256,17 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
         }
         mean2/=(Float_t)n;
         sigma2/=(Float_t)n;
+        if(verbosity>3)cout<<"mean2: "<<mean2<<"\tsigma2:"<<sigma2<<endl;
 
         Float_t mean=0;
         Float_t sigma=0;
         UInt_t nEvents=0;
+        Float_t nsigma = range==fiveSigma?5:3;
         for(UInt_t i=0;i<vec.size();i++){
             Float_t x = vec.at(i);
             if(x<xmin||x>xmax)
                 continue;
-            if( (x-mean2)/sigma2>3.)
+            if( ((x-mean2)/sigma2)>nsigma)
                 continue;
             mean+=x;
             sigma+=x*x;
