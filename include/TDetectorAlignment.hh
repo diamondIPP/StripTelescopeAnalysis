@@ -107,6 +107,7 @@ public:
   bool isPreAligned(Float_t maxOffset=0.3,Int_t nAlignedDetectors=2);
   void addEventIntervall(UInt_t first,UInt_t last);
   void setAlignmentTrainingTrackFraction(Float_t fraction){alignmentTrainingTrackFraction=fraction;};
+  Float_t getAlignmentTrainingTrackFraction() const {return alignmentTrainingTrackFraction;}
   void setDiamondDate(){diaTime=TDatime();};
   void setSiliconDate(){silTime=TDatime();};
   void setRunNumber(UInt_t rn){this->runNumber=rn;};
