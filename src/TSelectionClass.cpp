@@ -168,6 +168,9 @@ bool TSelectionClass::createSelectionTree(int nEvents)
     if(verbosity)cout<<"\tgoToSelection Tree:"<<endl;
     settings->goToSelectionTreeDir();
     selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"READ");
+    if (settings->RerunSelection()){
+        std::cout<<"Rerun Selection please approve:"<<flush;
+    }
     if(selectionFile->IsZombie() || settings->RerunSelection()){
         if(verbosity && selectionFile->IsZombie())
             cout<<"\tselectionfile does not exist, create new one..."<<endl;
