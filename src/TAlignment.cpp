@@ -2028,6 +2028,38 @@ void TAlignment::CreateScatterPlotPredYvsDeltaY(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, bool isSiliconPostAlignment) {
+    TString name = preName + TString::Format("_ScatterPlot_YPred_vs_DeltaY_Plane_%d_with_",subjectPlane )+refPlaneString+postName;
+    bool verb = name.BeginsWith("hSilicon_PostAlignment_ScatterPlot_YPred_vs_DeltaY_Plane_1");
+    if (bPlot && subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //ScatterPlot DeltaY vs Xpred
+        TString xTitle = "Y predicted /#mum";
+        TString yTitle = "Delta Y /#mum";
+        if(verbosity>3) cout<<"Save: "<<name<<" "<<flush;
+        TH2F *histo = histSaver->CreateScatterHisto((string)name, vecYLabDeltaMetric,  vecYLabPredMetric, 256);
+        if(!histo)
+            cerr<<"Could not create "<<name<<endl;
+        else if (histo->GetEntries()==0)
+            cerr<<"histo has 0 entries"<<vecYLabDeltaMetric.size()<<"/"<<vecXLabPredMetric.size()<<endl;
+        else{
+            histo->GetXaxis()->SetTitle(xTitle);
+            histo->GetYaxis()->SetTitle(yTitle);
+            histSaver->SaveHistogram((TH2F*) histo->Clone());
+            delete histo;
+        }
+
+        name.Replace(0,1,"g");
+        TGraph graph = histSaver->CreateDipendencyGraph((string)name, vecYLabDeltaMetric, vecYLabPredMetric);
+        graph.Draw("APL");
+        graph.GetXaxis()->SetTitle(xTitle);
+        graph.GetYaxis()->SetTitle(yTitle);
+        histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
+        if(verbosity>3)cout<<" DONE"<<endl;
+    }
+    if(verb){
+        cout<<"[CreateScatterPlotPredXvsDeltaY] Pres a key"<<endl;
+        char t;
+        cin>>t;
+    }
+
 }
 
 void TAlignment::CreateRelHitPosVsChi2Plots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString){
@@ -2190,6 +2222,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     if(bUpdateResolution)
         xPredictionSigma = CreateSigmaOfPredictionXPlots( cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateDistributionPlotDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,xPredictionSigma);
+
     CreateScatterPlotPredYvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotPredXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotMeasXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
@@ -2199,7 +2232,10 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateResidualVsAngle(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateFidValueXVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     Float_t yPredictionSigma = CreateSigmaOfPredictionYPlots(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
+
     CreateDistributionPlotDeltaY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,yPredictionSigma);
+    CreateScatterPlotPredXvsDeltaY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
+    CreateScatterPlotPredYvsDeltaY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
 
     CreateScatterPlotObsXvsObsY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
 
