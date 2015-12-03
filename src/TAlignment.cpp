@@ -1617,6 +1617,8 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
         xmin = mean - 3 * sigma;
         xmax = mean + 3 * sigma;
         histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric,vecYLabPredMetric,256,512,xmin,xmax,ymin,ymax);
+        if(!histo)
+            cout<<"isSiliconPostAlignment: "<<xmin<<" "<<xmax<<" "<<ymin<<" "<<ymax<<" "<<mean<<"+/-"<<sigma<<endl;
     }
     else
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecYLabPredMetric, 256);
@@ -1625,6 +1627,11 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
         histo->GetYaxis()->SetTitle("Delta X / #mum");
         histSaver->SaveHistogram(histo);
         delete histo;
+    }
+    else{
+        std::cout<<"Something is wrong CreateScatterPlotPredYvsDeltaX"<<endl;
+        char t;
+        cin>>t;
     }
     histName.Append( "_graph");
     TGraph graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecYLabPredMetric);
