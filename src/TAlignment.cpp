@@ -2109,12 +2109,20 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
 void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, string refPlaneString, bool bPlot, bool bUpdateResolution, bool bChi2) {
     if (!bPlot && !bUpdateResolution) return;
     if (bPlot)
-        if(verbosity>3)cout<<"Save Histograms: "<<  vecXLabDeltaMetric.size() << " " << vecYLabDeltaMetric.size() << " " << vecXLabPredMetric.size() << " " << vecYLabPredMetric.size() << " " << vecXLabMeasMetric.size() << " " << vecYLabMeasMetric.size() << endl;
+        if(verbosity>0)cout<<"Save Histograms: "<<  vecXLabDeltaMetric.size() << " " << vecYLabDeltaMetric.size() << " " << vecXLabPredMetric.size() << " " << vecYLabPredMetric.size() << " " << vecXLabMeasMetric.size() << " " << vecYLabMeasMetric.size() << endl;
     // define preName
     TString preName  = GetPlotPreName(subjectPlane);;
     TString postName = GetPlotPostName(bChi2);
     bool isSiliconPostAlignment = (subjectPlane!=4)&&(nAlignmentStep == nAlignSteps);
-    isSiliconPostAlignment  = isSiliconPostAlignment  || ((subjectPlane==4) && nDiaAlignSteps == nDiaAlignSteps);
+    isSiliconPostAlignment  = isSiliconPostAlignment  || ((subjectPlane==4) && nDiaAlignSteps == nDiaAlignmentStep);
+    std::cout << "Create Plots: pre:\""<<preName<<"\"  post\""<<postName<<"\"" << endl;
+    std::cout << "   Update Resolution: "<<bUpdateResolution << endl;
+    std::cout << "   SubjectPlane "<<subjectPlane << endl;
+    std::cout << "   nAlignmentStep: "<<nAlignmentStep << endl;
+    std::cout << "   nAlignSteps: " << nAlignSteps << endl;
+    std::cout << "   nDiaAlignSteps: " << nDiaAlignSteps << endl;
+    std::cout << "   nDiaAlignmentStep " << nDiaAlignmentStep << endl;
+    std::cout << "   IsSiliconPostAlignment: "<<isSiliconPostAlignment << endl;;
 
     stringstream histName;
     if(verbosity){cout << "\nCreatePlots with " << preName << " " << (subjectPlane!=4?nAlignmentStep:nDiaAlignmentStep) <<" Step" << flush;
