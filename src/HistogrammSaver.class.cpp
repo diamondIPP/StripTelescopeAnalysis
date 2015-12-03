@@ -2230,7 +2230,7 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
     if(vec.size()==0)
         return new TH1F(name.c_str(),name.c_str(),nBins,0.,1.);
     std::vector<Float_t>vec2 = vec;
-    std::sort (vec2.begin(), vec2.end())
+    std::sort (vec2.begin(), vec2.end());
     int entries = vec2.size();
     int low = entries *.05;
     int up = entries *.95;
@@ -2332,10 +2332,10 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
         histo->Fill(vec.at(i));
     }
     int ntries=0;
-    Double_t entries = histo->GetEntries();
+    entries = histo->GetEntries();
     while (true){
         Double_t max = histo->GetBinContent(histo->GetMaximumBin());
-        Double_t fraction = max / entries;
+        Double_t fraction = max / (Double_t)entries;
         if (histo->GetNbinsX() < 20)
             break;
         if (max>0.05)

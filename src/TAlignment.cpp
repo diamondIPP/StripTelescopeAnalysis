@@ -369,7 +369,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
     align->addEventIntervall(startEvent, nEvent);
     align->setNUsedEvents((UInt_t) events.size());
     align->setAlignmentTrainingTrackFraction(settings->getAlignment_training_track_fraction());
-    cout<<"AlignmentTrainingTrackFraction: "<< align->getAlignmentTrainingTrackFraction() <<end;
+    cout<<"AlignmentTrainingTrackFraction: "<< align->getAlignmentTrainingTrackFraction() <<endl;
     align->setRunNumber(settings->getRunNumber());
     if(events.size()<=0){
         cerr<<"The Event vector has the size 0. No Alignment can be performed. EXIT."<<endl;
@@ -2482,7 +2482,8 @@ void TAlignment::clearMeasuredVectors() {
 
 }
 
-void TAlignment::CreateDistributionPlotDeltaY(
+void TAlignment::CreateDistributionPlotDeltaY
+(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, Float_t yPredictionSigma) {
@@ -2506,7 +2507,7 @@ void TAlignment::CreateDistributionPlotDeltaY(
             Float_t fitWidth = sigma *1.5;
             Float_t mean = histo->GetMean();
             if (verb){
-                cout<<"Title: "<<title<<endl;
+                cout<<"Name: "<<name<<endl;
                 cout<<"mean "<<mean<<endl;
                 cout<<"sigma "<<sigma<<endl;
                 cout<<"fitWidth "<<fitWidth<<endl;
