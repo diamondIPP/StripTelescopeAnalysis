@@ -2081,20 +2081,28 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
         cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
         return new TH2F();
     }
-    Float_t maxX = posX.at(0);
-    Float_t maxY = posY.at(0);
-    Float_t minX = posY.at(0);
-    Float_t minY = posY.at(0);
-    for(UInt_t i=0;i<posX.size();i++){
-        if (posX.at(i)<minRangeX||posX.at(i)>maxRangeX)
-            continue;
-        if (posY.at(i)<minRangeY||posY.at(i)>maxRangeY)
-            continue;
-        if(posX.at(i)>maxX)maxX=posX.at(i);
-        else if(posX.at(i)<minX)minX=posX.at(i);
-        if(posY.at(i)>maxY)maxY=posY.at(i);
-        else if(posY.at(i)<minY)minY=posY.at(i);
+    UInt_t entries = posX.size();
+    std::vector<Float_t> posX2 = posX;
+    std::vector<Float_t> posY2 = posY;
+    std::sort(posX2.begin(),posX2.end());
+    std::sort(posY2.begin(),posY2.end());
+    UInt_t nLow = 0;
+    UInt_t nUp  = entries;
+    if (maxRangeX == (+1) * std::numeric_limits<float>::infinity() ||
+        minRangeX == (-1) * std::numeric_limits<float>::infinity() ||
+        maxRangeY == (+1) * std::numeric_limits<float>::infinity() ||
+        minRangeY == (-1) * std::numeric_limits<float>::infinity() ){
+            nLow = .05 * entries;
+            nUp = .95 * entries;
     }
+    Float_t minX = posX2.at(nLow);
+    Float_t maxX = posX2.at(nUp);
+    Float_t minY = posY2.at(nLow);
+    Float_t maxY = posY2.at(nUp);
+    if (minX < minRangeX) minX = minRangeX;
+    if (maxX > maxRangeX) maxX = maxRangeX;
+    if (minY < minRangeY) minY = minRangeY;
+    if (maxY > maxRangeY) maxY = maxRangeY;
     //cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
     Float_t deltaX=maxX-minX;
     Float_t deltaY=maxY-minY;
