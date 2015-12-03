@@ -359,17 +359,18 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
         cout<<"\nCreated Vector of Events with one and only one Hit in Silicon  + one diamond Cluster + in Fiducial Cut Area"<<endl;
         cout<<"first Event: "<<startEvent<<"\t last Event: "<<nEvent<<"\t total Events: "<<endl;//todo
         cout<<"Cut Flow:\n";
-        cout<<"\tTotal Events looked at:     "<<setw(7)<<nEvent-startEvent<<"\n";
-        cout<<"\tPlane with no Silicon Hit:   "<<setw(7)<<noHitDet<<"\n";
-        cout<<"\tPlane with no Silicon Hit:   "<<setw(7)<<nTelescopeAlignmentEvents<<"\n";
-        cout<<"\tSil Track not in Fid Cut:    "<<setw(7)<<nNotInFidCut<<"\n";
-        cout<<"\tNo of Diamond Clust. != 1:   "<<setw(7)<<falseClusterSizeDia<<"\n";
-        cout<<"\t                             "<<"-------\n";
-        cout<<"\t                             "<<setw(7)<<nCandidates<<" = "<<(Float_t)nCandidates/(Float_t)(nEvent-startEvent)*100.<<"%\n"<<endl;
+        cout<<"\tTotal Events looked at:            "<<setw(7)<<nEvent-startEvent<<"\n";
+        cout<<"\tEvents with no Silicon Hit:        "<<setw(7)<<noHitDet<<"\n";
+        cout<<"\tSil Track not in Fid Cut:          "<<setw(7)<<nNotInFidCut<<"\n";
+        cout<<"\tNo of Diamond Clust. != 1:         "<<setw(7)<<falseClusterSizeDia<<"\n";
+        cout<<"\t                                   "<<"-------\n";
+        cout<<"\tTotal Events for Dia Alignment:    "<<setw(7)<<nCandidates<<" = "<<(Float_t)nCandidates/(Float_t)(nEvent-startEvent)*100.<<"%\n"<<endl;
+        cout<<"\tAdd. Events for Silicon Alignment: "<<setw(7)<<nTelescopeAlignmentEvents<<"\n";
     }
     align->addEventIntervall(startEvent, nEvent);
     align->setNUsedEvents((UInt_t) events.size());
     align->setAlignmentTrainingTrackFraction(settings->getAlignment_training_track_fraction());
+    cout<<"AlignmentTrainingTrackFraction: "<< align->getAlignmentTrainingTrackFraction() <<end;
     align->setRunNumber(settings->getRunNumber());
     if(events.size()<=0){
         cerr<<"The Event vector has the size 0. No Alignment can be performed. EXIT."<<endl;
@@ -455,7 +456,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
 void TAlignment::AlignSiliconPlanes() {
     cout<<"Alignment of Silicon Planes. max. Alignment Steps: "<<nAlignSteps<<endl;
     nAlignmentStep = -1;
-    if(!align->isPreAligned()){
+    if(!align->isPreAligned() || bPlotAll){
         if (verbosity)cout << "\nCheck Detector Alignment:" << endl;
         resPlane1 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 1, 0, 3, true);
         resPlane2 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 2, 0, 3, true);
