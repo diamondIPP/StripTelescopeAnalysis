@@ -1614,15 +1614,19 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
         Float_t mean = histo->GetMean(2);
         Float_t sigma = histo->GetRMS(2);
         delete histo;
+        histo = 0;
         xmin = mean - 3 * sigma;
         xmax = mean + 3 * sigma;
         histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric,vecYLabPredMetric,256,512,xmin,xmax,ymin,ymax);
-        if(!histo)
+        if(!histo || (histo->GetEntries() == 0))
             cout<<"isSiliconPostAlignment: "<<xmin<<" "<<xmax<<" "<<ymin<<" "<<ymax<<" "<<mean<<"+/-"<<sigma<<endl;
     }
     else
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecYLabPredMetric, 256);
-    if(histo){
+
+    if (histo->GetEntries() == 0)
+        cout<<"entries == 0";
+    if(histo && histo->GetEntries()){
         histo->GetXaxis()->SetTitle("Y Predicted / #mum");
         histo->GetYaxis()->SetTitle("Delta X / #mum");
         histSaver->SaveHistogram(histo);
