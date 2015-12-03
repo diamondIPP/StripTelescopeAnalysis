@@ -849,7 +849,9 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     else
         cout<<" is Diamond Alignment with "<<nEvents<<endl;
     bool cmnCorrected = settings->doCommonModeNoiseCorrection();
-
+    Float_t pw_sil = settings->getPitchWidth(0,0);
+    Float_t maxXLabMetric = TPlaneProperties::getNChannelsSilicon() * pw_sil;
+    Float_t maxYLabMetric = TPlaneProperties::getNChannelsSilicon() * pw_sil;
     for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, nEvents);
         if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent])
@@ -951,7 +953,14 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             cout<<" ->"<<useEvent<<endl;
 
         }
-
+        if (useEvent && abs(xLabPredictedMetric) > maxXLabMetric){
+            cout<<" Invalid xLabPredictedMetric: "<<xLabPredictedMetric<<" / "<<maxXLabMetric<<endl;
+            useEvent = false;
+        }
+        if (useEvent && abs(yLabPredictedMetric) > maxYLabMetric){
+            cout<<" Invalid yLabPredictedMetric: "<<yLabPredictedMetric<<" / "<<maxYLabMetric<<endl;
+            useEvent = false;
+        }
         vecXDetRelHitPosPredMetricAll.push_back(relHitPosPredictedMetric);
         vecXDetRelHitPosMeasMetricAll.push_back(relHitPosMeasuredMetric);
         vecDeltaXMetricAll.push_back(xDelta);
