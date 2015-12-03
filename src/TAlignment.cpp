@@ -1392,7 +1392,7 @@ void TAlignment::UpdateResolutions(vector<Float_t> residuals, vector<Float_t> re
         resolutions = newResolutions;
     }
     //	cout<<"Resolution is: "<<resolution<<endl;
-    char t; cin>>t;
+//    char t; cin>>t;
 }
 
 
@@ -2019,8 +2019,8 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
     }
     if(verb){
         cout<<"[CreateScatterPlotPredXvsDeltaY] Pres a key"<<endl;
-        char t;
-        cin>>t;
+//        char t;
+//        cin>>t;
     }
 }
 
@@ -2056,8 +2056,8 @@ void TAlignment::CreateScatterPlotPredYvsDeltaY(
     }
     if(verb){
         cout<<"[CreateScatterPlotPredXvsDeltaY] Pres a key"<<endl;
-        char t;
-        cin>>t;
+//        char t;
+//        cin>>t;
     }
 
 }
@@ -2563,8 +2563,8 @@ void TAlignment::CreateDistributionPlotDeltaY(
             }
             if (bPlot) histSaver->SaveHistogram(histo);
             if (verb){
-                std::cout<<"Press a key"<<endl;
-                char t; cin >>t;
+//                std::cout<<"Press a key"<<endl;
+//                char t; cin >>t;
             }
             if(verbosity>3)cout<<" DONE"<<endl;
             delete fitGausY;
