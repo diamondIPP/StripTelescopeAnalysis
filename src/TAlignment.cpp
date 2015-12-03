@@ -12,7 +12,6 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
     cout << "\n\n\n**********************************************************" << endl;
     cout << "*************TAlignment::TAlignment***********************" << endl;
     cout << "**********************************************************" << endl;
-
     this->mode = mode;
     sys = gSystem;
     setSettings(inputSettings);
@@ -388,6 +387,15 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
  * @todo work on return values
  */
 int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign detToAlign) {
+    cout << "Alignment of ";
+    switch (detToAlign){
+        case diaAlignment:
+            cout <<" Diamond."<<endl;break;
+        case silAlignment:
+            cout<<" Silicon."<<endl;break;
+        case bothAlignment:
+            cout<<" Silicon and Diamond."<<endl;break;
+    }
 
     if (verbosity>2) {
         cout << "\n\n\nTAlignment::Align:Starting \"" << histSaver->GetPlotsPath() << "\"" << endl;
@@ -396,7 +404,8 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
     }
 
     if(this->mode == TSettings::transparentMode){
-        cout<< "\n Det to align:: "<<detToAlign<<endl;
+        cout<< "\n***Transparent Alignment mode***" << endl;
+        cout<< " Det to align:: "<<detToAlign<<endl;
         cout<< " ResetAlignmen: "<<settings->resetAlignment()<<endl;
         cout<< " AlignmentMode of diamond: "<<diaCalcMode<<endl;
     }
@@ -457,15 +466,18 @@ void TAlignment::AlignSiliconPlanes() {
     cout<<"Alignment of Silicon Planes. max. Alignment Steps: "<<nAlignSteps<<endl;
     nAlignmentStep = -1;
     if(!align->isPreAligned() || bPlotAll){
+        std::cout << "Detector is NOT pre-aligned" << endl;
         if (verbosity)cout << "\nCheck Detector Alignment:" << endl;
         resPlane1 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 1, 0, 3, true);
         resPlane2 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 2, 0, 3, true);
         resPlane3 = CheckDetectorAlignment(TPlaneProperties::XY_COR, 3, 1, 2, true);
     }
-    else
+    else{
+        std::cout << "Detector is pre-aligned" << endl;
         if(verbosity)
             cout<<"Detectors are already pre alignend do not create new Prealigment plots."<<endl;
-
+    }
+    
 
     doPreAlignment();
 
@@ -479,7 +491,8 @@ void TAlignment::AlignSiliconPlanes() {
     nAlignmentStep=nAlignSteps;
     if(neededAlignmentSteps<nAlignSteps-1){
         if(verbosity) cout<<"Creating Post Alignment Plots, since the alignment was good after "<< neededAlignmentSteps <<" Steps."<<endl;
-        siliconAlignmentStep(nAlignmentStep-1>=nAlignSteps||bPlotAll,false);
+        //nAlignmentStep-1>=nAlignSteps||bPlotAll,
+        siliconAlignmentStep(true,false);
     }
     cout<<"Alignment step: "<<neededAlignmentSteps<<endl;
     cout<<"\n\n\n*******************";
@@ -488,7 +501,6 @@ void TAlignment::AlignSiliconPlanes() {
     nAlignmentStep = nAlignSteps;
     getFinalSiliconAlignmentResuluts();
     myTrack->setVerbosity(verbosity-4>0?verbosity-4:0);
-
 }
 
 /** "Rough Alignment" of Plane 3 in order to have an aligned system when starting
@@ -2042,7 +2054,7 @@ void TAlignment::CreateResidualVsAngle(TPlaneProperties::enumCoordinate cor, UIn
     if(!bPlot)  return;
 
     TString histName = preName + TString::Format("_DeltaX_Vs_PhiX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
-    TH2F* hist = histSaver->CreateScatterHisto(histName,this->vecXLabDeltaMetric,this->vecXPhi);
+    TH2F* hist = histSaver->CreateScatterHisto((string)histName,this->vecXLabDeltaMetric,this->vecXPhi);
      if(hist){
          hist->GetYaxis()->SetTitle("Angle #Phi_X");
          hist->GetXaxis()->SetTitle("Delta X");
@@ -2051,7 +2063,7 @@ void TAlignment::CreateResidualVsAngle(TPlaneProperties::enumCoordinate cor, UIn
          delete hist;
      }
      histName = preName + TString::Format("_DeltaX_Vs_PhiY_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
-     hist = histSaver->CreateScatterHisto(histName,this->vecXLabDeltaMetric,this->vecYPhi);
+     hist = histSaver->CreateScatterHisto((string)histName,this->vecXLabDeltaMetric,this->vecYPhi);
      if(hist){
          hist->GetYaxis()->SetTitle("Angle #Phi_Y");
          hist->GetXaxis()->SetTitle("Delta X");
@@ -2061,7 +2073,7 @@ void TAlignment::CreateResidualVsAngle(TPlaneProperties::enumCoordinate cor, UIn
      }
 
      histName = preName + TString::Format("_DeltaY_Vs_PhiX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
-     hist = histSaver->CreateScatterHisto(histName,this->vecYLabDeltaMetric,this->vecXPhi);
+     hist = histSaver->CreateScatterHisto((string)histName,this->vecYLabDeltaMetric,this->vecXPhi);
      if(hist){
          hist->GetYaxis()->SetTitle("Angle #PhiX");
          hist->GetXaxis()->SetTitle("Delta Y");
@@ -2071,7 +2083,7 @@ void TAlignment::CreateResidualVsAngle(TPlaneProperties::enumCoordinate cor, UIn
      }
 
      histName = preName + TString::Format("_DeltaY_Vs_PhiY_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
-     hist = histSaver->CreateScatterHisto(histName,this->vecYLabDeltaMetric,this->vecYPhi);
+     hist = histSaver->CreateScatterHisto((string)histName,this->vecYLabDeltaMetric,this->vecYPhi);
      if(hist){
          hist->GetYaxis()->SetTitle("Angle #Phi_Y");
          hist->GetXaxis()->SetTitle("Delta Y");
@@ -2145,7 +2157,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateScatterPlotEtaVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosMeasXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosPredXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
-    CreateResidualVsAngle(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
+    CreateResidualVsAngle(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateFidValueXVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     Float_t yPredictionSigma = CreateSigmaOfPredictionYPlots(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     CreateDistributionPlotDeltaY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,yPredictionSigma);
