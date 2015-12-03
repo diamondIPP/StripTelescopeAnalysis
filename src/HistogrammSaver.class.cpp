@@ -2307,8 +2307,18 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
         histo->Fill(vec.at(i));
     }
     int ntries=0;
-    while ((histo->GetBinContent(histo->GetMaximumBin())/histo->GetEntries())<0.05&&ntries<3){//todo change hardcoding
-        histo->Rebin();ntries++;
+    Double_t entries = histo->GetEntries();
+    while (true){
+        Double_t max = histo->GetBinContent(histo->GetMaximumBin());
+        Double_t fraction = max / entries;
+        if (histo->GetNbinsX() < 20)
+            break;
+        if (max>0.05)
+            break;
+        if(ntries>=3)//todo change hardcoding
+            break;
+        histo->Rebin();
+        ntries++;
     }
     histo->GetXaxis()->SetRangeUser(min,max);
     histo->GetYaxis()->SetTitle("number of entries #");
