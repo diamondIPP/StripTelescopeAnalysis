@@ -2081,19 +2081,23 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
         cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
         return new TH2F();
     }
+//    cout<<"[HistogrammSaver::CreateScatterHisto]";
     UInt_t entries = posX.size();
+//    cout<<"entries: "<<entries;
     std::vector<Float_t> posX2 = posX;
     std::vector<Float_t> posY2 = posY;
     std::sort(posX2.begin(),posX2.end());
     std::sort(posY2.begin(),posY2.end());
     UInt_t nLow = 0;
-    UInt_t nUp  = entries;
+    UInt_t nUp  = entries-1;
     if (maxRangeX == (+1) * std::numeric_limits<float>::infinity() ||
         minRangeX == (-1) * std::numeric_limits<float>::infinity() ||
         maxRangeY == (+1) * std::numeric_limits<float>::infinity() ||
         minRangeY == (-1) * std::numeric_limits<float>::infinity() ){
             nLow = .05 * entries;
             nUp = .95 * entries;
+            if (nUp >= entries)
+                nUp = entries-1;
     }
     Float_t minX = posX2.at(nLow);
     Float_t maxX = posX2.at(nUp);
