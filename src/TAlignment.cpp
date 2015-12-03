@@ -2437,7 +2437,8 @@ void TAlignment::clearMeasuredVectors() {
 
 }
 
-void TAlignment::CreateDistributionPlotDeltaY(
+void TAlignment::
+(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, Float_t yPredictionSigma) {
