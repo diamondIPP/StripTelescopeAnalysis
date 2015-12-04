@@ -968,6 +968,14 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             cout<<" Invalid yLabPredictedMetric: "<<yLabPredictedMetric<<" / "<<maxYLabMetric<<endl;
             useEvent = false;
         }
+        if (relHitPosPredictedMetric == N_INVALID){
+            cout<<" Invalid relHitPosPredictedMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
+            useEvent = false;
+        }
+        if (relHitPosMeasuredMetric == N_INVALID){
+            cout<<" Invalid relHitPosMeasuredMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<relHitPosMeasuredMetric<<endl;
+            useEvent = false;
+        }
         vecXDetRelHitPosPredMetricAll.push_back(relHitPosPredictedMetric);
         vecXDetRelHitPosMeasMetricAll.push_back(relHitPosMeasuredMetric);
         vecDeltaXMetricAll.push_back(xDelta);
@@ -1596,7 +1604,7 @@ void TAlignment::CreateDistributionPlotDeltaX(
                     xres2 = xres2/TMath::Sqrt2();
                     cout<<" .... xRes < xPredictionSigma .....Update xRes to "<<xres2<<endl;
                 }
-                cout<< "xDet: "<<xres2*100 <<" = Sqrt("<<xRes*100<<"^2 + "<<xPredictionSigma*100<<"^2)"<<endl;
+                cout<< "xDet: "<<xres2*100 <<" = Sqrt("<<xRes*100<<"^2 - "<<xPredictionSigma*100<<"^2)"<<endl;
                 align->setXResolution(xres2, subjectPlane);
                 align->setXMean(mean,subjectPlane);
             }
@@ -1800,7 +1808,7 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
         cout<<histName<< "\t number of entries: "<<vecXDetRelHitPosPredMetricAll.size()<<"/"<<vecUsedEventAll.size()<<endl;
         return;
     }
-    TH2F *histo = histSaver->CreateScatterHisto((string)histName, vecXDetRelHitPosPredMetricAll, vecUsedEventAll, 2,256);
+    TH2F *histo = histSaver->CreateScatterHisto((string)histName, vecXDetRelHitPosPredMetricAll, vecUsedEventAll, 2,256,-1,2,-100,100);
     //    histo.Draw("goff");
     if(histo){
         histo->Draw("goff");
@@ -2226,9 +2234,6 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
         histSaver->SaveHistogram(histo2);
         delete histo2;
     }
-
-
-
 }
 
 void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, string refPlaneString, bool bPlot, bool bUpdateResolution, bool bChi2) {
