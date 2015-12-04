@@ -2327,8 +2327,8 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
         if(verbosity>3)cout<<" positiveSigma: 0 - "<<max<<endl;
     }
     else if(range==manual){
-        max =xmax;
-        min=xmin;
+        max = xmax;
+        min = xmin;
         if(verbosity>3)cout<<" manual: "<<min<<" - " << max <<endl;
     }
 
@@ -2342,17 +2342,23 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
     int ntries=0;
     entries = histo->GetEntries();
     while (true){
-        Double_t max = histo->GetBinContent(histo->GetMaximumBin());
-        Double_t fraction = max / (Double_t)entries;
+        Double_t max2 = histo->GetBinContent(histo->GetMaximumBin());
+        Double_t fraction = max2 / (Double_t)entries;
         if (histo->GetNbinsX() < 20)
             break;
-        if (max>0.05)
+        if (max2>0.05)
             break;
         if(ntries>=3)//todo change hardcoding
             break;
         histo->Rebin();
         ntries++;
     }
+    histo->Draw("goff");
+    Int_t binsx = histo->GetNbinsX();
+    if (histo->GetXaxis()->GetBinCenter(1) > min)
+        min = histo->GetXaxis()->GetBinLowEdge(1);
+    if (histo->GetXaxis()->GetBinCenter(binsx) <= max)
+        max = histo->GetXaxis()->GetBinUpEdge(max);
     histo->GetXaxis()->SetRangeUser(min,max);
     histo->GetYaxis()->SetTitle("number of entries #");
     return histo;
