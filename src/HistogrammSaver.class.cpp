@@ -2229,7 +2229,6 @@ Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
 }
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax, Float_t factor)
 {
-
     TString hName = name;
     bool verb = hName.BeginsWith("hSilicon_PostAlignment_Distribution_DeltaY_Plane_0");
     verb = verb || hName.BeginsWith("hDiamond_PostAlignment_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_");

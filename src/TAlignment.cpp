@@ -1732,10 +1732,15 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
     if (!bPlot) return;
     if (!((cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR))) return;
     TString histName = preName + TString::Format("_ScatterPlot_XPred_vs_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName;
+    bool verb = histName.BeginsWith("hDiamond_PostAlignment_ScatterPlot_XPred_vs_DeltaX_Plane_4");
     TString xTitle = "X Predicted / #mum";
     TString yTitle = "Delta X / #mum";
     TH2F *histo=0;
+    if (verb){
+        std::cout<< "[CreateScatterPlotPredXvsDeltaX]: "<<histName<< " bPlot:"<<bPlot<<" bUpdateResolution:"<<bUpdateResolution<<" isSiliconPostAlignment:"<<isSiliconPostAlignment<<endl;
+    }
     if(isSiliconPostAlignment){
+        if(verb)cout<<"isSiliconPostAlignment"<<endl;
         Float_t xmin = -1e9;
         Float_t xmax = +1e9;
         Float_t ymin = -50;
@@ -1744,13 +1749,15 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
         Float_t mean = histo->GetMean(2);
         Float_t sigma = histo->GetRMS(2);
         delete histo;
-        xmin = mean - 3 * sigma;
-        xmax = mean + 3 * sigma;
+        ymin = mean - 3 * sigma;
+        ymax = mean + 3 * sigma;
         histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric,vecXLabPredMetric,256,512,xmin,xmax,ymin,ymax);
     }
     else
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecXLabPredMetric, 512);
+    if(verb)cout<<" HISTO: "<<histo<<endl;
     if(histo){
+        if(verb)cout<<" save: "<<histo->GetName()<<"\n entries: "<<histo->GetEntries()<<endl;
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
         histSaver->SaveHistogram(histo);
@@ -1765,6 +1772,11 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
+    if (verb){
+        cout<<"Press a key to continue."
+        char t;
+        cin>>t;
+    }
 }
 
 
