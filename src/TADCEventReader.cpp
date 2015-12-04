@@ -689,6 +689,17 @@ bool TADCEventReader::isValidTrack()
 	return this->bValidSiliconTrack;
 }
 
+bool TADCEventReader::hasSmallSiliconClusterSizes(UInt_t maxClusterSize){
+    bool retVal = this->bValidSiliconTrack;
+    for (UInt_t det = 0; det < TPlaneProperties::getNSiliconDetectors() && retVal;det ++)
+        for (UInt_t cl = 0; cl <= this->getNClusters(det); cl++){
+            retVal &= (this->getClusterSize(det,cl) <= maxClusterSize);
+            if (!retVal)
+                cout << "Invalid clustersize for " << det << "/" << cl << endl;
+        }
+    return retVal;
+}
+
 UInt_t TADCEventReader::getNDiamondClusters()
 {
 	return this->nDiamondClusters;

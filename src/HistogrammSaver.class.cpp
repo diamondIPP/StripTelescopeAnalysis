@@ -2223,7 +2223,6 @@ Float_t HistogrammSaver::GetMean(std::vector<Float_t> vec){
 TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Float_t> vec, UInt_t nBins,EnumAxisRange range,Float_t xmin,Float_t xmax, Float_t factor)
 {
 
-    TString hName = name;
     bool verb = hName.BeginsWith("hSilicon_PostAlignment_Distribution_DeltaY_Plane_0");
     int verbosity = verb*6;
     //	Float_t factor = 0.05;//5% bigger INtervall...
@@ -2327,8 +2326,8 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
     TH1F* histo = new TH1F(name.c_str(),name.c_str(),nBins,min,max);
     for(UInt_t i=0;i<vec.size();i++){
         Float_t x = vec.at(i);
-        if(x<xmin||x>xmax)
-            continue;
+//        if(x<xmin||x>xmax)
+//            continue;
         histo->Fill(vec.at(i));
     }
     int ntries=0;

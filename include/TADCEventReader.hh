@@ -39,6 +39,7 @@ public:
 	bool isOK();
 //    bool getCMNEvent_flag() const;
 	bool isValidTrack();
+	bool hasSmallSiliconClusterSizes(UInt_t maxClusterSize=3);
   Int_t getAdcValue(UInt_t det,UInt_t ch);
 	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected=false);
 	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);

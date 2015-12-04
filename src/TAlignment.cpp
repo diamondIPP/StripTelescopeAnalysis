@@ -272,6 +272,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
     if (nEvents == 0) nEvents = eventReader->GetEntries() - startEvent;
     if (nEvents + startEvent > eventReader->GetEntries()) nEvents = eventReader->GetEntries() - startEvent;
     int noHitDet = 0;
+    UInt_t invalidClusterSize = 0;
     //	int falseClusterSizeDet=0;
     //int noHitDia=0;
     int falseClusterSizeDia = 0;
@@ -297,6 +298,11 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
             noHitDet++;
             continue;
         }
+        if (!eventReader->hasSmallSiliconClusterSizes(3)){
+            invalidClusterSize++;
+            continue;
+        }
+
         if (eventReader->isDetMasked()) {
             nScreened++;
             continue;
@@ -360,6 +366,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
         cout<<"Cut Flow:\n";
         cout<<"\tTotal Events looked at:            "<<setw(7)<<nEvent-startEvent<<"\n";
         cout<<"\tEvents with no Silicon Hit:        "<<setw(7)<<noHitDet<<"\n";
+        cout<<"\tInvalid Silicon Clustersize:       "<<setw(7)<<invalidClusterSize<<"\n";
         cout<<"\tSil Track not in Fid Cut:          "<<setw(7)<<nNotInFidCut<<"\n";
         cout<<"\tNo of Diamond Clust. != 1:         "<<setw(7)<<falseClusterSizeDia<<"\n";
         cout<<"\t                                   "<<"-------\n";
@@ -1494,6 +1501,7 @@ Float_t TAlignment::CreateSigmaOfPredictionXPlots(TPlaneProperties::enumCoordina
 }
 
 
+
 void TAlignment::CreateDistributionPlotDeltaX(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot, bool bUpdateResolution, Float_t xPredictionSigma) {
@@ -1656,8 +1664,6 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
     if(gr) delete gr;
 }
 
-
-
 void TAlignment::CreateScatterPlotMeasXvsDeltaX(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment) {
@@ -1681,6 +1687,31 @@ void TAlignment::CreateScatterPlotMeasXvsDeltaX(
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("measured X  / #mum");
     graph.GetYaxis()->SetTitle("delta X / #mum");
+    TGraph* gr = (TGraph*) graph.Clone();
+    histSaver->SaveGraph(gr, (string)histName);
+    if(gr) delete gr;
+}
+
+void TAlignment::CreateScatterPlotPredXDetvsDeltaX(
+        TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
+        TString preName, TString postName, TString refPlaneString, bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment) {
+    if (!bPlot) return;
+    if (!((cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR))) return;
+    TString histName = preName + TString::Format("_ScatterPlot_XPredictedDet_vs_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName;
+    TH2F* histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric, vecXDetPredMetric,256);
+    if(!histo)
+        cerr<<"Could not CreateScatterHisto: "<<histName<<endl;
+    else{
+        histo->GetXaxis()->SetTitle("X Predicted_{Det} / #mum");
+        histo->GetYaxis()->SetTitle("Delta X / #mum");
+        histSaver->SaveHistogram(histo);
+        delete histo;
+    }
+    histName.Replace(0,1,"g");
+    TGraph graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecXDetPredMetric);
+    graph.Draw("APL");
+    graph.GetXaxis()->SetTitle("X Predicted_{Det} / #mum");
+    graph.GetYaxis()->SetTitle("Delta X / #mum");
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
@@ -2185,6 +2216,19 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
         histSaver->SaveHistogram(histo);
         delete histo;
     }
+
+    TString histName = preName + TString::Format("_RelHitPosMeasX_Vs_xDetMeasMetric_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+    TH1F* histo = histSaver->CreateScatterHisto((string)histName, vecRelPos,vecXDetPredMetric);
+    if(histo){
+        histo->GetYaxis()->SetTitle("relative Hit Position_{observed} / #mum");
+        histo->GetXaxis()->SetTitle("predicted Hit Position_{observed}  / #mum");
+        histo->GetZaxis()->SetTitle("number of entries");
+        histSaver->SaveHistogram(histo);
+        delete histo;
+    }
+
+
+
 }
 
 void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, string refPlaneString, bool bPlot, bool bUpdateResolution, bool bChi2) {
@@ -2226,6 +2270,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateScatterPlotPredYvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotPredXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotMeasXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
+    CreateScatterPlotPredXDetvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotEtaVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosMeasXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosPredXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
