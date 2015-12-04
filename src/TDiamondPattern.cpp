@@ -243,7 +243,7 @@ Float_t TDiamondPattern::convertMetricToRelativeMetric(Float_t metric,UInt_t int
     Int_t firstChannel = firstChannelOfInterval[interval]-1;
     Int_t lastChannel = firstChannelOfInterval[interval] + nChannelsOfInterval[interval];
     Float_t pw = pitchWidth.at(interval);
-    cout << "[TDiamondPattern::convertMetricToRelativeMetric]"<<metric<<" in " <<interval <<" - ch "<<firstChannel <<" - "<<lastChannel<<" / pw: "<<pw<<endl;
+//    cout << "[TDiamondPattern::convertMetricToRelativeMetric]"<<metric<<" in " <<interval <<" - ch "<<firstChannel <<" - "<<lastChannel<<" / pw: "<<pw<<endl;
     Float_t retVal = N_INVALID;
 //  if(metric >= 3660 && metric <= 3715) cout<<"[TDiamondPattern::convertMetricToChannel]"<<metric<<" in " << interval <<": "<<firstChannel<<"-"<<lastChannel<<endl;
     for(Int_t ch = firstChannel; ch <= lastChannel;ch++){
@@ -259,7 +259,7 @@ Float_t TDiamondPattern::convertMetricToRelativeMetric(Float_t metric,UInt_t int
             rightPos = getChannelToMetric(ch+1);
 //      if(metric >= 3660 && metric <= 3715)
         if ( leftPos <= metric && metric <= rightPos ){
-            cout<<" "<<leftPos<<"-"<<rightPos<< "/ "<<metric<<endl;
+//            cout<<" "<<leftPos<<"-"<<rightPos<< "/ "<<metric<<endl;
             if(metric-leftPos < rightPos-metric)
                 retVal = (metric - leftPos);
             else
@@ -267,7 +267,7 @@ Float_t TDiamondPattern::convertMetricToRelativeMetric(Float_t metric,UInt_t int
             break;
         }
     }
-    cout<<"Returning: "<<retVal<<endl;
+//    cout<<"Returning: "<<retVal<<endl;
     return retVal;
 
 }

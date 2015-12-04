@@ -965,11 +965,11 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             useEvent = false;
         }
         if (useEvent && abs(yLabPredictedMetric) > maxYLabMetric){
-            cout<<" Invalid yLabPredictedMetric: "<<yLabPredictedMetric<<" / "<<maxYLabMetric<<endl;
+//            cout<<" Invalid yLabPredictedMetric: "<<yLabPredictedMetric<<" / "<<maxYLabMetric<<endl;
             useEvent = false;
         }
         if (relHitPosPredictedMetric == N_INVALID){
-            cout<<" Invalid relHitPosPredictedMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
+//            cout<<" Invalid relHitPosPredictedMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
             useEvent = false;
         }
         if (relHitPosMeasuredMetric == N_INVALID){
@@ -1815,7 +1815,6 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
         histo->GetYaxis()->SetTitle("rel pred hit Pos /#mum");
         histo->GetXaxis()->SetTitle("use event");
         histSaver->SaveHistogram(histo);
-        delete histo;
     }
     vector<Float_t> relHitPosUsed,relHitPosNotUsed;
     for(UInt_t i=0;i<vecXDetRelHitPosPredMetricAll.size()&& i < vecUsedEventAll.size();i++){
@@ -1824,9 +1823,12 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
         else
             relHitPosNotUsed.push_back(vecXDetRelHitPosPredMetricAll[i]);
     }
-    TH1F* hProjUsed = histSaver->CreateDistributionHisto((string)(histName+(TString)"_UsedEvents"),relHitPosUsed,256);
+    //TODO
+    Int_t bin = histo->GetXaxis()->FindBin(1);
+    TH1F* hProjUsed = histo->ProjectionY((string)(histName+(TString)"_UsedEvents"),bin,bin);
     if(hProjUsed) hProjUsed->SetLineColor(kGreen);
-    TH1F* hProjNotUsed = histSaver->CreateDistributionHisto((string)(histName+(TString)"_NotUsedEvents"),relHitPosNotUsed,256);
+    bin = histo->GetXaxis()->FindBin(0);
+    TH1F* hProjNotUsed = histo->ProjectionY((string)(histName+(TString)"_NotUsedEvents"),bin,bin);
     if(hProjNotUsed) hProjNotUsed->SetLineColor(kRed);
 
     TString name = preName+(TString)("_StackRelHitPosXPred_")+refPlaneString+postName;
@@ -1852,6 +1854,8 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
     histSaver->SaveStack(stack,"hist");
 
     delete stack;
+    if (histo)
+        delete histo;
 }
 
 void TAlignment::CreateRelHitPosXMeasDetMetricVsUseEventPlot(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,TString preName, TString postName, TString refPlaneString,bool bPlot){

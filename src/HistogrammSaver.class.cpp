@@ -2081,9 +2081,11 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
         cerr<<"ERROR HistogrammSaver::CreateScatterHisto vectors have different size "<<posX.size()<<" "<<posY.size()<<" "<<name<<endl;
         return new TH2F();
     }
-//    cout<<"[HistogrammSaver::CreateScatterHisto]";
+    TString hName = name;
+    bool  verb = hName.Contains("_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_");
+    if (verb)    cout<<"[HistogrammSaver::CreateScatterHisto]" <<name <<endl;;
     UInt_t entries = posX.size();
-//    cout<<"entries: "<<entries;
+    if (verb) cout<<" entries: "<<entries;
     std::vector<Float_t> posX2 = posX;
     std::vector<Float_t> posY2 = posY;
     std::sort(posX2.begin(),posX2.end());
@@ -2103,15 +2105,20 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
     Float_t maxX = posX2.at(nUp);
     Float_t minY = posY2.at(nLow);
     Float_t maxY = posY2.at(nUp);
+    if (verb) cout <<" X:"<<minX<<"-"<<maxX<<"\tY:"<<minY<<"-"<<maxY<<" --- "<<posX2.at(0)<<"-"<<posX2.at(entries-1)<<"/"<<posY2.at(0)<<"-"<<posY2.at(entries-1)<<endl;
     if (minX < minRangeX) minX = minRangeX;
     if (maxX > maxRangeX) maxX = maxRangeX;
     if (minY < minRangeY) minY = minRangeY;
     if (maxY > maxRangeY) maxY = maxRangeY;
-    //cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
+    if (verb) cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
     Float_t deltaX=maxX-minX;
     Float_t deltaY=maxY-minY;
     TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBinsX,minX-factor*deltaX,maxX+factor*deltaX,nBinsY,minY-factor*deltaY,maxY+factor*deltaY);
     for(UInt_t i=0;i<posX.size();i++){
+        if (verb){
+            if ((abs(posX.at(i)) >50) ||(abs(posX.at(i)) >50) )
+                cout <<"Filling: " << i<< "/"<<posX.at(i)<<" "<<posY.at(i)<<endl;;
+        }
         if (posX.at(i) < minRangeX || posX.at(i) > maxRangeX)
             continue;
         if (posY.at(i) < minRangeY || posY.at(i) > maxRangeY)
@@ -2225,6 +2232,7 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
 
     TString hName = name;
     bool verb = hName.BeginsWith("hSilicon_PostAlignment_Distribution_DeltaY_Plane_0");
+    verb = verb || hName.BeginsWith("hDiamond_PostAlignment_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_");
     int verbosity = verb*6;
     //	Float_t factor = 0.05;//5% bigger INtervall...
     if(vec.size()==0)
