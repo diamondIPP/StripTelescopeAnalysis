@@ -693,7 +693,8 @@ Float_t TTrack::getRelativeHitPosition(UInt_t det, Float_t hitPosDetMetric) {
     else if(TPlaneProperties::isDiamondDetector(det)){
 //      cout<<"validPAttern  TTrack::inChannelDetectorSpace "<<det<<" "<<metricPosition<<": "<<flush;
 //      cout<<settings->diamondPattern.hasInvalidIntervals()<<endl;
-       return  settings->diamondPattern.convertMetricToRelativeMetric(hitPosDetMetric);
+      Float_t relMetric = settings->diamondPattern.convertMetricToRelativeMetric(hitPosDetMetric);
+      return relMetric;
     }
     return N_INVALID;
 }

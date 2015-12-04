@@ -1814,7 +1814,6 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
         histo->Draw("goff");
         histo->GetYaxis()->SetTitle("rel pred hit Pos /#mum");
         histo->GetXaxis()->SetTitle("use event");
-
         histSaver->SaveHistogram(histo);
         delete histo;
     }
