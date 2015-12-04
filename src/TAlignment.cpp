@@ -2224,7 +2224,7 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
         histo2->GetXaxis()->SetTitle("predicted Hit Position_{observed}  / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
         histSaver->SaveHistogram(histo2);
-        delete histo;
+        delete histo2;
     }
 
 
@@ -2507,6 +2507,8 @@ void TAlignment::clearMeasuredVectors() {
     vecYLabMeasMetric.clear();
     vecXLabDeltaMetric.clear();
     vecYLabDeltaMetric.clear();
+    vecXDetPredMetric.clear();
+    vecYDetPredMetric.clear();
     vecXFidValue.clear();
     vecYFidValue.clear();
     vecXChi2.clear();
