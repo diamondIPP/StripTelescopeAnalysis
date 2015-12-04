@@ -2033,7 +2033,6 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, bool isSiliconPostAlignment) {
     TString name = preName + TString::Format("_ScatterPlot_XPred_vs_DeltaY_Plane_%d_with_",subjectPlane )+refPlaneString+postName;
-    bool verb = name.BeginsWith("hSilicon_PostAlignment_ScatterPlot_XPred_vs_DeltaY_Plane_1");
     if (bPlot && subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //ScatterPlot DeltaY vs Xpred
 
         TString xTitle = "X predicted /#mum";
@@ -2058,11 +2057,6 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
         graph.GetYaxis()->SetTitle(yTitle);
         histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
         if(verbosity>3)cout<<" DONE"<<endl;
-    }
-    if(verb){
-        cout<<"[CreateScatterPlotPredXvsDeltaY] Pres a key"<<endl;
-//        char t;
-//        cin>>t;
     }
 }
 
