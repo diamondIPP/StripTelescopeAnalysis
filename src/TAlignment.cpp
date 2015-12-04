@@ -1773,7 +1773,7 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
     if (verb){
-        cout<<"Press a key to continue."
+        cout<<"Press a key to continue."<<flush;
         char t;
         cin>>t;
     }
@@ -1836,11 +1836,11 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
             relHitPosNotUsed.push_back(vecXDetRelHitPosPredMetricAll[i]);
     }
     //TODO
-    Int_t bin = histo->GetXaxis()->FindBin(1);
-    TH1F* hProjUsed = histo->ProjectionY((string)(histName+(TString)"_UsedEvents"),bin,bin);
+    Int_t bin = histo->GetXaxis()->FindBin(1.0);
+    TH1D* hProjUsed = histo->ProjectionY((TString)(histName+(TString)"_UsedEvents"),bin,bin);
     if(hProjUsed) hProjUsed->SetLineColor(kGreen);
-    bin = histo->GetXaxis()->FindBin(0);
-    TH1F* hProjNotUsed = histo->ProjectionY((string)(histName+(TString)"_NotUsedEvents"),bin,bin);
+    bin = histo->GetXaxis()->FindBin(0.0);
+    TH1D* hProjNotUsed = histo->ProjectionY((TString)(histName+(TString)"_NotUsedEvents"),bin,bin);
     if(hProjNotUsed) hProjNotUsed->SetLineColor(kRed);
 
     TString name = preName+(TString)("_StackRelHitPosXPred_")+refPlaneString+postName;
