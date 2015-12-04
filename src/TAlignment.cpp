@@ -298,15 +298,15 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
             noHitDet++;
             continue;
         }
+        if (eventReader->isDetMasked()) {
+            nScreened++;
+            continue;
+        }
         if (!eventReader->hasSmallSiliconClusterSizes(3)){
             invalidClusterSize++;
             continue;
         }
 
-        if (eventReader->isDetMasked()) {
-            nScreened++;
-            continue;
-        }
 
         float fidCutX=eventReader->getFiducialValueX();
         float fidCutY=eventReader->getFiducialValueY();
@@ -2217,13 +2217,13 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
         delete histo;
     }
 
-    TString histName = preName + TString::Format("_RelHitPosMeasX_Vs_xDetMeasMetric_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
-    TH1F* histo = histSaver->CreateScatterHisto((string)histName, vecRelPos,vecXDetPredMetric);
-    if(histo){
-        histo->GetYaxis()->SetTitle("relative Hit Position_{observed} / #mum");
-        histo->GetXaxis()->SetTitle("predicted Hit Position_{observed}  / #mum");
-        histo->GetZaxis()->SetTitle("number of entries");
-        histSaver->SaveHistogram(histo);
+    histName = preName + TString::Format("_RelHitPosMeasX_Vs_xDetMeasMetric_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+    TH2F* histo2 = histSaver->CreateScatterHisto((string)histName, vecRelPos,vecXDetPredMetric);
+    if(histo2){
+        histo2->GetYaxis()->SetTitle("relative Hit Position_{observed} / #mum");
+        histo2->GetXaxis()->SetTitle("predicted Hit Position_{observed}  / #mum");
+        histo2->GetZaxis()->SetTitle("number of entries");
+        histSaver->SaveHistogram(histo2);
         delete histo;
     }
 
