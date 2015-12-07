@@ -1805,7 +1805,7 @@ void TAlignment::CreateScatterChi2vsDeltaX(
         delete histo;
     }
     histName.Replace(0,1,"g");
-    TGraph graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecYChi2);
+    graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecYChi2);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle(xTitle);
     graph.GetYaxis()->SetTitle(yTitle);
