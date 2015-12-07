@@ -1763,6 +1763,56 @@ void TAlignment::CreateScatterPlotPredXDetvsDeltaX(
     if(gr) delete gr;
 }
 
+void TAlignment::CreateScatterChi2vsDeltaX(
+        TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
+        TString preName, TString postName, TString refPlaneString, bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment) {
+    bool verb  = true;
+    if (!bPlot) return;
+    if (!((cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR))) return;
+    TString histName = preName + TString::Format("_ScatterPlot_Chi2X_vs_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName;
+    TString xTitle = "Chi2X";
+    TString yTitle = "Delta X / #mum";
+    TH2F *histo=0;
+    histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecXChi2, 512);
+    if(verb)cout<<" HISTO: "<<histo<<endl;
+    if(histo){
+        if(verb)cout<<" save: "<<histo->GetName()<<"\n entries: "<<histo->GetEntries()<<endl;
+        histo->GetXaxis()->SetTitle(xTitle);
+        histo->GetYaxis()->SetTitle(yTitle);
+        histSaver->SaveHistogram(histo);
+        delete histo;
+    }
+    histName.Replace(0,1,"g");
+    TGraph graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecXChi2);
+    graph.Draw("APL");
+    graph.GetXaxis()->SetTitle(xTitle);
+    graph.GetYaxis()->SetTitle(yTitle);
+    TGraph* gr = (TGraph*) graph.Clone();
+    histSaver->SaveGraph(gr, (string)histName);
+    if(gr) delete gr;
+
+    histName = preName + TString::Format("_ScatterPlot_Chi2Y_vs_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName;
+    xTitle = "Chi2Y";
+    yTitle = "Delta X / #mum";
+    histo=0;
+    histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecYChi2, 512);
+    if(verb)cout<<" HISTO: "<<histo<<endl;
+    if(histo){
+        if(verb)cout<<" save: "<<histo->GetName()<<"\n entries: "<<histo->GetEntries()<<endl;
+        histo->GetXaxis()->SetTitle(xTitle);
+        histo->GetYaxis()->SetTitle(yTitle);
+        histSaver->SaveHistogram(histo);
+        delete histo;
+    }
+    histName.Replace(0,1,"g");
+    TGraph graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecYChi2);
+    graph.Draw("APL");
+    graph.GetXaxis()->SetTitle(xTitle);
+    graph.GetYaxis()->SetTitle(yTitle);
+    gr = (TGraph*) graph.Clone();
+    histSaver->SaveGraph(gr, (string)histName);
+    if(gr) delete gr;
+}
 void TAlignment::CreateScatterPlotPredXvsDeltaX(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment) {
@@ -2318,6 +2368,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateDistributionPlotDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,xPredictionSigma);
 
     CreateScatterPlotPredYvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
+    CreateScatterChi2vsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotPredXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotMeasXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotPredXDetvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
@@ -2387,10 +2438,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
             }
         }
 
-        if(bChi2){
-            CreateRelHitPosVsChi2Plots(cor,subjectPlane,preName,postName,refPlaneString);
-
-        }
+        CreateRelHitPosVsChi2Plots(cor,subjectPlane,preName,postName,refPlaneString);
     }
 }
 

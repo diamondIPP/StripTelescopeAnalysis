@@ -190,6 +190,7 @@ private:
     void CreateScatterPlotPredYvsDeltaY(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotPredYvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotPredXvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateScatterChi2vsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
 
     void CreateScatterPlotMeasXvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotPredXDetvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
