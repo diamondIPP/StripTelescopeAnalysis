@@ -976,7 +976,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             cout<<" Invalid relHitPosMeasuredMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<relHitPosMeasuredMetric<<endl;
             useEvent = false;
         }
-        if (settings->IgnoreStripForAlignment(subjectDet,predHitPosDetCh)){
+        if (useEvent && settings->IgnoreStripForAlignment(subjectDet,predHitPosDetCh)){
             cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
             useEvent = false;
         }

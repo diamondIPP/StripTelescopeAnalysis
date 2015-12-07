@@ -409,7 +409,7 @@ private:
 	Float_t chi2Cut3D_Y;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
-	std::vector< std::vector<Int_t>> vecAlignmentIgnoreChannels;
+	std::vector< std::vector<Int_t> > vecAlignmentIgnoreChannels;
 	bool bResetAlignment;
 	Float_t alignmentPrecision_Offset;
 	Float_t alignmentPrecision_Angle;

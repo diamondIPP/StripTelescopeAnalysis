@@ -23,6 +23,7 @@ TSettings::TSettings(TRunInfo *runInfo)
 	fidCuts3DEdge = new TFidCutRegions();
 	fidCuts3DMetallisation = new TFidCutRegions();
 	centralRegion3DnH = new TFiducialCut(0);
+	vecAlignmentIgnoreChannels.resize(TPlaneProperties::getNDetectors());
 	DefaultLoadDefaultSettings();
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
@@ -397,6 +398,7 @@ void TSettings::LoadSettings(){
 		if(value.find_first_of(';')!=string::npos) {
 			value = line.substr(offsetr+1, value.find_first_of(';'));//line.length()-(offsetr+1)-1);
 		}
+        cout<<"Analyse "<<key<<" - "<<value << endl;
 
 		//cant switch on strings so use if statements
 		if (TPlaneProperties::startsWith(key,"assymetricSample")) Parse(key,value,bAsymmetricSample);
@@ -421,7 +423,9 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_fraction")) Parse(key,value,alignment_training_track_fraction);
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_number")) Parse(key,value,alignment_training_track_number);
         if (TPlaneProperties::startsWith(key,"RerunSelection")) Parse(key,value,bRerunSelection);
-        if (TPlaneProperties::startsWith(key,"AlignmentIgnoreChannelDia")) ParseIntArray(key,value,vecAlignmentIgnoreChannels.at(TPlaneProperties::getDetDiamond()));
+        if (TPlaneProperties::startsWith(key,"AlignmentIgnoreChannelDia")){
+            ParseIntArray(key,value,vecAlignmentIgnoreChannels.at(TPlaneProperties::getDetDiamond()));
+        }
 		//bRerunSelection
 		if (TPlaneProperties::startsWith(key,"alignment_training_method")){
 			cout << key.c_str() << " = " << value.c_str() << endl;
@@ -608,6 +612,16 @@ void TSettings::LoadSettings(){
 	        store_threshold = (float)strtod(value.c_str(),0);
 	      }*/
 	}
+    cout<<"vecAlignmentIgnoreChannels: "<<endl;
+    for (UInt_t det = 0; det < vecAlignmentIgnoreChannels.size(); det++){
+        cout<<"\tDEtector "<<det<<" with "<<vecAlignmentIgnoreChannels.at(det).size()<<" ignored channels: [";
+        for (UInt_t i = 0; i < vecAlignmentIgnoreChannels.at(det).size();i++)
+            if (i==0)
+                cout<<i<<"/"<<vecAlignmentIgnoreChannels.at(det).at(i);
+            else
+                cout<<", "<<i<<"/"<<vecAlignmentIgnoreChannels.at(det).at(i);
+        cout<<"]"<<endl;
+    }
 
 //	for(UInt_t ch=0;ch<TPlaneProperties::getNChannelsDiamond();ch++)
 //		cout<<setw(3)<<ch<<":"<<setw(3)<<getDiaDetectorAreaOfChannel(ch)<<"\t"<<getClusterSeedFactor(TPlaneProperties::getDetDiamond(),ch)
@@ -655,7 +669,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	if(getVerbosity())
 		cout<<"TSettings::LoadDefaultSettings"<<endl;
 	//default general settings
-	vecAlignmentIgnoreChannels.resize(TPlaneProperties::getNDetectors(),vector<Int_t>);
+	vecAlignmentIgnoreChannels.resize(TPlaneProperties::getNDetectors());
 	isStandardArea=true;
 	isStandardSelectionFidCut=true;
 	runDescription="";
@@ -985,11 +999,14 @@ void TSettings::ParseFloatArray(string key, string value, vector<float> &vec) {
 }
 
 void TSettings::ParseIntArray(string key, string value, vector<int> &vec) {
-	if(verbosity>8)cout << key.c_str() << " = " << value.c_str() << endl;
+    bool verb = false;
+	if(verbosity>8 || verb)cout << key.c_str() << " = " << value.c_str() << endl;
+    if (TPlaneProperties::startsWith(key,"AlignmentIgnoreChannelDia"))
+        verb = true;
 	std::vector <std::string> stringArray;
 	ParseStringArray(key, value,stringArray);
 	vec.clear();
-	//    cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
+	if (verb)    cout<<value<<" --> Array length: "<<stringArray.size()<<endl;
 	for(UInt_t i=0;i<stringArray.size();i++)
 		vec.push_back((int)strtod(stringArray.at(i).c_str(),0));
 }
@@ -2250,10 +2267,10 @@ bool TSettings::IgnoreStripForAlignment(UInt_t det, Float_t predHitPosDetCh) {
     if (det < vecAlignmentIgnoreChannels.size()){
         for (UInt_t i = 0; i < vecAlignmentIgnoreChannels.at(det).size();i++)
             if ( vecAlignmentIgnoreChannels.at(det).at(i) == ch){
-                cout<<"\tFound: "<<ch<<" at "<<i<<endl;
+                cout<<"\tFound: "<<ch<<" at "<<i<<"  -> IGNORE EVENT"<<endl;
                 return true;
             }
-        cout<<"\tDidn't find ch "<<ch<< " in det "<<det<<" with "<<vecAlignmentIgnoreChannels.at(det).size()<<" channels ignored"<<endl;
+        cout<<"\tDidn't find ch "<<ch<< " in det "<<det<<" with "<<vecAlignmentIgnoreChannels.at(det).size()<<" channels ignored- Do NOT ignore"<<endl;
     }
     else
         cout<<"\tDidn't find det" <<det<<endl;
