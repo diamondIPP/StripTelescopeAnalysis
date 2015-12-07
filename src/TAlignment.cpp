@@ -1542,6 +1542,7 @@ void TAlignment::CreateDistributionPlotDeltaX(
     Float_t mean = histo->GetMean();
     cout << "Alignment for plane " << subjectPlane << endl;
     if(verb) cout<<"bins: "<<histo->GetNbinsX()<<"\tRange: "<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax()<<endl;
+    if(verb) cout<<"mean: "<<mean<<"+/-"<<sigma<<" / "<<fitWidth<<endl;
     TF1* fitX=0;
     if(TPlaneProperties::isDiamondPlane(subjectPlane) && this->mode == TSettings::transparentMode){
         fitWidth = 3 * sigma;
@@ -1560,6 +1561,8 @@ void TAlignment::CreateDistributionPlotDeltaX(
         if (verb) cout<<"Double Gaus Fit"<<endl;
     }
     else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
+        Float_t xmin = mean-1* fitWidth;
+        Float_t xmax = mean+1* fitWidth;
         fitWidth = 3*sigma;
         fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",mean-fitWidth,mean+fitWidth);
         fitX->FixParameter(3,settings->getDiamondPitchWidth()/2);//TODO
@@ -1578,6 +1581,9 @@ void TAlignment::CreateDistributionPlotDeltaX(
     if (this->mode==TSettings::transparentMode){
         cout<<"Fitfunction: "<<fitX->GetName()<<" "<<fitX->GetTitle()<<endl;
     }
+    if (verb) cout<<"FIT: "<<mean-fitWidth<<"-"<<mean+fitWidth<<endl;
+    if(verb) cout<<"bins: "<<histo->GetNbinsX()<<"\tRange: "<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax()<<endl;
+    if(verb) cout<<"mean: "<<mean<<"+/-"<<sigma<<" / "<<fitWidth<<endl;
     histo->Fit(fitX, "Q", "",mean-fitWidth, mean+fitWidth);
     Float_t xRes=0;
 
