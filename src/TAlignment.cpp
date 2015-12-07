@@ -1520,107 +1520,118 @@ void TAlignment::CreateDistributionPlotDeltaX(
     histName.Append(TString::Format("_Distribution_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName);
     if (verbosity >4) cout<<histName<<endl;
     TH1F* histo = 0;
+    bool verb = false;;
 
     if(TPlaneProperties::isDiamondPlane(subjectPlane)&&(nDiaAlignmentStep == nDiaAlignSteps)){
+        verb = true;
         Float_t pitchWidth = settings->getDiamondPitchWidth();
-        histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 512, HistogrammSaver::manual,-1.1*pitchWidth,1.1*pitchWidth);
+        Float_t xmin = -1.5*pitchWidth;
+        Float_t xmax =  1.5*pitchWidth;
+        histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 512, HistogrammSaver::manual,xmin,xmax);
+        if (verb)cout<<"Pitch width "<< pitchWidth<<endl;
     }
     else
         histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 512, HistogrammSaver::threeSigma);
-    if (!histo)
+    if (!histo){
         cerr<<"Could not CreateDistributionHisto: "<<histName<<endl;
+        return;
+    }
+    histo->Draw("goff");
+    Float_t sigma = histo->GetRMS();
+    Float_t fitWidth = sigma * 1.5;
+    Float_t mean = histo->GetMean();
+    cout << "Alignment for plane " << subjectPlane << endl;
+    if(verb) cout<<"bins: "<<histo->GetNbinsX()<<"\tRange: "<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax()<<endl;
+    TF1* fitX=0;
+    if(TPlaneProperties::isDiamondPlane(subjectPlane) && this->mode == TSettings::transparentMode){
+        fitWidth = 3 * sigma;
+        fitX = new TF1("doubleGausFit","gaus(0)+gaus(3)",mean-fitWidth,mean+fitWidth);
+        //              fitX->SetParLimits(0,0,4*sigma);
+        fitX->SetParLimits(1,-4*sigma,4*sigma);
+        fitX->SetParLimits(2,0,4*sigma);
+        //              fitX->SetParLimits(3,0,4*sigma);
+        fitX->SetParLimits(4,-4*sigma,4*sigma);
+        fitX->SetParLimits(5,0,4*sigma);
+        fitX->SetParNames("C_{0}","#mu_{0}","#sigma_{0}","#C_{1}","#mu_{1}","#sigma_{1}");
+        fitX->SetParameter(1,mean);
+        fitX->SetParameter(2,sigma);
+        fitX->SetParameter(4,mean);
+        fitX->SetParameter(5,sigma);
+        if (verb) cout<<"Double Gaus Fit"<<endl;
+    }
+    else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
+        fitWidth = 3*sigma;
+        fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",mean-fitWidth,mean+fitWidth);
+        fitX->FixParameter(3,settings->getDiamondPitchWidth()/2);//TODO
+        fitX->SetParLimits(1,0,sigma);
+        fitX->SetParNames("Integral","sigma of Gaus","position");
+        fitX->SetParameter(2,0);
+        fitX->SetParameter(1,0.1);
+        if (verb) cout<<"Box Fit"<<endl;
+    }
     else{
-        histo->Draw("goff");
-        Float_t sigma = histo->GetRMS();
-        Float_t fitWidth = sigma * 1.5;
-        Float_t mean = histo->GetMean();
-        cout << "Alignment for plane " << subjectPlane << endl;
-        TF1* fitX=0;
-        if(TPlaneProperties::isDiamondPlane(subjectPlane) && this->mode == TSettings::transparentMode){
-            fitWidth = 3 * sigma;
-            fitX = new TF1("doubleGausFit","gaus(0)+gaus(3)",mean-fitWidth,mean+fitWidth);
-            //              fitX->SetParLimits(0,0,4*sigma);
-            fitX->SetParLimits(1,-4*sigma,4*sigma);
-            fitX->SetParLimits(2,0,4*sigma);
-            //              fitX->SetParLimits(3,0,4*sigma);
-            fitX->SetParLimits(4,-4*sigma,4*sigma);
-            fitX->SetParLimits(5,0,4*sigma);
-            fitX->SetParNames("C_{0}","#mu_{0}","#sigma_{0}","#C_{1}","#mu_{1}","#sigma_{1}");
-            fitX->SetParameter(1,mean);
-            fitX->SetParameter(2,sigma);
-            fitX->SetParameter(4,mean);
-            fitX->SetParameter(5,sigma);
-        }
-        else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
-            fitWidth = 3*sigma;
-            fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",mean-fitWidth,mean+fitWidth);
-            fitX->FixParameter(3,settings->getDiamondPitchWidth()/2);//TODO
-            fitX->SetParLimits(1,0,sigma);
-            fitX->SetParNames("Integral","sigma of Gaus","position");
-            fitX->SetParameter(2,0);
-            fitX->SetParameter(1,0.1);
+        fitX = new TF1("fitGausX", "gaus", mean - fitWidth , mean + fitWidth);
+        fitX->SetParameter(1,mean);
+        fitX->SetParameter(2,sigma);
+        if (verb) cout<<"Gaus Fit"<<endl;
+    }
+    if (this->mode==TSettings::transparentMode){
+        cout<<"Fitfunction: "<<fitX->GetName()<<" "<<fitX->GetTitle()<<endl;
+    }
+    histo->Fit(fitX, "Q", "",mean-fitWidth, mean+fitWidth);
+    Float_t xRes=0;
+
+
+    if(TPlaneProperties::isDiamondPlane(subjectPlane) && mode == TSettings::transparentMode){
+        //check TODO
+    }
+    else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
+        xRes = TMath::Max(fitX->GetParameter(1),fitX->GetParError(2));
+        mean = fitX->GetParameter(2);
+    }
+    else{
+        mean = fitX->GetParameter(1);
+        xRes = fitX->GetParameter(2);
+        gausFitValuesX.at(subjectPlane)= make_pair(mean,xRes);
+    }
+    if (verb) cout<<"Fit: "<<mean<<"+/-"<<xRes<<endl;
+
+    if(xRes>0&&bUpdateResolution&&histo->GetEntries()>0){
+        if(TPlaneProperties::isDiamondPlane(subjectPlane)){
+            cout << "set Resolution via Gaus fit for diamond: " << xRes*100 << " with " << vecXLabDeltaMetric.size() << " Events" << endl;
+            align->setXResolution(xRes,subjectPlane);
+            align->setXMean(mean,subjectPlane);
         }
         else{
-            fitX = new TF1("fitGausX", "gaus", mean - fitWidth , mean + fitWidth);
-            fitX->SetParameter(1,mean);
-            fitX->SetParameter(2,sigma);
-        }
-        if (this->mode==TSettings::transparentMode){
-            cout<<"Fitfunction: "<<fitX->GetName()<<" "<<fitX->GetTitle()<<endl;
-        }
-        histo->Fit(fitX, "Q", "",mean-fitWidth, mean+fitWidth);
-        Float_t xRes=0;
-
-
-        if(TPlaneProperties::isDiamondPlane(subjectPlane) && mode == TSettings::transparentMode){
-            //check TODO
-        }
-        else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
-            xRes = TMath::Max(fitX->GetParameter(1),fitX->GetParError(2));
-            mean = fitX->GetParameter(2);
-        }
-        else{
-            mean = fitX->GetParameter(1);
-            xRes = fitX->GetParameter(2);
-            gausFitValuesX.at(subjectPlane)= make_pair(mean,xRes);
-        }
-
-        if(xRes>0&&bUpdateResolution&&histo->GetEntries()>0){
-            if(TPlaneProperties::isDiamondPlane(subjectPlane)){
-                cout << "set Resolution via Gaus fit for diamond: " << xRes*100 << " with " << vecXLabDeltaMetric.size() << " Events" << endl;
-                align->setXResolution(xRes,subjectPlane);
-                align->setXMean(mean,subjectPlane);
+            cout << "\n\nset Resolution via Gaus-Fit: " << xRes*100 << " with " << vecXLabDeltaMetric.size() << " Events" << endl;
+            cout << "xRes: "<<xRes*100<<endl;
+            cout << "xPre: "<<xPredictionSigma*100<<endl;
+            Float_t xres2 =xRes;
+            if(xRes>xPredictionSigma){
+                xres2 = xRes*xRes-xPredictionSigma*xPredictionSigma;
+                xres2 = TMath::Sqrt(xres2);
             }
             else{
-                cout << "\n\nset Resolution via Gaus-Fit: " << xRes*100 << " with " << vecXLabDeltaMetric.size() << " Events" << endl;
-                cout << "xRes: "<<xRes*100<<endl;
-                cout << "xPre: "<<xPredictionSigma*100<<endl;
-                Float_t xres2 =xRes;
-                if(xRes>xPredictionSigma){
-                    xres2 = xRes*xRes-xPredictionSigma*xPredictionSigma;
-                    xres2 = TMath::Sqrt(xres2);
-                }
-                else{
-                    xres2 = xres2/TMath::Sqrt2();
-                    cout<<" .... xRes < xPredictionSigma .....Update xRes to "<<xres2<<endl;
-                }
-                cout<< "xDet: "<<xres2*100 <<" = Sqrt("<<xRes*100<<"^2 - "<<xPredictionSigma*100<<"^2)"<<endl;
-                align->setXResolution(xres2, subjectPlane);
-                align->setXMean(mean,subjectPlane);
+                xres2 = xres2/TMath::Sqrt2();
+                cout<<" .... xRes < xPredictionSigma .....Update xRes to "<<xres2<<endl;
             }
-            if(xRes<fitWidth/3&&TPlaneProperties::isDiamondPlane(subjectPlane))
-                xRes = fitWidth/3;
-            histo->GetXaxis()->SetRangeUser(mean-4 * xRes, mean + 4 * xRes);
+            cout<< "xDet: "<<xres2*100 <<" = Sqrt("<<xRes*100<<"^2 - "<<xPredictionSigma*100<<"^2)"<<endl;
+            align->setXResolution(xres2, subjectPlane);
+            align->setXMean(mean,subjectPlane);
         }
-        histo->GetXaxis()->SetTitle("Delta X / #mum");
-        histo->GetYaxis()->SetTitle("Number of entries");
-        if (bPlot) histSaver->SaveHistogram(histo);
-        delete fitX;
-        delete histo;
-        histo =0;
+        if(xRes<fitWidth/3&&TPlaneProperties::isDiamondPlane(subjectPlane))
+            xRes = fitWidth/3;
+        histo->GetXaxis()->SetRangeUser(mean-4 * xRes, mean + 4 * xRes);
     }
-    //    if(histo)
-    //        delete histo;
+    histo->GetXaxis()->SetTitle("Delta X / #mum");
+    histo->GetYaxis()->SetTitle("Number of entries");
+    if (verb)cout<<"save"<<histo->GetName()<<endl;
+    if(verb) cout<<"bins: "<<histo->GetNbinsX()<<"\tRange: "<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax()<<endl;
+    if (verb) { cout<<"Press a key"<<endl; char t; cin>>t;}
+    if (bPlot) histSaver->SaveHistogram(histo);
+    delete fitX;
+    delete histo;
+    histo =0;
 }
 
 void TAlignment::CreateScatterPlotPredYvsDeltaX(
@@ -1746,12 +1757,14 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
         Float_t ymin = -50;
         Float_t ymax = 50;
         histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric,vecXLabPredMetric,256,512,xmin,xmax,ymin,ymax);
+        if (verb) cout<<"x: "<<xmin <<"-"<<xmax<<"\ty: "<<ymin<<"-"<<ymax<<endl;
         Float_t mean = histo->GetMean(2);
         Float_t sigma = histo->GetRMS(2);
         delete histo;
         ymin = mean - 3 * sigma;
         ymax = mean + 3 * sigma;
         histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric,vecXLabPredMetric,256,512,xmin,xmax,ymin,ymax);
+        if (verb) cout<<"x: "<<xmin <<"-"<<xmax<<"\ty: "<<ymin<<"-"<<ymax<<endl;
     }
     else
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecXLabPredMetric, 512);
@@ -2660,8 +2673,13 @@ void TAlignment::CreateScatterPlotDeltaXvsChi2X(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, bool isSiliconPostAlignment) {
+    if (!bPlot)
+        return;
+    if (!nAlignmentStep > -1)
+        return;
+    if (!(cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR))
+        return;
 
-    if (bPlot && nAlignmentStep > -1 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) { //ScatterHisto DeltaX vs Chi2X
         TString name = preName+ TString::Format("_ScatterPlot_DeltaX_vs_Chi2X_Plane_%d_with_",subjectPlane)+refPlaneString + postName;
         TString xTitle = "#chi^{2}_{X}";
         TString yTitle ="Sum of Delta X / #mum";
@@ -2679,8 +2697,6 @@ void TAlignment::CreateScatterPlotDeltaXvsChi2X(
         histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
         delete histo;
         if(verbosity>3)cout<<"DONE"<<endl;
-    }
-
 }
 
 void TAlignment::CreateScatterPlotDeltaYvsChi2Y(
