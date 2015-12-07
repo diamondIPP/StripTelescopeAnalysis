@@ -713,12 +713,12 @@ void TSelectionClass::saveHistos()
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
     hProjection = hFiducialCutSiliconRoughCut->ProjectionX("hFidCutSilicon_OneAndOnlyOneCluster_RoughCut_px");
-    hProjection->SetTitle("One and onlu one silicon in Rough FidCut - Projection X");
+    hProjection->SetTitle("One and only one silicon in Rough FidCut - Projection X");
     cout<<"\nSaving: "<<hProjection->GetName()<<" "<<hProjection->GetEntries()<<endl;
     histSaver->SaveHistogram(hProjection);
     delete hProjection;
     hProjection = hFiducialCutSiliconRoughCut->ProjectionY("hFidCutSilicon_OneAndOnlyOneCluster_RoughCut_py");
-    hProjection->SetTitle("One and onlu one silicon in Rough FidCut - Projection Y");
+    hProjection->SetTitle("One and only one silicon in Rough FidCut - Projection Y");
     cout<<"Saving: "<<hProjection->GetName()<<" "<<hProjection->GetEntries()<<endl;
     histSaver->SaveHistogram(hProjection);
     delete hProjection;
@@ -726,11 +726,33 @@ void TSelectionClass::saveHistos()
     c1=0;
     delete hFiducialCutSiliconRoughCut;
 
+
+
+    fiducialCuts->setHistogramm(hFiducialCutSiliconDiamondHit);
+    histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
+    histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));
+    c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR);
+    c1->SetTitle(Form("Fiducial Cut of Run %i with \"%s\"",settings->getRunNumber(),settings->getRunDescription().c_str()));
+    c1->SetName("cFidCutCanvasXY");
+    histSaver->SaveCanvas(c1);
+    delete c1;
+    c1 = 0;
+
     name = hFiducialCutSiliconDiamondHit->GetName();
     name.Insert(0,"c");
     c1 = fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit,true);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
+    hProjection = hFiducialCutSiliconRoughCut->ProjectionX("hFidCutSilicon_OneAndOnlyOneClusterAndDiamondHit_RoughCut_px");
+    hProjection->SetTitle("One and only one silicon + >= 1 Diamond Hit in Rough FidCut - Projection X");
+    cout<<"\nSaving: "<<hProjection->GetName()<<" "<<hProjection->GetEntries()<<endl;
+    histSaver->SaveHistogram(hProjection);
+    delete hProjection;
+    hProjection = hFiducialCutSiliconRoughCut->ProjectionY("hFidCutSilicon_OneAndOnlyOneClusterAndDiamondHit_RoughCut_py");
+    hProjection->SetTitle("One and only one silicon + >= 1  Diamond Hit  in Rough FidCut - Projection Y");
+    cout<<"Saving: "<<hProjection->GetName()<<" "<<hProjection->GetEntries()<<endl;
+    histSaver->SaveHistogram(hProjection);
+    delete hProjection;
     delete c1;
     c1=0;
     delete hFiducialCutSiliconDiamondHit;
