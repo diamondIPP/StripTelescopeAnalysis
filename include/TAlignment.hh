@@ -137,7 +137,9 @@ private:
 	 *
 	 * @return
 	 */
-	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,bool bAlign=false,bool bPlot=false,TResidual resOld=TResidual(true),TCluster::calculationMode_t mode=TCluster::maxValue,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10){
+	TResidual getStripResidual(TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane, vector<UInt_t> vecRefPlanes,
+	        bool bAlign=false,bool bPlot=false,TResidual resOld=TResidual(true),
+	        TCluster::calculationMode_t mode=TCluster::maxValue,resCalcMode calcMode = normalCalcMode,Float_t maxChi2=10){
 	    return Residual(singleStrip,cor,subjectPlane,vecRefPlanes,bAlign,bPlot,resOld,mode,calcMode,maxChi2);
 	}
 
@@ -168,6 +170,7 @@ private:
 	Int_t nAlignmentStep;
     Int_t nAlignSteps;
 
+    bool silicon_chi2_cut;
     Int_t nDiaAlignmentStep;
     Int_t nDiaAlignSteps;
     TCluster::calculationMode_t diaCalcMode;

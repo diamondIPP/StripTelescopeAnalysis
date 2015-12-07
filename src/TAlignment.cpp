@@ -70,6 +70,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
     cout<<"Selection Fidcuts: "<<endl;
     settings->getSelectionFidCuts()->Print();
     cout<<"\nAlignment FIdcuts: "<<settings->getAlignmentFidCuts()<<endl;
+    silicon_chi2_cut = false;
 
 }
 
@@ -470,6 +471,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
  *
  */
 void TAlignment::AlignSiliconPlanes() {
+    silicon_chi2_cut = false;
     cout<<"Alignment of Silicon Planes. max. Alignment Steps: "<<nAlignSteps<<endl;
     nAlignmentStep = -1;
     if(!align->isPreAligned() || bPlotAll){
@@ -607,6 +609,7 @@ void TAlignment::AlignDiamondPlane() {
     cout << "*******************************************************\n" << endl;
 
     settings->diamondPattern.hasInvalidIntervals();
+    silicon_chi2_cut = true;
     //create ReferencePlane Vector: using all Silicon Planes for Alignment 0,1,2,3
     UInt_t diaPlane = 4;
     vector<UInt_t> vecRefPlanes;
@@ -815,16 +818,34 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     TString refPlaneString = GetReferencePlaneString(&vecRefPlanes);
 
     bool isStripAlignment = (aligning == singleStrip);
-    if(isStripAlignment)
-        cout<<"isSingle Strip Alignment. "<<endl;
-    //    char t; cin>>t;
 
-    if (verbosity){
+    if (verbosity||isStripAlignment){
         cout << "TAlignment::get";
-        if(isStripAlignment)cout<<"Strip";
+        if(isStripAlignment)cout<<"SingleStrip";
         cout<<"Residual of Plane " << subjectPlane << TPlaneProperties::getCoordinateString(cor);
-        cout << " with " << refPlaneString << ", plotting: " << bPlot<< ", using "<<events.size()<<" Events\t" << resOld.isTestResidual();
-        cout<<"\tvalidPatternStrip: "<<mode<<"-"<<calcMode<<" "<<endl;
+        cout << " with " << refPlaneString << ", plotting: " << bPlot<< ", using "<<events.size()<<" Events\t"l
+                if (resOld.isTestResidual()) cout<<" having a TestResidual";
+        cout<<"\tClusterPos: ";
+        switch (mode) {
+            case maxValue: cout<<"MaxValue";break;
+            case chargeWeighted: cout<<"Charge Weigthed";break;
+            case highest2Centroid: cout<<"Highest2Centroid";break;
+            case eta: cout<<"Eta";break;
+            case corEta: cout<<"corEta";break;
+            case highest2CentroidNoSmallHits: cout<<"highest2CentroidNoSmallHits";
+            default:
+                cout<<"Unknown";
+        }
+        cout<<"\tResidualCalcMode: ";
+        switch (calcMode){
+            case chi2CalcMode: cout<<"Chi2 CalcMode";break;
+            case normalCalcMode: cout<<"normal CalcMode";break;
+            case resolutionCalcMode: cout<<"resolution CalcMode";break;
+            default:
+                cout<<"Unknown CalcMode";break;
+        }
+        cout<<endl;
+
         if(verbosity>0&&resOld.isTestResidual())resOld.Print(1);
     }
     clearMeasuredVectors();
@@ -850,6 +871,12 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     Float_t pw_sil = settings->getPitchWidth(0,0);
     Float_t maxXLabMetric = TPlaneProperties::getNChannelsSilicon() * pw_sil;
     Float_t maxYLabMetric = TPlaneProperties::getNChannelsSilicon() * pw_sil;
+    if (silicon_chi2_cut){
+        Float_t chi2 = settings->getAlignment_chi2();
+        cout<<"Applying Chi2 cut on silicon for Alignment of diamond: "<<chi2<<endl;
+        if (maxChi2 > chi2)
+            maxChi2 = chi2;
+    }
     for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, nEvents);
         if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent])
@@ -960,6 +987,9 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         if (useEvent && settings->IgnoreStripForAlignment(subjectDet,predHitPosDetCh)){
             //            cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
             useEvent = false;
+        }
+        if (useEvent && silicon_chi2_cut){
+            useEvent = chi2x < maxChi2 && chi2y < maxChi2;
         }
 
         vecXDetRelHitPosPredMetricAll.push_back(relHitPosPredictedMetric);
@@ -1088,8 +1118,8 @@ TResidual TAlignment::CheckStripDetectorAlignmentChi2(TPlaneProperties::enumCoor
     cout<<"[TAlignment::CheckStripDetectorAlignmentChi2] "<<subjectPlane<<" Align: "<<bAlign<<"/"<<bPlot<<" Chi2: "<<maxChi2<<endl;
     TResidual res;
     res = getStripResidual(cor, subjectPlane, vecRefPlanes, bAlign, true,res,diaCalcMode,chi2CalcMode, maxChi2);
-//    if (verbosity)
-        res.Print();
+////    if (verbosity)
+//        res.Print();
     return res;
 }
 /**
