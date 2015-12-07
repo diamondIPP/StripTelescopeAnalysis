@@ -2248,7 +2248,7 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
     bool verb = hName.BeginsWith("hSilicon_PostAlignment_Distribution_DeltaY_Plane_0");
     verb = verb || hName.BeginsWith("hDiamond_PostAlignment_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_");
     verb = verb || hName.BeginsWith("hDiamond_PostAlignment_Distribution_DeltaX_Plane_");
-    if (verb) cout<<"\n[CreateDistributionHisto]"<<hName<endl;
+    if (verb) cout<<"\n[CreateDistributionHisto]"<<hName<<endl;
     int verbosity = verb*6;
     //	Float_t factor = 0.05;//5% bigger INtervall...
     if(vec.size()==0)

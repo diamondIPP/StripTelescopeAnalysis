@@ -977,7 +977,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             useEvent = false;
         }
         if (useEvent && settings->IgnoreStripForAlignment(subjectDet,predHitPosDetCh)){
-            cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
+            //cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
             useEvent = false;
         }
 
@@ -1825,8 +1825,7 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
-//    if (verb){cout<<"Press a key to continue."<<flush;char t;cin>>t;
-    }
+//    if (verb){cout<<"Press a key to continue."<<flush;char t;cin>>t;}
 }
 
 
