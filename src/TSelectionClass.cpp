@@ -726,17 +726,32 @@ void TSelectionClass::saveHistos()
     c1=0;
     delete hFiducialCutSiliconRoughCut;
 
+    if(fiducialCuts){
+        TH2F* h2 = hFiducialCutSiliconDiamondHit->Clone();
+        cout<<"setHistogramm(hFiducialCutSiliconDiamondHit)"<<hFiducialCutSiliconDiamondHit<<endl;
+        fiducialCuts->setHistogramm(h2);
+        cout<<"get CanvasX"<<endl;
+        c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR);
+        cout<<"SaveCanvas FIducialCutCanvas X <<(hFiducialCutSiliconDiamondHit)"<<hFiducialCutSiliconDiamondHit<<endl;
+        histSaver->SaveCanvas(c1);
+        delete c1;
+        c1 = 0;
 
+        cout<<"get CanvasY"<<endl;
+        c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR);
+        cout<<"SaveCanvas FiducialCutCanvas Y <<(hFiducialCutSiliconDiamondHit)"<<hFiducialCutSiliconDiamondHit<<endl;
+        histSaver->SaveCanvas(c1);
+        delete c1;
+        c1 = 0;
 
-    fiducialCuts->setHistogramm(hFiducialCutSiliconDiamondHit);
-    histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::X_COR));
-    histSaver->SaveCanvas(fiducialCuts->getFiducialCutCanvas(TPlaneProperties::Y_COR));
-    c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR);
-    c1->SetTitle(Form("Fiducial Cut of Run %i with \"%s\"",settings->getRunNumber(),settings->getRunDescription().c_str()));
-    c1->SetName("cFidCutCanvasXY");
-    histSaver->SaveCanvas(c1);
-    delete c1;
-    c1 = 0;
+        cout<<"get CanvasXY"<<endl;
+        c1 = fiducialCuts->getFiducialCutCanvas(TPlaneProperties::XY_COR);
+        c1->SetTitle(Form("Fiducial Cut of Run %i with \"%s\"",settings->getRunNumber(),settings->getRunDescription().c_str()));
+        c1->SetName("cFidCutCanvasXY");
+        histSaver->SaveCanvas(c1);
+        delete c1;
+        c1 = 0;
+    }
 
     name = hFiducialCutSiliconDiamondHit->GetName();
     name.Insert(0,"c");
