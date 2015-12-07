@@ -2374,7 +2374,8 @@ TH1F* HistogrammSaver::CreateDistributionHisto(std::string name, std::vector<Flo
     if (histo->GetXaxis()->GetBinCenter(1) > min)
         min = histo->GetXaxis()->GetBinLowEdge(1);
     if (histo->GetXaxis()->GetBinCenter(binsx) <= max)
-        max = histo->GetXaxis()->GetBinUpEdge(max);
+        max = histo->GetXaxis()->GetBinUpEdge(binsx);
+    if(verbosity>3)cout<<"Update Xaxis Range: "<<min<<"-"<<max<<endl;
     histo->GetXaxis()->SetRangeUser(min,max);
     histo->GetYaxis()->SetTitle("number of entries #");
     return histo;
