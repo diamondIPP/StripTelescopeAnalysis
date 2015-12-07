@@ -89,9 +89,11 @@ private:
 	bool oneAndOnlyOneSiliconCluster; //One and only one cluster in each silicon plane;
 	Int_t siliconClusterBitMask;
 	Int_t siliconOneAndOnlyOneClusterBitMask;
+    Int_t siliconValidClusterHitBitMask;
 	Int_t siliconOneAndOnlyOneValidClusterHitBitMask;
 	TH1F* hSiliconClusterBitMask;
 	TH1F* hSiliconOneAndOnlyOneClusterBitMask;
+    TH1F* hSiliconValidClusterHitBitMask;
 	TH1F* hSiliconOneAndOnlyOneValidClusterHitBitMask;
 	bool IsInFiducialCut; //if hasValidSiliconTrack avarage of x and y of all planes is in fidcut region
 	bool isSiliconTrackNotFiducialCut;

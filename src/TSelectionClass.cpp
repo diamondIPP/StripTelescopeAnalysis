@@ -262,10 +262,10 @@ bool TSelectionClass::isOneAndOnlyOneClusterSiliconEvent(){
         siliconOneAndOnlyOneClusterBitMask  |= ((bool)oneAndOnlyOne<<det);
         if(verbosity>10)cout<<"DET "<<det<<": "<<oneAndOnlyOne<<" "<<checkDetMasked(det)<<" "<<isSaturated(det)<<flush;
         bool valid_cluster =  !checkDetMasked(det) && !isSaturated(det);
-        siliconOneAndOnlyOneValidClusterHitBitMask |= ( (bool)valid_cluster<<det);
         oneAndOnlyOne = oneAndOnlyOne && valid_cluster;
-        if (oneAndOnlyOneClusterInAllSilicon==true)
-            oneAndOnlyOneClusterInAllSilicon=oneAndOnlyOneClusterInAllSilicon&&oneAndOnlyOne;
+        siliconOneAndOnlyOneValidClusterHitBitMask |= ( (bool)oneAndOnlyOne<<det);
+//        if (oneAndOnlyOneClusterInAllSilicon==true)
+        oneAndOnlyOneClusterInAllSilicon=oneAndOnlyOneClusterInAllSilicon&&oneAndOnlyOne;
     }
     return oneAndOnlyOneClusterInAllSilicon;
 }
@@ -369,6 +369,7 @@ void TSelectionClass::setVariables(){
 void TSelectionClass::fillHitOccupancyPlots(){
     hSiliconClusterBitMask->Fill(siliconClusterBitMask);
     hSiliconOneAndOnlyOneClusterBitMask->Fill(siliconOneAndOnlyOneClusterBitMask);
+    hSiliconValidClusterHitBitMask->Fill(siliconValidClusterHitBitMask);
     hSiliconOneAndOnlyOneValidClusterHitBitMask->Fill(siliconOneAndOnlyOneValidClusterHitBitMask);
     if(!oneAndOnlyOneSiliconCluster)
         return;
@@ -564,6 +565,20 @@ void TSelectionClass::initialiseHistos()
     hSiliconOneAndOnlyOneClusterBitMask = new TH1F(name,"One And Only One Cluster",bins,0,bins);
     name = "hSiliconOneAndOnlyOneValidClusterHitBitMask";
     hSiliconOneAndOnlyOneValidClusterHitBitMask = new TH1F(name,"One And Only One Valid Cluster",bins,0,bins);
+    name = "hSiliconValidClusterHitBitMask";
+    hSiliconValidClusterHitBitMask = new TH1F(name,"Valid Cluster",bins,0,bins);
+    for (int i = 0; i < bins; i++){
+        TString title = "";
+        for (int det = 0; det < TPlaneProperties::getNSiliconDetectors();det++)
+            title+= TString::Format("%d",((i&(1<<det))==(1<<det)));
+        cout<<"Bin "<<i<<": "<<title<<endl;
+        hSiliconValidClusterHitBitMask->GetXaxis()->SetBinLabel(i+1,title);
+        hSiliconOneAndOnlyOneValidClusterHitBitMask->GetXaxis()->SetBinLabel(i+1,title);
+        hSiliconOneAndOnlyOneClusterBitMask->GetXaxis()->SetBinLabel(i+1,title);
+        hSiliconClusterBitMask->GetXaxis()->SetBinLabel(i+1,title);
+
+    }
+
 
 }
 
@@ -704,7 +719,9 @@ void TSelectionClass::saveHistos()
     histSaver->SaveHistogram( hSiliconOneAndOnlyOneClusterBitMask);
     delete hSiliconClusterBitMask;
     histSaver->SaveHistogram( hSiliconOneAndOnlyOneValidClusterHitBitMask);
-    delete hSiliconClusterBitMask;
+    delete hSiliconOneAndOnlyOneValidClusterHitBitMask;
+    histSaver->SaveHistogram(hSiliconValidClusterHitBitMask);
+    delete hSiliconValidClusterHitBitMask;
 
 
     name = hFiducialCutSiliconRoughCut->GetName();
