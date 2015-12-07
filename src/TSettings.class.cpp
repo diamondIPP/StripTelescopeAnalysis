@@ -2262,18 +2262,19 @@ bool TSettings::hasBorderHit(UInt_t det, TCluster cluster){
 
 
 bool TSettings::IgnoreStripForAlignment(UInt_t det, Float_t predHitPosDetCh) {
+    bool verb = false;
     Int_t ch = (Int_t)(predHitPosDetCh +.5);
-    cout << "[IgnoreStripForAlignment]: "<<det<<" - "<<predHitPosDetCh<<" ==> "<<ch<<endl;
+    if (verb) cout << "[IgnoreStripForAlignment]: "<<det<<" - "<<predHitPosDetCh<<" ==> "<<ch<<endl;
     if (det < vecAlignmentIgnoreChannels.size()){
         for (UInt_t i = 0; i < vecAlignmentIgnoreChannels.at(det).size();i++)
             if ( vecAlignmentIgnoreChannels.at(det).at(i) == ch){
-                cout<<"\tFound: "<<ch<<" at "<<i<<"  -> IGNORE EVENT"<<endl;
+                if (verb) cout<<"\tFound: "<<ch<<" at "<<i<<"  -> IGNORE EVENT"<<endl;
                 return true;
             }
-        cout<<"\tDidn't find ch "<<ch<< " in det "<<det<<" with "<<vecAlignmentIgnoreChannels.at(det).size()<<" channels ignored- Do NOT ignore"<<endl;
+        if (verb) cout<<"\tDidn't find ch "<<ch<< " in det "<<det<<" with "<<vecAlignmentIgnoreChannels.at(det).size()<<" channels ignored- Do NOT ignore"<<endl;
     }
     else
-        cout<<"\tDidn't find det" <<det<<endl;
+        if (verb) cout<<"\tDidn't find det" <<det<<endl;
     return false;
 }
 

@@ -1531,11 +1531,12 @@ void TAlignment::CreateDistributionPlotDeltaX(
 
     if(TPlaneProperties::isDiamondPlane(subjectPlane)&&(nDiaAlignmentStep == nDiaAlignSteps)){
         verb = true;
+        if (verb) cout<<"\n[TAlignment::CreateDistributionPlotDeltaX]"<<histName<<endl;
         Float_t pitchWidth = settings->getDiamondPitchWidth();
         Float_t xmin = -1.5*pitchWidth;
         Float_t xmax =  1.5*pitchWidth;
         histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 512, HistogrammSaver::manual,xmin,xmax);
-        if (verb)cout<<"Pitch width "<< pitchWidth<<endl;
+        if (verb)cout<<"Pitch width "<< pitchWidth<<" "<<xmin<<"-"<<xmax<<endl;
     }
     else
         histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 512, HistogrammSaver::threeSigma);
@@ -1543,7 +1544,7 @@ void TAlignment::CreateDistributionPlotDeltaX(
         cerr<<"Could not CreateDistributionHisto: "<<histName<<endl;
         return;
     }
-    histo->Draw("goff");
+    histo->Draw("");
     Float_t sigma = histo->GetRMS();
     Float_t fitWidth = sigma * 1.5;
     Float_t mean = histo->GetMean();
@@ -2337,6 +2338,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateScatterPlotPredXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotMeasXvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotPredXDetvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
+    CreateScatterPlotPredXChvsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);//,xPredictionSigma);
     CreateScatterPlotEtaVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosMeasXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateRelHitPosPredXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
