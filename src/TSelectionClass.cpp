@@ -233,6 +233,9 @@ void TSelectionClass::resetVariables(){
     isDetMasked = false;//one of the Silicon Planes contains a Cluster with a masked channel
     nDiamondClusters=0;
     oneAndOnlyOneSiliconCluster=true;; //One and only one cluster in each silicon plane;
+    siliconClusterBitMask = 0;
+    siliconOneAndOnlyOneClusterBitMask = 0;
+    siliconOneAndOnlyOneValidClusterHitBitMask = 0;
     useForAnalysis=false;
     useForAlignment=false;
     useForSiliconAlignment=false;
@@ -248,12 +251,21 @@ void TSelectionClass::resetVariables(){
  * This includes a check if a channel is Masked or Saturated
  */
 bool TSelectionClass::isOneAndOnlyOneClusterSiliconEvent(){
+    siliconClusterBitMask = 0;
+    siliconOneAndOnlyOneClusterBitMask = 0;
+    siliconOneAndOnlyOneValidClusterHitBitMask = 0;
     bool oneAndOnlyOneClusterInAllSilicon = true;
-    for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors()&&oneAndOnlyOneClusterInAllSilicon==true;det++){
-        bool oneAndOnlyOne = (eventReader->getNClusters(det)==1);
+    for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
+        Int_t nclus = eventReader->getNClusters(det);
+        siliconClusterBitMask |= ((bool)nclus<<det);
+        bool oneAndOnlyOne = (nclus==1);
+        siliconOneAndOnlyOneClusterBitMask  |= ((bool)oneAndOnlyOne<<det);
         if(verbosity>10)cout<<"DET "<<det<<": "<<oneAndOnlyOne<<" "<<checkDetMasked(det)<<" "<<isSaturated(det)<<flush;
-        oneAndOnlyOne = oneAndOnlyOne && !checkDetMasked(det) && !isSaturated(det);
-        oneAndOnlyOneClusterInAllSilicon=oneAndOnlyOneClusterInAllSilicon&&oneAndOnlyOne;
+        bool valid_cluster =  !checkDetMasked(det) && !isSaturated(det);
+        siliconOneAndOnlyOneValidClusterHitBitMask |= ( (bool)valid_cluster<<det);
+        oneAndOnlyOne = oneAndOnlyOne && valid_cluster;
+        if (oneAndOnlyOneClusterInAllSilicon==true)
+            oneAndOnlyOneClusterInAllSilicon=oneAndOnlyOneClusterInAllSilicon&&oneAndOnlyOne;
     }
     return oneAndOnlyOneClusterInAllSilicon;
 }
@@ -355,6 +367,9 @@ void TSelectionClass::setVariables(){
 }
 
 void TSelectionClass::fillHitOccupancyPlots(){
+    hSiliconClusterBitMask->Fill(siliconClusterBitMask);
+    hSiliconOneAndOnlyOneClusterBitMask->Fill(siliconOneAndOnlyOneClusterBitMask);
+    hSiliconOneAndOnlyOneValidClusterHitBitMask->Fill(siliconOneAndOnlyOneValidClusterHitBitMask);
     if(!oneAndOnlyOneSiliconCluster)
         return;
     hFiducialCutSilicon->Fill(fiducialValueX,fiducialValueY);
@@ -542,7 +557,13 @@ void TSelectionClass::initialiseHistos()
     pDiamondPatternFiducialPatternProfile->GetXaxis()->SetTitle("pattern selectionCut");
     pDiamondPatternFiducialPatternProfile->GetYaxis()->SetTitle("rel. number of mappings found");
 
-
+    Int_t bins = 1 <<TPlaneProperties::getNSiliconDetectors();
+    name = "hSiliconClusterBitMask";
+    hSiliconClusterBitMask  = new TH1F(name,"At Least One Cluster",bins,0,bins);
+    name = "hSiliconOneAndOnlyOneClusterBitMask";
+    hSiliconOneAndOnlyOneClusterBitMask = new TH1F(name,"One And Only One Cluster",bins,0,bins);
+    name = "hSiliconOneAndOnlyOneValidClusterHitBitMask";
+    hSiliconOneAndOnlyOneValidClusterHitBitMask = new TH1F(name,"One And Only One Valid Cluster",bins,0,bins);
 
 }
 
@@ -678,6 +699,12 @@ void TSelectionClass::saveHistos()
     c1 = 0;
     delete hFiducialCutSilicon;
 
+    histSaver->SaveHistogram( hSiliconClusterBitMask);
+    delete hSiliconClusterBitMask;
+    histSaver->SaveHistogram( hSiliconOneAndOnlyOneClusterBitMask);
+    delete hSiliconClusterBitMask;
+    histSaver->SaveHistogram( hSiliconOneAndOnlyOneValidClusterHitBitMask);
+    delete hSiliconClusterBitMask;
 
 
     name = hFiducialCutSiliconRoughCut->GetName();
