@@ -421,6 +421,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_fraction")) Parse(key,value,alignment_training_track_fraction);
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_number")) Parse(key,value,alignment_training_track_number);
         if (TPlaneProperties::startsWith(key,"RerunSelection")) Parse(key,value,bRerunSelection);
+        if (TPlaneProperties::startsWith(key,"AlignmentIgnoreChannelDia")) ParseIntArray(key,value,vecAlignmentIgnoreChannels.at(TPlaneProperties::getDetDiamond()));
 		//bRerunSelection
 		if (TPlaneProperties::startsWith(key,"alignment_training_method")){
 			cout << key.c_str() << " = " << value.c_str() << endl;
@@ -654,6 +655,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	if(getVerbosity())
 		cout<<"TSettings::LoadDefaultSettings"<<endl;
 	//default general settings
+	vecAlignmentIgnoreChannels.resize(TPlaneProperties::getNDetectors(),vector<Int_t>);
 	isStandardArea=true;
 	isStandardSelectionFidCut=true;
 	runDescription="";
@@ -2239,6 +2241,23 @@ bool TSettings::hasBorderHit(UInt_t det, TCluster cluster){
 			cout<<flush;
 	}
 	return false;
+}
+
+
+bool TSettings::IgnoreStripForAlignment(UInt_t det, Float_t predHitPosDetCh) {
+    Int_t ch = (Int_t)(predHitPosDetCh +.5);
+    cout << "[IgnoreStripForAlignment]: "<<det<<" - "<<predHitPosDetCh<<" ==> "<<ch<<endl;
+    if (det < vecAlignmentIgnoreChannels.size()){
+        for (UInt_t i = 0; i < vecAlignmentIgnoreChannels.at(det).size();i++)
+            if ( vecAlignmentIgnoreChannels.at(det).at(i) == ch){
+                cout<<"\tFound: "<<ch<<" at "<<i<<endl;
+                return true;
+            }
+        cout<<"\tDidn't find ch "<<ch<< " in det "<<det<<" with "<<vecAlignmentIgnoreChannels.at(det).size()<<" channels ignored"<<endl;
+    }
+    else
+        cout<<"\tDidn't find det" <<det<<endl;
+    return false;
 }
 
 Float_t TSettings::getPitchWidth(UInt_t det, UInt_t area){

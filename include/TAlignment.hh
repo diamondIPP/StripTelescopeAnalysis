@@ -193,6 +193,7 @@ private:
 
     void CreateScatterPlotMeasXvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateScatterPlotPredXDetvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
+    void CreateScatterPlotPredXChvsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateFidValueXVsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     void CreateFidValueYVsDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
     Float_t CreateSigmaOfPredictionYPlots(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment);
@@ -217,6 +218,7 @@ private:
 	vector<Float_t> vecXLabPredMetric;
 	vector<Float_t> vecYLabPredMetric;
 	vector<Float_t> vecXDetPredMetric,vecYDetPredMetric;
+	vector<Float_t> vecXDetPredChannel;
 	vector<Float_t> vecXLabMeasMetric;
 	vector<Float_t> vecYLabMeasMetric;
 	vector<Float_t> vecXLabDeltaMetric;

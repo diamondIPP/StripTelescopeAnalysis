@@ -976,6 +976,11 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             cout<<" Invalid relHitPosMeasuredMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<relHitPosMeasuredMetric<<endl;
             useEvent = false;
         }
+        if (settings->IgnoreStripForAlignment(subjectDet,predHitPosDetCh)){
+            cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
+            useEvent = false;
+        }
+
         vecXDetRelHitPosPredMetricAll.push_back(relHitPosPredictedMetric);
         vecXDetRelHitPosMeasMetricAll.push_back(relHitPosMeasuredMetric);
         vecDeltaXMetricAll.push_back(xDelta);
@@ -993,6 +998,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
 
             vecXDetPredMetric.push_back(xDetPredictedMetric);
             vecYDetPredMetric.push_back(yDetPredictedMetric);
+
+            vecXDetPredChannel.push_back(predHitPosDetCh);
 
             vecXDetMeasMetric.push_back(xDetMeasuredMetric);
             vecYDetMeasMetric.push_back(yDetMeasuredMetric);
@@ -1712,6 +1719,32 @@ void TAlignment::CreateScatterPlotMeasXvsDeltaX(
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("measured X  / #mum");
     graph.GetYaxis()->SetTitle("delta X / #mum");
+    TGraph* gr = (TGraph*) graph.Clone();
+    histSaver->SaveGraph(gr, (string)histName);
+    if(gr) delete gr;
+}
+
+
+void TAlignment::CreateScatterPlotPredXChvsDeltaX(
+        TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
+        TString preName, TString postName, TString refPlaneString, bool bPlot, bool bUpdateResolution, bool isSiliconPostAlignment) {
+    if (!bPlot) return;
+    if (!((cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR))) return;
+    TString histName = preName + TString::Format("_ScatterPlot_XPredictedCht_vs_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName;
+    TH2F* histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric, vecXDetPredChannel,256);
+    if(!histo)
+        cerr<<"Could not CreateScatterHisto: "<<histName<<endl;
+    else{
+        histo->GetXaxis()->SetTitle("X Predicted_{Det} / CH");
+        histo->GetYaxis()->SetTitle("Delta X / #mum");
+        histSaver->SaveHistogram(histo);
+        delete histo;
+    }
+    histName.Replace(0,1,"g");
+    TGraph graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecXDetPredChannel);
+    graph.Draw("APL");
+    graph.GetXaxis()->SetTitle("X Predicted_{Det} / CH");
+    graph.GetYaxis()->SetTitle("Delta X / #mum");
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
@@ -2542,6 +2575,7 @@ void TAlignment::clearMeasuredVectors() {
     vecYLabDeltaMetric.clear();
     vecXDetPredMetric.clear();
     vecYDetPredMetric.clear();
+    vecXDetPredChannel.clear();
     vecXFidValue.clear();
     vecYFidValue.clear();
     vecXChi2.clear();

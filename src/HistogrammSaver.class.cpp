@@ -2092,6 +2092,7 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
     std::sort(posY2.begin(),posY2.end());
     UInt_t nLow = 0;
     UInt_t nUp  = entries-1;
+    Float_t minX,maxX,minY,maxY,deltaX,deltaY;
     if (maxRangeX == (+1) * std::numeric_limits<float>::infinity() ||
         minRangeX == (-1) * std::numeric_limits<float>::infinity() ||
         maxRangeY == (+1) * std::numeric_limits<float>::infinity() ||
@@ -2100,19 +2101,33 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
             nUp = .95 * entries;
             if (nUp >= entries)
                 nUp = entries-1;
+            minX = posX2.at(nLow);
+            maxX = posX2.at(nUp);
+            deltaX = maxX-minX;
+            minX = minX-.1*deltaX;
+            maxX = maxX+.1*deltaX;
+            minY = posY2.at(nLow);
+            maxY = posY2.at(nUp);
+            deltaY = maxY-minY;
+            minY = minY-.1*deltaY;
+            maxY = maxY+.1*deltaY;
     }
-    Float_t minX = posX2.at(nLow);
-    Float_t maxX = posX2.at(nUp);
-    Float_t minY = posY2.at(nLow);
-    Float_t maxY = posY2.at(nUp);
+    else{
+        minX = posX2.at(nLow);
+        maxX = posX2.at(nUp);
+        deltaX = maxX-minX;
+        minY = posY2.at(nLow);
+        maxY = posY2.at(nUp);
+    deltaY = maxY-minY;
+    }
     if (verb) cout <<" X:"<<minX<<"-"<<maxX<<"\tY:"<<minY<<"-"<<maxY<<" --- "<<posX2.at(0)<<"-"<<posX2.at(entries-1)<<"/"<<posY2.at(0)<<"-"<<posY2.at(entries-1)<<endl;
     if (minX < minRangeX) minX = minRangeX;
     if (maxX > maxRangeX) maxX = maxRangeX;
     if (minY < minRangeY) minY = minRangeY;
     if (maxY > maxRangeY) maxY = maxRangeY;
     if (verb) cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
-    Float_t deltaX=maxX-minX;
-    Float_t deltaY=maxY-minY;
+    deltaX=maxX-minX;
+    deltaY=maxY-minY;
     TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBinsX,minX-factor*deltaX,maxX+factor*deltaX,nBinsY,minY-factor*deltaY,maxY+factor*deltaY);
     for(UInt_t i=0;i<posX.size();i++){
         if (verb){

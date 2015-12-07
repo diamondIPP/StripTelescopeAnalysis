@@ -125,6 +125,7 @@ public:
 	Float_t getClusterSeedFactor(UInt_t det,UInt_t ch);
 	Float_t getClusterHitFactor(UInt_t det,UInt_t ch);
 	Float_t getAlignment_chi2() const;
+	bool IgnoreStripForAlignment(UInt_t det,Float_t predHitPosDetCh);
 	void setAlignment_chi2(Float_t alignment_chi2);
 	Float_t getTransparentChi2() const{return transparentChi2;}
 	void setTransparentChi2(Float_t chi2){transparentChi2=chi2;}
@@ -408,6 +409,7 @@ private:
 	Float_t chi2Cut3D_Y;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
+	std::vector< std::vector<Int_t>> vecAlignmentIgnoreChannels;
 	bool bResetAlignment;
 	Float_t alignmentPrecision_Offset;
 	Float_t alignmentPrecision_Angle;
