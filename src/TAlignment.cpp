@@ -977,7 +977,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             useEvent = false;
         }
         if (useEvent && settings->IgnoreStripForAlignment(subjectDet,predHitPosDetCh)){
-            //cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
+//            cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
             useEvent = false;
         }
 
@@ -1592,6 +1592,8 @@ void TAlignment::CreateDistributionPlotDeltaX(
     if (verb) cout<<"FIT: "<<mean-fitWidth<<"-"<<mean+fitWidth<<endl;
     if(verb) cout<<"bins: "<<histo->GetNbinsX()<<"\tRange: "<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax()<<endl;
     if(verb) cout<<"mean: "<<mean<<"+/-"<<sigma<<" / "<<fitWidth<<endl;
+    if (fitX)
+        fitX->SetNpx(1000);
     histo->Fit(fitX, "Q", "",mean-fitWidth, mean+fitWidth);
     Float_t xRes=0;
 
