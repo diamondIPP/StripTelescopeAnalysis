@@ -827,12 +827,12 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
                 if (resOld.isTestResidual()) cout<<" having a TestResidual";
         cout<<"\tClusterPos: ";
         switch (mode) {
-            case maxValue: cout<<"MaxValue";break;
-            case chargeWeighted: cout<<"Charge Weigthed";break;
-            case highest2Centroid: cout<<"Highest2Centroid";break;
-            case eta: cout<<"Eta";break;
-            case corEta: cout<<"corEta";break;
-            case highest2CentroidNoSmallHits: cout<<"highest2CentroidNoSmallHits";
+            case TCluster::maxValue: cout<<"MaxValue";break;
+            case TCluster::chargeWeighted: cout<<"Charge Weigthed";break;
+            case TCluster::highest2Centroid: cout<<"Highest2Centroid";break;
+            case TCluster::eta: cout<<"Eta";break;
+            case TCluster::corEta: cout<<"corEta";break;
+            case TCluster::highest2CentroidNoSmallHits: cout<<"highest2CentroidNoSmallHits";
             default:
                 cout<<"Unknown";
         }
