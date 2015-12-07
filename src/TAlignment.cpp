@@ -1641,7 +1641,7 @@ void TAlignment::CreateDistributionPlotDeltaX(
     histo->GetYaxis()->SetTitle("Number of entries");
     if (verb)cout<<"save"<<histo->GetName()<<endl;
     if(verb) cout<<"bins: "<<histo->GetNbinsX()<<"\tRange: "<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax()<<endl;
-    if (verb) { cout<<"Press a key"<<endl; char t; cin>>t;}
+//    if (verb) { cout<<"Press a key"<<endl; char t; cin>>t;}
     if (bPlot) histSaver->SaveHistogram(histo);
     delete fitX;
     delete histo;
@@ -1825,10 +1825,7 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
-    if (verb){
-        cout<<"Press a key to continue."<<flush;
-        char t;
-        cin>>t;
+//    if (verb){cout<<"Press a key to continue."<<flush;char t;cin>>t;
     }
 }
 
