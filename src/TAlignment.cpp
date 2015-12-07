@@ -823,8 +823,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         cout << "TAlignment::get";
         if(isStripAlignment)cout<<"SingleStrip";
         cout<<"Residual of Plane " << subjectPlane << TPlaneProperties::getCoordinateString(cor);
-        cout << " with " << refPlaneString << ", plotting: " << bPlot<< ", using "<<events.size()<<" Events\t"l
-                if (resOld.isTestResidual()) cout<<" having a TestResidual";
+        cout << " with " << refPlaneString << ", plotting: " << bPlot<< ", using "<<events.size()<<" Events\t";
+        if (resOld.isTestResidual()) cout<<" having a TestResidual";
         cout<<"\tClusterPos: ";
         switch (mode) {
             case TCluster::maxValue: cout<<"MaxValue";break;
