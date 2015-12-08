@@ -2396,7 +2396,7 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
         histo2->GetYaxis()->SetTitle("relative Hit Position_{observed} / #mum");
         histo2->GetXaxis()->SetTitle("predicted Hit Position_{observed}  / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
-        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
+        histo2->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveHistogram(histo2);
         delete histo2;
     }
