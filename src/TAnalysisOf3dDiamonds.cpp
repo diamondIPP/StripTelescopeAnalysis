@@ -3027,6 +3027,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos(Fl
                 xRelPosDet<<"/"<<yRelPosDet<<" with charge: "<<clusterCharge<<" has Invalid ClusterSize "<<ClusterSize<<" but size is"<<hCellsOverlayAvrgChargeMinusBadCells.size()<<endl;
         return;
     }
+    if (verbosity>6) cout<"[ TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos]  find "<<ClusterSize<<" in "<<hCellsOverlayAvrgChargeMinusBadCells.size()<<" sized hCellsOverlayAvrgChargeMinusBadCells"<<endl;
     Int_t XBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetXaxis()->FindBin(xRelPosDet);
     Int_t YBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetYaxis()->FindBin(yRelPosDet);
     Int_t YBins = hCellsOverlayAvrgChargeMinusBadCells.at(0)->GetYaxis()->GetNbins();
