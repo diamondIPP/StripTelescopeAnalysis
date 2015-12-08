@@ -1504,8 +1504,16 @@ TString TAlignment::GetPlotPreName(UInt_t subjectPlane){
 
 TString TAlignment::GetPlotPostName(bool bChi2){
     TString postName="";
-    if(bChi2) postName=TString::Format("with_Chi2_cut_on_%.0f",settings->getAlignment_chi2());
+    if(bChi2) postName=TString::Format("with_Chi2_cut");
     return postName;
+}
+TString TAlignment::GetPlotPostTitle(bool bChi2){
+    TString postName="";
+    if(bChi2) postName=TString::Format("_on_%.0f",settings->getAlignment_chi2());
+    return postName;
+}
+TString TAlignment::GetPlotPostTitle(TString postName){
+    return GetPlotPostTitle(postName.BeginsWith("with_Chi2_cut"));
 }
 
 Float_t TAlignment::CreateSigmaOfPredictionXPlots(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString, bool bPlot){
@@ -1518,6 +1526,7 @@ Float_t TAlignment::CreateSigmaOfPredictionXPlots(TPlaneProperties::enumCoordina
         if (!histo)
             cerr<<"Could not CreateDistributionHisto: "<<histName<<endl;
         else{
+            histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
             histo->Draw("goff");
             histo->GetXaxis()->SetTitle("Delta X/ #mum");
             histo->GetYaxis()->SetTitle("Number of entries");
@@ -1559,6 +1568,7 @@ void TAlignment::CreateDistributionPlotDeltaX(
         cerr<<"Could not CreateDistributionHisto: "<<histName<<endl;
         return;
     }
+    histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
     histo->Draw("");
     Float_t sigma = histo->GetRMS();
     Float_t fitWidth = sigma * 1.5;
@@ -1693,6 +1703,7 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
 
     if (histo->GetEntries() == 0)
         cout<<"entries == 0";
+    histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
     if(histo && histo->GetEntries()){
         histo->GetXaxis()->SetTitle("Y Predicted / #mum");
         histo->GetYaxis()->SetTitle("Delta X / #mum");
@@ -1721,6 +1732,7 @@ void TAlignment::CreateScatterPlotMeasXvsDeltaX(
     if (!((cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR))) return;
     TString histName = preName + TString::Format("_ScatterPlot_XMeasured_vs_DeltaX_Plane_%d_with_",subjectPlane) +refPlaneString+postName;
     TH2F* histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric, vecXDetMeasMetric,256);
+    histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
     if(!histo)
         cerr<<"Could not CreateScatterHisto: "<<histName<<endl;
     else{
@@ -1737,6 +1749,7 @@ void TAlignment::CreateScatterPlotMeasXvsDeltaX(
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("measured X  / #mum");
     graph.GetYaxis()->SetTitle("delta X / #mum");
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
@@ -1753,6 +1766,7 @@ void TAlignment::CreateScatterPlotPredXChvsDeltaX(
     if(!histo)
         cerr<<"Could not CreateScatterHisto: "<<histName<<endl;
     else{
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle("X Predicted_{Det} / CH");
         histo->GetYaxis()->SetTitle("Delta X / #mum");
         histSaver->SaveHistogram(histo);
@@ -1763,6 +1777,7 @@ void TAlignment::CreateScatterPlotPredXChvsDeltaX(
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("X Predicted_{Det} / CH");
     graph.GetYaxis()->SetTitle("Delta X / #mum");
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
@@ -1778,6 +1793,7 @@ void TAlignment::CreateScatterPlotPredXDetvsDeltaX(
     if(!histo)
         cerr<<"Could not CreateScatterHisto: "<<histName<<endl;
     else{
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle("X Predicted_{Det} / #mum");
         histo->GetYaxis()->SetTitle("Delta X / #mum");
         histSaver->SaveHistogram(histo);
@@ -1788,6 +1804,7 @@ void TAlignment::CreateScatterPlotPredXDetvsDeltaX(
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle("X Predicted_{Det} / #mum");
     graph.GetYaxis()->SetTitle("Delta X / #mum");
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
@@ -1807,6 +1824,7 @@ void TAlignment::CreateScatterChi2vsDeltaX(
     if(verb)cout<<" HISTO: "<<histo<<endl;
     if(histo){
         if(verb)cout<<" save: "<<histo->GetName()<<"\n entries: "<<histo->GetEntries()<<endl;
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
         histSaver->SaveHistogram(histo);
@@ -1817,6 +1835,7 @@ void TAlignment::CreateScatterChi2vsDeltaX(
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle(xTitle);
     graph.GetYaxis()->SetTitle(yTitle);
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
@@ -1828,6 +1847,7 @@ void TAlignment::CreateScatterChi2vsDeltaX(
     histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecYChi2, 512);
     if(verb)cout<<" HISTO: "<<histo<<endl;
     if(histo){
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         if(verb)cout<<" save: "<<histo->GetName()<<"\n entries: "<<histo->GetEntries()<<endl;
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
@@ -1837,6 +1857,7 @@ void TAlignment::CreateScatterChi2vsDeltaX(
     histName.Replace(0,1,"g");
     graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecYChi2);
     graph.Draw("APL");
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     graph.GetXaxis()->SetTitle(xTitle);
     graph.GetYaxis()->SetTitle(yTitle);
     gr = (TGraph*) graph.Clone();
@@ -1877,6 +1898,7 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecXLabPredMetric, 512);
     if(verb)cout<<" HISTO: "<<histo<<endl;
     if(histo){
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         if(verb)cout<<" save: "<<histo->GetName()<<"\n entries: "<<histo->GetEntries()<<endl;
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
@@ -1889,6 +1911,7 @@ void TAlignment::CreateScatterPlotPredXvsDeltaX(
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle(xTitle);
     graph.GetYaxis()->SetTitle(yTitle);
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
@@ -1907,6 +1930,7 @@ void TAlignment::CreateScatterPlotEtaVsDeltaX(
     TH2F *histo = histSaver->CreateScatterHisto((string)histName, vecEta, vecXLabDeltaMetric, 256);
     //    histo.Draw("goff");
     if(histo){
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetYaxis()->SetTitle("#eta");
         histo->GetXaxis()->SetTitle("Delta X / #mum");
         Float_t minX = histo->GetMean(1) - histo->GetRMS(1)*5;
@@ -1921,6 +1945,7 @@ void TAlignment::CreateScatterPlotEtaVsDeltaX(
     graph.Draw("APL");
     graph.GetYaxis()->SetTitle("#eta");
     graph.GetXaxis()->SetTitle("delta X / #mum");
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     TGraph *gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr,(string) histName);
     if(gr) delete gr;
@@ -1939,6 +1964,7 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
     TH2F *histo = histSaver->CreateScatterHisto((string)histName, vecXDetRelHitPosPredMetricAll, vecUsedEventAll, 2,256,-1,2,-100,100);
     //    histo.Draw("goff");
     if(histo){
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->Draw("goff");
         histo->GetYaxis()->SetTitle("rel pred hit Pos /#mum");
         histo->GetXaxis()->SetTitle("use event");
@@ -1966,6 +1992,7 @@ void TAlignment::CreateRelHitPosXPredDetMetricVsUseEventPlot(TPlaneProperties::e
     if(hProjNotUsed)
         stack->Add(hProjNotUsed);
     stack->Draw("nostack");
+    stack->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
     if(hProjNotUsed||hProjUsed)
         if (stack->GetXaxis())
             stack->GetXaxis()->SetTitle("rel pred hit pos /#mum");
@@ -2061,6 +2088,7 @@ void TAlignment::CreateRelHitPosMeasXPlot(TPlaneProperties::enumCoordinate cor, 
     TString histName = preName + TString::Format("_RelHitPosMeasX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
     TH1F* histo = histSaver->CreateDistributionHisto((string)histName, vecRelPos, 256);
     if(histo){
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle("relative Hit Position_{observed} / ch");
         histo->GetYaxis()->SetTitle("number of entries");
         histSaver->SaveHistogram(histo);
@@ -2082,6 +2110,7 @@ void TAlignment::CreateFidValueXVsDeltaX(TPlaneProperties::enumCoordinate cor,
     if(!histo)
         cerr<<"Could not CreateScatterHisto: "<<histName<<endl;
     else{
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
         histSaver->SaveHistogram(histo);
@@ -2093,6 +2122,7 @@ void TAlignment::CreateFidValueXVsDeltaX(TPlaneProperties::enumCoordinate cor,
     //          cerr<<"Could not CreateDipendencyGraph: "<<histName.str()<<endl;
     //      else{
     graph.Draw("APL");
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     graph.GetXaxis()->SetTitle(xTitle);
     graph.GetYaxis()->SetTitle(yTitle);
     TGraph* gr = (TGraph*) graph.Clone();
@@ -2115,6 +2145,7 @@ void TAlignment::CreateFidValueYVsDeltaX(TPlaneProperties::enumCoordinate cor,
     if(!histo)
         cerr<<"Could not CreateScatterHisto: "<<histName<<endl;
     else{
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
         histSaver->SaveHistogram(histo);
@@ -2123,6 +2154,7 @@ void TAlignment::CreateFidValueYVsDeltaX(TPlaneProperties::enumCoordinate cor,
     histName.Replace(0,1,"g");
     TGraph graph = histSaver->CreateDipendencyGraph((string)histName, vecXLabDeltaMetric, vecYFidValue);
     graph.Draw("APL");
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     graph.GetXaxis()->SetTitle(xTitle);
     graph.GetYaxis()->SetTitle(yTitle);
     TGraph* gr = (TGraph*) graph.Clone();
@@ -2145,6 +2177,7 @@ Float_t TAlignment::CreateSigmaOfPredictionYPlots(
             cerr<<"Could not CreateDistributionHisto: "<<name<<endl;
         else{
             histo->Draw("goff");
+            histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
             histo->GetXaxis()->SetTitle(xTitle);
             histo->GetYaxis()->SetTitle(yTitle);
             yPredictionSigma =  histSaver->GetMean(vecYResPrediction);
@@ -2172,6 +2205,7 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
         else if (histo->GetEntries()==0)
             cerr<<"histo has 0 entries"<<vecYLabDeltaMetric.size()<<"/"<<vecXLabPredMetric.size()<<endl;
         else{
+            histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
             histo->GetXaxis()->SetTitle(xTitle);
             histo->GetYaxis()->SetTitle(yTitle);
             histSaver->SaveHistogram((TH2F*) histo->Clone());
@@ -2183,6 +2217,7 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
         graph.Draw("APL");
         graph.GetXaxis()->SetTitle(xTitle);
         graph.GetYaxis()->SetTitle(yTitle);
+        graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
         if(verbosity>3)cout<<" DONE"<<endl;
     }
@@ -2204,6 +2239,7 @@ void TAlignment::CreateScatterPlotPredYvsDeltaY(
         else if (histo->GetEntries()==0)
             cerr<<"histo has 0 entries"<<vecYLabDeltaMetric.size()<<"/"<<vecXLabPredMetric.size()<<endl;
         else{
+            histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
             histo->GetXaxis()->SetTitle(xTitle);
             histo->GetYaxis()->SetTitle(yTitle);
             histSaver->SaveHistogram((TH2F*) histo->Clone());
@@ -2213,6 +2249,7 @@ void TAlignment::CreateScatterPlotPredYvsDeltaY(
         name.Replace(0,1,"g");
         TGraph graph = histSaver->CreateDipendencyGraph((string)name, vecYLabDeltaMetric, vecYLabPredMetric);
         graph.Draw("APL");
+        graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
         graph.GetXaxis()->SetTitle(xTitle);
         graph.GetYaxis()->SetTitle(yTitle);
         histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
@@ -2254,6 +2291,7 @@ void TAlignment::CreateRelHitPosVsChi2Plots(TPlaneProperties::enumCoordinate cor
     if(histo){
         histo->GetXaxis()->SetTitle("relative Hit Position / ch");
         histo->GetYaxis()->SetTitle("number of entries");
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveHistogram(histo);
         delete histo;
     }
@@ -2346,6 +2384,8 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
     if(histo){
         histo->GetXaxis()->SetTitle("relative Hit Position_{observed} / ch");
         histo->GetYaxis()->SetTitle("number of entries");
+
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveHistogram(histo);
         delete histo;
     }
@@ -2356,6 +2396,7 @@ void TAlignment::CreateRelHitPosPredXPlot(TPlaneProperties::enumCoordinate cor, 
         histo2->GetYaxis()->SetTitle("relative Hit Position_{observed} / #mum");
         histo2->GetXaxis()->SetTitle("predicted Hit Position_{observed}  / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveHistogram(histo2);
         delete histo2;
     }
@@ -2408,6 +2449,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateRelHitPosPredXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateResidualVsAngle(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateFidValueXVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
+    CreateScatterPlotDeltaXvsChi2X(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     Float_t yPredictionSigma = CreateSigmaOfPredictionYPlots(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
 
     CreateDistributionPlotDeltaY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,yPredictionSigma);
@@ -2461,6 +2503,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
                 cout<<histName.str()<<endl;
             TH1F* histo = histSaver->CreateDistributionHisto(histName.str(), vecRelPos, 512);
             if(histo){
+                histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(bChi2));
                 histo->GetXaxis()->SetTitle("relative Hit Position / ch");
                 histo->GetYaxis()->SetTitle("number of entries");
                 histSaver->SaveHistogram(histo);
@@ -2603,6 +2646,8 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
         histSaver->SaveHistogram(vecHEta.at(det));
         correctedEtaFile->Add(vecHEta.at(det));
         cout << "save " << histo->GetTitle() << " " << histo->GetEntries() << endl;
+
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveHistogram(histo);
         correctedEtaFile->Add(histo->Clone());
     }
@@ -2677,6 +2722,7 @@ void TAlignment::CreateDistributionPlotDeltaY
         if(!histo)
             cerr<<"Could not CreateDistributionHisto: "<<name<<endl;
         else{
+            histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
             histo->Draw("goff");
             histo->GetXaxis()->SetTitle(xTitle);
             histo->GetYaxis()->SetTitle(yTitle);
@@ -2763,6 +2809,7 @@ void TAlignment::CreateScatterPlotObsXvsObsY(
         if(!histo)
             cerr<<"Could not create CreateScatterHisto: "<<name<<endl;
         else{
+            histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
             histo->GetXaxis()->SetTitle("XObs / #mum");
             histo->GetYaxis()->SetTitle("YObs / #mum");
             histSaver->SaveHistogram(histo);    //,histName.str());
@@ -2789,14 +2836,18 @@ void TAlignment::CreateScatterPlotDeltaXvsChi2X(
     if(verbosity>3) cout<<"Save: "<<(string)name<<" "<<flush;
     TH2F *histo = histSaver->CreateScatterHisto((string)name, vecXLabDeltaMetric, vecXChi2, 256);
     //    histo->Draw("goff");
-    histo->GetXaxis()->SetTitle(xTitle);
-    histo->GetYaxis()->SetTitle(yTitle);
-    histSaver->SaveHistogram((TH2F*) histo->Clone());
+    if (histo){
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
+        histo->GetXaxis()->SetTitle(xTitle);
+        histo->GetYaxis()->SetTitle(yTitle);
+        histSaver->SaveHistogram((TH2F*) histo->Clone());
+    }
     name.Replace(0,1,"g");
     TGraph graph = histSaver->CreateDipendencyGraph((string)name, vecXLabDeltaMetric, vecXChi2);
     graph.Draw("APL");
     graph.GetXaxis()->SetTitle(xTitle);
     graph.GetYaxis()->SetTitle(yTitle);
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
     histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
     delete histo;
     if(verbosity>3)cout<<"DONE"<<endl;
@@ -2813,6 +2864,7 @@ void TAlignment::CreateScatterPlotDeltaYvsChi2Y(
         TString yTitle ="Sum of Delta Y / #mum";
         if(verbosity>3) cout<<"Save: "<<(string)name<<" "<<flush;
         TH2F *histo = histSaver->CreateScatterHisto((string)name, vecYLabDeltaMetric, vecYChi2, 256);
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
 
@@ -2822,6 +2874,7 @@ void TAlignment::CreateScatterPlotDeltaYvsChi2Y(
         graph.Draw("APL");
         graph.GetXaxis()->SetTitle(xTitle);
         graph.GetYaxis()->SetTitle(yTitle);
+        graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
         delete histo;
         if(verbosity>3)cout<<"DONE"<<endl;
@@ -2838,6 +2891,7 @@ void TAlignment::CreateAngularDistributionPlot(
         TString yTitle = "#Phi_{Y} / degree";
         if(verbosity>3) cout<<"Save: "<<name<<" "<<flush;
         TH2F *histo = histSaver->CreateScatterHisto((string)name,vecXPhi,vecYPhi,512);
+        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histo->GetXaxis()->SetTitle(xTitle);
         histo->GetYaxis()->SetTitle(yTitle);
         histSaver->SaveHistogram((TH2F*) histo->Clone());
@@ -2846,6 +2900,7 @@ void TAlignment::CreateAngularDistributionPlot(
         graph.Draw("APL");
         graph.GetXaxis()->SetTitle(xTitle);
         graph.GetYaxis()->SetTitle(yTitle);
+        graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveGraph((TGraph*)graph.Clone(),(string)name);
         delete histo;
         if(verbosity>3)cout<<"DONE"<<endl;

@@ -181,6 +181,8 @@ private:
 private:
     TString GetPlotPreName(UInt_t subjectPlane);
     TString GetPlotPostName(bool bChi2);
+    TString GetPlotPostTitle(TString postName);
+    TString GetPlotPostTitle(bool bChi2);
 
     Float_t CreateSigmaOfPredictionXPlots(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot);
     void CreateDistributionPlotDeltaX(TPlaneProperties::enumCoordinate cor,UInt_t subjectPlane, TString preName,TString postName,TString refPlaneString,bool bPlot, bool bUpdateResolution, Float_t xPredictionSigma);
