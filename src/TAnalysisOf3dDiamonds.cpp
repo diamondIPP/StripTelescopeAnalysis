@@ -62,13 +62,22 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     FileNameEnd = "";
     cout<<"analyze selection data..."<<endl;
+
     //intialise vectors
-    init_vectors();
+    for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
+        vecPHDiamondHit.push_back(new vector<float>);
+        vecXPredicted.push_back(new vector<float>);
+        vecYPredicted.push_back(new vector<float>);
+        ptrCanvas.push_back(new TCanvas); //To Create pointer to canvas for 3D Plot
+        ptrCanvasEvents.push_back(new TCanvas);
+        ptrCanvasMean.push_back(new TCanvas);
+    }
     cout<<"Areas to be analysed:"<<endl;
     for(UInt_t i=0; i<settings->diamondPattern.getNIntervals(); i++){
         pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
         cout<<channels.first<<"-"<<channels.second<<endl;
     }
+
     initialiseHistos();
 
     if(nEvents<=0) nEvents=eventReader->GetEntries();
@@ -83,18 +92,23 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
             if (verbosity > 7)	cout<<"don't use"<<endl;
             continue;
         }
-        if (verbosity > 7)  cout<<"use Event"<<endl;
+        if (verbosity > 7)	cout<<"use Event"<<endl;
         // Analyse
+
         if(settings->do3dTransparentAnalysis()){
             isTransparentCluster = TransparentAnalysis();
         }
         else
             isTransparentCluster = false;
+
+        //cout<<"Before Strip Analysis"<<endl;
         StripAnalysis();
+        //cout<<"After Strip Analysis"<<endl;
         if(settings->do3dShortAnalysis() == 1){ShortAnalysis();}
-        if(settings->do3dLongAnalysis() == 1){
-            LongAnalysis();
-        }
+        //cout<<"After Short Analysis"<<endl;
+        if(settings->do3dLongAnalysis() == 1){LongAnalysis();}
+        //cout<<"After Long Analysis"<<endl;
+
     }
     cout<< "ENTRIES: "<<clusteredAnalysis->getEntries()<<endl;
     createTreeTestHistos();
@@ -109,24 +123,13 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     saveHistos();
 }
 
-void TAnalysisOf3dDiamonds::init_vectors(){
-    for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
-        vecPHDiamondHit.push_back(new vector<float>);
-        vecXPredicted.push_back(new vector<float>);
-        vecYPredicted.push_back(new vector<float>);
-        ptrCanvas.push_back(new TCanvas); //To Create pointer to canvas for 3D Plot
-        ptrCanvasEvents.push_back(new TCanvas);
-        ptrCanvasMean.push_back(new TCanvas);
-    }
-}
-
 /**
  * checks if the event has one and only one valid silicon cluster in each
  * telescope plane
  * it predicts the position and than sets some variables as fiducialValue,
  * chi2, predictedPsosition and predictedDetectorPosition as global variables
  * since they are used quite often
- * @return whether the event should be used for analysis or not
+ * @return wheater the event should be used for analysis or not
  */
 bool TAnalysisOf3dDiamonds::eventValid(){
     if(!eventReader->isValidTrack()){
@@ -157,15 +160,8 @@ bool TAnalysisOf3dDiamonds::eventValid(){
     return true;
 }
 
-/**
- * Analysis of events with hit in strip detector.
- * Checks if chi2 cut is fullfilled.
- * checks if right selection/area is hitted
- * checks if only one cluster exists
- * checks if is valid Cluster
- * checks that cluster is not saturated
- */
 void TAnalysisOf3dDiamonds::StripAnalysis() {
+
     if(!settings->do3dTransparentAnalysis()){
         if(!eventReader->getNDiamondClusters())
             return;
@@ -178,22 +174,46 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
             return;
         diamondCluster = & transparentCluster;
     }
-    if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
+
+    //cout<<"Transparent Cluster, ";
+    if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
         return;
+    //cout<<"Chi Squared, ";
+    /*
+    if(transparentCluster.getFirstHitChannel()>23 && transparentCluster.getLastHitChannel()<40)
+    	printf("Cluster Channels: %f - %f, Charge: %f \n", transparentCluster.getFirstHitChannel(),transparentCluster.getLastHitChannel(),diamondCluster->getPositiveCharge());
+     */
+
     Int_t stripDetector = 1;
     if(settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY)!=stripDetector)
         return;
+    //cout<<"Fiducial Cut, ";
+
     if(eventReader->getNDiamondClusters()!=1)
         return;
+    //cout<<"Number Clusters, ";
+    //	UInt_t diamond = TPlaneProperties::getDetDiamond();
+    //TCluster diamondCluster = eventReader->getCluster(diamond,0);
+
     int areaStripDetector = 0;
     if (!settings->isClusterInDiaDetectorArea(diamondCluster,areaStripDetector) ){
         return;
     }
+
+    //cout<<"Cluster completely in detector area"<<endl;
     if( !settings->diamondPattern.isValidCluster(diamondCluster)){
         return;
     }
+
+    //cout<<"Is valid cluster"<<endl;
     if (diamondCluster->isSaturatedCluster())
         return;
+    //cout<<"Is not saturated"<<endl;
+
+    //cout<<"diamondCluster charge: "<<diamondCluster->getPositiveCharge()<<endl;
+
+    //cout<<"Entry to Strip Histo."<<endl;
+
     hLandauStrip->Fill(diamondCluster->getPositiveCharge());
     hLandauStripFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
 }
@@ -201,7 +221,8 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
     if(!settings->do3dTransparentAnalysis()){
-        if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
+        Float_t maxChi2 = settings->getChi2Cut3D();
+        if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
             return;
 
         hNumberofClusters->Fill(eventReader->getNDiamondClusters());
@@ -209,8 +230,9 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
         Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
         ShortAnalysis_FillEdgeAlignmentHistos();
-        if (predictedDetector <1 || predictedDetector > settings->getNDiaDetectorAreas())
+        if(predictedDetector !=1 && predictedDetector !=2 && predictedDetector !=3)
             return;
+
         switch (eventReader->getNDiamondClusters()) {
             case 1:
                 ShortAnalysis_Analyse1Cluster();
@@ -239,6 +261,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_FillEdgeAlignmentHistos(){
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
+
     if(!settings->do3dTransparentAnalysis()){
         clusteredCluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),clusterNo);
         diamondCluster = &clusteredCluster;
@@ -260,11 +283,15 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
     }
     //Edge Finding
 //    ShortAnalysis_FillEdgeDistributions(diamondCluster->getPositiveCharge(false));
-    Float_t clusterCharge = diamondCluster->getPositiveCharge(useCMN,true);
+
+    Float_t clusterCharge = diamondCluster->getPositiveCharge(false);
+
     ShortAnalysis_FillMeanChargeVector(clusterCharge);
     hTotalAvrgChargeXY->Fill(xPredDet,yPredDet,clusterCharge);
     //Universal PHvsChannel Plot
+
     for(UInt_t i=0; i < settings->diamondPattern.getNIntervals();i++){
+
         pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
         //cout<<"Diamond pattern: "<<i<<" Channels: "<<channels.first<<"-"<<channels.second<<endl;
         Int_t HighestSignalChannel = diamondCluster->getHighestSignalChannel();
@@ -348,8 +375,9 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
 
 
 void TAnalysisOf3dDiamonds::LongAnalysis_checkClusteredAnalysis(){
+    Float_t maxChi2 = settings->getChi2Cut3D();
 
-    if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
+    if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
     {
         if(verbosity>8) cout<< "to high chi2: "<<chi2x<<" "<<chi2y<<endl;
         validClusteredAnalysis=false;
@@ -393,7 +421,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_checkTransparentAnalysis(){
         if(validClusteredAnalysis){
             if(verbosity>4)cout<<"\n"<<nEvent<<"\tvalid clustered analysis, but invalid transparentAnalysis: "<<xPredDet<<"/"<<yPredDet<<endl;
             if(verbosity>4)cout<<"\tpattern: "<<settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)<<endl;
-            if(verbosity>4)settings->get3dMetallisationFidCuts()->Print(4);
+            settings->get3dMetallisationFidCuts()->Print(4);
             if(verbosity>4)cout<<"\tXdetChannelsSpaceInt"<<flush;
             cout<<settings->diamondPattern.convertMetricToIntChannel(xPredDet);
             if(settings->diamondPattern.convertMetricToIntChannel(xPredDet)<0){
@@ -424,9 +452,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     validClusteredAnalysis= true;
     validTransparentAnalysis = true;
     //check if clustered cluster exists
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.1"<<endl;
     LongAnalysis_checkClusteredAnalysis();
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.2"<<endl;
     LongAnalysis_checkTransparentAnalysis();
     if (!validTransparentAnalysis && ! validClusteredAnalysis)
         return;
@@ -438,29 +464,23 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         diamondCluster = &transparentCluster;
 
     }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.3"<<endl;
     LongAnalysis_FillResolutionPlots();
 //    if (settings->do3dTransparentAnalysis() && !validTransparentAnalysis)
 //        return;
     if(verbosity>5)cout<<"Cluster Formed."<<endl;
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.4"<<endl;
+
     pair<int,int> cell = settings->getCellAndQuarterNo(xPredDet,yPredDet);
     UInt_t cellNo = cell.first;
     UInt_t quarterNo = cell.second;
 
     Float_t charge;
     Int_t pos;
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.5"<<endl;
-    if (diamondCluster->hasNegativeCharge(charge,pos,useCMN)){
+    if (diamondCluster->hasNegativeCharge(charge,pos,useCMN))
         if(charge<-50)
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
-        if (charge < 0)
-            hNegativeCharges->Fill(charge);
-    }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.6"<<endl;
+
     Int_t area3DwithColumns = 2;
     Int_t area3DwithoutColumns =1;
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.7"<<endl;
     if(!settings->do3dTransparentAnalysis()){
         if (!settings->isClusterInDiaDetectorArea(diamondCluster,area3DwithColumns)){
             hLongAnalysisInvalidCluster->Fill(xPredDet,yPredDet);
@@ -471,7 +491,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             return;
         }
     }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.8"<<endl;
     pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
     charge = diamondCluster->getPositiveCharge(false);
@@ -482,7 +501,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         this->LongAnalysis_FillGoodCellsLandaus(charge);
     }
     ///*
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.9"<<endl;
      if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)==3){
 
     	 mapPredictedPositionsAllCells[nEvent] = make_pair(xPredDet,yPredDet);
@@ -492,7 +510,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     		 mapTransparentAnalysisAllCells[nEvent] = transparentCluster;
      }
      //*/
-     //if (nEvent>=10000) cout<<nEvent<<"Print 6.10"<<endl;
+
     for(UInt_t i=0; i<settings->getDeadCell3D().size(); i++){
         int badcell = settings->getDeadCell3D()[i];
         int relCellY = cellNo - badcell;
@@ -509,7 +527,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     if(cellNo < hCellsLandau.size())
         hCellsLandau.at(cellNo)->Fill(charge);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.11"<<endl;
+
     if(!settings->do3dTransparentAnalysis()){
         if(cellNo < hCellsClusteSize.size()){
             Int_t ClusterSize = diamondCluster->getClusterSize()-2;
@@ -523,7 +541,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     if(nEvent >= 519000 &&nEvent<=520000 && settings->getRunNumber() == 17212)
         cout<<"QuarterCellLandaus"<<endl;
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.12"<<endl;
     if  (cellNo < hQuarterCellsLandau.size()){
         UInt_t size = hQuarterCellsLandau[cellNo].size();
         if(quarterNo < size){
@@ -549,7 +566,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     else{
         if(verbosity>6) cout <<TString::Format("X%2d-%d,\t%3.1f",cellNo,quarterNo,charge)<<endl;
     }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.13"<<endl;
+
     Int_t StartClusterSize;
     Int_t MaxOverlayClusterSize;
     if(settings->do3dTransparentAnalysis()){
@@ -560,36 +577,30 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         StartClusterSize = 3;
         MaxOverlayClusterSize = 3;
     }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14"<<endl;
+
     for(Int_t ClusterSize = StartClusterSize; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
         //cout<<"DiamondCLusterSize: "<<diamondCluster.getClusterSize()<<endl;
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.0."<<ClusterSize<<endl;
         if(settings->do3dTransparentAnalysis()){
             diamondCluster->SetTransparentClusterSize(ClusterSize);
         }
         Float_t charge = diamondCluster->getPositiveCharge(false);
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1"<<endl;
         LongAnalysis_FillOverlayedHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize);
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.2"<<endl;
         LongAnalysis_FillOverlayCentralColumnHistos(cellNo,relPos.first,relPos.second,charge, ClusterSize, diamondCluster);
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.3"<<endl;
         LongAnalysis_FillOverlayBiasColumnHistos(cellNo,relPos.first,relPos.second,diamondCluster->getPositiveCharge(false), ClusterSize, diamondCluster);
         //cout<<"After Fill Bias Column"<<endl;
 
         //to check
     }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.15"<<endl;
+
     LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.16"<<endl;
     LongAnalysis_FillRelativeAddedTransparentCharge();
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.17"<<endl;
     if(settings->do3dTransparentAnalysis())
         LongAnalysis_FillResolutionPlots();
 };
 
 bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
-    if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
+    if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
         return false;
 
     Int_t DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
@@ -2203,8 +2214,7 @@ void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 
     TCanvas* cTransparentAnalysisValidClusterFidCutXvsFidCutY = new TCanvas("cTransparentAnalysisValidClusterFidCutXvsFidCutY", "cTransparentAnalysisValidClusterFidCutXvsFidCutY");
     cTransparentAnalysisValidClusterFidCutXvsFidCutY->cd();
-    hTransparentAnalysisValidClusterFidCutXvsFidCutY->Draw("colz");
-    cTransparentAnalysisValidClusterFidCutXvsFidCutY->Update();
+    hTransparentAnalysisValidClusterFidCutXvsFidCutY->Draw();
     settings->getSelectionFidCuts()->DrawFiducialCutsToCanvas(cTransparentAnalysisValidClusterFidCutXvsFidCutY);
     histSaver->SaveCanvas(cTransparentAnalysisValidClusterFidCutXvsFidCutY);
 
@@ -2262,7 +2272,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge();
     LongAnalysis_SaveCellsOverlayBiasColumnAndCentralColumnStack();
     //LongAnalysis_Save3DCellOverlayIndividualBinHistos();
-    //LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignment();
+    LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignment();
     LongAnalysis_SaveCellsOverlayOffsetMeanCharge();
     LongAnalysis_SaveMeanChargePlots();
     LongAnalysis_CreateRelativeAddedTransparentChargeComparisonPlots();
@@ -2276,9 +2286,6 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     hNegativeChargePosition->SetTitle(hNegativeChargePosition->GetTitle() +(TString)"_grid");
     histSaver->SaveHistogramWithCellGrid(hNegativeChargePosition);
     histSaver->SaveHistogram(hNegativeChargePosition);
-
-    histSaver->SaveHistogram(hNegativeCharges);
-    delete hNegativeCharges;
 }
 
 
@@ -2815,45 +2822,45 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayedHistos(Int_t cellNo,Float_
         Float_t clusterCharge, Float_t ClusterSize) {
     //	hCellsOverlayCharge->Fill(xRelPosDet,yRelPosDet,clusterCharge);
     //	hCellsOverlayEvents->Fill(xRelPosDet,yRelPosDet,1);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.0"<<endl;
+
     Float_t pw = settings->getPitchWidth(subjectDetector,2);
     Float_t OffsetX = settings->getOverlayOffsetX();
     Float_t OffsetY = settings->getOverlayOffsetY();
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.1"<<endl;
+
     hCellsOverlayAvrgCharge.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.2"<<endl;
     hCellsOffsetOverlayAvrgCharge.at(ClusterSize)->Fill(fmod(xRelPosDet+OffsetX,pw),fmod(yRelPosDet+OffsetY,pw),clusterCharge);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.3"<<endl;
+
     hCellOverlayWithColumnLandau.at(ClusterSize)->Fill(clusterCharge);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4"<<endl;
+
     if(!settings->isBadCell(3,cellNo)){
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.0"<<endl;
         hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.1"<<endl;
         hCellsLandauMinusBadCells.at(ClusterSize)->Fill(clusterCharge);
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.2"<<endl;
         hCellsOffsetOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Fill(fmod(xRelPosDet+OffsetX,pw),fmod(yRelPosDet+OffsetY,pw),clusterCharge);
         if(ClusterSize ==3)
             hCellsOffsetOverlayUnEvenBinningAvrgChargeMinusBadCells->Fill(fmod(xRelPosDet+OffsetX,pw),fmod(yRelPosDet+OffsetY,pw),clusterCharge);
-        //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.3"<<endl;
         //Int_t CellNumber = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge)
         if(ClusterSize ==3){
-            //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.4"<<endl;
             LongAnalysis_Fill3DCellOverlayIndividualBinHistos(xRelPosDet, yRelPosDet, clusterCharge, ClusterSize);
-            //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.5"<<endl;
             LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(xRelPosDet, yRelPosDet, clusterCharge, ClusterSize);
         }
 
+        /*Int_t XBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetXaxis()->FindBin(xRelPosDet);
+    	Int_t YBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetYaxis()->FindBin(yRelPosDet);
+    	Int_t YBins = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetYaxis()->GetNbins();
+    	Int_t T2DBin = (XBin*YBins + YBin);
+    	cout<<"T2DBin: "<<T2DBin<<endl;
+    	cout<<"xbin + (nxbins+2)*ybin: "<<(XBin + (15+2)*YBin)<<endl;
+    	cout<<"HELLO"<<endl;
+    	hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->SetBinContent(XBin,YBin,clusterCharge);
+    	cout<<"xRelPosDet: "<<xRelPosDet<<" yRelPosDet: "<<yRelPosDet<<" CellNumber: "<<CellNumber<<endl;*/
     }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.5"<<endl;
     if(settings->IsGoodCell(3, cellNo)){
         hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
         hCellsOffsetOverlayAvrgChargeGoodCells.at(ClusterSize)->Fill(fmod(xRelPosDet+OffsetX,pw),fmod(yRelPosDet+OffsetY,pw),clusterCharge);
     }
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.6"<<endl;
     if(settings->isBadCell(3,cellNo))
         hCellsOverlayAvrgChargeBadCells.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.7"<<endl;
+
     if(settings->IsWithInTheColumnRadius(xRelPosDet, yRelPosDet)){
         hCellOverlayColumnLandau.at(ClusterSize)->Fill(clusterCharge);
     }
@@ -2995,36 +3002,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(
 
 void TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos(Float_t xRelPosDet,Float_t yRelPosDet,
         Float_t clusterCharge, Float_t ClusterSize) {
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.4.0"<<endl;
+
     //hCellsOverlayAvrgChargeMinusBadCells
     Int_t XBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetXaxis()->FindBin(xRelPosDet);
     Int_t YBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetYaxis()->FindBin(yRelPosDet);
     Int_t YBins = hCellsOverlayAvrgChargeMinusBadCells.at(0)->GetYaxis()->GetNbins();
     Int_t BinNum = (XBin-1)*YBins + YBin-1;
-    if (BinNum<0){
-        cout<<"Invalid BinNum: "<<BinNum<<endl;
-        cout<<"XBin: "<<XBin<<endl;
-        cout<<"YBin: "<<YBin<<endl;
-        cout<<"YBins: "<<YBins<<endl;
-        return;
-    }
-//    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.4.1"<<endl;
-    if (BinNum < VecOverlayCellBinHistos.size())
-        VecOverlayCellBinHistos.at(BinNum)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
-    else{
-        cout<<"Cannot find Bin "<<BinNum<< " in "<< VecOverlayCellBinHistos.size()<<" bins of VecOverlayCellBinHistos"<<endl;
-        return;
-    }
-    if (BinNum < VecOverlayCellBinLandaus.size())
-        VecOverlayCellBinLandaus.at(BinNum)->Fill(clusterCharge);
-    else{
-        cout<<"Cannot find Bin "<<BinNum<< " in "<< VecOverlayCellBinLandaus.size()<<" bins of VecOverlayCellBinLandaus"<<endl;
-        return;
-    }
+
+    VecOverlayCellBinHistos.at(BinNum)->Fill(xRelPosDet,yRelPosDet,clusterCharge);
+    VecOverlayCellBinLandaus.at(BinNum)->Fill(clusterCharge);
     hOverlayCellBinHits->Fill(BinNum);
     if(clusterCharge<settings->getOverlayColumnPulseHeightCut())
         hOverlayCellBinHitsBelowCut->Fill(BinNum);
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.4.2"<<endl;
+
     Float_t pw = settings->getPitchWidth(subjectDetector,2);
     Float_t OffsetX = settings->getOverlayOffsetX();
     Float_t OffsetY = settings->getOverlayOffsetY();
@@ -3034,7 +3024,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos(Fl
     YBin = hCellsOffsetOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetYaxis()->FindBin(fmod(yRelPosDet+OffsetY,pw));
     YBins = hCellsOffsetOverlayAvrgChargeMinusBadCells.at(0)->GetYaxis()->GetNbins();
     BinNum = (XBin-1)*YBins + YBin-1;
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.4.3"<<endl;
+
     hOverlayCellOffsetBinHits->Fill(BinNum);
     if(clusterCharge<settings->getOverlayColumnPulseHeightCut())
         hOverlayCellOffsetBinHitsBelowCut->Fill(BinNum);
@@ -3044,7 +3034,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos(Fl
     YBin = hCellsOffsetOverlayUnEvenBinningAvrgChargeMinusBadCells->GetYaxis()->FindBin(fmod(yRelPosDet+OffsetY,pw));
     YBins = hCellsOffsetOverlayUnEvenBinningAvrgChargeMinusBadCells->GetYaxis()->GetNbins();
     BinNum = (XBin-1)*YBins + YBin-1;
-    //if (nEvent>=10000) cout<<nEvent<<"Print 6.14.1.4.4.4"<<endl;
+
     hOverlayCellUnEvenBinningBinHits->Fill(BinNum);
     if(clusterCharge<settings->getOverlayColumnPulseHeightCut())
         hOverlayCellUnEvenBinningBinHitsBelowCut->Fill(BinNum);
@@ -3321,16 +3311,16 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
         if (settings->do3dTransparentAnalysis())
             appendix = TString::Format("_ClusterSize%i_trans", ClusterSize);
 
-        if(verbosity)cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge]"<<endl;
-        if(verbosity)cout<<hCellsOverlayAvrgCharge.at(ClusterSize)<<endl;	if(hCellsOverlayAvrgCharge.at(ClusterSize)){
-            if(verbosity)cout<<hCellsOverlayAvrgCharge.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsOverlayAvrgCharge.at(ClusterSize)->GetEntries()<<endl;
+        cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge]"<<endl;
+        cout<<hCellsOverlayAvrgCharge.at(ClusterSize)<<endl;	if(hCellsOverlayAvrgCharge.at(ClusterSize)){
+            cout<<hCellsOverlayAvrgCharge.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsOverlayAvrgCharge.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsOverlayAvrgCharge_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgCharge.at(ClusterSize)->Clone(name);
             if(verbosity)cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
             ////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
@@ -3340,24 +3330,24 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             //		delete hCellsOverlayAvrgCharge ;
         }
         if(hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)){
-            if(verbosity)cout<<hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsOverlayAvrgChargeGoodCells_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeGoodCells.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
         }
         if(hCellsOverlayAvrgChargeBadCells.at(ClusterSize)){
-            if(verbosity)cout<<hCellsOverlayAvrgChargeBadCells.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsOverlayAvrgChargeBadCells.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsOverlayAvrgChargeBadCells.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsOverlayAvrgChargeBadCells.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsOverlayAvrgChargeBadCells_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeBadCells.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(300,1200);
             histSaver->SaveHistogram(histo);
@@ -3366,16 +3356,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
         if(hCellsLandauMinusBadCells.at(ClusterSize)){
             histSaver->SaveHistogram(hCellsLandauMinusBadCells[ClusterSize]);
             if(ClusterSize+1!=3)delete hCellsLandauMinusBadCells[ClusterSize];
+
         }
         if(hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)){
-            if(verbosity)cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsOverlayAvrgChargeMinusBadCells_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             histSaver->SaveOverlay(histo);
             if(ClusterSize+1!=3)delete histo;
@@ -3390,9 +3381,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)->Clone(name);
             histo->SetTitle("Avrg PH - overlayed - no hit in columns");
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
             //		hCellsOverlayAvrgChargeNoColumnHit->SetName("hCellsOverlayAvrgChargeNoColumns");
@@ -3403,14 +3394,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
         //		hCellsOverlayPulseHeight->Project3D("xy");
 
         if(hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)){
-            if(verbosity)cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsOverlayAvrgChargeMinusBadCells_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
             TH2D* hCellsOverlayAvrgChargeMinusBadCellsNentries = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->ProjectionXY("hCellsOverlayAvrgChargeMinusBadCellsNentries","b");
@@ -3424,7 +3415,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)->Clone(name);
             histo->SetTitle("Avrg PH - overlayed - no hit in columns");
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histSaver->SaveHistogram(histo);
             delete histo;
             TH2D* hCellsOverlayAvrgChargeNoColumnHitNentries = hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)->ProjectionXY("hCellsOverlayAvrgChargeNoColumnHitNentries","b");
@@ -3457,51 +3448,95 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
             appendix = TString::Format("_ClusterSize%i_trans", ClusterSize);
 
         cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge]"<<endl;
-        if(verbosity)cout<<hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)<<endl;
+        cout<<hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)<<endl;
         if(hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)){
             cout<<hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->IsZombie()<<endl;
             cout<<hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsCentralColumnOverlayAvrgCharge_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
+            ////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
+            //		cout<<"Set Name: "<<hCellsOverlayAvrgCharge<<endl;
+            ////		hCellsOverlayAvrgCharge->SetTitle("Avrg PH - overlayed");
+            //		histSaver->SaveHistogram(hCellsOverlayAvrgCharge);
+            //		delete hCellsOverlayAvrgCharge ;
+
+            /*	TProfile* pfx = (TProfile*)hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->ProfileX("Hello");
+			pfx->GetYaxis()->SetTitle("Average PulseHeight [ADC]");
+			pfx->GetXaxis()->SetTitle("Cell Pos X [um]");
+			//histSaver->SaveHistogram(pfx);
+			TCanvas* cCellsCentralColumnOverlayAvrgCharge_pfx = new TCanvas("cCellsCentralColumnOverlayAvrgCharge_pfx","cCellsCentralColumnOverlayAvrgCharge_pfx");
+			cCellsCentralColumnOverlayAvrgCharge_pfx->cd();
+			pfx->Draw();
+			name = "cCellsCentralColumnOverlayAvrgCharge_pfx";
+			name.Append(appendix);
+			histSaver->SaveCanvas(cCellsCentralColumnOverlayAvrgCharge_pfx);
+			delete pfx;
+			TProfile*	TH2::ProfileX(const char* name = "_pfx", Int_t firstybin = 1, Int_t lastybin = -1, Option_t* option = "") constMENU
+					TH1F* hEdgeFittingAvrgCharge_pfx = (TH1F*)hEdgeFittingAvrgCharge->ProfileX();*/
+
         }
         if(hCellsCentralColumnOverlayAvrgChargeGoodCells.at(ClusterSize)){
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeGoodCells.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeGoodCells.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeGoodCells.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeGoodCells.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsCentralColumnOverlayAvrgChargeGoodCells_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeGoodCells.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
+
+            /*TProfile* pfx = (TProfile*)hCellsCentralColumnOverlayAvrgChargeGoodCells->ProfileX();
+			pfx->GetYaxis()->SetTitle("Average PulseHeight [ADC]");
+			pfx->GetXaxis()->SetTitle("Cell Pos X [um]");
+			//histSaver->SaveHistogram(pfx);
+			TCanvas* cCellsCentralColumnOverlayAvrgChargeGoodCells_pfx = new TCanvas("cCellsCentralColumnOverlayAvrgChargeGoodCells_pfx","cCellsCentralColumnOverlayAvrgChargeGoodCells_pfx");
+			cCellsCentralColumnOverlayAvrgChargeGoodCells_pfx->cd();
+			pfx->Draw();
+			name = "cCellsCentralColumnOverlayAvrgChargeGoodCells_pfx";
+			name.Append(appendix);
+			histSaver->SaveCanvas(cCellsCentralColumnOverlayAvrgChargeGoodCells_pfx);
+			delete pfx;*/
         }
         if(hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)){
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsCentralColumnOverlayAvrgChargeMinusBadCells_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Clone(name);
-            if(verbosity)            cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolzTEXT");
             histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
+
+            /*TProfile* pfx = (TProfile*)hCellsCentralColumnOverlayAvrgChargeMinusBadCells->ProfileX();
+			pfx->GetYaxis()->SetTitle("Average PulseHeight [ADC]");
+			pfx->GetXaxis()->SetTitle("Cell Pos X [um]");
+			//histSaver->SaveHistogram(pfx);
+			TCanvas* cCellsCentralColumnOverlayAvrgChargeMinusBadCells_pfx = new TCanvas("cCellsCentralColumnOverlayAvrgChargeMinusBadCells_pfx","cCellsCentralColumnOverlayAvrgChargeMinusBadCells_pfx");
+			cCellsCentralColumnOverlayAvrgChargeMinusBadCells_pfx->cd();
+			pfx->Draw();
+			name = "cCellsCentralColumnOverlayAvrgChargeMinusBadCells_pfx";
+			name.Append(appendix);
+			histSaver->SaveCanvas(cCellsCentralColumnOverlayAvrgChargeMinusBadCells_pfx);
+			delete pfx;*/
         }
 
         if(hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)){
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
@@ -3509,19 +3544,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
 
         }
         if (hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)){
-            if(verbosity) cout<<hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->GetName()<<endl;
+            cout<<hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->GetName()<<endl;
             histSaver->SaveHistogram(hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize));
             delete hLandauMinusBadCellsOffsetAnalysis.at(ClusterSize);
 
         }
 
         if(hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents.at(ClusterSize)){
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut_cl";
             name.Append(appendix);
             TH2F* histo = (TH2F*)hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(0,10);
             //histSaver->SaveHistogram(histo);
@@ -3559,13 +3594,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
         }
 
         if(hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)){
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)->IsZombie()<<endl;
-            if(verbosity)cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)->GetEntries()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)->IsZombie()<<endl;
+            cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)->GetEntries()<<endl;
             TString name = "hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut_cl";
             name.Append(appendix);
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)->Clone(name);
-            if(verbosity)cout<<"SAVE"<<endl;
+            //TH2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)->ProjectionXY("B");
+            //histo->SetName(name);
+            cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
+            /*histo->GetXaxis()->SetRangeUser(settings->getCentralColumnOverlayXLow(),settings->getCentralColumnOverlayXHigh());
+			histo->GetYaxis()->SetRangeUser(settings->getCentralColumnOverlayYLow(),settings->getCentralColumnOverlayYHigh());*/
             histSaver->SaveHistogram(histo);
 
             name = "hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCutScaled_cl";
@@ -3575,8 +3614,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
             histo->GetZaxis()->SetRangeUser(0,1);
             histSaver->SaveHistogram(histo);
 
+            /*TCanvas* cCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut = new TCanvas("cCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut","cCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut");
+			cCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut->cd();
+			histo->Draw("colztext");
+			histSaver->SaveCanvas(cCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut);*/
+
             delete histo;
         }
+
 
         histSaver->SaveHistogram(hCellsCentralColumnOverlayLandau.at(ClusterSize));
         histSaver->SaveHistogram(hCellsCentralColumnOverlayLandauMinusBadCells.at(ClusterSize));
@@ -3584,9 +3629,23 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
         histSaver->SaveHistogram(hCellsCentralColumnOverlayLandauGoodCells.at(ClusterSize));
 
     } //End of for ClusterSize
+
+    //		hCellsOverlayPulseHeight->Project3D("xy");
+
+    /* hCellsOverlayEvents->Draw("sameTEXT");
+		cCellsOverlayMeanCharge->SetName("cCellsOverlayMeanChargeWithEntries");
+		histSaver->SaveCanvas(cCellsOverlayMeanCharge);*/
+
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge() {
+    //	return;
+
+    /*Int_t MaxOverlayClusterSize = settings->getMaxOverlayClusterSize();
+	for(Int_t ClusterSize = 1; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
+		TString appendix = TString::Format("_ClusterSize%i", ClusterSize);
+		if (settings->do3dTransparentAnalysis())
+			appendix = TString::Format("_ClusterSize%i_trans", ClusterSize);*/
 
     TString appendix = "";
     if (settings->do3dTransparentAnalysis())
@@ -3595,12 +3654,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge() 
     cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge]"<<endl;
     cout<<hCellsBiasColumnOverlayAvrgCharge<<endl;
     if(hCellsBiasColumnOverlayAvrgCharge){
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgCharge->IsZombie()<<endl;
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgCharge->GetEntries()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgCharge->IsZombie()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgCharge->GetEntries()<<endl;
         TString name = "hCellsBiasColumnOverlayAvrgCharge_cl";
         name.Append(appendix);
         TProfile2D* histo = (TProfile2D*)hCellsBiasColumnOverlayAvrgCharge->Clone(name);
-        if(verbosity)cout<<"SAVE"<<endl;
+        cout<<"SAVE"<<endl;
         histo->Draw("goffcolz");
         histo->GetZaxis()->SetRangeUser(0,1200);
         histSaver->SaveHistogram(histo);
@@ -3608,12 +3667,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge() 
     }
 
     if(hCellsBiasColumnOverlayAvrgChargeMinusBadCells){
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCells->IsZombie()<<endl;
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCells->GetEntries()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCells->IsZombie()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCells->GetEntries()<<endl;
         TString name = "hCellsBiasColumnOverlayAvrgChargeMinusBadCells_cl";
         name.Append(appendix);
         TProfile2D* histo = (TProfile2D*)hCellsBiasColumnOverlayAvrgChargeMinusBadCells->Clone(name);
-        if(verbosity)cout<<"SAVE"<<endl;
+        cout<<"SAVE"<<endl;
         histo->Draw("goffcolzTEXT");
         histo->GetZaxis()->SetRangeUser(0,1200);
         histSaver->SaveHistogram(histo);
@@ -3621,14 +3680,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge() 
     }
 
     if(hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents){
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents->IsZombie()<<endl;
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents->GetEntries()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents->IsZombie()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents->GetEntries()<<endl;
         TString name = "hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents_cl";
         name.Append(appendix);
         TH2F* histo = (TH2F*)hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCutEvents->Clone(name);
-        if(verbosity)cout<<"SAVE"<<endl;
+        cout<<"SAVE"<<endl;
         histo->Draw("goffcolz");
         histo->GetZaxis()->SetRangeUser(0,10);
+        //histSaver->SaveHistogram(histo);
 
         TCanvas* cCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut = new TCanvas("cCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut","cCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut");
         cCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut->cd();
@@ -3663,14 +3723,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsBiasColumnOverlayMeanCharge() 
     }
 
     if(hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut){
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut->IsZombie()<<endl;
-        if(verbosity)cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut->GetEntries()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut->IsZombie()<<endl;
+        cout<<hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut->GetEntries()<<endl;
         TString name = "hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut_cl";
         name.Append(appendix);
         TProfile2D* histo = (TProfile2D*)hCellsBiasColumnOverlayAvrgChargeMinusBadCellsBelowCut->Clone(name);
         //TH2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeMinusBadCellsBelowCut.at(ClusterSize)->ProjectionXY("B");
         //histo->SetName(name);
-        if(verbosity)cout<<"SAVE"<<endl;
+        cout<<"SAVE"<<endl;
         histo->Draw("goffcolz");
         histo->GetXaxis()->SetRangeUser(settings->getBiasColumnOverlayXLow(),settings->getBiasColumnOverlayXHigh());
         histo->GetYaxis()->SetRangeUser(settings->getBiasColumnOverlayYLow(),settings->getBiasColumnOverlayYHigh());
@@ -3727,6 +3787,28 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayBiasColumnAndCentralCol
     TProfile2D* histo1;
     TProfile2D* histo2;
 
+    /*if(hCellsCentralColumnOverlayShiftedAvrgChargeMinusBadCells){
+		//cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(3)->IsZombie()<<endl;
+		//cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(3)->GetEntries()<<endl;
+		histo1 = (TProfile2D*)hCellsCentralColumnOverlayShiftedAvrgChargeMinusBadCells->Clone();
+		//cout<<"SAVE"<<endl;
+		//histo->Draw("goffcolz");
+		//histo->GetXaxis()->SetRangeUser(settings->getBiasColumnOverlayXLow(),settings->getBiasColumnOverlayXHigh());
+		//histo->GetYaxis()->SetRangeUser(settings->getBiasColumnOverlayYLow(),settings->getBiasColumnOverlayYHigh());
+		//histSaver->SaveHistogram(histo);
+		histo1->GetZaxis()->SetRangeUser(300,1500);
+		sCellOverlayColumnBinOverlay.Add(histo1);
+
+		for(int i=0;i<5;i++){
+			for(int j=0;j<5;j++){
+				Int_t BinNum = i*5 + j +1;
+				cout<<"Bin: "<<BinNum<<" Content: "<<histo1->GetBinContent(BinNum)<<endl;
+			}
+		}
+
+		histo1->Draw("goffcolz");
+		//delete histo;
+	}*/
     if(hCellsBiasColumnOverlayShiftedAvrgChargeMinusBadCells){
         //cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(3)->IsZombie()<<endl;
         //cout<<hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(3)->GetEntries()<<endl;
@@ -3754,6 +3836,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayBiasColumnAndCentralCol
     delete histo1;
     delete histo2;
 
+    /*//hCellsCentralColumnOverlayLandauMinusBadCells.at(3)->SetFillColor(2);
+	hCellsCentralColumnOverlayLandauMinusBadCells.at(3)->SetLineColor(2);
+
+	hCellsCentralColumnOverlayLandauMinusBadCells.at(3)->Fill(2000);
+	hCellsBiasColumnOverlayLandauMinusBadCells->Fill(2000);
+	hCellsBiasColumnOverlayLandauMinusBadCells->Fill(2000);*/
+
     name = "sCellOverlayColumnBinOverlayLandau";
     name.Append(appendix);
     THStack sCellOverlayColumnBinOverlayLandau(name,name);
@@ -3778,26 +3867,34 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayBiasColumnAndCentralCol
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_Save3DCellOverlayIndividualBinHistos() {
+    //	return;
+
+    /*Int_t MaxOverlayClusterSize = settings->getMaxOverlayClusterSize();
+	for(Int_t ClusterSize = 1; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
+		TString appendix = TString::Format("_ClusterSize%i", ClusterSize);
+		if (settings->do3dTransparentAnalysis())
+			appendix = TString::Format("_ClusterSize%i_trans", ClusterSize);*/
+
     TString appendix = "";
     if (settings->do3dTransparentAnalysis())
         appendix = "_trans";
 
-    cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_Save3DCellOverlayIndividualBinHistos] "<<appendix<<endl;
+    cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_Save3DCellOverlayIndividualBinHistos]"<<endl;
 
     Int_t NBins = 225;
     for(Int_t BinNum=0;BinNum<NBins; BinNum++){
 
         if(BinNum == 126 || BinNum == 220 || BinNum ==20){
 
-            if(verbosity)cout<<VecOverlayCellBinHistos.at(BinNum)<<endl;
+            cout<<VecOverlayCellBinHistos.at(BinNum)<<endl;
 
             if(VecOverlayCellBinHistos.at(BinNum)){
-                if(verbosity)cout<<VecOverlayCellBinHistos.at(BinNum)->IsZombie()<<endl;
-                if(verbosity)cout<<VecOverlayCellBinHistos.at(BinNum)->GetEntries()<<endl;
+                cout<<VecOverlayCellBinHistos.at(BinNum)->IsZombie()<<endl;
+                cout<<VecOverlayCellBinHistos.at(BinNum)->GetEntries()<<endl;
                 TString name = TString::Format ("hOverlayCellsAvrgChargeBin%i_cl", BinNum);
                 name.Append(appendix);
                 TProfile2D* histo = (TProfile2D*)VecOverlayCellBinHistos.at(BinNum)->Clone(name);
-                if(verbosity)cout<<"SAVE"<<endl;
+                cout<<"SAVE"<<endl;
                 histo->Draw("goffcolz");
                 histo->GetZaxis()->SetRangeUser(0,1200);
                 histSaver->SaveHistogram(histo);
@@ -4021,14 +4118,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
             //cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)<<endl;
 
             if(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)){
-                if(verbosity)cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)->IsZombie()<<endl;
-                if(verbosity)cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)->GetEntries()<<endl;
+                cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)->IsZombie()<<endl;
+                cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)->GetEntries()<<endl;
                 TString name = hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)->GetName();
                 //name.Append(appendix);
                 TProfile2D* histo = (TProfile2D*)hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Alignment)->Clone(name);
-                if(verbosity)cout<<"SAVE"<<endl;
+                cout<<"SAVE"<<endl;
                 histo->Draw("goffcolz");
-                histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+                histo->GetZaxis()->SetRangeUser(700,1200);
                 histSaver->SaveHistogram(histo);
                 delete histo;
             }
@@ -4124,17 +4221,18 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
     //hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetXaxis()->CenterLabels();
 
     if(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut){
-        if(verbosity)cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->IsZombie()<<endl;
-        if(verbosity)cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetEntries()<<endl;
+        cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->IsZombie()<<endl;
+        cout<<hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetEntries()<<endl;
         TString name = "hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut";
         name.Append(appendix);
         TProfile2D* histo = (TProfile2D*)hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->Clone(name);
-        if(verbosity)cout<<"SAVE"<<endl;
+        cout<<"SAVE"<<endl;
         histo->Draw("goffcolz");
         //histo->GetZaxis()->SetRangeUser(0,1);
         histSaver->SaveHistogram(histo);
         delete histo;
     }
+
     histSaver->SaveHistogram(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentToTalBiasEntriesBelowCut);
     histSaver->SaveHistogram(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeBiasEntriesBelowCut);
     histSaver->SaveHistogram(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCutRMS);
@@ -4142,11 +4240,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
 }
 
 Float_t TAnalysisOf3dDiamonds::LongAnalysis_CalculateRMS(vector<Float_t>* nVector){
+
     Float_t SumSquares = 0;
+
     for(int i=0; i<nVector->size(); i++){
         SumSquares += (nVector->at(i))*(nVector->at(i));
     }
+
     SumSquares /= nVector->size();
+
     return sqrt(SumSquares);
 
 }
@@ -4158,6 +4260,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill2DCellHitsBelowCutRelative(TH1F* nH
     Int_t NBins = NXBins*NYBins;
     if(verbosity>6)
         printf("NXBins: %i, NYBins: %i, NBins: %i \n", NXBins, NYBins, NBins);
+
+    /*for(int Bin=0; Bin<NBins; Bin++){
+		Float_t BinEntries = nHisto->GetBinContent(Bin);
+		cout<<"Bin Entries: "<<BinEntries<<endl;
+		hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut.at(Alignment)->SetBinContent(Bin,BinEntries);
+	}*/
 
     for(int BinX=0; BinX<NXBins; BinX++){
         for(int BinY=0; BinY<NYBins; BinY++){
@@ -4226,7 +4334,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayOffsetMeanCharge() {
             TProfile2D* histo = (TProfile2D*)hCellsOffsetOverlayAvrgCharge.at(ClusterSize)->Clone(name);
             cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
             ////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
@@ -4243,7 +4351,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayOffsetMeanCharge() {
             TProfile2D* histo = (TProfile2D*)hCellsOffsetOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Clone(name);
             cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
         }
@@ -4255,7 +4363,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayOffsetMeanCharge() {
             TProfile2D* histo = (TProfile2D*)hCellsOffsetOverlayAvrgChargeGoodCells.at(ClusterSize)->Clone(name);
             cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+            histo->GetZaxis()->SetRangeUser(700,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
         }
@@ -4274,7 +4382,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayOffsetMeanCharge() {
         TProfile2D* histo = (TProfile2D*)hCellsOffsetOverlayUnEvenBinningAvrgChargeMinusBadCells->Clone(name);
         cout<<"SAVE"<<endl;
         histo->Draw("goffcolz");
-        histo->GetZaxis()->SetRangeUser(settings->get3DOverlayRange().first,settings->get3DOverlayRange().second);
+        histo->GetZaxis()->SetRangeUser(700,1200);
         histSaver->SaveHistogram(histo);
         delete histo;
     }
@@ -4391,6 +4499,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_FillEdgeDistributions(Float_t clusterC
             //				cout<<nEvent<<": "<<xPredDet<<"/"<<yPredDet<<" --> "<<i<<endl;
         }
     }
+
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveEdgeDistributions() {
@@ -4515,9 +4624,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 }
 
 void TAnalysisOf3dDiamonds::saveHistos() {
-    if(settings->do3dLongAnalysis() == 1){
-        SaveLongAnalysisHistos();
-    }
+    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     histSaver->SaveHistogram(hValidEventsDetSpace);
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
     SaveStripAnalysisHistos();
@@ -4550,14 +4657,6 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCluster");
 
     hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells",4);
-
-    TString name = "hNegativeCharges";
-
-    TString appendix ="";
-    if (settings->do3dTransparentAnalysis())
-        appendix ="_trans";
-    name.Append(appendix);
-    hNegativeCharges = new TH1F(name,name,8192,-4096,4096);
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
@@ -4568,6 +4667,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     cout<<"vecPulseHeight_ShortAna "<<vecPulseHeight_ShortAna.size()<<endl;
 
     if (settings->do3dTransparentAnalysis())
+
         cout<<"Create Project3dProfile for hChargeDistribution3D ..."<<flush;
 
     TProfile2D* hMeanCharge = histSaver->CreateProfile2D("hChargeDistribution3D",vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna,1024,1024);
@@ -4598,7 +4698,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     name.Append(appendix);
     hMeanCharge->SetName(name);
     histSaver->SaveHistogram(hMeanCharge,false);
-
     name = "cAvrgPulseHeigthDetSystem_MetalizationLayer";
     name.Append(appendix);
     TCanvas *c1 = new TCanvas(name, name);
@@ -4612,19 +4711,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     settings->DrawMetallisationGrid(c1,3);
     hMeanCharge->Draw("colz same");
     histSaver->SaveCanvas(c1);
-    c1->Clear();
-
-    TH2D* hMeanChargeEntries = hMeanCharge->ProjectionXY(name,"B");
-    hMeanChargeEntries->Draw("colz");
-    settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1);
-    settings->DrawMetallisationGrid(c1,3);
-    name = "cAvrgPulseHeigthDetSystemEntries_MetalizationLayer";
-    name.Append(appendix);
-    c1->SetName(name);
-    if (hMeanChargeEntries)
-        delete hMeanChargeEntries;
-
-
     TFiducialCut *fidCut3dWithColumns = settings->get3dMetallisationFidCuts()->getFidCut(3);
     cout<<"3d FidCut: "<<endl;
     fidCut3dWithColumns->Print(1);
@@ -4644,11 +4730,10 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     name.Append(appendix);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
-
     name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
     TProfile2D* hMeanCharge3D = histSaver->CreateProfile2D("hChargeDistribution3D_3D",
               vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna,
-              settings->getNColumns3d()*4,settings->getNRows3d()*4,
+              settings->getNColumns3d()*15,settings->getNRows3d()*15,
               xmin,xmax,ymin,ymax
       );
     hMeanCharge3D->Draw("colz");
@@ -4657,17 +4742,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     name.Append(appendix);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
-
-    name = "hEntriesAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
-    name.Append(appendix);
-    hMeanChargeEntries = hMeanCharge3D->ProjectionXY(name,"B");
-    hMeanChargeEntries->Draw("colz");
-    name.Replace(0,1,"c");
-    c1->SetName(name);
-    histSaver->SaveCanvas(c1);
-
-    if(hMeanChargeEntries)
-        delete hMeanChargeEntries;
     if (hMeanCharge)
         delete hMeanCharge;
     if(hMeanCharge3D)
@@ -5071,6 +5145,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRelativeAddedTransparentCharge() {
     hTransparentAnalysisTransparentAddedChargeProfile.clear();
 
     // without edge
+
     hTransparentAnalysisRelativeAddedChargeWithoutEdge.clear();
     hTransparentAnalysisRelativeAddedChargeBadCellsWithoutEdge.clear();
     hTransparentAnalysisRelativeAddedChargeGoodCellsWithoutEdge.clear();
@@ -5187,26 +5262,81 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodCellsLandaus() {
         TCanvas *c1 = new TCanvas("cLandauGoodCellsAll");
         c1->cd();
         hLandauGoodCells->DrawNormalized();
-        hLandauGoodCellsWithoutColumns->DrawNormalized("same");
-        hLandauGoodCellsWithoutEdges->DrawNormalized("same");
+        hLandauGoodCellsWithoutColumns->Draw("same");
+        hLandauGoodCellsWithoutEdges->Draw("same");
         histSaver->SaveCanvas(c1);
         delete c1;
     }
+
     if(hLandauGoodCellsWithoutEdges) delete hLandauGoodCellsWithoutEdges;
     if(hLandauGoodCellsWithoutColumns) delete hLandauGoodCellsWithoutColumns;
     if(hLandauGoodCells) delete hLandauGoodCells;
 }
 
-void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay( TProfile2D* profOverlay, TH1F* hLandauOfOverlay) {
-    TAvrgChargePerBinMonteCarlo  mc(histSaver);
-    mc.setPulseHeightBins(PulseHeightBins);
-    mc.setPulseHeightMax(PulseHeightMax);
-    mc.setPulseHeightMaxMeanCharge(PulseHeightMaxMeanCharge);
-    mc.setPulseHeightMin(PulseHeightMin);
-    mc.setPulseHeightMinMeanCharge(PulseHeightMinMeanCharge);
-    mc.setCut(500);
-    mc.doMonteCarlo(profOverlay,hLandauOfOverlay);
+void TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay(
+        TProfile2D* profOverlay, TH1F* hLandauOfOverlay) {
+    if(!profOverlay || !hLandauOfOverlay){
+        cerr<<"[TAnalysisOf3dDiamonds::DoMonteCarloOfAvrgChargePerBinInOverlay] one of the histograms is not defined! ";
+        cout<<profOverlay<<" "<<hLandauOfOverlay<<endl;
+    }
+    TH2D* hBinContents = histSaver->GetBinContentHisto(profOverlay);
+    histSaver->SaveHistogram(hBinContents,false,false,(TString)"colzText");
+    TString name = profOverlay->GetName()+(TString)"_Entries";
+    Int_t max = hBinContents->GetBinContent(hBinContents->GetMaximumBin())+1;
+    Int_t min = hBinContents->GetBinContent(hBinContents->GetMinimumBin())+1;
+    max -=5;
+    min -=5;
+    Float_t cut = 500;
+    Int_t bins = max-min;
+    TH1F* hEntries = new TH1F(name,name,bins,min,max);
+    for(Int_t binx = 1;binx < hBinContents->GetNbinsX();binx++)
+        for(Int_t biny = 1;biny < hBinContents->GetNbinsY();biny++){
+            Int_t bin = hBinContents->GetBin(binx,biny);
+            hEntries->Fill(hBinContents->GetBinContent(bin));
+        }
+    histSaver->SaveHistogram(hEntries);
+    name = "hMonteCarloAvrgChargePerBin";
+    TH1D* hMonteCarloAvrgChargePerBin = new TH1D(name,name,PulseHeightBins,PulseHeightMinMeanCharge-100,PulseHeightMaxMeanCharge+100);
+
+    name =TString::Format("hMonteCarloNBelowCut_%d",(int)cut);;
+    TH1D* hNumberOfEntriesBelowCut = new TH1D(name,name,100,0,100);
+    hNumberOfEntriesBelowCut->GetXaxis()->SetTitle(TString::Format("number of  entries below %.f",cut));
+    hNumberOfEntriesBelowCut->GetYaxis()->SetTitle("number of  entries #");
+
+    name =TString::Format("hMonteCarloRelativeBelowCut_%d",(int)cut);;
+    TH1D* hRelativeNumberBelowCut = new TH1D(name,name,100,0,1);
+    hRelativeNumberBelowCut->GetXaxis()->SetTitle(TString::Format("rel. number of  entries below %.f",cut));
+    hRelativeNumberBelowCut->GetYaxis()->SetTitle("number of  entries #");
+    Float_t mean =0;
+    Int_t entries = 0;
+    int nBelowCut = 0;
+    for(UInt_t nMC = 0; nMC < 1e6; nMC++){
+        entries = hEntries->GetRandom();
+        mean = 0;
+        nBelowCut = 0;
+        for(Int_t entry =0; entry < entries; entry++){
+            Float_t charge =  hLandauOfOverlay->GetRandom();
+            mean += charge;
+            if(charge<cut)
+                nBelowCut ++;
+        }
+        mean /= (Float_t)entries;
+        hNumberOfEntriesBelowCut->Fill(nBelowCut);
+        hRelativeNumberBelowCut->Fill((Float_t)nBelowCut/(Float_t)entries);
+        //        cout<<TString::Format("%6d --> %6.1f (%d)",nMC,mean,entries)<<endl;;
+        hMonteCarloAvrgChargePerBin->Fill(mean);
+    }
+    hMonteCarloAvrgChargePerBin->GetXaxis()->SetTitle("mean charge per bin_{MonteCarlo}");
+    hMonteCarloAvrgChargePerBin->GetYaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hMonteCarloAvrgChargePerBin,false,true,true);
+    histSaver->SaveHistogram(hNumberOfEntriesBelowCut,false,true,true);
+    histSaver->SaveHistogram(hRelativeNumberBelowCut,false,true,true);
+    delete hMonteCarloAvrgChargePerBin;
+    delete hBinContents;
+    delete hEntries;
+
 }
+
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps(){
     if ( !settings->do3dTransparentAnalysis())
@@ -5216,7 +5346,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
     differences->setClusteredMap(&mapClusteredAnalysisGoodCells);
     differences->setTransparentMap(&mapTransparentAnalysisGoodCells);
     differences->setPredictedPositions(&mapPredictedPositionsGoodCells);
-    differences->set3DPhantomLandau(hLandau3DWithoutColumns_subset);
     differences->Analysis();
     delete differences;
 
@@ -5225,7 +5354,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
     differences->setClusteredMap(&mapClusteredAnalysisAllCells);
     differences->setTransparentMap(&mapTransparentAnalysisAllCells);
     differences->setPredictedPositions(&mapPredictedPositionsAllCells);
-    differences->set3DPhantomLandau(hLandau3DWithoutColumns_subset);
     differences->Analysis();
     delete differences;
 }
