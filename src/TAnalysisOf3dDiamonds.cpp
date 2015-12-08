@@ -2409,13 +2409,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     }
     histSaver->SetPlotsPath(plots_path);
     hResolutionGoodCells->GetYaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hResolutionGoodCells,false,false,false);
+    histSaver->SaveHistogram(hResolutionGoodCells,false,false,true);
     hResolutionBadCells->GetYaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hResolutionBadCells);
+    histSaver->SaveHistogram(hResolutionBadCells,false,false,true);
     hResolutionAllCells->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionAllCells);
     hResolutionAllButBadCells->GetYaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hResolutionAllButBadCells);
+    histSaver->SaveHistogram(hResolutionAllButBadCells,false,false,true);
     delete hResolutionGoodCells;
     delete hResolutionBadCells;
     delete hResolutionAllCells;
@@ -4693,7 +4693,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster");
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCluster");
 
-    hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells",4);
+    hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells",16);
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
