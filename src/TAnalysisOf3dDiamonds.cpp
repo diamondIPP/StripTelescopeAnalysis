@@ -30,7 +30,10 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
     histSaver=new HistogrammSaver(settings);
     settings->goTo3dDiamondAnalysisDir();
 
+
     histSaver->SetPlotsPath(settings->get3dDiamondAnalysisPath());
+
+    html3D->setFileGeneratingPath(settings->get3dDiamondAnalysisPath());
     histSaver->SetRunNumber(runNumber);
     settings->goTo3dDiamondTreeDir();
     clusteredAnalysis = new TCellAnalysisClass(settings);
