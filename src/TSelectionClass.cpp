@@ -744,7 +744,7 @@ void TSelectionClass::saveHistos()
     delete hFiducialCutSiliconRoughCut;
 
     if(fiducialCuts){
-        TH2F* h2 = hFiducialCutSiliconDiamondHit->Clone();
+        TH2F* h2 = (TH2F*)hFiducialCutSiliconDiamondHit->Clone();
         cout<<"setHistogramm(hFiducialCutSiliconDiamondHit)"<<hFiducialCutSiliconDiamondHit<<endl;
         fiducialCuts->setHistogramm(h2);
         cout<<"get CanvasX"<<endl;
