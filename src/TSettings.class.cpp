@@ -2578,10 +2578,10 @@ pair<Float_t, Float_t> TSettings::getRelativePositionInCell(Float_t xPredDet,
 	Int_t column = getColumnOfCell(cellNo);
 	Float_t relX = xPredDet - (startOf3dDetectorX+column*cellWidth); //+5;		//2365 is the start of the 3D detector in x
 	Float_t relY = yPredDet - (row*cellHight);
-	if ((relX>cellWidth||relY>cellHight||relX<0||relY<0)&&verbosity>6)
+	if ((relX>cellWidth||relY>cellHight||relX<0||relY<0) && DiamondPattern >=0 )
 		cerr<<"[TSettings::getRelativePositionInCell] invalid output: "<<
 		TString::Format("%03.1f/%03.1f from %03.1f/%03.1f, with calculated hit in cell %d = %d_%d",
-				relX,relY,xPredDet,yPredDet,cellNo,column,row)<<endl;
+				relX,relY,xPredDet,yPredDet,cellNo,column,row)" Starting at: "<<startOf3dDetectorX<<endl;
 	return make_pair(relX,relY);
 }
 
