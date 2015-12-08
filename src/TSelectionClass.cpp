@@ -236,7 +236,7 @@ void TSelectionClass::resetVariables(){
     siliconClusterBitMask = 0;
     siliconOneAndOnlyOneClusterBitMask = 0;
     siliconOneAndOnlyOneValidClusterHitBitMask = 0;
-    hSiliconValidClusterHitBitMask = 0;
+    siliconValidClusterHitBitMask = 0;
     useForAnalysis=false;
     useForAlignment=false;
     useForSiliconAlignment=false;
@@ -255,7 +255,7 @@ bool TSelectionClass::isOneAndOnlyOneClusterSiliconEvent(){
     siliconClusterBitMask = 0;
     siliconOneAndOnlyOneClusterBitMask = 0;
     siliconOneAndOnlyOneValidClusterHitBitMask = 0;
-    hSiliconValidClusterHitBitMask = 0;
+    siliconValidClusterHitBitMask = 0;
     bool oneAndOnlyOneClusterInAllSilicon = true;
     for(UInt_t det=0;det<TPlaneProperties::getNSiliconDetectors();det++){
         Int_t nclus = eventReader->getNClusters(det);
@@ -264,7 +264,7 @@ bool TSelectionClass::isOneAndOnlyOneClusterSiliconEvent(){
         siliconOneAndOnlyOneClusterBitMask  |= ((bool)oneAndOnlyOne<<det);
         if(verbosity>10)cout<<"DET "<<det<<": "<<oneAndOnlyOne<<" "<<checkDetMasked(det)<<" "<<isSaturated(det)<<flush;
         bool valid_cluster =  !checkDetMasked(det) && !isSaturated(det);
-        hSiliconValidClusterHitBitMask |=  ( (bool)valid_cluster<<det);
+        siliconValidClusterHitBitMask |=  ( (bool)valid_cluster<<det);
         oneAndOnlyOne = oneAndOnlyOne && valid_cluster;
         siliconOneAndOnlyOneValidClusterHitBitMask |= ( (bool)oneAndOnlyOne<<det);
 //        if (oneAndOnlyOneClusterInAllSilicon==true)

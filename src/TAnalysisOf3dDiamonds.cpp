@@ -592,7 +592,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
 
     for(Int_t ClusterSize = StartClusterSize; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
-        if(verbosity>6) cout<<"DiamondClusterSize: "<<diamondCluster.getClusterSize()<<endl;
+        if(verbosity>6) cout<<"DiamondClusterSize: "<<diamondCluster->getClusterSize()<<endl;
         if(settings->do3dTransparentAnalysis()){
             diamondCluster->SetTransparentClusterSize(ClusterSize);
         }
@@ -3027,16 +3027,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos(Fl
                 xRelPosDet<<"/"<<yRelPosDet<<" with charge: "<<clusterCharge<<" has Invalid ClusterSize "<<ClusterSize<<" but size is"<<hCellsOverlayAvrgChargeMinusBadCells.size()<<endl;
         return;
     }
-    if (verbosity>6)
-        cout<"[ TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos]  find "<<
-        ClusterSize<<" in "<<hCellsOverlayAvrgChargeMinusBadCells.size()<<" sized hCellsOverlayAvrgChargeMinusBadCells"<<endl;
+    if (verbosity>6) cout<<"[ TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos]  find "<<ClusterSize<<" in "<<hCellsOverlayAvrgChargeMinusBadCells.size()<<" sized hCellsOverlayAvrgChargeMinusBadCells"<<endl;
     Int_t XBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetXaxis()->FindBin(xRelPosDet);
     Int_t YBin = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->GetYaxis()->FindBin(yRelPosDet);
     Int_t YBins = hCellsOverlayAvrgChargeMinusBadCells.at(0)->GetYaxis()->GetNbins();
     Int_t BinNum = (XBin-1)*YBins + YBin-1;
     if (BinNum >= VecOverlayCellBinHistos.size()){
         cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos] invalid BinNum: "<<BinNum
-                << "( Xbin: "<<XBin<<"/Ybin: "<<Ybin<<" with BinNum = (XBin-1)*YBins + YBin-1) for a vector of size: "<<VecOverlayCellBinHistos.size()<<endl;
+                << "( Xbin: "<<XBin<<"/Ybin: "<<YBin<<" with BinNum = (XBin-1)*YBins + YBin-1) for a vector of size: "<<VecOverlayCellBinHistos.size()<<endl;
         cout<<"\t xRelPosDet: "<<xRelPosDet<<"\t yRelPosDet:"<<yRelPosDet<<endl;
         return;
     }
