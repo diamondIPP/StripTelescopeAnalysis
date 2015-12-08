@@ -433,11 +433,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_checkTransparentAnalysis(){
     }
     if(!isTransparentCluster){
         if(validClusteredAnalysis){
-            if(verbosity>4)cout<<"\n"<<nEvent<<"\tvalid clustered analysis, but invalid transparentAnalysis: "<<xPredDet<<"/"<<yPredDet<<endl;
-            if(verbosity>4)cout<<"\tpattern: "<<settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)<<endl;
-            if (true) {cout<<"[LongAnalysis_checkTransparentAnalysis]"<<flush; settings->get3dMetallisationFidCuts()->Print(4);}
-            if(verbosity>4)cout<<"\tXdetChannelsSpaceInt"<<flush;
-            cout<<settings->diamondPattern.convertMetricToIntChannel(xPredDet);
+            if (verbosity>4){
+                cout<<"[LongAnalysis_checkTransparentAnalysis]"<<flush;
+                cout<<"\n"<<nEvent<<"\tvalid clustered analysis, but invalid transparentAnalysis: "<<xPredDet<<"/"<<yPredDet<<endl;
+                cout<<"\tpattern: "<<settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)<<endl;
+                settings->get3dMetallisationFidCuts()->Print(4);
+                cout<<"\tXdetChannelsSpaceInt"<<flush;
+                cout<<settings->diamondPattern.convertMetricToIntChannel(xPredDet);
+            }
             if(settings->diamondPattern.convertMetricToIntChannel(xPredDet)<0){
                 settings->diamondPattern.setVerbosity(8);
                 if(verbosity>4)cout<<"\t"<<settings->diamondPattern.convertMetricToIntChannel(xPredDet);
