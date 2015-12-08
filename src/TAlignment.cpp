@@ -818,8 +818,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     TString refPlaneString = GetReferencePlaneString(&vecRefPlanes);
 
     bool isStripAlignment = (aligning == singleStrip);
-
-    if (verbosity||isStripAlignment){
+    bool verb = verbosity||isStripAlignment;
+    if (verb){
         cout << "TAlignment::get";
         if(isStripAlignment)cout<<"SingleStrip";
         cout<<"Residual of Plane " << subjectPlane << TPlaneProperties::getCoordinateString(cor);
@@ -846,7 +846,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         }
         cout<<endl;
 
-        if(verbosity>0&&resOld.isTestResidual())resOld.Print(1);
+        if(verb&&resOld.isTestResidual())resOld.Print(1);
     }
     clearMeasuredVectors();
 
@@ -1068,10 +1068,13 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         align->setNDiamondAlignmentEvents((UInt_t) vecXLabDeltaMetric.size());
         align->setDiaChi2(settings->getAlignment_chi2());
     }
-    if(isStripAlignment)
-        this->CreatePlots(cor, subjectPlane,(string) refPlaneString, bPlot, bAlign);
-    else
-        this->CreatePlots(cor, subjectPlane, (string)refPlaneString, bPlot,calcMode==chi2CalcMode&&bPlot,calcMode==chi2CalcMode);
+    bool bChi2 = calcMode==chi2CalcMode;
+    bool bUpdateResolutions = calcMode==chi2CalcMode&&bPlot;
+    if(isStripAlignment){
+        bUpdateResolutions = bAlign;
+        this->CreatePlots(cor, subjectPlane,(string) refPlaneString, bPlot, bAlign,false);
+    }
+    this->CreatePlots(cor, subjectPlane, (string)refPlaneString, bPlot,bUpdateResolutions,bChi2);
     clearMeasuredVectors();
     return res;
 }
@@ -2450,6 +2453,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateResidualVsAngle(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateFidValueXVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     CreateScatterPlotDeltaXvsChi2X(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
+    CreateScatterPlotDeltaYvsChi2Y(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     Float_t yPredictionSigma = CreateSigmaOfPredictionYPlots(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
 
     CreateDistributionPlotDeltaY(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,yPredictionSigma);
@@ -2824,9 +2828,7 @@ void TAlignment::CreateScatterPlotDeltaXvsChi2X(
         bool bUpdateResolution, bool isSiliconPostAlignment) {
     if (!bPlot)
         return;
-    if (!nAlignmentStep > -1)
-        return;
-    if (!(cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR))
+    if (cor == TPlaneProperties::Y_COR)
         return;
 
     TString name = preName+ TString::Format("_ScatterPlot_DeltaX_vs_Chi2X_Plane_%d_with_",subjectPlane)+refPlaneString + postName;
@@ -2856,28 +2858,29 @@ void TAlignment::CreateScatterPlotDeltaYvsChi2Y(
         TPlaneProperties::enumCoordinate cor, UInt_t subjectPlane,
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, bool isSiliconPostAlignment) {
+    if (!bPlot)
+        return;
+    if (cor == TPlaneProperties::X_COR)
+        return;
+    TString name = preName+ TString::Format("_ScatterPlot_DeltaY_vs_Chi2Y_Plane_%d_with_",subjectPlane)+refPlaneString + postName;
+    TString xTitle = "#chi^{2}_{Y}";
+    TString yTitle ="Sum of Delta Y / #mum";
+    if(verbosity>3) cout<<"Save: "<<(string)name<<" "<<flush;
+    TH2F *histo = histSaver->CreateScatterHisto((string)name, vecYLabDeltaMetric, vecYChi2, 256);
+    histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
+    histo->GetXaxis()->SetTitle(xTitle);
+    histo->GetYaxis()->SetTitle(yTitle);
 
-    if (bPlot && nAlignmentStep > -1 && subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) { //ScatterHisto DeltaY vs Chi2Y
-        TString name = preName+ TString::Format("_ScatterPlot_DeltaY_vs_Chi2Y_Plane_%d_with_",subjectPlane)+refPlaneString + postName;
-        TString xTitle = "#chi^{2}_{Y}";
-        TString yTitle ="Sum of Delta Y / #mum";
-        if(verbosity>3) cout<<"Save: "<<(string)name<<" "<<flush;
-        TH2F *histo = histSaver->CreateScatterHisto((string)name, vecYLabDeltaMetric, vecYChi2, 256);
-        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
-        histo->GetXaxis()->SetTitle(xTitle);
-        histo->GetYaxis()->SetTitle(yTitle);
-
-        histSaver->SaveHistogram((TH2F*) histo->Clone());
-        name.Replace(0,1,"g");
-        TGraph graph = histSaver->CreateDipendencyGraph((string)name, vecYLabDeltaMetric, vecYChi2);
-        graph.Draw("APL");
-        graph.GetXaxis()->SetTitle(xTitle);
-        graph.GetYaxis()->SetTitle(yTitle);
-        graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
-        histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
-        delete histo;
-        if(verbosity>3)cout<<"DONE"<<endl;
-    }
+    histSaver->SaveHistogram((TH2F*) histo->Clone());
+    name.Replace(0,1,"g");
+    TGraph graph = histSaver->CreateDipendencyGraph((string)name, vecYLabDeltaMetric, vecYChi2);
+    graph.Draw("APL");
+    graph.GetXaxis()->SetTitle(xTitle);
+    graph.GetYaxis()->SetTitle(yTitle);
+    graph.SetTitle(graph.GetTitle()+GetPlotPostTitle(postName));
+    histSaver->SaveGraph((TGraph*) graph.Clone(), (string)name);
+    delete histo;
+    if(verbosity>3)cout<<"DONE"<<endl;
 }
 
 void TAlignment::CreateAngularDistributionPlot(
