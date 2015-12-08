@@ -310,6 +310,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
             TFiducialCut *cut = settings->getSelectionFidCuts()->getFidCut(i+1);
             if (!cut){
                 cerr<<"Cannot get cut no "<<i+1<<" in "<<settings->getSelectionFidCuts()->getNFidCuts()<<endl;
+                cout<<"[ShortAnalysis_Analyse1Cluster] ERROR:"<<flush;
                 settings->getSelectionFidCuts()->Print(1);
                 return;
             }
@@ -434,7 +435,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_checkTransparentAnalysis(){
         if(validClusteredAnalysis){
             if(verbosity>4)cout<<"\n"<<nEvent<<"\tvalid clustered analysis, but invalid transparentAnalysis: "<<xPredDet<<"/"<<yPredDet<<endl;
             if(verbosity>4)cout<<"\tpattern: "<<settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)<<endl;
-            settings->get3dMetallisationFidCuts()->Print(4);
+            if (true) {cout<<"[LongAnalysis_checkTransparentAnalysis]"<<flush; settings->get3dMetallisationFidCuts()->Print(4);}
             if(verbosity>4)cout<<"\tXdetChannelsSpaceInt"<<flush;
             cout<<settings->diamondPattern.convertMetricToIntChannel(xPredDet);
             if(settings->diamondPattern.convertMetricToIntChannel(xPredDet)<0){
