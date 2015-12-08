@@ -574,6 +574,7 @@ public:
 	int do3dShortAnalysis() {return b3dShortAnalysis;}
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
 	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
+	void set3dTransparentAnalysis(int trans){b3dTransparentAnalysis = trans;}
 	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
 	UInt_t getNRows3d(){return nRows3d;};
 	UInt_t getNColumns3d(){return nColumns3d;};

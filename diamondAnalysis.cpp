@@ -275,6 +275,13 @@ int main(int argc, char ** argv) {
 			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
 			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
 			delete analyse3dDiamond;
+            if (settings->do3dTransparentAnalysis())
+                settings->set3dTransparentAnalysis(0);
+            else
+                settings->set3dTransparentAnalysis(1);
+			analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+			delete analyse3dDiamond;
 			currentResults->createResultFiles();
 		}
 
