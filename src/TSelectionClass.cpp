@@ -574,7 +574,7 @@ void TSelectionClass::initialiseHistos()
         TString title = "";
         for (int det = 0; det < TPlaneProperties::getNSiliconDetectors();det++)
             title+= TString::Format("%d",((i&(1<<det))==(1<<det)));
-        cout<<"Bin "<<i<<": "<<title<<endl;
+//        cout<<"Bin "<<i<<": "<<title<<endl;
         hSiliconValidClusterHitBitMask->GetXaxis()->SetBinLabel(i+1,title);
         hSiliconOneAndOnlyOneValidClusterHitBitMask->GetXaxis()->SetBinLabel(i+1,title);
         hSiliconOneAndOnlyOneClusterBitMask->GetXaxis()->SetBinLabel(i+1,title);
