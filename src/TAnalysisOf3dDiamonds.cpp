@@ -2279,7 +2279,7 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps();
     //	LongAnalysis_SaveCellsOverlayMeanCharge();
-    if(!settings->do3dTransparentAnalysis()){
+    if(true){
         LongAnalysisSaveCellAndQuaterNumbering();
         LongAnalysis_SaveDeadCellProfile();
         LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors();
@@ -2707,13 +2707,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
 
     name = "hHighlightedQuarterFail";
     name.Append(appendix);
-    TH2D* hHighlightedQuarterFail = new TH2D(name,name,settings->GetNCells3d(),0,settings->GetNCells3d(),1,yMin,yMax);
+    Int_t ncells = settings->GetNCells3d();
+    TH2D* hHighlightedQuarterFail = new TH2D(name,name,ncells,0,ncells,1,yMin,yMax);
     name = "hHighlightedQuarterFailSorted";
     name.Append(appendix);
     TH2D* hHighlightedQuarterFailSorted = (TH2D*) hHighlightedQuarterFail->Clone(name);
+    TH1D* histo = new TH1D("hMeanPulseHeightCells","hMeanPulseHeightCells",ncells,0,ncells);
     //hCellsLandau2DQuarterFail->GetXaxis()->SetTitle("Charge ADC");
     //hCellsLandau2DQuarterFail->GetYaxis()->SetTitle("Cell");
-    for (UInt_t pos = 0 ; pos < settings->GetNCells3d(); pos ++){
+    for (UInt_t pos = 0 ; pos < ncells; pos ++){
         Int_t cellSorted = -1;
         string title = hCellLandausSorted[pos]->GetName();
         size_t found=title.find_last_of('_');
@@ -2721,21 +2723,32 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
             title = title.substr(found+1);
             cellSorted = atoi(title.c_str());
         }
-        TString binLabel = TString::Format("%3d",cellSorted);
+        histo->Fill(pos,hCellsLandau.at(pos)->GetMean());
+
+        TString binLabel = TString::Format("%3d",pos);
         hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetBinLabel(pos,binLabel);
+
         hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetLabelSize(0.02);
-        binLabel = TString::Format("%3d",pos);
+        hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetBinLabel(pos,binLabel);
+
+        binLabel = TString::Format("%3d",cellSorted);
         hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetBinLabel(pos,binLabel);
         hCellsLandau2DHighlightedQuarterFailSorted->GetXaxis()->SetLabelSize(0.02);
 
-        for(int yBin =0; yBin<yBins; yBin++){
-            hCellsLandau2DHighlightedQuarterFail->SetBinContent(pos,yBin,hCellsLandau[pos]->GetBinContent(yBin));
-            hCellsLandau2DHighlightedQuarterFailSorted->SetBinContent(pos,yBin,hCellLandausSorted[pos]->GetBinContent(yBin));
+        for(int yBin = 0; yBin<yBins; yBin++){
+            Float_t ph = hCellsLandau[pos]->GetXaxis()->GetBinCenter(yBin+1);
+            Float_t weight = hCellsLandau[pos]->GetBinContent(yBin);
+            hCellsLandau2DHighlightedQuarterFail->Fill(pos,ph,weight);
+
+            ph = hCellLandausSorted[pos]->GetXaxis()->GetBinCenter(yBin+1);
+            weight =hCellLandausSorted[pos]->GetBinContent(yBin);
+            hCellsLandau2DHighlightedQuarterFailSorted->Fill(pos,yBin,weight);
         }
         hHighlightedQuarterFail->SetBinContent(pos,1,HighlightGrading.at(pos));
         hHighlightedQuarterFailSorted->SetBinContent(pos,1,HighlightGrading.at(cellSorted));
     }
-
+    histSaver->SaveHistogram(histo);
+    delete histo;
     name = "cCellsLandau2DHighlightedQuarterFail";
     name.Append(appendix);
     TCanvas* cCellsLandau2DHighlightedQuarterFail = new TCanvas(name,name);
@@ -4692,7 +4705,6 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
     hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster");
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCluster");
-
     hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells",16);
 }
 
