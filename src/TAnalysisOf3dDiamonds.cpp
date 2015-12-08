@@ -300,7 +300,13 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
 
             if(!settings->do3dTransparentAnalysis()){
             }
-            if(!settings->getSelectionFidCuts()->getFidCut(i+1)->IsInFiducialCut(fiducialValueX,fiducialValueY))
+            TFiducialCut *cut = settings->getSelectionFidCuts()->getFidCut(i+1);
+            if (!cut){
+                cerr<<"Cannot get cut no "<<i+1<<" in "<<settings->getSelectionFidCuts()->getNFidCuts()<<endl;
+                settings->getSelectionFidCuts()->Print(1);
+                return;
+            }
+            if( cut->IsInFiducialCut(fiducialValueX,fiducialValueY))
                 return;
 
             //hTransparentAnalysisValidClusterFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
