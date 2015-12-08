@@ -2327,34 +2327,38 @@ void TAlignment::CreateResidualVsAngle(TPlaneProperties::enumCoordinate cor, UIn
     if(!bPlot)  return;
 
     TString histName = preName + TString::Format("_DeltaX_Vs_PhiX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
-    TH2F* hist = histSaver->CreateScatterHisto((string)histName,this->vecXLabDeltaMetric,this->vecXPhi);
-    if(hist){
-        hist->GetYaxis()->SetTitle("Angle #Phi_X");
-        hist->GetXaxis()->SetTitle("Delta X");
-        hist->GetZaxis()->SetTitle("number of entries");
-        histSaver->SaveHistogram(hist);
-        delete hist;
-    }
-    histName = preName + TString::Format("_DeltaX_Vs_PhiY_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
-    hist = histSaver->CreateScatterHisto((string)histName,this->vecXLabDeltaMetric,this->vecYPhi);
-    if(hist){
-        hist->GetYaxis()->SetTitle("Angle #Phi_Y");
-        hist->GetXaxis()->SetTitle("Delta X");
-        hist->GetZaxis()->SetTitle("number of entries");
-        histSaver->SaveHistogram(hist);
-        delete hist;
+    TH2F* hist;
+    if (cor!=TPlaneProperties::Y_COR){
+        hist = histSaver->CreateScatterHisto((string)histName,this->vecXLabDeltaMetric,this->vecXPhi);
+        if(hist){
+            hist->GetXaxis()->SetTitle("Angle #Phi_X");
+            hist->GetYaxis()->SetTitle("Delta X");
+            hist->GetZaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hist);
+            delete hist;
+        }
+        histName = preName + TString::Format("_DeltaX_Vs_PhiY_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+        hist = histSaver->CreateScatterHisto((string)histName,this->vecXLabDeltaMetric,this->vecYPhi);
+        if(hist){
+            hist->GetXaxis()->SetTitle("Angle #Phi_Y");
+            hist->GetYaxis()->SetTitle("Delta X");
+            hist->GetZaxis()->SetTitle("number of entries");
+            histSaver->SaveHistogram(hist);
+            delete hist;
+        }
     }
 
+    if (cor!=TPlaneProperties::Y_COR)
+            return;
     histName = preName + TString::Format("_DeltaY_Vs_PhiX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
     hist = histSaver->CreateScatterHisto((string)histName,this->vecYLabDeltaMetric,this->vecXPhi);
     if(hist){
-        hist->GetYaxis()->SetTitle("Angle #PhiX");
-        hist->GetXaxis()->SetTitle("Delta Y");
+        hist->GetXaxis()->SetTitle("Angle #PhiX");
+        hist->GetYaxis()->SetTitle("Delta Y");
         hist->GetZaxis()->SetTitle("number of entries");
         histSaver->SaveHistogram(hist);
         delete hist;
     }
-
     histName = preName + TString::Format("_DeltaY_Vs_PhiY_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
     hist = histSaver->CreateScatterHisto((string)histName,this->vecYLabDeltaMetric,this->vecYPhi);
     if(hist){
