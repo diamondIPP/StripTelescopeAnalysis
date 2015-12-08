@@ -577,7 +577,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         }
     }
     else{
-        if(verbosity>6) cout <<TString::Format("X%2d-%d,\t%3.1f",cellNo,quarterNo,charge)<<endl;
+        if(verbosity>6) cout <<TString::Format("Problem with QuarterCellsLandau: cellNo%2d - Quarter %d,\tCharge: %3.1f",cellNo,quarterNo,charge)<<endl;
     }
 
     Int_t StartClusterSize;
@@ -592,7 +592,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
 
     for(Int_t ClusterSize = StartClusterSize; ClusterSize<=MaxOverlayClusterSize; ClusterSize++){
-        //cout<<"DiamondCLusterSize: "<<diamondCluster.getClusterSize()<<endl;
+        if(verbosity>6) cout<<"DiamondClusterSize: "<<diamondCluster.getClusterSize()<<endl;
         if(settings->do3dTransparentAnalysis()){
             diamondCluster->SetTransparentClusterSize(ClusterSize);
         }
@@ -604,11 +604,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
         //to check
     }
-
+    if(verbosity>6) cout<<"LongAnalysis_FillEdgeFreeHistos"<<endl;
     LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
+    if(verbosity>6) cout<<"LongAnalysis_FillRelativeAddedTransparentCharge"<<endl;
     LongAnalysis_FillRelativeAddedTransparentCharge();
-    if(settings->do3dTransparentAnalysis())
+    if(settings->do3dTransparentAnalysis()){
+        if(verbosity>6) cout<<"LongAnalysis_FillResolutionPlots"<<endl;
         LongAnalysis_FillResolutionPlots();
+    }
 };
 
 bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
