@@ -28,7 +28,7 @@
 #include "TStopwatch.h"
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
-#include "THTMLPedestal.hh"
+#include "THTML3DAnalysis.hh"
 #include "TAnalysisOfAnalysisDifferences.hh"
 #include "LandauGaussFit.hh"
 
@@ -420,6 +420,7 @@ private:
 
 
 	TSettings *settings;
+	THTML3DAnalysis* html3D;
 	HistogrammSaver *histSaver;
 	TTracking* eventReader;
 	UInt_t nEvent;

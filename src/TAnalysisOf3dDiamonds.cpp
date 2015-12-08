@@ -18,6 +18,8 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
     predictedPosition=0;
     UInt_t runNumber=settings->getRunNumber();
 
+    html3D = new THTML3DAnalysis(settings);
+
     //htmlLandau=new THTMLLandaus(settings);
 
     settings->goTo3dDiamondTreeDir();
@@ -53,6 +55,11 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
     //htmlLandau->generateHTMLFile();
+
+    html3D->createContent();
+    html3D->generateHTMLFile();
+    if(html3D!=0) delete html3D;
+
     if(eventReader!=0) delete eventReader;
     if(histSaver!=0)   delete histSaver;
     //if(htmlLandau!=0)  delete htmlLandau;

@@ -43,6 +43,7 @@ LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTracking.o
 LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.o
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
+LIBFILES		+=  THTML3DAnalysis.o
 LIBFILES		+=  THTMLSelectionAnalysis.o TAnalysisOfAsymmetricEta.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
 LIBFILES		+=  $(LIBFILES3D)
