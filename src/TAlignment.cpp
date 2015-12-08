@@ -2647,7 +2647,6 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
         correctedEtaFile->Add(vecHEta.at(det));
         cout << "save " << histo->GetTitle() << " " << histo->GetEntries() << endl;
 
-        histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
         histSaver->SaveHistogram(histo);
         correctedEtaFile->Add(histo->Clone());
     }
