@@ -3035,8 +3035,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos(Fl
     Int_t YBins = hCellsOverlayAvrgChargeMinusBadCells.at(0)->GetYaxis()->GetNbins();
     Int_t BinNum = (XBin-1)*YBins + YBin-1;
     if (BinNum >= VecOverlayCellBinHistos.size()){
-        cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos] invlaid BinNum: "<<BinNum
-                << "for a vector of size: "<<VecOverlayCellBinHistos.size()<<endl;
+        cout<<"[TAnalysisOf3dDiamonds::LongAnalysis_Fill3DCellOverlayIndividualBinHistos] invalid BinNum: "<<BinNum
+                << "( Xbin: "<<XBin<<"/Ybin: "<<Ybin<<" with BinNum = (XBin-1)*YBins + YBin-1) for a vector of size: "<<VecOverlayCellBinHistos.size()<<endl;
+        cout<<"\t xRelPosDet: "<<xRelPosDet<<"\t yRelPosDet:"<<yRelPosDet<<endl;
         return;
     }
 
