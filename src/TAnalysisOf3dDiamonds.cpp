@@ -515,7 +515,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
     ///*
      if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)==3){
-
+         if(verbosity > 7) cout<< "mapPredictedPositionsAllCells"<<endl;
     	 mapPredictedPositionsAllCells[nEvent] = make_pair(xPredDet,yPredDet);
     	 if(validClusteredAnalysis)
     		 mapClusteredAnalysisAllCells[nEvent] = clusteredCluster;
@@ -2816,6 +2816,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet,Flo
     if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)!=3)
         return;
     bool isInEdgeRegion = false;
+    if (verbosity >8) cout<<"TAnalysisOf3dDiamonds::LongAnalysis_FillEdgeFreeHistos"<<xPredDet<<" "<<yPredDet<<" "<<charge<<endl;
 
     pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
     isInEdgeRegion =  settings->IsOnTheEdgeOfCell(relPos.first,relPos.second);
