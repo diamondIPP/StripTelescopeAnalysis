@@ -71,7 +71,7 @@ public:
 	void goToOutputDir();
 	void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
 	void goToAlignmentRootDir(alignmentMode mode = normalMode){goToDir(this->getAbsoluteOuputPath(false));}
-	Float_t getNegativeChargeCut(){return negativeChargeCut;}
+	Float_t getNegativeChargeCut() const{return negativeChargeCut;}
 	void setNegativeChargeCut(Float_t value){negativeChargeCut  = value;}
 
 
