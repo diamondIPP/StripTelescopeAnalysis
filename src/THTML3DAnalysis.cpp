@@ -39,9 +39,11 @@ void THTML3DAnalysis::createOverviewPlots(){
 	sectionContent<<putImage(".",(string)"cTotalAvrgChargeXY","png",45)<<" \n";
 	sectionContent<<putImage(".",(string)"cTotalAvrgChargeXY_trans","png",45)<<" \n";
 	sectionContent<<putImage(".",(string)"hPulseHeightVsDetectorHitPostionXY_rebinned","png",45)<<" \n";
-	sectionContent<<putImage(".",(string)"hPulseHeightVsDetectorHitPostionXY_rebinned_trnas","png",45)<<" \n";
+	sectionContent<<putImage(".",(string)"hPulseHeightVsDetectorHitPostionXY_rebinned_trans","png",45)<<" \n";
 
 	sectionContent<<putImage(".",(string)"hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells","png",45)<<" \n";
+	sectionContent<<putImage(".",(string)"hTransparentAnalysisTransparentSmallChargeInFirstChannelGoodCells_grid","png",45)<<" \n";
+	sectionContent<<putImage(".",(string)"cNegativeChargePositionAllCells","png",45)<<" \n";
 	sectionContent<<" <br<br>\n";
 
 	this->addSection("Overview Plots",sectionContent.str());

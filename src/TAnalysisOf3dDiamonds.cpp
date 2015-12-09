@@ -2307,8 +2307,9 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
     histSaver->SaveHistogram(hNegativeChargePosition);
     hNegativeChargePosition->SetTitle(hNegativeChargePosition->GetTitle() +(TString)"_grid");
+    hNegativeChargePosition->SetName(hNegativeChargePosition->GetName() +(TString)"_grid");
     histSaver->SaveHistogramWithCellGrid(hNegativeChargePosition);
-    histSaver->SaveHistogram(hNegativeChargePosition);
+    //histSaver->SaveHistogram(hNegativeChargePosition);
 }
 
 
