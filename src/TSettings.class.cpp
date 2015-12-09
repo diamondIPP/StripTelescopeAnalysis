@@ -2393,7 +2393,8 @@ std::pair<Float_t, Float_t> TSettings::getCellPositionY(UInt_t column, UInt_t ro
 void  TSettings::PrintCellPosition(UInt_t cell, int DiamondPattern){
     std::pair<Float_t, Float_t> x = getCellPositionX(cell,DiamondPattern);
     std::pair<Float_t, Float_t> y = getCellPositionY(cell,DiamondPattern);
-    cout<<"Cell No: "<<cell<<" placed at "<<column<<"/"<<row<<": X:"<<x.first<<"-"<<x.second<<", \tY: "<<y.first<<"-"<<y.second<<endl;
+    cout.precision(6);
+    cout<<"Cell No: "<<cell<<" placed at "<<column<<"/"<<row<<": X:"<< setw(10)<<x.first<<"-"<< setw(10)<<x.second<<", \tY: "<< setw(10)<<y.first<<"-"<< setw(10)<<y.second<<endl;
 }
 
 /**
