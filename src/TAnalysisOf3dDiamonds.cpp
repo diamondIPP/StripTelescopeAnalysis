@@ -62,9 +62,10 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
     settings->diamondPattern.Print();
     cout<<"\n";
     std::pair<Int_t,Int_t> bla = settings->diamondPattern.getInterval(2);
-    cout.precision(0);
+    std::cout.precision(7);
+    cout<<std::fixed;
     for (int i = bla.first ; i <= bla.second;i++)
-        cout<<setw(3)<<i<<":\t"<< setw(10)<<settings->diamondPattern.getChannelToMetric(i)<<endl;
+        cout<<setw(3)<<i<<":\t"<< std::fixed<<setw(10)<<settings->diamondPattern.getChannelToMetric(i)<<endl;
     cout<<"\n";
     for(UInt_t n = 0; n < settings->getNRows3d();n++){
         UInt_t cell = settings->get3DCellNo(2,n);
