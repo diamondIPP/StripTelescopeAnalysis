@@ -66,7 +66,13 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
         cout<<setw(3)<<i<<":\t"<<settings->diamondPattern.getChannelToMetric(i)<<endl;
     cout<<"\n";
     for(UInt_t n = 0; n < settings->getNRows3d();n++){
-        settings->PrintCellPosition(n,2);
+        UInt_t cell = settings->get3DCellNo(2,n);
+        settings->PrintCellPosition(cell,2);
+    }
+    cout<<"\n";
+    for(UInt_t n = 0; n < settings->getNRows3d();n++){
+        UInt_t cell = settings->get3DCellNo(2,n);
+        settings->PrintCellPosition(cell,3);
     }
     cout<<endl;
     cout<<"Press a key"<<endl;
