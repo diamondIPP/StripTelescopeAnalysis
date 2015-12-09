@@ -65,19 +65,19 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
     std::cout.precision(7);
     cout<<std::fixed;
     for (int i = bla.first ; i <= bla.second;i++)
-        cout<<setw(3)<<i<<":\t"<< std::fixed<<setw(10)<<settings->diamondPattern.getChannelToMetric(i)<<endl;
+        cout<<setw(3)<<i<<":\t"<< std::fixed<<setw(10)<<settings->diamondPattern.convertChannelToMetric(i)<<endl;
     cout<<"\n";
-    for(UInt_t n = 0; n < settings->getNRows3d();n++){
-        UInt_t cell = settings->get3DCellNo(2,n);
+    for(Int_t n = 0; n < settings->getNRows3d();n++){
+        UInt_t cell = settings->get3DCellNo((Int_t)2,n);
         settings->PrintCellPosition(cell,3);
-        cell = settings->get3DCellNo(n,2);
+        cell = settings->get3DCellNo(n,(Int_t)2);
         settings->PrintCellPosition(cell,3);
     }
     cout<<"\n";
-    for(UInt_t n = 0; n < settings->getNRows3d();n++){
-        UInt_t cell = settings->get3DCellNo(2,n);
+    for(Int_t n = 0; n < settings->getNRows3d();n++){
+        UInt_t cell = settings->get3DCellNo((Int_t)2,n);
         settings->PrintCellPosition(cell,3);
-        cell = settings->get3DCellNo(n,2);
+        cell = settings->get3DCellNo(n,(Int_t)2);
         settings->PrintCellPosition(cell,3);
     }
     cout<<endl;

@@ -2393,6 +2393,8 @@ std::pair<Float_t, Float_t> TSettings::getCellPositionY(UInt_t column, UInt_t ro
 void  TSettings::PrintCellPosition(UInt_t cell, int DiamondPattern){
     std::pair<Float_t, Float_t> x = getCellPositionX(cell,DiamondPattern);
     std::pair<Float_t, Float_t> y = getCellPositionY(cell,DiamondPattern);
+    Int_t row = this->getRowOfCell(cell);
+    Int_t column = this->getColumnOfCell(cell);
     cout.precision(6);
     cout<<"Cell No: "<<setw(3)<<cell<<" placed at "<<setw(2)<<column<<"/"<<setw(2)<<row<<": X:"<< setw(10)<<x.first<<"-"<< setw(10)<<x.second<<", \tY: "<< setw(10)<<y.first<<"-"<< setw(10)<<y.second<<endl;
 }
@@ -2713,5 +2715,3 @@ bool TSettings::IsNoisyChannel(Int_t ch) {
         return false;
 }
 
-void TSettings::PrintCellPosition(UInt_t cell) {
-}
