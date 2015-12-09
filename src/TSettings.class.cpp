@@ -2362,6 +2362,40 @@ int TSettings::get3DQuarterNo( int column, int row,int quarter){
 	return quarterNo;
 }
 
+std::pair<Float_t, Float_t> TSettings::getCellPositionX(UInt_t cell, int DiamondPattern){
+    Int_t row = this->getRowOfCell(cell);
+    Int_t column = this->getColumnOfCell(cell);
+    return getCellPositionX(column,row,DiamondPattern);
+}
+
+std::pair<Float_t, Float_t> TSettings::getCellPositionY(UInt_t cell, int DiamondPattern){
+    Int_t row = this->getRowOfCell(cell);
+    Int_t column = this->getColumnOfCell(cell);
+    return getCellPositionY(column,row,DiamondPattern);
+}
+
+std::pair<Float_t, Float_t> TSettings::getCellPositionX(UInt_t column, UInt_t row, int DiamondPattern){
+    UInt_t det = TPlaneProperties::getDetDiamond();
+    Float_t cellwidth = GetCellWidth(det,DiamondPattern-1);
+    Float_t xLow = get3dMetallisationFidCuts()->getXLow(DiamondPattern) + column*cellwidth;
+    Float_t xHigh = xLow+cellwidth;
+    return make_pair(xLow,xHigh);
+}
+
+
+std::pair<Float_t, Float_t> TSettings::getCellPositionY(UInt_t column, UInt_t row, int DiamondPattern){
+    Float_t cellheight = GetCellHeight();
+    Float_t yLow = get3dMetallisationFidCuts()->getYLow(DiamondPattern) + row*cellheight;
+    Float_t yHigh = yLow+cellheight;
+    return make_pair(yLow,yHigh);
+}
+
+void  TSettings::PrintCellPosition(UInt_t cell, int DiamondPattern){
+    std::pair<Float_t, Float_t> x = getCellPositionX(cell,DiamondPattern);
+    std::pair<Float_t, Float_t> y = getCellPositionY(cell,DiamondPattern);
+    cout<<"Cell No: "<<cell<<" placed at "<<column<<"/"<<row<<": X:"<<x.first<<"-"<<x.second<<", \tY: "<<y.first<<"-"<<y.second<<endl;
+}
+
 /**
  * @todo look at hardcoded numbers
  * @todo move to histogrammSaver class
@@ -2405,18 +2439,16 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 	if(DiamondPattern==2||DiamondPattern==3){
 		for(UInt_t column=0;column<getNColumns3d();column++){
 			for(UInt_t row=0;row<getNRows3d();row++){
-				float xLow = get3dMetallisationFidCuts()->getXLow(DiamondPattern) + column*cellwidth;
-				float yLow = get3dMetallisationFidCuts()->getYLow(DiamondPattern) + row*cellheight;
-				float xHigh = xLow+cellwidth;
-				float yHigh = yLow+cellheight;
+			    std::pair<Float_t,Float_t> x = getCellPositionX(column,row,DiamondPattern);
+			    std::pair<Float_t,Float_t> y = getCellPositionY(column,row,DiamondPattern);
 				TString name = nCanvas->GetName();
 				name.Append(TString::Format("_CellGrid%d_%d",column,row));
 				TCutG * gridPoint = new TCutG(name,5);
-				gridPoint->SetPoint(0,xLow,yLow);
-				gridPoint->SetPoint(1,xLow,yHigh);
-				gridPoint->SetPoint(2,xHigh,yHigh);
-				gridPoint->SetPoint(3,xHigh,yLow);
-				gridPoint->SetPoint(4,xLow,yLow);
+				gridPoint->SetPoint(0,x.first,y.first);
+				gridPoint->SetPoint(1,x.first,y.second);
+				gridPoint->SetPoint(2,x.second,y.second);
+				gridPoint->SetPoint(3,x.second,y.first);
+				gridPoint->SetPoint(4,x.first,y.first);
 				gridPoint->SetFillStyle(0);
 				gridPoint->SetLineWidth(1);
 				gridPoint->SetLineColor(kBlack);
@@ -2680,3 +2712,5 @@ bool TSettings::IsNoisyChannel(Int_t ch) {
         return false;
 }
 
+void TSettings::PrintCellPosition(UInt_t cell) {
+}

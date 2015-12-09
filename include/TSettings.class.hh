@@ -577,6 +577,11 @@ public:
 	void set3dTransparentAnalysis(int trans){b3dTransparentAnalysis = trans;}
 	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
 	UInt_t getNRows3d(){return nRows3d;};
+	void PrintCellPosition(UInt_t cell, int diamondPattern);
+	std::pair<Float_t, Float_t> getCellPositionX(UInt_t cell, int diamondPattern);
+	std::pair<Float_t, Float_t> getCellPositionY(UInt_t cell, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionX(UInt_t column,UInt_t row, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionY(UInt_t column,UInt_t row,int diamondPattern);
 	UInt_t getNColumns3d(){return nColumns3d;};
 	UInt_t GetNCells3d(){return nRows3d * nColumns3d;};
 	UInt_t getNQuarters3d(){return 4;}

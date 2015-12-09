@@ -58,6 +58,20 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
     //htmlLandau->generateHTMLFile();
+    cout<<"Diamond Pattern: \n";
+    settings->diamondPattern.Print();
+    cout<<"\n";
+    std::pair<Int_t,Int_t> bla = settings->diamondPattern.getInterval(2);
+    for (int i = bla.first ; i <= bla.second;i++)
+        cout<<setw(3)<<i<<":\t"<<settings->diamondPattern.getChannelToMetric(i)<<endl;
+    cout<<"\n";
+    for(UInt_t n = 0; n < settings->getNRows3d();n++){
+        settings->PrintCellPosition(n,2);
+    }
+    cout<<endl;
+    cout<<"Press a key"<<endl;
+    char t;
+    cin>>t;
 
     html3D->createContent();
     html3D->generateHTMLFile();
