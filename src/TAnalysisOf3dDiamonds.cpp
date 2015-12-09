@@ -2412,6 +2412,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
         vec->at(cell)= 0;
         delete histo;
     }
+    Float_t xmin = -100;
+    Float_t xmax = +100;
+    TF1* fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",xmin,xmax);
+    fitX->FixParameter(3,settings->GetCellWidth(subjectDetector,2)/2);//TODO
+    fitX->SetParLimits(1,0,40);
+    fitX->SetParNames("Integral","sigma of Gaus","position");
+    fitX->SetParameter(2,0.);
+    fitX->SetParameter(1,10);
     Int_t statOpt = gStyle->GetOptStat();
     gStyle->SetOptStat(1111);
     histSaver->SetPlotsPath(plots_path);
