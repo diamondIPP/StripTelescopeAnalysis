@@ -64,15 +64,15 @@ void THTML3DAnalysis::createDistributionComparePlots(){
 
 void THTML3DAnalysis::createResolutionPlots(){
     stringstream sectionContent;
-    sectionContent<<putImage(".",(string)"hResolutionAllCells_maxValue","png",33)<<" \n";
-    sectionContent<<putImage(".",(string)"hResolutionAllCells_highest2Centroid","png",33)<<" \n";
-    sectionContent<<putImage(".",(string)"hResolutionAllCells_chargeWeighted","png",33)<<" <br>\n";
-    sectionContent<<putImage(".",(string)"hResolutionAllButBadCells_maxValue","png",33)<<" \n";
-    sectionContent<<putImage(".",(string)"hResolutionAllButBadCells_highest2Centroid","png",33)<<" \n";
-    sectionContent<<putImage(".",(string)"hResolutionAllButBadCells_chargeWeighted","png",33)<<" <br>\n";
-    sectionContent<<putImage(".",(string)"hResolutionGoodCells_maxValue","png",33)<<" \n";
-    sectionContent<<putImage(".",(string)"hResolutionGoodCells_highest2Centroid","png",33)<<" \n";
-    sectionContent<<putImage(".",(string)"hResolutionGoodCells_chargeWeighted","png",33)<<" \n";
+    sectionContent<<putImage(".",(string)"hResolutionAllCells_maxValue","png",32)<<" \n";
+    sectionContent<<putImage(".",(string)"hResolutionAllCells_highest2Centroid","png",32)<<" \n";
+    sectionContent<<putImage(".",(string)"hResolutionAllCells_chargeWeighted","png",32)<<" <br>\n";
+    sectionContent<<putImage(".",(string)"hResolutionAllButBadCells_maxValue","png",32)<<" \n";
+    sectionContent<<putImage(".",(string)"hResolutionAllButBadCells_highest2Centroid","png",32)<<" \n";
+    sectionContent<<putImage(".",(string)"hResolutionAllButBadCells_chargeWeighted","png",32)<<" <br>\n";
+    sectionContent<<putImage(".",(string)"hResolutionGoodCells_maxValue","png",32)<<" \n";
+    sectionContent<<putImage(".",(string)"hResolutionGoodCells_highest2Centroid","png",32)<<" \n";
+    sectionContent<<putImage(".",(string)"hResolutionGoodCells_chargeWeighted","png",32)<<" \n";
     sectionContent<<" <br<br>\n";
     this->addSection("Resolution Plots",sectionContent.str());
 }
