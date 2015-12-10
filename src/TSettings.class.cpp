@@ -2561,7 +2561,7 @@ Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
                 "\n deltaX: "    << deltaX<<
                 "\n deltaY: "    << deltaY<<
                 "\n column: "    << column<<"/"<<this->getNColumns3d()<<
-                "\n row: "       << row<<<<"/"<<this->getNRows3d()<<
+                "\n row: "       << row<<"/"<<this->getNRows3d()<<
                 "\n cell: "      << cell<<endl;
 
 	if (verbosity>6)
