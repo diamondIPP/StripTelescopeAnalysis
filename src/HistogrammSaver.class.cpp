@@ -615,16 +615,17 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv,Float_
 
 TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     cout<<"HistogrammSaver::DrawHistogramWithCellGrid: "<<flush;
-    cout<<"H1: "
+    cout<<"H1: ";
     if (histo)
         cout<<histo->GetName();
     else
         cout<<histo;
-    cout<<"\tH2: "
-        if (histo2)
-            cout<<histo2->GetName();
-        else
-            cout<<histo2;
+    cout<<"\tH2: ";
+    if (histo2)
+        cout<<histo2->GetName();
+    else
+        cout<<histo2;
+    cout<<flush;
 
     TString name = histo->GetName();
     if (name.BeginsWith("h"))
