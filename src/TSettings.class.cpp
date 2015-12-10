@@ -2551,6 +2551,19 @@ Int_t TSettings::getCellNo(Float_t xDet, Float_t yDet){
 	Int_t cell = -1;
 	if(column >= 0 && column < (Int_t) this->getNColumns3d() && row >= 0 && row < (Int_t) this->getNRows3d())
 		cell = row + column *  this->getNRows3d();
+	if ((cell < 0) || ((this->getNRows3d()*this->getNColumns3d()) <= cell))
+	    cout <<"[TSettings::getCellNo] "<<
+                "\n pattern: "   << DiamondPattern<<
+                "\n startX: "    << startOf3dDetectorX<<
+                "\n startY: "    << startOf3dDetectorY<<
+                "\n cellWidth: " << cellWidth<<
+                "\n cellHight: " << cellHight<<
+                "\n deltaX: "    << deltaX<<
+                "\n deltaY: "    << deltaY<<
+                "\n column: "    << column<<"/"<<this->getNColumns3d()<<
+                "\n row: "       << row<<<<"/"<<this->getNRows3d()<<
+                "\n cell: "      << cell<<endl;
+
 	if (verbosity>6)
 		cout<<"\t->\t"<<cell<<endl;
 	return cell;
