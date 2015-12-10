@@ -614,6 +614,7 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv,Float_
 
 
 TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
+    cout<<"HistogrammSaver::DrawHistogramWithCellGrid: "<<endl;
     TString name = histo->GetName();
     if (name.BeginsWith("h"))
         name.Replace(0,1,"c");
@@ -624,11 +625,17 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     c1->SetRightMargin(.15);
     hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
     hGridReferenceDetSpace->Draw("COL");
+    cout<<"hGridReferenceDetSpace: ";
+    cout<<"X:"<<hGridReferenceDetSpace->GetXaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetXaxis()->GetXmax();
+    cout<<"\tY:"<<hGridReferenceDetSpace->GetYaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetYaxis()->GetXmax();
     histo->GetZaxis()->SetTitleOffset(1.3);
     histo->GetZaxis()->SetLabelOffset(0);
     if (histo){
         histo->SetContour(100);
         histo->Draw("sameCOLZ");
+        cout<<"histo: "<<histo->GetName()<<" ";
+        cout<<"X:"<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax();
+            cout<<"\tY:"<<histo->GetYaxis()->GetXmin()<<"-"<<histo->GetYaxis()->GetXmax();
         hGridReferenceDetSpace->Draw("sameCOL");
     }
     //	TLegend* leg = 0;
@@ -654,6 +661,8 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     //	cout<<c1->GetName()<<endl;
     //	if (leg)
     //		leg->Draw();
+    char t;
+    cin>>t;
     return c1;
 }
 
@@ -734,6 +743,9 @@ TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
         Int_t binsPerCellAxis) {
     cout<<"create "<<name<<endl;
     TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
+    cout<<" HistogrammSaver::GetProfile2dBinedInCells: "<<name<<"  binsPerCellAxis: "<<binsPerCellAxis<<endl;
+    diaMetFidCut->Print();
+    cout<<"Columns: "<<settings->getNColumns3d()<<"/ Rows:"<<settings->getNRows3d()
     TProfile2D* histo = new TProfile2D(name,name,
             settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
             settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
