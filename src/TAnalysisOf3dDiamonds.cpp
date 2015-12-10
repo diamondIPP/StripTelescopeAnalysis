@@ -54,6 +54,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
     maxClusterSize3d = 5;
     useCMN = true;
+    PrintPositions();
 }
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
