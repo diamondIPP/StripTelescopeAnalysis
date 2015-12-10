@@ -160,6 +160,12 @@ bool TSettings::existsDirectory(std::string dir){
 	return (retVal>=0);
 }
 
+std::string TSettings::get3dDiamondAnalysisPath(){
+    std::string append = "/3dDiamondAnalysis";
+    append += PathExtension3d;
+    append +="/"
+    return this->getAbsoluteOuputPath(true).append(append);}
+}
 std::string TSettings::get3dDiamondTreeFilePath(){
         stringstream path;
         path<<getAbsoluteOuputPath(false);
@@ -413,6 +419,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"single_channel_analysis_eventwindow")) Parse(key,value,single_channel_analysis_eventwindow);
 		if (TPlaneProperties::startsWith(key,"CMN_corr_low")) Parse(key,value,CMN_corr_low);
 		if (TPlaneProperties::startsWith(key,"CMN_corr_high"))Parse(key,value,CMN_corr_high);
+		if (TPlaneProperties::startsWith(key,"PathExtension3d"))Parse(key,value,PathExtension3d);
 		if (TPlaneProperties::startsWith(key,"resetAlignment"))Parse(key,value,bResetAlignment);
 		if (TPlaneProperties::startsWith(key,"CMN_cut")) Parse(key,value,CMN_cut);
 		if (TPlaneProperties::startsWith(key,"DO_CMC")) Parse(key,value,DO_CMC);
@@ -688,7 +695,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	CMN_corr_low=3;
 	bDoAllAlignmentPlots = false;
 	detectorsToAlign = 2;
-
+	PathExtension3d="";
 
 	res_keep_factor=2;
 	alignmentPrecision_Offset = 0.01;

@@ -33,6 +33,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
     histSaver->SetPlotsPath(settings->get3dDiamondAnalysisPath());
 
     html3D->setFileGeneratingPath(settings->get3dDiamondAnalysisPath());
+    cout<<"PATH: "<<settings->get3dDiamondAnalysisPath()<<endl;
     histSaver->SetRunNumber(runNumber);
     settings->goTo3dDiamondTreeDir();
     clusteredAnalysis = new TCellAnalysisClass(settings);
@@ -2313,19 +2314,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
     for (UInt_t cell = 0; cell <nCells;cell++){
-        TString name = TString::Format("hResolution_CellNo_%02d_maxValue",cell);
+        TString name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
         TString title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
         TH1F* histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_maxValue.push_back(histo);
         /*******/
-        name = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);
+        name = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_chargeWeighted.push_back(histo);
         /*******/
-        name = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);
+        name = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
@@ -2372,16 +2373,16 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     UInt_t nBins = 128;
     Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX =settings->GetCellWidth(subjectDetector,2);
-    TString name = "hResolutionGoodCells_"+kind;
+    TString name = "hResolutionGoodCells_"+kind+appendix;
     TH1F* hResolutionGoodCells = new TH1F(name,name,nBins,minX,maxX);
     hResolutionGoodCells->GetXaxis()->SetTitle("Residual / #mum");
-    name = "hResolutionBadCells_"+kind;
+    name = "hResolutionBadCells_"+kind+appendix;
     TH1F* hResolutionBadCells = new TH1F(name,name,nBins,minX,maxX);
     hResolutionBadCells->GetXaxis()->SetTitle("Residual / #mum");
-    name = "hResolutionAllCells_"+kind;
+    name = "hResolutionAllCells_"+kind+appendix;
     TH1F* hResolutionAllCells = new TH1F(name,name,nBins,minX,maxX);
     hResolutionAllCells->GetXaxis()->SetTitle("Residual / #mum");
-    name = "hResolutionAllButBadCells_"+kind;
+    name = "hResolutionAllButBadCells_"+kind+appendix;
     TH1F* hResolutionAllButBadCells = new TH1F(name,name,nBins,minX,maxX);
     hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
     string plots_path = histSaver->GetPlotsPath();
@@ -2527,7 +2528,7 @@ vector<Float_t> TAnalysisOf3dDiamonds::LongAnalysis_GradeCellByQuarters(int quar
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors(int quarterFailCriteriaTyp) {
 
-    TString name = TString::Format("hQuarterFailCriteria_%d",quarterFailCriteriaTyp);
+    TString name = TString::Format("hQuarterFailCriteria_%d",quarterFailCriteriaTyp)+appendix;
     hLongAnalysisQuarterFluctuations = histSaver->GetHistoBinedInCells(name,2);
     cout<<"LongAnalysis_CreateQuarterCellsPassFailAndCellGradingVectors"<<endl;
     cout<<" Criteria: "<<quarterFailCriteriaTyp<<endl;
@@ -2606,19 +2607,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
     TProfile2D* hPulseHeigthCentralRegionCell = 0;
     TProfile2D* hPulseHeigthEdgeRegionCell = 0;
     if(hPulseHeigthCentralRegion){
-        TString name = (TString)hPulseHeigthCentralRegion->GetName()+"_Cell";
+        TString name = (TString)hPulseHeigthCentralRegion->GetName()+"_Cell"+appendix;
         hPulseHeigthCentralRegionCell = (TProfile2D*)hPulseHeigthCentralRegion->Rebin2D(2,2,name);
         hPulseHeigthCentralRegionCell->Sumw2();
         histSaver->SaveHistogramWithCellGrid(hPulseHeigthCentralRegionCell);
     }
     if(hPulseHeigthEdgeRegion){
-        TString name =(TString)hPulseHeigthEdgeRegion->GetName()+"_Cell";
+        TString name =(TString)hPulseHeigthEdgeRegion->GetName()+"_Cell+appendix";
         hPulseHeigthEdgeRegionCell = (TProfile2D*)hPulseHeigthEdgeRegion->Rebin2D(2,2,name);
         hPulseHeigthEdgeRegionCell->Sumw2();
         histSaver->SaveHistogramWithCellGrid(hPulseHeigthEdgeRegionCell);
     }
     if(hPulseHeigthEdgeRegionCell && hPulseHeigthCentralRegionCell){
-        TString name = "hPulseHeigthCompareRegion_Cell";
+        TString name = "hPulseHeigthCompareRegion_Cell"+appendix;
         name.Append(appendix);
         hCompare = (TProfile2D*)hPulseHeigthCentralRegionCell->Clone(name);
         if(hCompare){
@@ -2690,12 +2691,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsLandau2DHighlightedQuarterFail
     Int_t yBins = hCellsLandau.at(0)->GetNbinsX();
     Float_t yMin = hCellsLandau.at(0)->GetBinLowEdge(1);
     Float_t yMax = hCellsLandau.at(0)->GetBinLowEdge(yBins) + hCellsLandau.at(0)->GetBinWidth(yBins);
-    TString name = "hCellsLandau2DHighlightedQuarterFail";
+    TString name = "hCellsLandau2DHighlightedQuarterFail"+appendix;
     name.Append(appendix);
     TH2D* hCellsLandau2DHighlightedQuarterFail = new TH2D(name,name,settings->GetNCells3d(),0,settings->GetNCells3d(),yBins,yMin,yMax);
     hCellsLandau2DHighlightedQuarterFail->GetXaxis()->SetTitle("Cell");
     hCellsLandau2DHighlightedQuarterFail->GetYaxis()->SetTitle("Charge ADC");
-    name ="hCellsLandau2DHighlightedQuarterFailSorted";
+    name ="hCellsLandau2DHighlightedQuarterFailSorted"+appendix;
     name.Append(appendix);
     TH2D* hCellsLandau2DHighlightedQuarterFailSorted = (TH2D*)hCellsLandau2DHighlightedQuarterFail->Clone(name);
     vector<TH1F*> hCellLandausSorted = hCellsLandau;
@@ -3322,7 +3323,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveDeadCellProfile() {
             continue;
         }
         TF1* fit = (TF1*)fitX->Clone(TString::Format("fDeadCell_%d",i));
-        TString name = TString::Format("cDeadCellMeanCharge_%d",i);
+        TString name = TString::Format("cDeadCellMeanCharge_%d",i)+appendix;
         c1 = new TCanvas(name,name);
         c1->cd();
         hDeadCellCharge[i]->Fit(fit);

@@ -62,7 +62,7 @@ public:
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
 	std::string getEtaDistributionPath(Int_t step=-1);
 	std::string get3dDiamondTreeFilePath();
-	std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
+	std::string get3dDiamondAnalysisPath();
 	std::string getResultsRootFilePath();
 	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
@@ -564,6 +564,7 @@ private:
 	void CheckEdgeFidcuialCuts();
 	Float_t minimumEdgeDistance;
 	Float_t adcToElectronConversion;
+	TString PathExtension3d;
 public:
     TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
