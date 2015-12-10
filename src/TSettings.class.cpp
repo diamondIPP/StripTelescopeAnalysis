@@ -162,9 +162,13 @@ bool TSettings::existsDirectory(std::string dir){
 
 std::string TSettings::get3dDiamondAnalysisPath(){
     std::string append = "/3dDiamondAnalysis";
+    if (PathExtension3d != "" && !(PathExtension3d.BeginsWith('_')))
+            append+="_";
     append += PathExtension3d;
-    append +="/"
-    return this->getAbsoluteOuputPath(true).append(append);}
+    append +="/";
+    string retVal= this->getAbsoluteOuputPath(true).append(append);
+    return retVal;
+
 }
 std::string TSettings::get3dDiamondTreeFilePath(){
         stringstream path;

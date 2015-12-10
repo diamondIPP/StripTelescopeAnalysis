@@ -2282,7 +2282,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(hNegativeChargePosition);
     histSaver->SaveHistogram(hNegativeChargePosition);
     TH2F* histo = (TH2F*)hNegativeChargePosition->Clone(hNegativeChargePosition->GetName() +(TString)"_grid");
-    TCanvas c1* c1 = histSaver->DrawHistogramWithCellGrid(histo,histo);
+    TCanvas * c1 = histSaver->DrawHistogramWithCellGrid(histo,histo);
     c1->SetName("chNegativeChargePosition");
     histo->Draw("same colz");
     settings->DrawMetallisationGrid(c1,3);
