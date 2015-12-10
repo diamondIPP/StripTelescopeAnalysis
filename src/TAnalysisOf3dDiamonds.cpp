@@ -84,9 +84,9 @@ void TAnalysisOf3dDiamonds::PrintPositions(){
         settings->PrintCellPosition(cell,3);
     }
     cout<<endl;
-    cout<<"Press a key"<<endl;
-    char t;
-    cin>>t;
+    //cout<<"Press a key"<<endl;
+    //char t;
+    //cin>>t;
 }
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     FileNameEnd = "";
