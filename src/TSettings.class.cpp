@@ -2457,7 +2457,7 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 			    std::pair<Float_t,Float_t> x = getCellPositionX(column,row,DiamondPattern);
 			    std::pair<Float_t,Float_t> y = getCellPositionY(column,row,DiamondPattern);
 			    Int_t cell = this->get3DCellNo((int)column,(int)row);
-			    if (row==0){
+			    if (row==0 && false){//debug information
 			        cout<<column<<"/"<<row<<": "<<cell<<" = "<< getColumnOfCell(cell)<<"/"<<getRowOfCell(cell);
 			        cout<<"- X: "<<x.first<<"-"<<x.second<<"   Y: "<<y.first<<"-"<<y.second<<endl;
 			    }

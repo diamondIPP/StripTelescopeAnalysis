@@ -614,7 +614,18 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv,Float_
 
 
 TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
-    cout<<"HistogrammSaver::DrawHistogramWithCellGrid: "<<endl;
+    cout<<"HistogrammSaver::DrawHistogramWithCellGrid: "<<flush;
+    cout<<"H1: "
+    if (histo)
+        cout<<histo->GetName();
+    else
+        cout<<histo;
+    cout<<"\tH2: "
+        if (histo2)
+            cout<<histo2->GetName();
+        else
+            cout<<histo2;
+
     TString name = histo->GetName();
     if (name.BeginsWith("h"))
         name.Replace(0,1,"c");
@@ -625,33 +636,25 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     c1->SetRightMargin(.15);
     hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
     hGridReferenceDetSpace->Draw("COL");
-    cout<<"hGridReferenceDetSpace: ";
-    cout<<"X:"<<hGridReferenceDetSpace->GetXaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetXaxis()->GetXmax();
-    cout<<"\tY:"<<hGridReferenceDetSpace->GetYaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetYaxis()->GetXmax()<<"\n"<<endl;
-    for (UInt_t i =1; i < hGridReferenceDetSpace->GetNbinsX()+1;i++)
-        cout<<i<<": "<<hGridReferenceDetSpace->GetXaxis()->GetBinLowEdge(i)<<" "<<hGridReferenceDetSpace->GetXaxis()->GetBinUpEdge(i)<<endl;
+//    cout<<"hGridReferenceDetSpace: ";
+//    cout<<"X:"<<hGridReferenceDetSpace->GetXaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetXaxis()->GetXmax();
+//    cout<<"\tY:"<<hGridReferenceDetSpace->GetYaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetYaxis()->GetXmax()<<"\n"<<endl;
+//    for (UInt_t i =1; i < hGridReferenceDetSpace->GetNbinsX()+1;i++)
+//        cout<<i<<": "<<hGridReferenceDetSpace->GetXaxis()->GetBinLowEdge(i)<<" "<<hGridReferenceDetSpace->GetXaxis()->GetBinUpEdge(i)<<endl;
 
     histo->GetZaxis()->SetTitleOffset(1.3);
     histo->GetZaxis()->SetLabelOffset(0);
     if (histo){
         histo->SetContour(100);
         histo->Draw("sameCOLZ");
-        cout<<"histo: "<<histo->GetName()<<" ";
-        cout<<"X:"<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax();
-            cout<<"\tY:"<<histo->GetYaxis()->GetXmin()<<"-"<<histo->GetYaxis()->GetXmax();
+//        cout<<"histo: "<<histo->GetName()<<" ";
+//        cout<<"X:"<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax();
+//            cout<<"\tY:"<<histo->GetYaxis()->GetXmin()<<"-"<<histo->GetYaxis()->GetXmax();
         hGridReferenceDetSpace->Draw("sameCOL");
     }
-    //	TLegend* leg = 0;
     if (histo2){
         histo2->Draw("sameTEXTAH");
-        //		if(histo2!=histo){
-        //			leg = c1->BuildLegend();
-        //			leg->Clear();
-        //			leg->AddEntry(histo);
-        //			leg->AddEntry(histo2);
-        //		}
     }
-    //hGridReference->Draw("COL");
     settings->DrawMetallisationGrid(c1, 3);
     name.Replace(0,1,"f");
     TFile *f = GetFilePointer(GetROOTFileName(name),"RECREATE");
@@ -661,12 +664,6 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     if(histo2)
         histo2->Clone()->Write();
     delete f;
-    //	cout<<c1->GetName()<<endl;
-    //	if (leg)
-    //		leg->Draw();
-    char t;
-    cin>>t;
-    return c1;
 }
 
 void HistogrammSaver::SaveHistogramWithCellGrid(TH2* histo,TH2* histo2) {
