@@ -58,32 +58,6 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
     //htmlLandau->generateHTMLFile();
-    cout<<"Diamond Pattern: \n";
-    settings->diamondPattern.Print();
-    cout<<"\n";
-    std::pair<Int_t,Int_t> bla = settings->diamondPattern.getInterval(2);
-    std::cout.precision(7);
-    cout<<std::fixed;
-    for (int i = bla.first ; i <= bla.second;i++)
-        cout<<setw(3)<<i<<":\t"<< std::fixed<<setw(10)<<settings->diamondPattern.convertChannelToMetric(i)<<endl;
-    cout<<"\n";
-    for(Int_t n = 0; n < settings->getNRows3d();n++){
-        UInt_t cell = settings->get3DCellNo((Int_t)2,n);
-        settings->PrintCellPosition(cell,3);
-        cell = settings->get3DCellNo(n,(Int_t)2);
-        settings->PrintCellPosition(cell,3);
-    }
-    cout<<"\n";
-    for(Int_t n = 0; n < settings->getNRows3d();n++){
-        UInt_t cell = settings->get3DCellNo((Int_t)2,n);
-        settings->PrintCellPosition(cell,3);
-        cell = settings->get3DCellNo(n,(Int_t)2);
-        settings->PrintCellPosition(cell,3);
-    }
-    cout<<endl;
-    cout<<"Press a key"<<endl;
-    char t;
-    cin>>t;
 
     html3D->createContent();
     html3D->generateHTMLFile();
@@ -94,7 +68,25 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
     //if(htmlLandau!=0)  delete htmlLandau;
     settings->goToOutputDir();
 }
-
+void TAnalysisOf3dDiamonds::PrintPositions(){
+    cout<<"Diamond Pattern: \n";
+    settings->diamondPattern.Print();
+    cout<<"\n";
+    std::pair<Int_t,Int_t> bla = settings->diamondPattern.getInterval(2);
+    std::cout.precision(7);
+    cout<<std::fixed;
+    for (int i = bla.first ; i <= bla.second;i++)
+        cout<<setw(3)<<i<<":\t"<< std::fixed<<setw(10)<<settings->diamondPattern.convertChannelToMetric(i)<<endl;
+    cout<<"\n";
+    for(Int_t n = 0; n < settings->getNRows3d();n++){
+        UInt_t cell = settings->get3DCellNo(n,(Int_t)2);
+        settings->PrintCellPosition(cell,3);
+    }
+    cout<<endl;
+    cout<<"Press a key"<<endl;
+    char t;
+    cin>>t;
+}
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     FileNameEnd = "";
     cout<<"analyze selection data..."<<endl;

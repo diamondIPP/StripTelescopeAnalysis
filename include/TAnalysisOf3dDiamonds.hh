@@ -50,6 +50,7 @@ public:
 	void	doAnalysis(UInt_t nEvents=0);
 
 private:
+	void PrintPositions();
 	bool eventValid();
 	void createTreeTestHistos();
 
