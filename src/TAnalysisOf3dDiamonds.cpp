@@ -2680,9 +2680,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveFailedQuarters(){
     histSaver->DrawFailedQuarters(failedQuarters,c1);
     histSaver->SaveCanvas(c1);
     delete c1;
+    cout<<"Draw HistogramWithCellGrid"<<endl;
     c1 = histSaver->DrawHistogramWithCellGrid(hLongAnalysisQuarterFluctuations,hLongAnalysisQuarterFluctuations);
+    cout<<"Draw DrawFailedQuarters"<<endl;
     histSaver->DrawFailedQuarters(failedQuarters,c1);
-    histo->Draw("sameTEXT");
+    if (histo){
+        histo->Draw("sameTEXT");
+    }
     histSaver->SaveCanvas(c1);
     delete c1;
 }

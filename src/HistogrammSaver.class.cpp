@@ -665,6 +665,8 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     if(histo2)
         histo2->Clone()->Write();
     delete f;
+    cout<<"-Done"<<endl;
+    return c1;
 }
 
 void HistogrammSaver::SaveHistogramWithCellGrid(TH2* histo,TH2* histo2) {
@@ -678,6 +680,11 @@ void HistogrammSaver::SaveHistogramWithCellGrid(TH2* histo,TH2* histo2) {
 
 void HistogrammSaver::DrawFailedQuarters(
         vector<pair<Int_t, Int_t> > failedQuarters, TCanvas* c1) {
+    if (!c1){
+        cerr<<"DrawFailedQuarters - Canvas =0"<<endl;
+        return;
+    }
+    cout<<"[HistogrammSaver::DrawFailedQuarters]"<<endl;
     UInt_t DiamondPattern = 3;
     Float_t xStart = settings->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
     Float_t yStart =settings->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
@@ -689,20 +696,24 @@ void HistogrammSaver::DrawFailedQuarters(
     for (vector<pair<Int_t, Int_t> >::iterator quarter = failedQuarters.begin();
             quarter != failedQuarters.end(); ++quarter){
         i++;
-        if(!settings->isValidCellNo((*quarter).first)){
-            cerr<< "Invalid Cell No: " << (*quarter).first<<endl;
+        Int_t ncell = (*quarter).first;
+        Int_t nquarter = (*quarter).second;
+        if(!settings->isValidCellNo((UInt_t)ncell)){
+            cerr<< "Invalid Cell No: " << ncell<<endl;
             continue;
         }
-
-        int column = settings->getColumnOfCell((*quarter).first);
-        int row = settings->getRowOfCell((*quarter).first);
-        float xLow = xStart + (column+.5*((*quarter).second/2))*cellwidth;
-        float yLow = yStart + (row+.5*((*quarter).second%2))*cellheight;
+        int column = settings->getColumnOfCell(ncell);
+        int row = settings->getRowOfCell(ncell);
+        float xLow = xStart + (column+.5*(nquarter/2))*cellwidth;
+        float yLow = yStart + (row+.5*(nquarter%2))*cellheight;
         float xHigh = xLow+cellwidth/2;
         float yHigh = yLow+cellheight/2;
+        cout<<ncell<<"."<<<nquarter;
+        cout<<": X:" <<xLow<<"-"<<xHigh;
+        cout<<"; Y:" <<yLow<<"-"<<yHigh<<"; "<<flush;
         TString name = c1->GetName();
         name.Append(TString::Format("_FailedQuarter_%dOf%d",i,(int)failedQuarters.size()));
-        //		cout<<" DRAW: "<< name<<endl;
+        cout<<" DRAW: "<< name<<flush;;
         failedQuarter = new TCutG(name,5);
         failedQuarter->SetPoint(0,xLow,yLow);
         failedQuarter->SetPoint(1,xLow,yHigh);
@@ -713,6 +724,7 @@ void HistogrammSaver::DrawFailedQuarters(
         failedQuarter->SetLineWidth(0);
         failedQuarter->SetFillColor(kRed);
         failedQuarter->Draw("sameF");
+        cout<" - Done"<<endl;
     }
 }
 
