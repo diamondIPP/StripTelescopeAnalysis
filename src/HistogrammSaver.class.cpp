@@ -745,7 +745,7 @@ TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
     TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
     cout<<" HistogrammSaver::GetProfile2dBinedInCells: "<<name<<"  binsPerCellAxis: "<<binsPerCellAxis<<endl;
     diaMetFidCut->Print();
-    cout<<"Columns: "<<settings->getNColumns3d()<<"/ Rows:"<<settings->getNRows3d()
+    cout<<"Columns: "<<settings->getNColumns3d()<<"/ Rows:"<<settings->getNRows3d()<<endl;
     TProfile2D* histo = new TProfile2D(name,name,
             settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
             settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
