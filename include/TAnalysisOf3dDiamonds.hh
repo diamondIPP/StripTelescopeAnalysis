@@ -158,6 +158,7 @@ private:
 private:
 	bool isTransparentCluster;
 	bool useCMN;
+	TString appendix;
 private:
     TCluster GhostCluster;
 	TH1F* hLandauStrip;
