@@ -627,7 +627,10 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     hGridReferenceDetSpace->Draw("COL");
     cout<<"hGridReferenceDetSpace: ";
     cout<<"X:"<<hGridReferenceDetSpace->GetXaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetXaxis()->GetXmax();
-    cout<<"\tY:"<<hGridReferenceDetSpace->GetYaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetYaxis()->GetXmax();
+    cout<<"\tY:"<<hGridReferenceDetSpace->GetYaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetYaxis()->GetXmax()<<"\n"<<endl;
+    for (UInt_t i =1; i < hGridReferenceDetSpace->GetNbinsX()+1;i++)
+        cout<<i<<": "<<hGridReferenceDetSpace->GetXaxis()->GetBinLowEdge(i)<<" "<<hGridReferenceDetSpace->GetXaxis()->GetBinUpEdge(i)<<endl;
+
     histo->GetZaxis()->SetTitleOffset(1.3);
     histo->GetZaxis()->SetLabelOffset(0);
     if (histo){
