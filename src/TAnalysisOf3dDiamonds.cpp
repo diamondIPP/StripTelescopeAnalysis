@@ -4748,31 +4748,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
 
-
-    xmin = fidCut3dWithColumns->GetXLow();
-    xmax = fidCut3dWithColumns->GetXHigh();
-    deltaX = TMath::Abs(.05*(xmax-xmin));
-    ymin = fidCut3dWithColumns->GetYLow();
-    ymax = fidCut3dWithColumns->GetYHigh();
-    deltaY = TMath::Abs(.05*(ymax-ymin));
-    pair<Float_t, Float_t> x = settings->getAllGoodCellsXpos();
-    pair<Float_t, Float_t> y = settings->getAllGoodCellsYpos();
-    cout<<"X: "<<x.first<<"-"<<x.second<<"   Y: "<<y.first<<"-"<<y.second<<endl;
-    hMeanCharge->GetXaxis()->SetRangeUser(x.first,x.second);
-    hMeanCharge->GetYaxis()->SetRangeUser(y.first,y.second);
-    TH2D* hGridReferenceDetSpace = (TH2D*)histSaver->GetGridReferenceDetSpace()->Clone();
-    hGridReferenceDetSpace->GetXaxis()->SetRangeUser(x.first,x.second);
-    hGridReferenceDetSpace->GetYaxis()->SetRangeUser(y.first,y.second);
-    hGridReferenceDetSpace->Draw("col");
-    hMeanCharge->Draw("colz same");
-    c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCells";
-    settings->DrawMetallisationGrid(c1,3);
-    hGridReferenceDetSpace->Draw("col same");
-    name.Append(appendix);
-    c1->SetName(name);
-    histSaver->SaveCanvas(c1);
-
     name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned"+appendix;
     TProfile2D* hMeanCharge3D = histSaver->CreateProfile2D("hChargeDistribution3D_3D",
               vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna,
@@ -4783,6 +4758,24 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     c1->Update();
     name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
     name.Append(appendix);
+    c1->SetName(name);
+    histSaver->SaveCanvas(c1);
+
+    pair<Float_t, Float_t> x = settings->getAllGoodCellsXpos();
+    pair<Float_t, Float_t> y = settings->getAllGoodCellsYpos();
+    cout<<"X: "<<x.first<<"-"<<x.second<<"   Y: "<<y.first<<"-"<<y.second<<endl;
+    hMeanCharge->GetXaxis()->SetRangeUser(x.first,x.second);
+    hMeanCharge->GetYaxis()->SetRangeUser(y.first,y.second);
+    TH2D* hGridReferenceDetSpace = (TH2D*)histSaver->GetGridReferenceDetSpace()->Clone();
+    hGridReferenceDetSpace->GetXaxis()->SetRangeUser(x.first,x.second);
+    hGridReferenceDetSpace->GetYaxis()->SetRangeUser(y.first,y.second);
+    hGridReferenceDetSpace->Draw("COL");
+    c1->Update();
+    hMeanCharge->Draw("sameCOLZ");
+    settings->DrawMetallisationGrid(c1,3);
+    hGridReferenceDetSpace->Draw("sameCOL");
+    c1->Update();
+    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCells"+appendix;
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
     if (hMeanCharge)

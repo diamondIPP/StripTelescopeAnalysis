@@ -637,20 +637,11 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     c1->SetRightMargin(.15);
     hGridReferenceDetSpace->SetTitle(histo->GetTitle());		//Set title to require
     hGridReferenceDetSpace->Draw("COL");
-//    cout<<"hGridReferenceDetSpace: ";
-//    cout<<"X:"<<hGridReferenceDetSpace->GetXaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetXaxis()->GetXmax();
-//    cout<<"\tY:"<<hGridReferenceDetSpace->GetYaxis()->GetXmin()<<"-"<<hGridReferenceDetSpace->GetYaxis()->GetXmax()<<"\n"<<endl;
-//    for (UInt_t i =1; i < hGridReferenceDetSpace->GetNbinsX()+1;i++)
-//        cout<<i<<": "<<hGridReferenceDetSpace->GetXaxis()->GetBinLowEdge(i)<<" "<<hGridReferenceDetSpace->GetXaxis()->GetBinUpEdge(i)<<endl;
-
     histo->GetZaxis()->SetTitleOffset(1.3);
     histo->GetZaxis()->SetLabelOffset(0);
     if (histo){
         histo->SetContour(100);
         histo->Draw("sameCOLZ");
-//        cout<<"histo: "<<histo->GetName()<<" ";
-//        cout<<"X:"<<histo->GetXaxis()->GetXmin()<<"-"<<histo->GetXaxis()->GetXmax();
-//            cout<<"\tY:"<<histo->GetYaxis()->GetXmin()<<"-"<<histo->GetYaxis()->GetXmax();
         hGridReferenceDetSpace->Draw("sameCOL");
     }
     if (histo2){
