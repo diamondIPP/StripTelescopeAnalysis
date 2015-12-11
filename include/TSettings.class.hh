@@ -20,7 +20,7 @@
 #include "TObject.h"
 #include "TSystem.h"
 #include "TFile.h"
-
+#include "TMacro.h"
 #include "ChannelScreen.hh"
 #include "TChannelMapping.hh"
 #include "TCluster.hh"
@@ -351,6 +351,7 @@ private:
 	TFidCutRegions* fidCuts3DEdge;
 	TFidCutRegions* fidCuts3DMetallisation;
 	std::pair<float,float> OverlayRange3d;
+	TMacro *macro;
 protected:
 	float store_threshold;
 private:

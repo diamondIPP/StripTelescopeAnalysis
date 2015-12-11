@@ -27,6 +27,7 @@ TSettings::TSettings(TRunInfo *runInfo)
 	DefaultLoadDefaultSettings();
 	this->runNumber=runInfo->getRunNumber();
 	sys = gSystem;
+	macro=0;
 	setRunDescription(runInfo->getRunDescription());
 	nEvents = runInfo->getEvents();
 	stringstream fileNameStr;
@@ -366,13 +367,16 @@ void TSettings::LoadSettings(){
 		return;
 	}
 	else cout <<"TSettings::"<< fileName << " successfully opened." << endl << endl;
-
+	if (macro)
+	    delete macro;
+	macro = new TMacro("settings");
 
 	while(!file.eof()) {
 
 		//get next line
 		string line;
 		getline(file,line);
+		macro->AddLine(line);
 
 		//check if comment or empty line: comments: ";","#","/"
 		if ((line.substr(0, 1) == ";") || (line.substr(0, 1) == "#") || (line.substr(0, 1) == "/") || line.empty()) {
