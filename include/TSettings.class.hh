@@ -42,6 +42,7 @@ private:
 	std::string outputDir;
 	std::string inputDir;
 public:
+	TMacro* GetMacro(){return macro;}
 	static UInt_t GetColor(int no);
 	static bool existsDirectory(std::string dir);
 	TSettings(TRunInfo* runInfo);

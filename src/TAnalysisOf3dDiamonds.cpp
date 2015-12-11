@@ -70,6 +70,7 @@ TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
 
     html3D->createContent();
     html3D->generateHTMLFile();
+    settings->GetMacro()->Clone()->Write();
     if(html3D!=0) delete html3D;
 
     if(eventReader!=0) delete eventReader;
