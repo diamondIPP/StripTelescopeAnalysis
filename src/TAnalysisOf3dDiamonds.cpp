@@ -4869,7 +4869,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     settings->DrawMetallisationGrid(c1, 3);
     hGridReferenceDetSpace->Draw("sameCOL");
     c1->Update();
-    TString name = "cProfRebinned_ZoomGoodCells"+appendix;
+    name = "cProfRebinned_ZoomGoodCells"+appendix;
     c1->SetName(name);
     histSaver->DrawGoodCellsRegion(c1);
     histSaver->SaveCanvas(c1);//*/
