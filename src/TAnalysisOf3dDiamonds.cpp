@@ -4835,7 +4835,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXY);
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXYGoodCells);
 
-    name = "hPulseHeightVsDetectorHitPostionXY_rebinned";
+    TString name = "hPulseHeightVsDetectorHitPostionXY_rebinned";
     name.Append(appendix);
     TProfile2D* profRebinned = (TProfile2D*)hPulseHeightVsDetectorHitPostionXY->Rebin2D(2,2,name);
     profRebinned->Draw();
