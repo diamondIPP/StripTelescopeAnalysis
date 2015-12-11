@@ -4728,6 +4728,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     settings->DrawMetallisationGrid(c1,3);
     hMeanCharge->Draw("colz same");
     histSaver->SaveCanvas(c1);
+
     TFiducialCut *fidCut3dWithColumns = settings->get3dMetallisationFidCuts()->getFidCut(3);
     cout<<"3d FidCut: "<<endl;
     fidCut3dWithColumns->Print(1);
@@ -4738,7 +4739,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     Float_t ymin = fidCut3dWithColumns->GetYLow();
     Float_t ymax = fidCut3dWithColumns->GetYHigh();
     Float_t deltaY = TMath::Abs(.05*(ymax-ymin));
-
     hMeanCharge->GetXaxis()->SetRangeUser(xmin-deltaX,xmax+deltaX);
     hMeanCharge->GetYaxis()->SetRangeUser(ymin-deltaY,ymax+deltaY);
     hMeanCharge->Draw("colz");
@@ -4747,7 +4747,33 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     name.Append(appendix);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
+
+
+    xmin = fidCut3dWithColumns->GetXLow();
+    xmax = fidCut3dWithColumns->GetXHigh();
+    deltaX = TMath::Abs(.05*(xmax-xmin));
+    ymin = fidCut3dWithColumns->GetYLow();
+    ymax = fidCut3dWithColumns->GetYHigh();
+    deltaY = TMath::Abs(.05*(ymax-ymin));
+    pair<Float_t, Float_t> x = settings->getAllGoodCellsXpos();
+    pair<Float_t, Float_t> y = settings->getAllGoodCellsYpos();
+    cout<<"X: "<<x.first<<"-"<<x.second<<"   Y: "<<y.first<<"-"<<y.second<<endl;
+    hMeanCharge->GetXaxis()->SetRangeUser(x.first,x.second);
+    hMeanCharge->GetYaxis()->SetRangeUser(y.first,y.second);
+    TH2D* hGridReferenceDetSpace = (TH2D*)histSaver->GetGridReferenceDetSpace()->Clone();
+    hGridReferenceDetSpace->GetXaxis()->SetRangeUser(x.first,x.second);
+    hGridReferenceDetSpace->GetYaxis()->SetRangeUser(y.first,y.second);
+    hGridReferenceDetSpace->Draw("col");
+    hMeanCharge->Draw("colz same");
+    c1->Update();
+    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCells";
+    settings->DrawMetallisationGrid(c1,3);
+    hGridReferenceDetSpace->Draw("col same");
+    name.Append(appendix);
+    c1->SetName(name);
+    histSaver->SaveCanvas(c1);
+
+    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned"+appendix;
     TProfile2D* hMeanCharge3D = histSaver->CreateProfile2D("hChargeDistribution3D_3D",
               vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna,
               settings->getNColumns3d()*15,settings->getNRows3d()*15,
@@ -4773,7 +4799,7 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStrip->GetYaxis()->SetTitle("number of entries #");
     hLandauStrip->SetLineColor(kBlue);
 
-    name = "hLandauStripFidCutXvsFidCutY";
+    name = "hLandauStripFidCutXvsFidCutY"+appendix;
     hLandauStripFidCutXvsFidCutY = new TH2F(name,name,
             213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
             160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
@@ -4788,7 +4814,6 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
-    TString name ="";
     histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY);
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXY);
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXYGoodCells);
@@ -4796,11 +4821,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     name = "hPulseHeightVsDetectorHitPostionXY_rebinned";
     name.Append(appendix);
     TProfile2D* profRebinned = (TProfile2D*)hPulseHeightVsDetectorHitPostionXY->Rebin2D(2,2,name);
-
     profRebinned->Draw();
     profRebinned->Draw("colz");
-//    profRebinned->GetZaxis()->SetTitleOffset(1.1);
     histSaver->SaveHistogram(profRebinned);
+
     TCanvas *c1 =histSaver->DrawHistogramWithCellGrid(profRebinned);
     c1->SetName("cProfRebinned"+appendix);
     histSaver->DrawGoodCellsRegion(c1);

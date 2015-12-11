@@ -595,6 +595,8 @@ public:
 	vector<Int_t> getBadCells3D(){return badCells3d;};
 	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
 	vector<Int_t> getDeadCell3D(){return deadCell3d;}
+	pair<Float_t, Float_t> getAllGoodCellsXpos();
+	pair<Float_t, Float_t> getAllGoodCellsYpos();
 	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
 	bool IsGoodCell(UInt_t nDiamondPattern, Int_t cellNo);

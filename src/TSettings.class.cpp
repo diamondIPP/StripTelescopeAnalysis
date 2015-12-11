@@ -376,7 +376,7 @@ void TSettings::LoadSettings(){
 		//get next line
 		string line;
 		getline(file,line);
-		macro->AddLine(line);
+		macro->AddLine((TString)line);
 
 		//check if comment or empty line: comments: ";","#","/"
 		if ((line.substr(0, 1) == ";") || (line.substr(0, 1) == "#") || (line.substr(0, 1) == "/") || line.empty()) {
@@ -2480,6 +2480,39 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 			}
 		}
 	}		//for 3D structures
+}
+
+
+
+pair<Float_t, Float_t> TSettings::getAllGoodCellsXpos(){
+    Float_t xmin,xmax;
+    xmin = +1e9;
+    xmax = -1e9;
+    for (UInt_t cell = 0; cell < this->GetNCells3d();cell++){
+        if (this->IsGoodCell(3,cell)){
+            pair<Float_t,Float_t> x = getCellPositionX(cell,3);
+            if (xmin > x.first)
+                xmin = x.first;
+            if (xmax < x.second)
+                xmax = x.second;
+        }
+    }
+    return make_pair(xmin,xmax);
+}
+pair<Float_t, Float_t> TSettings::getAllGoodCellsYpos(){
+    Float_t ymin,ymax;
+    ymin = +1e9;
+    ymax = -1e9;
+    for (UInt_t cell = 0; cell < this->GetNCells3d();cell++){
+        if (this->IsGoodCell(3,cell)){
+            pair<Float_t,Float_t> y = getCellPositionY(cell,3);
+            if (ymin > y.first)
+                ymin = y.first;
+            if (ymax < y.second)
+                ymax = y.second;
+        }
+    }
+    return make_pair(ymin,ymax);
 }
 
 /** todo: hardcoded 2 & 3 replace by suitable variables
