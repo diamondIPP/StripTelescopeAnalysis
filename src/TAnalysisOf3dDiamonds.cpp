@@ -4838,6 +4838,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     TString name = "hPulseHeightVsDetectorHitPostionXY_rebinned";
     name.Append(appendix);
     TProfile2D* profRebinned = (TProfile2D*)hPulseHeightVsDetectorHitPostionXY->Rebin2D(2,2,name);
+    profRebinned->SetContour(100);
     profRebinned->Draw();
     profRebinned->Draw("colz");
     histSaver->SaveHistogram(profRebinned);
@@ -4847,7 +4848,34 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->DrawGoodCellsRegion(c1);
     histSaver->SaveCanvas(c1);
     histSaver->SaveHistogramWithCellGrid(profRebinned);
+
+    c1->cd();
+    c1->SetRightMargin(.15);
+    pair<Float_t, Float_t> x = settings->getAllGoodCellsXpos();
+    pair<Float_t, Float_t> y = settings->getAllGoodCellsYpos();
+    cout<<"X: "<<x.first<<"-"<<x.second<<"   Y: "<<y.first<<"-"<<y.second<<endl;
+    TH2D* hGridReferenceDetSpace = (TH2D*)histSaver->GetGridReferenceDetSpace()->Clone("hGridReferenceDetSpace_cl");
+    profRebinned->GetYaxis()->SetRangeUser(y.first,y.second);
+    profRebinned->GetXaxis()->SetRangeUser(x.first,x.second);
+    hGridReferenceDetSpace->GetYaxis()->SetRangeUser(y.first,y.second);
+    hGridReferenceDetSpace->GetXaxis()->SetRangeUser(x.first,x.second);
+    hGridReferenceDetSpace->SetTitle(profRebinned->GetTitle());        //Set title to require
+    hGridReferenceDetSpace->Draw("COL");
+    profRebinned->GetZaxis()->SetTitleOffset(1.3);
+    profRebinned->GetZaxis()->SetLabelOffset(0);
+    profRebinned->SetContour(100);
+    profRebinned->Draw("sameCOLZ");
+    hGridReferenceDetSpace->Draw("sameCOL");
+    settings->DrawMetallisationGrid(c1, 3);
+    hGridReferenceDetSpace->Draw("sameCOL");
+    c1->Update();
+    TString name = "cProfRebinned_ZoomGoodCells"+appendix;
+    c1->SetName(name);
+    histSaver->DrawGoodCellsRegion(c1);
+    histSaver->SaveCanvas(c1);//*/
     delete profRebinned;
+    delete c1;
+    delete hGridReferenceDetSpace;
 
     UInt_t xBins = hPulseHeightVsDetectorHitPostionXY->GetXaxis()->GetNbins();
     UInt_t yBins = hPulseHeightVsDetectorHitPostionXY->GetYaxis()->GetNbins();
