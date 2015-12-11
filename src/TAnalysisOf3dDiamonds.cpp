@@ -4766,7 +4766,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     cout<<"X: "<<x.first<<"-"<<x.second<<"   Y: "<<y.first<<"-"<<y.second<<endl;
     hMeanCharge->GetXaxis()->SetRangeUser(x.first,x.second);
     hMeanCharge->GetYaxis()->SetRangeUser(y.first,y.second);
-    TH2D* hGridReferenceCellSpace = (TH2D*)histSaver->GetGridRefenrenceCellSpace()->Clone();
+    TH2D* hGridReferenceCellSpace = (TH2D*)histSaver->GetGridReferenceCellSpace()->Clone();
     hGridReferenceCellSpace->GetXaxis()->SetRangeUser(x.first,x.second);
     hGridReferenceCellSpace->GetYaxis()->SetRangeUser(y.first,y.second);
     hGridReferenceCellSpace->Draw("COL");
