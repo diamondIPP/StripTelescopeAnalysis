@@ -708,7 +708,7 @@ void HistogrammSaver::DrawFailedQuarters(
         float yLow = yStart + (row+.5*(nquarter%2))*cellheight;
         float xHigh = xLow+cellwidth/2;
         float yHigh = yLow+cellheight/2;
-        cout<<ncell<<"."<<<nquarter;
+        cout<<ncell<<"."<<nquarter;
         cout<<": X:" <<xLow<<"-"<<xHigh;
         cout<<"; Y:" <<yLow<<"-"<<yHigh<<"; "<<flush;
         TString name = c1->GetName();
@@ -724,7 +724,7 @@ void HistogrammSaver::DrawFailedQuarters(
         failedQuarter->SetLineWidth(0);
         failedQuarter->SetFillColor(kRed);
         failedQuarter->Draw("sameF");
-        cout<" - Done"<<endl;
+        cout<<" - Done"<<endl;
     }
 }
 

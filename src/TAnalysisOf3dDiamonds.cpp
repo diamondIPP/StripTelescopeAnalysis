@@ -54,6 +54,13 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
     maxClusterSize3d = 5;
     useCMN = true;
+    if(settings->do3dTransparentAnalysis())
+        appendix = "_trans";
+    else
+        appendix = "";
+
+            
+
     PrintPositions();
     LongAnalysisSaveCellAndQuaterNumbering();
 }
