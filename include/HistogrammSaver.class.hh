@@ -160,6 +160,7 @@ public:
 	TH3D* Get3dHistoBinedInCells(TString name,UInt_t binsz, Float_t minz,Float_t maxz, Int_t binsPerCellAxis=1);
 	TCutG* GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y);
 	TH2D* GetGridReferenceDetSpace(){return hGridReferenceDetSpace;}
+	TH2D* GetGridReferenceCellSpace(){return hGridReferenceCellSpace;}
 private:
 	Float_t xRangeMin,xRangeMax;
     TPaveText *pt;

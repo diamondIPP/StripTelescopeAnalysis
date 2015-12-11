@@ -4766,18 +4766,42 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     cout<<"X: "<<x.first<<"-"<<x.second<<"   Y: "<<y.first<<"-"<<y.second<<endl;
     hMeanCharge->GetXaxis()->SetRangeUser(x.first,x.second);
     hMeanCharge->GetYaxis()->SetRangeUser(y.first,y.second);
-    TH2D* hGridReferenceDetSpace = (TH2D*)histSaver->GetGridReferenceDetSpace()->Clone();
-    hGridReferenceDetSpace->GetXaxis()->SetRangeUser(x.first,x.second);
-    hGridReferenceDetSpace->GetYaxis()->SetRangeUser(y.first,y.second);
-    hGridReferenceDetSpace->Draw("COL");
+    TH2D* hGridReferenceCellSpace = (TH2D*)histSaver->GetGridRefenrenceCellSpace()->Clone();
+    hGridReferenceCellSpace->GetXaxis()->SetRangeUser(x.first,x.second);
+    hGridReferenceCellSpace->GetYaxis()->SetRangeUser(y.first,y.second);
+    hGridReferenceCellSpace->Draw("COL");
     c1->Update();
+//    hMeanCharge->Rebin2D(4,4);
     hMeanCharge->Draw("sameCOLZ");
     settings->DrawMetallisationGrid(c1,3);
-    hGridReferenceDetSpace->Draw("sameCOL");
+    hGridReferenceCellSpace->Draw("sameCOL");
     c1->Update();
     name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCells"+appendix;
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
+
+    hGridReferenceCellSpace->Draw("COL");
+    c1->Update();
+    hMeanCharge->Rebin2D(2,2);
+    hMeanCharge->Draw("sameCOLZ");
+    settings->DrawMetallisationGrid(c1,3);
+    hGridReferenceCellSpace->Draw("sameCOL");
+    c1->Update();
+    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCellsRebinned"+appendix;
+    c1->SetName(name);
+    histSaver->SaveCanvas(c1);
+
+    hGridReferenceCellSpace->Draw("COL");
+    c1->Update();
+    hMeanCharge->Rebin2D(2,2);
+    hMeanCharge->Draw("sameCOLZ");
+    settings->DrawMetallisationGrid(c1,3);
+    hGridReferenceCellSpace->Draw("sameCOL");
+    c1->Update();
+    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCellsRebinned2"+appendix;
+    c1->SetName(name);
+    histSaver->SaveCanvas(c1);
+
     if (hMeanCharge)
         delete hMeanCharge;
     if(hMeanCharge3D)
