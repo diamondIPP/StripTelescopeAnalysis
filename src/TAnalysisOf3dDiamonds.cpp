@@ -2351,11 +2351,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
-        histo = new TH2F(name,title,nBins,minX,maxX,110,-10,20);
-        histo->GetXaxis()->SetTitle("Residual / #mum");
-        histo->GetYaxis()->SetTitle("SNR 2nd hit");
-        histo->GetZaxis()->SetTitle("number of entries");
-        vecHResolutionPerCell_highest2Centroid_vs_SNR.push_back(histo);
+        TH2F* histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,20);
+        histo2->GetXaxis()->SetTitle("Residual / #mum");
+        histo2->GetYaxis()->SetTitle("SNR 2nd hit");
+        histo2->GetZaxis()->SetTitle("number of entries");
+        vecHResolutionPerCell_highest2Centroid_vs_SNR.push_back(histo2);
     }
 }
 
@@ -2418,7 +2418,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec
     TH2F* hResolutionBadCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
     hResolutionBadCells->GetXaxis()->SetTitle("Residual / #mum");
     name = "hResolutionAllCells_"+kind+appendix;
-    TH2F* hResolutionAllCells = new TH2F(name,name,nBins,minX,maxX);
+    TH2F* hResolutionAllCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
     hResolutionAllCells->GetXaxis()->SetTitle("Residual / #mum");
     name = "hResolutionAllButBadCells_"+kind+appendix;
     TH2F* hResolutionAllButBadCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
