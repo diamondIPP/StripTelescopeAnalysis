@@ -578,17 +578,17 @@ public:
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
 	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
 	void set3dTransparentAnalysis(int trans){b3dTransparentAnalysis = trans;}
-	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
-	UInt_t getNRows3d(){return nRows3d;};
-	void PrintCellPosition(UInt_t cell, int diamondPattern);
-	std::pair<Float_t, Float_t> getCellPositionX(UInt_t cell, int diamondPattern);
-	std::pair<Float_t, Float_t> getCellPositionY(UInt_t cell, int diamondPattern);
+    void PrintCellPosition(UInt_t cell, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionX(UInt_t cell, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionY(UInt_t cell, int diamondPattern);
     std::pair<Float_t, Float_t> getCellPositionX(UInt_t column,UInt_t row, int diamondPattern);
     std::pair<Float_t, Float_t> getCellPositionY(UInt_t column,UInt_t row,int diamondPattern);
-	UInt_t getNColumns3d(){return nColumns3d;};
+	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
+	UInt_t getNRows3d(){return nRows3d;}; // Horizontally
+	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
+	UInt_t getNColumns3d(){return nColumns3d;};//Vertical
 	UInt_t GetNCells3d(){return nRows3d * nColumns3d;};
 	UInt_t getNQuarters3d(){return 4;}
-	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
 	//vector<Int_t> getGoodCells3D(){return goodCells3d;};		//Changed by Iain 5/9/13
 	vector< vector<Int_t> > getGoodCellRegions3d(){return goodCellRegions3d;}

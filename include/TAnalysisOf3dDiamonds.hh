@@ -123,6 +123,7 @@ private:
 	void LongAnalysis_InitResolutionPlots();
 	void LongAnalysis_CreateResolutionPlots();
 	void LongAnalysis_CreateResolutionPlots(vector<TH1F*> *vec,TString kind);
+	void LongAnalysis_CreateResolutionPlots(vector<TH2F*> *vec,TString kind);
 	void LongAnalysis_SaveRawPulseHeightPlots();
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_InitGoodCellsLandaus();
@@ -432,6 +433,7 @@ private:
 	vector<TH1F*> vecHResolutionPerCell_maxValue;
 	vector<TH1F*> vecHResolutionPerCell_chargeWeighted;
 	vector<TH1F*> vecHResolutionPerCell_highest2Centroid;
+	vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_SNR;
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;
