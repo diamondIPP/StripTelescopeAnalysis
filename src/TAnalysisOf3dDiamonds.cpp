@@ -2351,7 +2351,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
-        histo = new TH2F(name,title,nBins,minX,maxX,110,-10,100);
+        histo = new TH2F(name,title,nBins,minX,maxX,110,-10,20);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         histo->GetYaxis()->SetTitle("SNR 2nd hit");
         histo->GetZaxis()->SetTitle("number of entries");
@@ -2392,7 +2392,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             Int_t highest_hit_pos = diamondCluster->getHighestHitClusterPosition();
             Int_t Second_highest_hit_pos = diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN);
             Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
-            if (histo);
+            if (snr > 20) snr=20;
+            if (histo)
                 histo->Fill(delta*cellWidth,snr);
         }
      if (cellNo<99&&false   ){
@@ -2425,7 +2426,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec
     string plots_path = histSaver->GetPlotsPath();
     histSaver->SetPlotsPath(plots_path+(string)"/resolution/");
     for(UInt_t cell=0;cell< vec->size();cell++){
-        TH1F* histo = vec->at(cell);
+        TH2F* histo = vec->at(cell);
         if (!histo)
             continue;
         if (settings->IsGoodCell(3,cell))
