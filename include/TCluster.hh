@@ -118,8 +118,8 @@ public:
     void SetTransparentClusterSize(UInt_t size){if(size>0) transparentClusterSize=TMath::Min(size,checkClusterForSize());};
     UInt_t GetTransparentClusterSize(){return transparentClusterSize;}
     Int_t getTransparentClusterPosition(UInt_t clusterNo=0);
-private:
     bool IsValidTransparentClusterPosition(UInt_t clusterPosition);
+private:
     direction_t getDirection(UInt_t clusterPosition);
     Float_t getChargeStartingAt(UInt_t nChannels,UInt_t startingClusterPos,direction_t direction, bool noNegativeCharge, bool useCMcorrection, bool useSmallSignals);
     void initialiseNewCluster();

@@ -400,9 +400,12 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 }
 
 bool TCluster::IsValidTransparentClusterPosition(UInt_t clusPos){
+    Int_t cp1 = GetTransparentClusterSize()-1;
+    Int_t cp2 = GetTransparentClusterSize()-2;
 
-	Int_t cl1 = this->getTransparentClusterPosition(GetTransparentClusterSize()-1);
-	Int_t cl2 = this->getTransparentClusterPosition(GetTransparentClusterSize()-2);
+
+	Int_t cl1 = this->getTransparentClusterPosition(cp1);
+	Int_t cl2 = this->getTransparentClusterPosition(cp2);
 	if(cl1<0)
 		cl1 = 0;
 	if(cl2<0)
@@ -418,6 +421,15 @@ bool TCluster::IsValidTransparentClusterPosition(UInt_t clusPos){
 	}
 	if(cl1<=clusPos&&clusPos<=cl2)
 		return true;
+    if (clusPos< clusterADC.size()){
+        cout<<"TCluster::IsValidTransparentClusterPosition("<<clusPos<<"): cl: ["<<cl1<<"-"<<clusPos<<"-"<<cl2<<"]"<<flush;
+        cout<<"                     "<<this->getTransparentClusterPosition(cp1)<<"/"<<
+            this->getTransparentClusterPosition(cp2) <<"   "<<cp1<<"//"<<cp2<<endl;
+        for (UInt_t i = 0; i < clusterADC.size();i++)
+            cout<<" "<<setw(2)<<i<<": "<<this->getTransparentClusterPosition(i)<<" "<<
+                getAdcValue(this->getTransparentClusterPosition(i))<<endl;
+    }
+    //this->Print();
 	return false;
 }
 
