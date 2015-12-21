@@ -433,6 +433,8 @@ private:
 	vector<TH1F*> vecHResolutionPerCell_maxValue;
 	vector<TH1F*> vecHResolutionPerCell_chargeWeighted;
 	vector<TH1F*> vecHResolutionPerCell_highest2Centroid;
+	vector<TH2F*> vecHResolutionPerCell_maxValue_vs_SNR;
+	vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_SNR;
 	vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_SNR;
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
@@ -537,6 +539,7 @@ private:
     map<Int_t, TCluster> mapClusteredAnalysisAllCells;
     map<Int_t, TCluster> mapTransparentAnalysisAllCells;
     map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsAllCells;
+    Float_t maxsnr;
 };
 
 #endif /* TANALYSISOF3DDIAMONDS_HH_ */

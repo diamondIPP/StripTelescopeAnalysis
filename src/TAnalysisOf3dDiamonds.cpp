@@ -51,6 +51,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
     PulseHeightMax = 2800;
     PulseHeightMinMeanCharge = 1;
     PulseHeightMaxMeanCharge = 1500;
+    maxsnr = 40;
 
     maxClusterSize3d = 5;
     useCMN = true;
@@ -2348,9 +2349,25 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
         vecHResolutionPerCell_highest2Centroid.push_back(histo);
 
         /*******/
+        name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_SNR",cell)+appendix;
+        title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
+        TH2F* histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
+        histo2->GetXaxis()->SetTitle("Residual / #mum");
+        histo2->GetYaxis()->SetTitle("SNR 2nd hit");
+        histo2->GetZaxis()->SetTitle("number of entries");
+        vecHResolutionPerCell_maxValue_vs_SNR.push_back(histo2);
+
+        name = TString::Format("hResolution_CellNo_%02d_chargeWeighted_vs_SNR",cell)+appendix;
+        title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
+        histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
+        histo2->GetXaxis()->SetTitle("Residual / #mum");
+        histo2->GetYaxis()->SetTitle("SNR 2nd hit");
+        histo2->GetZaxis()->SetTitle("number of entries");
+        vecHResolutionPerCell_chargeWeighted_vs_SNR.push_back(histo2);
+
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
-        TH2F* histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,20);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("SNR 2nd hit");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -2362,6 +2379,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     UInt_t cellNo = settings->getCellNo(xPredDet,yPredDet);
     Float_t cellWidth = settings->GetCellWidth(subjectDetector,2);
     diamondCluster->SetTransparentClusterSize(5);
+    Int_t highest_hit_pos = diamondCluster->getHighestHitClusterPosition();
+    Int_t Second_highest_hit_pos = diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN,true);
+    Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
+    if (!diamondCluster->getClusterSize() || snr < -1){
+        cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
+        diamondCluster->Print(1);
+    }
+    if (snr > maxsnr) snr=maxsnr;
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta = pos - predPos;
@@ -2370,6 +2395,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
         if (histo);
             histo->Fill(delta*cellWidth);
     }
+    if (cellNo< vecHResolutionPerCell_maxValue_vs_SNR.size()){
+        TH2F* histo  = vecHResolutionPerCell_maxValue_vs_SNR.at(cellNo);
+        if (histo)
+            histo->Fill(delta*cellWidth,snr);
+    }
     /*********/
     pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
     delta = pos - predPos;
@@ -2377,6 +2407,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
         TH1F* histo  = vecHResolutionPerCell_chargeWeighted.at(cellNo);
         if (histo);
             histo->Fill(delta*cellWidth);
+    }
+    if (cellNo< vecHResolutionPerCell_chargeWeighted_vs_SNR.size()){
+        TH2F* histo  = vecHResolutionPerCell_chargeWeighted_vs_SNR.at(cellNo);
+        if (histo)
+            histo->Fill(delta*cellWidth,snr);
     }
     /*********/
         pos = diamondCluster->getPosition(useCMN,TCluster::highest2Centroid);
@@ -2388,20 +2423,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
         }
         if (cellNo< vecHResolutionPerCell_highest2Centroid_vs_SNR.size()){
             TH2F* histo  = vecHResolutionPerCell_highest2Centroid_vs_SNR.at(cellNo);
-            Int_t highest_hit_pos = diamondCluster->getHighestHitClusterPosition();
-            Int_t Second_highest_hit_pos = diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN);
-            Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
-            if (!diamondCluster->getClusterSize() || snr < -1){
-                cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
-                diamondCluster->Print(1);
-            }
-            if (snr > 20) snr=20;
-            if (snr==-1){
-                cout<<"2ndHighest Hit:"<<diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN, true)<<endl;;
-                cout<<"SNR < 0; " <<highest_hit_pos<<"/"<<Second_highest_hit_pos<<": "<<snr<<" - "<<delta*cellWidth<<" "<<diamondCluster->IsValidTransparentClusterPosition(highest_hit_pos)<< " -- "<<diamondCluster->getAdcValue(highest_hit_pos)<<endl;
-                cout<<"POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
-                diamondCluster->Print(1);
-            }
             if (histo)
                 histo->Fill(delta*cellWidth,snr);
         }
@@ -2417,7 +2438,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec
     Float_t maxX =settings->GetCellWidth(subjectDetector,2);
     UInt_t nBinsY = 110;
     Float_t minY = -10;
-    Float_t maxY = 20;
+    Float_t maxY = maxsnr;
     TString name = "hResolutionGoodCells_"+kind+appendix;
     TH2F* hResolutionGoodCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
     hResolutionGoodCells->GetXaxis()->SetTitle("Residual / #mum");
@@ -2538,6 +2559,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid,"highest2Centroid");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue,"maxValue");
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue_vs_SNR,"maxValue_SNR");
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted_vs_SNR,"chargeWeighted_SNR");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid_vs_SNR,"highest2Centroid_SNR");
 }
 
