@@ -2190,7 +2190,6 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::saveTransparentAnalysisHistos() {
 
-    LongAnalysis_CreateResolutionPlots();
     TCanvas* cTransparentAnalysisInvalidCluster = new TCanvas("cTransparentAnalysisInvalidCluster"+appendix, "cTransparentAnalysisInvalidCluster");
     cTransparentAnalysisInvalidCluster->cd();
     hTransparentAnalysisInvalidCluster->Draw("colz");
@@ -2362,7 +2361,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
 void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     UInt_t cellNo = settings->getCellNo(xPredDet,yPredDet);
     Float_t cellWidth = settings->GetCellWidth(subjectDetector,2);
-    diamondCluster->SetTransparentClusterSize(3);
+    diamondCluster->SetTransparentClusterSize(5);
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta = pos - predPos;
@@ -2392,11 +2391,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             Int_t highest_hit_pos = diamondCluster->getHighestHitClusterPosition();
             Int_t Second_highest_hit_pos = diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN);
             Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
-            if (!diamondCluster->checkClusterForSize() || snr < -1){
+            if (!diamondCluster->getClusterSize() || snr < -1){
                 cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
                 diamondCluster->Print();
             }
             if (snr > 20) snr=20;
+            if (snr==-1){
+                cout<<"SNR < 0; " <<highest_hit_pos<<"/"<<Second_highest_hit_pos<<": "<<snr<<" - "<<delta*cellWidth<<endl;
+                diamondCluster->Print();
+            }
             if (histo)
                 histo->Fill(delta*cellWidth,snr);
         }
@@ -2412,7 +2415,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec
     Float_t maxX =settings->GetCellWidth(subjectDetector,2);
     UInt_t nBinsY = 110;
     Float_t minY = -10;
-    Float_t maxY = 100;
+    Float_t maxY = 20;
     TString name = "hResolutionGoodCells_"+kind+appendix;
     TH2F* hResolutionGoodCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
     hResolutionGoodCells->GetXaxis()->SetTitle("Residual / #mum");
@@ -4728,6 +4731,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 }
 
 void TAnalysisOf3dDiamonds::saveHistos() {
+    LongAnalysis_CreateResolutionPlots();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     histSaver->SaveHistogram(hValidEventsDetSpace);
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
