@@ -436,6 +436,9 @@ private:
 	vector<TH2F*> vecHResolutionPerCell_maxValue_vs_SNR;
 	vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_SNR;
 	vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_SNR;
+    vector<TH2F*> vecHResolutionPerCell_maxValue_vs_PredHit;
+    vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_PredHit;
+    vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_PredHit;
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;

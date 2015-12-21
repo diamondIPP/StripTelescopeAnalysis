@@ -2351,7 +2351,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
-        TH2F* histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
+        TH2F* histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("SNR 2nd hit");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -2372,6 +2372,32 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
         histo2->GetYaxis()->SetTitle("SNR 2nd hit");
         histo2->GetZaxis()->SetTitle("number of entries");
         vecHResolutionPerCell_highest2Centroid_vs_SNR.push_back(histo2);
+
+        /*******/
+
+        name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_PredHit",cell)+appendix;
+        title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
+        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2->GetXaxis()->SetTitle("Residual / #mum");
+        histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
+        histo2->GetZaxis()->SetTitle("number of entries");
+        vecHResolutionPerCell_maxValue_vs_PredHit.push_back(histo2);
+
+        name = TString::Format("hResolution_CellNo_%02d_chargeWeighted_vs_PredHit",cell)+appendix;
+        title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
+        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2->GetXaxis()->SetTitle("Residual / #mum");
+        histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
+        histo2->GetZaxis()->SetTitle("number of entries");
+        vecHResolutionPerCell_chargeWeighted_vs_PredHit.push_back(histo2);
+
+        name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_PredHit",cell)+appendix;
+        title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
+        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2->GetXaxis()->SetTitle("Residual / #mum");
+        histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
+        histo2->GetZaxis()->SetTitle("number of entries");
+        vecHResolutionPerCell_highest2Centroid_vs_PredHit.push_back(histo2);
     }
 }
 
@@ -2390,6 +2416,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta = pos - predPos;
+    Float_t relPredPos = fmod(predPos+.5,1)-.5;
     if (cellNo< vecHResolutionPerCell_maxValue.size()){
         TH1F* histo  = vecHResolutionPerCell_maxValue.at(cellNo);
         if (histo);
@@ -2399,6 +2426,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
         TH2F* histo  = vecHResolutionPerCell_maxValue_vs_SNR.at(cellNo);
         if (histo)
             histo->Fill(delta*cellWidth,snr);
+    }
+
+    if (cellNo< vecHResolutionPerCell_maxValue_vs_PredHit.size()){
+        TH2F* histo  = vecHResolutionPerCell_maxValue_vs_PredHit.at(cellNo);
+        if (histo)
+            histo->Fill(delta*cellWidth,relPredPos);
     }
     /*********/
     pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
@@ -2413,6 +2446,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
         if (histo)
             histo->Fill(delta*cellWidth,snr);
     }
+
+    if (cellNo< vecHResolutionPerCell_chargeWeighted_vs_PredHit.size()){
+        TH2F* histo  = vecHResolutionPerCell_chargeWeighted_vs_PredHit.at(cellNo);
+        if (histo)
+            histo->Fill(delta*cellWidth,relPredPos);
+    }
     /*********/
         pos = diamondCluster->getPosition(useCMN,TCluster::highest2Centroid);
         delta = pos - predPos;
@@ -2425,6 +2464,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             TH2F* histo  = vecHResolutionPerCell_highest2Centroid_vs_SNR.at(cellNo);
             if (histo)
                 histo->Fill(delta*cellWidth,snr);
+        }
+
+        if (cellNo< vecHResolutionPerCell_highest2Centroid_vs_PredHit.size()){
+            TH2F* histo  = vecHResolutionPerCell_highest2Centroid_vs_PredHit.at(cellNo);
+            if (histo)
+                histo->Fill(delta*cellWidth,relPredPos);
         }
      if (cellNo<99&&false   ){
 
@@ -2562,6 +2607,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue_vs_SNR,"maxValue_SNR");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted_vs_SNR,"chargeWeighted_SNR");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid_vs_SNR,"highest2Centroid_SNR");
+
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue_vs_PredHit,"maxValue_PredHit");
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHit,"chargeWeighted_PredHit");
+    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHit,"highest2Centroid_PredHit");
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
