@@ -433,12 +433,15 @@ private:
 	vector<TH1F*> vecHResolutionPerCell_maxValue;
 	vector<TH1F*> vecHResolutionPerCell_chargeWeighted;
 	vector<TH1F*> vecHResolutionPerCell_highest2Centroid;
+    vector<TH1F*> vecHResolutionPerCell_h2C_WithCut;
 	vector<TH2F*> vecHResolutionPerCell_maxValue_vs_SNR;
 	vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_SNR;
 	vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_SNR;
+    vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_SNR;
     vector<TH2F*> vecHResolutionPerCell_maxValue_vs_PredHit;
     vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_PredHit;
     vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_PredHit;
+    vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHit;
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;

@@ -567,9 +567,11 @@ private:
 	Float_t minimumEdgeDistance;
 	Float_t adcToElectronConversion;
 	TString PathExtension3d;
+	Float_t resolutionSNR;
 public:
     TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
+	Float_t GetResolutionSNR(){return resolutionSNR;}
 	Float_t GetCellWidth(int det,int pattern){return getPitchWidth(det,pattern);}
 	TString getEdgePositionName(UInt_t i){if(i<vecEdgePositionName.size()) return vecEdgePositionName[i];return "";}//todo make it safe
 	TPlaneProperties::enumCoordinate getEdgePositionType(UInt_t i){if(i<vecEdgePositionType.size()) return vecEdgePositionType[i];return TPlaneProperties::UNKOWN_COR;}

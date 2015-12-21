@@ -866,6 +866,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	OverlayRange3d = make_pair((float)700.,(float)1200.);
 	negativeChargeCut = -50.;
 	bRerunSelection = false;
+	resolutionSNR = 8;
 //	checkSettings();
 }
 
