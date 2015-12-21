@@ -89,7 +89,7 @@ TCluster::TCluster(const TCluster& rhs){
 	eventNumber=rhs.eventNumber;
 	isTransparentCluster=rhs.isTransparentCluster;
 	transparentClusterSize=rhs.transparentClusterSize;
-	cout<<"transparentClusterSize"<<transparentClusterSize<<"/"<<rhs.transparentClusterSize<<endl;
+	//cout<<"transparentClusterSize"<<transparentClusterSize<<"/"<<rhs.transparentClusterSize<<endl;
 }
 
 /**
@@ -135,7 +135,7 @@ TCluster & TCluster::operator =(const TCluster & src)
 	isTransparentCluster = src.isTransparentCluster;
 	//printf("srcisTransparentCluster: %f, CopiedisTransparentCluster: %f \n",src.isTransparentCluster,isTransparentCluster);
 	transparentClusterSize = src.transparentClusterSize;
-	cout<<"transparentClusterSize: "<<transparentClusterSize<<"/"<<src.transparentClusterSize<<endl;
+	//cout<<"transparentClusterSize: "<<transparentClusterSize<<"/"<<src.transparentClusterSize<<endl;
 	//printf("srcClusterSize: %i, CopiedClusterSize: %i \n",src.transparentClusterSize,transparentClusterSize);
 	for(UInt_t i=0;i<src.clusterChannel.size();i++)
 		clusterChannel.push_back(src.clusterChannel.at(i));
@@ -1208,7 +1208,7 @@ UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorre
  */
 UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected,bool bNegativeSignals)
 {
-    if (bNegativeSignals)
+    if (false&&bNegativeSignals)
         cout <<"TCluster::getHighestSignalNeighbourClusterPosition"<<clPos<<"/"<<cmnCorrected<<
         "/clSize: "<<checkClusterForSize()<<endl;
 	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;
@@ -1221,7 +1221,7 @@ UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnC
 
 		bool valid1 = IsValidTransparentClusterPosition(clPos-1);
 		bool valid2 = IsValidTransparentClusterPosition(clPos+1);
-		cout<<"Valid Hits: "<<clPos-1<<": "<<valid1<<"/ "<<clPos+1<<": "<<valid2<<endl;
+		//cout<<"Valid Hits: "<<clPos-1<<": "<<valid1<<"/ "<<clPos+1<<": "<<valid2<<endl;
 		if(!valid1&&!valid2)
 			return 9999;
 		else if (!valid1)
@@ -1231,7 +1231,7 @@ UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnC
 	}
 	Float_t signalLeft = getSignal(clPos-1,cmnCorrected);
 	Float_t signalRight=getSignal(clPos+1,cmnCorrected);
-	if (bNegativeSignals)
+	if (false&&bNegativeSignals)
 	    cout<<"clPos-1: "<<signalLeft<<"\tclPos+1:"<<signalRight<<endl;
 	if (signalLeft < signalRight){
 		if (signalRight>0|| bNegativeSignals)

@@ -2408,19 +2408,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     Int_t highest_hit_pos = diamondCluster->getHighestHitClusterPosition();
     Int_t Second_highest_hit_pos = diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN,true);
     Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
-    if (!diamondCluster->getClusterSize() || snr < -1){
-        cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
-        diamondCluster->Print(1);
-    }
-    if (snr > maxsnr) snr=maxsnr*109/110;
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
+    if (snr > maxsnr) snr=maxsnr*109/110;
     Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta_max = pos - predPos;
     pos = diamondCluster->getPosition(useCMN,TCluster::highest2Centroid);
     Float_t delta_h2C = pos - predPos;
-    Float_t pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
+    pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
     Float_t delta_Weigthed = pos - predPos;
     Float_t relPredPos = fmod(predPos+.5,1)-.5;
+    if (!diamondCluster->getClusterSize() || snr < -100){
+        cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
+        diamondCluster->Print(1);
+    }
     if (cellNo< vecHResolutionPerCell_maxValue.size()){
         TH1F* histo  = vecHResolutionPerCell_maxValue.at(cellNo);
         if (histo);
@@ -2450,8 +2450,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
 
     if (cellNo< vecHResolutionPerCell_chargeWeighted_vs_PredHit.size()){
         TH2F* histo  = vecHResolutionPerCell_chargeWeighted_vs_PredHit.at(cellNo);
+        //cout<<"FILL vecHResolutionPerCell_chargeWeighted_vs_PredHit:"<<cellNo<<"\t"<<relPredPos<<" --> "<<delta*cellWidth<<endl;
         if (histo)
             histo->Fill(delta_Weigthed*cellWidth,relPredPos);
+    }
+    else{
+        cout<<"Cannot find "<<cellNo<< " in "<<vecHResolutionPerCell_chargeWeighted_vs_PredHit.size()<<endl;
     }
     /*********/
     if (cellNo< vecHResolutionPerCell_highest2Centroid.size()){
