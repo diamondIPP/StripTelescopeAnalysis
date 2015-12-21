@@ -115,7 +115,10 @@ public:
     bool IsTransparentCluster(){return !(isTransparentCluster<0);}
     Float_t GetTransparentHitPosition(){return isTransparentCluster;}
     void SetTransparentCluster(Float_t startChannel);
-    void SetTransparentClusterSize(UInt_t size){if(size>0) transparentClusterSize=TMath::Min(size,checkClusterForSize());};
+    void SetTransparentClusterSize(UInt_t size){
+        if(size>0) transparentClusterSize=TMath::Min(size,checkClusterForSize());
+        cout<<"TCluster:SetTransparentClusterSize("<<size<<"): - "<<transparentClusterSize<<endl;
+    };
     UInt_t GetTransparentClusterSize(){return transparentClusterSize;}
     Int_t getTransparentClusterPosition(UInt_t clusterNo=0);
     bool IsValidTransparentClusterPosition(UInt_t clusterPosition);
