@@ -2392,14 +2392,16 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             Int_t highest_hit_pos = diamondCluster->getHighestHitClusterPosition();
             Int_t Second_highest_hit_pos = diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN);
             Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
+            if (!diamondCluster->checkClusterForSize() || snr < -1){
+                cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
+                diamondCluster->Print();
+            }
             if (snr > 20) snr=20;
             if (histo)
                 histo->Fill(delta*cellWidth,snr);
         }
      if (cellNo<99&&false   ){
 
-         cout<<"POS: "<<predPos<<" / "<<pos<<endl;
-         diamondCluster->Print();
      }
 }
 
