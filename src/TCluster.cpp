@@ -89,7 +89,7 @@ TCluster::TCluster(const TCluster& rhs){
 	eventNumber=rhs.eventNumber;
 	isTransparentCluster=rhs.isTransparentCluster;
 	transparentClusterSize=rhs.transparentClusterSize;
-
+	cout<<"transparentClusterSize"<<transparentClusterSize<<"/"<<rhs.transparentClusterSize<<endl;
 }
 
 /**
@@ -135,6 +135,7 @@ TCluster & TCluster::operator =(const TCluster & src)
 	isTransparentCluster = src.isTransparentCluster;
 	//printf("srcisTransparentCluster: %f, CopiedisTransparentCluster: %f \n",src.isTransparentCluster,isTransparentCluster);
 	transparentClusterSize = src.transparentClusterSize;
+	cout<<"transparentClusterSize: "<<transparentClusterSize<<"/"<<src.transparentClusterSize<<endl;
 	//printf("srcClusterSize: %i, CopiedClusterSize: %i \n",src.transparentClusterSize,transparentClusterSize);
 	for(UInt_t i=0;i<src.clusterChannel.size();i++)
 		clusterChannel.push_back(src.clusterChannel.at(i));
@@ -177,6 +178,7 @@ void TCluster::SetTransparentCluster(Float_t startChannel) {
 }
 void TCluster::SetTransparentClusterSize(UInt_t size){
     if(size>0) transparentClusterSize=TMath::Min(size,checkClusterForSize());
+    cout<<"TCluster:SetTransparentClusterSize("<<size<<"): - "<<transparentClusterSize<<endl;
     cout<<"TCluster:SetTransparentClusterSize("<<size<<"): - "<<transparentClusterSize<<endl;
     char t;
     cin>>t;
@@ -482,7 +484,7 @@ Float_t TCluster::getChargeStartingAt(UInt_t nChannels, UInt_t startingClusterPo
 	UInt_t size = checkClusterForSize();
 	nChannels = TMath::Min(nChannels,2*size);
 	if(IsTransparentCluster()){
-		nChannels = TMath::Min(nChannels,transparentClusterSize);
+		nChannels = TMath::Min(nChannels,GetTransparentClusterSize());
 	}
 	if(verbosity>3)cout<<" "<<nChannels<<endl;
 	if(startingClusterPos>=size)
@@ -580,7 +582,7 @@ UInt_t TCluster::GetHighestSignalChannelTransparentCluster(){
 	Int_t maxChannel = -1;
 	Float_t maxSignal = -1e9;
 	Int_t dir = ch-isTransparentCluster>0?-1:+1;
-	UInt_t len = TMath::Min(transparentClusterSize,2*this->checkClusterForSize());
+	UInt_t len = TMath::Min(GetTransparentClusterSize(),2*this->checkClusterForSize());
 //	cout<<"GetHighestSignalChannelTransparentCluster: "<< ch<<" "<<clPosStart<< " "<< dir<<" "<<len<<endl;
 	for (UInt_t i = 0; i< len; i++){
 		UInt_t clPos = getTransparentClusterPosition(i);
@@ -625,7 +627,7 @@ void TCluster::UpdateHighestSignalChannel() {
 
 UInt_t TCluster::getClusterSize(){
 	if(IsTransparentCluster())
-		return TMath::Min(transparentClusterSize,checkClusterForSize());
+		return TMath::Min(GetTransparentClusterSize(),checkClusterForSize());
 	return this->checkClusterForSize();
 }
 
@@ -719,7 +721,7 @@ UInt_t TCluster::getHighestHitClusterPositionTransparentCluster(){
 		UInt_t ch = isTransparentCluster+.5;
 		Int_t maxClPos = -1;
 		Float_t maxSignal = -1e9;
-		UInt_t len = TMath::Min(transparentClusterSize,2*this->checkClusterForSize());
+		UInt_t len = TMath::Min(GetTransparentClusterSize(),2*this->checkClusterForSize());
 		for (UInt_t i = 0; i< len; i++){
 			UInt_t clPos = getTransparentClusterPosition(i);
 			if(getSignal(clPos)>maxSignal){
@@ -851,8 +853,8 @@ UInt_t TCluster::getSmallestChannelNumber()
 	if(clusterChannel.size()==0)
 		return 0;
 //	if(IsTransparentCluster()){
-//		Int_t channel1 = getTransparentClusterPosition(transparentClusterSize-1);
-//		Int_t channel1 = getTransparentClusterPosition(transparentClusterSize-2);
+//		Int_t channel1 = getTransparentClusterPosition(GetTransparentClusterSize()-1);
+//		Int_t channel1 = getTransparentClusterPosition(GetTransparentClusterSize()-2);
 //
 //	}
 
@@ -869,7 +871,7 @@ UInt_t TCluster::getHighestChannelNumber()
 	if(clusterChannel.size()==0)
 		return 0;
 //	if(IsTransparentCluster())
-//		return TMath::Max(getChannel(transparentClusterSize-2),getChannel(transparentClusterSize-1));
+//		return TMath::Max(getChannel(GetTransparentClusterSize()-2),getChannel(GetTransparentClusterSize()-1));
 	return clusterChannel.back();
 }
 
