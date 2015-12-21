@@ -178,10 +178,10 @@ void TCluster::SetTransparentCluster(Float_t startChannel) {
 }
 void TCluster::SetTransparentClusterSize(UInt_t size){
     if(size>0) transparentClusterSize=TMath::Min(size,checkClusterForSize());
-    cout<<"TCluster:SetTransparentClusterSize("<<size<<"): - "<<transparentClusterSize<<endl;
-    cout<<"TCluster:SetTransparentClusterSize("<<size<<"): - "<<transparentClusterSize<<endl;
-    char t;
-    cin>>t;
+//    cout<<"TCluster:SetTransparentClusterSize("<<size<<"): - "<<transparentClusterSize<<endl;
+//    cout<<"TCluster:SetTransparentClusterSize("<<size<<"): - "<<transparentClusterSize<<endl;
+//    char t;
+//    cin>>t;
 };
 
 Int_t TCluster::getTransparentClusterPosition(UInt_t clusterNo) {

@@ -2399,7 +2399,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             if (snr==-1){
                 diamondCluster->SetTransparentClusterSize(5);
                 cout<<"SetTransparentClusterSize"<<diamondCluster->GetTransparentClusterSize()<<endl;
+                cout<<"2ndHighest Hit:"<<diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN);
                 cout<<"SNR < 0; " <<highest_hit_pos<<"/"<<Second_highest_hit_pos<<": "<<snr<<" - "<<delta*cellWidth<<" "<<diamondCluster->IsValidTransparentClusterPosition(highest_hit_pos)<< " -- "<<diamondCluster->getAdcValue(highest_hit_pos)<<endl;
+                cout<<"POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
                 diamondCluster->Print(1);
             }
             if (histo)
@@ -3212,7 +3214,7 @@ void TAnalysisOf3dDiamonds::MakeGhostCluster(TCluster *diamondCluster, Int_t Clu
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAnalysis(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet, Float_t ClusterSize, TCluster *diamondCluster) {
 
-    diamondCluster->SetTransparentClusterSize(5);
+//    diamondCluster->SetTransparentClusterSize(5);
     //    MakeGhostCluster(diamondCluster,5);
 
     diamondCluster->SetTransparentClusterSize(ClusterSize);
