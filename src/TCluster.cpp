@@ -403,7 +403,6 @@ bool TCluster::IsValidTransparentClusterPosition(UInt_t clusPos){
     Int_t cp1 = GetTransparentClusterSize()-1;
     Int_t cp2 = GetTransparentClusterSize()-2;
 
-
 	Int_t cl1 = this->getTransparentClusterPosition(cp1);
 	Int_t cl2 = this->getTransparentClusterPosition(cp2);
 	if(cl1<0)
@@ -1199,7 +1198,7 @@ UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorre
  * @param clPos position where should be looked next to
  * @return clusterPosition in cluster
  */
-UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected)
+UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected,bool bNegativeSignals)
 {
 	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;
 	if(checkClusterForSize()==2){
@@ -1207,7 +1206,7 @@ UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnC
 		else if(clPos==0) return clPos+1;
 		else return 9999;
 	}
-	if(IsTransparentCluster()){
+	if(IsTransparentCluster() && !bNegativeSignals){
 
 		bool valid1 = IsValidTransparentClusterPosition(clPos-1);
 		bool valid2 = IsValidTransparentClusterPosition(clPos+1);
@@ -1222,11 +1221,11 @@ UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnC
 	Float_t signalRight=getSignal(clPos+1,cmnCorrected);
 
 	if (signalLeft < signalRight){
-		if (signalRight>0)
+		if (signalRight>0|| bNegativeSignals)
 			return clPos+1;
 	}
 	else{
-		if (signalLeft > 0) return clPos-1;
+		if (signalLeft > 0||bNegativeSignals) return clPos-1;
 	}
 	return 9999;
 }

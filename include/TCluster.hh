@@ -64,7 +64,7 @@ public:
     UInt_t getHighestSignalChannel();
     UInt_t GetHighestSignalChannelTransparentCluster();
     UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
-    UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false);
+    UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false,bool bNegativeSignals = false);
     Float_t getChargeWeightedMean(bool cmnCorrected, bool useNonHits=false);
     Float_t getEtaPostion(bool cmnCorrected=false);
     Float_t getPositionCorEta(bool cmnCorrected,TH1F* histo=0);
