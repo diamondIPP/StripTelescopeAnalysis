@@ -2397,6 +2397,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
             }
             if (snr > 20) snr=20;
             if (snr==-1){
+                diamondCluster->SetTransparentClusterSize(5);
+                cout<<"SetTransparentClusterSize"<<diamondCluster->GetTransparentClusterSize()<<endl;
                 cout<<"SNR < 0; " <<highest_hit_pos<<"/"<<Second_highest_hit_pos<<": "<<snr<<" - "<<delta*cellWidth<<" "<<diamondCluster->IsValidTransparentClusterPosition(highest_hit_pos)<< " -- "<<diamondCluster->getAdcValue(highest_hit_pos)<<endl;
                 diamondCluster->Print(1);
             }
