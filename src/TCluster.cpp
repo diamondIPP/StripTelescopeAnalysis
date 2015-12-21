@@ -1208,16 +1208,20 @@ UInt_t TCluster::getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorre
  */
 UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected,bool bNegativeSignals)
 {
+    if (bNegativeSignals)
+        cout <<"TCluster::getHighestSignalNeighbourClusterPosition"<<clPos<<"/"<<cmnCorrected<<
+        "/clSize: "<<checkClusterForSize()<<endl;
 	if (clPos>=checkClusterForSize() || clPos<0 || checkClusterForSize()<2) return 9999;
 	if(checkClusterForSize()==2){
 		if(clPos==1) return clPos-1;
 		else if(clPos==0) return clPos+1;
 		else return 9999;
 	}
-	if(IsTransparentCluster() && !bNegativeSignals){
+	if(IsTransparentCluster()){
 
 		bool valid1 = IsValidTransparentClusterPosition(clPos-1);
 		bool valid2 = IsValidTransparentClusterPosition(clPos+1);
+		cout<<"Valid Hits: "<<clPos-1<<": "<<valid1<<"/ "<<clPos+1<<": "<<valid2<<endl;
 		if(!valid1&&!valid2)
 			return 9999;
 		else if (!valid1)
@@ -1227,7 +1231,8 @@ UInt_t TCluster::getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnC
 	}
 	Float_t signalLeft = getSignal(clPos-1,cmnCorrected);
 	Float_t signalRight=getSignal(clPos+1,cmnCorrected);
-
+	if (bNegativeSignals)
+	    cout<<"clPos-1: "<<signalLeft<<"\tclPos+1:"<<signalRight<<endl;
 	if (signalLeft < signalRight){
 		if (signalRight>0|| bNegativeSignals)
 			return clPos+1;
