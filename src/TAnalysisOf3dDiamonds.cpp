@@ -2386,7 +2386,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
         cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
         diamondCluster->Print(1);
     }
-    if (snr > maxsnr) snr=maxsnr;
+    if (snr > maxsnr) snr=maxsnr*109/110;
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta = pos - predPos;
