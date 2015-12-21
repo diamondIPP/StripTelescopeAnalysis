@@ -2392,7 +2392,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
         vecHResolutionPerCell_chargeWeighted_vs_PredHit.push_back(histo2);
 
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_PredHit",cell)+appendix;
-        title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
+        title = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_PredHit",cell);;
         histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
