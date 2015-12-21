@@ -2417,9 +2417,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
     Float_t delta_Weigthed = pos - predPos;
     Float_t relPredPos = fmod(predPos+.5,1)-.5;
+    relPredPos*=cellWidth;
+    //cout<<"\n "<<pos<<" "<<predPos<<" "<<delta_max<<" "<<delta_Weigthed<<" "<<delta_h2C<< " "<<relPredPos<<endl;
+    //diamondCluster->Print(1);
+
     if (!diamondCluster->getClusterSize() || snr < -100){
         cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
-        diamondCluster->Print(1);
     }
     if (cellNo< vecHResolutionPerCell_maxValue.size()){
         TH1F* histo  = vecHResolutionPerCell_maxValue.at(cellNo);
