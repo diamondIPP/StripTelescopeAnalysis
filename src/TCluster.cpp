@@ -428,7 +428,7 @@ bool TCluster::IsValidTransparentClusterPosition(UInt_t clusPos){
 	}
 	if(cl1<=clusPos&&clusPos<=cl2)
 		return true;
-    if (clusPos< clusterADC.size()){
+    if (false && clusPos< clusterADC.size()){
         cout<<"TCluster::IsValidTransparentClusterPosition("<<clusPos<<"):"<<GetTransparentClusterSize()<<"/"<<flush;
         cout<<"cl: ["<<cl1<<"-"<<clusPos<<"-"<<cl2<<"]"<<flush;
         cout<<"                     "<<this->getTransparentClusterPosition(cp1)<<"/"<<
