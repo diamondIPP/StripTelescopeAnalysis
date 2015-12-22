@@ -2423,7 +2423,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     //diamondCluster->Print(1);
 
     if (!diamondCluster->getClusterSize() || snr < -100){
-        cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
+        cout<<"ERROR: POS: "<<predPos<<" / "<<pos_max<<"/"<<pos_h2c<<"/"<<pos_weighted
+                <<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
     }
 
     if (cellNo< vecHResolutionPerCell_maxValue.size()){
