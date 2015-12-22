@@ -2410,12 +2410,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     if (snr > maxsnr) snr=maxsnr*109/110;
-    Float_t pos = diamondCluster->getPosition(useCMN,TCluster::maxValue);
-    Float_t delta_max = pos - predPos;
-    pos = diamondCluster->getPosition(useCMN,TCluster::highest2Centroid);
-    Float_t delta_h2C = pos - predPos;
-    pos = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
-    Float_t delta_Weigthed = pos - predPos;
+
+    Float_t pos_max = diamondCluster->getPosition(useCMN,TCluster::maxValue);
+    Float_t delta_max = pos_max - predPos;
+    Float_t pos_h2c = diamondCluster->getPosition(useCMN,TCluster::highest2Centroid);
+    Float_t delta_h2C = pos_h2c - predPos;
+    Float_t pos_weighted = diamondCluster->getPosition(useCMN,TCluster::chargeWeighted);
+    Float_t delta_Weigthed = pos_weighted - predPos;
     Float_t relPredPos = fmod(predPos+.5,1)-.5;
     relPredPos*=cellWidth;
     //cout<<"\n "<<pos<<" "<<predPos<<" "<<delta_max<<" "<<delta_Weigthed<<" "<<delta_h2C<< " "<<relPredPos<<endl;
@@ -2424,6 +2425,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     if (!diamondCluster->getClusterSize() || snr < -100){
         cout<<"ERROR: POS: "<<predPos<<" / "<<pos<<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
     }
+
     if (cellNo< vecHResolutionPerCell_maxValue.size()){
         TH1F* histo  = vecHResolutionPerCell_maxValue.at(cellNo);
         if (histo);
@@ -2494,24 +2496,27 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
 
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec,TString kind){
-    UInt_t nBins = 128;
-    Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
-    Float_t maxX =settings->GetCellWidth(subjectDetector,2);
-    UInt_t nBinsY = 110;
-    Float_t minY = -10;
-    Float_t maxY = maxsnr;
+    if (!vec) return;
+    if (vec->size() == 0) return;
+    TH2F* histo = vec->at(0);
+    if (!histo) return;
+
     TString name = "hResolutionGoodCells_"+kind+appendix;
-    TH2F* hResolutionGoodCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
-    hResolutionGoodCells->GetXaxis()->SetTitle("Residual / #mum");
+    TH2F* hResolutionGoodCells = (TH2F*)histo->Clone(name);
+    hResolutionGoodCells->Reset();
+
     name = "hResolutionBadCells_"+kind+appendix;
-    TH2F* hResolutionBadCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
-    hResolutionBadCells->GetXaxis()->SetTitle("Residual / #mum");
-    name = "hResolutionAllCells_"+kind+appendix;
-    TH2F* hResolutionAllCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
-    hResolutionAllCells->GetXaxis()->SetTitle("Residual / #mum");
+    TH2F* hResolutionBadCells = hResolutionGoodCells->Clone(name);
+    hResolutionBadCells->Reset();
+
     name = "hResolutionAllButBadCells_"+kind+appendix;
-    TH2F* hResolutionAllButBadCells = new TH2F(name,name,nBins,minX,maxX,nBinsY,minY,maxY);
-    hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
+    TH2F* hResolutionAllButBadCells = hResolutionGoodCells->Clone(name);
+    hResolutionAllButBadCells->Reset();
+
+    name = "hResolutionAllCells_"+kind+appendix;
+    TH2F* hResolutionAllCells = hResolutionGoodCells->Clone(name);
+    hResolutionAllCells->Reset();
+
     string plots_path = histSaver->GetPlotsPath();
     histSaver->SetPlotsPath(plots_path+(string)"/resolution/");
     for(UInt_t cell=0;cell< vec->size();cell++){
@@ -2529,16 +2534,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec
         vec->at(cell)= 0;
         delete histo;
     }
-//    Float_t xmin = -100;
-//    Float_t xmax = +100;
-//    TF1* fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",xmin,xmax);
-//    fitX->FixParameter(3,settings->GetCellWidth(subjectDetector,2)/2);//TODO
-//    fitX->SetParLimits(1,0,40);
-//    fitX->SetParNames("Integral","sigma of Gaus","position");
-//    fitX->SetParameter(2,0.);
-//    fitX->SetParameter(1,10);
-//    Int_t statOpt = gStyle->GetOptStat();
-//    gStyle->SetOptStat(1111);
     histSaver->SetPlotsPath(plots_path);
     hResolutionGoodCells->GetZaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionGoodCells);//,false,false,true);
@@ -2548,7 +2543,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec
     histSaver->SaveHistogram(hResolutionAllCells);
     hResolutionAllButBadCells->GetZaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionAllButBadCells);//,false,false,true);
-//    gStyle->SetOptStat(statOpt);
     delete hResolutionGoodCells;
     delete hResolutionBadCells;
     delete hResolutionAllCells;
