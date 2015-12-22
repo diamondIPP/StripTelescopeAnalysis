@@ -2506,15 +2506,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec
     hResolutionGoodCells->Reset();
 
     name = "hResolutionBadCells_"+kind+appendix;
-    TH2F* hResolutionBadCells = hResolutionGoodCells->Clone(name);
+    TH2F* hResolutionBadCells =  (TH2F*)hResolutionGoodCells->Clone(name);
     hResolutionBadCells->Reset();
 
     name = "hResolutionAllButBadCells_"+kind+appendix;
-    TH2F* hResolutionAllButBadCells = hResolutionGoodCells->Clone(name);
+    TH2F* hResolutionAllButBadCells =  (TH2F*)hResolutionGoodCells->Clone(name);
     hResolutionAllButBadCells->Reset();
 
     name = "hResolutionAllCells_"+kind+appendix;
-    TH2F* hResolutionAllCells = hResolutionGoodCells->Clone(name);
+    TH2F* hResolutionAllCells =  (TH2F*)hResolutionGoodCells->Clone(name);
     hResolutionAllCells->Reset();
 
     string plots_path = histSaver->GetPlotsPath();
