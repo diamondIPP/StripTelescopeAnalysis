@@ -4841,7 +4841,8 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 }
 
 void TAnalysisOf3dDiamonds::saveHistos() {
-    LongAnalysis_CreateResolutionPlots();
+    if (settings->do3dTransparentAnalysis())
+        LongAnalysis_CreateResolutionPlots();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     histSaver->SaveHistogram(hValidEventsDetSpace);
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
@@ -4869,7 +4870,9 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     initialiseEdgeFreeHistos();
     LongAnalysis_InitialiseRelativeAddedTransparentCharge();
     LongAnalysis_InitGoodCellsLandaus();
-    LongAnalysis_InitResolutionPlots();
+
+    if (settings->do3dTransparentAnalysis())
+        LongAnalysis_InitResolutionPlots();
     hLongAnalysisInvalidCellNo = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCellNo"+appendix);
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
     hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster"+appendix);
