@@ -385,6 +385,7 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 	    do_cmn = true;
 	TString str = "";
 	Int_t direction = copysign(1.0,alpha);
+	alpha = copysign(alpha,1.0);
 	str += TString::Format("\ngetCrossTalkCorrectedCluster for det %d: %5.2f %%\n",det,alpha*100);
     bool bChanged = false;
 	for(UInt_t cl = 0; cl < clSize;cl++){
