@@ -410,8 +410,8 @@ bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
 				alpha = +.01;
 	}
 	else {
-		if(det == 6 || det ==2) 
-			skewness*=-1;
+//		if(det == 6 || det ==2)
+//			skewness*=-1;
 		//				if( TMath::Abs(mean-.5)>.05){
 			//					if(alpha<0)
 		//						alpha *= .5/mean*2;
