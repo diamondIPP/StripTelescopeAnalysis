@@ -390,18 +390,21 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 		Int_t adc = this->getAdcValue(clPos);
 		Float_t ped = this->getPedestalMean(clPos,do_cmn);
 		Float_t measured_signal = adc-ped;
-		Float_t S_i = (measured_signal - S_i * alpha)/(1-alpha);
-		adc = (Int_t)(S_i+ped+0.5);
+
 		UInt_t channel = this->getChannel(clPos);
 
+		cout<<"\t* "<<cl<<" - "<<channel<<" -->"<<(Int_t)adc <<","<<ped<<"="<<measured_signal<<", "<<S_i<<flush;
+        S_i = (measured_signal - S_i * alpha)/(1-alpha);
+        adc = (Int_t)(S_i+ped+0.5);
+        cout<<" ==> "<<S_i<<"/"<<(Int_t)adc<<endl;
 		bool isSaturated = this->getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det);
 		newClus.addChannel(channel,this->getPedestalMean(clPos),this->getPedestalSigma(clPos),
 		        this->getPedestalMean(clPos,true),this->getPedestalSigma(clPos,true),adc,
 				isSaturated,this->isScreened(clPos));
 	}
-	if (alpha) cout<<"OLD: "<<endl;
+	if (alpha) cout<<"\nOLD: "<<endl;
 	if (alpha) this->Print(1);
-	if (alpha) cout<<"\nNEW: "<<endl;
+	if (alpha) cout<<"NEW: "<<endl;
 	if (alpha) newClus.Print(1);
 	return newClus;
 }
