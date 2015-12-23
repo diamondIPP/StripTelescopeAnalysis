@@ -729,7 +729,7 @@ void TAnalysisOfClustering::saveEtaIntegrals(){
 
 
 void TAnalysisOfClustering::saveHistos(){
-    //    	analyseAsymmetricSample2();
+    analyseAsymmetricSample();
     //	char t; cin>>t;
     cout<<"1"<<flush;
     if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
@@ -933,7 +933,7 @@ void TAnalysisOfClustering::saveHistos(){
     savePHHistos();
 
     if (verbosity)  cout<<"Save Asymmetric Eta Sample analysis"<<endl;
-    analyseAsymmetricSample();
+//    analyseAsymmetricSample();
     savePedestalHistos();
     saveNoiseHistos();
     saveADCHistos();
