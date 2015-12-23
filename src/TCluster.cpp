@@ -383,6 +383,8 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 	bool do_cmn = false;
 	if (det == TPlaneProperties::isDiamondDetector(det))
 	    do_cmn = true;
+	TString str = "";
+	str += TString::Format("\ngetCrossTalkCorrectedCluster for det %d: %5.2f %%\n",det,alpha*100);
 	for(UInt_t cl = 0; cl < clSize;cl++){
 		UInt_t clPos = cl;
 		if(det == 2 || det == 6)
@@ -392,16 +394,17 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 		Float_t measured_signal = adc-ped;
 
 		UInt_t channel = this->getChannel(clPos);
-
-		cout<<"\t* "<<cl<<" - "<<channel<<" -->"<<(Int_t)adc <<","<<ped<<"="<<measured_signal<<", "<<S_i<<flush;
+		str+= TString::Format("\t*%2d - %3d --> %4d - %6.1f = %6.1f, %6.1f", cl,channel,(Int_t)adc,ped,measured_signal,S_i);
         S_i = (measured_signal - S_i * alpha)/(1-alpha);
+        Int_t old_adc = adc;
         adc = (Int_t)(S_i+ped+0.5);
-        cout<<" ==> "<<S_i<<"/"<<(Int_t)adc<<endl;
+        str+=  TString::Format(" ==> %6.1f / %4d  - %1d\n", S_i,adc,(old_adc-adc));
 		bool isSaturated = this->getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det);
 		newClus.addChannel(channel,this->getPedestalMean(clPos),this->getPedestalSigma(clPos),
 		        this->getPedestalMean(clPos,true),this->getPedestalSigma(clPos,true),adc,
 				isSaturated,this->isScreened(clPos));
 	}
+	if (alpha) cout<<str<<endl;
 	if (alpha) cout<<"\nOLD: "<<endl;
 	if (alpha) this->Print(1);
 	if (alpha) cout<<"NEW: "<<endl;
