@@ -386,6 +386,7 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 	TString str = "";
 	Int_t direction = copysign(1.0,alpha);
 	str += TString::Format("\ngetCrossTalkCorrectedCluster for det %d: %5.2f %%\n",det,alpha*100);
+    bool bChanged = false;
 	for(UInt_t cl = 0; cl < clSize;cl++){
 		UInt_t clPos = cl;
 		if(direction == -1)
@@ -404,12 +405,15 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 		newClus.addChannel(channel,this->getPedestalMean(clPos),this->getPedestalSigma(clPos),
 		        this->getPedestalMean(clPos,true),this->getPedestalSigma(clPos,true),adc,
 				isSaturated,this->isScreened(clPos));
+        if (old_adc!=adc) bChanged = true;
 	}
-	if (alpha) cout<<str<<endl;
-	if (alpha) cout<<"\nOLD: "<<endl;
-	if (alpha) this->Print(1);
-	if (alpha) cout<<"NEW: "<<endl;
-	if (alpha) newClus.Print(1);
+    if (bChanged&&false){
+	    if (alpha) cout<<str<<endl;
+	    if (alpha) cout<<"OLD: "<<endl;
+	    if (alpha) this->Print(1);
+	    if (alpha) cout<<"NEW: "<<endl;
+	    if (alpha) newClus.Print(1);
+    }
 	return newClus;
 }
 
