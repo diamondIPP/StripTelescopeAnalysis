@@ -419,7 +419,7 @@ bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
 		//						alpha *= mean/.5/2;
 		//				}
 		//				else
-		if (skewness > 0 ){
+		if (skewness < 0 ){
 			if(alpha<0)
 				alpha*=1.01;
 			else
