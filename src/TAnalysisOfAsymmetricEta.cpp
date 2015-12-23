@@ -399,23 +399,15 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
 }
 
 bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
-	if(verbosity>4){
+	if(verbosity>4||true){
 		cout<<"TAnalysisOfAsymmetricEta::updateAlpha for "<<det<<"\tMean:"<<mean<<" Skew:"<<skewness<<endl;
 		cout<<"Alpha: "<<alpha<<endl;
 	}
 	if (alpha == 0){
-		if(det == 6 || det ==2){
 			if(mean- .5>0)
 				alpha = -.01;
 			else
 				alpha = +.01;
-		}
-		else{
-			if(mean- .5>0)
-				alpha = .01;
-			else
-				alpha = -.01;
-		}
 	}
 	else {
 		if(det == 6 || det ==2) 
@@ -440,7 +432,7 @@ bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
 				alpha*=1.01;
 		}
 	}
-	if (verbosity>4)
+	if (verbosity>4||true)
 		cout<<"Alpha: "<<alpha<<endl;
 	return true;
 }

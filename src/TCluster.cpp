@@ -384,10 +384,11 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 	if (det == TPlaneProperties::isDiamondDetector(det))
 	    do_cmn = true;
 	TString str = "";
+	Int_t direction = copysign(1.0,alpha);
 	str += TString::Format("\ngetCrossTalkCorrectedCluster for det %d: %5.2f %%\n",det,alpha*100);
 	for(UInt_t cl = 0; cl < clSize;cl++){
 		UInt_t clPos = cl;
-		if(det == 2 || det == 6)
+		if(direction == -1)
 			clPos = clSize - cl-1;
 		Int_t adc = this->getAdcValue(clPos);
 		Float_t ped = this->getPedestalMean(clPos,do_cmn);
