@@ -442,6 +442,8 @@ private:
     vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_PredHit;
     vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_PredHit;
     vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHit;
+    TH2F* hAdjacentChannels_SNR;
+    TH2F* hAdjacentSNR_vs_cellNo;
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;

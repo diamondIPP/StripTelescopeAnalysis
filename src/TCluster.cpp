@@ -377,7 +377,6 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 	TCluster newClus = TCluster(this->eventNumber,this->det,this->seedSigma,this->hitSigma,this->nChannels,this->cmNoise);
 	newClus.clear();//(clus.getEventNumber(),clus.getD);
 	UInt_t det = this->getDetector();
-	Float_t sharedCharge = 0;
 	UInt_t clSize = this->getClusterSize();
 	Float_t S_i = 0;
 	bool do_cmn = false;

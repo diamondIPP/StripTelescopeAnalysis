@@ -2266,6 +2266,9 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 }
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
+    histSaver->SaveHistogram(hAdjacentChannels_SNR);
+    delete hAdjacentChannels_SNR;
+    hAdjacentChannels_SNR=0;
     LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps();
     //	LongAnalysis_SaveCellsOverlayMeanCharge();
     if(true){
@@ -2328,9 +2331,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     UInt_t nBins = 128;
     Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
+    TString name = "hAdjacentSNR_vs_cellNo"+appendix;
+    TString title = "hAdjacentSNR_vs_cellNo"+appendix;
+    hAdjacentSNR_vs_cellNo = new TH2F(name,title,nCells,0,nCells,160,-30,50);
     for (UInt_t cell = 0; cell <nCells;cell++){
-        TString name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
-        TString title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
+        name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
+        title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
         TH1F* histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_maxValue.push_back(histo);
@@ -2431,6 +2437,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     if (snr > maxsnr) snr=maxsnr*109/110;
+    hAdjacentChannels_SNR->Fill(diamondCluster->getSNR(highest_hit_pos-1,useCMN),
+                                diamondCluster->getSNR(highest_hit_pos+1,useCMN));
+    hAdjacentSNR_vs_cellNo->Fill(snr,cellNo);
 
     Float_t pos_max = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta_max = pos_max - predPos;
@@ -2647,6 +2656,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHit,"chargeWeighted_PredHit");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHit,"highest2Centroid_PredHit");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHit,"h2C_WithCut_PredHit");
+
+    histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
+    delete hAdjacentSNR_vs_cellNo;
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
@@ -4879,6 +4891,13 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCluster");
     hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells"+appendix,16);
     hNegativeChargePosition->SetTitle(TString::Format("hNegativeChargePositionAllCells, cut: %+3f",settings->getNegativeChargeCut()));
+
+    TString name = "hAdjacentChannels_SNR"+appendix;
+    TString title = "SNR of adjacent channels";
+    hAdjacentChannels_SNR = new TH2F(name,title,160,-30,50,160,-30,50);
+    hAdjacentChannels_SNR->GetXaxis()->SetTitle("SNR left strip");
+    hAdjacentChannels_SNR->GetYaxis()->SetTitle("SNR right strip");
+    hAdjacentChannels_SNR->GetZaxis()->SetTitle("number of entries");
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
