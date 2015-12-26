@@ -2266,7 +2266,7 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 }
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
-    histSaver->SaveHistogram(hAdjacentChannels_SNR);
+
     TH1D* pX = hAdjacentSNR_vs_cellNo->ProjectionX("hSNR_left");
     pX->SetTitle("SNR left");
     pX->SetLineColor(kRed);
@@ -2277,12 +2277,13 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     THStack *stack = new THStack("stackAllSNRs","stackAllSNRs");
     stack->Add(pX);
     stack->Add(pY);
-    stack->Add(hAdjacentChannels_SNR);
+    stack->Add(hAdjacentChannels_SNR->Clone());
     histSaver->SaveStack(stack,"nostack",true,true,"SNR","number of entries");
     TCanvas * c5 = new TCanvas("cAllSNRs");
     c5->cd();
     stack->Draw("nostack");
     histSaver->SaveCanvas(c5);
+    histSaver->SaveHistogram(hAdjacentChannels_SNR);
     delete stack;
     delete pX;
     delete pY;
