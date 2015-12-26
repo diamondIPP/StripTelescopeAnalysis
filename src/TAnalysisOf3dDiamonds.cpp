@@ -2274,11 +2274,15 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     pY->SetTitle("SNR right");
     pY->SetLineColor(kGreen);
     hAdjacentChannels_SNR->SetTitle("SNR max");
-    THStack *stack = new THStack();
+    THStack *stack = new THStack("stackAllSNRs");
     stack->Add(pX);
     stack->Add(pY);
     stack->Add(hAdjacentChannels_SNR);
     histSaver->SaveStack(stack,"nostack",true,true,"SNR","number of entries");
+    TCanvas * c1 = new TCanvas("cAllSNRs");
+    c1->cd();
+    stack->Draw("nostack");
+    histSaver->SaveCanvas(c1);
     delete stack;
     delete pX;
     delete pY;
