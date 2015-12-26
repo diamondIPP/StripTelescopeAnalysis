@@ -2274,7 +2274,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     pY->SetTitle("SNR right");
     pY->SetLineColor(kGreen);
     hAdjacentChannels_SNR->SetTitle("SNR max");
-    THStack *stack = new THStack("stackAllSNRs");
+    THStack *stack = new THStack("stackAllSNRs","stackAllSNRs");
     stack->Add(pX);
     stack->Add(pY);
     stack->Add(hAdjacentChannels_SNR);
