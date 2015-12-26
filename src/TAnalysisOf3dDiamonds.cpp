@@ -2267,6 +2267,21 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(hAdjacentChannels_SNR);
+    TH1D* pX = hAdjacentSNR_vs_cellNo->ProjectionX("hSNR_left");
+    pX->SetTitle("SNR left");
+    pX->SetLineColor(kRed);
+    TH1D* pY = hAdjacentSNR_vs_cellNo->ProjectionY("hSNR_right");
+    pY->SetTitle("SNR right");
+    pY->SetLineColor(kGreen);
+    hAdjacentChannels_SNR->SetTitle("SNR max");
+    THStack *stack = new THStack();
+    stack->Add(pX);
+    stack->Add(pY);
+    stack->Add(hAdjacentChannels_SNR);
+    histSaver->SaveStack(stack,"nostack",true,true,"SNR","number of entries");
+    delete stack;
+    delete pX;
+    delete pY;
     delete hAdjacentChannels_SNR;
     hAdjacentChannels_SNR=0;
     LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps();
