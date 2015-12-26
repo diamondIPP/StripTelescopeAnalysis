@@ -2267,28 +2267,6 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
 
 void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 
-    TH1D* pX = hAdjacentSNR_vs_cellNo->ProjectionX("hSNR_left");
-    pX->SetTitle("SNR left");
-    pX->SetLineColor(kRed);
-    TH1D* pY = hAdjacentSNR_vs_cellNo->ProjectionY("hSNR_right");
-    pY->SetTitle("SNR right");
-    pY->SetLineColor(kGreen);
-    hAdjacentChannels_SNR->SetTitle("SNR max");
-    THStack *stack = new THStack("stackAllSNRs","stackAllSNRs");
-    stack->Add(pX);
-    stack->Add(pY);
-    stack->Add(hAdjacentChannels_SNR->Clone());
-    histSaver->SaveStack(stack,"nostack",true,true,"SNR","number of entries");
-    TCanvas * c5 = new TCanvas("cAllSNRs");
-    c5->cd();
-    stack->Draw("nostack");
-    histSaver->SaveCanvas(c5);
-    histSaver->SaveHistogram(hAdjacentChannels_SNR);
-    delete stack;
-    delete pX;
-    delete pY;
-    delete hAdjacentChannels_SNR;
-    hAdjacentChannels_SNR=0;
     LongAnalysis_CompareTransparentAndClusteredAnalysis_Maps();
     //	LongAnalysis_SaveCellsOverlayMeanCharge();
     if(true){
@@ -2679,11 +2657,33 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHit,"highest2Centroid_PredHit");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHit,"h2C_WithCut_PredHit");
 
+
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
-    TProfile* prof = hAdjacentSNR_vs_cellNo->ProjectionY("hAdjacentSNR");
     histSaver->SaveHistogram(prof);
+    TProfile* prof = hAdjacentSNR_vs_cellNo->ProjectionY("hAdjacentSNR");
+    TH1D* pX = hAdjacentSNR_vs_cellNo->ProjectionX("hSNR_left");
+    pX->SetTitle("SNR left");
+    pX->SetLineColor(kRed);
+    TH1D* pY = hAdjacentSNR_vs_cellNo->ProjectionY("hSNR_right");
+    pY->SetTitle("SNR right");
+    pY->SetLineColor(kGreen);
+    hAdjacentChannels_SNR->SetTitle("SNR max");
+    THStack *stack = new THStack("stackAllSNRs","stackAllSNRs");
+    stack->Add(pX);
+    stack->Add(pY);
+    stack->Add(prof);
+    histSaver->SaveStack(stack,"nostack",true,true,"SNR","number of entries");
+    TCanvas * c5 = new TCanvas("cAllSNRs");
+    c5->cd();
+    stack->Draw("nostack");
+    histSaver->SaveCanvas(c5);
+    histSaver->SaveHistogram(hAdjacentChannels_SNR);
+    delete stack;
+    delete pX;
+    delete pY;
     delete prof;
     delete hAdjacentSNR_vs_cellNo;
+    hAdjacentChannels_SNR=0;
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
