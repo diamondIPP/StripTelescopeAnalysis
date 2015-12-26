@@ -2333,7 +2333,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
     TString name = "hAdjacentSNR_vs_cellNo"+appendix;
     TString title = "hAdjacentSNR_vs_cellNo"+appendix;
+    title+=";Cell No;SNR adjacent Strip";
     hAdjacentSNR_vs_cellNo = new TH2F(name,title,nCells,0,nCells,160,-30,50);
+
     for (UInt_t cell = 0; cell <nCells;cell++){
         name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
@@ -2439,7 +2441,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     if (snr > maxsnr) snr=maxsnr*109/110;
     hAdjacentChannels_SNR->Fill(diamondCluster->getSNR(highest_hit_pos-1,useCMN),
                                 diamondCluster->getSNR(highest_hit_pos+1,useCMN));
-    hAdjacentSNR_vs_cellNo->Fill(snr,cellNo);
+    hAdjacentSNR_vs_cellNo->Fill(cellNo,snr);
 
     Float_t pos_max = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta_max = pos_max - predPos;
@@ -2658,6 +2660,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHit,"h2C_WithCut_PredHit");
 
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
+    TProfile* prof = hAdjacentSNR_vs_cellNo->ProjectionY("hAdjacentSNR");
+    histSaver->SaveHistogram(prof);
+    delete prof;
     delete hAdjacentSNR_vs_cellNo;
 }
 
