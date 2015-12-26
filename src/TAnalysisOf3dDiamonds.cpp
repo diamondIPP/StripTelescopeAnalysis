@@ -2659,8 +2659,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
 
 
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
-    histSaver->SaveHistogram(prof);
+
     TProfile* prof = hAdjacentSNR_vs_cellNo->ProjectionY("hAdjacentSNR");
+    histSaver->SaveHistogram(prof);
     TH1D* pX = hAdjacentSNR_vs_cellNo->ProjectionX("hSNR_left");
     pX->SetTitle("SNR left");
     pX->SetLineColor(kRed);
@@ -2683,6 +2684,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     delete pY;
     delete prof;
     delete hAdjacentSNR_vs_cellNo;
+    delete hAdjacentChannels_SNR;
     hAdjacentChannels_SNR=0;
 }
 
