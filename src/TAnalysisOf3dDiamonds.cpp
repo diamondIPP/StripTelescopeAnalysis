@@ -2279,10 +2279,10 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     stack->Add(pY);
     stack->Add(hAdjacentChannels_SNR);
     histSaver->SaveStack(stack,"nostack",true,true,"SNR","number of entries");
-    TCanvas * c1 = new TCanvas("cAllSNRs");
-    c1->cd();
+    TCanvas * c5 = new TCanvas("cAllSNRs");
+    c5->cd();
     stack->Draw("nostack");
-    histSaver->SaveCanvas(c1);
+    histSaver->SaveCanvas(c5);
     delete stack;
     delete pX;
     delete pY;
