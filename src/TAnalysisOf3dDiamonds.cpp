@@ -2430,6 +2430,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
+
+    if (!settings->do3dTransparentAnalysis())
+        return;
     UInt_t cellNo = settings->getCellNo(xPredDet,yPredDet);
     Float_t cellWidth = settings->GetCellWidth(subjectDetector,2);
     diamondCluster->SetTransparentClusterSize(5);
@@ -2530,6 +2533,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
 
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec,TString kind){
+
     if (!vec) return;
     if (vec->size() == 0) return;
     TH2F* histo = vec->at(0);
@@ -2645,6 +2649,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
+
+    if (!settings->do3dTransparentAnalysis())
+        return;
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid,"highest2Centroid");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue,"maxValue");
