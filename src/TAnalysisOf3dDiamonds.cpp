@@ -64,6 +64,7 @@ TAnalysisOf3dDiamonds::TAnalysisOf3dDiamonds(TSettings *newSettings) {
 
     PrintPositions();
     LongAnalysisSaveCellAndQuaterNumbering();
+    hAdjacentSNR_vs_cellNo=0;
 }
 
 TAnalysisOf3dDiamonds::~TAnalysisOf3dDiamonds() {
@@ -2437,8 +2438,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     Float_t snr = diamondCluster->getSNR(Second_highest_hit_pos,useCMN);
     Float_t predPos = diamondCluster->GetTransparentHitPosition();
     if (snr > maxsnr) snr=maxsnr*109/110;
+    if (hAdjacentChannels_SNR)
     hAdjacentChannels_SNR->Fill(diamondCluster->getSNR(highest_hit_pos-1,useCMN),
                                 diamondCluster->getSNR(highest_hit_pos+1,useCMN));
+    if (hAdjacentSNR_vs_cellNo)
     hAdjacentSNR_vs_cellNo->Fill(cellNo,snr);
 
     Float_t pos_max = diamondCluster->getPosition(useCMN,TCluster::maxValue);
@@ -4880,8 +4883,8 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 }
 
 void TAnalysisOf3dDiamonds::saveHistos() {
-    if (settings->do3dTransparentAnalysis())
-        LongAnalysis_CreateResolutionPlots();
+//    if (settings->do3dTransparentAnalysis())
+    LongAnalysis_CreateResolutionPlots();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     histSaver->SaveHistogram(hValidEventsDetSpace);
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
@@ -4910,8 +4913,8 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     LongAnalysis_InitialiseRelativeAddedTransparentCharge();
     LongAnalysis_InitGoodCellsLandaus();
 
-    if (settings->do3dTransparentAnalysis())
-        LongAnalysis_InitResolutionPlots();
+//    if (settings->do3dTransparentAnalysis())
+    LongAnalysis_InitResolutionPlots();
     hLongAnalysisInvalidCellNo = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCellNo"+appendix);
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
     hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster"+appendix);
