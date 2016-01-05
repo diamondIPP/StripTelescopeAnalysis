@@ -190,6 +190,9 @@ bool TAnalysisOf3dDiamonds::eventValid(){
         return false;
     chi2x = predictedPosition->getChi2X();
     chi2y = predictedPosition->getChi2Y();
+
+    if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())     //(chi2x>maxChi2||chi2y>maxChi2)
+        return false;
     xPredicted = predictedPosition->getPositionX();	//Predicted positions in labframe
     yPredicted = predictedPosition->getPositionY();
     xPredDet = eventReader->getPositionInDetSystem( subjectDetector, xPredicted, yPredicted);
@@ -216,8 +219,6 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     }
 
     //cout<<"Transparent Cluster, ";
-    if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
-        return;
     //cout<<"Chi Squared, ";
     /*
     if(transparentCluster.getFirstHitChannel()>23 && transparentCluster.getLastHitChannel()<40)
@@ -262,8 +263,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
     if(!settings->do3dTransparentAnalysis()){
         Float_t maxChi2 = settings->getChi2Cut3D();
-        if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
-            return;
 
         hNumberofClusters->Fill(eventReader->getNDiamondClusters());
         ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
@@ -363,8 +362,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
 
             if(!settings->do3dTransparentAnalysis()){
                 hHitandSeedCount[i]->Fill(HitCount,SeedCount);
-                hChi2XChi2Y[i]->Fill(chi2x, chi2y);
             }
+            hChi2XChi2Y[i]->Fill(chi2x, chi2y);
         }
     }		//End of for diamond patterns
 }
@@ -424,7 +423,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse2Cluster(){
 void TAnalysisOf3dDiamonds::LongAnalysis_checkClusteredAnalysis(){
     Float_t maxChi2 = settings->getChi2Cut3D();
 
-    if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
+    if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
     {
         if(verbosity>8) cout<< "to high chi2: "<<chi2x<<" "<<chi2y<<endl;
         validClusteredAnalysis=false;
@@ -653,7 +652,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
 bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
-    if(chi2x>5||chi2y>20)     //(chi2x>maxChi2||chi2y>maxChi2)
+    if(chi2x>settings->getChi2Cut3D_X()||chi2y>settings->getChi2Cut3D_Y())
         return false;
 
     Int_t DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
@@ -2693,9 +2692,31 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     delete pLeft;
     delete pRight;
     delete pMax;
+    LongAnalysis_SaveSNRPerCell();
     delete hAdjacentSNR_vs_cellNo;
     delete hAdjacentChannels_SNR;
     hAdjacentChannels_SNR=0;
+}
+
+void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
+    TH2D* hNegativeSNRs = histSaver->GetHistoBinedInCells("hNegativeSNRs"+appendix,1);
+    TH2D* hNegativeSNRsRelative = histSaver->GetHistoBinedInCells("hNegativeSNRsRelative"+appendix,1);
+    for (UInt_t i = 1; i <= hAdjacentSNR_vs_cellNo->GetNbinsX();i++){
+        TH1D* p = hAdjacentSNR_vs_cellNo->ProjectionY("",i,i);
+        Int_t maxbin = p->GetXaxis()->FindBin(0);
+        Float_t nNegatives = p->Integral(0,maxbin);
+        Float_t entries = p->GetEntries();
+        Int_t row = settings->getRowOfCell(i-1);
+        Int_t column = settings->getColumnOfCell(i-1);
+        hNegativeSNRs->SetBinContent(column+1,row+1,nNegatives);
+        hNegativeSNRsRelative->SetBinContent(column+1,row+1,nNegatives/entries*100.);
+        cout<<TString::Format("%3d -> %2d/%2d | %5.0f | 5.2f ",i,column,row,nNegatives,nNegatives/entries*100.)<<endl;
+        delete p;
+    }
+    histSaver->SaveHistogram(hNegativeSNRs);
+    histSaver->SaveHistogram(hNegativeSNRsRelative);
+    char t;
+    cin>>t;
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
@@ -4894,6 +4915,9 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     LongAnalysis_CreateResolutionPlots();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     histSaver->SaveHistogram(hValidEventsDetSpace);
+    hValidEventsDetSpace->SetName("hValidEventsDetSpaceGrid"+appendix);
+    hValidEventsDetSpace->Rebin2D(2,2);
+    histSaver->SaveHistogramWithCellGrid(hValidEventsDetSpace);
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
     SaveStripAnalysisHistos();
     // Save

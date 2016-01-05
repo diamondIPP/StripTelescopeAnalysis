@@ -125,6 +125,7 @@ private:
 	void LongAnalysis_CreateResolutionPlots(vector<TH1F*> *vec,TString kind);
 	void LongAnalysis_CreateResolutionPlots(vector<TH2F*> *vec,TString kind);
 	void LongAnalysis_SaveRawPulseHeightPlots();
+	void LongAnalysis_SaveSNRPerCell();
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
 	void LongAnalysis_InitGoodCellsLandaus();
 	void LongAnalysis_FillGoodCellsLandaus(Float_t charge);
