@@ -2734,7 +2734,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
         delete p;
     }
     TGraph g = histSaver->CreateDipendencyGraph("gNegativeVsAvrgSignal",nNegativeSNRs,fSignal);
+    g.SetMarkerStyle(5);
     histSaver->SaveGraph(&g,"gNegativeVsAvrgSignal");
+    g.SetMarkerStyle(5);
     g = histSaver->CreateDipendencyGraph("gRelNegativeVsAvrgSignal",rNegativeSNRs,fSignal);
     histSaver->SaveGraph(&g,"gRelNegativeVsAvrgSignal");
     std::vector<Float_t>::iterator result = std::min_element(nNegativeSNRs.begin(), nNegativeSNRs.end());
