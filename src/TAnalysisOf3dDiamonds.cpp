@@ -2699,8 +2699,25 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
+
+    TH2D* h = hPulseHeightVsDetectorHitPostionXY->Clone;
+    UInt_t xBins = h->GetXaxis()->GetNbins();
+    UInt_t yBins = h->GetYaxis()->GetNbins();
+    UInt_t xRebin = xBins/settings->getNColumns3d()/2;
+    UInt_t yRebin = yBins/settings->getNRows3d()/2;
+    TString name = "hPulseHeightVsDetectorHitPostionXY_perCell";
+    h = h->Rebin2D(xRebin*2,yRebin*2,name);
     TH2D* hNegativeSNRs = histSaver->GetHistoBinedInCells("hNegativeSNRs"+appendix,1);
     TH2D* hNegativeSNRsRelative = histSaver->GetHistoBinedInCells("hNegativeSNRsRelative"+appendix,1);
+    if (h->GetNbinsX()!=hNegativeSNRs->GetNbinsX() ||
+            h->GetNbinsY()!=hNegativeSNRs->GetNbinsY()){
+        cout<<"ERROR; Bin Numbers do NOT Agree:"<<
+                hNegativeSNRs->GetNbinsX()<<"/"<<hNegativeSNRs->GetNbinsY()<<"\t"<<
+                h->GetNbinsX()<<"/"<<h->GetNbinsY()<<endl;
+        char t;
+        cin >>t;
+    }
+    vector<Float_t> nNegativeSNRs, rNegativeSNRs, fSignal;
     for (UInt_t i = 1; i <= hAdjacentSNR_vs_cellNo->GetNbinsX();i++){
         TH1D* p = hAdjacentSNR_vs_cellNo->ProjectionY("",i,i);
         Int_t maxbin = p->GetXaxis()->FindBin(0.);
@@ -2709,10 +2726,55 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
         Int_t row = settings->getRowOfCell(i-1);
         Int_t column = settings->getColumnOfCell(i-1);
         hNegativeSNRs->SetBinContent(column+1,row+1,nNegatives);
+        nNegativeSNRs.push_back(nNegatives);
+        rNegativeSNRs.push_back(nNegatives/entries*100.);
+        fSignal.push_back(h->GetBinContent(column+1,row+1));
         hNegativeSNRsRelative->SetBinContent(column+1,row+1,nNegatives/entries*100.);
         cout<<TString::Format("%3d -> %2d/%2d | %5.0f | 5.2f ",i,column,row,nNegatives,nNegatives/entries*100.)<<endl;
         delete p;
     }
+    TGraph g = histSaver->CreateDipendencyGraph("gNegativeVsAvrgSignal",nNegativeSNRs,fSignal);
+    histSaver->SaveGraph(&g,"gNegativeVsAvrgSignal");
+    g = histSaver->CreateDipendencyGraph("gRelNegativeVsAvrgSignal",nNegativeSNRs,fSignal);
+    histSaver->SaveGraph(&g,"gelNegativeVsAvrgSignal");
+    std::vector<Float_t>::iterator result = std::min_element(nNegativeSNRs.begin(), nNegativeSNRs.end());
+    Float_t minX = *result;
+    result = std::max_element(nNegativeSNRs.begin(), nNegativeSNRs.end());
+    Float_t maxX = *result;
+    result = std::min_element(rNegativeSNRs.begin(), rNegativeSNRs.end());
+    Float_t minX2 = *result;
+    result = std::max_element(rNegativeSNRs.begin(), rNegativeSNRs.end());
+    Float_t maxX2 = *result;
+    result = std::min_element(fSignal.begin(), fSignal.end());
+    Float_t minY = *result;
+    result = std::max_element(fSignal.begin(), fSignal.end());
+    Float_t maxY = *result;
+    cout<<"nNegativeSNR: "<<minX<<"-"<<maxX<<endl;
+    cout<<"rNegativeSNR: "<<minX2<<"-"<<maxX2<<endl;
+    cout<<"fSignal: "<<minY<<"-"<<maxY<<endl;
+    Int_t xbins = 20;
+    Int_t ybins = 20;
+    Float_t xmin = minX - .1 * (maxX - minX);
+    Float_t xmax = maxX + .1 * (maxX - minX);
+    Float_t ymin = minY - .1 * (maxY - minY);
+    Float_t ymax = maxY + .1 * (maxY - minY);
+    name = "hNegativeVsAvrgSignal";
+    TH2D* hNegativeVsAvrgSignal = new TH2D(name,name,xbins,xmin,xmax,ybins,ymin,ymax);
+    Float_t xmin = minX2 - .1 * (maxX2 - minX2);
+    Float_t xmax = maxX2 + .1 * (maxX2 - minX2);
+    name = "hRelNegativeVsAvrgSignal";
+    TH2D* hRelNegativeVsAvrgSignal = new TH2D(name,name,xbins,xmin,xmax,ybins,ymin,ymax);
+    for (UInt_t i = 0; i < fSignal.size();i++){
+        hNegativeVsAvrgSignal->Fill(nNegativeSNRs.at(i),fSignal.at(i));
+        hRelNegativeVsAvrgSignal->Fill(rNegativeSNRs.at(i),fSignal.at(i));
+    }
+    hNegativeVsAvrgSignal->GetYaxis()->SetTitle("Avrg Signal of Cell");
+    hNegativeVsAvrgSignal->GetXaxis()->SetTitle("No of adjacent negative SNRs in Cell");
+    histSaver->SaveHistogram(hNegativeVsAvrgSignal);
+    hRelNegativeVsAvrgSignal->GetYaxis()->SetTitle("Avrg Signal of Cell");
+    hRelNegativeVsAvrgSignal->GetXaxis()->SetTitle("rel. no. of adjacent negative SNRs in Cell");
+    histSaver->SaveHistogram(hRelNegativeVsAvrgSignal);
+
     histSaver->SaveHistogram(hNegativeSNRs);
     histSaver->SaveHistogram(hNegativeSNRsRelative);
     char t;
@@ -5180,7 +5242,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveHistogram(hDetXvsDetY3DMeanChargeCells);
     delete hDetXvsDetY3DMeanChargeCells;
     //
-    delete hPulseHeightVsDetectorHitPostionXY;
+//    delete hPulseHeightVsDetectorHitPostionXY;
 
 }
 

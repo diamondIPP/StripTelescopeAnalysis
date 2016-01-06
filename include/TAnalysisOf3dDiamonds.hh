@@ -16,6 +16,7 @@
 #include <cstring>
 #include <vector>
 #include <deque>
+#include <algorithm>    // std::min_element, std::max_element
 
 #include "TSystem.h"
 #include "TH1F.h"
