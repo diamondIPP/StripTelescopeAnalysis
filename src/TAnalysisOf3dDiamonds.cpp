@@ -2703,7 +2703,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
     TH2D* hNegativeSNRsRelative = histSaver->GetHistoBinedInCells("hNegativeSNRsRelative"+appendix,1);
     for (UInt_t i = 1; i <= hAdjacentSNR_vs_cellNo->GetNbinsX();i++){
         TH1D* p = hAdjacentSNR_vs_cellNo->ProjectionY("",i,i);
-        Int_t maxbin = p->GetXaxis()->FindBin(0);
+        Int_t maxbin = p->GetXaxis()->FindBin(0.);
         Float_t nNegatives = p->Integral(0,maxbin);
         Float_t entries = p->GetEntries();
         Int_t row = settings->getRowOfCell(i-1);
