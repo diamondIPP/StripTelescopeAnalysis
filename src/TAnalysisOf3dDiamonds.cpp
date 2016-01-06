@@ -4974,6 +4974,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 
 void TAnalysisOf3dDiamonds::saveHistos() {
 //    if (settings->do3dTransparentAnalysis())
+
     histSaver->SaveHistogram(hValidEventsDetSpace);
     hValidEventsDetSpace->SetName("hValidEventsDetSpaceGrid"+appendix);
     hValidEventsDetSpace->Rebin2D(2,2);
@@ -4981,14 +4982,11 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     hValidEventsDetSpace->SetName("hValidEventsDetSpaceGridRebinned"+appendix);
     hValidEventsDetSpace->Rebin2D(2,2);
     histSaver->SaveHistogramWithCellGrid(hValidEventsDetSpace);
-    cout<<"PRess a key"<<endl;
-    char t;
-    cin>>t;
 
+    histSaver->SaveHistogram(hValidEventsFiducialSpace);
 
     LongAnalysis_CreateResolutionPlots();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
-    histSaver->SaveHistogram(hValidEventsFiducialSpace);
     SaveStripAnalysisHistos();
     // Save
     if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();}
