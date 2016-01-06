@@ -2706,7 +2706,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
     UInt_t xRebin = xBins/settings->getNColumns3d()/2;
     UInt_t yRebin = yBins/settings->getNRows3d()/2;
     TString name = "hPulseHeightVsDetectorHitPostionXY_perCell";
-    h = h->Rebin2D(xRebin*2,yRebin*2,name);
+    h = (TH2D*)h->Rebin2D(xRebin*2,yRebin*2,name);
     TH2D* hNegativeSNRs = histSaver->GetHistoBinedInCells("hNegativeSNRs"+appendix,1);
     TH2D* hNegativeSNRsRelative = histSaver->GetHistoBinedInCells("hNegativeSNRsRelative"+appendix,1);
     if (h->GetNbinsX()!=hNegativeSNRs->GetNbinsX() ||
