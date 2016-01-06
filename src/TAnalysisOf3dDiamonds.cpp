@@ -2730,13 +2730,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
         rNegativeSNRs.push_back(nNegatives/entries*100.);
         fSignal.push_back(h->GetBinContent(column+1,row+1));
         hNegativeSNRsRelative->SetBinContent(column+1,row+1,nNegatives/entries*100.);
-        cout<<TString::Format("%3d -> %2d/%2d | %5.0f | 5.2f ",i,column,row,nNegatives,nNegatives/entries*100.)<<endl;
+        cout<<TString::Format("%3d -> %2d/%2d | %5.0f | %5.2f ",i,column,row,nNegatives,nNegatives/entries*100.)<<endl;
         delete p;
     }
     TGraph g = histSaver->CreateDipendencyGraph("gNegativeVsAvrgSignal",nNegativeSNRs,fSignal);
     histSaver->SaveGraph(&g,"gNegativeVsAvrgSignal");
-    g = histSaver->CreateDipendencyGraph("gRelNegativeVsAvrgSignal",nNegativeSNRs,fSignal);
-    histSaver->SaveGraph(&g,"gelNegativeVsAvrgSignal");
+    g = histSaver->CreateDipendencyGraph("gRelNegativeVsAvrgSignal",rNegativeSNRs,fSignal);
+    histSaver->SaveGraph(&g,"gRelNegativeVsAvrgSignal");
     std::vector<Float_t>::iterator result = std::min_element(nNegativeSNRs.begin(), nNegativeSNRs.end());
     Float_t minX = *result;
     result = std::max_element(nNegativeSNRs.begin(), nNegativeSNRs.end());
@@ -4974,12 +4974,20 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 
 void TAnalysisOf3dDiamonds::saveHistos() {
 //    if (settings->do3dTransparentAnalysis())
-    LongAnalysis_CreateResolutionPlots();
-    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     histSaver->SaveHistogram(hValidEventsDetSpace);
     hValidEventsDetSpace->SetName("hValidEventsDetSpaceGrid"+appendix);
     hValidEventsDetSpace->Rebin2D(2,2);
     histSaver->SaveHistogramWithCellGrid(hValidEventsDetSpace);
+    hValidEventsDetSpace->SetName("hValidEventsDetSpaceGridRebinned"+appendix);
+    hValidEventsDetSpace->Rebin2D(2,2);
+    histSaver->SaveHistogramWithCellGrid(hValidEventsDetSpace);
+    cout<<"PRess a key"<<endl;
+    char t;
+    cin>>t;
+
+
+    LongAnalysis_CreateResolutionPlots();
+    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
     SaveStripAnalysisHistos();
     // Save
@@ -5238,7 +5246,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     name = "hPulseHeightVsDetectorHitPostion_Cells";
     name.Append(appendix);
     TH2D* hDetXvsDetY3DMeanChargeCells = (TH2D*)hPulseHeightVsDetectorHitPostionXY->Rebin2D(xRebin*2,yRebin*2,name);
-    histSaver->SaveHistogramWithCellGrid(hDetXvsDetY3DMeanChargeCells);
+    histSaver->SaveHistogramWithCellGrid(hDetXvsDetY3DMeanChargeCells,hDetXvsDetY3DMeanChargeCells);
     histSaver->SaveHistogram(hDetXvsDetY3DMeanChargeCells);
     delete hDetXvsDetY3DMeanChargeCells;
     //
