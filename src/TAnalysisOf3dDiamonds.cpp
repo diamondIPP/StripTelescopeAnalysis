@@ -2700,7 +2700,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
 
-    TH2D* h = hPulseHeightVsDetectorHitPostionXY->Clone;
+    TH2D* h = (TH2D*)hPulseHeightVsDetectorHitPostionXY->Clone;
     UInt_t xBins = h->GetXaxis()->GetNbins();
     UInt_t yBins = h->GetYaxis()->GetNbins();
     UInt_t xRebin = xBins/settings->getNColumns3d()/2;
@@ -2760,8 +2760,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
     Float_t ymax = maxY + .1 * (maxY - minY);
     name = "hNegativeVsAvrgSignal";
     TH2D* hNegativeVsAvrgSignal = new TH2D(name,name,xbins,xmin,xmax,ybins,ymin,ymax);
-    Float_t xmin = minX2 - .1 * (maxX2 - minX2);
-    Float_t xmax = maxX2 + .1 * (maxX2 - minX2);
+    xmin = minX2 - .1 * (maxX2 - minX2);
+    xmax = maxX2 + .1 * (maxX2 - minX2);
     name = "hRelNegativeVsAvrgSignal";
     TH2D* hRelNegativeVsAvrgSignal = new TH2D(name,name,xbins,xmin,xmax,ybins,ymin,ymax);
     for (UInt_t i = 0; i < fSignal.size();i++){
