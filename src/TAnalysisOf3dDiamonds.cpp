@@ -2700,7 +2700,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
 
-    TH2D* h = (TH2D*)hPulseHeightVsDetectorHitPostionXY->Clone;
+    TH2D* h = (TH2D*)hPulseHeightVsDetectorHitPostionXY->Clone();
     UInt_t xBins = h->GetXaxis()->GetNbins();
     UInt_t yBins = h->GetYaxis()->GetNbins();
     UInt_t xRebin = xBins/settings->getNColumns3d()/2;
