@@ -270,10 +270,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
         Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
         ShortAnalysis_FillEdgeAlignmentHistos();
         if(predictedDetector !=1 && predictedDetector !=2 && predictedDetector !=3){
-            if (settings->do3dTransparentAnalysis()){
-                cout<<"reject cluster: "<<predictedDetector;
-                diamondCluster->Print();
-            }
+            if (settings->do3dTransparentAnalysis())
+                if (xPredDet>1650&&xPredDet<2200){
+                    cout<<"\nreject cluster: "<<predictedDetector;
+                    diamondCluster->Print();
+                }
             return;
         }
 
