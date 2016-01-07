@@ -2779,8 +2779,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
 
     histSaver->SaveHistogram(hNegativeSNRs);
     histSaver->SaveHistogram(hNegativeSNRsRelative);
-    char t;
-    cin>>t;
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
