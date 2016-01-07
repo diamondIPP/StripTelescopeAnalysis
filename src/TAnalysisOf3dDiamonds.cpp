@@ -271,8 +271,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
         ShortAnalysis_FillEdgeAlignmentHistos();
         if(predictedDetector !=1 && predictedDetector !=2 && predictedDetector !=3){
             if (settings->do3dTransparentAnalysis())
-                if (xPredDet>1650&&xPredDet<2200){
-                    cout<<"\nreject cluster: "<<predictedDetector;
+                if (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650){
+                    cout<<"\nreject cluster: "<<predictedDetector<<" = "<<xPredDet<<"/"<<yPredDet<<"\t";
                     diamondCluster->Print();
                 }
             return;
