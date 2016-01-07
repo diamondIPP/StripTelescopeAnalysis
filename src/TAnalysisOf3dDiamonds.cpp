@@ -670,11 +670,11 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
 
     bool bOutput = (verbosity >5 &&xPredDet >= 3660 && xPredDet <= 3710&& yPredDet >= 0 && yPredDet <= 1500);
     bOutput = bOutput || (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650));
-    if (bOutput)	cout<<TString::Format("%6d, Hit in %5.1f,%5.1f ",nEvent, xPredDet,yPredDet);
+    TString s = TString::Format("[TAnalysisOf3dDiamonds::TransparentAnalysis] %6d, Hit in %5.1f,%5.1f ",nEvent, xPredDet,yPredDet);
     if(DiamondPattern !=1 && DiamondPattern !=2 && DiamondPattern !=3){
         //cout<<TString::Format("xPredDet: %.2f, yPredDet: %.2f", xPredDet, yPredDet)<<endl;
         hTransparentAnalysisInvalidCluster->Fill(xPredDet, yPredDet);
-        if (bOutput) cout<<" invalid Cluster: "<<DiamondPattern<<endl;
+        if (bOutput) cout<<s<<" invalid Cluster: "<<DiamondPattern<<endl;
         return false;
     }
 
@@ -682,7 +682,7 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
     Float_t XdetChannelSpace = settings->diamondPattern.convertMetricToChannel(xPredDet);
 
     if(XdetChannelSpaceInt<0){	//Returns -9998 when hit in channel 93.
-        if (bOutput) cout<<" invalid XdetChannelInSpaceInt"<<endl;
+        if (bOutput) cout<<s<<" invalid XdetChannelInSpaceInt: "<<XdetChannelSpaceInt<< "/" <<endl;
         return false;
     }
 
@@ -699,13 +699,13 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
     transparentCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,XdetChannelSpace,maxClusterSize3d);
 
     if(transparentCluster.isSaturatedCluster()){
-        if (bOutput) cout<<"SaturatedCluster"<<endl;
+        if (bOutput) cout<<s<<"SaturatedCluster"<<endl;
         return false;
     }
 
     UInt_t  clusSize = transparentCluster.GetTransparentClusterSize();
 
-    if (bOutput) cout<<"Valid Cluster"<<endl;
+//    if (bOutput) cout<<"Valid Cluster"<<endl;
     return true;
 
 
