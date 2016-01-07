@@ -669,7 +669,7 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
     Int_t DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
 
     bool bOutput = (verbosity >5 &&xPredDet >= 3660 && xPredDet <= 3710&& yPredDet >= 0 && yPredDet <= 1500);
-    bOutput = bOutput || (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650))
+    bOutput = bOutput || (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650));
     if (bOutput)	cout<<TString::Format("%6d, Hit in %5.1f,%5.1f ",nEvent, xPredDet,yPredDet);
     if(DiamondPattern !=1 && DiamondPattern !=2 && DiamondPattern !=3){
         //cout<<TString::Format("xPredDet: %.2f, yPredDet: %.2f", xPredDet, yPredDet)<<endl;
