@@ -269,8 +269,13 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
         Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
         ShortAnalysis_FillEdgeAlignmentHistos();
-        if(predictedDetector !=1 && predictedDetector !=2 && predictedDetector !=3)
+        if(predictedDetector !=1 && predictedDetector !=2 && predictedDetector !=3){
+            if (settings->do3dTransparentAnalysis()){
+                cout<<"reject cluster: "<<predictedDetector;
+                diamondCluster->Print();
+            }
             return;
+        }
 
         switch (eventReader->getNDiamondClusters()) {
             case 1:
@@ -309,6 +314,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
         if( !settings->diamondPattern.isValidCluster(diamondCluster)){
             //		cerr <<" Cluster is invalid: ";
             //		diamondCluster->Print(1);
+            if (xPredDet>1650 && xPredDet < 2200)
+            {
+                cout<<"ShortAnalysis_Analyse1Cluster - invalid cluster: "<<xPredDet<<"/"<<yPredDet;
+                diamondCluster->Print(1);
+            }
             return;
         }
         HitandSeedCount(diamondCluster);
