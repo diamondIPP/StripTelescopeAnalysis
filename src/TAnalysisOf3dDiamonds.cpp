@@ -261,7 +261,7 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
 
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
-    if(!settings->do3dTransparentAnalysis()){
+//    if(!settings->do3dTransparentAnalysis()){
         Float_t maxChi2 = settings->getChi2Cut3D();
 
         hNumberofClusters->Fill(eventReader->getNDiamondClusters());
@@ -283,9 +283,9 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
             default:
                 hRelatviveNumberOfMultipleClusterEvents->Fill(predictedDetector,1);
         }
-    }
-    else
-        ShortAnalysis_Analyse1Cluster();
+//    }
+//    else
+//        ShortAnalysis_Analyse1Cluster();
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_FillEdgeAlignmentHistos(){
