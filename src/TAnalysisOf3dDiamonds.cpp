@@ -669,7 +669,7 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
     Int_t DiamondPattern = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
 
     bool bOutput = (verbosity >5 &&xPredDet >= 3660 && xPredDet <= 3710&& yPredDet >= 0 && yPredDet <= 1500);
-    bOutput = bOutput ;//|| (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650);
+    bOutput = bOutput || (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650);
     TString s = TString::Format("[TAnalysisOf3dDiamonds::TransparentAnalysis] %6d, Hit in %5.1f,%5.1f ",nEvent, xPredDet,yPredDet);
     if(DiamondPattern !=1 && DiamondPattern !=2 && DiamondPattern !=3){
         //cout<<TString::Format("xPredDet: %.2f, yPredDet: %.2f", xPredDet, yPredDet)<<endl;
@@ -3859,7 +3859,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->Clone(name);
             cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(zmin,zmax);
+            histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
             ////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
@@ -3891,7 +3891,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeGoodCells.at(ClusterSize)->Clone(name);
             cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(zmin,zmax);
+            histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
 
@@ -3915,7 +3915,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeMinusBadCells.at(ClusterSize)->Clone(name);
             cout<<"SAVE"<<endl;
             histo->Draw("goffcolzTEXT");
-            histo->GetZaxis()->SetRangeUser(zmin,zmax);
+            histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
 
@@ -3940,7 +3940,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsCentralColumnOverlayMeanCharge
             TProfile2D* histo = (TProfile2D*)hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->Clone(name);
             cout<<"SAVE"<<endl;
             histo->Draw("goffcolz");
-            histo->GetZaxis()->SetRangeUser(zmin,zmax);
+            histo->GetZaxis()->SetRangeUser(0,1200);
             histSaver->SaveHistogram(histo);
             delete histo;
 
