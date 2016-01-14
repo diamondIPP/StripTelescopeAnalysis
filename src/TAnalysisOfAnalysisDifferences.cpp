@@ -375,8 +375,8 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     histSaver->SaveCanvas(c1);
     if (h2) delete h1;
     if (h1) delete h2;
-    if (hs)
-        delete hs;
+    if (hS)
+        delete hS;
     cout<<"Save6"<<endl;
 
 
