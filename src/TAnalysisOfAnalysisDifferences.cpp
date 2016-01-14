@@ -358,18 +358,18 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     h2->Scale(1./h2->GetBinContent(h2->GetMaximumBin()));
     h1->Draw();
     h2->Draw("same");
-    TH1F* hs= 0;
+    TH1F* hS= 0;
     if(stripHisto){
-        hs = (TH1F*)stripHisto->Clone();
-        hs->Scale(1./hs->GetBinContent(hs->GetMaximumBin()));
-        stripHisto->SetLineColor(kBlue);
-        stripHisto->Draw("same");
-        stripHisto->SetTitle("Strip");
+        hS = (TH1F*)stripHisto->Clone();
+        hS->Scale(1./hS->GetBinContent(hS->GetMaximumBin()));
+        hS->SetLineColor(kBlue);
+        hS->Draw("same");
+        hS->SetTitle("Strip");
     }
     h1->SetTitle("Clustered");
     h2->SetTitle("Tranparent");
     if (leg) delete leg;
-    leg= c1->BuildLegend();
+    leg = c1->BuildLegend();
     leg->SetFillColor(kWhite);
     leg->Draw();
     histSaver->SaveCanvas(c1);
