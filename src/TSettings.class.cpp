@@ -2056,7 +2056,7 @@ UInt_t TSettings::getAlignmentEvents(UInt_t nEvents){
 bool TSettings::isInAlignmentFiducialRegion(Float_t xVal,Float_t yVal){
 
 	Int_t fidCutRegion = this->getSelectionFidCuts()->getFiducialCutIndex(xVal,yVal);
-	if(verbosity>6)cout<<" isInAlignmentFiducialRegion\t"<<fidCutRegion<<flush;
+	if(verbosity>12)cout<<" isInAlignmentFiducialRegion\t"<<fidCutRegion<<flush;
 	for(UInt_t i=0; i < alignmentFidCuts.size();i++)
 		if(alignmentFidCuts.at(i)==0 || alignmentFidCuts.at(i)==fidCutRegion){
 			if(verbosity>6)cout<<"\tTrue"<<endl;
