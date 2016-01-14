@@ -368,7 +368,8 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     }
     h1->SetTitle("Clustered");
     h2->SetTitle("Tranparent");
-    TLegend* leg = c1->BuildLegend();
+    if (leg) delete leg;
+    leg= c1->BuildLegend();
     leg->SetFillColor(kWhite);
     leg->Draw();
     histSaver->SaveCanvas(c1);
