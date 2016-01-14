@@ -674,7 +674,7 @@ UInt_t TADCEventReader::getNClusters(UInt_t det)
 	}
 	if(det<TPlaneProperties::getNDetectors()){
 		UInt_t nClusters = this->pEvent->getNClusters(det);
-		if(verbosity>7){
+		if(verbosity>20){
 			cout<<"TADCEventReader::getNClusters of det "<<det<<": "<<nClusters<<endl;
 			pEvent->setVerbosity(verbosity>3);
 		}
