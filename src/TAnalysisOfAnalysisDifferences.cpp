@@ -329,7 +329,8 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     }
     histSaver->SaveTwoHistos("cComparisionPulseHeights"+extension,histo1,histo2);
     histSaver->SaveTwoHistosNormalized("cComparisionPulseHeightsNormalized"+extension,histo1,histo2);
-    TString name = "cComparisionPulseHeight"+extension;
+
+    TString name = "cComparisionPulseHeightWithStrip"+extension;
     TCanvas *c1 = new TCanvas(name,name);
     histo1->Draw();
     histo2->Draw("same");
@@ -348,6 +349,35 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     leg->Draw();
     histSaver->SaveCanvas(c1);
     cout<<"Save6"<<endl;
+
+    TString name = "cComparisionPulseHeightWithStrip_scaled"+extension;
+    c1->SetName(name);
+    TH1F* h1 = (TH1F*)histo1->Clone();
+    TH1F* h2 = (TH1F*)histo2->Clone();
+    h1->Scale(1./h1->GetBinContent(h1->GetMaximumBin()));
+    h2->Scale(1./h2->GetBinContent(h2->GetMaximumBin()));
+    h1->Draw();
+    h2->Draw("same");
+    TH1F* hs= 0;
+    if(stripHisto){
+        hs = (TH1F*)stripHisto->Clone();
+        hs->Scale(1./hs->GetBinContent(hs->GetMaximumBin()));
+        stripHisto->SetLineColor(kBlue);
+        stripHisto->Draw("same");
+        stripHisto->SetTitle("Strip");
+    }
+    h1->SetTitle("Clustered");
+    h2->SetTitle("Tranparent");
+    TLegend* leg = c1->BuildLegend();
+    leg->SetFillColor(kWhite);
+    leg->Draw();
+    histSaver->SaveCanvas(c1);
+    if (h2) delete h1;
+    if (h1) delete h2;
+    if (hs)
+        delete hs;
+    cout<<"Save6"<<endl;
+
 
     name = "cNoNegativeCharge_PulseHeight_Comparision"+extension;
     c1->SetTitle(name);
