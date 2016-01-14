@@ -350,7 +350,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     histSaver->SaveCanvas(c1);
     cout<<"Save6"<<endl;
 
-    TString name = "cComparisionPulseHeightWithStrip_scaled"+extension;
+    name = "cComparisionPulseHeightWithStrip_scaled"+extension;
     c1->SetName(name);
     TH1F* h1 = (TH1F*)histo1->Clone();
     TH1F* h2 = (TH1F*)histo2->Clone();
