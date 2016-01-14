@@ -720,7 +720,7 @@ void TSelectionClass::saveHistos()
     histSaver->SaveHistogram( hSiliconClusterBitMask);
     delete hSiliconClusterBitMask;
     histSaver->SaveHistogram( hSiliconOneAndOnlyOneClusterBitMask);
-    delete hSiliconClusterBitMask;
+    delete hSiliconOneAndOnlyOneClusterBitMask;
     histSaver->SaveHistogram( hSiliconOneAndOnlyOneValidClusterHitBitMask);
     delete hSiliconOneAndOnlyOneValidClusterHitBitMask;
     histSaver->SaveHistogram(hSiliconValidClusterHitBitMask);
