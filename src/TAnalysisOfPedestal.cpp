@@ -560,7 +560,7 @@ void TAnalysisOfPedestal::initialiseHistos()
                 TPlaneProperties::getNChannels(det),0,TPlaneProperties::getNChannels(det),xbins,xlow,xup);
 
         name ="hNoiseDistributionPerChannel_"+TPlaneProperties::getStringForDetector(det);
-        TString title ="Noise Dist per Channel"+TPlaneProperties::getStringForDetector(det)+"ch no;adc-ped";
+        title ="Noise Dist per Channel"+TPlaneProperties::getStringForDetector(det)+"ch no;adc-ped";
         hNoiseDistribution[det] = new TH2F(name,title,
                 TPlaneProperties::getNChannels(det),0,TPlaneProperties::getNChannels(det),xbins,xlow,xup);
 
