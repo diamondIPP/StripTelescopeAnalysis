@@ -2730,7 +2730,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     pRight = hAdjacentChannels_SNR->ProjectionY("hSNR_right");
     pRight->SetTitle("SNR right");
     pRight->SetLineColor(kGreen);
-    *stack = new THStack("hAllSNRs","hAllSNRs");
+    stack = new THStack("hAllSNRs","hAllSNRs");
     stack->Add(pLeft);
     stack->Add(pRight);
     stack->Add(pMax);
