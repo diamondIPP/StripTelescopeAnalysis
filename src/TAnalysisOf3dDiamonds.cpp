@@ -150,6 +150,8 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
         //cout<<"After Long Analysis"<<endl;
 
     }
+
+    saveHistos();
     cout<< "ENTRIES: "<<clusteredAnalysis->getEntries()<<endl;
     createTreeTestHistos();
     clusteredAnalysis->cellAnalysisTree->SaveAs("analysis3d.root");
@@ -160,7 +162,6 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     cout<<"tree: "<<tree->GetEntries()<<endl;
     cout<<gSystem->pwd()<<" "<<file->GetPath()<<" "<<file->GetName()<<endl;
     file->Close();
-    saveHistos();
 }
 
 /**
