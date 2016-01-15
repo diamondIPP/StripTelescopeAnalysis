@@ -5223,7 +5223,7 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStripFidCutXvsFidCutY->GetZaxis()->SetTitle("Charge ADC");
 
     name = "hLandauStripFiducialPosition"+appendix;
-    hLandauStripFiducialPosition= new TProfile2D(name,name,
+    hLandauStripFiducialPosition= new TH2F(name,name,
             213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
             160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
     hLandauStripFiducialPosition->GetXaxis()->SetTitle("FidCutX");
