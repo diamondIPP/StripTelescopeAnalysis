@@ -165,12 +165,14 @@ private:
 private:
     TCluster GhostCluster;
 	TH1F* hLandauStrip;
+	TH2F* hLandauStripNegativeCharges;
 	TH1F* hLandau3DWithColumns;
-	TH1F* hLandau3DWithoutColumns;
-    TH1F* hLandau3DWithoutColumns_subset;
-	TH2F* hLandauStripFidCutXvsFidCutY;
+	TH1F* hLandau3DPhantom;
+    TH1F* hLandau3DPhantomCentral;
+	TProfile2D* hLandauStripFidCutXvsFidCutY;
+	TH2F* hLandauStripFiducialPosition;
 	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
-	TH2F* hLandau3DWithoutColumnsFidCutXvsFidCutY;
+	TH2F* hLandau3DPhantomFidCutXvsFidCutY;
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
 	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y,xPredicted,yPredicted,xPredDet,yPredDet;

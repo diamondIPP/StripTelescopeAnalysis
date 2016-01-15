@@ -217,6 +217,8 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
             return;
         diamondCluster = & transparentCluster;
     }
+    if (diamondCluster->isSaturatedCluster())
+            return;
 
     //cout<<"Transparent Cluster, ";
     //cout<<"Chi Squared, ";
@@ -255,15 +257,26 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
 
     //cout<<"Entry to Strip Histo."<<endl;
 
-    hLandauStrip->Fill(diamondCluster->getPositiveCharge());
-    hLandauStripFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
+    Float_t charge = diamondCluster->getPositiveCharge();
+    Float_t negativeCharge;
+    Int_t clPos;
+    bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negativeCharge,clPos,useCMN);
+
+    hLandauStrip->Fill(charge);
+    if (hasNegativeCharge)
+        hLandauStripNegativeCharges->Fill(negativeCharge,charge);
+    else
+        hLandauStripNegativeCharges->Fill(0.0,charge);
+    hLandauStripFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY,charge);
+    hLandauStripFiducialPosition->Fill(fiducialValueX, fiducialValueY);
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
 //    if(!settings->do3dTransparentAnalysis()){
         Float_t maxChi2 = settings->getChi2Cut3D();
-
+        if (diamondCluster->isSaturatedCluster())
+                return;
         hNumberofClusters->Fill(eventReader->getNDiamondClusters());
         ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
 
@@ -333,7 +346,8 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
     }
     //Edge Finding
 //    ShortAnalysis_FillEdgeDistributions(diamondCluster->getPositiveCharge(false));
-
+    if (diamondCluster->isSaturatedCluster())
+        return;
     Float_t clusterCharge = diamondCluster->getPositiveCharge(false);
 
     ShortAnalysis_FillMeanChargeVector(clusterCharge);
@@ -524,6 +538,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         diamondCluster = &transparentCluster;
 
     }
+    if (diamondCluster->isSaturatedCluster())
+            return;
     LongAnalysis_FillResolutionPlots();
 //    if (settings->do3dTransparentAnalysis() && !validTransparentAnalysis)
 //        return;
@@ -2307,7 +2323,14 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(hLongAnalysisInvalidCellNo);
     histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
     histSaver->SaveHistogram(hNegativeChargePosition);
-    histSaver->SaveHistogram(hNegativeChargePosition);
+    TString name = "hNegativeChargePosition_"+appendix+"_px";
+    TH1F* proj = hNegativeChargePosition->ProjectionX(name);
+    histSaver->SaveHistogram(proj);
+    delete proj;
+    name = "hNegativeChargePosition_"+appendix+"_py";
+    proj = hNegativeChargePosition->ProjectionY(name);
+    histSaver->SaveHistogram(proj);
+    delete proj;
     TH2F* histo = (TH2F*)hNegativeChargePosition->Clone(hNegativeChargePosition->GetName() +(TString)"_grid");
     TCanvas * c1 = histSaver->DrawHistogramWithCellGrid(histo,histo);
     c1->SetName("chNegativeChargePosition"+appendix);
@@ -2318,7 +2341,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogramWithCellGrid(histo);
     delete c1;
 
-    TString name = "chNegativeChargePositionGrid"+ appendix;
+    name = "chNegativeChargePositionGrid"+ appendix;
     c1 = new TCanvas(name,name);
     c1->cd();
     histo->Draw("colz");
@@ -2796,32 +2819,32 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     TH1F* hStrip = (TH1F*)hLandauStrip->Clone();
     hStrip->SetLineStyle(2);
     histSaver->SaveHistogram(hLandau3DWithColumns);
-    histSaver->SaveHistogram(hLandau3DWithoutColumns);
-    histSaver->SaveHistogram(hLandau3DWithoutColumns_subset);
+    histSaver->SaveHistogram(hLandau3DPhantom);
+    histSaver->SaveHistogram(hLandau3DPhantomCentral);
     histSaver->SaveHistogram(hLandau3DWithColumnsFidCutXvsFidCutY);
-    histSaver->SaveHistogram(hLandau3DWithoutColumnsFidCutXvsFidCutY);
+    histSaver->SaveHistogram(hLandau3DPhantomFidCutXvsFidCutY);
 
     hLandau3DWithColumns->SetTitle("3D");
-    hLandau3DWithoutColumns->SetTitle("3D Phantom");
-    hLandau3DWithoutColumns_subset->SetTitle("3D Phantom, central Region");
+    hLandau3DPhantom->SetTitle("3D Phantom");
+    hLandau3DPhantomCentral->SetTitle("3D Phantom, central Region");
     TString name = "sAllPulseHeigthDistributions";
     name.Append(appendix);
     THStack sAllPulseHeigthDistributions(name,name);
     sAllPulseHeigthDistributions.Add(hLandauStrip);
     sAllPulseHeigthDistributions.Add(hLandau3DWithColumns);
-    sAllPulseHeigthDistributions.Add(hLandau3DWithoutColumns);
-    sAllPulseHeigthDistributions.Add(hLandau3DWithoutColumns_subset);
+    sAllPulseHeigthDistributions.Add(hLandau3DPhantom);
+    sAllPulseHeigthDistributions.Add(hLandau3DPhantomCentral);
     histSaver->SaveStack(&sAllPulseHeigthDistributions,"nostack",true,false);
 
 
     Float_t max = hLandau3DWithColumns->GetBinContent(hLandau3DWithColumns->GetMaximumBin());
     hLandau3DWithColumns->Scale(1./max);
 
-    max = hLandau3DWithoutColumns->GetBinContent(hLandau3DWithoutColumns->GetMaximumBin());
-    hLandau3DWithoutColumns->Scale(1./max);
+    max = hLandau3DPhantom->GetBinContent(hLandau3DPhantom->GetMaximumBin());
+    hLandau3DPhantom->Scale(1./max);
 
-    max = hLandau3DWithoutColumns_subset->GetBinContent(hLandau3DWithoutColumns_subset->GetMaximumBin());
-    hLandau3DWithoutColumns_subset->Scale(1./max);
+    max = hLandau3DPhantomCentral->GetBinContent(hLandau3DPhantomCentral->GetMaximumBin());
+    hLandau3DPhantomCentral->Scale(1./max);
 
     max = hStrip->GetBinContent(hStrip->GetMaximumBin());
     hStrip->Scale(1./max);
@@ -2832,8 +2855,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     THStack sAllPulseHeigthDistributions_normalized(name,name);
     sAllPulseHeigthDistributions_normalized.Add(hStrip);
     sAllPulseHeigthDistributions_normalized.Add(hLandau3DWithColumns);
-    sAllPulseHeigthDistributions_normalized.Add(hLandau3DWithoutColumns);
-    sAllPulseHeigthDistributions_normalized.Add(hLandau3DWithoutColumns_subset);
+    sAllPulseHeigthDistributions_normalized.Add(hLandau3DPhantom);
+    sAllPulseHeigthDistributions_normalized.Add(hLandau3DPhantomCentral);
     sAllPulseHeigthDistributions_normalized.Draw("");
     gPad->Update();;
     if(sAllPulseHeigthDistributions_normalized.GetXaxis()) sAllPulseHeigthDistributions_normalized.GetXaxis()->SetTitle("charge / ADC");
@@ -2845,8 +2868,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     c1->SetObjectStat(false);
     hLandau3DWithColumns->SetObjectStat(false);
     hLandau3DWithColumns->Draw();
-    hLandau3DWithoutColumns->Draw("same");
-    hLandau3DWithoutColumns_subset->Draw("same");
+    hLandau3DPhantom->Draw("same");
+    hLandau3DPhantomCentral->Draw("same");
     hStrip->Draw("same");
     TLegend* leg = c1->BuildLegend();
     leg->SetFillColor(kWhite);
@@ -2856,10 +2879,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
 
     delete hStrip;
     delete hLandau3DWithColumns;
-    delete hLandau3DWithoutColumns;
-    delete hLandau3DWithoutColumns_subset;
+    delete hLandau3DPhantom;
+    delete hLandau3DPhantomCentral;
     delete hLandau3DWithColumnsFidCutXvsFidCutY;
-    delete hLandau3DWithoutColumnsFidCutXvsFidCutY;
+    delete hLandau3DPhantomFidCutXvsFidCutY;
 }
 vector<Float_t> TAnalysisOf3dDiamonds::LongAnalysis_GradeCellByQuarters(int quarterFailCriteriaTyp, vector<TH1F*> hQuarterLandaus){
     vector<Float_t> vecFluctuations;
@@ -4878,10 +4901,10 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_FillMeanChargeVector(
 
     Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
     if (predictedDetector == 2){
-        hLandau3DWithoutColumns->Fill(clusterCharge);
-        hLandau3DWithoutColumnsFidCutXvsFidCutY->Fill(fiducialValueX,fiducialValueY);
+        hLandau3DPhantom->Fill(clusterCharge);
+        hLandau3DPhantomFidCutXvsFidCutY->Fill(fiducialValueX,fiducialValueY);
         if(settings->centralRegion3DnH->IsInFiducialCut(xPredDet,yPredDet))
-            hLandau3DWithoutColumns_subset->Fill(clusterCharge);
+            hLandau3DPhantomCentral->Fill(clusterCharge);
     }
     else if (predictedDetector == 3){
         hLandau3DWithColumns->Fill(clusterCharge);
@@ -4945,19 +4968,19 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hLandau3DWithColumns->SetLineColor(kBlack);
     name = "hLandau3DWO";
     name.Append(appendix);
-    hLandau3DWithoutColumns = new TH1F(name,"3D Phantom",PulseHeightBins,PulseHeightMin,PulseHeightMax);
-    hLandau3DWithoutColumns->GetXaxis()->SetTitle("charge / ADC");
-    hLandau3DWithoutColumns->GetYaxis()->SetTitle("number of entries #");
-    hLandau3DWithoutColumns->SetLineColor(kRed);
-    hLandau3DWithoutColumns->SetLineStyle(7);
+    hLandau3DPhantom = new TH1F(name,"3D Phantom",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DPhantom->GetXaxis()->SetTitle("charge / ADC");
+    hLandau3DPhantom->GetYaxis()->SetTitle("number of entries #");
+    hLandau3DPhantom->SetLineColor(kRed);
+    hLandau3DPhantom->SetLineStyle(7);
 
     name = "hLandau3DWO_subset";
     name.Append(appendix);
-    hLandau3DWithoutColumns_subset = new TH1F(name,"3D Phantom, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
-    hLandau3DWithoutColumns_subset->GetXaxis()->SetTitle("charge / ADC");
-    hLandau3DWithoutColumns_subset->GetYaxis()->SetTitle("number of entries #");
-    hLandau3DWithoutColumns_subset->SetLineColor(kRed);
-    hLandau3DWithoutColumns_subset->SetLineWidth(2);
+    hLandau3DPhantomCentral = new TH1F(name,"3D Phantom, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DPhantomCentral->GetXaxis()->SetTitle("charge / ADC");
+    hLandau3DPhantomCentral->GetYaxis()->SetTitle("number of entries #");
+    hLandau3DPhantomCentral->SetLineColor(kRed);
+    hLandau3DPhantomCentral->SetLineWidth(2);
 
     name = "hLandau3DWithColumnsFidCutXvsFidCutY";
     hLandau3DWithColumnsFidCutXvsFidCutY = new TH2F(name,name,
@@ -4967,11 +4990,11 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hLandau3DWithColumnsFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
 
     name = "hLandau3DWithoutColumnsFidCutXvsFidCutY";
-    hLandau3DWithoutColumnsFidCutXvsFidCutY = new TH2F(name,name,
+    hLandau3DPhantomFidCutXvsFidCutY = new TH2F(name,name,
             213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
             160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
-    hLandau3DWithoutColumnsFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
-    hLandau3DWithoutColumnsFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
+    hLandau3DPhantomFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
+    hLandau3DPhantomFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
 
     if(settings->do3dShortAnalysis() == 1){
         initialiseShortAnalysisHistos();
@@ -5181,18 +5204,38 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStrip->GetYaxis()->SetTitle("number of entries #");
     hLandauStrip->SetLineColor(kBlue);
 
+    Int_t xbins = 512;
+    Float_t xlow = -500;
+    Float_t xup = 0;
+    name = "hLandauStripNegativeCharges"+appendix;
+    hLandauStripNegativeCharges = new TH2F(name,name,xbins,xlow,xup,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandauStripNegativeCharges->GetXaxis()->SetTitle("AdjacentNegativeCharge / ADC");
+    hLandauStripNegativeCharges->GetYaxis()->SetTitle("charge / ADC");
+    hLandauStripNegativeCharges->GetZaxis()->SetTitle("no of entries");
+
+
     name = "hLandauStripFidCutXvsFidCutY"+appendix;
-    hLandauStripFidCutXvsFidCutY = new TH2F(name,name,
+    hLandauStripFidCutXvsFidCutY = new TProfile2D(name,name,
             213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
             160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
     hLandauStripFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
     hLandauStripFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
     hLandauStripFidCutXvsFidCutY->GetZaxis()->SetTitle("Charge ADC");
+
+    name = "hLandauStripFiducialPosition"+appendix;
+    hLandauStripFiducialPosition= new TProfile2D(name,name,
+            213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
+            160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
+    hLandauStripFiducialPosition->GetXaxis()->SetTitle("FidCutX");
+    hLandauStripFiducialPosition->GetYaxis()->SetTitle("FidCutY");
+    hLandauStripFiducialPosition->GetZaxis()->SetTitle("number of entries");
 }
 
 void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     histSaver->SaveHistogram(hLandauStrip);
     histSaver->SaveHistogram(hLandauStripFidCutXvsFidCutY);
+    histSaver->SaveHistogram(hLandauStripNegativeCharges);
+    histSaver->SaveHistogram(hLandauStripFiducialPosition);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
