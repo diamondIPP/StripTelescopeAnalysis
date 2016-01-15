@@ -449,6 +449,7 @@ private:
     vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHit;
     TH2F* hAdjacentChannels_SNR;
     TH2F* hAdjacentSNR_vs_cellNo;
+    TH2F* hAdjacentChannels_Signal;
 private:
 	TH2F* hLongAnalysisInvalidCellNo;
 	TH2F* hLongAnalysisInvalidCluster;

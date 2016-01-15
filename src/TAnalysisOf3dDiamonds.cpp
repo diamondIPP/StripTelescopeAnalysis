@@ -2354,7 +2354,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     TString title = "hAdjacentSNR_vs_cellNo"+appendix;
     title+=";Cell No;SNR adjacent Strip";
     hAdjacentSNR_vs_cellNo = new TH2F(name,title,nCells,0,nCells,160,-30,50);
-
+    name = "hAdjacentChannels_Signal"+appendix;
+    title = "hAdjacentChannels_Signal"+appendix;
+    title+=";Signal left Strip / ADC No;Signal right Strip / ADC";
+    hAdjacentChannels_Signal = new TH2F(name,title,300,-300,300,300,-300,300);
     for (UInt_t cell = 0; cell <nCells;cell++){
         name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
@@ -2465,7 +2468,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     hAdjacentChannels_SNR->Fill(diamondCluster->getSNR(highest_hit_pos-1,useCMN),
                                 diamondCluster->getSNR(highest_hit_pos+1,useCMN));
     if (hAdjacentSNR_vs_cellNo)
-    hAdjacentSNR_vs_cellNo->Fill(cellNo,snr);
+        hAdjacentSNR_vs_cellNo->Fill(cellNo,snr);
+    if (hAdjacentChannels_Signal)
+        hAdjacentChannels_Signal->Fill(diamondCluster->getSignal(highest_hit_pos-1,useCMN),
+                                       diamondCluster->getSignal(highest_hit_pos+1,useCMN));
 
     Float_t pos_max = diamondCluster->getPosition(useCMN,TCluster::maxValue);
     Float_t delta_max = pos_max - predPos;
@@ -2689,17 +2695,32 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
 
 
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
+    histSaver->SaveHistogram(hAdjacentChannels_Signal);
+    TH1D* pLeft = hAdjacentChannels_Signal->ProjectionX("hSNR_left");
+    pLeft->SetTitle("Signal left / ADC");
+    pLeft->SetLineColor(kRed);
+    TH1D* pRight = hAdjacentChannels_Signal->ProjectionY("hSNR_right");
+    pRight->SetTitle("Signal right / ADC");
+    pRight->SetLineColor(kGreen);
+    THStack *stack = new THStack("hAdjacentChannels_SignalAll","hAdjacentChannels_SignalAll");
+    stack->Add(pLeft);
+    stack->Add(pRight);
+    histSaver->SaveStack(stack,"nostack",true,false,"Signal","number of entries");
+    delete stack;
+    delete pLeft;
+    delete pRight;
+
 
     TH1D* pMax = hAdjacentSNR_vs_cellNo->ProjectionY("hAdjacentSNR");
     pMax->SetTitle("SNR max");
     histSaver->SaveHistogram(pMax);
-    TH1D* pLeft = hAdjacentChannels_SNR->ProjectionX("hSNR_left");
+    pLeft = hAdjacentChannels_SNR->ProjectionX("hSNR_left");
     pLeft->SetTitle("SNR left");
     pLeft->SetLineColor(kRed);
-    TH1D* pRight = hAdjacentChannels_SNR->ProjectionY("hSNR_right");
+    pRight = hAdjacentChannels_SNR->ProjectionY("hSNR_right");
     pRight->SetTitle("SNR right");
     pRight->SetLineColor(kGreen);
-    THStack *stack = new THStack("hAllSNRs","hAllSNRs");
+    *stack = new THStack("hAllSNRs","hAllSNRs");
     stack->Add(pLeft);
     stack->Add(pRight);
     stack->Add(pMax);
@@ -2716,6 +2737,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     LongAnalysis_SaveSNRPerCell();
     delete hAdjacentSNR_vs_cellNo;
     delete hAdjacentChannels_SNR;
+    delete hAdjacentChannels_Signal;
     hAdjacentChannels_SNR=0;
 }
 
