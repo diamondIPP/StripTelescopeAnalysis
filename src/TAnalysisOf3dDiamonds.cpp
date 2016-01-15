@@ -851,8 +851,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
         if(verbosity) cout<<"Loop: "<<i<<endl;
         pair<int,int> channels =settings->diamondPattern.getPatternChannels(i+1);
         //hLandau
-        name = TString::Format("hLandau_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
-        name.Append(appendix);
+        name = TString::Format("hLandau_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second) +appendix;
         if(verbosity>1) cout<<"Create "<<name<<endl;
         hLandau.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
         if(hLandau.back()){
@@ -863,8 +862,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
             cerr<<"hLandau:'"<<name<<"' wasn't created correctly"<<endl;
 
         //hPHvsChannel
-        name = TString::Format("hEventsvsChannel_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
-        name.Append(appendix);
+        name = TString::Format("hEventsvsChannel_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second) + appendix;
         hEventsvsChannel.push_back(new TH1F(name,name,100,0,100));
         if(hEventsvsChannel.back()){
             hEventsvsChannel.back()->GetXaxis()->SetTitle("HighestPH [ch]");
@@ -872,8 +870,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
         }
 
         //hPHvsChannel
-        name = TString::Format("hPHvsChannel_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
-        name.Append(appendix);
+        name = TString::Format("hPHvsChannel_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second) + appendix;
         hPHvsChannel.push_back(new TH2F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax,100,0,100));
         if(hPHvsChannel.back()){
             hPHvsChannel.back()->Draw();
@@ -883,12 +880,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
             hPHvsChannel.back()->GetYaxis()->SetRangeUser(channels.first-1,channels.second+1);
             hPHvsChannel.back()->GetXaxis()->SetTitle("cluster charge /ADC");
             hPHvsChannel.back()->GetYaxis()->SetTitle("XPos /ch");
-            //hPHvsChannel.back()->GetXaxis()->SetRange(PulseHeightMin,PulseHeightMax);
         }
-
-        //hPHvsChannel.at(i)->SetMaximum(3000);
-        //hPHvsChannel.at(i)->SetMinimum(0);
-
         //hHitandSeedCount
         name = TString::Format("hHitandSeedCount_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second);
         name.Append(appendix);
@@ -972,8 +964,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
         hFidCutXvsFidCutYClusters.at(i)->GetZaxis()->SetTitle("Events");
     }
 
-    name ="hShortAnalysis2ClusterHitPattern_1stCluster";
-    name.Append(appendix);
+    name ="hShortAnalysis2ClusterHitPattern_1stCluster" + appendix;
     int nFidCuts =settings->get3dMetallisationFidCuts()->getNFidCuts();
     hShortAnalysis2ClusterHitPattern_1stCluster =  new TH2F(name,name,
             nFidCuts,.5,nFidCuts+.5,
@@ -981,8 +972,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hShortAnalysis2ClusterHitPattern_1stCluster->GetXaxis()->SetTitle("predicteded hit pattern");
     hShortAnalysis2ClusterHitPattern_1stCluster->GetYaxis()->SetTitle("cluster_{1}-hit-pattern - predicted-hit-pattern");
 
-    name = "hShortAnalysis2ClusterHitPattern_2ndCluster";
-    name.Append(appendix);
+    name = "hShortAnalysis2ClusterHitPattern_2ndCluster" + appendix;
     hShortAnalysis2ClusterHitPattern_2ndCluster = (TH2F*)hShortAnalysis2ClusterHitPattern_1stCluster->Clone(name);
     hShortAnalysis2ClusterHitPattern_2ndCluster->SetTitle(name);
     hShortAnalysis2ClusterHitPattern_2ndCluster->GetYaxis()->SetTitle("cluster_{2}-hit-pattern - predicted-hit-pattern");
@@ -2046,7 +2036,6 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
             if (i==0)
                 extension = "_all";
             name = hShortAnalysis2ClusterHitPattern_1stCluster->GetName();
-            name.Append(appendix);
             name.Append(extension);
             if(verbosity>3) cout<<name<<endl;
             if(i==0)
@@ -2056,7 +2045,6 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
                 histo1st_py= hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionY(name,i,i);
             }
             name = hShortAnalysis2ClusterHitPattern_2ndCluster->GetName();
-            name.Append(appendix);
             name.Append(extension);
             if(verbosity>3)cout<<name<<endl;
 
@@ -2064,24 +2052,23 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
                 histo2nd_py = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionY(name);
             else
                 histo2nd_py = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionY(name,i,i);
-            name = "h2ClusterAnalysis_ClusterPatterns";
-            name.Append(appendix);
-            name.Append(extension);
+            name = "h2ClusterAnalysis_ClusterPatterns" +appendix + extension;
             histSaver->SaveTwoHistos((string)name,histo1st_py,histo2nd_py);
             histSaver->SaveHistogram(histo1st_py);
             histSaver->SaveHistogram(histo2nd_py);
             delete histo1st_py;
             delete histo2nd_py;
         }
-        name = "c2ClusterAnalysis_ClusterPatterns";
-        name.Append(appendix);
-        TH1D* histo1st_px = hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionX();//name);
-        TH1D* histo2nd_px = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionX();//name);
+        name = "c2ClusterAnalysis_ClusterPatterns_px" +appendix;
+        TH1D* histo1st_px = hShortAnalysis2ClusterHitPattern_1stCluster->ProjectionX(name);
+        name = "c2ClusterAnalysis_ClusterPatterns_py" +appendix;
+        TH1D* histo2nd_px = hShortAnalysis2ClusterHitPattern_2ndCluster->ProjectionX(name);
+        name = "c2ClusterAnalysis_ClusterPatterns" +appendix;
         histSaver->SaveTwoHistos((string)name,histo1st_px,histo2nd_px);
         histSaver->SaveHistogram(histo1st_px);
         histSaver->SaveHistogram(histo2nd_px);
-        //		if(histo1st_px) delete histo1st_px;
-        //		if(histo2nd_px) delete histo2nd_px;
+        if(histo1st_px) delete histo1st_px;
+        if(histo2nd_px) delete histo2nd_px;
     }
 
     //	char t; cin>>t;
@@ -2098,7 +2085,6 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
         pair<int,int> channels = settings->diamondPattern.getPatternChannels(i+1);
         name = "c_";
         name.Append(hLandau[i]->GetName());
-        name.Append(appendix);
 
         Float_t factor = hLandau[i]->GetBinContent(hLandau[i]->GetMaximumBin());
         factor/= (Float_t) hLandauStrip->GetBinContent(hLandauStrip->GetMaximumBin());
@@ -2110,10 +2096,8 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
         histSaver->SaveHistogram(hHitandSeedCount[i]);
 
         name = "c_"+(TString)hPHvsChannel[i]->GetName();
-        name.Append(appendix);
         TCanvas *c1 = new TCanvas(name,name);
         name = "h"+(TString)hPHvsChannel[i]->GetName();
-        name.Append(appendix);
 
         Int_t min = channels.first-1;
         max = channels.second+1;
@@ -3001,7 +2985,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
     }
     if(hPulseHeigthEdgeRegionCell && hPulseHeigthCentralRegionCell){
         TString name = "hPulseHeigthCompareRegion_Cell"+appendix;
-        name.Append(appendix);
         hCompare = (TProfile2D*)hPulseHeigthCentralRegionCell->Clone(name);
         if(hCompare){
             hCompare->Draw("goffcolz");
