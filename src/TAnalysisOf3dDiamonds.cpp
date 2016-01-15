@@ -5263,6 +5263,10 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     histSaver->SaveHistogram(hLandauStripFidCutXvsFidCutY);
     histSaver->SaveHistogram(hLandauStripNegativeChargesClPos);
     histSaver->SaveHistogram(hLandauStripNegativeCharges);
+    TString name = "hLandauStripNegativeCharges"+appendix+"_px";
+    TH2D* px = hLandauStripNegativeCharges->ProjectionX(name);
+    histSaver->SaveHistogram(px);
+    delete px;
     histSaver->SaveHistogram(hLandauStripFiducialPosition);
 }
 
