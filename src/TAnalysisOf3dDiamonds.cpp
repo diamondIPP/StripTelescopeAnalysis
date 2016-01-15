@@ -260,13 +260,17 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     Float_t charge = diamondCluster->getPositiveCharge();
     Float_t negativeCharge;
     Int_t clPos;
+    UInt_t clsize = diamondCluster->GetTransparentClusterSize();
+    diamondCluster->SetTransparentClusterSize(3);
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negativeCharge,clPos,useCMN);
+    diamondCluster->SetTransparentClusterSize(clsize);
 
     hLandauStrip->Fill(charge);
     if (hasNegativeCharge)
         hLandauStripNegativeCharges->Fill(negativeCharge,charge);
     else
         hLandauStripNegativeCharges->Fill(0.0,charge);
+    hLandauStripNegativeChargesClPos->Fill(negativeCharge,clPos);
     hLandauStripFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY,charge);
     hLandauStripFiducialPosition->Fill(fiducialValueX, fiducialValueY);
 }
@@ -362,8 +366,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
 
         if(HighestSignalChannel<=channels.second && HighestSignalChannel>=channels.first){
 
-            if(!settings->do3dTransparentAnalysis()){
-            }
             TFiducialCut *cut = settings->getSelectionFidCuts()->getFidCut(i+1);
             if (!cut){
                 cerr<<"Cannot get cut no "<<i+1<<" in "<<settings->getSelectionFidCuts()->getNFidCuts()<<endl;
@@ -2307,7 +2309,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(hLongAnalysisInvalidCellNo);
     histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
     histSaver->SaveHistogram(hNegativeChargePosition);
-    TString name = "hNegativeChargePosition_"+appendix+"_px";
+    TString name = "hNegativeChargePosition"+appendix+"_px";
     TH1D* proj_px = hNegativeChargePosition->ProjectionX(name);
     histSaver->SaveHistogram(proj_px);
     name = "hNegativeChargePosition_"+appendix+"_py";
@@ -5189,12 +5191,21 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
 
     Int_t xbins = 512;
     Float_t xlow = -500;
-    Float_t xup = 0;
+    Float_t xup = 12;
     name = "hLandauStripNegativeCharges"+appendix;
     hLandauStripNegativeCharges = new TH2F(name,name,xbins,xlow,xup,PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandauStripNegativeCharges->GetXaxis()->SetTitle("AdjacentNegativeCharge / ADC");
     hLandauStripNegativeCharges->GetYaxis()->SetTitle("charge / ADC");
     hLandauStripNegativeCharges->GetZaxis()->SetTitle("no of entries");
+
+    Int_t xbins = 7;
+    xlow = -2;
+    xup = 5;
+    name = "hLandauStripNegativeChargesClPos"+appendix;
+    hLandauStripNegativeChargesClPos = new TH2F(name,name,xbins,xlow,xup,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandauStripNegativeChargesClPos->GetXaxis()->SetTitle("neg charge of cluster / ADC");
+    hLandauStripNegativeChargesClPos->GetYaxis()->SetTitle("rel. Pos of negative in transp. cluster");
+    hLandauStripNegativeChargesClPos->GetZaxis()->SetTitle("no of entries");
 
 
     name = "hLandauStripFidCutXvsFidCutY"+appendix;
@@ -5217,6 +5228,7 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
 void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     histSaver->SaveHistogram(hLandauStrip);
     histSaver->SaveHistogram(hLandauStripFidCutXvsFidCutY);
+    histSaver->SaveHistogram(hLandauStripNegativeChargesClPos);
     histSaver->SaveHistogram(hLandauStripNegativeCharges);
     histSaver->SaveHistogram(hLandauStripFiducialPosition);
 }
