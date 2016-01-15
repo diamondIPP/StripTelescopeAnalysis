@@ -109,7 +109,8 @@ void TAnalysisOfAnalysisDifferences::LoopOverBothMaps(){
     cout<<"loop over events: "<<itPredicted->first<<endl;
 //    char t; cout<<"Key Press:"<<flush; cin >>t;
     while (!endLoop){
-        cout<<"TAnalysisOfAnalysisDifferences::looping"<<flush;
+        if (verbosity>2)
+            cout<<"TAnalysisOfAnalysisDifferences::looping"<<flush;
         UpdatePredictedPosition();
 
         if (itClustered->first == itTransparent->first){
@@ -199,12 +200,13 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     else
         mapHistos["hNoNegativeCharge_PulseHeight"]->Fill(posCharge);
     mapHistos["hPositive_Minus_Negative_TransparentCharge"]->Fill(posCharge-transparentCharge);
-    if ( posCharge - clusteredCharge < 0 ){
-        cout<<"posCharge - clusteredCharge" <<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\t\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
+    if ( posCharge - clusteredCharge < 0 && verbosity>0 && itClustered->second.getClusterSize()<4){
+        cout<<"posCharge - clusteredCharge " <<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
         cout<<"\tclustered: ";
         itClustered->second.Print(2);
         cout<<"\ttransparent: ";
         itTransparent->second.Print(2);
+        cout<<endl;
     }
     mapHistos["hPositiveTransparentCharge_Minus_ClusteredCharge"]->Fill(posCharge-clusteredCharge);
     //    cout<<"\t"<<transparentCharge<<"\t"<<posCharge<<" = "<<transparentCharge-posCharge<<" "<<clusteredCharge-posCharge<<endl;
@@ -577,7 +579,8 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
 }
 
 void TAnalysisOfAnalysisDifferences::UpdatePredictedPosition() {
-    cout<<"UPDATE Postion"<<endl;
+
+    if (verbosity>2)cout<<"UPDATE Postion"<<endl;
     while (itClustered->first > itPredicted->first &&
             itTransparent->first > itPredicted->first &&
             itPredicted!= predictedPositions->end()){
