@@ -2791,6 +2791,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
     histSaver->SaveGraph(&g,"gNegativeVsAvrgSignal");
     g.SetMarkerStyle(5);
     g = histSaver->CreateDipendencyGraph("gRelNegativeVsAvrgSignal",rNegativeSNRs,fSignal);
+    g.SetMarkerStyle(5);
     histSaver->SaveGraph(&g,"gRelNegativeVsAvrgSignal");
     std::vector<Float_t>::iterator result = std::min_element(nNegativeSNRs.begin(), nNegativeSNRs.end());
     Float_t minX = *result;
@@ -2830,8 +2831,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
     hRelNegativeVsAvrgSignal->GetXaxis()->SetTitle("rel. no. of adjacent negative SNRs in Cell");
     histSaver->SaveHistogram(hRelNegativeVsAvrgSignal);
 
-    histSaver->SaveHistogram(hNegativeSNRs);
-    histSaver->SaveHistogram(hNegativeSNRsRelative);
+    histSaver->SaveTwoHistos(hNegativeSNRs->GetName(),hNegativeSNRs,hNegativeSNRs);
+    histSaver->SaveTwoHistos(hNegativeSNRsRelative->GetName(),hNegativeSNRsRelative,hNegativeSNRsRelative);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
