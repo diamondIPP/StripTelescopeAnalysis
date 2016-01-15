@@ -132,7 +132,8 @@ void TAnalysisOfPedestal::analyseEvent(){
             checkForDeadChannels(det,ch);
             updateMeanCalulation(det,ch);
             findBiggestSignalInDet(det,ch);
-
+            hNoiseDistributionCMN[det]->Fill(ch,noiseCMN);
+            hNoiseDistribution[det]->Fill(ch,noise);
             if(det == TPlaneProperties::getDetDiamond() && ch == settings->getNoisePlotChannel()){
                 Float_t hitCut = settings->getClusterHitFactor(det,ch);
                 Float_t seedCut = settings->getClusterSeedFactor(det,ch);
@@ -477,6 +478,7 @@ void TAnalysisOfPedestal::initialiseHistos()
         histo->GetXaxis()->SetTitle("biggest adjacent hit in sigma cmn");
         histo->GetYaxis()->SetTitle("number of entries #");
         hBiggestAdjacentSignalInSigmaDiaPatternCMN[i+1] = histo;
+
     }
     map<Int_t,TH1F*>::iterator it;
     for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++)
@@ -538,6 +540,30 @@ void TAnalysisOfPedestal::initialiseHistos()
             hDiaAllAdcNoiseCMNChannel->GetYaxis()->SetTitle(xTitle.str().c_str());
             hDiaAllAdcNoiseCMNChannel->GetZaxis()->SetTitle(yTitle.str().c_str());
         }
+
+        Int_t nbins = 512;
+        Float_t xlow;
+        Float_t xup;
+        if (TPlaneProperties::isSiliconDetector(det)){
+            xlow = -10;
+            xup = 10;
+        }
+        else{
+            xlow = -100;
+            xup = 100;
+        }
+
+
+        name ="hNoiseDistributionPerChannelCMN_"+TPlaneProperties::getStringForDetector(det);
+        TString title ="Noise Dist per Channel CMN "+TPlaneProperties::getStringForDetector(det)+"ch no;adc-ped-cmn";
+        hNoiseDistributionCMN[det] = new TH2F(name,title,
+                TPlaneProperties::getNChannels(det),0,TPlaneProperties::getNChannels(det),xbins,xlow,xup);
+
+        name ="hNoiseDistributionPerChannel_"+TPlaneProperties::getStringForDetector(det);
+        TString title ="Noise Dist per Channel"+TPlaneProperties::getStringForDetector(det)+"ch no;adc-ped";
+        hNoiseDistribution[det] = new TH2F(name,title,
+                TPlaneProperties::getNChannels(det),0,TPlaneProperties::getNChannels(det),xbins,xlow,xup);
+
     }
 
     for (int det=0;det<9;det++){
@@ -1100,6 +1126,12 @@ void TAnalysisOfPedestal::saveHistos(){
         if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
         histSaver->SaveHistogramPNG(hSaturatedChannels[det]);
         hSaturatedChannels[det]->Delete();
+
+        histSaver->SaveHistogram(hNoiseDistributionCMN[det]);
+        delete hNoiseDistributionCMN[det];
+
+        histSaver->SaveHistogram(hNoiseDistribution[det]);
+        delete hNoiseDistribution[det];
     }
     for (int det=0;det<9;det++){
         if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSeedMap[det]->GetName()<<endl;
