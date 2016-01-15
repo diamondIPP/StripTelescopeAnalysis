@@ -5198,7 +5198,7 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStripNegativeCharges->GetYaxis()->SetTitle("charge / ADC");
     hLandauStripNegativeCharges->GetZaxis()->SetTitle("no of entries");
 
-    Int_t xbins = 7;
+    xbins = 7;
     xlow = -2;
     xup = 5;
     name = "hLandauStripNegativeChargesClPos"+appendix;

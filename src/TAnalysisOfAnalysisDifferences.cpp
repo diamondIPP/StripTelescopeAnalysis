@@ -166,7 +166,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     itTransparent->second.SetTransparentClusterSize(3);
     Float_t transparentCharge = itTransparent->second.getCharge(true);
     if (itClustered->second.isSaturatedCluster()||itTransparent->second.isSaturatedCluster())
-        continue;
+        return;
     Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
     mapHistos["hTransparentPulseHeight"]->Fill(posCharge);
     mapHistos["hClusteredPulseHeight"]->Fill(clusteredCharge);
