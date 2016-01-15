@@ -141,6 +141,16 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
         else
             isTransparentCluster = false;
 
+        if(!settings->do3dTransparentAnalysis()){
+            diamondCluster = &clusteredCluster;
+        }
+        else
+        {
+            diamondCluster = &transparentCluster;
+
+        }
+        if (diamondCluster->isSaturatedCluster())
+                return;
         //cout<<"Before Strip Analysis"<<endl;
         StripAnalysis();
         //cout<<"After Strip Analysis"<<endl;
