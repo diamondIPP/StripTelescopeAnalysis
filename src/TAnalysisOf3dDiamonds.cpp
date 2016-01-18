@@ -269,21 +269,28 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     //cout<<"Entry to Strip Histo."<<endl;
 
     Float_t charge = diamondCluster->getPositiveCharge();
+    hLandauStripFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY,charge);
+    hLandauStripFiducialPosition->Fill(fiducialValueX, fiducialValueY);
     Float_t negativeCharge;
     Int_t clPos;
-    UInt_t clsize = diamondCluster->GetTransparentClusterSize();
-    diamondCluster->SetTransparentClusterSize(3);
+    UInt_t clsize;
+    if (settings->do3dTransparentAnalysis()){
+        clsize = diamondCluster->GetTransparentClusterSize();
+        diamondCluster->SetTransparentClusterSize(3);
+    }
+    hLandauStrip->Fill(charge);
+    if (!settings->do3dTransparentAnalysis())
+        return;
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negativeCharge,clPos,useCMN);
     diamondCluster->SetTransparentClusterSize(clsize);
 
-    hLandauStrip->Fill(charge);
-    if (hasNegativeCharge)
+    cout<<nEvent<<" "<<hasNegativeCharge<<" "<<negativeCharge<<" "<<clPos<<" "<<useCMN;
+    diamondCluster->Print();
+    if (negativeCharge<0)
         hLandauStripNegativeCharges->Fill(negativeCharge,charge);
     else
         hLandauStripNegativeCharges->Fill(0.0,charge);
     hLandauStripNegativeChargesClPos->Fill(negativeCharge,clPos);
-    hLandauStripFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY,charge);
-    hLandauStripFiducialPosition->Fill(fiducialValueX, fiducialValueY);
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
