@@ -289,7 +289,7 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         diamondCluster->Print(1);
     }
     if (negativeCharge<0){
-        cout<<"\n"<<nEvent<<"\tFill: "<<hasNegativeCharge<<" "<<negativeCharge<< " " <<clPos<<" "<< charge<<endl;
+        cout<<nEvent<<"\tFill: "<<hasNegativeCharge<<" "<<negativeCharge<< " " <<clPos<<" "<< charge<<endl;
         hLandauStripNegativeCharges->Fill(negativeCharge,charge);
         //    else
         //        hLandauStripNegativeCharges->Fill(0.0,charge);
@@ -5243,11 +5243,11 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStripNegativeCharges->GetYaxis()->SetTitle("charge / ADC");
     hLandauStripNegativeCharges->GetZaxis()->SetTitle("no of entries");
 
-    xbins = 7;
-    xlow = -2;
-    xup = 5;
+    Int_t ybins = 7;
+    Float_t ylow = -2;
+    Float_t yup = 5;
     name = "hLandauStripNegativeChargesClPos"+appendix;
-    hLandauStripNegativeChargesClPos = new TH2F(name,name,xbins,xlow,xup,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandauStripNegativeChargesClPos = new TH2F(name,name,xbins,xlow,xup,ybins,ylow,yup);//PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandauStripNegativeChargesClPos->GetXaxis()->SetTitle("neg charge of cluster / ADC");
     hLandauStripNegativeChargesClPos->GetYaxis()->SetTitle("rel. Pos of negative in transp. cluster");
     hLandauStripNegativeChargesClPos->GetZaxis()->SetTitle("no of entries");
