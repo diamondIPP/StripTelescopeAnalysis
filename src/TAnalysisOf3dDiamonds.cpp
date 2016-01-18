@@ -5273,13 +5273,15 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
 void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     histSaver->SaveHistogram(hLandauStrip);
     histSaver->SaveHistogram(hLandauStripFidCutXvsFidCutY);
+    histSaver->SaveHistogram(hLandauStripFiducialPosition);
+    if (!settings->do3dTransparentAnalysis())
+        return;
     histSaver->SaveHistogram(hLandauStripNegativeChargesClPos);
     histSaver->SaveHistogram(hLandauStripNegativeCharges);
     TString name = "hLandauStripNegativeCharges"+appendix+"_px";
     TH1D* px = hLandauStripNegativeCharges->ProjectionX(name);
     histSaver->SaveHistogram(px);
     delete px;
-    histSaver->SaveHistogram(hLandauStripFiducialPosition);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
