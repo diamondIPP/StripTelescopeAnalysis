@@ -630,7 +630,7 @@ void HistogrammSaver::AddMarkedCells(TCanvas *c1){
         int row = settings->getRowOfCell(i);
         int cellno = settings->get3DCellNo(column,row);
         //cout<<"Cell: "<<i<<"|"<<cellno<<": "<<column<<"/"<<row<<": "<<cellType<<endl;
-        cell = settings->GetCell(i,histo->GetName());
+        cell = settings->GetCell(i,c1->GetName());
         cell->SetLineWidth(2);
         switch (cellType){
             case 1: cell->SetLineColor(kGreen); break;
