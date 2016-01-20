@@ -2313,6 +2313,10 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
             cellType = 4;
         if (cellType==0)
             continue;
+        int column = settings->getColumnOfCell(i);
+        int row = settings->getRowOfCell(i);
+        int cellno = settings->get3DCellNo(column,row);
+        cout<<"Cell: "<<i<<"|"<<cellno<<": "<<column<<"/"<<row<<": "<<cellType<<endl;
         cell = settings->GetCell(i,hCellNumbering->GetName());
         cell->SetLineWidth(2);
         switch (cellType){
