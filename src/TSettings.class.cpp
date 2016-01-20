@@ -2420,7 +2420,7 @@ TCutG* TSettings::GetCell(Int_t nCell, TString name = "GridPoint"){
     Int_t row = this->getRowOfCell(nCell);
     std::pair<Float_t,Float_t> x = getCellPositionX(column,row,3);
     std::pair<Float_t,Float_t> y = getCellPositionY(column,row,3);
-    name.Append(TString::Format("_CellGrid%d_%d",i,j));
+    name.Append(TString::Format("_CellGrid%d_%d",column,row));
     TCutG* gridPoint =   new TCutG(name,5);
     gridPoint->SetPoint(0,x.first,y.first);
     gridPoint->SetPoint(1,x.first,y.second);
