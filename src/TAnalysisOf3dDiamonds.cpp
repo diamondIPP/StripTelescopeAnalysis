@@ -2334,8 +2334,6 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
     }
     for (UInt_t i =0; i<goodCells.size();i++)
         goodCells.at(i)->Draw("same");
-    char t;
-    cin>>t;
     histSaver->SaveCanvas(c1,hCellNumbering->GetName()+(TString)"_markedCells");
     for (UInt_t i=0;i<cells.size();i++)
         delete cells.at(i);
