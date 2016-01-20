@@ -612,7 +612,45 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv,Float_
     return ptMean;
 }
 
-
+void HistogrammSaver::AddMarkedCells(TCanvas *c1){
+    if (!c1) return;
+    vector<TCutG*> goodCells;
+    TCutG *cell;
+    for (UInt_t i = 0; i < settings->GetNCells3d();i++){
+        int cellType = 0;
+        if (settings->IsGoodCell(3,i))
+            cellType += 1;
+        if (settings->isBadCell(3,i))
+            cellType += 2;
+        if (settings->isDeadCell(3,i))
+            cellType += 4;
+        if (cellType==0)
+            continue;
+        int column = settings->getColumnOfCell(i);
+        int row = settings->getRowOfCell(i);
+        int cellno = settings->get3DCellNo(column,row);
+        //cout<<"Cell: "<<i<<"|"<<cellno<<": "<<column<<"/"<<row<<": "<<cellType<<endl;
+        cell = settings->GetCell(i,histo->GetName());
+        cell->SetLineWidth(2);
+        switch (cellType){
+            case 1: cell->SetLineColor(kGreen); break;
+            case 2: cell->SetLineColor(kRed); break;
+            case 4: cell->SetLineColor(kPink); break;
+            case 6: cell->SetLineColor(kBlue); break;
+            default: cell->SetLineWidth(4);break;
+        }
+        cell->Draw("same");
+        if (cellType == 1)
+            goodCells.push_back(cell);
+    }
+    for (UInt_t i =0; i<goodCells.size();i++)
+        goodCells.at(i)->Draw("same");
+}
+TCanvas* HistogrammSaver::DrawHistogramWithCellGridAndMarkedCells(TH2* histo,TH2* histo2){
+    TCanvas * c1 = DrawHistogramWithCellGrid(histo,histo2);
+    AddMarkedCells(c1);
+    return c1;
+}
 TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     cout<<"HistogrammSaver::DrawHistogramWithCellGrid: "<<flush;
     cout<<"H1: ";
@@ -658,6 +696,14 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     delete f;
     cout<<"-Done"<<endl;
     return c1;
+}
+
+void HistogrammSaver::SaveHistogramWithCellGridAndMarkedCells(TH2* histo,TH2* histo2){
+    if (!histo)
+        return;
+    gStyle->SetPaintTextFormat("4.2f");
+    TCanvas *c1 = DrawHistogramWithCellGridAndMarkedCells(histo,histo2);
+    this->SaveCanvas(c1);
 }
 
 void HistogrammSaver::SaveHistogramWithCellGrid(TH2* histo,TH2* histo2) {

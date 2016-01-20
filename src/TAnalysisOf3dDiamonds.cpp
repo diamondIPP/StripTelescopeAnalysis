@@ -2300,44 +2300,8 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
         }
     }
     histSaver->SaveHistogramWithCellGrid(hCellNumbering,hCellNumbering);
-    TCanvas *c1 = histSaver->DrawHistogramWithCellGrid(hCellNumbering,hCellNumbering);
-    vector<TCutG*> cells;
-    vector<TCutG*> goodCells;
-    TCutG *cell;
-    for (UInt_t i = 0; i < settings->GetNCells3d();i++){
-        int cellType = 0;
-        if (settings->IsGoodCell(3,i))
-            cellType += 1;
-        if (settings->isBadCell(3,i))
-            cellType += 2;
-        if (settings->isDeadCell(3,i))
-            cellType += 4;
-        if (cellType==0)
-            continue;
-        int column = settings->getColumnOfCell(i);
-        int row = settings->getRowOfCell(i);
-        int cellno = settings->get3DCellNo(column,row);
-        //cout<<"Cell: "<<i<<"|"<<cellno<<": "<<column<<"/"<<row<<": "<<cellType<<endl;
-        cell = settings->GetCell(i,hCellNumbering->GetName());
-        cell->SetLineWidth(2);
-        switch (cellType){
-            case 1: cell->SetLineColor(kGreen); break;
-            case 2: cell->SetLineColor(kRed); break;
-            case 4: cell->SetLineColor(kPink); break;
-            case 6: cell->SetLineColor(kBlue); break;
-            default: cell->SetLineWidth(4);break;
-        }
-        cell->Draw("same");
-        cells.push_back(cell);
-        if (cellType == 1)
-            goodCells.push_back(cell);
-    }
-    for (UInt_t i =0; i<goodCells.size();i++)
-        goodCells.at(i)->Draw("same");
-    histSaver->SaveCanvas(c1,hCellNumbering->GetName()+(TString)"_markedCells");
-    for (UInt_t i=0;i<cells.size();i++)
-        delete cells.at(i);
-    delete c1;
+    hCellNumbering->SetName(hCellNumbering->GetName()+(TString)"_markedCells");
+    histSaver->SaveHistogramWithCellGridAndMarkedCells(hCellNumbering,hCellNumbering);
     histSaver->SaveHistogramWithCellGrid(hQuarterNumbering,hQuarterNumbering);
 }
 
@@ -2388,6 +2352,8 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 //    histSaver->SaveCanvas(c1,c1->GetName());
     histo->SetTitle(histo->GetTitle()+(TString)" with grid");
     histSaver->SaveHistogramWithCellGrid(histo);
+    histo->SetName(histo->GetName()+(TString)"_markedCells");
+    histSaver->SaveHistogramWithCellGridAndMarkedCells(histo);
     delete c1;
 
     name = "chNegativeChargePositionGrid"+ appendix;
@@ -5344,7 +5310,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     c1->SetName("cProfRebinned"+appendix);
     histSaver->DrawGoodCellsRegion(c1);
     histSaver->SaveCanvas(c1);
+    histSaver->AddMarkedCells(c1);
+    c1->SetName("cProfRebinnedMarkedCells"+appendix);
+    histSaver->SaveCanvas(c1);
     histSaver->SaveHistogramWithCellGrid(profRebinned);
+
 
     c1->cd();
     c1->SetRightMargin(.15);

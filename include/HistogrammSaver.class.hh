@@ -110,8 +110,11 @@ public:
 //	void SaveHistogramWithCellGrid(TH2D* histo){SaveHistogramWithCellGrid(TH2*)histo)};
 //	void SaveHistogramWithCellGrid(TH2* histo){SaveHistogramWithCellGrid(TH2*)histo)}
 	TCanvas* DrawHistogramWithCellGrid(TH2* histo,TH2* histo2=0);
+	TCanvas* DrawHistogramWithCellGridAndMarkedCells(TH2* histo,TH2* histo2=0);
+	void AddMarkedCells(TCanvas *c1);
 	void DrawGoodCellsRegion(TCanvas* c1);
 	void SaveHistogramWithCellGrid(TH2* histo, TH2* histo2=0);
+    void SaveHistogramWithCellGridAndMarkedCells(TH2* histo, TH2* histo2=0);
 	void SetVerbosity(unsigned int i);
 	void SetRunNumber(unsigned int runNumber);
 	void SetNumberOfEvents(unsigned int nEvents);
