@@ -2322,7 +2322,7 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
         switch (cellType){
             case 1: cell->SetLineColor(kGreen); break;
             case 2: cell->SetLineColor(kRed); break;
-            case 3: cell->SetLineColor(kBlue); break;
+            case 4: cell->SetLineColor(kBlue); break;
         }
         cell->Draw("same");
         cells.push_back(cell);

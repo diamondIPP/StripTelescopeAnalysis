@@ -2427,6 +2427,8 @@ TCutG* TSettings::GetCell(Int_t nCell, TString name = "GridPoint"){
     gridPoint->SetPoint(2,x.second,y.second);
     gridPoint->SetPoint(3,x.second,y.first);
     gridPoint->SetPoint(4,x.first,y.first);
+    cout<<"Cell "<<nCell<<" @ "<<x.first<<"-"<<x.second<<" / "<<y.first<<"-"<<y.second<<endl;
+    PrintCellPosition(nCell,3);
     gridPoint->SetFillStyle(0);
     gridPoint->SetLineWidth(1);
     gridPoint->SetLineColor(kBlack);
