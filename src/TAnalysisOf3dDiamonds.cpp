@@ -295,6 +295,9 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         //        hLandauStripNegativeCharges->Fill(0.0,charge);
         hLandauStripNegativeChargesClPos->Fill(negativeCharge,clPos);
     }
+    else{
+        hLandauStripNegativeCharges->Fill(1,charge);
+    }
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis() {
@@ -2842,8 +2845,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
     hRelNegativeVsAvrgSignal->GetXaxis()->SetTitle("rel. no. of adjacent negative SNRs in Cell");
     histSaver->SaveHistogram(hRelNegativeVsAvrgSignal);
 
-    histSaver->SaveTwoHistos(hNegativeSNRs->GetName(),hNegativeSNRs,hNegativeSNRs);
-    histSaver->SaveTwoHistos(hNegativeSNRsRelative->GetName(),hNegativeSNRsRelative,hNegativeSNRsRelative);
+    histSaver->SaveHistogramWithCellGrid(hNegativeSNRs->GetName(),hNegativeSNRs,hNegativeSNRs);
+    histSaver->SaveHistogramWithCellGrid(hNegativeSNRsRelative->GetName(),hNegativeSNRsRelative,hNegativeSNRsRelative);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){

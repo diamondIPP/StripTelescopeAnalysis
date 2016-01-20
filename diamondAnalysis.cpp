@@ -377,7 +377,7 @@ int main(int argc, char ** argv) {
 
 	cout<<"time for all analysis:"<<endl;
 	comulativeWatch.Print();
-	cout<<"DONE_ALL"<<endl;
+	cout<<"DONE_ALL. Run with Revision: "<<SVN_REV<<endl;
 
 	return 0;
 }
