@@ -2317,7 +2317,7 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
         int column = settings->getColumnOfCell(i);
         int row = settings->getRowOfCell(i);
         int cellno = settings->get3DCellNo(column,row);
-        cout<<"Cell: "<<i<<"|"<<cellno<<": "<<column<<"/"<<row<<": "<<cellType<<endl;
+        //cout<<"Cell: "<<i<<"|"<<cellno<<": "<<column<<"/"<<row<<": "<<cellType<<endl;
         cell = settings->GetCell(i,hCellNumbering->GetName());
         cell->SetLineWidth(2);
         switch (cellType){
