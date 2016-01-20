@@ -2332,9 +2332,10 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     LongAnalysis_SaveRelativeAddedTransparentCharge();
     //LongAnalysis_SaveCellsClusterSize2DVsGrading();
     //LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading();
-
     histSaver->SaveHistogram(hLongAnalysisInvalidCellNo);
     histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
+    if (!settings->do3dTransparentAnalysis())
+        return;
     histSaver->SaveHistogram(hNegativeChargePosition);
     TString name = "hNegativeChargePosition"+appendix+"_px";
     TH1D* proj_px = hNegativeChargePosition->ProjectionX(name);
@@ -5310,10 +5311,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     c1->SetName("cProfRebinned"+appendix);
     histSaver->DrawGoodCellsRegion(c1);
     histSaver->SaveCanvas(c1);
-    histSaver->AddMarkedCells(c1);
-    c1->SetName("cProfRebinnedMarkedCells"+appendix);
-    histSaver->SaveCanvas(c1);
     histSaver->SaveHistogramWithCellGrid(profRebinned);
+    c1->SetName("cProfRebinnedMarkedCells"+appendix);
+    histSaver->AddMarkedCells(c1);
+
+    c1->Update();
+    histSaver->AddMarkedCells(c1);
+    histSaver->SaveCanvas(c1);
+
 
 
     c1->cd();

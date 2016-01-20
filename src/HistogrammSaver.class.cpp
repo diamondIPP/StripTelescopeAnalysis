@@ -614,6 +614,7 @@ TPaveText* HistogrammSaver::GetUpdatedLandauMeans(TH1F* histo,Float_t mpv,Float_
 
 void HistogrammSaver::AddMarkedCells(TCanvas *c1){
     if (!c1) return;
+    c1->cd();
     vector<TCutG*> goodCells;
     TCutG *cell;
     for (UInt_t i = 0; i < settings->GetNCells3d();i++){
