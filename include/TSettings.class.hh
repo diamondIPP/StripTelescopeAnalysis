@@ -94,7 +94,7 @@ public:
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 
 	enumRunDescription getAnalysedDiamond();
-
+	TCutG* GetCell(Int_t nCell,TString name);
 	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
 	vector< TH1*> sortHistosByPulseHeight(vector<TH1*> vec);
 	static bool SorterForPulseHeightOfHisto(TH1* a, TH1* b);
@@ -599,6 +599,7 @@ public:
 	vector<Int_t> getDeadCell3D(){return deadCell3d;}
 	pair<Float_t, Float_t> getAllGoodCellsXpos();
 	pair<Float_t, Float_t> getAllGoodCellsYpos();
+	bool isDeadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
 	bool IsGoodCell(UInt_t nDiamondPattern, Int_t cellNo);

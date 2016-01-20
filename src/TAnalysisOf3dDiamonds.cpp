@@ -2300,6 +2300,33 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
         }
     }
     histSaver->SaveHistogramWithCellGrid(hCellNumbering,hCellNumbering);
+    TCanvas *c1 = histSaver->DrawHistogramWithCellGrid(hCellNumbering,hCellNumbering);
+    vector<TCutG*> cells;
+    TCutG *cell;
+    for (UInt_t i = 0; i < settings->GetNCells3d();i++){
+        int cellType = 0;
+        if (settings->IsGoodCell(3,i))
+            cellType = 1;
+        if (settings->isBadCell(3,i))
+            cellType = 2;
+        if (settings->isDeadCell(3,i))
+            cellType = 4;
+        if (cellType==0)
+            continue;
+        cell = settings->GetCell(i,hCellNumbering->GetName());
+        cell->SetLineWidth(2);
+        switch (cellType){
+            case 1: cell->SetLineColor(kGreen); break;
+            case 2: cell->SetLineColor(kRed); break;
+            case 3: cell->SetLineColor(kBlue); break;
+        }
+        cell->Draw("same");
+        cells.push_back(cell);
+    }
+    histSaver->SaveCanvas(c1,hCellNumbering+"_markedCells");
+    for (UInt_t i=0;i<cells.size();i++)
+        delete cells.at(i);
+    delete c1;
     histSaver->SaveHistogramWithCellGrid(hQuarterNumbering,hQuarterNumbering);
 }
 
@@ -2845,8 +2872,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveSNRPerCell(){
     hRelNegativeVsAvrgSignal->GetXaxis()->SetTitle("rel. no. of adjacent negative SNRs in Cell");
     histSaver->SaveHistogram(hRelNegativeVsAvrgSignal);
 
-    histSaver->SaveHistogramWithCellGrid(hNegativeSNRs->GetName(),hNegativeSNRs,hNegativeSNRs);
-    histSaver->SaveHistogramWithCellGrid(hNegativeSNRsRelative->GetName(),hNegativeSNRsRelative,hNegativeSNRsRelative);
+    histSaver->SaveHistogramWithCellGrid(hNegativeSNRs,hNegativeSNRs);
+    histSaver->SaveHistogramWithCellGrid(hNegativeSNRsRelative,hNegativeSNRsRelative);
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
@@ -5237,8 +5264,8 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStrip->GetYaxis()->SetTitle("number of entries #");
     hLandauStrip->SetLineColor(kBlue);
 
-    Int_t xbins = 512;
-    Float_t xlow = -500;
+    Int_t xbins = 256;
+    Float_t xlow = -244;
     Float_t xup = 12;
     name = "hLandauStripNegativeCharges"+appendix;
     hLandauStripNegativeCharges = new TH2F(name,name,xbins,xlow,xup,PulseHeightBins,PulseHeightMin,PulseHeightMax);
@@ -5284,6 +5311,8 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     TString name = "hLandauStripNegativeCharges"+appendix+"_px";
     TH1D* px = hLandauStripNegativeCharges->ProjectionX(name);
     histSaver->SaveHistogram(px);
+    px->SetName(name+"_logy");
+    histSaver->SaveHistogram(px,false,false,true,"logy");
     delete px;
 }
 

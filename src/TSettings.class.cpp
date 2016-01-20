@@ -2415,6 +2415,23 @@ void  TSettings::PrintCellPosition(UInt_t cell, int DiamondPattern){
     cout<<"Cell No: "<<setw(3)<<cell<<" placed at "<<setw(2)<<column<<"/"<<setw(2)<<row<<": X:"<< setw(10)<<x.first<<"-"<< setw(10)<<x.second<<", \tY: "<< setw(10)<<y.first<<"-"<< setw(10)<<y.second<<endl;
 }
 
+TCutG* TSettings::GetCell(Int_t nCell, TString name = "GridPoint"){
+    Int_t column = this->getColumnOfCell(nCell);
+    Int_t row = this->getRowOfCell(nCell);
+    std::pair<Float_t,Float_t> x = getCellPositionX(column,row,3);
+    std::pair<Float_t,Float_t> y = getCellPositionY(column,row,3);
+    name.Append(TString::Format("_CellGrid%d_%d",i,j));
+    TCutG* gridPoint =   new TCutG(name,5);
+    gridPoint->SetPoint(0,x.first,y.first);
+    gridPoint->SetPoint(1,x.first,y.second);
+    gridPoint->SetPoint(2,x.second,y.second);
+    gridPoint->SetPoint(3,x.second,y.first);
+    gridPoint->SetPoint(4,x.first,y.first);
+    gridPoint->SetFillStyle(0);
+    gridPoint->SetLineWidth(1);
+    gridPoint->SetLineColor(kBlack);
+    return gridPoint;
+}
 /**
  * @todo look at hardcoded numbers
  * @todo move to histogrammSaver class
@@ -2468,15 +2485,7 @@ void TSettings::DrawMetallisationGrid(TCanvas* nCanvas, int DiamondPattern) {
 			    }
 			    TString name = nCanvas->GetName();
 				name.Append(TString::Format("_CellGrid%d_%d",column,row));
-				TCutG * gridPoint = new TCutG(name,5);
-				gridPoint->SetPoint(0,x.first,y.first);
-				gridPoint->SetPoint(1,x.first,y.second);
-				gridPoint->SetPoint(2,x.second,y.second);
-				gridPoint->SetPoint(3,x.second,y.first);
-				gridPoint->SetPoint(4,x.first,y.first);
-				gridPoint->SetFillStyle(0);
-				gridPoint->SetLineWidth(1);
-				gridPoint->SetLineColor(kBlack);
+				TCutG * gridPoint = GetCell(cell, nCanvas->GetName());
 				gridPoint->Draw("same");
 			}
 		}
@@ -2516,6 +2525,20 @@ pair<Float_t, Float_t> TSettings::getAllGoodCellsYpos(){
     return make_pair(ymin,ymax);
 }
 
+
+bool TSettings::isDeadCell(UInt_t nDiamondPattern, Int_t cellNo) {
+    if(nDiamondPattern == 2){
+     return false;
+    }
+    if(nDiamondPattern == 3){
+        for ( UInt_t i=0; i < getDeadCell3D().size(); i++)
+            if ( cellNo == getDeadCell3D().at(i)) {
+                return true;
+            }
+
+    }
+    return false;
+}
 /** todo: hardcoded 2 & 3 replace by suitable variables
  *
  *
