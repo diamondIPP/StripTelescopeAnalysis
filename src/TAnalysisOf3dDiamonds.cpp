@@ -2302,15 +2302,16 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
     histSaver->SaveHistogramWithCellGrid(hCellNumbering,hCellNumbering);
     TCanvas *c1 = histSaver->DrawHistogramWithCellGrid(hCellNumbering,hCellNumbering);
     vector<TCutG*> cells;
+    vector<TCutG*> goodCells;
     TCutG *cell;
     for (UInt_t i = 0; i < settings->GetNCells3d();i++){
         int cellType = 0;
         if (settings->IsGoodCell(3,i))
-            cellType = 1;
+            cellType += 1;
         if (settings->isBadCell(3,i))
-            cellType = 2;
+            cellType += 2;
         if (settings->isDeadCell(3,i))
-            cellType = 4;
+            cellType += 4;
         if (cellType==0)
             continue;
         int column = settings->getColumnOfCell(i);
@@ -2322,11 +2323,19 @@ void TAnalysisOf3dDiamonds::LongAnalysisSaveCellAndQuaterNumbering(){
         switch (cellType){
             case 1: cell->SetLineColor(kGreen); break;
             case 2: cell->SetLineColor(kRed); break;
-            case 4: cell->SetLineColor(kBlue); break;
+            case 4: cell->SetLineColor(kPink); break;
+            case 6: cell->SetLineColor(kBlue); break;
+            default: cell->SetLineWidth(4);break;
         }
         cell->Draw("same");
         cells.push_back(cell);
+        if (cellType == 1)
+            goodCells.push_back(cell);
     }
+    for (UInt_t i =0; i<goodCells.size();i++)
+        goodCells.at(i)->Draw("same");
+    char t;
+    cin>>t;
     histSaver->SaveCanvas(c1,hCellNumbering->GetName()+(TString)"_markedCells");
     for (UInt_t i=0;i<cells.size();i++)
         delete cells.at(i);
