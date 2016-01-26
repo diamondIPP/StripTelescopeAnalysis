@@ -197,8 +197,18 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     	mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,-1);
     if(hasNegativeCharge && charge < negChargeCut)
         mapHistos["hHasNegativeCharge_PulseHeight"]->Fill(posCharge);
-    else
+    else{
         mapHistos["hNoNegativeCharge_PulseHeight"]->Fill(posCharge);
+        if (posCharge < settings->getLowResponseThreshold()){
+            if (predictedPositions->count(eventNo)){
+                Float_t xPredDet = predictedPositions->at(eventNo).first;
+                Float_t yPredDet = predictedPositions->at(eventNo).second;
+                mapHistos["hNoNoegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
+            }
+            else
+                cout<<"Cannot find PredictedPosition of Event No: "<<eventNo<<endl;
+        }
+    }
     mapHistos["hPositive_Minus_Negative_TransparentCharge"]->Fill(posCharge-transparentCharge);
     if ( posCharge - clusteredCharge < 0 && verbosity>0 && itClustered->second.getClusterSize()<4){
         cout<<"posCharge - clusteredCharge " <<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
@@ -487,7 +497,8 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
         TString className = it->second->ClassName();
         if( it->first == "hNegativeChargeAboveCut_Position"||
                 it->first == "hOnlyTranspClusterPosition" ||
-                it->first == "hOnlyClusteredClusterPosition"){
+                it->first == "hOnlyClusteredClusterPosition" ||
+                it->first == "hNoNoegativeChargeLowResponsePosition"){
             name = "c";
             name.Append(it->first);
             name.Append(extension);
@@ -575,6 +586,12 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     name = "hPositiveTransparentCharge_Minus_ClusteredCharge";
     hname - name +extension;
     mapHistos[name] = new TH1F(hname,hname,512,-128,128);
+
+    name = "hNoNoegativeChargeLowResponsePosition";
+    hname=name;
+    hname+=TString::Format("_Thrs_%d",(int)settings->getLowResponseThreshold())+extension;
+    histo = histSaver->GetHistoBinedInCells(hname,8);
+    mapHistos[name] = histo;
 
 }
 

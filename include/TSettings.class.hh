@@ -568,7 +568,9 @@ private:
 	Float_t adcToElectronConversion;
 	TString PathExtension3d;
 	Float_t resolutionSNR;
+	Float_t lowResponseThreshold;
 public:
+	Float_t getLowResponseThreshold(){return lowResponseThreshold;}
     TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
 	Float_t GetResolutionSNR(){return resolutionSNR;}

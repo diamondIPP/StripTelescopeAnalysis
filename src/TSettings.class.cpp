@@ -545,6 +545,7 @@ void TSettings::LoadSettings(){
         if (TPlaneProperties::startsWith(key,"currentEnd")){Parse(key,value,currentEnd);}
         if (TPlaneProperties::startsWith(key,"adcToElectron")){Parse(key,value,adcToElectronConversion);}
         if (TPlaneProperties::startsWith(key,"negativeChargeCut")){Parse(key,value,negativeChargeCut);}
+        if (TPlaneProperties::startsWith(key,"lowResponseThreshold")){Parse(key,value,lowResponseThreshold);}
         //if adcToElectronConversion.
 		if (TPlaneProperties::startsWith(key,"diamondMapping")) {
 			cout<<key<<" = "<<value.c_str()<<endl;
@@ -867,6 +868,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	negativeChargeCut = -50.;
 	bRerunSelection = false;
 	resolutionSNR = 8;
+	lowResponseThreshold = 500.;
 //	checkSettings();
 }
 
