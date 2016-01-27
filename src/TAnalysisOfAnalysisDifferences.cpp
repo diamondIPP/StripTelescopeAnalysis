@@ -180,10 +180,14 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     Int_t pos = 0;
     Float_t charge = 0;
     bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(charge,pos,true);
+
+    Float_t lowThr = settings->getResponseWindow().first;
+    Float_t highThr = settings->getResponseWindow().second;
     if(predictedPositions->count(eventNo)){
         Float_t xPredDet = predictedPositions->at(eventNo).first;
         Float_t yPredDet = predictedPositions->at(eventNo).second;
-        mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
+        if (lowThr < posCharge && posCharge < highThr)
+            mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
     }
 //    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
     if (hasNegativeCharge){
@@ -211,7 +215,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
             if (posCharge < settings->getLowResponseThreshold()){
                     mapHistos["hNoNegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
                 }
-            if (settings->getResponseWindow().first<posCharge && posCharge < settings->getResponseWindow().second)
+            if (lowThr < posCharge && posCharge < highThr)
                 mapHistos["hNoNegativeChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
         }
         else
@@ -525,9 +529,9 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             name.Append(it->first);
             name.Append(extension);
             histSaver->SaveHistogramWithCellGridAndMarkedCells((TH2*)it->second);
-            TCanvas *c1 = new TCanvas(name,name);
+            TCanvas *c1 = histSaver->DrawHistogramWithCellGrid((TH2*)it->second);
             c1->cd();
-            it->second->Draw("colz");
+//            it->second->Draw("colz");
             settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1);
             settings->DrawMetallisationGrid(c1,3);
             histSaver->AddMarkedCells(c1);
