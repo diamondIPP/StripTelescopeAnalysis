@@ -571,6 +571,7 @@ private:
 	Float_t lowResponseThreshold;
 public:
 	Float_t getLowResponseThreshold(){return lowResponseThreshold;}
+	std::pair<Float_t,Float_t> getResponseWindow(){return make_pair(1750.,1850.);}
     TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
 	Float_t GetResolutionSNR(){return resolutionSNR;}
