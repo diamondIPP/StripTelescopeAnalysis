@@ -326,6 +326,8 @@ Float_t TCluster::getPosition(bool cmnCorrected, calculationMode_t mode,TH1F *hi
 
 UInt_t TCluster::size()
 {
+    if (IsTransparentCluster())
+        return GetMaxTransparentClusterSize();
 	return numberOfSeeds+numberOfHits;
 }
 

@@ -606,11 +606,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     if (settings->do3dTransparentAnalysis()){
         UInt_t clusterSize = diamondCluster->GetTransparentClusterSize();
-        for (UInt_t i = 1; i< diamondCluster->GetTransparentClusterSize();i++){
+        for (UInt_t i = 1; i< diamondCluster->GetMaxTransparentClusterSize();i++){
             diamondCluster->SetTransparentClusterSize(i);
-            diamondCluster->getPositiveCharge(false);
+            Float_t transcharge = diamondCluster->getPositiveCharge(false);
             if (i-1<hPulseHeightVsDetectorHitPostionXY_trans.size())
-                hPulseHeightVsDetectorHitPostionXY_trans[i-1]->Fill(xPredDet,yPredDet,charge);
+                hPulseHeightVsDetectorHitPostionXY_trans[i-1]->Fill(xPredDet,yPredDet,transcharge);
+            else
+                cout<<"ERROR hPulseHeightVsDetectorHitPostionXY_trans["<<i-1<<"] doesn't exist"<<endl;
         }
         diamondCluster->SetTransparentClusterSize(clusterSize);
     }
@@ -1050,7 +1052,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
 
     for (UInt_t i = 0; i< 6;i++){
-        name = TString::Format("hPulseHeightVsDetectorHitPostionXY_Trans_clusterSize_%d",i+1);
+        name = TString::Format("hPulseHeightVsDetectorHitPostionXY_clusterSize_%d",i+1);
         name+=appendix;
         hPulseHeightVsDetectorHitPostionXY_trans.push_back((TProfile2D*)hPulseHeightVsDetectorHitPostionXY->Clone(name));
     }
@@ -3573,12 +3575,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillOverlayCentralColumnHistosOffsetAna
 
 //    diamondCluster->SetTransparentClusterSize(5);
     //    MakeGhostCluster(diamondCluster,5);
-
+    Int_t cs = diamondCluster->GetTransparentClusterSize();
     diamondCluster->SetTransparentClusterSize(ClusterSize);
     GhostCluster.SetTransparentClusterSize(ClusterSize);
     Float_t GhostClusterCharge = GhostCluster.getPositiveCharge(useCMN);
     hCellsCentralColumnOverlayAvrgChargeMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(xRelPosDet,yRelPosDet,GhostClusterCharge);
     hCellsCentralColumnOverlayLandauMinusBadCellsOffsetAnalysis.at(ClusterSize)->Fill(GhostClusterCharge);
+    diamondCluster->SetTransparentClusterSize(cs);
 }
 
 
@@ -3676,15 +3679,35 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
         TString name = "hColumnLandau_Column_";
         name.Append(settings->getColumnChar(column));
+        name+=appendix;
         TH1F* hColumnLandau = (TH1F*)hCellsLandau.at(0)->Clone(name);
         hColumnLandau->Reset();
         hColumnLandau->SetTitle(name);
+
+        name = "hColumnLandau_NotBad_Column_";
+        name.Append(settings->getColumnChar(column));
+        name+=appendix;
+        TH1F* hColumnLandauNotBad = (TH1F*)hCellsLandau.at(0)->Clone(name);
+        hColumnLandauNotBad->Reset();
+        hColumnLandauNotBad->SetTitle(name);
+
+        name = "hColumnLandau_Good_Column_";
+        name.Append(settings->getColumnChar(column));
+        name+=appendix;
+        TH1F* hColumnLandauGood = (TH1F*)hCellsLandau.at(0)->Clone(name);
+        hColumnLandauGood->Reset();
+        hColumnLandauGood->SetTitle(name);
+
         for(UInt_t row=0;row<settings->getNRows3d();row++){
             Int_t cell = settings->get3DCellNo((int)column,row);
             TH1F* h = hCellsLandau.at(cell);
             //hCellNumbering->SetBinContent(column+1,row+1,cell); //This should be a clone of the 2D Cell Mean Charge Plot, Wait till Felix has finished.
             histSaver->SaveHistogram(h);
             hColumnLandau->Add(h);
+            if (!settings->isBadCell(3,cell))
+                hColumnLandauNotBad->Add(h);
+            if (settings->IsGoodCell(3,cell))
+                hColumnLandau->Add(h);
             for(UInt_t i=0; i<settings->getBadCells3D().size(); i++)
                 if(cell==settings->getBadCells3D().at(i)){
                     //                    Int_t Entries = hLandauBadCells->GetEntries();

@@ -118,6 +118,7 @@ public:
     void SetTransparentCluster(Float_t startChannel);
     void SetTransparentClusterSize(UInt_t size);
     UInt_t GetTransparentClusterSize(){return transparentClusterSize;}
+    UInt_t GetMaxTransparentClusterSize(){return checkClusterForSize();}
     Int_t getTransparentClusterPosition(UInt_t clusterNo=0);
     bool IsValidTransparentClusterPosition(UInt_t clusterPosition);
 private:
