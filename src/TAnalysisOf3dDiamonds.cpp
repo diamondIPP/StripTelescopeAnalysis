@@ -5030,7 +5030,8 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     //Universal histograms
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
-        TString name = "hColumnLandau_Column"+settings->getColumnChar(column);
+        TString name = "hColumnLandau_Column";
+        name.Append(settings->getColumnChar(column));
         cout<<column<<": "<<name<<endl;
     }
     char t;
