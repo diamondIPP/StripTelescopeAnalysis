@@ -2662,7 +2662,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,T
     hAllCells->Reset();
 
     string plots_path = histSaver->GetPlotsPath();
-    histSaver->SetPlotsPath(plots_path+(string)prefix);
+    string new_plots_path = plots_path;
+    new_plots_path+=(string)prefix;
+    new_plots_path+="/";
+    histSaver->SetPlotsPath(new_plots_path);
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH2F* histo = vec->at(cell);
         if (!histo)
