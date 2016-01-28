@@ -289,7 +289,7 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     //    diamondCluster->Print(1);
     //}
     if (negativeCharge<0){
-        cout<<nEvent<<"\tFill: "<<hasNegativeCharge<<" "<<negativeCharge<< " " <<clPos<<" "<< charge<<endl;
+//        cout<<nEvent<<"\tFill: "<<hasNegativeCharge<<" "<<negativeCharge<< " " <<clPos<<" "<< charge<<endl;
         hLandauStripNegativeCharges->Fill(negativeCharge,charge);
         //    else
         //        hLandauStripNegativeCharges->Fill(0.0,charge);
@@ -2401,11 +2401,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitChargeSharingPlots(){
     Float_t minY = 0;
     Float_t maxY = PulseHeightMax/2.;
     for (UInt_t cell = 0; cell <nCells;cell++){
-        TString name = TString::Format("hChargeSharing_CellNo_%02d_maxValue",cell)+appendix;
-        TString title = TString::Format("hChargeSharing_CellNo_%02d_maxValue",cell);;
+        TString name = TString::Format("hChargeSharing_CellNo_%02d",cell)+appendix;
+        TString title = TString::Format("hChargeSharing_CellNo_%02d",cell);;
         TH2F* histo = new TH2F(name,title,nBinsX,minX,maxX,nBinsY,minY,maxY);
         histo->GetXaxis()->SetTitle("Charge highest signal / ADC");
         histo->GetYaxis()->SetTitle("Charge highest adjancent signal / ADC");
+        histo->GetYaxis()->SetMaximum(maxY);
         vecHChargeSharing.push_back(histo);
     }
 }
@@ -2677,7 +2678,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,T
         else
             hAllButBadCells->Add(histo);
         hAllCells->Add(histo);
-        histSaver->SaveHistogram(histo);
+        histSaver->SaveHistogram(histo,true,false);
         vec->at(cell)= 0;
         delete histo;
     }
