@@ -2406,7 +2406,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitChargeSharingPlots(){
         TH2F* histo = new TH2F(name,title,nBinsX,minX,maxX,nBinsY,minY,maxY);
         histo->GetXaxis()->SetTitle("Charge highest signal / ADC");
         histo->GetYaxis()->SetTitle("Charge highest adjancent signal / ADC");
-        histo->GetYaxis()->SetMaximum(maxY);
         vecHChargeSharing.push_back(histo);
     }
 }
