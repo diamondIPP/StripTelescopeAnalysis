@@ -545,7 +545,10 @@ void TSettings::LoadSettings(){
         if (TPlaneProperties::startsWith(key,"currentEnd")){Parse(key,value,currentEnd);}
         if (TPlaneProperties::startsWith(key,"adcToElectron")){Parse(key,value,adcToElectronConversion);}
         if (TPlaneProperties::startsWith(key,"negativeChargeCut")){Parse(key,value,negativeChargeCut);}
+        if (TPlaneProperties::startsWith(key,"negativeStripChargeCut")){Parse(key,value,negativeChargeCutStrip);}
         if (TPlaneProperties::startsWith(key,"lowResponseThreshold")){Parse(key,value,lowResponseThreshold);}
+        if (TPlaneProperties::startsWith(key,"responseWindow")){ParseFloatPair(key,value,responseWindow);}
+//        responseWindow
         //if adcToElectronConversion.
 		if (TPlaneProperties::startsWith(key,"diamondMapping")) {
 			cout<<key<<" = "<<value.c_str()<<endl;
@@ -866,9 +869,11 @@ void TSettings::DefaultLoadDefaultSettings(){
 	adcToElectronConversion= 1;
 	OverlayRange3d = make_pair((float)700.,(float)1200.);
 	negativeChargeCut = -50.;
+	negativeChargeCutStrip = -20;
 	bRerunSelection = false;
 	resolutionSNR = 8;
 	lowResponseThreshold = 500.;
+	responseWindow = make_pair(1600.,1700.);
 //	checkSettings();
 }
 
@@ -2697,6 +2702,15 @@ pair<int,int> TSettings::getCellAndQuarterNo(Float_t xDet, Float_t yDet) {
 				cell<<"<=> "<<column<<"/"<<row<<" "<<deltaX<<"/"<<deltaY<<" -->"<<quarter<<endl;
 //	i*11+j
 	return make_pair(cell,quarter);
+}
+
+char TSettings::getColumnChar(Int_t column){
+    return (char)('A'+column);
+}
+
+char TSettings::getColumnCharOfCell(Int_t cellNo){
+    Int_t column = this->getColumnOfCell(cellNo);
+    return getColumnChar(column);
 }
 
 pair<Float_t, Float_t> TSettings::getRelativePositionInCell(Float_t xPredDet,

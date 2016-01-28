@@ -73,6 +73,7 @@ public:
 	void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
 	void goToAlignmentRootDir(alignmentMode mode = normalMode){goToDir(this->getAbsoluteOuputPath(false));}
 	Float_t getNegativeChargeCut() const{return negativeChargeCut;}
+	Float_t getNegativeChargeCutStrip() const{return negativeChargeCutStrip;}
 	void setNegativeChargeCut(Float_t value){negativeChargeCut  = value;}
 
 
@@ -491,7 +492,6 @@ private:
 	Float_t rms_sigma_difference_cut;
 	Int_t high_rms_cut; //cut on absolute rms value instead of comparing to Gaussian
 	Float_t rms_cut; //value to use if high_rms_cut
-	Float_t negativeChargeCut;
 	Int_t zoomDiamondPlots; //zoom in on DC_Pedestal (100 event / window)
 
 	Int_t singleTrack2D; //plot single tracks only in 2D hits histogram
@@ -569,9 +569,12 @@ private:
 	TString PathExtension3d;
 	Float_t resolutionSNR;
 	Float_t lowResponseThreshold;
+	Float_t negativeChargeCut;
+	Float_t negativeChargeCutStrip;
+	pair<Float_t,Float_t> responseWindow;
 public:
 	Float_t getLowResponseThreshold(){return lowResponseThreshold;}
-	std::pair<Float_t,Float_t> getResponseWindow(){return make_pair(1750.,1850.);}
+	std::pair<Float_t,Float_t> getResponseWindow(){return responseWindow;}
     TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
 	Float_t GetResolutionSNR(){return resolutionSNR;}
@@ -632,6 +635,8 @@ public:
 
 	inline Int_t getRowOfCell(Int_t cellNo){return cellNo % getNRows3d();}
 	inline Int_t getColumnOfCell(Int_t cellNo){return cellNo / getNRows3d();}
+	char getColumnChar(Int_t column);
+	char getColumnCharOfCell(Int_t cellNo);
 	pair<Float_t,Float_t> getRelativePositionInCell(Float_t xPredDet,Float_t yPredDet);
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};
 	bool IsWithInTheColumnRadius(Float_t relCellPosX,Float_t relCellPosY);

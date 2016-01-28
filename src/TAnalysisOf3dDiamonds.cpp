@@ -294,6 +294,10 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         //    else
         //        hLandauStripNegativeCharges->Fill(0.0,charge);
         hLandauStripNegativeChargesClPos->Fill(negativeCharge,clPos);
+        if (negativeCharge < settings->getNegativeChargeCut()){
+            hLandauStripNegativeChargePosition->Fill(xPredDet,yPredDet);
+
+        }
     }
     else{
         hLandauStripNegativeCharges->Fill(1,charge);
@@ -568,6 +572,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     if (diamondCluster->isSaturatedCluster())
             return;
     LongAnalysis_FillResolutionPlots();
+    LongAnalysis_FillChargeSharingPlots();
 //    if (settings->do3dTransparentAnalysis() && !validTransparentAnalysis)
 //        return;
     if(verbosity>5)cout<<"Cluster Formed."<<endl;
@@ -598,6 +603,17 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     charge = diamondCluster->getPositiveCharge(false);
     hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
+
+    if (settings->do3dTransparentAnalysis()){
+        UInt_t clusterSize = diamondCluster->GetTransparentClusterSize();
+        for (UInt_t i = 1; i< diamondCluster->GetTransparentClusterSize();i++){
+            diamondCluster->SetTransparentClusterSize(i);
+            diamondCluster->getPositiveCharge(false);
+            if (i-1<hPulseHeightVsDetectorHitPostionXY_trans.size())
+                hPulseHeightVsDetectorHitPostionXY_trans[i-1]->Fill(xPredDet,yPredDet,charge);
+        }
+        diamondCluster->SetTransparentClusterSize(clusterSize);
+    }
     //	hDetXvsDetY3DEvents->Fill(xPredDet,yPredDet,1);
     //analyse Good Cells
     if(settings->IsGoodCell(3,cellNo)){
@@ -698,10 +714,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     LongAnalysis_FillEdgeFreeHistos(xPredDet,yPredDet,charge);
     if(verbosity>6) cout<<"LongAnalysis_FillRelativeAddedTransparentCharge"<<endl;
     LongAnalysis_FillRelativeAddedTransparentCharge();
-    if(settings->do3dTransparentAnalysis()){
-        if(verbosity>6) cout<<"LongAnalysis_FillResolutionPlots"<<endl;
-        LongAnalysis_FillResolutionPlots();
-    }
 };
 
 bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
@@ -1036,6 +1048,12 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXY->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetTitle("charge / ADC");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+
+    for (UInt_t i = 0; i< 6;i++){
+        name = TString::Format("hPulseHeightVsDetectorHitPostionXY_Trans_clusterSize_%d",i+1);
+        name+=appendix;
+        hPulseHeightVsDetectorHitPostionXY_trans.push_back((TProfile2D*)hPulseHeightVsDetectorHitPostionXY->Clone(name));
+    }
 
     //hPulseHeightVsDetectorHitPostionXYGoodCells
     name = "hPulseHeightVsDetectorHitPostionXYGoodCells";
@@ -2372,7 +2390,37 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     //histSaver->SaveHistogram(hNegativeChargePosition);
 }
 
+void TAnalysisOf3dDiamonds::LongAnalysis_InitChargeSharingPlots(){
+    UInt_t nCells = settings->GetNCells3d();
+    UInt_t nBinsX = 256;
+    UInt_t nBinsY = 256;
+    Float_t minX = 0;
+    Float_t maxX = PulseHeightMax;
+    Float_t minY = 0;
+    Float_t maxY = PulseHeightMax;
+    for (UInt_t cell = 0; cell <nCells;cell++){
+        TString name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
+        TString title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
+        TH2F* histo = new TH2F(name,title,nBinsX,minX,maxX,nBinsY,minY,maxY);
+        histo->GetXaxis()->SetTitle("Charge highest signal / ADC");
+        histo->GetXaxis()->SetTitle("Charge highest adjancent signal / ADC");
+        vecHChargeSharing.push_back(histo);
+    }
+}
 
+
+void TAnalysisOf3dDiamonds::LongAnalysis_FillChargeSharingPlots(){
+    UInt_t cellNo = settings->getCellNo(xPredDet,yPredDet);
+    Int_t highest_hit_pos = diamondCluster->getHighestHitClusterPosition();
+    Int_t Second_highest_hit_pos = diamondCluster->getHighestSignalNeighbourClusterPosition(highest_hit_pos,useCMN,true);
+    Float_t highestSignal = diamondCluster->getSignal(highest_hit_pos,useCMN);
+    Float_t adjacentSignal = diamondCluster->getSignal(Second_highest_hit_pos,useCMN);
+    vecHChargeSharing.at(cellNo)->Fill(highestSignal,adjacentSignal);
+}
+//LongAnalysis_SaveChargeSharingPlots
+void TAnalysisOf3dDiamonds::LongAnalysis_SaveChargeSharingPlots(){
+    LongAnalysis_CreateTH2_CellPlots(&vecHChargeSharing,"","hChargeSharing");
+}
 
 void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
     UInt_t nCells = settings->GetNCells3d();
@@ -2586,63 +2634,62 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     }
 }
 
-
-void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH2F*>*vec,TString kind){
-
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,TString kind, TString prefix){
     if (!vec) return;
     if (vec->size() == 0) return;
     TH2F* histo = vec->at(0);
     if (!histo) return;
 
-    TString name = "hResolutionGoodCells_"+kind+appendix;
-    TH2F* hResolutionGoodCells = (TH2F*)histo->Clone(name);
-    hResolutionGoodCells->Reset();
+    TString name = prefix+"GoodCells_"+kind+appendix;
+    TH2F* hGoodCells = (TH2F*)histo->Clone(name);
+    hGoodCells->Reset();
+    hGoodCells->SetTitle(prefix + " Good Cells "+ kind +appendix);
 
-    name = "hResolutionBadCells_"+kind+appendix;
-    TH2F* hResolutionBadCells =  (TH2F*)hResolutionGoodCells->Clone(name);
-    hResolutionBadCells->Reset();
+    name = prefix+"BadCells_"+kind+appendix;
+    TH2F* hBadCells =  (TH2F*)hGoodCells->Clone(name);
+    hBadCells->Reset();
+    hBadCells->SetTitle(prefix + " Bad Cells "+ kind +appendix);
 
-    name = "hResolutionAllButBadCells_"+kind+appendix;
-    TH2F* hResolutionAllButBadCells =  (TH2F*)hResolutionGoodCells->Clone(name);
-    hResolutionAllButBadCells->Reset();
+    name = prefix+"AllButBadCells_"+kind+appendix;
+    TH2F* hAllButBadCells =  (TH2F*)hGoodCells->Clone(name);
+    hAllButBadCells->Reset();
+    hBadCells->SetTitle(prefix + " AllButBad Cells "+ kind +appendix);
 
-    name = "hResolutionAllCells_"+kind+appendix;
-    TH2F* hResolutionAllCells =  (TH2F*)hResolutionGoodCells->Clone(name);
-    hResolutionAllCells->Reset();
+    name = prefix+"AllCells_"+kind+appendix;
+    TH2F* hAllCells =  (TH2F*)hGoodCells->Clone(name);
+    hAllCells->Reset();
 
     string plots_path = histSaver->GetPlotsPath();
-    histSaver->SetPlotsPath(plots_path+(string)"/resolution/");
+    histSaver->SetPlotsPath(plots_path+(string)prefix);
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH2F* histo = vec->at(cell);
         if (!histo)
             continue;
         if (settings->IsGoodCell(3,cell))
-            hResolutionGoodCells->Add(histo);
+            hGoodCells->Add(histo);
         if (settings->isBadCell(3,cell))
-            hResolutionBadCells->Add(histo);
+            hBadCells->Add(histo);
         else
-            hResolutionAllButBadCells->Add(histo);
-        hResolutionAllCells->Add(histo);
+            hAllButBadCells->Add(histo);
+        hAllCells->Add(histo);
         histSaver->SaveHistogram(histo);
         vec->at(cell)= 0;
         delete histo;
     }
     histSaver->SetPlotsPath(plots_path);
-    hResolutionGoodCells->GetZaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hResolutionGoodCells);//,false,false,true);
-    hResolutionBadCells->GetZaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hResolutionBadCells);//,false,false,true);
-    hResolutionAllCells->GetZaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hResolutionAllCells);
-    hResolutionAllButBadCells->GetZaxis()->SetTitle("number of entries #");
-    histSaver->SaveHistogram(hResolutionAllButBadCells);//,false,false,true);
-    delete hResolutionGoodCells;
-    delete hResolutionBadCells;
-    delete hResolutionAllCells;
-    delete hResolutionAllButBadCells;
+    hGoodCells->GetZaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hGoodCells);//,false,false,true);
+    hBadCells->GetZaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hBadCells);//,false,false,true);
+    hAllCells->GetZaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hAllCells);
+    hAllButBadCells->GetZaxis()->SetTitle("number of entries #");
+    histSaver->SaveHistogram(hAllButBadCells);//,false,false,true);
+    delete hGoodCells;
+    delete hBadCells;
+    delete hAllCells;
+    delete hAllButBadCells;
 }
-
-
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec,TString kind){
     UInt_t nBins = 128;
@@ -2712,15 +2759,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue,"maxValue");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_h2C_WithCut,"h2C_WithCut");
 
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue_vs_SNR,"maxValue_SNR");
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted_vs_SNR,"chargeWeighted_SNR");
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid_vs_SNR,"highest2Centroid_SNR");
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_h2C_WithCut_vs_SNR,"h2C_WithCut_SNR");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_maxValue_vs_SNR,"maxValue_SNR");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_SNR,"chargeWeighted_SNR");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_SNR,"highest2Centroid_SNR");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_SNR,"h2C_WithCut_SNR");
 
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue_vs_PredHit,"maxValue_PredHit");
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHit,"chargeWeighted_PredHit");
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHit,"highest2Centroid_PredHit");
-    LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHit,"h2C_WithCut_PredHit");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_maxValue_vs_PredHit,"maxValue_PredHit");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHit,"chargeWeighted_PredHit");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHit,"highest2Centroid_PredHit");
+    LongAnalysis_CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHit,"h2C_WithCut_PredHit");
 
 
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
@@ -3627,16 +3674,22 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
     histSaver->SetPlotsPath(plots_path+(string)"/CellLandaus/");
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
+        TString name = "hColumnLandau_Column"+settings->getColumnChar(column);
+        TH1F* hColumnLandau = hCellsLandau.at(0)->Clone(name);
+        hColumnLandau->Reset();
+        hColumnLandau->SetTitle(name);
         for(UInt_t row=0;row<settings->getNRows3d();row++){
             Int_t cell = settings->get3DCellNo((int)column,row);
+            TH1F* h = hCellsLandau.at(cell);
             //hCellNumbering->SetBinContent(column+1,row+1,cell); //This should be a clone of the 2D Cell Mean Charge Plot, Wait till Felix has finished.
-            histSaver->SaveHistogram(hCellsLandau.at(cell));
+            histSaver->SaveHistogram(h);
+            hColumnLandau->Add(h);
             for(UInt_t i=0; i<settings->getBadCells3D().size(); i++)
                 if(cell==settings->getBadCells3D().at(i)){
                     //                    Int_t Entries = hLandauBadCells->GetEntries();
                     //                    hLandauBadCells->Add(hCellsLandau.at(cell),1);	//Not working for some reason, ask Felix
                     //                    hLandauBadCells->SetEntries(Entries+hCellsLandau.at(cell)->GetEntries());
-                    listBadCells->Add(hCellsLandau.at(cell));
+                    listBadCells->Add(h);
                     //                    cout<<"\tbad"<<endl;
                 }
             for(UInt_t i=0; i<settings->getGoodCellRegions3d().size(); i++){
@@ -3645,12 +3698,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
                         //                        Int_t Entries = hLandauGoodCells->GetEntries();
                         //                        hLandauGoodCells->Add(hCellsLandau.at(cell));	//Not working for some reason, ask Felix
                         //                        hLandauGoodCells->SetEntries(Entries+hCellsLandau.at(cell)->GetEntries());
-                        listGoodCells->Add(hCellsLandau.at(cell));
+                        listGoodCells->Add(h);
                         //                        cout<<"\tgood"<<endl;
                     }
-            }
-        }
-    }
+            }//end good cells region
+        }//end row
+        histSaver->SaveHistogram(hColumnLandau);
+        delete hColumnLandau;
+    }//end columns
     histSaver->SetPlotsPath(plots_path);
     cout<<"List Good Cells: "<<listGoodCells->GetEntries()<<endl;
     listGoodCells->Print();
@@ -5060,6 +5115,7 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
 
     LongAnalysis_CreateResolutionPlots();
+    LongAnalysis_SaveChargeSharingPlots();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     SaveStripAnalysisHistos();
     // Save
@@ -5088,6 +5144,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
 
 //    if (settings->do3dTransparentAnalysis())
     LongAnalysis_InitResolutionPlots();
+    LongAnalysis_InitChargeSharingPlots();
     hLongAnalysisInvalidCellNo = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCellNo"+appendix);
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
     hLongAnalysisInvalidCluster = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCluster"+appendix);
@@ -5260,6 +5317,17 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStripNegativeChargesClPos->GetYaxis()->SetTitle("rel. Pos of negative in transp. cluster");
     hLandauStripNegativeChargesClPos->GetZaxis()->SetTitle("no of entries");
 
+    name = "hLandauStripNegativeChargePosition";
+    TString hName = name + TString::Format(" Thr: %d",int(settings->getNegativeChargeCutStrip()));
+    hName+= ";pred pos x / #mum;pred pos y / #mum";
+    name+=appendix;
+    xlow = settings->get3dMetallisationFidCuts()->getXLow(1);
+    xup = settings->get3dMetallisationFidCuts()->getXHigh(1);
+    ylow = settings->get3dMetallisationFidCuts()->getYLow(1);
+    yup = settings->get3dMetallisationFidCuts()->getYHigh(1);
+    ybins = 128;
+    xbins = 128;
+    hLandauStripNegativeChargePosition  = new TH2F(name,hName,xbins,xlow,xup,ybins,ylow,yup);
 
     name = "hLandauStripFidCutXvsFidCutY"+appendix;
     hLandauStripFidCutXvsFidCutY = new TProfile2D(name,name,
@@ -5285,6 +5353,7 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     if (!settings->do3dTransparentAnalysis())
         return;
     histSaver->SaveHistogram(hLandauStripNegativeChargesClPos);
+    histSaver->SaveHistogram(hLandauStripNegativeChargePosition);
     histSaver->SaveHistogram(hLandauStripNegativeCharges);
     TString name = "hLandauStripNegativeCharges"+appendix+"_px";
     TH1D* px = hLandauStripNegativeCharges->ProjectionX(name);
@@ -5296,6 +5365,10 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY);
+    for (UInt_t i = 0; i< hPulseHeightVsDetectorHitPostionXY_trans.size();i++){
+        histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY_trans.at(i));
+        delete hPulseHeightVsDetectorHitPostionXY_trans[i];
+    }
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXY);
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXYGoodCells);
 

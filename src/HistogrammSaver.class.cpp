@@ -263,7 +263,7 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
     hGridReferenceDetSpace = new TH2D(nameDet,nameDet,xBins,xLow,xHigh,yBins,yLow,yHigh);
     hGridReferenceCellSpace = new TH2D(nameCell,nameCell,xBins,0,xBins,yBins,0,yBins);
 
-    for(UInt_t i=0;i<settings->getNRows3d();i++){
+    for(UInt_t i=0;i<settings->getNColumns3d();i++){
         hGridReferenceDetSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
         hGridReferenceCellSpace->GetXaxis()->SetBinLabel(i+1,TString::Format("%c",(char)('A'+i)));//iLetter.str().c_str());
     }

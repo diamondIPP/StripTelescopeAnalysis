@@ -124,7 +124,10 @@ private:
 	void LongAnalysis_InitResolutionPlots();
 	void LongAnalysis_CreateResolutionPlots();
 	void LongAnalysis_CreateResolutionPlots(vector<TH1F*> *vec,TString kind);
-	void LongAnalysis_CreateResolutionPlots(vector<TH2F*> *vec,TString kind);
+	void LongAnalysis_CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix= "hResolution");
+	void LongAnalysis_InitChargeSharingPlots();
+	void LongAnalysis_FillChargeSharingPlots();
+	void LongAnalysis_SaveChargeSharingPlots();
 	void LongAnalysis_SaveRawPulseHeightPlots();
 	void LongAnalysis_SaveSNRPerCell();
 	void LongAnalysis_SaveGoodAndBadCellLandaus();
@@ -167,6 +170,7 @@ private:
 	TH1F* hLandauStrip;
 	TH2F* hLandauStripNegativeCharges;
 	TH2F* hLandauStripNegativeChargesClPos;
+	TH2F* hLandauStripNegativeChargePosition;
 	TH1F* hLandau3DWithColumns;
 	TH1F* hLandau3DPhantom;
     TH1F* hLandau3DPhantomCentral;
@@ -305,6 +309,7 @@ private:
 	//LongAnalysis
 
 	TCanvas* cDetXvsDetY3DMeanCharge;
+	vector<TProfile2D*> hPulseHeightVsDetectorHitPostionXY_trans;
 	TProfile2D* hPulseHeightVsDetectorHitPostionXY;
 	TProfile2D* hPulseHeightVsDetectorHitPostionXYGoodCells;
 	TH1F* hLandauGoodCellsWithoutEdges;
@@ -435,6 +440,7 @@ private:
 	vector<Float_t> vecXPredictedDiamondHit,vecYPredictedDiamondHit,vecPHDiamondHitStrip,vecPHDiamondHit3dNoHoles,vecPHDiamondHit3dWithHoles,vecClusterSize,vecChi2Y,vecChi2X,vecClusterSeedSize,vecXPredictedStrip,vecYPredictedStrip;
 	vector< vector<Float_t>* > vecPHDiamondHit, vecXPredicted, vecYPredicted, vecClusterFrequency,vecXPreditedDetector,vecYPreditedDetector;
 	vector< vector <Float_t> > vecEdgePredX,vecEdgePredY,vecEdgePulseHeight;
+	vector<TH2F*> vecHChargeSharing;
 	vector<TH1F*> vecHResolutionPerCell_maxValue;
 	vector<TH1F*> vecHResolutionPerCell_chargeWeighted;
 	vector<TH1F*> vecHResolutionPerCell_highest2Centroid;
