@@ -2397,13 +2397,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitChargeSharingPlots(){
     Float_t minX = 0;
     Float_t maxX = PulseHeightMax;
     Float_t minY = 0;
-    Float_t maxY = PulseHeightMax;
+    Float_t maxY = PulseHeightMax/2.;
     for (UInt_t cell = 0; cell <nCells;cell++){
-        TString name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
-        TString title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
+        TString name = TString::Format("hChargeSharing_CellNo_%02d_maxValue",cell)+appendix;
+        TString title = TString::Format("hChargeSharing_CellNo_%02d_maxValue",cell);;
         TH2F* histo = new TH2F(name,title,nBinsX,minX,maxX,nBinsY,minY,maxY);
         histo->GetXaxis()->SetTitle("Charge highest signal / ADC");
-        histo->GetXaxis()->SetTitle("Charge highest adjancent signal / ADC");
+        histo->GetYaxis()->SetTitle("Charge highest adjancent signal / ADC");
         vecHChargeSharing.push_back(histo);
     }
 }
@@ -5029,6 +5029,12 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     // Initialise
     //Universal histograms
 
+    for(UInt_t column=0;column<settings->getNColumns3d();column++){
+        TString name = "hColumnLandau_Column"+settings->getColumnChar(column);
+        cout<<column<<": "<<name<<endl;
+    }
+    char t;
+    cin>>t;
     TString name = "hValidEventsFiducialSpace";
     name.Append(appendix);
     hValidEventsFiducialSpace = new TH2F(name,name,1024,0,256,1024,0,256);
