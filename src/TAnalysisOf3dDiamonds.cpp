@@ -3674,7 +3674,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
     histSaver->SetPlotsPath(plots_path+(string)"/CellLandaus/");
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
-        TString name = "hColumnLandau_Column"+settings->getColumnChar(column);
+        TString name = "hColumnLandau_Column_";
+        name.Append(settings->getColumnChar(column));
         TH1F* hColumnLandau = (TH1F*)hCellsLandau.at(0)->Clone(name);
         hColumnLandau->Reset();
         hColumnLandau->SetTitle(name);
@@ -5029,13 +5030,6 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     // Initialise
     //Universal histograms
 
-    for(UInt_t column=0;column<settings->getNColumns3d();column++){
-        TString name = "hColumnLandau_Column";
-        name.Append(settings->getColumnChar(column));
-        cout<<column<<": "<<name<<endl;
-    }
-    char t;
-    cin>>t;
     TString name = "hValidEventsFiducialSpace";
     name.Append(appendix);
     hValidEventsFiducialSpace = new TH2F(name,name,1024,0,256,1024,0,256);
