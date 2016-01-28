@@ -3675,7 +3675,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
         TString name = "hColumnLandau_Column"+settings->getColumnChar(column);
-        TH1F* hColumnLandau = hCellsLandau.at(0)->Clone(name);
+        TH1F* hColumnLandau = (TH1F*)hCellsLandau.at(0)->Clone(name);
         hColumnLandau->Reset();
         hColumnLandau->SetTitle(name);
         for(UInt_t row=0;row<settings->getNRows3d();row++){
