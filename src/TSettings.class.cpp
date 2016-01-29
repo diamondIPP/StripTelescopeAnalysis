@@ -548,7 +548,7 @@ void TSettings::LoadSettings(){
         if (TPlaneProperties::startsWith(key,"negativeStripChargeCut")){Parse(key,value,negativeChargeCutStrip);}
         if (TPlaneProperties::startsWith(key,"lowResponseThreshold")){Parse(key,value,lowResponseThreshold);}
         if (TPlaneProperties::startsWith(key,"responseWindow")){
-            ParseFloatPair(key,value,responseWindow);char t; cinn>t;}
+            ParseFloatPair(key,value,responseWindow);char t; cin>>t;}
 //        responseWindow
         //if adcToElectronConversion.
 		if (TPlaneProperties::startsWith(key,"diamondMapping")) {
