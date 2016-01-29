@@ -288,6 +288,10 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     //    cout<<"\nStrip:"<<nEvent<<" "<<hasNegativeCharge<<" "<<negativeCharge<<" "<<clPos<<" "<<useCMN;
     //    diamondCluster->Print(1);
     //}
+    if (negativeCharge < settings->getNegativeChargeCut())
+        hLandauStripNegativeChargesFraction->Fill(1);
+    else
+        hLandauStripNegativeChargesFraction->Fill(0);
     if (negativeCharge<0){
 //        cout<<nEvent<<"\tFill: "<<hasNegativeCharge<<" "<<negativeCharge<< " " <<clPos<<" "<< charge<<endl;
         hLandauStripNegativeCharges->Fill(negativeCharge,charge);
@@ -296,11 +300,10 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         hLandauStripNegativeChargesClPos->Fill(negativeCharge,clPos);
         if (negativeCharge < settings->getNegativeChargeCut()){
             hLandauStripNegativeChargePosition->Fill(xPredDet,yPredDet);
-
         }
     }
     else{
-        hLandauStripNegativeCharges->Fill(1,charge);
+//        hLandauStripNegativeCharges->Fill(1,charge);
     }
 }
 
@@ -3680,21 +3683,21 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
     histSaver->SetPlotsPath(plots_path+(string)"/CellLandaus/");
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
-        TString name = "hColumnLandau_Column_";
+        TString name = "hAllCellColumnLandau_Column_";
         name.Append(settings->getColumnChar(column));
         name+=appendix;
         TH1F* hColumnLandau = (TH1F*)hCellsLandau.at(0)->Clone(name);
         hColumnLandau->Reset();
         hColumnLandau->SetTitle(name);
 
-        name = "hColumnLandau_NotBad_Column_";
+        name = "hAllButBadCellColumnLandau_Column_";
         name.Append(settings->getColumnChar(column));
         name+=appendix;
         TH1F* hColumnLandauNotBad = (TH1F*)hCellsLandau.at(0)->Clone(name);
         hColumnLandauNotBad->Reset();
         hColumnLandauNotBad->SetTitle(name);
 
-        name = "hColumnLandau_Good_Column_";
+        name = "hGoodCellColumnLandau_Column_";
         name.Append(settings->getColumnChar(column));
         name+=appendix;
         TH1F* hColumnLandauGood = (TH1F*)hCellsLandau.at(0)->Clone(name);
@@ -3731,6 +3734,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
             }//end good cells region
         }//end row
         histSaver->SaveHistogram(hColumnLandau);
+        histSaver->SaveHistogram(hColumnLandauGood);
+        histSaver->SaveHistogram(hColumnLandauNotBad);
         delete hColumnLandau;
     }//end columns
     histSaver->SetPlotsPath(plots_path);
@@ -5335,6 +5340,12 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStripNegativeCharges->GetYaxis()->SetTitle("charge / ADC");
     hLandauStripNegativeCharges->GetZaxis()->SetTitle("no of entries");
 
+    name = "hLandauStripNegativeChargesFraction"+appendix;
+    TString hName = TString::Format("Negative Charge Fraction: Thr %d",(int)settings->getNegativeChargeCutStrip());
+    hName += ";has Negative charge below Thr";
+    hName += ";number of entries";
+    hLandauStripNegativeChargesFraction = new TH1F(name,hName,2,0,1);
+
     Int_t ybins = 7;
     Float_t ylow = -2;
     Float_t yup = 5;
@@ -5381,19 +5392,30 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
         return;
     histSaver->SaveHistogram(hLandauStripNegativeChargesClPos);
     histSaver->SaveHistogram(hLandauStripNegativeChargePosition);
+    TCanvas *c1 = new TCanvas("c"+hLandauStripNegativeChargePosition->GetName());
+    hLandauStripNegativeChargePosition->Draw("colz");
+    settings->DrawMetallisationGrid(c1,1);
+    histSaver->SaveCanvas(c1,"cLandauStripNegativeChargePosition");
     histSaver->SaveHistogram(hLandauStripNegativeCharges);
+    histSaver->SaveHistogram(hLandauStripNegativeChargesFraction);
     TString name = "hLandauStripNegativeCharges"+appendix+"_px";
     TH1D* px = hLandauStripNegativeCharges->ProjectionX(name);
     histSaver->SaveHistogram(px);
     px->SetName(name+"_logy");
     histSaver->SaveHistogram(px,false,false,true,"logy");
     delete px;
+    delete hLandauStripNegativeChargesFraction;
+    delete hLandauStripNegativeCharges;
+    delete hLandauStripNegativeChargePosition;
+    delete hLandauStripNegativeChargesClPos;
+    delete hLandauStripFidCutXvsFidCutY;
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY);
     for (UInt_t i = 0; i< hPulseHeightVsDetectorHitPostionXY_trans.size();i++){
         histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY_trans.at(i));
+        histSaver->SaveHistogramWithCellGridAndMarkedCells(hPulseHeightVsDetectorHitPostionXY_trans.at(i));
         delete hPulseHeightVsDetectorHitPostionXY_trans[i];
     }
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXY);

@@ -169,6 +169,8 @@ private:
     TCluster GhostCluster;
 	TH1F* hLandauStrip;
 	TH2F* hLandauStripNegativeCharges;
+	TH1F* hLandauStripNegativeChargesFraction;
+
 	TH2F* hLandauStripNegativeChargesClPos;
 	TH2F* hLandauStripNegativeChargePosition;
 	TH1F* hLandau3DWithColumns;
