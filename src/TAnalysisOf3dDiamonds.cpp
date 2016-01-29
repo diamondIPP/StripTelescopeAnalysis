@@ -5359,7 +5359,7 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStripNegativeCharges->GetZaxis()->SetTitle("no of entries");
 
     name = "hLandauStripNegativeChargesFraction"+appendix;
-   hName = TString::Format("Negative Charge Fraction: Thr %d",(int)settings->getNegativeChargeCutStrip());
+    hName = TString::Format("Negative Charge Fraction: Thr %d",(int)settings->getNegativeChargeCutStrip());
     hName += ";has Negative charge below Thr";
     hName += ";number of entries";
     hLandauStripNegativeChargesFraction = new TH1F(name,hName,2,0,1);
@@ -5410,7 +5410,7 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
         return;
     histSaver->SaveHistogram(hLandauStripNegativeChargesClPos);
     histSaver->SaveHistogram(hLandauStripNegativeChargePosition);
-    TCanvas *c1 = new TCanvas("c"+hLandauStripNegativeChargePosition->GetName());
+    TCanvas *c1 = new TCanvas((TString)"c"+hLandauStripNegativeChargePosition->GetName());
     hLandauStripNegativeChargePosition->Draw("colz");
     settings->DrawMetallisationGrid(c1,1);
     histSaver->SaveCanvas(c1,"cLandauStripNegativeChargePosition");
