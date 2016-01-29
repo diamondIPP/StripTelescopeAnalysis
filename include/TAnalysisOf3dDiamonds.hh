@@ -323,6 +323,7 @@ private:
 	TH2F* hValidEventsDetSpace;
 
 	TH2D* hNegativeChargePosition;
+	TH1F* hNegativeChargeFraction;
 
 	//vector<TCanvas*> cDeadCellMeanCharge;
 	vector<TProfile*> hDeadCellCharge;

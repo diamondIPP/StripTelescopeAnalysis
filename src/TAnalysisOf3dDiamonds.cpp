@@ -589,7 +589,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     if (diamondCluster->hasNegativeCharge(charge,pos,useCMN))
         if(charge<settings->getNegativeChargeCut())
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
-
+    if(charge<settings->getNegativeChargeCut()){
+        hNegativeChargeFraction->Fill(1);
+    }
+    else {
+        hNegativeChargeFraction->Fill(0);
+    }
     Int_t area3DwithColumns = 2;
     Int_t area3DwithoutColumns =1;
     if(!settings->do3dTransparentAnalysis()){
@@ -2360,6 +2365,12 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     if (!settings->do3dTransparentAnalysis())
         return;
     histSaver->SaveHistogram(hNegativeChargePosition);
+    histSaver->SaveHistogram(hNegativeChargeFraction);
+    hLandauStripNegativeChargesFraction->SetTitle("Strip");
+    hLandauStripNegativeChargesFraction->SetLineColor(kBlue);
+    hNegativeChargeFraction->SetTitle("3D detector");
+    histSaver->SaveTwoHistos("hNegativeChargeFractionComparision",hNegativeChargeFraction,hLandauStripNegativeChargesFraction);
+    delete hNegativeChargeFraction;
     TString name = "hNegativeChargePosition"+appendix+"_px";
     TH1D* proj_px = hNegativeChargePosition->ProjectionX(name);
     histSaver->SaveHistogram(proj_px);
@@ -5184,12 +5195,19 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells"+appendix,16);
     hNegativeChargePosition->SetTitle(TString::Format("hNegativeChargePositionAllCells, cut: %+3f",settings->getNegativeChargeCut()));
 
+
     TString name = "hAdjacentChannels_SNR"+appendix;
     TString title = "SNR of adjacent channels";
     hAdjacentChannels_SNR = new TH2F(name,title,160,-30,50,160,-30,50);
     hAdjacentChannels_SNR->GetXaxis()->SetTitle("SNR left strip");
     hAdjacentChannels_SNR->GetYaxis()->SetTitle("SNR right strip");
     hAdjacentChannels_SNR->GetZaxis()->SetTitle("number of entries");
+
+    name = "hNegativeChargeFraction"+appendix;
+    title = TString::Format("Negative Charge Fraction: Thr %d",(int)settings->getNegativeChargeCut());
+    title+=";has Negative Charge below Thr;number of entries";
+    hNegativeChargeFraction = new TH1F(name,title,2,0,1);
+
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
@@ -5404,7 +5422,6 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     px->SetName(name+"_logy");
     histSaver->SaveHistogram(px,false,false,true,"logy");
     delete px;
-    delete hLandauStripNegativeChargesFraction;
     delete hLandauStripNegativeCharges;
     delete hLandauStripNegativeChargePosition;
     delete hLandauStripNegativeChargesClPos;
