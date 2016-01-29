@@ -589,12 +589,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     if (diamondCluster->hasNegativeCharge(charge,pos,useCMN))
         if(charge<settings->getNegativeChargeCut())
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
-    if(charge<settings->getNegativeChargeCut()){
+    if(charge<settings->getNegativeChargeCut())
         hNegativeChargeFraction->Fill(1);
-    }
-    else {
+    else
         hNegativeChargeFraction->Fill(0);
-    }
     Int_t area3DwithColumns = 2;
     Int_t area3DwithoutColumns =1;
     if(!settings->do3dTransparentAnalysis()){
@@ -2655,25 +2653,28 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,T
     if (vec->size() == 0) return;
     TH2F* histo = vec->at(0);
     if (!histo) return;
+    if (kind != "" && !kind.BeginsWith("_"))
+        kind.Prepend("_");
 
-    TString name = prefix+"GoodCells_"+kind+appendix;
+    TString name = prefix+"GoodCells"+kind+appendix;
     TH2F* hGoodCells = (TH2F*)histo->Clone(name);
     hGoodCells->Reset();
     hGoodCells->SetTitle(prefix + " Good Cells "+ kind +appendix);
 
-    name = prefix+"BadCells_"+kind+appendix;
+    name = prefix+"BadCells"+kind+appendix;
     TH2F* hBadCells =  (TH2F*)hGoodCells->Clone(name);
     hBadCells->Reset();
     hBadCells->SetTitle(prefix + " Bad Cells "+ kind +appendix);
 
-    name = prefix+"AllButBadCells_"+kind+appendix;
+    name = prefix+"AllButBadCells"+kind+appendix;
     TH2F* hAllButBadCells =  (TH2F*)hGoodCells->Clone(name);
     hAllButBadCells->Reset();
-    hBadCells->SetTitle(prefix + " AllButBad Cells "+ kind +appendix);
+    hAllButBadCells->SetTitle(prefix + " AllButBad Cells "+ kind +appendix);
 
-    name = prefix+"AllCells_"+kind+appendix;
+    name = prefix+"AllCells"+kind+appendix;
     TH2F* hAllCells =  (TH2F*)hGoodCells->Clone(name);
     hAllCells->Reset();
+    hAllCells->SetTitle(prefix + " All Cells "+ kind +appendix);
 
     string plots_path = histSaver->GetPlotsPath();
     string new_plots_path = plots_path;
@@ -5430,10 +5431,14 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY);
-    for (UInt_t i = 0; i< hPulseHeightVsDetectorHitPostionXY_trans.size();i++){
-        histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY_trans.at(i));
-        histSaver->SaveHistogramWithCellGridAndMarkedCells(hPulseHeightVsDetectorHitPostionXY_trans.at(i));
-        delete hPulseHeightVsDetectorHitPostionXY_trans[i];
+    if (settings->do3dTransparentAnalysis()){
+        for (UInt_t i = 0; i< hPulseHeightVsDetectorHitPostionXY_trans.size();i++){
+            if( hPulseHeightVsDetectorHitPostionXY_trans[i]->GetEntries()){
+                histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY_trans.at(i));
+                histSaver->SaveHistogramWithCellGridAndMarkedCells(hPulseHeightVsDetectorHitPostionXY_trans.at(i));
+            }
+            delete hPulseHeightVsDetectorHitPostionXY_trans[i];
+        }
     }
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXY);
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsDetectorHitPostionXYGoodCells);
