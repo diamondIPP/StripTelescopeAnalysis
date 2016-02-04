@@ -1359,9 +1359,13 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected)
     if (verb) this->Print();
     pos = 0;
     Float_t negCharge = 0;
+    Float_t smallCharge = 1e9;
     for(UInt_t clusterSize = 1; clusterSize<= this->size();clusterSize++){
         currentCharge = this->getCharge(clusterSize,cmnCorrected);
         charge = currentCharge - oldCharge;
+        if (currentCharge < smallCharge){
+            smallCharge = currentCharge;
+        }
         if (verb) cout<<"\t"<<clusterSize<<TString::Format("%+7.1f - %+7.1f - %+7.1f",currentCharge,oldCharge,charge)<<"\n";
         if (charge < 0 and !hasNegCharge){
             if( clusterSize+1<this->size() &&
@@ -1385,7 +1389,10 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected)
         char t;
         cin>>t;
     }
-    charge = negCharge;
+    if (hasNegCharge)
+        charge = negCharge;
+    else
+        charge = smallCharge;
     if(hasNegCharge && verb)
         cout<<"found negative charge at "<< pos<<": "<<negCharge<<endl;
     else if (verb)
