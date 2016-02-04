@@ -283,18 +283,17 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         return;
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negativeCharge,clPos,useCMN);
     diamondCluster->SetTransparentClusterSize(clsize);
-
-    if (true||!hasNegativeCharge<0){
+    if (false||!hasNegativeCharge<0){
         cout<<"\nStrip: "<<hasNegativeCharge<<" "<<negativeCharge<<" "<<clPos<<" "<<useCMN<<" "<<nEvent;;
         diamondCluster->Print(1);
     }
+    hLandauStripNegativeCharges->Fill(negativeCharge,charge);
     if (negativeCharge < settings->getNegativeChargeCut())
         hLandauStripNegativeChargesFraction->Fill(1);
     else
         hLandauStripNegativeChargesFraction->Fill(0);
     if (negativeCharge<0){
 //        cout<<nEvent<<"\tFill: "<<hasNegativeCharge<<" "<<negativeCharge<< " " <<clPos<<" "<< charge<<endl;
-        hLandauStripNegativeCharges->Fill(negativeCharge,charge);
         //    else
         //        hLandauStripNegativeCharges->Fill(0.0,charge);
         hLandauStripNegativeChargesClPos->Fill(negativeCharge,clPos);
@@ -5350,12 +5349,12 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStrip->GetYaxis()->SetTitle("number of entries #");
     hLandauStrip->SetLineColor(kBlue);
 
-    Int_t xbins = 256;
-    Float_t xlow = -244;
-    Float_t xup = 12;
+    Int_t xbins = 512;
+    Float_t xlow = -PulseHeightMax/2;
+    Float_t xup = PulseHeightMax/2;
     name = "hLandauStripNegativeCharges"+appendix;
     hLandauStripNegativeCharges = new TH2F(name,name,xbins,xlow,xup,PulseHeightBins,PulseHeightMin,PulseHeightMax);
-    hLandauStripNegativeCharges->GetXaxis()->SetTitle("AdjacentNegativeCharge / ADC");
+    hLandauStripNegativeCharges->GetXaxis()->SetTitle("SmallesAdjacentNegativeCharge / ADC");
     hLandauStripNegativeCharges->GetYaxis()->SetTitle("charge / ADC");
     hLandauStripNegativeCharges->GetZaxis()->SetTitle("no of entries");
 
