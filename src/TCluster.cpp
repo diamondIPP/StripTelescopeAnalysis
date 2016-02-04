@@ -1351,7 +1351,7 @@ Float_t TCluster::getPositiveCharge(UInt_t nClusterEntries, bool cmnCorrected,
  * @return
  */
 bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected) {
-    bool verb = true;
+    bool verb = false;
     Float_t oldCharge = 0;
     Float_t currentCharge;
     if (verb) cout<<"negCharge: "<<endl;
