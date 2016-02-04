@@ -1351,7 +1351,7 @@ Float_t TCluster::getPositiveCharge(UInt_t nClusterEntries, bool cmnCorrected,
  * @return
  */
 bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected) {
-    bool verb = false;
+    bool verb = true;
     Float_t oldCharge = 0;
     Float_t currentCharge;
     if (verb) cout<<"negCharge: "<<endl;
@@ -1360,13 +1360,13 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected)
     pos = 0;
     Float_t negCharge = 0;
     Float_t smallCharge = 1e9;
-    for(UInt_t clusterSize = 1; clusterSize<= this->size();clusterSize++){
+    for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
         currentCharge = this->getCharge(clusterSize,cmnCorrected);
         charge = currentCharge - oldCharge;
-        if (currentCharge < smallCharge){
-            smallCharge = currentCharge;
+        if (charge < smallCharge){
+            smallCharge = charge;
         }
-        if (verb) cout<<"\t"<<clusterSize<<TString::Format("%+7.1f - %+7.1f - %+7.1f",currentCharge,oldCharge,charge)<<"\n";
+        if (verb) cout<<"\t"<<clusterSize<<TString::Format("%+7.1f - %+7.1f - %+7.1f | %7.1f",currentCharge,oldCharge,charge,smallCharge)<<"\n";
         if (charge < 0 and !hasNegCharge){
             if( clusterSize+1<this->size() &&
                 this->getCharge(clusterSize+1,cmnCorrected)-currentCharge > charge){
