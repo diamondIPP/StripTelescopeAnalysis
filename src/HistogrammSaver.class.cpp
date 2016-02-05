@@ -961,6 +961,34 @@ void HistogrammSaver::DrawGoodCellsRegion(TCanvas* c1) {
     }
 }
 
+TH1F* HistogrammSaver::GetBinsInHistogram(TH2* histo2, UInt_t nbins) {
+    if (!histo2)
+        return 0;
+    Float_t min = 1e9;
+    Float_t max = -1e9;
+    Float_t content;
+    for (UInt_t xbin = 1; xbin<= histo2->GetNbinsX();xbin++)
+    for (UInt_t ybin = 1; ybin<= histo2->GetNbinsY();xbin++){
+        content = histo2->GetBinContent(xbin,ybin);
+        if (content<min)
+            min=content;
+        if (content>max)
+            max = content;
+    }
+    Float_t delta = max-min;
+    min -= .1*delta;
+    max += .1*delta;
+    TString name = histo2->GetName()+"_binned";
+    TString title = histo2->GetTitle;
+    TH1F* histo = new TH1F(name,title,nbins,min,max);
+    histo->GetXaxis()->SetTitle(histo2->GetZaxis()->GetTitle());
+    for (UInt_t xbin = 1; xbin<= histo2->GetNbinsX();xbin++)
+       for (UInt_t ybin = 1; ybin<= histo2->GetNbinsY();xbin++){
+           histo->Fill(histo2->GetBinContent(xbin,ybin));
+       }
+    return histo;
+}
+
 void HistogrammSaver::UpdatePaveText(){
     if (!pt)
         return;
@@ -1387,6 +1415,9 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     std::pair<Float_t,Float_t> biasColumn = make_pair(0,0);
     if (!histo)return;
     if(histo->GetEntries()==0)return;
+    TH1F *h = this->GetBinsInHistogram(histo);
+    this->SaveHistogram(h);
+    delete h;
     Int_t style = gStyle->GetOptStat();
     if (settings->IsPaperMode())
         gStyle->SetOptStat("e");
