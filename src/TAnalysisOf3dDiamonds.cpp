@@ -5426,7 +5426,7 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
 
     TF1* fit = new TF1("fit","gaus",xmin,xmax);
     px->Fit(fit,"RQ","+",xmin,xmax);
-    histSaver->SaveHistogram(px);
+    histSaver->SaveHistogramWithFit(px,fit,xmin,xmax,false);
     px->SetName(name+"_logy");
     histSaver->SaveHistogram(px,false,false,true,"logy");
     delete px;
