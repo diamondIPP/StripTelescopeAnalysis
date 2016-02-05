@@ -5350,8 +5350,8 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     hLandauStrip->SetLineColor(kBlue);
 
     Int_t xbins = 512;
-    Float_t xlow = -0.3*PulseHeightMax/4;
-    Float_t xup = .78*PulseHeightMax/4;
+    Float_t xlow = -PulseHeightMax/14;
+    Float_t xup = .78*PulseHeightMax/5;
     name = "hLandauStripNegativeCharges"+appendix;
     hLandauStripNegativeCharges = new TH2F(name,name,xbins,xlow,xup,PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandauStripNegativeCharges->GetXaxis()->SetTitle("SmallesAdjacentNegativeCharge / ADC");
