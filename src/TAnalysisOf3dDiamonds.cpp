@@ -5418,7 +5418,7 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     histSaver->SaveHistogram(hLandauStripNegativeChargesFraction);
     TString name = "hLandauStripNegativeCharges"+appendix+"_px";
     TH1D* px = hLandauStripNegativeCharges->ProjectionX(name);
-    histSaver->SaveHistogram(px);
+    histSaver->SaveHistogram(px,true);
     px->SetName(name+"_logy");
     histSaver->SaveHistogram(px,false,false,true,"logy");
     delete px;
