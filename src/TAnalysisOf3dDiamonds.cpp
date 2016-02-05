@@ -288,6 +288,8 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         diamondCluster->Print(1);
     }
     hLandauStripNegativeCharges->Fill(negativeCharge,charge);
+    cout<<"Fill hLandauStripNegativeChargesFraction"<<(bool)(negativeCharge < settings->getNegativeChargeCut())<<
+            " "<<negativeCharge<<" "<<settings->getNegativeChargeCut()<<endl;
     if (negativeCharge < settings->getNegativeChargeCut())
         hLandauStripNegativeChargesFraction->Fill(1);
     else
@@ -5362,7 +5364,7 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     TString hName = TString::Format("Negative Charge Fraction: Thr %d",(int)settings->getNegativeChargeCutStrip());
     hName += ";has Negative charge below Thr";
     hName += ";number of entries";
-    hLandauStripNegativeChargesFraction = new TH1F(name,hName,2,0,1);
+    hLandauStripNegativeChargesFraction = new TH1F(name,hName,2,-1.5,1.5);
 
     Int_t ybins = 7;
     Float_t ylow = -2;
