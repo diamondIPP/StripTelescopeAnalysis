@@ -978,8 +978,8 @@ TH1F* HistogrammSaver::GetBinsInHistogram(TH2* histo2, UInt_t nbins) {
     Float_t delta = max-min;
     min -= .1*delta;
     max += .1*delta;
-    TString name = histo2->GetName()+"_binned";
-    TString title = histo2->GetTitle;
+    TString name = histo2->GetName()+(TString)"_binned";
+    TString title = histo2->GetTitle();
     TH1F* histo = new TH1F(name,title,nbins,min,max);
     histo->GetXaxis()->SetTitle(histo2->GetZaxis()->GetTitle());
     for (UInt_t xbin = 1; xbin<= histo2->GetNbinsX();xbin++)
