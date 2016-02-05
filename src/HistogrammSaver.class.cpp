@@ -1116,7 +1116,7 @@ void HistogrammSaver::SaveHistogramWithExtendedFit(TH1* histo,TF1* fit, Float_t 
     delete c1;
 }
 
-void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosity){
+void HistogrammSaver::SaveHistogramWithFit(TH1* histo,TF1* fit, UInt_t verbosity){
     return SaveHistogramWithFit(histo,fit,1,-1,verbosity);
     if(histo==0)return;
     if(histo->GetEntries()==0)return;
@@ -1157,7 +1157,7 @@ void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit, UInt_t verbosit
     //	if(plots_canvas)delete plots_canvas;
 }
 
-void HistogrammSaver::SaveHistogramWithFit(TH1F* histo,TF1* fit,Float_t xmin,Float_t xmax, UInt_t verbosity){
+void HistogrammSaver::SaveHistogramWithFit(TH1* histo,TF1* fit,Float_t xmin,Float_t xmax, UInt_t verbosity){
     if(histo==0)return;
     if(histo->GetEntries()==0)return;
     if(fit==0) SaveHistogram(histo);

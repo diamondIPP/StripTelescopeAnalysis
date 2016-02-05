@@ -91,8 +91,8 @@ public:
 	TProfile* GetProfileX(TProfile2D* prof,TString name ="_pfx",Int_t firstybin = 1, Int_t lastybin = -1);
     TProfile* GetProfileY(TProfile2D* prof,TString name ="_pfy",Int_t firstxbin = 1, Int_t lastxbin = -1);
     TH2D* GetBinContentHisto(TProfile2D* prof);
-	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);
-	void SaveHistogramWithFit(TH1F* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);
+	void SaveHistogramWithFit(TH1* histo, TF1* fit,UInt_t verbosity=0);
+	void SaveHistogramWithFit(TH1* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
 	void SaveHistogramLogZ(TH2* histo);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
