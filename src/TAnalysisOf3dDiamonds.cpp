@@ -5419,7 +5419,14 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
     histSaver->SaveHistogram(hLandauStripNegativeChargesFraction);
     TString name = "hLandauStripNegativeCharges"+appendix+"_px";
     TH1D* px = hLandauStripNegativeCharges->ProjectionX(name);
-    histSaver->SaveHistogram(px,true);
+    Float_t mp = hLandauStripNegativeCharges->GetBinCenter(hLandauStripNegativeCharges->GetMaximumBin());
+    Float_t max= hLandauStripNegativeCharges->GetBinContent(hLandauStripNegativeCharges->GetMaximumBin());
+    Float_t xmin = hLandauStripNegativeCharges->FindFirstBinAbove(max/2);
+    Float_t xmax = hLandauStripNegativeCharges->FindLastBinAbove(max/2);
+
+    TF1* fit = new TF1("fit","gaus",xmin,xmax);
+    px->Fit(fit,"RQ","+",xmin,xmax);
+    histSaver->SaveHistogram(px);
     px->SetName(name+"_logy");
     histSaver->SaveHistogram(px,false,false,true,"logy");
     delete px;
