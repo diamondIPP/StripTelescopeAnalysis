@@ -288,8 +288,7 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         diamondCluster->Print(1);
     }
     hLandauStripNegativeCharges->Fill(negativeCharge,charge);
-    cout<<"Fill hLandauStripNegativeChargesFraction"<<(bool)(negativeCharge < settings->getNegativeChargeCut())<<
-            " "<<negativeCharge<<" "<<settings->getNegativeChargeCut()<<endl;
+    //                    " "<<setw(7)<<negativeCharge<<" "<<setw(5)<<settings->getNegativeChargeCut()<<endl;
     if (negativeCharge < settings->getNegativeChargeCut())
         hLandauStripNegativeChargesFraction->Fill(1);
     else
