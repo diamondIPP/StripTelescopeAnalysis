@@ -5363,7 +5363,7 @@ void TAnalysisOf3dDiamonds::InitialiseStripAnalysisHistos() {
     TString hName = TString::Format("Negative Charge Fraction: Thr %d",(int)settings->getNegativeChargeCutStrip());
     hName += ";has Negative charge below Thr";
     hName += ";number of entries";
-    hLandauStripNegativeChargesFraction = new TH1F(name,hName,2,-1.5,1.5);
+    hLandauStripNegativeChargesFraction = new TH1F(name,hName,3,-1.5,1.5);
 
     Int_t ybins = 7;
     Float_t ylow = -2;
