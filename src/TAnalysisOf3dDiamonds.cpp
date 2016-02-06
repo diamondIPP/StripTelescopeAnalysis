@@ -3887,9 +3887,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(zmin,zmax);
             histSaver->SaveHistogram(histo);
-            TH1F *h = histSaver->GetBinsInHistogram(histo);
-            histSaver->SaveHistogram(h);
-            delete h;
+            histSaver->SaveOverlay(histo);
             delete histo;
             ////		hCellsOverlayAvrgCharge->SetName("hCellsOverlayAvrgCharge");
             //		cout<<"Set Name: "<<hCellsOverlayAvrgCharge<<endl;
@@ -3907,9 +3905,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(zmin,zmax);
             histSaver->SaveHistogram(histo);
-            TH1F *h = histSaver->GetBinsInHistogram(histo);
-            histSaver->SaveHistogram(h);
-            delete h;
+            histSaver->SaveOverlay(histo);
             delete histo;
         }
         if(hCellsOverlayAvrgChargeBadCells.at(ClusterSize)){
@@ -3922,9 +3918,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(zmin,zmax);
             histSaver->SaveHistogram(histo);
-            TH1F *h = histSaver->GetBinsInHistogram(histo);
-            histSaver->SaveHistogram(h);
-            delete h;
             delete histo;
         }
         if(hCellsLandauMinusBadCells.at(ClusterSize)){
@@ -3943,9 +3936,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             histo->GetZaxis()->SetRangeUser(zmin,zmax);
             histSaver->SaveHistogram(histo);
             histSaver->SaveOverlay(histo);
-            TH1F *h = histSaver->GetBinsInHistogram(histo);
-            histSaver->SaveHistogram(h);
-            delete h;
             if(ClusterSize+1!=3)delete histo;
         }
         if(ClusterSize+1==3){
@@ -3962,9 +3952,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(zmin,zmax);
             histSaver->SaveHistogram(histo);
-            TH1F *h = histSaver->GetBinsInHistogram(histo);
-            histSaver->SaveHistogram(h);
-            delete h;
+            histSaver->SaveOverlay(histo);
             delete histo;
             //		hCellsOverlayAvrgChargeNoColumnHit->SetName("hCellsOverlayAvrgChargeNoColumns");
             //		hCellsOverlayAvrgChargeNoColumnHit->SetTitle("Avrg PH - overlayed - no hit in columns");
@@ -3983,9 +3971,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             histo->Draw("goffcolz");
             histo->GetZaxis()->SetRangeUser(zmin,zmax);
             histSaver->SaveHistogram(histo);
-            TH1F *h = histSaver->GetBinsInHistogram(histo);
-            histSaver->SaveHistogram(h);
-            delete h;
+            histSaver->SaveOverlay(histo);
             delete histo;
             TH2D* hCellsOverlayAvrgChargeMinusBadCellsNentries = hCellsOverlayAvrgChargeMinusBadCells.at(ClusterSize)->ProjectionXY("hCellsOverlayAvrgChargeMinusBadCellsNentries","b");
             hCellsOverlayAvrgChargeMinusBadCellsNentries->Draw("colz");
@@ -4000,9 +3986,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsOverlayMeanCharge() {
             histo->SetTitle("Avrg PH - overlayed - no hit in columns");
             cout<<"SAVE"<<endl;
             histSaver->SaveHistogram(histo);
-            TH1F *h = histSaver->GetBinsInHistogram(histo);
-            histSaver->SaveHistogram(h);
-            delete h;
+            histSaver->SaveOverlay(histo);
             delete histo;
             TH2D* hCellsOverlayAvrgChargeNoColumnHitNentries = hCellsOverlayAvrgChargeNoColumnHit.at(ClusterSize)->ProjectionXY("hCellsOverlayAvrgChargeNoColumnHitNentries","b");
             hCellsOverlayAvrgChargeNoColumnHitNentries->Draw("colz");

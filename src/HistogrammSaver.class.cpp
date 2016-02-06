@@ -1415,9 +1415,9 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     std::pair<Float_t,Float_t> biasColumn = make_pair(0,0);
     if (!histo)return;
     if(histo->GetEntries()==0)return;
-    TH1F *h = this->GetBinsInHistogram(histo);
-    this->SaveHistogram(h);
-    delete h;
+//    TH1F *h = this->GetBinsInHistogram(histo);
+//    this->SaveHistogram(h);
+//    delete h;
     Int_t style = gStyle->GetOptStat();
     if (settings->IsPaperMode())
         gStyle->SetOptStat("e");
