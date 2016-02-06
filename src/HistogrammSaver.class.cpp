@@ -989,6 +989,76 @@ TH1F* HistogrammSaver::GetBinsInHistogram(TH2* histo2, UInt_t nbins) {
     return histo;
 }
 
+void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
+    if (!histo)
+        return;
+
+    Float_t minX =  histo->GetMinimum();
+    Float_t maxX = histo->GetMaximum();
+    Float_t deltaX = maxX-minX;
+    maxX += deltaX*0.05;
+    minX -= deltaX*0.1;
+    cout<<"HistogrammSaver::SaveOverlayDistribution"<<histo<<" range: "<<minX<<"-"<<maxX<<flush;
+    UInt_t nbins = 50;
+    TString name = histo->GetName()+TString("_1D");
+    TH1F *histo_1D = new TH1F(name,'all other bins',nbins,minX,maxX);
+    name = histo->GetName()+TString("_1D_middle");
+    TH1F *histo_1D_middle = new TH1F('hOverlay_1D_middle','readout column bin',nbins,minX,maxX);
+    name = histo->GetName()+TString("_1D_corners");
+    TH1F *histo_1D_corner = new TH1F('hOverlay_1D_corners','bias column bins',nbins,minX,maxX);
+    Float_t content,xlow,ylow,xhigh,yhigh;
+    cout<<" fill content"<<flush;
+    for (UInt_t bx=1;bx<= histo->GetNbinsX();bx++){
+        for (UInt_t by = 1; by <= histo->GetNbinsY();by++){
+            content = histo->GetBinContent(bx,by);
+            xlow = histo->GetXaxis()->GetBinLowEdge(bx);
+            xhigh = histo->GetXaxis()->GetBinUpEdge(bx);
+            ylow = histo->GetYaxis()->GetBinLowEdge(by);
+            yhigh = histo->GetYaxis()->GetBinUpEdge(by);
+            if ( (xlow < 75 && 75 < xhigh ) && ( ylow < 75 && 75 < yhigh))
+                histo_1D_middle->Fill(content);
+            else if ( ( xlow <=0 && 0 <= xhigh) && (ylow<=0 && 0<=yhigh))
+                histo_1D_corner->Fill(content);
+            else if(( xlow<=150 && 150 <=xhigh) && ( ylow<=0 && 0<=yhigh))
+                histo_1D_corner->Fill(content);
+            else if(( xlow<=150 && 150 <=xhigh) && (ylow<=150 && 150<=yhigh))
+                histo_1D_corner->Fill(content);
+            else if(( xlow<=0 && 0<=xhigh) && (ylow<=150 && 150<=yhigh))
+                histo_1D_corner->Fill(content);
+            else
+                histo_1D->Fill(content);
+        }
+    }
+    cout<<"-done "<<histo_1D->GetEntries()<<"/"<<histo_1D_corner->GetEntries()<<histo_1D_middle->GetEntries()<<flush;
+    histo_1D->SetLineColor(kBlack);
+    cout<<" fitGaus"<<flush;
+    TF1* fGaus = new TF1('fgaus','gaus',minX,maxX);
+    fGaus->SetLineStyle(2);
+    fGaus->SetLineColor(kGreen);
+    histo_1D->Fit(fGaus);
+
+    histo_1D_middle->SetLineColor(kRed);
+    histo_1D_middle->SetLineStyle(2);
+    histo_1D_middle->SetFillColor(kRed);
+    histo_1D_middle->SetFillStyle(3013);
+    histo_1D_corner->SetLineColor(kBlue);
+    histo_1D_corner->SetLineStyle(3);
+    histo_1D_corner->SetFillColor(kBlue);
+    histo_1D_corner->SetFillStyle(3021);
+    name= TString("stack_")+histo->GetName()+TString("_1D");
+    cout<<" saveStack"<<flush;
+    THStack* hstack = THStack(name,"Overlay distribution;avrg. signals/ electrons;number of entries");
+    hstack->Add(histo_1D);
+    hstack->Add(histo_1D_middle);
+    hstack->Add(histo_1D_corner);
+    this->SaveStack(hstack,"stack",true);
+    delete hstack;
+    delete histo_1D_middle;
+    delete histo_1D_corner;
+    delete histo_1D;
+    cout<<" DONE"<<endl;
+}
+
 void HistogrammSaver::UpdatePaveText(){
     if (!pt)
         return;
@@ -1467,7 +1537,9 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     c1->Update();
     SaveCanvas(c1);
     delete c1;
+    this->SaveOverlayDistribution(histo);
 }
+
 TCutG* HistogrammSaver::GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y){
     if (!histo)return 0;
 
