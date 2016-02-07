@@ -992,11 +992,10 @@ TH1F* HistogrammSaver::GetBinsInHistogram(TH2* histo2, UInt_t nbins) {
 void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
     if (!histo)
         return;
-
-    Float_t minX =  histo->GetMinimum();
-    Float_t maxX = histo->GetMaximum();
+    Float_t minX =  histo->GetBinContent(histo->GetMinimumBin());
+    Float_t maxX = histo->GetBinContent(histo->GetMaximumBin());
     Float_t deltaX = maxX-minX;
-    maxX += deltaX*0.05;
+    maxX += deltaX*0.2;
     minX -= deltaX*0.1;
     cout<<"HistogrammSaver::SaveOverlayDistribution"<<histo<<" range: "<<minX<<"-"<<maxX<<flush;
     UInt_t nbins = 50;
@@ -1051,7 +1050,7 @@ void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
     hstack->Add(histo_1D);
     hstack->Add(histo_1D_middle);
     hstack->Add(histo_1D_corner);
-    this->SaveStack(hstack,"stack",true);
+    this->SaveStack(hstack,"",true);
     delete hstack;
     delete histo_1D_middle;
     delete histo_1D_corner;
