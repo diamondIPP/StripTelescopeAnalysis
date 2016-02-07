@@ -1034,7 +1034,7 @@ void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
     TF1* fGaus = new TF1("fgaus","gaus",minX,maxX);
     fGaus->SetLineStyle(2);
     fGaus->SetLineColor(kGreen);
-    histo_1D->Fit(fGaus);
+    histo_1D->Fit(fGaus,"Q");
 
     histo_1D_middle->SetLineColor(kRed);
     histo_1D_middle->SetLineStyle(2);
@@ -1484,6 +1484,7 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     std::pair<Float_t,Float_t> biasColumn = make_pair(0,0);
     if (!histo)return;
     if(histo->GetEntries()==0)return;
+    this->SaveOverlayDistribution(histo);
 //    TH1F *h = this->GetBinsInHistogram(histo);
 //    this->SaveHistogram(h);
 //    delete h;
@@ -1536,7 +1537,6 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     c1->Update();
     SaveCanvas(c1);
     delete c1;
-    this->SaveOverlayDistribution(histo);
 }
 
 TCutG* HistogrammSaver::GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y){
