@@ -1373,16 +1373,17 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         Int_t clPos = this->getTransparentClusterPosition(clusterNo);
         Int_t startChannel = Int_t(isTransparentCluster+.5);
         Int_t clStart = this->getClusterPosition(startChannel);
-        Int_t dir;
+        Int_t orig_dir;
         if (startChannel-isTransparentCluster<0)
-            dir = -1;
+            orig_dir = -1;
         else
-            dir = 1;
+            orig_dir = 1;
+        Int_t dir = orig_dir;
         if (clusterNo%2==0) dir *= -1;
         Int_t dif = (Int_t(clusterNo)+1)/2;
         Int_t clusPos = clStart + dir *dif;
         if (clusPos != clPos){
-            cout<<"\n\nclStart: "<<clStart<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
+            cout<<"\n\nclStart: "<<clStart<<" origDir: "<<orig_dir<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
             this->Print();
             char t;
             cin>>t;
