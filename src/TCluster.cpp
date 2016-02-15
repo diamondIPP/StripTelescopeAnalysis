@@ -1365,13 +1365,26 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
     pos = 0;
     Float_t negCharge = 0;
     Float_t smallCharge = 1e9;
+    Int_t startChannel = Int_t(isTransparentCluster+.5);
+    Int_t clStart = this->getClusterPosition(startChannel);
+    Int_t dir = 0;
+    if (startChannel-isTransparentCluster<0)
+        dir = -1;
+    else
+        dir = 1;
     for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
         currentCharge = this->getCharge(clusterSize,cmnCorrected);
         charge = currentCharge - oldCharge;
         Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
+
+        if (clusterSize-1%2==0) dir *= -1;
+        Int_t dif = (Int_t(clusterSize))/2;
         Float_t signal = this->getSignal(clPos,cmnCorrected);
-        if (charge != signal && !verb){
+
+        Int_t clusPos = clStart + dir *dif;
+        if (charge != signal)
             cout<<"\n"<<clusterSize<<"/"<<clPos<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
+            cout<<"clStart: "<<clStart<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
             return hasNegativeCharge(charge,pos,cmnCorrected,true);
             verb = true;
         }
