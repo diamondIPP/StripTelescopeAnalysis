@@ -9,6 +9,7 @@
 
 TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settings,HistogrammSaver* histSaver,TString extension) {
     // TODO Auto-generated constructor stub
+    cout<<"TAnalysisOfAnalysisDifferences:: "<<extension<<endl;
     this->settings = settings;
     this->histSaver = histSaver;
     if(settings==0 || histSaver==0)
@@ -26,6 +27,7 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
 TAnalysisOfAnalysisDifferences::~TAnalysisOfAnalysisDifferences() {
 //    delete stripHisto;
     // TODO Auto-generated destructor stub
+    cout<<"Done with TAnalysisOfAnalysisDifferences"<<endl;
 }
 void TAnalysisOfAnalysisDifferences::setStripHistogram(TH1F* histo){
     this->stripHisto = (TH1F*)histo->Clone();
