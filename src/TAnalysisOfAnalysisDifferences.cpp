@@ -196,9 +196,6 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
         Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
         Int_t pos_neg = itTransparent->second.getTransparentClusterPosition(pos-1);
         Int_t delta = pos_neg - pos_hit;
-        cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<" "<<pos_hit<<"/"<<pos_neg<<"="<<delta<<"\n";
-        itTransparent->second.Print(1);
-        cout<<endl;
 
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
 		mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,pos);
@@ -210,6 +207,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
                 Float_t yPredDet = predictedPositions->at(eventNo).second;
                 mapHistos["hNegativeChargeAboveCut_Position"]->Fill(xPredDet,yPredDet);
                 pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+                cout<<"hNegativeChargeAboveCut_RelPosition FILL "<<relPos.first<<"/"<<relPos.second<<endl;
                 mapHistos["hNegativeChargeAboveCut_RelPosition"]->Fill(relPos.first,relPos.second);
             }
         }
@@ -225,6 +223,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
             Float_t xPredDet = predictedPositions->at(eventNo).first;
             Float_t yPredDet = predictedPositions->at(eventNo).second;
             pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+            cout<<"hNoNegativeCharge_RelPosition FILL "<<relPos.first<<"/"<<relPos.second<<endl;
             mapHistos["hNoNegativeCharge_RelPosition"]->Fill(relPos.first,relPos.second);
             if (posCharge < settings->getLowResponseThreshold()){
                 mapHistos["hNoNegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
@@ -520,6 +519,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
     cout<<"[TAnalysisOfAnalysisDifferences]Save Histos it map "<<mapHistos.size()<<endl;
     for(it;it!=mapHistos.end();it++){
+        cout<<"Save: "<<it->first<<endl;
         TString className = it->second->ClassName();
         if (className.Contains("TH2F"))
             histSaver->SaveHistogram((TH2F*)it->second);
