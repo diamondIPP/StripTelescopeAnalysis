@@ -40,6 +40,8 @@ private:
     void InitClusteredHistos();
     void InitSameHistos();
     void SaveHistograms();
+    void SaveTransparentClusteredComparison();
+    void SaveComparisonPlots(TString name,TH1* histo,bool includePhantom=false);
     void LoopOverBothMaps();
     void UpdatePredictedPosition();
     void AnalyseSameEvent();

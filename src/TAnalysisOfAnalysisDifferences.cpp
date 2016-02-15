@@ -177,7 +177,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
     Float_t allCharge = itTransparent->second.getCharge(true,true);
     mapHistos["hTransparentPulseHeight"]->Fill(posCharge);
-    mapHistos["hTransparentPulseHeightAll"]->Fill(allCharge);
+    mapHistos["hTransparentPulseHeightAllCharge"]->Fill(allCharge);
     mapHistos["hClusteredPulseHeight"]->Fill(clusteredCharge);
     if (1810<posCharge&&posCharge<1840){
         cout<<"PH: "<<posCharge;
@@ -378,7 +378,8 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     mapHistos[name] = histo;
 }
 
-void TAnalysisOfAnalysisDifferences::SaveHistograms() {
+
+void TAnalysisOfAnalysisDifferences::SaveTransparentClusteredComparison() {
     TH1F* histo1 = (TH1F*)mapHistos["hClusteredPulseHeight"]->Clone();
     TH1F* histo2 = (TH1F*)mapHistos["hTransparentPulseHeight"]->Clone();
     TH1F* hPhantomScaled = 0;
@@ -438,99 +439,106 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     if (hS)
         delete hS;
     cout<<"Save6"<<endl;
+}
 
 
-    name = "cNoNegativeCharge_PulseHeight_Comparision"+extension;
-    c1->SetTitle(name);
-    c1->SetName(name);
-    c1->Clear();
-    mapHistos["hNoNegativeCharge_PulseHeight"]->SetTitle("3D");
-    mapHistos["hNoNegativeCharge_PulseHeight"]->Draw();
-//    if(histo2){
-//        histo2->SetLineColor(kRed);
-//        histo2->Draw("same");
-//    }
-    if(stripHisto){
-        stripHisto->SetTitle("Strip");
-        stripHisto->SetLineStyle(2);
-        stripHisto->Draw("same");
+void TAnalysisOfAnalysisDifferences::SaveComparisonPlots(TString name, TH1* histo,bool includePhantom) {
+    if (!histo) return;
+    if (!hPhantomLandau) includePhantom=false;
+    else{
+        hPhantomLandau->SetTitle("3D Phantom");
+        hPhantomLandau->SetLineStyle(4);
+        hPhantomLandau->SetLineColor(kRed);
     }
-    leg = c1->BuildLegend();
+
+    if (stripHisto){
+        stripHisto->SetTitle("Strip");
+        stripHisto->SetLineColor(kBlue);
+        stripHisto->SetLineStyle(2);
+    }
+    TString hName = name+extension;
+    hName.Insert(0,"c");
+    TCanvas *c1 = new TCanvas(hName,hName);
+    c1->SetTitle(hName);
+    c1->SetName(hName);
+    c1->Clear();
+    histo->SetTitle("3D");
+    histo->Draw();
+    if (stripHisto) stripHisto->Draw("same");
+    TLegend* leg = c1->BuildLegend();
     leg->SetFillColor(kWhite);
     leg->Draw();
     histSaver->SaveCanvas(c1);
 
-    name = "stack_NoNegativeCharge_PulseHeight_Comparision"+extension;
-    THStack *hs1 = new THStack(name,name);
-    hs1->Add(mapHistos["hNoNegativeCharge_PulseHeight"]);
+    hName = "stack_"+name+extension;
+    TString title = name +extension+";charge / ADC;number of entries";
+    THStack *hs1 = new THStack(hName,title);
+    hs1->Add(histo);
     if(stripHisto)hs1->Add(stripHisto);
+    if (includePhantom) hs1->Add(hPhantomLandau);
     hs1->Draw("");
-    if(hs1->GetXaxis())hs1->GetXaxis()->SetTitle("charge / ADC");
-    if(hs1->GetYaxis())hs1->GetYaxis()->SetTitle("number of entries");
     histSaver->SaveStack(hs1,"nostack",true,false);
 
-    name = "stack_NoNegativeCharge_PulseHeight_Comparision_normalized"+extension;
-    THStack *hs2 = new THStack(name,name);
-    hs2->Add(mapHistos["hNoNegativeCharge_PulseHeight"]->DrawNormalized("goff"));
+    hName = "stack_"+name+"_normalized"+extension;
+    THStack *hs2 = new THStack(hName,title);
+    hs2->Add(histo->DrawNormalized("goff"));
+    if (includePhantom) hs2->Add(hPhantomLandau->DrawNormalized("goff"));
     if(stripHisto)hs2->Add(stripHisto->DrawNormalized("goff"));
     hs2->Draw("");
-    if(hs2->GetXaxis())hs2->GetXaxis()->SetTitle("charge / ADC");
-    if(hs2->GetYaxis())hs2->GetYaxis()->SetTitle("number of entries - normalized");
-//    histSaver->SaveStack(hs2,"nostack",true,false);
 
-    name = "stack_NoNegativeCharge_PulseHeight_Comparision_scaled"+extension;
-    THStack *hs3 = new THStack(name,name);
-    TH1F* histo3 = (TH1F*)mapHistos["hNoNegativeCharge_PulseHeight"]->Clone();
-    Float_t scale = histo3->GetBinContent(histo3->GetMaximumBin());
-    histo3->Scale(1./scale);
-    histo3->SetTitle("3D");
-    TH1F* histo4 =0;
+    hName = "stack_"+name+"_scaled"+extension;
+    THStack *hs3 = new THStack(hName,title);
+    TH1F* h_scaled = (TH1F*)histo->Clone();
+    Float_t scale = h_scaled->GetBinContent(h_scaled->GetMaximumBin());
+    h_scaled->Scale(1./scale);
+    TH1F* hStrip_scaled =0;
     if (stripHisto){
-        histo4 = (TH1F*)stripHisto->Clone();
-        scale = histo4->GetBinContent(histo4->GetMaximumBin());
-        histo4->Scale(1./scale);
-        histo4->SetTitle("Strip");
+        hStrip_scaled = (TH1F*)stripHisto->Clone();
+        scale = hStrip_scaled->GetBinContent(hStrip_scaled->GetMaximumBin());
+        hStrip_scaled->Scale(1./scale);
+        hStrip_scaled->SetTitle("Strip");
     }
-    hs3->Add(histo3);
-    if(histo4)
-        hs3->Add(histo4);
-    if (hPhantomScaled){
-        hs3->Add(hPhantomScaled);
+    TH1F* hPhantom_scaled =0;
+    if (includePhantom){
+        hPhantom_scaled = (TH1F*)hPhantomLandau->Clone();
+        scale = hStrip_scaled->GetBinContent(hPhantom_scaled->GetMaximumBin());
+        hPhantom_scaled->Scale(1./scale);
+        hPhantom_scaled->SetTitle("Phantom");
     }
+    hs3->Add(h_scaled);
+    if (hStrip_scaled) hs3->Add(hStrip_scaled);
+    if (hPhantom_scaled)hs3->Add(hPhantom_scaled);
     hs3->Draw("");
-    if(hs3->GetXaxis())hs3->GetXaxis()->SetTitle("charge / ADC");
-    if(hs3->GetYaxis())hs3->GetYaxis()->SetTitle("number of entries - rescaled");
     histSaver->SaveStack(hs3,"nostack",true,false,"charge / ADC","rel. no of entries");
+}
 
 
+void TAnalysisOfAnalysisDifferences::SaveHistograms() {
+    SaveTransparentClusteredComparison();
+    TString name = "NoNegativeCharge_PulseHeight_Comparision";
+    SaveComparisonPlots(name,mapHistos["hNoNegativeCharge_PulseHeight"]);
+    name= "PositiveCharge_PulseHeight_Comparision";
+    SaveComparisonPlots(name,mapHistos["hTransparentPulseHeight"]);
+    name= "AllCharge_PulseHeight_Comparision";
+    SaveComparisonPlots(name,mapHistos["hTransparentPulseHeightAllCharge"]);
 
-    name = "stackPulseHeights_GoodCells"+extension;
+    mapHistos["hHasNegativeCharge_PulseHeight"]->SetTitle("hasNegativeCharge");
+    mapHistos["hNoNegativeCharge_PulseHeight"]->SetTitle("noNegativeCharge");
+    name = "stackPulseHeights_NegativeChargeComparison"+extension;
     THStack *hs = new THStack(name,name);
     hs->Add((TH1F*)mapHistos["hHasNegativeCharge_PulseHeight"]->Clone());
     hs->Add((TH1F*)mapHistos["hNoNegativeCharge_PulseHeight"]->Clone());
-    if (hPhantomScaled){
-        hs3->Add(hPhantomScaled);
-    }
     hs->Draw("");
     if(hs->GetXaxis())hs->GetXaxis()->SetTitle("charge / ADC");
     if(hs->GetYaxis())hs->GetYaxis()->SetTitle("number of entries");
     histSaver->SaveStack(hs,"",true,false);
 
-    name = "stackPulseHeights_GoodCells"+extension;
-    hs->SetTitle(name);
-    hs->SetName(name);
-    histSaver->SaveStack(hs,"",true,false);
 
-    name = "stackPulseHeights_GoodCells_nostack"+extension;
+    name = "stackPulseHeights_NegativeChargeComparison_nostack"+extension;
     hs->SetTitle(name);
     hs->SetName(name);
     histSaver->SaveStack(hs,"nostack",true,false);
-
     delete hs;
-    delete hs1;
-    delete hs2;
-    delete histo1;
-    delete histo2;
 
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
     cout<<"[TAnalysisOfAnalysisDifferences]Save Histos it map "<<mapHistos.size()<<endl;
