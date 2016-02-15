@@ -601,16 +601,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             Int_t pos_hit = diamondCluster->getTransparentClusterPosition(0);
             Int_t delta = pos_hit - pos_neg;
             cout<<"Delta: "<<pos_neg<<" "<<pos_hit<<": "<<delta<<endl;
-            if (pos<3){
-                if (TMath::Abs(charge2_neg-charge)>1 || ch_hit != ch_hit2){
-                    cout<<"\n\n";
-                    diamondCluster->Print(1);
-                    cout<<"Neg Position: "<<pos<<"-->"<<pos_neg<<"\tHit Pos: "<<pos_hit<<endl;
-                    cout<<"Neg: "<<ch_neg<<"\t"<<ch_hit<<" = "<< ch_hit-ch_neg<<"\tCharge: "<<charge<<endl;
-                    cout<<"charges: "<<charge<<"/"<<charge_neg<<"/"<<charge2_neg<<"\t"<<charge_hit<<"/"<<charge2_hit<<" "<<ch_hit<<"/"<<ch_hit2<<endl;
-                    diamondCluster->hasNegativeCharge(charge,pos,useCMN,true);
-                }
-            }
         }
     }
     if(charge<settings->getNegativeChargeCut())
