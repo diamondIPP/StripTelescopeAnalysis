@@ -1382,7 +1382,7 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         Float_t signal = this->getSignal(clPos,cmnCorrected);
 
         Int_t clusPos = clStart + dir *dif;
-        if (charge != signal)
+        if (charge != signal){
             cout<<"\n"<<clusterSize<<"/"<<clPos<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
             cout<<"clStart: "<<clStart<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
             return hasNegativeCharge(charge,pos,cmnCorrected,true);
