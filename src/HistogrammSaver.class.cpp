@@ -400,7 +400,7 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
     if (verbosity>2) cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
     TCanvas *c1 = new TCanvas(canvasName,canvasName);
     c1->cd();
-    c1->SetObjectStat(false);
+    c1->SetObjectStat(true);
     Float_t min1 = histo1->GetBinContent(histo1->GetMinimumBin());//GetMinimum();
     Float_t min2 = histo2->GetBinContent(histo2->GetMinimumBin());
     Float_t min = TMath::Min(min1,min2);
@@ -444,24 +444,25 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
     frame->SetTitle("frame");
     frame->GetXaxis()->SetTitle(histo1->GetXaxis()->GetTitle());
     frame->GetYaxis()->SetTitle(histo1->GetYaxis()->GetTitle());
+    frame->Draw();
     histo1->Draw("same");
     histo2->Draw("same");
-//    if(histo1->GetMaximum()>histo2->GetMaximum()){
-//        if (verbosity>2) cout<<"\tdraw1-"<<flush;
-//        histo1->Draw("");
-//        histo1->GetYaxis()->SetRangeUser(min,max);
-//        if (verbosity>2) cout<<"draw2 "<<flush;
-//        histo2->Draw("same");
-//        //		histo2->GetYaxis()->SetRangeUser(min,max);
-//    }
-//    else{
-//        if (verbosity>2) cout<<"\tdraw2-"<<flush;
-//        histo2->Draw("");
-//        histo2->GetYaxis()->SetRangeUser(min,max);
-//        if (verbosity>2) cout<<"draw1 "<<flush;
-//        histo1->Draw("same");
-//        //		histo1->GetYaxis()->SetRangeUser(min,max);
-//    }
+    if(histo1->GetMaximum()>histo2->GetMaximum()){
+        if (verbosity>2) cout<<"\tdraw1-"<<flush;
+        histo1->Draw("");
+        histo1->GetYaxis()->SetRangeUser(min,max);
+        if (verbosity>2) cout<<"draw2 "<<flush;
+        histo2->Draw("same");
+        //		histo2->GetYaxis()->SetRangeUser(min,max);
+    }
+    else{
+        if (verbosity>2) cout<<"\tdraw2-"<<flush;
+        histo2->Draw("");
+        histo2->GetYaxis()->SetRangeUser(min,max);
+        if (verbosity>2) cout<<"draw1 "<<flush;
+        histo1->Draw("same");
+        //		histo1->GetYaxis()->SetRangeUser(min,max);
+    }
     c1->Update();
     TVirtualPad *pad =c1->GetPad(0);
     if (verbosity>2) cout<<"MIN: "<<min<<"-->";
