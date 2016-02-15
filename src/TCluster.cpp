@@ -203,6 +203,7 @@ Int_t TCluster::getTransparentClusterPosition(UInt_t clusterNo) {
 //			dir = -1;
 //	}
 	Int_t clusPos = clStart + dir *dif;
+    //cout<<"[TCluster::getTransparentClusterPosition] "<<startChannel<<" "<<clStart<<" "<<dir<<" "<<dif<<" "<<clusPos<<endl;
 	return clusPos;
 }
 
@@ -1355,7 +1356,7 @@ Float_t TCluster::getPositiveCharge(UInt_t nClusterEntries, bool cmnCorrected,
  * @param cmnCorrected
  * @return
  */
-bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected, bool verb = false) {
+bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected, bool verb) {
     Float_t oldCharge = 0;
     Float_t currentCharge;
     if (verb) cout<<"negCharge: "<<endl;
@@ -1383,8 +1384,8 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
                 Float_t charge2 =this->getCharge(clusterSize+2,cmnCorrected);
                 Int_t pos1 = this->getTransparentClusterPosition(clusterSize);
                 Int_t pos2 = this->getTransparentClusterPosition(clusterSize+1);
-                Float_t sig1 = this->GetSignal(pos1,cmnCorrected);
-                Float_t sig2 = this->GetSignal(pos2,cmnCorrected);
+                Float_t sig1 = this->getSignal(pos1,cmnCorrected);
+                Float_t sig2 = this->getSignal(pos2,cmnCorrected);
                 if (sig1<sig2){
                     if (sig1<charge)
                         cout<<"Change to sig1"<<endl;
@@ -1393,8 +1394,8 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
                     if (sig2<charge)
                             cout<<"Change to sig2"<<endl;
                 }
-                if (verb) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<charge<<"/"
-                        <<charge1<<"/"<<charge2<<"\t"<<charge1-charge<<"/"<<charge2-charge1<<endl;
+                if (verb||true) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<signal<<"/"<<charge<<"/"
+                        <<charge1<<"/"<<charge2<<"\t"<<charge1-charge<<"/"<<charge2-charge1<<"/"<<signal<<"/"<<sig1<<"/"<<sig2<<endl;
             }
             else if( clusterSize+1<this->size() &&
                 this->getCharge(clusterSize+1,cmnCorrected)-currentCharge > charge){
