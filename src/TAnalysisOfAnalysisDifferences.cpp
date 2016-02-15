@@ -210,7 +210,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
                 cout<<"hNegativeChargeAboveCut_RelPosition FILL "<<relPos.first<<"/"<<relPos.second<<endl;
                 cout<<mapHistos["hNegativeChargeAboveCut_RelPosition"]->GetEntries();
                 mapHistos["hNegativeChargeAboveCut_RelPosition"]->Fill(relPos.first,relPos.second);
-                cout<<"-->"<<mapHistos["hNegativeChargeAboveCut_RelPosition"]->GetEntries();
+                cout<<"-->"<<mapHistos["hNegativeChargeAboveCut_RelPosition"]->GetEntries()<<endl;;
             }
         }
     }
