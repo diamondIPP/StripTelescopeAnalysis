@@ -352,14 +352,13 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
 
     name = "hTransparentPulseHeightAllCharge";
     hname = name+extension;
-    histo = new TH1F(hname,hname,bins,xmin,xmax);
+    histo = (TH1F*) histo->Clone(hname);
     histo->GetXaxis()->SetTitle("Charge / ADC");
     histo->GetYaxis()->SetTitle("no of entries #");
     mapHistos[name] = histo;
 
     name = "hClusteredPulseHeight";
     hname = name + extension;
-
     histo = (TH1F*) histo->Clone(hname);
     histo->SetLineColor(kBlack);
     mapHistos[name] = histo;
@@ -394,7 +393,15 @@ void TAnalysisOfAnalysisDifferences::SaveTransparentClusteredComparison() {
     TH1F* histo1 = (TH1F*)(((TH1F*)(mapHistos["hClusteredPulseHeight"]))->Clone());
     TH1F* histo2 = (TH1F*)(((TH1F*)(mapHistos["hTransparentPulseHeight"]))->Clone());
     histo1->SetTitle("Clustered");
+    histo1->SetLineColor(kBlack);
     histo2->SetTitle("Tranparent");
+    histo2->SetLineColor(kRed);
+    cout<<"histo1: "<<histo1->GetName()<<" | "<<histo1->GetTitle()<<": "<<histo1->GetEntries()<<endl;;
+    cout<<"histo2: "<<histo2->GetName()<<" | "<<histo2->GetTitle()<<": "<<histo2->GetEntries()<<endl;;
+    if (stripHisto)
+        cout<<"strip"<<stripHisto->GetName()<<" | "<<stripHisto->GetTitle()<<": "<<stripHisto->GetEntries()<<endl;;
+    char t;
+    cin>>t;
     TH1F* hPhantomScaled = 0;
     TH1F* hStripScaled = 0;
     if (stripHisto){
