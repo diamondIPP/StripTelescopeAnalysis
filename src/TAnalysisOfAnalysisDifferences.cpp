@@ -394,7 +394,7 @@ void TAnalysisOfAnalysisDifferences::SaveTransparentClusteredComparison() {
     TH1F* histo2 = (TH1F*)(((TH1F*)(mapHistos["hTransparentPulseHeight"]))->Clone());
     histo1->SetTitle("Clustered");
     histo1->SetLineColor(kBlack);
-    histo2->SetTitle("Tranparent");
+    histo2->SetTitle("Transparent");
     histo2->SetLineColor(kRed);
     cout<<"histo1: "<<histo1->GetName()<<" | "<<histo1->GetTitle()<<": "<<histo1->GetEntries()<<endl;;
     cout<<"histo2: "<<histo2->GetName()<<" | "<<histo2->GetTitle()<<": "<<histo2->GetEntries()<<endl;;
