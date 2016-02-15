@@ -400,8 +400,6 @@ void TAnalysisOfAnalysisDifferences::SaveTransparentClusteredComparison() {
     cout<<"histo2: "<<histo2->GetName()<<" | "<<histo2->GetTitle()<<": "<<histo2->GetEntries()<<endl;;
     if (stripHisto)
         cout<<"strip"<<stripHisto->GetName()<<" | "<<stripHisto->GetTitle()<<": "<<stripHisto->GetEntries()<<endl;;
-    char t;
-    cin>>t;
     TH1F* hPhantomScaled = 0;
     TH1F* hStripScaled = 0;
     if (stripHisto){
