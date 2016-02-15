@@ -199,7 +199,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
             mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
         pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
         mapHistos["hAllEvents_RelPosition"]->Fill(relPos.first,relPos.second);
-        mapHistos["hNegativeChargeProfileRelPosition"]->Fill(relPos.first,relPos.second,charge);
+        ((TProfile2D*)mapHistos["hNegativeChargeProfileRelPosition"])->Fill(relPos.first,relPos.second,charge);
     }
 //    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
     if (hasNegativeCharge){
