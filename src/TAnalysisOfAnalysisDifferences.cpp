@@ -529,6 +529,9 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
         if (it->first.Contains("RelPosition")){
             histSaver->SaveHistogram((TH2*)it->second);
             histSaver->SaveOverlay((TH2*)it->second);
+            cout<<"KeyPress"<<endl;
+            char t;
+            cin>>t;
         }
         if( it->first == "hNegativeChargeAboveCut_Position"||
                 it->first == "hOnlyTranspClusterPosition" ||
