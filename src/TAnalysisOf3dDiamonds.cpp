@@ -598,14 +598,9 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
         if (true||!hasNegativeCharge<0){
             Int_t pos_neg = diamondCluster->getTransparentClusterPosition(pos-1);
-            Int_t ch_neg = diamondCluster->getChannel(pos_neg);
             Int_t pos_hit = diamondCluster->getTransparentClusterPosition(0);
-            Int_t ch_hit = diamondCluster->getChannel(pos_hit);
-            Int_t ch_hit2 = Int_t(diamondCluster->GetTransparentHitPosition()+.5);
-            Float_t charge_neg = diamondCluster->getSignal(pos_neg,useCMN);
-            Float_t charge_hit = diamondCluster->getSignal(pos_hit,useCMN);
-            Float_t charge2_neg = diamondCluster->getSignalOfChannel(ch_neg,useCMN);
-            Float_t charge2_hit = diamondCluster->getSignalOfChannel(ch_hit,useCMN);
+            Int_t delta = pos_hit - pos_neg;
+            cout<<"Delta: "<<pos_neg<<" "<<pos_hit<<": "<<delta<<endl;
             if (pos<3){
                 if (TMath::Abs(charge2_neg-charge)>1 || ch_hit != ch_hit2){
                     cout<<"\n\n";
