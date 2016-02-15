@@ -191,12 +191,13 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     }
 //    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
     if (hasNegativeCharge){
-        Int_t ch_neg = itTransparent->second.getChannel(pos);
-        Int_t ch_hit = itTransparent->second.getTransparentClusterPosition(0);
+        Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
+        Int_t pos_neg = itTransparent->second.getTransparentClusterPosition(pos-1);
+        Int_t delta = pos_neg - pos_neg;
 
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
 		mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,pos);
-		mapHistos["hNegativeChargeChannelPositionTransparent"]->Fill(charge,ch_hit-ch_neg);
+		mapHistos["hNegativeChargeChannelPositionTransparent"]->Fill(charge,delta);
         mapHistos["hNegativeCharge"]->Fill(charge);
         if(charge<negChargeCut){
             if(predictedPositions->count(eventNo)){
@@ -577,7 +578,7 @@ void TAnalysisOfAnalysisDifferences::InitTransparentHistos() {
     mapHistos[name] = histo;
 
     name = "hNegativeChargeChannelPositionTransparent";
-    histo = new TH2F(name+extension,name+extension,512,-512,0,5,-2.5,2.5);
+    histo = new TH2F(name+extension,name+extension,512,-512,0,7,-3.5,3.5);
     histo->GetXaxis()->SetTitle("first neg. Charge in transparent Cluster / ADC");
     histo->GetYaxis()->SetTitle("rel position of negative charge in transp. cluster");
     mapHistos[name] = histo;

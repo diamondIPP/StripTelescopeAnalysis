@@ -596,10 +596,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         if(charge<settings->getNegativeChargeCut())
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
 
-        if (true||!hasNegativeCharge<0){
+        if (false&&!hasNegativeCharge<0){
             Int_t pos_neg = diamondCluster->getTransparentClusterPosition(pos-1);
             Int_t pos_hit = diamondCluster->getTransparentClusterPosition(0);
-            Int_t delta = pos_hit - pos_neg;
+            Int_t delta = pos_neg - pos_neg;
             cout<<"\n"<<endl;
             diamondCluster->Print();
             cout<<"Delta: "<<pos_neg<<" "<<pos_hit<<": "<<delta<<endl;
