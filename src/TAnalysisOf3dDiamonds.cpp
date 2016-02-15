@@ -283,8 +283,12 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         return;
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negativeCharge,clPos,useCMN);
     diamondCluster->SetTransparentClusterSize(clsize);
-    if (false||!hasNegativeCharge<0){
+    if (true||!hasNegativeCharge<0){
         cout<<"\nStrip: "<<hasNegativeCharge<<" "<<negativeCharge<<" "<<clPos<<" "<<useCMN<<" "<<nEvent;;
+        Int_t ch_neg = itTransparent->second.getChannel(pos);
+        Int_t ch_hit = itTransparent->second.getTransparentClusterPosition(0);
+        cout<<"Neg Position: "<<pos<<endl;
+        cout<<"Neg: "<<ch_neg<<"\t"<<ch_hit<<" = "<< ch_hit-ch_neg<<endl;
         diamondCluster->Print(1);
     }
     hLandauStripNegativeCharges->Fill(negativeCharge,charge);
