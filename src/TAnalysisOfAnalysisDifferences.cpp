@@ -230,6 +230,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
         pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
         mapHistos["hAllEvents_RelPosition"]->Fill(relPos.first,relPos.second);
         TProfile2D* prof = (TProfile2D*)mapHistos["hNegativeChargeProfileRelPosition"];
+        cout<<"hNegativeChargeProfileRelPosition - FILL: "<<relPos.first<<","<<relPos.second<<": "<<charge<<endl;
         prof->Fill(relPos.first,relPos.second,charge);
     }
     if (hasNegativeCharge){
@@ -390,9 +391,19 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
 
 
 void TAnalysisOfAnalysisDifferences::SaveTransparentClusteredComparison() {
-    TH1F* histo1 = (TH1F*)mapHistos["hClusteredPulseHeight"]->Clone();
-    TH1F* histo2 = (TH1F*)mapHistos["hTransparentPulseHeight"]->Clone();
+    TH1F* histo1 = (TH1F*)(((TH1F*)(mapHistos["hClusteredPulseHeight"]))->Clone());
+    TH1F* histo2 = (TH1F*)(((TH1F*)(mapHistos["hTransparentPulseHeight"]))->Clone());
+    histo1->SetTitle("Clustered");
+    histo2->SetTitle("Tranparent");
     TH1F* hPhantomScaled = 0;
+    TH1F* hStripScaled = 0;
+    if (stripHisto){
+        stripHisto->SetLineColor(kBlue);
+        stripHisto->SetTitle("Strip");
+        hStripScaled = (TH1F*)stripHisto->Clone();
+        Float_t scale = hStripScaled->GetBinContent(hStripScaled->GetMaximumBin());
+        hStripScaled->Scale(1./scale);
+    }
     if (hPhantomLandau){
         hPhantomScaled = (TH1F*)hPhantomLandau->Clone();
         Float_t scale = hPhantomScaled->GetBinContent(hPhantomScaled->GetMaximumBin());
@@ -402,53 +413,39 @@ void TAnalysisOfAnalysisDifferences::SaveTransparentClusteredComparison() {
     histSaver->SaveTwoHistosNormalized("cComparisionPulseHeightsNormalized"+extension,histo1,histo2);
 
     TString name = "cComparisionPulseHeightWithStrip"+extension;
-    TCanvas *c1 = new TCanvas(name,name);
-    histo1->Draw();
-    histo2->Draw("same");
+    TString title = name+";Charge / ADC; number of entries";
+    THStack *hs = new THStack(name,title);
+    hs->Add(histo1);
+    hs->Add(histo2);
     if(stripHisto){
         Float_t scale = histo2->GetBinContent(histo2->GetMaximumBin());
-        scale /= stripHisto->GetBinContent(stripHisto->GetMaximumBin());
-        stripHisto->Scale(scale);
-        stripHisto->SetLineColor(kBlue);
-        stripHisto->Draw("same");
-        stripHisto->SetTitle("Strip");
+        scale += histo1->GetBinContent(histo1->GetMaximumBin());
+        scale /= 2.;
+        scale /= hStripScaled->GetBinContent(hStripScaled->GetMaximumBin());
+        hStripScaled->Scale(scale);
+        hs->Add(hStripScaled);
     }
-    histo1->SetTitle("Clustered");
-    histo2->SetTitle("Tranparent");
-    TLegend* leg = c1->BuildLegend();
-    leg->SetFillColor(kWhite);
-    leg->Draw();
-    histSaver->SaveCanvas(c1);
-    cout<<"Save6"<<endl;
+    histSaver->SaveStack(hs,"nostack",true);
 
     name = "cComparisionPulseHeightWithStrip_scaled"+extension;
-    c1->SetName(name);
-    TH1F* h1 = (TH1F*)histo1->Clone();
-    TH1F* h2 = (TH1F*)histo2->Clone();
+    title = name+";Charge / ADC; a.u.";
+    THStack *hs1 = new THStack(name,title);
+    TH1F* h1 = histo1;
+    TH1F* h2 = histo2;
     h1->Scale(1./h1->GetBinContent(h1->GetMaximumBin()));
     h2->Scale(1./h2->GetBinContent(h2->GetMaximumBin()));
-    h1->Draw();
-    h2->Draw("same");
-    TH1F* hS= 0;
+    hs1->Add(h1);
+    hs1->Add(h2);
     if(stripHisto){
-        hS = (TH1F*)stripHisto->Clone();
-        hS->Scale(1./hS->GetBinContent(hS->GetMaximumBin()));
-        hS->SetLineColor(kBlue);
-        hS->Draw("same");
-        hS->SetTitle("Strip");
+        Float_t scale = 1./hStripScaled->GetBinContent(hStripScaled->GetMaximumBin());
+        hStripScaled->Scale(scale);
+        hs1->Add(hStripScaled);
     }
-    h1->SetTitle("Clustered");
-    h2->SetTitle("Tranparent");
-    if (leg) delete leg;
-    leg = c1->BuildLegend();
-    leg->SetFillColor(kWhite);
-    leg->Draw();
-    histSaver->SaveCanvas(c1);
-    if (h2) delete h1;
-    if (h1) delete h2;
-    if (hS)
-        delete hS;
+    histSaver->SaveStack(hs1,"nostack",true);
     cout<<"Save6"<<endl;
+    delete hs;
+    delete histo1;
+    delete histo2;
 }
 
 
@@ -570,15 +567,23 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     cout<<"[TAnalysisOfAnalysisDifferences]Save Histos it map "<<mapHistos.size()<<endl;
     for(it;it!=mapHistos.end();it++){
         cout<<"Save: "<<it->first<<"\t"<<it->second->GetEntries()<<endl;
+        if (it->second->GetEntries()==0)
+            continue;
         TString className = it->second->ClassName();
-        if (className.Contains("TH2F"))
+        if (className.Contains("TH2") || className.Contains("TProfile2D"))
             histSaver->SaveHistogram((TH2F*)it->second);
         else
             histSaver->SaveHistogram(it->second);
 
         if (it->first.Contains("RelPosition")){
-            histSaver->SaveHistogram((TH2*)it->second);
-            histSaver->SaveOverlay((TH2*)it->second);
+            if (className.Contains("TProfile2D")){
+                histSaver->SaveHistogram((TProfile2D*)it->second);
+                histSaver->SaveOverlay((TProfile2D*)it->second);
+            }
+            else{
+                histSaver->SaveHistogram((TH2*)it->second);
+                histSaver->SaveOverlay((TH2*)it->second);
+            }
         }
         if( it->first == "hNegativeChargeAboveCut_Position"||
                 it->first == "hOnlyTranspClusterPosition" ||

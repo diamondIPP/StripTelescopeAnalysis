@@ -392,6 +392,8 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
         else SaveHistogram(histo2);
         return;
     }
+    histo1 = histo1->Clone();
+    histo2 = histo2->Clone();
     if(histo1->GetLineColor() == histo2->GetLineColor())
         histo2->SetLineColor(histo1->GetLineColor()+1);
     cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
@@ -404,10 +406,8 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
     Float_t min = TMath::Min(min1,min2);
     Float_t max1 =  histo1->GetBinContent(histo1->GetMaximumBin());//GetMinimum();
     Float_t max2 = histo2->GetBinContent(histo2->GetMaximumBin());
-    //	Float_t range1 = max1-min1;
-    //	Float_t range2 = max2-min2;
-    Float_t factor = 1.1;
     Float_t max = TMath::Max(max1,max2);
+    Float_t factor = 1.1;
     Float_t range = max - min;
     Float_t middle = (max+min)/2.;
     if(min>=0&&(middle - range/2.*factor)<0)
@@ -426,6 +426,7 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
     Float_t xmax2 = histo2->GetXaxis()->GetBinLowEdge(histo2->GetXaxis()->GetLast());
     Float_t xmin = TMath::Min(xmin1,xmin2);
     Float_t xmax = TMath::Max(xmax1,xmax2);
+
     histo1->GetXaxis()->SetRangeUser(xmin,xmax);
     histo2->GetXaxis()->SetRangeUser(xmin,xmax);
     if(refactorSecond!=1)histo2->Scale(refactorSecond);
@@ -434,22 +435,33 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
     if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
     histo1->SetStats(false);
     histo2->SetStats(false);
-    if(histo1->GetMaximum()>histo2->GetMaximum()){
-        if (verbosity>2) cout<<"\tdraw1-"<<flush;
-        histo1->Draw("");
-        histo1->GetYaxis()->SetRangeUser(min,max);
-        if (verbosity>2) cout<<"draw2 "<<flush;
-        histo2->Draw("same");
-        //		histo2->GetYaxis()->SetRangeUser(min,max);
-    }
-    else{
-        if (verbosity>2) cout<<"\tdraw2-"<<flush;
-        histo2->Draw("");
-        histo2->GetYaxis()->SetRangeUser(min,max);
-        if (verbosity>2) cout<<"draw1 "<<flush;
-        histo1->Draw("same");
-        //		histo1->GetYaxis()->SetRangeUser(min,max);
-    }
+    Float_t ymin = TMath::Min(histo1->GetBinContent(histo1->GetMinimumBin()),
+            histo2->GetBinContent(histo2->GetMinimumBin()));
+    ymin = TMath::Min(ymin,min);
+    Float_t ymax = TMath::Max(histo1->GetBinContent(histo1->GetMaximumBin()),
+            histo2->GetBinContent(histo2->GetMaximumBin()));
+    TH1F* frame = c1->DrawFrame(xmin,xmax,ymin,ymax);
+    frame->SetTitle("frame");
+    frame->GetXaxis()->SetTitle(histo1->GetXaxis()->GetTitle());
+    frame->GetYaxis()->SetTitle(histo1->GetYaxis()->GetTitle());
+    histo1->Draw("same");
+    histo2->Draw("same");
+//    if(histo1->GetMaximum()>histo2->GetMaximum()){
+//        if (verbosity>2) cout<<"\tdraw1-"<<flush;
+//        histo1->Draw("");
+//        histo1->GetYaxis()->SetRangeUser(min,max);
+//        if (verbosity>2) cout<<"draw2 "<<flush;
+//        histo2->Draw("same");
+//        //		histo2->GetYaxis()->SetRangeUser(min,max);
+//    }
+//    else{
+//        if (verbosity>2) cout<<"\tdraw2-"<<flush;
+//        histo2->Draw("");
+//        histo2->GetYaxis()->SetRangeUser(min,max);
+//        if (verbosity>2) cout<<"draw1 "<<flush;
+//        histo1->Draw("same");
+//        //		histo1->GetYaxis()->SetRangeUser(min,max);
+//    }
     c1->Update();
     TVirtualPad *pad =c1->GetPad(0);
     if (verbosity>2) cout<<"MIN: "<<min<<"-->";
