@@ -283,11 +283,17 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
         return;
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negativeCharge,clPos,useCMN);
     diamondCluster->SetTransparentClusterSize(clsize);
-    if (true||!hasNegativeCharge<0){
+    if (false||!hasNegativeCharge<0){
         cout<<"\nStrip: "<<hasNegativeCharge<<" "<<negativeCharge<<" "<<clPos<<" "<<useCMN<<" "<<nEvent;;
+<<<<<<< .mine
+        Int_t ch_neg = diamondCluster->getChannel(clPos);
+        Int_t ch_hit = diamondCluster->getTransparentClusterPosition(0);
+        cout<<"Neg Position: "<<clPos<<endl;
+=======
         Int_t ch_neg = diamondCluster->getChannel(clPos);
         Int_t ch_hit = diamondCluster->getTransparentClusterPosition(0);
         cout<<"Neg Position: "<<clP<<endl;
+>>>>>>> .r1610
         cout<<"Neg: "<<ch_neg<<"\t"<<ch_hit<<" = "<< ch_hit-ch_neg<<endl;
         diamondCluster->Print(1);
     }
@@ -591,9 +597,33 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
 
     Float_t charge;
     Int_t pos;
-    if (diamondCluster->hasNegativeCharge(charge,pos,useCMN))
+    bool hasNegativeCharge = diamondCluster->hasNegativeCharge(charge,pos,useCMN);
+    if (hasNegativeCharge){
         if(charge<settings->getNegativeChargeCut())
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
+
+        if (true||!hasNegativeCharge<0){
+            Int_t pos_neg = diamondCluster->getTransparentClusterPosition(pos);
+            Int_t ch_neg = diamondCluster->getChannel(pos_neg);
+            Int_t pos_hit = diamondCluster->getTransparentClusterPosition(0);
+            Int_t ch_hit = diamondCluster->getChannel(pos_hit);
+            Int_t ch_hit2 = Int_t(diamondCluster->GetTransparentHitPosition()+.5);
+            Float_t charge_neg = diamondCluster->getSignal(pos_neg,useCMN);
+            Float_t charge_hit = diamondCluster->getSignal(pos_hit,useCMN);
+            Float_t charge2_neg = diamondCluster->getSignalOfChannel(ch_neg,useCMN);
+            Float_t charge2_hit = diamondCluster->getSignalOfChannel(ch_hit,useCMN);
+            if (pos<3){
+                if (TMath::Abs(charge2_neg-charge)>1 || ch_hit != ch_hit2){
+                    cout<<"\n\n";
+                    diamondCluster->Print(1);
+                    cout<<"Neg Position: "<<pos<<"-->"<<pos_neg<<"\tHit Pos: "<<pos_hit<<endl;
+                    cout<<"Neg: "<<ch_neg<<"\t"<<ch_hit<<" = "<< ch_hit-ch_neg<<"\tCharge: "<<charge<<endl;
+                    cout<<"charges: "<<charge<<"/"<<charge_neg<<"/"<<charge2_neg<<"\t"<<charge_hit<<"/"<<charge2_hit<<" "<<ch_hit<<"/"<<ch_hit2<<endl;
+                    diamondCluster->hasNegativeCharge(charge,pos,useCMN,true);
+                }
+            }
+        }
+    }
     if(charge<settings->getNegativeChargeCut())
         hNegativeChargeFraction->Fill(1);
     else

@@ -196,7 +196,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
 
         mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
 		mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,pos);
-		mapHistos["hNegativeChargeChannelPositionTransparent"]->Fill(charge,ch_pos);
+		mapHistos["hNegativeChargeChannelPositionTransparent"]->Fill(charge,ch_hit-ch_neg);
         mapHistos["hNegativeCharge"]->Fill(charge);
         if(charge<negChargeCut){
             if(predictedPositions->count(eventNo)){
