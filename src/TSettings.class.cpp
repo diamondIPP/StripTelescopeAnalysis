@@ -2836,7 +2836,7 @@ TH2F* TSettings::GetOverlayHisto(TString name,Int_t pattern, UInt_t nbinsx, UInt
     Float_t yup = this->GetCellHeight();
     cout<<"TSettings::GetOverlayHisto: "<<name<<" "<<pattern<< " "<<nbinsx<<"/"<<nbinsy<<endl;
     cout<<"\t"<<xlow<<"-"<<xup<<" || "<<ylow<<"-"<<yup<<endl;
-    TH2F* histo = new TProfile2D(name,name,nbinsx,xlow,xup,nbinsy,ylow,yup);
+    TH2F* histo = new TH2F(name,name,nbinsx,xlow,xup,nbinsy,ylow,yup);
     histo->GetXaxis()->SetTitle("#it{x} position within a cell / #mum");
     histo->GetYaxis()->SetTitle("#it{y} position within a cell / #mum");
     histo->GetZaxis()->SetTitle("number of entries");
