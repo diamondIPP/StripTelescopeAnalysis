@@ -597,7 +597,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
 
         if (true||!hasNegativeCharge<0){
-            Int_t pos_neg = diamondCluster->getTransparentClusterPosition(pos);
+            Int_t pos_neg = diamondCluster->getTransparentClusterPosition(pos-1);
             Int_t ch_neg = diamondCluster->getChannel(pos_neg);
             Int_t pos_hit = diamondCluster->getTransparentClusterPosition(0);
             Int_t ch_hit = diamondCluster->getChannel(pos_hit);

@@ -1384,48 +1384,41 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         Int_t dif = (Int_t(clusterNo)+1)/2;
         Int_t clusPos = clStart + dir *dif;
         Float_t signal = this->getSignal(clPos,cmnCorrected);
-        if (TMath::Abs(charge -signal) >.2 && !verb){
-            cout<<"\n\n"<<clusterSize<<"/"<<clPos<<"/"<<clusterNo<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
-            cout<<"clusNo: "<<clusterNo<<"startCHannel: "<<startChannel<<" clStart: "<<clStart
-                    <<" Delta: "<<(startChannel-isTransparentCluster)
-                <<" origDir: "<<orig_dir<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
-            return hasNegativeCharge(charge,pos,cmnCorrected,true);
-            verb = true;
-        }
         if (charge < smallCharge){
             smallCharge = charge;
         }
         if (verb) cout<<"\t"<<clusterSize<<"-"<<clPos<<TString::Format("%+7.1f - %+7.1f - %+7.1f | %7.1f | %7.1f",
                 currentCharge,oldCharge,charge,smallCharge, signal)<<"\n";
         if (charge < 0 and !hasNegCharge){
-            if (clusterSize==1 && clusterSize+2<=this->size()){
-                pos = 0;
-                hasNegCharge = true;
-                negCharge = charge;
-                Int_t pos1 = this->getTransparentClusterPosition(clusterSize);
-                Int_t pos2 = this->getTransparentClusterPosition(clusterSize+1);
-                Float_t sig1 = this->getSignal(pos1,cmnCorrected);
-                Float_t sig2 = this->getSignal(pos2,cmnCorrected);
-                bool change = false;
-                if (sig1<sig2){
-                    if (sig1<charge){
-                        negCharge = sig1;
-                        pos = 1;
-                        change = true;
-                    }
-                }
-                else{
-                    if (sig2<charge){
-                        negCharge = sig2;
-                        pos = 2;
-                        change=true;
-                    }
-                }
-                if (verb||change) 
-                    cout <<clusterSize<< " found negative charge at "<< pos<<": "<<signal<<"/"<<charge<<"/"
-                        <<"/"<<sig1<<"/"<<sig2<<endl;
-            }
-            else if( clusterSize+1<this->size() &&
+//            if (clusterSize==1 && clusterSize+2<=this->size()){
+//                pos = 0;
+//                hasNegCharge = true;
+//                negCharge = charge;
+//                Int_t pos1 = this->getTransparentClusterPosition(clusterSize);
+//                Int_t pos2 = this->getTransparentClusterPosition(clusterSize+1);
+//                Float_t sig1 = this->getSignal(pos1,cmnCorrected);
+//                Float_t sig2 = this->getSignal(pos2,cmnCorrected);
+//                bool change = false;
+//                if (sig1<sig2){
+//                    if (sig1<charge){
+//                        negCharge = sig1;
+//                        pos = 1;
+//                        change = true;
+//                    }
+//                }
+//                else{
+//                    if (sig2<charge){
+//                        negCharge = sig2;
+//                        pos = 2;
+//                        change=true;
+//                    }
+//                }
+//                if (verb||change)
+//                    cout <<clusterSize<< " found negative charge at "<< pos<<": "<<signal<<"/"<<charge<<"/"
+//                        <<"/"<<sig1<<"/"<<sig2<<endl;
+//            }
+//            else
+            if( clusterSize+1<this->size() &&
                 this->getCharge(clusterSize+1,cmnCorrected)-currentCharge > charge){
                 pos = clusterSize;
                 if (verb) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<charge<<endl;
