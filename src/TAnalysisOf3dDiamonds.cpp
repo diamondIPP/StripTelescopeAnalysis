@@ -150,7 +150,7 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
 
         }
         if (diamondCluster->isSaturatedCluster())
-                return;
+                continue;;
         //cout<<"Before Strip Analysis"<<endl;
         StripAnalysis();
         //cout<<"After Strip Analysis"<<endl;
