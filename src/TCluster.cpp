@@ -1359,7 +1359,7 @@ Float_t TCluster::getPositiveCharge(UInt_t nClusterEntries, bool cmnCorrected,
 bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected, bool verb) {
     Float_t oldCharge = 0;
     Float_t currentCharge;
-    if (verb) cout<<"negCharge: "<<endl;
+    if (verb) cout<<"[TCluster::hasNegativeCharge]: "<<endl;
     bool hasNegCharge = false;
     if (verb) this->Print();
     pos = 0;
@@ -1370,8 +1370,11 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         charge = currentCharge - oldCharge;
         Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
         Float_t signal = this->getSignal(clPos,cmnCorrected);
-        if (charge != signal)
-            cout<<clusterSize<<"/"<<clPos<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
+        if (charge != signal && !verb){
+            cout<<"\n"<<clusterSize<<"/"<<clPos<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
+            return hasNegativeCharge(charge,pos,cmnCorrected,true);
+            verb = true;
+        }
         if (charge < smallCharge){
             smallCharge = charge;
         }
