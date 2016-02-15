@@ -2839,8 +2839,6 @@ TProfile2D* TSettings::GetOverlayHisto(TString name,Int_t pattern, UInt_t nbinsx
     TProfile2D* prof = new TProfile2D(name,name,nbinsx,xlow,xup,nbinsy,ylow,yup);
     prof->GetXaxis()->SetTitle("#it{x} position within a cell / #mum");
     prof->GetYaxis()->SetTitle("#it{y} position within a cell / #mum");
-    prof->GetZaxis()->SetTitle("pulse height of cluster / ADC");c
-    char t;
-    cin>>t;
+    prof->GetZaxis()->SetTitle("pulse height of cluster / ADC");
     return prof;
 }
