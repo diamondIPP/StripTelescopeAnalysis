@@ -581,7 +581,6 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
                 histSaver->SaveOverlay((TProfile2D*)it->second);
             }
             else{
-                histSaver->SaveHistogram((TH2*)it->second);
                 histSaver->SaveOverlay((TH2*)it->second);
             }
         }
