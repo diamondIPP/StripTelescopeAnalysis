@@ -392,8 +392,8 @@ void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2
         else SaveHistogram(histo2);
         return;
     }
-    histo1 = histo1->Clone();
-    histo2 = histo2->Clone();
+    histo1 = (TH1*)histo1->Clone();
+    histo2 = (TH1*)histo2->Clone();
     if(histo1->GetLineColor() == histo2->GetLineColor())
         histo2->SetLineColor(histo1->GetLineColor()+1);
     cout<<"Save2Histos: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
