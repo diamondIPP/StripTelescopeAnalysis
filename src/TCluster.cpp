@@ -1381,6 +1381,18 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
                 negCharge = charge;
                 Float_t charge1 = this->getCharge(clusterSize+1,cmnCorrected);
                 Float_t charge2 =this->getCharge(clusterSize+2,cmnCorrected);
+                Int_t pos1 = this->getTransparentClusterPosition(clusterSize);
+                Int_t pos2 = this->getTransparentClusterPosition(clusterSize+1);
+                Float_t sig1 = this->GetSignal(pos1,cmnCorrected);
+                Float_t sig2 = this->GetSignal(pos2,cmnCorrected);
+                if (sig1<sig2){
+                    if (sig1<charge)
+                        cout<<"Change to sig1"<<endl;
+                }
+                else{
+                    if (sig2<charge)
+                            cout<<"Change to sig2"<<endl;
+                }
                 if (verb) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<charge<<"/"
                         <<charge1<<"/"<<charge2<<"\t"<<charge1-charge<<"/"<<charge2-charge1<<endl;
             }
