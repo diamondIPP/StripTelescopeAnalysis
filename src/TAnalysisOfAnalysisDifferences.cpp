@@ -195,7 +195,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     if (hasNegativeCharge){
         Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
         Int_t pos_neg = itTransparent->second.getTransparentClusterPosition(pos-1);
-        Int_t delta = pos_neg - pos_neg;
+        Int_t delta = pos_neg - pos_hit;
         cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<" "<<pos_hit<<"/"<<pos_neg<<"="<<delta<<"\n";
         itTransparent->second.Print(1);
         cout<<endl;
