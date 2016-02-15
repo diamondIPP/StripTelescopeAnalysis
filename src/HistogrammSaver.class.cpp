@@ -1046,7 +1046,8 @@ void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
     histo_1D_corner->SetFillStyle(3021);
     name= TString("stack_")+histo->GetName()+TString("_1D");
     cout<<" saveStack"<<flush;
-    THStack* hstack = new THStack(name,"Overlay distribution;avrg. signals/ electrons;number of entries");
+    TString title = TString("Overlay distribution;") +histo->GetZaxis()->GetTitle()+TString(";number of entries");
+    THStack* hstack = new THStack(name,title);
     hstack->Add(histo_1D);
     hstack->Add(histo_1D_middle);
     hstack->Add(histo_1D_corner);
