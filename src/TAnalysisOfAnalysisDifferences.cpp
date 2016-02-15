@@ -208,7 +208,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
                 mapHistos["hNegativeChargeAboveCut_Position"]->Fill(xPredDet,yPredDet);
                 pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
                 cout<<"hNegativeChargeAboveCut_RelPosition FILL "<<relPos.first<<"/"<<relPos.second<<endl;
+                cout<<mapHistos["hNegativeChargeAboveCut_RelPosition"]->GetEntries();
                 mapHistos["hNegativeChargeAboveCut_RelPosition"]->Fill(relPos.first,relPos.second);
+                cout<<"-->"<<mapHistos["hNegativeChargeAboveCut_RelPosition"]->GetEntries();
             }
         }
     }
@@ -224,7 +226,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
             Float_t yPredDet = predictedPositions->at(eventNo).second;
             pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
             cout<<"hNoNegativeCharge_RelPosition FILL "<<relPos.first<<"/"<<relPos.second<<endl;
+            cout<<mapHistos["hNoNegativeCharge_RelPosition"]->GetEntries();
             mapHistos["hNoNegativeCharge_RelPosition"]->Fill(relPos.first,relPos.second);
+            cout<<"-->"<<mapHistos["hNoNegativeCharge_RelPosition"]->GetEntries()<<endl;;
             if (posCharge < settings->getLowResponseThreshold()){
                 mapHistos["hNoNegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
             }
