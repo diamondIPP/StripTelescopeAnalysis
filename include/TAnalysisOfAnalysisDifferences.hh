@@ -50,6 +50,7 @@ private:
 private:
     TH1F* stripHisto;
     TSettings *settings;
+    string oldPlotPath;
     Int_t verbosity;
     Float_t negChargeCut;
     HistogrammSaver *histSaver;

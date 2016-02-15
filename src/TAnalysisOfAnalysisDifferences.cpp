@@ -12,6 +12,8 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
     cout<<"TAnalysisOfAnalysisDifferences:: "<<extension<<endl;
     this->settings = settings;
     this->histSaver = histSaver;
+    oldPlotPath = histSaver->GetPlotsPath();
+    histSaver->SetPlotsPath(oldPlotPath+(string)"/negativeCharges/");
     if(settings==0 || histSaver==0)
         cerr<<"ERROR: invalid settings or histogram saver"<<endl;
     transparentMap = 0;
@@ -25,10 +27,13 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
 }
 
 TAnalysisOfAnalysisDifferences::~TAnalysisOfAnalysisDifferences() {
-//    delete stripHisto;
-    // TODO Auto-generated destructor stub
+    histSaver->MoveRootFilesInSubfolder();
+    histSaver->SetPlotsPath(oldPlotPath);
+    if (stripHisto)
+        delete stripHisto;
     cout<<"Done with TAnalysisOfAnalysisDifferences"<<endl;
 }
+
 void TAnalysisOfAnalysisDifferences::setStripHistogram(TH1F* histo){
     this->stripHisto = (TH1F*)histo->Clone();
     if(stripHisto)
@@ -170,7 +175,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     if (itClustered->second.isSaturatedCluster()||itTransparent->second.isSaturatedCluster())
         return;
     Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
+    Float_t allCharge = itTransparent->second.getCharge(true,true);
     mapHistos["hTransparentPulseHeight"]->Fill(posCharge);
+    mapHistos["hTransparentPulseHeightAll"]->Fill(allCharge);
     mapHistos["hClusteredPulseHeight"]->Fill(clusteredCharge);
     if (1810<posCharge&&posCharge<1840){
         cout<<"PH: "<<posCharge;
@@ -190,6 +197,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
         Float_t yPredDet = predictedPositions->at(eventNo).second;
         if (lowThr < posCharge && posCharge < highThr)
             mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
+        pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+        mapHistos["hAllEvents_RelPosition"]->Fill(relPos.first,relPos.second);
+        mapHistos["hNegativeChargeProfileRelPosition"]->Fill(relPos.first,relPos.second,charge);
     }
 //    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
     if (hasNegativeCharge){
@@ -207,10 +217,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
                 Float_t yPredDet = predictedPositions->at(eventNo).second;
                 mapHistos["hNegativeChargeAboveCut_Position"]->Fill(xPredDet,yPredDet);
                 pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
-                cout<<"hNegativeChargeAboveCut_RelPosition FILL "<<relPos.first<<"/"<<relPos.second<<endl;
-                cout<<mapHistos["hNegativeChargeAboveCut_RelPosition"]->GetEntries();
                 mapHistos["hNegativeChargeAboveCut_RelPosition"]->Fill(relPos.first,relPos.second);
-                cout<<"-->"<<mapHistos["hNegativeChargeAboveCut_RelPosition"]->GetEntries()<<endl;;
             }
         }
     }
@@ -225,9 +232,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
             Float_t xPredDet = predictedPositions->at(eventNo).first;
             Float_t yPredDet = predictedPositions->at(eventNo).second;
             pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
-            cout<<"hNoNegativeCharge_RelPosition FILL "<<relPos.first<<"/"<<relPos.second<<endl;
-            cout<< ((TH2F*)(mapHistos["hNoNegativeCharge_RelPosition"]))->GetEntries();
-            ((TH2F*)(mapHistos["hNoNegativeCharge_RelPosition"]))->Fill(relPos.first,relPos.second);
+            mapHistos["hNoNegativeCharge_RelPosition"]->Fill(relPos.first,relPos.second);
             cout<<"-->"<<((TH2F*)(mapHistos["hNoNegativeCharge_RelPosition"]))->GetEntries()<<endl;;
             if (posCharge < settings->getLowResponseThreshold()){
                 mapHistos["hNoNegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
@@ -329,6 +334,13 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
 
     TString name = "hTransparentPulseHeight";
     TString hname = name+extension;
+    histo = new TH1F(hname,hname,bins,xmin,xmax);
+    histo->GetXaxis()->SetTitle("Charge / ADC");
+    histo->GetYaxis()->SetTitle("no of entries #");
+    mapHistos[name] = histo;
+
+    name = "hTransparentPulseHeightAllCharge";
+    hname = name+extension;
     histo = new TH1F(hname,hname,bins,xmin,xmax);
     histo->GetXaxis()->SetTitle("Charge / ADC");
     histo->GetYaxis()->SetTitle("no of entries #");
@@ -549,6 +561,11 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveCanvas(c1);
             delete c1;
         }
+        if (it->first == "hNegativeChargeChannelPositionTransparent"){
+            TH1D* proj = ((TH2F*)(it->second))->ProjectionY();
+            histSaver->SaveHistogram(proj);
+            delete proj;
+        }
         if (it->first == "hNoNegativeChargeLowResponsePosition" ||
             it->first == "hNoNegativeChargeResponseWindowPosition" ||
             it->first == "hChargeResponseWindowPosition"){
@@ -635,6 +652,10 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     histo = histSaver->GetHistoBinedInCells(hname,8);
     mapHistos[name] = histo;
 
+    name = "hAllEvents_RelPosition";
+    hname = name +extension;
+    histo = settings->GetOverlayHisto(hname);
+    mapHistos[name] = histo;
 
     name = "hNegativeChargeAboveCut_RelPosition";
     hname = name +extension;
@@ -644,6 +665,12 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     name = "hNoNegativeCharge_RelPosition";
     hname = name +extension;
     histo = settings->GetOverlayHisto(hname);
+    mapHistos[name] = histo;
+// mapHistos["hNegativeChargePosition"]
+
+    name = "hNegativeChargeProfileRelPosition";
+    hname = name +extension;
+    histo = settings->GetOverlayProfile(hname);
     mapHistos[name] = histo;
 
     name = "hPositive_Minus_Negative_TransparentCharge";
@@ -655,23 +682,29 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     mapHistos[name] = new TH1F(hname,hname,512,-128,128);
 
     name = "hNoNegativeChargeLowResponsePosition";
-    hname=name;
-    hname+=TString::Format("_Thrs_%d",(int)settings->getLowResponseThreshold())+extension;
+    hname=name+extension;
+    TString title = name;
+    title +=TString::Format(" Thrs: %.0f",settings->getLowResponseThreshold())+extension;
     histo = histSaver->GetHistoBinedInCells(hname,8);
+    histo->SetTitle(title);
     mapHistos[name] = histo;
 
     name = "hNoNegativeChargeResponseWindowPosition";
-    hname=name;
-    hname+=TString::Format("_Thrs_%d_to_%d",(int)settings->getResponseWindow().first,
-                                      (int)settings->getResponseWindow().second)+extension;
+    hname=name+extension;
+    title = name;
+    hname+=TString::Format(", Thrs: %.0f - %.0f",settings->getResponseWindow().first,
+                                      settings->getResponseWindow().second)+extension;
     histo = histSaver->GetHistoBinedInCells(hname,8);
+    histo->SetTitle(title);
     mapHistos[name] = histo;
 
     name = "hChargeResponseWindowPosition";
-    hname=name;
-    hname+=TString::Format("_Thrs_%d_to_%d",(int)settings->getResponseWindow().first,
-                                      (int)settings->getResponseWindow().second)+extension;
+     title = name;
+    hname=name+extension;
+    title+=TString::Format(" Thrs %.0f - %.0f",settings->getResponseWindow().first,
+                                      settings->getResponseWindow().second)+extension;
     histo = histSaver->GetHistoBinedInCells(hname,8);
+    histo->SetTitle(title);
     mapHistos[name] = histo;
 }
 

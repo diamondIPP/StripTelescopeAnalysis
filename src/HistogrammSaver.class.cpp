@@ -79,14 +79,19 @@ HistogrammSaver::~HistogrammSaver() {
 
     //	TString string1 = sys->GetFromPipe(".! mkdir root-Files");
     //	cout<<string1<<endl;
+    MoveRootFilesInSubfolder();
+    //	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
+    //	cout<<string1<<endl;
+    if (pt) this->pt->Delete();
+}
+
+
+void HistogrammSaver::MoveRootFilesInSubfolder(){
     stringstream test;
     test << "find "<<plots_path<<" -maxdepth 1 -iname \"*.root\" -exec mv -f {} "<<plots_path<<"/root/  \\;";
     //    test<< "mv -f -E ignore -I "<<plots_path<<"/*.root "<<plots_path<<"/root/";
     cout<<"Execute: \""<<test.str()<<"\""<<endl;
     system(test.str().c_str());//t.str();//<<"\""<<endl;
-    //	string1 = sys->GetFromPipe(".!mv -v *.root root-Files");
-    //	cout<<string1<<endl;
-    if (pt) this->pt->Delete();
 }
 
 void HistogrammSaver::SetPaperPlotStyle(){
@@ -1098,6 +1103,8 @@ void HistogrammSaver::SetNumberOfEvents(unsigned int nNewEvents){
     UpdatePaveText();
 }
 void HistogrammSaver::SetPlotsPath(string path){
+    if (plots_path.size()>1)
+        MoveRootFilesInSubfolder();
     plots_path.assign(path);
     if(verbosity)cout<<"HistogrammSaver::Set Plotspath: \""<<plots_path<<"\""<<endl;
     int isNotCreated=sys->mkdir(plots_path.c_str(),true);

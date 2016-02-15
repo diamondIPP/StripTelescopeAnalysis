@@ -62,6 +62,7 @@ public:
 	TString GetROOTFileName(TString name="histograms");
 	HistogrammSaver(TSettings* settings,int verbosity=0);
 	virtual ~HistogrammSaver();
+	void MoveRootFilesInSubfolder();
 	void SetPaperPlotStyle();
 	void InitializeGridReferenceDetSpace();
 	void SetOptStat(std::string optStat){gStyle->SetOptStat(optStat.c_str());}
