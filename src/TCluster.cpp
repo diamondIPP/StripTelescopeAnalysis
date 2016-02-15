@@ -188,7 +188,7 @@ Int_t TCluster::getTransparentClusterPosition(UInt_t clusterNo) {
 	Int_t startChannel = Int_t(isTransparentCluster+.5);
 	Int_t clStart = this->getClusterPosition(startChannel);
 	Int_t dir;
-	if (startChannel-isTransparentCluster<0)
+	if (isTransparentCluster-(Float_t)startChannel<0)
 	    dir = -1;
 	else
 	    dir = 1;
@@ -1374,7 +1374,7 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         Int_t startChannel = Int_t(isTransparentCluster+.5);
         Int_t clStart = this->getClusterPosition(startChannel);
         Int_t orig_dir;
-        Float_t delta = (Float_t)startChannel-isTransparentCluster;
+        Float_t delta = isTransparentCluster-(Float_t)startChannel;
         if (delta<0)
             orig_dir = -1;
         else
