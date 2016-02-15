@@ -1375,7 +1375,7 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         if (charge < smallCharge){
             smallCharge = charge;
         }
-        if (verb) cout<<"\t"<<clusterSize<<TString::Format("%+7.1f - %+7.1f - %+7.1f | %7.1f | %7.1f",
+        if (verb) cout<<"\t"<<clusterSize<<"-"<<clPos<<TString::Format("%+7.1f - %+7.1f - %+7.1f | %7.1f | %7.1f",
                 currentCharge,oldCharge,charge,smallCharge, signal)<<"\n";
         if (charge < 0 and !hasNegCharge){
             if (clusterSize==1 && clusterSize+2<=this->size()){
