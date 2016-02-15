@@ -1370,6 +1370,8 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         charge = currentCharge - oldCharge;
         Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
         Float_t signal = this->getSignal(clPos,cmnCorrected);
+        if (charge != signal)
+            cout<<clusterSize<<"/"<<clPos<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
         if (charge < smallCharge){
             smallCharge = charge;
         }
@@ -1380,19 +1382,21 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
                 pos = 0;
                 hasNegCharge = true;
                 negCharge = charge;
-                Float_t charge1 = this->getCharge(clusterSize+1,cmnCorrected);
-                Float_t charge2 =this->getCharge(clusterSize+2,cmnCorrected);
                 Int_t pos1 = this->getTransparentClusterPosition(clusterSize);
                 Int_t pos2 = this->getTransparentClusterPosition(clusterSize+1);
                 Float_t sig1 = this->getSignal(pos1,cmnCorrected);
                 Float_t sig2 = this->getSignal(pos2,cmnCorrected);
                 if (sig1<sig2){
-                    if (sig1<charge)
-                        cout<<"Change to sig1"<<endl;
+                    if (sig1<charge){
+                        negCharge = sig1;
+                        pos = 1;
+                    }
                 }
                 else{
-                    if (sig2<charge)
-                            cout<<"Change to sig2"<<endl;
+                    if (sig2<charge){
+                        negCharge = sig2;
+                        pos = 2;
+                    }
                 }
                 if (verb||true) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<signal<<"/"<<charge<<"/"
                         <<charge1<<"/"<<charge2<<"\t"<<charge1-charge<<"/"<<charge2-charge1<<"/"<<signal<<"/"<<sig1<<"/"<<sig2<<endl;
