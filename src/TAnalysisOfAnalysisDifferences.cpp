@@ -519,7 +519,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
     cout<<"[TAnalysisOfAnalysisDifferences]Save Histos it map "<<mapHistos.size()<<endl;
     for(it;it!=mapHistos.end();it++){
-        cout<<"Save: "<<it->first<<endl;
+        cout<<"Save: "<<it->first<<"\t"<<it->second->GetEntries()<<endl;
         TString className = it->second->ClassName();
         if (className.Contains("TH2F"))
             histSaver->SaveHistogram((TH2F*)it->second);
