@@ -177,7 +177,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
     Int_t eventNo = itClustered->first;
     mapHistos["hChargeDifference"]->Fill(transparentCharge-clusteredCharge);
-
+    mapHistos["hClusteredPulseHeight"]->Fill(itClustered->second.getPositiveCharge());
     if ( posCharge - clusteredCharge < 0 && verbosity>0 && itClustered->second.getClusterSize()<4){
         cout<<"posCharge - clusteredCharge " <<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
         cout<<"\tclustered: ";
