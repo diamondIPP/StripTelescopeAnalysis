@@ -45,6 +45,7 @@ private:
     void LoopOverBothMaps();
     void UpdatePredictedPosition();
     void AnalyseSameEvent();
+    void AnalyseTransparentEvent();
     void AnalyseOnlyTransparentEvent();
     void AnalyseOnlyClusteredEvent();
 //    bool hasNegativeCharge(std::map<Int_t,TCluster>::iterator it,Int_t &pos,Float_t& charge);

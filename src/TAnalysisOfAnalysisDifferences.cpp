@@ -165,7 +165,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
         cout<<"invalid cluster size"<<endl;
         return;
     }
-
+    AnalyseTransparentEvent();
 
     if(itPredicted->first != itTransparent->first || itPredicted->first != itClustered->first)
         cout<<"predicted,transparent and clustered iterator do not agree"<<itPredicted->first<<" "<<itTransparent->first<<" "<<itClustered->first<<endl;
@@ -175,75 +175,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     if (itClustered->second.isSaturatedCluster()||itTransparent->second.isSaturatedCluster())
         return;
     Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
-    Float_t allCharge = itTransparent->second.getCharge(true,true);
-    mapHistos["hTransparentPulseHeight"]->Fill(posCharge);
-    mapHistos["hTransparentPulseHeightAllCharge"]->Fill(allCharge);
-    mapHistos["hClusteredPulseHeight"]->Fill(clusteredCharge);
-    if (1810<posCharge&&posCharge<1840){
-        cout<<"PH: "<<posCharge;
-        itTransparent->second.Print(1);
-    }
-
     Int_t eventNo = itClustered->first;
     mapHistos["hChargeDifference"]->Fill(transparentCharge-clusteredCharge);
-    Int_t pos = 0;
-    Float_t charge = 0;
-    bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(charge,pos,true);
 
-    Float_t lowThr = settings->getResponseWindow().first;
-    Float_t highThr = settings->getResponseWindow().second;
-    if(predictedPositions->count(eventNo)){
-        Float_t xPredDet = predictedPositions->at(eventNo).first;
-        Float_t yPredDet = predictedPositions->at(eventNo).second;
-        if (lowThr < posCharge && posCharge < highThr)
-            mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
-        pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
-        mapHistos["hAllEvents_RelPosition"]->Fill(relPos.first,relPos.second);
-        ((TProfile2D*)mapHistos["hNegativeChargeProfileRelPosition"])->Fill(relPos.first,relPos.second,charge);
-    }
-//    cout<<eventNo<< " negCharge: "<<hasNegativeCharge<<" "<<charge<< " "<<pos<<endl;
-    if (hasNegativeCharge){
-        Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
-        Int_t pos_neg = itTransparent->second.getTransparentClusterPosition(pos-1);
-        Int_t delta = pos_neg - pos_hit;
-
-        mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
-		mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,pos);
-		mapHistos["hNegativeChargeChannelPositionTransparent"]->Fill(charge,delta);
-        mapHistos["hNegativeCharge"]->Fill(charge);
-        if(charge<negChargeCut){
-            if(predictedPositions->count(eventNo)){
-                Float_t xPredDet = predictedPositions->at(eventNo).first;
-                Float_t yPredDet = predictedPositions->at(eventNo).second;
-                mapHistos["hNegativeChargeAboveCut_Position"]->Fill(xPredDet,yPredDet);
-                pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
-                mapHistos["hNegativeChargeAboveCut_RelPosition"]->Fill(relPos.first,relPos.second);
-            }
-        }
-    }
-    else
-    	mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,-1);
-    if(hasNegativeCharge && charge < negChargeCut)
-        mapHistos["hHasNegativeCharge_PulseHeight"]->Fill(posCharge);
-    else{
-        mapHistos["hNoNegativeCharge_PulseHeight"]->Fill(posCharge);
-
-        if (predictedPositions->count(eventNo)){
-            Float_t xPredDet = predictedPositions->at(eventNo).first;
-            Float_t yPredDet = predictedPositions->at(eventNo).second;
-            pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
-            mapHistos["hNoNegativeCharge_RelPosition"]->Fill(relPos.first,relPos.second);
-            cout<<"-->"<<((TH2F*)(mapHistos["hNoNegativeCharge_RelPosition"]))->GetEntries()<<endl;;
-            if (posCharge < settings->getLowResponseThreshold()){
-                mapHistos["hNoNegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
-            }
-            if (lowThr < posCharge && posCharge < highThr)
-                mapHistos["hNoNegativeChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
-        }
-        else
-                cout<<"Cannot find PredictedPosition of Event No: "<<eventNo<<endl;
-    }
-    mapHistos["hPositive_Minus_Negative_TransparentCharge"]->Fill(posCharge-transparentCharge);
     if ( posCharge - clusteredCharge < 0 && verbosity>0 && itClustered->second.getClusterSize()<4){
         cout<<"posCharge - clusteredCharge " <<eventNo<<"\t"<<posCharge-clusteredCharge<<"\n\tposCharge: "<<posCharge<<"\n\tclusCharge: "<<clusteredCharge<<endl;
         cout<<"\tclustered: ";
@@ -267,13 +201,89 @@ void TAnalysisOfAnalysisDifferences::AnalyseSameEvent() {
     mapHistos["hGoodCellsEventTypes"]->Fill(0);
 }
 
+void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
+    itTransparent->second.SetTransparentClusterSize(3);
+    Float_t transparentCharge = itTransparent->second.getCharge(true);
+    if (itTransparent->second.isSaturatedCluster())
+        return;
+    Int_t eventNo = itTransparent->first;
+    Float_t posCharge = itTransparent->second.getPositiveCharge(true);//100,true,true);
+    Float_t allCharge = itTransparent->second.getCharge(true,true);
+    mapHistos["hTransparentPulseHeight"]->Fill(posCharge);
+    mapHistos["hTransparentPulseHeightAllCharge"]->Fill(allCharge);
+    if (1810<posCharge&&posCharge<1840){
+        cout<<"PH: "<<posCharge;
+        itTransparent->second.Print(1);
+    }
+
+    Int_t pos = 0;
+    Float_t charge = 0;
+    bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(charge,pos,true);
+
+    Float_t lowThr = settings->getResponseWindow().first;
+    Float_t highThr = settings->getResponseWindow().second;
+    if(predictedPositions->count(eventNo)){
+        Float_t xPredDet = predictedPositions->at(eventNo).first;
+        Float_t yPredDet = predictedPositions->at(eventNo).second;
+        if (lowThr < posCharge && posCharge < highThr)
+            mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
+        pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+        mapHistos["hAllEvents_RelPosition"]->Fill(relPos.first,relPos.second);
+        TProfile2D* prof = (TProfile2D*)mapHistos["hNegativeChargeProfileRelPosition"];
+        prof->Fill(relPos.first,relPos.second,charge);
+    }
+    if (hasNegativeCharge){
+        Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
+        Int_t pos_neg = itTransparent->second.getTransparentClusterPosition(pos-1);
+        Int_t delta = pos_neg - pos_hit;
+
+        mapHistos["hNegativeChargePosition"]->Fill(charge,pos);
+        mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,pos);
+        mapHistos["hNegativeChargeChannelPositionTransparent"]->Fill(charge,delta);
+        mapHistos["hNegativeCharge"]->Fill(charge);
+        if(charge<negChargeCut){
+            if(predictedPositions->count(eventNo)){
+                Float_t xPredDet = predictedPositions->at(eventNo).first;
+                Float_t yPredDet = predictedPositions->at(eventNo).second;
+                mapHistos["hNegativeChargeAboveCut_Position"]->Fill(xPredDet,yPredDet);
+                pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+                mapHistos["hNegativeChargeAboveCut_RelPosition"]->Fill(relPos.first,relPos.second);
+            }
+        }
+    }
+    else
+        mapHistos["hNegativeChargePositionTransparent"]->Fill(charge,-1);
+    if(hasNegativeCharge && charge < negChargeCut)
+        mapHistos["hHasNegativeCharge_PulseHeight"]->Fill(posCharge);
+    else{
+        mapHistos["hNoNegativeCharge_PulseHeight"]->Fill(posCharge);
+
+        if (predictedPositions->count(eventNo)){
+            Float_t xPredDet = predictedPositions->at(eventNo).first;
+            Float_t yPredDet = predictedPositions->at(eventNo).second;
+            pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+            mapHistos["hNoNegativeCharge_RelPosition"]->Fill(relPos.first,relPos.second);
+            cout<<"-->"<<((TH2F*)(mapHistos["hNoNegativeCharge_RelPosition"]))->GetEntries()<<endl;;
+            if (posCharge < settings->getLowResponseThreshold()){
+                mapHistos["hNoNegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
+            }
+            if (lowThr < posCharge && posCharge < highThr)
+                mapHistos["hNoNegativeChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
+        }
+        else
+            cout<<"Cannot find PredictedPosition of Event No: "<<eventNo<<endl;
+    }
+    mapHistos["hPositive_Minus_Negative_TransparentCharge"]->Fill(posCharge-transparentCharge);
+
+}
+
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyTransparentEvent() {
 
     if (itTransparent->second.getClusterSize()==0){
         cout<<"invalid cluster size"<<endl;
         return;
     }
-
+    AnalyseTransparentEvent();
     nOnlyTransparent++;
     if( verbosity>3)
         cout<<itTransparent->first<< " only in Transparent Analysis"<<endl;
@@ -282,7 +292,6 @@ void TAnalysisOfAnalysisDifferences::AnalyseOnlyTransparentEvent() {
         cout<<"predicted and clusterer iterator do not agree"<<itPredicted->first<<" "<<itTransparent->first<<endl;
     mapHistos["hOnlyTranspClusterCharge"]->Fill(itTransparent->second.getPositiveCharge());
 
-    mapHistos["hTransparentPulseHeight"]->Fill(itTransparent->second.getPositiveCharge());
     mapHistos["hOnlyTranspClusterPosition"]->Fill(itPredicted->second.first,itPredicted->second.second);
     mapHistos["hGoodCellsEventTypes"]->Fill(1);
     Int_t pos = 0;
@@ -303,6 +312,7 @@ void TAnalysisOfAnalysisDifferences::set3DPhantomLandau(TH1F* hPhantomLandau) {
     this->hPhantomLandau->SetName("hPhantom");
     this->hPhantomLandau->SetTitle("Phantom");
 }
+
 
 void TAnalysisOfAnalysisDifferences::AnalyseOnlyClusteredEvent() {
 
@@ -540,6 +550,22 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     histSaver->SaveStack(hs,"nostack",true,false);
     delete hs;
 
+    name = "stackPulseHeights_NegativeChargeComparison_scaled"+extension;
+    hs = new THStack(name,name);
+    TH1F* hHasNegative_scaled = (TH1F*)mapHistos["hHasNegativeCharge_PulseHeight"]->Clone();
+    Float_t factor = hHasNegative_scaled->GetBinContent(hHasNegative_scaled->GetMaximumBin());
+    hHasNegative_scaled->Scale(1./factor);
+    TH1F* hNoNegative_scaled = (TH1F*)mapHistos["hNoNegativeCharge_PulseHeight"]->Clone();
+    factor = hNoNegative_scaled->GetBinContent(hNoNegative_scaled->GetMaximumBin());
+    hNoNegative_scaled->Scale(1./factor);
+    hs->Add(hHasNegative_scaled);
+    hs->Add(hNoNegative_scaled);
+    hs->Draw("");
+    if(hs->GetXaxis())hs->GetXaxis()->SetTitle("charge / ADC");
+    if(hs->GetYaxis())hs->GetYaxis()->SetTitle("number of entries");
+    histSaver->SaveStack(hs,"nostack",true,false);
+    delete hs;
+
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
     cout<<"[TAnalysisOfAnalysisDifferences]Save Histos it map "<<mapHistos.size()<<endl;
     for(it;it!=mapHistos.end();it++){
@@ -561,13 +587,15 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             name.Append(it->first);
             name.Append(extension);
             histSaver->SaveHistogramWithCellGrid((TH2*)it->second);
-            TCanvas *c1 = new TCanvas(name,name);
-            c1->cd();
-            it->second->Draw("colz");
-            settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1);
-            settings->DrawMetallisationGrid(c1,3);
-            histSaver->SaveCanvas(c1);
-            delete c1;
+            if (it->second->GetEntries()){
+                TCanvas *c1 = new TCanvas(name,name);
+                c1->cd();
+                it->second->Draw("colz");
+                settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1);
+                settings->DrawMetallisationGrid(c1,3);
+                histSaver->SaveCanvas(c1);
+                delete c1;
+            }
         }
         if (it->first == "hNegativeChargeChannelPositionTransparent"){
             TH1D* proj = ((TH2F*)(it->second))->ProjectionY();
@@ -663,6 +691,7 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     name = "hAllEvents_RelPosition";
     hname = name +extension;
     histo = settings->GetOverlayHisto(hname);
+    histo->SetMinimum(0);
     mapHistos[name] = histo;
 
     name = "hNegativeChargeAboveCut_RelPosition";
