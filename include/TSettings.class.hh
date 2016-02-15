@@ -21,6 +21,7 @@
 #include "TSystem.h"
 #include "TFile.h"
 #include "TMacro.h"
+#include "TProfile2D.h"
 #include "ChannelScreen.hh"
 #include "TChannelMapping.hh"
 #include "TCluster.hh"
@@ -574,6 +575,7 @@ private:
 	pair<Float_t,Float_t> responseWindow;
 public:
 	Float_t getLowResponseThreshold(){return lowResponseThreshold;}
+	TProfile2D* GetOverlayHisto(TString name,Int_t pattern=2,UInt_t nbinsx=15,UInt_t nbinsy=15);
 	std::pair<Float_t,Float_t> getResponseWindow(){return responseWindow;}
     TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}

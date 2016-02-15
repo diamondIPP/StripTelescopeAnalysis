@@ -2829,3 +2829,14 @@ bool TSettings::IsNoisyChannel(Int_t ch) {
         return false;
 }
 
+TProfile2D* TSettings::GetOverlayHisto(TString name,Int_t pattern, UInt_t nbinsx, UInt_t nbinsy) {
+    Float_t xlow = 0;
+    Float_t ylow = 0;
+    Float_t xup = this->GetCellWidth( TPlaneProperties::getDetDiamond(),pattern);
+    Float_t yup = this->GetCellHeight();
+    TProfile2D* prof =  TProfile2D(name,name,nbinsx,xlow,xup,nbinsy,ylow,yup);
+    prof->GetXaxis()->SetTitle("#it{x} position within a cell / #mum");
+    prof->GetYaxis()->SetTitle("#it{y} position within a cell / #mum");
+    prof->GetZaxis()->SetTitle("pulse height of cluster / ADC");
+    return prof;
+}
