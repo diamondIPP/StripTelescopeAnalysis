@@ -1384,6 +1384,14 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         Int_t dif = (Int_t(clusterNo)+1)/2;
         Int_t clusPos = clStart + dir *dif;
         Float_t signal = this->getSignal(clPos,cmnCorrected);
+        if (TMath::Abs(charge -signal) >.2 && !verb){
+            cout<<"\n\n"<<clusterSize<<"/"<<clPos<<"/"<<clusterNo<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
+            cout<<"clusNo: "<<clusterNo<<"startCHannel: "<<startChannel<<" clStart: "<<clStart
+                    <<" Delta: "<<(startChannel-isTransparentCluster)
+                <<" origDir: "<<orig_dir<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
+            return hasNegativeCharge(charge,pos,cmnCorrected,true);
+            verb = true;
+        }
         if (charge < smallCharge){
             smallCharge = charge;
         }
@@ -1418,7 +1426,7 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
 //                        <<"/"<<sig1<<"/"<<sig2<<endl;
 //            }
 //            else
-            if( clusterSize+1<this->size() &&
+                if( clusterSize+1<this->size() &&
                 this->getCharge(clusterSize+1,cmnCorrected)-currentCharge > charge){
                 pos = clusterSize;
                 if (verb) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<charge<<endl;
