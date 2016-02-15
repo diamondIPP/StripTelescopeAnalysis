@@ -285,15 +285,9 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     diamondCluster->SetTransparentClusterSize(clsize);
     if (false||!hasNegativeCharge<0){
         cout<<"\nStrip: "<<hasNegativeCharge<<" "<<negativeCharge<<" "<<clPos<<" "<<useCMN<<" "<<nEvent;;
-<<<<<<< .mine
         Int_t ch_neg = diamondCluster->getChannel(clPos);
         Int_t ch_hit = diamondCluster->getTransparentClusterPosition(0);
         cout<<"Neg Position: "<<clPos<<endl;
-=======
-        Int_t ch_neg = diamondCluster->getChannel(clPos);
-        Int_t ch_hit = diamondCluster->getTransparentClusterPosition(0);
-        cout<<"Neg Position: "<<clP<<endl;
->>>>>>> .r1610
         cout<<"Neg: "<<ch_neg<<"\t"<<ch_hit<<" = "<< ch_hit-ch_neg<<endl;
         diamondCluster->Print(1);
     }
