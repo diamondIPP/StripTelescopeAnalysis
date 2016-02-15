@@ -185,18 +185,23 @@ void TCluster::SetTransparentClusterSize(UInt_t size){
 };
 
 Int_t TCluster::getTransparentClusterPosition(UInt_t clusterNo) {
-	Int_t startChannel = isTransparentCluster+.5;
+	Int_t startChannel = Int_t(isTransparentCluster+.5);
 	Int_t clStart = this->getClusterPosition(startChannel);
-	Int_t dir = 1;
+	Int_t dir;
+	if (startChannel-isTransparentCluster<0)
+	    dir = -1;
+	else
+	    dir = 1;
+	if (clusterNo%2==0) dir *= -1;
 	Int_t dif = (Int_t(clusterNo)+1)/2;
-	if(isTransparentCluster-startChannel>0){
-		if(clusterNo%2==0)
-			dir = -1;
-	}
-	else{
-		if(clusterNo%2==1)
-			dir = -1;
-	}
+//	if(isTransparentCluster-startChannel>0){
+//		if(clusterNo%2==0)
+//			dir = -1;
+//	}
+//	else{
+//		if(clusterNo%2==1)
+//			dir = -1;
+//	}
 	Int_t clusPos = clStart + dir *dif;
 	return clusPos;
 }
