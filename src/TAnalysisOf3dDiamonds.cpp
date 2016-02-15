@@ -5179,10 +5179,10 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     histSaver->SaveHistogramWithCellGrid(hValidEventsDetSpace);
 
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
+    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
 
     LongAnalysis_CreateResolutionPlots();
     LongAnalysis_SaveChargeSharingPlots();
-    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
     SaveStripAnalysisHistos();
     // Save
     if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();}
