@@ -1374,7 +1374,8 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         Int_t startChannel = Int_t(isTransparentCluster+.5);
         Int_t clStart = this->getClusterPosition(startChannel);
         Int_t orig_dir;
-        if (startChannel-isTransparentCluster<0)
+        Float_t delta = (Float_t)startChannel-isTransparentCluster;
+        if (delta<0)
             orig_dir = -1;
         else
             orig_dir = 1;
@@ -1393,6 +1394,7 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         if (charge != signal && !verb){
             cout<<"\n\n"<<clusterSize<<"/"<<clPos<<"/"<<clusterNo<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
             cout<<"clusNo: "<<clusterNo<<"startCHannel: "<<startChannel<<" clStart: "<<clStart
+                    <<" Delta: "<<(startChannel-isTransparentCluster)
                 <<" origDir: "<<orig_dir<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
             return hasNegativeCharge(charge,pos,cmnCorrected,true);
             verb = true;
