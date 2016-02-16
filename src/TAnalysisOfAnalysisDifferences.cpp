@@ -225,9 +225,11 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
     if(predictedPositions->count(eventNo)){
         Float_t xPredDet = predictedPositions->at(eventNo).first;
         Float_t yPredDet = predictedPositions->at(eventNo).second;
-        if (lowThr < posCharge && posCharge < highThr)
-            mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
         pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+        if (lowThr < posCharge && posCharge < highThr){
+            mapHistos["hChargeResponseWindowPosition"]->Fill(xPredDet,yPredDet);
+            mapHistos["hChargeResponseWindowRelPosition"]->Fill(relPos.first,relPos.second);
+        }
         mapHistos["hAllEvents_RelPosition"]->Fill(relPos.first,relPos.second);
         TProfile2D* prof = (TProfile2D*)mapHistos["hNegativeChargeProfileRelPosition"];
         cout<<"hNegativeChargeProfileRelPosition - FILL: "<<relPos.first<<","<<relPos.second<<": "<<charge<<endl;
@@ -703,6 +705,13 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     histo->SetMinimum(0);
     mapHistos[name] = histo;
 
+    name = "hChargeResponseWindowRelPosition";
+    hname = name +extension;
+    histo = settings->GetOverlayHisto(hname);
+    histo->SetTitle(TString::Format("ChargeResponseWindowPosition, Thrs %.0f - %0.f",
+            settings->getResponseWindow().first,settings->getResponseWindow().first));
+    mapHistos[name] = histo;
+
     name = "hNegativeChargeAboveCut_RelPosition";
     hname = name +extension;
     histo = settings->GetOverlayHisto(hname);
@@ -738,7 +747,7 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     name = "hNoNegativeChargeResponseWindowPosition";
     hname=name+extension;
     title = name;
-    hname+=TString::Format(", Thrs: %.0f - %.0f",settings->getResponseWindow().first,
+    title+=TString::Format(", Thrs: %.0f - %.0f",settings->getResponseWindow().first,
                                       settings->getResponseWindow().second)+extension;
     histo = histSaver->GetHistoBinedInCells(hname,8);
     histo->SetTitle(title);
