@@ -643,6 +643,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     if(settings->IsGoodCell(3,cellNo)){
         this->LongAnalysis_FillGoodCellsLandaus(charge);
     }
+    if(!settings->isBadCell(3,cellNo)){
+        mapPredictedPositionsAllButBadCells[nEvent] = make_pair(xPredDet,yPredDet);
+        if(validClusteredAnalysis)
+            mapClusteredAnalysisAllButBadCells[nEvent] = clusteredCluster;
+        if (validTransparentAnalysis)
+            mapTransparentAnalysisAllButBadCells[nEvent] = transparentCluster;
+    }
     ///*
      if(settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet)==3){
          if(verbosity > 7) cout<< "mapPredictedPositionsAllCells"<<endl;
@@ -5125,7 +5132,8 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hLandau3DWithColumns->GetXaxis()->SetTitle("charge / ADC");
     hLandau3DWithColumns->GetYaxis()->SetTitle("number of entries #");
     hLandau3DWithColumns->SetLineColor(kBlack);
-    name = "hLandau3DWO";
+
+    name = "hLandau3DPhantom";
     name.Append(appendix);
     hLandau3DPhantom = new TH1F(name,"3D Phantom",PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandau3DPhantom->GetXaxis()->SetTitle("charge / ADC");
@@ -5133,7 +5141,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hLandau3DPhantom->SetLineColor(kRed);
     hLandau3DPhantom->SetLineStyle(7);
 
-    name = "hLandau3DWO_subset";
+    name = "hLandau3DPhantom_subset";
     name.Append(appendix);
     hLandau3DPhantomCentral = new TH1F(name,"3D Phantom, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandau3DPhantomCentral->GetXaxis()->SetTitle("charge / ADC");
@@ -5148,7 +5156,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hLandau3DWithColumnsFidCutXvsFidCutY->GetXaxis()->SetTitle("FidCutX");
     hLandau3DWithColumnsFidCutXvsFidCutY->GetYaxis()->SetTitle("FidCutY");
 
-    name = "hLandau3DWithoutColumnsFidCutXvsFidCutY";
+    name = "hLandau3DPhantomFidCutXvsFidCutY";
     hLandau3DPhantomFidCutXvsFidCutY = new TH2F(name,name,
             213,settings->getSi_avg_fidcut_xlow(),settings->getSi_avg_fidcut_xhigh(),
             160,settings->getSi_avg_fidcut_ylow(),settings->getSi_avg_fidcut_yhigh());
@@ -5196,6 +5204,9 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     mapPredictedPositionsAllCells.clear();
     mapClusteredAnalysisAllCells.clear();
     mapTransparentAnalysisAllCells.clear();
+    mapPredictedPositionsAllButBadCells.clear();
+    mapClusteredAnalysisAllButBadCells.clear();
+    mapTransparentAnalysisAllButBadCells.clear();
     initialise3DYAlignmentHistos();
     initialise3DOverviewHistos();
     initialise3DCellOverlayHistos();
@@ -6064,6 +6075,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
         return;
     TAnalysisOfAnalysisDifferences* differences = new TAnalysisOfAnalysisDifferences(settings,histSaver,"good");
     differences->setStripHistogram(this->hLandauStrip);
+    differences->set3DPhantomLandau(this->hLandau3DPhantom);
     differences->setClusteredMap(&mapClusteredAnalysisGoodCells);
     differences->setTransparentMap(&mapTransparentAnalysisGoodCells);
     differences->setPredictedPositions(&mapPredictedPositionsGoodCells);
@@ -6072,9 +6084,20 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CompareTransparentAndClusteredAnalysis_
 
     differences = new TAnalysisOfAnalysisDifferences(settings,histSaver,"all");
     differences->setStripHistogram(this->hLandauStrip);
+    differences->set3DPhantomLandau(this->hLandau3DPhantom);
     differences->setClusteredMap(&mapClusteredAnalysisAllCells);
     differences->setTransparentMap(&mapTransparentAnalysisAllCells);
     differences->setPredictedPositions(&mapPredictedPositionsAllCells);
+    differences->Analysis();
+    delete differences;
+
+
+    differences = new TAnalysisOfAnalysisDifferences(settings,histSaver,"allButBad");
+    differences->setStripHistogram(this->hLandauStrip);
+    differences->set3DPhantomLandau(this->hLandau3DPhantom);
+    differences->setClusteredMap(&mapClusteredAnalysisAllButBadCells);
+    differences->setTransparentMap(&mapTransparentAnalysisAllButBadCells);
+    differences->setPredictedPositions(&mapPredictedPositionsAllButBadCells);
     differences->Analysis();
     delete differences;
 }

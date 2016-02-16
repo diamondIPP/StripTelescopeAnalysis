@@ -562,6 +562,11 @@ private:
     map<Int_t, TCluster> mapClusteredAnalysisAllCells;
     map<Int_t, TCluster> mapTransparentAnalysisAllCells;
     map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsAllCells;
+
+    map<Int_t, TCluster> mapClusteredAnalysisAllButBadCells;
+    map<Int_t, TCluster> mapTransparentAnalysisAllButBadCells;
+    map<Int_t, pair<Float_t,Float_t> > mapPredictedPositionsAllButBadCells;
+
     Float_t maxsnr;
 };
 
