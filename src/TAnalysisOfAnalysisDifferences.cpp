@@ -11,11 +11,13 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
     // TODO Auto-generated constructor stub
     cout<<"TAnalysisOfAnalysisDifferences:: "<<extension<<endl;
     this->settings = settings;
-    this->histSaver = histSaver;
-    oldPlotPath = histSaver->GetPlotsPath();
-    histSaver->SetPlotsPath(oldPlotPath+(string)"/negativeCharges/");
+
     if(settings==0 || histSaver==0)
         cerr<<"ERROR: invalid settings or histogram saver"<<endl;
+    this->histSaver = new HistogrammSaver(settings);
+    oldPlotPath = histSaver->GetPlotsPath();
+    this->histSaver->SetPlotsPath(oldPlotPath+(string)"/negativeCharges/");
+
     transparentMap = 0;
     clusteredMap = 0;
     predictedPositions = 0;
@@ -27,8 +29,7 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
 }
 
 TAnalysisOfAnalysisDifferences::~TAnalysisOfAnalysisDifferences() {
-    histSaver->MoveRootFilesInSubfolder();
-    histSaver->SetPlotsPath(oldPlotPath);
+    delete histSaver;
     if (stripHisto)
         delete stripHisto;
     cout<<"Done with TAnalysisOfAnalysisDifferences"<<endl;

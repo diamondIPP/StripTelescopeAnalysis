@@ -2703,7 +2703,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,T
     string new_plots_path = plots_path;
     new_plots_path+=(string)prefix;
     new_plots_path+="/";
-    histSaver->SetPlotsPath(new_plots_path);
+    HistogrammSaver newHistSaver(settings);
+    newHistSaver.SetPlotsPath(new_plots_path);
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH2F* histo = vec->at(cell);
         if (!histo)
@@ -2715,11 +2716,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,T
         else
             hAllButBadCells->Add(histo);
         hAllCells->Add(histo);
-        histSaver->SaveHistogram(histo,true,false);
+        newHistSaver.SaveHistogram(histo,true,false);
         vec->at(cell)= 0;
         delete histo;
     }
-    histSaver->SetPlotsPath(plots_path);
     hGoodCells->GetZaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hGoodCells);//,false,false,true);
     hBadCells->GetZaxis()->SetTitle("number of entries #");
@@ -2751,7 +2751,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     TH1F* hResolutionAllButBadCells = new TH1F(name,name,nBins,minX,maxX);
     hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
     string plots_path = histSaver->GetPlotsPath();
-    histSaver->SetPlotsPath(plots_path+(string)"/resolution/");
+    HistogrammSaver newHistSaver(settings);
+    newHistSaver.SetPlotsPath(plots_path+(string)"/resolution/");
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH1F* histo = vec->at(cell);
         if (!histo)
@@ -2763,7 +2764,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
         else
             hResolutionAllButBadCells->Add(histo);
         hResolutionAllCells->Add(histo);
-        histSaver->SaveHistogram(histo);
+        newHistSaver.SaveHistogram(histo);
         vec->at(cell)= 0;
         delete histo;
     }
@@ -2777,7 +2778,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     fitX->SetParameter(1,10);
     Int_t statOpt = gStyle->GetOptStat();
     gStyle->SetOptStat(1111);
-    histSaver->SetPlotsPath(plots_path);
     hResolutionGoodCells->GetYaxis()->SetTitle("number of entries #");
     histSaver->SaveHistogram(hResolutionGoodCells,false,false,true);
     hResolutionBadCells->GetYaxis()->SetTitle("number of entries #");
@@ -3715,8 +3715,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
     TList *listGoodCells = new TList;
     TList *listBadCells = new TList;
     string plots_path = histSaver->GetPlotsPath();
-    histSaver->SetPlotsPath(plots_path+(string)"/CellLandaus/");
-
+    HistogrammSaver newHistSaver(settings);
+    newHistSaver.SetPlotsPath(plots_path+(string)"/CellLandaus/");
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
         TString name = "hAllCellColumnLandau_Column_";
         name.Append(settings->getColumnChar(column));
@@ -3743,7 +3743,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
             Int_t cell = settings->get3DCellNo((int)column,row);
             TH1F* h = hCellsLandau.at(cell);
             //hCellNumbering->SetBinContent(column+1,row+1,cell); //This should be a clone of the 2D Cell Mean Charge Plot, Wait till Felix has finished.
-            histSaver->SaveHistogram(h);
+            newHistSaver.SaveHistogram(h);
             hColumnLandau->Add(h);
             if (!settings->isBadCell(3,cell))
                 hColumnLandauNotBad->Add(h);
@@ -3768,12 +3768,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveGoodAndBadCellLandaus() {
                     }
             }//end good cells region
         }//end row
-        histSaver->SaveHistogram(hColumnLandau);
-        histSaver->SaveHistogram(hColumnLandauGood);
-        histSaver->SaveHistogram(hColumnLandauNotBad);
+        newHistSaver.SaveHistogram(hColumnLandau);
+        newHistSaver.SaveHistogram(hColumnLandauGood);
+        newHistSaver.SaveHistogram(hColumnLandauNotBad);
         delete hColumnLandau;
     }//end columns
-    histSaver->SetPlotsPath(plots_path);
     cout<<"List Good Cells: "<<listGoodCells->GetEntries()<<endl;
     listGoodCells->Print();
     cout<<"\nList Bad Cells: "<<listBadCells->GetEntries()<<endl;
@@ -4663,7 +4662,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
     Float_t RelativeBiasEntriesBelowCut=0;
 
     string plots_path = histSaver->GetPlotsPath();
-    histSaver->SetPlotsPath(plots_path+(string)"/OverlayAlignment/");
+    HistogrammSaver newHistSaver(settings);
+    newHistSaver.SetPlotsPath(plots_path+(string)"/OverlayAlignment/");
     for(int i=0; i<ShiftX.size(); i++){
         Float_t OffsetX = settings->getOverlayOffsetX() + ShiftX[i];
         for(int j=0; j<ShiftY.size(); j++){
@@ -4685,11 +4685,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
                 cout<<"SAVE"<<endl;
                 histo->Draw("goffcolz");
                 histo->GetZaxis()->SetRangeUser(700,1200);
-                histSaver->SaveHistogram(histo);
+                newHistSaver.SaveHistogram(histo);
                 delete histo;
             }
-            histSaver->SaveHistogram(hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment));
-            histSaver->SaveHistogram(hOverlayCellOffsetAlignmentBinHits.at(Alignment));
+            newHistSaver.SaveHistogram(hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment));
+            newHistSaver.SaveHistogram(hOverlayCellOffsetAlignmentBinHits.at(Alignment));
 
             TString name = TString::Format("%s_Relative", hOverlayCellOffsetAlignmentBinHitsBelowCut.at(Alignment)->GetName());
             //name.Append(appendix);
@@ -4770,13 +4770,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
             Float_t RMS = LongAnalysis_CalculateRMS(&RelativeBinEntriesBelowCutVec);
             hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCutRMS->Fill(Alignment,RMS);
 
-            histSaver->SaveCanvas(cOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment));
+            newHistSaver.SaveCanvas(cOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment));
             LongAnalysis_Fill2DCellHitsBelowCutRelative(hOverlayCellOffsetAlignmentBinHitsBelowCutRelative.at(Alignment), Alignment);
 
         } //End of for Alignment for i
     } //End of for Alignment for j
 
-    histSaver->SetPlotsPath(plots_path);
     //hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetXaxis()->CenterLabels();
 
     if(hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut){
