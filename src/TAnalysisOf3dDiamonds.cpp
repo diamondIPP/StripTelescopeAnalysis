@@ -595,6 +595,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negCharge,pos,useCMN);
     Float_t negativeChargeRatio = negCharge/charge;
     hNegativeChargeRatio->Fill(negativeChargeRatio,charge);
+    hNegativeChargeRatioAbs->Fill(negativeChargeRatio,negCharge);
 
     if (hasNegativeCharge){
         if(negCharge<settings->getNegativeChargeCut())
@@ -2393,6 +2394,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     TH1D* px = hNegativeChargeRatio->ProjectionX();
     histSaver->SaveHistogram(px);
     delete px;
+    histSaver->SaveHistogram(hNegativeChargeRatioAbs);
     histSaver->SaveHistogram(hNegativeChargeFraction);
     hLandauStripNegativeChargesFraction->SetTitle("Strip");
     hLandauStripNegativeChargesFraction->SetLineColor(kBlue);
@@ -2431,6 +2433,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     hNegativeChargePosition = 0;
     delete histo;
     delete hNegativeChargeRatio;
+    delete hNegativeChargeRatioAbs;
     histo =0;
     //histSaver->SaveHistogram(hNegativeChargePosition);
 }
@@ -5239,7 +5242,9 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     TString name = "hNegativeChargeRatio"+appendix;
     TString title = "Negative Charge Ratio "+appendix;
     title+="; signal ratio: S_{Min}/PH; Pulse Heigth / ADC;number of entries";
-    hNegativeChargeRatio = new TH2D(name,title,1000,-5,.5,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hNegativeChargeRatio = new TH2D(name,title,1000,-1,.5,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    name = "hNegativeChargeRatioAbs"+appendix;
+    hNegativeChargeRatioAbs = new TH2D(name,title,1000,-1,.5,PulseHeightBins,-400,400);
 
 
     name = "hAdjacentChannels_SNR"+appendix;
