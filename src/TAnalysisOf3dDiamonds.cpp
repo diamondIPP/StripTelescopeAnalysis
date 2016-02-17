@@ -589,11 +589,15 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     UInt_t cellNo = cell.first;
     UInt_t quarterNo = cell.second;
 
-    Float_t charge;
+    Float_t charge = diamondCluster->getPositiveCharge(false);
+    Float_t negCharge;
     Int_t pos;
-    bool hasNegativeCharge = diamondCluster->hasNegativeCharge(charge,pos,useCMN);
+    bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negCharge,pos,useCMN);
+    Float_t negativeChargeRatio = negCharge/charge;
+    hNegativeChargeRatio->Fill(negativeChargeRatio,charge);
+
     if (hasNegativeCharge){
-        if(charge<settings->getNegativeChargeCut())
+        if(negCharge<settings->getNegativeChargeCut())
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
 
         if (false&&!hasNegativeCharge<0){
@@ -605,7 +609,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             cout<<"Delta: "<<pos_neg<<" "<<pos_hit<<": "<<delta<<endl;
         }
     }
-    if(charge<settings->getNegativeChargeCut())
+    if(negCharge<settings->getNegativeChargeCut())
         hNegativeChargeFraction->Fill(1);
     else
         hNegativeChargeFraction->Fill(0);
@@ -623,7 +627,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
     pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
-    charge = diamondCluster->getPositiveCharge(false);
     hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
 
     if (settings->do3dTransparentAnalysis()){
@@ -2386,6 +2389,10 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     if (!settings->do3dTransparentAnalysis())
         return;
     histSaver->SaveHistogram(hNegativeChargePosition);
+    histSaver->SaveHistogram(hNegativeChargeRatio);
+    TH1D* px = hNegativeChargeRatio->ProjectionX();
+    histSaver->SaveHistogram(px);
+    delete px;
     histSaver->SaveHistogram(hNegativeChargeFraction);
     hLandauStripNegativeChargesFraction->SetTitle("Strip");
     hLandauStripNegativeChargesFraction->SetLineColor(kBlue);
@@ -2423,6 +2430,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     delete hNegativeChargePosition;
     hNegativeChargePosition = 0;
     delete histo;
+    delete hNegativeChargeRatio;
     histo =0;
     //histSaver->SaveHistogram(hNegativeChargePosition);
 }
@@ -5228,9 +5236,14 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hNegativeChargePosition = histSaver->GetHistoBinedInCells("hNegativeChargePositionAllCells"+appendix,16);
     hNegativeChargePosition->SetTitle(TString::Format("hNegativeChargePositionAllCells, cut: %+3f",settings->getNegativeChargeCut()));
 
+    TString name = "hNegativeChargeRatio"+appendix;
+    TString title = "Negative Charge Ratio "+appendix;
+    title+="; signal ratio: S_{Min}/PH; Pulse Heigth / ADC;number of entries";
+    hNegativeChargeRatio = new TH2D(name,title,1000,-5,.5,PulseHeightBins,PulseHeightMin,PulseHeightMax);
 
-    TString name = "hAdjacentChannels_SNR"+appendix;
-    TString title = "SNR of adjacent channels";
+
+    name = "hAdjacentChannels_SNR"+appendix;
+    title = "SNR of adjacent channels";
     hAdjacentChannels_SNR = new TH2F(name,title,160,-30,50,160,-30,50);
     hAdjacentChannels_SNR->GetXaxis()->SetTitle("SNR left strip");
     hAdjacentChannels_SNR->GetYaxis()->SetTitle("SNR right strip");
