@@ -1083,9 +1083,9 @@ void HistogrammSaver::SaveNegativeChargeOverlay(TH2* prof) {
         return;
     TString name = prof->GetName();
     prof->SetName("cc_"+name);
-    Float_t max = TMath::Abs(prof->GetBinContent(prof->GetMaximumBin()));
-    Float_t min = TMath::Abs(prof->GetBinContent(prof->GetMinimumBin()));
-    Float_t range = TMath::Max(min,max);
+    Float_t max = prof->GetBinContent(prof->GetMaximumBin());
+    Float_t min = prof->GetBinContent(prof->GetMinimumBin());
+    Float_t range = TMath::Max(TMath::Abs(min),TMath::Abs(max));
     int  NCont = 999;
     UInt_t NRGBs = 3;
     gStyle->SetNumberContours(NCont);
@@ -1093,11 +1093,18 @@ void HistogrammSaver::SaveNegativeChargeOverlay(TH2* prof) {
     Double_t red[]   = { 0.00, 1.00, 1.0};
     Double_t green[] = { 0.00, 1.00, 0.00};
     Double_t blue[]  = { 1.00, 1.00, 0.00};
+
     TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
     prof->SetContour(999);
+    min = prof->GetMinimum();
+    max = prof->GetMaximum();
+    prof->SetMinimum(range*-1.05);
+    prof->SetMinimum(range*1.05);
     this->SaveOverlay(prof);
     gStyle->SetPalette(53); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
     prof->SetName(name);
+    prof->SetMinimum(min);
+    prof->SetMaximum(max);
 }
 
 void HistogrammSaver::UpdatePaveText(){
