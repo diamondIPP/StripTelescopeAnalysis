@@ -2390,7 +2390,6 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     if (!settings->do3dTransparentAnalysis())
         return;
     histSaver->SaveHistogram(hNegativeChargePosition);
-    histSaver->SaveNegativeChargeHistogram(hNegativeChargePosition);
     histSaver->SaveHistogram(hNegativeChargeRatio);
     TH1D* px = hNegativeChargeRatio->ProjectionX();
     histSaver->SaveHistogram(px);

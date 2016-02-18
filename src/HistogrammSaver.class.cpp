@@ -1089,7 +1089,7 @@ void HistogrammSaver::SaveNegativeChargeHistogram(TH2* prof) {
     int  NCont = 999;
     UInt_t NRGBs = 3;
     gStyle->SetNumberContours(NCont);
-    Double_t stops[NRGBs] = { 0.00, 0.50, 1.00 };
+    Double_t stops[NRGBs] = { 0.00, 0.50, 1.00};
     Double_t red[NRGBs]   = { 0.00, 1.00, 1.0};
     Double_t green[NRGBs] = { 0.00, 1.00, 0.00};
     Double_t blue[NRGBs]  = { 1.00, 1.00, 0.00};
