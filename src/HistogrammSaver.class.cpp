@@ -1078,7 +1078,7 @@ void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
     cout<<" DONE"<<endl;
 }
 
-void HistogrammSaver::SaveNegativeChargeHistogram(TH2* prof) {
+void HistogrammSaver::SaveNegativeChargeOverlay(TH2* prof) {
     if (!prof)
         return;
     TString name = prof->GetName();
@@ -1095,7 +1095,7 @@ void HistogrammSaver::SaveNegativeChargeHistogram(TH2* prof) {
     Double_t blue[]  = { 1.00, 1.00, 0.00};
     TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
     prof->SetContour(999);
-    this->SaveHistogram(prof);
+    this->SaveOverlay(prof);
     gStyle->SetPalette(53); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
     prof->SetName(name);
 }
