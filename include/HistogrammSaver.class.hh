@@ -17,6 +17,8 @@
 #include "TH3F.h"
 #include "TProfile2D.h"
 #include "TH3.h"
+#include "TROOT.h"
+#include "TColor.h"
 #include "TCanvas.h"
 #include "TH2F.h"
 #include "TGraph.h"
