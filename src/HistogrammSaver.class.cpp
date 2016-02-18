@@ -17,6 +17,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
     }
 
     this->settings = newSettings;
+    this->runNumber=settings->getRunNumber();
     sys=NULL;
     pt=NULL;
     this->verbosity=verbosity;
@@ -1075,6 +1076,28 @@ void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
     delete histo_1D_corner;
     delete histo_1D;
     cout<<" DONE"<<endl;
+}
+
+void HistogrammSaver::SaveNegativeChargeHistogram(TH2* prof) {
+    if (!prof)
+        return;
+    TString name = prof->GetName();
+    prof->SetName("cc_"+name);
+    Float_t max = TMath::Abs(prof->GetBinContent(prof->GetMaximumBin()));
+    Float_t min = TMath::Abs(prof->GetBinContent(prof->GetMinimumBin()));
+    Float_t range = TMath::Max(min,max);
+    int  NCont = 999;
+    UInt_t NRGBs = 3;
+    gStyle->SetNumberContours(NCont);
+    Double_t stops[NRGBs] = { 0.00, 0.50, 1.00 };
+    Double_t red[NRGBs]   = { 0.00, 1.00, 1.0};
+    Double_t green[NRGBs] = { 0.00, 1.00, 0.00};
+    Double_t blue[NRGBs]  = { 1.00, 1.00, 0.00};
+    TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    prof->SetContour(999);
+    this->SaveHistogram(prof);
+    gStyle->SetPalette(53); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+    prof->SetName(name);
 }
 
 void HistogrammSaver::UpdatePaveText(){

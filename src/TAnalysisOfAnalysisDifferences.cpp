@@ -582,11 +582,13 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveHistogram((TH2F*)it->second);
         else
             histSaver->SaveHistogram(it->second);
-
+        if (it->first.Contains("NegativeChargeProfileRelPosition"))
+            histSaver->SaveNegativeChargeHistogram((TProfile2D*)it->second);
         if (it->first.Contains("RelPosition")){
             if (className.Contains("TProfile2D")){
                 histSaver->SaveHistogram((TProfile2D*)it->second);
                 histSaver->SaveOverlay((TProfile2D*)it->second);
+
             }
             else{
                 histSaver->SaveOverlay((TH2*)it->second);

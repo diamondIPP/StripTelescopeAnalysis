@@ -89,6 +89,7 @@ public:
 	TH1F* GetBinsInHistogram(TH2* histo, UInt_t nBins=512);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true,TString drawOption ="");
 	void SaveHistogramWithExtendedFit(TH1* histo, TF1* fit, Float_t xmin,Float_t xmax);
+	void SaveNegativeChargeHistogram(TH2* histo);
 	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
 	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false,bool bDrawOnCanvas = true,TString xTitle ="",TString yTitle="");
 	TProfile* GetProfileX(TProfile2D* prof,TString name ="_pfx",Int_t firstybin = 1, Int_t lastybin = -1);
