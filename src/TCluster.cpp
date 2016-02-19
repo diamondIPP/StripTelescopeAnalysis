@@ -906,12 +906,13 @@ Float_t TCluster::getHighestSignal(bool cmnCorrected){
 		}
 	}
 	highestSignalChannelPos=getChannel(highestSignalClusterPos);
-	if(maximumSignal!=highestSignal){
+	if(maximumSignal!=highestSignal && !cmnCorrected){
 		cout<<"maximumSignal "<<maximumSignal<<" and highest signal "<<highestSignal<<" does not match... Something is wrong:";
 		cout<<"highestSignalChannelPos: "<<highestSignalChannelPos<<"\thighesSignalClusterPos: "<<highestSignalClusterPos<<" "<<getHighestHitClusterPosition()<<endl;
 
 	}
-
+	if (cmnCorrected)
+	    return highestSignal;
 	return this->maximumSignal;
 }
 
