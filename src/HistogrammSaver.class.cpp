@@ -17,7 +17,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
     }
 
     this->settings = newSettings;
-    this->runNumber=settings->getRunNumber();
+    this->SetRunNumber(settings->getRunNumber());
     sys=NULL;
     pt=NULL;
     this->verbosity=verbosity;
