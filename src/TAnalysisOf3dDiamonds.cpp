@@ -594,8 +594,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     Int_t pos;
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negCharge,pos,useCMN);
     Float_t negativeChargeRatio = negCharge/charge;
+    Float_t maxCharge = diamondCluster->getHighestSignal(useCMN);
     hNegativeChargeRatio->Fill(negativeChargeRatio,charge);
     hNegativeChargeRatioAbs->Fill(negativeChargeRatio,negCharge);
+    hNegativeChargeRatioMax->Fill(negCharge/maxCharge,maxCharge);
+    hNegativeChargeRatioOverlay->Fill(xPredDet,yPredDet,negCharge/maxCharge);
 
     if (hasNegativeCharge){
         if(negCharge<settings->getNegativeChargeCut())
@@ -2395,6 +2398,9 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(px);
     delete px;
     histSaver->SaveHistogram(hNegativeChargeRatioAbs);
+    histSaver->SaveHistogram(hNegativeChargeRatioMax);
+    histSaver->SaveOverlay(hNegativeChargeRatioOverlay);
+    delete hNegativeChargeRatioOverlay;
     histSaver->SaveHistogram(hNegativeChargeFraction);
     hLandauStripNegativeChargesFraction->SetTitle("Strip");
     hLandauStripNegativeChargesFraction->SetLineColor(kBlue);
@@ -5242,10 +5248,20 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     TString name = "hNegativeChargeRatio"+appendix;
     TString title = "Negative Charge Ratio "+appendix;
     title+="; signal ratio: S_{Min}/PH; Pulse Heigth / ADC;number of entries";
-    hNegativeChargeRatio = new TH2D(name,title,1000,-1,.5,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hNegativeChargeRatio = new TH2D(name,title,1000,.5,.5,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    title = "Negative Charge Ratio "+appendix;
+    title+="; signal ratio: S_{Min}/PH; S_{Min} / ADC;number of entries";
     name = "hNegativeChargeRatioAbs"+appendix;
-    hNegativeChargeRatioAbs = new TH2D(name,title,1000,-1,.5,PulseHeightBins,-400,400);
+    hNegativeChargeRatioAbs = new TH2D(name,title,1000,-.5,.5,PulseHeightBins,-400,400);
 
+    name = "hNegativeChargeRatioMax"+appendix;
+    title = "Negative Charge Ratio Max "+appendix;
+    title+="; signal ratio: S_{Min}/PH_{max}; Max. Pulse Heigth / ADC;number of entries";
+    hNegativeChargeRatioMax = new TH2D(name,title,1000,-.5,.5,PulseHeightBins,PulseHeightMin,PulseHeightMax);
+
+    name = "hNegativeChargeRatioOverlay"+appendix;
+    hNegativeChargeRatioOverlay = settings->GetOverlayProfile(name);
+    hNegativeChargeRatioOverlay->SetZTitle("avrg min. adjacent Signal");
 
     name = "hAdjacentChannels_SNR"+appendix;
     title = "SNR of adjacent channels";
