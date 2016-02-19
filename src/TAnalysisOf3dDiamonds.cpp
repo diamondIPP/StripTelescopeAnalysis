@@ -630,7 +630,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             return;
         }
     }
-    pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
 
     hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
 
