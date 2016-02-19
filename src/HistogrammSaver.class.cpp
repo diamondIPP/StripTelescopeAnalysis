@@ -1100,7 +1100,10 @@ void HistogrammSaver::SaveNegativeChargeOverlay(TH2* prof) {
     max = prof->GetMaximum();
     prof->SetMinimum(range*-1.05);
     prof->SetMinimum(range*1.05);
+    prof->GetZaxis()->SetRangeUser(-1.05*range,1.05*range);
     this->SaveOverlay(prof);
+    prof->SetName("ch_"+name);
+    this->SaveHistogram(prof,true,false);
     gStyle->SetPalette(53); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
     prof->SetName(name);
     prof->SetMinimum(min);
