@@ -598,7 +598,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     hNegativeChargeRatio->Fill(negativeChargeRatio,charge);
     hNegativeChargeRatioAbs->Fill(negativeChargeRatio,negCharge);
     hNegativeChargeRatioMax->Fill(negCharge/maxCharge,maxCharge);
-    hNegativeChargeRatioOverlay->Fill(xPredDet,yPredDet,negCharge/maxCharge);
+    pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
+    hNegativeChargeRatioOverlay->Fill(relPos.first,relPos.second,negCharge/maxCharge);
 
     if (hasNegativeCharge){
         if(negCharge<settings->getNegativeChargeCut())
