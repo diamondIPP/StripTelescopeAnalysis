@@ -2402,6 +2402,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(hNegativeChargeRatioAbs);
     histSaver->SaveHistogram(hNegativeChargeRatioMax);
     histSaver->SaveOverlay(hNegativeChargeRatioOverlay);
+    histSaver->SaveNegativeChargeOverlay(hNegativeChargeRatioOverlay);
     delete hNegativeChargeRatioOverlay;
     histSaver->SaveHistogram(hNegativeChargeFraction);
     hLandauStripNegativeChargesFraction->SetTitle("Strip");
