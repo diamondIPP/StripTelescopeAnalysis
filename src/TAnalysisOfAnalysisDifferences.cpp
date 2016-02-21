@@ -243,7 +243,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
         cout<<"hNegativeChargeProfileRelPosition - FILL: "<<relPos.first<<","<<relPos.second<<": "<<negCharge<<endl;
         prof->Fill(relPos.first,relPos.second,negCharge);
         prof = (TProfile2D*)mapHistos["hNegativeChargeRatioOverlay"];
-        prof->Fill(relPos.first,relPos.second,negCharge/max);
+        prof->Fill(relPos.first,relPos.second,negCharge/maxCharge);
     }
     if (hasNegativeCharge){
         Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
