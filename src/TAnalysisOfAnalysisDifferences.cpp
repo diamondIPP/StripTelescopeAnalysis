@@ -15,6 +15,7 @@ TAnalysisOfAnalysisDifferences::TAnalysisOfAnalysisDifferences(TSettings* settin
     if(settings==0 || histSaver==0)
         cerr<<"ERROR: invalid settings or histogram saver"<<endl;
     this->histSaver = new HistogrammSaver(settings);
+    histSaver->SetNumberOfEvents(settings->getNEvents());
     oldPlotPath = histSaver->GetPlotsPath();
     this->histSaver->SetPlotsPath(oldPlotPath+(string)"/negativeCharges/");
 
