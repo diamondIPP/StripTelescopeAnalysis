@@ -5252,6 +5252,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     TString title = "Negative Charge Ratio "+appendix;
     title+="; signal ratio: S_{Min}/PH; Pulse Heigth / ADC;number of entries";
     hNegativeChargeRatio = new TH2D(name,title,1000,.5,.5,PulseHeightBins/4,PulseHeightMin,PulseHeightMax);
+
     title = "Negative Charge Ratio "+appendix;
     title+="; signal ratio: S_{Min}/PH; S_{Min} / ADC;number of entries";
     name = "hNegativeChargeRatioAbs"+appendix;
