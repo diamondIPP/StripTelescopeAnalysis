@@ -223,6 +223,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
     bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(negCharge,pos,true);
     Float_t maxCharge = itTransparent->second.getHighestSignal(true);
     Float_t charge = itTransparent->second.getCharge(true);
+    Float_t firstCharge = itTransparent->second.getTransparentCharge(1,true,true);
+    Float_t secondCharge = itTransparent->second.getTransparentCharge(2,true,true);
+    secondCharge-=firstCharge;
 
     Float_t lowThr = settings->getResponseWindow().first;
     Float_t highThr = settings->getResponseWindow().second;
@@ -230,6 +233,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
     mapHistos["hNegativeChargeRatio"]->Fill( negCharge/charge,charge);
     mapHistos["hNegativeChargeRatioAbs"]->Fill( negCharge/charge,negCharge);
     mapHistos["hNegativeChargeRatioMax"]->Fill(negCharge/maxCharge,maxCharge);
+
 
     if(predictedPositions->count(eventNo)){
         Float_t xPredDet = predictedPositions->at(eventNo).first;
@@ -245,6 +249,9 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
         prof->Fill(relPos.first,relPos.second,negCharge);
         prof = (TProfile2D*)mapHistos["hNegativeChargeRatioOverlay"];
         prof->Fill(relPos.first,relPos.second,negCharge/maxCharge);
+        prof = (TProfile2D*) mapHistos["hAdjacentChargeRatioOverlay"];
+        if (firstCharge>secondCharge)
+            prof->Fill(relPos.first,relPos.second,secondCharge/firstCharge);
     }
     if (hasNegativeCharge){
         Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
@@ -404,6 +411,12 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     hname = name + extension;
     histo = settings->GetOverlayProfile(hname);
     histo->SetZTitle("avrg min. adjacent Signal");
+    mapHistos[name] = histo;
+
+    name = "hAdjacentChargeRatioOverlay";
+    hname = name + extension;
+    histo = settings->GetOverlayProfile(hname);
+    histo->SetZTitle("avrg. adjacent Signal");
     mapHistos[name] = histo;
 
     name = "hNegativeChargeRatio";
@@ -619,7 +632,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveHistogram((TH2F*)it->second);
         else
             histSaver->SaveHistogram(it->second);
-        if (it->first.Contains("NegativeChargeProfileRelPosition") || it->first.Contains("hNegativeChargeRatioOverlay"))
+        if (it->first.Contains("NegativeChargeProfileRelPosition") || it->first.Contains("RatioOverlay") )
             histSaver->SaveNegativeChargeOverlay((TProfile2D*)it->second);
         if (it->first.Contains("RelPosition")){
             if (className.Contains("TProfile2D")){
