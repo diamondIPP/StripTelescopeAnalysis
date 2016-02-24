@@ -221,6 +221,8 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
     Int_t pos = 0;
     Float_t negCharge = 0;
     bool hasNegativeCharge = itTransparent->second.hasNegativeCharge(negCharge,pos,true);
+    if (negCharge == 0)
+        hasNegativeCharge = itTransparent->second.hasNegativeCharge(negCharge,pos,true,true);
     Float_t maxCharge = itTransparent->second.getHighestSignal(true);
     Float_t charge = itTransparent->second.getCharge(true);
     Float_t firstCharge = itTransparent->second.getTransparentCharge(1,true,true);
