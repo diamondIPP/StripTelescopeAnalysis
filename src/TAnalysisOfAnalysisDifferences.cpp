@@ -636,6 +636,11 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveHistogram(it->second);
         if (it->first.Contains("NegativeChargeProfileRelPosition") || it->first.Contains("RatioOverlay") )
             histSaver->SaveNegativeChargeOverlay((TProfile2D*)it->second);
+        if (it->first == "hNegativeChargeRatio"  || it->first == "hNegativeChargeRatioMax"){
+            histSaver->SaveProjectionX((TH2*)it->second);
+            histSaver->SaveProjectionY((TH2*)it->second);
+        }
+
         if (it->first.Contains("RelPosition")){
             if (className.Contains("TProfile2D")){
                 histSaver->SaveHistogram((TProfile2D*)it->second);
@@ -664,9 +669,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             }
         }
         if (it->first == "hNegativeChargeChannelPositionTransparent"){
-            TH1D* proj = ((TH2F*)(it->second))->ProjectionY();
-            histSaver->SaveHistogram(proj);
-            delete proj;
+            histSaver->SaveProjectionY((TH2*)it->second);
         }
         if (it->first == "hNoNegativeChargeLowResponsePosition" ||
             it->first == "hNoNegativeChargeResponseWindowPosition" ||

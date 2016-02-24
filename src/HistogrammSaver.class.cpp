@@ -1110,6 +1110,26 @@ void HistogrammSaver::SaveNegativeChargeOverlay(TH2* prof) {
     prof->SetMaximum(max);
 }
 
+void HistogrammSaver::SaveProjectionX(TH2* histo) {
+    if (!histo)
+        return;
+    TString name = histo->GetName();
+    name += "_px";
+    TH1D *px = histo->ProjectionX(name);
+    this->SaveHistogram(px);
+    delete px;
+}
+
+void HistogrammSaver::SaveProjectionY(TH2* histo) {
+    if (!histo)
+        return;
+    TString name = histo->GetName();
+    name += "_py";
+    TH1D *py = histo->ProjectionY(name);
+    this->SaveHistogram(py);
+    delete py;
+}
+
 void HistogrammSaver::UpdatePaveText(){
     if (!pt)
         return;
