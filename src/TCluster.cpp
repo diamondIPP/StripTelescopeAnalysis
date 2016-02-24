@@ -1368,30 +1368,28 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
     Float_t smallCharge = 1e9;
     Float_t newMethodCharge =0;
     Int_t newMethodPosition = -1;
-    if(verb){
-        for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
-            Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
-            Float_t signal = this->getSignal(clPos,cmnCorrected);
+    for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
+        Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
+        Float_t signal = this->getSignal(clPos,cmnCorrected);
 
-            if (signal< smallCharge){
-                smallCharge = signal;
-                pos = clusterSize;
-            }
-
-            if (verb) cout<<"\t"<<clusterSize<<"-"<<clPos<<TString::Format(" %7.1f", signal);
-            if (signal < 0){
-                hasNegCharge = true;
-
-                if (verb) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<charge<<endl;
-            }
-            else if (verb) cout<<endl;
-            if (hasNegCharge && clusterSize %2 == 1 && clusterSize >1)
-                break;
+        if (signal< smallCharge){
+            smallCharge = signal;
+            pos = clusterSize;
         }
-        cout<<"This method gives: "<<smallCharge <<"  @ "<<pos<<": "<<hasNegCharge<<"\n"<<endl;
-        newMethodCharge = smallCharge;
-        newMethodPosition = pos;
+
+        if (verb) cout<<"\t"<<clusterSize<<"-"<<clPos<<TString::Format(" %7.1f", signal);
+        if (signal < 0){
+            hasNegCharge = true;
+
+            if (verb) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<charge<<endl;
+        }
+        else if (verb) cout<<endl;
+        if (hasNegCharge && clusterSize %2 == 1 && clusterSize >1)
+            break;
     }
+    if (verb) cout<<"This method gives: "<<smallCharge <<"  @ "<<pos<<": "<<hasNegCharge<<"\n"<<endl;
+    newMethodCharge = smallCharge;
+    newMethodPosition = pos;
     hasNegCharge = false;
     pos = 0;
     negCharge = 0;
@@ -1491,6 +1489,11 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
     }
     if (verb)
         cout<<"Comparison: "<<pos<<"/"<<newMethodPosition<<"\t"<<charge<<"/"<<newMethodCharge<<endl;
+    if (!verb && (newMethodPosition != pos || newMethodCharge != charge)){
+        cout<<"Methods do not agree. Why?"<<pos<<":"<<negCharge<<"/"<<smallCharge<<"   -  " <<newMethodPosition<<": "<<newMethodCharge<<endl;
+        hasNegCharge = this->hasNegativeCharge(charge,pos,cmnCorrected,true);
+    }
+
     return hasNegCharge;
 }
 
