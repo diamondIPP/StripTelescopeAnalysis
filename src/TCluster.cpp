@@ -1366,6 +1366,8 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
     pos = 0;
     Float_t negCharge = 0;
     Float_t smallCharge = 1e9;
+    Float_t newMethodCharge =0;
+    Int_t newMethodPosition = -1;
     if(verb){
         for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
             Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
@@ -1387,6 +1389,8 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
                 break;
         }
         cout<<"This method gives: "<<smallCharge <<"  @ "<<pos<<": "<<hasNegCharge<<"\n"<<endl;
+        newMethodCharge = smallCharge;
+        newMethodPosition = pos;
     }
     hasNegCharge = false;
     pos = 0;
@@ -1484,9 +1488,9 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
     if (charge == 0 && !verb){
         cout<<"NegativeCharge is equal to 0. Why?"<<pos<<":"<<negCharge<<"/"<<smallCharge<<endl;
         hasNegCharge = this->hasNegativeCharge(charge,pos,cmnCorrected,true);
-
-
     }
+    if (verb)
+        cout<<"Comparison: "<<pos<<"/"<<newMethodPosition<<"\t"<<charge<<"/"<<newMethodCharge<<endl;
     return hasNegCharge;
 }
 
