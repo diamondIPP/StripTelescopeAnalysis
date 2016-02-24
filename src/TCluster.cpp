@@ -1365,15 +1365,12 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
     if (verb) this->Print();
     pos = 0;
     Float_t negCharge = 0;
-    Float_t smallCharge = 1e9;
-    Float_t newMethodCharge =0;
-    Int_t newMethodPosition = -1;
     for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
         Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
         Float_t signal = this->getSignal(clPos,cmnCorrected);
 
-        if (signal< smallCharge){
-            smallCharge = signal;
+        if (signal< charge){
+            charge = signal;
             pos = clusterSize;
         }
 
@@ -1387,113 +1384,7 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         if (hasNegCharge && clusterSize %2 == 1 && clusterSize >1)
             break;
     }
-    if (verb) cout<<"This method gives: "<<smallCharge <<"  @ "<<pos<<": "<<hasNegCharge<<"\n"<<endl;
-    newMethodCharge = smallCharge;
-    newMethodPosition = pos;
-    hasNegCharge = false;
-    pos = 0;
-    negCharge = 0;
-    smallCharge = 1e9;
-    for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
-        currentCharge = this->getCharge(clusterSize,cmnCorrected);
-        charge = currentCharge - oldCharge;
-        Int_t clusterNo = clusterSize -1;
-        Int_t clPos = this->getTransparentClusterPosition(clusterNo);
-        Int_t startChannel = Int_t(isTransparentCluster+.5);
-        Int_t clStart = this->getClusterPosition(startChannel);
-        Int_t orig_dir;
-        Float_t delta = isTransparentCluster-(Float_t)startChannel;
-        if (delta<0)
-            orig_dir = -1;
-        else
-            orig_dir = 1;
-        Int_t dir = orig_dir;
-        if (clusterNo%2==0) dir *= -1;
-        Int_t dif = (Int_t(clusterNo)+1)/2;
-        Int_t clusPos = clStart + dir *dif;
-        Float_t signal = this->getSignal(clPos,cmnCorrected);
-        if (TMath::Abs(charge -signal) >.2 && !verb){
-            cout<<"\n\n"<<clusterSize<<"/"<<clPos<<"/"<<clusterNo<<": Something is wrong: "<<charge<<"/"<<signal<<endl;
-            cout<<"clusNo: "<<clusterNo<<"startCHannel: "<<startChannel<<" clStart: "<<clStart
-                    <<" Delta: "<<(startChannel-isTransparentCluster)
-                <<" origDir: "<<orig_dir<<" dir: "<<dir<<" dif: "<<dif<<" clusPos:"<<clusPos<<"/"<<clPos<<endl;
-            return hasNegativeCharge(charge,pos,cmnCorrected,true);
-            verb = true;
-        }
-        if (charge < smallCharge){
-            smallCharge = charge;
-        }
-        if (verb) cout<<"\t"<<clusterSize<<"-"<<clPos<<TString::Format("%+7.1f - %+7.1f - %+7.1f | %7.1f | %7.1f",
-                currentCharge,oldCharge,charge,smallCharge, signal)<<"\n";
-        if (charge < 0 and !hasNegCharge){
-//            if (clusterSize==1 && clusterSize+2<=this->size()){
-//                pos = 0;
-//                hasNegCharge = true;
-//                negCharge = charge;
-//                Int_t pos1 = this->getTransparentClusterPosition(clusterSize);
-//                Int_t pos2 = this->getTransparentClusterPosition(clusterSize+1);
-//                Float_t sig1 = this->getSignal(pos1,cmnCorrected);
-//                Float_t sig2 = this->getSignal(pos2,cmnCorrected);
-//                bool change = false;
-//                if (sig1<sig2){
-//                    if (sig1<charge){
-//                        negCharge = sig1;
-//                        pos = 1;
-//                        change = true;
-//                    }
-//                }
-//                else{
-//                    if (sig2<charge){
-//                        negCharge = sig2;
-//                        pos = 2;
-//                        change=true;
-//                    }
-//                }
-//                if (verb||change)
-//                    cout <<clusterSize<< " found negative charge at "<< pos<<": "<<signal<<"/"<<charge<<"/"
-//                        <<"/"<<sig1<<"/"<<sig2<<endl;
-//            }
-//            else
-                if( clusterSize+1<this->size() &&
-                this->getCharge(clusterSize+1,cmnCorrected)-currentCharge > charge){
-                pos = clusterSize;
-                if (verb) cout <<clusterSize<< " found negative charge at "<< pos<<": "<<charge<<endl;
-                hasNegCharge = true;
-                negCharge = charge;
-            }else{
-                pos = clusterSize+1;
-                charge =  this->getCharge(clusterSize+1,cmnCorrected)-currentCharge;
-                if (verb) cout << clusterSize<<" found negative charge at "<< pos<<": "<<charge<<endl;
-                hasNegCharge =  true;
-                negCharge = charge;
-            }
-        }
-        oldCharge = currentCharge;
-    }
-    if (false && pos !=3 && hasNegCharge){
-        cout<<"press a key"<<endl;
-        char t;
-        cin>>t;
-    }
-    if (hasNegCharge)
-        charge = negCharge;
-    else
-        charge = smallCharge;
-    if(hasNegCharge && verb)
-        cout<<"found negative charge at "<< pos<<": "<<negCharge<<endl;
-    else if (verb)
-        cout<<"no negative charge at "<< pos<<": "<<negCharge<<endl;
-//    if (charge == 0 && !verb){
-//        cout<<"NegativeCharge is equal to 0. Why?"<<pos<<":"<<negCharge<<"/"<<smallCharge<<endl;
-//        hasNegCharge = this->hasNegativeCharge(charge,pos,cmnCorrected,true);
-//    }
-    if (verb)
-        cout<<"Comparison: "<<pos<<"/"<<newMethodPosition<<"\t"<<charge<<"/"<<newMethodCharge<<endl;
-    if (!verb && (newMethodPosition != pos || newMethodCharge != charge)){
-        cout<<"Methods do not agree. Why?"<<pos<<":"<<negCharge<<"/"<<smallCharge<<"   -  " <<newMethodPosition<<": "<<newMethodCharge<<endl;
-        hasNegCharge = this->hasNegativeCharge(charge,pos,cmnCorrected,true);
-    }
-
+    if (verb) cout<<"This method gives: "<<charge <<"  @ "<<pos<<": "<<hasNegCharge<<"\n"<<endl;
     return hasNegCharge;
 }
 
