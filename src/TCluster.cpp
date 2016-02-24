@@ -1483,10 +1483,10 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
         cout<<"found negative charge at "<< pos<<": "<<negCharge<<endl;
     else if (verb)
         cout<<"no negative charge at "<< pos<<": "<<negCharge<<endl;
-    if (charge == 0 && !verb){
-        cout<<"NegativeCharge is equal to 0. Why?"<<pos<<":"<<negCharge<<"/"<<smallCharge<<endl;
-        hasNegCharge = this->hasNegativeCharge(charge,pos,cmnCorrected,true);
-    }
+//    if (charge == 0 && !verb){
+//        cout<<"NegativeCharge is equal to 0. Why?"<<pos<<":"<<negCharge<<"/"<<smallCharge<<endl;
+//        hasNegCharge = this->hasNegativeCharge(charge,pos,cmnCorrected,true);
+//    }
     if (verb)
         cout<<"Comparison: "<<pos<<"/"<<newMethodPosition<<"\t"<<charge<<"/"<<newMethodCharge<<endl;
     if (!verb && (newMethodPosition != pos || newMethodCharge != charge)){
