@@ -425,7 +425,7 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     hname = name +extension;
     TString title = "Negative Charge Ratio "+extension;
     title+="; signal ratio: S_{Min}/PH; Pulse Heigth / ADC;number of entries";
-    histo = new TH2D(hname,title,1000,.5,.5,bins/4,xmin,xmax);
+    histo = new TH2D(hname,title,1000,-.5,.5,bins/4,xmin,xmax);
     mapHistos[name] = histo;
 
     name = "hNegativeChargeRatioAbs";
