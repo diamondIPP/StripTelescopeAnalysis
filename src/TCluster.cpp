@@ -1368,7 +1368,7 @@ bool TCluster::hasNegativeCharge(Float_t& charge, Int_t& pos, bool cmnCorrected,
     Float_t smallCharge = 1e9;
     if(verb){
         for(UInt_t clusterSize = 1; clusterSize<= this->GetTransparentClusterSize();clusterSize++){
-            Int_t clPos = this->getTransparentClusterPosition(clusterSize);
+            Int_t clPos = this->getTransparentClusterPosition(clusterSize-1);
             Float_t signal = this->getSignal(clPos,cmnCorrected);
 
             if (signal< smallCharge){
