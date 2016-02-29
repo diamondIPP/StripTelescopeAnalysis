@@ -256,8 +256,10 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
         prof = (TProfile2D*)mapHistos["hNegativeChargeRatioOverlay"];
         prof->Fill(relPos.first,relPos.second,negCharge/maxCharge);
         prof = (TProfile2D*) mapHistos["hAdjacentChargeRatioOverlay"];
-        if (firstCharge>secondCharge)
+        if (firstCharge>secondCharge){
             prof->Fill(relPos.first,relPos.second,secondCharge/firstCharge);
+            mapHistos["hAdjacentChargeRatio"]->Fill(secondCharge/firstCharge,maxCharge);
+        }
     }
     if (hasNegativeCharge){
         Int_t pos_hit = itTransparent->second.getTransparentClusterPosition(0);
@@ -423,6 +425,14 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     hname = name + extension;
     histo = settings->GetOverlayProfile(hname);
     histo->SetZTitle("avrg. adjacent Signal");
+    mapHistos[name] = histo;
+
+
+    name = "hAdjacentChargeRatio";
+    hname = name +extension;
+    TString title = "Adjacent Charge Ratio "+extension;
+    title+="; signal ratio: S_{Adjacent}/PH; Pulse Heigth / ADC;number of entries";
+    histo = new TH2D(hname,title,1000,-.5,.5,bins/4,xmin,xmax);
     mapHistos[name] = histo;
 
     name = "hNegativeChargeRatio";
