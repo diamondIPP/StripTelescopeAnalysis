@@ -430,14 +430,14 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
 
     name = "hAdjacentChargeRatio";
     hname = name +extension;
-    title = "Adjacent Charge Ratio "+extension;
+    TString title = "Adjacent Charge Ratio "+extension;
     title+="; signal ratio: S_{Adjacent}/PH; Pulse Heigth / ADC;number of entries";
     histo = new TH2D(hname,title,1000,-.5,.5,bins/4,xmin,xmax);
     mapHistos[name] = histo;
 
     name = "hNegativeChargeRatio";
     hname = name +extension;
-    TString title = "Negative Charge Ratio "+extension;
+    title = "Negative Charge Ratio "+extension;
     title+="; signal ratio: S_{Min}/PH; Pulse Heigth / ADC;number of entries";
     histo = new TH2D(hname,title,1000,-.5,.5,bins/4,xmin,xmax);
     mapHistos[name] = histo;
