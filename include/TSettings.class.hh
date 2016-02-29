@@ -645,6 +645,8 @@ public:
 	bool IsWithInTheColumnRadius(Float_t relCellPosX,Float_t relCellPosY);
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY,Float_t minDistanceToEdge);
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY){return IsOnTheEdgeOfCell(relCellPosX,relCellPosY,minimumEdgeDistance);}
+	bool IsOnTheEdgeOfCell(pair<Float_t,Float_t> relCellPos, Float_t minDistanceToEdge){return  IsOnTheEdgeOfCell(relCellPos.first,relCellPos.second,minDistanceToEdge);}
+	bool IsOnTheEdgeOfCell(pair<Float_t,Float_t> relCellPos){return IsOnTheEdgeOfCell(relCellPos,minimumEdgeDistance);}
 	Float_t GetMinimumEdgeDistance(){return minimumEdgeDistance;};
 	bool IsPaperMode(){return bPaperMode;}
 	Float_t getAdcToElectronConversion(){return 1;}

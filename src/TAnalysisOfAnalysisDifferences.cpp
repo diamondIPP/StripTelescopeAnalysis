@@ -257,10 +257,16 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
         prof->Fill(relPos.first,relPos.second,negCharge);
         prof = (TProfile2D*)mapHistos["hNegativeChargeRatioOverlay"];
         prof->Fill(relPos.first,relPos.second,negCharge/maxCharge);
-        prof = (TProfile2D*) mapHistos["hAdjacentChargeRatioOverlay"];
         if (firstCharge>secondCharge){
+            prof = (TProfile2D*) mapHistos["hAdjacentChargeRatioOverlay"];
             prof->Fill(relPos.first,relPos.second,secondCharge/firstCharge);
             mapHistos["hAdjacentChargeRatio"]->Fill(secondCharge/firstCharge,maxCharge);
+            if (settings->IsOnTheEdgeOfCell(relPos)){
+                prof = (TProfile2D*) mapHistos["hAdjacentChargeRatioOverlayNoBorder"];
+                prof->Fill(relPos.first,relPos.second,secondCharge/firstCharge);
+                mapHistos["hAdjacentChargeRatioNoBorder"]->Fill(secondCharge/firstCharge,maxCharge);
+            }
+//            hAdjacentChargeRatioOverlayNoBorder;
         }
     }
     if (hasNegativeCharge){
@@ -430,6 +436,23 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     histo->SetZTitle("avrg. adjacent Signal");
     mapHistos[name] = histo;
 
+    name = "hAdjacentChargeRatioOverlayNoBorder";
+    hname = name + extension;
+    title = TString::Format("hAdjacentChargeRatioOverlayNo Border (%.0f #mum) ",settings->GetMinimumEdgeDistance());
+    histo = settings->GetOverlayProfile(hname);
+    histo->SetTitle(title);
+    histo->SetZTitle("avrg. adjacent Signal");
+    mapHistos[name] = histo;
+
+    //hAdjacentChargeRatioOverlayNoBorder
+
+    name = "hAdjacentChargeRatioNoBorder";
+    hname = name +extension;
+    title = TString::Format("Adjacent Charge Ratio No Border (%.0f #mum) ",settings->GetMinimumEdgeDistance());
+    title+=extension;
+    title+="; signal ratio: S_{Adjacent}/PH; Pulse Heigth / ADC;number of entries";
+    histo = new TH2D(hname,title,1000,-.5,.5,bins/4,xmin,xmax);
+    mapHistos[name] = histo;
 
     name = "hAdjacentChargeRatio";
     hname = name +extension;
@@ -658,7 +681,8 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveHistogram(it->second);
         if (it->first.Contains("NegativeChargeProfileRelPosition") || it->first.Contains("RatioOverlay") )
             histSaver->SaveNegativeChargeOverlay((TProfile2D*)it->second);
-        if (it->first == "hNegativeChargeRatio"  || it->first == "hNegativeChargeRatioMax"){
+        if (it->first == "hNegativeChargeRatio"  || it->first == "hNegativeChargeRatioMax"
+                || it->first == "hAdjacentChargeRatio" || it->first == "hAdjacentChargeRatioNoBorder" ){
             histSaver->SaveProjectionX((TH2*)it->second);
             histSaver->SaveProjectionY((TH2*)it->second);
         }
