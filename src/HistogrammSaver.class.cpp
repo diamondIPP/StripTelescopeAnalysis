@@ -25,6 +25,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
     plots_path=".";
     pt = new TPaveText(0.07,0,0.22,0.10,"NDC");
     UpdatePaveText();
+    this->SetNumberOfEvents(newSettings->getNEvents());
     this->SetRunNumber(settings->getRunNumber());
     if(verbosity)cout<<"HistogrammSaver::HistogrammSaver:: get new TSystem"<<endl;
     //	sys=new TSystem();
