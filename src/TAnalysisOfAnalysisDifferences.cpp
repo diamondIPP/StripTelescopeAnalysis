@@ -227,7 +227,11 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
     Float_t charge = itTransparent->second.getCharge(true);
     Float_t firstCharge = itTransparent->second.getTransparentCharge(1,true,true);
     Float_t secondCharge = itTransparent->second.getTransparentCharge(2,true,true);
+    Float_t thirdCharge = itTransparent->second.getTransparentCharge(3,true,true);
+    thirdCharge-=secondCharge;
     secondCharge-=firstCharge;
+    cout<<"\nTransparent: "<<firstCharge<<" "<<secondCharge<<" "<<thirdCharge<<" "<<charge<<" "<<negCharge<<" "<<pos<<endl;
+    itTransparent->second.Print(1);
 
     Float_t lowThr = settings->getResponseWindow().first;
     Float_t highThr = settings->getResponseWindow().second;
