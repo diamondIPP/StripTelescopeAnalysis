@@ -18,7 +18,6 @@ TSettings::TSettings(TRunInfo *runInfo)
 	cout<<"TSettings TRunInfo"<<endl;
 	//  verbosity=runInfo->getVerbosity();
 	setVerbosity(runInfo->getVerbosity());
-	runInfo->getEvents()
 	diamondMapping=0;
 	fidCutsSelection = new TFidCutRegions();
 	fidCuts3DEdge = new TFidCutRegions();
