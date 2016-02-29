@@ -261,7 +261,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
             prof = (TProfile2D*) mapHistos["hAdjacentChargeRatioOverlay"];
             prof->Fill(relPos.first,relPos.second,secondCharge/firstCharge);
             mapHistos["hAdjacentChargeRatio"]->Fill(secondCharge/firstCharge,maxCharge);
-            if (settings->IsOnTheEdgeOfCell(relPos)){
+            if (!settings->IsOnTheEdgeOfCell(relPos)){
                 prof = (TProfile2D*) mapHistos["hAdjacentChargeRatioOverlayNoBorder"];
                 prof->Fill(relPos.first,relPos.second,secondCharge/firstCharge);
                 mapHistos["hAdjacentChargeRatioNoBorder"]->Fill(secondCharge/firstCharge,maxCharge);
