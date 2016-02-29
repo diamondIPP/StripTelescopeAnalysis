@@ -371,6 +371,7 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
     Int_t xmin = stripHisto?stripHisto->GetXaxis()->GetXmin():1;
     Int_t xmax = stripHisto?stripHisto->GetXaxis()->GetXmax():2800;
 
+    TString title;
     TString name = "hTransparentPulseHeight";
     TString hname = name+extension;
     histo = new TH1F(hname,hname,bins,xmin,xmax);
@@ -430,7 +431,7 @@ void TAnalysisOfAnalysisDifferences::InitHistograms() {
 
     name = "hAdjacentChargeRatio";
     hname = name +extension;
-    TString title = "Adjacent Charge Ratio "+extension;
+    title = "Adjacent Charge Ratio "+extension;
     title+="; signal ratio: S_{Adjacent}/PH; Pulse Heigth / ADC;number of entries";
     histo = new TH2D(hname,title,1000,-.5,.5,bins/4,xmin,xmax);
     mapHistos[name] = histo;
@@ -520,10 +521,12 @@ void TAnalysisOfAnalysisDifferences::SaveTransparentClusteredComparison() {
     delete hs;
     delete histo1;
     delete histo2;
+    cout<<"Save7"<<endl;
 }
 
 
 void TAnalysisOfAnalysisDifferences::SaveComparisonPlots(TString name, TH1* histo,bool includePhantom) {
+    cout<<"TAnalysisOfAnalysisDifferences::SaveComparisonPlots"<<name<<endl;
     if (!histo) return;
     if (!hPhantomLandau) includePhantom=false;
     else{
@@ -591,11 +594,14 @@ void TAnalysisOfAnalysisDifferences::SaveComparisonPlots(TString name, TH1* hist
     if (hPhantom_scaled)hs3->Add(hPhantom_scaled);
     hs3->Draw("");
     histSaver->SaveStack(hs3,"nostack",true,false,"charge / ADC","rel. no of entries");
+    cout<<"TAnalysisOfAnalysisDifferences::SaveComparisonPlots DONE"<<name<<endl;
+
 }
 
 
 void TAnalysisOfAnalysisDifferences::SaveHistograms() {
     SaveTransparentClusteredComparison();
+    cout<<"TAnalysisOfAnalysisDifferences::SaveHistograms1"<<endl;
     TString name = "NoNegativeCharge_PulseHeight_Comparision";
     SaveComparisonPlots(name,mapHistos["hNoNegativeCharge_PulseHeight"]);
     name= "PositiveCharge_PulseHeight_Comparision";
