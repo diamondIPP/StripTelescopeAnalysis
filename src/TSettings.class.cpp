@@ -547,6 +547,8 @@ void TSettings::LoadSettings(){
         if (TPlaneProperties::startsWith(key,"negativeChargeCut")){Parse(key,value,negativeChargeCut);}
         if (TPlaneProperties::startsWith(key,"negativeStripChargeCut")){Parse(key,value,negativeChargeCutStrip);}
         if (TPlaneProperties::startsWith(key,"lowResponseThreshold")){Parse(key,value,lowResponseThreshold);}
+        if (TPlaneProperties::startsWith(key,"minimumEdgeDistance")){Parse(key,value,minimumEdgeDistance);}
+
         if (TPlaneProperties::startsWith(key,"responseWindow")){
             ParseFloatPair(key,value,responseWindow);}
 //        responseWindow
