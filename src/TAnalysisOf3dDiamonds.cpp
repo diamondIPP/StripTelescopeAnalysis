@@ -2406,6 +2406,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
         return;
 
     histSaver->SaveHistogram(hNegativeChargeFieldWireFraction);
+    histSaver->SaveHistogramWithCellGrid(hNegativeChargeFieldWireFraction);
     histSaver->SaveHistogram(hNegativeChargeFieldWirePositions);
     histSaver->SaveOverlay(hNegativeChargeFieldWirePositionsOverlay);
     delete hNegativeChargeFieldWireFraction;
@@ -5300,7 +5301,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hNegativeChargeFraction = new TH1F(name,title,2,0,1);
 
     name = "hNegativeChargeFieldWireFraction"+appendix;
-    hNegativeChargeFieldWireFraction = histSaver->GetHistoBinnedAroundFieldWires(name,1);
+    hNegativeChargeFieldWireFraction = histSaver->GetProfileBinnedAroundFieldWires(name,1);
     hNegativeChargeFieldWireFraction->GetZaxis()->SetTitle("Fraction of negative charges");
 
     name = "hNegativeChargeFieldWirePositions"+appendix;

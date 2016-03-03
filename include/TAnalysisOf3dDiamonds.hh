@@ -180,7 +180,7 @@ private:
 	TH2F* hLandauStripFiducialPosition;
 	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
 	TH2F* hLandau3DPhantomFidCutXvsFidCutY;
-	TH2D* hNegativeChargeFieldWireFraction;
+	TProfile2D* hNegativeChargeFieldWireFraction;
 	TH2D* hNegativeChargeFieldWirePositions;
 	TH2F* hNegativeChargeFieldWirePositionsOverlay;
 	TCellAnalysisClass* clusteredAnalysis;

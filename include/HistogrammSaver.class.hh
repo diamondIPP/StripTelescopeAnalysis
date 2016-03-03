@@ -168,6 +168,7 @@ public:
 	TH2D* GetHistoBinedInQuarters(TString name);
 	TH2D* GetHistoBinedInCells(TString name,Int_t binsPerCellAxis=1);
 	TH2D* GetHistoBinnedAroundFieldWires(TString name, Int_t binsPerCellAxis=1);
+	TProfile2D* GetProfileBinnedAroundFieldWires(TString name, Int_t binsPerCellAxis=1);
 	TProfile2D* GetProfile2dBinedInCells(TString name,Int_t binsPerCellAxis=1);
 	TH3D* Get3dHistoBinedInCells(TString name,UInt_t binsz, Float_t minz,Float_t maxz, Int_t binsPerCellAxis=1);
 	TCutG* GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y);
