@@ -2407,6 +2407,12 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 
     histSaver->SaveHistogram(hNegativeChargeFieldWireFraction);
     histSaver->SaveHistogramWithCellGrid(hNegativeChargeFieldWireFraction);
+    TString name = hNegativeChargeFieldWireFraction->GetName();
+    name+="_entries";
+    TH2D* pxy = hNegativeChargeFieldWireFraction->ProjectionXY(name,"B");
+    histSaver->SaveHistogram(pxy);
+    histSaver->SaveHistogramWithCellGrid(pxy);
+    delete pxy;
     histSaver->SaveHistogram(hNegativeChargeFieldWirePositions);
     histSaver->SaveOverlay(hNegativeChargeFieldWirePositionsOverlay);
     delete hNegativeChargeFieldWireFraction;
@@ -2431,7 +2437,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     hNegativeChargeFraction->SetTitle("3D detector");
     histSaver->SaveTwoHistos("hNegativeChargeFractionComparision",hNegativeChargeFraction,hLandauStripNegativeChargesFraction);
     delete hNegativeChargeFraction;
-    TString name = "hNegativeChargePosition"+appendix+"_px";
+     name = "hNegativeChargePosition"+appendix+"_px";
     TH1D* proj_px = hNegativeChargePosition->ProjectionX(name);
     histSaver->SaveHistogram(proj_px);
     name = "hNegativeChargePosition_"+appendix+"_py";
