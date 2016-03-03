@@ -600,7 +600,19 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     hNegativeChargeRatioMax->Fill(negCharge/maxCharge,maxCharge);
     pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
     hNegativeChargeRatioOverlay->Fill(relPos.first,relPos.second,negCharge/maxCharge);
-
+    Float_t dx = relPos.first;
+    Float_t dy = relPos.second;
+    if (dx > settings->GetCellWidth(subjectDetector,2)/2.)
+        dx-=settings->GetCellWidth(subjectDetector,2);
+    if (dy > settings->GetCellHeight()/2.)
+        dy -= settings->GetCellHeight();
+    dx /= settings->GetCellWidth(subjectDetector,2);
+    dy /= settings->GetCellHeight();
+    if (TMath::Abs(dx) + TMath::Abs(dy) < 0.5){
+        hNegativeChargeFieldWireFraction->Fill(xPredDet,yPredDet,int(negCharge<settings->getNegativeChargeCut()));
+        hNegativeChargeFieldWirePositions->Fill(xPredDet,yPredDet);
+        hNegativeChargeFieldWirePositionsOverlay->Fill(relPos.first,relPos.second);
+    }
     if (hasNegativeCharge){
         if(negCharge<settings->getNegativeChargeCut())
             hNegativeChargePosition->Fill(xPredDet,yPredDet);
@@ -2392,6 +2404,14 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogram(hLongAnalysisInvalidCluster);
     if (!settings->do3dTransparentAnalysis())
         return;
+
+    histSaver->SaveHistogram(hNegativeChargeFieldWireFraction);
+    histSaver->SaveHistogram(hNegativeChargeFieldWirePositions);
+    histSaver->SaveOverlay(hNegativeChargeFieldWirePositionsOverlay);
+    delete hNegativeChargeFieldWireFraction;
+    delete hNegativeChargeFieldWirePositions;
+    delete hNegativeChargeFieldWirePositionsOverlay;
+
     histSaver->SaveHistogram(hNegativeChargePosition);
     histSaver->SaveHistogram(hNegativeChargeRatio);
     TH1D* px = hNegativeChargeRatio->ProjectionX();
@@ -5278,6 +5298,18 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     title = TString::Format("Negative Charge Fraction: Thr %d",(int)settings->getNegativeChargeCut());
     title+=";has Negative Charge below Thr;number of entries";
     hNegativeChargeFraction = new TH1F(name,title,2,0,1);
+
+    name = "hNegativeChargeFieldWireFraction"+appendix;
+    hNegativeChargeFieldWireFraction = histSaver->GetHistoBinnedAroundFieldWires(name,1);
+    hNegativeChargeFieldWireFraction->GetZaxis()->SetTitle("Fraction of negative charges");
+
+    name = "hNegativeChargeFieldWirePositions"+appendix;
+    hNegativeChargeFieldWirePositions = histSaver->GetHistoBinnedAroundFieldWires(name,30);
+    hNegativeChargeFieldWirePositions->GetZaxis()->SetTitle("Positions of entries in hNegativeChargeFieldWireFraction");
+
+    name = "hNegativeChargeFieldWirePositionsOverlay"+appendix;
+    hNegativeChargeFieldWirePositionsOverlay  = settings->GetOverlayHisto(name);
+    hNegativeChargeRatioOverlay->SetZTitle("Positions of entries in hNegativeChargeFieldWireFraction");
 
 }
 

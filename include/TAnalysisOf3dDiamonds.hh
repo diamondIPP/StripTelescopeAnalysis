@@ -180,6 +180,9 @@ private:
 	TH2F* hLandauStripFiducialPosition;
 	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
 	TH2F* hLandau3DPhantomFidCutXvsFidCutY;
+	TH2D* hNegativeChargeFieldWireFraction;
+	TH2D* hNegativeChargeFieldWirePositions;
+	TH2D* hNegativeChargeFieldWirePositionsOverlay;
 	TCellAnalysisClass* clusteredAnalysis;
 	vector<float> SortArrayPointer;
 	Float_t fiducialValueX, fiducialValueY, chi2x,chi2y,xPredicted,yPredicted,xPredDet,yPredDet;

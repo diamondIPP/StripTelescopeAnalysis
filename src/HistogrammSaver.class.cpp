@@ -790,6 +790,26 @@ TH2D* HistogrammSaver::GetHistoBinedInQuarters(TString name) {
     return GetHistoBinedInCells(name,2);
 }
 
+TH2D* HistogrammSaver::GetHistoBinnedAroundFieldWires(TString name, Int_t binsPerCellAxis) {
+    cout<<"[HistogrammSaver::GetHistoBinnedAroundFieldWires] create "<<name<<endl;
+    TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
+    Int_t xbins = settings->getNColumns3d();
+    Int_t ybins = settings->getNRows3d();
+    Float_t xlow = diaMetFidCut->GetXLow();
+    Float_t xup = diaMetFidCut->GetXHigh();
+    Float_t dx = (xup-xlow)/xbins;
+    Float_t ylow = diaMetFidCut->GetYLow();
+    Float_t yup = diaMetFidCut->GetXHigh();
+    Float_t dy = (yup-ylow)/ybins;
+    xlow -=dx/2.;
+    xup  +=dx/2.;
+    ylow -=dy/2.;
+    yup  +=dy/2.;
+    xbins = (xbins+1)*binsPerCellAxis;
+    ybins = (ybins+1)*binsPerCellAxis;
+    TH2D* histo = new TH2D(name,name,xbins,xlow,xup,ybins,ylow,yup);
+    return histo;
+}
 TH2D* HistogrammSaver::GetHistoBinedInCells(TString name, Int_t binsPerCellAxis) {
     cout<<"create "<<name<<endl;
     TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
