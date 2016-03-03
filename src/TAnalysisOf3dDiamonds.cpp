@@ -608,7 +608,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         dy -= settings->GetCellHeight();
     dx /= settings->GetCellWidth(subjectDetector,2);
     dy /= settings->GetCellHeight();
-    if (TMath::Abs(dx) + TMath::Abs(dy) < 0.5){
+    if (TMath::Abs(dx) + TMath::Abs(dy) < 0.4){
         hNegativeChargeFieldWireFraction->Fill(xPredDet,yPredDet,int(negCharge<settings->getNegativeChargeCut()));
         hNegativeChargeFieldWirePositions->Fill(xPredDet,yPredDet);
         hNegativeChargeFieldWirePositionsOverlay->Fill(relPos.first,relPos.second);
