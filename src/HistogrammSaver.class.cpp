@@ -790,7 +790,7 @@ TH2D* HistogrammSaver::GetHistoBinedInQuarters(TString name) {
     return GetHistoBinedInCells(name,2);
 }
 
-TProfil2D* HistogrammSaver::GetProfileBinnedAroundFieldWires(TString name, Int_t binsPerCellAxis) {
+TProfile2D* HistogrammSaver::GetProfileBinnedAroundFieldWires(TString name, Int_t binsPerCellAxis) {
     cout<<"[HistogrammSaver::GetHistoBinnedAroundFieldWires] create "<<name<<endl;
     TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
     Int_t xbins = settings->getNColumns3d();
