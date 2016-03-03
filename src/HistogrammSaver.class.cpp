@@ -807,7 +807,7 @@ TProfile2D* HistogrammSaver::GetProfileBinnedAroundFieldWires(TString name, Int_
     yup  +=dy/2.;
     xbins = (xbins+1)*binsPerCellAxis;
     ybins = (ybins+1)*binsPerCellAxis;
-    TProfile2D* histo = new TH2D(name,name,xbins,xlow,xup,ybins,ylow,yup);
+    TProfile2D* histo = new TProfile2D(name,name,xbins,xlow,xup,ybins,ylow,yup);
     return histo;
 }
 
