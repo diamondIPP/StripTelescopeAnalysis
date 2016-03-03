@@ -799,7 +799,7 @@ TProfile2D* HistogrammSaver::GetProfileBinnedAroundFieldWires(TString name, Int_
     Float_t xup = diaMetFidCut->GetXHigh();
     Float_t dx = (xup-xlow)/xbins;
     Float_t ylow = diaMetFidCut->GetYLow();
-    Float_t yup = diaMetFidCut->GetXHigh();
+    Float_t yup = diaMetFidCut->GetYHigh();
     Float_t dy = (yup-ylow)/ybins;
     xlow -=dx/2.;
     xup  +=dx/2.;
@@ -821,7 +821,7 @@ TH2D* HistogrammSaver::GetHistoBinnedAroundFieldWires(TString name, Int_t binsPe
     Float_t xup = diaMetFidCut->GetXHigh();
     Float_t dx = (xup-xlow)/xbins;
     Float_t ylow = diaMetFidCut->GetYLow();
-    Float_t yup = diaMetFidCut->GetXHigh();
+    Float_t yup = diaMetFidCut->GetYHigh();
     Float_t dy = (yup-ylow)/ybins;
     xlow -=dx/2.;
     xup  +=dx/2.;
