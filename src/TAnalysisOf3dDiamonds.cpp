@@ -148,8 +148,6 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
         {
             diamondCluster = &transparentCluster;
         }
-        if (diamondCluster->size())
-                        hClusterEventsDetSpace->Fill(xPredDet,yPredDet);
         if (diamondCluster->isSaturatedCluster())
                 continue;;
         //cout<<"Before Strip Analysis"<<endl;
@@ -317,10 +315,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
 //    if(!settings->do3dTransparentAnalysis()){
         Float_t maxChi2 = settings->getChi2Cut3D();
-        if (diamondCluster->isSaturatedCluster())
-                return;
-        hNumberofClusters->Fill(eventReader->getNDiamondClusters());
+        Int_t nClusters =eventReader->getNDiamondClusters();
+        hNumberofClusters->Fill(nClusters);
         ClusterPlots(eventReader->getNDiamondClusters(),fiducialValueX,fiducialValueY);
+        if (nClusters>0)
+            hClusterEventsDetSpace->Fill(xPredDet,yPredDet);
 
         Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
         ShortAnalysis_FillEdgeAlignmentHistos();
@@ -351,7 +350,9 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_FillEdgeAlignmentHistos(){
     Int_t nClusters = eventReader->getNDiamondClusters();
-    if (nClusters ==0 || nClusters >2)
+    if (nClusters ==0)
+        return;
+    if ( nClusters >2)
         return;
     Float_t charge = 0;
     for (UInt_t i = 0; i<nClusters; i++)
