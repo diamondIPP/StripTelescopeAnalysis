@@ -1052,14 +1052,16 @@ TH1F* HistogrammSaver::GetBinsInHistogram(TH2* histo2, UInt_t nbins) {
     return histo;
 }
 
-void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
+void HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Float_t minX,Float_t maxX,Int_t nBins) {
     if (!histo)
         return;
-    Float_t minX =  histo->GetBinContent(histo->GetMinimumBin());
-    Float_t maxX = histo->GetBinContent(histo->GetMaximumBin());
-    Float_t deltaX = maxX-minX;
-    maxX += deltaX*0.2;
-    minX -= deltaX*0.1;
+    if (minX>maxX){
+        minX =  histo->GetBinContent(histo->GetMinimumBin());
+        maxX = histo->GetBinContent(histo->GetMaximumBin());
+        Float_t deltaX = maxX-minX;
+        maxX += deltaX*0.2;
+        minX -= deltaX*0.1;
+    }
     cout<<"HistogrammSaver::SaveOverlayDistribution"<<histo<<" range: "<<minX<<"-"<<maxX<<flush;
     UInt_t nbins = 50;
     TString name = histo->GetName()+TString("_1D");
@@ -1077,15 +1079,15 @@ void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
             xhigh = histo->GetXaxis()->GetBinUpEdge(bx);
             ylow = histo->GetYaxis()->GetBinLowEdge(by);
             yhigh = histo->GetYaxis()->GetBinUpEdge(by);
-            if ( (xlow < 75 && 75 < xhigh ) && ( ylow < 75 && 75 < yhigh))
+            if ( isOverlay && (xlow < 75 && 75 < xhigh ) && ( ylow < 75 && 75 < yhigh))
                 histo_1D_middle->Fill(content);
-            else if ( ( xlow <=0 && 0 <= xhigh) && (ylow<=0 && 0<=yhigh))
+            else if ( isOverlay && ( xlow <=0 && 0 <= xhigh) && (ylow<=0 && 0<=yhigh))
                 histo_1D_corner->Fill(content);
-            else if(( xlow<=150 && 150 <=xhigh) && ( ylow<=0 && 0<=yhigh))
+            else if( isOverlay && ( xlow<=150 && 150 <=xhigh) && ( ylow<=0 && 0<=yhigh))
                 histo_1D_corner->Fill(content);
-            else if(( xlow<=150 && 150 <=xhigh) && (ylow<=150 && 150<=yhigh))
+            else if( isOverlay && ( xlow<=150 && 150 <=xhigh) && (ylow<=150 && 150<=yhigh))
                 histo_1D_corner->Fill(content);
-            else if(( xlow<=0 && 0<=xhigh) && (ylow<=150 && 150<=yhigh))
+            else if( isOverlay && ( xlow<=0 && 0<=xhigh) && (ylow<=150 && 150<=yhigh))
                 histo_1D_corner->Fill(content);
             else
                 histo_1D->Fill(content);
@@ -1109,12 +1111,21 @@ void HistogrammSaver::SaveOverlayDistribution(TH2* histo) {
     histo_1D_corner->SetFillStyle(3021);
     name= TString("stack_")+histo->GetName()+TString("_1D");
     cout<<" saveStack"<<flush;
-    TString title = TString("Overlay distribution;") +histo->GetZaxis()->GetTitle()+TString(";number of entries");
+    TString title;
+    if (isOverlay)
+        title = TString("Overlay distribution;");
+    else
+        title = histo->GetTitle()+" pz;";
+    title+=histo->GetZaxis()->GetTitle()+TString(";number of entries");
     THStack* hstack = new THStack(name,title);
     hstack->Add(histo_1D);
-    hstack->Add(histo_1D_middle);
-    hstack->Add(histo_1D_corner);
-    this->SaveStack(hstack,"",true);
+    if (isOverlay){
+        hstack->Add(histo_1D_middle);
+        hstack->Add(histo_1D_corner);
+        this->SaveStack(hstack,"",true);
+    }
+    else
+        this->SaveStack(hstack,"",false);
     delete hstack;
     delete histo_1D_middle;
     delete histo_1D_corner;
@@ -1602,7 +1613,7 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     std::pair<Float_t,Float_t> biasColumn = make_pair(0,0);
     if (!histo)return;
     if(histo->GetEntries()==0)return;
-    this->SaveOverlayDistribution(histo);
+    this->SaveProjectionZ(histo);
 //    TH1F *h = this->GetBinsInHistogram(histo);
 //    this->SaveHistogram(h);
 //    delete h;
