@@ -1052,7 +1052,7 @@ TH1F* HistogrammSaver::GetBinsInHistogram(TH2* histo2, UInt_t nbins) {
     return histo;
 }
 
-void HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Float_t minX,Float_t maxX,Int_t nBins) {
+TH1F* HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Float_t minX,Float_t maxX,Int_t nbins) {
     if (!histo)
         return;
     if (minX>maxX){
@@ -1063,7 +1063,6 @@ void HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Floa
         minX -= deltaX*0.1;
     }
     cout<<"HistogrammSaver::SaveOverlayDistribution"<<histo<<" range: "<<minX<<"-"<<maxX<<flush;
-    UInt_t nbins = 50;
     TString name = histo->GetName()+TString("_1D");
     TH1F *histo_1D = new TH1F(name,"all other bins",nbins,minX,maxX);
     name = histo->GetName()+TString("_1D_middle");
@@ -1099,7 +1098,8 @@ void HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Floa
     TF1* fGaus = new TF1("fgaus","gaus",minX,maxX);
     fGaus->SetLineStyle(2);
     fGaus->SetLineColor(kGreen);
-    histo_1D->Fit(fGaus,"Q");
+    if (doFit)
+        histo_1D->Fit(fGaus,"Q");
 
     histo_1D_middle->SetLineColor(kRed);
     histo_1D_middle->SetLineStyle(2);
@@ -1129,7 +1129,7 @@ void HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Floa
     delete hstack;
     delete histo_1D_middle;
     delete histo_1D_corner;
-    delete histo_1D;
+    return histo_1D;
     cout<<" DONE"<<endl;
 }
 
@@ -1183,6 +1183,28 @@ void HistogrammSaver::SaveProjectionY(TH2* histo) {
     TH1D *py = histo->ProjectionY(name);
     this->SaveHistogram(py);
     delete py;
+}
+
+void HistogrammSaver::SaveIntegral(TH1* histo,bool bRelative) {
+    if (!histo) return;
+    TString name = histo->GetName();
+    name += "_Integral";
+    Float_t factor = 1;
+    Int_t xbins = histo->GetNbinsX();
+    if (bRelative)
+        factor = histo->Integral(0,xbins+1);
+    if (factor==0)
+        factor =1;
+    Float_t xlow = histo->GetXaxis()->GetXmin();
+    Float_t xup = histo->GetXaxis()->GetXmax();
+    TH1D* hIntegral = new TH1D(name,name,xbins,xlow,xup);
+    for (Int_t i = 1; i <= xbins; i++)
+        hIntegral->SetBinContent(i,histo->Integral(0,i)/factor);
+    hIntegral->SetEntries(histo->GetEntries());
+    hIntegral->GetXaxis()->SetTitle(histo->GetXaxis()->GetTitle());
+    hIntegral->GetYaxis()->SetTitle("integrated no of events up to thrs.");
+    this->SaveHistogram(hIntegral);
+    delete hIntegral;
 }
 
 void HistogrammSaver::UpdatePaveText(){
@@ -1613,7 +1635,8 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
     std::pair<Float_t,Float_t> biasColumn = make_pair(0,0);
     if (!histo)return;
     if(histo->GetEntries()==0)return;
-    this->SaveProjectionZ(histo);
+    TH1F* h = this->SaveProjectionZ(histo);
+    delete h;
 //    TH1F *h = this->GetBinsInHistogram(histo);
 //    this->SaveHistogram(h);
 //    delete h;
