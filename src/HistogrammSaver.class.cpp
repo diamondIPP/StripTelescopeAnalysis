@@ -1054,7 +1054,7 @@ TH1F* HistogrammSaver::GetBinsInHistogram(TH2* histo2, UInt_t nbins) {
 
 TH1F* HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Float_t minX,Float_t maxX,Int_t nbins) {
     if (!histo)
-        return;
+        return 0;
     if (minX>maxX){
         minX =  histo->GetBinContent(histo->GetMinimumBin());
         maxX = histo->GetBinContent(histo->GetMaximumBin());
