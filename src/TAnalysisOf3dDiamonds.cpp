@@ -5246,10 +5246,12 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     histSaver->SaveHistogramWithCellGrid(hValidEventsDetSpace);
 
     histSaver->SaveHistogram(hClusterEventsDetSpace);
-    hClusterEventsDetSpace->SetName("hClusterEventsDetSpaceGrid"+appendix);
     hClusterEventsDetSpace->Rebin2D(2,2);
+    hClusterEventsDetSpace->SetName("hClusterEventsDetSpaceRebin"+appendix);
+    histSaver->SaveHistogram(hClusterEventsDetSpace);
+    hClusterEventsDetSpace->SetName("hClusterEventsDetSpaceGrid"+appendix);
     histSaver->SaveHistogramWithCellGrid(hClusterEventsDetSpace);
-    hClusterEventsDetSpace->SetName("hClusterEventsDetSpaceRebinned"+appendix);
+    hClusterEventsDetSpace->SetName("hClusterEventsDetSpaceGridRebinned"+appendix);
     hClusterEventsDetSpace->Rebin2D(2,2);
     histSaver->SaveHistogramWithCellGrid(hClusterEventsDetSpace);
 
