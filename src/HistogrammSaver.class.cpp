@@ -1115,7 +1115,7 @@ void HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Floa
     if (isOverlay)
         title = TString("Overlay distribution;");
     else
-        title = histo->GetTitle()+" pz;";
+        title = histo->GetTitle()+(TString)" pz;";
     title+=histo->GetZaxis()->GetTitle()+TString(";number of entries");
     THStack* hstack = new THStack(name,title);
     hstack->Add(histo_1D);
