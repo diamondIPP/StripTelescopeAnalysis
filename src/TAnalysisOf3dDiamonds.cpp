@@ -147,8 +147,9 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
         else
         {
             diamondCluster = &transparentCluster;
-
         }
+        if (diamondCluster->size())
+                        hClusterEventsDetSpace->Fill(xPredDet,yPredDet);
         if (diamondCluster->isSaturatedCluster())
                 continue;;
         //cout<<"Before Strip Analysis"<<endl;
@@ -5174,6 +5175,14 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     hValidEventsDetSpace->GetXaxis()->SetTitle("#it{X} / #mum");
     hValidEventsDetSpace->GetYaxis()->SetTitle("#it{Y} / #mum");
     hValidEventsDetSpace->GetZaxis()->SetTitle("number of entries #");
+
+    name = "hClusterEventsDetSpace";
+    name.Append(appendix);
+    hClusterEventsDetSpace = new TH2F(name,name,1024,xmin,xmax,1024,ymin,ymax);
+    hClusterEventsDetSpace->GetXaxis()->SetTitle("#it{X} / #mum");
+    hClusterEventsDetSpace->GetYaxis()->SetTitle("#it{Y} / #mum");
+    hClusterEventsDetSpace->GetZaxis()->SetTitle("number of entries #");
+
     InitialiseStripAnalysisHistos();
     name = "hLandau3D";
     name.Append(appendix);
@@ -5234,6 +5243,14 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     hValidEventsDetSpace->SetName("hValidEventsDetSpaceGridRebinned"+appendix);
     hValidEventsDetSpace->Rebin2D(2,2);
     histSaver->SaveHistogramWithCellGrid(hValidEventsDetSpace);
+
+    histSaver->SaveHistogram(hClusterEventsDetSpace);
+    hClusterEventsDetSpace->SetName("hClusterEventsDetSpaceGrid"+appendix);
+    hClusterEventsDetSpace->Rebin2D(2,2);
+    histSaver->SaveHistogramWithCellGrid(hClusterEventsDetSpace);
+    hClusterEventsDetSpace->SetName("hClusterEventsDetSpaceRebinned"+appendix);
+    hClusterEventsDetSpace->Rebin2D(2,2);
+    histSaver->SaveHistogramWithCellGrid(hClusterEventsDetSpace);
 
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}

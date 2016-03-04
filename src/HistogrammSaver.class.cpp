@@ -1205,7 +1205,7 @@ void HistogrammSaver::SaveIntegral(TH1* histo,bool bRelative) {
     hIntegral->GetYaxis()->SetTitle("integrated no of events up to thrs.");
     if (bRelative){
         hIntegral->SetMinimum(0);
-        hIntegral->SetMaximum(1);
+        hIntegral->SetMaximum(1.05);
     }
     this->SaveHistogram(hIntegral,false,false,true);
     delete hIntegral;

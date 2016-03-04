@@ -324,6 +324,7 @@ private:
 	TH1F* hCellMeanCharge;
 	TH2F* hValidEventsFiducialSpace;
 	TH2F* hValidEventsDetSpace;
+	TH2F* hClusterEventsDetSpace;
 
 	TH2D* hNegativeChargePosition;
 	TH1F* hNegativeChargeFraction;
