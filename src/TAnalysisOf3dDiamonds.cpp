@@ -2687,7 +2687,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
     pair<Float_t,Float_t> relPred = settings->getRelativePositionInCell(xPredDet,yPredDet);
     Float_t relPredPosY = relPred.second;
     if (TMath::Abs(relPredPos-relPred.first) > 5)
-        cout<<"\n "<<pos_max<<" "<<predPos<<" "<<delta_max<<" "<<delta_Weigthed<<" "<<delta_h2C<< " "<<relPredPos<<" "<<relPredPos.first<<"/"<<relPredPos.second<<endl;
+        cout<<"\n "<<pos_max<<" "<<predPos<<" "<<delta_max<<" "<<delta_Weigthed<<" "<<delta_h2C<< " "<<relPredPos<<" "<<relPred.first<<"/"<<relPred.second<<endl;
     //diamondCluster->Print(1);
 
     if (!diamondCluster->getClusterSize() || snr < -100){
