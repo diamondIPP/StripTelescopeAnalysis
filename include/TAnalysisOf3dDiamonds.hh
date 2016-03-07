@@ -484,8 +484,10 @@ private:
 	TProfile2D* hShortAnalysis2TotalChargeXY;
 	TProfile* hRelatviveNumberOfMultipleClusterEvents;
 	TProfile* hRelatviveNumberOfMultipleClusterEventsSamePattern;
+	TH2F* hHitPositionNoCluster;
 	TH2F* hHitPositionOneCluster;
 	TH2F* hHitPositionMultiCluster;
+	TH2F* hHitPositionTwoCluster;
 
 	TProfile2D* hTotalAvrgChargeXY;
 	TProfile2D* hTotalAvrgChargeXY_electrons;

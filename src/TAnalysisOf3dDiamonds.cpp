@@ -333,6 +333,9 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
         }
 
         switch (eventReader->getNDiamondClusters()) {
+            case 0:
+                hHitPositionNoCluster->Fill(xPredDet,yPredDet);
+                break;
             case 1:
                 ShortAnalysis_Analyse1Cluster();
                 hRelatviveNumberOfMultipleClusterEvents->Fill(predictedDetector,0);
@@ -341,6 +344,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
                 break;
             case 2:
                 ShortAnalysis_Analyse2Cluster();
+                hHitPositionTwoCluster->Fill(xPredDet,yPredDet);
             default:
                 hRelatviveNumberOfMultipleClusterEvents->Fill(predictedDetector,1);
                 hHitPositionMultiCluster->Fill(xPredDet,yPredDet);
@@ -838,6 +842,15 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hFidCutsVsMeanCharge->GetYaxis()->SetTitle("Y / #mum");
     hFidCutsVsMeanCharge->GetZaxis()->SetTitle("avrg total Charge of clusters - nClusters <= 2");
 
+    hHitPositionNoCluster
+    name ="hHitPositionNoCluster";
+    name.Append(appendix);
+    hHitPositionNoCluster= new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionNoCluster->GetXaxis()->SetTitle("X / #mum");
+    hHitPositionNoCluster->GetYaxis()->SetTitle("Y / #mum");
+    hHitPositionNoCluster->GetZaxis()->SetTitle("number of entries - nClusters == 0");
+    hHitPositionNoCluster->SetMarkerColor(kBlack);
+
     name ="hHitPositionOneCluster";
     name.Append(appendix);
     hHitPositionOneCluster= new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
@@ -846,6 +859,13 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hHitPositionOneCluster->GetZaxis()->SetTitle("number of entries - nClusters == 1");
     hHitPositionOneCluster->SetMarkerColor(kBlack);
 
+    name ="hHitPositionTwoCluster";
+    name.Append(appendix);
+    hHitPositionTwoCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionTwoCluster->GetXaxis()->SetTitle("X / #mum");
+    hHitPositionTwoCluster->GetYaxis()->SetTitle("Y / #mum");
+    hHitPositionTwoCluster->GetZaxis()->SetTitle("number of entries - nClusters == 2");
+    hHitPositionTwoCluster->SetMarkerColor(kGreen);
 
     name ="hHitPositionMultiCluster";
     name.Append(appendix);
@@ -2039,16 +2059,23 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
     hRelativeChargeTwoClustersXY->GetZaxis()->SetRangeUser(0,20);
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
     histSaver->SaveCanvas(c1);
+    c1->Clear();
     c1->SetName("cClusterHitPositions");
     hHitPositionOneCluster->Draw();
     hHitPositionMultiCluster->Draw("same");
-    histSaver->SaveHistogram(hHitPositionOneCluster);
-    histSaver->SaveHistogram(hHitPositionMultiCluster);
     histSaver->SaveCanvas(c1);
     c1->SetName("cClusterHitPositionsGrid");
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
     histSaver->SaveCanvas(c1);
     delete c1;
+    histSaver->SaveHistogram(hHitPositionNoCluster);
+    histSaver->SaveHistogram(hHitPositionOneCluster);
+    histSaver->SaveHistogram(hHitPositionMultiCluster);
+    histSaver->SaveHistogram(hHitPositionTwoCluster);
+    delete hHitPositionNoCluster;
+    delete hHitPositionOneCluster;
+    delete hHitPositionTwoCluster;
+    delete hHitPositionMultiCluster;
 
 
     name = "cShortAnalysis2TotalChargeXY";
