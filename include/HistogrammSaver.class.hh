@@ -190,6 +190,10 @@ private:
     TSystem *sys;
     TFile* histoFile;
     TSettings* settings;
+public:
+
+    void CreateResolutionPlots(vector<TH1F*> *vec,TString kind,  Int_t subjectDetector, TString appendix);
+    void CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix= "hResolution", TString appendix="");
 };
 
 #endif /* HISTOGRAMMSAVER_CLASS_HH_ */

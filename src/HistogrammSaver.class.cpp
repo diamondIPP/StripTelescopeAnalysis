@@ -2858,3 +2858,126 @@ TH2D* HistogrammSaver::GetBinContentHisto(TProfile2D* prof) {
     histo->GetZaxis()->SetTitle("number of entries #");
     return histo;
 }
+
+void HistogrammSaver::CreateResolutionPlots(vector<TH1F*>*vec,TString kind, Int_t subjectDetector, TString appendix){
+    UInt_t nBins = 128;
+    Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
+    Float_t maxX =settings->GetCellWidth(subjectDetector,2);
+    TString name = "hResolutionGoodCells_"+kind+appendix;
+    TH1F* hResolutionGoodCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionGoodCells->GetXaxis()->SetTitle("Residual / #mum");
+    name = "hResolutionBadCells_"+kind+appendix;
+    TH1F* hResolutionBadCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionBadCells->GetXaxis()->SetTitle("Residual / #mum");
+    name = "hResolutionAllCells_"+kind+appendix;
+    TH1F* hResolutionAllCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionAllCells->GetXaxis()->SetTitle("Residual / #mum");
+    name = "hResolutionAllButBadCells_"+kind+appendix;
+    TH1F* hResolutionAllButBadCells = new TH1F(name,name,nBins,minX,maxX);
+    hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
+    string plots_path = this->GetPlotsPath();
+    HistogrammSaver newHistSaver(settings);
+    newHistSaver.SetPlotsPath(plots_path+(string)"/resolution/");
+    for(UInt_t cell=0;cell< vec->size();cell++){
+        TH1F* histo = vec->at(cell);
+        if (!histo)
+            continue;
+        if (settings->IsGoodCell(3,cell))
+            hResolutionGoodCells->Add(histo);
+        if (settings->isBadCell(3,cell))
+            hResolutionBadCells->Add(histo);
+        else
+            hResolutionAllButBadCells->Add(histo);
+        hResolutionAllCells->Add(histo);
+        newHistSaver.SaveHistogram(histo);
+        vec->at(cell)= 0;
+        delete histo;
+    }
+    Float_t xmin = -100;
+    Float_t xmax = +100;
+    TF1* fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",xmin,xmax);
+    fitX->FixParameter(3,settings->GetCellWidth(subjectDetector,2)/2);//TODO
+    fitX->SetParLimits(1,0,40);
+    fitX->SetParNames("Integral","sigma of Gaus","position");
+    fitX->SetParameter(2,0.);
+    fitX->SetParameter(1,10);
+    Int_t statOpt = gStyle->GetOptStat();
+    gStyle->SetOptStat(1111);
+    hResolutionGoodCells->GetYaxis()->SetTitle("number of entries #");
+    this->SaveHistogram(hResolutionGoodCells,false,false,true);
+    hResolutionBadCells->GetYaxis()->SetTitle("number of entries #");
+    this->SaveHistogram(hResolutionBadCells,false,false,true);
+    hResolutionAllCells->GetYaxis()->SetTitle("number of entries #");
+    this->SaveHistogram(hResolutionAllCells);
+    hResolutionAllButBadCells->GetYaxis()->SetTitle("number of entries #");
+    this->SaveHistogram(hResolutionAllButBadCells,false,false,true);
+    gStyle->SetOptStat(statOpt);
+    delete hResolutionGoodCells;
+    delete hResolutionBadCells;
+    delete hResolutionAllCells;
+    delete hResolutionAllButBadCells;
+}
+
+void HistogrammSaver::CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix, TString appendix){
+    if (!vec) return;
+     if (vec->size() == 0) return;
+     TH2F* histo = vec->at(0);
+     if (!histo) return;
+     if (kind != "" && !kind.BeginsWith("_"))
+         kind.Prepend("_");
+
+     TString name = prefix+"GoodCells"+kind+appendix;
+     TH2F* hGoodCells = (TH2F*)histo->Clone(name);
+     hGoodCells->Reset();
+     hGoodCells->SetTitle(prefix + " Good Cells "+ kind +appendix);
+
+     name = prefix+"BadCells"+kind+appendix;
+     TH2F* hBadCells =  (TH2F*)hGoodCells->Clone(name);
+     hBadCells->Reset();
+     hBadCells->SetTitle(prefix + " Bad Cells "+ kind +appendix);
+
+     name = prefix+"AllButBadCells"+kind+appendix;
+     TH2F* hAllButBadCells =  (TH2F*)hGoodCells->Clone(name);
+     hAllButBadCells->Reset();
+     hAllButBadCells->SetTitle(prefix + " AllButBad Cells "+ kind +appendix);
+
+     name = prefix+"AllCells"+kind+appendix;
+     TH2F* hAllCells =  (TH2F*)hGoodCells->Clone(name);
+     hAllCells->Reset();
+     hAllCells->SetTitle(prefix + " All Cells "+ kind +appendix);
+
+     string plots_path = this->GetPlotsPath();
+     string new_plots_path = plots_path;
+     new_plots_path+=(string)prefix;
+     new_plots_path+="/";
+     HistogrammSaver newHistSaver(settings);
+     newHistSaver.SetPlotsPath(new_plots_path);
+     for(UInt_t cell=0;cell< vec->size();cell++){
+         TH2F* histo = vec->at(cell);
+         if (!histo)
+             continue;
+         if (settings->IsGoodCell(3,cell))
+             hGoodCells->Add(histo);
+         if (settings->isBadCell(3,cell))
+             hBadCells->Add(histo);
+         else
+             hAllButBadCells->Add(histo);
+         hAllCells->Add(histo);
+         newHistSaver.SaveHistogram(histo,true,false);
+         vec->at(cell)= 0;
+         delete histo;
+     }
+     hGoodCells->GetZaxis()->SetTitle("number of entries #");
+     this->SaveHistogram(hGoodCells);//,false,false,true);
+     hBadCells->GetZaxis()->SetTitle("number of entries #");
+     this->SaveHistogram(hBadCells);//,false,false,true);
+     hAllCells->GetZaxis()->SetTitle("number of entries #");
+     this->SaveHistogram(hAllCells);
+     hAllButBadCells->GetZaxis()->SetTitle("number of entries #");
+     this->SaveHistogram(hAllButBadCells);//,false,false,true);
+     delete hGoodCells;
+     delete hBadCells;
+     delete hAllCells;
+     delete hAllButBadCells;
+
+}

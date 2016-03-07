@@ -337,11 +337,13 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
                 ShortAnalysis_Analyse1Cluster();
                 hRelatviveNumberOfMultipleClusterEvents->Fill(predictedDetector,0);
                 hRelatviveNumberOfMultipleClusterEventsSamePattern->Fill(predictedDetector,0);
+                hHitPositionOneCluster->Fill(xPredDet,yPredDet);
                 break;
             case 2:
                 ShortAnalysis_Analyse2Cluster();
             default:
                 hRelatviveNumberOfMultipleClusterEvents->Fill(predictedDetector,1);
+                hHitPositionMultiCluster->Fill(xPredDet,yPredDet);
         }
 //    }
 //    else
@@ -835,6 +837,23 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hFidCutsVsMeanCharge->GetXaxis()->SetTitle("X / #mum");
     hFidCutsVsMeanCharge->GetYaxis()->SetTitle("Y / #mum");
     hFidCutsVsMeanCharge->GetZaxis()->SetTitle("avrg total Charge of clusters - nClusters <= 2");
+
+    name ="hHitPositionOneCluster";
+    name.Append(appendix);
+    hHitPositionOneCluster= new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionOneCluster->GetXaxis()->SetTitle("X / #mum");
+    hHitPositionOneCluster->GetYaxis()->SetTitle("Y / #mum");
+    hHitPositionOneCluster->GetZaxis()->SetTitle("number of entries - nClusters == 1");
+    hHitPositionOneCluster->SetMarkerColor(kBlack);
+
+
+    name ="hHitPositionMultiCluster";
+    name.Append(appendix);
+    hHitPositionMultiCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionMultiCluster->GetXaxis()->SetTitle("X / #mum");
+    hHitPositionMultiCluster->GetYaxis()->SetTitle("Y / #mum");
+    hHitPositionMultiCluster->GetZaxis()->SetTitle("number of entries - nClusters >= 2");
+    hHitPositionMultiCluster->SetMarkerColor(kGreen);
 
     name = "hRelativeChargeTwoClustersY";
     name.Append(appendix);
@@ -2019,6 +2038,12 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
     hRelativeChargeTwoClustersXY->Draw("colz");
     hRelativeChargeTwoClustersXY->GetZaxis()->SetRangeUser(0,20);
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
+    histSaver->SaveCanvas(c1);
+    c1->SetName("cClusterHitPositions")
+    hHitPositionOneCluster->Draw();
+    hHitPositionMultiCluster->Draw("same");
+    histSaver->SaveHistogram(hHitPositionOneCluster);
+    histSaver->SaveHistogram(hHitPositionMultiCluster);
     histSaver->SaveCanvas(c1);
     delete c1;
 
@@ -5263,7 +5288,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 
     name = "hLandau3DPhantom";
     name.Append(appendix);
-    hLandau3DPhantom = new TH1F(name,"3D Phantom",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DPhantom = new TH1F(name,"3D Phantom"+appendix,PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandau3DPhantom->GetXaxis()->SetTitle("charge / ADC");
     hLandau3DPhantom->GetYaxis()->SetTitle("number of entries #");
     hLandau3DPhantom->SetLineColor(kRed);
@@ -5271,7 +5296,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
 
     name = "hLandau3DPhantom_subset";
     name.Append(appendix);
-    hLandau3DPhantomCentral = new TH1F(name,"3D Phantom, central Region",PulseHeightBins,PulseHeightMin,PulseHeightMax);
+    hLandau3DPhantomCentral = new TH1F(name,"3D Phantom, central Region "+appendix,PulseHeightBins,PulseHeightMin,PulseHeightMax);
     hLandau3DPhantomCentral->GetXaxis()->SetTitle("charge / ADC");
     hLandau3DPhantomCentral->GetYaxis()->SetTitle("number of entries #");
     hLandau3DPhantomCentral->SetLineColor(kRed);
