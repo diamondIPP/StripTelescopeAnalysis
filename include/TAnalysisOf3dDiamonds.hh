@@ -461,9 +461,13 @@ private:
 	vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_SNR;
     vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_SNR;
     vector<TH2F*> vecHResolutionPerCell_maxValue_vs_PredHit;
+    vector<TH2F*> vecHResolutionPerCell_maxValue_vs_PredHitY;
     vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_PredHit;
+    vector<TH2F*> vecHResolutionPerCell_chargeWeighted_vs_PredHitY;
     vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_PredHit;
+    vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_PredHitY;
     vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHit;
+    vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHitY;
     TH2F* hAdjacentChannels_SNR;
     TH2F* hAdjacentSNR_vs_cellNo;
     TH2F* hAdjacentChannels_Signal;
