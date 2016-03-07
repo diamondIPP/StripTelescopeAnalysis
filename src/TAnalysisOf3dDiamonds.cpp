@@ -2411,6 +2411,8 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogramWithCellGrid(hNegativeChargeFieldWireFraction);
     TH1F* h = histSaver->SaveProjectionZ(hNegativeChargeFieldWireFraction,false,false,0,1.05,21);
     histSaver->SaveIntegral(h,true);
+    histSaver->SaveIntegral(h,false);
+    histSaver->SaveHistogram(h);
     delete h;
     TString name = hNegativeChargeFieldWireFraction->GetName();
     name+="_entries";

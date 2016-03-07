@@ -1189,6 +1189,8 @@ void HistogrammSaver::SaveIntegral(TH1* histo,bool bRelative) {
     if (!histo) return;
     TString name = histo->GetName();
     name += "_Integral";
+    if (bRelative)
+        name+="Rel";
     Float_t factor = 1;
     Int_t xbins = histo->GetNbinsX();
     if (bRelative)
