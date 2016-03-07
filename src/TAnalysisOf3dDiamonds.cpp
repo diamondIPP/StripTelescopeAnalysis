@@ -842,7 +842,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hFidCutsVsMeanCharge->GetYaxis()->SetTitle("Y / #mum");
     hFidCutsVsMeanCharge->GetZaxis()->SetTitle("avrg total Charge of clusters - nClusters <= 2");
 
-    hHitPositionNoCluster
+//    hHitPositionNoCluster
     name ="hHitPositionNoCluster";
     name.Append(appendix);
     hHitPositionNoCluster= new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
