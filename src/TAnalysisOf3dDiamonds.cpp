@@ -2039,11 +2039,14 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
     hRelativeChargeTwoClustersXY->GetZaxis()->SetRangeUser(0,20);
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
     histSaver->SaveCanvas(c1);
-    c1->SetName("cClusterHitPositions")
+    c1->SetName("cClusterHitPositions");
     hHitPositionOneCluster->Draw();
     hHitPositionMultiCluster->Draw("same");
     histSaver->SaveHistogram(hHitPositionOneCluster);
     histSaver->SaveHistogram(hHitPositionMultiCluster);
+    histSaver->SaveCanvas(c1);
+    c1->SetName("cClusterHitPositionsGrid");
+    settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
     histSaver->SaveCanvas(c1);
     delete c1;
 
