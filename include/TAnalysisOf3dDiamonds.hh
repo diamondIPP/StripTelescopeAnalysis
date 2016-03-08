@@ -63,6 +63,7 @@ private:
 	void InitialiseStripAnalysisHistos();
 
 	void saveHistos();
+	void saveGlobalHistos();
 	void SaveShortAnalysisHistos();
 	void SaveLongAnalysisHistos();
 	void SaveLongAnalysisHistos2();

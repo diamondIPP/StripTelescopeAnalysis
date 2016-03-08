@@ -2079,29 +2079,11 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
     histSaver->SaveCanvas(c1);
     c1->Clear();
-    c1->SetName("cClusterHitPositions");
-    hHitPositionNoCluster->Draw();
-    hHitPositionOneCluster->Draw("same");
-    hHitPositionMultiCluster->Draw("same");
-
-    histSaver->SaveCanvas(c1);
-    c1->SetName("cClusterHitPositionsGrid");
-    settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
-    histSaver->SaveCanvas(c1);
-    delete c1;
-    histSaver->SaveHistogram(hHitPositionNoCluster);
-    histSaver->SaveHistogram(hHitPositionOneCluster);
-    histSaver->SaveHistogram(hHitPositionMultiCluster);
-    histSaver->SaveHistogram(hHitPositionTwoCluster);
-    delete hHitPositionNoCluster;
-    delete hHitPositionOneCluster;
-    delete hHitPositionTwoCluster;
-    delete hHitPositionMultiCluster;
-
 
     name = "cShortAnalysis2TotalChargeXY";
     name.Append(appendix);
-    c1 = new TCanvas(name,name);
+    c1->SetName(name);
+    c1->SetTitle(name);
     c1->cd();
     hShortAnalysis2TotalChargeXY->Draw("colz");
     hShortAnalysis2TotalChargeXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
@@ -5379,9 +5361,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     }
 }
 
-void TAnalysisOf3dDiamonds::saveHistos() {
-//    if (settings->do3dTransparentAnalysis())
-
+void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     histSaver->SaveHistogram(hValidEventsDetSpace);
     hValidEventsDetSpace->SetName("hValidEventsDetSpaceGrid"+appendix);
     hValidEventsDetSpace->Rebin2D(2,2);
@@ -5401,6 +5381,33 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     histSaver->SaveHistogramWithCellGrid(hClusterEventsDetSpace);
 
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
+
+    TCanvas *c1 = new TCanvas("cClusterHitPositions");
+    hHitPositionNoCluster->Draw();
+    hHitPositionOneCluster->Draw("same");
+    hHitPositionMultiCluster->Draw("same");
+    histSaver->SaveCanvas(c1);
+
+    c1->SetName("cClusterHitPositionsGrid");
+    settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
+    histSaver->SaveCanvas(c1);
+    delete c1;
+
+    histSaver->SaveHistogram(hHitPositionNoCluster);
+    delete hHitPositionNoCluster;
+    histSaver->SaveHistogram(hHitPositionOneCluster);
+    delete hHitPositionOneCluster;
+    histSaver->SaveHistogram(hHitPositionMultiCluster);
+    delete hHitPositionMultiCluster;
+    histSaver->SaveHistogram(hHitPositionTwoCluster);
+    delete hHitPositionTwoCluster;
+    histSaver->SaveHistogram(hNClusters);
+    delete hNClusters;
+}
+
+void TAnalysisOf3dDiamonds::saveHistos() {
+//    if (settings->do3dTransparentAnalysis())
+    saveGlobalHistos();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
 
     LongAnalysis_CreateResolutionPlots();
