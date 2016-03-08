@@ -257,8 +257,6 @@ private:
 
 	TCanvas* cRebinnedQuarterCellFails;
 	TH2D* RebinnedQuarterCellFails;
-	TCanvas* cDetXvsDetY3DRebinnedRMS;
-	TH2D* hDetXvsDetY3DRebinnedRMS;
 
 	TCanvas* c2DClusterSizeQuarterCell;
 	TH2D* h2DClusterSizeQuarterCell;
@@ -319,6 +317,7 @@ private:
 	vector<TProfile2D*> hPulseHeightVsDetectorHitPostionXY_trans;
 	TProfile2D* hPulseHeightVsDetectorHitPostionXY;
 	TProfile2D* hPulseHeightVsDetectorHitPostionXYGoodCells;
+	TProfile2D* hPulseHeightVsCell;
 	TH1F* hLandauGoodCellsWithoutEdges;
 	TH1F* hLandauGoodCellsWithoutColumns;
 	TH1F* hLandauGoodCells;
@@ -432,7 +431,6 @@ private:
 	vector<TH2D*> hCellsEventsNoColumn;
 	vector<TH1F*> hCellsLandauNoColumn;
 	vector<TH1F*> hCellsLandauGradedNoColumn;
-	TH1F* hBinnedMeanCharge;
 
 	int* DeadCellsArrayPointer;
 	TH1F* hDeadCellsProfileCharge;

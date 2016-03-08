@@ -668,6 +668,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
 
     hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
+    hPulseHeightVsCell>Fill(xPredDet,yPredDet,charge);
 
     if (settings->do3dTransparentAnalysis()){
         UInt_t clusterSize = diamondCluster->GetTransparentClusterSize();
@@ -1165,6 +1166,12 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetTitle("charge / ADC");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
 
+    hPulseHeightVsCell = histSaver->GetProfile2dBinedInCells(name,1);
+    hPulseHeightVsCell->GetXaxis()->SetTitle("#it{x} / #mum");
+    hPulseHeightVsCell->GetYaxis()->SetTitle("#it{y} / #mum");
+    hPulseHeightVsCell->GetZaxis()->SetTitle("charge / ADC");
+    hPulseHeightVsCell->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+
     for (UInt_t i = 0; i< 6;i++){
         name = TString::Format("hPulseHeightVsDetectorHitPostionXY_clusterSize_%d",i+1);
         name+=appendix;
@@ -1188,24 +1195,6 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     //hDetXvsDetY3DMeanCharge
 
 
-    //hDetXvsDetY3DRebinnedMeanChargeRMS
-    name = "h3DdetRebinnedRMS";
-    name.Append(appendix);
-    hDetXvsDetY3DRebinnedRMS = histSaver->GetHistoBinedInCells(name);
-    //			new TH2D(hDetXvsDetY3DRebinnedRMSName.str().c_str(),hDetXvsDetY3DRebinnedRMSName.str().c_str(),
-    //			settings->getNColumns3d(),getXMetalisationStart3d,getXMetalisationEnd3d,
-    //			settings->getNRows3d(),getYMetalisationStart3d,getYMetalisationEnd3d);
-    hDetXvsDetY3DRebinnedRMS->GetXaxis()->SetTitle("Xdet (um)");
-    hDetXvsDetY3DRebinnedRMS->GetYaxis()->SetTitle("Ydet (um)");
-    hDetXvsDetY3DRebinnedRMS->GetZaxis()->SetTitle("Charge ADC");
-
-    //hBinnedMeanCharge
-    name = "h3DdetCellMeanChargeBinned";
-    name.Append(appendix);
-    if(verbosity>1) cout<<"Create "<<name<<endl;
-    hBinnedMeanCharge = new TH1F(name,name,9,400,1300);
-    hBinnedMeanCharge->GetXaxis()->SetTitle("MeanCharge");
-    hBinnedMeanCharge->GetYaxis()->SetTitle("Entries");
 
     //hDetXvsDetY3DOverview
     name = "hDetXvsDetY3DOverview";
@@ -5736,6 +5725,13 @@ void TAnalysisOf3dDiamonds::SaveStripAnalysisHistos() {
 
 void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY);
+    histSaver->SaveHistogram(hPulseHeightVsCell);
+    histSaver->SaveProfile2DWithEntriesAsText(hPulseHeightVsCell);
+    hPulseHeightVsCell->SetName(hPulseHeightVsCell->GetName()+"Grid");
+    histSaver->SaveHistogramWithCellGrid(hPulseHeightVsCell);
+    histSaver->SaveProjectionZ(hPulseHeightVsCell,false,true);
+
+    delete hPulseHeightVsCell;
     if (settings->do3dTransparentAnalysis()){
         for (UInt_t i = 0; i< hPulseHeightVsDetectorHitPostionXY_trans.size();i++){
             if( hPulseHeightVsDetectorHitPostionXY_trans[i]->GetEntries()){
