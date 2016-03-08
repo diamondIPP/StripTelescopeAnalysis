@@ -183,6 +183,10 @@ private:
 	TH2F* hLandau3DWithColumnsFidCutXvsFidCutY;
 	TH2F* hLandau3DPhantomFidCutXvsFidCutY;
 	TProfile2D* hNegativeChargeFieldWireFraction;
+	TH1F* hNegativeChargeFieldWireSpectrumAll;
+	TH1F* hNegativeChargeFieldWireSpectrumAllButBad;
+	TH1F* hNegativeChargeFieldWireSpectrumGood;
+
 	TH2D* hNegativeChargeFieldWirePositions;
 	TH2F* hNegativeChargeFieldWirePositionsOverlay;
 	TCellAnalysisClass* clusteredAnalysis;

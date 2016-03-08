@@ -636,6 +636,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
         hNegativeChargeFieldWireFraction->Fill(xPredDet,yPredDet,int(negCharge<settings->getNegativeChargeCut()));
         hNegativeChargeFieldWirePositions->Fill(xPredDet,yPredDet);
         hNegativeChargeFieldWirePositionsOverlay->Fill(relPos.first,relPos.second);
+        hNegativeChargeFieldWireSpectrumAll->Fill(negCharge);
+        if (!settings->isBadCell(3,cellNo))
+            hNegativeChargeFieldWireSpectrumAllButBad->Fill(negCharge);
+        if (!settings->IsGoodCell(3,cellNo))
+            hNegativeChargeFieldWireSpectrumGood->Fill(negCharge);
     }
     if (hasNegativeCharge){
         if(negCharge<settings->getNegativeChargeCut())
@@ -2478,6 +2483,12 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     delete hNegativeChargeFieldWireFraction;
     delete hNegativeChargeFieldWirePositions;
     delete hNegativeChargeFieldWirePositionsOverlay;
+    histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumAll);
+    delete hNegativeChargeFieldWireSpectrumAll;
+    histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumAllButBad);
+    delete hNegativeChargeFieldWireSpectrumAllButBad;
+    histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumGood);
+    delete hNegativeChargeFieldWireSpectrumGood;
 
     histSaver->SaveHistogram(hNegativeChargePosition);
     histSaver->SaveHistogram(hNegativeChargeRatio);
@@ -5496,6 +5507,15 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     hNegativeChargeFieldWirePositionsOverlay  = settings->GetOverlayHisto(name);
     hNegativeChargeRatioOverlay->SetZTitle("Positions of entries in hNegativeChargeFieldWireFraction");
 
+    name = "hNegativeChargeFieldWireSpectrumAll"+appendix;
+    title = "Negative Charges Around FieldWire All;negative Charge / ADC;number of entries";
+    hNegativeChargeFieldWireSpectrumAll = new TH1F(name,title,512,-512,0);
+    name = "hNegativeChargeFieldWireSpectrumAllButBad"+appendix;
+    title = "Negative Charges Around FieldWire AllButBad;negative Charge / ADC;number of entries";
+    hNegativeChargeFieldWireSpectrumAllButBad = new TH1F(name,title,512,-512,0);
+    name = "hNegativeChargeFieldWireSpectrumGood"+appendix;
+    title = "Negative Charges Around FieldWire Good;negative Charge / ADC;number of entries";
+    hNegativeChargeFieldWireSpectrumGood = new TH1F(name,title,512,-512,0);
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
