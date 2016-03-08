@@ -281,8 +281,8 @@ void HistogrammSaver::InitializeGridReferenceDetSpace(){
     hGridReferenceDetSpace->SetStats(kFALSE);
     hGridReferenceDetSpace->SetTickLength(0.0, "X");
     hGridReferenceDetSpace->SetTickLength(0.0, "Y");
-    hGridReferenceDetSpace->GetXaxis()->SetTitle("row of cell");
-    hGridReferenceDetSpace->GetYaxis()->SetTitle("column of cell");
+    hGridReferenceDetSpace->GetXaxis()->SetTitle("column of cell");
+    hGridReferenceDetSpace->GetYaxis()->SetTitle("row of cell");
     hGridReferenceCellSpace->SetStats(kFALSE);
     hGridReferenceCellSpace->SetTickLength(0.0, "X");
     hGridReferenceCellSpace->SetTickLength(0.0, "Y");
