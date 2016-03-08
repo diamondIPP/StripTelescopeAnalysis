@@ -668,7 +668,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
 
     hPulseHeightVsDetectorHitPostionXY->Fill(xPredDet,yPredDet,charge);
-    hPulseHeightVsCell>Fill(xPredDet,yPredDet,charge);
+    hPulseHeightVsCell->Fill(xPredDet,yPredDet,charge);
 
     if (settings->do3dTransparentAnalysis()){
         UInt_t clusterSize = diamondCluster->GetTransparentClusterSize();
