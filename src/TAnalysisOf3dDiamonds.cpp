@@ -3294,13 +3294,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
         TString name = (TString)hPulseHeigthCentralRegion->GetName()+"_Cell"+appendix;
         hPulseHeigthCentralRegionCell = (TProfile2D*)hPulseHeigthCentralRegion->Rebin2D(2,2,name);
         hPulseHeigthCentralRegionCell->Sumw2();
-        histSaver->SaveHistogramWithCellGrid(hPulseHeigthCentralRegionCell);
+        histSaver->SaveHistogramWithCellGrid(hPulseHeigthCentralRegionCell,hPulseHeigthCentralRegionCell);
     }
     if(hPulseHeigthEdgeRegion){
         TString name =(TString)hPulseHeigthEdgeRegion->GetName()+"_Cell"+appendix;
         hPulseHeigthEdgeRegionCell = (TProfile2D*)hPulseHeigthEdgeRegion->Rebin2D(2,2,name);
         hPulseHeigthEdgeRegionCell->Sumw2();
-        histSaver->SaveHistogramWithCellGrid(hPulseHeigthEdgeRegionCell);
+        histSaver->SaveHistogramWithCellGrid(hPulseHeigthEdgeRegionCell,hPulseHeigthEdgeRegionCell);
     }
     if(hPulseHeigthEdgeRegionCell && hPulseHeigthCentralRegionCell){
         TString name = "hPulseHeigthCompareRegion_Cell"+appendix;
@@ -3310,7 +3310,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
             hCompare->SetTitle("comparing pulse height of edge and central region");
             hCompare->GetZaxis()->SetTitle("avrg ph_{central} / avrg. ph_{edge}");
             hCompare->Divide(hPulseHeigthEdgeRegionCell);
-            histSaver->SaveHistogramWithCellGrid(hCompare);
+            histSaver->SaveHistogramWithCellGrid(hCompare,hCompare);
             delete hCompare;
         }
     }
