@@ -3272,8 +3272,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
     hPulseHeigthCentralRegion->Sumw2();
     hPulseHeigthEdgeRegion->Sumw2();
 
-    histSaver->SaveHistogramWithCellGrid(hPulseHeigthCentralRegion,hPulseHeigthCentralRegion);
-    histSaver->SaveHistogramWithCellGrid(hPulseHeigthEdgeRegion,hPulseHeigthEdgeRegion);
+    histSaver->SaveHistogramWithCellGrid(hPulseHeigthCentralRegion);
+    histSaver->SaveHistogramWithCellGrid(hPulseHeigthEdgeRegion);
 
     TProfile2D* hCompare;
     TString name = "hPulseHeigthCompareRegion";
