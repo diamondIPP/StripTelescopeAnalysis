@@ -1180,6 +1180,44 @@ void HistogrammSaver::SaveProjectionX(TH2* histo) {
     delete px;
 }
 
+void HistogrammSaver::SaveBinnedProjectionX(TH2* histo) {
+    if (!histo)
+        return;
+    TString name = histo->GetName();
+    name += "_BinnedPx";
+    Int_t nBinsY = histo->GetNbinsY();
+    TString yTitle = histo->GetYaxis()->GetTitle();
+    vector<TH1D*> projections;
+    TString title = name;
+    title+=";";
+    title+=histo->GetXaxis()->GetTitle();
+    title+=";number of entries";
+    THStack *stack = new THStack(name,name);
+    Int_t colors[] = {kBlack,kGreen,kBlue,kOrange};
+    Int_t styles[] = {3,1,2,4};
+    Int_t nStyles = 4;
+    Int_t n=0;
+    for (UInt_t i = 1; i <= nBinsY;i++){
+        TString hname = name;
+        hname+=TString::Format("_bin%d",i);
+        TH1D *px = histo->ProjectionX(hname,i,i);
+        px->SetTitle(yTitle+TString::Format(", Bin %d",i));
+        if (px->GetEntries()){
+            px->SetLineStyle(styles[n%nStyles]);
+            px->SetLineColor(styles[n%nStyles]);
+            projections.push_back(px);
+            stack->Add(px);
+            n+=1;
+        }
+        else
+            delete px;
+    }
+    this->SaveStack(stack,"nostack",true);
+    delete stack;
+    for (UInt_t i = 0; i < projections.size();i++)
+        delete projections[i];
+}
+
 void HistogrammSaver::SaveProjectionY(TH2* histo) {
     if (!histo)
         return;

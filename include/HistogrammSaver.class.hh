@@ -95,6 +95,7 @@ public:
 	void SaveHistogramWithExtendedFit(TH1* histo, TF1* fit, Float_t xmin,Float_t xmax);
 	void SaveNegativeChargeOverlay(TH2* histo);
 	void SaveProjectionX(TH2* histo);
+	void SaveBinnedProjectionX(TH2* histo);
 	void SaveProjectionY(TH2* histo);
 	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
 	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false,bool bDrawOnCanvas = true,TString xTitle ="",TString yTitle="");
