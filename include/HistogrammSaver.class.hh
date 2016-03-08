@@ -61,7 +61,9 @@ public:
 		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
 	};
 	TFile* GetFilePointer(TString name, TString option="UPDATE");
-	TString GetROOTFileName(TString name="histograms");
+	TString GetROOTFileName(TString name="histograms"){return GetFileName(name,"root");}
+	TString GetEpsFileName(TString name="histograms"){return GetFileName(name,"eps");}
+	TString GetFileName(TString name, TString extension);
 	HistogrammSaver(TSettings* settings,int verbosity=0);
 	virtual ~HistogrammSaver();
 	void MoveRootFilesInSubfolder();

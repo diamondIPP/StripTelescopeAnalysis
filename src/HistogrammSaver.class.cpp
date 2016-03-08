@@ -952,16 +952,21 @@ TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
     return histo;
 }
 
-TString HistogrammSaver::GetROOTFileName(TString name){
+TString HistogrammSaver::GetFileName(TString name, TString extension){
     if (name.Contains("/"))
         name = name(name.Last('/')+1,name.Length());
     TString path = (TString)plots_path;
+    if (!path.EndsWith("/"))
+        path += "/";
+    path+=extension+"/";
     if (name == "")
         name="histograms";
     path+=(TString)name;
-    TString appendix = TString::Format(".%d.root",runNumber);
+    TString appendix = TString::Format(".%d.",runNumber);
+    appendix+=extension;
     if (!path.EndsWith(appendix))
         path.Append(appendix);
+    path.ReplaceAll("//","/");
     return path;
 }
 
@@ -1273,6 +1278,12 @@ void HistogrammSaver::SetPlotsPath(string path){
     sys->mkdir(rootPath.str().c_str(),true);
     stat = mkdir(rootPath.str().c_str(),0777);//0777(S_IRWXO||S_IRWXG||S_IRWXU));// S_IRWXU|S_IRGRP|S_IXGRP||S_IRWXU||S_IRWXG||S_IRWXO);
     if(!stat)cout<<"Verzeichnis angelegt: \""<<rootPath.str().c_str()<<"\""<<endl;
+    stringstream epsPath;
+    epsPath<<plots_path<<"/eps";
+    sys->mkdir(epsPath.str().c_str(),true);
+    stat = mkdir(epsPath.str().c_str(),0777);//0777(S_IRWXO||S_IRWXG||S_IRWXU));// S_IRWXU|S_IRGRP|S_IXGRP||S_IRWXU||S_IRWXG||S_IRWXO);
+    if(!stat)cout<<"Verzeichnis angelegt: \""<<rootPath.str().c_str()<<"\""<<endl;
+
     //	else cout<<"Verzeichnis konnte nicht angelegt werden..."<<endl;
 
 }
@@ -1407,6 +1418,7 @@ void HistogrammSaver::SaveHistogramWithFit(TH1* histo,TF1* fit, UInt_t verbosity
     SaveCanvas(plots_canvas);
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
+    plots_canvas->Print(GetEpsFileName(histo->GetName()));
     f->Close();
     //	if(plots_canvas)delete plots_canvas;
 }
@@ -1462,6 +1474,7 @@ void HistogrammSaver::SaveHistogramWithFit(TH1* histo,TF1* fit,Float_t xmin,Floa
     plots_canvas->Write();
     path = (TString)plots_path + histo->GetName() +(TString)".png";
     plots_canvas->Print(path);
+    plots_canvas->Print(GetEpsFileName(histo->GetName()));
     f->Close();
     delete f;
     //	if(plots_canvas)delete plots_canvas;
@@ -1931,6 +1944,7 @@ void HistogrammSaver::SaveHistogramPNG(TH1* histo,TString drawOption,bool optimi
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
+    plots_canvas->Print(GetEpsFileName(histo->GetName()));
     //	if(plots_canvas)delete plots_canvas;
 }
 
@@ -1964,6 +1978,7 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, TString name)
     ostringstream plot_filename;
     plot_filename << plots_path << name<<".png";
     canvas->Print(plot_filename.str().c_str());
+    plots_canvas->Print(GetEpsFileName(name->GetName()));
 }
 
 void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
@@ -1981,6 +1996,7 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
     ostringstream plot_filename;
     plot_filename << plots_path << name << ".png";
     plots_canvas.Print(plot_filename.str().c_str());
+    plots_canvas->Print(GetEpsFileName(name));
 }
 
 void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
@@ -2004,6 +2020,7 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
     ostringstream plot_filename;
     plot_filename << plots_path << htemp->GetName() << ".png";
     plots_canvas.Print(plot_filename.str().c_str());
+    plots_canvas->Print(GetEpsFileName(htemp->GetName()));
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
@@ -2073,6 +2090,8 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange,TString dra
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
+    plots_canvas->Print(GetEpsFileName(histo->GetName()));
+
     //	gROOT->SetStyle("Plain_RD42");
     //currentStyle->cd();
     //	if(plots_canvas)delete plots_canvas;
