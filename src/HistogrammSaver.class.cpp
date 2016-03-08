@@ -1978,7 +1978,7 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, TString name)
     ostringstream plot_filename;
     plot_filename << plots_path << name<<".png";
     canvas->Print(plot_filename.str().c_str());
-    plots_canvas->Print(GetEpsFileName(name->GetName()));
+    canvas->Print(GetEpsFileName(name->GetName()));
 }
 
 void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
@@ -1996,7 +1996,7 @@ void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
     ostringstream plot_filename;
     plot_filename << plots_path << name << ".png";
     plots_canvas.Print(plot_filename.str().c_str());
-    plots_canvas->Print(GetEpsFileName(name));
+    plots_canvas.Print(GetEpsFileName(name));
 }
 
 void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
@@ -2020,7 +2020,7 @@ void HistogrammSaver::SaveHistogramFitGaussPNG(TH1* htemp) {
     ostringstream plot_filename;
     plot_filename << plots_path << htemp->GetName() << ".png";
     plots_canvas.Print(plot_filename.str().c_str());
-    plots_canvas->Print(GetEpsFileName(htemp->GetName()));
+    plots_canvas.Print(GetEpsFileName(htemp->GetName()));
 }
 
 void HistogrammSaver::SaveHistogramROOT(TH1* htemp) {
