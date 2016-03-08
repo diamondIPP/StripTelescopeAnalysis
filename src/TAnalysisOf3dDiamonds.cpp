@@ -865,7 +865,8 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 //    hHitPositionNoCluster
     name ="hHitPositionNoCluster";
     name.Append(appendix);
-    hHitPositionNoCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    Float_t xmin = -.1*xmax;
+    hHitPositionNoCluster = new TH2F(name,name, 256,xmin,xmax*1.3,256,-.3*ymax,ymax*1.3);
     hHitPositionNoCluster->GetXaxis()->SetTitle("X / #mum");
     hHitPositionNoCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionNoCluster->GetZaxis()->SetTitle("number of entries - nClusters == 0");
@@ -874,7 +875,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 
     name ="hHitPositionOneCluster";
     name.Append(appendix);
-    hHitPositionOneCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionOneCluster = new TH2F(name,name, 256,xmin,xmax*1.3,256,-.3*ymax,ymax*1.3);
     hHitPositionOneCluster->GetXaxis()->SetTitle("X / #mum");
     hHitPositionOneCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionOneCluster->GetZaxis()->SetTitle("number of entries - nClusters == 1");
@@ -883,7 +884,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 
     name ="hHitPositionTwoCluster";
     name.Append(appendix);
-    hHitPositionTwoCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionTwoCluster = new TH2F(name,name, 256,xmin,xmax*1.3,256,-.3*ymax,ymax*1.3);
     hHitPositionTwoCluster->GetXaxis()->SetTitle("X / #mum");
     hHitPositionTwoCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionTwoCluster->GetZaxis()->SetTitle("number of entries - nClusters == 2");
@@ -892,7 +893,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
 
     name ="hHitPositionMultiCluster";
     name.Append(appendix);
-    hHitPositionMultiCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionMultiCluster = new TH2F(name,name, 256,xmin,xmax*1.3,256,-.3*ymax,ymax*1.3);
     hHitPositionMultiCluster->GetXaxis()->SetTitle("X / #mum");
     hHitPositionMultiCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionMultiCluster->GetZaxis()->SetTitle("number of entries - nClusters > 2");
@@ -5388,8 +5389,12 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
 
     TCanvas *c1 = new TCanvas("cClusterHitPositions");
-
-    hHitPositionOneCluster->Draw("");
+    c1->DrawFrame(hHitPositionOneCluster->GetXaxis()->GetXmin(),
+                  hHitPositionOneCluster->GetXaxis()->GetXmax(),
+                  hHitPositionOneCluster->GetYaxis()->GetXmin(),
+                  hHitPositionOneCluster->GetYaxis()->GetXmax(),
+                  "Hit Positions");
+    hHitPositionOneCluster->Draw("same");
     hHitPositionNoCluster->Draw("same");
     hHitPositionTwoCluster->Draw("same");
     hHitPositionMultiCluster->Draw("same");
