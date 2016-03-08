@@ -54,6 +54,7 @@ private:
 	void PrintPositions();
 	bool eventValid();
 	void createTreeTestHistos();
+	void fillClusterDistributions();
 
 	void initialiseHistos();
 	void initialiseLongAnalysisHistos();
@@ -488,6 +489,7 @@ private:
 	TH2F* hHitPositionOneCluster;
 	TH2F* hHitPositionMultiCluster;
 	TH2F* hHitPositionTwoCluster;
+	TH1F* hNClusters;
 
 	TProfile2D* hTotalAvrgChargeXY;
 	TProfile2D* hTotalAvrgChargeXY_electrons;

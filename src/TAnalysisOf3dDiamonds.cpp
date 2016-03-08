@@ -99,6 +99,7 @@ void TAnalysisOf3dDiamonds::PrintPositions(){
     //char t;
     //cin>>t;
 }
+
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     FileNameEnd = "";
     cout<<"analyze selection data..."<<endl;
@@ -132,6 +133,7 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
             if (verbosity > 7)	cout<<"don't use"<<endl;
             continue;
         }
+        fillClusterDistributions();
         if (verbosity > 7)	cout<<"use Event"<<endl;
         // Analyse
 
@@ -213,6 +215,23 @@ bool TAnalysisOf3dDiamonds::eventValid(){
     return true;
 }
 
+void TAnalysisOf3dDiamonds::fillClusterDistributions(){
+    this->hHitPositionMultiCluster;
+    hNClusters->Fill(eventReader->getNDiamondClusters());
+
+    switch (eventReader->getNDiamondClusters()) {
+        case 0:
+            hHitPositionNoCluster->Fill(xPredDet,yPredDet);
+            break;
+        case 1:
+            hHitPositionOneCluster->Fill(xPredDet,yPredDet);
+            break;
+        case 2:
+            hHitPositionTwoCluster->Fill(xPredDet,yPredDet);
+        default:
+            hHitPositionMultiCluster->Fill(xPredDet,yPredDet);
+    }
+}
 void TAnalysisOf3dDiamonds::StripAnalysis() {
 
     if(!settings->do3dTransparentAnalysis()){
@@ -334,20 +353,16 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
 
         switch (eventReader->getNDiamondClusters()) {
             case 0:
-                hHitPositionNoCluster->Fill(xPredDet,yPredDet);
                 break;
             case 1:
                 ShortAnalysis_Analyse1Cluster();
                 hRelatviveNumberOfMultipleClusterEvents->Fill(predictedDetector,0);
                 hRelatviveNumberOfMultipleClusterEventsSamePattern->Fill(predictedDetector,0);
-                hHitPositionOneCluster->Fill(xPredDet,yPredDet);
                 break;
             case 2:
                 ShortAnalysis_Analyse2Cluster();
-                hHitPositionTwoCluster->Fill(xPredDet,yPredDet);
             default:
                 hRelatviveNumberOfMultipleClusterEvents->Fill(predictedDetector,1);
-                hHitPositionMultiCluster->Fill(xPredDet,yPredDet);
         }
 //    }
 //    else
@@ -842,18 +857,22 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hFidCutsVsMeanCharge->GetYaxis()->SetTitle("Y / #mum");
     hFidCutsVsMeanCharge->GetZaxis()->SetTitle("avrg total Charge of clusters - nClusters <= 2");
 
+    name = "hNClusters"+appendix;
+    TString title ="NClusters;number of clusters; number of entries";
+    hNClusters = new TH1F(name,title,6,-.5,5.5);
+
 //    hHitPositionNoCluster
     name ="hHitPositionNoCluster";
     name.Append(appendix);
-    hHitPositionNoCluster= new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionNoCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
     hHitPositionNoCluster->GetXaxis()->SetTitle("X / #mum");
     hHitPositionNoCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionNoCluster->GetZaxis()->SetTitle("number of entries - nClusters == 0");
-    hHitPositionNoCluster->SetMarkerColor(kBlack);
+    hHitPositionNoCluster->SetMarkerColor(kBlue);
 
     name ="hHitPositionOneCluster";
     name.Append(appendix);
-    hHitPositionOneCluster= new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
+    hHitPositionOneCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
     hHitPositionOneCluster->GetXaxis()->SetTitle("X / #mum");
     hHitPositionOneCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionOneCluster->GetZaxis()->SetTitle("number of entries - nClusters == 1");
@@ -2061,8 +2080,10 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
     histSaver->SaveCanvas(c1);
     c1->Clear();
     c1->SetName("cClusterHitPositions");
-    hHitPositionOneCluster->Draw();
+    hHitPositionNoCluster->Draw();
+    hHitPositionOneCluster->Draw("same");
     hHitPositionMultiCluster->Draw("same");
+
     histSaver->SaveCanvas(c1);
     c1->SetName("cClusterHitPositionsGrid");
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1,false);
