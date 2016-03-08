@@ -686,8 +686,9 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveProjectionX((TH2*)it->second);
             histSaver->SaveProjectionY((TH2*)it->second);
         }
-        if (it->first.Contains("hNegativeChargePosition")){
+        if (it->first.Contains("egativeChargePosition")){
             histSaver->SaveProjectionX((TH2*)it->second);
+            histSaver->SaveProjectionY((TH2*)it->second);
             histSaver->SaveBinnedProjectionX((TH2*)it->second);
         }
         if (it->first.Contains("RelPosition")){
@@ -717,8 +718,10 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
                 delete c1;
             }
         }
-        if (it->first == "hNegativeChargeChannelPositionTransparent"){
+        if (it->first == "hNegativeChargeChannelPosition"){
             histSaver->SaveProjectionY((TH2*)it->second);
+            histSaver->SaveProjectionX((TH2*)it->second);
+            histSaver->SaveBinnedProjectionX((TH2*)it->second);
         }
         if (it->first == "hNoNegativeChargeLowResponsePosition" ||
             it->first == "hNoNegativeChargeResponseWindowPosition" ||
