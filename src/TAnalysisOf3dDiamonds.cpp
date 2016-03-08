@@ -228,6 +228,7 @@ void TAnalysisOf3dDiamonds::fillClusterDistributions(){
             break;
         case 2:
             hHitPositionTwoCluster->Fill(xPredDet,yPredDet);
+            break;
         default:
             hHitPositionMultiCluster->Fill(xPredDet,yPredDet);
     }
@@ -869,6 +870,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hHitPositionNoCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionNoCluster->GetZaxis()->SetTitle("number of entries - nClusters == 0");
     hHitPositionNoCluster->SetMarkerColor(kBlue);
+    hHitPositionNoCluster->SetMarkerStyle(6);
 
     name ="hHitPositionOneCluster";
     name.Append(appendix);
@@ -877,6 +879,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hHitPositionOneCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionOneCluster->GetZaxis()->SetTitle("number of entries - nClusters == 1");
     hHitPositionOneCluster->SetMarkerColor(kBlack);
+    hHitPositionOneCluster->SetMarkerStyle(6);
 
     name ="hHitPositionTwoCluster";
     name.Append(appendix);
@@ -885,14 +888,16 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
     hHitPositionTwoCluster->GetYaxis()->SetTitle("Y / #mum");
     hHitPositionTwoCluster->GetZaxis()->SetTitle("number of entries - nClusters == 2");
     hHitPositionTwoCluster->SetMarkerColor(kGreen);
+    hHitPositionTwoCluster->SetMarkerStyle(6);
 
     name ="hHitPositionMultiCluster";
     name.Append(appendix);
     hHitPositionMultiCluster = new TH2F(name,name, 256,-.4*xmax,xmax*1.3,256,-.3*ymax,ymax*1.3);
     hHitPositionMultiCluster->GetXaxis()->SetTitle("X / #mum");
     hHitPositionMultiCluster->GetYaxis()->SetTitle("Y / #mum");
-    hHitPositionMultiCluster->GetZaxis()->SetTitle("number of entries - nClusters >= 2");
-    hHitPositionMultiCluster->SetMarkerColor(kGreen);
+    hHitPositionMultiCluster->GetZaxis()->SetTitle("number of entries - nClusters > 2");
+    hHitPositionMultiCluster->SetMarkerColor(kOrange);
+    hHitPositionMultiCluster->SetMarkerStyle(6);
 
     name = "hRelativeChargeTwoClustersY";
     name.Append(appendix);
@@ -5385,6 +5390,7 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     TCanvas *c1 = new TCanvas("cClusterHitPositions");
     hHitPositionNoCluster->Draw();
     hHitPositionOneCluster->Draw("same");
+    hHitPositionTwoCluster->Draw("same");
     hHitPositionMultiCluster->Draw("same");
     histSaver->SaveCanvas(c1);
 
@@ -5393,13 +5399,13 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     histSaver->SaveCanvas(c1);
     delete c1;
 
-    histSaver->SaveHistogram(hHitPositionNoCluster);
+    histSaver->SaveHistogram((TH2*)hHitPositionNoCluster,true,false,(TString)"");
     delete hHitPositionNoCluster;
-    histSaver->SaveHistogram(hHitPositionOneCluster);
+    histSaver->SaveHistogram((TH2*)hHitPositionOneCluster,true,false,(TString)"");
     delete hHitPositionOneCluster;
-    histSaver->SaveHistogram(hHitPositionMultiCluster);
+    histSaver->SaveHistogram((TH2*)hHitPositionMultiCluster,true,false,(TString)"");
     delete hHitPositionMultiCluster;
-    histSaver->SaveHistogram(hHitPositionTwoCluster);
+    histSaver->SaveHistogram((TH2*)hHitPositionTwoCluster,true,false,(TString)"");
     delete hHitPositionTwoCluster;
     histSaver->SaveHistogram(hNClusters);
     delete hNClusters;
