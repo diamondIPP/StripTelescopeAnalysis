@@ -5389,12 +5389,14 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     histSaver->SaveHistogram(hValidEventsFiducialSpace);
 
     TCanvas *c1 = new TCanvas("cClusterHitPositions");
-    c1->DrawFrame(hHitPositionOneCluster->GetXaxis()->GetXmin(),
-                  hHitPositionOneCluster->GetXaxis()->GetXmax(),
-                  hHitPositionOneCluster->GetYaxis()->GetXmin(),
-                  hHitPositionOneCluster->GetYaxis()->GetXmax(),
-                  "Hit Positions");
-    hHitPositionOneCluster->Draw("same");
+    c1->SetObjectStat(false);
+//    c1->DrawFrame(hHitPositionOneCluster->GetXaxis()->GetXmin(),
+//                  hHitPositionOneCluster->GetXaxis()->GetXmax(),
+//                  hHitPositionOneCluster->GetYaxis()->GetXmin(),
+//                  hHitPositionOneCluster->GetYaxis()->GetXmax(),
+//                  "Hit Positions");
+//    hHitPositionOneCluster->Draw("same");
+    hHitPositionOneCluster->Draw("");
     hHitPositionNoCluster->Draw("same");
     hHitPositionTwoCluster->Draw("same");
     hHitPositionMultiCluster->Draw("same");
