@@ -1978,7 +1978,7 @@ void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, TString name)
     ostringstream plot_filename;
     plot_filename << plots_path << name<<".png";
     canvas->Print(plot_filename.str().c_str());
-    canvas->Print(GetEpsFileName(name->GetName()));
+    canvas->Print(GetEpsFileName(name));
 }
 
 void HistogrammSaver::SaveGraphPNG(TGraph* graph,string name,string option){
