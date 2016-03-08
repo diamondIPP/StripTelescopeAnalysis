@@ -5727,7 +5727,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveHistogram(hPulseHeightVsDetectorHitPostionXY);
     histSaver->SaveHistogram(hPulseHeightVsCell);
     histSaver->SaveProfile2DWithEntriesAsText(hPulseHeightVsCell);
-    hPulseHeightVsCell->SetName(hPulseHeightVsCell->GetName()+"Grid");
+    hPulseHeightVsCell->SetName(hPulseHeightVsCell->GetName()+(TString)"Grid");
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsCell);
     histSaver->SaveProjectionZ(hPulseHeightVsCell,false,true);
 
