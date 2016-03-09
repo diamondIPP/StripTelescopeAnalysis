@@ -877,10 +877,22 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         if (maxChi2 > chi2)
             maxChi2 = chi2;
     }
+    Int_t nNonTelescopeAlignmentEvents = 0;
+    Int_t nInvalidxLabPredictedMetric = 0;
+    Int_t nInvalidyLabPredictedMetric = 0;
+    Int_t nInvalidXYLabMeasurement = 0;
+    Int_t nCalcModeCut = 0;
+    Int_t nTelescoepAlignmentEvent = 0;
+    Int_t nInvalidPredictedRelPos = 0;
+    Int_t nInvalidMeasuredRelPos = 0;
+    Int_t nIgnoreForStripAlignment = 0;
+    Int_t nInvalidSiliconChi2Cut = 0;
     for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, nEvents);
-        if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent])
+        if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent]){
+            nNonTelescopeAlignmentEvents++;
             continue;
+        }
         //        cout<<"get Event"<<endl;
         myTrack->setEvent(&events.at(nEvent));
         if (verbosity > 8) cout << "Event no.: " << nEvent << endl;
@@ -919,8 +931,11 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         yDetMeasuredMetric  = myTrack->getYMeasuredClusterPositionMetricSpace(subjectPlane, cmnCorrected, currentMode,myTrack->getEtaIntegral(subjectPlane*2+1));
 
         if(verbosity>5&&!isStripAlignment) cout<< "\tLabMeasMetric: "<<xLabMeasuredMetric<<"/"<<yLabMeasuredMetric<<endl;
-        if(!isStripAlignment&&(xLabMeasuredMetric<-400e3||yLabMeasuredMetric <-400e3))
+        if(!isStripAlignment&&(xLabMeasuredMetric<-400e3||yLabMeasuredMetric <-400e3)){
+            nInvalidXYLabMeasurement ++;
             continue;
+        }
+
 
         xDelta = xLabMeasuredMetric - xLabPredictedMetric;    //X_OBS-X_Pred
         yDelta = yLabMeasuredMetric - yLabPredictedMetric;    //Y_OBS-Y_Pred
@@ -946,19 +961,28 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
 
 
         bool useEvent=false;
-        if(calcMode==normalCalcMode){
-            if(cor==TPlaneProperties::XY_COR||isStripAlignment)  useEvent = resxtest < res_keep_factor && resytest < res_keep_factor;
-            else if(cor==TPlaneProperties::X_COR)        useEvent = resxtest < res_keep_factor;
-            else if(cor==TPlaneProperties::Y_COR)   useEvent = resytest < res_keep_factor;
+        switch (calcMode){
+            case normalCalcMode:
+                if(cor==TPlaneProperties::XY_COR||isStripAlignment)  useEvent = resxtest < res_keep_factor && resytest < res_keep_factor;
+                else if(cor==TPlaneProperties::X_COR)        useEvent = resxtest < res_keep_factor;
+                else if(cor==TPlaneProperties::Y_COR)   useEvent = resytest < res_keep_factor;
+                break;
+            case chi2CalcMode:
+                if(cor==TPlaneProperties::XY_COR || isStripAlignment)  useEvent = chi2x < maxChi2 && chi2y < maxChi2;
+                else if(cor==TPlaneProperties::X_COR)        useEvent = chi2x < maxChi2;
+                else if(cor==TPlaneProperties::Y_COR)   useEvent = chi2y < maxChi2;
+                break;
+            case resolutionCalcMode:
+                useEvent = true;
+                break;
+        }
+        if (!useEvent) nCalcModeCut++;
 
-        }
-        else if(calcMode==chi2CalcMode){
-            if(cor==TPlaneProperties::XY_COR || isStripAlignment)  useEvent = chi2x < maxChi2 && chi2y < maxChi2;
-            else if(cor==TPlaneProperties::X_COR)        useEvent = chi2x < maxChi2;
-            else if(cor==TPlaneProperties::Y_COR)   useEvent = chi2y < maxChi2;
-        }
-        if(isStripAlignment)
+        if(useEvent&& isStripAlignment){
             useEvent = useEvent && !telescopeAlignmentEvent[nEvent];
+            if (!useEvent) nTelescoepAlignmentEvent++;
+        }
+
         if(isStripAlignment&& false){
             cout<<TString::Format("%6d %6.1f - %6.1f = % 6.2f,",nEvent,xLabMeasuredMetric,xLabPredictedMetric,xDelta);
             cout<<TString::Format("  %6.2f",xDetMeasuredMetric);
@@ -970,26 +994,32 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         }
         if (useEvent && abs(xLabPredictedMetric) > maxXLabMetric){
             cout<<" Invalid xLabPredictedMetric: "<<xLabPredictedMetric<<" / "<<maxXLabMetric<<endl;
+            nInvalidxLabPredictedMetric++;
             useEvent = false;
         }
         if (useEvent && abs(yLabPredictedMetric) > maxYLabMetric){
             //            cout<<" Invalid yLabPredictedMetric: "<<yLabPredictedMetric<<" / "<<maxYLabMetric<<endl;
             useEvent = false;
+            nInvalidyLabPredictedMetric++;
         }
-        if (relHitPosPredictedMetric == N_INVALID){
+        if (useEvent && relHitPosPredictedMetric == N_INVALID){
             //            cout<<" Invalid relHitPosPredictedMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
             useEvent = false;
+            nInvalidPredictedRelPos++;
         }
-        if (relHitPosMeasuredMetric == N_INVALID){
+        if (useEvent && relHitPosMeasuredMetric == N_INVALID){
             cout<<" Invalid relHitPosMeasuredMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<relHitPosMeasuredMetric<<endl;
             useEvent = false;
+            nInvalidMeasuredRelPos++;
         }
         if (useEvent && settings->IgnoreStripForAlignment(subjectDet,predHitPosDetCh)){
             //            cout<<" Ignoring Strip "<<subjectDet<<"/"<<predHitPosDetCh<<" for alignment"<<endl;
             useEvent = false;
+            nIgnoreForStripAlignment++;
         }
         if (useEvent && silicon_chi2_cut){
             useEvent = chi2x < maxChi2 && chi2y < maxChi2;
+            nInvalidSiliconChi2Cut++;
         }
 
         vecXDetRelHitPosPredMetricAll.push_back(relHitPosPredictedMetric);
@@ -1049,6 +1079,16 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         cout << vecXLabDeltaMetric.size() << " " << vecYLabDeltaMetric.size() << " " << vecXLabPredMetric.size() << " " << vecYLabPredMetric.size() << endl;
 
     if(nUsedEvents==0){
+        cout << "nNonTelescopeAlignmentEvents: "<< nNonTelescopeAlignmentEvents << endl;
+        cout << "nInvalidxLabPredictedMetric:  "<< nInvalidxLabPredictedMetric << endl;
+        cout << "nInvalidyLabPredictedMetric:  "<< nInvalidyLabPredictedMetric << endl;
+        cout << "nInvalidXYLabMeasurement:     "<< nInvalidXYLabMeasurement << endl;
+        cout << "nCalcModeCut:                 "<< nCalcModeCut << endl;
+        cout << "nTelescoepAlignmentEvent:     "<< nTelescoepAlignmentEvent << endl;
+        cout << "nInvalidPredictedRelPos:      "<< nInvalidPredictedRelPos << endl;
+        cout << "nInvalidMeasuredRelPos:       "<< nInvalidMeasuredRelPos << endl;
+        cout << "nIgnoreForStripAlignment:     "<< nIgnoreForStripAlignment << endl;
+        cout << "nInvalidSiliconChi2Cut:       "<< nInvalidSiliconChi2Cut << endl;
         cerr<< "cannot calculate Residual/Alignment for 0 Events. BREAK!"<<endl;
         align->PrintResults(1);
         cerr<< "cannot calculate Residual/Alignment for 0 Events. BREAK!"<<endl;

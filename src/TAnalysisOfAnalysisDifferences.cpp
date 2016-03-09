@@ -831,7 +831,6 @@ void TAnalysisOfAnalysisDifferences::InitSameHistos() {
     hname = name +extension;
     histo = settings->GetOverlayHisto(hname);
     mapHistos[name] = histo;
-// mapHistos["hNegativeChargePosition"]
 
     name = "hNegativeChargeProfileRelPosition";
     hname = name +extension;

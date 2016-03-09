@@ -617,6 +617,11 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     Float_t negCharge;
     Int_t pos;
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negCharge,pos,useCMN);
+
+    if(negCharge<settings->getNegativeChargeCut())
+        hNegativeChargeFraction->Fill(1);
+    else
+        hNegativeChargeFraction->Fill(0);
     Float_t negativeChargeRatio = negCharge/charge;
     Float_t maxCharge = diamondCluster->getHighestSignal(useCMN);
     hNegativeChargeRatio->Fill(negativeChargeRatio,charge);
@@ -655,10 +660,6 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
             cout<<"Delta: "<<pos_neg<<" "<<pos_hit<<": "<<delta<<endl;
         }
     }
-    if(negCharge<settings->getNegativeChargeCut())
-        hNegativeChargeFraction->Fill(1);
-    else
-        hNegativeChargeFraction->Fill(0);
     Int_t area3DwithColumns = 2;
     Int_t area3DwithoutColumns =1;
     if(!settings->do3dTransparentAnalysis()){
