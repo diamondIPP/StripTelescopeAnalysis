@@ -958,15 +958,19 @@ TString HistogrammSaver::GetFileName(TString name, TString extension){
     TString path = (TString)plots_path;
     if (!path.EndsWith("/"))
         path += "/";
+    if (name.EndsWith(".root"))
+        name.ReplaceAll(".root","");
+    if (name.EndsWith(".png"))
+        name.ReplaceAll(".eps","");
     path+=extension+"/";
     if (name == "")
         name="histograms";
     path+=(TString)name;
     TString appendix = TString::Format(".%d.",runNumber);
     appendix+=extension;
-    if (!path.EndsWith(appendix))
-        path.Append(appendix);
-    path.ReplaceAll("//","/");
+//    if (!path.EndsWith(appendix))
+    path.Append(appendix);
+//    path.ReplaceAll("//","/");
     return path;
 }
 
@@ -1216,7 +1220,7 @@ void HistogrammSaver::SaveBinnedProjectionX(TH2* histo) {
             delete px;
     }
     cout<<"\tSave Stack \""<<stack->GetName()<<"\" with  "<<projections.size()<<" Projections."<<endl;
-    this->SaveStack(stack,"nostack",true);
+    this->SaveStack(stack,"nostack",true,false);
     delete stack;
     for (UInt_t i = 0; i < projections.size();i++)
         delete projections[i];
@@ -2133,6 +2137,7 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange,TString dra
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
+    plots_canvas->
     plots_canvas->Print(GetEpsFileName(histo->GetName()));
 
     //	gROOT->SetStyle("Plain_RD42");
@@ -2259,40 +2264,40 @@ void HistogrammSaver::SetVerbosity(unsigned int i)
 //}
 
 //void SaveCanvasC(TCanvas *canvas, char* location, char* file_name);
-void SaveCanvasC(TCanvas *canvas, string location, string file_name)
-{
-    if(canvas==0 )return;
-    char loc[500];
-    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
-    char cmac[] = ".C";
-    char *cmacloc = loc;
-
-    //Saving .C macro
-    strcat(cmacloc,file_name.c_str());
-    strcat(cmacloc,cmac);
-    char const *cmac_file = &cmacloc[0];
-    canvas->SaveSource(cmac_file);
-    cout << ".c macro was created at: " << cmac_file << endl;
-}
-
-void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, string location, string file_name)
-{
-    if(canvas==0)return;
-    char loc[500];
-    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
-    char png[] = ".png";
-    char *pngloc = loc;
-
-    //Save .png file
-    strcat(pngloc,file_name.c_str());
-    strcat(pngloc,png);
-    char const *png_file = &pngloc[0]; //assigns address of first element of the file string to the char_file pointer
-    TImage *img = TImage::Create();
-    img->FromPad(canvas);
-    img->WriteImage(png_file);
-    cout << ".png file was created at: " << png_file << endl;
-    delete img;
-}
+//void SaveCanvasC(TCanvas *canvas, string location, string file_name)
+//{
+//    if(canvas==0 )return;
+//    char loc[500];
+//    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
+//    char cmac[] = ".C";
+//    char *cmacloc = loc;
+//
+//    //Saving .C macro
+//    strcat(cmacloc,file_name.c_str());
+//    strcat(cmacloc,cmac);
+//    char const *cmac_file = &cmacloc[0];
+//    canvas->SaveSource(cmac_file);
+//    cout << ".c macro was created at: " << cmac_file << endl;
+//}
+//
+//void HistogrammSaver::SaveCanvasPNG(TCanvas *canvas, string location, string file_name)
+//{
+//    if(canvas==0)return;
+//    char loc[500];
+//    memcpy(loc,location.c_str(),strlen(location.c_str())+1);
+//    char png[] = ".png";
+//    char *pngloc = loc;
+//
+//    //Save .png file
+//    strcat(pngloc,file_name.c_str());
+//    strcat(pngloc,png);
+//    char const *png_file = &pngloc[0]; //assigns address of first element of the file string to the char_file pointer
+//    TImage *img = TImage::Create();
+//    img->FromPad(canvas);
+//    img->WriteImage(png_file);
+//    cout << ".png file was created at: " << png_file << endl;
+//    delete img;
+//}
 
 void HistogrammSaver::SetDuckStyle() {
     TStyle* DuckStyle = new TStyle("DuckStyle", "Famous Duck Style");
@@ -2890,8 +2895,10 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
         else
             stack->Draw(drawOption);
     }
+    if (xTitle!="")
     stack->GetXaxis()->SetTitle(xTitle);
-    stack->GetYaxis()->SetTitle(yTitle);
+    if (yTitle!="")
+        stack->GetYaxis()->SetTitle(yTitle);
     c1->Update();
     if (bDrawLegend){
         TLegend* leg = c1->BuildLegend();

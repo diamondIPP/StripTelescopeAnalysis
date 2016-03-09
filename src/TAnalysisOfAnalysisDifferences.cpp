@@ -253,7 +253,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
         }
         mapHistos["hAllEvents_RelPosition"]->Fill(relPos.first,relPos.second);
         TProfile2D* prof = (TProfile2D*)mapHistos["hNegativeChargeProfileRelPosition"];
-        cout<<"hNegativeChargeProfileRelPosition - FILL: "<<relPos.first<<","<<relPos.second<<": "<<negCharge<<endl;
+//        cout<<"hNegativeChargeProfileRelPosition - FILL: "<<relPos.first<<","<<relPos.second<<": "<<negCharge<<endl;
         prof->Fill(relPos.first,relPos.second,negCharge);
         prof = (TProfile2D*)mapHistos["hNegativeChargeRatioOverlay"];
         prof->Fill(relPos.first,relPos.second,negCharge/maxCharge);

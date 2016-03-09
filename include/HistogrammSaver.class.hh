@@ -164,8 +164,8 @@ public:
 			Float_t xmin = -1*std::numeric_limits<float>::infinity(),Float_t xmax = std::numeric_limits<float>::infinity(),
 			Float_t factor = 0.05);
 	static Float_t GetMean(std::vector<Float_t> vec);
-	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
-	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
+//	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
+//	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
 //	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
 	static TGraphErrors CreateErrorGraph(std::string name,std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey);
 	static void CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto);
