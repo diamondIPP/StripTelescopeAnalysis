@@ -391,7 +391,9 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		if(xPos==-1||yPos==-1)
 			lastPredictionValid = false;
 		if(verbosity>10||bPrint)
-			cout<<"\tAdd in Plane "<<plane<<"  "<<xPos<<"+/-"<<alignment->getXResolution(plane)<<" / "<<yPos<<"+/-"<<alignment->getYResolution(plane)<<" / "<<getZPosition(plane)<<endl;
+			cout<<"\tAdd in Plane "<<plane<<"  X: "<<xPos<<"+/-"<<xRes<<" / "<<
+			                                "  Y: "<<yPos<<"+/-"<<yRes<<" / "<<
+			                                "  Z: "<<getZPosition(plane) <<"("<<zPosVec.at(0)<<")"<<endl;
 	}
 	linFitX->Eval();
 	linFitY->Eval();

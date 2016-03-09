@@ -609,7 +609,7 @@ void TAlignment::AlignDiamondPlane() {
     cout << "*******************************************************\n" << endl;
 
     settings->diamondPattern.hasInvalidIntervals();
-    silicon_chi2_cut = false;
+    silicon_chi2_cut = true;
     //create ReferencePlane Vector: using all Silicon Planes for Alignment 0,1,2,3
     UInt_t diaPlane = 4;
     vector<UInt_t> vecRefPlanes;
@@ -623,8 +623,6 @@ void TAlignment::AlignDiamondPlane() {
     bool diaAlignmentDone = false;
     settings->diamondPattern.hasInvalidIntervals();
     for (nDiaAlignmentStep = 0; (nDiaAlignmentStep < nDiaAlignSteps) && (!diaAlignmentDone||nDiaAlignmentStep<2)	 ; nDiaAlignmentStep++) {
-        if (nDiaAlignmentStep >0)
-            silicon_chi2_cut = true;
         cout << "\n\n ****" << nDiaAlignmentStep << " of " << nDiaAlignSteps << " Steps..." << endl;
         //do Alignment using the resDia Residual
         alignStripDetector(TPlaneProperties::X_COR, diaPlane, vecRefPlanes, false||bPlotAll, resDia);
