@@ -1003,7 +1003,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             nInvalidyLabPredictedMetric++;
         }
         if (useEvent && nDiaAlignmentStep > 1 && relHitPosPredictedMetric == N_INVALID){
-            cout<<" Invalid relHitPosPredictedMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
+            cout<<" Invalid relHitPosPredictedMetric"<<nDiaAlignmentStep<<" "<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
             useEvent = false;
             nInvalidPredictedRelPos++;
         }
@@ -1019,6 +1019,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         }
         if (useEvent && silicon_chi2_cut){
             useEvent = chi2x < maxChi2 && chi2y < maxChi2;
+            cout<<"Invalid Silicon Chi2 Cut: "<<chi2x<<"/"<<chi2y<<" with cut on "<<maxChi2<<endl;
             nInvalidSiliconChi2Cut++;
         }
 
