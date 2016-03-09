@@ -169,7 +169,7 @@ bool TSelectionClass::createSelectionTree(int nEvents)
     settings->goToSelectionTreeDir();
     selectionFile=new TFile(settings->getSelectionTreeFilePath().c_str(),"READ");
     if (settings->RerunSelection()){
-        std::cout<<"Rerun Selection please approve:"<<flush;
+        std::cout<<"Rerun Selection activated:"<<flush;
     }
     if(selectionFile->IsZombie() || settings->RerunSelection()){
         if(verbosity && selectionFile->IsZombie())

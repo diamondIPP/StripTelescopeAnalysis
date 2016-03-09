@@ -1003,7 +1003,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             nInvalidyLabPredictedMetric++;
         }
         if (useEvent && relHitPosPredictedMetric == N_INVALID){
-            //            cout<<" Invalid relHitPosPredictedMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
+            cout<<" Invalid relHitPosPredictedMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<xDetPredictedMetric<<endl;
             useEvent = false;
             nInvalidPredictedRelPos++;
         }
