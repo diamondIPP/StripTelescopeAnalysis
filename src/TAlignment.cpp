@@ -453,7 +453,7 @@ int TAlignment::Align(UInt_t nEvents, UInt_t startEvent,enumDetectorsToAlign det
     if((detToAlign==silAlignment||detToAlign==bothAlignment)){
         AlignSiliconPlanes();
     }
-
+    this->saveAlignment(this->mode);
     if(detToAlign==diaAlignment||detToAlign==bothAlignment) {
         if(settings->resetAlignment())
             align->ResetAlignment(TPlaneProperties::getDiamondPlane());
