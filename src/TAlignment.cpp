@@ -2176,7 +2176,6 @@ void TAlignment::CreateFidValueXVsDeltaX(TPlaneProperties::enumCoordinate cor,
     TGraph* gr = (TGraph*) graph.Clone();
     histSaver->SaveGraph(gr, (string)histName);
     if(gr) delete gr;
-
 }
 
 void TAlignment::CreateFidValueYVsDeltaX(TPlaneProperties::enumCoordinate cor,

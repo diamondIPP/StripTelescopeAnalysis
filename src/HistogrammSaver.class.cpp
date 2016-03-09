@@ -1185,6 +1185,7 @@ void HistogrammSaver::SaveBinnedProjectionX(TH2* histo) {
         return;
     TString name = histo->GetName();
     name += "_BinnedPx";
+    cout<<"[HistogrammSaver::SaveBinnedProjectionX]: "<<name<<endl;
     Int_t nBinsY = histo->GetNbinsY();
     TString yTitle = histo->GetYaxis()->GetTitle();
     vector<TH1D*> projections;
@@ -1197,11 +1198,13 @@ void HistogrammSaver::SaveBinnedProjectionX(TH2* histo) {
     Int_t styles[] = {3,1,2,4};
     Int_t nStyles = 4;
     Int_t n=0;
+    cout<<"\tCreate stack out of "<<nBinsY<<"Projections."<<endl;
     for (UInt_t i = 1; i <= nBinsY;i++){
         TString hname = name;
         hname+=TString::Format("_bin%d",i);
         TH1D *px = histo->ProjectionX(hname,i,i);
         px->SetTitle(yTitle+TString::Format(", Bin %d",i));
+        cout<<"\t  * "<<i<<": "<<hname<<" "<<px->GetEntries()<<endl;
         if (px->GetEntries()){
             px->SetLineStyle(styles[n%nStyles]);
             px->SetLineColor(styles[n%nStyles]);
@@ -1212,10 +1215,12 @@ void HistogrammSaver::SaveBinnedProjectionX(TH2* histo) {
         else
             delete px;
     }
+    cout<<"\tSave Stack \""<<stack->GetName()<<"\" with  "<<projections.size()<<" Projections."<<endl;
     this->SaveStack(stack,"nostack",true);
     delete stack;
     for (UInt_t i = 0; i < projections.size();i++)
         delete projections[i];
+    cout<<"[HistogrammSaver::SaveBinnedProjectionX] Done."<<endl;
 }
 
 void HistogrammSaver::SaveProjectionY(TH2* histo) {

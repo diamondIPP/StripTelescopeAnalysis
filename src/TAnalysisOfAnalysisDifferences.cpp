@@ -670,7 +670,7 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
 
     std::map<TString,TH1*>::iterator it = mapHistos.begin();
     cout<<"[TAnalysisOfAnalysisDifferences]Save Histos it map "<<mapHistos.size()<<endl;
-    for(it;it!=mapHistos.end();it++){
+    for(;it!=mapHistos.end();it++){
         cout<<"Save: "<<it->first<<"\t"<<it->second->GetEntries()<<endl;
         if (it->second->GetEntries()==0)
             continue;
@@ -687,9 +687,13 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveProjectionY((TH2*)it->second);
         }
         if (it->first.Contains("egativeChargePosition")){
+            cout<<"Save: "<<it->first<<endl;
             histSaver->SaveProjectionX((TH2*)it->second);
             histSaver->SaveProjectionY((TH2*)it->second);
             histSaver->SaveBinnedProjectionX((TH2*)it->second);
+            char t;
+            cout<<"Press a key and enter to continue"<<flush;
+            cin>>t;
         }
         if (it->first.Contains("RelPosition")){
             if (className.Contains("TProfile2D")){

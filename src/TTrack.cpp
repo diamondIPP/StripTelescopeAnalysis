@@ -379,18 +379,18 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		Float_t xPos = (Double_t)getXPositionMetric(plane,cmnCorrection,mode,getEtaIntegral(pl*2));
 		Float_t yPos = (Double_t)getYPositionMetric(plane,cmnCorrection,mode,getEtaIntegral(pl*2+1));
 		if((xPos==-1||yPos==-1)&&(verbosity||bPrint)){
-			cout<<"Problem with Plane "<<plane<<" "<<xPos<<" "<<yPos<<endl;
+		    if(bPrint)cout<<"Problem with Plane "<<plane<<" "<<xPos<<" "<<yPos<<endl;
 			event->Print(1);
 		}
 		Float_t xRes = this->alignment->getXResolution(plane);
 		if (xRes <= 0)  {
 		    xRes = 10;
-		    cout<<"UPdate xREs to "<<xRes<<endl;
+		    if(bPrint)cout<<"UPdate xREs to "<<xRes<<endl;
 		}
 		Float_t yRes = this->alignment->getYResolution(plane);
 		if (yRes <= 0)  {
 		    yRes = 10;
-		    cout<<"Update yRes to "<<yRes<<endl;
+		    if(bPrint)cout<<"Update yRes to "<<yRes<<endl;
 		}
 		linFitX->AddPoint(&zPosVec.at(0),xPos,xRes);//todo anpassen des SIGMA
 		linFitY->AddPoint(&zPosVec.at(0),yPos,yRes);//todo anpassen des sigma 0.001

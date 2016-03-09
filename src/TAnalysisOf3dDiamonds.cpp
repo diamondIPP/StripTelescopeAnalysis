@@ -1172,6 +1172,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetTitle("charge / ADC");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
 
+    name = "hPulseHeightVsCell"+appendix;
     hPulseHeightVsCell = histSaver->GetProfile2dBinedInCells(name,1);
     hPulseHeightVsCell->GetXaxis()->SetTitle("#it{x} / #mum");
     hPulseHeightVsCell->GetYaxis()->SetTitle("#it{y} / #mum");
@@ -5750,7 +5751,10 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     histSaver->SaveProfile2DWithEntriesAsText(hPulseHeightVsCell);
     hPulseHeightVsCell->SetName(hPulseHeightVsCell->GetName()+(TString)"Grid");
     histSaver->SaveHistogramWithCellGrid(hPulseHeightVsCell);
-    histSaver->SaveProjectionZ(hPulseHeightVsCell,false,true);
+    TH1F* proj = histSaver->SaveProjectionZ(hPulseHeightVsCell,false,true);
+    histSaver->SaveIntegral(proj,false);
+    histSaver->SaveIntegral(proj,true);
+    delete proj;
 
     delete hPulseHeightVsCell;
     if (settings->do3dTransparentAnalysis()){
