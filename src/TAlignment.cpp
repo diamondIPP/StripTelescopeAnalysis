@@ -2501,6 +2501,7 @@ void TAlignment::CreatePlots(TPlaneProperties::enumCoordinate cor, UInt_t subjec
     CreateRelHitPosPredXPlot(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateResidualVsAngle(cor,subjectPlane,preName,postName,refPlaneString,bPlot);
     CreateFidValueXVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
+    CreateFidValueYVsDeltaX(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     CreateScatterPlotDeltaXvsChi2X(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     CreateScatterPlotDeltaYvsChi2Y(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
     Float_t yPredictionSigma = CreateSigmaOfPredictionYPlots(cor,subjectPlane,preName,postName,refPlaneString,bPlot,bUpdateResolution,isSiliconPostAlignment);
