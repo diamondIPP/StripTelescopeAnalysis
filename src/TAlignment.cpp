@@ -901,7 +901,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
 
         if (verbosity > 5) cout<<"Predict Position: "<<endl;
         //        cout<<"\tpredict pos"<<endl;
-        predictedPostionMetric = myTrack->predictPosition(subjectPlane, vecRefPlanes, cmnCorrected, silCalcMode, verbosity >7);
+        bool bVerbose = verbosity >7||(isStripAlignment && verbosity);
+        predictedPostionMetric = myTrack->predictPosition(subjectPlane, vecRefPlanes, cmnCorrected, silCalcMode, bVerbose);
         xLabPredictedMetric=predictedPostionMetric->getPositionX();
         yLabPredictedMetric=predictedPostionMetric->getPositionY();
         xDetPredictedMetric =myTrack->getPositionInDetSystem(2*subjectPlane,xLabPredictedMetric,yLabPredictedMetric);;
