@@ -1688,7 +1688,8 @@ void TAlignment::CreateDistributionPlotDeltaX(
     if(xRes>0&&bUpdateResolution&&histo->GetEntries()>0){
         if(TPlaneProperties::isDiamondPlane(subjectPlane)){
             cout << "set Resolution via Gaus fit for diamond: " << xRes*100 << " with " << vecXLabDeltaMetric.size() << " Events" << endl;
-            align->setXResolution(xRes,subjectPlane);
+            if (xRes >0)
+                align->setXResolution(xRes,subjectPlane);
             align->setXMean(mean,subjectPlane);
         }
         else{
@@ -1705,7 +1706,8 @@ void TAlignment::CreateDistributionPlotDeltaX(
                 cout<<" .... xRes < xPredictionSigma .....Update xRes to "<<xres2<<endl;
             }
             cout<< "xDet: "<<xres2*100 <<" = Sqrt("<<xRes*100<<"^2 - "<<xPredictionSigma*100<<"^2)"<<endl;
-            align->setXResolution(xres2, subjectPlane);
+            if (xres2 > 0)
+                align->setXResolution(xres2, subjectPlane);
             align->setXMean(mean,subjectPlane);
         }
         if(xRes<fitWidth/3&&TPlaneProperties::isDiamondPlane(subjectPlane))

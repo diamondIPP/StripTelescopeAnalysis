@@ -328,8 +328,8 @@ public:
 	void setMinimalAbsoluteEtaValue(Float_t minAbsEtaVal) {this->minAbsEtaVal = minAbsEtaVal;}
 	bool isUseUserResolutionInput() const {return bUseUserResolutionInput;}
 	void setUseUserResolutionInput(bool useUserResolutionInput) {bUseUserResolutionInput = useUserResolutionInput;}
-	Float_t GetDefaultResolutionX(UInt_t plane){if(plane<9)return alignment_resolutions.at(plane*2);return 0;}
-	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 0;};
+	Float_t GetDefaultResolutionX(UInt_t plane){if(plane<9)return alignment_resolutions.at(plane*2);return 20;}
+	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 20;};
 	//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
 	//	int getAreaOfInterest(){return inde
 	Float_t get3DYOffset(){return yOffset3D;};//todo
