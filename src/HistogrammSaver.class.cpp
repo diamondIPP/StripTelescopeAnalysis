@@ -2137,7 +2137,6 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange,TString dra
     ostringstream plot_filename;
     plot_filename << plots_path << histo->GetName() << ".png";
     plots_canvas->Print(plot_filename.str().c_str());
-    plots_canvas->
     plots_canvas->Print(GetEpsFileName(histo->GetName()));
 
     //	gROOT->SetStyle("Plain_RD42");
