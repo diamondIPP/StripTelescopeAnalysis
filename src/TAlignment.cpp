@@ -836,14 +836,14 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             default:
                 cout<<"Unknown";
         }
-        cout<<"\tResidualCalcMode: ";
-        switch (calcMode){
-            case chi2CalcMode: cout<<"Chi2 CalcMode";break;
-            case normalCalcMode: cout<<"normal CalcMode";break;
-            case resolutionCalcMode: cout<<"resolution CalcMode";break;
-            default:
-                cout<<"Unknown CalcMode";break;
-        }
+            cout<<"\tResidualCalcMode: ";
+            switch (calcMode){
+                case chi2CalcMode: cout<<"Chi2 CalcMode";break;
+                case normalCalcMode: cout<<"normal CalcMode";break;
+                case resolutionCalcMode: cout<<"resolution CalcMode";break;
+                default:
+                    cout<<"Unknown CalcMode";break;
+            }
         cout<<endl;
 
         if(verb&&resOld.isTestResidual())resOld.Print(1);
@@ -887,6 +887,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     Int_t nInvalidMeasuredRelPos = 0;
     Int_t nIgnoreForStripAlignment = 0;
     Int_t nInvalidSiliconChi2Cut = 0;
+    vector<Float_t> calcModeCutX;
+    vector<Float_t> calcModeCutY;
     for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, nEvents);
         if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent]){
@@ -967,11 +969,19 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
                 if(cor==TPlaneProperties::XY_COR||isStripAlignment)  useEvent = resxtest < res_keep_factor && resytest < res_keep_factor;
                 else if(cor==TPlaneProperties::X_COR)        useEvent = resxtest < res_keep_factor;
                 else if(cor==TPlaneProperties::Y_COR)   useEvent = resytest < res_keep_factor;
+                if (!useEvent){
+                    calcModeCutX.push_back(resxtest);
+                    calcModeCutY.push_back(resytest);
+                }
                 break;
             case chi2CalcMode:
                 if(cor==TPlaneProperties::XY_COR || isStripAlignment)  useEvent = chi2x < maxChi2 && chi2y < maxChi2;
                 else if(cor==TPlaneProperties::X_COR)        useEvent = chi2x < maxChi2;
                 else if(cor==TPlaneProperties::Y_COR)   useEvent = chi2y < maxChi2;
+                if (!useEvent){
+                    calcModeCutX.push_back(chi2x);
+                    calcModeCutY.push_back(chi2y);
+                }
                 break;
             case resolutionCalcMode:
                 useEvent = true;
@@ -1087,6 +1097,13 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         cout << "nInvalidyLabPredictedMetric:  "<< nInvalidyLabPredictedMetric << endl;
         cout << "nInvalidXYLabMeasurement:     "<< nInvalidXYLabMeasurement << endl;
         cout << "nCalcModeCut:                 "<< nCalcModeCut << endl;
+        if (nCalcModeCut > 0){
+            TH2F* h = histSaver->CreateScatterHisto("hCalcModeCutProblem",calcModeCutY,calcModeCutX,100,100);
+            histSaver->SaveHistogram(h);
+            delete h;
+        }
+
+
         cout << "nTelescoepAlignmentEvent:     "<< nTelescoepAlignmentEvent << endl;
         cout << "nInvalidPredictedRelPos:      "<< nInvalidPredictedRelPos << endl;
         cout << "nInvalidMeasuredRelPos:       "<< nInvalidMeasuredRelPos << endl;

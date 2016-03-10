@@ -2895,7 +2895,7 @@ void HistogrammSaver::SaveStack(THStack* stack, TString drawOption,bool bDrawLeg
             stack->Draw(drawOption);
     }
     if (xTitle!="")
-    stack->GetXaxis()->SetTitle(xTitle);
+        stack->GetXaxis()->SetTitle(xTitle);
     if (yTitle!="")
         stack->GetYaxis()->SetTitle(yTitle);
     c1->Update();
