@@ -1092,6 +1092,15 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         cout << vecXLabDeltaMetric.size() << " " << vecYLabDeltaMetric.size() << " " << vecXLabPredMetric.size() << " " << vecYLabPredMetric.size() << endl;
 
     if(nUsedEvents==0){
+        cout<<"ResidualCalcMode: ";
+        switch (calcMode){
+            case chi2CalcMode: cout<<"Chi2 CalcMode";break;
+            case normalCalcMode: cout<<"normal CalcMode";break;
+            case resolutionCalcMode: cout<<"resolution CalcMode";break;
+            default:
+                cout<<"Unknown CalcMode";break;
+        }
+        cout << endl;
         cout << "nNonTelescopeAlignmentEvents: "<< nNonTelescopeAlignmentEvents << endl;
         cout << "nInvalidxLabPredictedMetric:  "<< nInvalidxLabPredictedMetric << endl;
         cout << "nInvalidyLabPredictedMetric:  "<< nInvalidyLabPredictedMetric << endl;
