@@ -385,6 +385,64 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
     cout<<"Save Canvas "<< c1<<": "<<c1->GetName()<<endl;
     SaveCanvas(c1);
 }
+
+void HistogrammSaver::SaveTwoHistosScaled(TString canvasName, TH1 *histo1, TH1 *histo2, TString position, UInt_t verbosity){
+    if(!histo1||!histo2){
+        if (histo1) SaveHistogram(histo1);
+        if (histo2) SaveHistogram(histo2);
+        return;
+    }
+    Float_t scale1 = 1./histo1->GetBinContent(histo1->GetMaximumBin());
+    Float_t scale2 = 1./histo2->GetBinContent(histo2->GetMaximumBin());
+    this->SaveTwoHistosComparison(canvasName,histo1,histo2,scale1,scale2,position,verbosity);
+
+}
+void HistogrammSaver::SaveTwoHistosComparison(TString canvasName, TH1 *histo1, TH1 *histo2,double scale1, double scale2, TString position, UInt_t verbosity){
+    if(!histo1&&!histo2)return;
+      if(!histo1||!histo2){
+          if (histo1) SaveHistogram(histo1);
+          else SaveHistogram(histo2);
+          return;
+      }
+      histo1 = (TH1*)histo1->Clone();
+      histo2 = (TH1*)histo2->Clone();
+      histo1->Scale(scale1);
+      histo2->Scale(scale2);
+      if(histo1->GetLineColor() == histo2->GetLineColor())
+          histo2->SetLineColor(histo1->GetLineColor()+1);
+      cout<<"SaveTwoHistosComparison: "<<histo1->GetName()<<" "<<histo2->GetName()<<" to "<<canvasName<<endl;
+      TCanvas *c1 = new TCanvas(canvasName,canvasName);
+      c1->cd();
+      c1->SetObjectStat(true);
+      TString title = canvasName;
+      title+= ";";
+      title+= histo1->GetXaxis()->GetTitle();
+      title+= ";";
+      title+= histo1->GetYaxis()->GetTitle();
+      THStack* stack = new THStack(canvasName);
+      stack->Add(histo1);
+      stack->Add(histo2);
+      histo1->Draw("goff");
+      histo2->Draw("goff");
+      if (verbosity>2) cout<<endl<<"Nhisto1: "<<histo1->GetEntries()<<" Nhisto2:"<<histo2->GetEntries()<<flush;
+      histo1->SetStats(false);
+      histo2->SetStats(false);
+      stack->Draw("nostack");
+      c1->Update();
+      TLegend *leg;
+      position.ToLower();
+      if (position== "right")
+          leg = new TLegend(0.52,0.75,0.9,0.95);
+      else
+          leg = new TLegend(0.1,0.75,0.48,0.9);
+      leg->SetFillColor(kWhite);
+//      leg->SetHeader("Legend");
+      leg->AddEntry(histo1,histo1->GetName(),"LP");
+      leg->AddEntry(histo2,histo2->GetName(),"LP");
+      leg->Draw("same");
+      c1->Update();
+      SaveCanvas(c1);
+}
 void HistogrammSaver::SaveTwoHistos(TString canvasName, TH1 *histo1, TH1 *histo2,double refactorSecond, TString position, UInt_t verbosity)
 {
 //    cout<<"Save2Histos: "<<histo1<<" "<<histo2<<endl;

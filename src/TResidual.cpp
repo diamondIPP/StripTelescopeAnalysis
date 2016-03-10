@@ -108,10 +108,13 @@ Float_t TResidual::getXSigma()
 {
     if(bTestResidual) return (100000);
     Float_t retVal = N_INVALID;
-    if (nUsedTracks!=0)
-        retVal = (TMath::Sqrt(this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean()));
+    Float_t val;
+    if (nUsedTracks!=0){
+        val = this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean();
+        retVal = (TMath::Sqrt(val));
+    }
     if (retVal!=retVal){
-        cout<<"Could not calc Xsigma: "<<resXSigma<<"/"<<nUsedTracks<<"-"<<getXMean()<<"**2"<<endl;
+        cout<<"Could not calc Xsigma: "<<resXSigma<<"/"<<nUsedTracks<<"- ("<<getXMean()<<")**2 = "<<val<<" sqrt(\"): "<<retVal<<endl;
         return 100000;
     }
     else

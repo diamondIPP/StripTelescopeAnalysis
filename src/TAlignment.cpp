@@ -1030,9 +1030,11 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         }
         if (useEvent && silicon_chi2_cut){
             useEvent = chi2x < maxChi2 && chi2y < maxChi2;
-            predictedPostionMetric->Print();
-            cout<<"Invalid Silicon Chi2 Cut: "<<chi2x<<"/"<<chi2y<<" with cut on "<<maxChi2<<endl;
-            nInvalidSiliconChi2Cut++;
+            if (!useEvent){
+                predictedPostionMetric->Print();
+                cout<<"Invalid Silicon Chi2 Cut: "<<chi2x<<"/"<<chi2y<<" with cut on "<<maxChi2<<endl;
+                nInvalidSiliconChi2Cut++;
+            }
         }
 
         vecXDetRelHitPosPredMetricAll.push_back(relHitPosPredictedMetric);

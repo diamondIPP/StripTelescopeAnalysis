@@ -186,6 +186,9 @@ private:
 	TH1F* hNegativeChargeFieldWireSpectrumAll;
 	TH1F* hNegativeChargeFieldWireSpectrumAllButBad;
 	TH1F* hNegativeChargeFieldWireSpectrumGood;
+    TH1F* hNegativeChargeFullCellSpectrumAll;
+    TH1F* hNegativeChargeFullCellSpectrumAllButBad;
+    TH1F* hNegativeChargeFullCellSpectrumGood;
 
 	TH2D* hNegativeChargeFieldWirePositions;
 	TH2F* hNegativeChargeFieldWirePositionsOverlay;

@@ -618,6 +618,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     Int_t pos;
     bool hasNegativeCharge = diamondCluster->hasNegativeCharge(negCharge,pos,useCMN);
 
+
+    hNegativeChargeFullCellSpectrumAll->Fill(negCharge);
+    if (!settings->isBadCell(3,cellNo))
+        hNegativeChargeFullCellSpectrumAllButBad->Fill(negCharge);
+    if (!settings->IsGoodCell(3,cellNo))
+        hNegativeChargeFullCellSpectrumGood->Fill(negCharge);
+
     if(negCharge<settings->getNegativeChargeCut())
         hNegativeChargeFraction->Fill(1);
     else
@@ -2485,12 +2492,24 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     delete hNegativeChargeFieldWireFraction;
     delete hNegativeChargeFieldWirePositions;
     delete hNegativeChargeFieldWirePositionsOverlay;
+
+    histSaver->SaveHistogram(hNegativeChargeFullCellSpectrumAll);
     histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumAll);
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAll",hNegativeChargeFullCellSpectrumAll,hNegativeChargeFieldWireSpectrumAll);
+    delete hNegativeChargeFullCellSpectrumAll;
     delete hNegativeChargeFieldWireSpectrumAll;
+
+    histSaver->SaveHistogram(hNegativeChargeFullCellSpectrumAllButBad);
     histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumAllButBad);
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAllButBad",hNegativeChargeFullCellSpectrumAllButBad,hNegativeChargeFieldWireSpectrumAllButBad);
+    delete hNegativeChargeFullCellSpectrumAllButBad;
     delete hNegativeChargeFieldWireSpectrumAllButBad;
+
+    histSaver->SaveHistogram(hNegativeChargeFullCellSpectrumGood);
     histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumGood);
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonGood",hNegativeChargeFullCellSpectrumGood,hNegativeChargeFieldWireSpectrumGood);
     delete hNegativeChargeFieldWireSpectrumGood;
+    delete hNegativeChargeFullCellSpectrumGood;
 
     histSaver->SaveHistogram(hNegativeChargePosition);
     histSaver->SaveHistogram(hNegativeChargeRatio);
@@ -5518,6 +5537,17 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     name = "hNegativeChargeFieldWireSpectrumGood"+appendix;
     title = "Negative Charges Around FieldWire Good;negative Charge / ADC;number of entries";
     hNegativeChargeFieldWireSpectrumGood = new TH1F(name,title,512,-512,0);
+
+
+    name = "hNegativeChargeFullCellSpectrumAll"+appendix;
+    title = "Negative Charges Full Cell All;negative Charge / ADC;number of entries";
+    hNegativeChargeFullCellSpectrumAll = new TH1F(name,title,512,-512,0);
+    name = "hNegativeChargeFullCellSpectrumAllButBad"+appendix;
+    title = "Negative Charges Full Cell AllButBad;negative Charge / ADC;number of entries";
+    hNegativeChargeFullCellSpectrumAllButBad = new TH1F(name,title,512,-512,0);
+    name = "hNegativeChargeFullCellSpectrumGood"+appendix;
+    title = "Negative Charges Full Cell Good;negative Charge / ADC;number of entries";
+    hNegativeChargeFullCellSpectrumGood = new TH1F(name,title,512,-512,0);
 }
 
 void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
