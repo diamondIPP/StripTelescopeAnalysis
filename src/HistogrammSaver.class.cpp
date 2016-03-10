@@ -419,7 +419,7 @@ void HistogrammSaver::SaveTwoHistosComparison(TString canvasName, TH1 *histo1, T
       title+= histo1->GetXaxis()->GetTitle();
       title+= ";";
       title+= histo1->GetYaxis()->GetTitle();
-      THStack* stack = new THStack(canvasName);
+      THStack* stack = new THStack(canvasName,title);
       stack->Add(histo1);
       stack->Add(histo2);
       histo1->Draw("goff");
