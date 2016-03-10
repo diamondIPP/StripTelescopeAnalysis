@@ -107,9 +107,15 @@ void TResidual::addDataPoint(Float_t deltaX, Float_t predX, Float_t deltaY, Floa
 Float_t TResidual::getXSigma()
 {
     if(bTestResidual) return (100000);
+    Float_t retVal = N_INVALID;
     if (nUsedTracks!=0)
-        return (TMath::Sqrt(this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean()));
-    return ( N_INVALID);
+        retVal = (TMath::Sqrt(this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean()));
+    if (retVal!=retVal){
+        cout<<"Could not calc Xsigma: "<<resXSigma<<"/"<<nUsedTracks<<"-"<<getXMean()<<"**2"<<endl;
+        return 100000;
+    }
+    else
+        return retVal;
 }
 
 
@@ -117,9 +123,17 @@ Float_t TResidual::getXSigma()
 Float_t TResidual::getYSigma()
 {
     if(bTestResidual) return (100000);
+    Float_t retVal = N_INVALID;
     if (nUsedTracks!=0)
-        return (TMath::Sqrt(this->resYSigma / (Double_t)this->nUsedTracks - getYMean()*getYMean()));
-    return (N_INVALID);
+        retVal = (TMath::Sqrt(this->resYSigma / (Double_t)this->nUsedTracks - getYMean()*getYMean()));
+    else
+        retVal =  (N_INVALID);
+    if (retVal!=retVal){
+        cout<<"Could not calc resYSigma: "<<resYSigma<<"/"<<nUsedTracks<<"-"<<getYMean()<<"**2"<<endl;
+        return 100000;
+    }
+    else
+        return retVal;
 }
 
 
