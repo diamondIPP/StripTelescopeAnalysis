@@ -691,9 +691,6 @@ void TAnalysisOfAnalysisDifferences::SaveHistograms() {
             histSaver->SaveProjectionX((TH2*)it->second);
             histSaver->SaveProjectionY((TH2*)it->second);
             histSaver->SaveBinnedProjectionX((TH2*)it->second);
-            char t;
-            cout<<"Press a key and enter to continue"<<flush;
-            cin>>t;
         }
         if (it->first.Contains("RelPosition")){
             if (className.Contains("TProfile2D")){

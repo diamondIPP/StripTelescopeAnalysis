@@ -2473,6 +2473,7 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
     }
     TString hName = name;
     bool  verb = hName.Contains("_ScatterPlot_RelHitPosXPredDet_vs_UseEvent_Plane_");
+    if (hName.Contains("hCalcModeCutProblem")) verb = true;
     if (verb)    cout<<"[HistogrammSaver::CreateScatterHisto]" <<name <<endl;;
     UInt_t entries = posX.size();
     if (verb) cout<<" entries: "<<entries;
@@ -2483,24 +2484,38 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
     UInt_t nLow = 0;
     UInt_t nUp  = entries-1;
     Float_t minX,maxX,minY,maxY,deltaX,deltaY;
+    Int_t calcMethod = 0;
     if (maxRangeX == (+1) * std::numeric_limits<float>::infinity() ||
-        minRangeX == (-1) * std::numeric_limits<float>::infinity() ||
-        maxRangeY == (+1) * std::numeric_limits<float>::infinity() ||
-        minRangeY == (-1) * std::numeric_limits<float>::infinity() ){
-            nLow = .05 * entries;
-            nUp = .95 * entries;
-            if (nUp >= entries)
-                nUp = entries-1;
-            minX = posX2.at(nLow);
-            maxX = posX2.at(nUp);
-            deltaX = maxX-minX;
-            minX = minX-.1*deltaX;
-            maxX = maxX+.1*deltaX;
-            minY = posY2.at(nLow);
-            maxY = posY2.at(nUp);
-            deltaY = maxY-minY;
-            minY = minY-.1*deltaY;
-            maxY = maxY+.1*deltaY;
+            minRangeX == (-1) * std::numeric_limits<float>::infinity() ||
+            maxRangeY == (+1) * std::numeric_limits<float>::infinity() ||
+            minRangeY == (-1) * std::numeric_limits<float>::infinity() )
+        calcMethod = 1;
+    if (verb) cout<<" CalcMethod = "<<calcMethod<<endl;
+    if (calcMethod == 1){
+        nLow = .05 * entries;
+        nUp = .95 * entries;
+        if (nUp >= entries)
+            nUp = entries-1;
+    }
+    if (verb) cout<<" nLow "<<nLow<<"/"<<posX2.at(nLow)<<"/"<<posY2.at(nLow)<<endl;
+    if (verb) cout<<" nUp  "<<nUp<<"/" <<posX2.at(nUp)<<"/"<<posY2.at(nUp)<<endl;
+    while (posX2.at(nLow)!=posX2.at(nLow) && nLow < entries-1)
+        nLow++;
+    while (posX2.at(nUp)!=posX2.at(nUp) && nUp>0 )
+        nUp--;
+    if (verb) cout<<" nLow "<<nLow<<"/"<<posX2.at(nLow)<<"/"<<posY2.at(nLow)<<endl;
+    if (verb) cout<<" nUp  "<<nUp<<"/" <<posX2.at(nUp)<<"/"<<posY2.at(nUp)<<endl;
+    if (calcMethod == 1){
+        minX = posX2.at(nLow);
+        maxX = posX2.at(nUp);
+        deltaX = maxX-minX;
+        minX = minX-.1*deltaX;
+        maxX = maxX+.1*deltaX;
+        minY = posY2.at(nLow);
+        maxY = posY2.at(nUp);
+        deltaY = maxY-minY;
+        minY = minY-.1*deltaY;
+        maxY = maxY+.1*deltaY;
     }
     else{
         minX = posX2.at(nLow);
@@ -2508,8 +2523,9 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
         deltaX = maxX-minX;
         minY = posY2.at(nLow);
         maxY = posY2.at(nUp);
-    deltaY = maxY-minY;
+        deltaY = maxY-minY;
     }
+
     if (verb) cout <<" X:"<<minX<<"-"<<maxX<<"\tY:"<<minY<<"-"<<maxY<<" --- "<<posX2.at(0)<<"-"<<posX2.at(entries-1)<<"/"<<posY2.at(0)<<"-"<<posY2.at(entries-1)<<endl;
     if (minX < minRangeX) minX = minRangeX;
     if (maxX > maxRangeX) maxX = maxRangeX;
@@ -2562,6 +2578,8 @@ TGraph HistogrammSaver::CreateDipendencyGraph(std::string name, std::vector<Floa
         return TGraph();
     }
     //cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
+    if (maxSize==-1)
+        maxSize = vecY.size();
     ULong_t size = TMath::Min(maxSize,(ULong_t)vecY.size());
     TGraph hGraph = TGraph(size,&vecX.at(0),&vecY.at(0));
     hGraph.Draw("AP");

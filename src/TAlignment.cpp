@@ -1110,6 +1110,12 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             TH2F* h = histSaver->CreateScatterHisto("hCalcModeCutProblem",calcModeCutY,calcModeCutX,100,100);
             histSaver->SaveHistogram(h);
             delete h;
+            TGraph g = histSaver->CreateDipendencyGraph("gCalcModeCutProblem",calcModeCutY,calcModeCutX);
+            std::sort(calcModeCutY.begin(),calcModeCutY.end());
+            std::sort(calcModeCutX.begin(),calcModeCutX.end());
+            histSaver->SaveGraph(&g,"gCalcModeCutProblem");
+            cout<<"MinX: "<<calcModeCutX.front()<<" | MaxX: "<<calcModeCutX.back()<<endl;
+            cout<<"MinY: "<<calcModeCutY.front()<<" | MaxY: "<<calcModeCutY.back()<<endl;
         }
 
 
