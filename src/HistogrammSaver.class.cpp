@@ -386,7 +386,7 @@ void HistogrammSaver::SaveTwoHistosNormalized(TString canvasName, TH1 *histo1, T
     SaveCanvas(c1);
 }
 
-void HistogrammSaver::SaveTwoHistosScaled(TString canvasName, TH1 *histo1, TH1 *histo2, TString position, UInt_t verbosity){
+void HistogrammSaver::SaveTwoHistosScaled(TString canvasName, TH1 *histo1, TH1 *histo2, TString position, TString drawOption, UInt_t verbosity){
     if(!histo1||!histo2){
         if (histo1) SaveHistogram(histo1);
         if (histo2) SaveHistogram(histo2);
@@ -397,7 +397,7 @@ void HistogrammSaver::SaveTwoHistosScaled(TString canvasName, TH1 *histo1, TH1 *
     this->SaveTwoHistosComparison(canvasName,histo1,histo2,scale1,scale2,position,verbosity);
 
 }
-void HistogrammSaver::SaveTwoHistosComparison(TString canvasName, TH1 *histo1, TH1 *histo2,double scale1, double scale2, TString position, UInt_t verbosity){
+void HistogrammSaver::SaveTwoHistosComparison(TString canvasName, TH1 *histo1, TH1 *histo2,double scale1, double scale2, TString position, TString drawOption, UInt_t verbosity){
     if(!histo1&&!histo2)return;
       if(!histo1||!histo2){
           if (histo1) SaveHistogram(histo1);
@@ -440,6 +440,10 @@ void HistogrammSaver::SaveTwoHistosComparison(TString canvasName, TH1 *histo1, T
       leg->AddEntry(histo1,histo1->GetName(),"LP");
       leg->AddEntry(histo2,histo2->GetName(),"LP");
       leg->Draw("same");
+      if (drawOption.Contains("logy"))
+          c1->SetLogy();
+      if (drawOption.Contains("logx"))
+                c1->SetLogx();
       c1->Update();
       SaveCanvas(c1);
 }

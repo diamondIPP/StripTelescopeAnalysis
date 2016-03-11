@@ -79,9 +79,9 @@ public:
 	void SaveCanvas(TCanvas* canvas,TString name="");
 	void SaveCanvasROOT(TCanvas* canvas,TString name="");
 	void SaveCanvasPNG(TCanvas* canvas,TString name ="");
-	void SaveTwoHistosScaled(TString canvasName,TH1* histo1,TH1* histo2, TString position = "left", UInt_t verbosity=0);
+	void SaveTwoHistosScaled(TString canvasName,TH1* histo1,TH1* histo2, TString position = "left", TString drawOption = "", UInt_t verbosity=0);
 	void SaveTwoHistos(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "left", UInt_t verbosity=0);
-	void SaveTwoHistosComparison(TString canvasName,TH1* histo1,TH1* histo2,double scaleFirst = 1, double scaleSecond=1, TString position = "left", UInt_t verbosity=0);
+	void SaveTwoHistosComparison(TString canvasName,TH1* histo1,TH1* histo2,double scaleFirst = 1, double scaleSecond=1, TString position = "left", TString drawOption = "", UInt_t verbosity=0);
 	void SaveTwoHistosNormalized(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "right", UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);

@@ -2488,6 +2488,7 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogramWithCellGrid(pxy);
     delete pxy;
     histSaver->SaveHistogram(hNegativeChargeFieldWirePositions);
+    histSaver->SaveHistogramWithCellGrid(hNegativeChargeFieldWirePositions);
     histSaver->SaveOverlay(hNegativeChargeFieldWirePositionsOverlay);
     delete hNegativeChargeFieldWireFraction;
     delete hNegativeChargeFieldWirePositions;
@@ -2495,19 +2496,28 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
 
     histSaver->SaveHistogram(hNegativeChargeFullCellSpectrumAll);
     histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumAll);
-    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAll",hNegativeChargeFullCellSpectrumAll,hNegativeChargeFieldWireSpectrumAll);
+    hNegativeChargeFullCellSpectrumAll->SetTitle("FullCell");
+    hNegativeChargeFullCellSpectrumAll->SetTitle("Bias Column Region");
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAll",hNegativeChargeFullCellSpectrumAll,hNegativeChargeFieldWireSpectrumAll,"left","");
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAll_logy",hNegativeChargeFullCellSpectrumAll,hNegativeChargeFieldWireSpectrumAll,"left","logy");
     delete hNegativeChargeFullCellSpectrumAll;
     delete hNegativeChargeFieldWireSpectrumAll;
 
     histSaver->SaveHistogram(hNegativeChargeFullCellSpectrumAllButBad);
     histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumAllButBad);
-    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAllButBad",hNegativeChargeFullCellSpectrumAllButBad,hNegativeChargeFieldWireSpectrumAllButBad);
+    hNegativeChargeFullCellSpectrumAllButBad->SetTitle("FullCell");
+    hNegativeChargeFullCellSpectrumAllButBad->SetTitle("Bias Column Region");
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAllButBad",hNegativeChargeFullCellSpectrumAllButBad,hNegativeChargeFieldWireSpectrumAllButBad,"left","");
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonAllButBad_logy",hNegativeChargeFullCellSpectrumAllButBad,hNegativeChargeFieldWireSpectrumAllButBad,"left","logy");
     delete hNegativeChargeFullCellSpectrumAllButBad;
     delete hNegativeChargeFieldWireSpectrumAllButBad;
 
     histSaver->SaveHistogram(hNegativeChargeFullCellSpectrumGood);
     histSaver->SaveHistogram(hNegativeChargeFieldWireSpectrumGood);
+    hNegativeChargeFullCellSpectrumGood->SetTitle("FullCell");
+    hNegativeChargeFieldWireSpectrumGood->SetTitle("Bias Column Region");
     histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonGood",hNegativeChargeFullCellSpectrumGood,hNegativeChargeFieldWireSpectrumGood);
+    histSaver->SaveTwoHistosScaled("cNegativeChargeSpectrumComparisonGood_logy",hNegativeChargeFullCellSpectrumGood,hNegativeChargeFieldWireSpectrumGood,"left","logy");
     delete hNegativeChargeFieldWireSpectrumGood;
     delete hNegativeChargeFullCellSpectrumGood;
 
