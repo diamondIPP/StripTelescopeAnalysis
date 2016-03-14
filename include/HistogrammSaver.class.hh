@@ -60,6 +60,9 @@ public:
 	enum EnumAxisRange{
 		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
 	};
+	enum EnumDirection{
+	        positive,negative,
+	    };
 	TFile* GetFilePointer(TString name, TString option="UPDATE");
 	TString GetROOTFileName(TString name="histograms"){return GetFileName(name,"root");}
 	TString GetEpsFileName(TString name="histograms"){return GetFileName(name,"eps");}
@@ -129,6 +132,7 @@ public:
 	void DrawGoodCellsRegion(TCanvas* c1);
 	void SaveHistogramWithCellGrid(TH2* histo, TH2* histo2=0);
     void SaveHistogramWithCellGridAndMarkedCells(TH2* histo, TH2* histo2=0);
+    TH2D* GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir = positive);
 	void SetVerbosity(unsigned int i);
 	void SetRunNumber(unsigned int runNumber);
 	void SetNumberOfEvents(unsigned int nEvents);

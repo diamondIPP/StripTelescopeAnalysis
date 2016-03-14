@@ -3066,6 +3066,28 @@ void HistogrammSaver::CreateResolutionPlots(vector<TH1F*>*vec,TString kind, Int_
     delete hResolutionAllButBadCells;
 }
 
+TH2D* HistogrammSaver::GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir) {
+    if (!histo) return 0;
+    TString name = histo->GetName();
+    name.Append("_cut");
+    TString title = histo->GetTitle();
+    if (dir == positive)
+        title.Append(TString::Format(" cut: x > %f",cut));
+    else
+        title.Append(TString::Format(" cut: x < %f",cut));
+    TH2D* h = (TH2D*) histo->Clone(name);
+    for (UInt_t xbin = 1; xbin <= h->GetNbinsX(); xbin++)
+    for (UInt_t ybin = 1; ybin <= h->GetNbinsY(); ybin++){
+        Float_t val = h->GetBinContent(xbin,ybin);
+        if ( (dir == positive && val > cut) ||
+             (dir == negative && val < cut) )
+            h->SetBinContent(xbin,ybin,1);
+        else
+            h->SetBinContent(xbin,ybin,0);
+    }
+    return h;
+}
+
 void HistogrammSaver::CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix, TString appendix){
     if (!vec) return;
      if (vec->size() == 0) return;
