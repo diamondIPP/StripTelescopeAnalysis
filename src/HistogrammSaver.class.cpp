@@ -3100,8 +3100,6 @@ TH2D* HistogrammSaver::GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir) 
             cout<<TString::Format(" * %2d/%2d: %.3f < %.3f --> %d",xbin,ybin,val,cut,set_val)<<endl;
     }
     cout<<" Found "<<n<<" out of "<<h->GetNbinsX()*h->GetNbinsY()<<" bins fullfilling the cut."<<endl;
-    char t;
-    cin>>t;
     return h;
 }
 
