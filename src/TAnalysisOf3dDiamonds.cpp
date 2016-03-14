@@ -2479,8 +2479,9 @@ void TAnalysisOf3dDiamonds::SaveLongAnalysisHistos() {
     histSaver->SaveHistogramWithCellGrid(hNegativeChargeFieldWireFraction);
     histSaver->SaveHistogramWithCellGridAndMarkedCells(hNegativeChargeFieldWireFraction);
     TH2D* h2 =  histSaver->GetTH2DOfCut(hNegativeChargeFieldWireFraction,0.5);
-    histSaver->SaveNegativeChargeOverlay(h2);
+//    histSaver->SaveNegativeChargeOverlay(h2);
     histSaver->SaveHistogram(h2);
+    histSaver->SaveHistogramWithCellGridAndMarkedCells(h2);
     delete h2;
     histSaver->SaveHistogramWithCellGridAndMarkedCells(hNegativeChargeFieldWireFraction);
     TH1F* h = histSaver->SaveProjectionZ(hNegativeChargeFieldWireFraction,false,false,0,1.05,21);

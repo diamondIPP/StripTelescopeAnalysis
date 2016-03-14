@@ -3068,23 +3068,40 @@ void HistogrammSaver::CreateResolutionPlots(vector<TH1F*>*vec,TString kind, Int_
 
 TH2D* HistogrammSaver::GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir) {
     if (!histo) return 0;
+
     TString name = histo->GetName();
     name.Append("_cut");
+    cout<<"[HistogrammSaver::GetTH2DOfCut]: "<<name<<" x ";
+    if (dir == positive)
+        cout<<" > "<<cut<<endl;
+    else
+        cout<<" < "<<cut<<endl;
     TString title = histo->GetTitle();
     if (dir == positive)
         title.Append(TString::Format(" cut: x > %f",cut));
     else
         title.Append(TString::Format(" cut: x < %f",cut));
     TH2D* h = (TH2D*) histo->Clone(name);
+    h->SetTitle(title);
+    int n = 0;
     for (UInt_t xbin = 1; xbin <= h->GetNbinsX(); xbin++)
     for (UInt_t ybin = 1; ybin <= h->GetNbinsY(); ybin++){
         Float_t val = h->GetBinContent(xbin,ybin);
+        Int_t set_val  = 0;
         if ( (dir == positive && val > cut) ||
              (dir == negative && val < cut) )
-            h->SetBinContent(xbin,ybin,1);
+            set_val = 1;
+        if (set_val)
+            n++;
+        h->SetBinContent(xbin,ybin,set_val);
+        if (dir == positive)
+            cout<<TString::Format(" * %2d/%2d: %.3f > %.3f --> %d",xbin,ybin,val,cut,set_val)<<endl;
         else
-            h->SetBinContent(xbin,ybin,0);
+            cout<<TString::Format(" * %2d/%2d: %.3f < %.3f --> %d",xbin,ybin,val,cut,set_val)<<endl;
     }
+    cout<<" Found "<<n<<" out of "<<h->GetNbinsX()*h->GetNbinsY()<<" bins fullfilling the cut."<<endl;
+    char t;
+    cin>>t;
     return h;
 }
 
