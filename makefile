@@ -33,7 +33,7 @@ LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib $(DEBUG) $(LLABLDFLAGS) -fPIC -Wall -
 
 LIBFILES3D		:=  TAnalysisOf3dDiamonds.o TCellAnalysisClass.o TAnalysisOfAnalysisDifferences.o TAvrgChargePerBinMonteCarlo.o
 LIBFILES3D		+=  TAnalysisOf3DShortAnalysis.o TAnalysisOf3DLongAnalysis.o TAnalysisOf3DResolutionStudies.o TAnalysisOf3DGoodCellsLandau.o
-LIBFILES3D		+=  TAnalysisOf3DStripAnalysis.o
+LIBFILES3D		+=  TAnalysisOf3DStripAnalysis.o TAnalysisOf3DResolution.o
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
 LIBFILES		+=  TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o 
