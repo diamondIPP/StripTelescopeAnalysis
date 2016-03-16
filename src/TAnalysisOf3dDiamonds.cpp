@@ -2759,7 +2759,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_InitResolutionPlots(){
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_FillResolutionPlots(){
-
+    resolutionAnalysis->Fill(diamondCluster,xPredDet,yPredDet);
+    return;
     if (!settings->do3dTransparentAnalysis())
         return;
     UInt_t cellNo = settings->getCellNo(xPredDet,yPredDet);
@@ -2953,6 +2954,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,T
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec,TString kind){
+    delete resolutionAnalysis;
+    return;
     UInt_t nBins = 128;
     Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX =settings->GetCellWidth(subjectDetector,2);
@@ -5495,7 +5498,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
 
 //    if (settings->do3dTransparentAnalysis())
     resolutionAnalysis = new TAnalysisOf3DResolution(settings,histSaver,appendix);
-    LongAnalysis_InitResolutionPlots();
+//    LongAnalysis_InitResolutionPlots();
     LongAnalysis_InitChargeSharingPlots();
     hLongAnalysisInvalidCellNo = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCellNo"+appendix);
     hLongAnalysisInvalidCellNo->SetTitle("hLongAnalysisInvalidCellNo");
