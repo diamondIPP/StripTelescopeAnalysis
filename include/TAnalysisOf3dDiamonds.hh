@@ -31,6 +31,7 @@
 #include "HistogrammSaver.class.hh"
 #include "THTML3DAnalysis.hh"
 #include "TAnalysisOfAnalysisDifferences.hh"
+#include "TAnalysisOf3DResolution.hh"
 #include "LandauGaussFit.hh"
 
 #include "TADCEventReader.hh"
@@ -122,6 +123,7 @@ private:
 	void LongAnalysis_FillOverlayBiasColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(Float_t xRelPosDet,Float_t yRelPosDet, Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
+	TAnalysisOf3DResolution* resolutionAnalysis;
 	void LongAnalysis_FillResolutionPlots();
 	void LongAnalysis_InitResolutionPlots();
 	void LongAnalysis_CreateResolutionPlots();

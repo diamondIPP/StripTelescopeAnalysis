@@ -5494,6 +5494,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
     LongAnalysis_InitGoodCellsLandaus();
 
 //    if (settings->do3dTransparentAnalysis())
+    resolutionAnalysis = new TAnalysisOf3DResolution(settings,histSaver,appendix);
     LongAnalysis_InitResolutionPlots();
     LongAnalysis_InitChargeSharingPlots();
     hLongAnalysisInvalidCellNo = (TH2F*) hValidEventsDetSpace->Clone("hLongAnalysisInvalidCellNo"+appendix);
