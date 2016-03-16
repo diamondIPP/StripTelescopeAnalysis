@@ -300,7 +300,7 @@ void TAnalysisOfAnalysisDifferences::AnalyseTransparentEvent() {
             Float_t yPredDet = predictedPositions->at(eventNo).second;
             pair<Float_t,Float_t> relPos =  settings->getRelativePositionInCell(xPredDet,yPredDet);
             mapHistos["hNoNegativeCharge_RelPosition"]->Fill(relPos.first,relPos.second);
-            cout<<"-->"<<((TH2F*)(mapHistos["hNoNegativeCharge_RelPosition"]))->GetEntries()<<endl;;
+//            cout<<"-->"<<((TH2F*)(mapHistos["hNoNegativeCharge_RelPosition"]))->GetEntries()<<endl;;
             if (posCharge < settings->getLowResponseThreshold()){
                 mapHistos["hNoNegativeChargeLowResponsePosition"]->Fill(xPredDet,yPredDet);
             }
