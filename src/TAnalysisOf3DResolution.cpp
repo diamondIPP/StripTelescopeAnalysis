@@ -81,17 +81,17 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
         histo->Fill(delta_max*cellWidth);
     }
     if (cellNo< vecHResolutionPerCell_maxValue_vs_SNR.size()){
-        TH2F* histo  = vecHResolutionPerCell_maxValue_vs_SNR.at(cellNo);
+        TH2F* histo  = (TH2F*)vecHResolutionPerCell_maxValue_vs_SNR.at(cellNo);
         if (histo)
             histo->Fill(delta_max*cellWidth,snr);
     }
     if (cellNo< vecHResolutionPerCell_maxValue_vs_PredHit.size()){
-        TH2F* histo  = vecHResolutionPerCell_maxValue_vs_PredHit.at(cellNo);
+        TH2F* histo  =  (TH2F*)vecHResolutionPerCell_maxValue_vs_PredHit.at(cellNo);
         if (histo)
             histo->Fill(delta_max*cellWidth,relPredPos);
     }
     if (cellNo< vecHResolutionPerCell_maxValue_vs_PredHitY.size()){
-        TH2F* histo  = vecHResolutionPerCell_maxValue_vs_PredHitY.at(cellNo);
+        TH2F* histo  =  (TH2F*)vecHResolutionPerCell_maxValue_vs_PredHitY.at(cellNo);
         if (histo)
             histo->Fill(delta_max*cellWidth,relPredPosY);
     }
@@ -102,13 +102,13 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
         histo->Fill(delta_Weigthed*cellWidth);
     }
     if (cellNo< vecHResolutionPerCell_chargeWeighted_vs_SNR.size()){
-        TH2F* histo  = vecHResolutionPerCell_chargeWeighted_vs_SNR.at(cellNo);
+        TH2F* histo  = (TH2F*) vecHResolutionPerCell_chargeWeighted_vs_SNR.at(cellNo);
         if (histo)
             histo->Fill(delta_Weigthed*cellWidth,snr);
     }
 
     if (cellNo< vecHResolutionPerCell_chargeWeighted_vs_PredHit.size()){
-        TH2F* histo  = vecHResolutionPerCell_chargeWeighted_vs_PredHit.at(cellNo);
+        TH2F* histo  = (TH2F*) vecHResolutionPerCell_chargeWeighted_vs_PredHit.at(cellNo);
         //cout<<"FILL vecHResolutionPerCell_chargeWeighted_vs_PredHit:"<<cellNo<<"\t"<<relPredPos<<" --> "<<delta*cellWidth<<endl;
         if (histo)
             histo->Fill(delta_Weigthed*cellWidth,relPredPos);
@@ -118,7 +118,7 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
     }
 
     if (cellNo< vecHResolutionPerCell_chargeWeighted_vs_PredHitY.size()){
-        TH2F* histo  = vecHResolutionPerCell_chargeWeighted_vs_PredHitY.at(cellNo);
+        TH2F* histo  = (TH2F*) vecHResolutionPerCell_chargeWeighted_vs_PredHitY.at(cellNo);
         //cout<<"FILL vecHResolutionPerCell_chargeWeighted_vs_PredHit:"<<cellNo<<"\t"<<relPredPos<<" --> "<<delta*cellWidth<<endl;
         if (histo)
             histo->Fill(delta_Weigthed*cellWidth,relPredPosY);
@@ -130,15 +130,15 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
         histo->Fill(delta_h2C*cellWidth);
     }
     if (cellNo< vecHResolutionPerCell_highest2Centroid_vs_SNR.size()){
-        TH2F* histo  = vecHResolutionPerCell_highest2Centroid_vs_SNR.at(cellNo);
+        TH2F* histo  = (TH2F*) vecHResolutionPerCell_highest2Centroid_vs_SNR.at(cellNo);
         if (histo) histo->Fill(delta_h2C*cellWidth,snr);
     }
     if (cellNo< vecHResolutionPerCell_highest2Centroid_vs_PredHit.size()){
-        TH2F* histo  = vecHResolutionPerCell_highest2Centroid_vs_PredHit.at(cellNo);
+        TH2F* histo  =  (TH2F*)vecHResolutionPerCell_highest2Centroid_vs_PredHit.at(cellNo);
         if (histo)  histo->Fill(delta_h2C*cellWidth,relPredPos);
     }
     if (cellNo< vecHResolutionPerCell_highest2Centroid_vs_PredHitY.size()){
-        TH2F* histo  = vecHResolutionPerCell_highest2Centroid_vs_PredHitY.at(cellNo);
+        TH2F* histo  = (TH2F*)vecHResolutionPerCell_highest2Centroid_vs_PredHitY.at(cellNo);
         if (histo)  histo->Fill(delta_h2C*cellWidth,relPredPosY);
     }
 
@@ -150,16 +150,16 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
         histo->Fill(delta*cellWidth);
     }
     if (cellNo< vecHResolutionPerCell_h2C_WithCut_vs_SNR.size()){
-        TH2F* histo  = vecHResolutionPerCell_h2C_WithCut_vs_SNR.at(cellNo);
+        TH2F* histo  = (TH2F*)vecHResolutionPerCell_h2C_WithCut_vs_SNR.at(cellNo);
         if (histo) histo->Fill(delta*cellWidth,snr);
     }
     if (cellNo< vecHResolutionPerCell_h2C_WithCut_vs_PredHit.size()){
-        TH2F* histo  = vecHResolutionPerCell_h2C_WithCut_vs_PredHit.at(cellNo);
+        TH2F* histo  = (TH2F*)vecHResolutionPerCell_h2C_WithCut_vs_PredHit.at(cellNo);
         if (histo)  histo->Fill(delta*cellWidth,relPredPos);
     }
 
     if (cellNo< vecHResolutionPerCell_h2C_WithCut_vs_PredHitY.size()){
-        TH2F* histo  = vecHResolutionPerCell_h2C_WithCut_vs_PredHitY.at(cellNo);
+        TH2F* histo  = (TH2F*)vecHResolutionPerCell_h2C_WithCut_vs_PredHitY.at(cellNo);
         if (histo)  histo->Fill(delta*cellWidth,relPredPosY);
     }
 }

@@ -3106,7 +3106,7 @@ TH2D* HistogrammSaver::GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir) 
 void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString prefix, TString appendix){
     if (!vec) return;
      if (vec->size() == 0) return;
-     TH2F* histo = vec->at(0);
+     TH2* histo = (TH2*)vec->at(0);
      if (!histo) return;
      if (kind != "" && !kind.BeginsWith("_"))
          kind.Prepend("_");
@@ -3137,8 +3137,9 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      new_plots_path+="/";
      HistogrammSaver newHistSaver(settings);
      newHistSaver.SetPlotsPath(new_plots_path);
+     //TH2* histo;
      for(UInt_t cell=0;cell< vec->size();cell++){
-         TH2F* histo = vec->at(cell);
+         histo = (TH2*)vec->at(cell);
          if (!histo)
              continue;
          if (settings->IsGoodCell(3,cell))
