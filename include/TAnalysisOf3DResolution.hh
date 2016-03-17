@@ -13,6 +13,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <map>
 #include <deque>
 #include <algorithm>    // std::min_element, std::max_element
 
@@ -63,6 +64,7 @@ class TAnalysisOf3DResolution {
         vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_PredHitY;
         vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHit;
         vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHitY;
+        std::map< TString, std::vector<TH1*> > cellHistos;
         bool useCMN;
 };
 

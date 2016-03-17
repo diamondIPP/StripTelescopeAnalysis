@@ -156,22 +156,39 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
 }
 
 void TAnalysisOf3DResolution::initialiseHistos() {
+
+    TString key,  cellName;
     UInt_t nCells = settings->GetNCells3d();
     UInt_t nBins = 128;
     Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
     TString name = "hAdjacentSNR_vs_cellNo"+appendix;
     TString title = "hAdjacentSNR_vs_cellNo"+appendix;
+
     title+=";Cell No;SNR adjacent Strip";
     hAdjacentSNR_vs_cellNo = new TH2F(name,title,nCells,0,nCells,160,-30,50);
     name = "hAdjacentChannels_Signal"+appendix;
     title = "hAdjacentChannels_Signal"+appendix;
     title+=";Signal left Strip / ADC No;Signal right Strip / ADC";
     hAdjacentChannels_Signal = new TH2F(name,title,300,-300,300,300,-300,300);
+    TH1* histo;
     for (UInt_t cell = 0; cell <nCells;cell++){
+        cellName = TString::Format("hResolution_CellNo_%02d_",cell);
+
+        key = "h2C_vs_Eta";
+        name = cellName+key+appendix;
+        title = name+";residualt_{h2C}/#um;Eta = #frac{S_R}{S_L+S_R}";
+        histo = new TH2F(name,name,nBins,minX,maxX,nBins,0,1);
+        if (cellHistos.find(key) == cellHistos.end() ){
+            cellHistos[key] = vector<TH1*>;
+            cout<<"Add "<<key<<" to cellHistoMap"<<endl;
+        }
+        cellHistos[key].push_back(histo);
+        cout<<" * Add Histo: " <<name<<endl;
+
         name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
-        TH1F* histo = new TH1F(name,title,nBins,minX,maxX);
+        histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_maxValue.push_back(histo);
         /*******/
