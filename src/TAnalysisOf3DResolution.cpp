@@ -187,13 +187,13 @@ void TAnalysisOf3DResolution::initialiseHistos() {
         key = "h2C_vs_Eta";
         name = cellName+key+appendix;
         title = name+";residualt_{h2C}/#um;Eta = #frac{S_R}{S_L+S_R}";
-        histo = new TH2F(name,name,nBins,minX,maxX,nBins,0,1);
+        histo = new TH2F(name,name,nBins,minX,maxX,nBins,-1,1);
         if (cellHistos.find(key) == cellHistos.end() ){
             cellHistos[key] = vector<TH1*>();
-            cout<<"Add "<<key<<" to cellHistoMap"<<endl;
+//            cout<<"Add "<<key<<" to cellHistoMap"<<endl;
         }
         cellHistos[key].push_back((TH1F*)histo);
-        cout<<" * Add Histo: " <<name<<endl;
+//        cout<<" * Add Histo: " <<name<<endl;
 
         name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
