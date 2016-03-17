@@ -180,35 +180,35 @@ void TAnalysisOf3DResolution::initialiseHistos() {
         title = name+";residualt_{h2C}/#um;Eta = #frac{S_R}{S_L+S_R}";
         histo = new TH2F(name,name,nBins,minX,maxX,nBins,0,1);
         if (cellHistos.find(key) == cellHistos.end() ){
-            cellHistos[key] = vector<TH1*>;
+            cellHistos[key] = vector<TH1*>();
             cout<<"Add "<<key<<" to cellHistoMap"<<endl;
         }
-        cellHistos[key].push_back(histo);
+        cellHistos[key].push_back((TH1F*)histo);
         cout<<" * Add Histo: " <<name<<endl;
 
         name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
-        vecHResolutionPerCell_maxValue.push_back(histo);
+        vecHResolutionPerCell_maxValue.push_back((TH1F*)histo);
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
-        vecHResolutionPerCell_chargeWeighted.push_back(histo);
+        vecHResolutionPerCell_chargeWeighted.push_back((TH1F*)histo);
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
-        vecHResolutionPerCell_highest2Centroid.push_back(histo);
+        vecHResolutionPerCell_highest2Centroid.push_back((TH1F*)histo);
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_h2C_withCut",cell)+appendix;
         title = TString::Format("hResolution Cell %02d - h2C with SNR Cut: %2.1f",cell,settings->GetResolutionSNR());;
         histo = new TH1F(name,title,nBins,minX,maxX);
         histo->GetXaxis()->SetTitle("Residual / #mum");
-        vecHResolutionPerCell_h2C_WithCut.push_back(histo);
+        vecHResolutionPerCell_h2C_WithCut.push_back((TH1F*)histo);
 
         /*******  RESOLUTION VS SNR *********/
         name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_SNR",cell)+appendix;
