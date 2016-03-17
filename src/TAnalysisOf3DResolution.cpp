@@ -315,32 +315,35 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 }
 
 void TAnalysisOf3DResolution::saveHistos() {
-
+    std::cout<<"[TAnalysisOf3DResolution::saveHistos()] "<<flush;
     if (!settings->do3dTransparentAnalysis())
         return;
     TString prefix = "hResolution";
+    cout<<0<<flush;
     histSaver->CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted",subjectDetector,appendix);
     histSaver->CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid,"highest2Centroid",subjectDetector,appendix);
     histSaver->CreateResolutionPlots(&vecHResolutionPerCell_maxValue,"maxValue",subjectDetector,appendix);
     histSaver->CreateResolutionPlots(&vecHResolutionPerCell_h2C_WithCut,"h2C_WithCut",subjectDetector,appendix);
 
+    cout<<1<<flush;
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_maxValue_vs_SNR,"maxValue_SNR",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_SNR,"chargeWeighted_SNR",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_SNR,"highest2Centroid_SNR",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_SNR,"h2C_WithCut_SNR",prefix,appendix);
 
+    cout<<2<<flush;
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_maxValue_vs_PredHit,"maxValue_PredHit",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHit,"chargeWeighted_PredHit",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHit,"highest2Centroid_PredHit",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHit,"h2C_WithCut_PredHit",prefix,appendix);
 
-
+    cout<<3<<flush;
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_maxValue_vs_PredHitY,"maxValue_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHitY,"chargeWeighted_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHitY,"highest2Centroid_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHitY,"h2C_WithCut_PredHitY",prefix,appendix);
 
-
+    cout<<4<<flush;
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
     histSaver->SaveHistogram(hAdjacentChannels_Signal);
     TH1D* pLeft = hAdjacentChannels_Signal->ProjectionX("hSNR_left");
@@ -357,7 +360,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     delete pLeft;
     delete pRight;
 
-
+    cout<<5<<flush;
     TH1D* pMax = hAdjacentSNR_vs_cellNo->ProjectionY("hAdjacentSNR");
     pMax->SetTitle("SNR max");
     histSaver->SaveHistogram(pMax);
@@ -381,43 +384,62 @@ void TAnalysisOf3DResolution::saveHistos() {
     delete pLeft;
     delete pRight;
     delete pMax;
+    cout<<"  -> DONE "<<endl;
     //    LongAnalysis_SaveSNRPerCell();
 }
 
 void TAnalysisOf3DResolution::deleteHistos() {
+    cout<<"[TAnalysisOf3DResolution::deleteHistos]"<<endl;
     delete hAdjacentSNR_vs_cellNo;
     delete hAdjacentChannels_SNR;
     delete hAdjacentChannels_Signal;
+    cout<<"* vecHResolutionPerCell_maxValue"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_maxValue.size();i++)
         delete vecHResolutionPerCell_maxValue[i];
+    cout<<"* vecHResolutionPerCell_chargeWeighted"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_chargeWeighted.size();i++)
         delete vecHResolutionPerCell_chargeWeighted[i];
+    cout<<"* vecHResolutionPerCell_highest2Centroid"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_highest2Centroid.size();i++)
         delete vecHResolutionPerCell_highest2Centroid[i];
+    cout<<"* vecHResolutionPerCell_h2C_WithCut"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_h2C_WithCut.size();i++)
         delete vecHResolutionPerCell_h2C_WithCut[i];
+    cout<<"* vecHResolutionPerCell_maxValue_vs_SNR"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_maxValue_vs_SNR.size();i++)
         delete vecHResolutionPerCell_maxValue_vs_SNR[i];
+    cout<<"* vecHResolutionPerCell_chargeWeighted_vs_SNR"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_chargeWeighted_vs_SNR.size();i++)
         delete vecHResolutionPerCell_chargeWeighted_vs_SNR[i];
+    cout<<"* vecHResolutionPerCell_highest2Centroid_vs_SNR"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_highest2Centroid_vs_SNR.size();i++)
         delete vecHResolutionPerCell_highest2Centroid_vs_SNR[i];
+    cout<<"* vecHResolutionPerCell_h2C_WithCut_vs_SNR"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_h2C_WithCut_vs_SNR.size();i++)
         delete vecHResolutionPerCell_h2C_WithCut_vs_SNR[i];
+    cout<<"* vecHResolutionPerCell_maxValue_vs_PredHit"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_maxValue_vs_PredHit.size();i++)
         delete vecHResolutionPerCell_maxValue_vs_PredHit[i];
+    cout<<"* vecHResolutionPerCell_maxValue_vs_PredHitY"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_maxValue_vs_PredHitY.size();i++)
         delete vecHResolutionPerCell_maxValue_vs_PredHitY[i];
+    cout<<"* vecHResolutionPerCell_chargeWeighted_vs_PredHit"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_chargeWeighted_vs_PredHit.size();i++)
         delete vecHResolutionPerCell_chargeWeighted_vs_PredHit[i];
+    cout<<"* vecHResolutionPerCell_chargeWeighted_vs_PredHitY"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_chargeWeighted_vs_PredHitY.size();i++)
         delete vecHResolutionPerCell_chargeWeighted_vs_PredHitY[i];
+    cout<<"* vecHResolutionPerCell_highest2Centroid_vs_PredHit"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_highest2Centroid_vs_PredHit.size();i++)
         delete vecHResolutionPerCell_highest2Centroid_vs_PredHit[i];
+    cout<<"* vecHResolutionPerCell_highest2Centroid_vs_PredHitY"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_highest2Centroid_vs_PredHitY.size();i++)
         delete vecHResolutionPerCell_highest2Centroid_vs_PredHitY[i];
+    cout<<"* vecHResolutionPerCell_h2C_WithCut_vs_PredHit"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_h2C_WithCut_vs_PredHit.size();i++)
         delete vecHResolutionPerCell_h2C_WithCut_vs_PredHit[i];
+    cout<<"* vecHResolutionPerCell_h2C_WithCut_vs_PredHitY"<<endl;
     for (UInt_t i = 0; i < vecHResolutionPerCell_h2C_WithCut_vs_PredHitY.size();i++)
         delete vecHResolutionPerCell_h2C_WithCut_vs_PredHitY[i];
+    cout<<"DONE"<<endl;
 }
