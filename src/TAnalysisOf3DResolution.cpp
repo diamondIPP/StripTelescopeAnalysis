@@ -61,8 +61,8 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
         cout<<"\n "<<pos_max<<" "<<predPos<<" "<<delta_max<<" "<<delta_Weigthed<<" "<<delta_h2C<< " "<<relPredPos<<" "<<relPred.first<<"/"<<relPred.second<<endl;
     Int_t leftChannel;
     Float_t eta = diamondCluster->getEta(leftChannel,useCMN);
-    cout<<"ETA: "<<eta<<": leftChannel:"<<leftChannel<<endl;
-    diamondCluster->Print(1);
+    //cout<<"\nETA: "<<eta<<": leftChannel:"<<leftChannel<<endl;
+    //diamondCluster->Print(1);
 
 
     TH1* h;
