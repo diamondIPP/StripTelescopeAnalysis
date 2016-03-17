@@ -396,6 +396,8 @@ void TTransparentAnalysis::initHistograms() {
 
         hLandau.push_back(new TH1F(histNameLandau.str().c_str(),histNameLandau.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
         hLandau2Highest.push_back(new TH1F(histNameLandau2Highest.str().c_str(),histNameLandau2Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+        histNameLandau2Highest<<"_noCMC";
+        hLandau2Highest_nonCMC.push_back(new TH1F(histNameLandau2Highest.str().c_str(),histNameLandau2Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
         this->hLandau1Highest.push_back(new TH1F(histNameLandau1Highest.str().c_str(),histNameLandau1Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
 
 
@@ -455,11 +457,12 @@ void TTransparentAnalysis::fillHistograms() {
         Float_t charge = this->transparentClusters.getCharge(cmCorrected);
 
         Float_t chargeOfTwo = this->transparentClusters.getCharge(2,cmCorrected);
-
+        Float_t chargeOfTwo_noCMC= this->transparentClusters.getCharge(2,false);
         fillPHvsEventNoAreaPlots(area,clusterSize+1,charge,chargeOfTwo);
         vecVecLandau[clusterSize].push_back(charge);
         hLandau[clusterSize]->Fill(charge);
         hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
+        hLandau2Highest_nonCMC[clusterSize]->Fill(chargeOfTwo_noCMC);
         vecVecPh2Highest[clusterSize].push_back(chargeOfTwo);
         if (clusterSize<hLandau2HighestProfile2D.size())
             if (hLandau2HighestProfile2D[clusterSize])
@@ -742,6 +745,7 @@ void TTransparentAnalysis::fitHistograms() {
         if(fit==0){cout<<"PROBLEM with fit..."<<clusterSize<<endl;}
         fitLandau.push_back(fit);
         fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLandau2Highest[clusterSize],true));
+        TF1* trash_fit = landauGauss->doLandauGaussFit(hLandau2Highest_nonCMC[clusterSize],true);
         if(clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1){
             Float_t mean;
             if(hLandau2Highest[clusterSize]) mean = hLandau2Highest[clusterSize]->GetMean();
@@ -1490,6 +1494,7 @@ void TTransparentAnalysis::saveHistograms() {
         //		if (clusterSize == 0) {
         histSaver->SaveHistogramLandau(hLandau[clusterSize]);
         histSaver->SaveHistogramLandau(hLandau2Highest[clusterSize]);
+        histSaver->SaveHistogramLandau(hLandau2Highest_nonCMC[clusterSize]);
         histSaver->SaveHistogramLandau(hLandauFixedNoise[clusterSize]);
         histSaver->SaveHistogramLandau(hLandau2HighestFixedNoise[clusterSize]);
         histSaver->SaveHistogramLandau(hLandau1Highest[clusterSize]);
@@ -1647,6 +1652,7 @@ void TTransparentAnalysis::deleteHistograms() {
     for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
         if(hLandau[clusterSize]) delete hLandau[clusterSize];
         if(hLandau2Highest[clusterSize])delete hLandau2Highest[clusterSize];
+        if(hLandau2Highest_nonCMC[clusterSize])delete hLandau2Highest_nonCMC[clusterSize];
         if(hLandau1Highest[clusterSize])delete hLandau1Highest[clusterSize];
         if ( hEta[clusterSize]) delete hEta[clusterSize];
         if ( hEtaCMNcorrected[clusterSize]) delete hEtaCMNcorrected[clusterSize];

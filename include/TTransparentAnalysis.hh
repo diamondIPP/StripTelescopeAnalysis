@@ -198,6 +198,7 @@ private:
 	TH1F* hPredictedPositionInStrip;
 	
 	vector<TH1F*> hLandau2Highest;
+	vector<TH1F*> hLandau2Highest_nonCMC;
 	vector<TH1F*> hLandau1Highest;
 	vector<TH1F*> hLandau2HighestFixedNoise;
 	vector <TH1F*> hLandauFixedNoise;
