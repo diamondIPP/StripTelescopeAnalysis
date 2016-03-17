@@ -59,7 +59,16 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
     relPred.second-=settings->GetCellHeight()/2.;
     if (TMath::Abs(relPredPos-relPred.first) > 5)
         cout<<"\n "<<pos_max<<" "<<predPos<<" "<<delta_max<<" "<<delta_Weigthed<<" "<<delta_h2C<< " "<<relPredPos<<" "<<relPred.first<<"/"<<relPred.second<<endl;
-    //diamondCluster->Print(1);
+    Int_t leftChannel;
+    Float_t eta = diamondCluster->getEta(leftChannel,useCMN);
+    cout<<"ETA: "<<eta<<": leftChannel:"<<leftChannel<<endl;
+    diamondCluster->Print(1);
+
+
+    TH1* h;
+    TString key = "h2C_vs_Eta";
+    if (cellNo < cellHistos[key].size() && cellHistos[key].at(cellNo))
+        cellHistos[key].at(cellNo)->Fill(delta_h2C*cellWidth,eta);
 
     if (!diamondCluster->getClusterSize() || snr < -100){
         cout<<"ERROR: POS: "<<predPos<<" / "<<pos_max<<"/"<<pos_h2c<<"/"<<pos_weighted
