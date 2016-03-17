@@ -3103,7 +3103,7 @@ TH2D* HistogrammSaver::GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir) 
     return h;
 }
 
-void HistogrammSaver::CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix, TString appendix){
+void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString prefix, TString appendix){
     if (!vec) return;
      if (vec->size() == 0) return;
      TH2F* histo = vec->at(0);

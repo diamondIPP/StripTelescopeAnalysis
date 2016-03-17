@@ -36,6 +36,7 @@ class TAnalysisOf3DResolution {
         virtual ~TAnalysisOf3DResolution();
         void Fill(TCluster* clus,Float_t xPredDet,Float_t yPredDet);
     private:
+        typedef std::map< TString, std::vector<TH1*> > TCellHistoMap;
         void initialiseHistos();
         void saveHistos();
         void deleteHistos();
@@ -64,7 +65,7 @@ class TAnalysisOf3DResolution {
         vector<TH2F*> vecHResolutionPerCell_highest2Centroid_vs_PredHitY;
         vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHit;
         vector<TH2F*> vecHResolutionPerCell_h2C_WithCut_vs_PredHitY;
-        std::map< TString, std::vector<TH1*> > cellHistos;
+        TCellHistoMap cellHistos;
         bool useCMN;
 };
 
