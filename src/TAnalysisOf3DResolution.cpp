@@ -169,8 +169,8 @@ void TAnalysisOf3DResolution::initialiseHistos() {
     TString key,  cellName;
     UInt_t nCells = settings->GetNCells3d();
     UInt_t nBins = 128;
-    Float_t minX = - 1*settings->GetCellWidth(subjectDetector,2);
-    Float_t maxX = 1*settings->GetCellWidth(subjectDetector,2);
+    Float_t minX = - 1.5*settings->GetCellWidth(subjectDetector,2);
+    Float_t maxX = 1.5*settings->GetCellWidth(subjectDetector,2);
     TString name = "hAdjacentSNR_vs_cellNo"+appendix;
     TString title = "hAdjacentSNR_vs_cellNo"+appendix;
 
