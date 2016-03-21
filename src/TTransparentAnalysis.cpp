@@ -341,6 +341,7 @@ void TTransparentAnalysis::setSettings(TSettings* settings) {
 }
 void TTransparentAnalysis::initHistograms2() {
     UInt_t bins = 128;
+    TString name,title;
     for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
         TString nameProfile =  TString::Format("hLandau2HighestHitProfile_%d",clusterSize+1);
         TProfile2D* hLandau2HighestHitProfile = new TProfile2D(nameProfile,nameProfile, bins ,predXMin,predXMax,bins,predYMin,predXMax);
@@ -348,6 +349,23 @@ void TTransparentAnalysis::initHistograms2() {
         hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
         hLandau2HighestHitProfile->GetXaxis()->SetTitle(TString::Format("Avrg Mean Charge, 2 highest in %d",clusterSize+1));
         hLandau2HighestProfile2D.push_back(hLandau2HighestHitProfile);
+
+        name = TString::Format("hLandau2HighestFidCutX_2outOf%02d",clusterSize+1);
+        title = name + ";pulse height / ADC;FidCutX / ch";
+        hLandau2HighestFidCutX = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                256,0,255);
+        name = TString::Format("hLandau2HighestFidCutY_2outOf%02d",clusterSize+1);
+        title = name + ";pulse height / ADC;FidCutY / ch";
+        hLandau2HighestFidCutY = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                256,0,255);
+        name = TString::Format("hLandau2HighestPredHitX_2outOf%02d",clusterSize+1);
+        title = name + ";pulse height / ADC;PredHitX / ch";
+        hLandau2HighestPredX = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                bins ,predXMin,predXMax);
+        name = TString::Format("hLandau2HighestPredHitY_2outOf%02d",clusterSize+1);
+        title = name + ";pulse height / ADC;PredHitY / ch";
+        hLandau2HighestPredY = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                bins ,predYMin,predYMax);
     }
 }
 
@@ -442,7 +460,9 @@ void TTransparentAnalysis::fillClusteredHistos(){
 
 void TTransparentAnalysis::fillHistograms() {
     hSelectedTracksAvrgSiliconHitPos->Fill(eventReader->getFiducialValueX(),eventReader->getFiducialValueY());
-    vecVecFidCutX.push_back(eventReader->getFiducialValueX());
+    Float_t fidCutX = eventReader->getFiducialValueX();
+    Float_t fidCutY = eventReader->getFiducialValueY();
+    vecVecFidCutX.push_back(fidCutX);
     vecVecFidCutY.push_back(eventReader->getFiducialValueY());
     vecPredX.push_back(predXPosition);
     vecPredY.push_back(predYPosition);
@@ -467,6 +487,10 @@ void TTransparentAnalysis::fillHistograms() {
         if (clusterSize<hLandau2HighestProfile2D.size())
             if (hLandau2HighestProfile2D[clusterSize])
                 hLandau2HighestProfile2D[clusterSize]->Fill(predXPosition,predYPosition,chargeOfTwo);
+        hLandau2HighestFidCutX[clusterSize]->Fill(chargeOfTwo,fidCutX);
+        hLandau2HighestFidCutY[clusterSize]->Fill(chargeOfTwo,fidCutY);
+        hLandau2HighestPredX[clusterSize]->Fill(chargeOfTwo,predXPosition);
+        hLandau2HighestPredY[clusterSize]->Fill(chargeOfTwo,predYPosition);
         Float_t eta = this->transparentClusters.getEta();
 
         Float_t etaCMN = this->transparentClusters.getEta(true);
@@ -1502,6 +1526,11 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize]);
         histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
         histSaver->SaveHistogram(hLandau2HighestProfile2D[clusterSize]);
+        histSaver->SaveHistogram(hLandau2HighestFidCutX[clusterSize]);
+        histSaver->SaveHistogram(hLandau2HighestFidCutY[clusterSize]);
+        histSaver->SaveHistogram(hLandau2HighestPredX[clusterSize]);
+        histSaver->SaveHistogram(hLandau2HighestPredY[clusterSize]);
+//        delete hLandau2HighestProfile2D[clusterSize];
         //			TCanvas *c1 = new TCanvas(TString::Format("cLandau_clusterSize%02d_both",clusterSize+1));
         //			c1->cd();
         //			hLandau[clusterSize]->Draw();
