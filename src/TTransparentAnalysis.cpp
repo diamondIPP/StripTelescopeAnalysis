@@ -352,20 +352,20 @@ void TTransparentAnalysis::initHistograms2() {
 
         name = TString::Format("hLandau2HighestFidCutX_2outOf%02d",clusterSize+1);
         title = name + ";pulse height / ADC;FidCutX / ch";
-        hLandau2HighestFidCutX = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                256,0,255);
+        hLandau2HighestFidCutX.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                256,0,255));
         name = TString::Format("hLandau2HighestFidCutY_2outOf%02d",clusterSize+1);
         title = name + ";pulse height / ADC;FidCutY / ch";
-        hLandau2HighestFidCutY = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                256,0,255);
+        hLandau2HighestFidCutY.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                256,0,255));
         name = TString::Format("hLandau2HighestPredHitX_2outOf%02d",clusterSize+1);
         title = name + ";pulse height / ADC;PredHitX / ch";
-        hLandau2HighestPredX = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                bins ,predXMin,predXMax);
+        hLandau2HighestPredX.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                bins ,predXMin,predXMax));
         name = TString::Format("hLandau2HighestPredHitY_2outOf%02d",clusterSize+1);
         title = name + ";pulse height / ADC;PredHitY / ch";
-        hLandau2HighestPredY = new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                bins ,predYMin,predYMax);
+        hLandau2HighestPredY.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
+                bins ,predYMin,predYMax));
     }
 }
 
