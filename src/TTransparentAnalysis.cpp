@@ -126,11 +126,11 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
+    initHistograms2();
 
     createEventVector(startEvent);
     cout<<"X: "<<predXMin<<" - "<<predXMax<<endl;
     cout<<"Y: "<<predYMin<<" - "<<predYMax<<endl;
-    initHistograms2();
     usedForAlignment += newstartEvent;
 
     this->printCutFlow();
