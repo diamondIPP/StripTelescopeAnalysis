@@ -343,7 +343,7 @@ void TTransparentAnalysis::initHistograms2() {
     UInt_t bins = 128;
     TString name,title;
     for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-        TString nameProfile =  TString::Format("hLandau2HighestHitProfile_%d",clusterSize+1);
+        TString nameProfile =  TString::Format("hLandau2HighestHitProfile_2OutOf%02d",clusterSize+1);
         TProfile2D* hLandau2HighestHitProfile = new TProfile2D(nameProfile,nameProfile, bins ,predXMin,predXMax,bins,predYMin,predXMax);
         hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
         hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
@@ -1525,11 +1525,20 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize]);
         histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize]);
         histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
-        histSaver->SaveHistogram(hLandau2HighestProfile2D[clusterSize]);
-        histSaver->SaveHistogram(hLandau2HighestFidCutX[clusterSize]);
-        histSaver->SaveHistogram(hLandau2HighestFidCutY[clusterSize]);
-        histSaver->SaveHistogram(hLandau2HighestPredX[clusterSize]);
-        histSaver->SaveHistogram(hLandau2HighestPredY[clusterSize]);
+        TProfile* prof;
+        histSaver->SaveHistogram(hLandau2HighestProfile2D[clusterSize],true,false);
+        histSaver->SaveHistogram(hLandau2HighestFidCutX[clusterSize],true,false);
+        prof = hLandau2HighestFidCutX[clusterSize]->ProfileY();
+        prof->GetYaxis()->SetTitle("avrg. Pulse Height /adc");
+        histSaver->SaveHistogram(hLandau2HighestFidCutY[clusterSize],true,false);
+        prof = hLandau2HighestFidCutY[clusterSize]->ProfileY();
+        prof->GetYaxis()->SetTitle("avrg. Pulse Height /adc");
+        histSaver->SaveHistogram(hLandau2HighestPredX[clusterSize],true,false);
+        prof = hLandau2HighestPredX[clusterSize]->ProfileY();
+        prof->GetYaxis()->SetTitle("avrg. Pulse Height /adc");
+        histSaver->SaveHistogram(hLandau2HighestPredY[clusterSize],true,false);
+        prof = hLandau2HighestPredY[clusterSize]->ProfileY();
+        prof->GetYaxis()->SetTitle("avrg. Pulse Height /adc");
 //        delete hLandau2HighestProfile2D[clusterSize];
         //			TCanvas *c1 = new TCanvas(TString::Format("cLandau_clusterSize%02d_both",clusterSize+1));
         //			c1->cd();
