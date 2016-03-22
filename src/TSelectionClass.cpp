@@ -772,12 +772,13 @@ void TSelectionClass::saveHistos()
         delete c1;
         c1 = 0;
     }
-
-    hProjection = hFiducialCutSiliconRoughCut->ProjectionX("hFidCutSilicon_OneAndOnlyOneClusterAndDiamondHit_RoughCut_px");
-    hProjection->SetTitle("One and only one silicon + >= 1 Diamond Hit in Rough FidCut - Projection X");
-    cout<<"\nSaving: "<<hProjection->GetName()<<" "<<hProjection->GetEntries()<<endl;
-    histSaver->SaveHistogram(hProjection);
-    delete hProjection;
+    if (hFiducialCutSiliconRoughCut && !hFiducialCutSiliconRoughCut->IsZombie()){
+        hProjection = hFiducialCutSiliconRoughCut->ProjectionX("hFidCutSilicon_OneAndOnlyOneClusterAndDiamondHit_RoughCut_px");
+        hProjection->SetTitle("One and only one silicon + >= 1 Diamond Hit in Rough FidCut - Projection X");
+        cout<<"\nSaving: "<<hProjection->GetName()<<" "<<hProjection->GetEntries()<<endl;
+        histSaver->SaveHistogram(hProjection);
+        delete hProjection;
+    }
     name = hFiducialCutSiliconDiamondHit->GetName();
     name.Insert(0,"c");
     c1 = fiducialCuts->getAllFiducialCutsCanvas(hFiducialCutSiliconDiamondHit,true);

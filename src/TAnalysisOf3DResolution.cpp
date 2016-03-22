@@ -180,6 +180,16 @@ void TAnalysisOf3DResolution::initialiseHistos() {
     title = "hAdjacentChannels_Signal"+appendix;
     title+=";Signal left Strip / ADC No;Signal right Strip / ADC";
     hAdjacentChannels_Signal = new TH2F(name,title,300,-300,300,300,-300,300);
+
+
+
+    name = "hAdjacentChannels_SNR"+appendix;
+    title = "SNR of adjacent channels";
+    hAdjacentChannels_SNR = new TH2F(name,title,160,-30,50,160,-30,50);
+    hAdjacentChannels_SNR->GetXaxis()->SetTitle("SNR left strip");
+    hAdjacentChannels_SNR->GetYaxis()->SetTitle("SNR right strip");
+    hAdjacentChannels_SNR->GetZaxis()->SetTitle("number of entries");
+
     TH1* histo;
     for (UInt_t cell = 0; cell <nCells;cell++){
         cellName = TString::Format("hResolution_CellNo_%02d_",cell);
@@ -402,6 +412,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     delete pLeft;
     delete pRight;
     delete pMax;
+    delete hAdjacentChannels_SNR;
     cout<<"  -> DONE "<<endl;
     //    LongAnalysis_SaveSNRPerCell();
 }

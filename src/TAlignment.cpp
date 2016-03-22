@@ -1019,7 +1019,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             nInvalidPredictedRelPos++;
         }
         if (useEvent && relHitPosMeasuredMetric == N_INVALID){
-            cout<<" Invalid relHitPosMeasuredMetric"<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<relHitPosMeasuredMetric<<endl;
+            cout<<" Invalid relHitPosMeasuredMetric"<<xDetMeasuredMetric<<"/"<<yDetMeasuredMetric<<" -- "<<relHitPosPredictedMetric<<"/"<<subjectDet<<"/"<<relHitPosMeasuredMetric<<endl;
             useEvent = false;
             nInvalidMeasuredRelPos++;
         }
@@ -1126,9 +1126,15 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         cout << "nInvalidMeasuredRelPos:       "<< nInvalidMeasuredRelPos << endl;
         cout << "nIgnoreForStripAlignment:     "<< nIgnoreForStripAlignment << endl;
         cout << "nInvalidSiliconChi2Cut:       "<< nInvalidSiliconChi2Cut << endl;
+        cout << "TAlignment::get";
+        if(isStripAlignment)cout<<"SingleStrip";
+        cout<<"Residual of Plane " << subjectPlane << TPlaneProperties::getCoordinateString(cor);
+        cout << " with " << refPlaneString << ", plotting: " << bPlot<< ", using "<<events.size()<<" Events\t";
+
         cerr<< "cannot calculate Residual/Alignment for 0 Events. BREAK!"<<endl;
         align->PrintResults(1);
         cerr<< "cannot calculate Residual/Alignment for 0 Events. BREAK!"<<endl;
+
         exit(-1);
     }
     if (verbosity > 2)

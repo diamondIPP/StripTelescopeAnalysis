@@ -91,9 +91,15 @@ HistogrammSaver::~HistogrammSaver() {
 void HistogrammSaver::MoveRootFilesInSubfolder(){
     stringstream test;
     test << "find "<<plots_path<<" -maxdepth 1 -iname \"*.root\" -exec mv -f {} "<<plots_path<<"/root/  \\;";
-    //    test<< "mv -f -E ignore -I "<<plots_path<<"/*.root "<<plots_path<<"/root/";
-    cout<<"Execute: \""<<test.str()<<"\""<<endl;
-    system(test.str().c_str());//t.str();//<<"\""<<endl;
+    TString toPath = plots_path +"/root/";
+    TString fromPath = plots_path +"/*.root";
+    TString executeString = "mkdir -p "+toPath;
+//    cout<<"MoveRootFilesInSubfolder: Execute: \""<<executeString<<"\", "<<flush;
+    system(executeString);
+    executeString ="mv  -f -u "+fromPath+" "+toPath;
+//    cout<<"Execute: \""<<executeString<<"\",..."<<flush;
+    system(executeString);//t.str();//<<"\""<<endl;
+//    cout<<"DONE"<<endl;
 }
 
 void HistogrammSaver::SetPaperPlotStyle(){
@@ -3108,6 +3114,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      if (vec->size() == 0) return;
      TH2* histo = (TH2*)vec->at(0);
      if (!histo) return;
+     cout<<"CreateTH2_CellPlots: "<<predix<<" "<<kind<<" "<<appendix<<endl;
      if (kind != "" && !kind.BeginsWith("_"))
          kind.Prepend("_");
 
@@ -3134,11 +3141,12 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      string plots_path = this->GetPlotsPath();
      string new_plots_path = plots_path;
      new_plots_path+=(string)prefix;
-     new_plots_path+="/";
+     new_plots_path+="/"+(string)kind+"/";
      HistogrammSaver newHistSaver(settings);
      newHistSaver.SetPlotsPath(new_plots_path);
      //TH2* histo;
      for(UInt_t cell=0;cell< vec->size();cell++){
+         cout<<"\r"<<cell<<"/"<<vec->size()<<flush;
          histo = (TH2*)vec->at(cell);
          if (!histo)
              continue;
@@ -3153,6 +3161,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
          vec->at(cell)= 0;
          delete histo;
      }
+     cout<<"\nDONE"<<endl;
      hGoodCells->GetZaxis()->SetTitle("number of entries #");
      this->SaveHistogram(hGoodCells);//,false,false,true);
      hBadCells->GetZaxis()->SetTitle("number of entries #");
