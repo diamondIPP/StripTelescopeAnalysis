@@ -352,8 +352,14 @@ void TAnalysisOf3DResolution::saveHistos() {
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHitY,"highest2Centroid_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHitY,"h2C_WithCut_PredHitY",prefix,appendix);
 
-    for (TCellHistoMap::iterator it = cellHistos.begin();it != cellHistos.end();it++)
+    for (TCellHistoMap::iterator it = cellHistos.begin();it != cellHistos.end();it++){
+        cout<<it->first<<":"<<flush;
         histSaver->CreateTH2_CellPlots(&it->second,"h2C_WithCut_PredHitY",prefix,appendix);
+        cout<<endl;
+    }
+    char t;
+    cin >>t;
+
 
     cout<<4<<flush;
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
