@@ -3114,7 +3114,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      if (vec->size() == 0) return;
      TH2* histo = (TH2*)vec->at(0);
      if (!histo) return;
-     cout<<"CreateTH2_CellPlots: "<<predix<<" "<<kind<<" "<<appendix<<endl;
+     cout<<"CreateTH2_CellPlots: "<<prefix<<" "<<kind<<" "<<appendix<<endl;
      if (kind != "" && !kind.BeginsWith("_"))
          kind.Prepend("_");
 
