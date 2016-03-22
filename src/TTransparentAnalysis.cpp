@@ -1527,7 +1527,7 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
         TProfile* prof;
         histSaver->SaveHistogram(hLandau2HighestProfile2D[clusterSize],true,false);
-        histSaver->SaveHistogram(hLandau2HighestFidCutX[clusterSize],true,false);
+        histSaver->SaveHistogram(hLandau2HighestFidCutX[clusterSize],true,true);
         prof = hLandau2HighestFidCutX[clusterSize]->ProfileY();
         prof->GetYaxis()->SetTitle("avrg. Pulse Height /adc");
         histSaver->SaveHistogram(hLandau2HighestFidCutY[clusterSize],true,false);
