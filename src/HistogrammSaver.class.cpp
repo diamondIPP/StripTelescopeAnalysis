@@ -745,18 +745,18 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGridAndMarkedCells(TH2* histo,TH2
     return c1;
 }
 TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
-    cout<<"HistogrammSaver::DrawHistogramWithCellGrid: "<<flush;
-    cout<<"H1: ";
+    if (verbosity) cout<<"HistogrammSaver::DrawHistogramWithCellGrid: "<<flush;
+    if (verbosity) cout<<"H1: ";
     if (histo)
-        cout<<histo->GetName();
+        if (verbosity) cout<<histo->GetName();
     else
-        cout<<histo;
-    cout<<"\tH2: ";
+        if (verbosity) cout<<histo;
+    if (verbosity) cout<<"\tH2: ";
     if (histo2)
-        cout<<histo2->GetName();
+        if (verbosity) cout<<histo2->GetName();
     else
-        cout<<histo2;
-    cout<<flush;
+        if (verbosity) cout<<histo2;
+    if (verbosity) cout<<flush;
 
     TString name = histo->GetName();
     if (name.BeginsWith("h"))
@@ -787,7 +787,7 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     if(histo2)
         histo2->Clone()->Write();
     delete f;
-    cout<<"-Done"<<endl;
+    if (verbosity) cout<<"-Done"<<endl;
     return c1;
 }
 
@@ -814,7 +814,7 @@ void HistogrammSaver::DrawFailedQuarters(
         cerr<<"DrawFailedQuarters - Canvas =0"<<endl;
         return;
     }
-    cout<<"[HistogrammSaver::DrawFailedQuarters]"<<endl;
+    if(verbosity)cout<<"[HistogrammSaver::DrawFailedQuarters]"<<endl;
     UInt_t DiamondPattern = 3;
     Float_t xStart = settings->get3dMetallisationFidCuts()->getXLow(DiamondPattern);
     Float_t yStart =settings->get3dMetallisationFidCuts()->getYLow(DiamondPattern);
@@ -838,12 +838,12 @@ void HistogrammSaver::DrawFailedQuarters(
         float yLow = yStart + (row+.5*(nquarter%2))*cellheight;
         float xHigh = xLow+cellwidth/2;
         float yHigh = yLow+cellheight/2;
-        cout<<ncell<<"."<<nquarter;
-        cout<<": X:" <<xLow<<"-"<<xHigh;
-        cout<<"; Y:" <<yLow<<"-"<<yHigh<<"; "<<flush;
+        if(verbosity)cout<<ncell<<"."<<nquarter;
+        if(verbosity)cout<<": X:" <<xLow<<"-"<<xHigh;
+        if(verbosity)cout<<"; Y:" <<yLow<<"-"<<yHigh<<"; "<<flush;
         TString name = c1->GetName();
         name.Append(TString::Format("_FailedQuarter_%dOf%d",i,(int)failedQuarters.size()));
-        cout<<" DRAW: "<< name<<flush;;
+        if(verbosity)cout<<" DRAW: "<< name<<flush;;
         failedQuarter = new TCutG(name,5);
         failedQuarter->SetPoint(0,xLow,yLow);
         failedQuarter->SetPoint(1,xLow,yHigh);
@@ -854,7 +854,7 @@ void HistogrammSaver::DrawFailedQuarters(
         failedQuarter->SetLineWidth(0);
         failedQuarter->SetFillColor(kRed);
         failedQuarter->Draw("sameF");
-        cout<<" - Done"<<endl;
+        if(verbosity)cout<<" - Done"<<endl;
     }
 }
 
@@ -906,7 +906,7 @@ TH2D* HistogrammSaver::GetHistoBinnedAroundFieldWires(TString name, Int_t binsPe
 }
 
 TH2D* HistogrammSaver::GetHistoBinedInCells(TString name, Int_t binsPerCellAxis) {
-    cout<<"create "<<name<<endl;
+    if (verbosity) cout<<"create "<<name<<endl;
     TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
     TH2D* histo = new TH2D(name,name,
             settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
@@ -916,7 +916,7 @@ TH2D* HistogrammSaver::GetHistoBinedInCells(TString name, Int_t binsPerCellAxis)
 
 TH3D* HistogrammSaver::Get3dHistoBinedInCells(TString name, UInt_t binsz,
         Float_t minz, Float_t maxz, Int_t binsPerCellAxis) {
-    cout<<"create "<<name<<endl;
+    if (verbosity) cout<<"create "<<name<<endl;
     TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
     TH3D* histo = new TH3D(name,name,
             settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
@@ -927,11 +927,11 @@ TH3D* HistogrammSaver::Get3dHistoBinedInCells(TString name, UInt_t binsz,
 
 TProfile2D* HistogrammSaver::GetProfile2dBinedInCells(TString name,
         Int_t binsPerCellAxis) {
-    cout<<"create "<<name<<endl;
+    if (verbosity) cout<<"create "<<name<<endl;
     TFiducialCut* diaMetFidCut = settings->get3dMetallisationFidCuts()->getFidCut(3);
-    cout<<" HistogrammSaver::GetProfile2dBinedInCells: "<<name<<"  binsPerCellAxis: "<<binsPerCellAxis<<endl;
+    if (verbosity) cout<<" HistogrammSaver::GetProfile2dBinedInCells: "<<name<<"  binsPerCellAxis: "<<binsPerCellAxis<<endl;
     diaMetFidCut->Print();
-    cout<<"Columns: "<<settings->getNColumns3d()<<"/ Rows:"<<settings->getNRows3d()<<endl;
+    if (verbosity) cout<<"Columns: "<<settings->getNColumns3d()<<"/ Rows:"<<settings->getNRows3d()<<endl;
     TProfile2D* histo = new TProfile2D(name,name,
             settings->getNColumns3d()*binsPerCellAxis,diaMetFidCut->GetXLow(),diaMetFidCut->GetXHigh(),
             settings->getNRows3d()*binsPerCellAxis,diaMetFidCut->GetYLow(),diaMetFidCut->GetYHigh());
@@ -1143,7 +1143,7 @@ TH1F* HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Flo
         maxX += deltaX*0.2;
         minX -= deltaX*0.1;
     }
-    cout<<"HistogrammSaver::SaveOverlayDistribution"<<histo<<" range: "<<minX<<"-"<<maxX<<flush;
+//    cout<<"HistogrammSaver::SaveOverlayDistribution"<<histo<<" range: "<<minX<<"-"<<maxX<<flush;
     TString name = histo->GetName()+TString("_1D");
     TH1F *histo_1D = new TH1F(name,"all other bins",nbins,minX,maxX);
     name = histo->GetName()+TString("_1D_middle");
@@ -1151,7 +1151,7 @@ TH1F* HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Flo
     name = histo->GetName()+TString("_1D_corners");
     TH1F *histo_1D_corner = new TH1F("hOverlay_1D_corners","bias column bins",nbins,minX,maxX);
     Float_t content,xlow,ylow,xhigh,yhigh;
-    cout<<" fill content"<<flush;
+//    cout<<" fill content"<<flush;
     for (UInt_t bx=1;bx<= histo->GetNbinsX();bx++){
         for (UInt_t by = 1; by <= histo->GetNbinsY();by++){
             content = histo->GetBinContent(bx,by);
@@ -1173,9 +1173,9 @@ TH1F* HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Flo
                 histo_1D->Fill(content);
         }
     }
-    cout<<"-done "<<histo_1D->GetEntries()<<"/"<<histo_1D_corner->GetEntries()<<histo_1D_middle->GetEntries()<<flush;
+//    cout<<"-done "<<histo_1D->GetEntries()<<"/"<<histo_1D_corner->GetEntries()<<histo_1D_middle->GetEntries()<<flush;
     histo_1D->SetLineColor(kBlack);
-    cout<<" fitGaus"<<flush;
+//    cout<<" fitGaus"<<flush;
     TF1* fGaus = new TF1("fgaus","gaus",minX,maxX);
     fGaus->SetLineStyle(2);
     fGaus->SetLineColor(kGreen);
@@ -1191,7 +1191,7 @@ TH1F* HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Flo
     histo_1D_corner->SetFillColor(kBlue);
     histo_1D_corner->SetFillStyle(3021);
     name= TString("stack_")+histo->GetName()+TString("_1D");
-    cout<<" saveStack"<<flush;
+//    cout<<" saveStack"<<flush;
     TString title;
     if (isOverlay)
         title = TString("Overlay distribution;");
@@ -1211,7 +1211,7 @@ TH1F* HistogrammSaver::SaveProjectionZ(TH2* histo, bool isOverlay,bool doFit,Flo
     delete histo_1D_middle;
     delete histo_1D_corner;
     return histo_1D;
-    cout<<" DONE"<<endl;
+//    cout<<" DONE"<<endl;
 }
 
 void HistogrammSaver::SaveNegativeChargeOverlay(TH2* prof) {
