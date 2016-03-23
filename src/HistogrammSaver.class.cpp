@@ -3187,12 +3187,24 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      }
      cout<<"\nDONE"<<endl;
      ((TH2F*)hGoodCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram(hGoodCells);//,false,false,true);
+     this->SaveHistogram((TH2F*)hGoodCells);//,false,false,true);
+     TH1D* proj = ((TH2F*)hGoodCells)->ProjectionX();
+     this->SaveHistogram(proj);
+     delete proj;
      ((TH2F*)hBadCells)->GetZaxis()->SetTitle("number of entries #");
      this->SaveHistogram((TH2F*)hBadCells);//,false,false,true);
+     proj = ((TH2F*)hBadCells)->ProjectionX();
+     this->SaveHistogram(proj);
+     delete proj;
      ((TH2F*)hAllCells)->GetZaxis()->SetTitle("number of entries #");
      this->SaveHistogram((TH2F*)hAllCells);
+     proj = ((TH2F*)hAllCells)->ProjectionX();
+     this->SaveHistogram(proj);
+     delete proj;
      ((TH2F*)hAllButBadCells)->GetZaxis()->SetTitle("number of entries #");
      this->SaveHistogram((TH2F*)hAllButBadCells);//,false,false,true);
+     proj = ((TH2F*)hAllButBadCells)->ProjectionX();
+     this->SaveHistogram(proj);
+     delete proj;
 
 }
