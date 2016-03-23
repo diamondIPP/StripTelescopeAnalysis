@@ -37,7 +37,9 @@ class TAnalysisOf3DResolution {
         void Fill(TCluster* clus,Float_t xPredDet,Float_t yPredDet);
     private:
         typedef std::map< TString, std::vector<TH1*> > TCellHistoMap;
+        typedef std::map< TString, TString> TCellTypeMap;
         void initialiseHistos();
+        void addCellHisto(TString key, TH1* histo, TString type);
         void saveHistos();
         void deleteHistos();
         void SaveResolutionPlots(vector<TH1F*>*vec,TString kind);
@@ -49,10 +51,10 @@ class TAnalysisOf3DResolution {
         TH2F* hAdjacentChannels_SNR;
         TH2F* hAdjacentSNR_vs_cellNo;
         TH2F* hAdjacentChannels_Signal;
-        vector<TH1F*> vecHResolutionPerCell_maxValue;
-        vector<TH1F*> vecHResolutionPerCell_chargeWeighted;
-        vector<TH1F*> vecHResolutionPerCell_highest2Centroid;
-        vector<TH1F*> vecHResolutionPerCell_h2C_WithCut;
+        vector<TH1*> vecHResolutionPerCell_maxValue;
+        vector<TH1*> vecHResolutionPerCell_chargeWeighted;
+        vector<TH1*> vecHResolutionPerCell_highest2Centroid;
+        vector<TH1*> vecHResolutionPerCell_h2C_WithCut;
         vector<TH1*> vecHResolutionPerCell_maxValue_vs_SNR;
         vector<TH1*> vecHResolutionPerCell_chargeWeighted_vs_SNR;
         vector<TH1*> vecHResolutionPerCell_highest2Centroid_vs_SNR;
@@ -66,6 +68,7 @@ class TAnalysisOf3DResolution {
         vector<TH1*> vecHResolutionPerCell_h2C_WithCut_vs_PredHit;
         vector<TH1*> vecHResolutionPerCell_h2C_WithCut_vs_PredHitY;
         TCellHistoMap cellHistos;
+        TCellTypeMap cellTypes;
         bool useCMN;
 };
 

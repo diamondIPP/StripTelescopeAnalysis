@@ -70,13 +70,17 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
     if (cellNo < cellHistos[key].size() && cellHistos[key].at(cellNo))
         cellHistos[key].at(cellNo)->Fill(delta_h2C*cellWidth,eta);
 
+    key = "chargeWeighted";
+    if (cellNo < cellHistos[key].size() && cellHistos[key].at(cellNo))
+        cellHistos[key].at(cellNo)->Fill(delta_Weigthed*cellWidth);
+
     if (!diamondCluster->getClusterSize() || snr < -100){
         cout<<"ERROR: POS: "<<predPos<<" / "<<pos_max<<"/"<<pos_h2c<<"/"<<pos_weighted
                 <<" "<<Second_highest_hit_pos<<" - " << highest_hit_pos<<" "<<snr<<endl;
     }
 
     if (cellNo< vecHResolutionPerCell_maxValue.size()){
-        TH1F* histo  = vecHResolutionPerCell_maxValue.at(cellNo);
+        TH1F* histo  = (TH1F*)vecHResolutionPerCell_maxValue.at(cellNo);
         if (histo);
         histo->Fill(delta_max*cellWidth);
     }
@@ -97,10 +101,11 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
     }
     /*********/
     if (cellNo< vecHResolutionPerCell_chargeWeighted.size()){
-        TH1F* histo  = vecHResolutionPerCell_chargeWeighted.at(cellNo);
-        if (histo);
-        histo->Fill(delta_Weigthed*cellWidth);
+        TH1F* histo  = (TH1F*)vecHResolutionPerCell_chargeWeighted.at(cellNo);
+        if (histo)
+            histo->Fill(delta_Weigthed*cellWidth);
     }
+
     if (cellNo< vecHResolutionPerCell_chargeWeighted_vs_SNR.size()){
         TH2F* histo  = (TH2F*) vecHResolutionPerCell_chargeWeighted_vs_SNR.at(cellNo);
         if (histo)
@@ -125,8 +130,8 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
     }
     /*********/
     if (cellNo< vecHResolutionPerCell_highest2Centroid.size()){
-        TH1F* histo  = vecHResolutionPerCell_highest2Centroid.at(cellNo);
-        if (histo);
+        TH1F* histo  = (TH1F*)vecHResolutionPerCell_highest2Centroid.at(cellNo);
+        if (histo)
         histo->Fill(delta_h2C*cellWidth);
     }
     if (cellNo< vecHResolutionPerCell_highest2Centroid_vs_SNR.size()){
@@ -145,8 +150,8 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
     /*********/
     Float_t delta = snr>settings->GetResolutionSNR()?delta_h2C:delta_max;
     if (cellNo< vecHResolutionPerCell_h2C_WithCut.size()){
-        TH1F* histo  = vecHResolutionPerCell_h2C_WithCut.at(cellNo);
-        if (histo);
+        TH1F* histo  = (TH1F*)vecHResolutionPerCell_h2C_WithCut.at(cellNo);
+        if (histo)
         histo->Fill(delta*cellWidth);
     }
     if (cellNo< vecHResolutionPerCell_h2C_WithCut_vs_SNR.size()){
@@ -163,6 +168,22 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
         if (histo)  histo->Fill(delta*cellWidth,relPredPosY);
     }
 }
+
+
+void TAnalysisOf3DResolution::addCellHisto(TString key, TH1* histo, TString type) {
+    if (cellHistos.find(key) == cellHistos.end() ){
+        cellHistos[key] = vector<TH1*>();
+        cellTypes[key] = type;
+//            cout<<"Add "<<key<<" to cellHistoMap"<<endl;
+    }
+    if (type ==  typeid(TH1F*).name())
+        cellHistos[key].push_back((TH1F*)histo);
+    else if (type ==  typeid(TH2F*).name())
+        cellHistos[key].push_back((TH2F*)histo);
+    else
+        cellHistos[key].push_back(histo);
+}
+
 
 void TAnalysisOf3DResolution::initialiseHistos() {
 
@@ -191,30 +212,33 @@ void TAnalysisOf3DResolution::initialiseHistos() {
     hAdjacentChannels_SNR->GetZaxis()->SetTitle("number of entries");
 
     TH1* histo;
+    TString type;
     for (UInt_t cell = 0; cell <nCells;cell++){
         cellName = TString::Format("hResolution_CellNo_%02d_",cell);
 
         key = "h2C_vs_Eta";
         name = cellName+key+appendix;
         title = name+";residualt_{h2C}/#um;Eta = #frac{S_R}{S_L+S_R}";
+        type =  typeid(TH2F).name();
         histo = new TH2F(name,name,nBins,minX,maxX,nBins,-1,1);
-        if (cellHistos.find(key) == cellHistos.end() ){
-            cellHistos[key] = vector<TH1*>();
-//            cout<<"Add "<<key<<" to cellHistoMap"<<endl;
-        }
-        cellHistos[key].push_back((TH1F*)histo);
+        addCellHisto(key,histo,type);
 //        cout<<" * Add Histo: " <<name<<endl;
 
-        name = TString::Format("hResolution_CellNo_%02d_maxValue",cell)+appendix;
-        title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
+        key = "maxValue";
+        name = cellName+key+appendix;
+        title =name + ";Residual / #mum; number of entries";
+        type =  typeid(TH1F).name();
         histo = new TH1F(name,title,nBins,minX,maxX);
-        histo->GetXaxis()->SetTitle("Residual / #mum");
+        addCellHisto(key,histo->Clone(),type);
         vecHResolutionPerCell_maxValue.push_back((TH1F*)histo);
+
         /*******/
-        name = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell)+appendix;
-        title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
+        key = "chargeWeighted";
+        name = cellName+key+appendix;
+        title =name + ";Residual / #mum; number of entries";
+        type =  typeid(TH1F).name();
         histo = new TH1F(name,title,nBins,minX,maxX);
-        histo->GetXaxis()->SetTitle("Residual / #mum");
+        addCellHisto(key,histo->Clone(),type);
         vecHResolutionPerCell_chargeWeighted.push_back((TH1F*)histo);
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell)+appendix;
@@ -364,12 +388,13 @@ void TAnalysisOf3DResolution::saveHistos() {
 
     for (TCellHistoMap::iterator it = cellHistos.begin();it != cellHistos.end();it++){
         cout<<it->first<<":"<<flush;
-        histSaver->CreateTH2_CellPlots(&it->second,"h2C_WithCut_PredHitY",prefix,appendix);
+        if (cellTypes[it->first] ==  typeid(TH2F).name())
+            histSaver->CreateTH2_CellPlots(&it->second,it->first,prefix,appendix);
+
+        if (cellTypes[it->first] ==  typeid(TH1F).name())
+            histSaver->CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted",subjectDetector,appendix);
         cout<<endl;
     }
-    char t;
-    cin >>t;
-
 
     cout<<4<<flush;
     histSaver->SaveHistogram(hAdjacentSNR_vs_cellNo);
@@ -416,7 +441,6 @@ void TAnalysisOf3DResolution::saveHistos() {
     cout<<"  -> DONE "<<endl;
     //    LongAnalysis_SaveSNRPerCell();
 }
-
 void TAnalysisOf3DResolution::deleteHistos() {
     cout<<"[TAnalysisOf3DResolution::deleteHistos]"<<endl;
     delete hAdjacentSNR_vs_cellNo;

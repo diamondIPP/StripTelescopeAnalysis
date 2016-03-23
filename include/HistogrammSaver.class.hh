@@ -42,6 +42,7 @@
 #include <limits>
 #include "TCutG.h"
 #include "TPaveStats.h"
+#include "TRawEventSaver.hh"
 #include "TSettings.class.hh"
 #include "TText.h"
 #include "TFidCutRegions.hh"
@@ -201,7 +202,7 @@ private:
     TSettings* settings;
 public:
 
-    void CreateResolutionPlots(vector<TH1F*> *vec,TString kind,  Int_t subjectDetector, TString appendix);
+    void CreateResolutionPlots(vector<TH1*> *vec,TString kind,  Int_t subjectDetector, TString appendix);
     void CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString prefix= "hResolution", TString appendix="");
 //    void CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix= "hResolution", TString appendix="");
 };

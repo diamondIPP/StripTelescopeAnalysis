@@ -3013,7 +3013,7 @@ TH2D* HistogrammSaver::GetBinContentHisto(TProfile2D* prof) {
     return histo;
 }
 
-void HistogrammSaver::CreateResolutionPlots(vector<TH1F*>*vec,TString kind, Int_t subjectDetector, TString appendix){
+void HistogrammSaver::CreateResolutionPlots(vector<TH1*>*vec,TString kind, Int_t subjectDetector, TString appendix){
     UInt_t nBins = 128;
     Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
     Float_t maxX =settings->GetCellWidth(subjectDetector,2);
@@ -3033,7 +3033,7 @@ void HistogrammSaver::CreateResolutionPlots(vector<TH1F*>*vec,TString kind, Int_
     HistogrammSaver newHistSaver(settings);
     newHistSaver.SetPlotsPath(plots_path+(string)"/resolution/");
     for(UInt_t cell=0;cell< vec->size();cell++){
-        TH1F* histo = vec->at(cell);
+        TH1F* histo = (TH1F*)vec->at(cell);
         if (!histo)
             continue;
         if (settings->IsGoodCell(3,cell))
@@ -3146,7 +3146,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      newHistSaver.SetPlotsPath(new_plots_path);
      //TH2* histo;
      for(UInt_t cell=0;cell< vec->size();cell++){
-         cout<<"\r"<<cell<<"/"<<vec->size()<<flush;
+         TRawEventSaver::showStatusBar(cell,vec->size(),1);
          histo = (TH2*)vec->at(cell);
          if (!histo)
              continue;
