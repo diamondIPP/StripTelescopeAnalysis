@@ -71,6 +71,7 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
         cellHistos[key].at(cellNo)->Fill(delta_h2C*cellWidth,eta);
     eta_corretedPos.push_back(make_pair(delta_h2C*cellWidth,eta));
     eta_correctedCell.push_back(cellNo);
+    cout<<"Size"<<eta_corretedPos.size()<<"/"<<eta_correctedCell.size()<<endl;
     key = "chargeWeighted";
     if (cellNo < cellHistos[key].size() && cellHistos[key].at(cellNo))
         cellHistos[key].at(cellNo)->Fill(delta_Weigthed*cellWidth);
