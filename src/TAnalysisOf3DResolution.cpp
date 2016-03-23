@@ -392,7 +392,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     cout<<"CreateTH2_CellPlots of "<<key<endl;
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
     cout<<"Get Profile"<<endl;
-    TProfile prof = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("");
+    TProfile *prof = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("");
     cout<<"Create Test Histo"<<endl;
     TH2F* hTest = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"ImprovedEta"+appendix);
     cout<<"Reset Test Histo"<<endl;
