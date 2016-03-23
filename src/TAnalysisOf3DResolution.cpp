@@ -389,7 +389,7 @@ void TAnalysisOf3DResolution::saveHistos() {
 
     cout<<"Trying to Use an Improved Eta correction method"<<endl;
     TString key = "h2C_vs_Eta";
-    cout<<"CreateTH2_CellPlots of "<<key<endl;
+    cout<<"CreateTH2_CellPlots of "<<key<<endl;
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
     cout<<"Get Profile"<<endl;
     TProfile *prof = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("");
