@@ -603,7 +603,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis() {
     }
     if (diamondCluster->isSaturatedCluster())
             return;
-//    LongAnalysis_FillResolutionPlots();
+    LongAnalysis_FillResolutionPlots();
     LongAnalysis_FillChargeSharingPlots();
 //    if (settings->do3dTransparentAnalysis() && !validTransparentAnalysis)
 //        return;
