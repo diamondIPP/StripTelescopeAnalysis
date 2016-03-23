@@ -418,6 +418,9 @@ void TAnalysisOf3DResolution::saveHistos() {
     else{
         cout<<"sizes do not agree"<<endl;
     }
+    cout<<"Press a key to continue!"<<endl;
+    char t;
+    cin>>t;
     if (hTest) delete hTest;
     if (prof) delete prof;
 
