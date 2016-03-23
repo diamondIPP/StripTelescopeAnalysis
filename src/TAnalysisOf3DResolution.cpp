@@ -437,7 +437,6 @@ void TAnalysisOf3DResolution::saveHistos() {
     delete pLeft;
     delete pRight;
     delete pMax;
-    delete hAdjacentChannels_SNR;
     cout<<"  -> DONE "<<endl;
     //    LongAnalysis_SaveSNRPerCell();
 }
