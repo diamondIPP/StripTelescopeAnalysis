@@ -69,6 +69,8 @@ class TAnalysisOf3DResolution {
         vector<TH1*> vecHResolutionPerCell_h2C_WithCut_vs_PredHitY;
         TCellHistoMap cellHistos;
         TCellTypeMap cellTypes;
+        vector< pair<Float_t,Float_t> > eta_corretedPos;
+        vector<UInt_t> eta_correctedCell;
         bool useCMN;
 };
 

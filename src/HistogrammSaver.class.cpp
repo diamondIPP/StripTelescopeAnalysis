@@ -22,6 +22,10 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
     this->verbosity=verbosity;
     runNumber=0;
     nEvents=0;
+    hGoodCells = 0;
+    hBadCells = 0;
+    hAllCells = 0;
+    hAllButBadCells = 0;
     plots_path=".";
     pt = new TPaveText(0.07,0,0.22,0.10,"NDC");
     UpdatePaveText();
@@ -78,7 +82,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
 }
 
 HistogrammSaver::~HistogrammSaver() {
-
+    DeleteCellHistos();
     //	TString string1 = sys->GetFromPipe(".! mkdir root-Files");
     //	cout<<string1<<endl;
     MoveRootFilesInSubfolder();
@@ -3109,6 +3113,25 @@ TH2D* HistogrammSaver::GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir) 
     return h;
 }
 
+void HistogrammSaver::DeleteCellHistos(){
+    if (hGoodCells){
+        delete hGoodCells;
+        hGoodCells = 0;
+    }
+    if (hBadCells){
+        delete hBadCells;
+        hBadCells = 0;
+    }
+    if (hAllCells){
+        delete hAllCells;
+        hAllCells = 0;
+    }
+    if (hAllButBadCells){
+         delete hAllButBadCells;
+         hAllButBadCells = 0;
+    }
+}
+
 void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString prefix, TString appendix){
     if (!vec) return;
      if (vec->size() == 0) return;
@@ -3117,24 +3140,24 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      cout<<"CreateTH2_CellPlots: "<<prefix<<" "<<kind<<" "<<appendix<<endl;
      if (kind != "" && !kind.BeginsWith("_"))
          kind.Prepend("_");
-
+     DeleteCellHistos();
      TString name = prefix+"GoodCells"+kind+appendix;
-     TH2F* hGoodCells = (TH2F*)histo->Clone(name);
+     hGoodCells = (TH2F*)histo->Clone(name);
      hGoodCells->Reset();
      hGoodCells->SetTitle(prefix + " Good Cells "+ kind +appendix);
 
      name = prefix+"BadCells"+kind+appendix;
-     TH2F* hBadCells =  (TH2F*)hGoodCells->Clone(name);
+     hBadCells =  (TH2F*)hGoodCells->Clone(name);
      hBadCells->Reset();
      hBadCells->SetTitle(prefix + " Bad Cells "+ kind +appendix);
 
      name = prefix+"AllButBadCells"+kind+appendix;
-     TH2F* hAllButBadCells =  (TH2F*)hGoodCells->Clone(name);
+     hAllButBadCells =  (TH2F*)hGoodCells->Clone(name);
      hAllButBadCells->Reset();
      hAllButBadCells->SetTitle(prefix + " AllButBad Cells "+ kind +appendix);
 
      name = prefix+"AllCells"+kind+appendix;
-     TH2F* hAllCells =  (TH2F*)hGoodCells->Clone(name);
+     hAllCells =  (TH2F*)hGoodCells->Clone(name);
      hAllCells->Reset();
      hAllCells->SetTitle(prefix + " All Cells "+ kind +appendix);
 
@@ -3162,17 +3185,13 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
          delete histo;
      }
      cout<<"\nDONE"<<endl;
-     hGoodCells->GetZaxis()->SetTitle("number of entries #");
+     (TH2F*)(hGoodCells)->GetZaxis()->SetTitle("number of entries #");
      this->SaveHistogram(hGoodCells);//,false,false,true);
-     hBadCells->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram(hBadCells);//,false,false,true);
-     hAllCells->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram(hAllCells);
-     hAllButBadCells->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram(hAllButBadCells);//,false,false,true);
-     delete hGoodCells;
-     delete hBadCells;
-     delete hAllCells;
-     delete hAllButBadCells;
+     (TH2F*)(hBadCells)->GetZaxis()->SetTitle("number of entries #");
+     this->SaveHistogram((TH2F*)hBadCells);//,false,false,true);
+     (TH2F*)(hAllCells)->GetZaxis()->SetTitle("number of entries #");
+     this->SaveHistogram((TH2F*)hAllCells);
+     (TH2F*)(hAllButBadCells)->GetZaxis()->SetTitle("number of entries #");
+     this->SaveHistogram((TH2F*)hAllButBadCells);//,false,false,true);
 
 }

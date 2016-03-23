@@ -201,7 +201,11 @@ private:
     TFile* histoFile;
     TSettings* settings;
 public:
-
+    void DeleteCellHistos();
+    TH1* hGoodCells;
+    TH1* hAllCells;
+    TH1* hAllButBadCells;
+    TH1* hBadCells;
     void CreateResolutionPlots(vector<TH1*> *vec,TString kind,  Int_t subjectDetector, TString appendix);
     void CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString prefix= "hResolution", TString appendix="");
 //    void CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix= "hResolution", TString appendix="");

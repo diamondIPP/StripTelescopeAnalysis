@@ -69,7 +69,8 @@ void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, F
     TString key = "h2C_vs_Eta";
     if (cellNo < cellHistos[key].size() && cellHistos[key].at(cellNo))
         cellHistos[key].at(cellNo)->Fill(delta_h2C*cellWidth,eta);
-
+    eta_corretedPos.push_back(make_pair(delta_h2C*cellWidth,eta));
+    eta_correctedCell.push_back(cellNo);
     key = "chargeWeighted";
     if (cellNo < cellHistos[key].size() && cellHistos[key].at(cellNo))
         cellHistos[key].at(cellNo)->Fill(delta_Weigthed*cellWidth);
@@ -385,6 +386,40 @@ void TAnalysisOf3DResolution::saveHistos() {
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHitY,"chargeWeighted_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHitY,"highest2Centroid_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHitY,"h2C_WithCut_PredHitY",prefix,appendix);
+
+    cout<<"Trying to Use an Improved Eta correction method"<<endl;
+    TString key = "h2C_vs_Eta";
+    cout<<"CreateTH2_CellPlots of "<<key<endl;
+    histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
+    cout<<"Get Profile"<<endl;
+    TProfile prof = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("");
+    cout<<"Create Test Histo"<<endl;
+    TH2F* hTest = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"ImprovedEta"+appendix);
+    cout<<"Reset Test Histo"<<endl;
+    hTest->Reset();
+    Float_t eta, pos;
+    cout<<"Fill Test Histo"<<endl;
+    if (eta_corretedPos.size() == eta_correctedCell.size()){
+        for (UInt_t i =0; i < eta_corretedPos.size(); i++){
+            if (!settings->isBadCell(eta_correctedCell.at(i))){
+                pos = eta_corretedPos.at(i).first;
+                eta = eta_corretedPos.at(i).second;
+                if (eta>=0){
+                    pos -= prof->GetBinContent(prof->FindBin(eta));
+                }
+                hTest->Fill(pos,eta);
+            }
+        }
+        histSaver->SaveHistogram(hTest);
+        TH1D* px = hTest->ProjectionX();
+        histSaver->SaveHistogram(px);
+        delete px;
+    }
+    else{
+        cout<<"sizes do not agree"<<endl;
+    }
+    if (hTest) delete hTest;
+    if (prof) delete prof;
 
     for (TCellHistoMap::iterator it = cellHistos.begin();it != cellHistos.end();it++){
         cout<<it->first<<":"<<flush;
