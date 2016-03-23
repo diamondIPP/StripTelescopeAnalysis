@@ -401,7 +401,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     cout<<"Fill Test Histo"<<endl;
     if (eta_corretedPos.size() == eta_correctedCell.size()){
         for (UInt_t i =0; i < eta_corretedPos.size(); i++){
-            if (!settings->isBadCell(eta_correctedCell.at(i))){
+            if (!settings->isBadCell(3,eta_correctedCell.at(i))){
                 pos = eta_corretedPos.at(i).first;
                 eta = eta_corretedPos.at(i).second;
                 if (eta>=0){
