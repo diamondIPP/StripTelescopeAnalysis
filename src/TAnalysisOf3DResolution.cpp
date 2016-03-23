@@ -399,6 +399,8 @@ void TAnalysisOf3DResolution::saveHistos() {
     hTest->Reset();
     Float_t eta, pos;
     cout<<"Fill Test Histo"<<endl;
+    cout<<"Entries: "<<(histSaver->hAllButBadCells)->GetName()<<"/"<<(histSaver->hAllButBadCells)->GetEntries()<<endl;
+    cout<<"eta_corretedPos: "<<eta_corretedPos.size()<<"/"<<eta_correctedCell.size()<<endl;
     if (eta_corretedPos.size() == eta_correctedCell.size()){
         for (UInt_t i =0; i < eta_corretedPos.size(); i++){
             if (!settings->isBadCell(3,eta_correctedCell.at(i))){
@@ -410,7 +412,8 @@ void TAnalysisOf3DResolution::saveHistos() {
                 hTest->Fill(pos,eta);
             }
         }
-        cout<<"Save :"<<hTest->GetName()<<endl;
+        cout<<"Path: "<<histSaver->GetPlotsPath()<<endl;
+        cout<<"Save :"<<hTest->GetName()<<"/"<<hTest->GetEntries()<<endl;
         histSaver->SaveHistogram(hTest);
         TH1D* px = hTest->ProjectionX();
         cout<<"Save :"<<px->GetName()<<endl;
