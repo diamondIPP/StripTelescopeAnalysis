@@ -410,8 +410,10 @@ void TAnalysisOf3DResolution::saveHistos() {
                 hTest->Fill(pos,eta);
             }
         }
+        cout<<"Save :"<<hTest->GetName()<<endl;
         histSaver->SaveHistogram(hTest);
         TH1D* px = hTest->ProjectionX();
+        cout<<"Save :"<<px->GetName()<<endl;
         histSaver->SaveHistogram(px);
         delete px;
     }

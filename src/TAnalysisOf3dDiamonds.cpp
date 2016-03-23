@@ -2954,7 +2954,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateTH2_CellPlots(vector<TH2F*>*vec,T
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec,TString kind){
-    delete resolutionAnalysis;
+    if (resolutionAnalysis) delete resolutionAnalysis;
+    resolutionAnalysis = 0;
     return;
     UInt_t nBins = 128;
     Float_t minX = -1*settings->GetCellWidth(subjectDetector,2);
@@ -3015,7 +3016,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
-
+    if (resolutionAnalysis) delete resolutionAnalysis;
+        resolutionAnalysis = 0;
     if (!settings->do3dTransparentAnalysis())
         return;
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
