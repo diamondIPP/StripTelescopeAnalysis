@@ -229,7 +229,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
         title =name + ";Residual / #mum; number of entries";
         type =  typeid(TH1F).name();
         histo = new TH1F(name,title,nBins,minX,maxX);
-        addCellHisto(key,histo->Clone(),type);
+        addCellHisto(key,(TH1F*)histo->Clone(),type);
         vecHResolutionPerCell_maxValue.push_back((TH1F*)histo);
 
         /*******/
@@ -238,7 +238,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
         title =name + ";Residual / #mum; number of entries";
         type =  typeid(TH1F).name();
         histo = new TH1F(name,title,nBins,minX,maxX);
-        addCellHisto(key,histo->Clone(),type);
+        addCellHisto(key,(TH1F*)histo->Clone(),type);
         vecHResolutionPerCell_chargeWeighted.push_back((TH1F*)histo);
         /*******/
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell)+appendix;
