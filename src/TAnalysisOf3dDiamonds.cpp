@@ -5466,7 +5466,7 @@ void TAnalysisOf3dDiamonds::saveHistos() {
     saveGlobalHistos();
     if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
 
-    LongAnalysis_CreateResolutionPlots();
+//    LongAnalysis_CreateResolutionPlots();
     LongAnalysis_SaveChargeSharingPlots();
     SaveStripAnalysisHistos();
     // Save
