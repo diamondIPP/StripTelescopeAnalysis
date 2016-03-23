@@ -41,6 +41,7 @@ class TAnalysisOf3DResolution {
         void initialiseHistos();
         void addCellHisto(TString key, TH1* histo, TString type);
         void saveHistos();
+        void ImprovedResolutionWithEta();
         void deleteHistos();
         void SaveResolutionPlots(vector<TH1F*>*vec,TString kind);
         TString appendix;

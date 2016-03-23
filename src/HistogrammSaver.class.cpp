@@ -3164,7 +3164,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      string plots_path = this->GetPlotsPath();
      string new_plots_path = plots_path;
      new_plots_path+=(string)prefix;
-     new_plots_path+="/"+(string)kind+"/";
+     new_plots_path+="/"+(string)kind(1,kind.Length())+"/";
      HistogrammSaver newHistSaver(settings);
      newHistSaver.SetPlotsPath(new_plots_path);
      //TH2* histo;

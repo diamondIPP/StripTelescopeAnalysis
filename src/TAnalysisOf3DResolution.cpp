@@ -218,12 +218,6 @@ void TAnalysisOf3DResolution::initialiseHistos() {
     for (UInt_t cell = 0; cell <nCells;cell++){
         cellName = TString::Format("hResolution_CellNo_%02d_",cell);
 
-        key = "h2C_vs_Eta";
-        name = cellName+key+appendix;
-        title = name+";residualt_{h2C}/#um;Eta = #frac{S_R}{S_L+S_R}";
-        type =  typeid(TH2F).name();
-        histo = new TH2F(name,name,nBins,minX,maxX,nBins,-1,1);
-        addCellHisto(key,histo,type);
 //        cout<<" * Add Histo: " <<name<<endl;
 
         key = "maxValue";
@@ -255,10 +249,17 @@ void TAnalysisOf3DResolution::initialiseHistos() {
         histo->GetXaxis()->SetTitle("Residual / #mum");
         vecHResolutionPerCell_h2C_WithCut.push_back((TH1F*)histo);
 
+        key = "h2C_vs_Eta";
+        name = cellName+key+appendix;
+        title = name+";residualt_{h2C}/#um;Eta = #frac{S_R}{S_L+S_R}";
+        type =  typeid(TH2F).name();
+        histo = new TH2F(name,name,nBins,minX,maxX,nBins,-1,1);
+        addCellHisto(key,histo,type);
+        nBins = 64;
         /*******  RESOLUTION VS SNR *********/
         name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
-        TH2F* histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
+        TH2F* histo2 = new TH2F(name,title,nBins,minX,maxX,50,-10,maxsnr);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("SNR 2nd hit");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -266,7 +267,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_chargeWeighted_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,50,-10,maxsnr);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("SNR 2nd hit");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -274,7 +275,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,50,-10,maxsnr);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("SNR 2nd hit");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -282,7 +283,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_h2C_withCut_vs_SNR",cell)+appendix;
         title = TString::Format("hResolution Cell %02d - h2C with SNR Cut: %2.1f",cell,settings->GetResolutionSNR());;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,110,-10,maxsnr);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,50,-10,maxsnr);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("SNR 2nd hit");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -292,7 +293,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_PredHit",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -300,7 +301,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_chargeWeighted_vs_PredHit",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -308,7 +309,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_PredHit",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_PredHit",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -316,7 +317,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_h2C_withCut_vs_PredHit",cell)+appendix;
         title = TString::Format("hResolution Cell %02d - h2C with SNR Cut: %2.1f",cell,settings->GetResolutionSNR());;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -327,7 +328,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_PredHitY",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_maxValue",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -335,7 +336,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_chargeWeighted_vs_PredHitY",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_chargeWeighted",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -343,7 +344,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_PredHitY",cell)+appendix;
         title = TString::Format("hResolution_CellNo_%02d_highest2Centroid_vs_PredHitY",cell);;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
@@ -351,12 +352,75 @@ void TAnalysisOf3DResolution::initialiseHistos() {
 
         name = TString::Format("hResolution_CellNo_%02d_h2C_withCut_vs_PredHitY",cell)+appendix;
         title = TString::Format("hResolution Cell %02d - h2C with SNR Cut: %2.1f",cell,settings->GetResolutionSNR());;
-        histo2 = new TH2F(name,title,nBins,minX,maxX,160,-80,80);
+        histo2 = new TH2F(name,title,nBins,minX,maxX,80,-80,80);
         histo2->GetXaxis()->SetTitle("Residual / #mum");
         histo2->GetYaxis()->SetTitle("Pred Hit Pos / #mum");
         histo2->GetZaxis()->SetTitle("number of entries");
         vecHResolutionPerCell_h2C_WithCut_vs_PredHitY.push_back(histo2);
     }
+}
+
+void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
+    TString prefix = "hResolution";
+    cout<<"Trying to Use an Improved Eta correction method"<<endl;
+    TString key = "h2C_vs_Eta";
+    cout<<"CreateTH2_CellPlots of "<<key<<endl;
+    histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
+    cout<<"Get Profile"<<endl;
+    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("");
+    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY("");
+    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY("");
+    cout<<"Create Test Histo"<<endl;
+    TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_ImprovedEta"+appendix);
+    TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_ImprovedEta"+appendix);
+    TH2F* hGood = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_ImprovedEta"+appendix);
+    cout<<"Reset Test Histo"<<endl;
+    hAllButBad->Reset();
+    Float_t eta, pos;
+    cout<<"Fill Test Histo"<<endl;
+    cout<<"Entries: "<<(histSaver->hAllButBadCells)->GetName()<<"/"<<(histSaver->hAllButBadCells)->GetEntries()<<endl;
+    cout<<"eta_corretedPos: "<<eta_corretedPos.size()<<"/"<<eta_correctedCell.size()<<endl;
+    if (eta_corretedPos.size() == eta_correctedCell.size()){
+        for (UInt_t i =0; i < eta_corretedPos.size(); i++){
+            eta = eta_corretedPos.at(i).second;
+            if (settings->IsGoodCell(3,eta_correctedCell.at(i))){
+                pos = eta_corretedPos.at(i).first;
+                if (eta>=0) pos -= prof_Good->GetBinContent(prof_Good->FindBin(eta));
+                hGood->Fill(pos,eta);
+            }
+            if (!settings->isBadCell(3,eta_correctedCell.at(i))){
+                pos = eta_corretedPos.at(i).first;
+                if (eta>=0) pos -= prof_AllButBad->GetBinContent(prof_AllButBad->FindBin(eta));
+                hAllButBad->Fill(pos,eta);
+            }
+            pos = eta_corretedPos.at(i).first;
+            if (eta>=0) pos -= prof_All->GetBinContent(prof_All->FindBin(eta));
+            hAll->Fill(pos,eta);
+        }
+        cout<<"Path: "<<histSaver->GetPlotsPath()<<endl;
+        histSaver->SaveHistogram((TH2F*)hAllButBad);
+        histSaver->SaveHistogram((TH2F*)hAll);
+        histSaver->SaveHistogram((TH2F*)hGood);
+        TH1D* px = hAllButBad->ProjectionX();
+        histSaver->SaveHistogram(px);
+        delete px;
+        px = hAll->ProjectionX();
+        histSaver->SaveHistogram(px);
+        delete px;
+        px = hGood->ProjectionX();
+        histSaver->SaveHistogram(px);
+        delete px;
+    }
+    else{
+        cout<<"sizes do not agree"<<endl;
+    }
+    cout<<"Press a key to continue!"<<endl;
+    if (hAllButBad) delete hAllButBad;
+    if (prof_AllButBad) delete prof_AllButBad;
+    if (hAll) delete hAll;
+    if (prof_All) delete prof_All;
+    if (hGood) delete hGood;
+    if (prof_Good) delete prof_Good;
 }
 
 void TAnalysisOf3DResolution::saveHistos() {
@@ -387,56 +451,15 @@ void TAnalysisOf3DResolution::saveHistos() {
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHitY,"chargeWeighted_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHitY,"highest2Centroid_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHitY,"h2C_WithCut_PredHitY",prefix,appendix);
-
-    cout<<"Trying to Use an Improved Eta correction method"<<endl;
-    TString key = "h2C_vs_Eta";
-    cout<<"CreateTH2_CellPlots of "<<key<<endl;
-    histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
-    cout<<"Get Profile"<<endl;
-    TProfile *prof = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("");
-    cout<<"Create Test Histo"<<endl;
-    TH2F* hTest = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"ImprovedEta"+appendix);
-    cout<<"Reset Test Histo"<<endl;
-    hTest->Reset();
-    Float_t eta, pos;
-    cout<<"Fill Test Histo"<<endl;
-    cout<<"Entries: "<<(histSaver->hAllButBadCells)->GetName()<<"/"<<(histSaver->hAllButBadCells)->GetEntries()<<endl;
-    cout<<"eta_corretedPos: "<<eta_corretedPos.size()<<"/"<<eta_correctedCell.size()<<endl;
-    if (eta_corretedPos.size() == eta_correctedCell.size()){
-        for (UInt_t i =0; i < eta_corretedPos.size(); i++){
-            if (!settings->isBadCell(3,eta_correctedCell.at(i))){
-                pos = eta_corretedPos.at(i).first;
-                eta = eta_corretedPos.at(i).second;
-                if (eta>=0){
-                    pos -= prof->GetBinContent(prof->FindBin(eta));
-                }
-                hTest->Fill(pos,eta);
-            }
-        }
-        cout<<"Path: "<<histSaver->GetPlotsPath()<<endl;
-        cout<<"Save :"<<hTest->GetName()<<"/"<<hTest->GetEntries()<<endl;
-        histSaver->SaveHistogram(hTest);
-        TH1D* px = hTest->ProjectionX();
-        cout<<"Save :"<<px->GetName()<<endl;
-        histSaver->SaveHistogram(px);
-        delete px;
-    }
-    else{
-        cout<<"sizes do not agree"<<endl;
-    }
-    cout<<"Press a key to continue!"<<endl;
-    char t;
-    cin>>t;
-    if (hTest) delete hTest;
-    if (prof) delete prof;
+    ImprovedResolutionWithEta();
 
     for (TCellHistoMap::iterator it = cellHistos.begin();it != cellHistos.end();it++){
-        cout<<it->first<<":"<<flush;
+        cout<<"TCellHistoMap: Save: "<<it->first<<":"<<flush;
         if (cellTypes[it->first] ==  typeid(TH2F).name())
             histSaver->CreateTH2_CellPlots(&it->second,it->first,prefix,appendix);
 
         if (cellTypes[it->first] ==  typeid(TH1F).name())
-            histSaver->CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted",subjectDetector,appendix);
+            histSaver->CreateResolutionPlots(&it->second,it->first,subjectDetector,appendix);
         cout<<endl;
     }
 
@@ -484,6 +507,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     cout<<"  -> DONE "<<endl;
     //    LongAnalysis_SaveSNRPerCell();
 }
+
 void TAnalysisOf3DResolution::deleteHistos() {
     cout<<"[TAnalysisOf3DResolution::deleteHistos]"<<endl;
     delete hAdjacentSNR_vs_cellNo;

@@ -3018,6 +3018,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     if (resolutionAnalysis) delete resolutionAnalysis;
         resolutionAnalysis = 0;
+    return;
     if (!settings->do3dTransparentAnalysis())
         return;
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
