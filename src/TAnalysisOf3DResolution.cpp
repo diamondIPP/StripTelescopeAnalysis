@@ -370,14 +370,14 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
     cout<<"Get Profile from "<<((TH2F*)histSaver->hAllButBadCells)->GetName() <<" with "<<
         ((TH2F*)histSaver->hAllButBadCells)->GetEntries()<<" Entries."<<endl;
-    Int_t startBin = ((TH2F*)histSaver->hAllButBadCells)->GetYaxis()->FindBin(0);
-    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY(histSaver->hAllButBadCells->GetName()+"_py",startBin);
+    Int_t startBin = ((TH2F*)histSaver->hAllButBadCells)->GetYaxis()->FindBin(0.0);
+    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY(histSaver->hAllButBadCells->GetName()+(TString)"_py",startBin);
     cout<<"Save: "<<prof_AllButBad->GetName();
     histSaver->SaveHistogram(prof_AllButBad);
-    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY(histSaver->hAllCells->GetName()+"_py",startBin);
+    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY(histSaver->hAllCells->GetName()+(TString)"_py",startBin);
     cout<<"Save: "<<prof_All->GetName();
     histSaver->SaveHistogram(prof_All);
-    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY(histSaver->hGoodCells->GetName()+"_py",startBin);
+    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY(histSaver->hGoodCells->GetName()+(TString)"_py",startBin);
     cout<<"Save: "<<prof_Good->GetName();
     histSaver->SaveHistogram(prof_Good);
     cout<<"Create New Histograms"<<endl;
