@@ -384,7 +384,7 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     cout<<"Save: "<<prof_Good->GetName();
     histSaver->SaveHistogram(prof_Good,false,false);
     cout<<"Create New Histograms"<<endl;
-    THStack *stack = new THStack("sAllEtaCorrectionProfiles");
+    THStack *stack = new THStack("sAllEtaCorrectionProfiles","sAllEtaCorrectionProfiles;eta #eta = #frac{S_R}{S_R+S_L}; avrg. residual error /#mum");
     prof_Good->SetLineColor(kGreen);
     prof_AllButBad->SetLineColor(kBlue);
     stack->Add(prof_All);
