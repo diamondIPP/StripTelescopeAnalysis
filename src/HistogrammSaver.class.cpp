@@ -3202,7 +3202,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      this->SaveHistogram(proj);
      delete proj;
      ((TH2F*)hAllButBadCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hAllButBadCells,true,false,true);
+     this->SaveHistogram((TH2F*)hAllButBadCells,true,false,:);
      proj = ((TH2F*)hAllButBadCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;

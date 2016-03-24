@@ -384,6 +384,7 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     cout<<hAllButBad->GetName()<<endl;
     TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_h2CImprovedEta"+appendix);
     TH2F* hGood = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2CImprovedEta"+appendix);
+    TH2F* hGood2 = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2CImprovedEta2"+appendix);
     hAllButBad->Reset();
     hAll->Reset();
     hGood->Reset();
@@ -398,6 +399,10 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
                 pos = eta_corretedPos.at(i).first;
                 if (eta>=0) pos -= prof_Good->GetBinContent(prof_Good->FindBin(eta));
                 hGood->Fill(pos,eta);
+                if (eta >.2 && eta <0.8)
+                    hGood2->Fill(pos,eta);
+                else
+                    hGood2->Fill(eta_corretedPos.at(i).first,eta);
             }
             if (!settings->isBadCell(3,eta_correctedCell.at(i))){
                 pos = eta_corretedPos.at(i).first;
@@ -412,6 +417,7 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
         histSaver->SaveHistogram((TH2F*)hAllButBad);
         histSaver->SaveHistogram((TH2F*)hAll);
         histSaver->SaveHistogram((TH2F*)hGood);
+        histSaver->SaveHistogram((TH2F*)hGood2);
         TH1D* px_new = hAllButBad->ProjectionX();
         TH1D* px_old = ((TH2F*)histSaver->hAllButBadCells)->ProjectionX();
         histSaver->SaveHistogram(px_new);
@@ -428,6 +434,13 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
         px_old = ((TH2F*)histSaver->hGoodCells)->ProjectionX();
         histSaver->SaveHistogram(px_new);
         histSaver->SaveTwoHistosScaled("hResidualComparison_GoodCells",px_new,px_old);
+        delete px_new;
+        delete px_old;
+
+        px_new = hGood2->ProjectionX();
+        px_old = ((TH2F*)histSaver->hGoodCells)->ProjectionX();
+        histSaver->SaveHistogram(px_new);
+        histSaver->SaveTwoHistosScaled("hResidualComparison_GoodCells2",px_new,px_old);
         delete px_new;
         delete px_old;
     }
