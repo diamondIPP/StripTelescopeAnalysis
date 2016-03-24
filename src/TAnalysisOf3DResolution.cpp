@@ -371,7 +371,7 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     cout<<"Get Profile from "<<((TH2F*)histSaver->hAllButBadCells)->GetName() <<" with "<<
         ((TH2F*)histSaver->hAllButBadCells)->GetEntries()<<" Entries."<<endl;
     Int_t startBin = -1;//((TH2F*)histSaver->hAllButBadCells)->GetYaxis()->FindBin(0);
-    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY(histSaver->hAllButBadCells->GetName()+"_py",startBin);
+    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY(histSaver->hAllButBadCells->GetName()+(TString)"_py",startBin);
     prof_AllButBad->GetXaxis()->SetRangeUser(0,1);
     cout<<"Save: "<<prof_AllButBad->GetName();
     histSaver->SaveHistogram(prof_AllButBad,false,false);
