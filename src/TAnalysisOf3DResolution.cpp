@@ -370,13 +370,13 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
     cout<<"Get Profile from "<<((TH2F*)histSaver->hAllButBadCells)->GetName() <<" with "<<
         ((TH2F*)histSaver->hAllButBadCells)->GetEntries()<<" Entries."<<endl;
-    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("",10);
+    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("_py",10);
     cout<<"Save: "<<prof_AllButBad->GetName();
     histSaver->SaveHistogram(prof_AllButBad);
-    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY("",10);
+    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY("_py",10);
     cout<<"Save: "<<prof_All->GetName();
     histSaver->SaveHistogram(prof_All);
-    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY("",10);
+    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY("_py",10);
     cout<<"Save: "<<prof_Good->GetName();
     histSaver->SaveHistogram(prof_Good);
     cout<<"Create New Histograms"<<endl;
@@ -412,15 +412,24 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
         histSaver->SaveHistogram((TH2F*)hAllButBad);
         histSaver->SaveHistogram((TH2F*)hAll);
         histSaver->SaveHistogram((TH2F*)hGood);
-        TH1D* px = hAllButBad->ProjectionX();
-        histSaver->SaveHistogram(px);
-        delete px;
-        px = hAll->ProjectionX();
-        histSaver->SaveHistogram(px);
-        delete px;
-        px = hGood->ProjectionX();
-        histSaver->SaveHistogram(px);
-        delete px;
+        TH1D* px_new = hAllButBad->ProjectionX();
+        TH1D* px_old = ((TH2F*)histSaver->hAllButBadCells)->ProjectionX();
+        histSaver->SaveHistogram(px_new);
+        histSaver->SaveTwoHistosScaled("hResidualComparison_AllButBadCells",px_new,px_old);
+        delete px_new;
+        delete px_old;
+        px_new = hAll->ProjectionX();
+        px_old = ((TH2F*)histSaver->hAllCells)->ProjectionX();
+        histSaver->SaveHistogram(px_new);
+        histSaver->SaveTwoHistosScaled("hResidualComparison_AllCells",px_new,px_old);
+        delete px_new;
+        delete px_old;
+        px_new = hGood->ProjectionX();
+        px_old = ((TH2F*)histSaver->hGoodCells)->ProjectionX();
+        histSaver->SaveHistogram(px_new);
+        histSaver->SaveTwoHistosScaled("hResidualComparison_GoodCells",px_new,px_old);
+        delete px_new;
+        delete px_old;
     }
     else{
         cout<<"sizes do not agree"<<endl;
