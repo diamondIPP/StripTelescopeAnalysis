@@ -370,17 +370,27 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
     cout<<"Get Profile from "<<((TH2F*)histSaver->hAllButBadCells)->GetName() <<" with "<<
         ((TH2F*)histSaver->hAllButBadCells)->GetEntries()<<" Entries."<<endl;
-    Int_t startBin = ((TH2F*)histSaver->hAllButBadCells)->GetYaxis()->FindBin(0.0);
-    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY(histSaver->hAllButBadCells->GetName()+(TString)"_py",startBin);
+    Int_t startBin = -1;//((TH2F*)histSaver->hAllButBadCells)->GetYaxis()->FindBin(0);
+    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY(histSaver->hAllButBadCells->GetName()+"_py",startBin);
+    prof_AllButBad->GetXaxis()->SetRangeUser(0,1);
     cout<<"Save: "<<prof_AllButBad->GetName();
-    histSaver->SaveHistogram(prof_AllButBad);
+    histSaver->SaveHistogram(prof_AllButBad,false,false);
     TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY(histSaver->hAllCells->GetName()+(TString)"_py",startBin);
+    prof_All->GetXaxis()->SetRangeUser(0,1);
     cout<<"Save: "<<prof_All->GetName();
-    histSaver->SaveHistogram(prof_All);
+    histSaver->SaveHistogram(prof_All,false,false);
     TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY(histSaver->hGoodCells->GetName()+(TString)"_py",startBin);
+    prof_Good->GetXaxis()->SetRangeUser(0,1);
     cout<<"Save: "<<prof_Good->GetName();
-    histSaver->SaveHistogram(prof_Good);
+    histSaver->SaveHistogram(prof_Good,false,false);
     cout<<"Create New Histograms"<<endl;
+    THStack *stack = new THStack("sAllEtaCorrectionProfiles");
+    prof_Good->SetLineColor(kGreen);
+    prof_AllButBad->SetLineColor(kBlue);
+    stack->Add(prof_All);
+    stack->Add(prof_Good);
+    stack->Add(prof_AllButBad);
+    histSaver->SaveStack(stack,"nostack",true);
     TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_h2C_ImprovedEta"+appendix);
     cout<<hAllButBad->GetName()<<endl;
     TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_h2C_ImprovedEta"+appendix);
@@ -449,6 +459,7 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     else{
         cout<<"sizes do not agree"<<endl;
     }
+    delete stack;
 //    cout<<"Press a key to continue!"<<endl;
 //    if (hAllButBad) delete hAllButBad;
 //    if (prof_AllButBad) delete prof_AllButBad;
