@@ -390,7 +390,13 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     stack->Add(prof_All);
     stack->Add(prof_Good);
     stack->Add(prof_AllButBad);
-    histSaver->SaveStack(stack,"nostack",true);
+    histSaver->SaveStack(stack,"nostack",true,false);
+    TCanvas *c1 = TCanvas("cAdjacentChannels_SignalAll");
+    stack->Draw("nostack");
+    if (stack->GetXaxis())
+        stack->GetXaxis()->SetRangeUser(0,1);
+    c1->BuildLegend();
+    histSaver->SaveCanvas(c1);
     TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_h2C_ImprovedEta"+appendix);
     cout<<hAllButBad->GetName()<<endl;
     TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_h2C_ImprovedEta"+appendix);
@@ -522,6 +528,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     THStack *stack = new THStack("hAdjacentChannels_SignalAll","hAdjacentChannels_SignalAll");
     stack->Add(pLeft);
     stack->Add(pRight);
+
     histSaver->SaveStack(stack,"nostack",true,false,"Signal","number of entries");
     delete stack;
     delete pLeft;
