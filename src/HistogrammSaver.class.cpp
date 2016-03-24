@@ -3169,22 +3169,24 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      HistogrammSaver newHistSaver(settings);
      newHistSaver.SetPlotsPath(new_plots_path);
      //TH2* histo;
+
      for(UInt_t cell=0;cell< vec->size();cell++){
          TRawEventSaver::showStatusBar(cell,vec->size(),1);
          histo = (TH2*)vec->at(cell);
-         if (!histo)
-             continue;
-         if (settings->IsGoodCell(3,cell))
-             hGoodCells->Add(histo);
          if (settings->isBadCell(3,cell))
-             hBadCells->Add(histo);
+              hBadCells->Add(histo);
+         else if (settings->IsGoodCell(3,cell))
+             hGoodCells->Add(histo);
          else
              hAllButBadCells->Add(histo);
-         hAllCells->Add(histo);
          newHistSaver.SaveHistogram(histo,true,false);
          vec->at(cell)= 0;
          delete histo;
      }
+     cout<"#"<<flush;
+     hAllButBadCells->Add(hGoodCells);
+     hAllCells->Add(hAllButBadCells);
+     hAllCells->Add(hBadCells);
      cout<<"DONE"<<endl;
      ((TH2F*)hGoodCells)->GetZaxis()->SetTitle("number of entries #");
      this->SaveHistogram((TH2F*)hGoodCells,true,false);

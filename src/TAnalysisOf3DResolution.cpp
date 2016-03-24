@@ -370,24 +370,26 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
     cout<<"Get Profile from "<<((TH2F*)histSaver->hAllButBadCells)->GetName() <<" with "<<
         ((TH2F*)histSaver->hAllButBadCells)->GetEntries()<<" Entries."<<endl;
-    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("_py",10);
+    Int_t startBin = ((TH2F*)histSaver->hAllButBadCells)->GetYaxis()->FindBin(0);
+    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY(histSaver->hAllButBadCells->GetName()+"_py",startBin);
     cout<<"Save: "<<prof_AllButBad->GetName();
     histSaver->SaveHistogram(prof_AllButBad);
-    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY("_py",10);
+    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY(histSaver->hAllCells->GetName()+"_py",startBin);
     cout<<"Save: "<<prof_All->GetName();
     histSaver->SaveHistogram(prof_All);
-    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY("_py",10);
+    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY(histSaver->hGoodCells->GetName()+"_py",startBin);
     cout<<"Save: "<<prof_Good->GetName();
     histSaver->SaveHistogram(prof_Good);
     cout<<"Create New Histograms"<<endl;
-    TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_h2CImprovedEta"+appendix);
+    TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_h2C_ImprovedEta"+appendix);
     cout<<hAllButBad->GetName()<<endl;
-    TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_h2CImprovedEta"+appendix);
-    TH2F* hGood = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2CImprovedEta"+appendix);
-    TH2F* hGood2 = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2CImprovedEta2"+appendix);
+    TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_h2C_ImprovedEta"+appendix);
+    TH2F* hGood = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2C_ImprovedEta"+appendix);
+    TH2F* hGood2 = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2C_ImprovedEta2"+appendix);
     hAllButBad->Reset();
     hAll->Reset();
     hGood->Reset();
+    hGood2->Reset();
     Float_t eta, pos;
     cout<<"Fill ImprovedEta Histos"<<endl;
     cout<<"eta_corretedPos: "<<eta_corretedPos.size()<<"/"<<eta_correctedCell.size()<<endl;
@@ -399,7 +401,7 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
                 pos = eta_corretedPos.at(i).first;
                 if (eta>=0) pos -= prof_Good->GetBinContent(prof_Good->FindBin(eta));
                 hGood->Fill(pos,eta);
-                if (eta >.2 && eta <0.8)
+                if (0.1 < eta && eta < 0.8)
                     hGood2->Fill(pos,eta);
                 else
                     hGood2->Fill(eta_corretedPos.at(i).first,eta);
