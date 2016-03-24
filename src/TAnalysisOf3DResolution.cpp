@@ -391,7 +391,7 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     stack->Add(prof_Good);
     stack->Add(prof_AllButBad);
     histSaver->SaveStack(stack,"nostack",true,false);
-    TCanvas *c1 = TCanvas("cAdjacentChannels_SignalAll");
+    TCanvas *c1 = new TCanvas("cAdjacentChannels_SignalAll");
     stack->Draw("nostack");
     if (stack->GetXaxis())
         stack->GetXaxis()->SetRangeUser(0,1);
