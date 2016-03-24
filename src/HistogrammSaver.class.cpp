@@ -3183,7 +3183,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
          vec->at(cell)= 0;
          delete histo;
      }
-     cout<"#"<<flush;
+     cout<<"#"<<flush;
      hAllButBadCells->Add(hGoodCells);
      hAllCells->Add(hAllButBadCells);
      hAllCells->Add(hBadCells);
