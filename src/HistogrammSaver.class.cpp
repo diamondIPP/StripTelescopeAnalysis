@@ -3035,7 +3035,7 @@ void HistogrammSaver::CreateResolutionPlots(vector<TH1*>*vec,TString kind, Int_t
     hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
     string plots_path = this->GetPlotsPath();
     HistogrammSaver newHistSaver(settings);
-    newHistSaver.SetPlotsPath(plots_path+(string)"/hResolution/"+kind+(string)"/");
+    newHistSaver.SetPlotsPath(plots_path+(string)"/hResolution/"+(string)kind+(string)"/");
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH1F* histo = (TH1F*)vec->at(cell);
         if (!histo)
@@ -3187,22 +3187,22 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      }
      cout<<"DONE"<<endl;
      ((TH2F*)hGoodCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hGoodCells,true,false,true);
+     this->SaveHistogram((TH2F*)hGoodCells,true,false);
      TH1D* proj = ((TH2F*)hGoodCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;
      ((TH2F*)hBadCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hBadCells,true,false,true);
+     this->SaveHistogram((TH2F*)hBadCells,true,false);
      proj = ((TH2F*)hBadCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;
      ((TH2F*)hAllCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hAllCells);
+     this->SaveHistogram((TH2F*)hAllCells,true,false);
      proj = ((TH2F*)hAllCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;
      ((TH2F*)hAllButBadCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hAllButBadCells,true,false,:);
+     this->SaveHistogram((TH2F*)hAllButBadCells,true,false);
      proj = ((TH2F*)hAllButBadCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;
