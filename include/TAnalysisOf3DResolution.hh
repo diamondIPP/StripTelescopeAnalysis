@@ -29,6 +29,7 @@
 #include "TTracking.hh"
 #include "TSettings.class.hh"
 #include "TCluster.hh"
+#include "TRawEventSaver.hh"
 
 class TAnalysisOf3DResolution {
     public:

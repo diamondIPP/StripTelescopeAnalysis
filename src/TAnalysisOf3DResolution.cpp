@@ -192,8 +192,8 @@ void TAnalysisOf3DResolution::initialiseHistos() {
     TString key,  cellName;
     UInt_t nCells = settings->GetNCells3d();
     UInt_t nBins = 128;
-    Float_t minX = - 1.5*settings->GetCellWidth(subjectDetector,2);
-    Float_t maxX = 1.5*settings->GetCellWidth(subjectDetector,2);
+    Float_t minX = - 2*settings->GetCellWidth(subjectDetector,2);
+    Float_t maxX = 2*settings->GetCellWidth(subjectDetector,2);
     TString name = "hAdjacentSNR_vs_cellNo"+appendix;
     TString title = "hAdjacentSNR_vs_cellNo"+appendix;
 
@@ -216,6 +216,7 @@ void TAnalysisOf3DResolution::initialiseHistos() {
     TH1* histo;
     TString type;
     for (UInt_t cell = 0; cell <nCells;cell++){
+        nBins = 128;
         cellName = TString::Format("hResolution_CellNo_%02d_",cell);
 
 //        cout<<" * Add Histo: " <<name<<endl;
@@ -253,8 +254,9 @@ void TAnalysisOf3DResolution::initialiseHistos() {
         name = cellName+key+appendix;
         title = name+";residualt_{h2C}/#um;Eta = #frac{S_R}{S_L+S_R}";
         type =  typeid(TH2F).name();
-        histo = new TH2F(name,name,nBins,minX,maxX,nBins,-1,1);
+        histo = new TH2F(name,name,nBins,minX,maxX,100,-1,1);
         addCellHisto(key,histo,type);
+
         nBins = 64;
         /*******  RESOLUTION VS SNR *********/
         name = TString::Format("hResolution_CellNo_%02d_maxValue_vs_SNR",cell)+appendix;
@@ -367,21 +369,25 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     cout<<"CreateTH2_CellPlots of "<<key<<endl;
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
     cout<<"Get Profile"<<endl;
-    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("");
-    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY("");
-    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY("");
-    cout<<"Create Test Histo"<<endl;
-    TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_ImprovedEta"+appendix);
-    TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_ImprovedEta"+appendix);
-    TH2F* hGood = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_ImprovedEta"+appendix);
-    cout<<"Reset Test Histo"<<endl;
+    TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("",10);
+    histSaver->SaveHistogram(prof_AllButBad);
+    TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY("",10);
+    histSaver->SaveHistogram(prof_All);
+    TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY("",10);
+    histSaver->SaveHistogram(prof_Good);
+    cout<<"Create New Histograms"<<endl;
+    TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_h2CImprovedEta"+appendix);
+    TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_h2CImprovedEta"+appendix);
+    TH2F* hGood = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2CImprovedEta"+appendix);
     hAllButBad->Reset();
+    hAll->Reset();
+    hGood->Reset();
     Float_t eta, pos;
-    cout<<"Fill Test Histo"<<endl;
-    cout<<"Entries: "<<(histSaver->hAllButBadCells)->GetName()<<"/"<<(histSaver->hAllButBadCells)->GetEntries()<<endl;
+    cout<<"Fill ImprovedEta Histos"<<endl;
     cout<<"eta_corretedPos: "<<eta_corretedPos.size()<<"/"<<eta_correctedCell.size()<<endl;
     if (eta_corretedPos.size() == eta_correctedCell.size()){
         for (UInt_t i =0; i < eta_corretedPos.size(); i++){
+            TRawEventSaver::showStatusBar(i,(int)(eta_corretedPos.size()),100);
             eta = eta_corretedPos.at(i).second;
             if (settings->IsGoodCell(3,eta_correctedCell.at(i))){
                 pos = eta_corretedPos.at(i).first;
