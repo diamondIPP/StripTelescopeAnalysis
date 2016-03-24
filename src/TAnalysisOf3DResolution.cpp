@@ -414,13 +414,13 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     else{
         cout<<"sizes do not agree"<<endl;
     }
-    cout<<"Press a key to continue!"<<endl;
-    if (hAllButBad) delete hAllButBad;
-    if (prof_AllButBad) delete prof_AllButBad;
-    if (hAll) delete hAll;
-    if (prof_All) delete prof_All;
-    if (hGood) delete hGood;
-    if (prof_Good) delete prof_Good;
+//    cout<<"Press a key to continue!"<<endl;
+//    if (hAllButBad) delete hAllButBad;
+//    if (prof_AllButBad) delete prof_AllButBad;
+//    if (hAll) delete hAll;
+//    if (prof_All) delete prof_All;
+//    if (hGood) delete hGood;
+//    if (prof_Good) delete prof_Good;
 }
 
 void TAnalysisOf3DResolution::saveHistos() {
