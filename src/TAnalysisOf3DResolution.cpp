@@ -368,15 +368,20 @@ void TAnalysisOf3DResolution::ImprovedResolutionWithEta(){
     TString key = "h2C_vs_Eta";
     cout<<"CreateTH2_CellPlots of "<<key<<endl;
     histSaver->CreateTH2_CellPlots(&cellHistos[key],key,prefix,appendix);
-    cout<<"Get Profile"<<endl;
+    cout<<"Get Profile from "<<((TH2F*)histSaver->hAllButBadCells)->GetName() <<" with "<<
+        ((TH2F*)histSaver->hAllButBadCells)->GetEntries()<<" Entries."<<endl;
     TProfile *prof_AllButBad = ((TH2F*)histSaver->hAllButBadCells)->ProfileY("",10);
+    cout<<"Save: "<<prof_AllButBad->GetName();
     histSaver->SaveHistogram(prof_AllButBad);
     TProfile *prof_All = ((TH2F*)histSaver->hAllCells)->ProfileY("",10);
+    cout<<"Save: "<<prof_All->GetName();
     histSaver->SaveHistogram(prof_All);
     TProfile *prof_Good = ((TH2F*)histSaver->hGoodCells)->ProfileY("",10);
+    cout<<"Save: "<<prof_Good->GetName();
     histSaver->SaveHistogram(prof_Good);
     cout<<"Create New Histograms"<<endl;
     TH2F* hAllButBad = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllButBadCells_h2CImprovedEta"+appendix);
+    cout<<hAllButBad->GetName()<<endl;
     TH2F* hAll = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"AllCells_h2CImprovedEta"+appendix);
     TH2F* hGood = (TH2F*)((TH2F*)histSaver->hAllButBadCells)->Clone(prefix+"GoodCells_h2CImprovedEta"+appendix);
     hAllButBad->Reset();
@@ -433,6 +438,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     std::cout<<"[TAnalysisOf3DResolution::saveHistos()] "<<flush;
     if (!settings->do3dTransparentAnalysis())
         return;
+    ImprovedResolutionWithEta();
     TString prefix = "hResolution";
     cout<<0<<flush;
     histSaver->CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted",subjectDetector,appendix);
@@ -457,7 +463,7 @@ void TAnalysisOf3DResolution::saveHistos() {
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_chargeWeighted_vs_PredHitY,"chargeWeighted_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_highest2Centroid_vs_PredHitY,"highest2Centroid_PredHitY",prefix,appendix);
     histSaver->CreateTH2_CellPlots(&vecHResolutionPerCell_h2C_WithCut_vs_PredHitY,"h2C_WithCut_PredHitY",prefix,appendix);
-    ImprovedResolutionWithEta();
+
 
     for (TCellHistoMap::iterator it = cellHistos.begin();it != cellHistos.end();it++){
         cout<<"TCellHistoMap: Save: "<<it->first<<":"<<flush;

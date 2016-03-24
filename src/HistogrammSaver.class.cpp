@@ -3035,7 +3035,7 @@ void HistogrammSaver::CreateResolutionPlots(vector<TH1*>*vec,TString kind, Int_t
     hResolutionAllButBadCells->GetXaxis()->SetTitle("Residual / #mum");
     string plots_path = this->GetPlotsPath();
     HistogrammSaver newHistSaver(settings);
-    newHistSaver.SetPlotsPath(plots_path+(string)"/resolution/");
+    newHistSaver.SetPlotsPath(plots_path+(string)"/hResolution/"+kind+(string)"/");
     for(UInt_t cell=0;cell< vec->size();cell++){
         TH1F* histo = (TH1F*)vec->at(cell);
         if (!histo)
@@ -3137,7 +3137,7 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      if (vec->size() == 0) return;
      TH2* histo = (TH2*)vec->at(0);
      if (!histo) return;
-     cout<<"CreateTH2_CellPlots: "<<prefix<<" "<<kind<<" "<<appendix<<endl;
+     cout<<"[HistogrammSaver::CreateTH2_CellPlots] "<<prefix<<" "<<kind<<" "<<appendix<<endl;
      if (kind != "" && !kind.BeginsWith("_"))
          kind.Prepend("_");
      DeleteCellHistos();
@@ -3185,14 +3185,14 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
          vec->at(cell)= 0;
          delete histo;
      }
-     cout<<"\nDONE"<<endl;
+     cout<<"DONE"<<endl;
      ((TH2F*)hGoodCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hGoodCells);//,false,false,true);
+     this->SaveHistogram((TH2F*)hGoodCells,true,false,true);
      TH1D* proj = ((TH2F*)hGoodCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;
      ((TH2F*)hBadCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hBadCells);//,false,false,true);
+     this->SaveHistogram((TH2F*)hBadCells,true,false,true);
      proj = ((TH2F*)hBadCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;
@@ -3202,9 +3202,9 @@ void HistogrammSaver::CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString
      this->SaveHistogram(proj);
      delete proj;
      ((TH2F*)hAllButBadCells)->GetZaxis()->SetTitle("number of entries #");
-     this->SaveHistogram((TH2F*)hAllButBadCells);//,false,false,true);
+     this->SaveHistogram((TH2F*)hAllButBadCells,true,false,true);
      proj = ((TH2F*)hAllButBadCells)->ProjectionX();
      this->SaveHistogram(proj);
      delete proj;
-
+     cout<<"Test: "<<((TH2F*)hAllButBadCells)->GetName()<<" with "<<((TH2F*)hAllButBadCells)->GetEntries()<<endl;
 }
