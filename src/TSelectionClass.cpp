@@ -744,7 +744,6 @@ void TSelectionClass::saveHistos()
     delete hProjection;
     delete c1;
     c1=0;
-    delete hFiducialCutSiliconRoughCut;
 
     if(fiducialCuts){
         TH2F* h2 = (TH2F*)hFiducialCutSiliconDiamondHit->Clone();
@@ -772,7 +771,7 @@ void TSelectionClass::saveHistos()
         delete c1;
         c1 = 0;
     }
-    if (hFiducialCutSiliconRoughCut && !hFiducialCutSiliconRoughCut->IsZombie()){
+    if (hFiducialCutSiliconRoughCut && !hFiducialCutSiliconRoughCut->IsZombie() && False){
         hProjection = hFiducialCutSiliconRoughCut->ProjectionX("hFidCutSilicon_OneAndOnlyOneClusterAndDiamondHit_RoughCut_px");
         hProjection->SetTitle("One and only one silicon + >= 1 Diamond Hit in Rough FidCut - Projection X");
         cout<<"\nSaving: "<<hProjection->GetName()<<" "<<hProjection->GetEntries()<<endl;
