@@ -30,6 +30,8 @@
 #include "TResults.hh"
 #include "TRunInfo.hh"
 #include "TFile.h"
+#include <string>     // std::string, std::stoi
+#include <stdlib.h>     /* strtol */
 
 using namespace std;
 /*** USAGE ***/
@@ -99,6 +101,12 @@ bool readInputs(int argc,char ** argv){
 			runSettingsDir=string(argv[i]);
 			cout<<"settingDirPath is set to: \""<<runSettingsDir<<"\""<<endl;
 		}
+        if ( ( (string(argv[i]) == "-3d") || (string(argv[i]) == "-3D")) && i+1 < argc){
+                i++;
+                //run_3danalysis=std::stoi(argv[i]);
+                run_3danalysis= strtol(string(argv[i]).c_str(),0,10);
+                cout<<"Running 3D Analysis: "<<run_3danalysis<<endl;
+        }
 	}
 	return true;
 }
@@ -271,19 +279,23 @@ int main(int argc, char ** argv) {
 			currentResults->createResultFiles();
 		}
 		//		if(settings->is3dDiamond()){
-		if(settings->do3dShortAnalysis()||settings->do3dLongAnalysis()||settings->do3dTransparentAnalysis()){
-			TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
-			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
-			delete analyse3dDiamond;
-            if (settings->do3dTransparentAnalysis())
-                settings->set3dTransparentAnalysis(0);
-            else
-                settings->set3dTransparentAnalysis(1);
-			analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
-			analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
-			delete analyse3dDiamond;
-			currentResults->createResultFiles();
-		}
+        //
+
+        if ( run_3danalysis ){
+            if(settings->do3dShortAnalysis()||settings->do3dLongAnalysis()||settings->do3dTransparentAnalysis()){
+                TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+                analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+                delete analyse3dDiamond;
+                if (settings->do3dTransparentAnalysis())
+                    settings->set3dTransparentAnalysis(0);
+                else
+                    settings->set3dTransparentAnalysis(1);
+                analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+                analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+                delete analyse3dDiamond;
+                currentResults->createResultFiles();
+            }
+        }
 
 		if(DO_ALIGNMENTANALYSIS){
 			sys->cd(currentDir.c_str());

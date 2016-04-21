@@ -53,10 +53,10 @@ void THTMLAlignment::createPostSiliconOverview()
 	sectionContent<<"<br><br>\n";
 
 	sectionContent<<"<h3>X_Obs vs. Y_Obs</h3>\n";
-	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_0_with_1_2_and_3with_Chi2"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
-	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_1_with_0_2_and_3with_Chi2"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
-	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_2_with_0_1_and_3with_Chi2"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
-	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_3_with_0_1_and_2with_Chi2"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
+	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_0_with_1_2_and_3with_Chi2_cut"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
+	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_1_with_0_2_and_3with_Chi2_cut"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
+	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_2_with_0_1_and_3with_Chi2_cut"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
+	sectionContent<<putImage(".",TString::Format("hSilicon_PostAlignment_ScatterPlot_XObs_vs_YObs_Plane_3_with_0_1_and_2with_Chi2_cut"),"png",24)<<"\n ";//_cut_on_%1.f",settings->getAlignment_chi2()),"png",24)<<"\n";
 	sectionContent<<"<br><br>\n";
 
 	sectionContent<<"<h3>Y_Pred vs DeltaX</h3>\n";
