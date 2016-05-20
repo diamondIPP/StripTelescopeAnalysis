@@ -112,17 +112,17 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     this->nEvents =nEvents+startEvent;
     histSaver->SetNumberOfEvents(nEvents);
     UInt_t newstartEvent = 0;
-//    if(settings->getAlignmentEvents(nEvents)>startEvent){ // DA: Commented this so that it uses the alignment events for analysis to
-//        cout<<"startEvent:      "<<startEvent<<endl;
-//        cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
+    if(settings->getAlignmentEvents(nEvents)>startEvent){// DA: Commented to lines so that the alignment events are taken into account for analysis
+        cout<<"startEvent:      "<<startEvent<<endl;
+        cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
 //        newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
-//        cout<<"newstartEvent: "<<newstartEvent<<endl;
-//        cout<<"nEvents: "<<nEvents<<endl;
+        cout<<"newstartEvent: "<<newstartEvent<<endl;
+        cout<<"nEvents: "<<nEvents<<endl;
 //        nEvents -= newstartEvent-startEvent;
-//        startEvent = newstartEvent;
-//        cout<<"\nnEvents = "<<nEvents<<endl;
-//        cout<<"startEvent= "<<startEvent<<endl;
-//    }// DA: end of the commented part.
+        startEvent = newstartEvent;
+        cout<<"\nnEvents = "<<nEvents<<endl;
+        cout<<"startEvent= "<<startEvent<<endl;
+    }
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
