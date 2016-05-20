@@ -112,14 +112,14 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     this->nEvents =nEvents+startEvent;
     histSaver->SetNumberOfEvents(nEvents);
     UInt_t newstartEvent = 0;
-    if(settings->getAlignmentEvents(nEvents)>startEvent){// DA: Commented to lines so that the alignment events are taken into account for analysis
+    if(settings->getAlignmentEvents(nEvents)>startEvent){
         cout<<"startEvent:      "<<startEvent<<endl;
         cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
-//        newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
+        if(!(settings->doAnalyseAlignmentEvents())) newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
         cout<<"newstartEvent: "<<newstartEvent<<endl;
         cout<<"nEvents: "<<nEvents<<endl;
-//        nEvents -= newstartEvent-startEvent;
-        startEvent = newstartEvent;
+        nEvents -= newstartEvent-startEvent;
+        if(!(settings->doAnalyseAlignmentEvents())) startEvent = newstartEvent;
         cout<<"\nnEvents = "<<nEvents<<endl;
         cout<<"startEvent= "<<startEvent<<endl;
     }
@@ -1835,7 +1835,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         //		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
         if (settings->useForAlignment(nEvent,nEvents)){
             usedForAlignment++;
-            continue;
+            if(!(settings->doAnalyseAlignmentEvents())) continue;
         }
         if(nEvent>eventReader->GetEntries())
             break;
