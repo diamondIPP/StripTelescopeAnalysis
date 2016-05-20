@@ -115,11 +115,15 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     if(settings->getAlignmentEvents(nEvents)>startEvent){
         cout<<"startEvent:      "<<startEvent<<endl;
         cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
-        if(!(settings->doAnalyseAlignmentEvents())) newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
+        if(settings->doAnalyseAlignmentEvents()){
+            newstartEvent = startEvent;
+        }
+        else
+            newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
         cout<<"newstartEvent: "<<newstartEvent<<endl;
         cout<<"nEvents: "<<nEvents<<endl;
         nEvents -= newstartEvent-startEvent;
-        if(!(settings->doAnalyseAlignmentEvents())) startEvent = newstartEvent;
+        startEvent = newstartEvent;
         cout<<"\nnEvents = "<<nEvents<<endl;
         cout<<"startEvent= "<<startEvent<<endl;
     }
