@@ -1890,8 +1890,10 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         TRawEventSaver::showStatusBar(nEvent,nEvents,100);
         //		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
         if (settings->useForAlignment(nEvent,nEvents)){
-            usedForAlignment++;
-            if(!(settings->doAnalyseAlignmentEvents())) continue;
+            if(!(settings->doAnalyseAlignmentEvents())){
+                usedForAlignment++;
+                continue;
+            }
         }
         if(nEvent>eventReader->GetEntries())
             break;
