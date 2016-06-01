@@ -182,7 +182,7 @@ private:
 	// histograms
 	vector<TH1F*> hLandau;
 	vector<TProfile2D*> hLandau2HighestProfile2D;
-	vector<TProfile2D*> hLandau1HighestProfile2D:
+	vector<TProfile2D*> hLandau1HighestProfile2D;
 	vector< TH2F*> hLandau2HighestFidCutX;
 	vector< TH2F*> hLandau2HighestFidCutY;
 	vector< TH2F*> hLandau2HighestPredX;
