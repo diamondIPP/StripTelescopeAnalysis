@@ -81,6 +81,7 @@ private:
 	void analyseNonHitEvents();
 	void initHistograms();
 	void initHistograms2();
+	void initHistograms1();
 	void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
 	void initClusteredHistos(UInt_t startEvent = 1e5, UInt_t maxEvents=1e6);
 	void fillHistograms();
@@ -181,10 +182,15 @@ private:
 	// histograms
 	vector<TH1F*> hLandau;
 	vector<TProfile2D*> hLandau2HighestProfile2D;
+	vector<TProfile2D*> hLandau1HighestProfile2D:
 	vector< TH2F*> hLandau2HighestFidCutX;
 	vector< TH2F*> hLandau2HighestFidCutY;
 	vector< TH2F*> hLandau2HighestPredX;
 	vector< TH2F*> hLandau2HighestPredY;
+	vector< TH2F*> hLandau1HighestFidCutX;//DA: added this 4 vectors of histograms
+	vector< TH2F*> hLandau1HighestFidCutY;
+	vector< TH2F*> hLandau1HighestPredX;
+	vector< TH2F*> hLandau1HighestPredY;
 	vector< vector< Float_t> > vecVecLandau;
 	vector< Float_t> vecPredictedChannel;
 	vector< Float_t> vecPredictedDetectorPositionY;
