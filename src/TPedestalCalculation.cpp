@@ -254,11 +254,11 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 	//  if(ch==7)cout<<"calcFirstPedCMN:"<<ch<<" "<<meanCMN<<" "<<sigmaCMN<<" "<<diaEventsInSumCMN[ch]<<endl;
 	this->diaEventUsedCMN[ch].clear();
 	for(nEvent=0;nEvent<adcQueue.size();nEvent++){
-		Float_t adc = adcQueue.at(nEvent);
+		Float_t adc = adcQueue.at(nEvent);// DA: it's the adc signal subtracted with the cmnoise.
 		Float_t lowLimit = getLowLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 		Float_t highLimit = getHighLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 		if(ch ==0) cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl;
-		if(   (adc >= lowLimit)	&& (adc <= highLimit) ){
+		if(   (adc >= lowLimit)	&& (adc <= highLimit) ){// DA: if this 'adc' is not considered signal (below hit cut)
 			diaEventUsedCMN[ch].push_back(true);
 			diaSUMCmn[ch]+=adc;
 			diaSUM2Cmn[ch]+=adc*adc;
@@ -502,8 +502,10 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 	}
 	if(verbosity)cout<<"update first Pedestal Calculation"<<endl;
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
-		pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalMeanStartValues[ch],7,MAXDIASIGMA);
-		values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);
+		//pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);// DA: TODO before iterations should be sigma not mean // DA: TODO Delete this line, it does not do anything. Values won't be used.
+		cout << "BLA before: " << diaPedestalMeanStartValues[ch] << endl;
+		pair<Float_t, Float_t> values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);
+		cout << "BLA after: " << diaPedestalMeanStartValues[ch] << endl;
 		diaPedestalMeanCMN[ch] = values.first;
 		diaPedestalSigmaCMN[ch] = values.second;
 		if(ch==7&&verbosity>4){
