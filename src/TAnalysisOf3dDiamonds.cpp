@@ -5463,18 +5463,18 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     delete hNClusters;
 }
 
-void TAnalysisOf3dDiamonds::saveHistos() {cout << "BLBA" << endl;
+void TAnalysisOf3dDiamonds::saveHistos() {cout << "BLBA 0" << endl;
 //    if (settings->do3dTransparentAnalysis())
-    LongAnalysis_CreateResolutionPlots();
-    saveGlobalHistos();
-    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
+    LongAnalysis_CreateResolutionPlots();cout << "BLA 1" << endl;
+    saveGlobalHistos();cout << "BLA 2" << endl;
+    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();cout << "BLA 3" << endl;}
 
-
-    LongAnalysis_SaveChargeSharingPlots();
-    SaveStripAnalysisHistos();
+    cout << "BLA 4" << endl;
+    LongAnalysis_SaveChargeSharingPlots(); cout << "BLA 5" << endl;
+    SaveStripAnalysisHistos();cout << "BLA 6" << endl;
     // Save
-    if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();}
-    if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
+    if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();cout << "BLA 7"<< endl;}
+    if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();cout << "BLA 8 " << endl;/*saveTransparentAnalysisHistos()*/}
 }
 
 void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
