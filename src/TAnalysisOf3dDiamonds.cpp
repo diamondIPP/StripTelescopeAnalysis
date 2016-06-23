@@ -3018,7 +3018,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
     if (resolutionAnalysis) delete resolutionAnalysis;
         resolutionAnalysis = 0;
-    return;
+//    return; // DA: always entered this condition
     if (!settings->do3dTransparentAnalysis())
         return;
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
@@ -5463,18 +5463,18 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     delete hNClusters;
 }
 
-void TAnalysisOf3dDiamonds::saveHistos() {cout << "BLBA 0" << endl;
+void TAnalysisOf3dDiamonds::saveHistos() {cout << "DA: BLBA 0" << endl;
 //    if (settings->do3dTransparentAnalysis())
-    LongAnalysis_CreateResolutionPlots();cout << "BLA 1" << endl;
-    saveGlobalHistos();cout << "BLA 2" << endl;
-    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();cout << "BLA 3" << endl;}
+    LongAnalysis_CreateResolutionPlots();cout << "DA: BLA 1" << endl;
+    saveGlobalHistos();cout << "DA: BLA 2" << endl;
+    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();cout << "DA: BLA 3" << endl;}
 
-    cout << "BLA 4" << endl;
-    LongAnalysis_SaveChargeSharingPlots(); cout << "BLA 5" << endl;
-    SaveStripAnalysisHistos();cout << "BLA 6" << endl;
+    cout << "DA: BLA 4" << endl;
+    LongAnalysis_SaveChargeSharingPlots(); cout << "DA: BLA 5" << endl;
+    SaveStripAnalysisHistos();cout << "DA: BLA 6" << endl;
     // Save
-    if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();cout << "BLA 7"<< endl;}
-    if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();cout << "BLA 8 " << endl;/*saveTransparentAnalysisHistos()*/}
+    if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();cout << "DA: BLA 7"<< endl;}
+    if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();cout << "DA: BLA 8 " << endl;/*saveTransparentAnalysisHistos()*/}
 }
 
 void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
