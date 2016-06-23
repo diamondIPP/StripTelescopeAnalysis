@@ -3015,8 +3015,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     delete hResolutionAllButBadCells;
 }
 
-void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){cout << "DA: BLA0: " << resolutionAnalysis << endl;
-    if (resolutionAnalysis) {cout << "DA: bla1: " << endl;
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
+    if (resolutionAnalysis) {
         delete resolutionAnalysis;cout << "DA: bla1.5: " << endl;
         TAnalysisOf3DResolution *resolutionAnalysis = 0;cout << "DA: bla 2: "<< resolutionAnalysis << endl;
     }
@@ -5405,7 +5405,7 @@ void TAnalysisOf3dDiamonds::initialiseHistos() {
     if(settings->do3dShortAnalysis() == 1){
         initialiseShortAnalysisHistos();
     }
-    if(settings->do3dLongAnalysis() == 1){
+    if(settings->do3dLongAnalysis() == 1){cout << "DA: should not enter here" << endl;
         initialiseLongAnalysisHistos();
     }
     if(settings->do3dTransparentAnalysis() == 1){

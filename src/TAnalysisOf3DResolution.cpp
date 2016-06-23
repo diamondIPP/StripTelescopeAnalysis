@@ -18,10 +18,10 @@ TAnalysisOf3DResolution::TAnalysisOf3DResolution(TSettings *settings,  Histogram
     this->appendix =appendix;
 }
 
-TAnalysisOf3DResolution::~TAnalysisOf3DResolution() {
+TAnalysisOf3DResolution::~TAnalysisOf3DResolution() {cout << "DA: bla 0" << endl;
     // TODO Auto-generated destructor stub
-    saveHistos();
-    deleteHistos();
+    saveHistos();cout << "DA: bla1" << endl;
+    deleteHistos();cout << "DA: bla2 " << endl;
 }
 
 void TAnalysisOf3DResolution::Fill(TCluster* diamondCluster, Float_t xPredDet, Float_t yPredDet) {
