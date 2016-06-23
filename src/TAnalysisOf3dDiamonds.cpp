@@ -3016,7 +3016,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
 }
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){cout << "DA: bla 123" << endl;
-    if (resolutionAnalysis) delete resolutionAnalysis; cout << "DA: bla 1234" << endl;
+    if (resolutionAnalysis) cout << "will try to delete"<< endl; //delete resolutionAnalysis; cout << "DA: bla 1234" << endl;
         resolutionAnalysis = 0; cout<< "DA: bla 12345" << endl;
     return;
     if (!settings->do3dTransparentAnalysis()){cout << "DA: bla 123456" << endl;
