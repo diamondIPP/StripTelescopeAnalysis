@@ -3017,8 +3017,8 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
 
 void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){cout << "DA: BLA0: " << resolutionAnalysis << endl;
     if (resolutionAnalysis) {
-        delete resolutionAnalysis;
-        TAnalysisOf3DResolution *resolutionAnalysis = 0;
+        delete resolutionAnalysis;cout << "DA: bla1: " << endl;
+        TAnalysisOf3DResolution *resolutionAnalysis = 0;cout << "DA: bla 2: "<< resolutionAnalysis << endl;
     }
     else
         return;
