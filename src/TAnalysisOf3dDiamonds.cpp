@@ -5463,7 +5463,7 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     delete hNClusters;
 }
 
-void TAnalysisOf3dDiamonds::saveHistos() {
+void TAnalysisOf3dDiamonds::saveHistos() {cout << "BLBA" << endl;
 //    if (settings->do3dTransparentAnalysis())
     LongAnalysis_CreateResolutionPlots();
     saveGlobalHistos();

@@ -284,9 +284,9 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 
 pair<Float_t,Float_t> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxSigma){
 	if(detEventUsed[det][ch].size()!=slidingLength)
-		cout<<"detEventInUse has wrong length"<<detEventUsed[det][ch].size();
+		cout<<"detEventInUse has wrong length "<<detEventUsed[det][ch].size();
 	if(detAdcValues[det][ch].size()!=slidingLength+1)
-		cout<<"detAdcValues has wrong length..."<<detAdcValues[det][ch].size()<<endl;
+		cout<<"detAdcValues has wrong length... "<<detAdcValues[det][ch].size()<<endl;
 
 	float mean =this->detSUM[det][ch]/(float)this->detEventsInSum[det][ch];
 	float sigma=TMath::Sqrt(this->detSUM2[det][ch]/(float)this->detEventsInSum[det][ch]-mean*mean);
