@@ -3015,10 +3015,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     delete hResolutionAllButBadCells;
 }
 
-void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
-    if (resolutionAnalysis) delete resolutionAnalysis;
-        resolutionAnalysis = 0;
-//    return; // DA: always entered this condition
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){cout << "DA: BLA0: " << resolutionAnalysis << endl;
+    if (resolutionAnalysis) {
+        delete resolutionAnalysis;
+        TAnalysisOf3DResolution *resolutionAnalysis = 0;
+    }
+    else
+        return;
     if (!settings->do3dTransparentAnalysis())
         return;
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
