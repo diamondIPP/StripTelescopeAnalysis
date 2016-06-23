@@ -123,7 +123,7 @@ private:
 	void LongAnalysis_FillOverlayBiasColumnHistos(Int_t cellNo,Float_t xRelPosDet,Float_t yRelPosDet,Float_t clusterCharge, Float_t ClusterSize, TCluster* diamondCluster);
 	void LongAnalysis_Fill3DOffsetOverlayBiasColumnAlignment(Float_t xRelPosDet,Float_t yRelPosDet, Float_t clusterCharge, Float_t ClusterSize);
 	void LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet, Float_t yPredDet, Float_t charge);
-	TAnalysisOf3DResolution* resolutionAnalysis;
+	TAnalysisOf3DResolution* resolutionAnalysis = 0;// DA: initialize with 0
 	void LongAnalysis_FillResolutionPlots();
 	void LongAnalysis_InitResolutionPlots();
 	void LongAnalysis_CreateResolutionPlots();
