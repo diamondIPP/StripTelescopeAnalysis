@@ -3015,13 +3015,12 @@ void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(vector<TH1F*>*vec
     delete hResolutionAllButBadCells;
 }
 
-void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){cout << "DA: bla 123" << endl;
-    if (resolutionAnalysis) delete resolutionAnalysis; cout << "DA: bla 1234" << endl;
-        resolutionAnalysis = 0; cout<< "DA: bla 12345" << endl;
+void TAnalysisOf3dDiamonds::LongAnalysis_CreateResolutionPlots(){
+    if (resolutionAnalysis) delete resolutionAnalysis;
+        resolutionAnalysis = 0;
     return;
-    if (!settings->do3dTransparentAnalysis()){cout << "DA: bla 123456" << endl;
+    if (!settings->do3dTransparentAnalysis()){
         return;}
-    cout << "DA: bla 1234567" << endl;
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_chargeWeighted,"chargeWeighted");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_highest2Centroid,"highest2Centroid");
     LongAnalysis_CreateResolutionPlots(&vecHResolutionPerCell_maxValue,"maxValue");
@@ -5464,18 +5463,18 @@ void TAnalysisOf3dDiamonds::saveGlobalHistos(){
     delete hNClusters;
 }
 
-void TAnalysisOf3dDiamonds::saveHistos() {cout << "DA: BLBA 0" << endl;
+void TAnalysisOf3dDiamonds::saveHistos() {
 //    if (settings->do3dTransparentAnalysis())
-    LongAnalysis_CreateResolutionPlots();cout << "DA: BLA 1" << endl;
-    saveGlobalHistos();cout << "DA: BLA 2" << endl;
-    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();cout << "DA: BLA 3" << endl;}
+    LongAnalysis_CreateResolutionPlots();
+    saveGlobalHistos();
+    if(settings->do3dLongAnalysis() == 1){SaveLongAnalysisHistos();}
 
-    cout << "DA: BLA 4" << endl;
-    LongAnalysis_SaveChargeSharingPlots(); cout << "DA: BLA 5" << endl;
-    SaveStripAnalysisHistos();cout << "DA: BLA 6" << endl;
+
+    LongAnalysis_SaveChargeSharingPlots();
+    SaveStripAnalysisHistos();
     // Save
-    if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();cout << "DA: BLA 7"<< endl;}
-    if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();cout << "DA: BLA 8 " << endl;/*saveTransparentAnalysisHistos()*/}
+    if(settings->do3dShortAnalysis() == 1){SaveShortAnalysisHistos();}
+    if(settings->do3dTransparentAnalysis() == 1){saveTransparentAnalysisHistos();/*saveTransparentAnalysisHistos()*/}
 }
 
 void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
