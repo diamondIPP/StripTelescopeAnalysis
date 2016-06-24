@@ -476,12 +476,14 @@ void TTransparentAnalysis::fillHistograms() {
         transparentClusters.SetTransparentClusterSize(clusterSize+1);
         Float_t charge = this->transparentClusters.getCharge(cmCorrected);
 
+        Float_t chargeOfOne = this->transparentClusters.getCharge(1,cmCorrected);
         Float_t chargeOfTwo = this->transparentClusters.getCharge(2,cmCorrected);
         Float_t chargeOfTwo_noCMC= this->transparentClusters.getCharge(2,false);
         fillPHvsEventNoAreaPlots(area,clusterSize+1,charge,chargeOfTwo);
         vecVecLandau[clusterSize].push_back(charge);
         hLandau[clusterSize]->Fill(charge);
         hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
+        hLandau1Highest[clusterSize]->Fill(chargeOfOne);
         hLandau2Highest_nonCMC[clusterSize]->Fill(chargeOfTwo_noCMC);
         vecVecPh2Highest[clusterSize].push_back(chargeOfTwo);
         if (clusterSize<hLandau2HighestProfile2D.size())
