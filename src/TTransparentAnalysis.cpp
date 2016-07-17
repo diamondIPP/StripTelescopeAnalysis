@@ -129,7 +129,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     }
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
-    initRawAndSignalCMNCHistos(nEvents+startEvent, 1); // DA:
+    initRawAndSignalCMNCHistos(nEvents+startEvent, 1000); // DA:
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
 //    initPHChannelVsEventNoPlots(startEvent, nEvents+startEvent); // DA: borrar
     initHistograms2();
