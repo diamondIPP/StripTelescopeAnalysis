@@ -164,6 +164,7 @@ public:
 	Float_t getEta_lowq_slice_low() const;
 	UInt_t getMaxAllowedClustersize(UInt_t det);
 	bool doAnalyseAlignmentEvents()const {return bAnalyseAlignmentEvents;} // DA:
+	bool getEventBinWidth()const {return bEventBinWidth;} // DA:
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
@@ -458,6 +459,7 @@ private:
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
 	bool bAnalyseAlignmentEvents; // DA:
+	Int_t bEventBinWidth; // DA:
 
 
 	std::vector<Float_t> alignment_x_offsets;

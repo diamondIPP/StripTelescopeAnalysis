@@ -548,7 +548,8 @@ void TSettings::LoadSettings(){
         if (TPlaneProperties::startsWith(key,"negativeStripChargeCut")){Parse(key,value,negativeChargeCutStrip);}
         if (TPlaneProperties::startsWith(key,"lowResponseThreshold")){Parse(key,value,lowResponseThreshold);}
         if (TPlaneProperties::startsWith(key,"minimumEdgeDistance")){Parse(key,value,minimumEdgeDistance);}
-		if (TPlaneProperties::startsWith(key,"analyseAlignmentEvents")){Parse(key,value,bAnalyseAlignmentEvents);}
+		if (TPlaneProperties::startsWith(key,"analyseAlignmentEvents")){Parse(key,value,bAnalyseAlignmentEvents);} // DA:
+		if (TPlaneProperties::startsWith(key,"eventBinWidth")){Parse(key,value,bEventBinWidth);} // DA:
 
         if (TPlaneProperties::startsWith(key,"responseWindow")){
             ParseFloatPair(key,value,responseWindow);}
@@ -879,6 +880,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	lowResponseThreshold = 500.;
 	responseWindow = make_pair(1600.,1700.);
 	bAnalyseAlignmentEvents = false;
+	bEventBinWidth = 20000;
 //	checkSettings();
 }
 

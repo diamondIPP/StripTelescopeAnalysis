@@ -129,7 +129,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     }
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
-    initADCAndSignalCMNCHistos(nEvents+startEvent, 20000); // DA:
+    initADCAndSignalCMNCHistos(nEvents+startEvent, settings->getEventBinWidth()); // DA:
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
 //    initPHChannelVsEventNoPlots(startEvent, nEvents+startEvent); // DA: borrar
     initHistograms2();
@@ -2745,7 +2745,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 
 void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
     cout<<"initPHvsEventNoAreaPlots"<<flush;
-    Int_t nentriesPerBin = 20000;
+    Int_t nentriesPerBin = settings->getEventBinWidth();
     UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
     if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
     if (nBins==0)nBins=1;
