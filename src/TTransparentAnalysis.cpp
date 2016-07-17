@@ -2843,11 +2843,9 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
 //    histSaver->SaveHistogram(hPHChVsEventNo_1); // DA: borrar
 //    histSaver->SaveHistogram(hPHChVsEventNo_2); // DA: borrar
     histSaver->SaveHistogram(hADCChVsEventNo); // DA:
-    histSaver->SaveHistogram(hADCCMNChVsEventNo); // DA:
     histSaver->SaveHistogram(hSigChVsEventNo); // DA:
     histSaver->SaveHistogram(hSigCMNChVsEventNo); // DA:
     delete hADCChVsEventNo;
-    delete hADCCMNChVsEventNo;
     delete hSigChVsEventNo;
     delete hSigCMNChVsEventNo;
 //    delete hPHChVsEventNo_1; // DA: borrar
