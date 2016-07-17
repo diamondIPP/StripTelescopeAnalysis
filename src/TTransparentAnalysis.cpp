@@ -130,7 +130,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
-    initPHChannelVsEventNoPlot(startEvent, nEvents+startEvent)
+    initPHChannelVsEventNoPlots(startEvent, nEvents+startEvent) // DA:
     initHistograms2();
     initHistograms1();
 
@@ -2809,8 +2809,10 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     }
     vecPH2HighestVsEventNo_Areas.clear();
 
-    histSaver->SaveHistogram(hPHChVsEventNo);
-    delete hPHChVsEventNo;
+    histSaver->SaveHistogram(hPHChVsEventNo_1);
+    histSaver->SaveHistogram(hPHChVsEventNo_2);
+    delete hPHChVsEventNo_1;
+    delete hPHChVsEventNo_2;
 
         //
         //        prof2d->Draw();
@@ -2908,9 +2910,9 @@ UInt_t TTransparentAnalysis::GetHitArea(TSettings* set,Float_t xVal,Float_t yVal
     return x+xDivisions*y;
 }
 
-void TTransparentAnalysis::initPHChannelVsEventNoPlot(UInt_t nStart, UInt_t nEnd) { // DA
+void TTransparentAnalysis::initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd) { // DA:
 
-    cout<<"initPHChannelvsEventNoAreaPlot"<<flush;
+    cout<<"initPHChannelvsEventNoAreaPlots"<<flush;
     Int_t nentriesPerBin = 1;
     while((nEnd-nStart)%nentriesPerBin!=0){
         nentriesPerBin--;
@@ -2918,16 +2920,25 @@ void TTransparentAnalysis::initPHChannelVsEventNoPlot(UInt_t nStart, UInt_t nEnd
     UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
     if (nBins==0)nBins=1;
 
-    TString name ="hPHChannelVsEventNo";
-    TString title = "PH Ch vs eventNo";
-    hPHChVsEventNo = new TH2D(name,title,(Int_t)(nBins+1),nStart-(nEnd-nStart)/((Float_t)(2*nBins)),nEnd+(nEnd-nStart)/((Float_t)(2*nBins)),127+1,0-0.5,127+0.5);
-    hPHChVsEventNo->GetXaxis()->SetTitle("Event");
-    hPHChVsEventNo->GetYaxis()->SetTitle("Diamond Channel");
+    TString name_1 ="hPHChannelVsEventNo_1";
+    TString name_2 ="hPHChannelVsEventNo_2";
+    TString title_1 = "PH Ch vs eventNo_1";
+    TString title_2 = "PH Ch vs eventNo_2";
+    hPHChVsEventNo_1 = new TH2D(name_1,title_1,(Int_t)(nBins+1),nStart-(nEnd-nStart)/((Float_t)(2*nBins)),nEnd+(nEnd-nStart)/((Float_t)(2*nBins)),127+1,0-0.5,127+0.5);
+    hPHChVsEventNo_2 = new TH2D(name_2,title_2,(Int_t)(nBins),nStart,nEnd,128,0,128);
+    hPHChVsEventNo_1->GetXaxis()->SetTitle("Event");
+    hPHChVsEventNo_2->GetXaxis()->SetTitle("Event");
+    hPHChVsEventNo_1->GetYaxis()->SetTitle("Diamond Channel");
+    hPHChVsEventNo_2->GetYaxis()->SetTitle("Diamond Channel");
 }
 
-void TTransparentAnalysis::fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge) { // DA
-    Int_t binEvent = TMath::Nint((Float_t)(nEvent-hPHChVsEventNo->GetXaxis()->GetXmin()+1)/hPHChVsEventNo->GetXaxis()->GetBinWidth(1));
-    Int_t binCh = TMath::Nint((Float_t)(channel-hPHChVsEventNo->GetYaxis()->GetXmin()+1)/hPHChVsEventNo->GetYaxis()->GetBinWidth(1));
-    Double_t temp = hPHChVsEventNo->GetBinContent(binEvent, binCh) + charge;
-    hPHChVsEventNo->SetBinContent(binEvent, binCh, charge);
+void TTransparentAnalysis::fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge) { // DA:
+    Int_t binEvent_1 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_1->GetXaxis()->GetXmin())/hPHChVsEventNo_1->GetXaxis()->GetBinWidth(1))+1;
+    Int_t binEvent_2 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_2->GetXaxis()->GetXmin())/hPHChVsEventNo_2->GetXaxis()->GetBinWidth(1))+1;
+    Int_t binCh_1 = (Int_t)((Float_t)(channel-hPHChVsEventNo_1->GetYaxis()->GetXmin())/hPHChVsEventNo_1->GetYaxis()->GetBinWidth(1))+1;
+    Int_t binCh_2 = (Int_t)((Float_t)(channel-hPHChVsEventNo_2->GetYaxis()->GetXmin())/hPHChVsEventNo_2->GetYaxis()->GetBinWidth(1))+1;
+    Double_t temp_1 = hPHChVsEventNo_1->GetBinContent((Int_t)binEvent_1, (Int_t)binCh_1) + charge;
+    Double_t temp_2 = hPHChVsEventNo_2->GetBinContent((Int_t)binEvent_2, (Int_t)binCh_2) + charge;
+    hPHChVsEventNo_1->SetBinContent((Int_t)binEvent_1, (Int_t)binCh_1, temp_1);
+    hPHChVsEventNo_2->SetBinContent((Int_t)binEvent_2, (Int_t)binCh_2, temp_2);
 }
