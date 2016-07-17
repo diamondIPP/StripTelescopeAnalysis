@@ -2212,10 +2212,10 @@ void TTransparentAnalysis::initRawAndSignalCMNCHistos(UInt_t maxEvents, UInt_t x
     TString nameRawCMN = TString("hRawCMNChVsEventNo");
     TString nameSig = TString("hSigChVsEventNo");
     TString nameSigCMN = TString("hSigCMNChVsEventNo");
-    hRawChVsEventNo = new TProfile(nameRaw, nameRaw, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
-    hRawCMNChVsEventNo = new TProfile(nameRawCMN, nameRawCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
-    hSigChVsEventNo = new TProfile(nameSig, nameSig, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
-    hSigCMNChVsEventNo = new TProfile(nameSigCMN, nameSigCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hRawChVsEventNo = new TProfile2D(nameRaw, nameRaw, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hRawCMNChVsEventNo = new TProfile2D(nameRawCMN, nameRawCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hSigChVsEventNo = new TProfile2D(nameSig, nameSig, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hSigCMNChVsEventNo = new TProfile2D(nameSigCMN, nameSigCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
     hRawChVsEventNo->GetXaxis()->SetTitle("Event");
     hRawCMNChVsEventNo->GetXaxis()->SetTitle("Event");
     hSigChVsEventNo->GetXaxis()->SetTitle("Event");
