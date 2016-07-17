@@ -313,7 +313,7 @@ private:
 	TProfile2D *hRawCMNChVsEventNo; // DA:
 	TProfile2D *hSigChVsEventNo; // DA:
 	TProfile2D *hSigCMNChVsEventNo; // DA:
-	void initRawAndSignalCMNCHistos(UInt_t maxEvents, xbinwidth = 1); // DA:
+	void initRawAndSignalCMNCHistos(UInt_t maxEvents, UInt_t xbinwidth = 1); // DA:
 	void fillRawAndSignalHistos(); // DA:
 //	void initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd); // DA: borrar
 //	void fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge); // DA: borrar

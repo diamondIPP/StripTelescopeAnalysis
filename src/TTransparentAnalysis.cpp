@@ -2204,7 +2204,7 @@ void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
     cout<<"."<<endl;
 }
 
-void TTransparentAnalysis::initRawAndSignalCMNCHistos(UInt_t maxEvents, xbinwidth) { // DA:
+void TTransparentAnalysis::initRawAndSignalCMNCHistos(UInt_t maxEvents, UInt_t xbinwidth) { // DA:
     cout<<"initRawAndSignalCMNCHistos"<<flush;
     UInt_t start = 0;
     UInt_t nBins = (maxEvents-start)/xbinwidth;
