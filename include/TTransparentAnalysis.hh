@@ -307,6 +307,9 @@ private:
 	void savePHvsEventNoAreaPlots();
 	UInt_t xDivisions;
 	UInt_t yDivisions;
+	TH2D *hPHChVsEventNo; // DA: ph Ch vs event
+	void initPHChannelVsEventNoPlot(UInt_t nStart, UInt_t nEnd);
+	void fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge);
 };
 
 

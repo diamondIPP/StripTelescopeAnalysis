@@ -130,6 +130,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
+    initPHChannelVsEventNoPlot(startEvent, nEvents+startEvent)
     initHistograms2();
     initHistograms1();
 
@@ -513,8 +514,10 @@ void TTransparentAnalysis::fillHistograms() {
         Float_t chargeOfTwo = this->transparentClusters.getCharge(2,cmCorrected);
         Float_t chargeOfTwo_noCMC= this->transparentClusters.getCharge(2,false);
         Float_t chargeOfOne = this->transparentClusters.getCharge(1,cmCorrected);// DA: added chargeOfOne
+        Float_t channelOfOne = this->transparentClusters.GetHighestSignalChannelTransparentCluster();// DA: added channel of highest signal in transparent cluster
         Float_t chargeOfOne_noCMC= this->transparentClusters.getCharge(1,false);
         fillPHvsEventNoAreaPlots(area,clusterSize+1,charge,chargeOfTwo);
+        fillPHCHvsEventNoPlots(channelOfOne, chargeOfOne);
         vecVecLandau[clusterSize].push_back(charge);
         hLandau[clusterSize]->Fill(charge);
         hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
@@ -2806,6 +2809,9 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     }
     vecPH2HighestVsEventNo_Areas.clear();
 
+    histSaver->SaveHistogram(hPHChVsEventNo);
+    delete hPHChVsEventNo;
+
         //
         //        prof2d->Draw();
         //        TProfile* prof = histSaver->GetProfileX(prof2d);
@@ -2900,4 +2906,28 @@ UInt_t TTransparentAnalysis::GetHitArea(TSettings* set,Float_t xVal,Float_t yVal
     Int_t x = relX*xDivisions;
     Int_t y = relY*yDivisions;
     return x+xDivisions*y;
+}
+
+void TTransparentAnalysis::initPHChannelVsEventNoPlot(UInt_t nStart, UInt_t nEnd) { // DA
+
+    cout<<"initPHChannelvsEventNoAreaPlot"<<flush;
+    Int_t nentriesPerBin = 1;
+    while((nEnd-nStart)%nentriesPerBin!=0){
+        nentriesPerBin--;
+    }
+    UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
+    if (nBins==0)nBins=1;
+
+    TString name ="hPHChannelVsEventNo";
+    TString title = "PH Ch vs eventNo";
+    hPHChVsEventNo = new TH2D(name,title,(Int_t)(nBins+1),nStart-(nEnd-nStart)/((Float_t)(2*nBins)),nEnd+(nEnd-nStart)/((Float_t)(2*nBins)),127+1,0-0.5,127+0.5);
+    hPHChVsEventNo->GetXaxis()->SetTitle("Event");
+    hPHChVsEventNo->GetYaxis()->SetTitle("Diamond Channel");
+}
+
+void TTransparentAnalysis::fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge) { // DA
+    Int_t binEvent = TMath::Nint((Float_t)(nEvent-hPHChVsEventNo->GetXaxis()->GetXmin()+1)/hPHChVsEventNo->GetXaxis()->GetBinWidth(1));
+    Int_t binCh = TMath::Nint((Float_t)(channel-hPHChVsEventNo->GetYaxis()->GetXmin()+1)/hPHChVsEventNo->GetYaxis()->GetBinWidth(1));
+    Double_t temp = hPHChVsEventNo->GetBinContent(binEvent, binCh) + charge;
+    hPHChVsEventNo->SetBinContent(binEvent, binCh, charge);
 }
