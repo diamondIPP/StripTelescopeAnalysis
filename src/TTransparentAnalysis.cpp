@@ -131,7 +131,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initRawAndSignalCMNCHistos(nEvents+startEvent, 1); // DA:
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
-    initPHChannelVsEventNoPlots(startEvent, nEvents+startEvent); // DA:
+//    initPHChannelVsEventNoPlots(startEvent, nEvents+startEvent); // DA: borrar
     initHistograms2();
     initHistograms1(); // DA:
 
