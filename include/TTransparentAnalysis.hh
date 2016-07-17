@@ -307,10 +307,16 @@ private:
 	void savePHvsEventNoAreaPlots();
 	UInt_t xDivisions;
 	UInt_t yDivisions;
-	TH2D *hPHChVsEventNo_1; // DA: ph Ch vs event
-	TH2D *hPHChVsEventNo_2; // DA: ph Ch vs event
-	void initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd);
-	void fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge);
+//	TH2D *hPHChVsEventNo_1; // DA: ph Ch vs event // DA: Borrar
+//	TH2D *hPHChVsEventNo_2; // DA: ph Ch // DA: Borrar
+	TProfile2D *hRawChVsEventNo; // DA:
+	TProfile2D *hRawCMNChVsEventNo; // DA:
+	TProfile2D *hSigChVsEventNo; // DA:
+	TProfile2D *hSigCMNChVsEventNo; // DA:
+	void initRawAndSignalCMNCHistos(UInt_t maxEvents, xbinwidth = 1); // DA:
+	void fillRawAndSignalHistos(); // DA:
+//	void initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd); // DA: borrar
+//	void fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge); // DA: borrar
 };
 
 

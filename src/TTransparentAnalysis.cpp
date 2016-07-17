@@ -129,10 +129,11 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     }
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
+    initRawAndSignalCMNCHistos(nEvents+startEvent, 1); // DA:
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
     initPHChannelVsEventNoPlots(startEvent, nEvents+startEvent); // DA:
     initHistograms2();
-    initHistograms1();
+    initHistograms1(); // DA:
 
     createEventVector(startEvent);
     cout<<"X: "<<predXMin<<" - "<<predXMax<<endl;
@@ -504,6 +505,7 @@ void TTransparentAnalysis::fillHistograms() {
     vecPredictedChannel.push_back(positionInDetSystemChannelSpace);
     vecPredictedDetectorPositionY.push_back(positionInDetSystemMetricY);
     fillPedestalsAndNoiseHistos();
+    fillRawAndSignalHistos(); // DA:
     UInt_t area = GetHitArea(settings,eventReader->getFiducialValueX(),eventReader->getFiducialValueY(),xDivisions,yDivisions);
     UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
     fillClusteredHistos();
@@ -514,10 +516,10 @@ void TTransparentAnalysis::fillHistograms() {
         Float_t chargeOfTwo = this->transparentClusters.getCharge(2,cmCorrected);
         Float_t chargeOfTwo_noCMC= this->transparentClusters.getCharge(2,false);
         Float_t chargeOfOne = this->transparentClusters.getCharge(1,cmCorrected);// DA: added chargeOfOne
-        Float_t channelOfOne = this->transparentClusters.GetHighestSignalChannelTransparentCluster();// DA: added channel of highest signal in transparent cluster
+//        Float_t channelOfOne = this->transparentClusters.GetHighestSignalChannelTransparentCluster();// DA: added channel of highest signal in transparent cluster // DA: borrar
         Float_t chargeOfOne_noCMC= this->transparentClusters.getCharge(1,false);
         fillPHvsEventNoAreaPlots(area,clusterSize+1,charge,chargeOfTwo);
-        fillPHCHvsEventNoPlots(channelOfOne, chargeOfOne);
+//        fillPHCHvsEventNoPlots(channelOfOne, chargeOfOne); // DA: borrar
         vecVecLandau[clusterSize].push_back(charge);
         hLandau[clusterSize]->Fill(charge);
         hLandau2Highest[clusterSize]->Fill(chargeOfTwo);
@@ -2202,6 +2204,28 @@ void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
     cout<<"."<<endl;
 }
 
+void TTransparentAnalysis::initRawAndSignalCMNCHistos(UInt_t maxEvents, xbinwidth) { // DA:
+    cout<<"initRawAndSignalCMNCHistos"<<flush;
+    UInt_t start = 0;
+    UInt_t nBins = (maxEvents-start)/xbinwidth;
+    TString nameRaw = TString("hRawChVsEventNo");
+    TString nameRawCMN = TString("hRawCMNChVsEventNo");
+    TString nameSig = TString("hSigChVsEventNo");
+    TString nameSigCMN = TString("hSigCMNChVsEventNo");
+    hRawChVsEventNo = new TProfile(nameRaw, nameRaw, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hRawCMNChVsEventNo = new TProfile(nameRawCMN, nameRawCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hSigChVsEventNo = new TProfile(nameSig, nameSig, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hSigCMNChVsEventNo = new TProfile(nameSigCMN, nameSigCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    hRawChVsEventNo->GetXaxis()->SetTitle("Event");
+    hRawCMNChVsEventNo->GetXaxis()->SetTitle("Event");
+    hSigChVsEventNo->GetXaxis()->SetTitle("Event");
+    hSigCMNChVsEventNo->GetXaxis()->SetTitle("Event");
+    hRawChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hRawCMNChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hSigChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hSigCMNChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+}
+
 void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
     std::map<UInt_t,TProfile*>::iterator it;
     for(it=hPedestalVsEvenNo.begin(); it!=hPedestalVsEvenNo.end(); it++){
@@ -2209,12 +2233,25 @@ void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
         Float_t pedestal = eventReader->getPedestalMean(subjectDetector,channel,settings->doCommonModeNoiseCorrection());
         (*it).second->Fill(nEvent,pedestal);
     }
-    for(it=hNoiseVsEvenNo.begin(); it!=hNoiseVsEvenNo.end(); it++){
+    for(it=hNoiseVsEvenNo.begin(); it!=hNoiseVsEvenNo.end(); it++) {
         UInt_t channel = (*it).first;
         Float_t noise = eventReader->getPedestalSigma(subjectDetector,channel,settings->doCommonModeNoiseCorrection());
         (*it).second->Fill(nEvent,noise);
     }
     hCmnVsEventNo->Fill(nEvent,eventReader->getCMNoise(subjectDetector,0));
+}
+
+void TTransparentAnalysis::fillRawAndSignalHistos() { // DA:
+    for (UInt_t channel = 0; channel <128; channel++) {
+        Double_t raw = eventReader->getRawSignal(subjectDetector, channel, false);
+        Double_t rawCMN = eventReader->getRawSignal(subjectDetector, channel, true);
+        Double_t signal = eventReader->getSignal(subjectDetector, channel, false);
+        Double_t signalCMN = eventReader->getSignal(subjectDetector, channel, true);
+        hRawChVsEventNo->Fill(nEvent, channel, raw);
+        hRawCMNChVsEventNo->Fill(nEvent, channel, rawCMN);
+        hSigChVsEventNo->Fill(nEvent, channel, signal);
+        hSigCMNChVsEventNo->Fill(nEvent, channel, signalCMN);
+    }
 }
 
 void TTransparentAnalysis::saveNoiseHistos() {
@@ -2809,10 +2846,18 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     }
     vecPH2HighestVsEventNo_Areas.clear();
 
-    histSaver->SaveHistogram(hPHChVsEventNo_1);
-    histSaver->SaveHistogram(hPHChVsEventNo_2);
-    delete hPHChVsEventNo_1;
-    delete hPHChVsEventNo_2;
+//    histSaver->SaveHistogram(hPHChVsEventNo_1); // DA: borrar
+//    histSaver->SaveHistogram(hPHChVsEventNo_2); // DA: borrar
+    histSaver->SaveHistogram(hRawChVsEventNo); // DA:
+    histSaver->SaveHistogram(hRawCMNChVsEventNo); // DA:
+    histSaver->SaveHistogram(hSigChVsEventNo); // DA:
+    histSaver->SaveHistogram(hSigCMNChVsEventNo); // DA:
+    delete hRawChVsEventNo;
+    delete hRawCMNChVsEventNo;
+    delete hSigChVsEventNo;
+    delete hSigCMNChVsEventNo;
+//    delete hPHChVsEventNo_1; // DA: borrar
+//    delete hPHChVsEventNo_2; // DA: borrar
 
         //
         //        prof2d->Draw();
@@ -2910,35 +2955,35 @@ UInt_t TTransparentAnalysis::GetHitArea(TSettings* set,Float_t xVal,Float_t yVal
     return x+xDivisions*y;
 }
 
-void TTransparentAnalysis::initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd) { // DA:
+//void TTransparentAnalysis::initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd) { // DA: Borrar
+//
+//    cout<<"initPHChannelvsEventNoAreaPlots"<<flush;
+//    Int_t nentriesPerBin = 1;
+//    while((nEnd-nStart)%nentriesPerBin!=0){
+//        nentriesPerBin--;
+//    }
+//    UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
+//    if (nBins==0)nBins=1;
+//
+//    TString name_1 ="hPHChannelVsEventNo_1";
+//    TString name_2 ="hPHChannelVsEventNo_2";
+//    TString title_1 = "PH Ch vs eventNo_1";
+//    TString title_2 = "PH Ch vs eventNo_2";
+//    hPHChVsEventNo_1 = new TH2D(name_1,title_1,(Int_t)(nBins+1),nStart-(nEnd-nStart)/((Float_t)(2*nBins)),nEnd+(nEnd-nStart)/((Float_t)(2*nBins)),127+1,0-0.5,127+0.5);
+//    hPHChVsEventNo_2 = new TH2D(name_2,title_2,(Int_t)(nBins),nStart,nEnd,128,0,128);
+//    hPHChVsEventNo_1->GetXaxis()->SetTitle("Event");
+//    hPHChVsEventNo_2->GetXaxis()->SetTitle("Event");
+//    hPHChVsEventNo_1->GetYaxis()->SetTitle("Diamond Channel");
+//    hPHChVsEventNo_2->GetYaxis()->SetTitle("Diamond Channel");
+//}
 
-    cout<<"initPHChannelvsEventNoAreaPlots"<<flush;
-    Int_t nentriesPerBin = 1;
-    while((nEnd-nStart)%nentriesPerBin!=0){
-        nentriesPerBin--;
-    }
-    UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
-    if (nBins==0)nBins=1;
-
-    TString name_1 ="hPHChannelVsEventNo_1";
-    TString name_2 ="hPHChannelVsEventNo_2";
-    TString title_1 = "PH Ch vs eventNo_1";
-    TString title_2 = "PH Ch vs eventNo_2";
-    hPHChVsEventNo_1 = new TH2D(name_1,title_1,(Int_t)(nBins+1),nStart-(nEnd-nStart)/((Float_t)(2*nBins)),nEnd+(nEnd-nStart)/((Float_t)(2*nBins)),127+1,0-0.5,127+0.5);
-    hPHChVsEventNo_2 = new TH2D(name_2,title_2,(Int_t)(nBins),nStart,nEnd,128,0,128);
-    hPHChVsEventNo_1->GetXaxis()->SetTitle("Event");
-    hPHChVsEventNo_2->GetXaxis()->SetTitle("Event");
-    hPHChVsEventNo_1->GetYaxis()->SetTitle("Diamond Channel");
-    hPHChVsEventNo_2->GetYaxis()->SetTitle("Diamond Channel");
-}
-
-void TTransparentAnalysis::fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge) { // DA:
-    Int_t binEvent_1 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_1->GetXaxis()->GetXmin())/hPHChVsEventNo_1->GetXaxis()->GetBinWidth(1))+1;
-    Int_t binEvent_2 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_2->GetXaxis()->GetXmin())/hPHChVsEventNo_2->GetXaxis()->GetBinWidth(1))+1;
-    Int_t binCh_1 = (Int_t)((Float_t)(channel-hPHChVsEventNo_1->GetYaxis()->GetXmin())/hPHChVsEventNo_1->GetYaxis()->GetBinWidth(1))+1;
-    Int_t binCh_2 = (Int_t)((Float_t)(channel-hPHChVsEventNo_2->GetYaxis()->GetXmin())/hPHChVsEventNo_2->GetYaxis()->GetBinWidth(1))+1;
-    Double_t temp_1 = hPHChVsEventNo_1->GetBinContent((Int_t)binEvent_1, (Int_t)binCh_1) + charge;
-    Double_t temp_2 = hPHChVsEventNo_2->GetBinContent((Int_t)binEvent_2, (Int_t)binCh_2) + charge;
-    hPHChVsEventNo_1->SetBinContent((Int_t)binEvent_1, (Int_t)binCh_1, temp_1);
-    hPHChVsEventNo_2->SetBinContent((Int_t)binEvent_2, (Int_t)binCh_2, temp_2);
-}
+//void TTransparentAnalysis::fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge) { // DA: Borrar
+//    Int_t binEvent_1 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_1->GetXaxis()->GetXmin())/hPHChVsEventNo_1->GetXaxis()->GetBinWidth(1))+1;
+//    Int_t binEvent_2 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_2->GetXaxis()->GetXmin())/hPHChVsEventNo_2->GetXaxis()->GetBinWidth(1))+1;
+//    Int_t binCh_1 = (Int_t)((Float_t)(channel-hPHChVsEventNo_1->GetYaxis()->GetXmin())/hPHChVsEventNo_1->GetYaxis()->GetBinWidth(1))+1;
+//    Int_t binCh_2 = (Int_t)((Float_t)(channel-hPHChVsEventNo_2->GetYaxis()->GetXmin())/hPHChVsEventNo_2->GetYaxis()->GetBinWidth(1))+1;
+//    Double_t temp_1 = hPHChVsEventNo_1->GetBinContent((Int_t)binEvent_1, (Int_t)binCh_1) + charge;
+//    Double_t temp_2 = hPHChVsEventNo_2->GetBinContent((Int_t)binEvent_2, (Int_t)binCh_2) + charge;
+//    hPHChVsEventNo_1->SetBinContent((Int_t)binEvent_1, (Int_t)binCh_1, temp_1);
+//    hPHChVsEventNo_2->SetBinContent((Int_t)binEvent_2, (Int_t)binCh_2, temp_2);
+//}
