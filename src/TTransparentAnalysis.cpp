@@ -229,7 +229,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
                 Float_t highestSignal = vecTransparentClusters[iEvent].getHighestSignal(cmCorrected);
                 this->vecSignalLeftOfEta.push_back(signalLeftOfEta);
                 this->vecSignalRightOfEta.push_back(signalRightOfEta);
-                this->vecSignalLeftOfHighest.push_back(leftOfHighestSignal);
+                this-> .push_back(leftOfHighestSignal);
                 this->vecSignalRightOfHighest.push_back(rightOfHighestSignal);
                 this->vecClusterCharge.push_back(charge);
                 this->vecHighestSignal.push_back(highestSignal);
@@ -2240,8 +2240,8 @@ void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
 void TTransparentAnalysis::fillADCAndSignalHistos() { // DA:
     for (UInt_t channel = 0; channel <128; channel++) {
         Double_t ADC = eventReader->getAdcValue(subjectDetector, channel);
-        Double_t signal = eventReader->getSignal(subjectDetector, channel, false);
-        Double_t signalCMN = eventReader->getSignal(subjectDetector, channel, true);
+        Double_t signal = eventReader->getRawSignal(subjectDetector, channel, false); // DA: getSignal...
+        Double_t signalCMN = eventReader->getRawSignal(subjectDetector, channel, true); // DA: getSignal
         hADCChVsEventNo->Fill(nEvent, channel, ADC);
         hSigChVsEventNo->Fill(nEvent, channel, signal);
         hSigCMNChVsEventNo->Fill(nEvent, channel, signalCMN);
