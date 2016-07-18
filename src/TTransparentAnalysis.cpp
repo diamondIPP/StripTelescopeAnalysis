@@ -229,7 +229,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
                 Float_t highestSignal = vecTransparentClusters[iEvent].getHighestSignal(cmCorrected);
                 this->vecSignalLeftOfEta.push_back(signalLeftOfEta);
                 this->vecSignalRightOfEta.push_back(signalRightOfEta);
-                this-> .push_back(leftOfHighestSignal);
+                this-> vecSignalLeftOfHighest.push_back(leftOfHighestSignal);
                 this->vecSignalRightOfHighest.push_back(rightOfHighestSignal);
                 this->vecClusterCharge.push_back(charge);
                 this->vecHighestSignal.push_back(highestSignal);
