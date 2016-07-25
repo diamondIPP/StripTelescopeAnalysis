@@ -2812,27 +2812,34 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 
 void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
     cout<<"initPHvsEventNoAreaPlots"<<flush;
+    if (settings->getDoEventwise()){
+        Float_t nnStart = settings->getEventwiseStart();
+        Float_t nnEnd = settings->getEventwiseStop();
+    }
     Int_t nentriesPerBin = settings->getEventBinWidth();
-    UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
+    UInt_t nBins = (settings->getDoEventwise()) ? (nnEnd-nnStart)/nentriesPerBin : (nEnd-nStart)/nentriesPerBin;
     if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
     if (nBins==0)nBins=1;
 
     TString name ="hPHVsEventNo_clustersize10";
     TString title = "PH_{clustersize = 10} vs eventNo";
-    hPHVsEventNo = new TH2D(name,title,nBins,nStart,nEnd,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector));
+    UInt_t nBinsy = settings->getPulse_height_num_bins();
+    Float_t ymin = 0;
+    Float_t ymax = settings->getPulse_height_max(subjectDetector);
+    hPHVsEventNo = (settings->getDoEventwise()) ? new TH2D(name,title,nBins+1,nnStart-(nnEnd - nnStart)/(2*(Float_t)nBins),nnEnd+(nnEnd - nnStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy)) : new TH2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy));
     hPHVsEventNo->GetXaxis()->SetTitle("event no.");
     hPHVsEventNo->GetXaxis()->SetTitle("pulse height");
 
     name ="hPHVsEventNo_2outOf10";
     title = "PH_{2 out of 10} vs eventNo";
-    hPH2OutOf10VsEventNo= new TH2D(name,title,nBins,nStart,nEnd,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector));
+    hPH2OutOf10VsEventNo= (settings->getDoEventwise()) ? new TH2D(name,title,nBins+1,nnStart-(nnEnd-nnStart)/(2*(Float_t)nBins),nnEnd+(nnEnd-nnStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy)) : new TH2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy));
     hPHVsEventNo->GetXaxis()->SetTitle("event no.");
     hPHVsEventNo->GetXaxis()->SetTitle("pulse height");
     for (UInt_t i = 0; i< TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); i++){
         name = TString::Format("hPHvsEventNoArea_clusterSize_%02d",i+1);
         title = TString::Format("ph vs eventNo, clustersize %d",i+1);
         UInt_t yBins = xDivisions*yDivisions;
-        TProfile2D* prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);
+        TProfile2D* prof = (settings->getDoEventwise()) ? new TProfile2D(name,title,nBins+1,nnStart-(nnEnd-nnStart)/(2*(Float_t)nBins),nnEnd+(nnEnd-nnStart)/(2*(Float_t)nBins),yBins+1,0-yBins/(2*(Float_t)yBins),yBins+yBins/(2*(Float_t)yBins)) : new TProfile2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),yBins+1,0-yBins/(2*(Float_t)yBins),yBins+yBins/(2*(Float_t)yBins));
         prof->Draw();
         prof->GetXaxis()->SetTitle("event no");
         initDividedAreaAxis(prof->GetYaxis());
@@ -2840,7 +2847,7 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
         vecPHVsEventNo_Areas.push_back(prof);
         name = TString::Format("hPHvsEventNo2HighestArea_clusterSize_%02d",i+1);
         title = TString::Format("ph vs eventNo 2Highest, clustersize %d",i+1);
-        prof = new TProfile2D(name,title,nBins,nStart,nEnd,yBins,0,yBins);
+        prof = (settings->getDoEventwise()) ? new TProfile2D(name,title,nBins+1,nnStart-(nnEnd-nnStart)/(2*(Float_t)nBins),nnEnd+(nnEnd-nnStart)/(2*(Float_t)nBins),yBins+1,0-yBins/(2*(Float_t)yBins),yBins+yBins/(2*(Float_t)yBins)) : new TProfile2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),yBins+1,0-yBins/(2*(Float_t)yBins),yBins+yBins/(2*(Float_t)yBins));
         prof->GetXaxis()->SetTitle("event no");
         initDividedAreaAxis(prof->GetYaxis());
         prof->GetZaxis()->SetTitle(TString::Format("avrg. pulse height 2 out of %d",i+1));
