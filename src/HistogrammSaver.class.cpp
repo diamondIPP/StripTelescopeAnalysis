@@ -2199,6 +2199,8 @@ void HistogrammSaver::SaveHistogramPNG(TH2* histo,bool optimizeRange,TString dra
     TCanvas *plots_canvas =  new TCanvas(TString::Format("cPng_%s", histo->GetName()), TString::Format("c_%s", histo->GetName()));
     plots_canvas->Clear();
     plots_canvas->cd();
+    plots_canvas->SetRightMargin(0.2);
+    gStyle->SetNumberContours(999);
     TH2* htemp = (TH2*)histo->Clone();
     if(optimizeRange) HistogrammSaver::OptimizeXYRange(htemp);
     htemp->Draw(drawOption);
@@ -2228,6 +2230,8 @@ void HistogrammSaver::SaveHistogramROOT(TH2* histo,bool optimizeRange,TString dr
     plots_canvas->Clear();
 
     plots_canvas->cd();
+    plots_canvas->SetRightMargin(0.2);
+    gStyle->SetNumberContours(999);
     TH2* htemp = (TH2*)histo->Clone();
     if(htemp==0)
         return;

@@ -2228,11 +2228,11 @@ void TTransparentAnalysis::initADCAndSignalCMNCHistos(UInt_t startEvent, UInt_t 
     TString nameCMNCh = TString("hCMNChVsEventNo");
     TString nameSignalCMNCut = TString("hSignalCMNCutChVsEventNo");
     float maxVal = TPlaneProperties::getMaxSignalHeightDiamond();
-    hADCChVsEventNo = new TProfile2D(nameADC, nameADC, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal); // DA:
-    hSigChVsEventNo = new TProfile2D(nameSig, nameSig, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
-    hSigCMNChVsEventNo = new TProfile2D(nameSigCMN, nameSigCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
-    hSigInSigmaChVsEventNo = new TProfile2D(nameSigInSigma, nameSigInSigma, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
-    hSigInSigmaCMNChVsEventNo = new TProfile2D(nameSigInSigmaCMN, nameSigInSigmaCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
+    hADCChVsEventNo = new TProfile2D(nameADC, nameADC, nBins+1, start, maxEvents, 128, -0.5, 127.5); // DA:
+    hSigChVsEventNo = new TProfile2D(nameSig, nameSig, nBins+1, start, maxEvents, 128, -0.5, 127.5);
+    hSigCMNChVsEventNo = new TProfile2D(nameSigCMN, nameSigCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5);
+    hSigInSigmaChVsEventNo = new TProfile2D(nameSigInSigma, nameSigInSigma, nBins+1, start, maxEvents, 128, -0.5, 127.5);
+    hSigInSigmaCMNChVsEventNo = new TProfile2D(nameSigInSigmaCMN, nameSigInSigmaCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5);
     hCMNChVsEventNo = new TProfile2D(nameCMNCh, nameCMNCh, nBins+1, start, maxEvents, 128, -0.5, 127.5);
     hSignalCMNCutChVsEventNo = new TProfile2D(nameSignalCMNCut, nameSignalCMNCut, nBins+1, start, maxEvents, 128, -0.5, 127.5);
     hADCChVsEventNo->GetXaxis()->SetTitle("Event");
