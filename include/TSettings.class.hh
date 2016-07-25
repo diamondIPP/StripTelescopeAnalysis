@@ -165,6 +165,9 @@ public:
 	UInt_t getMaxAllowedClustersize(UInt_t det);
 	bool doAnalyseAlignmentEvents()const {return bAnalyseAlignmentEvents;} // DA:
 	UInt_t getEventBinWidth()const {return bEventBinWidth;} // DA:
+	UInt_t getEventwiseStart()const {return bEventwiseStart;} // DA:
+	UInt_t getEventwiseStop()const {return bEventwiseStop;} // DA:
+	bool getDoEventwise()const {return bDoEventwise;} // DA:
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
@@ -460,6 +463,9 @@ private:
 	Int_t snr_plots_enable;
 	bool bAnalyseAlignmentEvents; // DA:
 	UInt_t bEventBinWidth; // DA:
+	UInt_t bEventwiseStart; // DA:
+	UInt_t bEventwiseStop; // DA:
+	bool bDoEventwise; // DA:
 
 
 	std::vector<Float_t> alignment_x_offsets;

@@ -440,7 +440,7 @@ void TPedestalCalculation::doCmNoiseCalculation()
         Float_t signal = adc-mean;
 		Float_t sigma = (nEvent<slidingLength)?diaPedestalSigmaStartValues[ch]:diaPedestalSigmaCMN[ch];
 		if(sigma<=0) {
-		    if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" sigma < 0 : "<<sigma<<endl;
+		    if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" sigma <= 0 : "<<sigma<<endl;
 		    continue;
 		}
 		Float_t snr = TMath::Abs(signal/sigma);

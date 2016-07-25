@@ -129,7 +129,12 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     }
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
-    initADCAndSignalCMNCHistos(nEvents+startEvent, settings->getEventBinWidth()); // DA:
+    if (settings->getDoEventwise()){
+        initADCAndSignalCMNCHistos(settings->getEventwiseStart(), settings->getEventwiseStart(), settings->getEventBinWidth());
+    }
+    else{
+        initADCAndSignalCMNCHistos(startEvent, nEvents+startEvent, settings->getEventBinWidth()); // DA:
+    }
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
 //    initPHChannelVsEventNoPlots(startEvent, nEvents+startEvent); // DA: borrar
     initHistograms2();
@@ -505,7 +510,14 @@ void TTransparentAnalysis::fillHistograms() {
     vecPredictedChannel.push_back(positionInDetSystemChannelSpace);
     vecPredictedDetectorPositionY.push_back(positionInDetSystemMetricY);
     fillPedestalsAndNoiseHistos();
-    fillADCAndSignalHistos(); // DA:
+    if (settings->getDoEventwise()){  // DA:
+        if(settings->getEventwiseStart() <= nEvent <= settings->getEventwiseStop()){
+            fillADCAndSignalHistos(); // DA:
+        }
+    }
+    else{
+        fillADCAndSignalHistos(); // DA:
+    }
     UInt_t area = GetHitArea(settings,eventReader->getFiducialValueX(),eventReader->getFiducialValueY(),xDivisions,yDivisions);
     UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
     fillClusteredHistos();
@@ -2204,22 +2216,59 @@ void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
     cout<<"."<<endl;
 }
 
-void TTransparentAnalysis::initADCAndSignalCMNCHistos(UInt_t maxEvents, UInt_t xbinwidth) { // DA:
+void TTransparentAnalysis::initADCAndSignalCMNCHistos(UInt_t startEvent, UInt_t maxEvents, UInt_t xbinwidth) { // DA:
     cout<<"initADCAndSignalCMNCHistos"<<flush;
-    UInt_t start = 0;
+    UInt_t start = startEvent;
     UInt_t nBins = (maxEvents-start)/xbinwidth;
     TString nameADC = TString("hADCChVsEventNo");
     TString nameSig = TString("hSigChVsEventNo");
-    TString nameSigCMN = TString("hSigCMNChVsEventNo");
-    hADCChVsEventNo = new TProfile2D(nameADC, nameADC, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
-    hSigChVsEventNo = new TProfile2D(nameSig, nameSig, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
-    hSigCMNChVsEventNo = new TProfile2D(nameSigCMN, nameSigCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, 4095);
+    TString nameSigInSigma = TString("hSigInSigmaChVsEventNo");
+    TString nameSigInSigmaCMN = TString("hSigInSigmaCMNChVsEventNo");
+    TString nameCMNCh = TString("hCMNChVsEventNo");
+    TString nameSignalCMNCut = TString("hSignalCMNCutChVsEventNo");
+    float maxVal = TPlaneProperties::getMaxSignalHeightDiamond();
+    hADCChVsEventNo = new TProfile2D(nameADC, nameADC, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal); // DA:
+    hSigChVsEventNo = new TProfile2D(nameSig, nameSig, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
+    hSigCMNChVsEventNo = new TProfile2D(nameSigCMN, nameSigCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
+    hSigInSigmaChVsEventNo = new TProfile2D(nameSigInSigma, nameSigInSigma, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
+    hSigInSigmaCMNChVsEventNo = new TProfile2D(nameSigInSigmaCMN, nameSigInSigmaCMN, nBins+1, start, maxEvents, 128, -0.5, 127.5, 0, maxVal);
+    hCMNChVsEventNo = new TProfile2D(nameCMNCh, nameCMNCh, nBins+1, start, maxEvents, 128, -0.5, 127.5);
+    hSignalCMNCutChVsEventNo = new TProfile2D(nameSignalCMNCut, nameSignalCMNCut, nBins+1, start, maxEvents, 128, -0.5, 127.5);
     hADCChVsEventNo->GetXaxis()->SetTitle("Event");
     hSigChVsEventNo->GetXaxis()->SetTitle("Event");
     hSigCMNChVsEventNo->GetXaxis()->SetTitle("Event");
+    hSigInSigmaChVsEventNo->GetXaxis()->SetTitle("Event");
+    hSigInSigmaCMNChVsEventNo->GetXaxis()->SetTitle("Event");
+    hCMNChVsEventNo->GetXaxis()->SetTitle("Event");
+    hSignalCMNCutChVsEventNo->GetXaxis()->SetTitle("Event");
     hADCChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
     hSigChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
     hSigCMNChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hSigInSigmaChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hSigInSigmaCMNChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hCMNChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hSignalCMNCutChVsEventNo->GetYaxis()->SetTitle("Diamond Ch");
+    hADCChVsEventNo->GetYaxis()->SetTitleOffset(1.3);
+    hSigChVsEventNo->GetYaxis()->SetTitleOffset(1.3);
+    hSigCMNChVsEventNo->GetYaxis()->SetTitleOffset(1.3);
+    hSigInSigmaChVsEventNo->GetYaxis()->SetTitleOffset(1.3);
+    hSigInSigmaCMNChVsEventNo->GetYaxis()->SetTitleOffset(1.3);
+    hCMNChVsEventNo->GetYaxis()->SetTitleOffset(1.3);
+    hSignalCMNCutChVsEventNo->GetYaxis()->SetTitleOffset(1.3);
+    hADCChVsEventNo->GetZaxis()->SetTitle("Raw in ADC");
+    hSigChVsEventNo->GetZaxis()->SetTitle("Signal (raw - ped)");
+    hSigCMNChVsEventNo->GetZaxis()->SetTitle("Signal CMNC (raw - ped - cmn)");
+    hSigInSigmaChVsEventNo->GetZaxis()->SetTitle("Signal in sigmas (raw - ped)");
+    hSigInSigmaCMNChVsEventNo->GetZaxis()->SetTitle("Signal CMNC in sigmas (raw - ped - cmn)");
+    hCMNChVsEventNo->GetZaxis()->SetTitle("CMN");
+    hSignalCMNCutChVsEventNo->GetZaxis()->SetTitle("Signal CMN Cut");
+    hADCChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
+    hSigChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
+    hSigCMNChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
+    hSigInSigmaChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
+    hSigInSigmaCMNChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
+    hCMNChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
+    hSignalCMNCutChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
 }
 
 void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
@@ -2242,9 +2291,18 @@ void TTransparentAnalysis::fillADCAndSignalHistos() { // DA:
         Double_t ADC = eventReader->getAdcValue(subjectDetector, channel);
         Double_t signal = eventReader->getRawSignal(subjectDetector, channel, false); // DA: getSignal...
         Double_t signalCMN = eventReader->getRawSignal(subjectDetector, channel, true); // DA: getSignal
+        Double_t signalInSigma = eventReader->getRawSignalInSigma(subjectDetector, channel, false);
+        Double_t signalInSigmaCMN = eventReader->getRawSignalInSigma(subjectDetector, channel, true);
+        Double_t CMNNoiseCh = eventReader->getCMNoise(subjectDetector, channel);
+        Double_t sigmaPed = eventReader->getDiaPedestalSigma(channel, false);
+        Double_t signalCMNCut = sigmaPed * settings->getCMN_cut();
         hADCChVsEventNo->Fill(nEvent, channel, ADC);
         hSigChVsEventNo->Fill(nEvent, channel, signal);
         hSigCMNChVsEventNo->Fill(nEvent, channel, signalCMN);
+        hSigInSigmaChVsEventNo->Fill(nEvent, channel, signalInSigma);
+        hSigInSigmaCMNChVsEventNo->Fill(nEvent, channel, signalInSigmaCMN);
+        hCMNChVsEventNo->Fill(nEvent, channel, CMNNoiseCh);
+        hSignalCMNCutChVsEventNo -> Fill(nEvent, channel, signalCMNCut);
     }
 }
 
@@ -2845,9 +2903,17 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     histSaver->SaveHistogram(hADCChVsEventNo); // DA:
     histSaver->SaveHistogram(hSigChVsEventNo); // DA:
     histSaver->SaveHistogram(hSigCMNChVsEventNo); // DA:
+    histSaver->SaveHistogram(hSigInSigmaChVsEventNo); // DA:
+    histSaver->SaveHistogram(hSigInSigmaCMNChVsEventNo); // DA:
+    histSaver->SaveHistogram(hCMNChVsEventNo); // DA:
+    histSaver->SaveHistogram(hSignalCMNCutChVsEventNo); // DA:
     delete hADCChVsEventNo;
     delete hSigChVsEventNo;
     delete hSigCMNChVsEventNo;
+    delete hSigInSigmaChVsEventNo;
+    delete hSigInSigmaCMNChVsEventNo;
+    delete hCMNChVsEventNo;
+    delete hSignalCMNCutChVsEventNo;
 //    delete hPHChVsEventNo_1; // DA: borrar
 //    delete hPHChVsEventNo_2; // DA: borrar
 
