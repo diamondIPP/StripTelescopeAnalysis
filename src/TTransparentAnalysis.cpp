@@ -2814,7 +2814,7 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
     cout<<"initPHvsEventNoAreaPlots"<<flush;
     Float_t nnStart = settings->getEventwiseStart();
     Float_t nnEnd = settings->getEventwiseStop();
-    Int_t nentriesPerBin = settings->getEventBinWidth();
+    Int_t nentriesPerBin = settings->getEventBinWidth();Int_t bla = 0;
     UInt_t nBins = (settings->getDoEventwise()) ? (nnEnd-nnStart)/nentriesPerBin : (nEnd-nStart)/nentriesPerBin;
     if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
     if (nBins==0)nBins=1;
