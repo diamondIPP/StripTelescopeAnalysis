@@ -2271,6 +2271,13 @@ void TTransparentAnalysis::initADCAndSignalCMNCHistos(UInt_t startEvent, UInt_t 
     hSigInSigmaCMNChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
     hCMNChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
     hSignalCMNCutChVsEventNo->GetZaxis()->SetTitleOffset(1.3);
+    hADCChVsEventNo->GetZaxis()->CenterTitle(true);
+    hSigChVsEventNo->GetZaxis()->CenterTitle(true);
+    hSigCMNChVsEventNo->GetZaxis()->CenterTitle(true);
+    hSigInSigmaChVsEventNo->GetZaxis()->CenterTitle(true);
+    hSigInSigmaCMNChVsEventNo->GetZaxis()->CenterTitle(true);
+    hCMNChVsEventNo->GetZaxis()->CenterTitle(true);
+    hSignalCMNCutChVsEventNo->GetZaxis()->CenterTitle(true);
 }
 
 void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
