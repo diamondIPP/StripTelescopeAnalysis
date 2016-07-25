@@ -312,6 +312,10 @@ private:
 	TProfile2D *hADCChVsEventNo; // DA:
 	TProfile2D *hSigChVsEventNo; // DA:
 	TProfile2D *hSigCMNChVsEventNo; // DA:
+	TProfile2D *hSigInSigmaChVsEventNo;
+	TProfile2D *hSigInSigmaCMNChVsEventNo;
+	TProfile2D *hCMNChVsEventNo;
+	TProfile2D *hSignalCMNCutChVsEventNo;
 	void initADCAndSignalCMNCHistos(UInt_t, startEvent, UInt_t maxEvents, UInt_t xbinwidth = 1); // DA:
 	void fillADCAndSignalHistos(); // DA:
 //	void initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd); // DA: borrar
