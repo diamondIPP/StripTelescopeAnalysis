@@ -2812,10 +2812,8 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 
 void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
     cout<<"initPHvsEventNoAreaPlots"<<flush;
-    if (settings->getDoEventwise()){
-        Float_t nnStart = settings->getEventwiseStart();
-        Float_t nnEnd = settings->getEventwiseStop();
-    }
+    Float_t nnStart = settings->getEventwiseStart();
+    Float_t nnEnd = settings->getEventwiseStop();
     Int_t nentriesPerBin = settings->getEventBinWidth();
     UInt_t nBins = (settings->getDoEventwise()) ? (nnEnd-nnStart)/nentriesPerBin : (nEnd-nStart)/nentriesPerBin;
     if((nEnd-nStart)%nentriesPerBin!=0)nBins++;

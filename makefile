@@ -10,7 +10,7 @@ ROOTGLIBS   	:= $(shell root-config --glibs) -lMinuit
 ROOTCINT		:= rootcint
 SVNDEV 			:= -D'SVN_REV="$(shell svnversion -n .)"'
 
-CC 				:= g++ 
+CC 				:= g++-4.9 
 #-std=gnu++0x
 SRCDIR          := src
 INCLUDEDIR      := include
