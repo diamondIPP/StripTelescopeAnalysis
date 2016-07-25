@@ -2222,6 +2222,7 @@ void TTransparentAnalysis::initADCAndSignalCMNCHistos(UInt_t startEvent, UInt_t 
     UInt_t nBins = (maxEvents-start)/xbinwidth;
     TString nameADC = TString("hADCChVsEventNo");
     TString nameSig = TString("hSigChVsEventNo");
+    TString nameSigCMN = TString("hSigCMNChVsEventNo");
     TString nameSigInSigma = TString("hSigInSigmaChVsEventNo");
     TString nameSigInSigmaCMN = TString("hSigInSigmaCMNChVsEventNo");
     TString nameCMNCh = TString("hCMNChVsEventNo");
