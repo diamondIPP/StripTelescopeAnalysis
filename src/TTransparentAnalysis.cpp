@@ -131,6 +131,9 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     initPedestalAndNoiseHistos(nEvents+startEvent);
     if (settings->getDoEventwise()){
         cout << "\n\n\nBLA BLA BLA BLA BLA BLA BLA \n\n\n";
+        cout << "\n\n\nBLA BLa" << settings->getEventBinWidth() << endl;
+        cout << "\n\n\nBLA BLa" << settings->getEventwiseStart() << endl;
+        cout << "\n\n\nBLA BLa" << settings->getEventwiseStop() << endl;
         initADCAndSignalCMNCHistos(settings->getEventwiseStart(), settings->getEventwiseStart(), settings->getEventBinWidth());
     }
     else{
