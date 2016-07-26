@@ -312,6 +312,7 @@ private:
 	TProfile2D *hADCChVsEventNo; // DA:
 	TProfile2D *hPedChVsEventNo; // DA:
 	TProfile2D *hPedCMNChVsEventNo; // DA:
+	TProfile2D *empty;
 	TProfile2D *hSigChVsEventNo; // DA:
 	TProfile2D *hSigCMNChVsEventNo; // DA:
 	TProfile2D *hSigInSigmaChVsEventNo;
