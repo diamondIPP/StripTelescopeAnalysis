@@ -310,6 +310,8 @@ private:
 //	TH2D *hPHChVsEventNo_1; // DA: ph Ch vs event // DA: Borrar
 //	TH2D *hPHChVsEventNo_2; // DA: ph Ch // DA: Borrar
 	TProfile2D *hADCChVsEventNo; // DA:
+	TProfile2D *hPedChVsEventNo; // DA:
+	TProfile2D *hPedCMNChVsEventNo; // DA:
 	TProfile2D *hSigChVsEventNo; // DA:
 	TProfile2D *hSigCMNChVsEventNo; // DA:
 	TProfile2D *hSigInSigmaChVsEventNo;
