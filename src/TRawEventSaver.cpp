@@ -81,8 +81,8 @@ void TRawEventSaver::saveEvents(int nEvents){
 		this->setBranches();
 		cout<<endl;
 		for (int i=0;i<nEvents;i++){
-			for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-				if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+			for(Int_t ii=0; ii< settings->getSkipEvents().size(); ii++) {
+				if (settings->getSkipEvents().at(ii).first < i < settings->getSkipEvents().at(ii).second) goto endfor1;
 			}
 			showStatusBar(i, nEvents, 100);
 			int suceed = rawEventReader->ReadRawEvent(i, false);//true);
