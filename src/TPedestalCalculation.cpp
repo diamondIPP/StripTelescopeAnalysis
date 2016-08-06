@@ -144,7 +144,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		//Add next Event to detAdcValues, diaAdcValues
 		//Remove first Event from Queue
-		for(i=0; i< settings->getSkipEvents().size(); i++) {
+		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
 			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
 		}
 		eventReader->LoadEvent(nEvent);

@@ -186,7 +186,7 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
     Float_t minEtaDif = settings->getMinimalAbsoluteEtaValue();
     cout << "CREATING VECTOR OF VALID EVENTS TRANSPARENT..."<<minEtaDif << endl;
     for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
-        for(i=0; i< settings->getSkipEvents().size(); i++) {
+        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
             if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
         }
         while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
@@ -290,7 +290,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
     UInt_t nTelescopeAlignmentEvents = 0;
     cout<<"DO Alignment: "<<detAlign<<endl;
     for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
-        for(i=0; i< settings->getSkipEvents().size(); i++) {
+        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
             if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
         }
         while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
@@ -901,7 +901,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     vector<Float_t> calcModeCutY;
     for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, nEvents);
-        for(i=0; i< settings->getSkipEvents().size(); i++) {
+        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
             if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
         }
         if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent]){
@@ -1272,7 +1272,7 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
     bool isTelescopeAlignment = TPlaneProperties::isSiliconPlane(subjectPlane)&&TPlaneProperties::AreAllSiliconPlanes(vecRefPlanes);
 
     for (UInt_t nEvent = 0; nEvent < events.size(); nEvent++) {
-        for(i=0; i< settings->getSkipEvents().size(); i++) {
+        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
             if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
         }
         if (!isTelescopeAlignment && telescopeAlignmentEvent[nEvent])
@@ -2654,7 +2654,7 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
 
     for (nEvent = 0; nEvent < this->events.size(); nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, events.size());
-        for(i=0; i< settings->getSkipEvents().size(); i++) {
+        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
             if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
         }
         myTrack->setEvent(&events.at(nEvent));
@@ -2695,7 +2695,7 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
 
     for (nEvent = 0; nEvent < events.size(); nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, events.size());
-        for(i=0; i< settings->getSkipEvents().size(); i++) {
+        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
             if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
         }
         myTrack->setEvent(&events.at(nEvent));

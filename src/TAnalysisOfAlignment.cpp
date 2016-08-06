@@ -160,7 +160,7 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
-		for(i=0; i< settings->getSkipEvents().size(); i++) {
+		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
 			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
 		}
 		eventReader->LoadEvent(nEvent);
@@ -203,7 +203,7 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 	cout<<"create flattened strip hit histo "<<eventReader->GetEntries()<<endl;
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
-		for(i=0; i< settings->getSkipEvents().size(); i++) {
+		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
 			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
 		}
 		eventReader->LoadEvent(nEvent);

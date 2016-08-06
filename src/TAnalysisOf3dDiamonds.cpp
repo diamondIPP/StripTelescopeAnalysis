@@ -128,7 +128,7 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     if(verbosity>5)settings->diamondPattern.Print();
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
-        for(i=0; i< settings->getSkipEvents().size(); i++) {
+        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
             if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
         }
         eventReader->LoadEvent(nEvent);
