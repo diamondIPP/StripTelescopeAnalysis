@@ -169,7 +169,7 @@ public:
 	UInt_t getEventwiseStart()const {return bEventwiseStart;} // DA:
 	UInt_t getEventwiseStop()const {return bEventwiseStop;} // DA:
 	bool getDoEventwise()const {return bDoEventwise;} // DA:
-	std::vector<std::pair<Int_t,Int_t>> getSkipEvents()const {return bSkipEvents;} // DA:
+	std::vector<std::pair<Int_t,Int_t> > getSkipEvents()const {return bSkipEvents;} // DA:
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
@@ -469,7 +469,7 @@ private:
 	UInt_t bEventwiseStart; // DA:
 	UInt_t bEventwiseStop; // DA:
 	bool bDoEventwise; // DA:
-	std::vector<std::pair<Int_t,Int_t>> bSkipEvents; // DA:
+	std::vector<std::pair<Int_t,Int_t> > bSkipEvents; // DA:
 
 
 	std::vector<Float_t> alignment_x_offsets;
