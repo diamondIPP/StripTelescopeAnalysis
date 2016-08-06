@@ -148,6 +148,9 @@ void TSelectionClass::MakeSelection(UInt_t nEvents){
         cout<<"Use the first "<<settings->getAlignmentTrainingTrackNumber()<<" Events for Alignment!"<<endl;
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         eventReader->LoadEvent(nEvent);
         if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
         resetVariables();
@@ -156,6 +159,8 @@ void TSelectionClass::MakeSelection(UInt_t nEvents){
         if(verbosity>10)cout<<"."<<flush;
         selectionTree->Fill();
         if(verbosity>10)cout<<"DONE"<<endl;
+        endfor1:
+            nEvent=nEvent;
     }
     createCutFlowDiagramm();
 }
@@ -908,11 +913,16 @@ void TSelectionClass::createFiducialCut(){
     cout<<" "<<nEvents<<endl;
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         eventReader->LoadEvent(nEvent);
         if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
         resetVariables();
         if(verbosity>10)cout<<"."<<flush;
         setVariables();
+        endfor1:
+            nEvent=nEvent;
     }
     //  findFiducialCut(hFiducialCutSiliconDiamondHit);
 

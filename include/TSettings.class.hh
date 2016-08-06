@@ -32,6 +32,7 @@
 #include "TFiducialCut.hh"
 #include "TFidCutRegions.hh"
 #include "TRunInfo.hh"
+#include "TString.h"
 #include <string>
 #include <sys/stat.h>
 class TSettings:public TObject {
@@ -168,6 +169,7 @@ public:
 	UInt_t getEventwiseStart()const {return bEventwiseStart;} // DA:
 	UInt_t getEventwiseStop()const {return bEventwiseStop;} // DA:
 	bool getDoEventwise()const {return bDoEventwise;} // DA:
+	std::vector<std::pair<Int_t,Int_t>> getSkipEvents()const {return bSkipEvents;} // DA:
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
@@ -364,7 +366,7 @@ protected:
 	float store_threshold;
 private:
 	Float_t minAbsEtaVal;
-	bool isStandardSelectionFidCut,isStandardArea,isStandard3dEdgeFidCut,isStandard3dMetallisationFidCut;;
+	bool isStandardSelectionFidCut,isStandardArea,isStandard3dEdgeFidCut,isStandard3dMetallisationFidCut,isEventSkipCut;;
 	void CheckAlignmentFidcuts();
 	void SetFileName(std::string fileName);
 	void LoadSettings();
@@ -398,6 +400,7 @@ private:
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
 	bool Parse(std::string key, std::string value, TString &output){return ParseTString(key,value,output);}
 	bool Parse(std::string key, std::string value, string &output){return ParseString(key,value,output);}
+	void ParseEventSkip(std::string key, std::string value, TString string[], isEventSkip);
 	pair<char,int> ParseCellPosition(std::string value);
 	void LoadDefaultResolutions();
 
@@ -466,6 +469,7 @@ private:
 	UInt_t bEventwiseStart; // DA:
 	UInt_t bEventwiseStop; // DA:
 	bool bDoEventwise; // DA:
+	std::vector<std::pair<Int_t,Int_t>> bSkipEvents; // DA:
 
 
 	std::vector<Float_t> alignment_x_offsets;

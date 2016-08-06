@@ -160,6 +160,9 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
+		for(i=0; i< settings->getSkipEvents().size(); i++) {
+			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+		}
 		eventReader->LoadEvent(nEvent);
 		if(!eventReader->useForAnalysis()&&!eventReader->useForAlignment())
 			continue;
@@ -181,6 +184,8 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 			histoStripDistribution.at(subjectPlane*2+1)->Fill(deltaY);
 			chi2Distribution();
 		}
+		endfor1:
+			nEvent=nEvent;
 	}
 	saveHistos();
 	vector<UInt_t> vecMinEntries;
@@ -198,6 +203,9 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 	cout<<"create flattened strip hit histo "<<eventReader->GetEntries()<<endl;
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
+		for(i=0; i< settings->getSkipEvents().size(); i++) {
+			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+		}
 		eventReader->LoadEvent(nEvent);
 		if(!eventReader->useForAnalysis()&&!eventReader->useForAlignment())
 			continue;
@@ -230,6 +238,8 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 				histoStripDistributionFlattned.at(subjectPlane*2+1)->Fill(deltaY);
 			}
 		}
+		endfor1:
+			nEvent = nEvent;
 	}
 	for(UInt_t det =0; det<TPlaneProperties::getNSiliconDetectors();det++){
 		cout<<"save histogram: "<<det<<"  "<<histoStripDistributionFlattned.at(det)->GetTitle()<<"  "<<histoStripDistribution.at(det)->GetTitle()<<endl;

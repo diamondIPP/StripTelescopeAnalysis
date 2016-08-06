@@ -186,6 +186,9 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
     Float_t minEtaDif = settings->getMinimalAbsoluteEtaValue();
     cout << "CREATING VECTOR OF VALID EVENTS TRANSPARENT..."<<minEtaDif << endl;
     for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
             telescopeAlignmentEvent.push_back(1);
         }
@@ -253,6 +256,8 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 
         //			if (eventReader->useForAnalysis())
         //				break;
+        endfor1:
+            nEvent = nEvent;
     }
 
     cout << "nAnalysedEvents " << setw(7) << nAnalysedEvents << endl;
@@ -285,6 +290,9 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
     UInt_t nTelescopeAlignmentEvents = 0;
     cout<<"DO Alignment: "<<detAlign<<endl;
     for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         while(telescopeAlignmentEvent.size()<events.size()){ //do not use events which fullfill all critera from the alignment of the DUT
             telescopeAlignmentEvent.push_back(1);
             nTelescopeAlignmentEvents++;
@@ -360,6 +368,8 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
         //			cout << "\nFound first Event for Analysis ->BREAK" << endl;
         //			break;
         //		}
+        endfor1:
+            nEvent=nEvent;
     }
     if(verbosity||true){
         cout<<"\nCreated Vector of Events with one and only one Hit in Silicon  + one diamond Cluster + in Fiducial Cut Area"<<endl;
@@ -891,6 +901,9 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
     vector<Float_t> calcModeCutY;
     for (UInt_t nEvent = 0; nEvent < nEvents; nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, nEvents);
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         if (!isTelescopeAlignment&&telescopeAlignmentEvent[nEvent]){
             nNonTelescopeAlignmentEvents++;
             continue;
@@ -1087,6 +1100,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         }
         if(predictedPostionMetric){predictedPostionMetric->Delete();predictedPostionMetric=0;}
         if (verbosity > 3) cout << xDelta << " " << yDelta << endl;
+        endfor1:
+            nEvent=nEvent;
     }
 
     cout<<"using "<<vecXLabDeltaMetric.size() <<"/"<<nUsedEvents<<" Events, of "<<nUsedEvents+nNotUsedEvents<<" "<<(Float_t)nUsedEvents/(Float_t)(nUsedEvents+nNotUsedEvents)*100.<<endl;
@@ -1257,6 +1272,9 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
     bool isTelescopeAlignment = TPlaneProperties::isSiliconPlane(subjectPlane)&&TPlaneProperties::AreAllSiliconPlanes(vecRefPlanes);
 
     for (UInt_t nEvent = 0; nEvent < events.size(); nEvent++) {
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         if (!isTelescopeAlignment && telescopeAlignmentEvent[nEvent])
             continue;
         TRawEventSaver::showStatusBar(nEvent, events.size());
@@ -1295,6 +1313,8 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
         vecYResPrediction.push_back(yPredSigma);
         //		}    //end if chi2x<maxCi && chi2y<maxChi
         predictedPosition->Delete();
+        endfor1:
+            nEvent = nEvent;
     }    //end for loop over nEvent
 
     //	myTrack->setVerbosity(oldVerbosity);
@@ -2634,6 +2654,9 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
 
     for (nEvent = 0; nEvent < this->events.size(); nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, events.size());
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         myTrack->setEvent(&events.at(nEvent));
 
         for (UInt_t subjectPlane = 0; subjectPlane < TPlaneProperties::getNSiliconPlanes(); subjectPlane++) {
@@ -2653,6 +2676,8 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
             histoStripDistribution.at(subjectPlane * 2)->Fill(deltaX);
             histoStripDistribution.at(subjectPlane * 2 + 1)->Fill(deltaY);
         }
+        endfor1:
+            nEvent = nEvent;
     }
     vector<UInt_t> vecMinEntries;
     cout << "Minimal Entries in a bin of historgram:" << endl;
@@ -2670,6 +2695,9 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
 
     for (nEvent = 0; nEvent < events.size(); nEvent++) {
         TRawEventSaver::showStatusBar(nEvent, events.size());
+        for(i=0; i< settings->getSkipEvents().size(); i++) {
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+        }
         myTrack->setEvent(&events.at(nEvent));
 
         for (UInt_t subjectPlane = 0; subjectPlane < TPlaneProperties::getNSiliconPlanes(); subjectPlane++) {
@@ -2699,6 +2727,8 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
                 histoStripDistributionFlattned.at(subjectPlane * 2 + 1)->Fill(deltaY);
             }
         }
+        endfor1:
+            nEvent = nEvent;
     }
     for (UInt_t det = 0; det < TPlaneProperties::getNSiliconDetectors(); det++) {
         cout << "save histogram: " << det << "  " << histoStripDistributionFlattned.at(det)->GetTitle() << "  " << histoStripDistribution.at(det)->GetTitle() << endl;
