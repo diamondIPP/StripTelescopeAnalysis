@@ -1210,7 +1210,7 @@ void TSettings::ParseFidCutRegion(std::string key, std::string value, TFidCutReg
 	}
 }
 
-void TSettings::ParseEventSkip(std::string key, std::string value, std::vector<std::vector<Int_t> > vect, isEventSkip){
+void TSettings::ParseEventSkip(std::string key, std::string value, std::vector<std::vector<Int_t> > vect, bool isEventSkip){
 	std::vector<std::string> stringArray;
 	ParseStringArray(key, value, stringArray);
 	if(stringArray.size() == 2){
