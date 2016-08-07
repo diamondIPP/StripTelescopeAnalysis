@@ -90,7 +90,7 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
         TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
         bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
                 skip = true;
                 break;
             }

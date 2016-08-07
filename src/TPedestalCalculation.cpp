@@ -146,7 +146,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		//Remove first Event from Queue
 		bool skip = false;
 		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+			if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
 				skip = true;
 				break;
 			}

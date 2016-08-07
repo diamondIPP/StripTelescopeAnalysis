@@ -188,7 +188,7 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
     for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
         bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent) < settings->getSkipEvents().at(i).second){
                 skip = true;
                 break;
             }
@@ -300,7 +300,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
     for (nEvent = startEvent; nEvent < nEvents + startEvent; nEvent++) {
         bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
                 skip = true;
                 break;
             }
@@ -924,7 +924,7 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         TRawEventSaver::showStatusBar(nEvent, nEvents);
         bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
                 skip = true;
                 break;
             }
@@ -1325,7 +1325,7 @@ void TAlignment::getChi2Distribution(Float_t maxChi2) {
     for (UInt_t nEvent = 0; nEvent < events.size(); nEvent++) {
         bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
                 skip = true;
                 break;
             }
@@ -2717,7 +2717,7 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
         TRawEventSaver::showStatusBar(nEvent, events.size());
         bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
                 skip = true;
                 break;
             }
@@ -2768,7 +2768,7 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
         TRawEventSaver::showStatusBar(nEvent, events.size());
         bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
                 skip = true;
                 break;
             }

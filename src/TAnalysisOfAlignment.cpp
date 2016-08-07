@@ -162,7 +162,7 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
 		bool skip = false;
 		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+			if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
 				skip = true;
 				break;
 			}
@@ -213,7 +213,7 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
 		bool skip = false;
 		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+			if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
 				skip = true;
 				break;
 			}
