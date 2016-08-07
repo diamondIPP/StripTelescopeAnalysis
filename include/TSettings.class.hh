@@ -400,7 +400,7 @@ private:
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
 	bool Parse(std::string key, std::string value, TString &output){return ParseTString(key,value,output);}
 	bool Parse(std::string key, std::string value, string &output){return ParseString(key,value,output);}
-	void ParseEventSkip(std::string key, std::string value, TString string[], bool isEventSkip);
+	void ParseEventSkip(std::string key, std::string value, std::vector<std::pair<Int_t, Int_t> >, bool isEventSkip);
 	pair<char,int> ParseCellPosition(std::string value);
 	void LoadDefaultResolutions();
 
