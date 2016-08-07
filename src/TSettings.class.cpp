@@ -553,7 +553,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"eventwiseStart")){Parse(key,value,bEventwiseStart);} // DA:
 		if (TPlaneProperties::startsWith(key,"eventwiseStop")){Parse(key,value,bEventwiseStop);} // DA:
 		if (TPlaneProperties::startsWith(key,"doEventwise")){Parse(key,value,bDoEventwise);} // DA:
-		if (TPlaneProperties::startsWith(key,"skipEvents")){ParseEventSkip(key,vlaue,bSkipEvents,isEventSkipCut);} // DA:
+		if (TPlaneProperties::startsWith(key,"skipEvents")){ParseEventSkip(key,vlaue,bSkipEvents);} // DA:
 
         if (TPlaneProperties::startsWith(key,"responseWindow")){
             ParseFloatPair(key,value,responseWindow);}
@@ -1210,12 +1210,12 @@ void TSettings::ParseFidCutRegion(std::string key, std::string value, TFidCutReg
 	}
 }
 
-void TSettings::ParseEventSkip(std::string key, std::string value, std::vector<std::pair<Int_t, Int_t> > vect, bool isEventSkip){
+void TSettings::ParseEventSkip(std::string key, std::string value, std::vector<std::pair<Int_t, Int_t> > vect){
 	std::vector<std::string> stringArray;
 	ParseStringArray(key, value, stringArray);
 	if(stringArray.size() == 2){
-		Int_t ini = int(std::stoi(stringArray[0],0));
-		Int_t fin = int(std::stoi(stringArray[1],0));
+		Int_t ini = int(std::stoi(stringArray[0]));
+		Int_t fin = int(std::stoi(stringArray[1]));
 		std::pair<Int_t, Int_t> pairs = std::make_pair(ini, fin);
 		vect.push_back(pairs);
 	}
