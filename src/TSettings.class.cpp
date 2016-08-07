@@ -1216,9 +1216,9 @@ void TSettings::ParseEventSkip(std::string key, std::string value, std::vector<s
 	if(stringArray.size() == 2){
 		Int_t ini = int(strtod(stringArray[0],0));
 		Int_t fin = int(strtod(stringArray[1],0));
+		std::pair<Int_t, Int_t> pairs = std::make_pair(ini, fin);
+		vect.push_back(pairs);
 	}
-	std::pair<Int_t, Int_t> pairs = std::make_pair(ini, fin);
-	vect.push_back(pairs);
 }
 
 std::pair< std::string,std::string > TSettings::ParseRegionString(string key, string value){
