@@ -553,7 +553,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"eventwiseStart")){Parse(key,value,bEventwiseStart);} // DA:
 		if (TPlaneProperties::startsWith(key,"eventwiseStop")){Parse(key,value,bEventwiseStop);} // DA:
 		if (TPlaneProperties::startsWith(key,"doEventwise")){Parse(key,value,bDoEventwise);} // DA:
-		if (TPlaneProperties::startsWith(key,"skipEvents")){ParseEventSkip(key,vlaue,bSkipEvents);} // DA:
+		if (TPlaneProperties::startsWith(key,"skipEvents")){ParseEventSkip(key,value,bSkipEvents);} // DA:
 
         if (TPlaneProperties::startsWith(key,"responseWindow")){
             ParseFloatPair(key,value,responseWindow);}
