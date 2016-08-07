@@ -142,8 +142,8 @@ void TRawEventSaver::loadEvent(){
 
 bool TRawEventSaver::treeExists(int nEvents){
 	bool value=false;
+	Long64_t skipped = 0;
 	if(!this->createdNewFile&&!this->createdNewTree)
-		int skipped = 0;
 		if(settings->isEventSkip()){
 			for(Int_t ii = 0; ii < settings->getSkipEvents().size(); ii++) {
 				skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first);
