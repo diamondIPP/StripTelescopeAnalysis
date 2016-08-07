@@ -144,20 +144,24 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		//Add next Event to detAdcValues, diaAdcValues
 		//Remove first Event from Queue
+		bool skip = false;
 		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+				skip = true;
+				break;
+			}
 		}
-		eventReader->LoadEvent(nEvent);
-		//SILICON PLANES
-		updateSiliconPedestals();
-		doCmNoiseCalculation();
-		//DIAMOND PLANE
-		updateDiamondPedestals();
-		//		printDiamond(30);
-		//calculateCurrentPedestals(detAdcValues,diaAdcValues);
-		pedestalTree->Fill();
-		endfor1:
-			nEvent=nEvent;
+		if(!skip) {
+			eventReader->LoadEvent(nEvent);
+			//SILICON PLANES
+			updateSiliconPedestals();
+			doCmNoiseCalculation();
+			//DIAMOND PLANE
+			updateDiamondPedestals();
+			//		printDiamond(30);
+			//calculateCurrentPedestals(detAdcValues,diaAdcValues);
+			pedestalTree->Fill();
+		}
 	}//end for
 
 	watch.Stop();

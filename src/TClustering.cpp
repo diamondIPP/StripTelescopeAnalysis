@@ -95,18 +95,22 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
+		bool skip = false;
 		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+				skip = true;
+				break;
+			}
 		}
-		eventReader->LoadEvent(nEvent);
-		clusterEvent();
-		addToEtaDistributions();
-		clusterTree->Fill();
+		if(!skip) {
+			eventReader->LoadEvent(nEvent);
+			clusterEvent();
+			addToEtaDistributions();
+			clusterTree->Fill();
 
-		if(pEvent->isValidSiliconEvent())
-			validEvents++;
-		endfor1:
-			nEvent = nEvent;
+			if (pEvent->isValidSiliconEvent())
+				validEvents++;
+		}
 	}
 
 	cout<<"nvalid Events: "<<validEvents<<" of "<<nEvents<<endl;

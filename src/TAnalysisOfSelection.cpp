@@ -61,13 +61,17 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
 	    TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
+		bool skip = false;
 		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+			if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+				skip = true;
+				break;
+			}
 		}
-		eventReader->LoadEvent(nEvent);
-		analyseEvent();
-		endfor1:
-			nEvent = nEvent;
+		if(!skip) {
+			eventReader->LoadEvent(nEvent);
+			analyseEvent();
+		}
 	}
 	saveHistos();
 

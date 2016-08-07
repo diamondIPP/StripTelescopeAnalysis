@@ -148,19 +148,23 @@ void TSelectionClass::MakeSelection(UInt_t nEvents){
         cout<<"Use the first "<<settings->getAlignmentTrainingTrackNumber()<<" Events for Alignment!"<<endl;
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
+        bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+                skip = true;
+                break;
+            }
         }
-        eventReader->LoadEvent(nEvent);
-        if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
-        resetVariables();
-        if(verbosity>10)cout<<"."<<flush;
-        setVariables();
-        if(verbosity>10)cout<<"."<<flush;
-        selectionTree->Fill();
-        if(verbosity>10)cout<<"DONE"<<endl;
-        endfor1:
-            nEvent=nEvent;
+        if(!skip) {
+            eventReader->LoadEvent(nEvent);
+            if (verbosity > 10)cout << "Loaded Event " << nEvent << flush;
+            resetVariables();
+            if (verbosity > 10)cout << "." << flush;
+            setVariables();
+            if (verbosity > 10)cout << "." << flush;
+            selectionTree->Fill();
+            if (verbosity > 10)cout << "DONE" << endl;
+        }
     }
     createCutFlowDiagramm();
 }
@@ -913,16 +917,20 @@ void TSelectionClass::createFiducialCut(){
     cout<<" "<<nEvents<<endl;
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
+        bool skip = false;
         for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second) goto endfor1;
+            if (settings->getSkipEvents().at(i).first < i < settings->getSkipEvents().at(i).second){
+                skip = true;
+                break;
+            }
         }
-        eventReader->LoadEvent(nEvent);
-        if(verbosity>10)cout<<"Loaded Event "<<nEvent<<flush;
-        resetVariables();
-        if(verbosity>10)cout<<"."<<flush;
-        setVariables();
-        endfor1:
-            nEvent=nEvent;
+        if(!skip) {
+            eventReader->LoadEvent(nEvent);
+            if (verbosity > 10)cout << "Loaded Event " << nEvent << flush;
+            resetVariables();
+            if (verbosity > 10)cout << "." << flush;
+            setVariables();
+        }
     }
     //  findFiducialCut(hFiducialCutSiliconDiamondHit);
 

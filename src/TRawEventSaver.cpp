@@ -81,22 +81,25 @@ void TRawEventSaver::saveEvents(int nEvents){
 		this->setBranches();
 		cout<<endl;
 		for (int i=0;i<nEvents;i++){
+			bool skip = false;
 			for(Int_t ii=0; ii< settings->getSkipEvents().size(); ii++) {
-				if (settings->getSkipEvents().at(ii).first < i < settings->getSkipEvents().at(ii).second) goto endfor1;
+				if (settings->getSkipEvents().at(ii).first < i < settings->getSkipEvents().at(ii).second){
+					skip = true;
+					break;
+				}
 			}
-			showStatusBar(i, nEvents, 100);
-			int suceed = rawEventReader->ReadRawEvent(i, false);//true);
-			if (suceed < 0) {
-				cout << "could not open file break" << endl;
-				exit(-1);
+			if(!skip) {
+				showStatusBar(i, nEvents, 100);
+				int suceed = rawEventReader->ReadRawEvent(i, false);//true);
+				if (suceed < 0) {
+					cout << "could not open file break" << endl;
+					exit(-1);
+				}
+				loadEvent();
+				eventNumber = i;
+				//if(i%1000==0)		cout<<"Event:"<<i<<" \t\t"<<(int)Dia_ADC[1]<<endl;
+				rawTree->Fill();
 			}
-			loadEvent();
-			eventNumber = i;
-			//if(i%1000==0)		cout<<"Event:"<<i<<" \t\t"<<(int)Dia_ADC[1]<<endl;
-			rawTree->Fill();
-
-			endfor1:
-				i=i;
 		}
 	}
 	cout<<"\nDONE."<<endl;
