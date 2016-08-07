@@ -82,6 +82,7 @@ void TRawEventSaver::saveEvents(int nEvents){
 		cout<<endl;
 		for (int i=0;i<nEvents;i++){
 			bool skip = false;
+			showStatusBar(i, nEvents, 100);
 			for(Int_t ii=0; ii< settings->getSkipEvents().size(); ii++) {
 				if ((settings->getSkipEvents().at(ii).first < i) && (i < settings->getSkipEvents().at(ii).second)){
 					skip = true;
@@ -89,7 +90,6 @@ void TRawEventSaver::saveEvents(int nEvents){
 				}
 			}
 			if(!skip) {
-				showStatusBar(i, nEvents, 100);
 				int suceed = rawEventReader->ReadRawEvent(i, false);//true);
 				if (suceed < 0) {
 					cout << "could not open file break" << endl;
@@ -143,7 +143,13 @@ void TRawEventSaver::loadEvent(){
 bool TRawEventSaver::treeExists(int nEvents){
 	bool value=false;
 	if(!this->createdNewFile&&!this->createdNewTree)
-		if(this->rawTree->GetEntries()>=nEvents)
+		int skipped = 0;
+		if(settings->isEventSkip()){
+			for(Int_t ii = 0; ii < settings->getSkipEvents().size(); ii++) {
+				skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first);
+			}
+		}
+		if(this->rawTree->GetEntries() + skipped >= nEvents)
 			value =true;
 	cout<<"created new File = "<<createdNewFile<<" \tcreated new Tree: "<<createdNewTree<<" \tEntries:"<<rawTree->GetEntries()<<"of "<<nEvents<<"needed Entries, so treeExists: "<<value<<endl;
 	return value;

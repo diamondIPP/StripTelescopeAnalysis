@@ -128,45 +128,36 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     if(verbosity>5)settings->diamondPattern.Print();
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
-        bool skip = false;
-        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
-                skip = true;
-                break;
-            }
+        eventReader->LoadEvent(nEvent);
+        if (!eventValid()) {
+            if (verbosity > 7) cout << "don't use" << endl;
+            continue;
         }
-        if(!skip) {
-            eventReader->LoadEvent(nEvent);
-            if (!eventValid()) {
-                if (verbosity > 7) cout << "don't use" << endl;
-                continue;
-            }
-            fillClusterDistributions();
-            if (verbosity > 7) cout << "use Event" << endl;
-            // Analyse
+        fillClusterDistributions();
+        if (verbosity > 7) cout << "use Event" << endl;
+        // Analyse
 
-            if (settings->do3dTransparentAnalysis()) {
-                isTransparentCluster = TransparentAnalysis();
-            }
-            else
-                isTransparentCluster = false;
-
-            if (!settings->do3dTransparentAnalysis()) {
-                diamondCluster = &clusteredCluster;
-            }
-            else {
-                diamondCluster = &transparentCluster;
-            }
-            if (diamondCluster->isSaturatedCluster())
-                continue;;
-            //cout<<"Before Strip Analysis"<<endl;
-            StripAnalysis();
-            //cout<<"After Strip Analysis"<<endl;
-            if (settings->do3dShortAnalysis() == 1) { ShortAnalysis(); }
-            //cout<<"After Short Analysis"<<endl;
-            if (settings->do3dLongAnalysis() == 1) { LongAnalysis(); }
-            //cout<<"After Long Analysis"<<endl;
+        if (settings->do3dTransparentAnalysis()) {
+            isTransparentCluster = TransparentAnalysis();
         }
+        else
+            isTransparentCluster = false;
+
+        if (!settings->do3dTransparentAnalysis()) {
+            diamondCluster = &clusteredCluster;
+        }
+        else {
+            diamondCluster = &transparentCluster;
+        }
+        if (diamondCluster->isSaturatedCluster())
+            continue;;
+        //cout<<"Before Strip Analysis"<<endl;
+        StripAnalysis();
+        //cout<<"After Strip Analysis"<<endl;
+        if (settings->do3dShortAnalysis() == 1) { ShortAnalysis(); }
+        //cout<<"After Short Analysis"<<endl;
+        if (settings->do3dLongAnalysis() == 1) { LongAnalysis(); }
+        //cout<<"After Long Analysis"<<endl;
     }
 
     saveHistos();

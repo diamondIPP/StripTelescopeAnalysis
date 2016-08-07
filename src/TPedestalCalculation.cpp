@@ -125,7 +125,7 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 	if(doCMNCorrection)cout<<"with CMN Correction";
 	cout<<endl;
 	calculateStartingPedestal(nEvents);
-	if(pedestalTree->GetEntries()>=nEvents){
+	if(pedestalTree->GetEntries() >= nEvents){
 		if(verbosity)cout<<"NO Sliding PEdestal Calculation needed, calculations already done."<<endl;
 		return;
 	}
@@ -144,24 +144,15 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		//Add next Event to detAdcValues, diaAdcValues
 		//Remove first Event from Queue
-		bool skip = false;
-		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
-				skip = true;
-				break;
-			}
-		}
-		if(!skip) {
-			eventReader->LoadEvent(nEvent);
-			//SILICON PLANES
-			updateSiliconPedestals();
-			doCmNoiseCalculation();
-			//DIAMOND PLANE
-			updateDiamondPedestals();
-			//		printDiamond(30);
-			//calculateCurrentPedestals(detAdcValues,diaAdcValues);
-			pedestalTree->Fill();
-		}
+		eventReader->LoadEvent(nEvent);
+		//SILICON PLANES
+		updateSiliconPedestals();
+		doCmNoiseCalculation();
+		//DIAMOND PLANE
+		updateDiamondPedestals();
+		//		printDiamond(30);
+		//calculateCurrentPedestals(detAdcValues,diaAdcValues);
+		pedestalTree->Fill();
 	}//end for
 
 	watch.Stop();
@@ -405,7 +396,7 @@ bool TPedestalCalculation::createPedestalTree(int nEvents)
 	pedestalFile->GetObject("pedestalTree",pedestalTree);
 	if(pedestalTree!=NULL){
 		if(verbosity)cout<<"File and Tree Exists... \t"<<pedestalTree->GetEntries()<<" of "<< nEvents<<flush;
-		if(pedestalTree->GetEntries()>=nEvents){
+		if(pedestalTree->GetEntries() >=nEvents){
 			createdNewTree=false;
 			setBranchAdresses();
 			if(verbosity)cout<<"tree has enough entries...."<<endl;

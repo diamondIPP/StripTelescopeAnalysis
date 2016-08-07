@@ -888,7 +888,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	bEventwiseStart = 0; // DA:
 	bEventwiseStop = nEvents; // DA:
 	bDoEventwise = false; // DA:
-	isEventSkipCut = true; // DA:
+	isEventSkipCut = false; // DA:
 //	checkSettings();
 }
 
@@ -1218,6 +1218,7 @@ void TSettings::ParseEventSkip(std::string key, std::string value, std::vector<s
 		Int_t fin = (int)strtod(stringArray.at(1).c_str(),0);
 		std::pair<Int_t, Int_t> pairs = std::make_pair(ini, fin);
 		vect.push_back(pairs);
+		isEventSkipCut = true;
 	}
 }
 

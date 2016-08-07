@@ -70,17 +70,8 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
     histSaver->SetNumberOfEvents(nEvents);
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,100);
-        bool skip = false;
-        for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-            if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
-                skip = true;
-                break;
-            }
-        }
-        if(!skip) {
-            eventReader->LoadEvent(nEvent);
-            analyseEvent();
-        }
+        eventReader->LoadEvent(nEvent);
+        analyseEvent();
     }
     cout<<"Save Histos!"<<endl;
     saveHistos();

@@ -43,7 +43,7 @@ TAnalysisOfAlignment::~TAnalysisOfAlignment() {
 }
 
 void TAnalysisOfAlignment::doAnalysis(UInt_t nEvents){
-	if (nEvents==0||eventReader->GetEntries()<nEvents)
+	if (nEvents==0||eventReader->GetEntries() <nEvents)
 		nEvents=eventReader->GetEntries();
 	cout<<"Do Analysis After Alignment...."<<endl;
 	DoEtaCorrection(1);
@@ -160,39 +160,30 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
-		bool skip = false;
-		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
-				skip = true;
-				break;
-			}
-		}
-		if(!skip) {
-			eventReader->LoadEvent(nEvent);
-			if (!eventReader->useForAnalysis() && !eventReader->useForAlignment())
-				continue;
-			for (UInt_t subjectPlane = 0; subjectPlane < TPlaneProperties::getNSiliconPlanes(); subjectPlane++) {
-				//			if(!eventReader->useForAlignment()&&!eventReader->useForAnalysis())
-				//				continue;
-				vector <UInt_t> vecRefPlanes;
-				for (UInt_t refPlane = 0; refPlane < TPlaneProperties::getNSiliconPlanes(); refPlane++)
-					if (subjectPlane != refPlane)vecRefPlanes.push_back(refPlane);
-				TPositionPrediction *pred = eventReader->predictPosition(subjectPlane, vecRefPlanes, false);
-				Float_t predictedStripPositionX = eventReader->getPositionInDetSystem(subjectPlane * 2,
-																					  pred->getPositionX(),
-																					  pred->getPositionY());
-				Float_t predictedStripPositionY = eventReader->getPositionInDetSystem(subjectPlane * 2 + 1,
-																					  pred->getPositionX(),
-																					  pred->getPositionY());
-				UInt_t stripMiddleX = (UInt_t)(predictedStripPositionX + 0.5);
-				Float_t deltaX = predictedStripPositionX - stripMiddleX;
-				UInt_t stripMiddleY = (UInt_t)(predictedStripPositionY + 0.5);
-				Float_t deltaY = predictedStripPositionY - stripMiddleY;
-				//			cout<<nEvent<<": "<<subjectPlane<<"Fill "<<deltaX<<" "<<deltaY<<endl;
-				histoStripDistribution.at(subjectPlane * 2)->Fill(deltaX);
-				histoStripDistribution.at(subjectPlane * 2 + 1)->Fill(deltaY);
-				chi2Distribution();
-			}
+		eventReader->LoadEvent(nEvent);
+		if (!eventReader->useForAnalysis() && !eventReader->useForAlignment())
+			continue;
+		for (UInt_t subjectPlane = 0; subjectPlane < TPlaneProperties::getNSiliconPlanes(); subjectPlane++) {
+			//			if(!eventReader->useForAlignment()&&!eventReader->useForAnalysis())
+			//				continue;
+			vector <UInt_t> vecRefPlanes;
+			for (UInt_t refPlane = 0; refPlane < TPlaneProperties::getNSiliconPlanes(); refPlane++)
+				if (subjectPlane != refPlane)vecRefPlanes.push_back(refPlane);
+			TPositionPrediction *pred = eventReader->predictPosition(subjectPlane, vecRefPlanes, false);
+			Float_t predictedStripPositionX = eventReader->getPositionInDetSystem(subjectPlane * 2,
+																				  pred->getPositionX(),
+																				  pred->getPositionY());
+			Float_t predictedStripPositionY = eventReader->getPositionInDetSystem(subjectPlane * 2 + 1,
+																				  pred->getPositionX(),
+																				  pred->getPositionY());
+			UInt_t stripMiddleX = (UInt_t)(predictedStripPositionX + 0.5);
+			Float_t deltaX = predictedStripPositionX - stripMiddleX;
+			UInt_t stripMiddleY = (UInt_t)(predictedStripPositionY + 0.5);
+			Float_t deltaY = predictedStripPositionY - stripMiddleY;
+			//			cout<<nEvent<<": "<<subjectPlane<<"Fill "<<deltaX<<" "<<deltaY<<endl;
+			histoStripDistribution.at(subjectPlane * 2)->Fill(deltaX);
+			histoStripDistribution.at(subjectPlane * 2 + 1)->Fill(deltaY);
+			chi2Distribution();
 		}
 	}
 	saveHistos();
@@ -211,51 +202,42 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 	cout<<"create flattened strip hit histo "<<eventReader->GetEntries()<<endl;
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
 		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
-		bool skip = false;
-		for(Int_t i=0; i< settings->getSkipEvents().size(); i++) {
-			if ((settings->getSkipEvents().at(i).first < nEvent) && (nEvent < settings->getSkipEvents().at(i).second)){
-				skip = true;
-				break;
+		eventReader->LoadEvent(nEvent);
+		if (!eventReader->useForAnalysis() && !eventReader->useForAlignment())
+			continue;
+
+		for (UInt_t subjectPlane = 0; subjectPlane < TPlaneProperties::getNSiliconPlanes(); subjectPlane++) {
+			//			if(!eventReader->useForAlignment()&&!eventReader->useForAnalysis())
+			//				continue;
+			vector <UInt_t> refPlanes;
+			for (UInt_t refPlane = 0; refPlane < TPlaneProperties::getNSiliconPlanes(); refPlane++)
+				if (subjectPlane != refPlane)refPlanes.push_back(refPlane);
+			TPositionPrediction *pred = eventReader->predictPosition(subjectPlane, refPlanes, false);
+
+			Float_t predictedStripPositionX = eventReader->getPositionInDetSystem(subjectPlane * 2,
+																				  pred->getPositionX(),
+																				  pred->getPositionY());
+			Float_t predictedStripPositionY = eventReader->getPositionInDetSystem(subjectPlane * 2 + 1,
+																				  pred->getPositionX(),
+																				  pred->getPositionY());
+			UInt_t stripMiddleX = (UInt_t)(predictedStripPositionX + 0.5);
+			Float_t deltaX = predictedStripPositionX - stripMiddleX;
+			//			histoStripDistribution.at(subjectPlane*2)->Fill(deltaX);
+			UInt_t stripMiddleY = (UInt_t)(predictedStripPositionY + 0.5);
+			Float_t deltaY = predictedStripPositionY - stripMiddleY;
+			//			histoStripDistribution.at(subjectPlane*2)->Fill(deltaY);
+
+			Int_t binX = histoStripDistributionFlattned.at(subjectPlane)->FindBin(deltaX);
+			Int_t binY = histoStripDistributionFlattned.at(subjectPlane)->FindBin(deltaY);
+			if (histoStripDistributionFlattned.at(subjectPlane * 2)->GetBinContent(binX) <
+				vecMinEntries.at(subjectPlane * 2)) {
+				vecEventNo[subjectPlane * 2].push_back(nEvent);
+				histoStripDistributionFlattned.at(subjectPlane * 2)->Fill(deltaX);
 			}
-		}
-		if(!skip) {
-			eventReader->LoadEvent(nEvent);
-			if (!eventReader->useForAnalysis() && !eventReader->useForAlignment())
-				continue;
-
-			for (UInt_t subjectPlane = 0; subjectPlane < TPlaneProperties::getNSiliconPlanes(); subjectPlane++) {
-				//			if(!eventReader->useForAlignment()&&!eventReader->useForAnalysis())
-				//				continue;
-				vector <UInt_t> refPlanes;
-				for (UInt_t refPlane = 0; refPlane < TPlaneProperties::getNSiliconPlanes(); refPlane++)
-					if (subjectPlane != refPlane)refPlanes.push_back(refPlane);
-				TPositionPrediction *pred = eventReader->predictPosition(subjectPlane, refPlanes, false);
-
-				Float_t predictedStripPositionX = eventReader->getPositionInDetSystem(subjectPlane * 2,
-																					  pred->getPositionX(),
-																					  pred->getPositionY());
-				Float_t predictedStripPositionY = eventReader->getPositionInDetSystem(subjectPlane * 2 + 1,
-																					  pred->getPositionX(),
-																					  pred->getPositionY());
-				UInt_t stripMiddleX = (UInt_t)(predictedStripPositionX + 0.5);
-				Float_t deltaX = predictedStripPositionX - stripMiddleX;
-				//			histoStripDistribution.at(subjectPlane*2)->Fill(deltaX);
-				UInt_t stripMiddleY = (UInt_t)(predictedStripPositionY + 0.5);
-				Float_t deltaY = predictedStripPositionY - stripMiddleY;
-				//			histoStripDistribution.at(subjectPlane*2)->Fill(deltaY);
-
-				Int_t binX = histoStripDistributionFlattned.at(subjectPlane)->FindBin(deltaX);
-				Int_t binY = histoStripDistributionFlattned.at(subjectPlane)->FindBin(deltaY);
-				if (histoStripDistributionFlattned.at(subjectPlane * 2)->GetBinContent(binX) <
-					vecMinEntries.at(subjectPlane * 2)) {
-					vecEventNo[subjectPlane * 2].push_back(nEvent);
-					histoStripDistributionFlattned.at(subjectPlane * 2)->Fill(deltaX);
-				}
-				if (histoStripDistributionFlattned.at(subjectPlane * 2 + 1)->GetBinContent(binY) <
-					vecMinEntries.at(subjectPlane * 2 + 1)) {
-					vecEventNo[subjectPlane * 2 + 1].push_back(nEvent);
-					histoStripDistributionFlattned.at(subjectPlane * 2 + 1)->Fill(deltaY);
-				}
+			if (histoStripDistributionFlattned.at(subjectPlane * 2 + 1)->GetBinContent(binY) <
+				vecMinEntries.at(subjectPlane * 2 + 1)) {
+				vecEventNo[subjectPlane * 2 + 1].push_back(nEvent);
+				histoStripDistributionFlattned.at(subjectPlane * 2 + 1)->Fill(deltaY);
 			}
 		}
 	}

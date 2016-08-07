@@ -10,6 +10,7 @@
 //#include "SlidingPedestal.class.hh"
 //#include "Clustering.class.hh"
 #include "TRawEventSaver.hh"
+#include "TADCEventReader.hh"
 #include "TPedestalCalculation.hh"
 #include "TAnalysisOfPedestal.hh"
 #include "TAnalysisOfClustering.hh"
@@ -210,11 +211,19 @@ int main(int argc, char ** argv) {
 		eventSaver->saveEvents(RunParameters[i].getEvents());
 		delete eventSaver;
 
+		Long64_t skipped = 0;
+		if(settings->isEventSkip()){
+			for(int ii = 0; ii < settings->getSkipEvents().size(); ii++){
+				skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first);
+			}
+		}
+		Long64_t nEvents = RunParameters[i].getEvents() - skipped;
+
 		//Calculate Pedestal
 		sys->cd(currentDir.c_str());
 		TPedestalCalculation* pedestalCalculation;
 		pedestalCalculation = new TPedestalCalculation(settings);
-		pedestalCalculation->calculateSlidingPedestals(RunParameters[i].getEvents());
+		pedestalCalculation->calculateSlidingPedestals(nEvents);
 		delete pedestalCalculation;
 
 		if(RunParameters[i].doPedestalAnalysis()){
@@ -222,7 +231,7 @@ int main(int argc, char ** argv) {
 			TAnalysisOfPedestal *analysisOfPedestal;
 			analysisOfPedestal = new TAnalysisOfPedestal(settings);
 			analysisOfPedestal->setResults(currentResults);
-			analysisOfPedestal->doAnalysis(RunParameters[i].getEvents());
+			analysisOfPedestal->doAnalysis(nEvents);
 			delete analysisOfPedestal;
 		}
 
@@ -242,7 +251,7 @@ int main(int argc, char ** argv) {
 		sys->cd(currentDir.c_str());
 		TClustering* clustering;
 		clustering=new TClustering(settings);//int seedDetSigma=10,int hitDetSigma=7,int seedDiaSigma=5, int hitDiaSigma=3);
-		clustering->ClusterEvents(RunParameters[i].getEvents());
+		clustering->ClusterEvents(nEvents);
 		delete clustering;
 
 		if(RunParameters[i].doClusterAnalysis()){
@@ -250,21 +259,21 @@ int main(int argc, char ** argv) {
 			TAnalysisOfClustering* analysisClustering;
 			analysisClustering = new TAnalysisOfClustering(settings);
 			analysisClustering->setResults(currentResults);
-			analysisClustering->doAnalysis(RunParameters[i].getEvents());
+			analysisClustering->doAnalysis(nEvents);
 			delete analysisClustering;
 		}
 
 		sys->cd(currentDir.c_str());
 		TSelectionClass* selectionClass = new TSelectionClass(settings);
 		selectionClass->SetResults(currentResults);
-		selectionClass->MakeSelection(RunParameters[i].getEvents());
+		selectionClass->MakeSelection(nEvents);
 		delete selectionClass;
 		currentResults->createResultFiles();
 
 		if(RunParameters[i].doSelectionAnalysis()){
 			sys->cd(currentDir.c_str());
 			TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
-			analysisSelection->doAnalysis(RunParameters[i].getEvents());
+			analysisSelection->doAnalysis(nEvents);
 			delete analysisSelection;
 			currentResults->createResultFiles();
 		}
@@ -274,7 +283,7 @@ int main(int argc, char ** argv) {
 			TAlignment *alignment = new TAlignment(settings);
 			//			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
-			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::enumDetectorsToAlign(settings->getAlignmentMode()));
+			alignment->Align(nEvents,0,TAlignment::enumDetectorsToAlign(settings->getAlignmentMode()));
 			delete alignment;
 			currentResults->createResultFiles();
 		}
@@ -284,14 +293,14 @@ int main(int argc, char ** argv) {
         if ( run_3danalysis ){
             if(settings->do3dShortAnalysis()||settings->do3dLongAnalysis()||settings->do3dTransparentAnalysis()){
                 TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
-                analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+                analyse3dDiamond->doAnalysis(nEvents);
                 delete analyse3dDiamond;
                 if (settings->do3dTransparentAnalysis())
                     settings->set3dTransparentAnalysis(0);
                 else
                     settings->set3dTransparentAnalysis(1);
                 analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
-                analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+                analyse3dDiamond->doAnalysis(nEvents);
                 delete analyse3dDiamond;
                 currentResults->createResultFiles();
             }
@@ -301,7 +310,7 @@ int main(int argc, char ** argv) {
 			sys->cd(currentDir.c_str());
 			TAnalysisOfAlignment *anaAlignment;
 			anaAlignment=new TAnalysisOfAlignment(settings);
-			anaAlignment->doAnalysis(RunParameters[i].getEvents());
+			anaAlignment->doAnalysis(nEvents);
 			delete anaAlignment;
 			currentResults->createResultFiles();
 		}
@@ -310,7 +319,7 @@ int main(int argc, char ** argv) {
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings);
 			transpAna->setResults(currentResults);
-			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
+			transpAna->analyze(nEvents,RunParameters.at(i).getStartEvent());
 			delete transpAna;
 			currentResults->createResultFiles();
 		}
@@ -318,17 +327,17 @@ int main(int argc, char ** argv) {
 		if ((DO_TRANSPARENT_ANALYSIS||DO_ALIGNMENT) && settings && settings->doTransparentAlignment()){
 			sys->cd(currentDir.c_str());
 			TAlignment *alignment = new TAlignment(settings,TSettings::transparentMode);
-			alignment->createTransparentEventVectors(RunParameters[i].getEvents());
+			alignment->createTransparentEventVectors(nEvents);
 			//			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
-			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::diaAlignment);
+			alignment->Align(nEvents,0,TAlignment::diaAlignment);
 			delete alignment;
 			currentResults->createResultFiles();
 
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings,TSettings::transparentMode);
 			transpAna->setResults(currentResults);
-			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
+			transpAna->analyze(nEvents,RunParameters.at(i).getStartEvent());
 			delete transpAna;
 			currentResults->createResultFiles();
 		}

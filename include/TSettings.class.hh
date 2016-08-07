@@ -170,6 +170,7 @@ public:
 	UInt_t getEventwiseStop()const {return bEventwiseStop;} // DA:
 	bool getDoEventwise()const {return bDoEventwise;} // DA:
 	std::vector<std::pair<Int_t,Int_t> > getSkipEvents()const {return bSkipEvents;} // DA:
+	bool isEventSkip() {return isEventSkipCut;}
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
