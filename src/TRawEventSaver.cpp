@@ -83,8 +83,9 @@ void TRawEventSaver::saveEvents(int nEvents){
 		for (int i=0;i<nEvents;i++){
 			bool skip = false;
 			for(Int_t ii=0; ii< settings->getSkipEvents().size(); ii++) {
-				if (settings->getSkipEvents().at(ii).first < i < settings->getSkipEvents().at(ii).second){
+				if ((settings->getSkipEvents().at(ii).first < i) && (i < settings->getSkipEvents().at(ii).second)){
 					skip = true;
+					std::cout << "Event " << i << " will be skipped: is in between events " << settings->getSkipEvents().at(ii).first << " and " << settings->getSkipEvents().at(ii).second << std::endl;
 					break;
 				}
 			}
