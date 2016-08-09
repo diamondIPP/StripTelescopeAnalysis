@@ -64,8 +64,8 @@ private:
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-	vector<Float_t> adc=0, ped=0, pedCMN=0, pedSigma=0, signal=0, signalCMN=0, signalInSigma=0, cmNoise=0;
-	vector<Int_t> ch=0;
+	vector<Float_t> adc, ped, pedCMN, pedSigma, signal, signalCMN, signalInSigma, cmNoise;
+	vector<Int_t> ch;
     ClassDef(TPlane,9);
 };
 
