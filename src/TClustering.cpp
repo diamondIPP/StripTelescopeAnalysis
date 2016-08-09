@@ -225,7 +225,6 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
 	Float_t signal =eventReader->getRawSignal(det,ch); // DA: it was getSignal(...)
-	Float_t signalInSigma = eventReader->getRawSignalInSigma(det, ch, false); // DA: added
 	Float_t signalInSigma=eventReader->getSignalInSigma(det,ch);
 	Int_t adcValue= eventReader->getAdcValue(det,ch);
 	Float_t cmNoise = eventReader->getCMNoise(det,ch);
