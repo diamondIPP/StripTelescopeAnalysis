@@ -85,6 +85,18 @@ enum TPlaneProperties::enumDetectorType TPlane::getDetectorType() const
 	//	else return 20;
 }
 
+void TPlane::FillPlaneSignalValues(Float_t adc, Float_t ped, Float_t pedCMN, Float_t pedSigma, Float_t signal, Float_t signalCMN, Float_t signalInSigma, Float_t cmNoise, Int_t ch){
+	this->adc.push_back(adc);
+	this->ped.push_back(ped);
+	this->pedCMN.push_back(pedCMN);
+	this->pedSigma.push_back(pedSigma);
+	this->signal.push_back(signal);
+	this->signalCMN.push_back(signalCMN);
+	this->signalInSigma.push_back(signalInSigma);
+	this->cmNoise.push_back(cmNoise);
+	this->ch.push_back(ch);
+}
+
 void TPlane::setDetectorType(TPlaneProperties::enumDetectorType type)
 {
 	this->type = type;

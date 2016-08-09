@@ -126,6 +126,7 @@ void TClustering::clusterEvent()
 	//siliconPlanes
 	for(UInt_t nplane=0;nplane<TPlaneProperties::getNSiliconPlanes();nplane++){
 		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
+		FillSignalChannelsPlane(nplane, plane);
 		if(verbosity>10)plane.Print(1);
 		pEvent->addPlane(plane,nplane);
 		if(verbosity>10)cout<<nplane<<"."<<flush;
@@ -134,6 +135,7 @@ void TClustering::clusterEvent()
 	//diamondPlanes
 	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
 	if(verbosity>10)cout<<4<<"."<<flush;
+	FillSignalChannelsPlane(TPlaneProperties::getDiamondPlane(), plane);
 	pEvent->addPlane(plane,TPlaneProperties::getDiamondPlane());
 	if(true){pEvent->isValidSiliconEvent();}
 	if(verbosity>8){
@@ -147,7 +149,15 @@ void TClustering::clusterEvent()
 		if(verbosity>4)cout<<nEvent<<": InvalidReadout"<<endl;
 		nInvalidReadout++;
 	}
+}
 
+void TClustering::FillSignalChannelsPlane(UInt_t det, TPlane &plane){
+	for (int ch = 0; ch < TPlaneProperties::getNChannels(plane); ch++){
+		plane.FillPlaneSignalValues(eventReader->getAdcValue(det, ch), eventReader->getPedestalMean(det, ch, false),
+									eventReader->getPedestalMean(det, ch, true), eventReader->getPedestalSigma(det, ch, false),
+									eventReader->getRawSignal(det, ch, false), eventReader->getRawSignal(det, ch, true),
+									eventReader->getRawSignalInSigma(det, ch, false), eventReader->getCMNoise(det, ch), ch);
+	}
 }
 
 void TClustering::clusterDetector(UInt_t det){
@@ -161,8 +171,14 @@ void TClustering::clusterDetector(UInt_t det){
 	for(int ch=0;ch<maxChannels;ch++){
 		//if(verbosity>30&&nEvent==0&&det==8&&ch<128)cout<<nEvent<<flush;
 
-		Float_t sigma=eventReader->getPedestalSigma(det,ch);
-		Float_t signal = eventReader->getSignal(det,ch);
+		Float_t rawADC=eventReader->getAdcValue(det,ch); //: DA: added
+		Float_t ped=eventReader->getPedestalMean(det,ch,false); //: DA: added
+		Float_t pedCMN = eventReader->getPedestalMean(det,ch,true); // DA: added
+		Float_t sigma=eventReader->getPedestalSigma(det,ch,false);
+		Float_t sigmaCMN = eventReader->getPedestalSigma(det,ch,true); // DA: added
+		Float_t signal = eventReader->getRawSignal(det,ch,false); // DA: it was: eventReader->getSignal(det,ch)
+		Float_t signalCMN = eventReader->getRawSignal(det,ch,true); // DA: it was: eventReader->getSignal(det,ch,true);
+		Float_t cmNoise = eventReader->getCMNoise(det,ch); // DA: added
 
 		//if(verbosity>9&&nEvent==0&&det==8&&ch<128)cout<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
 		//if(det==8)cout<<nEvent<<" # "<<det<<" # "<<ch<<" "<<signal<<" "<<sigma<<" "<<endl;
@@ -171,6 +187,7 @@ void TClustering::clusterDetector(UInt_t det){
 			continue;
 		}
 		Float_t SNR=eventReader->getSignalInSigma(det,ch);
+		Float_t SNRCMN = eventReader->getSignalInSigma(det,ch,true); // DA: added
 		if(SNR!=eventReader->getSignalInSigma(det,ch))cout<<"in the SNR there is something wrong...";
 		//if(verbosity>2&&nEvent==0&&det==8&&ch<TPlaneProperties::getNChannels(det))cout<<SNR<<flush;
 
@@ -207,7 +224,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"combine Cluster...start:"<<ch<<" ";
 
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
-	Float_t signal =eventReader->getSignal(det,ch);
+	Float_t signal =eventReader->getRawSignal(det,ch); // DA: it was getSignal(...)
 	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch);
 	Int_t adcValue= eventReader->getAdcValue(det,ch);
 	Float_t cmNoise = eventReader->getCMNoise(det,ch);
@@ -255,10 +272,10 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
 		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";
-		signal =eventReader->getSignal(det,currentCh);
-		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
+		signal =eventReader->getRawSignal(det,currentCh); // DA: it was getSignal(....
+		signalInSigma=eventReader->getRawSignalInSigma(det,currentCh);  // DA: it was getSignal(....
 		isScreened=this->settings->isDet_channel_screened(det,currentCh);
-		if(sigma!=0&&adcValueInSigma>hitSigma&&sigma!=0){
+		if(sigma!=0&&signalInSigma>hitSigma&&sigma!=0){
 			float pedMean = eventReader->getPedestalMean(det,currentCh,false);
 			float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
 			float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
@@ -266,7 +283,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
 		}
 		else{
-			if((verbosity>10&&det==8)||verbosity>11)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<adcValueInSigma<<"] ";
+			if((verbosity>10&&det==8)||verbosity>11)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<signalInSigma<<"] ";
 			break;
 		}
 	}

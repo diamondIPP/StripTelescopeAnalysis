@@ -243,7 +243,7 @@ UInt_t TCluster::checkClusterForSize() const{
 
 void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t pedMeanCMN, Float_t pedSigmaCMN, Int_t adcValue, bool bSaturated,bool isScreened){
 	//void TCluster::addChannel(UInt_t ch, Float_t signal,Float_t signalInSigma,UShort_t adcValue, bool bSaturated,bool screened){
-	if(ch>TPlaneProperties::getNChannels((UInt_t)this->det)||ch!=ch){
+	if(ch>TPlaneProperties::getNChannels(UInt_t(this->det))){ // DA: it was: getNChannels((UInt_t)this->det)||ch!=ch)....
 		cerr<<"The channel which should be added is not VALID! you cannot add a channel "<<ch<<" at det "<<det<<endl;
 		return;
 	}
@@ -254,7 +254,7 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
 	Float_t signal = adcValue - pedMean;
 	Float_t signalInSigma= signal/pedSigma;
 	Float_t signalCMN = adcValue - pedMeanCMN - this->cmNoise;
-	Float_t signalInSigmaCMN= signal/pedSigma;
+	Float_t signalInSigmaCMN= signalCMN/pedSigma; // DA: it was signal/pedSigma;
 	if(verbosity>2)cout<<"("<<ch<<"/"<<signal<<"/"<<signalInSigma<<")";
 	this->isSaturated=this->isSaturated||bSaturated;
 	if(signalInSigma>seedSigma)

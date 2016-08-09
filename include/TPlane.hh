@@ -58,11 +58,14 @@ public:
     void SetXClusters(vector<TCluster> xClusters);
     void SetYClusters(vector<TCluster> yClusters);
     bool hasInvalidReadout();
+	void FillPlaneSignalValues(Float_t adc, Float_t ped, Float_t pedCMN, Float_t pedSigma, Float_t signal, Float_t signalCMN, Float_t signalInSigma, Float_t cmNoise, Int_t ch);
 private:
     TPlaneProperties::enumDetectorType type;
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
+	vector<Float_t> adc=0, ped=0, pedCMN=0, pedSigma=0, signal=0, signalCMN=0, signalInSigma=0, cmNoise=0;
+	vector<Int_t> ch=0;
     ClassDef(TPlane,9);
 };
 
