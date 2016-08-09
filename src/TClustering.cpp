@@ -225,7 +225,8 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
 	Float_t signal =eventReader->getRawSignal(det,ch); // DA: it was getSignal(...)
-	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch);
+	Float_t signalInSigma = eventReader->getRawSignalInSigma(det, ch, false); // DA: added
+	Float_t signalInSigma=eventReader->getSignalInSigma(det,ch);
 	Int_t adcValue= eventReader->getAdcValue(det,ch);
 	Float_t cmNoise = eventReader->getCMNoise(det,ch);
 
@@ -239,23 +240,23 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	//look for hit channels smaller than or equal  to the seed channel
 	if(verbosity>10)cout<<cluster.size()<<" ";
 	UInt_t currentCh;
-	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0&&currentCh<=TPlaneProperties::getNChannels(det);currentCh--){
+	for(currentCh=ch;signalInSigma>hitSigma&&currentCh>=0&&currentCh<=TPlaneProperties::getNChannels(det);currentCh--){
 		sigma=eventReader->getPedestalSigma(det,currentCh);
 		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";
 		signal =eventReader->getSignal(det,currentCh);
-		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
+		signalInSigma=eventReader->getSignalInSigma(det,currentCh);
 		isScreened=this->settings->isDet_channel_screened(det,currentCh)||adcValue==maxAdcValue;
-		if(sigma!=0&&adcValueInSigma>hitSigma){
+		if(sigma!=0&&signalInSigma>hitSigma){
 			float pedMean = eventReader->getPedestalMean(det,currentCh,false);
 			float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
 			float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
 			float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
 			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened);
-			//			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
+			//			cluster.addChannel(currentCh,signal,signalInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 		}
 		else{
-			if((verbosity>10&&det==8)||verbosity>11)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<sigma<<"/"<<adcValueInSigma<<"] ";
+			if((verbosity>10&&det==8)||verbosity>11)cout<<" ["<<currentCh<<"/"<<signal<<"/"<<sigma<<"/"<<signalInSigma<<"] ";
 			break;
 		}
 	}
