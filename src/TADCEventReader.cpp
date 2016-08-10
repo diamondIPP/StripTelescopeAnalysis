@@ -641,7 +641,7 @@ bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 
 Float_t TADCEventReader::getRawSignal(UInt_t det, UInt_t ch,bool cmnCorrected){
 	if(det>=9)return -9999999;
-	Float_t cmn = getCMNoise();
+	Float_t cmn = getCMNoise(det, ch); // DA: it was getCMNNoise()
 	Int_t adc = getAdcValue(det,ch);
 	Float_t pedReal= getPedestalMean(det,ch,cmnCorrected);
 	if (!cmnCorrected||TPlaneProperties::isSiliconDetector(det))

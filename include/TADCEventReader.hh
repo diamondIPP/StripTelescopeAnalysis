@@ -79,6 +79,14 @@ public:
 	bool isInCurrentFiducialCut();
 	bool isInOneFiducialArea();
 
+	UShort_t *getDiaADC(){return Dia_ADC;}
+	Float_t *getDiaPed(){return diaPedestalMean;}
+	Float_t *getDiaPedCMN(){return diaPedestalMeanCMN;}
+	Float_t *getDiaSigma(){return diaPedestalSigma;}
+	Float_t *getDiaSigmaCMN(){return diaPedestalSigmaCMN;}
+	Float_t *getDiaRawSignal(bool CMNCorrected=false){Float_t temp[]; bla = int(CMNCorrected); for(int i=0; i<128; i++){temp[i] = Dia_ADC[i]-diaPedestalMean[i]-cmNoise*bla;} return temp;}
+	Float_t getDiaCMN(){return cmNoise;}
+
 	bool isDetMasked();
 	TEvent* getEvent();
 	void setVerbosity(UInt_t verbosity);

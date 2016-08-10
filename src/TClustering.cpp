@@ -125,8 +125,7 @@ void TClustering::clusterEvent()
 
 	//siliconPlanes
 	for(UInt_t nplane=0;nplane<TPlaneProperties::getNSiliconPlanes();nplane++){
-//		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
-		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon,eventReader);
+		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
 		if(verbosity>10)plane.Print(1);
 		pEvent->addPlane(plane,nplane);
 		if(verbosity>10)cout<<nplane<<"."<<flush;
@@ -134,9 +133,8 @@ void TClustering::clusterEvent()
 
 	//diamondPlanes
 //	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
-	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond,eventReader);
+	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond,eventReader->getDiaADC(),eventReader->getDiaPed(),eventReader->getDiaPedCMN(),eventReader->getDiaSigma(),eventReader->getDiaSigmaCMN(),eventReader->getDiaRawSignal(false),eventReader->getDiaRawSignal(true),eventReader->getDiaCMN());
 	if(verbosity>10)cout<<4<<"."<<flush;
-	FillSignalChannelsPlane(TPlaneProperties::getDiamondPlane(), plane);
 	pEvent->addPlane(plane,TPlaneProperties::getDiamondPlane());
 	if(true){pEvent->isValidSiliconEvent();}
 	if(verbosity>8){

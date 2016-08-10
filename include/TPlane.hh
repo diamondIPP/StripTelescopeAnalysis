@@ -28,7 +28,6 @@
 //own classes
 #include "TCluster.hh"
 #include "TPlaneProperties.hh"
-//#include "TADCEventReader.hh"
 
 
 //class TCluster;
@@ -40,7 +39,7 @@ public:
 
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
-	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters, TPlaneProperties::enumDetectorType type,TADCEventReader *eReader);
+	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters, TPlaneProperties::enumDetectorType type, Float_t eadc[], Float_t eped[], Float_t epedCMN[], Float_t epedSigma[], Float_t epedSigmaCMN[], Float_t erawSignal[], Float_t erawSignalCMN[], Float_t ecmNoise);
 	TPlane(const TPlane& rhs);//COPY Constructor
 	TPlane &operator=(const TPlane &src); //class assignment function
 	virtual ~TPlane();
@@ -60,15 +59,16 @@ public:
     void SetXClusters(vector<TCluster> xClusters);
     void SetYClusters(vector<TCluster> yClusters);
     bool hasInvalidReadout();
-	void SetSignalValues(TADCEventReader *eReader);
-	void FillPlaneSignalValues(Float_t adc, Float_t ped, Float_t pedCMN, Float_t pedSigma, Float_t signal, Float_t signalCMN, Float_t signalInSigma, Float_t cmNoise, Int_t ch);
+	void SetSignalValues(UShort_t eadc[], Float_t eped[], Float_t epedCMN[], Float_t epedSigma[], Float_t epedSigmaCMN[], Float_t erawSignal[], Float_t erawSignalCMN[], Float_t ecmNoise);
 private:
     TPlaneProperties::enumDetectorType type;
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-	vector<Float_t> adc, ped, pedCMN, pedSigma, pedSigmaCMN, rawSignal, rawSignalCMN, rawSignalInSigma, rawSignalInSigmaCMN, signal, signalCMN, signalInSigma, signalInSigmaCMN,cmNoise;
-	vector<Int_t> ch;
+	vector<UShort_t> adc;
+	vector<Float_t> ped, pedCMN, pedSigma, pedSigmaCMN, rawSignal, rawSignalCMN;
+	Float_t cmNoise;
+//	vector<Int_t> ch;
     ClassDef(TPlane,9);
 };
 

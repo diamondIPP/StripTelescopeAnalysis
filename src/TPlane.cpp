@@ -15,7 +15,13 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 	this->SetClusters(xClusters, yClusters);
 	this->type=type;
 	this->planeNo=planeNo;
-
+	this->adc.clear();
+	this->ped.clear();
+	this->pedCMN.clear();
+	this->pedSigma.clear();
+	this->pedSigmaCMN.clear();
+	this->rawSigna.clear();
+	this->rawSignalCMN.clear();
 }
 
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
@@ -27,14 +33,14 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 	this->planeNo=planeNo;
 }
 
-TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type, TADCEventReader *eReader){
+TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters, TPlaneProperties::enumDetectorType type, Float_t eadc[], Float_t eped[], Float_t epedCMN[], Float_t epedSigma[], Float_t epedSigmaCMN[], Float_t erawSignal[], Float_t erawSignalCMN[], Float_t ecmNoise){
 	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
-	this->SetXClusters(xClusters);
+	this->SetClusters(xClusters, yClusters);
 	this->yClusters.clear();
 	this->type=type;
 	this->planeNo=planeNo;
-	this->SetSignalValues(eReader);
+	this->SetSignalValues(eadc, eped, epedCMN, epedSigma, epedSigmaCMN, erawSignal, erawSignalCMN, ecmNoise);
 }
 
 //TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type)
@@ -191,7 +197,7 @@ void TPlane::SetYClusters(vector<TCluster> yClusters) {
 
 }
 
-void TPlane::SetSignalValues(TADCEventReader *eReader){
+void TPlane::SetSignalValues(UShort_t eadc[], Float_t eped[], Float_t epedCMN[], Float_t epedSigma[], Float_t epedSigmaCMN[], Float_t erawSignal[], Float_t erawSignalCMN[], Float_t ecmNoise){
 	this->adc.clear();
 	this->ped.clear();
 	this->pedCMN.clear();
@@ -199,30 +205,16 @@ void TPlane::SetSignalValues(TADCEventReader *eReader){
 	this->pedSigmaCMN.clear();
 	this->rawSignal.clear();
 	this->rawSignalCMN.clear();
-	this->rawSignalInSigma.clear();
-	this->rawSignalInSigmaCMN.clear();
-	this->signal.clear();
-	this->signalCMN.clear();
-	this->signalInSigma.clear();
-	this->signalInSigmaCMN.clear();
 	this->cmNoise.clear();
-	this->ch.clear();
 	for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++){
-		this->adc.push_back(eReader->getAdcValue(this->planeNo, ch));
-		this->ped.push_back(eReader->getPedestalMean(this->planeNo, ch, false));
-		this->pedCMN.push_back(eReader->getPedestalMean(this->planeNo, ch, true));
-		this->pedSigma.push_back(eReader->getPedestalSigma(this->planeNo, ch, false));
-		this->pedSigmaCMN.push_back(eReader->getPedestalSigma(this->planeNo, ch, true));
-		this->rawSignal.push_back(eReader->getRawSignal(this->planeNo, ch, false));
-		this->rawSignalCMN.push_back(eReader->getRawSignal(this->planeNo, ch, true));
-		this->rawSignalInSigma.push_back(eReader->getRawSignalInSigma(this->planeNo, ch, false));
-		this->rawSignalInSigmaCMN.push_back(eReader->getRawSignalInSigma(this->planeNo, ch, true));
-		this->signal.push_back(eReader->getSignal(this->planeNo, ch, false));
-		this->signalCMN.push_back(eReader->getSignal(this->planeNo, ch, true));
-		this->signalInSigma.push_back(eReader->getSignalInSigma(this->planeNo, ch, false));
-		this->signalInSigmaCMN.push_back(eReader->getSignalInSigma(this->planeNo, ch, true));
-		this->cmNoise.push_back(eReader->getCMNoise(this->planeNo, ch));
-		this->ch.push_back(ch);
+		this->adc.push_back(eadc[ch]);
+		this->ped.push_back(eped[ch]);
+		this->pedCMN.push_back(epedCMN[ch]);
+		this->pedSigma.push_back(epedSigma[ch]);
+		this->pedSigmaCMN.push_back(epedSigmaCMN[ch]);
+		this->rawSignal.push_back(erawSignal[ch]);
+		this->rawSignalCMN.push_back(erawSignalCMN[ch]);
+		this->cmNoise.push_back(ecmNoise);
 	}
 }
 
