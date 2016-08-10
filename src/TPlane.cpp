@@ -25,7 +25,6 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 	this->yClusters.clear();
 	this->type=type;
 	this->planeNo=planeNo;
-
 }
 
 //TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type)
