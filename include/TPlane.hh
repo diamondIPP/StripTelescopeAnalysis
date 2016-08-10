@@ -40,7 +40,7 @@ public:
 
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
-	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond, TADCEventReader *eReader);
+	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters, TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond,TADCEventReader *eReader);
 	TPlane(const TPlane& rhs);//COPY Constructor
 	TPlane &operator=(const TPlane &src); //class assignment function
 	virtual ~TPlane();
