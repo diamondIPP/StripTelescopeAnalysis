@@ -50,7 +50,6 @@ private:
 	void clusterEvent();
 	void clusterDetector(UInt_t det);
 	int combineCluster(UInt_t det,UInt_t ch);
-	void FillSignalChannelsPlane(UInt_t det, TPlane plane);
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;

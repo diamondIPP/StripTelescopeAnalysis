@@ -28,6 +28,7 @@
 //own classes
 #include "TCluster.hh"
 #include "TPlaneProperties.hh"
+#include "TADCEventReader.hh"
 
 
 //class TCluster;
@@ -39,6 +40,7 @@ public:
 
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
+	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond, TADCEventReader *eReader);
 	TPlane(const TPlane& rhs);//COPY Constructor
 	TPlane &operator=(const TPlane &src); //class assignment function
 	virtual ~TPlane();
@@ -58,13 +60,14 @@ public:
     void SetXClusters(vector<TCluster> xClusters);
     void SetYClusters(vector<TCluster> yClusters);
     bool hasInvalidReadout();
+	void SetSignalValues(TADCEventReader *eReader);
 	void FillPlaneSignalValues(Float_t adc, Float_t ped, Float_t pedCMN, Float_t pedSigma, Float_t signal, Float_t signalCMN, Float_t signalInSigma, Float_t cmNoise, Int_t ch);
 private:
     TPlaneProperties::enumDetectorType type;
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-	vector<Float_t> adc, ped, pedCMN, pedSigma, signal, signalCMN, signalInSigma, cmNoise;
+	vector<Float_t> adc, ped, pedCMN, pedSigma, pedSigmaCMN, rawSignal, rawSignalCMN, rawSignalInSigma, rawSignalInSigmaCMN, signal, signalCMN, signalInSigma, signalInSigmaCMN,cmNoise;
 	vector<Int_t> ch;
     ClassDef(TPlane,9);
 };

@@ -125,15 +125,16 @@ void TClustering::clusterEvent()
 
 	//siliconPlanes
 	for(UInt_t nplane=0;nplane<TPlaneProperties::getNSiliconPlanes();nplane++){
-		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
-		FillSignalChannelsPlane(nplane, plane);
+//		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon);
+		TPlane plane(nplane,vecCluster[nplane*2],vecCluster[nplane*2+1],TPlaneProperties::kSilicon,eventReader);
 		if(verbosity>10)plane.Print(1);
 		pEvent->addPlane(plane,nplane);
 		if(verbosity>10)cout<<nplane<<"."<<flush;
 	}
 
 	//diamondPlanes
-	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
+//	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
+	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond,eventReader);
 	if(verbosity>10)cout<<4<<"."<<flush;
 	FillSignalChannelsPlane(TPlaneProperties::getDiamondPlane(), plane);
 	pEvent->addPlane(plane,TPlaneProperties::getDiamondPlane());
@@ -148,12 +149,6 @@ void TClustering::clusterEvent()
 	if(pEvent->hasInvalidReadout()){
 		if(verbosity>4)cout<<nEvent<<": InvalidReadout"<<endl;
 		nInvalidReadout++;
-	}
-}
-
-void TClustering::FillSignalChannelsPlane(UInt_t det, TPlane plane){
-	for (int ch = 0; ch < TPlaneProperties::getNChannels(det); ch++){
-		plane.FillPlaneSignalValues(eventReader->getAdcValue(det, ch), eventReader->getPedestalMean(det, ch, false), eventReader->getPedestalMean(det, ch, true), eventReader->getPedestalSigma(det, ch, false), eventReader->getRawSignal(det, ch, false), eventReader->getRawSignal(det, ch, true), eventReader->getRawSignalInSigma(det, ch, false), eventReader->getCMNoise(det, ch), ch);
 	}
 }
 

@@ -27,6 +27,16 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 	this->planeNo=planeNo;
 }
 
+TPlane::TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond, TADCEventReader *eReader){
+	this->verbosity=0;
+	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
+	this->SetXClusters(xClusters);
+	this->yClusters.clear();
+	this->type=type;
+	this->planeNo=planeNo;
+	this->SetSignalValues(eReader);
+}
+
 //TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type)
 
 /**
@@ -84,18 +94,6 @@ enum TPlaneProperties::enumDetectorType TPlane::getDetectorType() const
 	//	else if(type==kUndefined)
 	//		return 0;
 	//	else return 20;
-}
-
-void TPlane::FillPlaneSignalValues(Float_t adc, Float_t ped, Float_t pedCMN, Float_t pedSigma, Float_t signal, Float_t signalCMN, Float_t signalInSigma, Float_t cmNoise, Int_t ch){
-	this->adc.push_back(adc);
-	this->ped.push_back(ped);
-	this->pedCMN.push_back(pedCMN);
-	this->pedSigma.push_back(pedSigma);
-	this->signal.push_back(signal);
-	this->signalCMN.push_back(signalCMN);
-	this->signalInSigma.push_back(signalInSigma);
-	this->cmNoise.push_back(cmNoise);
-	this->ch.push_back(ch);
 }
 
 void TPlane::setDetectorType(TPlaneProperties::enumDetectorType type)
@@ -191,6 +189,41 @@ void TPlane::SetYClusters(vector<TCluster> yClusters) {
 	for(UInt_t yCl=0;yCl<yClusters.size();yCl++)
 		this->yClusters.push_back(yClusters.at(yCl));
 
+}
+
+void TPlane::SetSignalValues(TADCEventReader *eReader){
+	this->adc.clear();
+	this->ped.clear();
+	this->pedCMN.clear();
+	this->pedSigma.clear();
+	this->pedSigmaCMN.clear();
+	this->rawSignal.clear();
+	this->rawSignalCMN.clear();
+	this->rawSignalInSigma.clear();
+	this->rawSignalInSigmaCMN.clear();
+	this->signal.clear();
+	this->signalCMN.clear();
+	this->signalInSigma.clear();
+	this->signalInSigmaCMN.clear();
+	this->cmNoise.clear();
+	this->ch.clear();
+	for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++){
+		this->adc.push_back(eReader->getAdcValue(this->planeNo, ch));
+		this->ped.push_back(eReader->getPedestalMean(this->planeNo, ch, false));
+		this->pedCMN.push_back(eReader->getPedestalMean(this->planeNo, ch, true));
+		this->pedSigma.push_back(eReader->getPedestalSigma(this->planeNo, ch, false));
+		this->pedSigmaCMN.push_back(eReader->getPedestalSigma(this->planeNo, ch, true));
+		this->rawSignal.push_back(eReader->getRawSignal(this->planeNo, ch, false));
+		this->rawSignalCMN.push_back(eReader->getRawSignal(this->planeNo, ch, true));
+		this->rawSignalInSigma.push_back(eReader->getRawSignalInSigma(this->planeNo, ch, false));
+		this->rawSignalInSigmaCMN.push_back(eReader->getRawSignalInSigma(this->planeNo, ch, true));
+		this->signal.push_back(eReader->getSignal(this->planeNo, ch, false));
+		this->signalCMN.push_back(eReader->getSignal(this->planeNo, ch, true));
+		this->signalInSigma.push_back(eReader->getSignalInSigma(this->planeNo, ch, false));
+		this->signalInSigmaCMN.push_back(eReader->getSignalInSigma(this->planeNo, ch, true));
+		this->cmNoise.push_back(eReader->getCMNoise(this->planeNo, ch));
+		this->ch.push_back(ch);
+	}
 }
 
 
