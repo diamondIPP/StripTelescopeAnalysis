@@ -28,6 +28,8 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 
 }
 
+//TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type)
+
 /**
  * Copy Constructor for TPlane class
  * @param rhs

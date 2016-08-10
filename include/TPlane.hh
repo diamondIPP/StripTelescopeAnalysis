@@ -28,6 +28,7 @@
 //own classes
 #include "TCluster.hh"
 #include "TPlaneProperties.hh"
+#include "TADCEventReader.hh"
 
 
 //class TCluster;

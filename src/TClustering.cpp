@@ -151,12 +151,9 @@ void TClustering::clusterEvent()
 	}
 }
 
-void TClustering::FillSignalChannelsPlane(UInt_t det, TPlane &plane){
+void TClustering::FillSignalChannelsPlane(UInt_t det, TPlane plane){
 	for (int ch = 0; ch < TPlaneProperties::getNChannels(det); ch++){
-		plane.FillPlaneSignalValues(eventReader->getAdcValue(det, ch), eventReader->getPedestalMean(det, ch, false),
-									eventReader->getPedestalMean(det, ch, true), eventReader->getPedestalSigma(det, ch, false),
-									eventReader->getRawSignal(det, ch, false), eventReader->getRawSignal(det, ch, true),
-									eventReader->getRawSignalInSigma(det, ch, false), eventReader->getCMNoise(det, ch), ch);
+		plane.FillPlaneSignalValues(eventReader->getAdcValue(det, ch), eventReader->getPedestalMean(det, ch, false), eventReader->getPedestalMean(det, ch, true), eventReader->getPedestalSigma(det, ch, false), eventReader->getRawSignal(det, ch, false), eventReader->getRawSignal(det, ch, true), eventReader->getRawSignalInSigma(det, ch, false), eventReader->getCMNoise(det, ch), ch);
 	}
 }
 
