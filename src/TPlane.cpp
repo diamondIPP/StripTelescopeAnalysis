@@ -24,7 +24,23 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 	this->rawSignalCMN.clear();
 }
 
-TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type){
+TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type) {
+	this->verbosity = 0;
+	if (verbosity)cout << "TPlane:" << planeNo << " xClusters:" << xClusters.size() << endl;
+	this->SetXClusters(xClusters);
+	this->yClusters.clear();
+	this->type = type;
+	this->planeNo = planeNo;
+	this->adc.clear();
+	this->ped.clear();
+	this->pedCMN.clear();
+	this->pedSigma.clear();
+	this->pedSigmaCMN.clear();
+	this->rawSigna.clear();
+	this->rawSignalCMN.clear();
+}
+
+TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type, Float_t ecmNoise){
 	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
 	this->SetXClusters(xClusters);
@@ -38,17 +54,18 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 	this->pedSigmaCMN.clear();
 	this->rawSigna.clear();
 	this->rawSignalCMN.clear();
+	this->cmNoise = ecmNoise;
 }
 
-TPlane::TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, Float_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
-	this->verbosity=0;
-	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
-	this->SetXClusters(xClusters);
-	this->yClusters.clear();
-	this->type=type;
-	this->planeNo=planeNo;
-	this->SetSignalValues(eadc, eped, epedCMN, epedSigma, epedSigmaCMN, erawSignal, erawSignalCMN, ecmNoise);
-}
+//TPlane::TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, Float_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
+//	this->verbosity=0;
+//	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
+//	this->SetXClusters(xClusters);
+//	this->yClusters.clear();
+//	this->type=type;
+//	this->planeNo=planeNo;
+//	this->SetSignalValues(eadc, eped, epedCMN, epedSigma, epedSigmaCMN, erawSignal, erawSignalCMN, ecmNoise);
+//}
 
 //TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type)
 

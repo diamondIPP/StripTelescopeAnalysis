@@ -133,7 +133,8 @@ void TClustering::clusterEvent()
 
 	//diamondPlanes
 //	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond);
-	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond,eventReader->getDiaADC(),eventReader->getDiaPed(),eventReader->getDiaPedCMN(),eventReader->getDiaSigma(),eventReader->getDiaSigmaCMN(),eventReader->getDiaRawSignal(false),eventReader->getDiaRawSignal(true),eventReader->getDiaCMN());
+	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond, eventReader->getDiaCMN());
+//	TPlane plane(TPlaneProperties::getDiamondPlane(),vecCluster[TPlaneProperties::getDetDiamond()],TPlaneProperties::kDiamond,eventReader->getDiaADC(),eventReader->getDiaPed(),eventReader->getDiaPedCMN(),eventReader->getDiaSigma(),eventReader->getDiaSigmaCMN(),eventReader->getDiaRawSignal(false),eventReader->getDiaRawSignal(true),eventReader->getDiaCMN());
 	if(verbosity>10)cout<<4<<"."<<flush;
 	pEvent->addPlane(plane,TPlaneProperties::getDiamondPlane());
 	if(true){pEvent->isValidSiliconEvent();}
