@@ -22,6 +22,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 	this->pedSigmaCMN.clear();
 	this->rawSignal.clear();
 	this->rawSignalCMN.clear();
+	this->cmNoise = 0;
 }
 
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type) {
@@ -38,6 +39,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 	this->pedSigmaCMN.clear();
 	this->rawSignal.clear();
 	this->rawSignalCMN.clear();
+	this->cmNoise = 0;
 }
 
 //TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type, Float_t ecmNoise){
