@@ -249,7 +249,7 @@ void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Fl
 	this->pedSigmaCMN.clear();
 	this->rawSignal.clear();
 	this->rawSignalCMN.clear();
-	for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++){
+	for (UInt_t ch = 0; ch < TPlaneProperties::getNChannelsDiamond(); ch++){
 		this->adc.push_back(eadc[ch]);
 		this->ped.push_back(eped[ch]);
 		this->pedCMN.push_back(epedCMN[ch]);
@@ -257,7 +257,6 @@ void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Fl
 		this->pedSigmaCMN.push_back(epedSigmaCMN[ch]);
 		this->rawSignal.push_back(erawSignal[ch]);
 		this->rawSignalCMN.push_back(erawSignalCMN[ch]);
-		this->cmNoise.push_back(ecmNoise);
 	}
 	this->cmNoise = ecmNoise;
 }
