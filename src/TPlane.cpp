@@ -74,10 +74,6 @@ TPlane::TPlane(const TPlane& rhs){
 	this->planeNo=rhs.planeNo;
 }
 
-TPlane::~TPlane() {
-
-}
-
 /**
  * Class Assignment function
  */
@@ -95,6 +91,10 @@ TPlane& TPlane::operator =(const TPlane &src){
 	for(UInt_t i=0;i<src.yClusters.size();i++)
 		yClusters.push_back(src.yClusters.at(i));
 	return *this;
+}
+
+TPlane::~TPlane() {
+
 }
 
 enum TPlaneProperties::enumDetectorType TPlane::getDetectorType() const
@@ -204,6 +204,26 @@ void TPlane::SetYClusters(vector<TCluster> yClusters) {
 
 }
 
+
+bool TPlane::hasInvalidReadout(){
+//	cout<<"\tTPlane::hasInvalidReadout "<<planeNo<<": "<<xClusters.size()<<"-"<<yClusters.size()<<endl;
+	bool invalidReadout=false;
+//	cout<<"\tX:\t"<<endl;
+	UInt_t xCl;
+	for(xCl=0;xCl<xClusters.size()&&!invalidReadout;xCl++)
+		invalidReadout = invalidReadout || xClusters.at(xCl).hasInvalidReadout();
+//	if(invalidReadout)
+//		cout<<planeNo<<" X"<<xCl<<endl;
+//	cout<<"\tY:"<<endl;
+	UInt_t yCl;
+	for(yCl=0;yCl<yClusters.size()&&!invalidReadout;yCl++){
+		invalidReadout = invalidReadout || yClusters.at(yCl).hasInvalidReadout();
+//		if(invalidReadout)
+//			cout<<planeNo<<"Y"<<xCl<<endl;
+	}//	cout<<"\treturning: "<<invalidReadout<<endl;
+	return invalidReadout;
+}
+
 void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
 	this->adc.clear();
 	this->ped.clear();
@@ -225,25 +245,6 @@ void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Fl
 	}
 }
 
-
-bool TPlane::hasInvalidReadout(){
-//	cout<<"\tTPlane::hasInvalidReadout "<<planeNo<<": "<<xClusters.size()<<"-"<<yClusters.size()<<endl;
-	bool invalidReadout=false;
-//	cout<<"\tX:\t"<<endl;
-	UInt_t xCl;
-	for(xCl=0;xCl<xClusters.size()&&!invalidReadout;xCl++)
-		invalidReadout = invalidReadout || xClusters.at(xCl).hasInvalidReadout();
-//	if(invalidReadout)
-//		cout<<planeNo<<" X"<<xCl<<endl;
-//	cout<<"\tY:"<<endl;
-	UInt_t yCl;
-	for(yCl=0;yCl<yClusters.size()&&!invalidReadout;yCl++){
-		invalidReadout = invalidReadout || yClusters.at(yCl).hasInvalidReadout();
-//		if(invalidReadout)
-//			cout<<planeNo<<"Y"<<xCl<<endl;
-	}//	cout<<"\treturning: "<<invalidReadout<<endl;
-	return invalidReadout;
-}
 void TPlane::Print(UInt_t level)
 {
 	cout<< TCluster::Intent(level)<<TPlaneProperties::getDetectortypeString(this->getDetectorType())<<"-Plane with "<<getNXClusters()<<"/"<<getNYClusters()<<endl;
