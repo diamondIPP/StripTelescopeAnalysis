@@ -39,7 +39,7 @@ public:
 
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
-	TPlane(UInt_t planeNo,vector<TCluster> xClusters, TPlaneProperties::enumDetectorType type, Float_t eadc[], Float_t eped[], Float_t epedCMN[], Float_t epedSigma[], Float_t epedSigmaCMN[], Float_t erawSignal[], Float_t erawSignalCMN[], Float_t ecmNoise);
+	TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, Float_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise);
 	TPlane(const TPlane& rhs);//COPY Constructor
 	TPlane &operator=(const TPlane &src); //class assignment function
 	virtual ~TPlane();
@@ -59,7 +59,7 @@ public:
     void SetXClusters(vector<TCluster> xClusters);
     void SetYClusters(vector<TCluster> yClusters);
     bool hasInvalidReadout();
-	void SetSignalValues(UShort_t eadc[], Float_t eped[], Float_t epedCMN[], Float_t epedSigma[], Float_t epedSigmaCMN[], Float_t erawSignal[], Float_t erawSignalCMN[], Float_t ecmNoise);
+	void SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise);
 private:
     TPlaneProperties::enumDetectorType type;
 	UInt_t planeNo;

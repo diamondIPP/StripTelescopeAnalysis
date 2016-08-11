@@ -79,12 +79,12 @@ public:
 	bool isInCurrentFiducialCut();
 	bool isInOneFiducialArea();
 
-	UShort_t *getDiaADC(){return Dia_ADC;}
-	Float_t *getDiaPed(){return diaPedestalMean;}
-	Float_t *getDiaPedCMN(){return diaPedestalMeanCMN;}
-	Float_t *getDiaSigma(){return diaPedestalSigma;}
-	Float_t *getDiaSigmaCMN(){return diaPedestalSigmaCMN;}
-	Float_t *getDiaRawSignal(bool CMNCorrected=false){for(int i=0; i<128; i++){diaRawSignalCMN[i] = Dia_ADC[i]-diaPedestalMean[i]-cmNoise;diaRawSignal[i] = Dia_ADC[i]-diaPedestalMean[i];} if(CMNCorrected){return diaRawSignalCMN;} else{return diaRawSignal;}}
+	UShort_t* getDiaADC(){return Dia_ADC;}
+	Float_t* getDiaPed(){return diaPedestalMean;}
+	Float_t* getDiaPedCMN(){return diaPedestalMeanCMN;}
+	Float_t* getDiaSigma(){return diaPedestalSigma;}
+	Float_t* getDiaSigmaCMN(){return diaPedestalSigmaCMN;}
+	Float_t* getDiaRawSignal(bool CMNCorrected=false){for(int i=0; i<128; i++){diaRawSignalCMN[i] = Dia_ADC[i]-diaPedestalMean[i]-cmNoise;diaRawSignal[i] = Dia_ADC[i]-diaPedestalMean[i];} if(CMNCorrected){return diaRawSignalCMN;} else{return diaRawSignal;}}
 	Float_t getDiaCMN(){return cmNoise;}
 
 	bool isDetMasked();
