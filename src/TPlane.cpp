@@ -57,7 +57,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 //	this->cmNoise = ecmNoise;
 //}
 
-TPlane::TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, Float_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
+TPlane::TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
 	this->verbosity=0;
 	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
 	this->SetXClusters(xClusters);
