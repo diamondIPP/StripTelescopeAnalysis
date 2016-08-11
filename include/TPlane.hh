@@ -70,7 +70,7 @@ private:
 	vector<Float_t> ped, pedCMN, pedSigma, pedSigmaCMN, rawSignal, rawSignalCMN;
 	Float_t cmNoise;
 //	vector<Int_t> ch;
-    ClassDef(TPlane,9);
+    ClassDef(TPlane,10);
 };
 
 #endif // TPlane_hh
