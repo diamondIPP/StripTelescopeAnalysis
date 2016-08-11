@@ -84,7 +84,7 @@ public:
 	Float_t *getDiaPedCMN(){return diaPedestalMeanCMN;}
 	Float_t *getDiaSigma(){return diaPedestalSigma;}
 	Float_t *getDiaSigmaCMN(){return diaPedestalSigmaCMN;}
-	Float_t *getDiaRawSignal(bool CMNCorrected=false){Float_t temp[]; bla = int(CMNCorrected); for(int i=0; i<128; i++){temp[i] = Dia_ADC[i]-diaPedestalMean[i]-cmNoise*bla;} return temp;}
+	Float_t *getDiaRawSignal(bool CMNCorrected=false){for(int i=0; i<128; i++){diaRawSignalCMN[i] = Dia_ADC[i]-diaPedestalMean[i]-cmNoise;diaRawSignal[i] = Dia_ADC[i]-diaPedestalMean[i];} if(CMNCorrected){return diaRawSignalCMN;} else{return diaRawSignal;}}
 	Float_t getDiaCMN(){return cmNoise;}
 
 	bool isDetMasked();
@@ -128,6 +128,8 @@ private:
   Float_t diaPedestalSigma[128];
   Float_t diaPedestalMeanCMN[128];
   Float_t diaPedestalSigmaCMN[128];
+	Float_t diaRawSignal[128];
+	Float_t diaRawSignalCMN[128];
 	Float_t cmNoise;
 	Float_t cmn_det[8*2];
 	Float_t cmnCreated[9];
