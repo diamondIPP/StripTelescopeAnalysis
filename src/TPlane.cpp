@@ -20,7 +20,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 	this->pedCMN.clear();
 	this->pedSigma.clear();
 	this->pedSigmaCMN.clear();
-	this->rawSigna.clear();
+	this->rawSignal.clear();
 	this->rawSignalCMN.clear();
 }
 
@@ -36,7 +36,7 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 	this->pedCMN.clear();
 	this->pedSigma.clear();
 	this->pedSigmaCMN.clear();
-	this->rawSigna.clear();
+	this->rawSignal.clear();
 	this->rawSignalCMN.clear();
 }
 
@@ -249,7 +249,6 @@ void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Fl
 	this->pedSigmaCMN.clear();
 	this->rawSignal.clear();
 	this->rawSignalCMN.clear();
-	this->cmNoise.clear();
 	for (UInt_t ch = 0; ch < TPlaneProperties::getNChannels(det); ch++){
 		this->adc.push_back(eadc[ch]);
 		this->ped.push_back(eped[ch]);
@@ -260,6 +259,7 @@ void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Fl
 		this->rawSignalCMN.push_back(erawSignalCMN[ch]);
 		this->cmNoise.push_back(ecmNoise);
 	}
+	this->cmNoise = ecmNoise;
 }
 
 void TPlane::Print(UInt_t level)
