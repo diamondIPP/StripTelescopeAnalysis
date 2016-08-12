@@ -35,7 +35,7 @@
 class TPlane:public TObject {
 public:
 
-	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();planeNo=0;verbosity=0;};
+	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();planeNo=0;verbosity=0;adc.clear();ped.clear();pedCMN.clear();pedSigma.clear();pedSigmaCMN.clear();rawSignal.clear();rawSignalCMN.clear();cmNoise=0;};
 
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
