@@ -217,7 +217,7 @@ int main(int argc, char ** argv) {
 				skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first);
 			}
 		}
-		Long64_t nEvents = RunParameters[i].getEvents() - skipped + 1;
+		Long64_t nEvents = RunParameters[i].getEvents() - skipped; // DA: +1 ?
 
 		//Calculate Pedestal
 		sys->cd(currentDir.c_str());
