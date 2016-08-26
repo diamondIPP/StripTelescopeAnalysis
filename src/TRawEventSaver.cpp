@@ -84,7 +84,7 @@ void TRawEventSaver::saveEvents(int nEvents){
 			bool skip = false;
 			showStatusBar(i, nEvents, 100);
 			for(Int_t ii=0; ii< settings->getSkipEvents().size(); ii++) {
-				if ((settings->getSkipEvents().at(ii).first < i) && (i < settings->getSkipEvents().at(ii).second)){
+				if ((settings->getSkipEvents().at(ii).first <= i) && (i <= settings->getSkipEvents().at(ii).second)){
 					skip = true;
 					break;
 				}

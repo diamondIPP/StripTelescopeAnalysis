@@ -214,11 +214,13 @@ int main(int argc, char ** argv) {
 		Long64_t skipped = 0;
 		if(settings->isEventSkip()){
 			for(int ii = 0; ii < settings->getSkipEvents().size(); ii++){
-				skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first);
+				if(settings->getSkipEvents().at(ii).second < RunParameters[i].getEvents()) {
+					skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first) + 1;
+				}
 			}
 		}
-		Long64_t nEvents = RunParameters[i].getEvents() - skipped; // DA: +1 ?
-
+		Long64_t nEvents = RunParameters[i].getEvents() - skipped;
+		cout << "Number of events to analyse: " << nEvents << endl; // DA: to check...
 		//Calculate Pedestal
 		sys->cd(currentDir.c_str());
 		TPedestalCalculation* pedestalCalculation;
