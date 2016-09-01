@@ -15,14 +15,14 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClus
 	this->SetClusters(xClusters, yClusters);
 	this->type=type;
 	this->planeNo=planeNo;
-	this->adc.clear();
-	this->ped.clear();
-	this->pedCMN.clear();
-	this->pedSigma.clear();
-	this->pedSigmaCMN.clear();
-	this->rawSignal.clear();
-	this->rawSignalCMN.clear();
-	this->cmNoise = 0;
+//	this->adc.clear();
+//	this->ped.clear();
+//	this->pedCMN.clear();
+//	this->pedSigma.clear();
+//	this->pedSigmaCMN.clear();
+//	this->rawSignal.clear();
+//	this->rawSignalCMN.clear();
+//	this->cmNoise = 0;
 }
 
 TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type) {
@@ -32,14 +32,14 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 	this->yClusters.clear();
 	this->type = type;
 	this->planeNo = planeNo;
-	this->adc.clear();
-	this->ped.clear();
-	this->pedCMN.clear();
-	this->pedSigma.clear();
-	this->pedSigmaCMN.clear();
-	this->rawSignal.clear();
-	this->rawSignalCMN.clear();
-	this->cmNoise = 0;
+//	this->adc.clear();
+//	this->ped.clear();
+//	this->pedCMN.clear();
+//	this->pedSigma.clear();
+//	this->pedSigmaCMN.clear();
+//	this->rawSignal.clear();
+//	this->rawSignalCMN.clear();
+//	this->cmNoise = 0;
 }
 
 //TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type, Float_t ecmNoise){
@@ -59,15 +59,15 @@ TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumD
 //	this->cmNoise = ecmNoise;
 //}
 
-TPlane::TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
-	this->verbosity=0;
-	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
-	this->SetXClusters(xClusters);
-	this->yClusters.clear();
-	this->type=type;
-	this->planeNo=planeNo;
-	this->SetSignalValues(eadc, eped, epedCMN, epedSigma, epedSigmaCMN, erawSignal, erawSignalCMN, ecmNoise);
-}
+//TPlane::TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
+//	this->verbosity=0;
+//	if(verbosity)cout<<"TPlane:"<<planeNo<<" xClusters:"<<xClusters.size()<<endl;
+//	this->SetXClusters(xClusters);
+//	this->yClusters.clear();
+//	this->type=type;
+//	this->planeNo=planeNo;
+//	this->SetSignalValues(eadc, eped, epedCMN, epedSigma, epedSigmaCMN, erawSignal, erawSignalCMN, ecmNoise);
+//}
 
 //TPlane::TPlane(UInt_t planeNo,vector<TCluster> xClusters,TPlaneProperties::enumDetectorType type)
 
@@ -80,14 +80,14 @@ TPlane::TPlane(const TPlane& rhs){
 	this->verbosity=rhs.verbosity;
 	this->xClusters.clear();
 	this->yClusters.clear();
-	this->adc.clear();
-	this->ped.clear();
-	this->pedCMN.clear();
-	this->pedSigma.clear();
-	this->pedSigmaCMN.clear();
-	this->rawSignal.clear();
-	this->rawSignalCMN.clear();
-	this->cmNoise = 0;
+//	this->adc.clear();
+//	this->ped.clear();
+//	this->pedCMN.clear();
+//	this->pedSigma.clear();
+//	this->pedSigmaCMN.clear();
+//	this->rawSignal.clear();
+//	this->rawSignalCMN.clear();
+//	this->cmNoise = 0;
 	if(verbosity>10)cout<<"Copy constructor of TPlane:"<<rhs.xClusters.size()<<" "<<rhs.yClusters.size()<<endl;
 	for(UInt_t xCl=0;xCl<rhs.xClusters.size();xCl++){
 		TCluster xCluster=rhs.xClusters.at(xCl);
@@ -99,28 +99,28 @@ TPlane::TPlane(const TPlane& rhs){
 	}
 	this->type=rhs.type;
 	this->planeNo=rhs.planeNo;
-	for(UInt_t iadc = 0; iadc<rhs.adc.size(); iadc++) {
-		this->adc.push_back(rhs.adc.at(iadc));
-	}
-	for(UInt_t iped = 0; iped<rhs.ped.size(); iped++) {
-		this->ped.push_back(rhs.ped.at(iped));
-	}
-	for(UInt_t ipedCMN = 0; ipedCMN<rhs.pedCMN.size(); ipedCMN++) {
-		this->pedCMN.push_back(rhs.pedCMN.at(ipedCMN));
-	}
-	for(UInt_t ipedSigma = 0; ipedSigma<rhs.pedSigma.size(); ipedSigma++) {
-		this->pedSigma.push_back(rhs.pedSigma.at(ipedSigma));
-	}
-	for(UInt_t ipedSigmaCMN = 0; ipedSigmaCMN<rhs.pedSigmaCMN.size(); ipedSigmaCMN++) {
-		this->pedSigmaCMN.push_back(rhs.pedSigmaCMN.at(ipedSigmaCMN));
-	}
-	for(UInt_t irawSignal = 0; irawSignal<rhs.rawSignal.size(); irawSignal++) {
-		this->rawSignal.push_back(rhs.rawSignal.at(irawSignal));
-	}
-	for(UInt_t irawSignalCMN = 0; irawSignalCMN<rhs.rawSignalCMN.size(); irawSignalCMN++) {
-		this->rawSignalCMN.push_back(rhs.rawSignalCMN.at(irawSignalCMN));
-	}
-	this->cmNoise = rhs.cmNoise;
+//	for(UInt_t iadc = 0; iadc<rhs.adc.size(); iadc++) {
+//		this->adc.push_back(rhs.adc.at(iadc));
+//	}
+//	for(UInt_t iped = 0; iped<rhs.ped.size(); iped++) {
+//		this->ped.push_back(rhs.ped.at(iped));
+//	}
+//	for(UInt_t ipedCMN = 0; ipedCMN<rhs.pedCMN.size(); ipedCMN++) {
+//		this->pedCMN.push_back(rhs.pedCMN.at(ipedCMN));
+//	}
+//	for(UInt_t ipedSigma = 0; ipedSigma<rhs.pedSigma.size(); ipedSigma++) {
+//		this->pedSigma.push_back(rhs.pedSigma.at(ipedSigma));
+//	}
+//	for(UInt_t ipedSigmaCMN = 0; ipedSigmaCMN<rhs.pedSigmaCMN.size(); ipedSigmaCMN++) {
+//		this->pedSigmaCMN.push_back(rhs.pedSigmaCMN.at(ipedSigmaCMN));
+//	}
+//	for(UInt_t irawSignal = 0; irawSignal<rhs.rawSignal.size(); irawSignal++) {
+//		this->rawSignal.push_back(rhs.rawSignal.at(irawSignal));
+//	}
+//	for(UInt_t irawSignalCMN = 0; irawSignalCMN<rhs.rawSignalCMN.size(); irawSignalCMN++) {
+//		this->rawSignalCMN.push_back(rhs.rawSignalCMN.at(irawSignalCMN));
+//	}
+//	this->cmNoise = rhs.cmNoise;
 }
 
 /**
@@ -134,40 +134,40 @@ TPlane& TPlane::operator =(const TPlane &src){
 	planeNo=src.planeNo;
 	verbosity=src.verbosity;
 	xClusters.clear();
-	adc.clear();
-	ped.clear();
-	pedCMN.clear();
-	pedSigma.clear();
-	pedSigmaCMN.clear();
-	rawSignal.clear();
-	rawSignalCMN.clear();
+//	adc.clear();
+//	ped.clear();
+//	pedCMN.clear();
+//	pedSigma.clear();
+//	pedSigmaCMN.clear();
+//	rawSignal.clear();
+//	rawSignalCMN.clear();
 	for(UInt_t i=0;i<src.xClusters.size();i++)
 		xClusters.push_back(src.xClusters.at(i));
 	yClusters.clear();
 	for(UInt_t i=0;i<src.yClusters.size();i++)
 		yClusters.push_back(src.yClusters.at(i));
-	for(UInt_t iadc = 0; iadc<src.adc.size(); iadc++) {
-		adc.push_back(src.adc.at(iadc));
-	}
-	for(UInt_t iped = 0; iped<src.ped.size(); iped++) {
-		ped.push_back(src.ped.at(iped));
-	}
-	for(UInt_t ipedCMN = 0; ipedCMN<src.pedCMN.size(); ipedCMN++) {
-		pedCMN.push_back(src.pedCMN.at(ipedCMN));
-	}
-	for(UInt_t ipedSigma = 0; ipedSigma<src.pedSigma.size(); ipedSigma++) {
-		pedSigma.push_back(src.pedSigma.at(ipedSigma));
-	}
-	for(UInt_t ipedSigmaCMN = 0; ipedSigmaCMN<src.pedSigmaCMN.size(); ipedSigmaCMN++) {
-		pedSigmaCMN.push_back(src.pedSigmaCMN.at(ipedSigmaCMN));
-	}
-	for(UInt_t irawSignal = 0; irawSignal<src.rawSignal.size(); irawSignal++) {
-		rawSignal.push_back(src.rawSignal.at(irawSignal));
-	}
-	for(UInt_t irawSignalCMN = 0; irawSignalCMN<src.rawSignalCMN.size(); irawSignalCMN++) {
-		rawSignalCMN.push_back(src.rawSignalCMN.at(irawSignalCMN));
-	}
-	cmNoise = src.cmNoise;
+//	for(UInt_t iadc = 0; iadc<src.adc.size(); iadc++) {
+//		adc.push_back(src.adc.at(iadc));
+//	}
+//	for(UInt_t iped = 0; iped<src.ped.size(); iped++) {
+//		ped.push_back(src.ped.at(iped));
+//	}
+//	for(UInt_t ipedCMN = 0; ipedCMN<src.pedCMN.size(); ipedCMN++) {
+//		pedCMN.push_back(src.pedCMN.at(ipedCMN));
+//	}
+//	for(UInt_t ipedSigma = 0; ipedSigma<src.pedSigma.size(); ipedSigma++) {
+//		pedSigma.push_back(src.pedSigma.at(ipedSigma));
+//	}
+//	for(UInt_t ipedSigmaCMN = 0; ipedSigmaCMN<src.pedSigmaCMN.size(); ipedSigmaCMN++) {
+//		pedSigmaCMN.push_back(src.pedSigmaCMN.at(ipedSigmaCMN));
+//	}
+//	for(UInt_t irawSignal = 0; irawSignal<src.rawSignal.size(); irawSignal++) {
+//		rawSignal.push_back(src.rawSignal.at(irawSignal));
+//	}
+//	for(UInt_t irawSignalCMN = 0; irawSignalCMN<src.rawSignalCMN.size(); irawSignalCMN++) {
+//		rawSignalCMN.push_back(src.rawSignalCMN.at(irawSignalCMN));
+//	}
+//	cmNoise = src.cmNoise;
 	return *this;
 }
 
@@ -302,25 +302,25 @@ bool TPlane::hasInvalidReadout(){
 	return invalidReadout;
 }
 
-void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
-	this->adc.clear();
-	this->ped.clear();
-	this->pedCMN.clear();
-	this->pedSigma.clear();
-	this->pedSigmaCMN.clear();
-	this->rawSignal.clear();
-	this->rawSignalCMN.clear();
-	for (UInt_t ch = 0; ch < TPlaneProperties::getNChannelsDiamond(); ch++){
-		this->adc.push_back(eadc[ch]);
-		this->ped.push_back(eped[ch]);
-		this->pedCMN.push_back(epedCMN[ch]);
-		this->pedSigma.push_back(epedSigma[ch]);
-		this->pedSigmaCMN.push_back(epedSigmaCMN[ch]);
-		this->rawSignal.push_back(erawSignal[ch]);
-		this->rawSignalCMN.push_back(erawSignalCMN[ch]);
-	}
-	this->cmNoise = ecmNoise;
-}
+//void TPlane::SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise){
+//	this->adc.clear();
+//	this->ped.clear();
+//	this->pedCMN.clear();
+//	this->pedSigma.clear();
+//	this->pedSigmaCMN.clear();
+//	this->rawSignal.clear();
+//	this->rawSignalCMN.clear();
+//	for (UInt_t ch = 0; ch < TPlaneProperties::getNChannelsDiamond(); ch++){
+//		this->adc.push_back(eadc[ch]);
+//		this->ped.push_back(eped[ch]);
+//		this->pedCMN.push_back(epedCMN[ch]);
+//		this->pedSigma.push_back(epedSigma[ch]);
+//		this->pedSigmaCMN.push_back(epedSigmaCMN[ch]);
+//		this->rawSignal.push_back(erawSignal[ch]);
+//		this->rawSignalCMN.push_back(erawSignalCMN[ch]);
+//	}
+//	this->cmNoise = ecmNoise;
+//}
 
 void TPlane::Print(UInt_t level)
 {

@@ -35,12 +35,13 @@
 class TPlane:public TObject {
 public:
 
-	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();planeNo=0;verbosity=0;adc.clear();ped.clear();pedCMN.clear();pedSigma.clear();pedSigmaCMN.clear();rawSignal.clear();rawSignalCMN.clear();cmNoise=0;};
+//	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();planeNo=0;verbosity=0;adc.clear();ped.clear();pedCMN.clear();pedSigma.clear();pedSigmaCMN.clear();rawSignal.clear();rawSignalCMN.clear();cmNoise=0;};
+	TPlane(){type = TPlaneProperties::kUndefined;xClusters.clear();yClusters.clear();planeNo=0;verbosity=0;};
 
 	TPlane(UInt_t planeNo,vector<TCluster> xClusters, vector<TCluster> yClusters,TPlaneProperties::enumDetectorType type=TPlaneProperties::kSilicon);
 	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond);
 //	TPlane(UInt_t planeNo,vector<TCluster> xCluster,TPlaneProperties::enumDetectorType type=TPlaneProperties::kDiamond, Float_t ecmNoise);
-	TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise);
+//	TPlane(UInt_t planeNo,vector<TCluster> xCluster, TPlaneProperties::enumDetectorType type, UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise);
 	TPlane(const TPlane& rhs);//COPY Constructor
 	TPlane &operator=(const TPlane &src); //class assignment function
 	virtual ~TPlane();
@@ -60,15 +61,15 @@ public:
     void SetXClusters(vector<TCluster> xClusters);
     void SetYClusters(vector<TCluster> yClusters);
     bool hasInvalidReadout();
-	void SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise);
+//	void SetSignalValues(UShort_t *eadc, Float_t *eped, Float_t *epedCMN, Float_t *epedSigma, Float_t *epedSigmaCMN, Float_t *erawSignal, Float_t *erawSignalCMN, Float_t ecmNoise);
 private:
     TPlaneProperties::enumDetectorType type;
 	UInt_t planeNo;
 	UInt_t verbosity;
 	vector<TCluster> xClusters, yClusters;
-	vector<UShort_t> adc;
-	vector<Float_t> ped, pedCMN, pedSigma, pedSigmaCMN, rawSignal, rawSignalCMN;
-	Float_t cmNoise;
+//	vector<UShort_t> adc;
+//	vector<Float_t> ped, pedCMN, pedSigma, pedSigmaCMN, rawSignal, rawSignalCMN;
+//	Float_t cmNoise;
 //	vector<Int_t> ch;
     ClassDef(TPlane,10);
 };
