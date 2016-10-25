@@ -62,18 +62,18 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
                 //	    gStyle->SetPadRightMargin(0.15);
                 if(gStyle->GetPadTopMargin()!=0.15) gStyle->SetPadTopMargin(0.15);
                 //gStyle->SetTitleColor(19,"");
-                gStyle->SetPalette(53);
+                gStyle->SetPalette(55); // kRainBow. Before it was 53 that is kDarkBodyRadiator
                 currentStyle= (TStyle*)gStyle->Clone("Plain_RD42");
-                currentStyle->SetPalette(53);
+                currentStyle->SetPalette(55); // kRainBow. Before it was 53 that is kDarkBodyRadiator
                 currentStyle2D= (TStyle*)currentStyle->Clone("Plain_RD42_2D");
                 currentStyle2D->SetOptStat("ne");
-                currentStyle2D ->SetPalette(53);
+                currentStyle2D ->SetPalette(55); // kRainBow. Before it was 53 that is kDarkBodyRadiator
                 currentStyle->cd();
                 //				gROOT->SetStyle("Plain_RD42");
             }
         }
 //    if (paperMode) gStyle->SetOptTitle(false);
-    gStyle->SetPalette(53); //
+    gStyle->SetPalette(55); // kRainBow. Before it was 53 that is kDarkBodyRadiator //
     SetPaperPlotStyle();
     if(verbosity)cout<<"HistogrammSaver::HistogrammSaver::Created instance of HistogrammSaver"<<endl;
     gErrorIgnoreLevel=3001;
@@ -1240,7 +1240,7 @@ void HistogrammSaver::SaveNegativeChargeOverlay(TH2* prof) {
     this->SaveOverlay(prof);
     prof->SetName("ch_"+name);
     this->SaveHistogram(prof,true,false);
-    gStyle->SetPalette(53); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+    gStyle->SetPalette(55); // kRainBow. Before it was 53 that is kDarkBodyRadiator // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
     prof->SetName(name);
     prof->SetMinimum(min);
     prof->SetMaximum(max);
@@ -2394,7 +2394,7 @@ void HistogrammSaver::SetDuckStyle() {
     DuckStyle->SetStatX(0.9);
     DuckStyle->SetStatY(0.97);
     DuckStyle->SetTitleOffset(1.0,"Y");
-    DuckStyle->SetPalette(53); // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
+    DuckStyle->SetPalette(55); // kRainBow. Before it was 53 that is kDarkBodyRadiator // determines the colors of temperature plots (use 1 for standard rainbow; 8 for greyscale)
     DuckStyle->SetCanvasBorderMode(0);
     DuckStyle->SetTitleFont(42,"XYZ");
     DuckStyle->SetTitleFontSize(0.038);

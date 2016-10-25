@@ -93,7 +93,7 @@ public:
     TProfile* CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
     TProfile* CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
     void Save1DProfileWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
-	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true,TString drawOption ="colz");
+	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=false,TString drawOption ="colz");
 	void SaveOverlay(TH2* histo,TString drawOption ="colz");
 	TH1F* SaveProjectionZ(TH2* histo,bool isOverlay=true,bool doFit=true,Float_t minX=1,Float_t maxX = 0, Int_t nBins=50);
 	TH1F* GetBinsInHistogram(TH2* histo, UInt_t nBins=512);
