@@ -441,14 +441,20 @@ void TTransparentAnalysis::initHistograms() {
     hLandau2HighestMP = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMP","hDiaTranspAnaPulseHeightOf2HighestMP",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
     hPredictedPositionInStrip = new TH1F("hPredictedPositionInStrip","hPredictedPositionInStrip",2,-1.5,1.5);
 
-	hSignalInSNR_Centroid2Strips_Dia              = new TH2F("hSignalInSNR_Centroid2Strips_Dia"       , "hSignalInSNR_Centroid2Strips_Dia"       , 300, 0., 300., 150, 0., 150.);
-	hSignalInSNR_Centroid2Strips_Dia_cmnCor       = new TH2F("hSignalInSNR_Centroid2Strips_Dia_cmnCor", "hSignalInSNR_Centroid2Strips_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
-	hSignalInSNR_Centroid2StripsSorted_Dia        = new TH2F("hSignalInSNR_Centroid2StripsSorted_Dia"       , "hSignalInSNR_Centroid2StripsSorted_Dia"       , 300, 0., 300., 150, 0., 150.);
-	hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor = new TH2F("hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor", "hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
-	hSignalInSNR_TrackStripLeft_Dia               = new TH2F("hSignalInSNR_TrackStripLeft_Dia"       , "hSignalInSNR_TrackStripLeft_Dia"       , 300, 0., 300., 150, 0., 150.);
-	hSignalInSNR_TrackStripLeft_Dia_cmnCor        = new TH2F("hSignalInSNR_TrackStripLeft_Dia_cmnCor", "hSignalInSNR_TrackStripLeft_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
-	hSignalInSNR_TrackStripRight_Dia              = new TH2F("hSignalInSNR_TrackStripRight_Dia"       , "hSignalInSNR_TrackStripRight_Dia"       , 300, 0., 300., 150, 0., 150.);
-	hSignalInSNR_TrackStripRight_Dia_cmnCor       = new TH2F("hSignalInSNR_TrackStripRight_Dia_cmnCor", "hSignalInSNR_TrackStripRight_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
+	UInt_t snr_nbinsx = 600;
+	Float_t snr_xmin  = 0.;
+	Float_t snr_xmax  = 300.;
+	UInt_t snr_nbinsy = 300;
+	Float_t snr_ymin  = 0.;
+	Float_t snr_ymax  = 150.;
+	hSignalInSNR_Centroid2Strips_Dia              = new TH2F("hSignalInSNR_Centroid2Strips_Dia"             , "hSignalInSNR_Centroid2Strips_Dia"             , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+	hSignalInSNR_Centroid2Strips_Dia_cmnCor       = new TH2F("hSignalInSNR_Centroid2Strips_Dia_cmnCor"      , "hSignalInSNR_Centroid2Strips_Dia_cmnCor"      , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+	hSignalInSNR_Centroid2StripsSorted_Dia        = new TH2F("hSignalInSNR_Centroid2StripsSorted_Dia"       , "hSignalInSNR_Centroid2StripsSorted_Dia"       , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+	hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor = new TH2F("hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor", "hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor", snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+	hSignalInSNR_TrackStripLeft_Dia               = new TH2F("hSignalInSNR_TrackStripLeft_Dia"              , "hSignalInSNR_TrackStripLeft_Dia"              , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+	hSignalInSNR_TrackStripLeft_Dia_cmnCor        = new TH2F("hSignalInSNR_TrackStripLeft_Dia_cmnCor"       , "hSignalInSNR_TrackStripLeft_Dia_cmnCor"       , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+	hSignalInSNR_TrackStripRight_Dia              = new TH2F("hSignalInSNR_TrackStripRight_Dia"             , "hSignalInSNR_TrackStripRight_Dia"             , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+	hSignalInSNR_TrackStripRight_Dia_cmnCor       = new TH2F("hSignalInSNR_TrackStripRight_Dia_cmnCor"      , "hSignalInSNR_TrackStripRight_Dia_cmnCor"      , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
 }
 
 void TTransparentAnalysis::fillClusteredHistos(){
