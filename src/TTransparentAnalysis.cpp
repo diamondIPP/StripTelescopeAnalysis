@@ -2170,7 +2170,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
 void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
     cout<<"initPedestalHistos"<<flush;
     UInt_t start = settings->getAlignmentEvents(maxEvents);
-    UInt_t nBins = (maxEvents-start)/20000;
+    UInt_t nBins = (maxEvents-start)/10000;
     for(UInt_t ch = 0; ch< TPlaneProperties::getNChannelsDiamond();ch++){
         if(settings->IsMasked(subjectDetector,ch))
             continue;
@@ -2734,7 +2734,7 @@ void TTransparentAnalysis::saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TSt
 
 void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
     cout<<"initPHvsEventNoAreaPlots"<<flush;
-    Int_t nentriesPerBin = 20000;
+    Int_t nentriesPerBin = 10000;
     UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
     if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
     if (nBins==0)nBins=1;
@@ -2772,7 +2772,7 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
 }
 
 void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvents) {
-    Int_t nBins = (maxEvents-startEvent)/20000;
+    Int_t nBins = (maxEvents-startEvent)/10000;
     Float_t min = 0;
     Float_t max = settings->getPulse_height_max(subjectDetector);
     Int_t bins = settings->getPulse_height_num_bins();
