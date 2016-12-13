@@ -200,6 +200,15 @@ private:
 	TH1F* hLandauMean;
 	TH1F* hLandauMP;
 	TH1F* hPredictedPositionInStrip;
+
+	TH2F* hSignalInSNR_Centroid2Strips_Dia;
+	TH2F* hSignalInSNR_Centroid2Strips_Dia_cmnCor;
+	TH2F* hSignalInSNR_Centroid2StripsSorted_Dia;
+	TH2F* hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor;
+	TH2F* hSignalInSNR_TrackStripLeft_Dia;
+	TH2F* hSignalInSNR_TrackStripLeft_Dia_cmnCor;
+	TH2F* hSignalInSNR_TrackStripRight_Dia;
+	TH2F* hSignalInSNR_TrackStripRight_Dia_cmnCor;
 	
 	vector<TH1F*> hLandau2Highest;
 	vector<TH1F*> hLandau2Highest_nonCMC;

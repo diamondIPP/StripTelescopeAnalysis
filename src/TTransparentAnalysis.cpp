@@ -440,6 +440,15 @@ void TTransparentAnalysis::initHistograms() {
     hLandau2HighestMean = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMean","hDiaTranspAnaPulseHeightOf2HighestMean",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
     hLandau2HighestMP = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMP","hDiaTranspAnaPulseHeightOf2HighestMP",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
     hPredictedPositionInStrip = new TH1F("hPredictedPositionInStrip","hPredictedPositionInStrip",2,-1.5,1.5);
+
+	hSignalInSNR_Centroid2Strips_Dia              = new TH2F("hSignalInSNR_Centroid2Strips_Dia"       , "hSignalInSNR_Centroid2Strips_Dia"       , 300, 0., 300., 150, 0., 150.);
+	hSignalInSNR_Centroid2Strips_Dia_cmnCor       = new TH2F("hSignalInSNR_Centroid2Strips_Dia_cmnCor", "hSignalInSNR_Centroid2Strips_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
+	hSignalInSNR_Centroid2StripsSorted_Dia        = new TH2F("hSignalInSNR_Centroid2StripsSorted_Dia"       , "hSignalInSNR_Centroid2StripsSorted_Dia"       , 300, 0., 300., 150, 0., 150.);
+	hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor = new TH2F("hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor", "hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
+	hSignalInSNR_TrackStripLeft_Dia               = new TH2F("hSignalInSNR_TrackStripLeft_Dia"       , "hSignalInSNR_TrackStripLeft_Dia"       , 300, 0., 300., 150, 0., 150.);
+	hSignalInSNR_TrackStripLeft_Dia_cmnCor        = new TH2F("hSignalInSNR_TrackStripLeft_Dia_cmnCor", "hSignalInSNR_TrackStripLeft_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
+	hSignalInSNR_TrackStripRight_Dia              = new TH2F("hSignalInSNR_TrackStripRight_Dia"       , "hSignalInSNR_TrackStripRight_Dia"       , 300, 0., 300., 150, 0., 150.);
+	hSignalInSNR_TrackStripRight_Dia_cmnCor       = new TH2F("hSignalInSNR_TrackStripRight_Dia_cmnCor", "hSignalInSNR_TrackStripRight_Dia_cmnCor", 300, 0., 300., 150, 0., 150.);
 }
 
 void TTransparentAnalysis::fillClusteredHistos(){
@@ -482,6 +491,30 @@ void TTransparentAnalysis::fillHistograms() {
     UInt_t area = GetHitArea(settings,eventReader->getFiducialValueX(),eventReader->getFiducialValueY(),xDivisions,yDivisions);
     UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
     fillClusteredHistos();
+    UInt_t firstChannel;
+    int direction;
+    direction = getSignedChannelNumber(positionInDetSystemChannelSpace);
+    firstChannel = TMath::Abs(direction);
+    if (direction < 0) direction = -1;
+    else               direction = 1;
+	UInt_t secondChannel;
+	secondChannel = firstChannel + direction;
+	Float_t snr_first         = eventReader->getSignalInSigma(subjectDetector, firstChannel  , false);
+	Float_t snr_first_cmnCor  = eventReader->getSignalInSigma(subjectDetector, firstChannel  , true );
+	Float_t snr_second        = eventReader->getSignalInSigma(subjectDetector, secondChannel , false);
+	Float_t snr_second_cmnCor = eventReader->getSignalInSigma(subjectDetector, secondChannel , true );
+	Float_t snr_left          = eventReader->getSignalInSigma(subjectDetector, firstChannel-1, false);
+	Float_t snr_left_cmnCor   = eventReader->getSignalInSigma(subjectDetector, firstChannel-1, true );
+	Float_t snr_right         = eventReader->getSignalInSigma(subjectDetector, firstChannel+1, false);
+	Float_t snr_right_cmnCor  = eventReader->getSignalInSigma(subjectDetector, firstChannel+1, true );
+	hSignalInSNR_Centroid2Strips_Dia       ->Fill(snr_first       , snr_second       );
+	hSignalInSNR_Centroid2Strips_Dia_cmnCor->Fill(snr_first_cmnCor, snr_second_cmnCor);
+	hSignalInSNR_Centroid2StripsSorted_Dia       ->Fill(TMath::Max(snr_first       , snr_second       ), TMath::Min(snr_first       , snr_second       ));
+	hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor->Fill(TMath::Max(snr_first_cmnCor, snr_second_cmnCor), TMath::Min(snr_first_cmnCor, snr_second_cmnCor));
+	hSignalInSNR_TrackStripLeft_Dia        ->Fill(snr_first       , snr_left        );
+	hSignalInSNR_TrackStripLeft_Dia_cmnCor ->Fill(snr_first_cmnCor, snr_left_cmnCor );
+	hSignalInSNR_TrackStripRight_Dia       ->Fill(snr_first       , snr_right       );
+	hSignalInSNR_TrackStripRight_Dia_cmnCor->Fill(snr_first_cmnCor, snr_right_cmnCor);
     for (UInt_t clusterSize = 0; clusterSize < maxSize; clusterSize++) {
         transparentClusters.SetTransparentClusterSize(clusterSize+1);
         Float_t charge = this->transparentClusters.getCharge(cmCorrected);
@@ -1572,6 +1605,14 @@ void TTransparentAnalysis::saveHistograms() {
     histSaver->SaveHistogram(hLandauMP);
     histSaver->SaveHistogram(hLandau2HighestMean);
     histSaver->SaveHistogram(hLandau2HighestMP);
+	histSaver->SaveHistogram(hSignalInSNR_Centroid2Strips_Dia             );
+	histSaver->SaveHistogram(hSignalInSNR_Centroid2Strips_Dia_cmnCor      );
+	histSaver->SaveHistogram(hSignalInSNR_Centroid2StripsSorted_Dia       );
+	histSaver->SaveHistogram(hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor);
+	histSaver->SaveHistogram(hSignalInSNR_TrackStripLeft_Dia              );
+	histSaver->SaveHistogram(hSignalInSNR_TrackStripLeft_Dia_cmnCor       );
+	histSaver->SaveHistogram(hSignalInSNR_TrackStripRight_Dia             );
+	histSaver->SaveHistogram(hSignalInSNR_TrackStripRight_Dia_cmnCor      );
     Float_t pw = settings->getPitchWidth(subjectDetector);
     for(UInt_t i=0;i<TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);i++){
         string name = (string)TString::Format("hRelPosVsResolutionEtaCorrectedIn%d",i+1);
@@ -1714,6 +1755,14 @@ void TTransparentAnalysis::deleteHistograms() {
     delete hLandauMP;
     delete hLandau2HighestMean;
     delete hLandau2HighestMP;
+	delete hSignalInSNR_Centroid2Strips_Dia             ;
+	delete hSignalInSNR_Centroid2Strips_Dia_cmnCor      ;
+	delete hSignalInSNR_Centroid2StripsSorted_Dia       ;
+	delete hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor;
+	delete hSignalInSNR_TrackStripLeft_Dia              ;
+	delete hSignalInSNR_TrackStripLeft_Dia_cmnCor       ;
+	delete hSignalInSNR_TrackStripRight_Dia             ;
+	delete hSignalInSNR_TrackStripRight_Dia_cmnCor      ;
 }
 
 void TTransparentAnalysis::deleteFits() {
