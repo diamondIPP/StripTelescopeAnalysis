@@ -471,15 +471,13 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("NStrips"             , &trTree_NStrips             , "NStrips/I"                      );
 	transparentTree->Branch("CenterStrip"         , &trTree_CenterStrip         , "CenterStrip/I"                  );
 	transparentTree->Branch("CMN"                 , &trTree_CMN                 , "CMN/F"                          );
-	for (int i = 0; i < trTree_nMaxStrips; i++){
-		transparentTree->Branch(TString::Format("ADC%d"                 , i), &trTree_ADC                 [i], TString::Format("ADC%d/F"                 , i));
-		transparentTree->Branch(TString::Format("Pedestal%d"            , i), &trTree_Pedestal            [i], TString::Format("Pedestal%d/F"            , i));
-		transparentTree->Branch(TString::Format("PedestalSigma%d"       , i), &trTree_PedestalSigma       [i], TString::Format("PedestalSigma%d/F"       , i));
-		transparentTree->Branch(TString::Format("Signal%d"              , i), &trTree_Signal              [i], TString::Format("Signal%d/F"              , i));
-		transparentTree->Branch(TString::Format("PedestalCMNcorr%d"     , i), &trTree_PedestalCMNcorr     [i], TString::Format("PedestalCMNcorr%d/F"     , i));
-		transparentTree->Branch(TString::Format("PedestalSigmaCMNcorr%d", i), &trTree_PedestalSigmaCMNcorr[i], TString::Format("PedestalSigmaCMNcorr%d/F", i));
-		transparentTree->Branch(TString::Format("SignalCMNcorr%d"       , i), &trTree_SignalCMNcorr       [i], TString::Format("SignalCMNcorr%d/F"       , i));
-	}
+	transparentTree->Branch("ADC"                 , &trTree_ADC                 , "ADC[10]/F"                 );
+	transparentTree->Branch("Pedestal"            , &trTree_Pedestal            , "Pedestal[10]/F"            );
+	transparentTree->Branch("PedestalSigma"       , &trTree_PedestalSigma       , "PedestalSigma[10]/F"       );
+	transparentTree->Branch("Signal"              , &trTree_Signal              , "Signal[10]/F"              );
+	transparentTree->Branch("PedestalCMNcor"      , &trTree_PedestalCMNcorr     , "PedestalCMNcor[10]/F"      );
+	transparentTree->Branch("PedestalSigmaCMNcor" , &trTree_PedestalSigmaCMNcorr, "PedestalSigmaCMNcor[10]/F" );
+	transparentTree->Branch("SignalCMNcor"        , &trTree_SignalCMNcorr       , "SignalCMNcor[10]/F"        );
 }
 
 void TTransparentAnalysis::resetTransparentTree(){
