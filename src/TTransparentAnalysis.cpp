@@ -60,13 +60,14 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 TTransparentAnalysis::~TTransparentAnalysis() {
     // TODO Auto-generated destructor stub
     cout<<"\n\nClosing TTransparentAnalysis"<<endl;
-	writeTransparentTree();
     analyseNonHitEvents();
     fitHistograms();
     saveHistograms();
     deleteHistograms();
     deleteFits();
+	writeTransparentTree();
 //	delete transparentTree;
+	delete transparentTreeFile;
 
     vector<vector <Float_t> > meanPulseHeights;
     vector<vector <Float_t> > mpPulseHeights;
