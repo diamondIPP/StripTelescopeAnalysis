@@ -184,11 +184,11 @@ private:
 	void fillTransparentTree();
 	void writeTransparentTree();
 	TTree* transparentTree;
-	int     trTree_RunNumber;
-	int     trTree_Event;
-	int     trTree_Direction;
-	int     trTree_NStrips;
-	int     trTree_CenterStrip;
+	Int_t   trTree_RunNumber;
+	Int_t   trTree_Event;
+	Int_t   trTree_Direction;
+	Int_t   trTree_NStrips;
+	Int_t   trTree_CenterStrip;
 	Float_t trTree_ADC                 [10];
 	Float_t trTree_Pedestal            [10];
 	Float_t trTree_PedestalSigma       [10];
