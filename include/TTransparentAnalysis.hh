@@ -183,6 +183,7 @@ private:
 	void resetTransparentTree();
 	void fillTransparentTree();
 	void writeTransparentTree();
+	TFile* transparentTreeFile;
 	TTree* transparentTree;
 	Int_t   trTree_RunNumber;
 	Int_t   trTree_Event;

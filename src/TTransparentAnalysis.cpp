@@ -66,7 +66,7 @@ TTransparentAnalysis::~TTransparentAnalysis() {
     saveHistograms();
     deleteHistograms();
     deleteFits();
-	delete transparentTree;
+//	delete transparentTree;
 
     vector<vector <Float_t> > meanPulseHeights;
     vector<vector <Float_t> > mpPulseHeights;
@@ -461,6 +461,9 @@ void TTransparentAnalysis::initHistograms() {
 }
 
 void TTransparentAnalysis::bookTransparentTree(){
+	TString treeFileName = histSaver->GetROOTFileName("TransparentTree");
+	transparentTreeFile = new TFile(treeFileName, "RECREATE");
+	transparentTreeFile->cd();
 	transparentTree = new TTree("TransparentEvents", "TransparentTree");
 	transparentTree->Branch("RunNumber"           , &trTree_RunNumber           , "RunNumber/I"                    );
 	transparentTree->Branch("Event"               , &trTree_Event               , "Event/I"                        );
@@ -527,11 +530,13 @@ void TTransparentAnalysis::fillTransparentTree(){
 }
 
 void TTransparentAnalysis::writeTransparentTree(){
-	TString treeFileName = histSaver->GetROOTFileName("TransparentTree");
-	TFile file(treeFileName, "RECREATE");
-	file.cd();
-	transparentTree->Write("TransparentEvents", TObject::kWriteDelete);
-	file.Close();
+	cout << "writing transparent tree..";
+	transparentTreeFile->cd();
+//	transparentTree->Write("TransparentEvents", TObject::kWriteDelete);
+	transparentTree->Write();
+	transparentTree->Delete();
+	transparentTreeFile->Close();
+	cout << " done.\n";
 }
 
 void TTransparentAnalysis::fillClusteredHistos(){
