@@ -177,6 +177,27 @@ private:
 	vector< Float_t> vecRelatedEta10;
 	vector< Float_t> vecRelatedResXEtaCorrected;
 
+	// transparent results tree
+	static const int trTree_nMaxStrips = 10;
+	void bookTransparentTree();
+	void resetTransparentTree();
+	void fillTransparentTree();
+	void writeTransparentTree();
+	TTree* transparentTree;
+	int     trTree_RunNumber;
+	int     trTree_Event;
+	int     trTree_Direction;
+	int     trTree_NStrips;
+	int     trTree_CenterStrip;
+	Float_t trTree_ADC                 [10];
+	Float_t trTree_Pedestal            [10];
+	Float_t trTree_PedestalSigma       [10];
+	Float_t trTree_Signal              [10];
+	Float_t trTree_CMN;
+	Float_t trTree_PedestalCMNcorr     [10];
+	Float_t trTree_PedestalSigmaCMNcorr[10];
+	Float_t trTree_SignalCMNcorr       [10];
+
 	Float_t inf;
 	// histograms
 	vector<TH1F*> hLandau;

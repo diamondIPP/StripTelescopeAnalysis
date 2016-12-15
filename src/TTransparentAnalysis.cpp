@@ -60,11 +60,13 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
 TTransparentAnalysis::~TTransparentAnalysis() {
     // TODO Auto-generated destructor stub
     cout<<"\n\nClosing TTransparentAnalysis"<<endl;
+	writeTransparentTree();
     analyseNonHitEvents();
     fitHistograms();
     saveHistograms();
     deleteHistograms();
     deleteFits();
+	delete transparentTree;
 
     vector<vector <Float_t> > meanPulseHeights;
     vector<vector <Float_t> > mpPulseHeights;
@@ -101,6 +103,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         char t;
         cin >>t;
     }
+	bookTransparentTree();
     predXMin = predYMin = 1e9;
     predXMax = predYMax = -1e9;
     //	usedForSiliconAlignment = 0;
@@ -455,6 +458,80 @@ void TTransparentAnalysis::initHistograms() {
 	hSignalInSNR_TrackStripLeft_Dia_cmnCor        = new TH2F("hSignalInSNR_TrackStripLeft_Dia_cmnCor"       , "hSignalInSNR_TrackStripLeft_Dia_cmnCor"       , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
 	hSignalInSNR_TrackStripRight_Dia              = new TH2F("hSignalInSNR_TrackStripRight_Dia"             , "hSignalInSNR_TrackStripRight_Dia"             , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
 	hSignalInSNR_TrackStripRight_Dia_cmnCor       = new TH2F("hSignalInSNR_TrackStripRight_Dia_cmnCor"      , "hSignalInSNR_TrackStripRight_Dia_cmnCor"      , snr_nbinsx, snr_xmin, snr_xmax, snr_nbinsy, snr_ymin, snr_ymax);
+}
+
+void TTransparentAnalysis::bookTransparentTree(){
+	transparentTree = new TTree("TransparentEvents", "TransparentTree");
+	transparentTree->Branch("RunNumber"           , &trTree_RunNumber           , "RunNumber/I"                    );
+	transparentTree->Branch("Event"               , &trTree_Event               , "Event/I"                        );
+	transparentTree->Branch("Direction"           , &trTree_Direction           , "Direction/I"                    );
+	transparentTree->Branch("NStrips"             , &trTree_NStrips             , "NStrips/I"                      );
+	transparentTree->Branch("CenterStrip"         , &trTree_CenterStrip         , "CenterStrip/I"                  );
+	transparentTree->Branch("CMN"                 , &trTree_CMN                 , "CMN/F"                          );
+	for (int i = 0; i < trTree_nMaxStrips; i++){
+		transparentTree->Branch(TString::Format("ADC%d"                 , i), &trTree_ADC                 [i], TString::Format("ADC%d/F"                 , i));
+		transparentTree->Branch(TString::Format("Pedestal%d"            , i), &trTree_Pedestal            [i], TString::Format("Pedestal%d/F"            , i));
+		transparentTree->Branch(TString::Format("PedestalSigma%d"       , i), &trTree_PedestalSigma       [i], TString::Format("PedestalSigma%d/F"       , i));
+		transparentTree->Branch(TString::Format("Signal%d"              , i), &trTree_Signal              [i], TString::Format("Signal%d/F"              , i));
+		transparentTree->Branch(TString::Format("PedestalCMNcorr%d"     , i), &trTree_PedestalCMNcorr     [i], TString::Format("PedestalCMNcorr%d/F"     , i));
+		transparentTree->Branch(TString::Format("PedestalSigmaCMNcorr%d", i), &trTree_PedestalSigmaCMNcorr[i], TString::Format("PedestalSigmaCMNcorr%d/F", i));
+		transparentTree->Branch(TString::Format("SignalCMNcorr%d"       , i), &trTree_SignalCMNcorr       [i], TString::Format("SignalCMNcorr%d/F"       , i));
+	}
+}
+
+void TTransparentAnalysis::resetTransparentTree(){
+	trTree_RunNumber   = -999;
+	trTree_Event       = -999;
+	trTree_Direction   = -999;
+	trTree_NStrips     = trTree_nMaxStrips;
+	trTree_CenterStrip = -999;
+	trTree_CMN         = -999.;
+	for (int i = 0; i < trTree_nMaxStrips; i++){
+		trTree_ADC                 [i] = -999.;
+		trTree_Pedestal            [i] = -999.;
+		trTree_PedestalSigma       [i] = -999.;
+		trTree_Signal              [i] = -999.;
+		trTree_PedestalCMNcorr     [i] = -999.;
+		trTree_PedestalSigmaCMNcorr[i] = -999.;
+		trTree_SignalCMNcorr       [i] = -999.;
+	}
+}
+
+void TTransparentAnalysis::fillTransparentTree(){
+	resetTransparentTree();
+    UInt_t firstChannel;
+    int direction;
+    direction = getSignedChannelNumber(positionInDetSystemChannelSpace);
+    firstChannel = TMath::Abs(direction);
+    if (direction < 0) direction = -1;
+    else               direction = 1;
+	trTree_RunNumber   = settings->getRunNumber();
+	trTree_Event       = nEvent;
+	trTree_Direction   = direction;
+	trTree_NStrips     = trTree_nMaxStrips;
+	trTree_CenterStrip = firstChannel;
+	trTree_CMN         = eventReader->getCMNoise(subjectDetector);
+	int channel_it = firstChannel;
+	for (int i = 0; i < trTree_nMaxStrips; i++){
+		direction *= -1;
+		channel_it += direction * i;
+		trTree_ADC                 [i] = eventReader->getAdcValue     (subjectDetector, channel_it              );
+		trTree_Pedestal            [i] = eventReader->getPedestalMean (subjectDetector, channel_it, false       );
+		trTree_PedestalSigma       [i] = eventReader->getPedestalSigma(subjectDetector, channel_it, false       );
+		trTree_Signal              [i] = eventReader->getSignal       (subjectDetector, channel_it, false, false);
+		trTree_PedestalCMNcorr     [i] = eventReader->getPedestalMean (subjectDetector, channel_it, true        );
+		trTree_PedestalSigmaCMNcorr[i] = eventReader->getPedestalSigma(subjectDetector, channel_it, true        );
+		trTree_SignalCMNcorr       [i] = eventReader->getSignal       (subjectDetector, channel_it, true , false);
+	}
+	transparentTree->Fill();
+}
+
+void TTransparentAnalysis::writeTransparentTree(){
+	TString treeFileName = histSaver->GetROOTFileName("TransparentTree");
+	TFile file(treeFileName, "RECREATE");
+	file.cd();
+	transparentTree->Write("TransparentEvents", TObject::kWriteDelete);
+	file.Close();
 }
 
 void TTransparentAnalysis::fillClusteredHistos(){
@@ -1969,6 +2046,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         //		cout<<"analyse("<<nEvent<<");"<<endl;
         nAnalyzedEvents++;
         this->fillHistograms();
+		this->fillTransparentTree();
         if (verbosity > 4) printEvent();
         //		cout<<"push Back("<<nEvent<<");"<<endl;
 
