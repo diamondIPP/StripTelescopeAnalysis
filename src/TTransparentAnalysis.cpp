@@ -166,7 +166,7 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
     //	vecChi2.clear();
     UInt_t maxSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
     for (UInt_t iEvent = 0; iEvent < eventNumbers.size(); iEvent++) {
-        TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
+//        TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
         nEvent = eventNumbers.at(iEvent);
         eventReader->LoadEvent(nEvent);
         if(!this->predictPositions(false))
@@ -1980,7 +1980,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
     cout<<"Rundes: "<<settings->getRunDescription()<<"\tIndex: "<<settings->getSelectionFidCuts()->getActiveIndex()<<endl;
     cout<<"Creating  Event Vector "<<endl;
     for (nEvent = startEvent; nEvent < nEvents; nEvent++) {
-        TRawEventSaver::showStatusBar(nEvent,nEvents,100);
+//        TRawEventSaver::showStatusBar(nEvent,nEvents,100);
         //		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
         if (settings->useForAlignment(nEvent,nEvents)){
             usedForAlignment++;
