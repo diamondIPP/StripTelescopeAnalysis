@@ -467,6 +467,8 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTreeFile->cd();
 	transparentTree = new TTree("TransparentEvents", "TransparentTree");
 	transparentTree->Branch("RunNumber"           , &trTree_RunNumber           , "RunNumber/I"                    );
+	transparentTree->Branch("SeedTHR"             , &trTree_tseed               , "SeedTHR/F"                      );
+	transparentTree->Branch("HitTHR"              , &trTree_thit                , "HitTHR/F"                       );
 	transparentTree->Branch("Event"               , &trTree_Event               , "Event/I"                        );
 	transparentTree->Branch("Direction"           , &trTree_Direction           , "Direction/I"                    );
 	transparentTree->Branch("NStrips"             , &trTree_NStrips             , "NStrips/I"                      );
@@ -483,6 +485,8 @@ void TTransparentAnalysis::bookTransparentTree(){
 
 void TTransparentAnalysis::resetTransparentTree(){
 	trTree_RunNumber   = -999;
+	trTree_tseed       = -999.;
+	trTree_thit        = -999.;
 	trTree_Event       = -999;
 	trTree_Direction   = -999;
 	trTree_NStrips     = trTree_nMaxStrips;
@@ -508,6 +512,8 @@ void TTransparentAnalysis::fillTransparentTree(){
     if (direction < 0) direction = -1;
     else               direction = 1;
 	trTree_RunNumber   = settings->getRunNumber();
+	trTree_tseed       = settings->getClusterSeedFactor(subjectDetector, 0);
+	trTree_thit        = settings->getClusterHitFactor (subjectDetector, 0);
 	trTree_Event       = nEvent;
 	trTree_Direction   = direction;
 	trTree_NStrips     = trTree_nMaxStrips;

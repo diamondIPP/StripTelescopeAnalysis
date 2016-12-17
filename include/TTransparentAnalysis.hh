@@ -186,6 +186,8 @@ private:
 	TFile* transparentTreeFile;
 	TTree* transparentTree;
 	Int_t   trTree_RunNumber;
+	Float_t trTree_tseed;
+	Float_t trTree_thit;
 	Int_t   trTree_Event;
 	Int_t   trTree_Direction;
 	Int_t   trTree_NStrips;
