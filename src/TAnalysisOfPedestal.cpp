@@ -500,11 +500,11 @@ void TAnalysisOfPedestal::initialiseHistos()
         histoTitle<<"Noise Distribution  of all non hit channels in Plane"<<TPlaneProperties::getStringForDetector(det);
         xTitle<<"non hit Noise (Adc-Ped.) in ADC counts";
         yTitle<<"Number of Entries #";
-        Float_t width = 8;
-        UInt_t nBins =64;
+        Float_t width = settings->getNoise_si_max     ();
+        UInt_t nBins  = settings->getNoise_si_num_bins();
         if (det==TPlaneProperties::getDetDiamond()){
-            width = 32;
-            nBins=128;
+            width = settings->getNoise_di_max     ();
+            nBins = settings->getNoise_di_num_bins();
         }
         if(TPlaneProperties::isSiliconDetector(det)){
             hAllAdcNoise[det]= new TH1F(histoName.str().c_str(),histoTitle.str().c_str(),nBins,(-1)*width,width);

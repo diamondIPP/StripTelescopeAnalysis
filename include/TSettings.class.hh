@@ -155,6 +155,10 @@ public:
 	Int_t getPulse_height_num_bins() const;
 	Float_t getPulse_height_si_max() const;
 	Float_t getPulse_height_max(UInt_t det) const;
+	Int_t   getNoise_si_num_bins() const;
+	Float_t getNoise_si_max     () const;
+	Int_t   getNoise_di_num_bins() const;
+	Float_t getNoise_di_max     () const;
 	Int_t getSaveAllFilesSwitch() const;
 	Float_t getSnr_distribution_di_max() const;
 	Float_t getSnr_distribution_si_max() const;
@@ -217,6 +221,10 @@ public:
 	void setPulse_height_di_max(Float_t pulse_height_di_max);
 	void setPulse_height_num_bins(Int_t pulse_height_num_bins);
 	void setPulse_height_si_max(Float_t pulse_height_si_max);
+	void setNoise_si_num_bins(Int_t   noise_si_num_bins);
+	void setNoise_si_max     (Float_t noise_si_max     );
+	void setNoise_di_num_bins(Int_t   noise_di_num_bins);
+	void setNoise_di_max     (Float_t noise_di_max     );
 	void setSaveAllFilesSwitch(Int_t SaveAllFilesSwitch);
 	void setSnr_distribution_di_max(Float_t snr_distribution_di_max);
 	void setSnr_distribution_si_max(Float_t snr_distribution_si_max);
@@ -450,6 +458,10 @@ private:
 	Float_t pulse_height_di_max;
 	Float_t snr_distribution_si_max;
 	Float_t snr_distribution_di_max;
+	Int_t   noise_si_num_bins;
+	Float_t noise_si_max;
+	Int_t   noise_di_num_bins;
+	Float_t noise_di_max;
 	Float_t eta_lowq_slice_low;
 	Float_t eta_lowq_slice_hi;
 	Float_t eta_hiq_slice_low;

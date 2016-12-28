@@ -503,6 +503,10 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"pulse_height_num_bins")) ParseInt(key,value,pulse_height_num_bins);
 		if (TPlaneProperties::startsWith(key,"pulse_height_si_max")) ParseFloat(key,value,pulse_height_si_max);
 		if (TPlaneProperties::startsWith(key,"pulse_height_di_max"))  ParseFloat(key,value,pulse_height_di_max);
+		if (TPlaneProperties::startsWith(key, "noise_si_num_bins"))  ParseInt  (key, value, noise_si_num_bins);
+		if (TPlaneProperties::startsWith(key, "noise_si_max"     ))  ParseFloat(key, value, noise_si_max     );
+		if (TPlaneProperties::startsWith(key, "noise_di_num_bins"))  ParseInt  (key, value, noise_di_num_bins);
+		if (TPlaneProperties::startsWith(key, "noise_di_max"     ))  ParseFloat(key, value, noise_di_max     );
 		if (TPlaneProperties::startsWith(key,"snr_distribution_si_max"))  Parse(key,value,snr_distribution_si_max);
 		if (TPlaneProperties::startsWith(key,"snr_distribution_di_max"))  Parse(key,value,snr_distribution_di_max);
 		if (TPlaneProperties::startsWith(key,"alignment_chi2")) Parse(key,value,alignment_chi2);
@@ -742,6 +746,11 @@ void TSettings::DefaultLoadDefaultSettings(){
 	pulse_height_num_bins = 300;
 	pulse_height_si_max = 300;
 	pulse_height_di_max = 3000;
+
+	noise_si_num_bins = 64;
+	noise_si_max = 8;
+	noise_di_num_bins = 128;
+	noise_di_max = 32;
 
 	snr_distribution_si_max = 2500;
 	snr_distribution_di_max = 2500;
@@ -1764,6 +1773,26 @@ Float_t TSettings::getPulse_height_max(UInt_t det) const
 	return -1;
 }
 
+Int_t TSettings::getNoise_si_num_bins() const
+{
+	return noise_si_num_bins;
+}
+
+Float_t TSettings::getNoise_si_max() const
+{
+	return noise_si_max;
+}
+
+Int_t TSettings::getNoise_di_num_bins() const
+{
+	return noise_di_num_bins;
+}
+
+Float_t TSettings::getNoise_di_max() const
+{
+	return noise_di_max;
+}
+
 Int_t TSettings::getSaveAllFilesSwitch() const
 {
 	return SaveAllFilesSwitch;
@@ -1802,6 +1831,26 @@ void TSettings::setPulse_height_num_bins(Int_t pulse_height_num_bins)
 void TSettings::setPulse_height_si_max(Float_t pulse_height_si_max)
 {
 	this->pulse_height_si_max = pulse_height_si_max;
+}
+
+void TSettings::setNoise_si_num_bins(Int_t noise_si_num_bins)
+{
+	this->noise_si_num_bins = noise_si_num_bins;
+}
+
+void TSettings::setNoise_si_max(Float_t noise_si_max)
+{
+	this->noise_si_max = noise_si_max;
+}
+
+void TSettings::setNoise_di_num_bins(Int_t noise_di_num_bins)
+{
+	this->noise_di_num_bins = noise_di_num_bins;
+}
+
+void TSettings::setNoise_di_max(Float_t noise_di_max)
+{
+	this->noise_di_max = noise_di_max;
 }
 
 void TSettings::setSaveAllFilesSwitch(Int_t SaveAllFilesSwitch)
