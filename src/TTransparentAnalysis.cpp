@@ -2899,22 +2899,22 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 
 
 	name = "hResidualHighest2Centroid_clustered";
-	hResidualHighest2Centroid_clustered = new TH1F(name,name,512,-40,40);
+	hResidualHighest2Centroid_clustered = new TH1F(name,name,800,-40,40);
 	hResidualHighest2Centroid_clustered->GetXaxis()->SetTitle("residual");
 	hResidualHighest2Centroid_clustered->GetYaxis()->SetTitle("number of entries");
 
 	name = "hResidualHighestHit_clustered";
-	hResidualHighestHit_clustered = new TH1F(name,name,512,-40,40);
+	hResidualHighestHit_clustered = new TH1F(name,name,800,-40,40);
 	hResidualHighestHit_clustered->GetXaxis()->SetTitle("residual");
 	hResidualHighestHit_clustered->GetYaxis()->SetTitle("number of entries");
 
 	name = "hResidualEtaCorrected_clustered";
-	hResidualEtaCorrected_clustered = new TH1F(name,name,512,-40,40);
+	hResidualEtaCorrected_clustered = new TH1F(name,name,800,-40,40);
 	hResidualEtaCorrected_clustered->GetXaxis()->SetTitle("residual");
 	hResidualEtaCorrected_clustered->GetYaxis()->SetTitle("number of entries");
 
 	name = "hResidualChargeWeighted_clustered";
-	hResidualChargeWeighted_clustered = new TH1F(name,name,512,-40,40);
+	hResidualChargeWeighted_clustered = new TH1F(name,name,800,-40,40);
 	hResidualChargeWeighted_clustered->GetXaxis()->SetTitle("residual");
 	hResidualChargeWeighted_clustered->GetYaxis()->SetTitle("number of entries");
 
