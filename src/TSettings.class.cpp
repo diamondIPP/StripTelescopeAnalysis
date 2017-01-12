@@ -510,6 +510,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"snr_distribution_si_max"))  Parse(key,value,snr_distribution_si_max);
 		if (TPlaneProperties::startsWith(key,"snr_distribution_di_max"))  Parse(key,value,snr_distribution_di_max);
 		if (TPlaneProperties::startsWith(key,"alignment_chi2")) Parse(key,value,alignment_chi2);
+		if (TPlaneProperties::startsWith(key,"transparentChi2")) Parse(key,value,transparentChi2);
 		if (TPlaneProperties::startsWith(key,"UseAutoFidCut")) Parse(key,value,UseAutoFidCut);
 		if (TPlaneProperties::startsWith(key,"nDiamonds")) this->setNDiamonds(ParseInt(key,value));
 		if (TPlaneProperties::startsWith(key,"AlternativeClustering")) Parse(key,value,AlternativeClustering);
