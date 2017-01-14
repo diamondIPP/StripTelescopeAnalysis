@@ -568,6 +568,10 @@ void TTransparentAnalysis::fillClusteredHistos(){
 	hResidualChargeWeighted_clustered  ->Fill(residualCW    );
 	hResidualHighest2Centroid_clustered->Fill(residualH2C   );
 	hResidualEtaCorrected_clustered    ->Fill(residualEtaCor);
+	hResidualHighestHitVsClusterSize_clustered      ->Fill(resXHighestHit, clusterSize);
+	hResidualChargeWeightedVsClusterSize_clustered  ->Fill(residualCW    , clusterSize);
+	hResidualHighest2CentroidVsClusterSize_clustered->Fill(residualH2C   , clusterSize);
+	hResidualEtaCorrectedVsClusterSize_clustered    ->Fill(residualEtaCor, clusterSize);
 }
 
 void TTransparentAnalysis::fillHistograms() {
@@ -2494,6 +2498,26 @@ void TTransparentAnalysis::saveClusteredHistos(){
 		delete hResidualEtaCorrected_clustered    ;
 		hResidualEtaCorrected_clustered     = 0;
 	}
+	if (hResidualHighestHitVsClusterSize_clustered      ) {
+		histSaver->SaveHistogram(hResidualHighestHitVsClusterSize_clustered      );
+		delete hResidualHighestHitVsClusterSize_clustered      ;
+		hResidualHighestHitVsClusterSize_clustered       = 0;
+	}
+	if (hResidualChargeWeightedVsClusterSize_clustered  ) {
+		histSaver->SaveHistogram(hResidualChargeWeightedVsClusterSize_clustered  );
+		delete hResidualChargeWeightedVsClusterSize_clustered  ;
+		hResidualChargeWeightedVsClusterSize_clustered   = 0;
+	}
+	if (hResidualHighest2CentroidVsClusterSize_clustered) {
+		histSaver->SaveHistogram(hResidualHighest2CentroidVsClusterSize_clustered);
+		delete hResidualHighest2CentroidVsClusterSize_clustered;
+		hResidualHighest2CentroidVsClusterSize_clustered = 0;
+	}
+	if (hResidualEtaCorrectedVsClusterSize_clustered    ) {
+		histSaver->SaveHistogram(hResidualEtaCorrectedVsClusterSize_clustered    );
+		delete hResidualEtaCorrectedVsClusterSize_clustered    ;
+		hResidualEtaCorrectedVsClusterSize_clustered     = 0;
+	}
 }
 
 void TTransparentAnalysis::savePedestalHistos() {
@@ -2917,6 +2941,26 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 	hResidualChargeWeighted_clustered = new TH1F(name,name,800,-40,40);
 	hResidualChargeWeighted_clustered->GetXaxis()->SetTitle("residual");
 	hResidualChargeWeighted_clustered->GetYaxis()->SetTitle("number of entries");
+
+	name = "hResidualHighest2CentroidVsClusterSize_clustered";
+	hResidualHighest2CentroidVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
+	hResidualHighest2CentroidVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
+	hResidualHighest2CentroidVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hResidualHighestHitVsClusterSize_clustered";
+	hResidualHighestHitVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
+	hResidualHighestHitVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
+	hResidualHighestHitVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hResidualEtaCorrectedVsClusterSize_clustered";
+	hResidualEtaCorrectedVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
+	hResidualEtaCorrectedVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
+	hResidualEtaCorrectedVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hResidualChargeWeightedVsClusterSize_clustered";
+	hResidualChargeWeightedVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
+	hResidualChargeWeightedVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
+	hResidualChargeWeightedVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
 
 }
 
