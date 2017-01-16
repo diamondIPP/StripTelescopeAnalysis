@@ -51,7 +51,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
     inf  = std::numeric_limits<float>::infinity();
     alignMode = mode;
     gRandom->SetSeed(1);
-    cmCorrected  = false;
+    cmCorrected  = true;
     if(verbosity>5) settings->diamondPattern.Print();
     xDivisions = 3;
     yDivisions = 3;
