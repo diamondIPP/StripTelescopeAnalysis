@@ -233,8 +233,16 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
                 this->vecEta.push_back(eta);
 
             }
-        }
-    }
+        } // end cluster size loop
+
+		// clustered eta corrected residuals
+		TCluster clusteredCluster = eventReader->getCluster(subjectDetector,0);
+		UInt_t clusterSize = clusteredCluster.size();
+		Float_t residualEtaCor;
+		if (!cmCorrected) residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaIntegrals            [1]);
+		else              residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaCMNcorrectedIntegrals[1]);
+		hResidualTranspEtaCorrectedVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
+    } // end event loop
 }
 
 bool TTransparentAnalysis::predictPositions(bool savePrediction) {
@@ -2538,6 +2546,11 @@ void TTransparentAnalysis::saveClusteredHistos(){
 		delete hResidualEtaCorrectedVsClusterSize_clustered    ;
 		hResidualEtaCorrectedVsClusterSize_clustered     = 0;
 	}
+	if (hResidualTranspEtaCorrectedVsClusterSize_clustered    ) {
+		histSaver->SaveHistogram(hResidualTranspEtaCorrectedVsClusterSize_clustered    );
+		delete hResidualTranspEtaCorrectedVsClusterSize_clustered    ;
+		hResidualTranspEtaCorrectedVsClusterSize_clustered     = 0;
+	}
 }
 
 void TTransparentAnalysis::savePedestalHistos() {
@@ -2990,6 +3003,11 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 	hResidualChargeWeightedVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
 	hResidualChargeWeightedVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
 	hResidualChargeWeightedVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hResidualTranspEtaCorrectedVsClusterSize_clustered";
+	hResidualTranspEtaCorrectedVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
+	hResidualTranspEtaCorrectedVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
+	hResidualTranspEtaCorrectedVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
 
 }
 

@@ -328,6 +328,7 @@ private:
 	TH2F* hResidualHighestHitVsClusterSize_clustered;
 	TH2F* hResidualEtaCorrectedVsClusterSize_clustered;
 	TH2F* hResidualChargeWeightedVsClusterSize_clustered;
+	TH2F* hResidualTranspEtaCorrectedVsClusterSize_clustered;
 
 	Float_t minX,maxX,minY,maxY;
 
