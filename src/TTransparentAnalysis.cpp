@@ -567,10 +567,12 @@ void TTransparentAnalysis::fillClusteredHistos(){
     if (clusterSize <= 2)
         hLandauVsEventNo_Clustered->Fill(nEvent,clusteredPH);
 
-	Float_t eta    = clusteredCluster.getEta();
-	Float_t etaCMN = clusteredCluster.getEta(true);
+	Float_t eta    = clusteredCluster.getEta(false, false);
+	Float_t etaCMN = clusteredCluster.getEta(true , false);
 	if (eta    > 0 && eta    < 1) hEtaVsClusterSize_clustered            ->Fill(eta   , clusterSize);
 	if (etaCMN > 0 && etaCMN < 1) hEtaCMNcorrectedVsClusterSize_clustered->Fill(etaCMN, clusterSize);
+	eta            = clusteredCluster.getEta(cmCorrected, false);
+	if (eta > 0 && eta < 1) hEta_clustered->Fill(eta);
 
 	TH1F* etaInt = eventReader->getEtaIntegral(subjectDetector);
 	Float_t relPos =this->predPosition-(int)(this->predPosition+.5);
@@ -2506,6 +2508,11 @@ void TTransparentAnalysis::saveClusteredHistos(){
 		delete hEtaCMNcorrectedVsClusterSize_clustered      ;
 		hEtaCMNcorrectedVsClusterSize_clustered       = 0;
 	}
+	if (hEta_clustered      ) {
+		histSaver->SaveHistogram(hEta_clustered      );
+		delete hEta_clustered      ;
+		hEta_clustered       = 0;
+	}
 	if (hResidualHighestHit_clustered      ) {
 		histSaver->SaveHistogram(hResidualHighestHit_clustered      );
 		delete hResidualHighestHit_clustered      ;
@@ -2968,6 +2975,11 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 	hResidualHighest2Centroid_clustered = new TH1F(name,name,800,-40,40);
 	hResidualHighest2Centroid_clustered->GetXaxis()->SetTitle("residual");
 	hResidualHighest2Centroid_clustered->GetYaxis()->SetTitle("number of entries");
+
+	name = "hEta_clustered";
+	hEta_clustered = new TH1F(name,name,1000, 0, 1);
+	hEta_clustered->GetXaxis()->SetTitle("eta");
+	hEta_clustered->GetYaxis()->SetTitle("number of entries");
 
 	name = "hResidualHighestHit_clustered";
 	hResidualHighestHit_clustered = new TH1F(name,name,800,-40,40);
