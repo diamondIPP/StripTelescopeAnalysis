@@ -313,6 +313,8 @@ Float_t TCluster::getPosition(bool cmnCorrected, calculationMode_t mode,TH1F *hi
 		return this->getHighestSignalChannel();
 	else if(mode==chargeWeighted)
 		return this->getChargeWeightedMean(cmnCorrected);
+	else if(mode == chargeWeightedOnlyHits)
+		return this->getChargeWeightedMean(cmnCorrected, false, false);
 	else if (mode == highest2CentroidNoSmallHits)
 		return this->getHighest2Centroid(cmnCorrected,false);
 	else if(mode==highest2Centroid)
@@ -655,13 +657,13 @@ UInt_t TCluster::getClusterSize(){
 	return this->checkClusterForSize();
 }
 
-Float_t TCluster::getChargeWeightedMean(bool cmnCorrected, bool useNonHits){
+Float_t TCluster::getChargeWeightedMean(bool cmnCorrected, bool useNonHits, bool useNonHitsForSmallCluster){
 	Float_t sum=0;
 	Float_t charged=0;
 	for(UInt_t cl=0;cl<this->checkClusterForSize();cl++){
 		if(IsTransparentCluster()&&!IsValidTransparentClusterPosition(cl))
 			continue;
-		if(useNonHits||isHit(cl)||checkClusterForSize()<4){//todo anpassen
+		if (useNonHits || isHit(cl) || (useNonHitsForSmallCluster && checkClusterForSize() < 4)){
 			//todo . take at least second biggest hit for =charge weighted mean
 			sum+=getChannel(cl)*getSignal(cl,cmnCorrected);//kanalnummer*signalNummer
 			charged+=getSignal(cl,cmnCorrected);;//signal

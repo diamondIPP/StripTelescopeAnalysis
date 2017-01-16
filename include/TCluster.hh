@@ -26,7 +26,7 @@ using namespace std;
 class TCluster :public TObject{
 public:
     static UInt_t TCLUSTER_REVISION() {return TCLUSTER_REV;};
-    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid = 3,eta=4,corEta=5, highest2CentroidNoSmallHits=6, etaOnlyHits = 7, corEtaOnlyHits = 8};
+    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid = 3,eta=4,corEta=5, highest2CentroidNoSmallHits=6, etaOnlyHits = 7, corEtaOnlyHits = 8, chargeWeightedOnlyHits = 9};
     enum direction_t {left = -1,right = +1};
     TCluster()
     {	initialiseNewCluster();
@@ -66,7 +66,7 @@ public:
     UInt_t GetHighestSignalChannelTransparentCluster();
     UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
     UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos, bool cmnCorrected = false, bool bNegativeSignals = false, bool useNonHits = true);
-    Float_t getChargeWeightedMean(bool cmnCorrected, bool useNonHits=false);
+    Float_t getChargeWeightedMean(bool cmnCorrected, bool useNonHits = false, bool useNonHitsForSmallCluster = true);
     Float_t getEtaPostion(bool cmnCorrected = false, bool useNonHits = true);
     Float_t getPositionCorEta(bool cmnCorrected, TH1F* histo = 0, bool useNonHits = true);
     void checkCluster();
