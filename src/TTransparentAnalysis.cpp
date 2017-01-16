@@ -579,10 +579,10 @@ void TTransparentAnalysis::fillClusteredHistos(){
 
 	TH1F* etaInt = eventReader->getEtaIntegral(subjectDetector);
 	Float_t relPos =this->predPosition-(int)(this->predPosition+.5);
-	Float_t resXHighestHit = this->getResidual(clusteredCluster, cmCorrected, TCluster::maxValue        , etaInt);
-	Float_t residualCW     = this->getResidual(clusteredCluster, cmCorrected, TCluster::chargeWeighted  , etaInt);
+	Float_t resXHighestHit = this->getResidual(clusteredCluster, cmCorrected, TCluster::maxValue                   , etaInt);
+	Float_t residualCW     = this->getResidual(clusteredCluster, cmCorrected, TCluster::chargeWeightedOnlyHits     , etaInt);
 	Float_t residualH2C    = this->getResidual(clusteredCluster, cmCorrected, TCluster::highest2CentroidNoSmallHits, etaInt);
-	Float_t residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta          , etaInt);
+	Float_t residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta                     , etaInt);
 	hResidualHighestHit_clustered      ->Fill(resXHighestHit);
 	hResidualChargeWeighted_clustered  ->Fill(residualCW    );
 	hResidualHighest2Centroid_clustered->Fill(residualH2C   );
