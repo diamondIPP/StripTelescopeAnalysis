@@ -252,6 +252,7 @@ private:
 	TH2F* hSelectedTracksAvrgSiliconHitPos;
 	vector<TH1F*> hEtaIntegrals;
 	vector<TH1F*> hEtaCMNcorrectedIntegrals;
+	TH1F* hEtaIntegral_clustered;
 //	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
 	
 	// fits

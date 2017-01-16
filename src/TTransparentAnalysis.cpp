@@ -823,6 +823,7 @@ TF1* TTransparentAnalysis::doDoubleGaussFit(TH1F *histo){
 }
 
 void TTransparentAnalysis::createEtaIntegrals() {
+	cout << "TTransparentAnalysis::createEtaIntegrals()" << endl;
     for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
         stringstream histName;
         histName << "hDiaTranspAnaEtaIntegral2HighestIn"<<clusterSize+1<<"Strips";
@@ -833,6 +834,12 @@ void TTransparentAnalysis::createEtaIntegrals() {
             delete hEtaCMNcorrectedIntegrals.at(clusterSize);
         hEtaCMNcorrectedIntegrals.at(clusterSize) = (TClustering::createEtaIntegral(hEtaCMNcorrected[clusterSize], histName.str()));
     }
+	cout << "create clustered eta integral.." << endl;
+	stringstream histName;
+	histName << "hDiaTranspAnaEtaIntegral_clustered";
+//	if (hEtaIntegral_clustered)
+//		delete hEtaIntegral_clustered;
+	hEtaIntegral_clustered = (TClustering::createEtaIntegral(hEta_clustered, histName.str()));
 }
 
 
@@ -1718,6 +1725,7 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogram(hEtaIntegrals[clusterSize],0);
         histSaver->SaveHistogram(hEtaCMNcorrectedIntegrals[clusterSize],0);
     }
+	histSaver->SaveHistogram(hEtaIntegral_clustered, 0);
     histSaver->SaveHistogram(hLandauMean);
     histSaver->SaveHistogram(hLandauMP);
     histSaver->SaveHistogram(hLandau2HighestMean);
