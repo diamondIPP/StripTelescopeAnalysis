@@ -825,11 +825,12 @@ TF1* TTransparentAnalysis::doDoubleGaussFit(TH1F *histo){
 void TTransparentAnalysis::createEtaIntegrals() {
 	cout << "TTransparentAnalysis::createEtaIntegrals()" << endl;
     for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
-        stringstream histName;
+        stringstream histName, histNameCMN;
         histName << "hDiaTranspAnaEtaIntegral2HighestIn"<<clusterSize+1<<"Strips";
         if (hEtaIntegrals.at(clusterSize))
             delete hEtaIntegrals.at(clusterSize);
         hEtaIntegrals.at(clusterSize) = (TClustering::createEtaIntegral(hEta[clusterSize], histName.str()));
+        histNameCMN << "hDiaTranspAnaEtaIntegralCMNcorrected2HighestIn"<<clusterSize+1<<"Strips";
         if (hEtaCMNcorrectedIntegrals.at(clusterSize))
             delete hEtaCMNcorrectedIntegrals.at(clusterSize);
         hEtaCMNcorrectedIntegrals.at(clusterSize) = (TClustering::createEtaIntegral(hEtaCMNcorrected[clusterSize], histName.str()));
