@@ -238,10 +238,13 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		// clustered eta corrected residuals
 		TCluster clusteredCluster = eventReader->getCluster(subjectDetector,0);
 		UInt_t clusterSize = clusteredCluster.size();
-		Float_t residualEtaCor;
-		if (!cmCorrected) residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegrals            [1]);
-		else              residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaCMNcorrectedIntegrals[1]);
-		hResidualTranspEtaCorrectedVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
+		Float_t residualTranspEtaCor;
+		if (!cmCorrected) residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegrals            [1]);
+		else              residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaCMNcorrectedIntegrals[1]);
+		hResidualTranspEtaCorrectedVsClusterSize_clustered->Fill(residualTranspEtaCor, clusterSize);
+		Float_t residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegral_clustered);
+		hResidualEtaCorrected_clustered             ->Fill(residualEtaCor);
+		hResidualEtaCorrectedVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
     } // end event loop
 }
 
@@ -583,11 +586,9 @@ void TTransparentAnalysis::fillClusteredHistos(){
 	hResidualHighestHit_clustered      ->Fill(resXHighestHit);
 	hResidualChargeWeighted_clustered  ->Fill(residualCW    );
 	hResidualHighest2Centroid_clustered->Fill(residualH2C   );
-	hResidualEtaCorrected_clustered    ->Fill(residualEtaCor);
 	hResidualHighestHitVsClusterSize_clustered      ->Fill(resXHighestHit, clusterSize);
 	hResidualChargeWeightedVsClusterSize_clustered  ->Fill(residualCW    , clusterSize);
 	hResidualHighest2CentroidVsClusterSize_clustered->Fill(residualH2C   , clusterSize);
-	hResidualEtaCorrectedVsClusterSize_clustered    ->Fill(residualEtaCor, clusterSize);
 }
 
 void TTransparentAnalysis::fillHistograms() {
