@@ -317,6 +317,8 @@ private:
 	TH1F* hClusterSize_Clustered;
 	TH2F* hLandauVsClusterSize_Clustered;
 	TH1F* hNClusteres_Clustered;
+	TH2F* hEtaVsClusterSize_clustered;
+	TH2F* hEtaCMNcorrectedVsClusterSize_clustered;
 	TH1F* hResidualHighest2Centroid_clustered;
 	TH1F* hResidualHighestHit_clustered;
 	TH1F* hResidualEtaCorrected_clustered;

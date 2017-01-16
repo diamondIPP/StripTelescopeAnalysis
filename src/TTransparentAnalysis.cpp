@@ -558,6 +558,11 @@ void TTransparentAnalysis::fillClusteredHistos(){
     if (clusterSize <= 2)
         hLandauVsEventNo_Clustered->Fill(nEvent,clusteredPH);
 
+	Float_t eta    = clusteredCluster.getEta();
+	Float_t etaCMN = clusteredCluster.getEta(true);
+	if (eta    > 0 && eta    < 1) hEtaVsClusterSize_clustered            ->Fill(eta   , clusterSize);
+	if (etaCMN > 0 && etaCMN < 1) hEtaCMNcorrectedVsClusterSize_clustered->Fill(etaCMN, clusterSize);
+
 	TH1F* etaInt = eventReader->getEtaIntegral(subjectDetector);
 	Float_t relPos =this->predPosition-(int)(this->predPosition+.5);
 	Float_t resXHighestHit = this->getResidual(clusteredCluster, cmCorrected, TCluster::maxValue        , etaInt);
@@ -2478,6 +2483,16 @@ void TTransparentAnalysis::saveClusteredHistos(){
         delete hNClusteres_Clustered;
         hNClusteres_Clustered = 0;
     }
+	if (hEtaVsClusterSize_clustered      ) {
+		histSaver->SaveHistogram(hEtaVsClusterSize_clustered      );
+		delete hEtaVsClusterSize_clustered      ;
+		hEtaVsClusterSize_clustered       = 0;
+	}
+	if (hEtaCMNcorrectedVsClusterSize_clustered      ) {
+		histSaver->SaveHistogram(hEtaCMNcorrectedVsClusterSize_clustered      );
+		delete hEtaCMNcorrectedVsClusterSize_clustered      ;
+		hEtaCMNcorrectedVsClusterSize_clustered       = 0;
+	}
 	if (hResidualHighestHit_clustered      ) {
 		histSaver->SaveHistogram(hResidualHighestHit_clustered      );
 		delete hResidualHighestHit_clustered      ;
@@ -2921,6 +2936,15 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
     hNClusteres_Clustered->GetXaxis()->SetTitle("No of clusteres_{clustered}");
     hNClusteres_Clustered->GetYaxis()->SetTitle("number of entries");
 
+	name = "hEtaVsClusterSize_clustered";
+	hEtaVsClusterSize_clustered = new TH2F(name, name, 1000, 0, 1, 10, -0.5, 9.5);
+	hEtaVsClusterSize_clustered->GetXaxis()->SetTitle("eta");
+	hEtaVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hEtaCMNcorrectedVsClusterSize_clustered";
+	hEtaCMNcorrectedVsClusterSize_clustered = new TH2F(name, name, 1000, 0, 1, 10, -0.5, 9.5);
+	hEtaCMNcorrectedVsClusterSize_clustered->GetXaxis()->SetTitle("eta cm corrected");
+	hEtaCMNcorrectedVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
 
 	name = "hResidualHighest2Centroid_clustered";
 	hResidualHighest2Centroid_clustered = new TH1F(name,name,800,-40,40);
