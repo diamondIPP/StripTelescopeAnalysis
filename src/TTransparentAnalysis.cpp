@@ -239,8 +239,8 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		TCluster clusteredCluster = eventReader->getCluster(subjectDetector,0);
 		UInt_t clusterSize = clusteredCluster.size();
 		Float_t residualEtaCor;
-		if (!cmCorrected) residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaIntegrals            [1]);
-		else              residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaCMNcorrectedIntegrals[1]);
+		if (!cmCorrected) residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegrals            [1]);
+		else              residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaCMNcorrectedIntegrals[1]);
 		hResidualTranspEtaCorrectedVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
     } // end event loop
 }
