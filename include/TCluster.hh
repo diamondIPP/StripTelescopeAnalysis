@@ -26,7 +26,7 @@ using namespace std;
 class TCluster :public TObject{
 public:
     static UInt_t TCLUSTER_REVISION() {return TCLUSTER_REV;};
-    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid = 3,eta=4,corEta=5, highest2CentroidNoSmallHits=6};
+    enum calculationMode_t{ maxValue = 1, chargeWeighted = 2, highest2Centroid = 3,eta=4,corEta=5, highest2CentroidNoSmallHits=6, etaOnlyHits = 7, corEtaOnlyHits = 8};
     enum direction_t {left = -1,right = +1};
     TCluster()
     {	initialiseNewCluster();
@@ -65,10 +65,10 @@ public:
     UInt_t getHighestSignalChannel();
     UInt_t GetHighestSignalChannelTransparentCluster();
     UInt_t getHighestSignalNeighbourChannel(UInt_t channelNo,bool cmnCorrected=false);
-    UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos,bool cmnCorrected=false,bool bNegativeSignals = false);
+    UInt_t getHighestSignalNeighbourClusterPosition(UInt_t clPos, bool cmnCorrected = false, bool bNegativeSignals = false, bool useNonHits = true);
     Float_t getChargeWeightedMean(bool cmnCorrected, bool useNonHits=false);
-    Float_t getEtaPostion(bool cmnCorrected=false);
-    Float_t getPositionCorEta(bool cmnCorrected,TH1F* histo=0);
+    Float_t getEtaPostion(bool cmnCorrected = false, bool useNonHits = true);
+    Float_t getPositionCorEta(bool cmnCorrected, TH1F* histo = 0, bool useNonHits = true);
     void checkCluster();
     bool isSeed(UInt_t cl);
     bool isHit(UInt_t cl);
@@ -103,9 +103,9 @@ public:
     static string Intent(UInt_t level);
     Float_t getReversedEta(bool cmnCorrected=false);
     Float_t getReversedEta(Int_t &rightChannel,bool cmnCorrected=false);
-    Float_t getEta(bool cmnCorrected=false);
-    Float_t getEta(Int_t &leftChannel,bool cmnCorrected=false);
-    Float_t getEta(UInt_t clusPos,Int_t &leftChannel,bool cmnCorrected=false);
+    Float_t getEta(bool cmnCorrected = false, bool useNonHits = true);
+    Float_t getEta(Int_t &leftChannel, bool cmnCorrected = false, bool useNonHits = true);
+    Float_t getEta(UInt_t clusPos, Int_t &leftChannel, bool cmnCorrected = false, bool useNonHits = true);
     UInt_t getClusterSize();
     void setVerbosity(UInt_t verbosity){this->verbosity=verbosity;};
     Float_t getLeftEta(bool cmnCorrected=false);
