@@ -251,6 +251,7 @@ private:
 	TH1F* hLandau2HighestMP;
 	TH2F* hSelectedTracksAvrgSiliconHitPos;
 	vector<TH1F*> hEtaIntegrals;
+	vector<TH1F*> hEtaCMNcorrectedIntegrals;
 //	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
 	
 	// fits

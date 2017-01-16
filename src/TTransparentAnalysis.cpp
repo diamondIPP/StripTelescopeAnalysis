@@ -392,6 +392,7 @@ void TTransparentAnalysis::initHistograms() {
     vecPredX.clear();
     vecPredY.clear();
     hEtaIntegrals.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+    hEtaCMNcorrectedIntegrals.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
     hSelectedTracksAvrgSiliconHitPos = new TH2F("hSelectedTracksAvrgSiliconHitPos","hSelectedTracksAvrgSiliconHitPos",1024,0 ,256,1024,0,256);
     for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
         vecVecLandau.at(clusterSize).clear();
@@ -818,6 +819,9 @@ void TTransparentAnalysis::createEtaIntegrals() {
         if (hEtaIntegrals.at(clusterSize))
             delete hEtaIntegrals.at(clusterSize);
         hEtaIntegrals.at(clusterSize) = (TClustering::createEtaIntegral(hEta[clusterSize], histName.str()));
+        if (hEtaCMNcorrectedIntegrals.at(clusterSize))
+            delete hEtaCMNcorrectedIntegrals.at(clusterSize);
+        hEtaCMNcorrectedIntegrals.at(clusterSize) = (TClustering::createEtaIntegral(hEtaCMNcorrected[clusterSize], histName.str()));
     }
 }
 
@@ -1702,6 +1706,7 @@ void TTransparentAnalysis::saveHistograms() {
         //		}
         histSaver->SaveHistogramWithFit(hResidualEtaCorrected[clusterSize],fitResidualEtaCorrected[clusterSize]);
         histSaver->SaveHistogram(hEtaIntegrals[clusterSize],0);
+        histSaver->SaveHistogram(hEtaCMNcorrectedIntegrals[clusterSize],0);
     }
     histSaver->SaveHistogram(hLandauMean);
     histSaver->SaveHistogram(hLandauMP);
