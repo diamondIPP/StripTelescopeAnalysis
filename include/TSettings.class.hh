@@ -160,6 +160,7 @@ public:
 	Int_t   getNoise_di_num_bins() const;
 	Float_t getNoise_di_max     () const;
 	Int_t getSaveAllFilesSwitch() const;
+	Int_t getSnr_distribution_num_bins() const;
 	Float_t getSnr_distribution_di_max() const;
 	Float_t getSnr_distribution_si_max() const;
 	Float_t getEta_hiq_slice_hi() const;
@@ -226,6 +227,7 @@ public:
 	void setNoise_di_num_bins(Int_t   noise_di_num_bins);
 	void setNoise_di_max     (Float_t noise_di_max     );
 	void setSaveAllFilesSwitch(Int_t SaveAllFilesSwitch);
+	void setSnr_distribution_num_bins(Float_t snr_distribution_num_bins);
 	void setSnr_distribution_di_max(Float_t snr_distribution_di_max);
 	void setSnr_distribution_si_max(Float_t snr_distribution_si_max);
 	void setEta_hiq_slice_hi(Float_t eta_hiq_slice_hi);
@@ -456,6 +458,7 @@ private:
 	Int_t pulse_height_num_bins;
 	Float_t pulse_height_si_max;
 	Float_t pulse_height_di_max;
+	Int_t snr_distribution_num_bins;
 	Float_t snr_distribution_si_max;
 	Float_t snr_distribution_di_max;
 	Int_t   noise_si_num_bins;

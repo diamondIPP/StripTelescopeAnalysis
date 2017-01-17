@@ -507,8 +507,9 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key, "noise_si_max"     ))  ParseFloat(key, value, noise_si_max     );
 		if (TPlaneProperties::startsWith(key, "noise_di_num_bins"))  ParseInt  (key, value, noise_di_num_bins);
 		if (TPlaneProperties::startsWith(key, "noise_di_max"     ))  ParseFloat(key, value, noise_di_max     );
-		if (TPlaneProperties::startsWith(key,"snr_distribution_si_max"))  Parse(key,value,snr_distribution_si_max);
-		if (TPlaneProperties::startsWith(key,"snr_distribution_di_max"))  Parse(key,value,snr_distribution_di_max);
+		if (TPlaneProperties::startsWith(key,"snr_distribution_num_bins"))  ParseInt(key,value,snr_distribution_num_bins);
+		if (TPlaneProperties::startsWith(key,"snr_distribution_si_max"))  ParseFloat(key,value,snr_distribution_si_max);
+		if (TPlaneProperties::startsWith(key,"snr_distribution_di_max"))  ParseFloat(key,value,snr_distribution_di_max);
 		if (TPlaneProperties::startsWith(key,"alignment_chi2")) Parse(key,value,alignment_chi2);
 		if (TPlaneProperties::startsWith(key,"transparentChi2")) Parse(key,value,transparentChi2);
 		if (TPlaneProperties::startsWith(key,"UseAutoFidCut")) Parse(key,value,UseAutoFidCut);
@@ -753,8 +754,9 @@ void TSettings::DefaultLoadDefaultSettings(){
 	noise_di_num_bins = 128;
 	noise_di_max = 32;
 
-	snr_distribution_si_max = 2500;
-	snr_distribution_di_max = 2500;
+	snr_distribution_num_bins = 1000;
+	snr_distribution_si_max = 500;
+	snr_distribution_di_max = 500;
 	transparentChi2 = 5;
 	UseAutoFidCut = 0;
 	nDiamonds=1;
@@ -1799,6 +1801,11 @@ Int_t TSettings::getSaveAllFilesSwitch() const
 	return SaveAllFilesSwitch;
 }
 
+Int_t TSettings::getSnr_distribution_num_bins() const
+{
+	return snr_distribution_num_bins;
+}
+
 Float_t TSettings::getSnr_distribution_di_max() const
 {
 	return snr_distribution_di_max;
@@ -1857,6 +1864,11 @@ void TSettings::setNoise_di_max(Float_t noise_di_max)
 void TSettings::setSaveAllFilesSwitch(Int_t SaveAllFilesSwitch)
 {
 	this->SaveAllFilesSwitch = SaveAllFilesSwitch;
+}
+
+void TSettings::setSnr_distribution_num_bins(Float_t snr_distribution_num_bins)
+{
+	this->snr_distribution_num_bins = snr_distribution_num_bins;
 }
 
 void TSettings::setSnr_distribution_di_max(Float_t snr_distribution_di_max)

@@ -607,10 +607,13 @@ void TAnalysisOfPedestal::initialiseHistos()
     }
 
     for (UInt_t det = 0; det < 9; det++) {
-        int nbins = 256;
+        int nbins = settings->getSnr_distribution_num_bins();
         Float_t min = 0.;
-        Float_t max = 64.;
-        if(det==TPlaneProperties::getDetDiamond()){max=128;nbins=512;}
+//        Float_t max = 64.;
+//        if(det==TPlaneProperties::getDetDiamond()){max=128;nbins=512;}
+		Float_t max;
+		if (TPlaneProperties::isDiamondDetector(det)) max = settings->getSnr_distribution_di_max();
+		else                                          max = settings->getSnr_distribution_si_max();
 
         stringstream histoName;
 
@@ -706,11 +709,14 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
         sigma=TMath::Sqrt(sigma/entries-mean*mean);
         cout<< "Mean: "<<mean<<" +/- "<<sigma<<"\tMaximum SNR: "<<max<<" "<<entries<<endl;
         //define xrange and nbins
-        Float_t xRangeMax = TMath::Min(mean+3*sigma,max);
-        Float_t xRangeMin = 4;
+//        Float_t xRangeMax = TMath::Min(mean+3*sigma,max);
+		Float_t xRangeMax;
+		if (TPlaneProperties::isDiamondDetector(det)) xRangeMax = settings->getSnr_distribution_di_max();
+		else                                          xRangeMax = settings->getSnr_distribution_si_max();
+        Float_t xRangeMin = 0;
         xMinBiggest = xRangeMin;
         xMaxBiggest = xRangeMax;
-        UInt_t nbins = 512;
+        UInt_t nbins = settings->getSnr_distribution_num_bins();
         cout<<"X Range: "<<xRangeMin<<","<<xRangeMax<<endl;
         hBiggestSignalInSigma[det] = new TH1F(histoName,histoName,nbins,xRangeMin,xRangeMax);
         histoName = histoName+"_CMNcorrected";
