@@ -185,6 +185,7 @@ private:
 	void writeTransparentTree();
 	TFile* transparentTreeFile;
 	TTree* transparentTree;
+	Bool_t  trTree_ValidTrack;
 	Int_t   trTree_RunNumber;
 	Float_t trTree_tseed;
 	Float_t trTree_thit;
@@ -200,6 +201,16 @@ private:
 	Float_t trTree_PedestalCMNcorr     [10];
 	Float_t trTree_PedestalSigmaCMNcorr[10];
 	Float_t trTree_SignalCMNcorr       [10];
+	Float_t trTree_HighestStripADC                 [10];
+	Float_t trTree_HighestStripPedestal            [10];
+	Float_t trTree_HighestStripPedestalSigma       [10];
+	Float_t trTree_HighestStripSignal              [10];
+	Float_t trTree_HighestStripSNR                 [10];
+	Float_t trTree_HighestStripADCCMNcorr          [10];
+	Float_t trTree_HighestStripPedestalCMNcorr     [10];
+	Float_t trTree_HighestStripPedestalSigmaCMNcorr[10];
+	Float_t trTree_HighestStripSignalCMNcorr       [10];
+	Float_t trTree_HighestStripSNRCMNcorr          [10];
 
 	Float_t inf;
 	// histograms

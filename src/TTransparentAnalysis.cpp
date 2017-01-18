@@ -478,6 +478,7 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTreeFile = new TFile(treeFileName, "RECREATE");
 	transparentTreeFile->cd();
 	transparentTree = new TTree("TransparentEvents", "TransparentTree");
+	transparentTree->Branch("ValidTrack"          , &trTree_ValidTrack          , "ValidTrack/O"                   );
 	transparentTree->Branch("RunNumber"           , &trTree_RunNumber           , "RunNumber/I"                    );
 	transparentTree->Branch("SeedTHR"             , &trTree_tseed               , "SeedTHR/F"                      );
 	transparentTree->Branch("HitTHR"              , &trTree_thit                , "HitTHR/F"                       );
@@ -493,9 +494,20 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("PedestalCMNcor"      , &trTree_PedestalCMNcorr     , "PedestalCMNcor[10]/F"      );
 	transparentTree->Branch("PedestalSigmaCMNcor" , &trTree_PedestalSigmaCMNcorr, "PedestalSigmaCMNcor[10]/F" );
 	transparentTree->Branch("SignalCMNcor"        , &trTree_SignalCMNcorr       , "SignalCMNcor[10]/F"        );
+	transparentTree->Branch("HighestStripADC"                 , &trTree_HighestStripADC                 , "HighestStripADC[10]/F"                 );
+	transparentTree->Branch("HighestStripPedestal"            , &trTree_HighestStripPedestal            , "HighestStripPedestal[10]/F"            );
+	transparentTree->Branch("HighestStripPedestalSigma"       , &trTree_HighestStripPedestalSigma       , "HighestStripPedestalSigma[10]/F"       );
+	transparentTree->Branch("HighestStripSignal"              , &trTree_HighestStripSignal              , "HighestStripSignal[10]/F"              );
+	transparentTree->Branch("HighestStripSNR"                 , &trTree_HighestStripSNR                 , "HighestStripSNR[10]/F"                 );
+	transparentTree->Branch("HighestStripADCCMNcorr"          , &trTree_HighestStripADCCMNcorr          , "HighestStripADCCMNcorr[10]/F"          );
+	transparentTree->Branch("HighestStripPedestalCMNcorr"     , &trTree_HighestStripPedestalCMNcorr     , "HighestStripPedestalCMNcorr[10]/F"     );
+	transparentTree->Branch("HighestStripPedestalSigmaCMNcorr", &trTree_HighestStripPedestalSigmaCMNcorr, "HighestStripPedestalSigmaCMNcorr[10]/F");
+	transparentTree->Branch("HighestStripSignalCMNcorr"       , &trTree_HighestStripSignalCMNcorr       , "HighestStripSignalCMNcorr[10]/F"       );
+	transparentTree->Branch("HighestStripSNRCMNcorr"          , &trTree_HighestStripSNRCMNcorr          , "HighestStripSNRCMNcorr[10]/F"          );
 }
 
 void TTransparentAnalysis::resetTransparentTree(){
+	trTree_ValidTrack  = false;
 	trTree_RunNumber   = -999;
 	trTree_tseed       = -999.;
 	trTree_thit        = -999.;
@@ -512,21 +524,86 @@ void TTransparentAnalysis::resetTransparentTree(){
 		trTree_PedestalCMNcorr     [i] = -999.;
 		trTree_PedestalSigmaCMNcorr[i] = -999.;
 		trTree_SignalCMNcorr       [i] = -999.;
+		trTree_HighestStripADC                 [i] = -999.;
+		trTree_HighestStripPedestal            [i] = -999.;
+		trTree_HighestStripPedestalSigma       [i] = -999.;
+		trTree_HighestStripSignal              [i] = -999.;
+		trTree_HighestStripSNR                 [i] = -999.;
+		trTree_HighestStripADCCMNcorr          [i] = -999.;
+		trTree_HighestStripPedestalCMNcorr     [i] = -999.;
+		trTree_HighestStripPedestalSigmaCMNcorr[i] = -999.;
+		trTree_HighestStripSignalCMNcorr       [i] = -999.;
+		trTree_HighestStripSNRCMNcorr          [i] = -999.;
 	}
 }
 
 void TTransparentAnalysis::fillTransparentTree(){
-	resetTransparentTree();
+	trTree_RunNumber   = settings->getRunNumber();
+	trTree_tseed       = settings->getClusterSeedFactor(subjectDetector, 0);
+	trTree_thit        = settings->getClusterHitFactor (subjectDetector, 0);
+	trTree_Event       = nEvent;
+
+	// find highest hit channel
+	UInt_t  highestChannel    = 0;
+	Float_t highestSignal     = -9999.;
+	UInt_t  highestChannelCMC = 0;
+	Float_t highestSignalCMC  = -9999.;
+	for (UInt_t currentChannel = 0; currentChannel < TPlaneProperties::getNChannels(subjectDetector); currentChannel++) {
+		if (!TPlaneProperties::IsValidChannel(subjectDetector, currentChannel)) continue;
+		if (settings->isDet_channel_screened (subjectDetector, currentChannel)) continue;
+		if (!TPlaneProperties::IsValidChannel(subjectDetector, currentChannel-1)) continue;
+		if (settings->isDet_channel_screened (subjectDetector, currentChannel-1)) continue;
+		if (!TPlaneProperties::IsValidChannel(subjectDetector, currentChannel+1)) continue;
+		if (settings->isDet_channel_screened (subjectDetector, currentChannel+1)) continue;
+		Float_t currentSignal    = eventReader->getSignal(subjectDetector, currentChannel, false, false);
+		Float_t currentSignalCMC = eventReader->getSignal(subjectDetector, currentChannel, true , false);
+		if (currentSignal > highestSignal) {
+			highestSignal  = currentSignal;
+			highestChannel = currentChannel;
+		}
+		if (currentSignal > highestSignalCMC) {
+			highestSignalCMC  = currentSignal;
+			highestChannelCMC = currentChannel;
+		}
+	}
+
+	// find adjacent highest channel
+	int adjacentDirection, adjacentDirectionCMC;
+	if (eventReader->getSignal(subjectDetector, highestChannel+1, false, false) > eventReader->getSignal(subjectDetector, highestChannel-1, false, false)) adjacentDirection =  1;
+	else                                                                                                                                                   adjacentDirection = -1;
+
+	// loop over channels around highest channel
+	Int_t channelIterator    = highestChannel;
+	Int_t channelIteratorCMC = highestChannelCMC;
+	for (UInt_t i = 0; i < trTree_nMaxStrips; i++) {
+		adjacentDirection    *= -1;
+		adjacentDirectionCMC *= -1;
+		channelIterator      += adjacentDirection    * i;
+		channelIteratorCMC   += adjacentDirectionCMC * i;
+		trTree_HighestStripADC                 [i] = eventReader->getAdcValue     (subjectDetector, channelIterator                 );
+		trTree_HighestStripPedestal            [i] = eventReader->getPedestalMean (subjectDetector, channelIterator   , false       );
+		trTree_HighestStripPedestalSigma       [i] = eventReader->getPedestalSigma(subjectDetector, channelIterator   , false       );
+		trTree_HighestStripSignal              [i] = eventReader->getSignal       (subjectDetector, channelIterator   , false, false);
+		trTree_HighestStripADCCMNcorr          [i] = eventReader->getAdcValue     (subjectDetector, channelIteratorCMC              );
+		trTree_HighestStripPedestalCMNcorr     [i] = eventReader->getPedestalMean (subjectDetector, channelIteratorCMC, true        );
+		trTree_HighestStripPedestalSigmaCMNcorr[i] = eventReader->getPedestalSigma(subjectDetector, channelIteratorCMC, true        );
+		trTree_HighestStripSignalCMNcorr       [i] = eventReader->getSignal       (subjectDetector, channelIteratorCMC, true , false);
+		trTree_HighestStripSNR                 [i] = trTree_HighestStripSignal       [i]/trTree_HighestStripPedestalSigma       [i];
+		trTree_HighestStripSNRCMNcorr          [i] = trTree_HighestStripSignalCMNcorr[i]/trTree_HighestStripPedestalSigmaCMNcorr[i];
+	}
+
+	if (!trTree_ValidTrack) {
+		transparentTree->Fill();
+		return;
+	}
+
+	// add channels around predicted position
     UInt_t firstChannel;
     int direction;
     direction = getSignedChannelNumber(positionInDetSystemChannelSpace);
     firstChannel = TMath::Abs(direction);
     if (direction < 0) direction = -1;
     else               direction = 1;
-	trTree_RunNumber   = settings->getRunNumber();
-	trTree_tseed       = settings->getClusterSeedFactor(subjectDetector, 0);
-	trTree_thit        = settings->getClusterHitFactor (subjectDetector, 0);
-	trTree_Event       = nEvent;
 	trTree_Direction   = direction;
 	trTree_NStrips     = trTree_nMaxStrips;
 	trTree_CenterStrip = firstChannel;
@@ -2032,6 +2109,9 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
             //		if (eventReader->useForAnalysis() == 0) {
             if (verbosity > 6) printEvent();
             noValidTrack++;
+			this->resetTransparentTree();
+			trTree_ValidTrack = false;
+			this->fillTransparentTree();
             continue;
         }
         Float_t fiducialValueX = eventReader->getFiducialValueX();
@@ -2090,6 +2170,8 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         //		cout<<"analyse("<<nEvent<<");"<<endl;
         nAnalyzedEvents++;
         this->fillHistograms();
+		this->resetTransparentTree();
+		trTree_ValidTrack = true;
 		this->fillTransparentTree();
         if (verbosity > 4) printEvent();
         //		cout<<"push Back("<<nEvent<<");"<<endl;
