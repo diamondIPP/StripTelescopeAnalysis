@@ -1585,6 +1585,14 @@ void TSettings::setTaylor_speed_throttle(Int_t Taylor_speed_throttle)
 	this->Taylor_speed_throttle = Taylor_speed_throttle;
 }
 
+Float_t TSettings::get_Pedestal_Hit_Factor(UInt_t det) const
+{
+	if (TPlaneProperties::isDiamondDetector(det))
+		return getDi_Pedestal_Hit_Factor();
+	else
+		return getSi_Pedestal_Hit_Factor();
+}
+
 Float_t TSettings::getDi_Pedestal_Hit_Factor() const
 {
 	return Di_Pedestal_Hit_Factor;

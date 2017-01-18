@@ -137,6 +137,7 @@ public:
 	Int_t getPedestalSildingLength(){return getIter_Size();};
 	Int_t getTaylor_speed_throttle() const;
 	Int_t getDia_input() const;
+	Float_t get_Pedestal_Hit_Factor(UInt_t det) const;
 	Float_t getDi_Pedestal_Hit_Factor() const;
 	Float_t getSi_Pedestal_Hit_Factor() const;
 	Int_t getDO_CMC() const;
