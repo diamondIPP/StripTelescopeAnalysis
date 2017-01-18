@@ -239,10 +239,19 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		TCluster clusteredCluster = eventReader->getCluster(subjectDetector,0);
 		UInt_t clusterSize = clusteredCluster.size();
 		Float_t residualTranspEtaCor;
+
+		// use only hits
 		if (!cmCorrected) residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegrals            [1]);
 		else              residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaCMNcorrectedIntegrals[1]);
-		hResidualTranspEtaCorrectedVsClusterSize_clustered->Fill(residualTranspEtaCor, clusterSize);
+		hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered->Fill(residualTranspEtaCor, clusterSize);
 		Float_t residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegral_clustered);
+		hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
+
+		// include adjacent channels
+		if (!cmCorrected) residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaIntegrals            [1]);
+		else              residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaCMNcorrectedIntegrals[1]);
+		hResidualTranspEtaCorrectedVsClusterSize_clustered->Fill(residualTranspEtaCor, clusterSize);
+		residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaIntegral_clustered);
 		hResidualEtaCorrected_clustered             ->Fill(residualEtaCor);
 		hResidualEtaCorrectedVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
     } // end event loop
@@ -2650,6 +2659,16 @@ void TTransparentAnalysis::saveClusteredHistos(){
 		delete hResidualTranspEtaCorrectedVsClusterSize_clustered    ;
 		hResidualTranspEtaCorrectedVsClusterSize_clustered     = 0;
 	}
+	if (hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered    ) {
+		histSaver->SaveHistogram(hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered    );
+		delete hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered    ;
+		hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered     = 0;
+	}
+	if (hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered    ) {
+		histSaver->SaveHistogram(hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered    );
+		delete hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered    ;
+		hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered     = 0;
+	}
 }
 
 void TTransparentAnalysis::savePedestalHistos() {
@@ -3112,6 +3131,16 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 	hResidualTranspEtaCorrectedVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
 	hResidualTranspEtaCorrectedVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
 	hResidualTranspEtaCorrectedVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered";
+	hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
+	hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
+	hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered";
+	hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
+	hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
+	hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
 
 }
 
