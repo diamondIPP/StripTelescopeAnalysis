@@ -666,10 +666,11 @@ void TAnalysisOfClustering::initialiseHistos()
         stringstream histName;
         histName<<"hPulseHeightDistribution_"<<TPlaneProperties::getStringForDetector(det);
         float max=0;
-        if(det==TPlaneProperties::getDetDiamond())
-            max = 4098;
-        else max = 512;
-        hPHDistribution[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),512,0,max,10,-.5,9.5);
+//        if(det==TPlaneProperties::getDetDiamond())
+//            max = 4098;
+//        else max = 512;
+		max = settings->getPulse_height_max(det);
+        hPHDistribution[det] = new TH2F(histName.str().c_str(), histName.str().c_str(), settings->getPulse_height_num_bins(), 0, max, 10, -.5, 9.5);
         histName.str("");
         histName<<"hPHDistIncreasingClustersize_"<<TPlaneProperties::getStringForDetector(det);
         hPHDistIncreasingClustersize[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),

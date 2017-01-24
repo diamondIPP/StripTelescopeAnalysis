@@ -70,7 +70,7 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 
 void TAnalysisOfSelection::initialiseHistos()
 {
-	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
+	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster", "hLandauDiamond_OneCluster", settings->getPulse_height_num_bins(), 0, settings->getPulse_height_max(8), 8, 0.5, 8.5);
 	histoLandauDistribution->GetXaxis()->SetTitle("Charge in ADC counts");
 	histoLandauDistribution->GetYaxis()->SetTitle("ClusterSize");
 
