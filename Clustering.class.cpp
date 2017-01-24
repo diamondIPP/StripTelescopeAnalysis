@@ -79,9 +79,10 @@ class Clustering {
       void ClusterEvent(bool verbose = 0);
 	void ClusterEventSeeds(bool verbose = 0);
       void BookHistograms();
-      void SaveHistogram(TH1F* histo);
+      void SaveHistogram(TH1F* histo, bool fitGauss = 0);
       void SaveHistogram(TH2F* histo);
-      void SaveHistogramPNG(TH1F* histo);
+	void SaveHistogramPNG(TH1F* histo);
+	void SaveHistogramFitGaussPNG(TH1F* histo);
       void SaveHistogramPNG(TH2F* histo);
       void SaveHistogramROOT(TH1F* histo);
       void SaveHistogramROOT(TH2F* histo);
@@ -153,7 +154,7 @@ class Clustering {
          
          
       //Alignment
-      vector<TDiamondTrack> tracks, tracks_fidcut;
+      vector<TDiamondTrack> tracks, tracks_fidcut, tracks_transparent;
       vector<bool> tracks_mask, tracks_fidcut_mask;
 	Float_t alignment_chi2;
 	vector<Float_t> dia_offset;
@@ -260,14 +261,43 @@ class Clustering {
 	TH1F* histo_transparentclustering_eta;
 	TH1F* histo_transparentclustering_hitdiff;
     TH2F* histo_transparentclustering_hitdiff_scatter;
+	TH1F* histo_transparentclustering_residuals[10];	// index: 0 distance to center of hit channel, 1 distance to charge weighted mean of closest two channels, 2 distance to charge weighted mean of closest three channels, ..
+	TH2F* histo_transparentclustering_residuals_scatter[10];	// index: 0 distance to center of hit channel, 1 distance to charge weighted mean of closest two channels, 2 distance to charge weighted mean of closest three channels, ..
+	TH1F* histo_transparentclustering_residuals_largest_hit[10];
+	TH2F* histo_transparentclustering_residuals_largest_hit_scatter[10];
+	TH1F* histo_transparentclustering_residuals_2largest_hits;
+	TH2F* histo_transparentclustering_residuals_2largest_hits_scatter;
     TH1F* histo_transparentclustering_2Channel_PulseHeight;
+	TH1F* histo_transparentclustering_SNR_vs_channel;
+	TH1F* histo_transparentclustering_chi2X;
+	TH1F* histo_transparentclustering_chi2Y;
 	
 	TH2F* histo_scatter_autofidcut;
+	
+	TH2F *histo_chi2_vs_deltaX[4];
+	TH2F *histo_chi2_vs_partX[4];
+	TH2F *histo_chi2_vs_deltaY[4];
+	TH2F *histo_chi2_vs_partY[4];
+	
+	TH1F *histo_pulseheight_sigma[8];
+	TH1F *histo_pulseheight_sigma_second[8];
+	TH1F *histo_pulseheight_sigma125[8];
+	TH1F *histo_second_biggest_hit_direction[8];
+	TH1F *histo_pulseheight_sigma_second_left[8];
+	TH1F *histo_pulseheight_sigma_second_right[8];
+	TH1F *histo_biggest_hit_map[8];
+	TH1F *histo_pulseheight_left_sigma[8];
+	TH1F *histo_pulseheight_left_sigma_second[8];
+	TH1F *histo_pulseheight_right_sigma[8];
+	TH1F *histo_pulseheight_right_sigma_second[8];
+
 	
 	  FidCutRegion* FCR[4];
       
       //added for handling of overall verbosity
       int Verbosity;
+	
+	Float_t dianoise_sigma[2];
 	
    private:
       
@@ -345,6 +375,10 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    
    //Number of slices (<1 to disable)
    etavsq_n_landau_slices = 0;
+	
+	for (int i=0; i<2; i++) {
+		dianoise_sigma[i] = 1;
+	}
    
    
    //Alignment
@@ -358,11 +392,11 @@ Clustering::Clustering(unsigned int RunNumber, string RunDescription) {
    detectorD3Z = 19.625; // by definition
    detectorDiaZ = 10.2; // by definition
    //compact geometry; edges: 0, 2.40, 6, 12, 14.40 (si modules 2.40cm wide, x/y planes spaced 2mm, D0/D1 interspacing 9mm, dia module 1.9cm wide)
-   //Double_t detectorD0Z = 0.725; // by definition
-   //Double_t detectorD1Z = 1.625; // by definition
-   //Double_t detectorD2Z = 12.725; // by definition
-   //Double_t detectorD3Z = 13.625; // by definition
-   //Double_t detectorDiaZ = 7.2; // by definition
+//   detectorD0Z = 0.725; // by definition
+//   detectorD1Z = 1.625; // by definition
+//   detectorD2Z = 12.725; // by definition
+//   detectorD3Z = 13.625; // by definition
+//   detectorDiaZ = 7.2; // by definition
 	
 	//cut tracks with chi2 > alignment_chi2
 	alignment_chi2 = 9999.;
@@ -1149,11 +1183,16 @@ void Clustering::ClusterEvent(bool verbose) {
    int previouschan, currentchan, hasaseed, hasmasked, previousseed, isgoldengate, islumpy, peakchan, hassaturated;
    float peakchan_psadc, currentchan_psadc, previouschan_psadc;
    
+//	cout << "start loop over detectors.." << endl;
+	
    for(int det=0; det<9; det++) {
       hits.clear();
       cluster.clear();
       clusters.clear();
-      
+//	   cout << "1" << endl;
+	   int biggest_hit_channel = 0;
+	   int second_biggest_hit_channel = 0;
+//	   verbose = true;
       //look for hits
       if(verbose) cout<<endl<<endl<<"Detector "<<det<<" hits: ";
       for(int i=0; i<(int)Det_NChannels[det]; i++) {
@@ -1173,7 +1212,81 @@ void Clustering::ClusterEvent(bool verbose) {
                cout<<", ";
             }
          }
+		  
+		  // look for biggest hit in silicon plane
+//		  cout << endl;
+//		  cout << "i = " << i << endl;
+//		  cout << "biggest_hit_channel = " << biggest_hit_channel << endl;
+//		  cout << "det = " << det << endl;
+//		  cout << "Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])" << Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) << endl;
+//		  cout << "Det_ADC[det][i]-Det_PedMean[det][i]" << Det_ADC[det][i]-Det_PedMean[det][i] << endl;
+//		  cout << "Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]" << Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel] << endl;
+//		  cout << "" <<  << endl;
+//		  cout << "" <<  << endl;
+//		  cout << "" <<  << endl;
+		  if (det < 8 && i < 253 && i > 70 && i < 170) {
+			  if (Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) && Det_ADC[det][i] < 255) {
+				  if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]/* && Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i])*/) {
+					  second_biggest_hit_channel = biggest_hit_channel;
+					  biggest_hit_channel = i;
+				  }
+				  else {
+					  if (Det_ADC[det][i]-Det_PedMean[det][i] > Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) {
+						  second_biggest_hit_channel = i;
+					  }
+				  }
+			  }
+			  else {
+				  if (Det_ADC[det][i] < 255) {
+					  cout << endl << endl;
+					  cout << "current_event: " << current_event << " Det" << det << "\tchannel: " << i << " Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]): " << Det_channel_screen[det].CheckChannel((int)Det_Channels[det][i]) << endl;
+					  cout << "Det_ADC: " << (int)Det_ADC[det][i] << "\tDet_PedMean: " << Det_PedMean[det][i] << "\tDetPedWidth: " << Det_PedWidth[det][i] << "\tPH: " << (Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i] << endl;
+				  }
+			  }
+			  if ((int)Det_Channels[det][i] == 125 && Det_ADC[det][i] < 255) {
+				  histo_pulseheight_sigma125[det]->Fill((Det_ADC[det][i]-Det_PedMean[det][i]) / Det_PedWidth[det][i]);
+			  }
+		  }
+//		  cout << "done." << endl;
       }
+//	   cout << "filling histogram.." << endl;
+	   // plot PH of biggest hit in units of sigma
+	   if (det < 8 && biggest_hit_channel != 0 && biggest_hit_channel > 71 && biggest_hit_channel < 169 && Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel] > 10 * Det_PedWidth[det][biggest_hit_channel] && biggest_hit_channel != 127 && biggest_hit_channel != 128) {
+		   
+		   // look for second biggest hit next to biggest hit
+		   if (Det_ADC[det][biggest_hit_channel-1]-Det_PedMean[det][biggest_hit_channel-1] < Det_ADC[det][biggest_hit_channel+1]-Det_PedMean[det][biggest_hit_channel+1]) {
+			   second_biggest_hit_channel = biggest_hit_channel + 1;
+			   histo_second_biggest_hit_direction[det]->Fill(1.);
+			   histo_pulseheight_sigma_second_right[det]->Fill((Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) / Det_PedWidth[det][second_biggest_hit_channel]);
+		   }
+		   else {
+			   second_biggest_hit_channel = biggest_hit_channel - 1;
+			   histo_second_biggest_hit_direction[det]->Fill(-1.);
+			   histo_pulseheight_sigma_second_left[det]->Fill((Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) / Det_PedWidth[det][second_biggest_hit_channel]);
+		   }
+		   
+		   histo_pulseheight_sigma[det]->Fill((Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]) / Det_PedWidth[det][biggest_hit_channel]);
+		   histo_pulseheight_sigma_second[det]->Fill((Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) / Det_PedWidth[det][second_biggest_hit_channel]);
+		   
+		   if (biggest_hit_channel < 128) {
+			   histo_pulseheight_left_sigma[det]->Fill((Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]) / Det_PedWidth[det][biggest_hit_channel]);
+			   histo_pulseheight_left_sigma_second[det]->Fill((Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) / Det_PedWidth[det][second_biggest_hit_channel]);
+		   }
+		   else {
+			   histo_pulseheight_right_sigma[det]->Fill((Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]) / Det_PedWidth[det][biggest_hit_channel]);
+			   histo_pulseheight_right_sigma_second[det]->Fill((Det_ADC[det][second_biggest_hit_channel]-Det_PedMean[det][second_biggest_hit_channel]) / Det_PedWidth[det][second_biggest_hit_channel]);
+		   }
+		   
+		   histo_biggest_hit_map[det]->Fill(biggest_hit_channel);
+		   
+		   if ((Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]) / Det_PedWidth[det][biggest_hit_channel] > 10 && (Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]) / Det_PedWidth[det][biggest_hit_channel] < 20 && false) {
+			   cout << endl << endl;
+			   cout << "current_event: " << current_event << " Det" << det << "\tchannel: " << biggest_hit_channel << endl;
+			   cout << "Det_ADC: " << (int)Det_ADC[det][biggest_hit_channel] << "\tDet_PedMean: " << Det_PedMean[det][biggest_hit_channel] << "\tDetPedWidth: " << Det_PedWidth[det][biggest_hit_channel] << "\tPH: " << (Det_ADC[det][biggest_hit_channel]-Det_PedMean[det][biggest_hit_channel]) / Det_PedWidth[det][biggest_hit_channel] << endl;
+		   }
+	   }
+	   
+	   
       if(verbose) {
          cout<<endl<<"Channels screened: ";
          for(int i=0; i<256; i++) if(!Det_channel_screen[det].CheckChannel(i)) cout<<i<<", ";
@@ -1415,6 +1528,8 @@ void Clustering::ClusterEvent(bool verbose) {
       }
    }//end loop over detectors
    
+	
+	
    //get ready for next event
    current_event++;
    
@@ -1820,8 +1935,9 @@ void SetDuckStyle() {
 	cout << "Using DuckStyle" << endl;
 }
 
-void Clustering::SaveHistogram(TH1F* histo) {
-   SaveHistogramPNG(histo);
+void Clustering::SaveHistogram(TH1F* histo, bool fitGauss) {
+	if (fitGauss) SaveHistogramFitGaussPNG(histo);
+   else SaveHistogramPNG(histo);
    SaveHistogramROOT(histo);
 }
 
@@ -1864,11 +1980,32 @@ void Clustering::SaveHistogramPDF(TH2F* histo) {
 void Clustering::SaveHistogramPNG(TH1F* histo) {
    TCanvas plots_canvas("plots_canvas","plots_canvas");
    plots_canvas.cd();
+	histo->SetMinimum(0.);
    histo->Draw();
    pt->Draw();
    ostringstream plot_filename;
    plot_filename << plots_path << histo->GetName() << ".png";
    plots_canvas.Print(plot_filename.str().c_str());
+}
+
+void Clustering::SaveHistogramFitGaussPNG(TH1F* histo) {
+	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
+	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
+	//TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);
+	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
+	//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
+	TF1 histofitx("histofitx","gaus",histo->GetMean()-2*histo->GetRMS(),histo->GetMean()+2*histo->GetRMS());
+	histofitx.SetLineColor(kBlue);
+	histo->Fit(&histofitx,"rq");
+	histo->Draw();
+	
+	TCanvas plots_canvas("plots_canvas","plots_canvas");
+	plots_canvas.cd();
+	histo->Draw();
+	pt->Draw();
+	ostringstream plot_filename;
+	plot_filename << plots_path << histo->GetName() << ".png";
+	plots_canvas.Print(plot_filename.str().c_str());
 }
 
 void Clustering::SaveHistogramROOT(TH1F* histo) {
@@ -1948,9 +2085,10 @@ void Clustering::DrawHistograms() {
    string tempname = "tempname";
    for(int cut=0; cut<2; cut++) if(histoswitch_dianoise[cut]) {
       tempname += "0";
-      histofit_dianoise[cut] = new TF1(tempname.c_str(),"gaus",histo_dianoise[cut]->GetMean()-histo_dianoise[cut]->GetRMS(),histo_dianoise[cut]->GetMean()+histo_dianoise[cut]->GetRMS());
+      histofit_dianoise[cut] = new TF1(tempname.c_str(),"gaus",histo_dianoise[cut]->GetMean()-2*histo_dianoise[cut]->GetRMS(),histo_dianoise[cut]->GetMean()+2*histo_dianoise[cut]->GetRMS());
       histofit_dianoise[cut]->SetLineColor(kBlue);
       histo_dianoise[cut]->Fit(tempname.c_str(),"r"); // fit option "r" restricts the range of the fit
+	   dianoise_sigma[cut] = histofit_dianoise[cut]->GetParameter(2);
       SaveHistogramPNG(histo_dianoise[cut]);
    }
     
@@ -2164,8 +2302,29 @@ void Clustering::BookHistograms() {
       for(int det=0; det<8; det++)
          if(clustered_event.GetCluster(det,0)->highest2_centroid==-1)
             zero_suppressed_track=1;
+	   
+	   int totalhits = clustered_event.GetCluster(0,0)->GetNHits() +
+	   clustered_event.GetCluster(2,0)->GetNHits() +
+	   clustered_event.GetCluster(4,0)->GetNHits() +
+	   clustered_event.GetCluster(6,0)->GetNHits() +
+	   clustered_event.GetCluster(1,0)->GetNHits() +
+	   clustered_event.GetCluster(3,0)->GetNHits() +
+	   clustered_event.GetCluster(5,0)->GetNHits() +
+	   clustered_event.GetCluster(7,0)->GetNHits();
          
-      if(zero_suppressed_track) //skip events where pedestal calc zero-suppression prevents eta correction
+      if(zero_suppressed_track
+		 ||
+		 totalhits < 8 || totalhits > 16
+//		 ||
+//		 clustered_event.GetCluster(0,0)->GetNHits() != 2 ||
+//		 clustered_event.GetCluster(2,0)->GetNHits() != 2 ||
+//		 clustered_event.GetCluster(4,0)->GetNHits() != 2 ||
+//		 clustered_event.GetCluster(6,0)->GetNHits() != 2 ||
+//		 clustered_event.GetCluster(1,0)->GetNHits() != 2 ||
+//		 clustered_event.GetCluster(3,0)->GetNHits() != 2 ||
+//		 clustered_event.GetCluster(5,0)->GetNHits() != 2 ||
+//		 clustered_event.GetCluster(7,0)->GetNHits() != 2
+		 ) //skip events where pedestal calc zero-suppression prevents eta correction
          counter_alignment_tracks_zero_suppressed++;
       
       else { //if track is ok, then add to list of alignment tracks
@@ -2195,6 +2354,11 @@ void Clustering::BookHistograms() {
          }
          else
             Dia.SetX(-1);
+		  
+		  if (fiducial_track) {
+			  TDiamondTrack track_transparent = TDiamondTrack(clustered_event.event_number,D0,D1,D2,D3);
+			  tracks_transparent.push_back(track_transparent);
+		  }
          
          TDiamondTrack track = TDiamondTrack(clustered_event.event_number,D0,D1,D2,D3);
          //track.SetEventNumber(Silicon_tracks[t].Event_number);
@@ -2209,6 +2373,7 @@ void Clustering::BookHistograms() {
    }//end if one_and_only_one
    
    uint nclusters;
+	bool uncommonClusterSize = false;
    //loop over detectors
    for(int det=0; det<9; det++) {
       
@@ -2336,11 +2501,18 @@ void Clustering::BookHistograms() {
          //-------------------
          
          if(one_and_only_one) {
+			 
+			 if ((det == 0 || det == 2) && nhits != 2) {
+				 uncommonClusterSize = true;
+			 }
             
             //cluster size frequency
-            histo_clustersizefreq[det][0][0]->Fill(nhits);
-            histo_clustersizefreq[det][1][0]->Fill(nseeds);
-            histo_clustersizefreq[det][2][0]->Fill(stddev);
+			 if (!uncommonClusterSize || true) {
+				 histo_clustersizefreq[det][0][0]->Fill(nhits);
+				 histo_clustersizefreq[det][1][0]->Fill(nseeds);
+				 histo_clustersizefreq[det][2][0]->Fill(stddev);
+			 }
+            
             
             //transparent eta
             if(eta!=-1) {
@@ -2914,6 +3086,112 @@ and plot the second 100k events,
 //sequentially cluster all events
 void Clustering::ClusterRun(bool plots) {
    
+	
+	histo_pulseheight_sigma[0] = new TH1F("PulseHeightD0XBiggestHitChannelInSigma","PulseHeightD0XBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma[1] = new TH1F("PulseHeightD0YBiggestHitChannelInSigma","PulseHeightD0YBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma[2] = new TH1F("PulseHeightD1XBiggestHitChannelInSigma","PulseHeightD1XBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma[3] = new TH1F("PulseHeightD1YBiggestHitChannelInSigma","PulseHeightD1YBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma[4] = new TH1F("PulseHeightD2XBiggestHitChannelInSigma","PulseHeightD2XBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma[5] = new TH1F("PulseHeightD2YBiggestHitChannelInSigma","PulseHeightD2YBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma[6] = new TH1F("PulseHeightD3XBiggestHitChannelInSigma","PulseHeightD3XBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma[7] = new TH1F("PulseHeightD3YBiggestHitChannelInSigma","PulseHeightD3YBiggestHitChannelInSigma",250,0.,50.);
+	
+	histo_pulseheight_sigma_second[0] = new TH1F("PulseHeightD0XSecondBiggestHitChannelInSigma","PulseHeightD0XSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma_second[1] = new TH1F("PulseHeightD0YSecondBiggestHitChannelInSigma","PulseHeightD0YSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma_second[2] = new TH1F("PulseHeightD1XSecondBiggestHitChannelInSigma","PulseHeightD1XSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma_second[3] = new TH1F("PulseHeightD1YSecondBiggestHitChannelInSigma","PulseHeightD1YSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma_second[4] = new TH1F("PulseHeightD2XSecondBiggestHitChannelInSigma","PulseHeightD2XSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma_second[5] = new TH1F("PulseHeightD2YSecondBiggestHitChannelInSigma","PulseHeightD2YSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma_second[6] = new TH1F("PulseHeightD3XSecondBiggestHitChannelInSigma","PulseHeightD3XSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_sigma_second[7] = new TH1F("PulseHeightD3YSecondBiggestHitChannelInSigma","PulseHeightD3YSecondBiggestHitChannelInSigma",250,0.,50.);
+	
+	histo_pulseheight_sigma125[0] = new TH1F("PulseHeightD0X78HitChannelInSigma","PulseHeightD0X78HitChannelInSigma",250,-10.,30.);
+	histo_pulseheight_sigma125[1] = new TH1F("PulseHeightD0Y78HitChannelInSigma","PulseHeightD0Y78HitChannelInSigma",250,-10.,30.);
+	histo_pulseheight_sigma125[2] = new TH1F("PulseHeightD1X78HitChannelInSigma","PulseHeightD1X78HitChannelInSigma",250,-10.,30.);
+	histo_pulseheight_sigma125[3] = new TH1F("PulseHeightD1Y78HitChannelInSigma","PulseHeightD1Y78HitChannelInSigma",250,-10.,30.);
+	histo_pulseheight_sigma125[4] = new TH1F("PulseHeightD2X78HitChannelInSigma","PulseHeightD2X78HitChannelInSigma",250,-10.,30.);
+	histo_pulseheight_sigma125[5] = new TH1F("PulseHeightD2Y78HitChannelInSigma","PulseHeightD2Y78HitChannelInSigma",250,-10.,30.);
+	histo_pulseheight_sigma125[6] = new TH1F("PulseHeightD3X78HitChannelInSigma","PulseHeightD3X78HitChannelInSigma",250,-10.,30.);
+	histo_pulseheight_sigma125[7] = new TH1F("PulseHeightD3Y78HitChannelInSigma","PulseHeightD3Y78HitChannelInSigma",250,-10.,30.);
+	
+	histo_second_biggest_hit_direction[0] = new TH1F("D0XSecondBiggestHitMinusBiggestHitPosition","D0XSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	histo_second_biggest_hit_direction[1] = new TH1F("D0YSecondBiggestHitMinusBiggestHitPosition","D0YSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	histo_second_biggest_hit_direction[2] = new TH1F("D1XSecondBiggestHitMinusBiggestHitPosition","D1XSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	histo_second_biggest_hit_direction[3] = new TH1F("D1YSecondBiggestHitMinusBiggestHitPosition","D1YSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	histo_second_biggest_hit_direction[4] = new TH1F("D2XSecondBiggestHitMinusBiggestHitPosition","D2XSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	histo_second_biggest_hit_direction[5] = new TH1F("D2YSecondBiggestHitMinusBiggestHitPosition","D2YSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	histo_second_biggest_hit_direction[6] = new TH1F("D3XSecondBiggestHitMinusBiggestHitPosition","D3XSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	histo_second_biggest_hit_direction[7] = new TH1F("D3YSecondBiggestHitMinusBiggestHitPosition","D3YSecondBiggestHitMinusBiggestHitPosition",2,-2.,2.);
+	
+	histo_pulseheight_sigma_second_left[0] = new TH1F("PulseHeightD0XSecondBiggestHitChannelInSigmaLeft","PulseHeightD0XSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	histo_pulseheight_sigma_second_left[1] = new TH1F("PulseHeightD0YSecondBiggestHitChannelInSigmaLeft","PulseHeightD0YSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	histo_pulseheight_sigma_second_left[2] = new TH1F("PulseHeightD1XSecondBiggestHitChannelInSigmaLeft","PulseHeightD1XSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	histo_pulseheight_sigma_second_left[3] = new TH1F("PulseHeightD1YSecondBiggestHitChannelInSigmaLeft","PulseHeightD1YSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	histo_pulseheight_sigma_second_left[4] = new TH1F("PulseHeightD2XSecondBiggestHitChannelInSigmaLeft","PulseHeightD2XSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	histo_pulseheight_sigma_second_left[5] = new TH1F("PulseHeightD2YSecondBiggestHitChannelInSigmaLeft","PulseHeightD2YSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	histo_pulseheight_sigma_second_left[6] = new TH1F("PulseHeightD3XSecondBiggestHitChannelInSigmaLeft","PulseHeightD3XSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	histo_pulseheight_sigma_second_left[7] = new TH1F("PulseHeightD3YSecondBiggestHitChannelInSigmaLeft","PulseHeightD3YSecondBiggestHitChannelInSigmaLeft",250,0.,50.);
+	
+	histo_pulseheight_sigma_second_right[0] = new TH1F("PulseHeightD0XSecondBiggestHitChannelInSigmaRight","PulseHeightD0XSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	histo_pulseheight_sigma_second_right[1] = new TH1F("PulseHeightD0YSecondBiggestHitChannelInSigmaRight","PulseHeightD0YSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	histo_pulseheight_sigma_second_right[2] = new TH1F("PulseHeightD1XSecondBiggestHitChannelInSigmaRight","PulseHeightD1XSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	histo_pulseheight_sigma_second_right[3] = new TH1F("PulseHeightD1YSecondBiggestHitChannelInSigmaRight","PulseHeightD1YSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	histo_pulseheight_sigma_second_right[4] = new TH1F("PulseHeightD2XSecondBiggestHitChannelInSigmaRight","PulseHeightD2XSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	histo_pulseheight_sigma_second_right[5] = new TH1F("PulseHeightD2YSecondBiggestHitChannelInSigmaRight","PulseHeightD2YSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	histo_pulseheight_sigma_second_right[6] = new TH1F("PulseHeightD3XSecondBiggestHitChannelInSigmaRight","PulseHeightD3XSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	histo_pulseheight_sigma_second_right[7] = new TH1F("PulseHeightD3YSecondBiggestHitChannelInSigmaRight","PulseHeightD3YSecondBiggestHitChannelInSigmaRight",250,0.,50.);
+	
+	histo_biggest_hit_map[0] = new TH1F("D0XBiggestHitMap","D0XBiggestHitMap",256,0.,255.);
+	histo_biggest_hit_map[1] = new TH1F("D0YBiggestHitMap","D0YBiggestHitMap",250,0.,255.);
+	histo_biggest_hit_map[2] = new TH1F("D1XBiggestHitMap","D1XBiggestHitMap",250,0.,255.);
+	histo_biggest_hit_map[3] = new TH1F("D1YBiggestHitMap","D1YBiggestHitMap",250,0.,255.);
+	histo_biggest_hit_map[4] = new TH1F("D2XBiggestHitMap","D2XBiggestHitMap",250,0.,255.);
+	histo_biggest_hit_map[5] = new TH1F("D2YBiggestHitMap","D2YBiggestHitMap",250,0.,255.);
+	histo_biggest_hit_map[6] = new TH1F("D3XBiggestHitMap","D3XBiggestHitMap",250,0.,255.);
+	histo_biggest_hit_map[7] = new TH1F("D3YBiggestHitMap","D3YBiggestHitMap",250,0.,255.);
+	
+	// -- left chip --
+	
+	histo_pulseheight_left_sigma[0] = new TH1F("PulseHeightD0XLeftBiggestHitChannelInSigma","PulseHeightD0XLeftBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma[1] = new TH1F("PulseHeightD0YLeftBiggestHitChannelInSigma","PulseHeightD0YLeftBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma[2] = new TH1F("PulseHeightD1XLeftBiggestHitChannelInSigma","PulseHeightD1XLeftBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma[3] = new TH1F("PulseHeightD1YLeftBiggestHitChannelInSigma","PulseHeightD1YLeftBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma[4] = new TH1F("PulseHeightD2XLeftBiggestHitChannelInSigma","PulseHeightD2XLeftBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma[5] = new TH1F("PulseHeightD2YLeftBiggestHitChannelInSigma","PulseHeightD2YLeftBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma[6] = new TH1F("PulseHeightD3XLeftBiggestHitChannelInSigma","PulseHeightD3XLeftBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma[7] = new TH1F("PulseHeightD3YLeftBiggestHitChannelInSigma","PulseHeightD3YLeftBiggestHitChannelInSigma",250,0.,50.);
+	
+	histo_pulseheight_left_sigma_second[0] = new TH1F("PulseHeightD0XLeftSecondBiggestHitChannelInSigma","PulseHeightD0XLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma_second[1] = new TH1F("PulseHeightD0YLeftSecondBiggestHitChannelInSigma","PulseHeightD0YLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma_second[2] = new TH1F("PulseHeightD1XLeftSecondBiggestHitChannelInSigma","PulseHeightD1XLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma_second[3] = new TH1F("PulseHeightD1YLeftSecondBiggestHitChannelInSigma","PulseHeightD1YLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma_second[4] = new TH1F("PulseHeightD2XLeftSecondBiggestHitChannelInSigma","PulseHeightD2XLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma_second[5] = new TH1F("PulseHeightD2YLeftSecondBiggestHitChannelInSigma","PulseHeightD2YLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma_second[6] = new TH1F("PulseHeightD3XLeftSecondBiggestHitChannelInSigma","PulseHeightD3XLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_left_sigma_second[7] = new TH1F("PulseHeightD3YLeftSecondBiggestHitChannelInSigma","PulseHeightD3YLeftSecondBiggestHitChannelInSigma",250,0.,50.);
+	
+	// -- right chip --
+	
+	histo_pulseheight_right_sigma[0] = new TH1F("PulseHeightD0XRightBiggestHitChannelInSigma","PulseHeightD0XRightBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma[1] = new TH1F("PulseHeightD0YRightBiggestHitChannelInSigma","PulseHeightD0YRightBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma[2] = new TH1F("PulseHeightD1XRightBiggestHitChannelInSigma","PulseHeightD1XRightBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma[3] = new TH1F("PulseHeightD1YRightBiggestHitChannelInSigma","PulseHeightD1YRightBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma[4] = new TH1F("PulseHeightD2XRightBiggestHitChannelInSigma","PulseHeightD2XRightBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma[5] = new TH1F("PulseHeightD2YRightBiggestHitChannelInSigma","PulseHeightD2YRightBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma[6] = new TH1F("PulseHeightD3XRightBiggestHitChannelInSigma","PulseHeightD3XRightBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma[7] = new TH1F("PulseHeightD3YRightBiggestHitChannelInSigma","PulseHeightD3YRightBiggestHitChannelInSigma",250,0.,50.);
+	
+	histo_pulseheight_right_sigma_second[0] = new TH1F("PulseHeightD0XRightSecondBiggestHitChannelInSigma","PulseHeightD0XRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma_second[1] = new TH1F("PulseHeightD0YRightSecondBiggestHitChannelInSigma","PulseHeightD0YRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma_second[2] = new TH1F("PulseHeightD1XRightSecondBiggestHitChannelInSigma","PulseHeightD1XRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma_second[3] = new TH1F("PulseHeightD1YRightSecondBiggestHitChannelInSigma","PulseHeightD1YRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma_second[4] = new TH1F("PulseHeightD2XRightSecondBiggestHitChannelInSigma","PulseHeightD2XRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma_second[5] = new TH1F("PulseHeightD2YRightSecondBiggestHitChannelInSigma","PulseHeightD2YRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma_second[6] = new TH1F("PulseHeightD3XRightSecondBiggestHitChannelInSigma","PulseHeightD3XRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	histo_pulseheight_right_sigma_second[7] = new TH1F("PulseHeightD3YRightSecondBiggestHitChannelInSigma","PulseHeightD3YRightSecondBiggestHitChannelInSigma",250,0.,50.);
+	
+	
+	
    //Start Timer
    TStopwatch Watch;
    Watch.Start();
@@ -2978,6 +3256,43 @@ void Clustering::ClusterRun(bool plots) {
          
       }
    }
+	
+	cout << "saving pulse height in units of sigma histograms.." << endl;
+	for (int det = 0; det < 8; det++) {
+		cout << "processing D" << det << endl;
+		SaveHistogram(histo_pulseheight_sigma[det]);
+		SaveHistogram(histo_pulseheight_sigma_second[det]);
+		SaveHistogram(histo_pulseheight_sigma125[det]);
+		SaveHistogram(histo_second_biggest_hit_direction[det]);
+//		SaveHistogram(histo_pulseheight_sigma_second_left[det]);
+//		SaveHistogram(histo_pulseheight_sigma_second_right[det]);
+		SaveHistogram(histo_biggest_hit_map[det]);
+		SaveHistogram(histo_pulseheight_left_sigma[det]);
+		SaveHistogram(histo_pulseheight_left_sigma_second[det]);
+		SaveHistogram(histo_pulseheight_right_sigma[det]);
+		SaveHistogram(histo_pulseheight_right_sigma_second[det]);
+		
+		
+		TCanvas tmp_canvas("plots_canvas","plots_canvas");
+		tmp_canvas.cd();
+		histo_pulseheight_sigma_second_left[det]->SetMinimum(0.);
+		histo_pulseheight_sigma_second_left[det]->SetLineColor(kBlue);
+		histo_pulseheight_sigma_second_left[det]->Draw();
+		ostringstream plot_filename;
+		plot_filename << plots_path << histo_pulseheight_sigma_second_left[det]->GetName() << "Right.png";
+		ostringstream histo_title;
+		histo_title <<  histo_pulseheight_sigma_second_left[det]->GetName() << "Right";
+		histo_pulseheight_sigma_second_left[det]->SetTitle(histo_title.str().c_str());
+		histo_pulseheight_sigma_second_left[det]->SetName(histo_title.str().c_str());
+		histo_pulseheight_sigma_second_right[det]->SetLineColor(kRed);
+		histo_pulseheight_sigma_second_right[det]->Draw("same");
+//		pt->Draw();
+		tmp_canvas.Print(plot_filename.str().c_str());
+		
+		
+		
+	}
+	cout << "done." << endl;
    
    //make the hitoccupancy plots for the saturated hits
    for(int det=0; det<9; det++) {
@@ -3404,7 +3719,7 @@ void Clustering::AutoFidCut() {
     //divide the detector plane in a maximum of four quadrants
     
     if(Verbosity>=1) {
-    cout << "#-#-#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#" << endl;
+    cout << "#-#-#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#" << endl;
     cout << "#" << endl;
     cout << "# afc region recognition started..." << endl;
     cout << "#" << endl;
@@ -3476,7 +3791,7 @@ void Clustering::AutoFidCut() {
         if(Verbosity>=1) cout << "#" << endl << "#" << endl << "# this run has more than one afc region." << endl;
     }
 	
-    if(Verbosity>=1) cout << "#" << endl << "# afc region recognition ended..." << endl << "#" << endl << "#-#-#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#Ð#" << endl;
+    if(Verbosity>=1) cout << "#" << endl << "# afc region recognition ended..." << endl << "#" << endl << "#-#-#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#ï¿½#" << endl;
 	
     //end divider code
 	
@@ -3800,6 +4115,7 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 		
 		// itterative alignment loop
 		for(int i=0; i<nPasses; i++) {
+//			continue;	// do alignment by hand.
 			cout << "\n\nPass " << i+1 << endl<< endl;
 			//xy alignment
 			align->CheckDetectorAlignmentXY(0, 1, 3);
@@ -3823,6 +4139,26 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 			//align->AlignDetectorZ(2, 0, 3, false, false);
 			//align->AlignDetectorZ(3, 0, 2, false, false);
 		}
+		
+//		cout << endl;
+//		cout << endl;
+//		cout << "set offsets by hand.." << endl;
+//		align->det_x_offset[0] = 0.;
+//		align->det_x_offset[1] = 0.53;
+//		align->det_x_offset[2] = -3.51;
+//		align->det_x_offset[3] = 1.68;
+//		align->det_y_offset[0] = 0.;
+//		align->det_y_offset[1] = -0.48;
+//		align->det_y_offset[2] = -0.25;
+//		align->det_y_offset[3] = 1.49;
+//		align->det_phix_offset[0] = 0.;
+//		align->det_phix_offset[1] = 0.00337256;
+//		align->det_phix_offset[2] = 0.0126113;
+//		align->det_phix_offset[3] = 1.80439e-06;
+//		align->det_phiy_offset[0] = 0.;
+//		align->det_phiy_offset[1] = 0.00215044;
+//		align->det_phiy_offset[2] = -0.0113994;
+//		align->det_phiy_offset[3] = 1.53406e-06;
 		
 		cout<<endl;
 		cout<<endl;
@@ -3854,8 +4190,15 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 		// generate residuals before alignment
 		align->CheckDetectorAlignmentXYPlots(4, 1, 2, prename);
 		
+		// set offsets by hand
+//		align->det_x_offset[4] = -61.25;
+//		align->det_y_offset[4] = 0.;
+//		align->det_phix_offset[4] = 0.00854277;
+//		align->det_phiy_offset[4] = 0.;
+		
 		// itterative alignment loop
 		for(int i=0; i<5; i++) {
+//			continue; // align by hand
 			cout << "\n\nPass " << i+1 << endl<< endl;
 			//xy alignment
 			align->AlignDetectorXY(4, 1, 2);
@@ -3966,7 +4309,8 @@ void Clustering::Align(bool plots, bool CutFakeTracksOn) {
 //			cout << "align->GetXOffset(4) = " << align->GetXOffset(4) << endl;
 //			cout << "align->GetXOffset(5) = " << align->GetXOffset(5) << endl;
 //			TransparentClustering(alignment_tracks, alignment_tracks_mask, align);
-			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
+//			TransparentClustering(alignment_tracks_fidcut, alignment_tracks_fidcut_mask, align);
+			TransparentClustering(tracks_transparent, alignment_tracks_fidcut_mask, align);
 			break;
 		}
 	} // end alignment loop
@@ -4009,7 +4353,7 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
     Double_t diamond_y_offset = align->GetYOffset(3);
     Double_t diamond_phi_offset = align->GetPhiXOffset(3);
     Double_t diamond_phi_y_offset = align->GetPhiYOffset(3);
-	Double_t diamond_z_position = 19.625; // TODO: is the z position of the diamond always 10.2??
+	Double_t diamond_z_position = detectorDiaZ; // TODO: is the z position of the diamond always 10.2??
 	Float_t eff_diamond_hit_position = 0;
 	int eff_diamond_hit_channel = 0;
 	Float_t hit_diff = 0;
@@ -4161,12 +4505,12 @@ void Clustering::TransparentAnalysis(vector<TDiamondTrack> &tracks, vector<bool>
 		
 		// fit track
 		par.clear();
-		align->LinTrackFit(z_positions, x_positions, par);
+//		align->LinTrackFit(z_positions, x_positions, par);
 		if (verbose) cout << "linear fit of track:\tpar[0] = " << par[0] << ",\tpar[1] = " << par[1] << endl;
         
         // fit y position
         par_y.clear();
-        align->LinTrackFit(z_positions, y_positions, par_y);
+//        align->LinTrackFit(z_positions, y_positions, par_y);
         if (verbose) cout << "linear fit of track:\tpar_y[0] = " << par_y[0] << ",\tpar_y[1] = " << par_y[1] << endl;
 		
 		// estimate hit position in diamond
@@ -4280,7 +4624,49 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 	Float_t eff_diamond_hit_position = 0;
 	int eff_diamond_hit_channel = 0;
 	Float_t hit_diff = 0;
+	bool HasMaskedChannel = 0;
+	Float_t chi2X = 0;
+	Float_t chi2Y = 0;
+	Float_t SiRes = align->GetSiResolution();
+	Float_t SiXResolutions[4];
+	Float_t SiYResolutions[4];
+	for (int i = 0; i < 4; i++) {
+		SiXResolutions[i] = align->GetXResolution(i);
+		SiYResolutions[i] = align->GetYResolution(i);
+	}
 	
+	Float_t xoffset[4], yoffset[4], phixoffset[4], phiyoffset[4];
+	
+	for (int det = 0; det < 4; det++) {
+		cout << "Det" << det << endl;
+		xoffset[det] = align->GetXOffset(det);
+		yoffset[det] = align->GetYOffset(det);
+		phixoffset[det] = align->GetPhiXOffset(det);
+		phiyoffset[det] = align->GetPhiYOffset(det);
+		
+		for (int i = 0; i < align->GetXOffsetHistory(det).size(); i++) {
+			cout << align->GetXOffsetHistory(det)[i] << "\t";
+			cout << align->GetYOffsetHistory(det)[i] << "\t";
+			cout << align->GetPhiOffsetHistory(det)[i] << endl;
+		}
+	}
+	
+//	xoffset[0] = -0.49;
+//	xoffset[1] = 0.47;
+//	xoffset[2] = -5.1;
+//	xoffset[3] = 5.3;
+//	yoffset[0] = 0.6;
+//	yoffset[1] = -0.57;
+//	yoffset[2] = -10.7;
+//	yoffset[3] = 11.2;
+	
+	
+	cout << "D0: x offset: " << align->GetXOffset(0) << "\ty offset: " << align->GetYOffset(0) << "\tphix offset: " << align->GetPhiXOffset(0) << "\tphiy offset: " << align->GetPhiYOffset(0) << endl;
+	cout << "D1: x offset: " << align->GetXOffset(1) << "\ty offset: " << align->GetYOffset(1) << "\tphix offset: " << align->GetPhiXOffset(1) << "\tphiy offset: " << align->GetPhiYOffset(1) << endl;
+	cout << "D2: x offset: " << align->GetXOffset(2) << "\ty offset: " << align->GetYOffset(2) << "\tphix offset: " << align->GetPhiXOffset(2) << "\tphiy offset: " << align->GetPhiYOffset(2) << endl;
+	cout << "D3: x offset: " << align->GetXOffset(3) << "\ty offset: " << align->GetYOffset(3) << "\tphix offset: " << align->GetPhiXOffset(3) << "\tphiy offset: " << align->GetPhiYOffset(3) << endl;
+	cout << "D4: x offset: " << align->GetXOffset(4) << "\ty offset: " << align->GetYOffset(4) << "\tphix offset: " << align->GetPhiXOffset(4) << "\tphiy offset: " << align->GetPhiYOffset(4) << endl;
+	cout << "silicon resolution: " << SiRes << endl;
 	cout << "diamond x offset: " << diamond_x_offset << endl;
     cout << "diamond y offset: " << diamond_y_offset << endl;
     cout << "diamond phi offset: " << diamond_phi_offset << endl;
@@ -4296,16 +4682,47 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 //		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
 //		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
 	}
-    histo_transparentclustering_landau_mean = new TH1F("PulseHeightMeanVsChannels_Dia_TranspAna_","PulseHeightMeanVsChannels_Dia_TranspAna",10,0.5,10.5);
+    histo_transparentclustering_landau_mean = new TH1F("PulseHeightMeanVsChannels_Dia_TranspAna","PulseHeightMeanVsChannels_Dia_TranspAna",11,-0.5,10.5);
+	histo_transparentclustering_SNR_vs_channel = new TH1F("SignificanceVsChannels_Dia_TranspAna","SignificanceVsChannels_Dia_TranspAna",11,-0.5,10.5);
 	ostringstream histoname_eta;
 	histoname_eta << "Eta_Dia_2CentroidHits_TransparClusters";
 	histo_transparentclustering_eta = new TH1F(histoname_eta.str().c_str(),histoname_eta.str().c_str(),100,0.,1.);
 	histo_transparentclustering_hitdiff = new TH1F("DiffEstEffHit_Dia_TransparClusters","DiffEstEffHit_Dia_TransparClusters", 200, -5.,5.);
-	histo_transparentclustering_hitdiff_scatter = new TH2F("DiffEstEffHit_Scatter_Dia_TransparClusters","DiffEstEffHit_Scatter_Dia_TransparClusters", 200, -5.,5.,128,0,127);
-    histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut","PulseHeight_Dia_2Channel_TranspCluster_8HitsFidcut",pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
+	histo_transparentclustering_hitdiff_scatter = new TH2F("DiffEstEffHit_Scatter_Dia_TransparClusters","DiffEstEffHit_Scatter_Dia_TransparClusters", 200, -5.,5.,256,0,255);
+    histo_transparentclustering_2Channel_PulseHeight = new TH1F("PulseHeight_Dia_2LargestHitsIn10Strips_TranspCluster_8HitsFidcut","PulseHeight_Dia_2LargestHitsIn10Strips_TranspCluster_8HitsFidcut",pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
+	for (int i = 0; i < 10; i++) {
+		ostringstream histoname_residuals, histoname_residuals_scatter, histoname_residuals_largest_hit, histoname_residuals_largest_hit_scatter;
+		histoname_residuals << "TranspAnaResidualsDia" << (i+1) << "StripsChargeWeighted";
+		histoname_residuals_scatter << "TranspAnaResidualsDia" << (i+1) << "StripsChargeWeightedVsY";
+		histoname_residuals_largest_hit << "TranspAnaResidualsDiaLargestHitIn" << (i+1) << "Strips";
+		histoname_residuals_largest_hit_scatter << "TranspAnaResidualsDiaLargestHitIn" << (i+1) << "StripsVsY";
+		histo_transparentclustering_residuals[i] = new TH1F(histoname_residuals.str().c_str(),histoname_residuals.str().c_str(), 200, -2.5, 2.5);
+		histo_transparentclustering_residuals_scatter[i] = new TH2F(histoname_residuals_scatter.str().c_str(),histoname_residuals_scatter.str().c_str(), 200, -2.5, 2.5,256,0,255);
+		histo_transparentclustering_residuals_largest_hit[i] = new TH1F(histoname_residuals_largest_hit.str().c_str(),histoname_residuals_largest_hit.str().c_str(), 200, -2.5, 2.5);
+		histo_transparentclustering_residuals_largest_hit_scatter[i] = new TH2F(histoname_residuals_largest_hit_scatter.str().c_str(),histoname_residuals_largest_hit_scatter.str().c_str(), 200, -2.5, 2.5,256,0,255);
+	}
+	histo_transparentclustering_residuals_2largest_hits = new TH1F("TranspAnaResidualsDia2LargestHitsIn10StripsChargedWeighted","TranspAnaResidualsDia2LargestHitsIn10StripsChargedWeighted",200, -2.5, 2.5);
+	histo_transparentclustering_residuals_2largest_hits_scatter = new TH2F("TranspAnaResidualsDia2LargestHitsIn10StripsChargedWeightedVsY","TranspAnaResidualsDia2LargestHitsIn10StripsChargedWeightedVsY",200, -2.5, 2.5, 256, 0, 255);
+	histo_transparentclustering_chi2X = new TH1F("TranspAnaChi2X","TranspAnaChi2X",200,0,20);
+	histo_transparentclustering_chi2Y = new TH1F("TranspAnaChi2Y","TranspAnaChi2Y",200,0,20);
+	
+	for (int i = 0; i < 4; i++) {
+		ostringstream histoname_chi2_vs_deltaX, histoname_chi2_vs_partX, histoname_chi2_vs_deltaY, histoname_chi2_vs_partY;
+			histoname_chi2_vs_deltaX << "D" << i << "XOffsetToTrackVSChi2";
+			histoname_chi2_vs_partX << "D" << i << "XOffsetOverResVSChi2";
+			histoname_chi2_vs_deltaY << "D" << i << "YOffsetToTrackVSChi2";
+			histoname_chi2_vs_partY << "D" << i << "YOffsetOverResVSChi2";
+		histo_chi2_vs_deltaX[i] = new TH2F(histoname_chi2_vs_deltaX.str().c_str(),histoname_chi2_vs_deltaX.str().c_str(),100,0.,10.,200,-0.5,0.5);
+		histo_chi2_vs_partX[i] = new TH2F(histoname_chi2_vs_partX.str().c_str(),histoname_chi2_vs_partX.str().c_str(),100,0.,10.,50,0.,5.);
+		histo_chi2_vs_deltaY[i] = new TH2F(histoname_chi2_vs_deltaY.str().c_str(),histoname_chi2_vs_deltaY.str().c_str(),100,0.,10.,200,-0.5,0.5);
+		histo_chi2_vs_partY[i] = new TH2F(histoname_chi2_vs_partY.str().c_str(),histoname_chi2_vs_partY.str().c_str(),100,0.,10.,50,0.,5.);
+	}
+	
+
+	
 	cout << " done." << endl;
 	
-	verbose = true;
+//	verbose = true;
 	
 	PedFile = new TFile(pedfile_path.c_str());
 	PedTree = (TTree*)PedFile->Get("PedTree");
@@ -4417,10 +4834,26 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		y_positions.clear();
 		z_positions.clear();
 		for (int det = 0; det < 4; det++) {
-			x_positions.push_back(align->track_holder.GetD(det).GetX());
-			y_positions.push_back(align->track_holder.GetD(det).GetY());
-			z_positions.push_back(align->track_holder.GetD(det).GetZ());
-            cout << "Det"<< det << " has z position " << align->track_holder.GetD(det).GetZ() << endl;
+			Float_t xpos = align->track_holder.GetD(det).GetX();
+			Float_t ypos = align->track_holder.GetD(det).GetY();
+			Float_t zpos = align->track_holder.GetD(det).GetZ();
+			
+			
+//			xpos = xpos - xoffset[det];
+//			ypos = ypos - yoffset[det];
+//			xpos = (xpos-128)*TMath::Cos(phixoffset[det]) - (ypos-128)*TMath::Sin(-phixoffset[det]) + 128;
+//			ypos = (xpos-128)*TMath::Sin(-phiyoffset[det]) + (ypos-128)*TMath::Cos(phiyoffset[det]) + 128;
+			
+			x_positions.push_back(xpos);
+			y_positions.push_back(ypos);
+			z_positions.push_back(zpos);
+			
+			
+			
+//			x_positions.push_back(align->track_holder.GetD(det).GetX());
+//			y_positions.push_back(align->track_holder.GetD(det).GetY());
+//			z_positions.push_back(align->track_holder.GetD(det).GetZ());
+            if (verbose) cout << "Det"<< det << " has z position " << align->track_holder.GetD(det).GetZ() << endl;
 		}
 		
 		// read out effictive diamond hit position
@@ -4428,13 +4861,29 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		
 		// fit track
 		par.clear();
-		align->LinTrackFit(z_positions, x_positions, par);
+		chi2X = 0;
+		chi2X = align->LinTrackFit(z_positions, x_positions, par, SiXResolutions);
 		if (verbose) cout << "linear fit of track:\tpar[0] = " << par[0] << ",\tpar[1] = " << par[1] << endl;
+		histo_transparentclustering_chi2X->Fill(chi2X);
+		for (int j = 0; j < 4; j++) {
+			histo_chi2_vs_deltaX[j]->Fill(chi2X,align->delta[j]);
+			histo_chi2_vs_partX[j]->Fill(chi2X,TMath::Sqrt(align->chi2part[j]));
+		}
         
         // fit y position
         par_y.clear();
-        align->LinTrackFit(z_positions, y_positions, par_y);
+		chi2Y = 0;
+        chi2Y = align->LinTrackFit(z_positions, y_positions, par_y, SiYResolutions);
         if (verbose) cout << "linear fit of track:\tpar_y[0] = " << par_y[0] << ",\tpar_y[1] = " << par_y[1] << endl;
+		histo_transparentclustering_chi2Y->Fill(chi2Y);
+		for (int j = 0; j < 4; j++) {
+			histo_chi2_vs_deltaY[j]->Fill(chi2Y,align->delta[j]);
+			histo_chi2_vs_partY[j]->Fill(chi2Y,TMath::Sqrt(align->chi2part[j]));
+		}
+		
+//		if (chi2X > 10 || chi2Y > 10) {
+//			continue;
+//		}
 		
 		// estimate hit position in diamond
 //		diamond_z_position = align->track_holder.GetD(4).GetZ();
@@ -4446,6 +4895,17 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
         diamond_hit_position += 0.5; // added 0.5 to take the middle of the channel instead of the edge
 		diamond_hit_channel = (int)diamond_hit_position;
 		if (verbose) cout << "z position of diamond is " << diamond_z_position << endl;
+		
+		if (diamond_hit_channel < 7 || diamond_hit_channel > 120) HasMaskedChannel = true;
+		else {
+			for (int j = diamond_hit_channel-5; j < diamond_hit_channel+6; j++) {
+				if (!Det_channel_screen[8].CheckChannel((int)Det_Channels[8][j])) HasMaskedChannel = true;
+			}
+		}
+		if (false) {//(HasMaskedChannel) {
+			cout << "estimated hit position in diamond ist close to masked channel --> skipping this track.." << endl;
+			continue;
+		}
 		
 		// difference between estimated and effective hit in diamond
 		hit_diff = TMath::Abs(eff_diamond_hit_position - diamond_hit_position);
@@ -4463,9 +4923,38 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 				eff_diamond_hit_channel = i;
 			}
 		}
-		histo_transparentclustering_hitdiff->Fill(eff_diamond_hit_channel + 0.5 - diamond_hit_position); // added 0.5 to eff_diamond_hit_channel to take the middle of the channel instead of the edge
-        histo_transparentclustering_hitdiff_scatter->Fill(eff_diamond_hit_channel + 0.5 - diamond_hit_position, diamond_hit_y_position);
-		cout << "effective diamond hit channel: " << eff_diamond_hit_channel << endl;
+		
+		// charge weighted effictive hit position (2 strips)
+		if (false) {
+			if (Dia_ADC[eff_diamond_hit_channel-1]-Det_PedMean[8][eff_diamond_hit_channel-1] < Dia_ADC[eff_diamond_hit_channel+1]-Det_PedMean[8][eff_diamond_hit_channel+1]) {
+				Float_t q1, q2;
+				q1 = Dia_ADC[eff_diamond_hit_channel]-Det_PedMean[8][eff_diamond_hit_channel];
+				q2 = Dia_ADC[eff_diamond_hit_channel+1]-Det_PedMean[8][eff_diamond_hit_channel+1];
+				eff_diamond_hit_position = eff_diamond_hit_channel + 0.5;//q2 / (q1+q2);
+			}
+			else {
+				Float_t q1, q2;
+				q1 = Dia_ADC[eff_diamond_hit_channel]-Det_PedMean[8][eff_diamond_hit_channel];
+				q2 = Dia_ADC[eff_diamond_hit_channel-1]-Det_PedMean[8][eff_diamond_hit_channel-1];
+				eff_diamond_hit_position = eff_diamond_hit_channel - 0.5;//q2 / (q1+q2);
+			}
+		}
+		
+		// charge weighted effictive hit position (3 strips)
+		if (true) {
+			Float_t q1,q2,q3;
+			q1 = Dia_ADC[eff_diamond_hit_channel]-Det_PedMean[8][eff_diamond_hit_channel];
+			q2 = Dia_ADC[eff_diamond_hit_channel-1]-Det_PedMean[8][eff_diamond_hit_channel-1];
+			q3 = Dia_ADC[eff_diamond_hit_channel+1]-Det_PedMean[8][eff_diamond_hit_channel+1];
+			eff_diamond_hit_position = eff_diamond_hit_channel - q2/(q1+q2+q3) + q3/(q1+q2+q3);
+		}
+		
+		
+//		eff_diamond_hit_position =- diamond_x_offset;
+		
+		histo_transparentclustering_hitdiff->Fill(eff_diamond_hit_position + 0.5 - diamond_hit_position); // added 0.5 to eff_diamond_hit_channel to take the middle of the channel instead of the edge
+        histo_transparentclustering_hitdiff_scatter->Fill(eff_diamond_hit_position + 0.5 - diamond_hit_position, diamond_hit_y_position);
+		if (verbose) cout << "effective diamond hit channel: " << eff_diamond_hit_channel << endl;
 		
 		// cluster diamond channels around estimated hit position
 //		cout << " --" << endl;
@@ -4487,25 +4976,62 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		histo_transparentclustering_eta->Fill(transp_eta);
         
         // fill pulse height histogram
-        histo_transparentclustering_2Channel_PulseHeight->Fill(firstchannel_adc+secondchannel_adc);
-		
+//        histo_transparentclustering_2Channel_PulseHeight->Fill(firstchannel_adc+secondchannel_adc);
+//		verbose = true;
 		if (verbose) cout << "clusters for track " << i << ":" << endl;
+		Float_t charge_mean, charge_weighted_position, charge_weighted_2largest_position;
+		int dia_largest_hit, dia_second_largest_hit;
 		// loop over different cluster sizes
 		for (int j = 0; j < 10; j++) {
 			cluster_adc = 0;
 			current_channel = diamond_hit_channel;
 			if (verbose) cout << "selected channels for " << j+1 << " hit transparent cluster: ";
 			current_sign = sign;
+//			Float_t qtot = 0;
+			charge_mean = 0;
+			charge_weighted_position = 0;
+			dia_largest_hit = 0;
 			// sum adc for n channel cluster
 			for (int channel = 0; channel <= j; channel++) {
 				current_channel = current_channel + current_sign * channel;
 				current_sign = (-1) * current_sign;
 				if (verbose) cout << current_channel;
 				if (verbose) if (channel < j) cout << ", ";
-				if (current_channel > 0 && current_channel < 128 /* && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel]*/)
+				if (current_channel > 0 && current_channel < 128 /* && Dia_ADC[current_channel]-Det_PedMean[8][current_channel] > Di_Cluster_Hit_Factor*Det_PedWidth[8][current_channel]*/) {
 					cluster_adc = cluster_adc + Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
+//					qtot += Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
+					charge_mean += (Dia_ADC[current_channel]-Det_PedMean[8][current_channel]) * (current_channel+0.5);
+//					cout << "Dia_ADC["<<current_channel<<"]-Det_PedMean[8]["<<current_channel<<"] = " << Dia_ADC[current_channel]-Det_PedMean[8][current_channel];
+//					cout << "\tcharge_mean = " << charge_mean << endl;
+					if (dia_largest_hit == 0 || (Dia_ADC[current_channel]-Det_PedMean[8][current_channel]) > (Dia_ADC[dia_largest_hit]-Det_PedMean[8][dia_largest_hit])) {
+						dia_second_largest_hit = dia_largest_hit;
+						dia_largest_hit = current_channel;
+					}
+					else {
+						if (channel > 0) {
+							if (dia_second_largest_hit == 0 || (Dia_ADC[current_channel]-Det_PedMean[8][current_channel]) > (Dia_ADC[dia_second_largest_hit]-Det_PedMean[8][dia_second_largest_hit])) {
+								dia_second_largest_hit = current_channel;
+							}
+						}
+					}
+				}
 			}
+			charge_weighted_position = charge_mean / cluster_adc;
+			if (j == 9) {
+				Float_t q1,q2;
+				q1 = Dia_ADC[dia_largest_hit]-Det_PedMean[8][dia_largest_hit];
+				q2 = Dia_ADC[dia_second_largest_hit]-Det_PedMean[8][dia_second_largest_hit];
+				charge_weighted_2largest_position = 1/(q1+q2) * (q1*(Float_t)dia_largest_hit + q2*(Float_t)dia_second_largest_hit);
+				histo_transparentclustering_residuals_2largest_hits->Fill(charge_weighted_2largest_position + 0.5 - diamond_hit_position);
+				histo_transparentclustering_residuals_2largest_hits_scatter->Fill(charge_weighted_2largest_position + 0.5 - diamond_hit_position, diamond_hit_y_position);
+				histo_transparentclustering_2Channel_PulseHeight->Fill(q1+q2);
+			}
+			histo_transparentclustering_residuals[j]->Fill(charge_weighted_position - diamond_hit_position);
+			histo_transparentclustering_residuals_scatter[j]->Fill(charge_weighted_position - diamond_hit_position, diamond_hit_y_position);
+			histo_transparentclustering_residuals_largest_hit[j]->Fill(dia_largest_hit + 0.5 - diamond_hit_position);
+			histo_transparentclustering_residuals_largest_hit_scatter[j]->Fill(dia_largest_hit + 0.5 - diamond_hit_position, diamond_hit_y_position);
 			if (verbose) cout << endl;
+			if (verbose) cout << "total charge of " << j+1 << " strips: " << cluster_adc << "\tcharge_weighted_position: " << charge_weighted_position << endl;
 			if (verbose) cout << "total charge of cluster: " << cluster_adc << endl;
 			if (verbose) cout << "histo_transparentclustering_landau[" << j << "] address: " << histo_transparentclustering_landau[j] << endl;
             if (current_channel <= 0 || current_channel >= 128) break;
@@ -4513,14 +5039,58 @@ void Clustering::TransparentClustering(vector<TDiamondTrack> &tracks, vector<boo
 		} // end loop over cluster sizes
 	} // end loop over tracks
 	
+	Float_t noise_multiple_channels = dianoise_sigma[1];
+	
 	// save histograms
 	for (int i = 0; i < 10; i++) {
-        histo_transparentclustering_landau_mean->SetBinContent(i+1,histo_transparentclustering_landau[i]->GetMean()); // plot pulse hight means into a histogram
+        histo_transparentclustering_landau_mean->SetBinContent(i+2,histo_transparentclustering_landau[i]->GetMean()); // plot pulse hight means into a histogram
+		histo_transparentclustering_SNR_vs_channel->SetBinContent(i+2,histo_transparentclustering_landau[i]->GetMean()/(TMath::Sqrt(i+1)*dianoise_sigma[1]));
+//		noise_multiple_channels = noise_multiple_channels * TMath::Sqrt(2);
 		SaveHistogram(histo_transparentclustering_landau[i]);
+		if (i>0) SaveHistogram(histo_transparentclustering_residuals[i],1);
+		else SaveHistogram(histo_transparentclustering_residuals[i],0);
+		SaveHistogram(histo_transparentclustering_residuals_scatter[i]);
+		SaveHistogram(histo_transparentclustering_residuals_largest_hit[i],0);
+		SaveHistogram(histo_transparentclustering_residuals_largest_hit_scatter[i]);
 	}
+	SaveHistogram(histo_transparentclustering_residuals_2largest_hits,1);
+	SaveHistogram(histo_transparentclustering_residuals_2largest_hits_scatter);
+	histo_transparentclustering_landau_mean->Scale(1/histo_transparentclustering_landau[9]->GetMean());
+	
+	SaveHistogram(histo_transparentclustering_chi2X);
+	SaveHistogram(histo_transparentclustering_chi2Y);
+	
+	for (int j = 0; j < 4; j++) {
+		SaveHistogram(histo_chi2_vs_deltaX[j]);
+		SaveHistogram(histo_chi2_vs_partX[j]);
+		SaveHistogram(histo_chi2_vs_deltaY[j]);
+		SaveHistogram(histo_chi2_vs_partY[j]);
+	}
+	
+	
+	TCanvas *tempcan = new TCanvas("residualstempcanv","residualstempcanv",800,600);
+	//plotresidualsX.GetXaxis()->SetRangeUser(resxmean-plot_width_factor*resxrms,resxmean+plot_width_factor*resxrms);
+	//TF1 histofitx("histofitx","gaus",resxmean-plot_fit_factor*resxrms,resxmean+plot_fit_factor*resxrms);
+//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
+//	plotresidualsX.GetXaxis()->SetRangeUser(plotresidualsX.GetMean()-plot_width_factor*plotresidualsX.GetRMS(),plotresidualsX.GetMean()+plot_width_factor*plotresidualsX.GetRMS());
+	TF1 histofitx("histofitx","gaus",histo_transparentclustering_hitdiff->GetMean()-1.5*histo_transparentclustering_hitdiff->GetRMS(),histo_transparentclustering_hitdiff->GetMean()+1.5*histo_transparentclustering_hitdiff->GetRMS());
+	histofitx.SetLineColor(kBlue);
+	histo_transparentclustering_hitdiff->Fit(&histofitx,"rq");
+	histo_transparentclustering_hitdiff->Draw();
+	
+		TCanvas plots_canvas("plots_canvas","plots_canvas");
+		plots_canvas.cd();
+		histo_transparentclustering_hitdiff->Draw();
+		pt->Draw();
+		ostringstream plot_filename;
+		plot_filename << plots_path << histo_transparentclustering_hitdiff->GetName() << ".png";
+		plots_canvas.Print(plot_filename.str().c_str());
+	
+	
     SaveHistogram(histo_transparentclustering_landau_mean);
+	SaveHistogram(histo_transparentclustering_SNR_vs_channel);
 	SaveHistogram(histo_transparentclustering_eta);
-	SaveHistogram(histo_transparentclustering_hitdiff);
+//	SaveHistogram(histo_transparentclustering_hitdiff);
     SaveHistogram(histo_transparentclustering_hitdiff_scatter);
     SaveHistogram(histo_transparentclustering_2Channel_PulseHeight);
 	

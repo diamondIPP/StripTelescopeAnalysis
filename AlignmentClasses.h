@@ -220,7 +220,8 @@ class TDetectorAlignment{
       void CheckDetectorAlignmentXYPlots(int subject_detector, int ref_detector1, int ref_detector2, string &histo_title);
 	void CheckDetectorAlignmentXYPlots(int subject_detector, string &histo_title);
 	void CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, Float_t alignment_chi2 = 9999., bool CutFakeTracksOn = false, bool verbose = false);
-	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, vector<Float_t> &par, Float_t res = 9999.);
+	Float_t LinTrackFit(vector<Float_t> X, vector<Float_t> Y, vector<Float_t> &par, Float_t *res, bool xySwitch = true);
+	void PrintDiamondTracks();
 
    protected:
       TDetectorPlane D0;
@@ -234,6 +235,8 @@ class TDetectorAlignment{
       vector<bool> track_mask_storage;
       //TODO: instead of having multiple copies of tracks, why not store pointer to list in stored in Clustering::tracks
       //TODO: instead of having tracks and tracks_fidcut, store boolean fidcut mask
+	Float_t chi2part[4];
+	Float_t delta[4];
       
    public:
       //temp data for calculations
@@ -492,6 +495,8 @@ void TDetectorAlignment::LoadTracks(vector<TDiamondTrack> &input_tracks, vector<
    track_mask_storage.clear(); track_mask_storage = input_tracks_mask; 
    cout<<"TDetectAlignment::LoadTracks: "<<track_storage.size()<<" tracks loaded"<<endl;
    if(track_storage.size() != track_mask_storage.size()) cout<<"TDetectorAlignment::LoadTracks: track_storage.size()="<<track_storage.size()<<" and track_mask_storage.size()="<<track_mask_storage.size()<<" are not equal!"<<endl;
+
+PrintDiamondTracks();
 }
 
 void TDetectorAlignment::PlotAngularDistribution()
@@ -695,7 +700,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
    //now select tracks with reasonably small residuals
    for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
    {
-      if(!track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
+      if(track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
       LoadData(track_storage[t]);
       if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
          PositionPredictor(subject_detector);
@@ -808,7 +813,7 @@ void TDetectorAlignment::AlignDetectorXY(int subject_detector, int ref_detector1
       //now select tracks with reasonably small residuals
       for(Int_t t=0; t<(Int_t)track_storage.size(); t++)
       {
-         if(!track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
+         if(track_mask_storage[t] || track_storage[t].FakeTrack) continue; // skip tracks not selected for determining alignment constants or track is marked as fake track
          LoadData(track_storage[t]);
          if(ref_detector1<0||ref_detector1>5||ref_detector2<0||ref_detector2>5) 
             PositionPredictor(subject_detector);
@@ -952,8 +957,8 @@ void TDetectorAlignment::CheckDetectorAlignmentXYPlots(int subject_detector, int
    string titleresxvsy = histo_title + detector_name.str() + "XvsY";
    string titleresyvsx = histo_title + detector_name.str() + "YvsX";
    
-   TH1F plotresidualsX(titleresx.c_str(),titleresx.c_str(),10000,-100,100);
-   TH1F plotresidualsY(titleresy.c_str(),titleresy.c_str(),10000,-100,100);
+   TH1F plotresidualsX(titleresx.c_str(),titleresx.c_str(),5000,-100,100);
+   TH1F plotresidualsY(titleresy.c_str(),titleresy.c_str(),5000,-100,100);
    TH2F plotresidualsXY(titleresxy.c_str(),titleresxy.c_str(),10000,-100,100,10000,-100,100);
    TH2F plotresidualsXvsY = TH2F(titleresxvsy.c_str(),titleresxvsy.c_str(),256,-0.5,255.5,10000,-100,100);
    TH2F plotresidualsYvsX = TH2F(titleresyvsx.c_str(),titleresyvsx.c_str(),256,-0.5,255.5,10000,-100,100);
@@ -1419,6 +1424,9 @@ void TDetectorAlignment::AlignDetectorZ(Int_t subject_detector, Int_t ref_detect
 }
 
 void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<bool> &tracks_mask, Float_t alignment_chi2, bool CutFakeTracksOn, bool verbose) {
+	
+	// NOT WORKING ANYMORE!!!
+	
 	LoadTracks(tracks, tracks_mask);
 	vector<Float_t> X_positions, Y_positions, Z_positions;
 	int NCutTracks = 0;
@@ -1450,8 +1458,8 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 //		cout << "X: " << X_positions[0] << "\t Y: " << Y_positions[0] << "\t Z: " << Z_positions[0] << endl;
 		if (verbose) cout << " -- fitting track " << i << " .." << endl << "res: " << res << endl;
 		vector<Float_t> par;
-		X_chi2 = LinTrackFit(Z_positions, X_positions, par, res);
-		Y_chi2 = LinTrackFit(Z_positions, Y_positions, par, res);
+//		X_chi2 = LinTrackFit(Z_positions, X_positions, par, res);
+//		Y_chi2 = LinTrackFit(Z_positions, Y_positions, par, res);
 		histo_alignmentfitchi2_XStrips->Fill(X_chi2);
 		histo_alignmentfitchi2_YStrips->Fill(Y_chi2);
 		if (X_positions[0] > 80. && X_positions[0] < 100. && Y_positions[0] > 80. && Y_positions[0] < 100.) {
@@ -1493,7 +1501,7 @@ void TDetectorAlignment::CutFakeTracks(vector<TDiamondTrack> &tracks, vector<boo
 	delete tmpcan;
 }
 
-Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, vector<Float_t> &par, Float_t res) {
+Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, vector<Float_t> &par, Float_t *res, bool xySwitch) {
 	// -- fits Y = par[0] + par[1] * x
 	// -- returns chi2
 	par.clear();
@@ -1504,6 +1512,39 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, ve
 	Float_t tmp3 = 0;
 	Float_t tmp4 = 0;
 	Float_t rms = 0;
+//	Float_t chi2part[4];
+//	Float_t delta[4];
+//	TH2F *histo_chi2_vs_deltaX[4];
+//	TH2F *histo_chi2_vs_part[4];
+//	for (int i = 0; i < 4; i++) {
+//		ostringstream histoname_chi2_vs_deltaX, histoname_chi2_vs_part;
+//		if (xySwitch) {
+//			histoname_chi2_vs_deltaX << "D" << i << "XOffsetToTrackVSChi2";
+//			histoname_chi2_vs_part << "D" << i << "XOffsetOverResVSChi2";
+//		}
+//		else {
+//			histoname_chi2_vs_deltaX << "D" << i << "YOffsetToTrackVSChi2";
+//			histoname_chi2_vs_part << "D" << i << "YOffsetOverResVSChi2";
+//		}
+//		histo_chi2_vs_deltaX[i] = new TH2F(histoname_chi2_vs_deltaX.str().c_str(),histoname_chi2_vs_deltaX.str().c_str(),50,0.,10.,200,-10.,10.);
+//		histo_chi2_vs_part[i] = new TH2F(histoname_chi2_vs_part.str().c_str(),histoname_chi2_vs_part.str().c_str(),50,0.,10.,50,0.,10.);
+//	}
+	
+	
+//	for (int i = 0; i < 10; i++) {
+//		ostringstream histoname_landau, histoname_eta;
+//		histoname_landau << "PulseHeight_D3X_" << (i+1) << "HitTransparClusters_8HitsFidcut";
+//		cout << "histoname_landau: " << histoname_landau.str().c_str() << endl;
+//		histo_transparentclustering_landau[i] = new TH1F(histoname_landau.str().c_str(),histoname_landau.str().c_str(),pulse_height_num_bins,-0.5,pulse_height_di_max+0.5);
+//        //		histoname_eta << "Eta_Dia_" << (i+1) << "HitTransparClusters";
+//        //		cout << "histoname_eta: " << histoname_eta.str().c_str() << endl;
+//	}
+	
+	
+	
+	
+	
+	
 //	Float_t par[3];
 	if (X.size() != Y.size()) {
 		cout << "TDetectorAlignment::LinTrackFit: number of x and y positions is different!" << endl;
@@ -1527,13 +1568,73 @@ Float_t TDetectorAlignment::LinTrackFit(vector<Float_t> X, vector<Float_t> Y, ve
 	// -- 
 	for (int i = 0; i < X.size(); i++) {
 		tmp1 = par[0] + par[1] * X[i];
-		tmp3 = tmp3 + (tmp1 - Y[i]) * (tmp1 - Y[i]);
+		delta[i] = tmp1 - Y[i];
+		chi2part[i] = (tmp1 - Y[i]) * (tmp1 - Y[i]) / (res[i] * res[i]);
+		tmp3 = tmp3 + chi2part[i];
 //		cout << "plane " << i << "\t hit position: ( " << X[i] << " , " << Y[i] << " ) fit position: " << tmp1 << endl;
 		tmp4 = tmp4 + (Y[i] - Y_Mean) * (Y[i] - Y_Mean);
 	}
 //	par[2] = tmp3 / (res * res);
 	rms = TMath::Sqrt(tmp4/Y.size());
+	
+//	for (int i = 0; i < 4; i++) {
+//		histo_chi2_vs_deltaX[i]->Fill(tmp3,delta[i]);
+//		histo_chi2_vs_part[i]->Fill(tmp3,chi2part[i]);
+//		
+//		// -- save histograms
+//		TCanvas *tmpcan = new TCanvas("tempcanvas");
+//		histo_chi2_vs_deltaX[i]->Draw();
+//		SaveCanvas(tmpcan, histo_chi2_vs_deltaX[i]->GetName());
+//		histo_chi2_vs_part[i]->Draw();
+//		SaveCanvas(tmpcan, histo_chi2_vs_part[i]->GetName());
+//		delete tmpcan;
+//	}
+	
+	
+	
+	// -- book and fill chi2 histograms
+//	TCanvas *tmpcan = new TCanvas("tempcanvas");
+//	histo_alignmentfitchi2_XStrips->Scale(1/histo_alignmentfitchi2_XStrips->GetEntries()/histo_alignmentfitchi2_XStrips->GetBinWidth(1));
+//	histo_alignmentfitchi2_XStrips->Draw();
+//	fcn_chi2->Draw("same");
+//	SaveCanvas(tmpcan, "alignmentfitchi2_XStrips.png");
+//	histo_alignmentfitchi2_YStrips->Scale(1/histo_alignmentfitchi2_YStrips->GetEntries()/histo_alignmentfitchi2_YStrips->GetBinWidth(1));
+//	histo_alignmentfitchi2_YStrips->Draw();
+//	fcn_chi2->Draw("same");
+//	SaveCanvas(tmpcan, "alignmentfitchi2_YStrips.png");
+//	histo_alignmentfitchi2_XStripsWindow->Scale(1/histo_alignmentfitchi2_XStripsWindow->GetEntries()/histo_alignmentfitchi2_XStripsWindow->GetBinWidth(1));
+//	histo_alignmentfitchi2_XStripsWindow->Draw();
+//	fcn_chi2->Draw("same");
+//	SaveCanvas(tmpcan, "alignmentfitchi2_XStripsWindow.png");
+//	histo_alignmentfitchi2_YStripsWindow->Scale(1/histo_alignmentfitchi2_YStripsWindow->GetEntries()/histo_alignmentfitchi2_YStripsWindow->GetBinWidth(1));
+//	histo_alignmentfitchi2_YStripsWindow->Draw();
+//	fcn_chi2->Draw("same");
+//	SaveCanvas(tmpcan, "alignmentfitchi2_YStripsWindow.png");
+//	delete tmpcan;
+
+	
+	
+	
+	
+	
+	
 //	cout << "rms: " << rms << endl;
 //	cout << "chi2: " << par[2] << endl;
-	return tmp3 / (res * res);
+	return tmp3;// / (res * res);
+}
+
+void TDetectorAlignment::PrintDiamondTracks(){
+   cout<<"\n\n\n\n";
+   for(UInt_t trackNo=0;trackNo<track_storage.size();trackNo++){
+       cout<<trackNo<<" "<<track_storage.at(trackNo).GetEventNumber()<<"\t";
+ //      cout<<std::setprecision(1);
+       for(UInt_t det=0;det<4;det++){
+           cout<<"(";
+           cout<</*setw(5)<<*/track_storage.at(trackNo).GetD(det).GetX()<<"/";
+           cout<</*setw(5)<<*/track_storage.at(trackNo).GetD(det).GetY()<<"/";
+           cout<</*setw(5)<<*/track_storage.at(trackNo).GetD(det).GetZ()<<") ";
+       }
+       cout<<"\n";
+   }
+   cout<<"\n\n\n\n"<<endl;
 }
