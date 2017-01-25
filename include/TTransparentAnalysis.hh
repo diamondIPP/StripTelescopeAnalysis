@@ -186,6 +186,11 @@ private:
 	TFile* transparentTreeFile;
 	TTree* transparentTree;
 	Bool_t  trTree_ValidTrack;
+	Bool_t  trTree_AlignmentTrack;
+	Bool_t  trTree_inFiducialRegion;
+	Bool_t  trTree_ValidPredRegion;
+	Bool_t  trTree_ValidChi2;
+	Float_t trTree_Chi2;
 	Int_t   trTree_RunNumber;
 	Float_t trTree_tseed;
 	Float_t trTree_thit;

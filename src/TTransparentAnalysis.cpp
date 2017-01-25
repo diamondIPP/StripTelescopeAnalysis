@@ -288,6 +288,8 @@ bool TTransparentAnalysis::predictPositions(bool savePrediction) {
         vecRelPredictedPosition.push_back(positionInDetSystemChannelSpace-(int)(positionInDetSystemChannelSpace));
         vecChi2.push_back(chi2);}
 
+	trTree_Chi2 = chi2;
+
     if(chi2>settings->getTransparentChi2())
         return false;
     return true;
@@ -488,6 +490,11 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTreeFile->cd();
 	transparentTree = new TTree("TransparentEvents", "TransparentTree");
 	transparentTree->Branch("ValidTrack"          , &trTree_ValidTrack          , "ValidTrack/O"                   );
+	transparentTree->Branch("AlignmentTrack"      , &trTree_AlignmentTrack      , "AlignmentTrack/O"               );
+	transparentTree->Branch("inFiducialRegion"    , &trTree_inFiducialRegion    , "inFiducialRegion/O"             );
+	transparentTree->Branch("ValidPredRegion"     , &trTree_ValidPredRegion     , "ValidPredRegion/O"              );
+	transparentTree->Branch("ValidChi2"           , &trTree_ValidChi2           , "ValidChi2/O"                    );
+	transparentTree->Branch("Chi2"                , &trTree_Chi2                , "Chi2/F"                         );
 	transparentTree->Branch("RunNumber"           , &trTree_RunNumber           , "RunNumber/I"                    );
 	transparentTree->Branch("SeedTHR"             , &trTree_tseed               , "SeedTHR/F"                      );
 	transparentTree->Branch("HitTHR"              , &trTree_thit                , "HitTHR/F"                       );
@@ -516,7 +523,12 @@ void TTransparentAnalysis::bookTransparentTree(){
 }
 
 void TTransparentAnalysis::resetTransparentTree(){
-	trTree_ValidTrack  = false;
+	trTree_ValidTrack       = true;
+	trTree_AlignmentTrack   = false;
+	trTree_inFiducialRegion = true;
+	trTree_ValidPredRegion  = true;
+	trTree_ValidChi2        = true;
+	trTree_Chi2        = -999.;
 	trTree_RunNumber   = -999;
 	trTree_tseed       = -999.;
 	trTree_thit        = -999.;
@@ -601,10 +613,10 @@ void TTransparentAnalysis::fillTransparentTree(){
 		trTree_HighestStripSNRCMNcorr          [i] = trTree_HighestStripSignalCMNcorr[i]/trTree_HighestStripPedestalSigmaCMNcorr[i];
 	}
 
-	if (!trTree_ValidTrack) {
-		transparentTree->Fill();
-		return;
-	}
+//	if (!trTree_ValidTrack) {
+//		transparentTree->Fill();
+//		return;
+//	}
 
 	// add channels around predicted position
     UInt_t firstChannel;
@@ -2107,9 +2119,12 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
     for (nEvent = startEvent; nEvent < nEvents; nEvent++) {
 //        TRawEventSaver::showStatusBar(nEvent,nEvents,100);
         //		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
+		this->resetTransparentTree();
+		bool skipEvent = false;
         if (settings->useForAlignment(nEvent,nEvents)){
-            usedForAlignment++;
-            continue;
+			if (!skipEvent) usedForAlignment++;
+			trTree_AlignmentTrack = true;
+			skipEvent = true;
         }
         if(nEvent>eventReader->GetEntries())
             break;
@@ -2117,32 +2132,35 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         if (eventReader->isValidTrack() == 0) {
             //		if (eventReader->useForAnalysis() == 0) {
             if (verbosity > 6) printEvent();
-            noValidTrack++;
-			this->resetTransparentTree();
+            if (!skipEvent) noValidTrack++;
 			trTree_ValidTrack = false;
-			this->fillTransparentTree();
-            continue;
+			skipEvent = true;
         }
         Float_t fiducialValueX = eventReader->getFiducialValueX();
         Float_t fiducialValueY = eventReader->getFiducialValueY();
         Int_t region = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
         cout<<"";
         if (!settings->getSelectionFidCuts()->IsInFiducialCut(fiducialValueX,fiducialValueY)) {
-            noFidCutRegion++;
-            continue;
+            if (!skipEvent) noFidCutRegion++;
+			trTree_inFiducialRegion = false;
+			skipEvent = true;
         }
         transparentClusters.clear();
         if (!this->predictPositions(true)){
             if (verbosity>4) cout<< nEvent << ": Chi2 to high: "<< positionPrediction->getChi2()<<endl;
-            highChi2++;
-            continue;
+            if (!skipEvent) highChi2++;
+			trTree_ValidChi2 = false;
+			skipEvent = true;
         }
         //		cout<<"predRegion("<<nEvent<<");"<<endl;
 
         //		cout<<"add Event"<<nEvent<<endl;
         bool predRegion = this->checkPredictedRegion(subjectDetector, this->positionInDetSystemChannelSpace, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
-        if (predRegion == false)
-            continue;
+		trTree_ValidPredRegion = predRegion;
+
+		this->fillTransparentTree();
+
+		if (skipEvent || predRegion == false) continue;
 
         //		cout<<"transparentClusters("<<nEvent<<");"<<endl;
         Int_t maxClusSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
@@ -2179,9 +2197,6 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         //		cout<<"analyse("<<nEvent<<");"<<endl;
         nAnalyzedEvents++;
         this->fillHistograms();
-		this->resetTransparentTree();
-		trTree_ValidTrack = true;
-		this->fillTransparentTree();
         if (verbosity > 4) printEvent();
         //		cout<<"push Back("<<nEvent<<");"<<endl;
 
