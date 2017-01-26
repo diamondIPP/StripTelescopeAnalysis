@@ -216,6 +216,16 @@ private:
 	Float_t trTree_HighestStripPedestalSigmaCMNcorr[10];
 	Float_t trTree_HighestStripSignalCMNcorr       [10];
 	Float_t trTree_HighestStripSNRCMNcorr          [10];
+	Float_t trTree_StripADC                        [128];
+	Float_t trTree_StripPedestal                   [128];
+	Float_t trTree_StripPedestalSigma              [128];
+	Float_t trTree_StripSignal                     [128];
+	Float_t trTree_StripSNR                        [128];
+	Float_t trTree_StripADCCMC                     [128];
+	Float_t trTree_StripPedestalCMC                [128];
+	Float_t trTree_StripPedestalSigmaCMC           [128];
+	Float_t trTree_StripSignalCMC                  [128];
+	Float_t trTree_StripSNRCMC                     [128];
 
 	Float_t inf;
 	// histograms

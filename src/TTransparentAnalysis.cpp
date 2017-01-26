@@ -520,6 +520,16 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("HighestStripPedestalSigmaCMNcorr", &trTree_HighestStripPedestalSigmaCMNcorr, "HighestStripPedestalSigmaCMNcorr[10]/F");
 	transparentTree->Branch("HighestStripSignalCMNcorr"       , &trTree_HighestStripSignalCMNcorr       , "HighestStripSignalCMNcorr[10]/F"       );
 	transparentTree->Branch("HighestStripSNRCMNcorr"          , &trTree_HighestStripSNRCMNcorr          , "HighestStripSNRCMNcorr[10]/F"          );
+	transparentTree->Branch("StripADC"                        , &trTree_StripADC                        , "StripADC[128]/F"                 );
+	transparentTree->Branch("StripPedestal"                   , &trTree_StripPedestal                   , "StripPedestal[128]/F"            );
+	transparentTree->Branch("StripPedestalSigma"              , &trTree_StripPedestalSigma              , "StripPedestalSigma[128]/F"       );
+	transparentTree->Branch("StripSignal"                     , &trTree_StripSignal                     , "StripSignal[128]/F"              );
+	transparentTree->Branch("StripSNR"                        , &trTree_StripSNR                        , "StripSNR[128]/F"                 );
+	transparentTree->Branch("StripADCCMC"                     , &trTree_StripADC                        , "StripADCCMC[128]/F"                 );
+	transparentTree->Branch("StripPedestalCMC"                , &trTree_StripPedestal                   , "StripPedestalCMC[128]/F"            );
+	transparentTree->Branch("StripPedestalSigmaCMC"           , &trTree_StripPedestalSigma              , "StripPedestalSigmaCMC[128]/F"       );
+	transparentTree->Branch("StripSignalCMC"                  , &trTree_StripSignal                     , "StripSignalCMC[128]/F"              );
+	transparentTree->Branch("StripSNRCMC"                     , &trTree_StripSNR                        , "StripSNRCMC[128]/F"                 );
 }
 
 void TTransparentAnalysis::resetTransparentTree(){
@@ -555,6 +565,18 @@ void TTransparentAnalysis::resetTransparentTree(){
 		trTree_HighestStripPedestalSigmaCMNcorr[i] = -999.;
 		trTree_HighestStripSignalCMNcorr       [i] = -999.;
 		trTree_HighestStripSNRCMNcorr          [i] = -999.;
+	}
+	for (int i = 0; i < 128; i++){
+		trTree_StripADC             [i] = -999.;
+		trTree_StripPedestal        [i] = -999.;
+		trTree_StripPedestalSigma   [i] = -999.;
+		trTree_StripSignal          [i] = -999.;
+		trTree_StripSNR             [i] = -999.;
+		trTree_StripADCCMC          [i] = -999.;
+		trTree_StripPedestalCMC     [i] = -999.;
+		trTree_StripPedestalSigmaCMC[i] = -999.;
+		trTree_StripSignalCMC       [i] = -999.;
+		trTree_StripSNRCMC          [i] = -999.;
 	}
 }
 
@@ -611,6 +633,18 @@ void TTransparentAnalysis::fillTransparentTree(){
 		trTree_HighestStripSignalCMNcorr       [i] = eventReader->getSignal       (subjectDetector, channelIteratorCMC, true , false);
 		trTree_HighestStripSNR                 [i] = trTree_HighestStripSignal       [i]/trTree_HighestStripPedestalSigma       [i];
 		trTree_HighestStripSNRCMNcorr          [i] = trTree_HighestStripSignalCMNcorr[i]/trTree_HighestStripPedestalSigmaCMNcorr[i];
+	}
+	for (UInt_t i = 0; i < 128; i++){
+		trTree_StripADC             [i] = eventReader->getAdcValue     (subjectDetector, i              );
+		trTree_StripPedestal        [i] = eventReader->getPedestalMean (subjectDetector, i, false       );
+		trTree_StripPedestalSigma   [i] = eventReader->getPedestalSigma(subjectDetector, i, false       );
+		trTree_StripSignal          [i] = eventReader->getSignal       (subjectDetector, i, false, false);
+		trTree_StripADCCMC          [i] = eventReader->getAdcValue     (subjectDetector, i              );
+		trTree_StripPedestalCMC     [i] = eventReader->getPedestalMean (subjectDetector, i, true        );
+		trTree_StripPedestalSigmaCMC[i] = eventReader->getPedestalSigma(subjectDetector, i, true        );
+		trTree_StripSignalCMC       [i] = eventReader->getSignal       (subjectDetector, i, true , false);
+		trTree_StripSNR             [i] = trTree_StripSignal   [i]/trTree_StripPedestalSigma   [i];
+		trTree_StripSNRCMC          [i] = trTree_StripSignalCMC[i]/trTree_StripPedestalSigmaCMC[i];
 	}
 
 //	if (!trTree_ValidTrack) {
