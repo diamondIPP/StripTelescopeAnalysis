@@ -84,7 +84,7 @@ void TAnalysisOf3dDiamonds::PrintPositions(){
     cout<<"Diamond Pattern: \n";
     settings->diamondPattern.Print();
     cout<<"\n";
-    std::pair<Int_t,Int_t> bla = settings->diamondPattern.getInterval(2);
+    std::pair<Int_t,Int_t> bla = settings->diamondPattern.getInterval(2); // TODO
     std::cout.precision(7);
     cout<<std::fixed;
     for (int i = bla.first ; i <= bla.second;i++)
