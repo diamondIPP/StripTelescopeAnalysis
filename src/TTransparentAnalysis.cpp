@@ -494,6 +494,7 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("inFiducialRegion"    , &trTree_inFiducialRegion    , "inFiducialRegion/O"             );
 	transparentTree->Branch("ValidPredRegion"     , &trTree_ValidPredRegion     , "ValidPredRegion/O"              );
 	transparentTree->Branch("ValidChi2"           , &trTree_ValidChi2           , "ValidChi2/O"                    );
+	transparentTree->Branch("ScreenedCluster"     , &trTree_ScreenedCluster     , "ScreenedCluster/O"              );
 	transparentTree->Branch("Chi2"                , &trTree_Chi2                , "Chi2/F"                         );
 	transparentTree->Branch("RunNumber"           , &trTree_RunNumber           , "RunNumber/I"                    );
 	transparentTree->Branch("SeedTHR"             , &trTree_tseed               , "SeedTHR/F"                      );
@@ -538,6 +539,7 @@ void TTransparentAnalysis::resetTransparentTree(){
 	trTree_inFiducialRegion = true;
 	trTree_ValidPredRegion  = true;
 	trTree_ValidChi2        = true;
+	trTree_ScreenedCluster  = false;
 	trTree_Chi2        = -999.;
 	trTree_RunNumber   = -999;
 	trTree_tseed       = -999.;
@@ -2192,9 +2194,10 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         bool predRegion = this->checkPredictedRegion(subjectDetector, this->positionInDetSystemChannelSpace, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 		trTree_ValidPredRegion = predRegion;
 
-		this->fillTransparentTree();
-
-		if (skipEvent || predRegion == false) continue;
+		if (skipEvent || predRegion == false) {
+			this->fillTransparentTree();
+			continue;
+		}
 
         //		cout<<"transparentClusters("<<nEvent<<");"<<endl;
         Int_t maxClusSize = TPlaneProperties::getMaxTransparentClusterSize(subjectDetector);
@@ -2229,6 +2232,9 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
             //			cout<<nEvent<<"isMasked: "<< pos <<" from "<<positionInDetSystemChannelSpace<<" "<<direction<<" "<<pos-positionInDetSystemChannelSpace<<endl;
         }
         //		cout<<"analyse("<<nEvent<<");"<<endl;
+		if (transparentClusters.isScreened()) trTree_ScreenedCluster = true;
+		this->fillTransparentTree();
+		if (trTree_ScreenedCluster) continue;
         nAnalyzedEvents++;
         this->fillHistograms();
         if (verbosity > 4) printEvent();

@@ -190,6 +190,7 @@ private:
 	Bool_t  trTree_inFiducialRegion;
 	Bool_t  trTree_ValidPredRegion;
 	Bool_t  trTree_ValidChi2;
+	Bool_t  trTree_ScreenedCluster;
 	Float_t trTree_Chi2;
 	Int_t   trTree_RunNumber;
 	Float_t trTree_tseed;
