@@ -9,7 +9,7 @@
 
 THTMLSelection::THTMLSelection(TSettings *settings):THTMLGenerator(settings) {
 	this->setFileName("selection.html");
-	this->setSubdirPath("selections/");
+	this->setSubdirPath("selections");
 	this->setMainPath("../");
 	this->setTitle("Selection - Cut Flow");
 

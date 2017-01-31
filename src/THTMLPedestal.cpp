@@ -10,7 +10,7 @@
 THTMLPedestal::THTMLPedestal(TSettings *settings):THTMLGenerator(settings) {
 	setTitle("Pedestals");
 
-	this->setMainPath("..//");
+	this->setMainPath("../");
 	this->setSubdirPath("pedestalAnalysis");
 	this->setFileName("pedestal.html");
 	//  path = mainPath+subdirPath;

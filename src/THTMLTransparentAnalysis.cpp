@@ -11,7 +11,7 @@ THTMLTransparentAnalysis::THTMLTransparentAnalysis(TSettings* settings):THTMLGen
 	// TODO Auto-generated constructor stub
 	this->setFileName("transparentAnalysis.html");
 	this->setMainPath("../");
-	this->setSubdirPath("transparentAnalysis/");
+	this->setSubdirPath("transparentAnalysis");
 	this->setTitle("Transparent Analysis");
 
 

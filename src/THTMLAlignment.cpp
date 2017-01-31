@@ -10,7 +10,7 @@
 THTMLAlignment::THTMLAlignment(TSettings *settings):THTMLGenerator(settings) {
 
 	this->setFileName("alignment.html");
-	this->setSubdirPath("alignment/");
+	this->setSubdirPath("alignment");
 	this->setTitle("Alignment");
 	alignment =0;
 

@@ -10,7 +10,7 @@
 THTMLLandaus::THTMLLandaus(TSettings* settings):THTMLGenerator(settings) {
 	this->setFileName("landaus.html");
 	this->setMainPath("../");
-	this->setSubdirPath("selectionAnalysis/");
+	this->setSubdirPath("selectionAnalysis");
 	this->setTitle("Landau Distributions");
 
 }

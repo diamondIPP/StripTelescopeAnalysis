@@ -12,7 +12,7 @@ THTMLSelectionAnalysis::THTMLSelectionAnalysis(TSettings *settings):THTMLGenerat
 	// TODO Auto-generated constructor stub
 	this->setFileName("selectionAnalysis.html");
 	this->setMainPath("../");
-	this->setSubdirPath("selectionAnalysis/");
+	this->setSubdirPath("selectionAnalysis");
 	this->setTitle("Selection Analysis");
 }
 

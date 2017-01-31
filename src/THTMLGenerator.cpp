@@ -201,7 +201,7 @@ std::string THTMLGenerator::putImage(std::string path, TString name, std::string
 std::string THTMLGenerator::putImage(std::string path, std::string name, std::string type,int percent,bool highlighted)
 {
 	stringstream imageLink;
-	imageLink<<path<<"//"<<name<<"."<<type;
+	imageLink<<path<<"/"<<name<<"."<<type;
 	stringstream output;
 	output<<"<img src=\""<<imageLink.str()<<"\" width=\""<<percent<<"%\" alt=\""<<name<<"\"";
 	if (highlighted)

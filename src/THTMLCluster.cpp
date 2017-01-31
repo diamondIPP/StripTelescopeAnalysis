@@ -10,7 +10,7 @@
 THTMLCluster::THTMLCluster(TSettings *settings):THTMLGenerator(settings) {
 	setTitle("Clustering");
 	this->setMainPath("../");
-	this->setSubdirPath("clustering/");
+	this->setSubdirPath("clustering");
 	this->setFileName("clustering.html");
 	this->updatePath();
 }

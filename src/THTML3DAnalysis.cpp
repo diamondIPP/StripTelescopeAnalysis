@@ -10,7 +10,7 @@
 THTML3DAnalysis::THTML3DAnalysis(TSettings *settings):THTMLGenerator(settings) {
 
 	this->setFileName("3dAnalysis.html");
-	this->setSubdirPath("3dDiamondAnalysis/");
+	this->setSubdirPath("3dDiamondAnalysis");
 	this->setTitle("3DAnalysis");
 
 
