@@ -360,6 +360,13 @@ private:
 	TH2F* hResidualTranspEtaCorrectedVsClusterSize_clustered;
 	TH2F* hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered;
 	TH2F* hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered;
+	TH2F* hResidualHighest2CentroidVsEventNo_clustered;
+	TH2F* hResidualHighestHitVsEventNo_clustered;
+	TH2F* hResidualChargeWeightedVsEventNo_clustered;
+	TH2F* hResidualEtaCorrectedVsEventNo_clustered;
+	TH2F* hResidualTranspEtaCorrectedVsEventNo_clustered;
+	TH2F* hResidualEtaCorrectedOnlyHitsVsEventNo_clustered;
+	TH2F* hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered;
 
 	Float_t minX,maxX,minY,maxY;
 

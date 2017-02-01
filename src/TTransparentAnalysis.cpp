@@ -244,16 +244,20 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
 		if (!cmCorrected) residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegrals            [1]);
 		else              residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaCMNcorrectedIntegrals[1]);
 		hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered->Fill(residualTranspEtaCor, clusterSize);
+		hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered->Fill(nEvent, residualTranspEtaCor);
 		Float_t residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEtaOnlyHits, hEtaIntegral_clustered);
 		hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
+		hResidualEtaCorrectedOnlyHitsVsEventNo_clustered->Fill(nEvent, residualEtaCor);
 
 		// include adjacent channels
 		if (!cmCorrected) residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaIntegrals            [1]);
 		else              residualTranspEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaCMNcorrectedIntegrals[1]);
 		hResidualTranspEtaCorrectedVsClusterSize_clustered->Fill(residualTranspEtaCor, clusterSize);
+		hResidualTranspEtaCorrectedVsEventNo_clustered->Fill(nEvent, residualTranspEtaCor);
 		residualEtaCor = this->getResidual(clusteredCluster, cmCorrected, TCluster::corEta, hEtaIntegral_clustered);
 		hResidualEtaCorrected_clustered             ->Fill(residualEtaCor);
 		hResidualEtaCorrectedVsClusterSize_clustered->Fill(residualEtaCor, clusterSize);
+		hResidualEtaCorrectedVsEventNo_clustered->Fill(nEvent, residualEtaCor);
     } // end event loop
 }
 
@@ -723,6 +727,9 @@ void TTransparentAnalysis::fillClusteredHistos(){
 	hResidualHighestHitVsClusterSize_clustered      ->Fill(resXHighestHit, clusterSize);
 	hResidualChargeWeightedVsClusterSize_clustered  ->Fill(residualCW    , clusterSize);
 	hResidualHighest2CentroidVsClusterSize_clustered->Fill(residualH2C   , clusterSize);
+	hResidualHighestHitVsEventNo_clustered      ->Fill(nEvent, resXHighestHit);
+	hResidualChargeWeightedVsEventNo_clustered  ->Fill(nEvent, residualCW    );
+	hResidualHighest2CentroidVsEventNo_clustered->Fill(nEvent, residualH2C   );
 }
 
 void TTransparentAnalysis::fillHistograms() {
@@ -2724,6 +2731,41 @@ void TTransparentAnalysis::saveClusteredHistos(){
 		delete hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered    ;
 		hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered     = 0;
 	}
+	if (hResidualHighestHitVsEventNo_clustered      ) {
+		histSaver->SaveHistogram(hResidualHighestHitVsEventNo_clustered      );
+		delete hResidualHighestHitVsEventNo_clustered      ;
+		hResidualHighestHitVsEventNo_clustered       = 0;
+	}
+	if (hResidualChargeWeightedVsEventNo_clustered  ) {
+		histSaver->SaveHistogram(hResidualChargeWeightedVsEventNo_clustered  );
+		delete hResidualChargeWeightedVsEventNo_clustered  ;
+		hResidualChargeWeightedVsEventNo_clustered   = 0;
+	}
+	if (hResidualHighest2CentroidVsEventNo_clustered) {
+		histSaver->SaveHistogram(hResidualHighest2CentroidVsEventNo_clustered);
+		delete hResidualHighest2CentroidVsEventNo_clustered;
+		hResidualHighest2CentroidVsEventNo_clustered = 0;
+	}
+	if (hResidualEtaCorrectedVsEventNo_clustered    ) {
+		histSaver->SaveHistogram(hResidualEtaCorrectedVsEventNo_clustered    );
+		delete hResidualEtaCorrectedVsEventNo_clustered    ;
+		hResidualEtaCorrectedVsEventNo_clustered     = 0;
+	}
+	if (hResidualTranspEtaCorrectedVsEventNo_clustered    ) {
+		histSaver->SaveHistogram(hResidualTranspEtaCorrectedVsEventNo_clustered    );
+		delete hResidualTranspEtaCorrectedVsEventNo_clustered    ;
+		hResidualTranspEtaCorrectedVsEventNo_clustered     = 0;
+	}
+	if (hResidualEtaCorrectedOnlyHitsVsEventNo_clustered    ) {
+		histSaver->SaveHistogram(hResidualEtaCorrectedOnlyHitsVsEventNo_clustered    );
+		delete hResidualEtaCorrectedOnlyHitsVsEventNo_clustered    ;
+		hResidualEtaCorrectedOnlyHitsVsEventNo_clustered     = 0;
+	}
+	if (hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered    ) {
+		histSaver->SaveHistogram(hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered    );
+		delete hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered    ;
+		hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered     = 0;
+	}
 }
 
 void TTransparentAnalysis::savePedestalHistos() {
@@ -3196,6 +3238,41 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 	hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered = new TH2F(name, name, 800, -40, 40, 10, -0.5, 9.5);
 	hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered->GetXaxis()->SetTitle("residual");
 	hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered->GetYaxis()->SetTitle("cluster size");
+
+	name = "hResidualHighest2CentroidVsEventNo_clustered";
+	hResidualHighest2CentroidVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
+	hResidualHighest2CentroidVsEventNo_clustered->GetXaxis()->SetTitle("event number");
+	hResidualHighest2CentroidVsEventNo_clustered->GetYaxis()->SetTitle("residual");
+
+	name = "hResidualHighestHitVsEventNo_clustered";
+	hResidualHighestHitVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
+	hResidualHighestHitVsEventNo_clustered->GetXaxis()->SetTitle("event number");
+	hResidualHighestHitVsEventNo_clustered->GetYaxis()->SetTitle("residual");
+
+	name = "hResidualChargeWeightedVsEventNo_clustered";
+	hResidualChargeWeightedVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
+	hResidualChargeWeightedVsEventNo_clustered->GetXaxis()->SetTitle("event number");
+	hResidualChargeWeightedVsEventNo_clustered->GetYaxis()->SetTitle("residual");
+
+	name = "hResidualEtaCorrectedVsEventNo_clustered";
+	hResidualEtaCorrectedVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
+	hResidualEtaCorrectedVsEventNo_clustered->GetXaxis()->SetTitle("event number");
+	hResidualEtaCorrectedVsEventNo_clustered->GetYaxis()->SetTitle("residual");
+
+	name = "hResidualTranspEtaCorrectedVsEventNo_clustered";
+	hResidualTranspEtaCorrectedVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
+	hResidualTranspEtaCorrectedVsEventNo_clustered->GetXaxis()->SetTitle("event number");
+	hResidualTranspEtaCorrectedVsEventNo_clustered->GetYaxis()->SetTitle("residual");
+
+	name = "hResidualEtaCorrectedOnlyHitsVsEventNo_clustered";
+	hResidualEtaCorrectedOnlyHitsVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
+	hResidualEtaCorrectedOnlyHitsVsEventNo_clustered->GetXaxis()->SetTitle("event number");
+	hResidualEtaCorrectedOnlyHitsVsEventNo_clustered->GetYaxis()->SetTitle("residual");
+
+	name = "hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered";
+	hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
+	hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered->GetXaxis()->SetTitle("event number");
+	hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered->GetYaxis()->SetTitle("residual");
 
 }
 
