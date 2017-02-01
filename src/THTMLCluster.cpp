@@ -54,7 +54,7 @@ void THTMLCluster::createEtaDistributions()
 	stringstream sectionContent;
 
 	//	sectionContent<<"<h2>Eta Distributions </h2>\n";
-	sectionContent<<putImagesOfAllDetectors(path,"hEtaDistribution_");
+	sectionContent<<putImagesOfAllDetectors(".", "hEtaDistribution_");
 
 	sectionContent<<"\n<br>\n\t";
 	Int_t nDias = settings->getNDiamonds();
@@ -73,14 +73,14 @@ void THTMLCluster::createEtaDistributions()
 	this->addSection("Eta Distributions",sectionContent.str());
 	sectionContent.clear();
 	sectionContent.str("");
-	sectionContent<<putImagesOfAllDetectors(path,"hEtaIntegral_");
+	sectionContent<<putImagesOfAllDetectors(".", "hEtaIntegral_");
 	this->addSection("Eta Integrals",sectionContent.str());
 
 
 	//c_hAsymmetricEtaFinal_
 	sectionContent.clear();
 	sectionContent.str("");
-	sectionContent<<putImagesOfAllDetectors(path,"c_hAsymmetricEtaFinal_","All");
+	sectionContent<<putImagesOfAllDetectors(".", "c_hAsymmetricEtaFinal_","All");
 	sectionContent<<"\n<br>\n\t";
 	for ( Int_t dia=0; dia<=nDias; dia++ ){
 	    TString name =TString::Format("c_hAsymmetricEtaFinal_DiaArea%d",dia);
@@ -113,7 +113,7 @@ void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
 	}
 	sectionContent<<createTable(vecTable);
 	sectionContent<<"\n\n<br><br>\n\n";
-	sectionContent<<this->putImagesOfAllDetectors(path,"cPulseHeightDistribution_allClusterSizes_");
+	sectionContent<<this->putImagesOfAllDetectors(".", "cPulseHeightDistribution_allClusterSizes_");
 	addSection("Pulse Height Distribution",sectionContent.str());
 }
 
@@ -185,7 +185,7 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	sectionContent<<output2.str()<<"\n<br>\n";
 
 	sectionContent<<"<h2>NumberOfClusters </h2>\n";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"NumberOfClusters_");
+	sectionContent<<putImagesOfAllDetectors(".", "NumberOfClusters_");
 	this->addSection("Clusters",sectionContent.str());
 }
 
