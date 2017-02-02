@@ -367,6 +367,7 @@ private:
 	TH2F* hResidualTranspEtaCorrectedVsEventNo_clustered;
 	TH2F* hResidualEtaCorrectedOnlyHitsVsEventNo_clustered;
 	TH2F* hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered;
+	TH2F* hResidualHighestHitVsChannel_clustered;
 
 	Float_t minX,maxX,minY,maxY;
 

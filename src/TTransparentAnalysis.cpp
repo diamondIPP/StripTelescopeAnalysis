@@ -730,6 +730,7 @@ void TTransparentAnalysis::fillClusteredHistos(){
 	hResidualHighestHitVsEventNo_clustered      ->Fill(nEvent, resXHighestHit);
 	hResidualChargeWeightedVsEventNo_clustered  ->Fill(nEvent, residualCW    );
 	hResidualHighest2CentroidVsEventNo_clustered->Fill(nEvent, residualH2C   );
+	hResidualHighestHitVsChannel_clustered      ->Fill(clusteredCluster.getPosition(cmCorrected, TCluster::maxValue), resXHighestHit);
 }
 
 void TTransparentAnalysis::fillHistograms() {
@@ -2766,6 +2767,11 @@ void TTransparentAnalysis::saveClusteredHistos(){
 		delete hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered    ;
 		hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered     = 0;
 	}
+	if (hResidualHighestHitVsChannel_clustered      ) {
+		histSaver->SaveHistogram(hResidualHighestHitVsChannel_clustered      );
+		delete hResidualHighestHitVsChannel_clustered      ;
+		hResidualHighestHitVsChannel_clustered       = 0;
+	}
 }
 
 void TTransparentAnalysis::savePedestalHistos() {
@@ -3273,6 +3279,11 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 	hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered = new TH2F(name, name, nBins, startEvent, maxEvents, 800, -40, 40);
 	hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered->GetXaxis()->SetTitle("event number");
 	hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered->GetYaxis()->SetTitle("residual");
+
+	name = "hResidualHighestHitVsChannel_clustered";
+	hResidualHighestHitVsChannel_clustered = new TH2F(name, name, 128, 0, 128, 800, -40, 40);
+	hResidualHighestHitVsChannel_clustered->GetXaxis()->SetTitle("channel");
+	hResidualHighestHitVsChannel_clustered->GetYaxis()->SetTitle("residual");
 
 }
 
