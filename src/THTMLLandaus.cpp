@@ -64,7 +64,7 @@ void THTMLLandaus::addLandauDiamond(Float_t width, Float_t MP, Float_t area, Flo
 		if(i<5) name<<"cPulseHeigthDiamond_"<<i<<"_ClusterSize";
 		sectionContent<<putImage(this->path,name.str(),"png",24)<<"\n"<<(i%4==0?"<br>":"");
 	}
-	sectionContent<<putImage(this->path,(TString)"cMVP_Landau_vs_ClusterSize","png",50)<<"<br>\n";
+	sectionContent<<putImage(this->path,(TString)"cMPV_Landau_vs_ClusterSize","png",50)<<"<br>\n";
 	//	sectionContent<<putImage(this->path,"hLandauDiamond_OneCluster","png",50)<<"<br>\n";
 	sectionContent<<"</p>";
 
