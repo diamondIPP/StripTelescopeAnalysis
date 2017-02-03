@@ -507,6 +507,7 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("Direction"           , &trTree_Direction           , "Direction/I"                    );
 	transparentTree->Branch("NStrips"             , &trTree_NStrips             , "NStrips/I"                      );
 	transparentTree->Branch("CenterStrip"         , &trTree_CenterStrip         , "CenterStrip/I"                  );
+	transparentTree->Branch("PredictedPosition"   , &trTree_PredictedPosition   , "PredictedPosition/F"            );
 	transparentTree->Branch("CMN"                 , &trTree_CMN                 , "CMN/F"                          );
 	transparentTree->Branch("ADC"                 , &trTree_ADC                 , "ADC[10]/F"                 );
 	transparentTree->Branch("Pedestal"            , &trTree_Pedestal            , "Pedestal[10]/F"            );
@@ -552,6 +553,7 @@ void TTransparentAnalysis::resetTransparentTree(){
 	trTree_Direction   = -999;
 	trTree_NStrips     = trTree_nMaxStrips;
 	trTree_CenterStrip = -999;
+	trTree_PredictedPosition = -999;
 	trTree_CMN         = -999.;
 	for (int i = 0; i < trTree_nMaxStrips; i++){
 		trTree_ADC                 [i] = -999.;
@@ -2196,6 +2198,8 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
 			trTree_ValidChi2 = false;
 			skipEvent = true;
         }
+
+		trTree_PredictedPosition = positionInDetSystemChannelSpace;
         //		cout<<"predRegion("<<nEvent<<");"<<endl;
 
         //		cout<<"add Event"<<nEvent<<endl;

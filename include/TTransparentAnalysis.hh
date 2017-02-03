@@ -199,6 +199,7 @@ private:
 	Int_t   trTree_Direction;
 	Int_t   trTree_NStrips;
 	Int_t   trTree_CenterStrip;
+	Float_t trTree_PredictedPosition;
 	Float_t trTree_ADC                 [10];
 	Float_t trTree_Pedestal            [10];
 	Float_t trTree_PedestalSigma       [10];
