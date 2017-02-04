@@ -531,11 +531,11 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("StripPedestalSigma"              , &trTree_StripPedestalSigma              , "StripPedestalSigma[128]/F"       );
 	transparentTree->Branch("StripSignal"                     , &trTree_StripSignal                     , "StripSignal[128]/F"              );
 	transparentTree->Branch("StripSNR"                        , &trTree_StripSNR                        , "StripSNR[128]/F"                 );
-	transparentTree->Branch("StripADCCMC"                     , &trTree_StripADC                        , "StripADCCMC[128]/F"                 );
-	transparentTree->Branch("StripPedestalCMC"                , &trTree_StripPedestal                   , "StripPedestalCMC[128]/F"            );
-	transparentTree->Branch("StripPedestalSigmaCMC"           , &trTree_StripPedestalSigma              , "StripPedestalSigmaCMC[128]/F"       );
-	transparentTree->Branch("StripSignalCMC"                  , &trTree_StripSignal                     , "StripSignalCMC[128]/F"              );
-	transparentTree->Branch("StripSNRCMC"                     , &trTree_StripSNR                        , "StripSNRCMC[128]/F"                 );
+	transparentTree->Branch("StripADCCMC"                     , &trTree_StripADCCMC                     , "StripADCCMC[128]/F"                 );
+	transparentTree->Branch("StripPedestalCMC"                , &trTree_StripPedestalCMC                , "StripPedestalCMC[128]/F"            );
+	transparentTree->Branch("StripPedestalSigmaCMC"           , &trTree_StripPedestalSigmaCMC           , "StripPedestalSigmaCMC[128]/F"       );
+	transparentTree->Branch("StripSignalCMC"                  , &trTree_StripSignalCMC                  , "StripSignalCMC[128]/F"              );
+	transparentTree->Branch("StripSNRCMC"                     , &trTree_StripSNRCMC                     , "StripSNRCMC[128]/F"                 );
 }
 
 void TTransparentAnalysis::resetTransparentTree(){
