@@ -33,7 +33,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	MAXDIASIGMA=settings->getDi_Pedestal_Hit_Factor();
 	if(verbosity)cout<<"Pedestal Hit Factor Silicon: "<<MAXSDETSIGMA<<"\nPedestal Hit Factor Diamond: "<<MAXDIASIGMA<<endl;
 	hCommonModeNoise = new TH1F("hCommonModeNoise","hCommonModeNoise",512,-32,32);
-	doCMNCorrection= settings->doCommonModeNoiseCorrection();
+	doCMNCorrection= true;//settings->doCommonModeNoiseCorrection();
 	if(verbosity)cout<<"DO Common Mode Noise Correction: ";
 	if(doCMNCorrection){
 		if(verbosity)cout<<"TRUE "<<endl;}
@@ -41,6 +41,8 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	//char t; cin >>t;//test
 	printChannel=1;
 	//settings->doCommonModeNoiseCorrection();
+	for (UInt_t i = 0; i < 8*2; i ++)
+	    cmn_sil[i] = 0;
 }
 
 TPedestalCalculation::~TPedestalCalculation() {
@@ -245,15 +247,18 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 }
 
 pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float meanCMN, float sigmaCMN, int iterations, float maxSigma) {
-	diaSUMCmn[ch]=0;
+	cout<<"calculateFirstPedestalDiaCMN "<<ch<<" "<<meanCMN<< " "<< sigmaCMN<< " "<<iterations<< " "<<maxSigma<<endl;
+    diaSUMCmn[ch]=0;
 	diaSUM2Cmn[ch]=0;
 	diaEventsInSumCMN[ch]=0;
 	//  if(ch==7)cout<<"calcFirstPedCMN:"<<ch<<" "<<meanCMN<<" "<<sigmaCMN<<" "<<diaEventsInSumCMN[ch]<<endl;
 	this->diaEventUsedCMN[ch].clear();
 	for(nEvent=0;nEvent<adcQueue.size();nEvent++){
 		Float_t adc = adcQueue.at(nEvent);
-		if(   (adc >= getLowLimitPedestal(meanCMN,sigmaCMN,maxSigma))
-				&& (adc <= getHighLimitPedestal(meanCMN,sigmaCMN,maxSigma)) ){
+		Float_t lowLimit = getLowLimitPedestal(meanCMN,sigmaCMN,maxSigma);
+		Float_t highLimit = getHighLimitPedestal(meanCMN,sigmaCMN,maxSigma);
+		if(ch ==0) cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl;
+		if(   (adc >= lowLimit)	&& (adc <= highLimit) ){
 			diaEventUsedCMN[ch].push_back(true);
 			diaSUMCmn[ch]+=adc;
 			diaSUM2Cmn[ch]+=adc*adc;
@@ -422,21 +427,40 @@ void TPedestalCalculation::doCmNoiseCalculation()
 
 	UInt_t nCmNoiseEvents=0;
 	Float_t maxVal = TPlaneProperties::getMaxSignalHeightDiamond();
-	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
+	UInt_t det = TPlaneProperties::getDetDiamond();
+	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 		if(nEvent>this->diaAdcValues[ch].size()&&nEvent<slidingLength){
 			cerr<<"diaADCValues["<<ch<<"].size() = "<<diaAdcValues[ch].size()<<" < "<<nEvent<<"  --> BREAK"<<endl;
 			exit(-1);
 		}
 
 		Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);
+        bool masked = settings->IsMasked(det,ch);
 		Float_t mean =  (nEvent<slidingLength)?diaPedestalMeanStartValues[ch]:diaPedestalMeanCMN[ch];
+        Float_t signal = adc-mean;
 		Float_t sigma = (nEvent<slidingLength)?diaPedestalSigmaStartValues[ch]:diaPedestalSigmaCMN[ch];
-		Float_t signal = adc-mean;
-		Float_t snr = (sigma==0)?(-1.):TMath::Abs(signal/sigma);
-		if(snr<0||snr>settings->getDi_Pedestal_Hit_Factor()||adc>=maxVal||adc<0||signal>maxVal)//settings->isDet_channel_screened(TPlaneProperties::getDetDiamond(),ch))
-			continue;
-		if(snr!=snr||adc!=adc||signal!=signal)
-			continue;
+		if(sigma<=0) {
+		    if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" sigma < 0 : "<<sigma<<endl;
+		    continue;
+		}
+		Float_t snr = TMath::Abs(signal/sigma);
+
+        if(snr!=snr||adc!=adc||signal!=signal)
+            continue;
+
+        if(adc>=maxVal || adc<0||signal>maxVal){
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" invalid adc/signal: "<<adc<<"/"<<signal<<endl;
+            continue;
+        }
+        if (TMath::Abs(snr)>settings->getCMN_cut()){
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch <<" snr over cut: "<<snr<<endl;
+            continue;
+        }
+        if (masked){
+            if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<det<<"/"<<ch <<" Is Masked "<<settings->isDet_channel_screened(det,ch)<<endl;
+            continue;
+        }
+
 		if(verbosity>10||(verbosity>4&&nEvent==0))cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
 		cmNoise+=signal;
 		nCmNoiseEvents++;
@@ -459,6 +483,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 		//		eventReader->LoadEvent(nEvent);
 		doCmNoiseCalculation();
 		cmnValues.push_back(cmNoise);
+        cout<<cmNoise<<endl;
 		for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 			Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);;
 			adc -=cmNoise;
@@ -478,7 +503,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 	if(verbosity)cout<<"update first Pedestal Calculation"<<endl;
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 		pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalMeanStartValues[ch],7,MAXDIASIGMA);
-		values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalMeanStartValues[ch],7,3);
+		values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);
 		diaPedestalMeanCMN[ch] = values.first;
 		diaPedestalSigmaCMN[ch] = values.second;
 		if(ch==7&&verbosity>4){
@@ -564,6 +589,7 @@ void TPedestalCalculation::updateDiamondPedestals(){
 void TPedestalCalculation::setBranchAdresses(){
 	pedestalTree->Branch("PedestalMean",&pedestalMean,"PedestalMean[8][256]/F");
 	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestaSigma[8][256]/F");
+	pedestalTree->Branch("cmn_sil",&cmn_sil,"cmn_sil[8]/F");
 
 	pedestalTree->Branch("diaPedestalMean",&diaPedestalMean,"diaPedestalMean[128]/F");
 	pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestaSigma[128]/F");
@@ -590,6 +616,16 @@ void TPedestalCalculation::printDiamond(UInt_t nChannel){
 
 Float_t TPedestalCalculation::getLowLimitPedestal(Float_t pedMean,Float_t pedSigma, Float_t maxSigma) {
 	return pedMean - TMath::Max(pedSigma*maxSigma,(Float_t)1.0);
+}
+
+void TPedestalCalculation::calculateCommonModeDet(int det) {
+}
+
+Float_t TPedestalCalculation::GetCommonModeNoise(int det, int ch) {
+    if (TPlaneProperties::isDiamondDetector(det))
+        return cmNoise;
+    int  i = ch>=(TPlaneProperties::getNChannels(det)/2)?1:0;
+    return cmn_sil[det*2+i];
 }
 
 Float_t TPedestalCalculation::getHighLimitPedestal(Float_t pedMean,Float_t pedSigma, Float_t maxSigma) {

@@ -84,6 +84,7 @@ bool TDiamondPattern::addPattern(Float_t pitchWidth, Float_t startPosition, UInt
 	nChannelsOfInterval.push_back(deltaChannels);
 	this->pitchWidth.push_back(pitchWidth);
 	cout<<"added: "<<getInterval(beginOfInterval.size()-1).first<<"-"<<getInterval(beginOfInterval.size()-1).second<<endl;
+    this->hasInvalidIntervals();
 	return retVal;
 }
 
@@ -99,6 +100,14 @@ bool TDiamondPattern::isValidCluster(TCluster* cluster) {
 	for (UInt_t cl = 0; cl < cluster->size(); cl ++)
 		if (cluster->isHit(cl)||cluster->isSeed(cl))
 			if ( !isValidChannelPosition( cluster->getChannel(cl) ) )
+				return false;
+	return true;
+}
+
+bool TDiamondPattern::isValidCluster(TCluster cluster) {
+	for (UInt_t cl = 0; cl < cluster.size(); cl ++)
+		if (cluster.isHit(cl)||cluster.isSeed(cl))
+			if ( !isValidChannelPosition( cluster.getChannel(cl) ) )
 				return false;
 	return true;
 }
@@ -143,7 +152,7 @@ bool TDiamondPattern::hasInvalidIntervals(){
 	if(!retVal){
 		cerr << " ERROR!! *********************************"<<endl;
 		cout <<"hasInvalidIntervals! "<< nChannelsOfInterval.size() << " " << beginOfInterval.size() << " " << endOfInterval.size() << " " << firstChannelOfInterval.size() <<endl;
-		//		this->Print();
+		this->Print();
 		exit(-1);
 	}
 
@@ -207,7 +216,11 @@ Float_t TDiamondPattern::convertMetricToChannel(Float_t metric) {
 			Float_t end = endOfInterval[i];
 			begin -= pw/2;
 			end += pw/2;
-
+			if(verbosity>5){
+			    TString output = TString::Format("\tIs %7.1f in [%7.1f,%7.1f]? ",metric,begin,end);
+			    cout<<output<<endl;
+//			    cout<<"\t Is: "<<metric <<" in ["<<begin<<","<<end<<"]\t"<<metric-begin<<" "<<end-metric<<endl;
+			}
 //			if(metric >= 3660 && metric <= 3715)
 //				cout<<metric <<"look at" <<begin<<"-"<<end<<" "<<pw<<endl;
 			if( begin <= metric && metric <= end ){
@@ -229,28 +242,33 @@ Float_t TDiamondPattern::convertMetricToRelativeMetric(Float_t metric,UInt_t int
     Float_t leftPos,rightPos;
     Int_t firstChannel = firstChannelOfInterval[interval]-1;
     Int_t lastChannel = firstChannelOfInterval[interval] + nChannelsOfInterval[interval];
+    Float_t pw = pitchWidth.at(interval);
+//    cout << "[TDiamondPattern::convertMetricToRelativeMetric]"<<metric<<" in " <<interval <<" - ch "<<firstChannel <<" - "<<lastChannel<<" / pw: "<<pw<<endl;
+    Float_t retVal = N_INVALID;
 //  if(metric >= 3660 && metric <= 3715) cout<<"[TDiamondPattern::convertMetricToChannel]"<<metric<<" in " << interval <<": "<<firstChannel<<"-"<<lastChannel<<endl;
     for(Int_t ch = firstChannel; ch <= lastChannel;ch++){
 //      if(metric >= 3660 && metric <= 3715)
 //          cout<<"check channel "<<ch<<" "<<flush;
         if(ch == firstChannel)
-            leftPos = getChannelToMetric(ch+1) - pitchWidth[interval];
+            leftPos = getChannelToMetric(ch+1) - pw;
         else
             leftPos = getChannelToMetric(ch);
         if (ch == lastChannel)
-            rightPos = getChannelToMetric(ch) + pitchWidth[interval];
+            rightPos = getChannelToMetric(ch) + pw;
         else
             rightPos = getChannelToMetric(ch+1);
 //      if(metric >= 3660 && metric <= 3715)
-//          cout<<" "<<leftPos<<"-"<<rightPos<<endl;
         if ( leftPos <= metric && metric <= rightPos ){
+//            cout<<" "<<leftPos<<"-"<<rightPos<< "/ "<<metric<<endl;
             if(metric-leftPos < rightPos-metric)
-                return metric - leftPos;
+                retVal = (metric - leftPos);
             else
-                return metric - rightPos;
+                retVal = (metric - rightPos);
+            break;
         }
     }
-    return N_INVALID;
+//    cout<<"Returning: "<<retVal<<endl;
+    return retVal;
 
 }
 Float_t TDiamondPattern::convertMetricToRelativeMetric(Float_t metric) {
@@ -375,4 +393,19 @@ Int_t TDiamondPattern::getPatternOfChannel(Int_t ch) {
             return i+1;
     }
     return -1;
+}
+
+std::pair<Int_t, Int_t> TDiamondPattern::getIntervalOfDiamond(TString runDesc) {
+    Int_t pattern = 0;
+    runDesc.ToLower();
+    runDesc = runDesc.Strip(TString::kBoth);
+    runDesc = runDesc.Strip(TString::kBoth,'\t');
+    if (runDesc.Contains("left") || runDesc.EqualTo("1"))
+        pattern = 1;
+    else if (runDesc.Contains("right") || runDesc.EqualTo("0"))
+        pattern = 2;
+    std::cout<<"Pattern of \'"<<runDesc<<"\": "<<pattern<<std::endl;
+    if (pattern == 0)
+        return getTotalInterval();
+    return getInterval(pattern);
 }

@@ -6,6 +6,8 @@
  */
 
 #include "../include/TResidual.hh"
+using namespace std;
+
 /**
  * calculating offset and Slope with
  * with method of minimum least square
@@ -23,7 +25,6 @@
  */
 
 
-using namespace std;
 /** Constructor of TResidual
  * initialise all the variables
  */
@@ -53,7 +54,7 @@ void TResidual::resetResidual(){
     sumVRx=0;
     sumVRy=0;
     nUsedTracks=0;
-    verbosity=0;
+    verbosity=4;
 }
 
 /** Prints the results of the ResidualCalulation
@@ -106,9 +107,18 @@ void TResidual::addDataPoint(Float_t deltaX, Float_t predX, Float_t deltaY, Floa
 Float_t TResidual::getXSigma()
 {
     if(bTestResidual) return (100000);
-    if (nUsedTracks!=0)
-        return (TMath::Sqrt(this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean()));
-    return ( N_INVALID);
+    Float_t retVal = N_INVALID;
+    Float_t val;
+    if (nUsedTracks!=0){
+        val = this->resXSigma / (Double_t)this->nUsedTracks - getXMean()*getXMean();
+        retVal = (TMath::Sqrt(val));
+    }
+    if (retVal!=retVal){
+        cout<<"Could not calc Xsigma: "<<resXSigma<<"/"<<nUsedTracks<<"- ("<<getXMean()<<")**2 = "<<val<<" sqrt(\"): "<<retVal<<endl;
+        return 100000;
+    }
+    else
+        return retVal;
 }
 
 
@@ -116,9 +126,17 @@ Float_t TResidual::getXSigma()
 Float_t TResidual::getYSigma()
 {
     if(bTestResidual) return (100000);
+    Float_t retVal = N_INVALID;
     if (nUsedTracks!=0)
-        return (TMath::Sqrt(this->resYSigma / (Double_t)this->nUsedTracks - getYMean()*getYMean()));
-    return (N_INVALID);
+        retVal = (TMath::Sqrt(this->resYSigma / (Double_t)this->nUsedTracks - getYMean()*getYMean()));
+    else
+        retVal =  (N_INVALID);
+    if (retVal!=retVal){
+        cout<<"Could not calc resYSigma: "<<resYSigma<<"/"<<nUsedTracks<<"-"<<getYMean()<<"**2"<<endl;
+        return 100000;
+    }
+    else
+        return retVal;
 }
 
 

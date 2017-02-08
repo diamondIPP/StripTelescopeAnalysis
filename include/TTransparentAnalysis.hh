@@ -33,6 +33,7 @@
 #include "TSystem.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TProfile2D.h"
 #include "TRandom.h"
 #include "TFitResult.h"//TFitResultPtr.h"
 //#include "TGraph.h"
@@ -41,6 +42,7 @@
 #include "TPaveText.h"
 #include "TList.h"
 #include "TPolyMarker.h"
+#include "TObjArray.h"
 //#include "FidCutRegion.hh"
 
 #include "TSettings.class.hh"
@@ -60,6 +62,7 @@
 #include "TAnalysisOfClustering.hh"
 #include "TSpectrum.h"
 
+
 using namespace std;
 
 class TTransparentAnalysis {
@@ -77,13 +80,20 @@ private:
 	void createEventVector(Int_t startEvent = 0);
 	void analyseNonHitEvents();
 	void initHistograms();
+	void initHistograms2();
 	void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
+	void initClusteredHistos(UInt_t startEvent = 1e5, UInt_t maxEvents=1e6);
 	void fillHistograms();
+	void fillClusteredHistos();
 	void fillPedestalsAndNoiseHistos();
+	void saveClusteredHistos();
 	void savePedestalHistos();
     void saveNoiseHistos();
-	TF1* doGaussFit(TH1F *histo);
+    Float_t GetFractionOutsideNSigma(TH1* hRes,Float_t mean, Float_t sigma,Int_t nSigma=2);
+	TF1* doGaussFit(TH1F *histo,Float_t xmin =0,Float_t xmax=0);
 	TF1* doDoubleGaussFit(TH1F *histo);
+	TF1* doFixedDoubleGaussFit(TH1F* histo);
+	TF1* doGaussPlusStepFunction(TH1F* histo);
 	void createEtaIntegrals();
 	void fitHistograms();
 	void createEfficiencyPlots(TH1F* hLandauDistribution);
@@ -92,6 +102,9 @@ private:
 	void saveHistograms();
 	void saveLandausVsPositionPlots(UInt_t clusterSize);
 	void SaveLandauVsEventNoPlots(UInt_t clusterSize);
+	void AnalyzeLandauVsEventNo(TH2* hLandauVsEventNo);
+    void AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo);
+    void AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo);
 	void deleteHistograms();
 	void deleteFits();
 	void printCutFlow();
@@ -103,8 +116,8 @@ private:
 	void printEvent();
 	void printCluster(TCluster cluster);
 	Float_t getResidual(TCluster cluster,bool cmnCorrected, TCluster::calculationMode_t clusterCalculationMode, TH1F* hEtaInt=0);
-	
-	void saveResolutionPlot(TH1F* hRes, UInt_t clusterSize);
+	std::pair<Float_t,Float_t >  getFWCrossingPoint(TH1F* hRes,Float_t crossingPoint);
+	void saveResolutionPlot(TH1F* hRes, UInt_t clusterSize,TString additionalInfo="");
 	// run variables
 	UInt_t subjectDetector, subjectPlane;
 	TPlaneProperties::enumCoordinate subjectDetectorCoordinate;
@@ -164,9 +177,66 @@ private:
 	vector< Float_t> vecRelatedEta10;
 	vector< Float_t> vecRelatedResXEtaCorrected;
 
+	// transparent results tree
+	static const int trTree_nMaxStrips = 10;
+	void bookTransparentTree();
+	void resetTransparentTree();
+	void fillTransparentTree();
+	void writeTransparentTree();
+	TFile* transparentTreeFile;
+	TTree* transparentTree;
+	Bool_t  trTree_ValidTrack;
+	Bool_t  trTree_AlignmentTrack;
+	Bool_t  trTree_inFiducialRegion;
+	Bool_t  trTree_ValidPredRegion;
+	Bool_t  trTree_ValidChi2;
+	Bool_t  trTree_ScreenedCluster;
+	Float_t trTree_Chi2;
+	Int_t   trTree_RunNumber;
+	Float_t trTree_tseed;
+	Float_t trTree_thit;
+	Int_t   trTree_Event;
+	Int_t   trTree_Direction;
+	Int_t   trTree_NStrips;
+	Int_t   trTree_CenterStrip;
+	Float_t trTree_PredictedPosition;
+	Float_t trTree_ADC                 [10];
+	Float_t trTree_Pedestal            [10];
+	Float_t trTree_PedestalSigma       [10];
+	Float_t trTree_Signal              [10];
+	Float_t trTree_CMN;
+	Float_t trTree_PedestalCMNcorr     [10];
+	Float_t trTree_PedestalSigmaCMNcorr[10];
+	Float_t trTree_SignalCMNcorr       [10];
+	Float_t trTree_HighestStripADC                 [10];
+	Float_t trTree_HighestStripPedestal            [10];
+	Float_t trTree_HighestStripPedestalSigma       [10];
+	Float_t trTree_HighestStripSignal              [10];
+	Float_t trTree_HighestStripSNR                 [10];
+	Float_t trTree_HighestStripADCCMNcorr          [10];
+	Float_t trTree_HighestStripPedestalCMNcorr     [10];
+	Float_t trTree_HighestStripPedestalSigmaCMNcorr[10];
+	Float_t trTree_HighestStripSignalCMNcorr       [10];
+	Float_t trTree_HighestStripSNRCMNcorr          [10];
+	Float_t trTree_StripADC                        [128];
+	Float_t trTree_StripPedestal                   [128];
+	Float_t trTree_StripPedestalSigma              [128];
+	Float_t trTree_StripSignal                     [128];
+	Float_t trTree_StripSNR                        [128];
+	Float_t trTree_StripADCCMC                     [128];
+	Float_t trTree_StripPedestalCMC                [128];
+	Float_t trTree_StripPedestalSigmaCMC           [128];
+	Float_t trTree_StripSignalCMC                  [128];
+	Float_t trTree_StripSNRCMC                     [128];
+
 	Float_t inf;
 	// histograms
 	vector<TH1F*> hLandau;
+	vector<TProfile2D*> hLandau2HighestProfile2D;
+	vector< TH2F*> hLandau2HighestFidCutX;
+	vector< TH2F*> hLandau2HighestFidCutY;
+	vector< TH2F*> hLandau2HighestPredX;
+	vector< TH2F*> hLandau2HighestPredY;
 	vector< vector< Float_t> > vecVecLandau;
 	vector< Float_t> vecPredictedChannel;
 	vector< Float_t> vecPredictedDetectorPositionY;
@@ -182,8 +252,18 @@ private:
 	TH1F* hLandauMean;
 	TH1F* hLandauMP;
 	TH1F* hPredictedPositionInStrip;
+
+	TH2F* hSignalInSNR_Centroid2Strips_Dia;
+	TH2F* hSignalInSNR_Centroid2Strips_Dia_cmnCor;
+	TH2F* hSignalInSNR_Centroid2StripsSorted_Dia;
+	TH2F* hSignalInSNR_Centroid2StripsSorted_Dia_cmnCor;
+	TH2F* hSignalInSNR_TrackStripLeft_Dia;
+	TH2F* hSignalInSNR_TrackStripLeft_Dia_cmnCor;
+	TH2F* hSignalInSNR_TrackStripRight_Dia;
+	TH2F* hSignalInSNR_TrackStripRight_Dia_cmnCor;
 	
 	vector<TH1F*> hLandau2Highest;
+	vector<TH1F*> hLandau2Highest_nonCMC;
 	vector<TH1F*> hLandau1Highest;
 	vector<TH1F*> hLandau2HighestFixedNoise;
 	vector <TH1F*> hLandauFixedNoise;
@@ -199,6 +279,8 @@ private:
 	TH1F* hLandau2HighestMP;
 	TH2F* hSelectedTracksAvrgSiliconHitPos;
 	vector<TH1F*> hEtaIntegrals;
+	vector<TH1F*> hEtaCMNcorrectedIntegrals;
+	TH1F* hEtaIntegral_clustered;
 //	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
 	
 	// fits
@@ -259,6 +341,37 @@ private:
 
 	vector<TProfile2D*> vecPHVsEventNo_Areas;
 	vector<TProfile2D*> vecPH2HighestVsEventNo_Areas;
+
+
+	TH2F* hLandauVsEventNo_Clustered;
+	TH1F* hClusterSize_Clustered;
+	TH2F* hLandauVsClusterSize_Clustered;
+	TH1F* hNClusteres_Clustered;
+	TH2F* hEtaVsClusterSize_clustered;
+	TH2F* hEtaCMNcorrectedVsClusterSize_clustered;
+	TH1F* hEta_clustered;
+	TH1F* hResidualHighest2Centroid_clustered;
+	TH1F* hResidualHighestHit_clustered;
+	TH1F* hResidualEtaCorrected_clustered;
+	TH1F* hResidualChargeWeighted_clustered;
+	TH2F* hResidualHighest2CentroidVsClusterSize_clustered;
+	TH2F* hResidualHighestHitVsClusterSize_clustered;
+	TH2F* hResidualEtaCorrectedVsClusterSize_clustered;
+	TH2F* hResidualChargeWeightedVsClusterSize_clustered;
+	TH2F* hResidualTranspEtaCorrectedVsClusterSize_clustered;
+	TH2F* hResidualEtaCorrectedOnlyHitsVsClusterSize_clustered;
+	TH2F* hResidualTranspEtaCorrectedOnlyHitsVsClusterSize_clustered;
+	TH2F* hResidualHighest2CentroidVsEventNo_clustered;
+	TH2F* hResidualHighestHitVsEventNo_clustered;
+	TH2F* hResidualChargeWeightedVsEventNo_clustered;
+	TH2F* hResidualEtaCorrectedVsEventNo_clustered;
+	TH2F* hResidualTranspEtaCorrectedVsEventNo_clustered;
+	TH2F* hResidualEtaCorrectedOnlyHitsVsEventNo_clustered;
+	TH2F* hResidualTranspEtaCorrectedOnlyHitsVsEventNo_clustered;
+	TH2F* hResidualHighestHitVsChannel_clustered;
+
+	Float_t minX,maxX,minY,maxY;
+
 public:
 	static UInt_t GetHitArea(TSettings* set, Float_t xVal, Float_t yVal,UInt_t xDivisions,UInt_t yDivisions);
 private:

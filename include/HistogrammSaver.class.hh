@@ -17,6 +17,8 @@
 #include "TH3F.h"
 #include "TProfile2D.h"
 #include "TH3.h"
+#include "TROOT.h"
+#include "TColor.h"
 #include "TCanvas.h"
 #include "TH2F.h"
 #include "TGraph.h"
@@ -40,11 +42,13 @@
 #include <limits>
 #include "TCutG.h"
 #include "TPaveStats.h"
+#include "TRawEventSaver.hh"
 #include "TSettings.class.hh"
 #include "TText.h"
 #include "TFidCutRegions.hh"
 #include "TFiducialCut.hh"
 #include "THStack.h"
+#include "TMarker.h"
 
 //#include <sys/dirent.h>
 #include <sys/stat.h>
@@ -57,8 +61,17 @@ public:
 	enum EnumAxisRange{
 		maxWidth,fiveSigma,threeSigma,positiveArea,positiveSigma,manual
 	};
+	enum EnumDirection{
+	        positive,negative,
+	    };
+	TFile* GetFilePointer(TString name, TString option="UPDATE");
+	TString GetROOTFileName(TString name="histograms"){return GetFileName(name,"root");}
+	TString GetEpsFileName(TString name="histograms"){return GetFileName(name,"eps");}
+	TString GetFileName(TString name, TString extension);
 	HistogrammSaver(TSettings* settings,int verbosity=0);
 	virtual ~HistogrammSaver();
+	void MoveRootFilesInSubfolder();
+	void SetPaperPlotStyle();
 	void InitializeGridReferenceDetSpace();
 	void SetOptStat(std::string optStat){gStyle->SetOptStat(optStat.c_str());}
 	void SetOptStat(Int_t stat){gStyle->SetOptStat(stat);}
@@ -67,30 +80,41 @@ public:
 								Float_t maxX =      std::numeric_limits<float>::infinity() );
 	TPaveText* GetUpdatedLandauMeans(TH1F* histo,Float_t mpv, Float_t gSigma=-1);
 	//void SetOptFit(std::string fitOpt){gStyle->SetOptFit(fitOpt.c_str());}
-	void SaveCanvas(TCanvas* canvas);
-	void SaveCanvasROOT(TCanvas* canvas);
-	void SaveCanvasPNG(TCanvas* canvas);
+	void SaveCanvas(TCanvas* canvas,TString name="");
+	void SaveCanvasROOT(TCanvas* canvas,TString name="");
+	void SaveCanvasPNG(TCanvas* canvas,TString name ="");
+	void SaveTwoHistosScaled(TString canvasName,TH1* histo1,TH1* histo2, TString position = "left", TString drawOption = "", UInt_t verbosity=0);
 	void SaveTwoHistos(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "left", UInt_t verbosity=0);
+	void SaveTwoHistosComparison(TString canvasName,TH1* histo1,TH1* histo2,double scaleFirst = 1, double scaleSecond=1, TString position = "left", TString drawOption = "", UInt_t verbosity=0);
 	void SaveTwoHistosNormalized(TString canvasName,TH1* histo1,TH1* histo2,double refactorSecond=1, TString position = "right", UInt_t verbosity=0);
 	void SaveHistogramLandau(TH1F* histo);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
 	void Save1DProfileYWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
-    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
-    void CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
-    void Save1DProfileXWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
+    TProfile* CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TString function, bool drawStatbox=true);
+    TProfile* CreateAndSave1DProfileXWithFitAndInfluence(TH2* histo, TF1* pol, bool drawStatbox=true);
+    void Save1DProfileWithFitAndInfluence(TProfile* prof, TF1* pol, bool drawStatbox=true);
 	void SaveHistogram(TH2* histo,bool drawStatBox=true, bool optimizeRange=true,TString drawOption ="colz");
+	void SaveOverlay(TH2* histo,TString drawOption ="colz");
+	TH1F* SaveProjectionZ(TH2* histo,bool isOverlay=true,bool doFit=true,Float_t minX=1,Float_t maxX = 0, Int_t nBins=50);
+	TH1F* GetBinsInHistogram(TH2* histo, UInt_t nBins=512);
 	void SaveHistogram(TH1* histo, bool fitGauss = 0,bool adjustRange =0,bool drawStatsBox = true,TString drawOption ="");
+	void SaveHistogramWithExtendedFit(TH1* histo, TF1* fit, Float_t xmin,Float_t xmax);
+	void SaveNegativeChargeOverlay(TH2* histo);
+	void SaveProjectionX(TH2* histo);
+	void SaveBinnedProjectionX(TH2* histo);
+	void SaveProjectionY(TH2* histo);
 	void SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool drawStatBox = false);
-	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false);
+	void SaveStack(THStack* stack,TString drawOption="",bool bDrawLegend=false,bool bDrawOnCanvas = true,TString xTitle ="",TString yTitle="");
 	TProfile* GetProfileX(TProfile2D* prof,TString name ="_pfx",Int_t firstybin = 1, Int_t lastybin = -1);
     TProfile* GetProfileY(TProfile2D* prof,TString name ="_pfy",Int_t firstxbin = 1, Int_t lastxbin = -1);
     TH2D* GetBinContentHisto(TProfile2D* prof);
-	void SaveHistogramWithFit(TH1F* histo, TF1* fit,UInt_t verbosity=0);
-	void SaveHistogramWithFit(TH1F* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);
+	void SaveHistogramWithFit(TH1* histo, TF1* fit,UInt_t verbosity=0);
+	void SaveHistogramWithFit(TH1* histo, TF1* fit, Float_t xmin, Float_t xmax, UInt_t verbosity=0);
 	void SaveHistogramWithCutLine(TH1F *histo,Float_t cutValue);
 	void SaveHistogramLogZ(TH2* histo);
+	void SaveIntegral(TH1* histo,bool relative=false);
 	void SaveGraph(TGraph* graph,std::string name,std::string option="AP");
-	void SaveHistogramPNG(TH1* histo,TString drawOption="");
+	void SaveHistogramPNG(TH1* histo,TString drawOption="",bool optimizedRange = false);
 	void SaveHistogramPNG(TH2* histo,bool optimizeRange=true,TString drawOption ="colz");
 	void SaveGraphPNG(TGraph* graph,std::string name,std::string option="AP");
 	void SaveHistogramFitGaussPNG(TH1* histo);
@@ -104,7 +128,12 @@ public:
 //	void SaveHistogramWithCellGrid(TH2D* histo){SaveHistogramWithCellGrid(TH2*)histo)};
 //	void SaveHistogramWithCellGrid(TH2* histo){SaveHistogramWithCellGrid(TH2*)histo)}
 	TCanvas* DrawHistogramWithCellGrid(TH2* histo,TH2* histo2=0);
+	TCanvas* DrawHistogramWithCellGridAndMarkedCells(TH2* histo,TH2* histo2=0);
+	void AddMarkedCells(TCanvas *c1);
+	void DrawGoodCellsRegion(TCanvas* c1);
 	void SaveHistogramWithCellGrid(TH2* histo, TH2* histo2=0);
+    void SaveHistogramWithCellGridAndMarkedCells(TH2* histo, TH2* histo2=0);
+    TH2D* GetTH2DOfCut(TH2* histo, Float_t cut, EnumDirection dir = positive);
 	void SetVerbosity(unsigned int i);
 	void SetRunNumber(unsigned int runNumber);
 	void SetNumberOfEvents(unsigned int nEvents);
@@ -119,7 +148,7 @@ public:
 	static void OptimizeYRange(TH2* histo);
 	static void OptimizeXYRange(TH2* histo);
 
-	static TProfile2D* CreateProfile2D(std::string name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
+	static TProfile2D* CreateProfile2D(TString name, std::vector<Float_t> posX, std::vector<Float_t> posY, std::vector<Float_t> posZ,
 			UInt_t nBinsX=128, UInt_t nBinsY=128,
 			Float_t minRangeX = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeX= std::numeric_limits<float>::infinity(),
 			Float_t minRangeY = (-1)*std::numeric_limits<float>::infinity(),Float_t maxRangeY= std::numeric_limits<float>::infinity(),
@@ -142,15 +171,20 @@ public:
 			Float_t xmin = -1*std::numeric_limits<float>::infinity(),Float_t xmax = std::numeric_limits<float>::infinity(),
 			Float_t factor = 0.05);
 	static Float_t GetMean(std::vector<Float_t> vec);
-	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
-	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
-	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
+//	static void SaveCanvasPNG(TCanvas *canvas, std::string location, std::string file_name);
+//	static void SaveCanvasC(TCanvas *canvas, std::string location, std::string file_name);
+//	static void SaveCanvasRoot(TCanvas *canvas, std::string location, std::string file_name);
 	static TGraphErrors CreateErrorGraph(std::string name,std::vector<Float_t> x, std::vector<Float_t> y, std::vector<Float_t> ex, std::vector<Float_t> ey);
 	static void CopyAxisRangesToHisto(TH1F* changingHisto,TH1F* axisInputHisto);
 	TH2D* GetHistoBinedInQuarters(TString name);
 	TH2D* GetHistoBinedInCells(TString name,Int_t binsPerCellAxis=1);
+	TH2D* GetHistoBinnedAroundFieldWires(TString name, Int_t binsPerCellAxis=1);
+	TProfile2D* GetProfileBinnedAroundFieldWires(TString name, Int_t binsPerCellAxis=1);
 	TProfile2D* GetProfile2dBinedInCells(TString name,Int_t binsPerCellAxis=1);
 	TH3D* Get3dHistoBinedInCells(TString name,UInt_t binsz, Float_t minz,Float_t maxz, Int_t binsPerCellAxis=1);
+	TCutG* GetCutGofBin(TString name, TH2* histo,Float_t x,Float_t y);
+	TH2D* GetGridReferenceDetSpace(){return hGridReferenceDetSpace;}
+	TH2D* GetGridReferenceCellSpace(){return hGridReferenceCellSpace;}
 private:
 	Float_t xRangeMin,xRangeMax;
     TPaveText *pt;
@@ -166,6 +200,15 @@ private:
     TSystem *sys;
     TFile* histoFile;
     TSettings* settings;
+public:
+    void DeleteCellHistos();
+    TH1* hGoodCells;
+    TH1* hAllCells;
+    TH1* hAllButBadCells;
+    TH1* hBadCells;
+    void CreateResolutionPlots(vector<TH1*> *vec,TString kind,  Int_t subjectDetector, TString appendix);
+    void CreateTH2_CellPlots(vector<TH1*> *vec,TString kind,TString prefix= "hResolution", TString appendix="");
+//    void CreateTH2_CellPlots(vector<TH2F*> *vec,TString kind,TString prefix= "hResolution", TString appendix="");
 };
 
 #endif /* HISTOGRAMMSAVER_CLASS_HH_ */

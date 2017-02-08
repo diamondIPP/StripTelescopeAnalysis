@@ -34,6 +34,7 @@ public:
 	void setTitle(string newTitle){if(verbosity)cout<<"HTML:SetTitle:"<<newTitle<<endl;this->title.assign(newTitle);};
 	virtual void createContent(){};
 public:
+	string cleanFileName(string fileName);
 //	template <typename T1, typename T2>
 //	string combineToString(T1 a, T2 b){
 //	    stringstream output;
@@ -58,12 +59,11 @@ protected:
 	void generateTableOfContent();
 	void fillContent();
 	std::string createTable(std::vector<std::vector<std::string> > content);
-	std::string putImage(std::string path, TString name, std::string type = "png",int sizeInPercentage=20);
-	std::string putImage(std::string path, std::string name, std::string type = "png",int sizeInPercentage=20);
+	std::string putImage(std::string path, TString name, std::string type = "png",int sizeInPercentage=20,bool highlighted = false);
+	std::string putImage(std::string path, std::string name, std::string type = "png",int sizeInPercentage=20,bool highlighted = false);
 public:
-	std::string putImageOfPath(std::string name, std::string type="png",int sizeInPercentage=20){return putImage(path,name,type,sizeInPercentage);};
+	std::string putImageOfPath(std::string name, std::string type="png",int sizeInPercentage=20,bool highlighted = false){return putImage(path,name,type,sizeInPercentage,highlighted);};
 protected:
-
 	std::string putImagesOfAllDetectors(std::string path,std::string name, std::string ending ="",std::string type="png", int percentage =20);
 	std::string putLink(std::string link,std::string content);
 	TSettings* settings;

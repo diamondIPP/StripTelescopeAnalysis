@@ -232,7 +232,7 @@ TF1* doLandauGaussFit(TH1F* inputHisto) {
 	float max = inputHisto->GetXaxis()->GetXmax();
 	TF1* landau = new TF1("landau","landau",min, max);
 	landau->SetLineColor(kRed);
-	inputHisto->Fit(landau,"");
+	inputHisto->Fit(landau,"Q");
 
 	Double_t fr[2];
 	Double_t sv[4], pllo[4], plhi[4], fp[4], fpe[4];

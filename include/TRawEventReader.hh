@@ -16,6 +16,7 @@
 #include <cstring>
 #include <vector>
 #include <deque>
+#include <bitset>
 
 //ROOT Class Headers
 #include "TTree.h"

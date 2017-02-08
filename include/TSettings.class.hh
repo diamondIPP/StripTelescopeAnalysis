@@ -20,7 +20,8 @@
 #include "TObject.h"
 #include "TSystem.h"
 #include "TFile.h"
-
+#include "TMacro.h"
+#include "TProfile2D.h"
 #include "ChannelScreen.hh"
 #include "TChannelMapping.hh"
 #include "TCluster.hh"
@@ -33,7 +34,6 @@
 #include "TRunInfo.hh"
 #include <string>
 #include <sys/stat.h>
-
 class TSettings:public TObject {
 public:
 	enum alignmentMode {normalMode=0,transparentMode=1};
@@ -43,12 +43,15 @@ private:
 	std::string outputDir;
 	std::string inputDir;
 public:
+	TMacro* GetMacro(){return macro;}
 	static UInt_t GetColor(int no);
 	static bool existsDirectory(std::string dir);
 	TSettings(TRunInfo* runInfo);
 	TSettings(UInt_t runNumber=0);
 	TSettings(std::string fileName,UInt_t runNumber=0);
 	virtual ~TSettings();
+    TString GetCurrentBegin(){return currentBegin;}
+    TString GetCurrentEnd(){return currentEnd;}
 	std::string getAbsoluteOuputPath(bool withRunDescribtion=0);
 	std::string getAbsoluteInputPath(){return inputDir;};//todo
 	std::string getRawTreeFilePath();
@@ -61,7 +64,7 @@ public:
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
 	std::string getEtaDistributionPath(Int_t step=-1);
 	std::string get3dDiamondTreeFilePath();
-	std::string get3dDiamondAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/3dDiamondAnalysis/");};
+	std::string get3dDiamondAnalysisPath();
 	std::string getResultsRootFilePath();
 	bool doCommonModeNoiseCorrection() const {return DO_CMC;}
 	void goToRawTreeDir();
@@ -70,6 +73,9 @@ public:
 	void goToOutputDir();
 	void goToPedestalTreeDir(){goToDir(this->getAbsoluteOuputPath(false));}
 	void goToAlignmentRootDir(alignmentMode mode = normalMode){goToDir(this->getAbsoluteOuputPath(false));}
+	Float_t getNegativeChargeCut() const{return negativeChargeCut;}
+	Float_t getNegativeChargeCutStrip() const{return negativeChargeCutStrip;}
+	void setNegativeChargeCut(Float_t value){negativeChargeCut  = value;}
 
 
 	void goTo3dDiamondTreeDir();
@@ -90,7 +96,7 @@ public:
 	bool isSpecialAnalysis(){return getRunDescription().at(0)!='0';};
 
 	enumRunDescription getAnalysedDiamond();
-
+	TCutG* GetCell(Int_t nCell,TString name);
 	void DrawMetallisationGrid(TCanvas* nCanvas,  int DiamondPattern);
 	vector< TH1*> sortHistosByPulseHeight(vector<TH1*> vec);
 	static bool SorterForPulseHeightOfHisto(TH1* a, TH1* b);
@@ -110,15 +116,19 @@ public:
 	void setInputDir (std::string inputDir){this->inputDir=inputDir;};
 	bool is3dDiamond(){return b3dDiamond;};
 	bool b3dDiamond;
-	bool doTransparentAlignmnet()const {return bTransparentAlignment;}
+	bool doTransparentAlignment()const {return bTransparentAlignment;}
+	int getAlignmentMode()const {return detectorsToAlign;}
+	int getDetectorsToAlign()const{return detectorsToAlign;}
 	std::string getInputDir()const {return inputDir;};
 	std::string getOutputDir()const {return outputDir;};
 	enum enumAlignmentTrainingMethod{enumFraction=0, enumEvents=1};
 	std::string getRunDescription() const {return runDescription;};
+	Int_t getRepeaterCard(){return repeaterCardNo;}
 	Float_t getPHinSigmaPlotFactor() const{return 0.8;}
 	Float_t getClusterSeedFactor(UInt_t det,UInt_t ch);
 	Float_t getClusterHitFactor(UInt_t det,UInt_t ch);
 	Float_t getAlignment_chi2() const;
+	bool IgnoreStripForAlignment(UInt_t det,Float_t predHitPosDetCh);
 	void setAlignment_chi2(Float_t alignment_chi2);
 	Float_t getTransparentChi2() const{return transparentChi2;}
 	void setTransparentChi2(Float_t chi2){transparentChi2=chi2;}
@@ -127,6 +137,7 @@ public:
 	Int_t getPedestalSildingLength(){return getIter_Size();};
 	Int_t getTaylor_speed_throttle() const;
 	Int_t getDia_input() const;
+	Float_t get_Pedestal_Hit_Factor(UInt_t det) const;
 	Float_t getDi_Pedestal_Hit_Factor() const;
 	Float_t getSi_Pedestal_Hit_Factor() const;
 	Int_t getDO_CMC() const;
@@ -145,7 +156,12 @@ public:
 	Int_t getPulse_height_num_bins() const;
 	Float_t getPulse_height_si_max() const;
 	Float_t getPulse_height_max(UInt_t det) const;
+	Int_t   getNoise_si_num_bins() const;
+	Float_t getNoise_si_max     () const;
+	Int_t   getNoise_di_num_bins() const;
+	Float_t getNoise_di_max     () const;
 	Int_t getSaveAllFilesSwitch() const;
+	Int_t getSnr_distribution_num_bins() const;
 	Float_t getSnr_distribution_di_max() const;
 	Float_t getSnr_distribution_si_max() const;
 	Float_t getEta_hiq_slice_hi() const;
@@ -169,7 +185,6 @@ public:
 	bool IsMasked(UInt_t det, Float_t ch){return (IsMasked(det,(UInt_t)ch)||IsMasked(det,(UInt_t)ch+1));}
 	UInt_t getNoisePlotChannel(){return 48;}//todo: variable in setttings file
 	std::vector<int> getDet_channel_screen_channels(int i) const;
-	std::vector<int> getDet_channel_screen_regions(int i) const;
 	bool getAlternativeClustering() const;
 	bool getUseAutoFidCut() const;
 	Float_t getAutoFidCutPercentage() const{return 0.4;};//todo in settingsfile adden
@@ -208,7 +223,12 @@ public:
 	void setPulse_height_di_max(Float_t pulse_height_di_max);
 	void setPulse_height_num_bins(Int_t pulse_height_num_bins);
 	void setPulse_height_si_max(Float_t pulse_height_si_max);
+	void setNoise_si_num_bins(Int_t   noise_si_num_bins);
+	void setNoise_si_max     (Float_t noise_si_max     );
+	void setNoise_di_num_bins(Int_t   noise_di_num_bins);
+	void setNoise_di_max     (Float_t noise_di_max     );
 	void setSaveAllFilesSwitch(Int_t SaveAllFilesSwitch);
+	void setSnr_distribution_num_bins(Float_t snr_distribution_num_bins);
 	void setSnr_distribution_di_max(Float_t snr_distribution_di_max);
 	void setSnr_distribution_si_max(Float_t snr_distribution_si_max);
 	void setEta_hiq_slice_hi(Float_t eta_hiq_slice_hi);
@@ -223,7 +243,6 @@ public:
 	void setSnr_plots_enable(Int_t snr_plots_enable);
 	void setDet_channel_screen(int i,ChannelScreen Det_channel_screen);
 	void setDet_channel_screen_channels(int i,std::vector<int> Det_channel_screen_channels);
-	void setDet_channel_screen_regions(int i,std::vector<int> Det_channel_screen_regions);
 	void setAlternativeClustering(bool AlternativeClustering);
 	void setUseAutoFidCut(bool UseAutoFidCut);
 	void setSingle_channel_analysis_enable(bool singleChannelAnalysisEnable);
@@ -289,7 +308,7 @@ public:
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
 	UInt_t getAlignmentEvents(UInt_t nEvents);
 	bool resetAlignment() const{return bResetAlignment;};
-	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
+//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	UInt_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
 	TFidCutRegions* get3dEdgeFidCuts(){return fidCuts3DEdge;};
@@ -298,7 +317,8 @@ public:
 	Float_t getMaxDiamondChannel();
 	std::pair< Int_t , Int_t > getDiaDetectorArea(Int_t n);
 	bool isInDiaDetectorArea(Int_t ch,Int_t area);
-	bool isClusterInDiaDetectorArea(TCluster *cluster, Int_t area);
+	bool isClusterInDiaDetectorArea(TCluster cluster, Int_t area);
+	bool isClusterInDiaDetectorArea(TCluster* cluster, Int_t area);
 	bool isValidCellNo(UInt_t cellNo){return (cellNo<nRows3d*nColumns3d);}
 	int getDiaDetectorAreaOfChannel(Int_t ch, UInt_t verbosity = 0);
 	bool isDiaDetectorAreaBorderChannel(UInt_t ch);
@@ -313,12 +333,14 @@ public:
 	Float_t convertMetricToChannelSpace(UInt_t det, Float_t metricValue);
 	void PrintPatterns(int k=0);
 	Float_t getChi2Cut3D(){return chi2Cut3D;}
+	Float_t getChi2Cut3D_X(){return chi2Cut3D;}
+	Float_t getChi2Cut3D_Y(){return chi2Cut3D;}
 	Float_t getMinimalAbsoluteEtaValue(){return minAbsEtaVal;}
 	void setMinimalAbsoluteEtaValue(Float_t minAbsEtaVal) {this->minAbsEtaVal = minAbsEtaVal;}
 	bool isUseUserResolutionInput() const {return bUseUserResolutionInput;}
 	void setUseUserResolutionInput(bool useUserResolutionInput) {bUseUserResolutionInput = useUserResolutionInput;}
-	Float_t GetDefaultResolutionX(UInt_t plane){if(plane<9)return alignment_resolutions.at(plane*2);return 0;}
-	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 0;};
+	Float_t GetDefaultResolutionX(UInt_t plane){if(plane<9)return alignment_resolutions.at(plane*2);return 20;}
+	Float_t GetDefaultResolutionY(UInt_t plane){if(plane<8)return alignment_resolutions.at(plane*2+1);return 20;};
 	//	Float_t GetDefaultResolution(TPlaneProperties::enumCoordinate cor, UInt_t plane);//todo
 	//	int getAreaOfInterest(){return inde
 	Float_t get3DYOffset(){return yOffset3D;};//todo
@@ -326,10 +348,24 @@ public:
 	vector<int> get3DnHAnalysisFidCut(){return TDnHAnalysisFidCut;};//todo: ????
 	vector<int> get3DwHAnalysisFidCut(){return TDwHAnalysisFidCut;};//todo: ????
 	TString  getAlignmentFidCuts(){TString output; for (UInt_t i=0;i<alignmentFidCuts.size();i++) output.Append(TString::Format("%d, ",i));return output;}
+	TString getDiamond(){return diamondName;}
+	Int_t getVoltage(){return voltage;}
+    const std::vector<int>& getDiaChannelNoisy() const {return Dia_channel_noisy;}
+    const std::vector<int>& getDiaChannelNotConnected() const {return Dia_channel_not_connected;}
+    bool IsNotConnectedChannel(Int_t ch);
+    bool IsNoisyChannel(Int_t ch);
+    UInt_t getNEvents(){return nEvents;};
+    const std::pair<float,float> get3DOverlayRange(){return OverlayRange3d;}
+    bool RerunSelection(){return bRerunSelection;}
 private:
+
+	TString diamondName;
+	Int_t voltage;
 	TFidCutRegions* fidCutsSelection;
 	TFidCutRegions* fidCuts3DEdge;
 	TFidCutRegions* fidCuts3DMetallisation;
+	std::pair<float,float> OverlayRange3d;
+	TMacro *macro;
 protected:
 	float store_threshold;
 private:
@@ -341,10 +377,12 @@ private:
 	void DefaultLoadDefaultSettings();
 	void ParseStringArray(std::string key, std::string value, std::vector<std::string> &vec);
 	void ParseFloatArray(std::string key, std::string value, std::vector<float> & vec);
+	void ParseFloatPair(std::string key, std::string value, std::pair<float,float> & p);
 	void ParseIntArray(std::string key, std::string value, std::vector<int> & vec);
 	void ParseRegionArray(std::string key, std::string value, std::vector< std::pair<Int_t, Int_t> > &vec);
 	void ParsePattern(std::string key, std::string value);
-	void ParseFidCut(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut);
+    void ParseFidCut(std::string key, std::string value, TFiducialCut* fidcut);
+	void ParseFidCutRegion(std::string key, std::string value, TFidCutRegions* fidCutRegions,bool &isStandardFidCut);
 	void ParseScreenedChannelArray(std::string key, std::string value, std::vector<int> & vec);
 	std::pair< std::string,std::string > ParseRegionString(std::string key, string value);
 	bool ParseFloat(std::string key, std::string value,float  &output);
@@ -354,6 +392,8 @@ private:
 	bool ParseInt(std::string key, std::string value, int &output);
 	bool ParseInt(std::string key, std::string value, UInt_t &output);
 	bool ParseBool(std::string key, std::string value, bool &output);
+	bool ParseTString(std::string key, std::string value, TString &output);
+    bool ParseString(std::string key, std::string value, string &output);
 	void ParseCellArray(std::string key, std::string value, vector<Int_t> &cells);
 	void ParseCellArray(string key, string value, vector<int> &vecCells, vector< vector<int> > &PtrvecCells);
 	void Parse(std::string key, std::string value, std::vector<float> & vec){ ParseFloatArray(key,value,vec);}
@@ -362,6 +402,8 @@ private:
 	bool Parse(std::string key, std::string value, int &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, UInt_t &output){return ParseInt(key,value,output);}
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
+	bool Parse(std::string key, std::string value, TString &output){return ParseTString(key,value,output);}
+	bool Parse(std::string key, std::string value, string &output){return ParseString(key,value,output);}
 	pair<char,int> ParseCellPosition(std::string value);
 	void LoadDefaultResolutions();
 
@@ -372,12 +414,17 @@ private:
 	TSystem *sys;
 	TFile *settingsFile;
 private:
+	bool bRerunSelection;
 	bool bUseUserResolutionInput;
 	bool bTransparentAlignment;
+	int detectorsToAlign;
 	bool bAsymmetricSample;
 	Float_t chi2Cut3D;
+	Float_t chi2Cut3D_X;
+	Float_t chi2Cut3D_Y;
 	Float_t transparentChi2;
 	std::vector< std::pair<Int_t,Int_t> > vecDiaDetectorAreasInChannel;
+	std::vector< std::vector<Int_t> > vecAlignmentIgnoreChannels;
 	bool bResetAlignment;
 	Float_t alignmentPrecision_Offset;
 	Float_t alignmentPrecision_Angle;
@@ -412,8 +459,13 @@ private:
 	Int_t pulse_height_num_bins;
 	Float_t pulse_height_si_max;
 	Float_t pulse_height_di_max;
+	Int_t snr_distribution_num_bins;
 	Float_t snr_distribution_si_max;
 	Float_t snr_distribution_di_max;
+	Int_t   noise_si_num_bins;
+	Float_t noise_si_max;
+	Int_t   noise_di_num_bins;
+	Float_t noise_di_max;
 	Float_t eta_lowq_slice_low;
 	Float_t eta_lowq_slice_hi;
 	Float_t eta_hiq_slice_low;
@@ -433,7 +485,8 @@ private:
 	UInt_t alignment_training_track_number;
 	enumAlignmentTrainingMethod trainingMethod;
 	std::vector<int> Det_channel_screen_channels[9];
-	std::vector<int> Det_channel_screen_regions[9];
+	std::vector<int> Dia_channel_not_connected;
+	std::vector<int> Dia_channel_noisy;
 	ChannelScreen Det_channel_screen[9];
 	bool dia_x_aligned;
 	bool eta_correction;
@@ -456,7 +509,6 @@ private:
 	Float_t rms_sigma_difference_cut;
 	Int_t high_rms_cut; //cut on absolute rms value instead of comparing to Gaussian
 	Float_t rms_cut; //value to use if high_rms_cut
-
 	Int_t zoomDiamondPlots; //zoom in on DC_Pedestal (100 event / window)
 
 	Int_t singleTrack2D; //plot single tracks only in 2D hits histogram
@@ -472,6 +524,10 @@ private:
 	TChannelMapping *diamondMapping;
 	Float_t pitchWidthSil;
 	Float_t pitchWidthDia;
+    TString currentBegin;
+    TString currentEnd;
+    Int_t repeaterCardNo;
+    bool bPaperMode;
 private:
 	//Filter tracks not in good fiducial region w/o bad strips
 	Int_t align_sil_fid_xlow;
@@ -487,6 +543,7 @@ private:
 	Float_t diaOffsetMetricSpace;
 	Float_t diaStartingChannel;
 private:
+	Int_t nEvents;
 	Float_t yOffset3D;
 //	vector<int> xEdgeFicucialRegion;
 //	vector<int> yEdgeFicucialRegion;
@@ -507,6 +564,10 @@ private:
 	Float_t CentralColumnOverlayYHigh;
 	Float_t CentralColumnOverlayXBins;
 	Float_t CentralColumnOverlayYBins;
+	Float_t BiasColumnOverlayXLow;
+	Float_t BiasColumnOverlayXHigh;
+	Float_t BiasColumnOverlayYLow;
+	Float_t BiasColumnOverlayYHigh;
 	Float_t OverlayOffsetX;
 	Float_t OverlayOffsetY;
 	Float_t OverlayColumnPulseHeightCut;
@@ -521,8 +582,21 @@ private:
 	Float_t cellHeight;
 	void CheckEdgeFidcuialCuts();
 	Float_t minimumEdgeDistance;
+	Float_t adcToElectronConversion;
+	TString PathExtension3d;
+	Float_t resolutionSNR;
+	Float_t lowResponseThreshold;
+	Float_t negativeChargeCut;
+	Float_t negativeChargeCutStrip;
+	pair<Float_t,Float_t> responseWindow;
 public:
+	Float_t getLowResponseThreshold(){return lowResponseThreshold;}
+	TH2F* GetOverlayHisto(TString name,Int_t pattern=2,UInt_t nbinsx=15,UInt_t nbinsy=15);
+	TProfile2D* GetOverlayProfile(TString name,Int_t pattern=2,UInt_t nbinsx=15,UInt_t nbinsy=15);
+	std::pair<Float_t,Float_t> getResponseWindow(){return responseWindow;}
+    TFiducialCut* centralRegion3DnH;
 	Float_t GetCellHeight(){return cellHeight;}
+	Float_t GetResolutionSNR(){return resolutionSNR;}
 	Float_t GetCellWidth(int det,int pattern){return getPitchWidth(det,pattern);}
 	TString getEdgePositionName(UInt_t i){if(i<vecEdgePositionName.size()) return vecEdgePositionName[i];return "";}//todo make it safe
 	TPlaneProperties::enumCoordinate getEdgePositionType(UInt_t i){if(i<vecEdgePositionType.size()) return vecEdgePositionType[i];return TPlaneProperties::UNKOWN_COR;}
@@ -530,18 +604,27 @@ public:
 	int do3dShortAnalysis() {return b3dShortAnalysis;}
 	int do3dLongAnalysis() {return b3dLongAnalysis;}
 	int do3dTransparentAnalysis() {return b3dTransparentAnalysis;}
+	void set3dTransparentAnalysis(int trans){b3dTransparentAnalysis = trans;}
+    void PrintCellPosition(UInt_t cell, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionX(UInt_t cell, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionY(UInt_t cell, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionX(UInt_t column,UInt_t row, int diamondPattern);
+    std::pair<Float_t, Float_t> getCellPositionY(UInt_t column,UInt_t row,int diamondPattern);
 	void setNRows3d(UInt_t nRows){nRows3d=nRows;};
-	UInt_t getNRows3d(){return nRows3d;};
-	UInt_t getNColumns3d(){return nColumns3d;};
+	UInt_t getNRows3d(){return nRows3d;}; // Horizontally
+	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
+	UInt_t getNColumns3d(){return nColumns3d;};//Vertical
 	UInt_t GetNCells3d(){return nRows3d * nColumns3d;};
 	UInt_t getNQuarters3d(){return 4;}
-	void setNColumns3d(UInt_t nColumns){nColumns3d=nColumns;};
 	//void setNColumns3d(int nColumns){nColumns3d=nColumns;};
 	//vector<Int_t> getGoodCells3D(){return goodCells3d;};		//Changed by Iain 5/9/13
 	vector< vector<Int_t> > getGoodCellRegions3d(){return goodCellRegions3d;}
 	vector<Int_t> getBadCells3D(){return badCells3d;};
 	vector<Int_t> getBadCells3DnH(){return badCells3dnH;};
 	vector<Int_t> getDeadCell3D(){return deadCell3d;}
+	pair<Float_t, Float_t> getAllGoodCellsXpos();
+	pair<Float_t, Float_t> getAllGoodCellsYpos();
+	bool isDeadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Int_t cellNo);
 	bool isBadCell(UInt_t nDiamondPattern, Float_t xDet, Float_t yDet);
 	bool IsGoodCell(UInt_t nDiamondPattern, Int_t cellNo);
@@ -560,19 +643,29 @@ public:
 	Float_t getCentralColumnOverlayXBins(){return CentralColumnOverlayXBins;}
 	Float_t getCentralColumnOverlayYBins(){return CentralColumnOverlayYBins;}
 
+	Float_t getBiasColumnOverlayXLow(){return BiasColumnOverlayXLow;}
+		Float_t getBiasColumnOverlayXHigh(){return BiasColumnOverlayXHigh;}
+		Float_t getBiasColumnOverlayYLow(){return BiasColumnOverlayYLow;}
+		Float_t getBiasColumnOverlayYHigh(){return BiasColumnOverlayYHigh;}
+
 	Float_t getOverlayOffsetX(){return OverlayOffsetX;}
 	Float_t getOverlayOffsetY(){return OverlayOffsetY;}
 	Float_t getOverlayColumnPulseHeightCut(){return OverlayColumnPulseHeightCut;}
 
 	inline Int_t getRowOfCell(Int_t cellNo){return cellNo % getNRows3d();}
 	inline Int_t getColumnOfCell(Int_t cellNo){return cellNo / getNRows3d();}
+	char getColumnChar(Int_t column);
+	char getColumnCharOfCell(Int_t cellNo);
 	pair<Float_t,Float_t> getRelativePositionInCell(Float_t xPredDet,Float_t yPredDet);
 	UInt_t get3dWithHolesDiamondPattern(){return 3;};
 	bool IsWithInTheColumnRadius(Float_t relCellPosX,Float_t relCellPosY);
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY,Float_t minDistanceToEdge);
 	bool IsOnTheEdgeOfCell(Float_t relCellPosX,Float_t relCellPosY){return IsOnTheEdgeOfCell(relCellPosX,relCellPosY,minimumEdgeDistance);}
+	bool IsOnTheEdgeOfCell(pair<Float_t,Float_t> relCellPos, Float_t minDistanceToEdge){return  IsOnTheEdgeOfCell(relCellPos.first,relCellPos.second,minDistanceToEdge);}
+	bool IsOnTheEdgeOfCell(pair<Float_t,Float_t> relCellPos){return IsOnTheEdgeOfCell(relCellPos,minimumEdgeDistance);}
 	Float_t GetMinimumEdgeDistance(){return minimumEdgeDistance;};
-
+	bool IsPaperMode(){return bPaperMode;}
+	Float_t getAdcToElectronConversion(){return 1;}
 
 	ClassDef(TSettings,6)
 

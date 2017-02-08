@@ -306,9 +306,15 @@ void TDetectorAlignment::ResetAlignment(Int_t plane){
 
 Double_t TDetectorAlignment::getXResolution(UInt_t plane)
 {
-	if(plane<6)
-		return xResolution[plane];
-	return 2;
+    Float_t xRes;
+	if(plane<6){
+		xRes = xResolution[plane];
+		if (xRes > 0)
+		    return xRes;
+	}
+
+	return 20;
+
 }
 
 Double_t TDetectorAlignment::getZResolution(UInt_t plane)
@@ -339,9 +345,13 @@ void TDetectorAlignment::setXResolution(Double_t xres,UInt_t plane)
 
 Double_t TDetectorAlignment::getYResolution(UInt_t plane)
 {
-	if(plane<6)
-		return yResolution[plane];
-	return -9999;
+    Float_t yRes;
+	if(plane<6){
+		yRes = yResolution[plane];
+		if (yRes >0)
+		    return yRes;
+	}
+	return 20;
 }
 
 void TDetectorAlignment::setYResolution(Double_t resolution,UInt_t plane)

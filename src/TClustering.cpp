@@ -210,14 +210,13 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	Float_t signal =eventReader->getSignal(det,ch);
 	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch);
 	Int_t adcValue= eventReader->getAdcValue(det,ch);
-	Float_t cmNoise = eventReader->getCMNoise();
+	Float_t cmNoise = eventReader->getCMNoise(det,ch);
 
 	//create Cluster
 	int seedSigma=settings->getClusterSeedFactor(det,ch);
 	int hitSigma=settings->getClusterHitFactor(det,ch);
 	bool isScreened=false;
 	int maxChannel=TPlaneProperties::getNChannels(det);
-
 	TCluster cluster(nEvent,(UChar_t)det,seedSigma,hitSigma,maxChannel,cmNoise);
 
 	//look for hit channels smaller than or equal  to the seed channel

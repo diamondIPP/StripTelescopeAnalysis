@@ -34,8 +34,8 @@ void TFiducialCut::SetAllValuesZero() {
 
 void TFiducialCut::Print (UInt_t i) {
 	std::cout <<TCluster::Intent(i)<< "FidCutRegion #" << index << ":"<<
-			" X: " <<setw(6) <<std::right<< x_low << " - " <<setw(6)<<std::left<< x_high <<
-			" Y: " <<setw(6) <<std::right<< y_low << " - " <<setw(6)<<std::left<<y_high <<std::right<< "\n"<<std::flush;
+			" X: " <<TString::Format("%7.1f - %-7.1f", x_low,x_high ) <<
+			" Y: " <<TString::Format("%7.1f - %-7.1f", y_low,y_high ) << "\n"<<std::flush;
 }
 
 TCutG* TFiducialCut::GetFiducialAreaCut(bool bEmphasis) {
@@ -72,4 +72,12 @@ void TFiducialCut::DrawFiducialCutToCanvas(TCanvas* c1,bool bEmphasis=false) {
 	if (cut)
 		cut->Draw("same");
 
+}
+
+void TFiducialCut::SetAllValues(Float_t xLow, Float_t xHigh, Float_t yLow,
+        Float_t yHigh) {
+    this->SetXLow(xLow);
+    this->SetXHigh(xHigh);
+    this->SetYLow(yLow);
+    this->SetYHigh(yHigh);
 }

@@ -379,17 +379,27 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 		Float_t xPos = (Double_t)getXPositionMetric(plane,cmnCorrection,mode,getEtaIntegral(pl*2));
 		Float_t yPos = (Double_t)getYPositionMetric(plane,cmnCorrection,mode,getEtaIntegral(pl*2+1));
 		if((xPos==-1||yPos==-1)&&(verbosity||bPrint)){
-			cout<<"Problem with Plane "<<plane<<" "<<xPos<<" "<<yPos<<endl;
+		    if(bPrint)cout<<"Problem with Plane "<<plane<<" "<<xPos<<" "<<yPos<<endl;
 			event->Print(1);
 		}
 		Float_t xRes = this->alignment->getXResolution(plane);
+		if (xRes <= 0)  {
+		    xRes = 10;
+		    if(bPrint)cout<<"UPdate xREs to "<<xRes<<endl;
+		}
 		Float_t yRes = this->alignment->getYResolution(plane);
+		if (yRes <= 0)  {
+		    yRes = 10;
+		    if(bPrint)cout<<"Update yRes to "<<yRes<<endl;
+		}
 		linFitX->AddPoint(&zPosVec.at(0),xPos,xRes);//todo anpassen des SIGMA
 		linFitY->AddPoint(&zPosVec.at(0),yPos,yRes);//todo anpassen des sigma 0.001
 		if(xPos==-1||yPos==-1)
 			lastPredictionValid = false;
 		if(verbosity>10||bPrint)
-			cout<<"\tAdd in Plane "<<plane<<"  "<<xPos<<"+/-"<<alignment->getXResolution(plane)<<" / "<<yPos<<"+/-"<<alignment->getYResolution(plane)<<" / "<<getZPosition(plane)<<endl;
+			cout<<"\tAdd in Plane "<<plane<<"  X: "<<xPos<<"+/-"<<xRes<<" / "<<
+			                                "  Y: "<<yPos<<"+/-"<<yRes<<" / "<<
+			                                "  Z: "<<getZPosition(plane) <<"("<<zPosVec.at(0)<<")"<<endl;
 	}
 	linFitX->Eval();
 	linFitY->Eval();
@@ -428,7 +438,8 @@ TPositionPrediction* TTrack::predictPosition(UInt_t subjectPlane, vector<UInt_t>
 	if(!lastPredictionValid)prediction->setValid(false);
 	if(verbosity>10||bPrint)	cout<<"\tPrediction of Plane "<<subjectPlane<<" with "<<vecRefPlanes.size()<<" Planes for ZPosition: "<<zPos<<endl;
 	if(verbosity>10||bPrint)	cout<<"\t X: "<<xprediction.first<<" +/- "<<xprediction.second<<"   with a Chi^2 of "<<xChi2<<"  "<<linFitX->GetNpoints()<<endl;
-	if(verbosity>10||bPrint)	cout<<"\t Y: "<<yprediction.first<<" +/- "<<yprediction.second<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n"<<endl;
+	if(verbosity>10||bPrint)	cout<<"\t Y: "<<yprediction.first<<" +/- "<<yprediction.second<<"   with a Chi^2 of "<<yChi2<<"  "<<linFitY->GetNpoints()<<"\n";
+    if(verbosity>10||bPrint)	cout<<"\t PhiX: "<<xPhi<<"  PhiY:"<<yPhi<<"\tm:"<<mx<<"/"<<my<<"  b:"<<bx<<"/"<<by<<"\n"<<endl;
 	return prediction;
 }
 
@@ -692,7 +703,8 @@ Float_t TTrack::getRelativeHitPosition(UInt_t det, Float_t hitPosDetMetric) {
     else if(TPlaneProperties::isDiamondDetector(det)){
 //      cout<<"validPAttern  TTrack::inChannelDetectorSpace "<<det<<" "<<metricPosition<<": "<<flush;
 //      cout<<settings->diamondPattern.hasInvalidIntervals()<<endl;
-       return  settings->diamondPattern.convertMetricToRelativeMetric(hitPosDetMetric);
+      Float_t relMetric = settings->diamondPattern.convertMetricToRelativeMetric(hitPosDetMetric);
+      return relMetric;
     }
     return N_INVALID;
 }

@@ -63,13 +63,14 @@ void THTMLGenerator::generatorHTMLHeader()
 	else correctionPath="./";
 
 	html_summary << "<b>"<<title<<"</b>||"
-			<< "<a href=\""<<correctionPath<<"/overview.html\">Summary</a>||"
-			<< "<a href=\""<<correctionPath<<"/pedestalAnalysis/pedestal.html\">Pedestal</a>||"
-			<< "<a href=\""<<correctionPath<<"/clustering/clustering.html\">Clustering</a>||"
-			<< "<a href=\""<<correctionPath<<"/selections/selection.html\">Selection</a>||"
-			<< "<a href=\""<<correctionPath<<"/alignment/alignment.html\">Alignment</a>||"
-			<< "<a href=\""<<correctionPath<<"/selectionAnalysis/landaus.html\">Landaus</a>||"
-			<< "<a href=\""<<correctionPath<<"/transparentAnalysis/transparentAnalysis.html\">TransparentAnalysis</a>||"
+			<< "<a href=\""<<correctionPath<<"overview.html\">Summary</a>||"
+			<< "<a href=\""<<correctionPath<<"pedestalAnalysis/pedestal.html\">Pedestal</a>||"
+			<< "<a href=\""<<correctionPath<<"clustering/clustering.html\">Clustering</a>||"
+			<< "<a href=\""<<correctionPath<<"selections/selection.html\">Selection</a>||"
+			<< "<a href=\""<<correctionPath<<"alignment/alignment.html\">Alignment</a>||"
+			<< "<a href=\""<<correctionPath<<"selectionAnalysis/landaus.html\">Landaus</a>||"
+            << "<a href=\""<<correctionPath<<"selectionAnalysis/selectionAnalysis.html\">selAnalysis</a>||"
+			<< "<a href=\""<<correctionPath<<"transparentAnalysis/transparentAnalysis.html\">TransparentAnalysis</a>||"
 			//				<< "<a href=\"d8.html\">Diamond</a>||"
 			//				<< "<a href=\"d0.html\">D0X</a>||"
 			//				<< "<a href=\"d1.html\">D0Y</a>||"
@@ -191,19 +192,21 @@ std::string THTMLGenerator::createTable(std::vector<std::vector<std::string> > c
 }
 
 
-std::string THTMLGenerator::putImage(std::string path, TString name, std::string type,int percent)
+std::string THTMLGenerator::putImage(std::string path, TString name, std::string type,int percent,bool highlighted)
 {
 	std::string stringname;
 	stringname.append(name);
 	return putImage(path,stringname,type,percent);
 }
-std::string THTMLGenerator::putImage(std::string path, std::string name, std::string type,int percent)
+std::string THTMLGenerator::putImage(std::string path, std::string name, std::string type,int percent,bool highlighted)
 {
 	stringstream imageLink;
-	imageLink<<path<<"//"<<name<<"."<<type;
+	imageLink<<path<<"/"<<name<<"."<<type;
 	stringstream output;
-	output<<"<img src=\""<<imageLink.str()<<"\" width=\""<<percent<<"%\" alt=\""<<name<<"\">\n";
-
+	output<<"<img src=\""<<imageLink.str()<<"\" width=\""<<percent<<"%\" alt=\""<<name<<"\"";
+	if (highlighted)
+	    output << " border=\"4\" ";
+	output <<">\n";
 	return (putLink(imageLink.str(),output.str()));
 }
 std::string THTMLGenerator::putLink(std::string link,std::string content){
@@ -246,7 +249,7 @@ std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string
 		name2<<name<<TPlaneProperties::getStringForDetector(det)<<ending;
 		output<<putImage(path,name2.str());
 	}
-	output<<"\n<br\n\t";
+	output<<"\n<br>\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
 		stringstream name2;
 		name2<<name<<TPlaneProperties::getStringForDetector(det)<<ending;
@@ -259,3 +262,10 @@ std::string THTMLGenerator::putImagesOfAllDetectors(std::string path,std::string
 	return (output.str());
 }
 
+string THTMLGenerator::cleanFileName(string fileName) {
+//    while (fileName.find("//") !=fileName.end){
+//        fileName.replace("//","");
+//    }
+
+    return fileName;
+}

@@ -49,7 +49,7 @@ public:
   void Print(Option_t *opt = "");
   Double_t GetXOffset(UInt_t plane) {return det_x_offset[plane];};
   Double_t GetYOffset(UInt_t plane) {return det_y_offset[plane];};
-  Double_t GetZOffset(UInt_t plane) {return det_z_offset[plane];};
+  Double_t GetZOffset(UInt_t plane) {return det_z_offset[plane]*10000;};
 
   void SetXOffset(UInt_t plane,Float_t xOffset) {if(plane<nDetectors)det_x_offset[plane]=xOffset;};
   void SetYOffset(UInt_t plane,Float_t yOffset) {if(plane<nDetectors)det_y_offset[plane]=yOffset;};
@@ -107,6 +107,7 @@ public:
   bool isPreAligned(Float_t maxOffset=0.3,Int_t nAlignedDetectors=2);
   void addEventIntervall(UInt_t first,UInt_t last);
   void setAlignmentTrainingTrackFraction(Float_t fraction){alignmentTrainingTrackFraction=fraction;};
+  Float_t getAlignmentTrainingTrackFraction() const {return alignmentTrainingTrackFraction;}
   void setDiamondDate(){diaTime=TDatime();};
   void setSiliconDate(){silTime=TDatime();};
   void setRunNumber(UInt_t rn){this->runNumber=rn;};

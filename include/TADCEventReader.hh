@@ -39,12 +39,13 @@ public:
 	bool isOK();
 //    bool getCMNEvent_flag() const;
 	bool isValidTrack();
+	bool hasSmallSiliconClusterSizes(UInt_t maxClusterSize=3);
   Int_t getAdcValue(UInt_t det,UInt_t ch);
-	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected=false);
-	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);
+	Float_t getSignalInSigma(UInt_t det, UInt_t ch, bool cmCorrected = false, bool suppressNegativeSignals = true);
+	Float_t getSignal(UInt_t det, UInt_t ch, bool cmCorrected = false, bool suppressNegativeSignals = true);
 	Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected=false);
 	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected=false);
-	inline Float_t getCMNoise() const {return cmNoise;};
+	Float_t getCMNoise(UInt_t det=8,UInt_t ch=0) const;
 	inline bool isCMNoiseCorrected() const {return bCMNoiseCorrected;};
 	UInt_t getCurrent_event() const;
 	UChar_t getDet_ADC(UInt_t i, UInt_t j) const;
@@ -120,6 +121,7 @@ private:
   Float_t diaPedestalMeanCMN[128];
   Float_t diaPedestalSigmaCMN[128];
 	Float_t cmNoise;
+	Float_t cmn_det[8*2];
 	Float_t cmnCreated[9];
 	bool bCMNoiseCorrected;
 	TEvent *pEvent;

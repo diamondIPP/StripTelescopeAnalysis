@@ -19,19 +19,21 @@ LIBDIR			:= ~/lib
 
 DEBUG			:= -g3
 OPTIMAZATIONFLAG :=	-O2 $(DEBUG)
-CFLAGS  		:= -Wall -I$(INCLUDEDIR) -D_REENTRANT 
+CFLAGS  		:=  -I$(INCLUDEDIR) -D_REENTRANT 
+#CFLAGS			+= -Wall
 CFLAGS      	+= $(SVNDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
-
 
 OBJ 			:= diamondAnalysis.cpp
 HEAD    		:= 
-
-
 
 LD              := g++
 
 LDFLAGS 		:= $(ROOTGLIBS) -L/usr/local/lib $(DEBUG) $(LLABLDFLAGS) -fPIC -Wall -m64 $(OPTIMAZATIONFLAG)
 
+
+LIBFILES3D		:=  TAnalysisOf3dDiamonds.o TCellAnalysisClass.o TAnalysisOfAnalysisDifferences.o TAvrgChargePerBinMonteCarlo.o
+LIBFILES3D		+=  TAnalysisOf3DShortAnalysis.o TAnalysisOf3DLongAnalysis.o TAnalysisOf3DResolutionStudies.o TAnalysisOf3DGoodCellsLandau.o
+LIBFILES3D		+=  TAnalysisOf3DStripAnalysis.o TAnalysisOf3DResolution.o
 LIBFILES		:=	HistogrammSaver.class.o  TDetectorPlane.o TDiamondTrack.o TPlaneProperties.o
 LIBFILES		+=  TDetector_Data.o TTrigger_Event.o
 LIBFILES		+=  TPed_and_RMS.o TEvent_Array.o 
@@ -41,8 +43,10 @@ LIBFILES		+=	TAnalysisOfClustering.o TAnalysisOfPedestal.o TTracking.o
 LIBFILES		+=	TTransparentAnalysis.o TAnalysisOfAlignment.o TAnalysisOfSelection.o
 LIBFILES		+=  TSelectionClass.o TPositionPrediction.o TRunInfo.o
 LIBFILES		+=  THTMLGenerator.o THTMLCluster.o THTMLPedestal.o THTMLAlignment.o THTMLSelection.o THTMLLandaus.o THTMLTransparentAnalysis.o
+LIBFILES		+=  THTML3DAnalysis.o
 LIBFILES		+=  THTMLSelectionAnalysis.o TAnalysisOfAsymmetricEta.o
 LIBFILES		+=  TAlignment.o TClustering.o TTrack.o TResidual.o
+LIBFILES		+=  $(LIBFILES3D)
 LIBFILES 		+=  TSettings.class.o  LandauGaussFit.o 
 LIBFILES		+=	libTEvent.so
 
@@ -67,13 +71,15 @@ all: diamondAnalysis
 #		
 #        #
         
-$(PROGS): $(LIBFILES)
+        
+$(PROGS): $(LIBFILES)  diamondAnalysis.cpp diamondAnalysis.h
         #
         # linking $@
         #
-        # Please do: export LD_LIBRARY_PATH+=$$LD_LIBRARY_PATH:~/lib
-		$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
-		@echo  "\n\nPlease do: export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:~/lib"
+        # Please do: export LD_LIBRARY_PATH+=:~/lib
+		#$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
+		$(LD) $(LIBFILES) $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
+		@echo  "Please do: export LD_LIBRARY_PATH+=:~/lib"
 
 
 libTEvent.so: $(ROOTLIBFILES)	

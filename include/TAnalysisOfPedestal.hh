@@ -25,6 +25,7 @@
 #include <deque>
 #include <algorithm>
 #include <set>
+#include <deque>
 
 #include "TSystem.h"
 #include "TH1F.h"
@@ -33,6 +34,7 @@
 #include "TGraphErrors.h"
 #include "TStopwatch.h"
 #include "TMultiGraph.h"
+#include "TPolyMarker.h"
 
 #include "TRawEventSaver.hh"
 #include "HistogrammSaver.class.hh"
@@ -55,6 +57,8 @@ private:
 
 	void initialiseHistos();
 	void saveHistos();
+	void saveAdcVsEventProfiles();
+	TH1F* doSlidingWindowAnalysis(TH1D* histo,Int_t nAvrg,bool absolute=true);
 	void savePHinSigmaHistos();
 	Float_t findYPlotRangeForPHHisto(TH1F* histo, Float_t hitCut);
 	void createPedestalMeanHistos();
@@ -62,6 +66,7 @@ private:
 	void analyseEvent();
 	void updateMeanCalulation(UInt_t det,UInt_t ch);
 	void checkForDeadChannels(UInt_t det,UInt_t ch);
+	void checkCommonModeNoise();
     void analyseBiggestHit(UInt_t det,bool CMN_corrected=false);
     void findBiggestSignalInDet(UInt_t det, UInt_t ch);
     void findBiggestSignalInDia(UInt_t pattern);//, UInt_t ch);
@@ -81,6 +86,8 @@ private:
 	TH1F* hSNR_BiggestSignal[9];
 	TH1F* hSNR_BiggestAdjacent[9];
 	TH1F* hCMNoiseDistribution;
+	TH2F* hNoiseDistribution[9];
+	TH2F* hNoiseDistributionCMN[9];
 	TADCEventReader* eventReader;
 	HistogrammSaver* histSaver;
     TSystem* sys;
@@ -93,6 +100,17 @@ private:
     TH1F *hBiggestSignalInSigmaCMN[9];
 	TH1F *hBiggestAdjacentSignalInSigma[9];
 	TH1F *hBiggestAdjacentSignalInSigmaCMN[9];
+	TH1F* hRelCmnUncertainty;
+	TH1F* hCmnNUsedChannels;
+	TH1F* hCmnUsedChannels;
+	TH1F* hNewComonModeNoise;
+	TH1F* hCmnChannelWeight;
+    TH2F* hCmnChannelWeightVsChannel;
+    TH2F* hCmnFractionVsChannel;
+	TH2F* hCmnNewVsNUsedChannels;
+	TH2F* hCmnVsNewCmn;
+	TH2F* hNewCmnVsEventNo;
+
 	TH1F *histo_pulseheight_sigma125[9];
 	TH1F *hHitOrderMap[9];
 	TH1F *histo_pulseheight_sigma_second_left[9];
@@ -106,6 +124,12 @@ private:
 	TH1F *hAllAdcNoise[9];
 	TH1F *hDiaAllAdcNoise;
 	TH1F *hDiaAllAdcNoiseCMN;
+	TH2F *hDiaAllAdcNoiseChannel;
+	TH2F *hDiaAllAdcNoiseCMNChannel;
+	TH2F *hLeftVsRightSignal[9];
+	TH2F *hLeftVsRightSignalCMN[9];
+	TH2F *hEtaVsCharge[9];
+	TH2F *hEtaVsSNR[9];
 	vector <Float_t> adcValues;
 	vector <Float_t> pedestalValues;
 	vector <Float_t> upperHitCutValues;
@@ -118,6 +142,7 @@ private:
 	vector <Float_t> upperSeedCutValuesCMN;
 	vector <Float_t> lowerSeedCutValuesCMN;
 	vector <Float_t> eventNumbers;
+	std::map<TString,TH1*> hHistoMap;
 private:
 	Float_t numberOfSeeds;
 	Float_t sumPed;

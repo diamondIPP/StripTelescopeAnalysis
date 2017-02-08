@@ -10,7 +10,7 @@
 THTMLCluster::THTMLCluster(TSettings *settings):THTMLGenerator(settings) {
 	setTitle("Clustering");
 	this->setMainPath("../");
-	this->setSubdirPath("clustering/");
+	this->setSubdirPath("clustering");
 	this->setFileName("clustering.html");
 	this->updatePath();
 }
@@ -54,18 +54,45 @@ void THTMLCluster::createEtaDistributions()
 	stringstream sectionContent;
 
 	//	sectionContent<<"<h2>Eta Distributions </h2>\n";
-	sectionContent<<putImagesOfAllDetectors(path,"hEtaDistribution_");
+	sectionContent<<putImagesOfAllDetectors(".", "hEtaDistribution_");
+
+	sectionContent<<"\n<br>\n\t";
+	Int_t nDias = settings->getNDiamonds();
+	for ( Int_t dia=0; dia<=nDias; dia++ ){
+	    TString name =TString::Format("c_hEtaDistribution_Dia_Area%d",dia);
+	    bool highlighted;
+	    if (settings->getNDiamonds() ==2)
+	    	highlighted = (dia ==  settings->getAnalysedDiamond());
+	    else
+	    	highlighted = (dia ==  settings->getAnalysedDiamond()+1);
+	    sectionContent<<putImageOfPath((string)name,"png",20,highlighted );
+	}
+	sectionContent<<"\n<br>\n";
+	sectionContent<<putImageOfPath("hEtaDistributionDia","png",20,false);
+
 	this->addSection("Eta Distributions",sectionContent.str());
 	sectionContent.clear();
 	sectionContent.str("");
-	sectionContent<<putImagesOfAllDetectors(path,"hEtaIntegral_");
+	sectionContent<<putImagesOfAllDetectors(".", "hEtaIntegral_");
 	this->addSection("Eta Integrals",sectionContent.str());
 
 
 	//c_hAsymmetricEtaFinal_
 	sectionContent.clear();
 	sectionContent.str("");
-	sectionContent<<putImagesOfAllDetectors(path,"c_hAsymmetricEtaFinal_","All");
+	sectionContent<<putImagesOfAllDetectors(".", "c_hAsymmetricEtaFinal_","All");
+	sectionContent<<"\n<br>\n\t";
+	for ( Int_t dia=0; dia<=nDias; dia++ ){
+	    TString name =TString::Format("c_hAsymmetricEtaFinal_DiaArea%d",dia);
+	    bool highlighted;
+	    if (settings->getNDiamonds() ==2)
+	    	highlighted = (dia ==  settings->getAnalysedDiamond());
+	    else
+	    	highlighted = (dia ==  settings->getAnalysedDiamond()+1);
+	    sectionContent<<putImageOfPath((string)name,"png",20,highlighted );
+	}
+	sectionContent<<"\n<br>\n";
+	sectionContent<<putImageOfPath("hAsymmetricEtaFinal_Dia","png",20,false);
 	this->addSection("Cross Talk Corrected Eta Distributions",sectionContent.str());
 }
 
@@ -86,7 +113,7 @@ void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
 	}
 	sectionContent<<createTable(vecTable);
 	sectionContent<<"\n\n<br><br>\n\n";
-	sectionContent<<this->putImagesOfAllDetectors(path,"c_hPulseHeightDistribution_allClusterSizes_");
+	sectionContent<<this->putImagesOfAllDetectors(".", "cPulseHeightDistribution_allClusterSizes_");
 	addSection("Pulse Height Distribution",sectionContent.str());
 }
 
@@ -123,32 +150,42 @@ void THTMLCluster::createClusterSize(std::vector<double> clusterSizes,std::vecto
 	output<<"\n\t";
 	output2<<"\n\t";
 	for(UInt_t det = 0; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output2<<putImage(path.str(),name2.str());
+		Int_t seed = settings->getClusterSeedFactor(det,0);
+		Int_t hit =settings->getClusterHitFactor(det,0);
+		TString name =TString::Format("hClusterSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((string)TPlaneProperties::getStringForDetector(det));
+//		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"_Hit"<<<<"_"<<;
+		output<<putImage(path.str(),(string)name);
+		name = TString::Format("hClusterSeedSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((string)TPlaneProperties::getStringForDetector(det));
+		output2<<putImage(path.str(),(string)name);
 	}
 	output<<"\n<br\n\t";
 	for(UInt_t det = 1; det< TPlaneProperties::getNSiliconDetectors();det+=2){
-		stringstream name,name2;
-		name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output<<putImage(path.str(),name.str());
-		name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(det,0)<<"-Hit"<<settings->getClusterHitFactor(det,0)<<"_"<<TPlaneProperties::getStringForDetector(det);
-		output2<<putImage(path.str(),name2.str());
+        Int_t seed = settings->getClusterSeedFactor(det,0);
+        Int_t hit =settings->getClusterHitFactor(det,0);
+        TString name =TString::Format("hClusterSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((TString)TPlaneProperties::getStringForDetector(det));
+        output<<putImage(path.str(),(string)name);
+        name = TString::Format("hClusterSeedSize_Seed%d_Hit%d_",(int)seed,(int)hit).Append((TString)TPlaneProperties::getStringForDetector(det));
+        output2<<putImage(path.str(),(string)name);
 	}
 	output<<"\n<br>\n\t";
 	output2<<"\n<br>\n\t";
-	stringstream name,name2;
-	name<<"hClusterSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
-	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
-	output<<putImage(path.str(),name.str());
-	output2<<putImage(path.str(),name2.str());
+	Int_t seed = settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0);
+	Int_t hit = settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0);
+	TString name = TString::Format("hClusterSize_Seed%d_Hit%d_",seed,hit);
+	name.Append((TString)TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond()));
+	output<<putImage(path.str(),(string)name);
+
+//	name<<"hClusterSize_Seed"<<seed<<"-Hit"<<hit<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+//	name2<<"hClusterSeedSize_Seed"<<settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(),0)<<"-Hit"<<settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(),0)<<"_"<<TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond());
+	name = TString::Format("hClusterSeedSize_Seed%d_Hit%d_",seed,hit);
+	name.Append((TString)TPlaneProperties::getStringForDetector(TPlaneProperties::getDetDiamond()));
+	output2<<putImage(path.str(),(string)name);
+
 	sectionContent<<output.str()<<"\n<br>\n";
 	sectionContent<<output2.str()<<"\n<br>\n";
 
 	sectionContent<<"<h2>NumberOfClusters </h2>\n";
-	sectionContent<<putImagesOfAllDetectors(path.str(),"NumberOfClusters_");
+	sectionContent<<putImagesOfAllDetectors(".", "NumberOfClusters_");
 	this->addSection("Clusters",sectionContent.str());
 }
 

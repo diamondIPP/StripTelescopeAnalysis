@@ -52,13 +52,16 @@ public:
 	bool isStandardPitchWidth(){return bLoadedStandardPitchWidthSettings;}
 	std::pair<int,int> getPatternChannels(UInt_t pattern);
 	std::pair<Int_t,Int_t> getInterval(UInt_t pattern);//{return getPatternChannels(pattern);}
+	std::pair<Int_t,Int_t> getIntervalOfDiamond(TString runDesc);
 	bool hasInvalidIntervals();
 	bool isValidChannelPosition(Float_t channel);
 	bool isValidCluster(TCluster* cluster);
+	bool isValidCluster(TCluster cluster);
 	Int_t getClusterPattern(TCluster *cluster);
 	Int_t getPatternOfChannel(Int_t ch);
 	UInt_t getNIntervals();//{return nChannelsOfInterval.size();}
 	std::pair<Int_t, Int_t> getTotalInterval();
+	void setVerbosity(UInt_t verb){verbosity=verb;};
 private:
 //	UInt_t getNIntervals();//
 	Float_t getChannelToMetric(UInt_t ch);

@@ -16,6 +16,13 @@ TPlaneProperties::~TPlaneProperties() {
 	// TODO Auto-generated destructor stub
 }
 
+
+bool TPlaneProperties::startsWith(const std::string& haystack, const std::string& needle) {
+    return needle.length() <= haystack.length()
+        && equal(needle.begin(), needle.end(), haystack.begin());
+}
+
+
 std::string TPlaneProperties::getCoordinateString(enumCoordinate cor){
 	switch (cor){
 	case X_COR: return "X";break;

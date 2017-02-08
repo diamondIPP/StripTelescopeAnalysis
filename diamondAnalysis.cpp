@@ -14,6 +14,7 @@
 #include "TAnalysisOfPedestal.hh"
 #include "TAnalysisOfClustering.hh"
 #include "TAnalysisOfSelection.hh"
+#include "TAnalysisOf3dDiamonds.hh"
 #include "TClustering.hh"
 #include "TSelectionClass.hh"
 #include "THTMLGenerator.hh"
@@ -29,6 +30,8 @@
 #include "TResults.hh"
 #include "TRunInfo.hh"
 #include "TFile.h"
+#include <string>     // std::string, std::stoi
+#include <stdlib.h>     /* strtol */
 
 using namespace std;
 /*** USAGE ***/
@@ -98,6 +101,12 @@ bool readInputs(int argc,char ** argv){
 			runSettingsDir=string(argv[i]);
 			cout<<"settingDirPath is set to: \""<<runSettingsDir<<"\""<<endl;
 		}
+        if ( ( (string(argv[i]) == "-3d") || (string(argv[i]) == "-3D")) && i+1 < argc){
+                i++;
+                //run_3danalysis=std::stoi(argv[i]);
+                run_3danalysis= strtol(string(argv[i]).c_str(),0,10);
+                cout<<"Running 3D Analysis: "<<run_3danalysis<<endl;
+        }
 	}
 	return true;
 }
@@ -157,6 +166,11 @@ int main(int argc, char ** argv) {
 		if (i+1 < RunParameters.size()) cout << ", ";
 	}
 	cout << " will be analysed.." << endl;
+	int bufsize = 300;
+	char buf[bufsize];
+	readlink("/proc/self/exe", buf, bufsize);
+	TString path = buf;
+	path = path(0,path.Last('/'));
 
 	if (!RunListOK) return 0;
 
@@ -185,6 +199,7 @@ int main(int argc, char ** argv) {
 		TSettings *settings = 0;
 		cout<<"settings"<<endl;
 		settings = new TSettings((TRunInfo*)&RunParameters[i]);
+        cout<<settings->diamondPattern.hasInvalidIntervals()<<endl;
 
 		TResults *currentResults =new TResults(settings);
 		currentResults->Print();
@@ -244,12 +259,14 @@ int main(int argc, char ** argv) {
 		selectionClass->SetResults(currentResults);
 		selectionClass->MakeSelection(RunParameters[i].getEvents());
 		delete selectionClass;
+		currentResults->createResultFiles();
 
 		if(RunParameters[i].doSelectionAnalysis()){
 			sys->cd(currentDir.c_str());
 			TAnalysisOfSelection *analysisSelection=new TAnalysisOfSelection(settings);
 			analysisSelection->doAnalysis(RunParameters[i].getEvents());
 			delete analysisSelection;
+			currentResults->createResultFiles();
 		}
 
 		if (DO_ALIGNMENT){
@@ -257,9 +274,28 @@ int main(int argc, char ** argv) {
 			TAlignment *alignment = new TAlignment(settings);
 			//			alignment->setSettings(settings);
 			//alignment->PrintEvents(1511,1501);
-			alignment->Align(RunParameters[i].getEvents());
+			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::enumDetectorsToAlign(settings->getAlignmentMode()));
 			delete alignment;
+			currentResults->createResultFiles();
 		}
+		//		if(settings->is3dDiamond()){
+        //
+
+        if ( run_3danalysis ){
+            if(settings->do3dShortAnalysis()||settings->do3dLongAnalysis()||settings->do3dTransparentAnalysis()){
+                TAnalysisOf3dDiamonds* analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+                analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+                delete analyse3dDiamond;
+                if (settings->do3dTransparentAnalysis())
+                    settings->set3dTransparentAnalysis(0);
+                else
+                    settings->set3dTransparentAnalysis(1);
+                analyse3dDiamond = new TAnalysisOf3dDiamonds(settings);
+                analyse3dDiamond->doAnalysis(RunParameters[i].getEvents());
+                delete analyse3dDiamond;
+                currentResults->createResultFiles();
+            }
+        }
 
 		if(DO_ALIGNMENTANALYSIS){
 			sys->cd(currentDir.c_str());
@@ -267,6 +303,7 @@ int main(int argc, char ** argv) {
 			anaAlignment=new TAnalysisOfAlignment(settings);
 			anaAlignment->doAnalysis(RunParameters[i].getEvents());
 			delete anaAlignment;
+			currentResults->createResultFiles();
 		}
 
 		if (DO_TRANSPARENT_ANALYSIS) {
@@ -275,9 +312,10 @@ int main(int argc, char ** argv) {
 			transpAna->setResults(currentResults);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
+			currentResults->createResultFiles();
 		}
 
-		if (settings && settings->doTransparentAlignmnet()){
+		if ((DO_TRANSPARENT_ANALYSIS||DO_ALIGNMENT) && settings && settings->doTransparentAlignment()){
 			sys->cd(currentDir.c_str());
 			TAlignment *alignment = new TAlignment(settings,TSettings::transparentMode);
 			alignment->createTransparentEventVectors(RunParameters[i].getEvents());
@@ -285,12 +323,14 @@ int main(int argc, char ** argv) {
 			//alignment->PrintEvents(1511,1501);
 			alignment->Align(RunParameters[i].getEvents(),0,TAlignment::diaAlignment);
 			delete alignment;
+			currentResults->createResultFiles();
 
 			TTransparentAnalysis *transpAna;
 			transpAna = new TTransparentAnalysis(settings,TSettings::transparentMode);
 			transpAna->setResults(currentResults);
 			transpAna->analyze(RunParameters[i].getEvents(),RunParameters.at(i).getStartEvent());
 			delete transpAna;
+			currentResults->createResultFiles();
 		}
 		cout<<"PRINT RESULTS"<<endl;
 		currentResults->Print();
@@ -330,13 +370,26 @@ int main(int argc, char ** argv) {
         }
         cout<<"DONE with Analysis of Run "<< RunParameters[i].getRunNumber();
         cout<<": "<<i+1<<"/"<<RunParameters.size()<<endl;
+        cout<<RunParameters[i].getOutputDir()<<endl;
+        cout<<"Bla"<<std::endl;
+
+        //settings->getAbsoluteOuputPath(true)<<"\""<<std::endl;
+        //find /scratch/analysis/output/1* -type d -exec cp -v /scratch/analysis/output/index.php {}
+        TString out_path = RunParameters[i].getOutputDir();
+        cout<<out_path<<endl;
+        out_path =out_path+TString::Format("/%d",RunParameters[i].nRunNumber);
+        cout<<out_path<<endl;
+        cout<<endl;
+        TString cmd = TString("find ")+out_path+ TString(" -type d -exec cp ")+path+TString("/index.php {} \\;");
+        cout<<"Copying indexfile into all subdirectories: "<<cmd<<endl;
+        system(cmd);
    }
    cout<<"DONE with Analysis of all "<<RunParameters.size()<<" Runs from RunList.ini"<<endl;
    cout<<"total time for all analysis:\n\t"<<flush;
 
 	cout<<"time for all analysis:"<<endl;
 	comulativeWatch.Print();
-	cout<<"DONE_ALL"<<endl;
+	cout<<"DONE_ALL. Run with Revision: "<<SVN_REV<<endl;
 
 	return 0;
 }
@@ -345,7 +398,9 @@ int main(int argc, char ** argv) {
 int ReadRunList() {
 	TRunInfo run;
 	RunParameters.clear();
-	cout << endl << "reading runlist.." << endl;
+	cout << endl << "reading runlist.."  << flush;
+	cout << "RunListPath: \""<<runListPath<<"\""<<endl;
+
 	ifstream file(runListPath.c_str());//"RunList.ini");
 	if (!file) {
 		cout << "An error has encountered while trying to open RunList.ini" << endl;

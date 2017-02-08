@@ -11,7 +11,7 @@ THTMLTransparentAnalysis::THTMLTransparentAnalysis(TSettings* settings):THTMLGen
 	// TODO Auto-generated constructor stub
 	this->setFileName("transparentAnalysis.html");
 	this->setMainPath("../");
-	this->setSubdirPath("transparentAnalysis/");
+	this->setSubdirPath("transparentAnalysis");
 	this->setTitle("Transparent Analysis");
 
 
@@ -29,10 +29,10 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	// TODO: change this:
 	subjectDetector = 8;
 
-	stringstream sectionContent;
-	sectionContent<<"<h2>\n"<<
-			"Summary table"
-			<<"</h2>\n";
+	stringstream sectionSummary;
+	stringstream section2Highest;
+	stringstream sectionAll;
+//	sectionSummary<<"<h2>\n"<<"Summary table"<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
 	//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
 	vecTable.resize(7);
@@ -50,12 +50,13 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 		vecTable.at(5).push_back(floatToString(vecMeanPulseHeigths.at(1).at(clusterSize)));
 		vecTable.at(6).push_back(floatToString(vecMPPulseHeigths.at(1).at(clusterSize)));
 	}
-	sectionContent << createTable(vecTable);
-	sectionContent	<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMean")
+	sectionSummary << createTable(vecTable);
+	sectionSummary	<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMean")
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMP")
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMean")
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMP");
-	sectionContent << "\n\n<br><br>\n\n";
+	sectionSummary << "\n\n<br><br>\n\n";
+    addSection("Pulse Height - Summary table",sectionSummary.str());
 	stringstream plots1, plots2;
 	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 		stringstream histoname1, histoname2;
@@ -64,10 +65,25 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 		plots1 << putImage(".",histoname1.str()) << " \n";
 		plots2 << putImage(".",histoname2.str()) << " \n";
 	}
-	sectionContent << "<h2>Pulse Height of N strips</h2><br>" << plots1.str();
-	sectionContent << "\n\n<br><br>\n\n";
-	sectionContent << "<h2>Pulse Height of 2 hightest channels in N strips</h2><br>" << plots2.str();
-	addSection("Pulse Height Distributions",sectionContent.str());
+//	sectionAll << "<h2>Pulse Height of N strips</h2><br>";
+	sectionAll << plots1.str();
+	sectionAll << "\n\n<br><br>\n\n";
+//	section2Highest << "<h2>Pulse Height of 2 hightest channels in N strips</h2><br>";
+	section2Highest << plots2.str();
+	section2Highest << "\n\n<br><br>\n\n";
+
+    addSection("Pulse Height of N strips",sectionAll.str());
+    addSection("Pulse Height of 2 hightest channels in N strips",section2Highest.str());
+
+	stringstream pXY;
+	pXY << putImage((string)".",(string)"hLandau2HighestFidCutX_2outOf10")<<"\n";
+	pXY << putImage((string)".",(string)"hLandau2HighestFidCutY_2outOf10")<<"\n";
+	pXY <<"\n\n<br><br>\n\n";
+    pXY << putImage((string)".",(string)"hLandau2HighestPredHitX_2outOf10")<<"\n";
+    pXY << putImage((string)".",(string)"hLandau2HighestPredHitY_2outOf10")<<"\n";
+    pXY <<"\n\n<br><br>\n\n";
+    pXY << putImage((string)".",(string)"hLandau2HighestHitProfile_2OutOf10")<<"\n";
+    addSection("XY Pulse Height Distributions",pXY.str());
 }
 
 void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_t,Float_t> > > resolutions) {

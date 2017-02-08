@@ -9,6 +9,7 @@
 
 using namespace std;
 ClassImp(TFidCutRegions);
+
 TFidCutRegions::TFidCutRegions() {
 	cout<< "create empty Fid Cut Regions pattern... "<<endl;
 	initVariables();
@@ -29,6 +30,11 @@ void TFidCutRegions::initVariables(){
 	fidCuts.clear();
 	name="";
 	verbosity=0;
+    //>1400 && xPredDet <1650)
+	addionalCut_xLow =1400;
+	addionalCut_xHigh =1650;
+	addionalCut_yLow =-1;
+	addionalCut_yHigh =-1;
 }
 
 TFidCutRegions::TFidCutRegions(std::vector<std::pair <Float_t, Float_t> > xInt, std::vector<std::pair <Float_t, Float_t> > yInt,UInt_t nDia) {
@@ -96,8 +102,8 @@ void TFidCutRegions::Print(int intend)
 		fidCuts.at(i)->Print(intend+1);
 	}
 	cout<<TCluster::Intent(intend)<<"Range to plot all Fiducial Cuts:"<<endl;
-	cout<<TCluster::Intent(intend)<<"\tX: "<<getMinFiducialX()<<"-"<<getMaxFiducialX()<<endl;
-	cout<<TCluster::Intent(intend)<<"\tY: "<<getMinFiducialY()<<"-"<<getMaxFiducialY()<<endl;
+	cout<<TCluster::Intent(intend)<<"\tX: "<<TString::Format("%.1f - %.1f",getMinFiducialX(),getMaxFiducialX())<<endl;
+	cout<<TCluster::Intent(intend)<<"\tY: "<<TString::Format("%.1f - %.1f",getMinFiducialY(),getMaxFiducialY())<<endl;
 
 	if(verbosity >3 &&verbosity%2==1){
 		cout<<"Done\nPress a key...\t"<<flush;
@@ -107,7 +113,7 @@ void TFidCutRegions::Print(int intend)
 }
 
 
-void TFidCutRegions::setRunDescription(std::string runDes)
+void TFidCutRegions::setRunDescription(std::string runDes,int nDiamonds)
 {
 	index=0;
 	this->runDescription=runDes;
@@ -140,6 +146,11 @@ void TFidCutRegions::setRunDescription(std::string runDes)
 	cout<<" runDescription is :"<<runDescription<<" ==> index: "<<index<<endl;
 	if(index!=0){
 		if(index>fidCuts.size()){
+            if (fidCuts.size()<nDiamonds && nDiamonds!=0){
+                index=0;
+                return;
+            }
+
 			cerr<<"the set index ( "<<index<<") is not possible. There are only "<<fidCuts.size()<< " possible Fidcuts..."<<endl;
 			cerr<<"Please enter a valid index. Use a number between 0 [all],1(left) - "<<fidCuts.size()+1<<endl;
 			unsigned int newIndex=0;
@@ -332,6 +343,15 @@ TPaveText *TFidCutRegions::getFiducialAreaPaveText(UInt_t nFidCut)
 	return pt;
 }
 
+TCutG *TFidCutRegions::getCutG(TString name, Float_t xLow,Float_t yLow,Float_t xHigh, Float_t yHigh){
+    TCutG * pt = new TCutG(name,5);
+    pt->SetPoint(0,xLow,yLow);
+    pt->SetPoint(1,xLow,yHigh);
+    pt->SetPoint(2,xHigh,yHigh);
+    pt->SetPoint(3,xHigh,yLow);
+    pt->SetPoint(4,xLow,yLow);
+    return pt;
+}
 TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 {
 	if (nFidCut>=fidCuts.size())
@@ -343,12 +363,12 @@ TCutG *TFidCutRegions::getFiducialAreaCut(UInt_t nFidCut)
 	cout<<"getting fitucial Area for "<<nFidCut<<": ";
 	cout<<TString::Format("X: %.1f-%.1f, Y: %.1f-%.1f",xLow,xHigh,yLow,yHigh);
 	TString name = TString::Format("fidCut_%d",nFidCut);
-	TCutG * pt = new TCutG(name,5);
-	pt->SetPoint(0,xLow,yLow);
-	pt->SetPoint(1,xLow,yHigh);
-	pt->SetPoint(2,xHigh,yHigh);
-	pt->SetPoint(3,xHigh,yLow);
-	pt->SetPoint(4,xLow,yLow);
+
+    TCutG* fidCut = fidCuts.at(nFidCut)->GetFiducialAreaCut(true);
+    fidCut->SetName(name);
+	TCutG * pt = 0;
+	if (fidCut) pt = fidCut;
+	else pt = this->getCutG(name,xLow,yLow,xHigh,yHigh);
 	//(xLow,yLow,xHigh,yHigh);
 	if(index == nFidCut + 1||index == 0){
 		pt->SetFillColor(kRed);
@@ -655,6 +675,10 @@ Float_t TFidCutRegions::getYHigh(UInt_t i) {
 void TFidCutRegions::DrawFiducialCutsToCanvas(TCanvas* c1, bool drawLegend){
 	if(!c1)
 		return;
+	if (TPlaneProperties::startsWith(c1->GetName(),"cTotalAvrgChargeXY")){
+	    cout<<"Canvas starts with pattern: "<<c1->GetName()<<endl;
+//	    char t; cin>>t;
+	}
 	c1->cd();
 	TLegend *leg;
 	if (drawLegend){
@@ -664,7 +688,20 @@ void TFidCutRegions::DrawFiducialCutsToCanvas(TCanvas* c1, bool drawLegend){
 	for(UInt_t i=0;i<fidCuts.size();i++){
 		TCutG* cut = getFiducialAreaCut(i);
 		cut->SetLineColor(kRed+i);
-		cut->Draw("same");
+		if (TPlaneProperties::startsWith(c1->GetName(),"cTotalAvrgChargeXY") && i ==1){
+//		    //>1400 && xPredDet <1650)
+//		    Float_t xLow  = addionalCut_xLow ==-1?cut->GetX()[0]:addionalCut_xLow;
+//		    Float_t xHigh = addionalCut_xHigh ==-1?cut->GetX()[2]:addionalCut_xHigh;
+//		    Float_t yLow = addionalCut_yLow ==-1?cut->GetY()[0]:addionalCut_yLow;
+//		    Float_t yHigh = addionalCut_yHigh==-1?cut->GetY()[1]:addionalCut_yHigh;
+//		    TCutG * cut2 = getCutG(cut->GetName()+(TString)"_centralRegion",xLow,yLow,xHigh,yHigh);
+//	        cut2->SetFillColor(kRed +i);
+//	        cut2->SetLineColor(kRed+i);
+	        cut->SetLineStyle(7);
+//	        cut2->SetLineWidth(3);
+//	        cut2->Draw("same");
+		}
+        cut->Draw("same");
 		if(drawLegend){
 			TString label = fidCuts[i]->GetName();
 			leg->AddEntry(cut,label,"L");

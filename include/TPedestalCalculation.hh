@@ -50,6 +50,8 @@ private:
 	pair <Float_t,Float_t> calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float mean, float sigma, int iterations=5,float maxSigma=5);
 	pair <Float_t,Float_t> checkPedestalDet(int det, int ch,int maxSigma=7);
 	pair <Float_t,Float_t> checkPedestalDia(int ch,int maxSigma=7);
+	void calculateCommonModeDet(int det);
+	Float_t GetCommonModeNoise(int det, int ch);
 	void printDiamond(UInt_t nChannel);
 	bool createPedestalTree(int nEvents);
 	void setBranchAdresses();
@@ -70,6 +72,7 @@ private:
 	UInt_t runNumber;
 	Float_t pedestalMean[9][N_DET_CHANNELS];
 	Float_t  pedestalSigma[9][N_DET_CHANNELS];
+	Float_t cmn_sil[8*2];
 
 	Float_t diaPedestalMean[N_DIA_CHANNELS];
 	Float_t diaPedestalSigma[N_DIA_CHANNELS];
@@ -107,6 +110,9 @@ private:
 	deque<Float_t> cmnValues;
 	deque<bool> diaEventUsedCMN[N_DIA_CHANNELS];
 	Float_t cmNoise;
+
+	Float_t pedestalDet[8][N_DET_CHANNELS];
+	Float_t pedestalDIA[N_DIA_CHANNELS];
 
 	//	stringstream rawfilepath;
 	int MAXSDETSIGMA;

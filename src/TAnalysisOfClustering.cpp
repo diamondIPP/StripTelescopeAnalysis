@@ -37,7 +37,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *newSettings) {
     verbosity=settings->getVerbosity();
     initialiseHistos();
     cout<<"end initialise"<<endl;
-    //	settings=0;
+//	settings=0;
     vecVecClusters.resize(TPlaneProperties::getNDetectors());
 
     nMaxClusters = 40000;
@@ -65,7 +65,7 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 
     initPedestalAndNoiseHistos(nEvents);
     cout<<"analyze clustering results..."<<endl;
-    //	eventReader->checkADC();
+//	eventReader->checkADC();
     if(nEvents==0) nEvents=eventReader->GetEntries();
     histSaver->SetNumberOfEvents(nEvents);
     for(nEvent=0;nEvent<nEvents;nEvent++){
@@ -79,13 +79,13 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 
 void TAnalysisOfClustering::analyseEvent(){
     if(eventReader->getEvent()->hasInvalidReadout()){
-        //		cout<<nEvent<<": Invalid Readout..."<<endl;
+//		cout<<nEvent<<": Invalid Readout..."<<endl;
         nInvalidReadout++;
         return;
     }
     checkForDeadChannels();
     checkForSaturatedChannels();
-    //		getBiggestHit();//not working
+//		getBiggestHit();//not working
     analyseForSeeds();
     analyseCluster();
     compareCentroid_ChargeWeightedMean();
@@ -254,7 +254,7 @@ void TAnalysisOfClustering::analysisSlopes(){
 }
 
 void TAnalysisOfClustering::saveVariableVsEventNoPlots(TSettings* settings,HistogrammSaver*histSaver, std::map<UInt_t,TProfile*> mProf,
-                    TString nameOfVariable,vector <Float_t>* vec, vector<Float_t> *vecCh){
+        TString nameOfVariable,vector <Float_t>* vec, vector<Float_t> *vecCh){
     TString name = (TString)"stack"+nameOfVariable+(TString)"VsEventNo";
     THStack * stack = new THStack(name,name);
     name = (TString)"h"+nameOfVariable+(TString)"SlopesVsChannel";
@@ -307,7 +307,7 @@ void TAnalysisOfClustering::saveVariableVsEventNoPlots(TSettings* settings,Histo
 
         TProfile * prof3 = (TProfile*)prof->Clone();
 
-        histSaver->Save1DProfileXWithFitAndInfluence(prof,fit,true);
+        histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         hVariableSlopesVsChannel->SetBinContent(hVariableSlopesVsChannel->FindBin(channel),fit->GetParameter(1));
         if ((int)vecCh->size()<=i){
             vecCh->push_back(channel);
@@ -319,13 +319,13 @@ void TAnalysisOfClustering::saveVariableVsEventNoPlots(TSettings* settings,Histo
 //        }
         vec->push_back(fit->GetParameter(1));
         Float_t firstVarableValue = prof3->GetBinContent(1);
-        cout<<channel<<" first"<<nameOfVariable<<"Value: "<<firstVarableValue<<endl;
+        if (false) cout<<channel<<" first"<<nameOfVariable<<"Value: "<<firstVarableValue<<endl;
         prof3->Scale(1./firstVarableValue);
         for(Int_t binx = 1;binx <= prof3->GetNbinsX();binx++){
             Float_t content = prof3->GetBinContent(binx);
             content = (content-1.)*100;
             Int_t bin = hRelVariableVsEventNo->GetBin(binx,channel+1);
-            //            cout<<"Fill: "<<channel<<" "<<binx<<" "<<content<<endl;
+//            cout<<"Fill: "<<channel<<" "<<binx<<" "<<content<<endl;
             hRelVariableVsEventNo->SetBinContent(bin,content);
         }
         delete prof3;
@@ -395,6 +395,10 @@ void TAnalysisOfClustering::initialiseHistos()
     vecvecSignalRightOfHighest.resize(nDet);
     vecvecSignalHighest.resize(nDet);
     vecvecEta.resize(nDet);
+
+    TString hName = "hEtaDistributionDia";
+    int nDiamonds = settings->getNDiamonds();
+    hEtaDistributionDia = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
 
     for(UInt_t det=0;det<9;det++){
         TString name = "hClusterPositionRelativeToNextIntegerCWM_"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -486,13 +490,29 @@ void TAnalysisOfClustering::initialiseHistos()
 
         name = "hSignalLeftVsSignalRight"+ (TString) TPlaneProperties::getStringForDetector(det);
         hSignalLeftVsSignalRight[det]=new TH2F(name,name,128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
+
+        name = "hDeltaLeftRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hDeltaLeftRightVsMaximum[det]=new TH2F(name,name,
+                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
+                256,0,TPlaneProperties::getMaxSignalHeight(det));
+//        hLeftVsMaximum[det]
+
+        name = "hLeftVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hLeftVsMaximum[det]=new TH2F(name,name,
+                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
+                256,0,TPlaneProperties::getMaxSignalHeight(det));
+
+        name = "hRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
+        hRightVsMaximum[det]=new TH2F(name,name,
+                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
+                256,0,TPlaneProperties::getMaxSignalHeight(det));
     }
-    //	for(int det = 0; det < 9; det++){
-    //	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
-    //	    hRelativeHitPosition[det] = new TH1F(name,name,512,-30,30);
-    //	    hRelativeHitPosition[det]->GetXaxis()->SetTitle("relative Hit Position/#mum");
-    //	    hRelativeHitPosition[det]->GetYaxis()->SetTitle("number of entries");
-    //	}
+//	for(int det = 0; det < 9; det++){
+//	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
+//	    hRelativeHitPosition[det] = new TH1F(name,name,512,-30,30);
+//	    hRelativeHitPosition[det]->GetXaxis()->SetTitle("relative Hit Position/#mum");
+//	    hRelativeHitPosition[det]->GetYaxis()->SetTitle("number of entries");
+//	}
     if(verbosity>3)cout<<"2"<<endl;
     for (int det=0;det<9;det++){
         stringstream histoName;
@@ -646,10 +666,15 @@ void TAnalysisOfClustering::initialiseHistos()
         stringstream histName;
         histName<<"hPulseHeightDistribution_"<<TPlaneProperties::getStringForDetector(det);
         float max=0;
-        if(det==TPlaneProperties::getDetDiamond())
-            max = 4098;
-        else max = 512;
-        hPHDistribution[det]=new TH2F(histName.str().c_str(),histName.str().c_str(),512,0,max,10,-.5,9.5);
+//        if(det==TPlaneProperties::getDetDiamond())
+//            max = 4098;
+//        else max = 512;
+		max = settings->getPulse_height_max(det);
+        hPHDistribution[det] = new TH2F(histName.str().c_str(), histName.str().c_str(), settings->getPulse_height_num_bins(), 0, max, 10, -.5, 9.5);
+        histName.str("");
+        histName<<"hPHDistIncreasingClustersize_"<<TPlaneProperties::getStringForDetector(det);
+        hPHDistIncreasingClustersize[det] = new TH2F(histName.str().c_str(),histName.str().c_str(),
+                                                    512,0,max,4,1,4);
 
     }
 
@@ -698,18 +723,16 @@ void TAnalysisOfClustering::saveEtaIntegrals(){
         histo->Write();
         hEtaDistribution[det]->Write();
     }
+    hEtaDistributionDia->Write();
     file->Close();
 }
 
 
 
 void TAnalysisOfClustering::saveHistos(){
-    //	analyseAsymmetricSample2();
-    //	char t; cin>>t;
-    savePedestalHistos();
-    saveNoiseHistos();
-    saveADCHistos();
-    analysisSlopes();
+    analyseAsymmetricSample();
+//	char t; cin>>t;
+    cout<<"1"<<flush;
     if (verbosity>2) cout<<"plot histo "<<histo_CWM_biggestHit->GetName();
     histSaver->SaveHistogram(histo_CWM_biggestHit);
     histo_CWM_biggestHit->Delete();
@@ -730,7 +753,7 @@ void TAnalysisOfClustering::saveHistos(){
         histSaver->SaveHistogram(hDeltaLeftRightHitOverLeftAndRight[det]);
         histSaver->SaveHistogram(hSignal2ndHighestOverSignalHighestRatio[det]);
     }
-
+    cout<<2<<flush;
     for (int det=0;det<9;det++){
         if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSaturatedChannels[det]->GetName()<<endl;
         histSaver->SaveHistogram(hSaturatedChannels[det]);
@@ -741,6 +764,7 @@ void TAnalysisOfClustering::saveHistos(){
         histSaver->SaveHistogram(hSeedMap[det]);
         hSeedMap[det]->Delete();
     }
+    cout<<3<<flush;
     for (int det=0;det<9;det++){
         if (verbosity>2) cout<<"plot histo"<<det<<" "<<hSeedMap2[det]->GetName()<<endl;
         histSaver->SaveHistogram(hSeedMap2[det]);
@@ -786,7 +810,7 @@ void TAnalysisOfClustering::saveHistos(){
         histSaver->SaveHistogram(this->hClusterPosition[det]);
         histSaver->SaveHistogram(this->hRelativeClusterPositionCWM[det]);
         histSaver->SaveHistogram((TH1F*)this->hRelativeClusterPositionCWM[det]->ProjectionY());
-        //		histSaver->SaveHistogram(this->hRelativeClusterPositionCorEta[det]);
+//		histSaver->SaveHistogram(this->hRelativeClusterPositionCorEta[det]);
         histSaver->SaveHistogram((TH1F*)this->hRelativeClusterPositionCorEta[det]->ProjectionY());
         histSaver->SaveHistogram((TH1F*)this->hRelativeClusterPositionEta[det]->ProjectionY());
         delete hClusterPosition[det];
@@ -796,13 +820,15 @@ void TAnalysisOfClustering::saveHistos(){
     }
     saveEtaIntegrals();
     if (verbosity) cout<<"create Eta Integrals"<<endl;
+    histSaver->SaveHistogram(hEtaDistributionDia);
+    saveEtaPerArea();
     for(UInt_t det=0;det<9;det++){
         stringstream histName;
         histName<<"hEtaIntegral_"<<TPlaneProperties::getStringForDetector(det);;
         TH1F *histo= TClustering::createEtaIntegral(hEtaDistribution[det],histName.str());
         if (verbosity) cout<<"Save: "<<histName.str()<<endl;
         histSaver->SaveHistogram(histo);
-        //		if(histo) delete histo;
+//		if(histo) delete histo;
         if (verbosity) cout<<hEtaDistribution[det]->GetName()<<endl;
         histSaver->SaveHistogram(this->hEtaDistribution[det]);
         if (verbosity) cout<<hEtaDistributionCMN[det]->GetName()<<endl;
@@ -822,7 +848,7 @@ void TAnalysisOfClustering::saveHistos(){
         }
         if (verbosity)  cout<<"Save "<< hEtaDistributionVsLeftChannel[det]->GetName()<<endl;
         histSaver->SaveHistogram(this->hEtaDistributionVsLeftChannel[det]);
-        //		if(hEtaDistributionVsLeftChannel) delete hEtaDistributionVsLeftChannel;
+//		if(hEtaDistributionVsLeftChannel) delete hEtaDistributionVsLeftChannel;
 
         if (verbosity)  cout<<"Save ClusterSize Plotss"<<endl;
         for(int i=1;(i<6&&TPlaneProperties::isDiamondDetector(det))||i<3;i++){
@@ -856,47 +882,172 @@ void TAnalysisOfClustering::saveHistos(){
         if (verbosity)  cout<<"Save "<< hSignalLeftVsSignalRight[det]->GetName() << endl;
         histSaver->SaveHistogram(this->hSignalLeftVsSignalRight[det]);
         if(hEtaDistribution[det])delete hEtaDistribution[det];
+        if(hDeltaLeftRightVsMaximum[det]){
+            hDeltaLeftRightVsMaximum[det]->GetXaxis()->SetTitle("S_{Right} - S_{Left} / ADC");
+            hDeltaLeftRightVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
+            histSaver->SaveHistogram(this->hDeltaLeftRightVsMaximum[det]);
+            TProfile* prof = hDeltaLeftRightVsMaximum[det]->ProfileY();
+            if (TPlaneProperties::isDiamondDetector(det))
+                prof->GetYaxis()->SetRangeUser(-500,500);
+            else
+                prof->GetYaxis()->SetRangeUser(-100,100);
+            histSaver->SaveHistogram(prof,false,false,false);(hDeltaLeftRightVsMaximum[det],0,false);
+
+            delete hDeltaLeftRightVsMaximum[det];
+            hDeltaLeftRightVsMaximum[det]=0;
+        }
+        TProfile* profRight = 0;
+        TProfile *profLeft = 0;
+        if(hLeftVsMaximum[det]){
+            hLeftVsMaximum[det]->GetXaxis()->SetTitle("S_{Left} / ADC");
+            hLeftVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
+            histSaver->SaveHistogram(this->hLeftVsMaximum[det]);
+            profLeft = hLeftVsMaximum[det]->ProfileY();
+            if (TPlaneProperties::isDiamondDetector(det))
+                profLeft->GetYaxis()->SetRangeUser(-500,500);
+            else
+                profLeft->GetYaxis()->SetRangeUser(-100,100);
+            histSaver->SaveHistogram(profLeft,false,false,false);
+            delete hLeftVsMaximum[det];
+            hLeftVsMaximum[det]=0;
+        }
+        if(hRightVsMaximum[det]){
+            hRightVsMaximum[det]->GetXaxis()->SetTitle("S_{Right} / ADC");
+            hRightVsMaximum[det]->GetYaxis()->SetTitle("S_{Middle} / ADC");
+            histSaver->SaveHistogram(this->hRightVsMaximum[det]);
+            profRight = hRightVsMaximum[det]->ProfileY();
+            if (TPlaneProperties::isDiamondDetector(det))
+                profRight->GetYaxis()->SetRangeUser(-500,500);
+            else
+                profRight->GetYaxis()->SetRangeUser(-100,100);
+            histSaver->SaveHistogram(profRight,false,false,false);
+            delete hRightVsMaximum[det];
+            hRightVsMaximum[det]=0;
+        }
+        if (profLeft && profRight){
+            histSaver->SaveTwoHistos("LeftRight_Vs_Maximum_profile",profLeft,profRight);
+        }
+        if (profLeft) delete profLeft;
+        if (profRight) delete profRight;
     }
     if (verbosity)  cout<<"Save PH Histos"<<endl;
     savePHHistos();
+
     if (verbosity)  cout<<"Save Asymmetric Eta Sample analysis"<<endl;
 //    analyseAsymmetricSample();
-    //    for (int det = 0; det < 9; det++) {
-    //		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
-    //        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
-    //		cout << "saving histogram" << this->histo_pulseheight_sigma_second[det]->GetName() << ".." << endl;
-    //		histSaver->SaveHistogram(this->histo_pulseheight_sigma_second[det]);
-    ////		cout << "saving histogram" << this->histo_pulseheight_sigma125[det]->GetName() << ".." << endl;
-    ////		histSaver->SaveHistogram(this->histo_pulseheight_sigma125[det]);
-    //		cout << "saving histogram" << this->histo_second_biggest_hit_direction[det]->GetName() << ".." << endl;
-    //		histSaver->SaveHistogram(this->histo_second_biggest_hit_direction[det]);
-    //		cout << "saving histogram" << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
-    //		histSaver->SaveHistogram(this->histo_biggest_hit_map[det]);
-    //		cout << "saving histogram" << this->histo_pulseheight_left_sigma[det]->GetName() << ".." << endl;
-    //		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma[det]);
-    //		cout << "saving histogram" << this->histo_pulseheight_left_sigma_second[det]->GetName() << ".." << endl;
-    //		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma_second[det]);
-    //		cout << "saving histogram" << this->histo_pulseheight_right_sigma[det]->GetName() << ".." << endl;
-    //		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma[det]);
-    //		cout << "saving histogram" << this->histo_pulseheight_right_sigma_second[det]->GetName() << ".." << endl;
-    //		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma_second[det]);
-    //        delete histo_pulseheight_sigma[det];
-    //		delete histo_pulseheight_sigma_second[det];
-    ////		delete histo_pulseheight_sigma125[det];
-    //		delete histo_second_biggest_hit_direction[det];
-    //		delete histo_biggest_hit_map[det];
-    //		delete histo_pulseheight_left_sigma[det];
-    //		delete histo_pulseheight_left_sigma_second[det];
-    //		delete histo_pulseheight_right_sigma[det];
-    //		delete histo_pulseheight_right_sigma_second[det];
-    //    }
-    //	saveEtaInvestigationHistos();
+    savePedestalHistos();
+    saveNoiseHistos();
+    saveADCHistos();
+    analysisSlopes();
+//    for (int det = 0; det < 9; det++) {
+//		cout << "saving histogram" << this->histo_pulseheight_sigma[det]->GetName() << ".." << endl;
+//        histSaver->SaveHistogram(this->histo_pulseheight_sigma[det]);
+//		cout << "saving histogram" << this->histo_pulseheight_sigma_second[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogram(this->histo_pulseheight_sigma_second[det]);
+////		cout << "saving histogram" << this->histo_pulseheight_sigma125[det]->GetName() << ".." << endl;
+////		histSaver->SaveHistogram(this->histo_pulseheight_sigma125[det]);
+//		cout << "saving histogram" << this->histo_second_biggest_hit_direction[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogram(this->histo_second_biggest_hit_direction[det]);
+//		cout << "saving histogram" << this->histo_biggest_hit_map[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogram(this->histo_biggest_hit_map[det]);
+//		cout << "saving histogram" << this->histo_pulseheight_left_sigma[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma[det]);
+//		cout << "saving histogram" << this->histo_pulseheight_left_sigma_second[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogram(this->histo_pulseheight_left_sigma_second[det]);
+//		cout << "saving histogram" << this->histo_pulseheight_right_sigma[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma[det]);
+//		cout << "saving histogram" << this->histo_pulseheight_right_sigma_second[det]->GetName() << ".." << endl;
+//		histSaver->SaveHistogram(this->histo_pulseheight_right_sigma_second[det]);
+//        delete histo_pulseheight_sigma[det];
+//		delete histo_pulseheight_sigma_second[det];
+////		delete histo_pulseheight_sigma125[det];
+//		delete histo_second_biggest_hit_direction[det];
+//		delete histo_biggest_hit_map[det];
+//		delete histo_pulseheight_left_sigma[det];
+//		delete histo_pulseheight_left_sigma_second[det];
+//		delete histo_pulseheight_right_sigma[det];
+//		delete histo_pulseheight_right_sigma_second[det];
+//    }
+//	saveEtaInvestigationHistos();
 }
 
 void TAnalysisOfClustering::fillClusterHitPositions() {
     for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det++){
     }
 
+}
+
+void TAnalysisOfClustering::saveEtaPerArea() {
+    TH2F* histoNoCor = 0;
+    int maxDia =(int)settings->getNDiamonds()+2;
+    for ( Int_t dia=-1; hEtaDistributionDia->GetYaxis()->GetBinCenter(dia)<maxDia; dia++ ){
+        TString histName = "hEtaDistribution_Dia_";
+        if(dia==-1)
+            histName.Append("All");
+        else
+            histName.Append(TString::Format("Area%d",(int)hEtaDistributionDia->GetYaxis()->GetBinCenter(dia)));
+
+        TH1F* hist = 0;
+        TH1F* histNoCor = 0;
+        if(dia==-1){
+            hist = (TH1F*)hEtaDistributionDia->ProjectionX(histName);
+            if(histoNoCor) histNoCor =  (TH1F*)histoNoCor->ProjectionX();
+        }
+        else{
+            hist = (TH1F*)hEtaDistributionDia->ProjectionX(histName,dia,dia);
+            if (histoNoCor) histNoCor =  (TH1F*)histoNoCor->ProjectionX("_px",dia,dia);
+        }
+        TString title = "Eta Distribution Dia";
+        if(dia==-1)
+            title.Append(" All");
+        else
+            title.Append(TString::Format(" Area%d",(int)hEtaDistributionDia->GetYaxis()->GetBinCenter(dia)));
+        int nbins = 512;
+        TString histName2 = histName;
+        TString title2 = title;
+        histName2.Append("inverted");
+        title.Append(" inverted");
+        TH1F* histInverted = new TH1F(histName2,title2,nbins,0,1);
+        for(int bin = 1; bin <= nbins;bin++){
+            histInverted->SetBinContent(bin,hist->GetBinContent(nbins+1-bin));
+        }
+        histInverted->SetLineColor(kBlue-7);
+        if(hist){
+            hist->SetTitle(title);
+            string name = "c_";
+            name.append(histName);
+            if(hist->GetEntries()>0){
+                TCanvas *c1 = new TCanvas(name.c_str());
+                c1->cd();
+                hist->Draw();
+                if(histInverted) histInverted->Draw("same");
+                hist->Draw("same");
+                histSaver->SaveCanvas(c1);
+                if(histNoCor&& histInverted) {
+                    name.insert(1,"1");
+                    name.append("_diff");
+                    c1->Clear();
+                    c1->SetName(name.c_str());
+                    c1->SetTitle(name.c_str());
+                    name = "stack_";
+                    name.append(histName);
+                    THStack *stack = new THStack(name.c_str(),hist->GetTitle());
+                    stack->Add(histNoCor,"");//->Draw("AXIS");
+                    stack->Add(histInverted,"");//->Draw("same");
+                    stack->Add(hist,"");//->Draw("same");
+                    stack->Draw("nostack");
+                    histSaver->SaveCanvas(c1);
+                }
+            }
+            else{
+                TCanvas *c1 = new TCanvas(name.c_str());
+                histSaver->SaveCanvas(c1);
+            }
+            histSaver->SaveHistogram(hist);
+            if(hist) delete hist;
+
+        }
+    }
 }
 
 void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight, Int_t etaLow, Int_t etaHigh,string name_comparision){
@@ -908,7 +1059,7 @@ void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight,
     TProfile* pDiff = new TProfile(pname,pname,nbins,xlow,xup);
     for(int i = 0; i <= pLeft->GetNbinsX() && i <= pRight->GetNbinsX(); i++){
         Float_t value =  pRight->GetBinContent(i) - pLeft->GetBinContent(i);
-        //		cout<< pDiff->GetBinCenter(i)<<": "<<value<<"\t\t"<<pRight->GetBinContent(i)<<" - "<<pLeft->GetBinContent(i)<<endl;
+//		cout<< pDiff->GetBinCenter(i)<<": "<<value<<"\t\t"<<pRight->GetBinContent(i)<<" - "<<pLeft->GetBinContent(i)<<endl;
         pDiff->SetBinContent(i,value);
     }
     pDiff->SetLineColor(kBlue);
@@ -920,7 +1071,7 @@ void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight,
     minY = minY>0?minY*.7:minY*1.1;
     TCanvas *c1 = new TCanvas(TString::Format("cProfile_%s_in_%03d_%03d",name_comparision.c_str(),etaLow,etaHigh));
 
-    //		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
+//		cout<<"compare: "<<pLeft->GetName()<<" vs. "<<pRight->GetName()<<":\t"<<c1->GetName()<<endl;
     c1->cd();
     TString title = TString::Format("hProfile_%s_eta_in_%03d_%03d",name_comparision.c_str(),etaLow,etaHigh);
     TH1F* pTitle = new TH1F(title,title,pLeft->GetNbinsX(),pLeft->GetXaxis()->GetXmin(),pLeft->GetXaxis()->GetXmax());
@@ -934,8 +1085,8 @@ void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight,
     }
     pTitle->Draw();
     pTitle->GetXaxis()->SetRangeUser(0,maxX);
-    //		pRight->GetXaxis()->SetRangeUser(0,maxX);
-    //		pLeft->GetXaxis()->SetRangeUser(0,maxX);
+//		pRight->GetXaxis()->SetRangeUser(0,maxX);
+//		pLeft->GetXaxis()->SetRangeUser(0,maxX);
     Float_t maxY = 1.1*TMath::Max(maxLeft,maxRight);
     pTitle->SetMaximum(maxY);
     pTitle->SetMinimum(minY);
@@ -959,13 +1110,13 @@ void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight,
     pTitle->Draw();
     pRight->Draw("sameHIST");
     pLeft->Draw("sameHIST");
-    //	pDiff->Draw("same");
+//	pDiff->Draw("same");
 
     TLegend *leg = c1->BuildLegend();
     leg->Clear();
     leg->AddEntry(pRight);
     leg->AddEntry(pLeft);
-    //	leg->AddEntry(pDiff);
+//	leg->AddEntry(pDiff);
     leg->SetFillColor(kWhite);
     Float_t x1NDC = leg->GetX1NDC();
     Float_t x2NDC = leg->GetX2NDC();
@@ -979,7 +1130,7 @@ void TAnalysisOfClustering::saveProfileHistos(TProfile* pLeft, TProfile *pRight,
     histSaver->SaveCanvas(c1);
     histSaver->SaveHistogram(pLeft);
     histSaver->SaveHistogram(pRight);
-    //	histSaver->SaveHistogram(pDiff);
+//	histSaver->SaveHistogram(pDiff);
     delete c1;
     if (pDiff) delete pDiff;
 }
@@ -1013,7 +1164,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
         name.clear();
         minZbin = histo3dLeft->GetZaxis()->FindBin(eta1);
         maxZbin = histo3dLeft->GetZaxis()->FindBin(eta2);
-        //		cout<<"eta "<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
+//		cout<<"eta "<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
         histo3dLeft->GetZaxis()->SetRange(minZbin, maxZbin);
         minZ = histo3dLeft->GetZaxis()->GetBinLowEdge(minZbin)*100;
         minZ=minZ<0?0:minZ;
@@ -1042,7 +1193,7 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
         name.clear();
         minZbin = histo3dRight->GetZaxis()->FindBin(eta1);
         maxZbin = histo3dRight->GetZaxis()->FindBin(eta2);
-        //		cout<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
+//		cout<<eta<<": "<<minZbin<<"-"<<maxZbin<<endl;
         histo3dRight->GetZaxis()->SetRange(minZbin, maxZbin);
         minZ = histo3dRight->GetZaxis()->GetBinLowEdge(minZbin)*100;
         minZ=minZ<0?0:minZ;
@@ -1088,13 +1239,13 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
         TH1F *histo1dRight = (TH1F*)histo2Right->ProjectionY(name.str().c_str(),minXbin,maxXbin);
         histo1dRight->SetTitle(name.str().c_str());
 
-        //		cout<<"save "<<histo1dRight->GetName()<<endl;
+//		cout<<"save "<<histo1dRight->GetName()<<endl;
         histSaver->SaveHistogram(histo1dRight);
-        //		cout<<"save "<<histo1dLeft->GetName()<<endl;
+//		cout<<"save "<<histo1dLeft->GetName()<<endl;
         histSaver->SaveHistogram(histo1dLeft);
-        //		cout<<"saving "<<histo2dLeft->GetName()<<endl;;
+//		cout<<"saving "<<histo2dLeft->GetName()<<endl;;
         histSaver->SaveHistogram(histo2dLeft,false);
-        //		cout<<"saving "<<histo2dRight->GetName()<<endl;
+//		cout<<"saving "<<histo2dRight->GetName()<<endl;
         histSaver->SaveHistogram(histo2dRight,false);
         name.str("");
         name.clear();
@@ -1150,9 +1301,9 @@ void TAnalysisOfClustering::saveEtaDividedHistos(TH3F* histo3dLeft,TH3F* histo3d
     cout<<"saving "<<histo3dLeft->GetName()<<endl;
     histSaver->SaveHistogramROOT(histo3dLeft);
 
-    //	cout<<"saving "<<histo2Left->GetName()<<endl;
+//	cout<<"saving "<<histo2Left->GetName()<<endl;
     histSaver->SaveHistogram(histo2Left);
-    //	cout<<"saving "<<histo2Right->GetName()<<endl;
+//	cout<<"saving "<<histo2Right->GetName()<<endl;
     histSaver->SaveHistogram(histo2Right);
 }
 
@@ -1255,11 +1406,11 @@ void TAnalysisOfClustering::compareCentroid_ChargeWeightedMean()
         this->histo_CWM_biggestHit->Fill(delta,cluster.size());
         delta = xH2C - xHit;
         this->histo_H2C_biggestHit->Fill(delta);
-        //		if(eventReader->getNClusters(8)>=1){
-        //			Float_t charge = eventReader->getCluster(8,0).getCharge();
-        //			Float_t signal2ndHighestHit=eventReader->getCluster(8,0).getCharge(2)-eventReader->getCluster(8,0).getCharge(1);
-        //			Float_t q =signal2ndHighestHit/charge;
-        //		}
+//		if(eventReader->getNClusters(8)>=1){
+//			Float_t charge = eventReader->getCluster(8,0).getCharge();
+//			Float_t signal2ndHighestHit=eventReader->getCluster(8,0).getCharge(2)-eventReader->getCluster(8,0).getCharge(1);
+//			Float_t q =signal2ndHighestHit/charge;
+//		}
 
 
     }
@@ -1269,15 +1420,17 @@ void TAnalysisOfClustering::analyseClusterPosition()
 {
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
         for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
-            Float_t posCWM = eventReader->getEvent()->getPosition(det,cl,TCluster::chargeWeighted);
+            bool bCMN = TPlaneProperties::isDiamondDetector(det);
+            Float_t posCWM = eventReader->getEvent()->getPosition(det,cl,bCMN,TCluster::chargeWeighted);
             Int_t chNo = (Int_t)(posCWM+0.5);
             Float_t relPos = posCWM - chNo;
             hClusterPosition[det]->Fill(posCWM);
             if(TPlaneProperties::isDiamondDetector(det))
                 hClusterPositionActiveChannels->Fill(posCWM);
             hRelativeClusterPositionCWM[det]->Fill(chNo+0.5,relPos);
-            //			Float_t eta =
+//			Float_t eta =
             TCluster cluster = eventReader->getCluster(det,cl);
+
             UInt_t highestClPos=cluster.getHighestHitClusterPosition();
             UInt_t nextHighestClPos=cluster.getHighestSignalNeighbourClusterPosition(highestClPos);
             if(nextHighestClPos==9999){
@@ -1315,13 +1468,31 @@ void TAnalysisOfClustering::analyseClusterPosition()
             Float_t eta= cluster.getEta(leftChannel);
             Float_t etaCmnCorrected = cluster.getEta(true);
             Float_t charge = cluster.getCharge((UInt_t)2,true,true);
+            Float_t S_M = cluster.getSignal(highestClPos);
+            Float_t S_R = cluster.getSignal(highestClPos+1);
+            Float_t S_L = cluster.getSignal(highestClPos-1);
+//					cluster.Print();
+//					cout<<"Cluster: "<<S_L<<"-"<<S_M<<"-"<<S_R<<endl;
+
+            hDeltaLeftRightVsMaximum[det]->Fill(S_R-S_L,S_M);
+            hLeftVsMaximum[det]->Fill(S_L,S_M);
+            hRightVsMaximum[det]->Fill(S_R,S_M);
+            if (cluster.isSaturatedCluster())
+                return;
             if(verbosity>3){
                 cout<<"charge of 2: "<<charge<<"\t"<<flush;
                 cluster.Print();
             }
-            //			Float_t eta3= signalRightReal/(signalLeftReal+signalRightReal);
-            //			cout<<nEvent<<" "<<eta<<" "<<eta1<<" "<<eta2<<" "<<eta3<<endl;
-            if(hEtaDistribution[det])hEtaDistribution[det]->Fill(eta);
+//			Float_t eta3= signalRightReal/(signalLeftReal+signalRightReal);
+//			cout<<nEvent<<" "<<eta<<" "<<eta1<<" "<<eta2<<" "<<eta3<<endl;
+            if(hEtaDistribution[det])
+                hEtaDistribution[det]->Fill(eta);
+            if (TPlaneProperties::isDiamondDetector(det)){
+                Int_t nDia = settings->getDiaDetectorAreaOfChannel(leftChannel)+1;
+                if(eta>0&&eta<1){
+                    hEtaDistributionDia->Fill(eta,nDia);
+                }
+            }
             if(hEtaDistributionCMN[det])hEtaDistributionCMN[det]->Fill(etaCmnCorrected);
             if(hEtaDistributionVsLeftChannel[det]) hEtaDistributionVsLeftChannel[det]->Fill(eta,leftChannel);
             if(hEtaDistributionVsClusterSize[det]) hEtaDistributionVsClusterSize[det]->Fill(eta,clusterSize);
@@ -1329,7 +1500,7 @@ void TAnalysisOfClustering::analyseClusterPosition()
             hEtaDistribution5Percent[det]->Fill(eta2);
             hSignalLeftVsSignalRight[det]->Fill(signalRight,signalLeft);
 
-            //			cout<<nextHighestClPos<<"<"<<highestClPos<<"\t"<<signalLeft<<" < "<<signalRight<<"\t"<<eta<<endl;
+//			cout<<nextHighestClPos<<"<"<<highestClPos<<"\t"<<signalLeft<<" < "<<signalRight<<"\t"<<eta<<endl;
             hEtaDistributionVsSignalLeft[det]->Fill(eta,signalLeft);
             hEtaDistributionVsSignalRight[det]->Fill(eta,signalRight);
             hEtaDistributionVsSignalSum[det]->Fill(eta,signalLeft+signalRight);
@@ -1347,8 +1518,7 @@ void TAnalysisOfClustering::analyseClusterPosition()
     }
 }
 
-void TAnalysisOfClustering::analyseCluster()
-{
+void TAnalysisOfClustering::analyseCluster(){
     for(int det=0;det<9;det++){
         hNumberOfClusters[det]->Fill(eventReader->getNClusters(det));
         for(UInt_t cl=0;cl<eventReader->getNClusters(det);cl++){
@@ -1370,11 +1540,11 @@ void TAnalysisOfClustering::analyseCluster()
 
 void TAnalysisOfClustering::analyse2ndHighestHit(){
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
-        //		if(nEvent==20){
-        //			cout<<nEvent<<":"<<endl;
-        //			eventReader->setVerbosity(10);
-        //		}
-        //		else eventReader->setVerbosity(0);
+//		if(nEvent==20){
+//			cout<<nEvent<<":"<<endl;
+//			eventReader->setVerbosity(10);
+//		}
+//		else eventReader->setVerbosity(0);
         Float_t nClusters=eventReader->getNClusters(det);
 
         for(UInt_t cl=0;cl<nClusters;cl++){
@@ -1404,8 +1574,8 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
             if(signalLeft==0&&signalRight==0)continue;
             if(sumSignals==0)continue;
             Float_t allCharge=cluster.getCharge(false);
-            //			Float_t charge = cluster.getCharge(false);
-            //			if (cluster.isHit())
+//			Float_t charge = cluster.getCharge(false);
+//			if (cluster.isHit())
             Float_t signalRatio=signal2ndHighest/signalHighest;
             if(signalRatio>1){
                 cout<<"Ratio>1:"<<signal2ndHighest<<" "<<signalHighest<<endl;
@@ -1453,8 +1623,8 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
                 hDeltaLeftRightHitOverLeftAndRight[det]->Fill(ratio);
             else {
                 if(TMath::Abs(ratio)>1){
-                    //					cout<<"hDeltaLeftRightHitOverLeftAndRight "<<det<<" "<<cl<<" "<<deltaSignals<<" "<<sumSignals<<endl;
-                    //					cluster.Print();
+//					cout<<"hDeltaLeftRightHitOverLeftAndRight "<<det<<" "<<cl<<" "<<deltaSignals<<" "<<sumSignals<<endl;
+//					cluster.Print();
                 }
             }
             ratio = signalLeft/sumSignals;
@@ -1485,7 +1655,10 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
     cout<<"****\n****\n FINAL RESULTS: "<<endl;
     std::ofstream ofs (settings->getCrossTalkFactorsFileName().c_str(), std::ofstream::out);
     for(UInt_t det = 0 ; det < vecAlphas.size();det ++){
-        if (res) res->setSignalFeedOverCorrection(det, vecAlphas[det]);
+        if (res){
+            res->setSignalFeedOverCorrection(det, vecAlphas[det]);
+            res->setFloatValue("Feed_Through_Correction",TPlaneProperties::getStringForDetector(det),vecAlphas[det]);
+        }
         cout<<det<<": "<< TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps" ;
         ofs<<det<<": "<<  TString::Format("%02.2f",vecAlphas.at(det)*100) << "%\t in "<<setw(2)<< vecNSteps.at(det) << " Steps";
 
@@ -1505,8 +1678,8 @@ void TAnalysisOfClustering::analyseAsymmetricSample(){
 
 
 void TAnalysisOfClustering::fillClusterVector(){
-    //	if (!settings->isAsymmetricSample())
-    //		return;
+//	if (!settings->isAsymmetricSample())
+//		return;
     for(UInt_t det = 0; det< TPlaneProperties::getNDetectors();det++){
         //	UInt_t det = 8;
         if(eventReader->getNClusters(det)!=1)
@@ -1532,7 +1705,7 @@ void TAnalysisOfClustering::etaInvestigation(){
             minSignal = -50;//todo
         for(UInt_t cl = 0; cl< eventReader->getNClusters(det);cl++){
             TCluster cluster = eventReader->getCluster(det,cl);
-            //			cluster.Print(1);
+//			cluster.Print(1);
             Int_t leftEtaChannel =-1;
             Float_t eta = cluster.getEta(leftEtaChannel,false);
             Int_t leftEtaClusterPosition = cluster.getClusterPosition(leftEtaChannel);
@@ -1547,8 +1720,8 @@ void TAnalysisOfClustering::etaInvestigation(){
             Float_t signalRightOfHighest = cluster.getSignal(highestSignalClusterPos+1);
             if(signalLeftLeft<minSignal||signalLeftOfHighest<minSignal||signalRightOfHighest<minSignal||signalRightRight<minSignal)
                 continue;
-            //			cout<< signalLeftOfEta<<" "<< leftEtaSignal<<" "<<rightEtaSignal<<" "<<signalRightOfEta<<"  ----  "<<signalLeftOfHighest<<" "<< highestSignal<<" "<<signalRightOfHighest<<"\n"<<endl;
-            //		Float_t signalLeftOfEta = eventReader->
+//			cout<< signalLeftOfEta<<" "<< leftEtaSignal<<" "<<rightEtaSignal<<" "<<signalRightOfEta<<"  ----  "<<signalLeftOfHighest<<" "<< highestSignal<<" "<<signalRightOfHighest<<"\n"<<endl;
+//		Float_t signalLeftOfEta = eventReader->
             if (signalLeftLeft < -100){
                 int clusPos = leftEtaClusterPosition-1;
                 cout<<"\n"<< nEvent<<", Problem signalLeftLeft: "<<signalLeftLeft<<" "<<leftEtaChannel<<": "<<cluster.getPedestalMean(clusPos)<<", "<<cluster.getAdcValue(clusPos)<<endl;
@@ -1571,26 +1744,32 @@ void TAnalysisOfClustering::savePHHistos()
 {
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
         histSaver->SaveHistogram(hPHDistribution[det]);
+        histSaver->SaveHistogram(hPHDistIncreasingClustersize[det]);
         vecClusterSize.clear();
         vecMPV.clear();
         vecClusterSizeError.clear();
         vecWidth.clear();
         for(UInt_t nClusters=0;nClusters<10;nClusters++){
             stringstream histName;
-            //    		string name = (string)hPHDistribution[det]->GetTitle();
-            //    		name = name.substr(0,histName.str().size()-6);
+//    		string name = (string)hPHDistribution[det]->GetTitle();
+//    		name = name.substr(0,histName.str().size()-6);
+            TString hname = "hPulseHeightDistribution_";
             histName<<"hPulseHeightDistribution_";
             if(nClusters==0)
-                histName<<"allClusterSizes";
+                hname += (TString) "allClusterSizes_";
             else
-                histName<<"nClusters"<<nClusters;
-            histName<<"_"<<TPlaneProperties::getStringForDetector(det);
-            TObject *htemp2 = (TObject*)gROOT->FindObject(histName.str().c_str());
+                hname += TString::Format("nClusters%d_",nClusters);
+
+            hname+=(TString)TPlaneProperties::getStringForDetector(det);
+            TObject *htemp2 = (TObject*)gROOT->FindObject(hname);
             if(htemp2!=0)delete htemp2;
 
             //CREATE HTEMP and ReBin it if necessary
             TH1F *htemp;
-            htemp = (TH1F*)hPHDistribution[det]->ProjectionX(histName.str().c_str(),nClusters+1,nClusters+1);
+//			if (nClusters == 0)
+//				htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname);//,nClusters+1,nClusters+1);
+//			else
+            htemp = (TH1F*)hPHDistribution[det]->ProjectionX(hname,nClusters+1,nClusters+1);
             if(htemp==0) continue;
 
             //adjust binning if necessary
@@ -1598,7 +1777,7 @@ void TAnalysisOfClustering::savePHHistos()
             UInt_t maximumEntries = htemp->GetMaximum();
             UInt_t nSteps =4;
             UInt_t nStep = 0;
-            while((maximumEntries<50&&maximumEntries<entries*0.8)&&nStep<nSteps){
+            while((maximumEntries<50&&maximumEntries<entries*0.7)&&nStep<nSteps){
                 htemp->Rebin(2);
                 entries = htemp->GetEntries();
                 maximumEntries = htemp->GetMaximum();
@@ -1639,6 +1818,23 @@ void TAnalysisOfClustering::savePHHistos()
             histSaver->SaveGraph(&graph,histTitle.str());
         }
         delete hPHDistribution[det];
+        vector<TH1D*> vhtemps;
+        TString hname = "hStackPHDist_ClusterSize";
+        hname += TPlaneProperties::getStringForDetector(det);
+        THStack* stack = new THStack(hname,hname);
+        for (UInt_t cl = 1; cl < 5; cl++){
+             hname = TString::Format("hPHDist_Cl%d_",cl);
+            hname += TPlaneProperties::getStringForDetector(det);
+            TH1D* htemp = hPHDistIncreasingClustersize[det]->ProjectionX(hname,cl,cl);
+            vhtemps.push_back(htemp);
+            histSaver->SaveHistogram(htemp);
+            stack->Add(htemp);
+        }
+        histSaver->SaveStack(stack,"nostack",true,true,"Cluster Signal / ADC","number of entries");
+        delete stack;
+        for (UInt_t i = 0; i < vhtemps.size(); i++)
+            delete vhtemps[i];
+        delete hPHDistIncreasingClustersize[det];
     }
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
         histSaver->SaveHistogram(hBiggestHitVsClusterSize[det]);
@@ -1660,11 +1856,15 @@ void TAnalysisOfClustering::createPHDistribution(){
         if(!isValid)
             continue;
         UInt_t nClusterSize = eventReader->getClusterSize(det,0);
-        Float_t charge = eventReader->getCluster(det,0).getCharge(true);
+        Float_t charge = eventReader->getCluster(det,0).getCharge(TPlaneProperties::isDiamondDetector(det));
 
         hPHDistribution[det]->Fill(charge,0);
         hPHDistribution[det]->Fill(charge,nClusterSize);
-        //		cout<<"Fill PH histo with "<<charge<<" and Clustersize "<<nClusterSize<<endl;
+//		cout<<"Fill PH histo with "<<charge<<" and Clustersize "<<nClusterSize<<endl;
+        for (UInt_t cl = 1; cl <= 5; cl++){
+            charge = eventReader->getCluster(det,0).getCharge(cl,TPlaneProperties::isDiamondDetector(det),true);
+            hPHDistIncreasingClustersize[det]->Fill(charge,cl);
+        }
     }
 }
 
