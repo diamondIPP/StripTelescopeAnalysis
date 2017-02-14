@@ -554,8 +554,10 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"eventwiseStop")){Parse(key,value,bEventwiseStop);} // DA:
 		if (TPlaneProperties::startsWith(key,"doEventwise")){Parse(key,value,bDoEventwise);} // DA:
 		if (TPlaneProperties::startsWith(key,"skipEvents")){ParseEventSkip(key,value,bSkipEvents);} // DA:
+		if (TPlaneProperties::startsWith(key,"cellHeight")){Parse(key,value,cellHeight);} // DA:
 
-        if (TPlaneProperties::startsWith(key,"responseWindow")){
+
+		if (TPlaneProperties::startsWith(key,"responseWindow")){
             ParseFloatPair(key,value,responseWindow);}
 //        responseWindow
         //if adcToElectronConversion.
@@ -2388,7 +2390,7 @@ int TSettings::get3DCellNo(int column, int row){
 	}
 	int nCell = row + column * nRows3d;
 	if(verbosity>4)
-		cout<<"column "<<column<<", row "<<row<<" with "<<nRows3d<<" = " <<nCell<<endl;
+		cout<<"column "<<column<<", row "<<row<<" out of "<<nRows3d<<" = " <<nCell<<endl;
 	return nCell;
 
 }

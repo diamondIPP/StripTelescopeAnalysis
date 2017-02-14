@@ -255,7 +255,7 @@ void TAnalysisOf3dDiamonds::StripAnalysis() {
     	printf("Cluster Channels: %f - %f, Charge: %f \n", transparentCluster.getFirstHitChannel(),transparentCluster.getLastHitChannel(),diamondCluster->getPositiveCharge());
      */
 
-    Int_t stripDetector = 1;
+    Int_t stripDetector = 1; // DA: TODO: Fix: Hard coded
     if(settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY)!=stripDetector)
         return;
     //cout<<"Fiducial Cut, ";
@@ -2295,6 +2295,14 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
         hName.Append(appendix);
         ptrCanvasMean.at(i)->SetName(hName);
         histSaver->SaveCanvas(ptrCanvasMean[i]);
+
+        //hFidCutxVsFidCutYVsEvents
+        ptrCanvasEvents.at(i)->cd();
+        hFidCutXvsFidCutYvsEvents.at(i)->Draw("colz");
+        TString hName2 = TString::Format("cFidCutXvsFidCutYvsEvents_%d_%d", channels.first, channels.second);
+        hName2.Append(appendix);
+        ptrCanvasEvents.at(i)->SetName(hName2);
+        histSaver->SaveCanvas(ptrCanvasEvents[i]);
 
         /*//hXdetvsYdetvsEvents
 		ptrCanvasXdetvsYdetMeanCharge.push_back(new TCanvas());
