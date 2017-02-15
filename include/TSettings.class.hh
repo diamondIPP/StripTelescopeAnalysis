@@ -54,9 +54,9 @@ public:
     TString GetCurrentEnd(){return currentEnd;}
 	std::string getAbsoluteOuputPath(bool withRunDescribtion=0);
 	std::string getAbsoluteInputPath(){return inputDir;};//todo
-	std::string getRawTreeFilePath();
-	std::string getPedestalTreeFilePath();
-	std::string getClusterTreeFilePath();
+	std::string getRawTreeFilePath(bool relativePath = false);
+	std::string getPedestalTreeFilePath(bool relativePath = false);
+	std::string getClusterTreeFilePath(bool relativePath = false);
 	std::string getAlignmentFilePath(TSettings::alignmentMode mode = TSettings::normalMode);
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};

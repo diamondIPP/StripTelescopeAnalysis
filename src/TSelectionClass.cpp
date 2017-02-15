@@ -78,13 +78,13 @@ TSelectionClass::~TSelectionClass() {
         if(verbosity)cout<<"CLOSING TREE"<<endl;
         settings->goToAlignmentRootDir();
         if(verbosity)cout<<"\t"<<eventReader->getTree()->GetName()<<" "<<settings->getClusterTreeFilePath()<<endl;
-        selectionTree->AddFriend("clusterTree",settings->getClusterTreeFilePath().c_str());
+        selectionTree->AddFriend("clusterTree", settings->getClusterTreeFilePath(true).c_str());
 
         if(verbosity)cout<<"\t"<<"pedestalTree"<<" "<<pedestalfilepath.str().c_str()<<endl;
-        selectionTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
+        selectionTree->AddFriend("pedestalTree", settings->getPedestalTreeFilePath(true).c_str());
 
         if(verbosity)cout<<"\t"<<"rawTree"<<" "<<rawfilepath.str().c_str()<<endl;
-        selectionTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
+        selectionTree->AddFriend("rawTree", settings->getRawTreeFilePath(true).c_str());
 
         if(verbosity)cout<<"\n\n\t"<<"save selectionTree: "<<selectionTree->GetListOfFriends()->GetEntries()<<endl;
         selectionFile->cd();

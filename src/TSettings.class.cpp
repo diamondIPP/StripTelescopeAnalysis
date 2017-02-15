@@ -199,26 +199,29 @@ string TSettings::getResultsRootFilePath(){
 }
 
 
-std::string TSettings::getRawTreeFilePath()
+std::string TSettings::getRawTreeFilePath(bool relativePath)
 {
 	stringstream path;
-	path<<getAbsoluteOuputPath(false);
+	if (!relativePath)
+		path<<getAbsoluteOuputPath(false);
 	path<<"rawData."<<getRunNumber()<<".root";
 	return path.str();
 }
 
-std::string TSettings::getPedestalTreeFilePath()
+std::string TSettings::getPedestalTreeFilePath(bool relativePath)
 {
 	stringstream path;
-	path<<getAbsoluteOuputPath(false);
+	if (!relativePath)
+		path<<getAbsoluteOuputPath(false);
 	path<<"pedestalData."<<getRunNumber()<<".root";
 	return path.str();
 }
 
-std::string TSettings::getClusterTreeFilePath()
+std::string TSettings::getClusterTreeFilePath(bool relativePath)
 {
 	stringstream path;
-	path<<getAbsoluteOuputPath(false);
+	if (!relativePath)
+		path<<getAbsoluteOuputPath(false);
 	path<<"clusterData."<<getRunNumber()<<".root";
 	return path.str();
 }

@@ -53,9 +53,9 @@ TClustering::~TClustering() {
 		cout<<"Invalid readouts: "<<nInvalidReadout<<endl;
 		if(verbosity)cout<<"CLOSING TREE"<<endl;
 		if(verbosity)cout<<"pedestalTree"<<" "<<settings->getPedestalTreeFilePath()<<" "<<filepath.str().c_str()<<endl;
-		clusterTree->AddFriend("pedestalTree",settings->getPedestalTreeFilePath().c_str());
+		clusterTree->AddFriend("pedestalTree", settings->getPedestalTreeFilePath(true).c_str());
 		if(verbosity)cout<<"rawTree"<<" "<<settings->getRawTreeFilePath()<<" "<<rawFilePath.str().c_str()<<endl;
-		clusterTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
+		clusterTree->AddFriend("rawTree", settings->getRawTreeFilePath(true).c_str());
 		if(verbosity)cout<<"save clusterTree: "<<clusterTree->GetListOfFriends()->GetEntries()<<endl;
 		clusterTree->Write();
 		saveEtaCorrections();
