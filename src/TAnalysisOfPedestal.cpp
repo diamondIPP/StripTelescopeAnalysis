@@ -1561,8 +1561,8 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 
     if(settings->isDet_channel_screened(det,ch))
         return;
-//    if(snr<settings->getClusterHitFactor(det,ch)){
-    if(snr < settings->get_Pedestal_Hit_Factor(det)){
+    if(snr<settings->getClusterHitFactor(det,ch)){
+//    if(snr < settings->get_Pedestal_Hit_Factor(det)){
         pedestalMeanValue.at(det).at(ch) +=pedestal;
         pedestalSigmaValue.at(det).at(ch) +=sigma;
         nPedestalHits.at(det).at(ch)++;
