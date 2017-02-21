@@ -102,7 +102,7 @@ void TAnalysisOf3dDiamonds::PrintPositions(){
 
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     FileNameEnd = "";
-    cout<<"analyze selection data..."<<endl;
+    cout<<"analyze selection data..."<<endl;cout<<"BLA\ncell Height\n" << settings->GetCellHeight() <<"\nBLA"<< cout; // BLA: DA BORRAR
 
     //intialise vectors
     for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
@@ -2298,8 +2298,9 @@ void TAnalysisOf3dDiamonds::SaveShortAnalysisHistos() {
 
         //hFidCutxVsFidCutYVsEvents
         ptrCanvasEvents.at(i)->cd();
-        hFidCutXvsFidCutYvsEvents.at(i)->Draw("colz");
         TString hName2 = TString::Format("cFidCutXvsFidCutYvsEvents_%d_%d", channels.first, channels.second);
+        hFidCutXvsFidCutYvsEvents.at(i)->SetTitle(hName2);
+        hFidCutXvsFidCutYvsEvents.at(i)->Draw("colz");
         hName2.Append(appendix);
         ptrCanvasEvents.at(i)->SetName(hName2);
         histSaver->SaveCanvas(ptrCanvasEvents[i]);
