@@ -102,7 +102,7 @@ void TAnalysisOf3dDiamonds::PrintPositions(){
 
 void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     FileNameEnd = "";
-    cout<<"analyze selection data..."<<endl;cout<<"BLA\ncell Height\n" << settings->GetCellHeight() <<"\nBLA"<< cout; // BLA: DA BORRAR
+    cout<<"analyze selection data..."<<endl;
 
     //intialise vectors
     for(UInt_t i=0;i<settings->diamondPattern.getNIntervals();i++){
@@ -342,11 +342,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis() {
         Int_t predictedDetector = settings->get3dMetallisationFidCuts()->getFidCutRegion(xPredDet,yPredDet);
         ShortAnalysis_FillEdgeAlignmentHistos();
         if(predictedDetector !=1 && predictedDetector !=2 && predictedDetector !=3){
-            if (settings->do3dTransparentAnalysis())
-                if (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650){
-                    cout<<"\nreject cluster: "<<predictedDetector<<" = "<<xPredDet<<"/"<<yPredDet<<"\t";
-                    diamondCluster->Print();
-                }
+//            if (settings->do3dTransparentAnalysis())
+//                if (xPredDet>1650 && xPredDet<2200 && yPredDet>0 && yPredDet<1650){
+//                    cout<<"\nreject cluster: "<<predictedDetector<<" = "<<xPredDet<<"/"<<yPredDet<<"\t";
+//                    diamondCluster->Print();
+//                }
             return;
         }
 
@@ -391,11 +391,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
         if( !settings->diamondPattern.isValidCluster(diamondCluster)){
             //		cerr <<" Cluster is invalid: ";
             //		diamondCluster->Print(1);
-            if (xPredDet>1650 && xPredDet < 2200)
-            {
-                cout<<"ShortAnalysis_Analyse1Cluster - invalid cluster: "<<xPredDet<<"/"<<yPredDet;
-                diamondCluster->Print(1);
-            }
+//            if (xPredDet>1650 && xPredDet < 2200)
+//            {
+//                cout<<"ShortAnalysis_Analyse1Cluster - invalid cluster: "<<xPredDet<<"/"<<yPredDet;
+//                diamondCluster->Print(1);
+//            }
             return;
         }
         HitandSeedCount(diamondCluster);
