@@ -595,7 +595,7 @@ void TResults::createOutputResultFile(){
         results["Voltage"] = "UNKOWN";
     else
         results["Voltage"] = TString::Format("%+d",voltage);
-    results["SVN_REV"] = SVN_REV;
+    results["SVN_REV"] = GIT_REV;
     results["lastUpdate"] = lastUpdate.AsString();
     results["maskedChannels"] =  getChannelsStringList(maskedChannels);
     results["noisyChannels"] = getChannelsStringList(noisyChannels);
@@ -851,7 +851,7 @@ void TResults::createOutputTextFile(){
 
     header1Stream<<emptyString(5)<<"\t";
     header2Stream<<"REV"<<emptyString(2)<<"\t";
-    resultStream<<SVN_REV;
+    resultStream<<GIT_REV;
 
     myfile<<header1Stream.str()<<endl;
     myfile<<header2Stream.str()<<endl;
