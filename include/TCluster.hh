@@ -37,7 +37,7 @@ public:
     TCluster &operator=(const TCluster &src); //class assignment function
 
     void addChannel(UInt_t channel, Float_t pedMean, Float_t pedSigma, Float_t pedMeanCMN, Float_t pedSigmaCMN, Int_t adcValue, bool bSaturated,bool isScreened);
-    //    void addChannel(UInt_t channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
+//    void addChannel(UInt_t channel, Float_t signal, Float_t signalInSigma, UShort_t adcValue, bool bSaturated,bool isScreened);
     Float_t getPosition(bool cmnCorrected, calculationMode_t mode=highest2Centroid,TH1F *histo=0);
     void clear();
     bool isLumpyCluster();
@@ -88,8 +88,8 @@ public:
     UInt_t getChannel(UInt_t clusterPos);
     UInt_t getFirstHitChannel();
     UInt_t getLastHitChannel();
-    //    Float_t getPedestalSigma(UInt_t clusterPos);
-    //    Float_t getPedestalMean(UInt_t clusterPos);
+//    Float_t getPedestalSigma(UInt_t clusterPos);
+//    Float_t getPedestalMean(UInt_t clusterPos);
     int getHitSigma() const;
     int getSeedSigma() const;
     void setHitSigma(int hitSigma);

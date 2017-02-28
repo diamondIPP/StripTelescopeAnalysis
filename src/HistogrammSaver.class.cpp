@@ -1351,7 +1351,7 @@ void HistogrammSaver::UpdatePaveText(){
         return;
     pt->SetTextSize(0.0250);
     std::ostringstream svnRev_label;
-    svnRev_label <<"Rev: "<<SVN_REV;
+    svnRev_label <<"Rev: "<<GIT_REV;
     pt->AddText(svnRev_label.str().c_str());
     std::ostringstream run_number_label;
     run_number_label << "Run " <<runNumber;

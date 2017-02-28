@@ -155,7 +155,7 @@ int main(int argc, char ** argv) {
 	TStopwatch comulativeWatch;
 	comulativeWatch.Start(true);
 	readInputs(argc,argv);
-	cout<<"Currrent Subversion Revision: "<<SVN_REV<<endl;
+	cout<<"Currrent Git Revision: "<<GIT_REV<<endl;
 	cout << "starting main loop.." << endl;
 	RunListOK = ReadRunList();
 	if(!RunListOK)exit(-1);
@@ -389,7 +389,7 @@ int main(int argc, char ** argv) {
 
 	cout<<"time for all analysis:"<<endl;
 	comulativeWatch.Print();
-	cout<<"DONE_ALL. Run with Revision: "<<SVN_REV<<endl;
+	cout<<"DONE_ALL. Run with Revision: "<<GIT_REV<<endl;
 
 	return 0;
 }

@@ -51,7 +51,7 @@ TPedestalCalculation::~TPedestalCalculation() {
 	delete histSaver;
 	if(createdNewTree){
 		pedestalFile->cd();
-		pedestalTree->AddFriend("rawTree",settings->getRawTreeFilePath().c_str());
+		pedestalTree->AddFriend("rawTree", settings->getRawTreeFilePath(true).c_str());
 		cout<<pedestalTree->GetListOfFriends()->GetEntries()<<endl;
 		pedestalFile->cd();
 		pedestalTree->Write();

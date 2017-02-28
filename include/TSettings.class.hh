@@ -54,9 +54,9 @@ public:
     TString GetCurrentEnd(){return currentEnd;}
 	std::string getAbsoluteOuputPath(bool withRunDescribtion=0);
 	std::string getAbsoluteInputPath(){return inputDir;};//todo
-	std::string getRawTreeFilePath();
-	std::string getPedestalTreeFilePath();
-	std::string getClusterTreeFilePath();
+	std::string getRawTreeFilePath(bool relativePath = false);
+	std::string getPedestalTreeFilePath(bool relativePath = false);
+	std::string getClusterTreeFilePath(bool relativePath = false);
 	std::string getAlignmentFilePath(TSettings::alignmentMode mode = TSettings::normalMode);
 	std::string getSelectionTreeFilePath();
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
@@ -308,7 +308,7 @@ public:
 	Float_t getAlignmentPrecisionAngle()const{return alignmentPrecision_Angle;}
 	UInt_t getAlignmentEvents(UInt_t nEvents);
 	bool resetAlignment() const{return bResetAlignment;};
-	//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
+//	void setAlignmentTrainingTrackNumber(UInt_t alignmentTrainingTrackNumber);
 	UInt_t getNDiaDetectorAreas(){return this->diamondPattern.getNPatterns();}
 	TFidCutRegions* getSelectionFidCuts(){return fidCutsSelection;}
 	TFidCutRegions* get3dEdgeFidCuts(){return fidCuts3DEdge;};

@@ -143,7 +143,7 @@ void THTMLGenerator::generateHTMLTail(){
 			<< " at " << dateandtime.GetHour() << ":"
 			<< dateandtime.GetMinute() << ":"
 			<< dateandtime.GetSecond()
-			<< " with SVN Version No. " << SVN_REV<<"<p>";
+			<< " with GIT Version No. " << GIT_REV<<"<p>";
 	html_summary<<"</body>"<<endl;
 	html_summary << "</HTML>" << endl;
 
