@@ -314,7 +314,7 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
         if (this->settings->getDet_channel_screen(det).isScreened(currentChannel) == true) {
             if (verbosity > 5) cout << "\tchannel " << currentChannel << " is screened.." << endl;
             screenedChannel++;
-            return false;
+            return true; // DA: it was false. Changing it to true to include channels close to the region of the detector
         }
         if (eventReader->isSaturated(det, currentChannel) == true) {
             if (verbosity > 5) cout << "\tchannel " << currentChannel << " has saturated.." << endl;
@@ -1948,7 +1948,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         transparentClusters = this->makeTransparentCluster(eventReader, settings,subjectDetector, positionInDetSystemChannelSpace, maxClusSize);
 
         Float_t pos = positionInDetSystemChannelSpace;
-        Float_t channels = 15;
+        Float_t channels = 15; // DA: hardcoded!!! TODO
         Int_t direction = 2*(int)(gRandom->Uniform()>.5)-1;
         pos +=direction * channels;
         bool isMasked = settings->IsMasked(subjectDetector,pos);

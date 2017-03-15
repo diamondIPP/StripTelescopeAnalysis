@@ -391,6 +391,9 @@ void TSelectionClass::fillHitOccupancyPlots(){
         return;
     hAnalysisFraction->Fill(nEvent);
     hSelectedEvents->Fill(fiducialValueX,fiducialValueY);
+
+    hCorrelationChannels.at(fiducialCuts->getFiducialCutIndex(fiducialValueX, fiducialValueY)-1)->Fill(fiducialValueX, (eventReader->getCluster(TPlaneProperties::getDetDiamond(), 0)).getPosition(true, TCluster::maxValue, 0)); // DA:
+
     //	if (verbosity>4)
     //		  cout<<nEvent<<" selected Event for ana or alignment @ "<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
     //	}
@@ -509,7 +512,7 @@ void TSelectionClass::initialiseHistos()
     hFiducialCutSilicon = new TH2F(name,name,512,0,256,512,0,256);
     hFiducialCutSilicon->GetYaxis()->SetTitle("yCoordinate in Channels");
     hFiducialCutSilicon->GetXaxis()->SetTitle("xCoordinate in Channels");
-    hFiducialCutSilicon->GetXaxis()->SetTitle("no. of entries");
+    hFiducialCutSilicon->GetZaxis()->SetTitle("no. of entries");
 
     name = "hFidCutSilicon_OneAndOnlyOneCluster_RoughCut";
     hFiducialCutSiliconRoughCut = (TH2F*)hFiducialCutSilicon->Clone(name);
@@ -539,11 +542,15 @@ void TSelectionClass::initialiseHistos()
 
     UInt_t area =  settings->getSelectionFidCuts()->getNFidCuts();
     area = TMath::Max(area,settings->diamondPattern.getNPatterns());
+    hCorrelationChannels.clear(); // DA:
     for(UInt_t i =0;i <area; i++){
         name = TString::Format("hFiducialCutSiliconDiamondHitSamePattern_%d",i+1);
         TH2F* histo= (TH2F*)hFiducialCutSilicon->Clone(name);
         histo->SetTitle(name);
         mapFiducialCutSiliconDiamondHitSamePattern[i+1] =histo;
+
+        name = TString::Format("hCorrelationSiChannelsDiamondCh_%d",i+1); // DA:
+        hCorrelationChannels.push_back(new TH2F(name, name, 256, 0, 256, 128, 0, 128)); // DA: TODO Unhardcode
     }
 
     name = "hDiamondPatternFiducialPattern";
@@ -822,6 +829,22 @@ void TSelectionClass::saveHistos()
         c1=0;
         delete histo;
     }
+
+    // DA: correlation plots for diamond and x silicon plane
+    vector<TH2F*>::iterator it2;
+    for(it2 = hCorrelationChannels.begin(); it2!=hCorrelationChannels.end(); it2++){
+        TH2F *histo = *it2;
+        name = histo->GetName();
+        name.Replace(0,1,"c");
+        TCanvas *c2 = new TCanvas(name, name, 1);
+        c2->cd();
+        histo->Draw("colz");
+        histSaver->SaveCanvas(c2);
+        delete c2;
+        c2 = 0;
+        delete histo;
+    }
+
     hAnalysisFraction->Scale(.1);
     hAnalysisFraction->SetStats(false);
     //	hAnalysisFraction->GetYaxis()->SetRangeUser(0,100);

@@ -424,7 +424,6 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
         Int_t HighestSignalChannel = diamondCluster->getHighestSignalChannel();
 
         if(HighestSignalChannel<=channels.second && HighestSignalChannel>=channels.first){
-
             TFiducialCut *cut = settings->getSelectionFidCuts()->getFidCut(i+1);
             if (!cut){
                 cerr<<"Cannot get cut no "<<i+1<<" in "<<settings->getSelectionFidCuts()->getNFidCuts()<<endl;
@@ -432,7 +431,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_Analyse1Cluster(UInt_t clusterNo){
                 settings->getSelectionFidCuts()->Print(1);
                 return;
             }
-            if( cut->IsInFiducialCut(fiducialValueX,fiducialValueY))
+            if( cut->IsInFiducialCut(fiducialValueX,fiducialValueY)) // DA: This is because this analysis is done to identify borders and define the fiducial regions.
                 return;
 
             //hTransparentAnalysisValidClusterFidCutXvsFidCutY->Fill(fiducialValueX, fiducialValueY);
@@ -1018,7 +1017,7 @@ void TAnalysisOf3dDiamonds::initialiseShortAnalysisHistos() {
         if(verbosity) cout<<"Loop: "<<i<<endl;
         pair<int,int> channels =settings->diamondPattern.getPatternChannels(i+1);
         //hLandau
-        name = TString::Format("hLandau_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second) +appendix;
+        name = TString::Format("hLandau_border_pattern_%d_ch_%02d_to_%02d",i,channels.first,channels.second) +appendix;
         if(verbosity>1) cout<<"Create "<<name<<endl;
         hLandau.push_back(new TH1F(name,name,PulseHeightBins,PulseHeightMin,PulseHeightMax));
         if(hLandau.back()){

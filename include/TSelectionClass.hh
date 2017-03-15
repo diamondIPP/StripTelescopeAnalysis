@@ -118,8 +118,8 @@ private:
 	UInt_t nSiliconTrackNotFiducialCut;
 	UInt_t nEvents;
 	TH1F * hAnalysisFraction;
-
 private:
+
 	TH2F *hFiducialCutSilicon;
 	TH2F* hFiducialCutSiliconRoughCut;
 	TH2F *hFiducialCutSiliconDiamondHit;
@@ -127,8 +127,9 @@ private:
 	TH1F* hDiamondPatternFiducialPattern;
 	TH1F* hDiamondPatternFiducialPatternNoMapping;
 	TProfile* pDiamondPatternFiducialPatternProfile;
-    TH2F *hFiducialCutSiliconOneAndOnlyOneDiamondHit;
+	TH2F *hFiducialCutSiliconOneAndOnlyOneDiamondHit;
 	TH2F *hSelectedEvents;
+	vector<TH2F *> hCorrelationChannels; // DA: one 2D hitmap for each diamond region. May be useful to detect hot pixels
 };
 
 #endif /* TSELECTIONCLASS_HH_ */
