@@ -129,7 +129,8 @@ private:
 	TProfile* pDiamondPatternFiducialPatternProfile;
 	TH2F *hFiducialCutSiliconOneAndOnlyOneDiamondHit;
 	TH2F *hSelectedEvents;
-	vector<TH2F *> hCorrelationChannels; // DA: one 2D hitmap for each diamond region. May be useful to detect hot pixels
+	TH2F *hCorrelationChannelsPlanes [3][5][5]; // DA:
+	vector<TH2F * > hCorrelationChannels; // DA: one 2D hitmap for each diamond region. May be useful to detect hot pixels
 };
 
 #endif /* TSELECTIONCLASS_HH_ */

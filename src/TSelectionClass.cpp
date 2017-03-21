@@ -392,7 +392,14 @@ void TSelectionClass::fillHitOccupancyPlots(){
     hAnalysisFraction->Fill(nEvent);
     hSelectedEvents->Fill(fiducialValueX,fiducialValueY);
 
+    // DA:
     hCorrelationChannels.at(fiducialCuts->getFiducialCutIndex(fiducialValueX, fiducialValueY)-1)->Fill(fiducialValueX, (eventReader->getCluster(TPlaneProperties::getDetDiamond(), 0)).getPosition(true, TCluster::maxValue, 0)); // DA:
+    for(UInt_t j=0; j<5; j++){
+        for(UInt_t k=0; k<5; k++){
+            hCorrelationChannelsPlanes[int(fiducialCuts->getFiducialCutIndex(fiducialValueX, fiducialValueY)-1)][j][k]->Fill(eventReader->getCluster(j, TPlaneProperties::X_COR, 0).getPosition(true, TCluster::maxValue, 0), eventReader->getCluster(k, TPlaneProperties::X_COR, 0).getPosition(
+                    true, TCluster::maxValue, 0)); // DA:
+        }
+    }
 
     //	if (verbosity>4)
     //		  cout<<nEvent<<" selected Event for ana or alignment @ "<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
@@ -551,6 +558,12 @@ void TSelectionClass::initialiseHistos()
 
         name = TString::Format("hCorrelationSiChannelsDiamondCh_%d",i+1); // DA:
         hCorrelationChannels.push_back(new TH2F(name, name, 256, 0, 256, 128, 0, 128)); // DA: TODO Unhardcode
+        for(UInt_t j = 0; j<5; j++){
+            for(UInt_t k = 0; k<5; k++){
+                name = TString::Format("hCorrelationPlane_%d_Plane_%d_region_%d", j, k, i);
+                hCorrelationChannelsPlanes[i][j][k] = new TH2F(name, name, 256,0,256,256,0,256);
+            }
+        }
     }
 
     name = "hDiamondPatternFiducialPattern";
@@ -843,6 +856,24 @@ void TSelectionClass::saveHistos()
         delete c2;
         c2 = 0;
         delete histo;
+    }
+
+    // DA: correlation plots of planes
+    for(UInt_t i = 0; i< TMath::Max(settings->getSelectionFidCuts()->getNFidCuts(),settings->diamondPattern.getNPatterns()); i++){
+        for(UInt_t j = 0; j<5; j++){
+            for(UInt_t k = 0; k<5; k++){
+                TH2F *histo = hCorrelationChannelsPlanes[i][j][k];
+                name = histo->GetName();
+                name.Replace(0,1,"c");
+                TCanvas *c3 = new TCanvas(name, name, 1);
+                c3->cd();
+                histo->Draw("colz");
+                histSaver->SaveCanvas(c3);
+                delete c3;
+                c3 = 0;
+                delete histo;
+            }
+        }
     }
 
     hAnalysisFraction->Scale(.1);
