@@ -394,12 +394,19 @@ void TSelectionClass::fillHitOccupancyPlots(){
 
     // DA:
     hCorrelationChannels.at(fiducialCuts->getFiducialCutIndex(fiducialValueX, fiducialValueY)-1)->Fill(fiducialValueX, (eventReader->getCluster(TPlaneProperties::getDetDiamond(), 0)).getPosition(true, TCluster::maxValue, 0)); // DA:
-    for(UInt_t j=0; j<5; j++){
-        for(UInt_t k=0; k<5; k++){
-            hCorrelationChannelsPlanes[int(fiducialCuts->getFiducialCutIndex(fiducialValueX, fiducialValueY)-1)][j][k]->Fill(eventReader->getCluster(j, TPlaneProperties::X_COR, 0).getPosition(true, TCluster::maxValue, 0), eventReader->getCluster(k, TPlaneProperties::X_COR, 0).getPosition(
-                    true, TCluster::maxValue, 0)); // DA:
+    // DA: histograms are too big... Only saving 1/10 of the events
+//    if(nEvent%10 == 0) {
+        for (UInt_t jplane = 0; jplane < TPlaneProperties::getNPlanes(); jplane++) {
+            for (UInt_t kplane = 0; ((kplane < TPlaneProperties::getNPlanes()) && (kplane < jplane)); kplane++) {
+                hCorrelationChannelsPlanes[int(
+                        fiducialCuts->getFiducialCutIndex(fiducialValueX, fiducialValueY) - 1)][jplane][kplane]->Fill(
+                        eventReader->getCluster(jplane, TPlaneProperties::X_COR, 0).getPosition(true,
+                                                                                                TCluster::maxValue, 0),
+                        eventReader->getCluster(kplane, TPlaneProperties::X_COR, 0).getPosition(
+                                true, TCluster::maxValue, 0)); // DA:
+            }
         }
-    }
+//    }
 
     //	if (verbosity>4)
     //		  cout<<nEvent<<" selected Event for ana or alignment @ "<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
@@ -558,10 +565,10 @@ void TSelectionClass::initialiseHistos()
 
         name = TString::Format("hCorrelationSiChannelsDiamondCh_%d",i+1); // DA:
         hCorrelationChannels.push_back(new TH2F(name, name, 256, 0, 256, 128, 0, 128)); // DA: TODO Unhardcode
-        for(UInt_t j = 0; j<5; j++){
-            for(UInt_t k = 0; k<5; k++){
-                name = TString::Format("hCorrelationPlane_%d_Plane_%d_region_%d", j, k, i);
-                hCorrelationChannelsPlanes[i][j][k] = new TH2F(name, name, 256,0,256,256,0,256);
+        for(UInt_t jplane = 0; jplane<TPlaneProperties::getNPlanes(); jplane++){
+            for(UInt_t kplane = 0; (kplane<TPlaneProperties::getNPlanes() && kplane<jplane); kplane++){
+                name = TString::Format("hCorrelationPlane_%d_Plane_%d_region_%d", jplane, kplane, i);
+                hCorrelationChannelsPlanes[i][jplane][kplane] = new TH2F(name, name, 256,0,256,256,0,256);
             }
         }
     }
@@ -858,11 +865,11 @@ void TSelectionClass::saveHistos()
         delete histo;
     }
 
-    // DA: correlation plots of planes
-    for(UInt_t i = 0; i< TMath::Max(settings->getSelectionFidCuts()->getNFidCuts(),settings->diamondPattern.getNPatterns()); i++){
-        for(UInt_t j = 0; j<5; j++){
-            for(UInt_t k = 0; k<5; k++){
-                TH2F *histo = hCorrelationChannelsPlanes[i][j][k];
+    // DA:
+    for(UInt_t iarea = 0; iarea< TMath::Max(settings->getSelectionFidCuts()->getNFidCuts(),settings->diamondPattern.getNPatterns()); iarea++){
+        for(UInt_t jplane = 0; jplane<TPlaneProperties::getNPlanes(); jplane++){
+            for(UInt_t kplane = 0; (kplane < TPlaneProperties::getNPlanes() && kplane<jplane); kplane++){
+                TH2F *histo = hCorrelationChannelsPlanes[iarea][jplane][kplane];
                 name = histo->GetName();
                 name.Replace(0,1,"c");
                 TCanvas *c3 = new TCanvas(name, name, 1);

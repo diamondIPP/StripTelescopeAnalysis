@@ -1188,11 +1188,11 @@ void TSettings::ParseFidCutRegion(std::string key, std::string value, TFidCutReg
 	ParseStringArray(key, value,stringArray);
 	if(stringArray.size()==2){
 		std::pair< std::string,std::string > region = ParseRegionString(key, stringArray[0]);
-		Float_t beginX = (int)strtod(region.first.c_str(),0);
-		Float_t endX = (int)strtod(region.second.c_str(),0);
+		Float_t beginX = Float_t(strtod(region.first.c_str(),0));//(int)strtod(region.first.c_str(),0);
+		Float_t endX = Float_t(strtod(region.second.c_str(),0));//(int)strtod(region.second.c_str(),0);
 		region = ParseRegionString(key, stringArray[1]);
-		Float_t beginY = (int)strtod(region.first.c_str(),0);
-		Float_t endY = (int)strtod(region.second.c_str(),0);
+		Float_t beginY = Float_t(strtod(region.first.c_str(),0));//(int)strtod(region.first.c_str(),0);
+		Float_t endY = Float_t(strtod(region.second.c_str(),0));//(int)strtod(region.second.c_str(),0);
 		if(beginX<endX&&beginY<endY){
 			if(isStandardFidCut){
 				fidCutRegions->Reset();

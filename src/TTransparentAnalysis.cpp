@@ -314,7 +314,7 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
         if (this->settings->getDet_channel_screen(det).isScreened(currentChannel) == true) {
             if (verbosity > 5) cout << "\tchannel " << currentChannel << " is screened.." << endl;
             screenedChannel++;
-            return true; // DA: it was false. Changing it to true to include channels close to the region of the detector
+            //return false; // DA: Commented it to allow clusters near the edges or for detectors with less than 10 channels (e.g. phantom in Oct 2016).
         }
         if (eventReader->isSaturated(det, currentChannel) == true) {
             if (verbosity > 5) cout << "\tchannel " << currentChannel << " has saturated.." << endl;

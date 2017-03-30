@@ -222,8 +222,8 @@ void TAnalysisOfSelection::initialiseHistos()
 	Float_t deltaY = ymax - ymin;
 	ymin = ymin - .1 * deltaY;
 	ymax = ymax + .1 * deltaY;
-	Int_t xBins = (Int_t)(3*(xmax-xmin));
-	Int_t yBins = (Int_t)(3*(ymax-ymin));
+	Int_t xBins = (Int_t)(4*(xmax-xmin));// DA: resolution was 1/3 of a channel. Changed it to 1/4
+	Int_t yBins = (Int_t)(4*(ymax-ymin));// DA: resolution was 1/3 of a channel. Changed it to 1/4
 	hChargeVsFidCut = new TH3F(name,name,xBins,xmin,xmax,yBins,ymin,ymax,4096,0,4096);
 	hChargeVsFidCut->GetXaxis()->SetTitle("FiducialValue X/ch");
 	hChargeVsFidCut->GetYaxis()->SetTitle("FiducialValue Y/ch");
@@ -609,7 +609,7 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 	}
 	//	Histogram(hChargeVsFidCutProfile);
 	//	cout<<"save hChargeVsFidCut"<<endl;
-	//	histSaver->SaveHistogramROOT(hChargeVsFidCut);Profile;
+	histSaver->SaveHistogramROOT(hChargeVsFidCut); // DA:
 	histSaver->SaveHistogram(hFidCutXvsChannelPos);
 	if(hFidCutXvsChannelPos)delete hFidCutXvsChannelPos;
 	if(verbosity)cout<<"save hChargeVsFidCut x/Y"<<endl;
