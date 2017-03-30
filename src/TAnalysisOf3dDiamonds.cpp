@@ -1174,14 +1174,16 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXY->GetXaxis()->SetTitle("#it{x} / #mum");
     hPulseHeightVsDetectorHitPostionXY->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetTitle("charge / ADC");
-    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+//    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(0,3000);
 
     name = "hPulseHeightVsCell"+appendix;
     hPulseHeightVsCell = histSaver->GetProfile2dBinedInCells(name,1);
     hPulseHeightVsCell->GetXaxis()->SetTitle("#it{x} / #mum");
     hPulseHeightVsCell->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsCell->GetZaxis()->SetTitle("charge / ADC");
-    hPulseHeightVsCell->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+//    hPulseHeightVsCell->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    hPulseHeightVsCell->GetZaxis()->SetRangeUser(0,3000);
 
     for (UInt_t i = 0; i< 6;i++){
         name = TString::Format("hPulseHeightVsDetectorHitPostionXY_clusterSize_%d",i+1);
@@ -1198,7 +1200,8 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetXaxis()->SetTitle("#it{x} / #mum");
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetTitle("charge /ADC");
-    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+//    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(0,3000);
 
     //hDetXvsDetY3DEvents
     //	hDetXvsDetY3DEvents = (TH2D*)hPulseHeightVsDetectorHitPostionXY->Clone("hDetXvsDetY3DvsEvents");
@@ -1405,7 +1408,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
         hCellsOverlayAvrgCharge.at(ClusterSize)->GetXaxis()->SetTitle("#it{x} position within a cell / #mum");
         hCellsOverlayAvrgCharge.at(ClusterSize)->GetYaxis()->SetTitle("#it{y} position within a cell / #mum");
         hCellsOverlayAvrgCharge.at(ClusterSize)->GetZaxis()->SetTitle("pulse height of cluster / ADC");
-        //	hCellsOverlayAvrgCharge->SetContour(99);
+        //	hCellsOverlayAvrgCharge->SetContour(999);
         name = "hCellsOverlayAvrgCharge_noColumnHit";
         name.Append(appendix2);
         hCellsOverlayAvrgChargeNoColumnHit.push_back((TProfile2D*)hCellsOverlayAvrgCharge.at(0)->Clone(name));
@@ -1466,7 +1469,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 			hCellsOverlayedMeanChargeBinAlignment.at(i)->GetYaxis()->SetTitle("Ydet (um)");
 			hCellsOverlayedMeanChargeBinAlignment.at(i)->GetZaxis()->SetTitle("Charge ADC");
 			hCellsOverlayedMeanChargeBinAlignment.at(i)->GetZaxis()->SetRangeUser(800,1200);
-			hCellsOverlayedMeanChargeBinAlignment.at(i)->SetContour(99);
+			hCellsOverlayedMeanChargeBinAlignment.at(i)->SetContour(999);
 			hCellsOverlayedMeanChargeBinAlignment.at(i)->SetStats(kFALSE);
 		}
 
@@ -1481,7 +1484,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayHistos() {
 			hCellsOverlayedMeanChargeBinAlignment1.at(i)->GetYaxis()->SetTitle("Ydet (um)");
 			hCellsOverlayedMeanChargeBinAlignment1.at(i)->GetZaxis()->SetTitle("Charge ADC");
 			hCellsOverlayedMeanChargeBinAlignment1.at(i)->GetZaxis()->SetRangeUser(800,1200);
-			hCellsOverlayedMeanChargeBinAlignment1.at(i)->SetContour(99);
+			hCellsOverlayedMeanChargeBinAlignment1.at(i)->SetContour(999);
 			hCellsOverlayedMeanChargeBinAlignment1.at(i)->SetStats(kFALSE);
 		}
 
@@ -1551,7 +1554,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellCentralColumnOverlayHistos() {
         hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->GetXaxis()->SetTitle("rel. x position within a cell / #mum");
         hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->GetYaxis()->SetTitle("rel. y position within a cell / #mum");
         hCellsCentralColumnOverlayAvrgCharge.at(ClusterSize)->GetZaxis()->SetTitle("pulse height of cluster /ADC");
-        //	hCellsOverlayAvrgCharge->SetContour(99);
+        //	hCellsOverlayAvrgCharge->SetContour(999);
 
         //hCellsOverlayAvrgChargeMinusBadCells
         name = "hCellsCentralColumnOverlayAvrgChargeMinusBadCells";
@@ -1660,7 +1663,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellBiasColumnOverlayHistos() {
     hCellsBiasColumnOverlayAvrgCharge->GetXaxis()->SetTitle("rel. x position within a cell / #mum");
     hCellsBiasColumnOverlayAvrgCharge->GetYaxis()->SetTitle("rel. y position within a cell / #mum");
     hCellsBiasColumnOverlayAvrgCharge->GetZaxis()->SetTitle("pulse height of cluster /ADC");
-    //	hCellsOverlayAvrgCharge->SetContour(99);
+    //	hCellsOverlayAvrgCharge->SetContour(999);
 
     //hCellsOverlayAvrgChargeMinusBadCells
     name = "hCellsBiasColumnOverlayAvrgChargeMinusBadCells";
@@ -1818,7 +1821,7 @@ void TAnalysisOf3dDiamonds::initialise3DCellOverlayIndividualBinHistos() {
             VecOverlayCellBinHistos.at(BinNum)->GetXaxis()->SetTitle("rel. x position within a cell / #mum");
             VecOverlayCellBinHistos.at(BinNum)->GetYaxis()->SetTitle("rel. y position within a cell / #mum");
             VecOverlayCellBinHistos.at(BinNum)->GetZaxis()->SetTitle("pulse height of cluster /ADC");
-            //	hCellsOverlayAvrgCharge->SetContour(99);
+            //	hCellsOverlayAvrgCharge->SetContour(999);
 
             //hCellsOverlayedColumnLandau
             name = TString::Format("hCellsOverlayAvrgChargeMinusBadCellsLandau_Bin%i", BinNum);
@@ -1868,7 +1871,7 @@ void TAnalysisOf3dDiamonds::initialise3DOffsetOverlayHistos() {
         hCellsOffsetOverlayAvrgCharge.at(ClusterSize)->GetXaxis()->SetTitle("rel. x position within a cell / #mum");
         hCellsOffsetOverlayAvrgCharge.at(ClusterSize)->GetYaxis()->SetTitle("rel. y position within a cell / #mum");
         hCellsOffsetOverlayAvrgCharge.at(ClusterSize)->GetZaxis()->SetTitle("pulse height of cluster /ADC");
-        //	hCellsOverlayAvrgCharge->SetContour(99);
+        //	hCellsOverlayAvrgCharge->SetContour(999);
 
         //hCellsOverlayAvrgChargeMinusBadCells
         name = "hCellsOffsetOverlayAvrgChargeMinusBadCells";
@@ -1971,7 +1974,7 @@ void TAnalysisOf3dDiamonds::initialise3DOffsetAlignmentOverlayHistos() {
             hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Shift)->GetXaxis()->SetTitle("rel. x position within a cell / #mum");
             hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Shift)->GetYaxis()->SetTitle("rel. y position within a cell / #mum");
             hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignment.at(Shift)->GetZaxis()->SetTitle("pulse height of cluster /ADC");
-            //	hCellsOverlayAvrgCharge->SetContour(99);
+            //	hCellsOverlayAvrgCharge->SetContour(999);
 
             name = "hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut";
             name.Append(appendix);
@@ -3548,7 +3551,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveCellsClusterSize2DVsGrading() {
         jNumber<<(i);
         hCellsClusterSize2D->GetXaxis()->SetBinLabel(i+1,jNumber.str().c_str());
     }
-    hCellsClusterSize2D->SetContour(99);
+    hCellsClusterSize2D->SetContour(999);
 
     for(UInt_t column=0;column<settings->getNColumns3d();column++){
         for(UInt_t row=0;row<settings->getNRows3d();row++){
@@ -3891,7 +3894,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveQuarterCellsClusterSize2DVsGrading(
         cout<<"i: "<<i<<endl;
     }
 
-    hQuarterCellsClusterSize2D->SetContour(99);
+    hQuarterCellsClusterSize2D->SetContour(999);
     //h2DClusterSize->SetTitleOffset(0.015,"X");
 
 
@@ -4860,7 +4863,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_Save3D3DOffsetOverlayBiasColumnAlignmen
     hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetYaxis()->SetTitle("Bias Column Bin");
     hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetZaxis()->SetTitle("Relative Entries Below Cut");
     //hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCut->GetXaxis()->ChooseTimeFormat("Y");
-    //	hCellsOverlayAvrgCharge->SetContour(99);
+    //	hCellsOverlayAvrgCharge->SetContour(999);
 
     //hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCutRMS
     name = "hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentBiasEntriesBelowCutRMS";
@@ -5832,7 +5835,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     TString name = "hPulseHeightVsDetectorHitPostionXY_rebinned";
     name.Append(appendix);
     TProfile2D* profRebinned = (TProfile2D*)hPulseHeightVsDetectorHitPostionXY->Rebin2D(2,2,name);
-    profRebinned->SetContour(100);
+    profRebinned->SetContour(999);
     profRebinned->Draw();
     profRebinned->Draw("colz");
     histSaver->SaveHistogram(profRebinned);
@@ -5865,7 +5868,7 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveMeanChargePlots() {
     hGridReferenceDetSpace->Draw("COL");
     profRebinned->GetZaxis()->SetTitleOffset(1.3);
     profRebinned->GetZaxis()->SetLabelOffset(0);
-    profRebinned->SetContour(100);
+    profRebinned->SetContour(999);
     profRebinned->Draw("sameCOLZ");
     hGridReferenceDetSpace->Draw("sameCOL");
     settings->DrawMetallisationGrid(c1, 3);

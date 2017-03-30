@@ -266,7 +266,8 @@ void TAnalysisOf3DLongAnalysis::initHistos() {
     hPulseHeightVsDetectorHitPostionXY->GetXaxis()->SetTitle("#it{x} / #mum");
     hPulseHeightVsDetectorHitPostionXY->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetTitle("charge / ADC");
-    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+//    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(0,3000);
 }
 
 void TAnalysisOf3DLongAnalysis::setTransparentCluster(bool isTransparentCluster, TCluster* transparentCluster) {

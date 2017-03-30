@@ -771,7 +771,7 @@ TCanvas* HistogrammSaver::DrawHistogramWithCellGrid(TH2* histo,TH2* histo2){
     histo->GetZaxis()->SetTitleOffset(1.3);
     histo->GetZaxis()->SetLabelOffset(0);
     if (histo){
-        histo->SetContour(100);
+        histo->SetContour(999);
         histo->Draw("sameCOLZ");
         hGridReferenceDetSpace->Draw("sameCOL");
     }
@@ -1752,7 +1752,7 @@ void HistogrammSaver::SaveProfile2DWithEntriesAsText(TProfile2D* prof, bool draw
     TCanvas *c1 = new TCanvas(name);
     if (!drawStatBox)
         c1->SetObjectStat(false);
-    prof->SetContour(100);
+    prof->SetContour(999);
     prof->Draw("colz");
     TH2D* histo = prof->ProjectionXY(prof->GetName()+(TString)"_binEntries","B");
     histo->Draw("TEXTsame");
@@ -1790,7 +1790,7 @@ void HistogrammSaver::SaveOverlay(TH2* histo,TString drawOption) {
         name.Insert(0,"c_");
     TCanvas *c1 = new TCanvas(name);
     c1->SetRightMargin(.15);
-    histo->SetContour(100);
+    histo->SetContour(999);
     histo->Draw("colz");
     histo->GetZaxis()->SetTitleOffset(1.2);
     TH1F* frame = c1->DrawFrame(0,0,150,150,histo->GetTitle());
@@ -2017,7 +2017,7 @@ void HistogrammSaver::SaveHistogramPDF(TH2* histo) {
     if (pt2) pt2->SetTextColor(kBlack);
     histo->SetTitleFont(42);
     histo->UseCurrentStyle();
-    histo->SetContour(100);
+    histo->SetContour(999);
     histo->Draw("colz");
     if(pt2 && !settings->IsPaperMode()) pt2->Draw();
     ostringstream plot_filename;

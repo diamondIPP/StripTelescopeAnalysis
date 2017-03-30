@@ -88,7 +88,8 @@ void TAnalysisOf3DGoodCellsLandau::initHistos() {
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetXaxis()->SetTitle("#it{x} / #mum");
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetTitle("charge /ADC");
-    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+//    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
+    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(0,3000);
 }
 
 void TAnalysisOf3DGoodCellsLandau::saveHistos(TH1F* hLandauStrip,TH1F* hLandauPhantom) {
