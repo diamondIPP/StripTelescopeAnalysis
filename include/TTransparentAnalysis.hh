@@ -196,6 +196,8 @@ private:
 	Float_t trTree_tseed;
 	Float_t trTree_thit;
 	Int_t   trTree_Event;
+	Float_t trTree_PredX;
+	Float_t trTree_PredY;
 	Int_t   trTree_Direction;
 	Int_t   trTree_NStrips;
 	Int_t   trTree_CenterStrip;

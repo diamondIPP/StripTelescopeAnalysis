@@ -504,6 +504,8 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("SeedTHR"             , &trTree_tseed               , "SeedTHR/F"                      );
 	transparentTree->Branch("HitTHR"              , &trTree_thit                , "HitTHR/F"                       );
 	transparentTree->Branch("Event"               , &trTree_Event               , "Event/I"                        );
+	transparentTree->Branch("PredX"               , &trTree_PredX               , "PredX/F"                        );
+	transparentTree->Branch("PredY"               , &trTree_PredY               , "PredY/F"                        );
 	transparentTree->Branch("Direction"           , &trTree_Direction           , "Direction/I"                    );
 	transparentTree->Branch("NStrips"             , &trTree_NStrips             , "NStrips/I"                      );
 	transparentTree->Branch("CenterStrip"         , &trTree_CenterStrip         , "CenterStrip/I"                  );
@@ -550,6 +552,8 @@ void TTransparentAnalysis::resetTransparentTree(){
 	trTree_tseed       = -999.;
 	trTree_thit        = -999.;
 	trTree_Event       = -999;
+	trTree_PredX       = -999.;
+	trTree_PredY       = -999.;
 	trTree_Direction   = -999;
 	trTree_NStrips     = trTree_nMaxStrips;
 	trTree_CenterStrip = -999;
@@ -593,6 +597,8 @@ void TTransparentAnalysis::fillTransparentTree(){
 	trTree_tseed       = settings->getClusterSeedFactor(subjectDetector, 0);
 	trTree_thit        = settings->getClusterHitFactor (subjectDetector, 0);
 	trTree_Event       = nEvent;
+	trTree_PredX       = positionInDetSystemMetric;
+	trTree_PredY       = positionInDetSystemMetricY;
 
 	// find highest hit channel
 	UInt_t  highestChannel    = 0;
