@@ -195,6 +195,7 @@ private:
 	Int_t   trTree_RunNumber;
 	Float_t trTree_tseed;
 	Float_t trTree_thit;
+	Int_t   trTree_NClusters;
 	Int_t   trTree_Event;
 	Float_t trTree_PredX;
 	Float_t trTree_PredY;

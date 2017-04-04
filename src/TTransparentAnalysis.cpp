@@ -503,6 +503,7 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("RunNumber"           , &trTree_RunNumber           , "RunNumber/I"                    );
 	transparentTree->Branch("SeedTHR"             , &trTree_tseed               , "SeedTHR/F"                      );
 	transparentTree->Branch("HitTHR"              , &trTree_thit                , "HitTHR/F"                       );
+	transparentTree->Branch("NClusters"           , &trTree_NClusters           , "NClusters/I"                    );
 	transparentTree->Branch("Event"               , &trTree_Event               , "Event/I"                        );
 	transparentTree->Branch("PredX"               , &trTree_PredX               , "PredX/F"                        );
 	transparentTree->Branch("PredY"               , &trTree_PredY               , "PredY/F"                        );
@@ -551,6 +552,7 @@ void TTransparentAnalysis::resetTransparentTree(){
 	trTree_RunNumber   = -999;
 	trTree_tseed       = -999.;
 	trTree_thit        = -999.;
+	trTree_NClusters   = -999;
 	trTree_Event       = -999;
 	trTree_PredX       = -999.;
 	trTree_PredY       = -999.;
@@ -596,6 +598,7 @@ void TTransparentAnalysis::fillTransparentTree(){
 	trTree_RunNumber   = settings->getRunNumber();
 	trTree_tseed       = settings->getClusterSeedFactor(subjectDetector, 0);
 	trTree_thit        = settings->getClusterHitFactor (subjectDetector, 0);
+	trTree_NClusters   = eventReader->getNClusters(subjectDetector);
 	trTree_Event       = nEvent;
 	trTree_PredX       = positionInDetSystemMetric;
 	trTree_PredY       = positionInDetSystemMetricY;
