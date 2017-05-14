@@ -236,6 +236,7 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 	Float_t mean=diaSUM[ch]/(Float_t)diaEventsInSum[ch];
 	Float_t sigma=TMath::Sqrt( diaSUM2[ch]/(Float_t)diaEventsInSum[ch]-mean*mean);
 
+	diaChannel[ch]=ch;
 	diaPedestalMean[ch]=RoundFloat(mean);
 	diaPedestalSigma[ch]=RoundFloat(sigma);
 	pair<Float_t,Float_t> output = make_pair(mean,sigma);
@@ -274,6 +275,7 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 	//  if(ch==7)cout<<diaSUMCmn[ch]<<" "<<diaSUM2Cmn[ch]<<" "<<diaEventsInSumCMN[ch]<<" "<<meanCMN<<endl;
 	sigmaCMN=TMath::Sqrt( (diaSUM2Cmn[ch]/(Float_t)diaEventsInSumCMN[ch])-meanCMN*meanCMN);
 
+	diaChannel[ch]=ch;
 	diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
 	diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
 	pair<Float_t,Float_t> output = make_pair(meanCMN,sigmaCMN);
@@ -363,6 +365,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
 	diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
 	diaPedestalMean[ch]=RoundFloat(mean);
+	diaChannel[ch] = ch; // DA:
 	diaPedestalSigma[ch]=RoundFloat(sigma);
 	//  if(diaPedestalSigma[ch]<diaPedestalSigmaCMN[ch])
 	//    cout<<std::setw(5)<<nEvent<<" "<<std::setw(3)<<ch<<" "<<setw(6)<<diaPedestalSigma[ch]<<" "<<setw(6)<<diaPedestalSigmaCMN[ch]<<endl;
@@ -491,6 +494,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 			Float_t sigma= RoundFloat(diaPedestalSigmaStartValues[ch]);
 
 			diaPedestalMean[ch]= RoundFloat(mean);
+			diaChannel[ch]=ch; // DA:
 			diaPedestalSigma[ch]= RoundFloat(sigma);
 			mean-=cmNoise;
 			//if(ch==7)cout<<nEvent<<" deque "<<adc<<" "<<diaAdcValues[ch].size()<<endl;
@@ -521,6 +525,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 		cmNoise = cmnValues.at(nEvent);
 		for (UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 			diaPedestalMean[ch]= RoundFloat(diaPedestalMean[ch]);
+			diaChannel[ch]=ch;
 			diaPedestalSigma[ch]= RoundFloat(diaPedestalSigma[ch]);
 			diaPedestalMeanCMN[ch] =  RoundFloat(diaPedestalMeanCMN[ch]);
 			diaPedestalSigmaCMN[ch] = RoundFloat(diaPedestalSigmaCMN[ch]);
@@ -590,6 +595,7 @@ void TPedestalCalculation::setBranchAdresses(){
 	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestaSigma[8][256]/F");
 	pedestalTree->Branch("cmn_sil",&cmn_sil,"cmn_sil[8]/F");
 
+	pedestalTree->Branch("diaChannel",&diaChannel,"diaChannel[128]/i"); // DA:
 	pedestalTree->Branch("diaPedestalMean",&diaPedestalMean,"diaPedestalMean[128]/F");
 	pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestaSigma[128]/F");
 

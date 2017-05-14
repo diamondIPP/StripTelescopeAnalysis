@@ -76,6 +76,7 @@ private:
 
 	Float_t diaPedestalMean[N_DIA_CHANNELS];
 	Float_t diaPedestalSigma[N_DIA_CHANNELS];
+	Int_t diaChannel[N_DIA_CHANNELS]; // DA: to get quickly the channel of the signal
 
 	Float_t diaPedestalMeanStartValues[N_DIA_CHANNELS];
 	Float_t diaPedestalSigmaStartValues[N_DIA_CHANNELS];

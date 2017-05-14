@@ -359,7 +359,7 @@ void TTransparentAnalysis::initHistograms2() {
         TString nameProfile =  TString::Format("hLandau2HighestHitProfile_2OutOf%02d",clusterSize+1);
         TProfile2D* hLandau2HighestHitProfile = new TProfile2D(nameProfile,nameProfile, bins ,predXMin,predXMax,bins,predYMin,predXMax);
         hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
-        hLandau2HighestHitProfile->GetYaxis()->SetTitle("Pred. X Position");
+        hLandau2HighestHitProfile->GetYaxis()->SetTitle("Pred. Y Position");
         hLandau2HighestHitProfile->GetZaxis()->SetTitle(TString::Format("Avrg Mean Charge, 2 highest in %d",clusterSize+1));
         hLandau2HighestHitProfile->SetMinimum(0);
         hLandau2HighestHitProfile->SetMaximum(3000);
@@ -391,7 +391,7 @@ void TTransparentAnalysis::initHistograms1() {
         TString nameProfile =  TString::Format("hLandau1HighestHitProfile_1OutOf%02d",clusterSize+1);
         TProfile2D* hLandau1HighestHitProfile = new TProfile2D(nameProfile,nameProfile, bins ,predXMin,predXMax,bins,predYMin,predXMax);
         hLandau1HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
-        hLandau1HighestHitProfile->GetYaxis()->SetTitle("Pred. X Position");
+        hLandau1HighestHitProfile->GetYaxis()->SetTitle("Pred. Y Position");
         hLandau1HighestHitProfile->GetZaxis()->SetTitle(TString::Format("Avrg Mean Charge, 1 highest in %d",clusterSize+1));
         hLandau1HighestHitProfile->SetMinimum(0);
         hLandau1HighestHitProfile->SetMaximum(3000);
