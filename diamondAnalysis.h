@@ -7,7 +7,7 @@ std::string inputDir="./";
 std::string outputDir="./";
 std::string runSettingsDir="./";
 std::string runListPath="RunList.ini";
-bool run_3danalysis = true;
+bool run_3danalysis = false;
 
 int ReadRunList();
 
