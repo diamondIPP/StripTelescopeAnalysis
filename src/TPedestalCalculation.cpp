@@ -505,8 +505,8 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 	}
 	if(verbosity)cout<<"update first Pedestal Calculation"<<endl;
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
-		//pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);// DA: TODO before iterations should be sigma not mean // DA: TODO Delete this line, it does not do anything. Values won't be used.
-		pair<Float_t, Float_t> values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);
+		pair<Float_t, Float_t> values = calculateFirstPedestalDia(ch,diaAdcValues[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);
+		values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);
 		diaPedestalMeanCMN[ch] = values.first;
 		diaPedestalSigmaCMN[ch] = values.second;
 		if(ch==7&&verbosity>4){
