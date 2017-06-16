@@ -83,11 +83,11 @@ void TRawEventSaver::saveEvents(int nEvents){
 		for (int i=0;i<nEvents;i++){
 			bool skip = false;
 			showStatusBar(i, nEvents, 100);
-			for(Int_t ii=0; ii< settings->getSkipEvents().size(); ii++) {
-				if ((settings->getSkipEvents().at(ii).first < i) && (i < settings->getSkipEvents().at(ii).second)){
+			for(Int_t ii=0; ii< /*settings->getSkipEvents().size()*/0; ii++) {
+//				if ((settings->getSkipEvents().at(ii).first < i) && (i < settings->getSkipEvents().at(ii).second)){
 					skip = true;
 					break;
-				}
+//				}
 			}
 			if(!skip) {
 				int suceed = rawEventReader->ReadRawEvent(i, false);//true);
@@ -145,8 +145,9 @@ bool TRawEventSaver::treeExists(int nEvents){
 	Long64_t skipped = 0;
 	if(!this->createdNewFile&&!this->createdNewTree)
 		if(settings->isEventSkip()){
-			for(Int_t ii = 0; ii < settings->getSkipEvents().size(); ii++) {
-				skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first);
+			for(Int_t ii = 0; ii < 0/*settings->getSkipEvents().size()*/; ii++) {
+//				skipped += (settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first);
+				cout << "" <<flush;
 			}
 		}
 		if(this->rawTree->GetEntries() + skipped >= nEvents)
