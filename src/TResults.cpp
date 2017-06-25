@@ -595,7 +595,7 @@ void TResults::createOutputResultFile(){
         results["Voltage"] = "UNKOWN";
     else
         results["Voltage"] = TString::Format("%+d",voltage);
-    results["SVN_REV"] = GIT_REV;
+    results["GIT_REV"] = GIT_REV;
     results["lastUpdate"] = lastUpdate.AsString();
     results["maskedChannels"] =  getChannelsStringList(maskedChannels);
     results["noisyChannels"] = getChannelsStringList(noisyChannels);
