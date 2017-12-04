@@ -1769,7 +1769,9 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
     if (!bPlot) return;
     if (!((cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::X_COR))) return;
     TString histName = preName+TString::Format("_ScatterPlot_YPred_vs_DeltaX_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
+	TString histName2 = preName+TString::Format("_ScatterPlot_YPred_vs_DeltaX_v2_Plane_%d_with_",subjectPlane)+refPlaneString+postName;
     TH2F *histo=0;
+	TH2F *histo2 = 0;
     if(isSiliconPostAlignment){
         Float_t xmin = -1e9;
         Float_t xmax = +1e9;
@@ -1785,9 +1787,13 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
         histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric,vecYLabPredMetric,256,512,xmin,xmax,ymin,ymax);
         if(!histo || (histo->GetEntries() == 0))
             cout<<"isSiliconPostAlignment: "<<xmin<<" "<<xmax<<" "<<ymin<<" "<<ymax<<" "<<mean<<"+/-"<<sigma<<endl;
+		Float_t mean_tmp = round(histo->GetMean(2)*10.)/10.;
+        histo2 = histSaver->CreateScatterHisto((string)histName2, vecXLabDeltaMetric, vecYLabPredMetric, 100, 700, 0., 1e4, mean_tmp - 35., mean_tmp + 35., 0., false);
     }
     else
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecYLabPredMetric, 256);
+		Float_t mean_tmp = round(histo->GetMean(2)*10.)/10.;
+        histo2 = histSaver->CreateScatterHisto((string)histName2, vecXLabDeltaMetric, vecYLabPredMetric, 100, 700, 0., 1e4, mean_tmp - 35., mean_tmp + 35., 0., false);
 
     if (histo->GetEntries() == 0)
         cout<<"entries == 0";
@@ -1800,6 +1806,19 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
     }
     else{
         std::cout<<"Something is wrong CreateScatterPlotPredYvsDeltaX"<<endl;
+        char t;
+        cin>>t;
+    }
+    histo2->SetTitle(histo2->GetTitle()+GetPlotPostTitle(postName));
+    if(histo2 && histo2->GetEntries()){
+        histo2->GetXaxis()->SetTitle("Y Predicted / #mum");
+        histo2->GetYaxis()->SetTitle("Delta X / #mum");
+        histSaver->SaveHistogram(histo2);
+        delete histo2;
+    }
+    else{
+        std::cout << "Something is wrong CreateScatterPlotPredYvsDeltaX " << histName2 << endl;
+		cout << histo2->GetEntries() << endl;
         char t;
         cin>>t;
     }
@@ -2281,12 +2300,25 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
         TString preName, TString postName, TString refPlaneString, bool bPlot,
         bool bUpdateResolution, bool isSiliconPostAlignment) {
     TString name = preName + TString::Format("_ScatterPlot_XPred_vs_DeltaY_Plane_%d_with_",subjectPlane )+refPlaneString+postName;
+	TString name2 = preName + TString::Format("_ScatterPlot_XPred_vs_DeltaY_v2_Plane_%d_with_",subjectPlane )+refPlaneString+postName;
     if (bPlot && subjectPlane < 4 && (cor == TPlaneProperties::XY_COR || cor == TPlaneProperties::Y_COR)) {    //ScatterPlot DeltaY vs Xpred
 
         TString xTitle = "X predicted /#mum";
         TString yTitle = "Delta Y /#mum";
         if(verbosity>3) cout<<"Save: "<<name<<" "<<flush;
         TH2F *histo = histSaver->CreateScatterHisto((string)name, vecYLabDeltaMetric,  vecXLabPredMetric, 256);
+		int     xbins_v2 = 100;
+		Float_t  xmin_v2 = 0.;
+		Float_t  xmax_v2 = 1e4;
+		int     ybins_v2 = 700;
+		Float_t  ymin_v2 = -35.;
+		Float_t  ymax_v2 = 35.;
+		if (!isSiliconPostAlignment) {
+			Float_t mean_v2 = round(histo->GetMean(2)*10.)/10.;
+			ymin_v2 += mean_v2;
+			ymax_v2 += mean_v2;
+		}
+		TH2F *histo2 = histSaver->CreateScatterHisto((string)name2, vecYLabDeltaMetric,  vecXLabPredMetric, xbins_v2, ybins_v2, xmin_v2, xmax_v2, ymin_v2, ymax_v2, 0., false);
         if(!histo)
             cerr<<"Could not create "<<name<<endl;
         else if (histo->GetEntries()==0)
@@ -2298,6 +2330,13 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
             histSaver->SaveHistogram((TH2F*) histo->Clone());
             delete histo;
         }
+		if (histo2) {
+			histo2->SetTitle(histo2->GetTitle()+GetPlotPostTitle(postName));
+			histo2->GetXaxis()->SetTitle(xTitle);
+			histo2->GetYaxis()->SetTitle(yTitle);
+			histSaver->SaveHistogram((TH2F*) histo2->Clone());
+			delete histo2;
+		}
 
         name.Replace(0,1,"g");
         TGraph graph = histSaver->CreateDipendencyGraph((string)name, vecYLabDeltaMetric, vecXLabPredMetric);

@@ -164,7 +164,7 @@ public:
 	static TH2F* CreateScatterHisto(std::string name,std::vector<Float_t> posY, std::vector<Float_t> posX,UInt_t nBinsX=512,UInt_t nBinsY=512,
 			Float_t minRangeX = (-1)*std::numeric_limits<float>::infinity(), Float_t maxRangeX = std::numeric_limits<float>::infinity(),
 			Float_t minRangeY = (-1)*std::numeric_limits<float>::infinity(), Float_t maxRangeY = std::numeric_limits<float>::infinity(),
-			Float_t factor = 0.05);
+			Float_t factor = 0.05, bool auto_limits = true);
 	static TGraph CreateDipendencyGraph(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos, ULong_t maxSize=-1);
 	static TH2F* CreateDipendencyHisto(std::string name,std::vector<Float_t> Delta, std::vector<Float_t> pos,UInt_t nBins=512);
 	static TH1F* CreateDistributionHisto(std::string name, std::vector<Float_t> vec,UInt_t nBins=4096,EnumAxisRange range=maxWidth,

@@ -2536,7 +2536,7 @@ TH3F* HistogrammSaver::Create3DHisto(std::string name, std::vector<Float_t> posX
  * @return TH2F histogram
  */
 TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t> posY, std::vector<Float_t> posX,
-        UInt_t nBinsX, UInt_t nBinsY, Float_t minRangeX,Float_t maxRangeX, Float_t minRangeY, Float_t maxRangeY,Float_t factor)
+        UInt_t nBinsX, UInt_t nBinsY, Float_t minRangeX,Float_t maxRangeX, Float_t minRangeY, Float_t maxRangeY,Float_t factor, bool auto_limits)
 {
     //	Float_t factor = 0.05;//5% bigger INtervall...
     if(posX.size()!=posY.size()||posX.size()==0) {
@@ -2606,6 +2606,14 @@ TH2F* HistogrammSaver::CreateScatterHisto(std::string name, std::vector<Float_t>
     if (verb) cout<<"HistogrammSaver::CREATE Scatterplot:\""<<name<<"\" with "<<posX.size()<<" Entries"<<endl;
     deltaX=maxX-minX;
     deltaY=maxY-minY;
+	if (!auto_limits) {
+		minX = minRangeX;
+		maxX = maxRangeX;
+		minY = minRangeY;
+		maxY = maxRangeY;
+		deltaX = 0.;
+		deltaY = 0.;
+	}
     TH2F* histo = new TH2F(name.c_str(),name.c_str(),nBinsX,minX-factor*deltaX,maxX+factor*deltaX,nBinsY,minY-factor*deltaY,maxY+factor*deltaY);
     for(UInt_t i=0;i<posX.size();i++){
         if (verb){
