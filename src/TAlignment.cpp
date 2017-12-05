@@ -1788,12 +1788,12 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
         if(!histo || (histo->GetEntries() == 0))
             cout<<"isSiliconPostAlignment: "<<xmin<<" "<<xmax<<" "<<ymin<<" "<<ymax<<" "<<mean<<"+/-"<<sigma<<endl;
 		Float_t mean_tmp = round(histo->GetMean(2)*10.)/10.;
-        histo2 = histSaver->CreateScatterHisto((string)histName2, vecXLabDeltaMetric, vecYLabPredMetric, 100, 700, 0., 1e4, mean_tmp - 35., mean_tmp + 35., 0., false);
+        histo2 = histSaver->CreateScatterHisto((string)histName2, vecXLabDeltaMetric, vecYLabPredMetric, 100, 800, 0., 1e4, mean_tmp - 40., mean_tmp + 40., 0., false);
     }
     else
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecYLabPredMetric, 256);
 		Float_t mean_tmp = round(histo->GetMean(2)*10.)/10.;
-        histo2 = histSaver->CreateScatterHisto((string)histName2, vecXLabDeltaMetric, vecYLabPredMetric, 100, 700, 0., 1e4, mean_tmp - 35., mean_tmp + 35., 0., false);
+        histo2 = histSaver->CreateScatterHisto((string)histName2, vecXLabDeltaMetric, vecYLabPredMetric, 100, 800, 0., 1e4, mean_tmp - 40., mean_tmp + 40., 0., false);
 
     if (histo->GetEntries() == 0)
         cout<<"entries == 0";
@@ -2310,9 +2310,9 @@ void TAlignment::CreateScatterPlotPredXvsDeltaY(
 		int     xbins_v2 = 100;
 		Float_t  xmin_v2 = 0.;
 		Float_t  xmax_v2 = 1e4;
-		int     ybins_v2 = 700;
-		Float_t  ymin_v2 = -35.;
-		Float_t  ymax_v2 = 35.;
+		int     ybins_v2 = 800;
+		Float_t  ymin_v2 = -40.;
+		Float_t  ymax_v2 = 40.;
 		if (!isSiliconPostAlignment) {
 			Float_t mean_v2 = round(histo->GetMean(2)*10.)/10.;
 			ymin_v2 += mean_v2;
