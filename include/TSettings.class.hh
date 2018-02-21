@@ -466,7 +466,7 @@ private:
 	Float_t eta_hiq_slice_hi;
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
-	bool bAnalyseAlignmentEvents; // DA:
+	bool bAnalyseAlignmentEvents = false; // DA:
 	UInt_t bEventBinWidth; // DA:
 	UInt_t bEventwiseStart; // DA:
 	UInt_t bEventwiseStop; // DA:
