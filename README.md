@@ -15,7 +15,7 @@ make -j N
 - Setup an runlist file with the runs you like to analyse according to this [template](defaultFiles/RunList.ini).
 - Create run-specific settings files in a separate directory.
   The file name has to be of the form `settings.RUNNUMBER.ini` or `settings.RUNNUMBER-POSITION.ini`.
-  A template is available [here](defaultFiles/Settings.ini).
+  A template is available [here](defaultFiles/settings.ini).
   These settings files are collected in the separate repository `StripTelescopeRunSettings`.
 - Run the analysis with:
   ```
