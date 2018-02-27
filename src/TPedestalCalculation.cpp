@@ -284,9 +284,9 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 
 pair<Float_t,Float_t> TPedestalCalculation::checkPedestalDet(int det,int ch,int maxSigma){
 	if(detEventUsed[det][ch].size()!=slidingLength)
-		cout<<"detEventInUse has wrong length"<<detEventUsed[det][ch].size();
+		cout<<"detEventInUse has wrong length "<<detEventUsed[det][ch].size();
 	if(detAdcValues[det][ch].size()!=slidingLength+1)
-		cout<<"detAdcValues has wrong length..."<<detAdcValues[det][ch].size()<<endl;
+		cout<<"detAdcValues has wrong length... "<<detAdcValues[det][ch].size()<<endl;
 
 	float mean =this->detSUM[det][ch]/(float)this->detEventsInSum[det][ch];
 	float sigma=TMath::Sqrt(this->detSUM2[det][ch]/(float)this->detEventsInSum[det][ch]-mean*mean);
@@ -440,7 +440,7 @@ void TPedestalCalculation::doCmNoiseCalculation()
         Float_t signal = adc-mean;
 		Float_t sigma = (nEvent<slidingLength)?diaPedestalSigmaStartValues[ch]:diaPedestalSigmaCMN[ch];
 		if(sigma<=0) {
-		    if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" sigma < 0 : "<<sigma<<endl;
+		    if(verbosity>7)cout<<"CMN: cannot use "<<nEvent<<"/"<<ch<<" sigma <= 0 : "<<sigma<<endl;
 		    continue;
 		}
 		Float_t snr = TMath::Abs(signal/sigma);
@@ -465,7 +465,7 @@ void TPedestalCalculation::doCmNoiseCalculation()
 		cmNoise+=signal;
 		nCmNoiseEvents++;
 	}
-	cmNoise = cmNoise/(Float_t)nCmNoiseEvents;
+    cmNoise = (nCMNoiseEvents != 0)? cmNoise/(Float_t)nCmNoiseEvents: 0;	// DA: division by zero!!!!
 	if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
 	hCommonModeNoise->Fill(cmNoise,true);
 }

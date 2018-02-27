@@ -785,7 +785,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		etaFileName<<"etaCorrection."<<runNumber<<".root";
 	else
 		etaFileName<<etaDistributionPath;
-	if(verbosity) cout<<etaFileName<<endl;
+//	if(verbosity) cout<<etaFileName<<endl;
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
