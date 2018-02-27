@@ -465,7 +465,7 @@ void TPedestalCalculation::doCmNoiseCalculation()
 		cmNoise+=signal;
 		nCmNoiseEvents++;
 	}
-    cmNoise = (nCMNoiseEvents != 0)? cmNoise/(Float_t)nCmNoiseEvents: 0;	// DA: division by zero!!!!
+    cmNoise = (nCmNoiseEvents != 0)? cmNoise/(Float_t)nCmNoiseEvents: 0;	// DA: division by zero!!!!
 	if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
 	hCommonModeNoise->Fill(cmNoise,true);
 }
