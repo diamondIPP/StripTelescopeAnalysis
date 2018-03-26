@@ -682,16 +682,16 @@ void TSettings::LoadSettings(){
 void TSettings::LoadDefaultResolutions(){
 	alignment_resolutions.resize(9);
 	//X
-	alignment_resolutions[0] = 1.8;
-	alignment_resolutions[2] = 1.8;
-	alignment_resolutions[4] = 1.8;
-	alignment_resolutions[6] = 1.8;
+	alignment_resolutions[0] = 2.3;
+	alignment_resolutions[2] = 2.2;
+	alignment_resolutions[4] = 1.6;
+	alignment_resolutions[6] = 1.7;
 
 	//Y
-	alignment_resolutions[1] = 1.8;
-	alignment_resolutions[3] = 1.8;
-	alignment_resolutions[5] = 1.8;
-	alignment_resolutions[7] = 1.8;
+	alignment_resolutions[1] = 1.6;
+	alignment_resolutions[3] = 1.5;
+	alignment_resolutions[5] = 1.9;
+	alignment_resolutions[7] = 2.0;
 
 	alignment_resolutions[8] = 10.0;//todo
 }
