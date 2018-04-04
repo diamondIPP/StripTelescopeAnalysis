@@ -239,6 +239,7 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 
 	diaPedestalMean[ch]=RoundFloat(mean);
 	diaPedestalSigma[ch]=RoundFloat(sigma);
+	diaChannel[ch] = (UChar_t)ch;
 	pair<Float_t,Float_t> output = make_pair(mean,sigma);
 	//	if(verbosity>4&& ch ==103)
 	//		cout<<"diamond ch "<<ch<<", it "<<iterations<<", usedEvents " <<diaEventsInSum[ch]<<"\t"<<mean<<"+/-"<<sigma<<endl;
@@ -277,6 +278,7 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 
 	diaPedestalMeanCMN[ch]=RoundFloat(meanCMN);
 	diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
+	diaChannel[ch] = (UChar_t)ch;
 	pair<Float_t,Float_t> output = make_pair(meanCMN,sigmaCMN);
 	if(iterations==0)return output;
 	else return this->calculateFirstPedestalDiaCMN(ch,adcQueue,meanCMN,sigmaCMN,iterations-1,maxSigma);
@@ -365,6 +367,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	diaPedestalSigmaCMN[ch]=RoundFloat(sigmaCMN);
 	diaPedestalMean[ch]=RoundFloat(mean);
 	diaPedestalSigma[ch]=RoundFloat(sigma);
+	diaChannel[ch] = (UChar_t)ch;
 	//  if(diaPedestalSigma[ch]<diaPedestalSigmaCMN[ch])
 	//    cout<<std::setw(5)<<nEvent<<" "<<std::setw(3)<<ch<<" "<<setw(6)<<diaPedestalSigma[ch]<<" "<<setw(6)<<diaPedestalSigmaCMN[ch]<<endl;
 	//	if(ch==7) cout<<cmNoise<<" mean: "<<mean<<"/"<<meanCMN<<"\tsigma:"<<sigma<<"/"<<sigmaCMN<<"\t"<<diaEventsInSum[ch]<<"/"<<diaEventsInSumCMN[ch]<<endl;
@@ -493,6 +496,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 
 			diaPedestalMean[ch]= RoundFloat(mean);
 			diaPedestalSigma[ch]= RoundFloat(sigma);
+			diaChannel[ch] = (UChar_t)ch;
 			mean-=cmNoise;
 			//if(ch==7)cout<<nEvent<<" deque "<<adc<<" "<<diaAdcValues[ch].size()<<endl;
 			diaPedestalMeanCMN[ch]= RoundFloat(mean);;
@@ -506,6 +510,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 		values = calculateFirstPedestalDiaCMN(ch,diaAdcValuesCMN[ch],diaPedestalMeanStartValues[ch],diaPedestalSigmaStartValues[ch],7,MAXDIASIGMA);
 		diaPedestalMeanCMN[ch] = values.first;
 		diaPedestalSigmaCMN[ch] = values.second;
+		diaChannel[ch] = (UChar_t)ch;
 		if(ch==7&&verbosity>4){
 			//      cout<<"PEDESTAL: ch: "<<ch<<" "<<values.first<<" "<<values.second<<endl;
 			for(UInt_t i=0;i<diaAdcValues[ch].size()&&i<diaAdcValuesCMN[ch].size();i++){
@@ -525,6 +530,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 			diaPedestalSigma[ch]= RoundFloat(diaPedestalSigma[ch]);
 			diaPedestalMeanCMN[ch] =  RoundFloat(diaPedestalMeanCMN[ch]);
 			diaPedestalSigmaCMN[ch] = RoundFloat(diaPedestalSigmaCMN[ch]);
+			diaChannel[ch] = (UChar_t)ch;
 		}
 		printDiamond(30);
 		this->pedestalTree->Fill();
@@ -601,6 +607,7 @@ void TPedestalCalculation::setBranchAdresses(){
 	pedestalTree->Branch("eventNumber",&nEvent,"eventNumber/i");
 	pedestalTree->Branch("runNumber",&runNumber,"runNumber/i");
 	pedestalTree->Branch("cmnCorrection",&doCMNCorrection,"cmnCorrection/O");
+	pedestalTree->Branch("diaChannel", &diaChannel, "diaChannel[128]/b");
 }
 
 
