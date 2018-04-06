@@ -24,27 +24,49 @@ std::string TRunInfo::getOutputDir()
 
 void TRunInfo::setInputDir(std::string inputDir)
 {
-	char resolved_path[300];
-	realpath(inputDir.c_str(), resolved_path);
-	printf("\nINPUTDIR: \"%s\"\t\n",resolved_path);
-	this->inputDir=resolved_path;
+//	char resolved_path[200];
+//	realpath(inputDir.c_str(), resolved_path);
+	this->inputDir=getAbsPath(inputDir);
+	cout<<"\nINPUTDIR: \""<<this->inputDir<<"\"\n";
 }
 
 void TRunInfo::setOutputDir(std::string outputDir)
 {
-	char resolved_path[300];
-	realpath(outputDir.c_str(), resolved_path);
-	printf("\nOUTPUTDIR: \"%s\"\n",resolved_path);
+//	char resolved_path[200];
+//	realpath(outputDir.c_str(), resolved_path);
 
-	this->outputDir = resolved_path;
+	this->outputDir = getAbsPath(outputDir);
+	cout<<"\nOUTPUTDIR: \""<<this->outputDir<<"\"\n";
 }
 
 void TRunInfo::setRunSettingsDir(string settingsDir)
 {
-	char resolved_path[300];
-	realpath(settingsDir.c_str(), resolved_path);
-	printf("\nsettingsDir: \"%s\"\n",resolved_path);
-	this->runSettingsDir = resolved_path;
+	this->runSettingsDir = getAbsPath(settingsDir);
+	cout<<"\nsettingsDir: \""<<this->runSettingsDir<<"\"\n";
+//	if(!this->runSettingsDir.compare("blaaaa"))
+//		cout<<"failed..."<<endl;
+//	else{
+//		cout<<"yayyyy :D"<<endl;
+//	}
+//	char resolved_path[200];cout<<"\nbla0\n";
+//	realpath(settingsDir.c_str(), resolved_path);cout<<"\nbla1\n";
+//	printf("\nsettingsDir: \"%s\"\n",resolved_path);cout<<"\nbla2\n";
+//	this->runSettingsDir = resolved_path;printf("\nblaaa3\n");
+}
+
+std::string TRunInfo::getAbsPath(std::string dir){
+	char *resolved_path;
+	resolved_path = realpath(dir.c_str(), NULL);
+	if (resolved_path != NULL){
+		string retrn_string(resolved_path);
+		free(resolved_path);
+		return retrn_string;
+	}
+	else{
+		cout<<"It Failed..."<<endl;
+		string bla("blaaaa");
+		return bla;
+	}
 }
 
 

@@ -23,6 +23,7 @@ public:
   std::string getOutputDir();
   void setInputDir(std::string inputDir);
   void setOutputDir(std::string outputDir);
+    std::string getAbsPath(std::string dir);
 public:
   UInt_t nRunNumber;
   UInt_t nVerbosity;
