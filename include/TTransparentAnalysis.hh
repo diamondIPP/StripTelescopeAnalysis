@@ -309,18 +309,18 @@ private:
 	UInt_t yDivisions;
 //	TH2D *hPHChVsEventNo_1; // DA: ph Ch vs event // DA: Borrar
 //	TH2D *hPHChVsEventNo_2; // DA: ph Ch // DA: Borrar
-	TProfile2D *hADCChVsEventNo; // DA:
-	TProfile2D *hPedChVsEventNo; // DA:
-	TProfile2D *hPedCMNChVsEventNo; // DA:
-	TProfile2D *empty;
-	TProfile2D *hSigChVsEventNo; // DA:
-	TProfile2D *hSigCMNChVsEventNo; // DA:
-	TProfile2D *hSigInSigmaChVsEventNo;
-	TProfile2D *hSigInSigmaCMNChVsEventNo;
-	TProfile2D *hCMNChVsEventNo;
-	TProfile2D *hSignalCMNCutChVsEventNo;
-	void initADCAndSignalCMNCHistos(UInt_t startEvent, UInt_t maxEvents, UInt_t xbinwidth = 1); // DA:
-	void fillADCAndSignalHistos(); // DA:
+//	TProfile2D *hADCChVsEventNo; // DA:
+//	TProfile2D *hPedChVsEventNo; // DA:
+//	TProfile2D *hPedCMNChVsEventNo; // DA:
+//	TProfile2D *empty;
+//	TProfile2D *hSigChVsEventNo; // DA:
+//	TProfile2D *hSigCMNChVsEventNo; // DA:
+//	TProfile2D *hSigInSigmaChVsEventNo;
+//	TProfile2D *hSigInSigmaCMNChVsEventNo;
+//	TProfile2D *hCMNChVsEventNo;
+//	TProfile2D *hSignalCMNCutChVsEventNo;
+//	void initADCAndSignalCMNCHistos(UInt_t startEvent, UInt_t maxEvents, UInt_t xbinwidth = 1); // DA:
+//	void fillADCAndSignalHistos(); // DA:
 //	void initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd); // DA: borrar
 //	void fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge); // DA: borrar
 };
