@@ -160,8 +160,10 @@ void TResults::initialiseResults(){
     seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
     hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
     noise.resize(TPlaneProperties::getNDetectors(),-1);
-    meanNoutOfN_normal.resize(TPlaneProperties::getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1);
-    meanNoutOfN_trans.resize(TPlaneProperties::getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1);
+//    meanNoutOfN_normal.resize(TPlaneProperties::getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
+    meanNoutOfN_normal.resize(settings->getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
+//    meanNoutOfN_trans.resize(TPlaneProperties::getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
+    meanNoutOfN_trans.resize(settings->getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
     doubleGaus1_normal = -1;
     doubleGaus2_normal = -1;
     doubleGaus1_trans = -1;

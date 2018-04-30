@@ -635,7 +635,8 @@ void TADCEventReader::checkADC(){
 bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 {
 	if(det<TPlaneProperties::getNDetectors())
-		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det);
+//		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det); // DA
+		return getAdcValue(det,ch)>=settings->getMaxSignalHeight(det); // DA
 	return true;
 }
 

@@ -428,7 +428,8 @@ void TPedestalCalculation::doCmNoiseCalculation()
 	cmNoise=0;
 
 	UInt_t nCmNoiseEvents=0;
-	Float_t maxVal = TPlaneProperties::getMaxSignalHeightDiamond();
+//	Float_t maxVal = TPlaneProperties::getMaxSignalHeightDiamond(); // DA
+	Float_t maxVal = settings->getDiaSaturation(); // DA
 	UInt_t det = TPlaneProperties::getDetDiamond();
 	for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 		if(nEvent>this->diaAdcValues[ch].size()&&nEvent<slidingLength){

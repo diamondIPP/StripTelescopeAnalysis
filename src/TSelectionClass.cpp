@@ -717,7 +717,8 @@ bool TSelectionClass::isSaturated(UInt_t det,UInt_t cl)
     TCluster cluster = eventReader->getCluster(det,cl);
     //  if(cluster.hasSaturatedChannels() )cout<<nEvent<<" hasSaturatedChannel"<<flush;
     for(UInt_t clPos=0;clPos<cluster.size();clPos++)
-        if(cluster.getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det)){
+//        if(cluster.getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det)){ // DA
+        if(cluster.getAdcValue(clPos)>=settings->getMaxSignalHeight(det)){ // DA
             //      cout<<"\t"<<this->nEvent<<" confirmed"<<endl;
             return true;
         }

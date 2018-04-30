@@ -143,7 +143,8 @@ void TAnalysisOfClustering::checkForSaturatedChannels()
 {
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++)
         for(UInt_t ch=0;ch<TPlaneProperties::getNChannels(det);ch++){
-            if(eventReader->getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det)){
+//            if(eventReader->getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det)){ // DA
+            if(eventReader->getAdcValue(det,ch)>=settings->getMaxSignalHeight(det)){ // DA
                 hSaturatedChannels[det]->Fill(ch);
             }
         }
@@ -480,32 +481,42 @@ void TAnalysisOfClustering::initialiseHistos()
         hEtaDistribution5Percent[det]=new TH1F(name,name,1024,0,1);
 
         name = "hEtaDistributionVsSignalLeft_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalLeft[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
+//        hEtaDistributionVsSignalLeft[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)); // DA
+        hEtaDistributionVsSignalLeft[det]=new TH2F(name,name,128,0,1,128,0,settings->getMaxSignalHeight(det)); // DA
 
         name = "hEtaDistributionVsSignalRight_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalRight[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det));
+//        hEtaDistributionVsSignalRight[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)); // DA
+        hEtaDistributionVsSignalRight[det]=new TH2F(name,name,128,0,1,128,0,settings->getMaxSignalHeight(det)); // DA
 
         name = "hEtaDistributionVsSignalSum_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalSum[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)*2);
+//        hEtaDistributionVsSignalSum[det]=new TH2F(name,name,128,0,1,128,0,TPlaneProperties::getMaxSignalHeight(det)*2); // DA
+        hEtaDistributionVsSignalSum[det]=new TH2F(name,name,128,0,1,128,0,settings->getMaxSignalHeight(det)*2); // DA
 
         name = "hSignalLeftVsSignalRight"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hSignalLeftVsSignalRight[det]=new TH2F(name,name,128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det));
+//        hSignalLeftVsSignalRight[det]=new TH2F(name,name,128,0,TPlaneProperties::getMaxSignalHeight(det),128,0,TPlaneProperties::getMaxSignalHeight(det)); // DA
+        hSignalLeftVsSignalRight[det]=new TH2F(name,name,128,0,settings->getMaxSignalHeight(det),128,0,settings->getMaxSignalHeight(det)); // DA
 
         name = "hDeltaLeftRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
         hDeltaLeftRightVsMaximum[det]=new TH2F(name,name,
-                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
-                256,0,TPlaneProperties::getMaxSignalHeight(det));
+//                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det), // DA
+                1024,-settings->getMaxSignalHeight(det),settings->getMaxSignalHeight(det), // DA
+//                256,0,TPlaneProperties::getMaxSignalHeight(det)); // DA
+                256,0,settings->getMaxSignalHeight(det)); // DA
 //        hLeftVsMaximum[det]
 
         name = "hLeftVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
         hLeftVsMaximum[det]=new TH2F(name,name,
-                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
-                256,0,TPlaneProperties::getMaxSignalHeight(det));
+//                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det), // DA
+                1024,-settings->(det),settings->getMaxSignalHeight(det), // DA
+//                256,0,TPlaneProperties::getMaxSignalHeight(det)); // DA
+                256,0,settings->getMaxSignalHeight(det)); // DA
 
         name = "hRightVsMaximum"+ (TString) TPlaneProperties::getStringForDetector(det);
         hRightVsMaximum[det]=new TH2F(name,name,
-                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det),
-                256,0,TPlaneProperties::getMaxSignalHeight(det));
+//                1024,-TPlaneProperties::getMaxSignalHeight(det),TPlaneProperties::getMaxSignalHeight(det), // DA
+                1024,-settings->getMaxSignalHeight(det),settings->getMaxSignalHeight(det), // DA
+//                256,0,TPlaneProperties::getMaxSignalHeight(det)); // DA
+                256,0,settings->getMaxSignalHeight(det)); // DA
     }
     //	for(int det = 0; det < 9; det++){
     //	    TString name = (TString)"hRelativeHitPosition"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -680,7 +691,8 @@ void TAnalysisOfClustering::initialiseHistos()
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
         stringstream name;
         name<<"hBiggestHitSizeVsClusterSize_"<<TPlaneProperties::getStringForDetector(det);
-        hBiggestHitVsClusterSize[det] = new TH2F(name.str().c_str(),name.str().c_str(),1024,0,TPlaneProperties::getMaxSignalHeight(det)*2,8,0.5,8.5);
+//        hBiggestHitVsClusterSize[det] = new TH2F(name.str().c_str(),name.str().c_str(),1024,0,TPlaneProperties::getMaxSignalHeight(det)*2,8,0.5,8.5); // DA
+        hBiggestHitVsClusterSize[det] = new TH2F(name.str().c_str(),name.str().c_str(),1024,0,settings->getMaxSignalHeight(det)*2,8,0.5,8.5); // DA
         hBiggestHitVsClusterSize[det]->GetXaxis()->SetTitle("Signal of Biggest Hit in Cluster [adc counts]");
         hBiggestHitVsClusterSize[det]->GetYaxis()->SetTitle("ClusterSize");
     }

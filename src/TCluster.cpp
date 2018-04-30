@@ -369,11 +369,13 @@ bool TCluster::isGoldenGateCluster(){
 bool TCluster::hasSaturatedChannels(){
 	if(IsTransparentCluster()){
 		for(UInt_t i=0; i<GetTransparentClusterSize();i++)
-				if (getAdcValue(getTransparentClusterPosition(i))>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
+//				if (getAdcValue(getTransparentClusterPosition(i))>=TPlaneProperties::getMaxSignalHeight(this->det)) return true; // DA
+				if (getAdcValue(getTransparentClusterPosition(i))>=settings->getMaxSignalHeight(this->det)) return true; // DA
 	}
 	else{
 		for(UInt_t cl=0;cl<this->clusterADC.size();cl++){
-			if (getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(this->det)) return true;
+//			if (getAdcValue(cl)>=TPlaneProperties::getMaxSignalHeight(this->det)) return true; // DA
+			if (getAdcValue(cl)>=settings->getMaxSignalHeight(this->det)) return true; // DA
 		}
 	}
 	return false;
@@ -409,7 +411,8 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
         Int_t old_adc = adc;
         adc = (Int_t)(S_i+ped+0.5);
         str+=  TString::Format(" ==> %6.1f / %4d  - %1d\n", S_i,adc,(old_adc-adc));
-		bool isSaturated = this->getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det);
+//		bool isSaturated = this->getAdcValue(clPos)>=TPlaneProperties::getMaxSignalHeight(det); // DA
+		bool isSaturated = this->getAdcValue(clPos)>=settings->getMaxSignalHeight(det); // DA
 		newClus.addChannel(channel,this->getPedestalMean(clPos),this->getPedestalSigma(clPos),
 		        this->getPedestalMean(clPos,true),this->getPedestalSigma(clPos,true),adc,
 				isSaturated,this->isScreened(clPos));

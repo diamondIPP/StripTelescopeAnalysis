@@ -168,10 +168,14 @@ public:
 	UInt_t getEventBinWidth()const {return bEventBinWidth;} // DA:
 	UInt_t getEventwiseStart()const {return bEventwiseStart;} // DA:
 	UInt_t getEventwiseStop()const {return bEventwiseStop;} // DA:
-//	bool getDoEventwise()const {return bDoEventwise;} // DA:
-//	std::vector<std::pair<Int_t,Int_t> > getSkipEvents()const {return bSkipEvents;} // DA:
 	std::vector<Int_t> getSkipEvents()const {return bSkipEvents;} // DA
-	bool isEventSkip() {return isEventSkipCut;}
+	bool isEventSkip() {return isEventSkipCut;} // DA borrar
+
+	UInt_t getDiaSaturation()const {return dia_saturation;} // DA
+	UInt_t getMaxSignalHeightSilicon()const {return 255;}  // DA
+	UInt_t getMaxSignalHeight(UInt_t det){switch(det){case 8: return getDiaSaturation();default: return getMaxSignalHeightSilicon();}} // DA
+	inline static bool isSaturated(UInt_t det, Int_t adcValue){return (adcValue>=getMaxSignalHeight(det));}
+	UInt_t getMaxTransparentClusterSize()const {return max_transparent_cluster_size;} // DA
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
@@ -470,9 +474,10 @@ private:
 	UInt_t bEventBinWidth; // DA:
 	UInt_t bEventwiseStart; // DA:
 	UInt_t bEventwiseStop; // DA:
-//	bool bDoEventwise; // DA:
-//	std::vector<std::pair<Int_t,Int_t> > bSkipEvents; // DA:
 	std::vector<Int_t> bSkipEvents;
+
+	UInt_t dia_saturation; // DA
+	UInt_t max_transparent_cluster_size; // DA
 
 	std::vector<Float_t> alignment_x_offsets;
 	std::vector<Float_t> alignment_y_offsets;

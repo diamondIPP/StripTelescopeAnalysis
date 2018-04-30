@@ -654,7 +654,8 @@ void TAnalysisOfPedestal::initialiseHistos()
 
         histoName.str("");
         //hLeftVsRightSignal
-        max = TPlaneProperties::getMaxSignalHeight(det);
+//        max = TPlaneProperties::getMaxSignalHeight(det); // DA
+        max = settings->getMaxSignalHeight(det); // DA
         if (max >1000)
             nbins = max/4;
         else
@@ -1824,7 +1825,8 @@ void TAnalysisOfPedestal::SetYRangeForSignalInSigmaPlot(TH1F* histo) {
 
 void TAnalysisOfPedestal::checkCommonModeNoise(){
     UInt_t det = TPlaneProperties::getDetDiamond();
-    Float_t maxVal =TPlaneProperties::getMaxSignalHeightDiamond();
+//    Float_t maxVal =TPlaneProperties::getMaxSignalHeightDiamond(); // DA
+    Float_t maxVal = settings->getDiaSaturation(); // DA
     Float_t cmNoise = 0;
     UInt_t nCmNoiseEvents =0;
     vector<Float_t> channelWeight;
