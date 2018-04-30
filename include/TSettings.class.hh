@@ -168,7 +168,7 @@ public:
 	UInt_t getEventBinWidth()const {return bEventBinWidth;} // DA:
 	UInt_t getEventwiseStart()const {return bEventwiseStart;} // DA:
 	UInt_t getEventwiseStop()const {return bEventwiseStop;} // DA:
-	bool getDoEventwise()const {return bDoEventwise;} // DA:
+//	bool getDoEventwise()const {return bDoEventwise;} // DA:
 //	std::vector<std::pair<Int_t,Int_t> > getSkipEvents()const {return bSkipEvents;} // DA:
 	std::vector<Int_t> getSkipEvents()const {return bSkipEvents;} // DA
 	bool isEventSkip() {return isEventSkipCut;}
@@ -470,7 +470,7 @@ private:
 	UInt_t bEventBinWidth; // DA:
 	UInt_t bEventwiseStart; // DA:
 	UInt_t bEventwiseStop; // DA:
-	bool bDoEventwise; // DA:
+//	bool bDoEventwise; // DA:
 //	std::vector<std::pair<Int_t,Int_t> > bSkipEvents; // DA:
 	std::vector<Int_t> bSkipEvents;
 
