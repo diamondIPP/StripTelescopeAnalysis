@@ -87,7 +87,7 @@ public:
 public:
     TString getMaskedChannels();
 
-    void initialiseResults();
+    void initialiseResults(TSettings *settings);
     void inheritOldResults(const TResults & rhs);
     void setPH_2outOf10(Float_t Mean, Float_t MP, Float_t width, Float_t gSigma,TSettings::alignmentMode mode);
     void setPH_NoutOfN(vector<Float_t> vecMeans, TSettings::alignmentMode mode);

@@ -44,7 +44,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	vecTable.at(5).push_back("mean");
 	vecTable.at(6).push_back("most probable");
 //	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
-	for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
+	for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) { // DA
 		vecTable.at(0).push_back(floatToString(clusterSize+1));
 		vecTable.at(2).push_back(floatToString(vecMeanPulseHeigths.at(0).at(clusterSize)));
 		vecTable.at(3).push_back(floatToString(vecMPPulseHeigths.at(0).at(clusterSize)));
@@ -60,7 +60,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
     addSection("Pulse Height - Summary table",sectionSummary.str());
 	stringstream plots1, plots2;
 //	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) { // DA
-	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) { // DA
+	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize()+1; clusterSize++) { // DA
 		stringstream histoname1, histoname2;
 		histoname1 << "cDiaTranspAnaPulseHeightOf"<<clusterSize<<"Strips";
 		histoname2 << "cDiaTranspAnaPulseHeightOf2HighestIn"<<clusterSize<<"Strips";
@@ -113,7 +113,7 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 		vecTable.at(9).push_back("resolution [&#956m]");
 	}
 //	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
-	for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
+	for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) { // DA
 		vecTable.at(0).push_back(floatToString(clusterSize+1));
 		vecTable.at(1).push_back(floatToString(resolutions.at(0).at(clusterSize).first,2));
 		vecTable.at(2).push_back(floatToString(resolutions.at(0).at(clusterSize).second,2));
@@ -131,7 +131,7 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 	sectionContent << "\n\n<br><br>\n\n";
 	stringstream plots1, plots2, plots3;
 //	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) { // DA
-	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) { // DA
+	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize()+1; clusterSize++) { // DA
 		stringstream histoname1, histoname2, histoname3;
 		TString name1,name2,name3;
 		name1 = TString::Format("hDiaTranspAnaResidualChargeWeightedIn%02dStripsMinusPred",clusterSize);
@@ -159,7 +159,7 @@ void THTMLTransparentAnalysis::createEtaPlots() {
 	//	<<"</h2>\n";
 
 //	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
-	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
+	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) { // DA
 		stringstream histoname;
 		histoname << "hDiaTranspAnaEta2HighestIn"<<clusterSize+1<<"Strips";
 		sectionContent << putImage(".",histoname.str());
@@ -179,7 +179,7 @@ void THTMLTransparentAnalysis::createEtaIntegrals() {
 	//	<<"</h2>\n";
 
 //	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
-	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
+	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) { // DA
 		stringstream histoname;
 		histoname << "hDiaTranspAnaEtaIntegral2HighestIn"<<clusterSize+1<<"Strips";
 		sectionContent << putImage(".",histoname.str());

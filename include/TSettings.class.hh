@@ -171,11 +171,11 @@ public:
 	std::vector<Int_t> getSkipEvents()const {return bSkipEvents;} // DA
 	bool isEventSkip() {return isEventSkipCut;} // DA borrar
 
-	UInt_t getDiaSaturation()const {return dia_saturation;} // DA
-	UInt_t getMaxSignalHeightSilicon()const {return 255;}  // DA
+	UInt_t getDiaSaturation() {return dia_saturation;} // DA
+	UInt_t getMaxSignalHeightSilicon() {return 255;}  // DA
 	UInt_t getMaxSignalHeight(UInt_t det){switch(det){case 8: return getDiaSaturation();default: return getMaxSignalHeightSilicon();}} // DA
-	inline static bool isSaturated(UInt_t det, Int_t adcValue){return (adcValue>=getMaxSignalHeight(det));}
-	UInt_t getMaxTransparentClusterSize()const {return max_transparent_cluster_size;} // DA
+	bool isSaturated(UInt_t det, Int_t adcValue) {return (adcValue>=getMaxSignalHeight(det));} // DA
+	UInt_t getMaxTransparentClusterSize() {return max_transparent_cluster_size;} // DA
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 

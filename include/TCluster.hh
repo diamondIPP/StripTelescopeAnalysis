@@ -19,7 +19,7 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
-#include <math.h>  
+#include <math.h>
 #define TCLUSTER_REV  40
 #define INVALID_POSITION -9999
 using namespace std;
@@ -31,7 +31,7 @@ public:
     TCluster()
     {	initialiseNewCluster();
     };
-    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256, float cmNoise=0);
+    TCluster(int eventNumber,UChar_t det,  int seedSigma = 10, int hitSigma = 7,UInt_t nChannels=256, float cmNoise=0, UInt_t maxHeight=4095);
     TCluster(const TCluster& a);//COPY Constructor
     virtual ~TCluster();
     TCluster &operator=(const TCluster &src); //class assignment function
@@ -162,6 +162,7 @@ private:
     Float_t cmNoise;
     Float_t isTransparentCluster;
     UInt_t transparentClusterSize;
+    UInt_t maxHeight;
     ClassDef(TCluster,TCLUSTER_REV);
 };
 #endif /* TCLUSTER_HH_ */

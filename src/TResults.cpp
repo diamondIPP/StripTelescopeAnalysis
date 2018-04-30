@@ -16,13 +16,13 @@ TResults::TResults(UInt_t runnumber){
     this->runnumber = runnumber;
     TString name =  TString::Format("results_%d",this->runnumber);
     this->SetName(name);
-    initialiseResults();
+//    initialiseResults();
     rootFileName = TString::Format("results.%d.root",this->runnumber);
 }
 
 TResults::TResults(TSettings *settings) {
     path = gSystem->pwd();
-    initialiseResults();
+    initialiseResults(settings);
     setResultsFromSettings(settings);
     cout<<"New TResults with settings "<<settings;
     if (settings) cout << "\t run: "<<settings->getRunNumber()<<endl;
@@ -48,7 +48,7 @@ TResults::~TResults() {
 }
 
 TResults::TResults(const   TResults& rhs){//copy constructor
-    initialiseResults();
+//    initialiseResults();
     inheritOldResults(rhs);
 }
 //
@@ -154,16 +154,16 @@ void TResults::inheritOldResults(const TResults & rhs)
     cout<<"added "<<k<< " keys in "<< i << " section..."<<endl;
 }
 
-void TResults::initialiseResults(){
+void TResults::initialiseResults(TSettings *settings){
     repeaterCard = -1;
     runnumber = -1;
     seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
     hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
     noise.resize(TPlaneProperties::getNDetectors(),-1);
 //    meanNoutOfN_normal.resize(TPlaneProperties::getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
-    meanNoutOfN_normal.resize(settings->getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
+    meanNoutOfN_normal.resize(settings->getMaxTransparentClusterSize()); // DA
 //    meanNoutOfN_trans.resize(TPlaneProperties::getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
-    meanNoutOfN_trans.resize(settings->getMaxTransparentClusterSize(TPlaneProperties::getDetDiamond()),-1); // DA
+    meanNoutOfN_trans.resize(settings->getMaxTransparentClusterSize()); // DA
     doubleGaus1_normal = -1;
     doubleGaus2_normal = -1;
     doubleGaus1_trans = -1;
