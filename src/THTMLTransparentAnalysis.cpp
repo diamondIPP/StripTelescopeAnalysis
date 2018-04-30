@@ -77,14 +77,25 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
     addSection("Pulse Height of N strips",sectionAll.str());
     addSection("Pulse Height of 2 hightest channels in N strips",section2Highest.str());
 
+	TString name;
 	stringstream pXY;
-	pXY << putImage((string)".",(string)"hLandau2HighestFidCutX_2outOf10")<<"\n";
-	pXY << putImage((string)".",(string)"hLandau2HighestFidCutY_2outOf10")<<"\n";
+	name = TString::Format("hLandau2HighestFidCutX_2outOf%02d",settings->getMaxTransparentClusterSize());
+//	pXY << putImage((string)".",(string)"hLandau2HighestFidCutX_2outOf10")<<"\n"; // DA
+	pXY << putImage((string)".",(string)name) <<"\n"; // DA
+	name = TString::Format("hLandau2HighestFidCutY_2outOf%02d",settings->getMaxTransparentClusterSize());
+//	pXY << putImage((string)".",(string)"hLandau2HighestFidCutY_2outOf10")<<"\n"; // DA
+	pXY << putImage((string)".",(string)name)<<"\n"; // DA
 	pXY <<"\n\n<br><br>\n\n";
-    pXY << putImage((string)".",(string)"hLandau2HighestPredHitX_2outOf10")<<"\n";
-    pXY << putImage((string)".",(string)"hLandau2HighestPredHitY_2outOf10")<<"\n";
-    pXY <<"\n\n<br><br>\n\n";
-    pXY << putImage((string)".",(string)"hLandau2HighestHitProfile_2OutOf10")<<"\n";
+	name = TString::Format("hLandau2HighestPredHitX_2outOf%02d",settings->getMaxTransparentClusterSize());
+//	pXY << putImage((string)".",(string)"hLandau2HighestPredHitX_2outOf10")<<"\n"; // DA
+	pXY << putImage((string)".",(string)name)<<"\n"; // DA
+	name = TString::Format("hLandau2HighestPredHitY_2outOf%02d",settings->getMaxTransparentClusterSize());
+//	pXY << putImage((string)".",(string)"hLandau2HighestPredHitY_2outOf10")<<"\n"; // DA
+	pXY << putImage((string)".",(string)name)<<"\n"; // DA
+	pXY <<"\n\n<br><br>\n\n";
+	name = TString::Format("hLandau2HighestHitProfile_2OutOf%02d",settings->getMaxTransparentClusterSize());
+//	pXY << putImage((string)".",(string)"hLandau2HighestHitProfile_2OutOf10")<<"\n"; // DA
+	pXY << putImage((string)".",(string)name)<<"\n"; // DA
     addSection("XY Pulse Height Distributions",pXY.str());
 }
 
