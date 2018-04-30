@@ -30,7 +30,7 @@ public:
 	inline static UInt_t getNChannelsDiamond(){return 128;};
 	inline static UInt_t getNChannels(UInt_t det){switch (det){case 8: return TPlaneProperties::getNChannelsDiamond();break;default: return TPlaneProperties::getNChannelsSilicon();break;}}
 	inline static UInt_t getMaxSignalHeightSilicon(){return 255;};
-	inline static UInt_t getMaxSignalHeightDiamond(){return 3370;};//{return 4095;};
+	inline static UInt_t getMaxSignalHeightDiamond(){return 3367;};//{return 4095;};
 	inline static Int_t getMaxSignalHeight(UInt_t det){switch(det){case 8: return getMaxSignalHeightDiamond();default: return getMaxSignalHeightSilicon();}}
 	inline static UInt_t getPlaneNumber(UInt_t det){return det/2;};
 	inline static UInt_t getNSiliconPlanes(){return 4;};
