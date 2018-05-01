@@ -151,6 +151,8 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 	for (int i=0; i<128;i++){
 		Dia0.ADC_values[i]=rzEvent.RD42[i*2+1];
 		Dia1.ADC_values[i]=rzEvent.RD42[i*2];
+		Dia0.ADC_values[i] *= settings->getDiaAdcScaleFactor();
+		Dia1.ADC_values[i] *= settings->getDiaAdcScaleFactor();
 		//if(i<20)cout<<rzEvent.RD42[i*2]<<" "<<Dia0.ADC_values[i]<<"  ";
 	}
 	// cout<<endl;
