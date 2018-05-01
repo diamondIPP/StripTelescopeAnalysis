@@ -515,6 +515,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"snr_distribution_di_max"))  ParseFloat(key,value,snr_distribution_di_max);
 		if (TPlaneProperties::startsWith(key,"alignment_chi2")) Parse(key,value,alignment_chi2);
 		if (TPlaneProperties::startsWith(key,"transparentChi2")) Parse(key,value,transparentChi2);
+		if (TPlaneProperties::startsWith(key, "DiaAdcScaleFactor"))  ParseFloat(key, value, DiaAdcScaleFactor);
 		if (TPlaneProperties::startsWith(key,"UseAutoFidCut")) Parse(key,value,UseAutoFidCut);
 		if (TPlaneProperties::startsWith(key,"nDiamonds")) this->setNDiamonds(ParseInt(key,value));
 		if (TPlaneProperties::startsWith(key,"AlternativeClustering")) Parse(key,value,AlternativeClustering);
@@ -756,6 +757,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	noise_si_max = 8;
 	noise_di_num_bins = 128;
 	noise_di_max = 32;
+
+	DiaAdcScaleFactor = 1.;
 
 	snr_distribution_num_bins = 1000;
 	snr_distribution_si_max = 500;
@@ -1807,6 +1810,11 @@ Float_t TSettings::getNoise_di_max() const
 	return noise_di_max;
 }
 
+Float_t TSettings::getDiaAdcScaleFactor() const
+{
+	return DiaAdcScaleFactor;
+}
+
 Int_t TSettings::getSaveAllFilesSwitch() const
 {
 	return SaveAllFilesSwitch;
@@ -1870,6 +1878,11 @@ void TSettings::setNoise_di_num_bins(Int_t noise_di_num_bins)
 void TSettings::setNoise_di_max(Float_t noise_di_max)
 {
 	this->noise_di_max = noise_di_max;
+}
+
+void TSettings::setDiaAdcScaleFactor(Float_t DiaAdcScaleFactor)
+{
+	this->DiaAdcScaleFactor = DiaAdcScaleFactor;
 }
 
 void TSettings::setSaveAllFilesSwitch(Int_t SaveAllFilesSwitch)

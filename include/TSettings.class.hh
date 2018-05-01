@@ -169,6 +169,7 @@ public:
 	Float_t getEta_lowq_slice_hi() const;
 	Float_t getEta_lowq_slice_low() const;
 	UInt_t getMaxAllowedClustersize(UInt_t det);
+	Float_t getDiaAdcScaleFactor() const;
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
@@ -227,6 +228,7 @@ public:
 	void setNoise_si_max     (Float_t noise_si_max     );
 	void setNoise_di_num_bins(Int_t   noise_di_num_bins);
 	void setNoise_di_max     (Float_t noise_di_max     );
+	void setDiaAdcScaleFactor(Float_t DiaAdcScaleFactor);
 	void setSaveAllFilesSwitch(Int_t SaveAllFilesSwitch);
 	void setSnr_distribution_num_bins(Float_t snr_distribution_num_bins);
 	void setSnr_distribution_di_max(Float_t snr_distribution_di_max);
@@ -472,6 +474,7 @@ private:
 	Float_t eta_hiq_slice_hi;
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
+	Float_t DiaAdcScaleFactor;
 
 
 	std::vector<Float_t> alignment_x_offsets;
