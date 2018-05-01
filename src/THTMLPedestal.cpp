@@ -158,12 +158,3 @@ void THTMLPedestal::createSaturatedChannels()
 	sectionContent<<putImagesOfAllDetectors(".", "hSaturatedChannels_");
 	this->addSection("Saturated Channels",sectionContent.str());
 }
-
-
-
-
-
-
-
-
-
