@@ -155,7 +155,7 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 	}
 	// cout<<endl;
 
-	//Memory Consistancy check. If The amounof Diamond memory is not 263 bytes worth, then this will output a non sensical number.
+	//Memory consistency check. If the amount of Diamond memory is not 263 bytes worth, then this will output a non sensible number.
 	if (verbosity&&(EventNumber%1000 == 0))
 	{
 		cout << "For requested event " << EventNumber << ", the current value of EvTrig and EvPos is: " << rzEvent.EvTrig << " and " << rzEvent.EvPos << endl;
