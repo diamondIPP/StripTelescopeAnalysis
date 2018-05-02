@@ -627,6 +627,13 @@ void TResults::createOutputResultFile(){
     myfile << createSection("Feed_Through_Correction",results);
 
     results.clear();
+	for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det += 1) {
+        results[TString("seed_" + TPlaneProperties::getStringForDetector(det))] = TString::Format("%.1f", seedSigma[det]);
+        results[TString("hit_"  + TPlaneProperties::getStringForDetector(det))] = TString::Format("%.1f", hitSigma [det]);
+    }
+    myfile << createSection("Cluster_cuts",results);
+
+    results.clear();
     results["mean2outOf10_clustered"] =     TString::Format("%+7.2f\t",mean_clustered_normal);;
     results["mp2outOf10_clustered"] =       TString::Format("%+7.2f\t",mp_clustered_normal);
     results ["width2outOf10_clustered"] =   TString::Format("%+7.2f\t",width_clustered_normal);
