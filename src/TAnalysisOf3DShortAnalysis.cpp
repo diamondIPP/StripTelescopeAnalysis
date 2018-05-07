@@ -201,7 +201,7 @@ void TAnalysisOf3DShortAnalysis::initHistos() {
             //hPHvsChannel.back()->GetXaxis()->SetRange(PulseHeightMin,PulseHeightMax);
         }
 
-        //hPHvsChannel.at(i)->SetMaximum(3000);
+        //hPHvsChannel.at(i)->SetMaximum(4096);
         //hPHvsChannel.at(i)->SetMinimum(0);
 
         //hHitandSeedCount

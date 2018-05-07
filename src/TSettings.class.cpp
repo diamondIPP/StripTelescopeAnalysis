@@ -753,7 +753,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 
 	pulse_height_num_bins = 300;
 	pulse_height_si_max = 300;
-	pulse_height_di_max = 3000;
+	pulse_height_di_max = 4096;
 
 	snr_distribution_si_max = 2500;
 	snr_distribution_di_max = 2500;

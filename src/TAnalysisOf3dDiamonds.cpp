@@ -1175,7 +1175,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXY->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetTitle("charge / ADC");
 //    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(0,3000);
+    hPulseHeightVsDetectorHitPostionXY->GetZaxis()->SetRangeUser(0,4096);
 
     name = "hPulseHeightVsCell"+appendix;
     hPulseHeightVsCell = histSaver->GetProfile2dBinedInCells(name,1);
@@ -1183,7 +1183,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsCell->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsCell->GetZaxis()->SetTitle("charge / ADC");
 //    hPulseHeightVsCell->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-    hPulseHeightVsCell->GetZaxis()->SetRangeUser(0,3000);
+    hPulseHeightVsCell->GetZaxis()->SetRangeUser(0,4096);
 
     for (UInt_t i = 0; i< 6;i++){
         name = TString::Format("hPulseHeightVsDetectorHitPostionXY_clusterSize_%d",i+1);
@@ -1201,7 +1201,7 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetYaxis()->SetTitle("#it{y} / #mum");
     hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetTitle("charge /ADC");
 //    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(0,3000);
+    hPulseHeightVsDetectorHitPostionXYGoodCells->GetZaxis()->SetRangeUser(0,4096);
 
     //hDetXvsDetY3DEvents
     //	hDetXvsDetY3DEvents = (TH2D*)hPulseHeightVsDetectorHitPostionXY->Clone("hDetXvsDetY3DvsEvents");

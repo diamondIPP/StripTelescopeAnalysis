@@ -358,7 +358,7 @@ void TTransparentAnalysis::initHistograms2() {
         hLandau2HighestHitProfile->GetYaxis()->SetTitle("Pred. Y Position");
         hLandau2HighestHitProfile->GetZaxis()->SetTitle(TString::Format("Avrg Mean Charge, 2 highest in %d",clusterSize+1));
         hLandau2HighestHitProfile->SetMinimum(0);
-        hLandau2HighestHitProfile->SetMaximum(3000);
+        hLandau2HighestHitProfile->SetMaximum(4096); // DA
         hLandau2HighestProfile2D.push_back(hLandau2HighestHitProfile);
 
         name = TString::Format("hLandau2HighestFidCutX_2outOf%02d",clusterSize+1);
@@ -390,7 +390,7 @@ void TTransparentAnalysis::initHistograms1() {
         hLandau1HighestHitProfile->GetYaxis()->SetTitle("Pred. Y Position");
         hLandau1HighestHitProfile->GetZaxis()->SetTitle(TString::Format("Avrg Mean Charge, 1 highest in %d",clusterSize+1));
         hLandau1HighestHitProfile->SetMinimum(0);
-        hLandau1HighestHitProfile->SetMaximum(3000);
+        hLandau1HighestHitProfile->SetMaximum(4096); // DA
         hLandau1HighestProfile2D.push_back(hLandau1HighestHitProfile);
 
         name = TString::Format("hLandau1HighestFidCutX_1outOf%02d",clusterSize+1);
@@ -1174,7 +1174,7 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo){
 }
 
 void TTransparentAnalysis::AnalyzeLandauVsEventNoFitSlices(TH2* hLandauVsEventNo){
-    TF1* fLandau = new TF1("fitLandau","landau",0,3000);
+    TF1* fLandau = new TF1("fitLandau","landau",0,4096); // DA
     TObjArray* objArray = new    TObjArray();
     objArray->SetOwner(kTRUE);
     hLandauVsEventNo->FitSlicesY(fLandau,0,-1,30,"QNRG5S",objArray);
@@ -1229,7 +1229,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
 
     if(clusterSize-1 < vecVecPh2Highest.size()){
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
-        hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,nEvents/1e4,512,0,nEvents,0,3000);
+        hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,nEvents/1e4,512,0,nEvents,0,4096); // DA
         cout<<"Save "<<name<<" "<<hLandau2OutOfXVsEventNo;
         if(hLandau2OutOfXVsEventNo) cout<<" "<<hLandau2OutOfXVsEventNo->GetEntries();
         cout<<endl;

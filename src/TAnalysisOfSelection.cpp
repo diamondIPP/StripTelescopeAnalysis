@@ -641,7 +641,7 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 		hMeanChargeArea->GetXaxis()->SetRangeUser(xmin-xCorrect,xmax+xCorrect);
 		hMeanChargeArea->GetYaxis()->SetRangeUser(ymin-yCorrect,ymax+yCorrect);
 		hMeanChargeArea->SetMinimum(0);
-		hMeanChargeArea->SetMaximum(3000);
+		hMeanChargeArea->SetMaximum(4096);
 		if(verbosity)cout<<"."<<flush;
 		histSaver->SaveHistogram(hMeanChargeArea);
 		if(verbosity)cout<<"."<<flush;
