@@ -313,6 +313,7 @@ void TResults::setResultsFromSettings(TSettings* settings){
     voltage = settings->getVoltage();
     StringMap["currentBegin"] = settings->GetCurrentBegin();
     StringMap["currentEnd"] = settings->GetCurrentEnd();
+    DiaAdcScaleFactor = settings->getDiaAdcScaleFactor();
 //    std::sort(maskedChannels.begin(),maskedChannels.end());
     //	cout<<runDescription<<endl;
     //	char t;
@@ -625,6 +626,10 @@ void TResults::createOutputResultFile(){
     results["sigSil"] = TString::Format("%+6.2f\t",getAvergSiliconCorrection().second*100);
     results["CorDia"] = TString::Format("%+6.2f\t",getAvergDiamondCorrection()*100);
     myfile << createSection("Feed_Through_Correction",results);
+
+    results.clear();
+    results["DiaAdcScaleFactor"] = TString::Format("%.8f\t", DiaAdcScaleFactor);
+    myfile << createSection("ADC_Correction", results);
 
     results.clear();
 	for (UInt_t det = 0; det < TPlaneProperties::getNDetectors(); det += 1) {

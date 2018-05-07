@@ -180,6 +180,8 @@ private:
     std::map<TString, TString> StringMap;
     outer_map keyList;
     ClassDef(TResults,8);
+
+    Float_t DiaAdcScaleFactor;
 };
 
 #endif /* TRESULTS_HH_ */

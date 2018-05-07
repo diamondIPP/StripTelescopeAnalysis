@@ -151,11 +151,13 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 	for (int i=0; i<128;i++){
 		Dia0.ADC_values[i]=rzEvent.RD42[i*2+1];
 		Dia1.ADC_values[i]=rzEvent.RD42[i*2];
+		Dia0.ADC_values[i] *= settings->getDiaAdcScaleFactor();
+		Dia1.ADC_values[i] *= settings->getDiaAdcScaleFactor();
 		//if(i<20)cout<<rzEvent.RD42[i*2]<<" "<<Dia0.ADC_values[i]<<"  ";
 	}
 	// cout<<endl;
 
-	//Memory Consistancy check. If The amounof Diamond memory is not 263 bytes worth, then this will output a non sensical number.
+	//Memory consistency check. If the amount of Diamond memory is not 263 bytes worth, then this will output a non sensible number.
 	if (verbosity&&(EventNumber%1000 == 0))
 	{
 		cout << "For requested event " << EventNumber << ", the current value of EvTrig and EvPos is: " << rzEvent.EvTrig << " and " << rzEvent.EvPos << endl;
