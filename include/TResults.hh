@@ -168,6 +168,7 @@ private:
     Float_t singleGaus_trans;
 
     Int_t repeaterCard;
+    Int_t dia_input;
     Int_t voltage;
     TString diamondName;
     std::pair<Int_t,Int_t> diamondChannels;

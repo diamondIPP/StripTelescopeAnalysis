@@ -97,6 +97,7 @@ void TResults::inheritOldResults(const TResults & rhs)
     width_clustered_trans = rhs.width_clustered_trans;
     gSigma_clustered_trans = rhs.gSigma_clustered_trans;
     repeaterCard = rhs.repeaterCard;
+    dia_input = rhs.dia_input;
     maskedChannels.clear();
     for (set<Int_t>::iterator it = rhs.maskedChannels.begin(); it !=  rhs.maskedChannels.end();it++)
         maskedChannels.insert(*it);
@@ -156,6 +157,7 @@ void TResults::inheritOldResults(const TResults & rhs)
 
 void TResults::initialiseResults(){
     repeaterCard = -1;
+    dia_input = -1;
     runnumber = -1;
     seedSigma.resize(TPlaneProperties::getNDetectors(),-1);
     hitSigma.resize(TPlaneProperties::getNDetectors(),-1);
@@ -309,6 +311,7 @@ void TResults::setResultsFromSettings(TSettings* settings){
     std::cout<<"get diamondChannels: "<<rundes<<std::endl;
     diamondChannels = settings->diamondPattern.getIntervalOfDiamond(rundes);
     repeaterCard = settings->getRepeaterCard();
+    dia_input = settings->getDia_input();
     diamondName = settings->getDiamond();
     voltage = settings->getVoltage();
     StringMap["currentBegin"] = settings->GetCurrentBegin();
@@ -591,6 +594,7 @@ void TResults::createOutputResultFile(){
     results["descr."] = runDescription;
     results["dia"] = diamondName;
     results["RepeaterCardNo"] = TString::Format("%d",repeaterCard);
+    results["dia_input"] = TString::Format("%d", dia_input);
     results["corrected"] = TString::Format("%d",(runnumber>1e5));
     if (voltage == 0)
         results["Voltage"] = "UNKOWN";
