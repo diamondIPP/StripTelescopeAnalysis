@@ -77,6 +77,7 @@ private:
 	Float_t diaPedestalMean[N_DIA_CHANNELS];
 	Float_t diaPedestalSigma[N_DIA_CHANNELS];
 	UChar_t diaChannel[N_DIA_CHANNELS]; // DA: to get quickly the channel of the signal
+	UChar_t silChannel[8][N_DET_CHANNELS]; // DA: to get quickly the channel of the signal
 
 	Float_t diaPedestalMeanStartValues[N_DIA_CHANNELS];
 	Float_t diaPedestalSigmaStartValues[N_DIA_CHANNELS];
@@ -124,6 +125,21 @@ private:
 	int verbosity;
 	static Float_t getLowLimitPedestal(Float_t pedMean, Float_t pedSigma,Float_t maxSigma);
 	static Float_t getHighLimitPedestal(Float_t pedMean, Float_t pedSigma,Float_t maxSigma);
+
+	bool silHitChs[8][N_DET_CHANNELS];
+	bool silSeedChs[8][N_DET_CHANNELS];
+	bool silHitChsDeque[1000][8][N_DET_CHANNELS];
+	bool silSeedChsDeque[1000][8][N_DET_CHANNELS];
+	bool diaHitChs[N_DIA_CHANNELS];
+	bool diaSeedChs[N_DIA_CHANNELS];
+	bool diaHitChsCmc[N_DIA_CHANNELS];
+	bool diaSeedChsCmc[N_DIA_CHANNELS];
+	bool diaCmChs[N_DIA_CHANNELS];
+	bool diaCmChsDeque[1000][N_DIA_CHANNELS];
+	bool diaHitChsDeque[1000][N_DIA_CHANNELS];
+	bool diaSeedChsDeque[1000][N_DIA_CHANNELS];
+	bool diaHitChsCmcDeque[1000][N_DIA_CHANNELS];
+	bool diaSeedChsCmcDeque[1000][N_DIA_CHANNELS];
 };
 
 #endif /* PEDESTALCALCULATION_HH_ */

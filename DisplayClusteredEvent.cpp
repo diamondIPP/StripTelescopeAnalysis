@@ -75,7 +75,7 @@ int DisplayClusteredEvent(unsigned int RunNumber, unsigned int EventNumber, stri
       Float_t Det_PedWidth[9][256];
       
       //Event Header Branches
-      PedestalTree->SetBranchAddress("RunNumber",&run_number);
+//      PedestalTree->SetBranchAddress("RunNumber",&run_number);
       PedestalTree->SetBranchAddress("EventNumber",&event_number);
       PedestalTree->SetBranchAddress("StoreThreshold",&store_threshold);
    

@@ -45,19 +45,19 @@ void setBranches(TTree* rawTree){
 	rawTree->Branch("D3X_ADC",&Det_ADC[6],"D3X_ADC[256]/b");
 	rawTree->Branch("D3Y_ADC",&Det_ADC[7],"D3Y_ADC[256]/b");
 	rawTree->Branch("DiaADC",&Dia_ADC,"DiaADC[128]/s");
-	rawTree->Branch("RunNumber",&runNumber,"RunNumber/i");
+//	rawTree->Branch("RunNumber",&runNumber,"RunNumber/i");
 	rawTree->Branch("EventNumber",&eventNumber,"EventNumber/i");
 }
 
 void setBranchAdresses(TTree* tree){
-	if(tree->FindBranch("RunNumber")){
+	/*if(tree->FindBranch("RunNumber")){
 		tree->SetBranchAddress("RunNumber",&runNumber);
 		if(verbosity>3)cout<<"Set Branch \"RunNumber\""<<endl;
 	}
 	else if(tree->FindBranch("runNumber")){
 		tree->SetBranchAddress("runNumber",&runNumber);
 		if(verbosity>3)cout<<"Set Branch \"runNumber\""<<endl;
-	}
+	}*/
 	if(tree->FindBranch("EventNumber")){
 		tree->SetBranchAddress("EventNumber",&eventNumber);
 		if(verbosity>3)cout<<"Set Branch \"EventNumber\""<<endl;

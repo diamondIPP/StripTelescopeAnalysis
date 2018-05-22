@@ -390,8 +390,8 @@ void TClustering::setBranchAdresses(){
 	clusterRev=TCluster::TCLUSTER_REVISION();
 	if(verbosity)cout<<"Branch eventNumber"<<endl;
 	clusterTree->Branch("eventNumber",&nEvent,"eventNumber/i");
-	if(verbosity)cout<<"Branch runNumber"<<endl;
-	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");
+	/*if(verbosity)cout<<"Branch runNumber"<<endl;
+	clusterTree->Branch("runNumber",&runNumber,"runNumber/i");*/
 	if(verbosity)cout<<"Branch nClusters"<<endl;
 	clusterTree->Branch("nClusters",&nClusters,"nClusters/i[9]");
 	if(verbosity)cout<<"Branch clusterRev"<<endl;

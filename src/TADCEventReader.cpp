@@ -98,14 +98,14 @@ bool TADCEventReader::isOK(){
 void TADCEventReader::SetBranchAddresses(){
 	pEvent=0;
 	//Event Header Branches
-	if(tree->FindBranch("RunNumber")){
+	/*if(tree->FindBranch("RunNumber")){
 		tree->SetBranchAddress("RunNumber",&run_number);
 		if(verbosity>3)cout<<"Set Branch \"RunNumber\""<<endl;
 	}
 	else if(tree->FindBranch("runNumber")){
 		tree->SetBranchAddress("runNumber",&run_number);
 		if(verbosity>3)cout<<"Set Branch \"runNumber\""<<endl;
-	}
+	}*/
 	if(tree->FindBranch("EventNumber")){
 		tree->SetBranchAddress("EventNumber",&event_number);
 		if(verbosity>3)cout<<"Set Branch \"EventNumber\""<<endl;

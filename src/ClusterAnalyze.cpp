@@ -56,7 +56,7 @@ ClusterAnalyze::ClusterAnalyze(unsigned int RunNumber, string RunDescription = "
    //PedTree->Branch("EventBranch","PSEvent",&store_event,24000,0); //address must be address of a pointer to a stored event
    
    //Event Header Branches
-   ClusterTree->SetBranchAddress("RunNumber",&run_number,"RunNumber/i");
+//   ClusterTree->SetBranchAddress("RunNumber",&run_number,"RunNumber/i");
    ClusterTree->SetBranchAddress("EventNumber",&event_number,"EventNumber/i");
    ClusterTree->SetBranchAddress("StoreThreshold",&store_threshold,"StoreThreshold/F");
 

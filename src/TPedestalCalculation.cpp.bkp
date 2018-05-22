@@ -593,19 +593,19 @@ void TPedestalCalculation::updateDiamondPedestals(){
 
 void TPedestalCalculation::setBranchAdresses(){
 	pedestalTree->Branch("PedestalMean",&pedestalMean,"PedestalMean[8][256]/F");
-	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestaSigma[8][256]/F");
-	pedestalTree->Branch("cmn_sil",&cmn_sil,"cmn_sil[8]/F");
+	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestalSigma[8][256]/F");
+//	pedestalTree->Branch("cmn_sil",&cmn_sil,"cmn_sil[8]/F");
 
 	pedestalTree->Branch("diaChannel",&diaChannel,"diaChannel[128]/i"); // DA:
 	pedestalTree->Branch("diaPedestalMean",&diaPedestalMean,"diaPedestalMean[128]/F");
-	pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestaSigma[128]/F");
+	pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestalSigma[128]/F");
 
 	pedestalTree->Branch("diaPedestalMeanCMN",&diaPedestalMeanCMN,"diaPedestalMeanCMN[128]/F");
-	pedestalTree->Branch("diaPedestalSigmaCMN",&diaPedestalSigmaCMN,"diaPedestaSigmaCMN[128]/F");
+	pedestalTree->Branch("diaPedestalSigmaCMN",&diaPedestalSigmaCMN,"diaPedestalSigmaCMN[128]/F");
 	pedestalTree->Branch("commonModeNoise",&cmNoise,"commonModeNoise/F");
 
 	pedestalTree->Branch("eventNumber",&nEvent,"eventNumber/i");
-	pedestalTree->Branch("runNumber",&runNumber,"runNumber/i");
+//	pedestalTree->Branch("runNumber",&runNumber,"runNumber/i");
 	pedestalTree->Branch("cmnCorrection",&doCMNCorrection,"cmnCorrection/O");
 }
 

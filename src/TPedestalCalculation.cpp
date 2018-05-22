@@ -45,6 +45,10 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	    cmn_sil[i] = 0;
     for (UInt_t i = 0; i < N_DIA_CHANNELS; i++)
 		diaChannel[i] = (UChar_t)i;
+	for (UInt_t i = 0; i < 8; i++){
+		for (UInt_t j = 0; j < N_DET_CHANNELS; j++)
+			silChannel[i][j] = (UChar_t)j;
+	}
 }
 
 TPedestalCalculation::~TPedestalCalculation() {
@@ -197,9 +201,8 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDet(int det,i
 	this->detEventUsed[det][ch].clear();
 	for(nEvent=0;nEvent<adcQueue.size();nEvent++){
 		Float_t adc = (Float_t)adcQueue.at(nEvent);
-		//mean - maxSigma*sigma<=adc<= mean + maxSigma*sigma <-- Than it is no hit/seed
-		if(  ( adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma) )
-				&&( adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
+		//mean - maxSigma*sigma<=adc<= mean + maxSigma*sigma <-- Than it is no hit/seed // DA: block commented line below
+		if(  (/* adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma) )&&(*/ adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
 			detEventUsed[det][ch].push_back(true);
 			detSUM[det][ch]+=adc;
 			detSUM2[det][ch]+=adc*adc;
@@ -207,6 +210,19 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDet(int det,i
 		}//end if
 		else
 			detEventUsed[det][ch].push_back(false);
+		// DA: flags to identify if hit or seed
+		if(adc-meanChannel < settings->getClusterHitFactor(det, ch) * sigmaChannel){
+			silHitChsDeque[nEvent][det][ch] = false;
+			silSeedChsDeque[nEvent][det][ch] = false;
+		}
+		else if((settings->getClusterHitFactor(det, ch) * sigmaChannel <= adc-meanChannel) && (adc-meanChannel < settings->getClusterSeedFactor(det, ch) * sigmaChannel)){
+			silHitChsDeque[nEvent][det][ch] = true;
+			silSeedChsDeque[nEvent][det][ch] = false;
+		}
+		else{
+			silHitChsDeque[nEvent][det][ch] = false;
+			silSeedChsDeque[nEvent][det][ch] = true;
+		}
 	}//end for nEvent
 	if(detEventsInSum[det][ch]<0.1*adcQueue.size())
 		cout<<"For the calculation of first pedestals in det "<<det<<" and ch "<<ch<<"there were only "<<detEventsInSum[det][ch]<<" Events used..."<<endl;
@@ -223,9 +239,9 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 	diaEventsInSum[ch]=0;
 	this->diaEventUsed[ch].clear();
 	for(UInt_t nEvent=0;nEvent<adcQueue.size();nEvent++){
-		Float_t adc = (Float_t) adcQueue.at(nEvent);
-		if(   (adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma)  )
-				&& (adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
+		Float_t adc = (Float_t) adcQueue.at(nEvent); // DA: block commented line below
+		if(   (/*adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma)  )
+				&& (*/adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
 			diaEventUsed[ch].push_back(true);
 			diaSUM[ch]+=adc;
 			diaSUM2[ch]+=adc*adc;
@@ -233,6 +249,20 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 		}//end if
 		else
 			diaEventUsed[ch].push_back(false);
+		// DA: flags to identify if hit or seed
+		if(adc-meanChannel < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaChannel){
+			diaHitChsDeque[nEvent][ch] = false;
+			diaSeedChsDeque[nEvent][ch] = false;
+		}
+		else if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaChannel <= adc-meanChannel) && (adc-meanChannel < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaChannel)){
+			diaHitChsDeque[nEvent][ch] = true;
+			diaSeedChsDeque[nEvent][ch] = false;
+		}
+		else{
+			diaHitChsDeque[nEvent][ch] = false;
+			diaSeedChsDeque[nEvent][ch] = true;
+		}
+
 	}//end for nEvent
 	if(diaEventsInSum[ch]<0.1*adcQueue.size())
 		cout<<"For the calculation of first pedestals in diamond and ch "<<ch<<"there were only "<<diaEventsInSum[ch]<<" Events used..."<<endl;
@@ -250,7 +280,7 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 }
 
 pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch, deque<Float_t> adcQueue, float meanCMN, float sigmaCMN, int iterations, float maxSigma) {
-	cout<<"calculateFirstPedestalDiaCMN "<<ch<<" "<<meanCMN<< " "<< sigmaCMN<< " "<<iterations<< " "<<maxSigma<<endl;
+	if(verbosity>4)cout<<"calculateFirstPedestalDiaCMN "<<ch<<" "<<meanCMN<< " "<< sigmaCMN<< " "<<iterations<< " "<<maxSigma<<endl;
     diaSUMCmn[ch]=0;
 	diaSUM2Cmn[ch]=0;
 	diaEventsInSumCMN[ch]=0;
@@ -260,8 +290,8 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 		Float_t adc = adcQueue.at(nEvent);
 		Float_t lowLimit = getLowLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 		Float_t highLimit = getHighLimitPedestal(meanCMN,sigmaCMN,maxSigma);
-		if(ch ==0) cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl;
-		if(   (adc >= lowLimit)	&& (adc <= highLimit) ){
+//		if(ch ==0) cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl; // DA: block commented below
+		if(   (/*adc >= lowLimit)	&& */(adc <= highLimit) ){
 			diaEventUsedCMN[ch].push_back(true);
 			diaSUMCmn[ch]+=adc;
 			diaSUM2Cmn[ch]+=adc*adc;
@@ -269,6 +299,19 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 		}//end if
 		else
 			diaEventUsedCMN[ch].push_back(false);
+		// DA: flags to identify if hit or seed
+		if(adc-meanCMN < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN){
+			diaHitChsCmcDeque[nEvent][ch] = false;
+			diaSeedChsCmcDeque[nEvent][ch] = false;
+		}
+		else if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN <= adc-meanCMN) && (adc-meanCMN < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN)){
+			diaHitChsCmcDeque[nEvent][ch] = true;
+			diaSeedChsCmcDeque[nEvent][ch] = false;
+		}
+		else{
+			diaHitChsCmcDeque[nEvent][ch] = false;
+			diaSeedChsCmcDeque[nEvent][ch] = true;
+		}
 	}//end for nEvent
 	//TODO!!! FIX!!! PROBLEM!!!!!!!!
 	///WORK HERE!!!!!!!
@@ -306,8 +349,8 @@ pair<Float_t,Float_t> TPedestalCalculation::checkPedestalDet(int det,int ch,int 
 		this->detEventsInSum[det][ch]--;
 	}
 	//now the sum is calculated from events 1-slidingLength-1
-	//todo make it readable
-	if((float)detAdcValues[det][ch].back()<=mean+max(sigma*maxSigma,(float)1.)&&(float)detAdcValues[det][ch].back()>=mean-max(sigma*maxSigma,(float)1.)){
+	//todo make it readable DA: block commented following line:
+	if((float)detAdcValues[det][ch].back()<=mean+max(sigma*maxSigma,(float)1.)/*&&(float)detAdcValues[det][ch].back()>=mean-max(sigma*maxSigma,(float)1.)*/){
 		//		if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<"new pedestalEvent "<<(int)detAdcValues[det][ch].back()<<" "<<flush;
 		this->detSUM[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back();
 		this->detSUM2[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back()*(ULong_t)this->detAdcValues[det][ch].back();
@@ -316,6 +359,19 @@ pair<Float_t,Float_t> TPedestalCalculation::checkPedestalDet(int det,int ch,int 
 	}
 	else
 		this->detEventUsed[det][ch].push_back(false);
+	// DA: flags to identify if hit or seed
+	if(detAdcValues[det][ch].back()-mean < settings->getClusterHitFactor(det, ch) * sigma){
+		silHitChs[det][ch] = false;
+		silSeedChs[det][ch] = false;
+	}
+	else if((settings->getClusterHitFactor(det, ch) * sigma <= detAdcValues[det][ch].back()-mean) && (detAdcValues[det][ch].back()-mean < settings->getClusterSeedFactor(det, ch) * sigma)){
+		silHitChs[det][ch] = true;
+		silSeedChs[det][ch] = false;
+	}
+	else{
+		silHitChs[det][ch] = false;
+		silSeedChs[det][ch] = true;
+	}
 	//now the sum is calculated for events 1-slidingLength
 
 	mean =this->detSUM[det][ch]/(float)this->detEventsInSum[det][ch];
@@ -336,8 +392,8 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 		this->diaSUM[ch]-=this->diaAdcValues[ch].front();
 		this->diaSUM2[ch]-=this->diaAdcValues[ch].front()*this->diaAdcValues[ch].front();
 		this->diaEventsInSum[ch]--;
-	}
-	if(diaAdcValues[ch].back()<=mean+max(sigma*maxSigma,(float)1.)&&diaAdcValues[ch].back()>=mean-max(sigma*maxSigma,(float)1.)){
+	} // DA: Block commented following line
+	if(diaAdcValues[ch].back()<=mean+max(sigma*maxSigma,(float)1.)/*&&diaAdcValues[ch].back()>=mean-max(sigma*maxSigma,(float)1.)*/){
 		this->diaSUM[ch]+=this->diaAdcValues[ch].back();
 		this->diaSUM2[ch]+=this->diaAdcValues[ch].back()*this->diaAdcValues[ch].back();
 		this->diaEventsInSum[ch]++;
@@ -345,14 +401,27 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	}
 	else
 		this->diaEventUsed[ch].push_back(false);
+	// DA: flags to identify if hit or seed
+	if(diaAdcValues[ch].back()-mean < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigma){
+		diaHitChs[ch] = false;
+		diaSeedChs[ch] = false;
+	}
+	else if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigma <= diaAdcValues[ch].back()-mean) && (diaAdcValues[ch].back()-mean < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigma)){
+		diaHitChs[ch] = true;
+		diaSeedChs[ch] = false;
+	}
+	else{
+		diaHitChs[ch] = false;
+		diaSeedChs[ch] = true;
+	}
 
 	//COMMON MODE NOISE CALCULATION WAY
 	if(this->diaEventUsedCMN[ch].front()){
 		this->diaSUMCmn[ch]-=this->diaAdcValuesCMN[ch].front();
 		this->diaSUM2Cmn[ch]-=this->diaAdcValuesCMN[ch].front()*this->diaAdcValuesCMN[ch].front();
 		this->diaEventsInSumCMN[ch]--;
-	}
-	if(diaAdcValuesCMN[ch].back()<=meanCMN+max(sigmaCMN*maxSigma,(float)1.)&&diaAdcValuesCMN[ch].back()>=meanCMN-max(sigmaCMN*maxSigma,(float)1.)){
+	} // DA: block commented following line:
+	if(diaAdcValuesCMN[ch].back()<=meanCMN+max(sigmaCMN*maxSigma,(float)1.)/*&&diaAdcValuesCMN[ch].back()>=meanCMN-max(sigmaCMN*maxSigma,(float)1.)*/){
 		this->diaSUMCmn[ch]+=this->diaAdcValuesCMN[ch].back();
 		this->diaSUM2Cmn[ch]+=this->diaAdcValuesCMN[ch].back()*this->diaAdcValuesCMN[ch].back();
 		this->diaEventsInSumCMN[ch]++;
@@ -360,6 +429,19 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	}
 	else
 		this->diaEventUsedCMN[ch].push_back(false);
+	// DA: flags to identify if hit or seed
+	if(diaAdcValuesCMN[ch].back()-meanCMN < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN){
+		diaHitChsCmc[ch] = false;
+		diaSeedChsCmc[ch] = false;
+	}
+	else if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN <= diaAdcValuesCMN[ch].back()-meanCMN) && (diaAdcValuesCMN[ch].back()-meanCMN < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN)){
+		diaHitChsCmc[ch] = true;
+		diaSeedChsCmc[ch] = false;
+	}
+	else{
+		diaHitChsCmc[ch] = false;
+		diaSeedChsCmc[ch] = true;
+	}
 
 	mean =this->diaSUM[ch]/(float)this->diaEventsInSum[ch];//ok
 	meanCMN = diaSUMCmn[ch]/(float)diaEventsInSumCMN[ch];//ok
@@ -439,8 +521,9 @@ void TPedestalCalculation::doCmNoiseCalculation()
 			cerr<<"diaADCValues["<<ch<<"].size() = "<<diaAdcValues[ch].size()<<" < "<<nEvent<<"  --> BREAK"<<endl;
 			exit(-1);
 		}
-
+		diaCmChs[ch] = false;
 		Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);
+		if(nEvent<slidingLength) diaCmChsDeque[nEvent][ch] = false;
         bool masked = settings->IsMasked(det,ch);
 		Float_t mean =  (nEvent<slidingLength)?diaPedestalMeanStartValues[ch]:diaPedestalMeanCMN[ch];
         Float_t signal = adc-mean;
@@ -470,6 +553,8 @@ void TPedestalCalculation::doCmNoiseCalculation()
 		if(verbosity>10||(verbosity>4&&nEvent==0))cout<<" "<<ch<<"\t"<<adc<<" "<<mean<< " "<<sigma<<" "<<signal<<" "<<snr<<endl;
 		cmNoise+=signal;
 		nCmNoiseEvents++;
+		diaCmChs[ch] = true;
+		if(nEvent < slidingLength) diaCmChsDeque[nEvent][ch] = diaCmChs[ch];
 	}
     cmNoise = (nCmNoiseEvents != 0)? cmNoise/(Float_t)nCmNoiseEvents: 0;	// DA: division by zero!!!!
 	if(verbosity>4)cout<<nEvent <<" cmNoise: "<<" "<<cmNoise<<" "<<nCmNoiseEvents<<" "<<eventReader->getCmnCreated(8)<<endl;
@@ -489,7 +574,7 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 		//		eventReader->LoadEvent(nEvent);
 		doCmNoiseCalculation();
 		cmnValues.push_back(cmNoise);
-        cout<<cmNoise<<endl;
+//        cout<<cmNoise<<endl;
 		for(UInt_t ch=0;ch<N_DIA_CHANNELS;ch++){
 			Float_t adc = (nEvent<slidingLength)?this->diaAdcValues[ch].at(nEvent):eventReader->getDia_ADC(ch);;
 			adc -=cmNoise;
@@ -533,7 +618,18 @@ void TPedestalCalculation::fillFirstEventsAndMakeDiaDeque()
 			diaPedestalSigma[ch]= RoundFloat(diaPedestalSigma[ch]);
 			diaPedestalMeanCMN[ch] =  RoundFloat(diaPedestalMeanCMN[ch]);
 			diaPedestalSigmaCMN[ch] = RoundFloat(diaPedestalSigmaCMN[ch]);
+			diaHitChs[ch] = diaHitChsDeque[nEvent][ch];
+			diaSeedChs[ch] = diaSeedChsDeque[nEvent][ch];
+			diaHitChsCmc[ch] = diaHitChsCmcDeque[nEvent][ch];
+			diaSeedChsCmc[ch] = diaSeedChsCmcDeque[nEvent][ch];
+			diaCmChs[ch] = diaCmChsDeque[nEvent][ch];
 //			diaChannel[ch] = (UChar_t)ch;
+		}
+		for (UInt_t det=0; det < 8; det ++){
+			for (UInt_t ch=0; ch < N_DET_CHANNELS; ch++){
+				silHitChs[det][ch] = silHitChsDeque[nEvent][det][ch];
+				silSeedChs[det][ch] = silSeedChsDeque[nEvent][det][ch];
+			}
 		}
 		printDiamond(30);
 		this->pedestalTree->Fill();
@@ -596,21 +692,29 @@ void TPedestalCalculation::updateDiamondPedestals(){
 }
 
 void TPedestalCalculation::setBranchAdresses(){
-	pedestalTree->Branch("PedestalMean",&pedestalMean,"PedestalMean[8][256]/F");
-	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestaSigma[8][256]/F");
-	pedestalTree->Branch("cmn_sil",&cmn_sil,"cmn_sil[8]/F");
-
-	pedestalTree->Branch("diaPedestalMean",&diaPedestalMean,"diaPedestalMean[128]/F");
-	pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestaSigma[128]/F");
-
-	pedestalTree->Branch("diaPedestalMeanCMN",&diaPedestalMeanCMN,"diaPedestalMeanCMN[128]/F");
-	pedestalTree->Branch("diaPedestalSigmaCMN",&diaPedestalSigmaCMN,"diaPedestaSigmaCMN[128]/F");
-	pedestalTree->Branch("commonModeNoise",&cmNoise,"commonModeNoise/F");
-
 	pedestalTree->Branch("eventNumber",&nEvent,"eventNumber/i");
-	pedestalTree->Branch("runNumber",&runNumber,"runNumber/i");
-	pedestalTree->Branch("cmnCorrection",&doCMNCorrection,"cmnCorrection/O");
+	pedestalTree->Branch("silChannel",&silChannel,"silChannel[8][256]/b");
+	pedestalTree->Branch("PedestalMean",&pedestalMean,"PedestalMean[8][256]/F");
+	pedestalTree->Branch("PedestalSigma",&pedestalSigma,"PedestalSigma[8][256]/F");
+	pedestalTree->Branch("silHitChs",&silHitChs,"silHitChs[8][256]/O");
+	pedestalTree->Branch("silSeedChs",&silSeedChs,"silSeedChs[8][256]/O");
+//	pedestalTree->Branch("cmn_sil",&cmn_sil,"cmn_sil[8]/F");
+
 	pedestalTree->Branch("diaChannel", &diaChannel, "diaChannel[128]/b");
+	pedestalTree->Branch("diaPedestalMean",&diaPedestalMean,"diaPedestalMean[128]/F");
+	pedestalTree->Branch("diaPedestalSigma",&diaPedestalSigma,"diaPedestalSigma[128]/F");
+	pedestalTree->Branch("diaHitChs",&diaHitChs,"diaHitChs[128]/O");
+	pedestalTree->Branch("diaSeedChs",&diaSeedChs,"diaSeedChs[128]/O");
+
+	pedestalTree->Branch("diaCmChs",&diaCmChs,"diaCmChs[128]/O");
+	pedestalTree->Branch("commonModeNoise",&cmNoise,"commonModeNoise/F");
+	pedestalTree->Branch("diaPedestalMeanCMN",&diaPedestalMeanCMN,"diaPedestalMeanCMN[128]/F");
+	pedestalTree->Branch("diaPedestalSigmaCMN",&diaPedestalSigmaCMN,"diaPedestalSigmaCMN[128]/F");
+	pedestalTree->Branch("diaHitChsCmc",&diaHitChsCmc,"diaHitChsCmc[128]/O");
+	pedestalTree->Branch("diaSeedChsCmc",&diaSeedChsCmc,"diaSeedChsCmc[128]/O");
+
+//	pedestalTree->Branch("runNumber",&runNumber,"runNumber/i");
+//	pedestalTree->Branch("cmnCorrection",&doCMNCorrection,"cmnCorrection/O");
 }
 
 

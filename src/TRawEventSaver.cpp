@@ -116,7 +116,7 @@ void TRawEventSaver::setBranches(){
 	rawTree->Branch("D3X_ADC",&Det_ADC[6],"D3X_ADC[256]/b");
 	rawTree->Branch("D3Y_ADC",&Det_ADC[7],"D3Y_ADC[256]/b");
 	rawTree->Branch("DiaADC",&Dia_ADC,"DiaADC[128]/s");
-	rawTree->Branch("RunNumber",&runNumber,"RunNumber/i");
+//	rawTree->Branch("RunNumber",&runNumber,"RunNumber/i");
 	rawTree->Branch("EventNumber",&eventNumber,"EventNumber/i");
 }
 

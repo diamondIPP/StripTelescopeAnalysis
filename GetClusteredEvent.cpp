@@ -233,7 +233,7 @@ ClusteredEvent GetClusteredEvent(unsigned int RunNumber, unsigned int EventNumbe
       
       
    //Event Header Branches
-   PedTree->SetBranchAddress("RunNumber",&run_number);
+//   PedTree->SetBranchAddress("RunNumber",&run_number);
    PedTree->SetBranchAddress("EventNumber",&event_number);
    PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
    

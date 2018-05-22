@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
       Float_t Det_PedWidth[9][256];
       
       //Event Header Branches
-      PedTree->SetBranchAddress("RunNumber",&run_number);
+//      PedTree->SetBranchAddress("RunNumber",&run_number);
       PedTree->SetBranchAddress("EventNumber",&event_number);
       PedTree->SetBranchAddress("StoreThreshold",&store_threshold);
    
