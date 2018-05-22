@@ -291,7 +291,7 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 		Float_t lowLimit = getLowLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 		Float_t highLimit = getHighLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 //		if(ch ==0) cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl; // DA: block commented below
-		if(   (/*adc >= lowLimit)	&& */(adc <= highLimit) ){
+		if(   /*(adc >= lowLimit)	&& */(adc <= highLimit) ){
 			diaEventUsedCMN[ch].push_back(true);
 			diaSUMCmn[ch]+=adc;
 			diaSUM2Cmn[ch]+=adc*adc;
