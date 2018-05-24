@@ -348,8 +348,10 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
 	if(verbosity>4)cout<<"skewness*100: "<<skewness*100<<endl;
 	if(verbosity>4)cout<<"left: "<<leftHalf<<"\tright: "<<rightHalf<<" "<<(Float_t)leftHalf/(Float_t)rightHalf*100<<endl;
 
-	bool valid = TMath::Abs(mean-.5)<.005;
-	valid = valid || TMath::Abs(skewness)<0.005;
+//	bool valid = TMath::Abs(mean-.5)<.005;
+	bool valid = TMath::Abs(mean-.5)<.001; // DA: more tight criteria for convergence!
+//	valid = valid || TMath::Abs(skewness)<0.005;
+	valid = valid && TMath::Abs(skewness)<0.001; // DA: more tight criteria for convergence!
 	if(verbosity>4)cout<<"Mean "<<mean*100<<" "<<valid<<endl;
 	TPolyMarker* pm = FindPeaks(histo,2);
 	Float_t p1=0;
@@ -377,7 +379,7 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
 	else
 		valid = false;
 	valid = TMath::Abs(mean-.5)<.001;
-	valid = valid || TMath::Abs(skewness)<0.0001;
+	valid = valid && TMath::Abs(skewness)<0.0001; // DA: made it tighter
 	alphaValues.push_back(alpha*10);
 	Float_t value = (Float_t)leftHalf/(Float_t)rightHalf-1;
 	if(value!=value) value = -1;
