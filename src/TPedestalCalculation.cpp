@@ -202,7 +202,7 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDet(int det,i
 	for(nEvent=0;nEvent<adcQueue.size();nEvent++){
 		Float_t adc = (Float_t)adcQueue.at(nEvent);
 		//mean - maxSigma*sigma<=adc<= mean + maxSigma*sigma <-- Than it is no hit/seed // DA: block commented line below
-		if(  (/* adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma) )&&(*/ adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
+		if(  ( adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma) )&&( adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
 			detEventUsed[det][ch].push_back(true);
 			detSUM[det][ch]+=adc;
 			detSUM2[det][ch]+=adc*adc;
@@ -240,8 +240,8 @@ pair <Float_t,Float_t> TPedestalCalculation::calculateFirstPedestalDia(int ch,de
 	this->diaEventUsed[ch].clear();
 	for(UInt_t nEvent=0;nEvent<adcQueue.size();nEvent++){
 		Float_t adc = (Float_t) adcQueue.at(nEvent); // DA: block commented line below
-		if(   (/*adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma)  )
-				&& (*/adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
+		if(   (adc >= getLowLimitPedestal(meanChannel,sigmaChannel,maxSigma)  )
+				&& (adc <= getHighLimitPedestal(meanChannel,sigmaChannel,maxSigma) ) ){
 			diaEventUsed[ch].push_back(true);
 			diaSUM[ch]+=adc;
 			diaSUM2[ch]+=adc*adc;
@@ -291,7 +291,7 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 		Float_t lowLimit = getLowLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 		Float_t highLimit = getHighLimitPedestal(meanCMN,sigmaCMN,maxSigma);
 //		if(ch ==0) cout<< nEvent<<" "<<ch<<" "<<adc<<" "<<lowLimit<<" "<<highLimit<<endl; // DA: block commented below
-		if(   /*(adc >= lowLimit)	&& */(adc <= highLimit) ){
+		if(   (adc >= lowLimit)	&&(adc <= highLimit) ){
 			diaEventUsedCMN[ch].push_back(true);
 			diaSUMCmn[ch]+=adc;
 			diaSUM2Cmn[ch]+=adc*adc;
@@ -350,7 +350,7 @@ pair<Float_t,Float_t> TPedestalCalculation::checkPedestalDet(int det,int ch,int 
 	}
 	//now the sum is calculated from events 1-slidingLength-1
 	//todo make it readable DA: block commented following line:
-	if((float)detAdcValues[det][ch].back()<=mean+max(sigma*maxSigma,(float)1.)/*&&(float)detAdcValues[det][ch].back()>=mean-max(sigma*maxSigma,(float)1.)*/){
+	if((float)detAdcValues[det][ch].back()<=mean+max(sigma*maxSigma,(float)1.)&&(float)detAdcValues[det][ch].back()>=mean-max(sigma*maxSigma,(float)1.)){
 		//		if(det==0&&ch==5&&nEvent<3490&&nEvent>3450)cout<<"new pedestalEvent "<<(int)detAdcValues[det][ch].back()<<" "<<flush;
 		this->detSUM[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back();
 		this->detSUM2[det][ch]+=(ULong_t)this->detAdcValues[det][ch].back()*(ULong_t)this->detAdcValues[det][ch].back();
@@ -393,7 +393,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 		this->diaSUM2[ch]-=this->diaAdcValues[ch].front()*this->diaAdcValues[ch].front();
 		this->diaEventsInSum[ch]--;
 	} // DA: Block commented following line
-	if(diaAdcValues[ch].back()<=mean+max(sigma*maxSigma,(float)1.)/*&&diaAdcValues[ch].back()>=mean-max(sigma*maxSigma,(float)1.)*/){
+	if(diaAdcValues[ch].back()<=mean+max(sigma*maxSigma,(float)1.)&&diaAdcValues[ch].back()>=mean-max(sigma*maxSigma,(float)1.)){
 		this->diaSUM[ch]+=this->diaAdcValues[ch].back();
 		this->diaSUM2[ch]+=this->diaAdcValues[ch].back()*this->diaAdcValues[ch].back();
 		this->diaEventsInSum[ch]++;
@@ -421,7 +421,7 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 		this->diaSUM2Cmn[ch]-=this->diaAdcValuesCMN[ch].front()*this->diaAdcValuesCMN[ch].front();
 		this->diaEventsInSumCMN[ch]--;
 	} // DA: block commented following line:
-	if(diaAdcValuesCMN[ch].back()<=meanCMN+max(sigmaCMN*maxSigma,(float)1.)/*&&diaAdcValuesCMN[ch].back()>=meanCMN-max(sigmaCMN*maxSigma,(float)1.)*/){
+	if(diaAdcValuesCMN[ch].back()<=meanCMN+max(sigmaCMN*maxSigma,(float)1.)&&diaAdcValuesCMN[ch].back()>=meanCMN-max(sigmaCMN*maxSigma,(float)1.)){
 		this->diaSUMCmn[ch]+=this->diaAdcValuesCMN[ch].back();
 		this->diaSUM2Cmn[ch]+=this->diaAdcValuesCMN[ch].back()*this->diaAdcValuesCMN[ch].back();
 		this->diaEventsInSumCMN[ch]++;
