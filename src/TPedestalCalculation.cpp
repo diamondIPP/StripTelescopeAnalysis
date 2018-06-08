@@ -43,11 +43,12 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	//settings->doCommonModeNoiseCorrection();
 	for (UInt_t i = 0; i < 8*2; i ++)
 	    cmn_sil[i] = 0;
-    for (UInt_t i = 0; i < N_DIA_CHANNELS; i++)
-		diaChannel[i] = (UChar_t)i;
-		settings->IsNoisyChannel(i) ? diaNoisyChs[i] = true : false;
-		settings->IsScreenedChannel(i) ? diaMaskedChs[i] = true : false;
-		settings->IsNotConnectedChannel(i) ? diaNcChs[i] = true : false;
+    for (UInt_t i = 0; i < N_DIA_CHANNELS; i++) {
+        diaChannel[i] = (UChar_t) i;
+        settings->IsNoisyChannel(i) ? diaNoisyChs[i] = true : false;
+        settings->IsScreenedChannel(i) ? diaMaskedChs[i] = true : false;
+        settings->IsNotConnectedChannel(i) ? diaNcChs[i] = true : false;
+    }
 	for (UInt_t i = 0; i < 8; i++){
 		for (UInt_t j = 0; j < N_DET_CHANNELS; j++)
 			silChannel[i][j] = (UChar_t)j;
