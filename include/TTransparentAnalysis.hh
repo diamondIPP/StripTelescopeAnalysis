@@ -82,6 +82,7 @@ private:
 	void initHistograms();
 	void initHistograms2();
 	void initHistograms1();
+	void initHistogramsN(); // DA
 	void initPedestalAndNoiseHistos(UInt_t maxEvents=1e6);
 	void initClusteredHistos(UInt_t startEvent = 1e5, UInt_t maxEvents=1e6);
 	void fillHistograms();
@@ -168,6 +169,7 @@ private:
 	vector< vector < Float_t> > vecvecResXChargeWeighted;
 	vector< vector < Float_t> > vecvecResXEtaCorrected;
 	vector< vector < Float_t> > vecvecResXHighest2Centroid;
+	vector< vector < Float_t> > vecvecResXHighestNCentroid; // DA
 	vector< vector < Float_t> > vecvecResXHighestHit;
 	vector< vector<Float_t> > vecvecRelPos;
 	vector< vector<Float_t> > vecvecRelPos2;
@@ -183,6 +185,7 @@ private:
 	vector<TH1F*> hLandau;
 	vector<TProfile2D*> hLandau2HighestProfile2D;
 	vector<TProfile2D*> hLandau1HighestProfile2D;
+	vector<TProfile2D*> hLandauNHighestProfile2D; // DA
 	vector< TH2F*> hLandau2HighestFidCutX;
 	vector< TH2F*> hLandau2HighestFidCutY;
 	vector< TH2F*> hLandau2HighestPredX;
@@ -191,6 +194,10 @@ private:
 	vector< TH2F*> hLandau1HighestFidCutY;
 	vector< TH2F*> hLandau1HighestPredX;
 	vector< TH2F*> hLandau1HighestPredY;
+	vector< TH2F*> hLandauNHighestFidCutX;//DA: added this 4 vectors of histograms
+	vector< TH2F*> hLandauNHighestFidCutY;
+	vector< TH2F*> hLandauNHighestPredX;
+	vector< TH2F*> hLandauNHighestPredY;
 	vector< vector< Float_t> > vecVecLandau;
 	vector< Float_t> vecPredictedChannel;
 	vector< Float_t> vecPredictedDetectorPositionY;
@@ -210,7 +217,9 @@ private:
 	vector<TH1F*> hLandau2Highest;
 	vector<TH1F*> hLandau2Highest_nonCMC;
 	vector<TH1F*> hLandau1Highest;
+	vector<TH1F*> hLandauNHighest; // DA
 	vector<TH1F*> hLandau2HighestFixedNoise;
+	vector<TH1F*> hLandauNHighestFixedNoise; // DA
 	vector <TH1F*> hLandauFixedNoise;
 //	vector<TH1F*> hEta2Hightest;
 	vector<TH1F*> hResidualHighest2Centroid;
@@ -222,6 +231,8 @@ private:
 	vector<TH2F*> hResidualVsHitPositionEtaCorrected;
 	TH1F* hLandau2HighestMean;
 	TH1F* hLandau2HighestMP;
+	TH1F* hLandauNHighestMean; // DA
+	TH1F* hLandauNHighestMP; // DA
 	TH2F* hSelectedTracksAvrgSiliconHitPos;
 	vector<TH1F*> hEtaIntegrals;
 //	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
@@ -231,8 +242,11 @@ private:
 	vector<TF1*> fitLandauFixedNoise;
 	vector<TF1*> fitLandau2Highest;
 	vector<TF1*> fitLandau2HighestFixedNoise;
+	vector<TF1*> fitLandauNHighest; // DA
+	vector<TF1*> fitLandauNHighestFixedNoise; // DA
 	vector<TF1*> fitResidualChargeWeighted;
 	vector<TF1*> fitResidualHighest2Centroid;
+	vector<TF1*> fitResidualHighestNCentroid; // DA
 	vector<TF1*> fitResidualEtaCorrected;
 	TSettings::alignmentMode alignMode;
 	
@@ -258,16 +272,19 @@ private:
 	vector<TCluster> vecTransparentClusters;
 	vector<Float_t> vecMPLandau;
 	vector<Float_t> vecMPLandau2Highest;
+	vector<Float_t> vecMPLandauNHighest; // DA
 	vector<Float_t> vecMeanLandau;
 	vector<Float_t> vecMeanLandau2Highest;
 	vector< pair <Float_t,Float_t> > vecResidualChargeWeighted;
 	vector< pair <Float_t,Float_t> > vecResidualHighest2Centroid;
+	vector< pair <Float_t,Float_t> > vecResidualHighestNCentroid; // DA
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected;
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected_2ndGaus;
 	vector<Float_t> vectorEventNo;
 	vector<Float_t> vectorCMN;
 	vector< vector<Float_t> > vecVecPh2Highest;
-	
+	vector< vector<Float_t> > vecVecPhNHighest; // DA
+
 	vector<Float_t> vecPredictedPosition, vecRelPredictedPosition;
 	vector<Float_t> vecChi2;
 	Float_t predXMin, predXMax, predYMin, predYMax;
@@ -276,6 +293,8 @@ private:
 	vector<Float_t> noiseWidthsCMN;
 	vector<Float_t> noiseWidths2OutOfX;
 	vector<Float_t> noiseWidths2OutOfXCMN;
+	vector<Float_t> noiseWidthsNOutOfX; // DA
+	vector<Float_t> noiseWidthsNOutOfXCMN; // DA
 
 	std::map< UInt_t, TProfile* > hPedestalVsEvenNo;
     std::map< UInt_t, TProfile* > hNoiseVsEvenNo;
@@ -284,6 +303,7 @@ private:
 
 	vector<TProfile2D*> vecPHVsEventNo_Areas;
 	vector<TProfile2D*> vecPH2HighestVsEventNo_Areas;
+	vector<TProfile2D*> vecPHNHighestVsEventNo_Areas; // DA
 
 
 	TH2F* hLandauVsEventNo_Clustered;
@@ -304,6 +324,7 @@ private:
 	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo);
 	TH2D* hPHVsEventNo;
 	TH2D* hPH2OutOf10VsEventNo;
+	TH2D* hPHNOutOfMVsEventNo; // DA
 	void savePHvsEventNoAreaPlots();
 	UInt_t xDivisions;
 	UInt_t yDivisions;

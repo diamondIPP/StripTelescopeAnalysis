@@ -176,6 +176,7 @@ public:
 	UInt_t getMaxSignalHeight(UInt_t det){switch(det){case 8: return getDiaSaturation();default: return getMaxSignalHeightSilicon();}} // DA
 	bool isSaturated(UInt_t det, Int_t adcValue) {return (adcValue>=getMaxSignalHeight(det));} // DA
 	UInt_t getMaxTransparentClusterSize() {return max_transparent_cluster_size;} // DA
+	UInt_t getTransparentClusterSize() {return transparent_cluster_size;} // DA
 
 	void setAsymmetricSample(bool asymmetricSample) {bAsymmetricSample = asymmetricSample;}
 
@@ -479,6 +480,7 @@ private:
 
 	UInt_t dia_saturation; // DA
 	UInt_t max_transparent_cluster_size; // DA
+    UInt_t transparent_cluster_size; // DA
 
 	std::vector<Float_t> alignment_x_offsets;
 	std::vector<Float_t> alignment_y_offsets;
