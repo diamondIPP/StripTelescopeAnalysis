@@ -354,6 +354,7 @@ public:
 	Int_t getVoltage(){return voltage;}
     const std::vector<int>& getDiaChannelNoisy() const {return Dia_channel_noisy;}
     const std::vector<int>& getDiaChannelNotConnected() const {return Dia_channel_not_connected;}
+	bool IsScreenedChannel(Int_t ch);
     bool IsNotConnectedChannel(Int_t ch);
     bool IsNoisyChannel(Int_t ch);
     UInt_t getNEvents(){return nEvents;};

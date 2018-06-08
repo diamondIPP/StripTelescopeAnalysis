@@ -2849,16 +2849,23 @@ bool TSettings::IsOnTheEdgeOfCell(Float_t relCellPosX, Float_t relCellPosY, Floa
 
 bool TSettings::IsNotConnectedChannel(Int_t ch) {
     for (UInt_t i = 0; i < Dia_channel_noisy.size();i++)
-        if (Dia_channel_noisy[i] == ch)
+        if (Dia_channel_not_connected[i] == ch)
             return true;
     return false;
 }
 
 bool TSettings::IsNoisyChannel(Int_t ch) {
     for (UInt_t i = 0; i < Dia_channel_not_connected.size();i++)
-            if (Dia_channel_not_connected[i] == ch)
+            if (Dia_channel_noisy[i] == ch)
                 return true;
         return false;
+}
+
+bool TSettings::IsScreenedChannel(Int_t ch){
+	for (UInt_t i = 0; i < Dia_channel_noisy.size();i++)
+		if ( Det_channel_screen_channels[8][i]== ch)
+			return true;
+	return false;
 }
 
 TH2F* TSettings::GetOverlayHisto(TString name,Int_t pattern, UInt_t nbinsx, UInt_t nbinsy) {
