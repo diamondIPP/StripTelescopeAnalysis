@@ -562,7 +562,7 @@ void TTransparentAnalysis::fillHistograms() {
         fillPHvsEventNoAreaPlots(area,clusterSize+1,charge,chargeOfN);
         vecVecLandau[clusterSize].push_back(charge);
         hLandau[clusterSize]->Fill(charge);
-        hLandau2Highest[clusterSize]->Fill(chargeOfN);
+        hLandauNHighest[clusterSize]->Fill(chargeOfN);
         hLandauNHighest_nonCMC[clusterSize]->Fill(chargeOfN_noCMC);
         vecVecPhNHighest[clusterSize].push_back(chargeOfN);
         if (clusterSize<hLandauNHighestProfile2D.size())
@@ -785,7 +785,7 @@ void TTransparentAnalysis::createEfficiencyPlots(TH1F *hLandau){
 void TTransparentAnalysis::fitHistograms() {
     for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) {
         if (verbosity) cout<<"Create EfficencyPlots "<<clusterSize<<endl;
-        createEfficiencyPlots(hLandau2Highest[clusterSize]);
+        createEfficiencyPlots(hLandauNHighest[clusterSize]);
         createEfficiencyPlots(hLandau[clusterSize]);
         createEfficiencyPlots(hLandau1Highest[clusterSize]);
         vector<Float_t> vecResChargeWeighted = vecvecResXChargeWeighted[clusterSize];
@@ -889,7 +889,7 @@ void TTransparentAnalysis::fitHistograms() {
         vecMeanLandau.push_back(hLandau[clusterSize]->GetMean());
         vecMeanLandauNHighest.push_back(hLandauNHighest[clusterSize]->GetMean());
         hLandauMean->SetBinContent(clusterSize+1,hLandau[clusterSize]->GetMean());
-        hLandauNHighestMean->SetBinContent(clusterSize+1,hLandau2Highest[clusterSize]->GetMean());
+        hLandauNHighestMean->SetBinContent(clusterSize+1,hLandauNHighest[clusterSize]->GetMean());
         pair <Float_t,Float_t> tempPair,tempPair2;
         if (fitResidualChargeWeighted[clusterSize]!=0) {
             tempPair.first = fitResidualChargeWeighted[clusterSize]->GetParameter(1);
@@ -1605,7 +1605,7 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogram(hEtaCMNcorrected[clusterSize],0);
         //		if (clusterSize == 0) {
         histSaver->SaveHistogramLandau(hLandau[clusterSize]);
-        histSaver->SaveHistogramLandau(hLandau2Highest[clusterSize]);
+        histSaver->SaveHistogramLandau(hLandauNHighest[clusterSize]);
         histSaver->SaveHistogramLandau(hLandauNHighest_nonCMC[clusterSize]);
         histSaver->SaveHistogramLandau(hLandauFixedNoise[clusterSize]);
         histSaver->SaveHistogramLandau(hLandauNHighestFixedNoise[clusterSize]);
@@ -1791,7 +1791,7 @@ void TTransparentAnalysis::saveHistograms() {
 void TTransparentAnalysis::deleteHistograms() {
     for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) {
         if(hLandau[clusterSize]) delete hLandau[clusterSize];
-        if(hLandau2Highest[clusterSize])delete hLandau2Highest[clusterSize];
+        if(hLandauNHighest[clusterSize])delete hLandauNHighest[clusterSize];
         if(hLandauNHighest_nonCMC[clusterSize])delete hLandauNHighest_nonCMC[clusterSize];
         if(hLandau1Highest[clusterSize])delete hLandau1Highest[clusterSize];
         if ( hEta[clusterSize]) delete hEta[clusterSize];
@@ -2181,7 +2181,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
         name = TString::Format("cNonHitPulseHeightDitribution_%dOutOf%02d", nStrips, j+1);
         histSaver->SaveTwoHistos((string)name,hNonHitNoiseDistributionsNOutOfX[j],hNonHitNoiseDistributionsNOutOfXCMN[j]);
         delete hNonHitNoiseDistributions[j];
-        delete hNonHitNoiseDistributionsnCMN[j];
+        delete hNonHitNoiseDistributionsCMN[j];
         delete hNonHitNoiseDistributionsNOutOfX[j];
         delete hNonHitNoiseDistributionsNOutOfXCMN[j];
     }
@@ -2760,13 +2760,14 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
 //    Float_t nnStart = settings->getEventwiseStart();
 //    Float_t nnEnd = settings->getEventwiseStop();
     UInt_t nStrips = settings->getNumHighestTransparentCluster();
+    UInt_t maxStrips = settings->getMaxTransparentClusterSize();
     Int_t nentriesPerBin = 1000;
     UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
     if((nEnd-nStart)%nentriesPerBin!=0)nBins++;
     if (nBins==0)nBins=1;
 
-    TString name ="hPHVsEventNo_clustersize10";
-    TString title = "PH_{clustersize = 10} vs eventNo";
+    TString name = TString::Format("hPHVsEventNo_clustersize%02d", maxStrips);
+    TString title = TString::Format("PH_{clustersize = %d} vs eventNo", maxStrips);
     UInt_t nBinsy = settings->getPulse_height_num_bins();
     Float_t ymin = 0;
     Float_t ymax = settings->getPulse_height_max(subjectDetector);
@@ -2774,9 +2775,9 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
     hPHVsEventNo->GetXaxis()->SetTitle("event no.");
     hPHVsEventNo->GetYaxis()->SetTitle("pulse height");
 
-    name ="hPHVsEventNo_"<<nStrips<<"outOf10";
-    title = "PH_{"<<nStrips<<" out of 10} vs eventNo";
-    hPHNOutOf10VsEventNo= new TH2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy));
+    name = TString::Format("hPHVsEventNo_%doutOf%02d", nStrips, maxStrips);
+    title = TString::Format("PH_{%d out of %d} vs eventNo", nStrips, maxStrips);
+    hPHNOutOfMVsEventNo= new TH2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy));
     hPHVsEventNo->GetXaxis()->SetTitle("event no.");
     hPHVsEventNo->GetYaxis()->SetTitle("pulse height");
     for (UInt_t i = 0; i< settings->getMaxTransparentClusterSize(); i++){
@@ -2837,9 +2838,9 @@ void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvent
 
 void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     cout<<"[TTransparentAnalysis::savePHvsEventNoAreaPlots] "<<endl;
-    histSaver->SaveHistogram(hPHNOutOf10VsEventNo);
-    histSaver->Save1DProfileYWithFitAndInfluence(hPHNOutOf10VsEventNo,"pol1",true);
-    delete hPHNOutOf10VsEventNo;
+    histSaver->SaveHistogram(hPHNOutOfMVsEventNo);
+    histSaver->Save1DProfileYWithFitAndInfluence(hPHNOutOfMVsEventNo,"pol1",true);
+    delete hPHNOutOfMVsEventNo;
     histSaver->SaveHistogram(hPHVsEventNo);
     histSaver->Save1DProfileYWithFitAndInfluence(hPHVsEventNo,"pol1",true);
     delete hPHVsEventNo;
