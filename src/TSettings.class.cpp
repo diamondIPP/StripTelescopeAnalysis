@@ -679,6 +679,17 @@ void TSettings::LoadSettings(){
 		cout<<"analyse detector "<<det<< " with "<<getClusterSeedFactor(det,0)<<"/"<<getClusterHitFactor(det,0)<<endl;
 	}
 //	checkSettings();
+
+    for(UInt_t ch = 0; ch < 128; ch++){
+        if(IsNoisyChannel(ch))
+            cout << "channel " << ch << ": Noisy" << endl;
+        if(IsNotConnectedChannel(ch))
+            cout << "channel " << ch << ": NC" << endl;
+        if(IsScreenedChannel(ch))
+            cout << "channel " << ch << ": Masked" << endl;
+        if(!(IsNoisyChannel(ch))&&!(IsNotConnectedChannel(ch))&&!(IsScreenedChannel(ch)))
+            cout << "channel " << ch << ": Good" << endl;
+    }
 }
 
 void TSettings::LoadDefaultResolutions(){
