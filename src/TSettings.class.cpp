@@ -437,7 +437,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"dia_input")) Parse(key,value,dia_input);
 		if (TPlaneProperties::startsWith(key,"dia_saturation")) Parse(key,value,dia_saturation); // DA
 		if (TPlaneProperties::startsWith(key,"max_transparent_cluster_size")) Parse(key,value,max_transparent_cluster_size); // DA
-		if (TPlaneProperties::startsWith(key,"transparent_cluster_size")) Parse(key,value,transparent_cluster_size); // DA
+		if (TPlaneProperties::startsWith(key,"num_highest_transparent_cluster")) Parse(key,value,num_highest_transparent_cluster); // DA
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_fraction")) Parse(key,value,alignment_training_track_fraction);
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_number")) Parse(key,value,alignment_training_track_number);
         if (TPlaneProperties::startsWith(key,"RerunSelection")) Parse(key,value,bRerunSelection);
@@ -724,7 +724,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	PathExtension3d="";
 	dia_saturation = 4095; // DA
 	max_transparent_cluster_size = 10; // DA
-    transparent_cluster_size = 2; // DA
+    num_highest_transparent_cluster = 2; // DA
 
 	res_keep_factor=2;
 	alignmentPrecision_Offset = 0.01;
