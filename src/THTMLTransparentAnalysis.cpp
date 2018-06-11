@@ -28,9 +28,9 @@ void THTMLTransparentAnalysis::createContent() {
 void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > vecMeanPulseHeigths, vector<vector <Float_t> > vecMPPulseHeigths) {
 	// TODO: change this:
 	subjectDetector = 8;
-
+    UInt_t nStrips = settings->getNumHighestTransparentCluster();
 	stringstream sectionSummary;
-	stringstream section2Highest;
+	stringstream sectionNHighest;
 	stringstream sectionAll;
 //	sectionSummary<<"<h2>\n"<<"Summary table"<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
@@ -40,7 +40,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	vecTable.at(1).push_back("PulseHeigth");
 	vecTable.at(2).push_back("mean");
 	vecTable.at(3).push_back("most probable");
-	vecTable.at(4).push_back("PulseHeigth 2 highest channels");
+	vecTable.at(4).push_back(TString::Format("PulseHeigth %d highest channels", nStrips).Data()); // DA
 	vecTable.at(5).push_back("mean");
 	vecTable.at(6).push_back("most probable");
 //	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
@@ -54,8 +54,8 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	sectionSummary << createTable(vecTable);
 	sectionSummary	<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMean")
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMP")
-									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMean")
-									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMP");
+									<< putImage(".",TString::Format("hDiaTranspAnaPulseHeightOf%dHighestMean", settings->getNumHighestTransparentCluster()))
+									<< putImage(".",TString::Format("hDiaTranspAnaPulseHeightOf%dHighestMP", settings->getNumHighestTransparentCluster()));
 	sectionSummary << "\n\n<br><br>\n\n";
     addSection("Pulse Height - Summary table",sectionSummary.str());
 	stringstream plots1, plots2;
@@ -63,7 +63,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	for (UInt_t clusterSize = 1; clusterSize < settings->getMaxTransparentClusterSize()+1; clusterSize++) { // DA
 		stringstream histoname1, histoname2;
 		histoname1 << "cDiaTranspAnaPulseHeightOf"<<clusterSize<<"Strips";
-		histoname2 << "cDiaTranspAnaPulseHeightOf2HighestIn"<<clusterSize<<"Strips";
+		histoname2 << "cDiaTranspAnaPulseHeightOf"<<settings->getNumHighestTransparentCluster()<<"HighestIn"<<clusterSize<<"Strips";
 		plots1 << putImage(".",histoname1.str()) << " \n";
 		plots2 << putImage(".",histoname2.str()) << " \n";
 	}
@@ -71,29 +71,29 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	sectionAll << plots1.str();
 	sectionAll << "\n\n<br><br>\n\n";
 //	section2Highest << "<h2>Pulse Height of 2 hightest channels in N strips</h2><br>";
-	section2Highest << plots2.str();
-	section2Highest << "\n\n<br><br>\n\n";
+	sectionNHighest << plots2.str();
+	sectionNHighest << "\n\n<br><br>\n\n";
 
     addSection("Pulse Height of N strips",sectionAll.str());
-    addSection("Pulse Height of 2 hightest channels in N strips",section2Highest.str());
+    addSection(TString::Format("Pulse Height of %d hightest channels in N strips", nStrips).Data(),sectionNHighest.str());
 
 	TString name;
 	stringstream pXY;
-	name = TString::Format("hLandau2HighestFidCutX_2outOf%02d",settings->getMaxTransparentClusterSize());
+	name = TString::Format("hLandau%dHighestFidCutX_%doutOf%02d",settings->getNumHighestTransparentCluster(), settings->getNumHighestTransparentCluster(), settings->getMaxTransparentClusterSize());
 //	pXY << putImage((string)".",(string)"hLandau2HighestFidCutX_2outOf10")<<"\n"; // DA
 	pXY << putImage((string)".",(string)name) <<"\n"; // DA
-	name = TString::Format("hLandau2HighestFidCutY_2outOf%02d",settings->getMaxTransparentClusterSize());
+	name = TString::Format("hLandau%dHighestFidCutY_%doutOf%02d",settings->getNumHighestTransparentCluster(), settings->getNumHighestTransparentCluster(), settings->getMaxTransparentClusterSize());
 //	pXY << putImage((string)".",(string)"hLandau2HighestFidCutY_2outOf10")<<"\n"; // DA
 	pXY << putImage((string)".",(string)name)<<"\n"; // DA
 	pXY <<"\n\n<br><br>\n\n";
-	name = TString::Format("hLandau2HighestPredHitX_2outOf%02d",settings->getMaxTransparentClusterSize());
+	name = TString::Format("hLandau%dHighestPredHitX_%doutOf%02d",settings->getNumHighestTransparentCluster(), settings->getNumHighestTransparentCluster(), settings->getMaxTransparentClusterSize());
 //	pXY << putImage((string)".",(string)"hLandau2HighestPredHitX_2outOf10")<<"\n"; // DA
 	pXY << putImage((string)".",(string)name)<<"\n"; // DA
-	name = TString::Format("hLandau2HighestPredHitY_2outOf%02d",settings->getMaxTransparentClusterSize());
+	name = TString::Format("hLandau%dHighestPredHitY_%doutOf%02d",settings->getNumHighestTransparentCluster(), settings->getNumHighestTransparentCluster(), settings->getMaxTransparentClusterSize());
 //	pXY << putImage((string)".",(string)"hLandau2HighestPredHitY_2outOf10")<<"\n"; // DA
 	pXY << putImage((string)".",(string)name)<<"\n"; // DA
 	pXY <<"\n\n<br><br>\n\n";
-	name = TString::Format("hLandau2HighestHitProfile_2OutOf%02d",settings->getMaxTransparentClusterSize());
+	name = TString::Format("hLandau%dHighestHitProfile_%dOutOf%02d",settings->getNumHighestTransparentCluster(), settings->getNumHighestTransparentCluster(), settings->getMaxTransparentClusterSize());
 //	pXY << putImage((string)".",(string)"hLandau2HighestHitProfile_2OutOf10")<<"\n"; // DA
 	pXY << putImage((string)".",(string)name)<<"\n"; // DA
     addSection("XY Pulse Height Distributions",pXY.str());
