@@ -423,15 +423,15 @@ bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
 		//				else
 		if (skewness < 0 ){
 			if(alpha<0)
-				alpha*=1.01;
+				alpha*=1.02;
 			else
-				alpha *=.95;
+				alpha *=.98;
 		}
 		else{//skewness<0
 			if (alpha<0)
-				alpha*=.95;
+				alpha*=.98;
 			else
-				alpha*=1.01;
+				alpha*=1.02;
 		}
 	}
 	if (verbosity>4||true)
