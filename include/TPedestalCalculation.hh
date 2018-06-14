@@ -126,13 +126,17 @@ private:
 	static Float_t getLowLimitPedestal(Float_t pedMean, Float_t pedSigma,Float_t maxSigma);
 	static Float_t getHighLimitPedestal(Float_t pedMean, Float_t pedSigma,Float_t maxSigma);
 
+	bool silMaskedChs[8][N_DET_CHANNELS];
+	bool silSaturatedChs[8][N_DET_CHANNELS];
 	bool silHitChs[8][N_DET_CHANNELS];
 	bool silSeedChs[8][N_DET_CHANNELS];
+	bool silSaturatedChsDeque[1000][8][N_DET_CHANNELS];
 	bool silHitChsDeque[1000][8][N_DET_CHANNELS];
 	bool silSeedChsDeque[1000][8][N_DET_CHANNELS];
 	bool diaNcChs[N_DIA_CHANNELS];
 	bool diaNoisyChs[N_DIA_CHANNELS];
 	bool diaMaskedChs[N_DIA_CHANNELS];
+	bool diaSaturatedChs[N_DIA_CHANNELS];
 	bool diaPedChs[N_DIA_CHANNELS];
 	bool diaHitChs[N_DIA_CHANNELS];
 	bool diaSeedChs[N_DIA_CHANNELS];
@@ -140,6 +144,7 @@ private:
 	bool diaHitChsCmc[N_DIA_CHANNELS];
 	bool diaSeedChsCmc[N_DIA_CHANNELS];
 	bool diaCmChs[N_DIA_CHANNELS];
+	bool diaSaturatedChsDeque[1000][N_DIA_CHANNELS];
 	bool diaCmChsDeque[1000][N_DIA_CHANNELS];
 	bool diaPedChsDeque[1000][N_DIA_CHANNELS];
 	bool diaHitChsDeque[1000][N_DIA_CHANNELS];
