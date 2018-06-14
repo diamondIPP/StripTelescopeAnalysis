@@ -50,9 +50,10 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
         settings->IsNotConnectedChannel(i) ? diaNcChs[i] = true : false;
     }
 	for (UInt_t i = 0; i < 8; i++){
-		for (UInt_t j = 0; j < N_DET_CHANNELS; j++)
-			silChannel[i][j] = (UChar_t)j;
-			settings->isDet_channel_screened(i, j) ? silMaskedChs[i][j] = true : false;
+		for (UInt_t j = 0; j < N_DET_CHANNELS; j++) {
+            silChannel[i][j] = (UChar_t) j;
+            settings->isDet_channel_screened(i, j) ? silMaskedChs[i][j] = true : false;
+        }
 	}
 }
 
