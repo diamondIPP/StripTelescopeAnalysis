@@ -318,7 +318,7 @@ pair<Float_t, Float_t> TPedestalCalculation::calculateFirstPedestalDiaCMN(int ch
 		diaHitChsCmcDeque[nEvent][ch] = false;
 		diaSeedChsCmcDeque[nEvent][ch] = false;
 		if(diaSaturatedChsDeque[nEvent][ch]){
-			diaSaturatedChsDeque[nEvent][ch] = true;
+			// Do nothing
 		}
 		else if(abs(adc-meanCMN) < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN){
 			diaPedChsCmcDeque[nEvent][ch] = true;
@@ -458,8 +458,8 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	diaPedChsCmc[ch] = false;
 	diaHitChsCmc[ch] = false;
 	diaSeedChsCmc[ch] = false;
-	if(settings->isSaturated(8, diaAdcValues[ch].back())){
-		diaSaturatedChs[ch] = true;
+	if(diaSaturatedChs[ch]){
+		// Do nothing
 	}
 	else if(abs(diaAdcValuesCMN[ch].back()-meanCMN) < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN){
 		diaPedChsCmc[ch] = true;
