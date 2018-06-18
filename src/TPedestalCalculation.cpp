@@ -427,8 +427,26 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 	diaHitChs[ch] = false;
 	diaSeedChs[ch] = false;
 	diaSaturatedChs[ch] = false;
+    if((nEvent==391096||nEvent==391098||nEvent==391099||nEvent==391100||nEvent==391101||nEvent==391102||nEvent==391103||nEvent==391104||nEvent==391105||nEvent==391106||nEvent==391107)&&ch==0){
+        cout<<"event "<<nEvent<<" ch 0 has adc: "<<diaAdcValues[ch].back()<<"."<< endl;
+        cout<<"current value for saturation is: "<<int(diaSaturatedChs[ch])<< endl;
+        if(diaAdcValues[ch].back()>=4095){
+            cout<<"This event in ch 0 should be marked as saturated..."<<endl;
+        }
+        else{
+            cout<<"This event in ch0 should not be marked as saturated..."<< endl;
+        }
+    }
 	if(settings->isSaturated(8, diaAdcValues[ch].back())){
 		diaSaturatedChs[ch] = true;
+        if((nEvent==391096||nEvent==391098||nEvent==391099||nEvent==391100||nEvent==391101||nEvent==391102||nEvent==391103||nEvent==391104||nEvent==391105||nEvent==391106||nEvent==391107)&&ch==0){
+            if(diaAdcValues[ch].back()!=4095) {
+                cout << "STUPID SAYS IT IS SATURATED!!!" << endl;
+            }
+            else{
+                cout << "IT should be saturated!" << endl;
+            }
+        }
 	}
 	else if(abs(diaAdcValues[ch].back()-mean) < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigma){
 		diaPedChs[ch] = true;
