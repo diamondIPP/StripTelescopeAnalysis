@@ -721,6 +721,9 @@ void TPedestalCalculation::updateSiliconPedestals(){
 void TPedestalCalculation::updateDiamondPedestals(){
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
 		Float_t adcValue = (Float_t)eventReader->getDia_ADC(ch);
+        if(nEvent==39106){
+            cout<<"the reader has for ch 0 "<< adcValue<<endl;
+        }
         this->diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
 		adcValue-=cmNoise;
         this->diaAdcValuesCMN[ch].push_back(adcValue);//eventReader->getDia_ADC(ch));
