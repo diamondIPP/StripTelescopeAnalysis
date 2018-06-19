@@ -31,6 +31,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 
 	stringstream sectionSummary;
 	stringstream section2Highest;
+	stringstream sectionNHighest;
 	stringstream sectionAll;
 //	sectionSummary<<"<h2>\n"<<"Summary table"<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
@@ -57,7 +58,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMP");
 	sectionSummary << "\n\n<br><br>\n\n";
     addSection("Pulse Height - Summary table",sectionSummary.str());
-	stringstream plots1, plots2;
+	stringstream plots1, plots2, plots3;
 	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 		stringstream histoname1, histoname2;
 		histoname1 << "cDiaTranspAnaPulseHeightOf"<<clusterSize<<"Strips";
@@ -65,15 +66,23 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 		plots1 << putImage(".",histoname1.str()) << " \n";
 		plots2 << putImage(".",histoname2.str()) << " \n";
 	}
+	for (UInt_t n_strips = 0; n_strips < 10; n_strips++) {
+		stringstream histoname3;
+		histoname3 << "cDiaTranspAnaPulseHeight" << n_strips+1 << "HighestIn10Strips";
+		plots3 << putImage(".",histoname3.str()) << " \n";
+	}
 //	sectionAll << "<h2>Pulse Height of N strips</h2><br>";
 	sectionAll << plots1.str();
 	sectionAll << "\n\n<br><br>\n\n";
 //	section2Highest << "<h2>Pulse Height of 2 hightest channels in N strips</h2><br>";
 	section2Highest << plots2.str();
 	section2Highest << "\n\n<br><br>\n\n";
+	sectionNHighest << plots3.str();
+	sectionNHighest << "\n\n<br><br>\n\n";
 
     addSection("Pulse Height of N strips",sectionAll.str());
     addSection("Pulse Height of 2 hightest channels in N strips",section2Highest.str());
+    addSection("Pulse Height of N hightest channels in 10 strips", sectionNHighest.str());
 
 	stringstream pXY;
 	pXY << putImage((string)".",(string)"hLandau2HighestFidCutX_2outOf10")<<"\n";
