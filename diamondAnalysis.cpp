@@ -211,13 +211,7 @@ int main(int argc, char ** argv) {
 		eventSaver->saveEvents(RunParameters[i].getEvents());
 		delete eventSaver;
 
-		Long64_t skipped = 0;
-		if(settings->isEventSkip()){
-			for(int ii = 0; ii < /*settings->getSkipEvents().size()*/0; ii++){
-				skipped += /*(settings->getSkipEvents().at(ii).second - settings->getSkipEvents().at(ii).first) + */1;
-			}
-		}
-		Long64_t nEvents = RunParameters[i].getEvents() - skipped;
+		Long64_t nEvents = RunParameters[i].getEvents();
 
 		//Calculate Pedestal
 		sys->cd(currentDir.c_str());

@@ -593,12 +593,12 @@ Int_t TADCEventReader::getAdcValue(UInt_t det,UInt_t ch){
 	return -1;
 }
 
-Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch, bool cmnCorrected)
+Float_t TADCEventReader::getSignalInSigma(UInt_t det, UInt_t ch, bool cmnCorrected, bool suppressNegativeSignals)
 {
 	if(getPedestalSigma(det,ch,cmnCorrected)==0)
 		return 0;
 	else
-		return (this->getSignal(det,ch,cmnCorrected)/this->getPedestalSigma(det,ch,cmnCorrected));
+		return (this->getSignal(det, ch, cmnCorrected, suppressNegativeSignals)/this->getPedestalSigma(det, ch, cmnCorrected));
 }
 
 TCluster TADCEventReader::getCluster(UInt_t det, UInt_t cl)
@@ -635,7 +635,6 @@ void TADCEventReader::checkADC(){
 bool TADCEventReader::isSaturated(UInt_t det, UInt_t ch)
 {
 	if(det<TPlaneProperties::getNDetectors())
-//		return getAdcValue(det,ch)>=TPlaneProperties::getMaxSignalHeight(det); // DA
 		return getAdcValue(det,ch)>=settings->getMaxSignalHeight(det); // DA
 	return true;
 }
@@ -657,12 +656,12 @@ Float_t TADCEventReader::getRawSignalInSigma(UInt_t det, UInt_t ch,bool cmnCorre
 	return (getRawSignal(det,ch,cmnCorrected)/getPedestalSigma(det,ch,cmnCorrected));
 }
 
-Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected)
+Float_t TADCEventReader::getSignal(UInt_t det, UInt_t ch,bool cmnCorrected, bool suppressNegativeSignals)
 {
 	if(det>=TPlaneProperties::getNDetectors()) return -9999999;
 	if(ch<0||ch>=TPlaneProperties::getNChannels(det)) return 0;
 	Float_t signal = getRawSignal(det,ch,cmnCorrected);
-	if(signal<0)return 0;
+	if(signal < 0 && suppressNegativeSignals) return 0;
 
 	return signal;
 }

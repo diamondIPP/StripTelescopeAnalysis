@@ -164,11 +164,7 @@ public:
 	Float_t getEta_lowq_slice_hi() const;
 	Float_t getEta_lowq_slice_low() const;
 	UInt_t getMaxAllowedClustersize(UInt_t det);
-	bool doAnalyseAlignmentEvents()const {return bAnalyseAlignmentEvents;} // DA:
-	UInt_t getEventBinWidth()const {return bEventBinWidth;} // DA:
-	UInt_t getEventwiseStart()const {return bEventwiseStart;} // DA:
-	UInt_t getEventwiseStop()const {return bEventwiseStop;} // DA:
-	std::vector<Int_t> getSkipEvents()const {return bSkipEvents;} // DA
+//	std::vector<Int_t> getSkipEvents()const {return bSkipEvents;} // DA
 	bool isEventSkip() {return isEventSkipCut;} // DA borrar
 
 	UInt_t getDiaSaturation() {return dia_saturation;} // DA
@@ -408,7 +404,7 @@ private:
 	bool Parse(std::string key, std::string value, float &output){return ParseFloat(key,value,output);}
 	bool Parse(std::string key, std::string value, TString &output){return ParseTString(key,value,output);}
 	bool Parse(std::string key, std::string value, string &output){return ParseString(key,value,output);}
-	void ParseEventSkip(std::string key, std::string value, std::vector<std::pair<Int_t, Int_t> > & vect);
+//	void ParseEventSkip(std::string key, std::string value, std::vector<std::pair<Int_t, Int_t> > & vect);
 	pair<char,int> ParseCellPosition(std::string value);
 	void LoadDefaultResolutions();
 
@@ -472,11 +468,7 @@ private:
 	Float_t eta_hiq_slice_hi;
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
-	bool bAnalyseAlignmentEvents = false; // DA:
-	UInt_t bEventBinWidth; // DA:
-	UInt_t bEventwiseStart; // DA:
-	UInt_t bEventwiseStop; // DA:
-	std::vector<Int_t> bSkipEvents;
+//	std::vector<Int_t> bSkipEvents;
 
 	UInt_t dia_saturation; // DA
 	UInt_t max_transparent_cluster_size; // DA

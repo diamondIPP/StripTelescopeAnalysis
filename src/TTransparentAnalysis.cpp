@@ -51,7 +51,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
     inf  = std::numeric_limits<float>::infinity();
     alignMode = mode;
     gRandom->SetSeed(1);
-    cmCorrected  = false;
+    cmCorrected  = true;
     if(verbosity>5) settings->diamondPattern.Print();
     xDivisions = 3;
     yDivisions = 3;
@@ -115,11 +115,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     if(settings->getAlignmentEvents(nEvents)>startEvent){
         cout<<"startEvent:      "<<startEvent<<endl;
         cout<<"alignmentEvents: "<<settings->getAlignmentEvents(nEvents)<<endl;
-        if(settings->doAnalyseAlignmentEvents()){
-            newstartEvent = startEvent;
-        }
-        else
-            newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
+        newstartEvent = TMath::Max(settings->getAlignmentEvents(nEvents),startEvent);
         cout<<"newstartEvent: "<<newstartEvent<<endl;
         cout<<"nEvents: "<<nEvents<<endl;
         nEvents -= newstartEvent-startEvent;
@@ -130,7 +126,6 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
-//    initHistograms2();
     initHistograms1(); // DA:
     initHistogramsN(); // DA:
 
@@ -310,7 +305,7 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
         if (this->settings->getDet_channel_screen(det).isScreened(currentChannel) == true) {
             if (verbosity > 5) cout << "\tchannel " << currentChannel << " is screened.." << endl;
             screenedChannel++;
-            return false; // DA: Commented it to allow clusters near the edges or for detectors with less than 10 channels (e.g. phantom in Oct 2016).
+            return false;
         }
         if (eventReader->isSaturated(det, currentChannel) == true) {
             if (verbosity > 5) cout << "\tchannel " << currentChannel << " has saturated.." << endl;
@@ -1936,10 +1931,8 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         TRawEventSaver::showStatusBar(nEvent,nEvents,100);
         //		if (verbosity > 4) cout << "-----------------------------\n" << "analyzing event " << nEvent << ".." << eventReader<<endl;
         if (settings->useForAlignment(nEvent,nEvents)){
-            if(!(settings->doAnalyseAlignmentEvents())){
-                usedForAlignment++;
-                continue;
-            }
+            usedForAlignment++;
+            continue;
         }
         if(nEvent>eventReader->GetEntries())
             break;
@@ -2957,16 +2950,13 @@ void TTransparentAnalysis::initDividedAreaAxis(TAxis* axis){
 void TTransparentAnalysis::fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfN) {
     if(clusterSize == settings->getMaxTransparentClusterSize()){
         hPHNOutOfMVsEventNo->Fill(nEvent,chargeOfN);
-//        hPH2OutOf10VsEventNo->Fill(nEvent,chargeOfN);
         hPHVsEventNo->Fill(nEvent,charge);
     }
     UInt_t i = clusterSize -1;
     if (i < vecPHVsEventNo_Areas.size())
         vecPHVsEventNo_Areas[i]->Fill(nEvent,area,charge);
-//    if (i < vecPH2HighestVsEventNo_Areas.size())
     if (i < vecPHNHighestVsEventNo_Areas.size())
         vecPHNHighestVsEventNo_Areas[i]->Fill(nEvent,area,chargeOfN);
-//        vecPH2HighestVsEventNo_Areas[i]->Fill(nEvent,area,chargeOfTwo);
 }
 
 
@@ -2980,36 +2970,3 @@ UInt_t TTransparentAnalysis::GetHitArea(TSettings* set,Float_t xVal,Float_t yVal
     Int_t y = relY*yDivisions;
     return x+xDivisions*y;
 }
-
-//void TTransparentAnalysis::initPHChannelVsEventNoPlots(UInt_t nStart, UInt_t nEnd) { // DA: Borrar
-//
-//    cout<<"initPHChannelvsEventNoAreaPlots"<<flush;
-//    Int_t nentriesPerBin = 1;
-//    while((nEnd-nStart)%nentriesPerBin!=0){
-//        nentriesPerBin--;
-//    }
-//    UInt_t nBins = (nEnd-nStart)/nentriesPerBin;
-//    if (nBins==0)nBins=1;
-//
-//    TString name_1 ="hPHChannelVsEventNo_1";
-//    TString name_2 ="hPHChannelVsEventNo_2";
-//    TString title_1 = "PH Ch vs eventNo_1";
-//    TString title_2 = "PH Ch vs eventNo_2";
-//    hPHChVsEventNo_1 = new TH2D(name_1,title_1,(Int_t)(nBins+1),nStart-(nEnd-nStart)/((Float_t)(2*nBins)),nEnd+(nEnd-nStart)/((Float_t)(2*nBins)),127+1,0-0.5,127+0.5);
-//    hPHChVsEventNo_2 = new TH2D(name_2,title_2,(Int_t)(nBins),nStart,nEnd,128,0,128);
-//    hPHChVsEventNo_1->GetXaxis()->SetTitle("Event");
-//    hPHChVsEventNo_2->GetXaxis()->SetTitle("Event");
-//    hPHChVsEventNo_1->GetYaxis()->SetTitle("Diamond Channel");
-//    hPHChVsEventNo_2->GetYaxis()->SetTitle("Diamond Channel");
-//}
-
-//void TTransparentAnalysis::fillPHCHvsEventNoPlots(UInt_t channel, UInt_t charge) { // DA: Borrar
-//    Int_t binEvent_1 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_1->GetXaxis()->GetXmin())/hPHChVsEventNo_1->GetXaxis()->GetBinWidth(1))+1;
-//    Int_t binEvent_2 = (Int_t)((Float_t)(nEvent-hPHChVsEventNo_2->GetXaxis()->GetXmin())/hPHChVsEventNo_2->GetXaxis()->GetBinWidth(1))+1;
-//    Int_t binCh_1 = (Int_t)((Float_t)(channel-hPHChVsEventNo_1->GetYaxis()->GetXmin())/hPHChVsEventNo_1->GetYaxis()->GetBinWidth(1))+1;
-//    Int_t binCh_2 = (Int_t)((Float_t)(channel-hPHChVsEventNo_2->GetYaxis()->GetXmin())/hPHChVsEventNo_2->GetYaxis()->GetBinWidth(1))+1;
-//    Double_t temp_1 = hPHChVsEventNo_1->GetBinContent((Int_t)binEvent_1, (Int_t)binCh_1) + charge;
-//    Double_t temp_2 = hPHChVsEventNo_2->GetBinContent((Int_t)binEvent_2, (Int_t)binCh_2) + charge;
-//    hPHChVsEventNo_1->SetBinContent((Int_t)binEvent_1, (Int_t)binCh_1, temp_1);
-//    hPHChVsEventNo_2->SetBinContent((Int_t)binEvent_2, (Int_t)binCh_2, temp_2);
-//}

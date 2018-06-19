@@ -654,7 +654,6 @@ void TAnalysisOfPedestal::initialiseHistos()
 
         histoName.str("");
         //hLeftVsRightSignal
-//        max = TPlaneProperties::getMaxSignalHeight(det); // DA
         max = settings->getMaxSignalHeight(det); // DA
         if (max >1000)
             nbins = max/4;
@@ -1763,8 +1762,6 @@ void TAnalysisOfPedestal::saveAdcVsEventProfiles() {
     }//for loop det
 }
 
-
-
 TH1F* TAnalysisOfPedestal::doSlidingWindowAnalysis(TH1D* histo,Int_t nAvrg,bool absolute) {
     if (!histo)
         return 0;
@@ -1819,13 +1816,10 @@ void TAnalysisOfPedestal::SetYRangeForSignalInSigmaPlot(TH1F* histo) {
     }
     max *=1.1;
     histo->GetYaxis()->SetRangeUser(0,max);
-
-
 }
 
 void TAnalysisOfPedestal::checkCommonModeNoise(){
     UInt_t det = TPlaneProperties::getDetDiamond();
-//    Float_t maxVal =TPlaneProperties::getMaxSignalHeightDiamond(); // DA
     Float_t maxVal = settings->getDiaSaturation(); // DA
     Float_t cmNoise = 0;
     UInt_t nCmNoiseEvents =0;

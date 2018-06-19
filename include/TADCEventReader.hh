@@ -41,8 +41,8 @@ public:
 	bool isValidTrack();
 	bool hasSmallSiliconClusterSizes(UInt_t maxClusterSize=3);
   Int_t getAdcValue(UInt_t det,UInt_t ch);
-	Float_t getSignalInSigma(UInt_t det,UInt_t ch, bool cmCorrected=false);
-	Float_t getSignal(UInt_t det,UInt_t ch, bool cmCorrected=false);
+	Float_t getSignalInSigma(UInt_t det, UInt_t ch, bool cmCorrected = false, bool suppressNegativeSignals = true);
+	Float_t getSignal(UInt_t det, UInt_t ch, bool cmCorrected = false, bool suppressNegativeSignals = true);
 	Float_t getRawSignal(UInt_t det,UInt_t ch,bool cmnCorrected=false);
 	Float_t getRawSignalInSigma(UInt_t det,UInt_t ch, bool cmnCorrected=false);
 	Float_t getCMNoise(UInt_t det=8,UInt_t ch=0) const;

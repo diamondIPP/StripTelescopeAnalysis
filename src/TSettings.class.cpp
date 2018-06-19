@@ -551,14 +551,6 @@ void TSettings::LoadSettings(){
         if (TPlaneProperties::startsWith(key,"negativeStripChargeCut")){Parse(key,value,negativeChargeCutStrip);}
         if (TPlaneProperties::startsWith(key,"lowResponseThreshold")){Parse(key,value,lowResponseThreshold);}
         if (TPlaneProperties::startsWith(key,"minimumEdgeDistance")){Parse(key,value,minimumEdgeDistance);}
-//		if (TPlaneProperties::startsWith(key,"analyseAlignmentEvents")){Parse(key,value,bAnalyseAlignmentEvents);} // DA:
-//		if (TPlaneProperties::startsWith(key,"eventBinWidth")){Parse(key,value,bEventBinWidth);} // DA:
-//		if (TPlaneProperties::startsWith(key,"eventwiseStart")){Parse(key,value,bEventwiseStart);} // DA:
-//		if (TPlaneProperties::startsWith(key,"eventwiseStop")){Parse(key,value,bEventwiseStop);} // DA:
-//		if (TPlaneProperties::startsWith(key,"doEventwise")){Parse(key,value,bDoEventwise);} // DA:
-//		if (TPlaneProperties::startsWith(key,"skipEvents")){ParseEventSkip(key,value,bSkipEvents);} // DA:
-//		if (TPlaneProperties::startsWith(key,"cellHeight")){Parse(key,value,cellHeight);} // DA:
-
 
 		if (TPlaneProperties::startsWith(key,"responseWindow")){
             ParseFloatPair(key,value,responseWindow);}
@@ -902,12 +894,6 @@ void TSettings::DefaultLoadDefaultSettings(){
 	resolutionSNR = 8;
 	lowResponseThreshold = 500.;
 	responseWindow = make_pair(1600.,1700.);
-//	bAnalyseAlignmentEvents = false;
-//	bEventBinWidth = 1000; // DA:
-//	bEventwiseStart = 0; // DA:
-//	bEventwiseStop = nEvents; // DA:
-//	bDoEventwise = false; // DA:
-//	isEventSkipCut = false; // DA:
 //	checkSettings();
 }
 

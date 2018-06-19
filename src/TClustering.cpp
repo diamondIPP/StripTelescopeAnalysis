@@ -203,7 +203,6 @@ void TClustering::clusterDetector(UInt_t det){
  * 			\return first channel which is not part of the cluster
  */
 int TClustering::combineCluster(UInt_t det, UInt_t ch){
-//	int maxAdcValue = TPlaneProperties::getMaxSignalHeight(det); // DA
 	int maxAdcValue = settings->getMaxSignalHeight(det); // DA
 	if((verbosity>10&&det==8)||verbosity>11)cout<<"combine Cluster...start:"<<ch<<" ";
 
@@ -235,7 +234,6 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 			float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
 			float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
 			float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
-//			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened); // DA
 			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,settings->isSaturated(det,adcValue),isScreened); // DA
 			//			cluster.addChannel(currentCh,signal,adcValueInSigma,adcValue,adcValue>=maxAdcValue,isScreened);//todo add saturated
 		}
@@ -250,7 +248,6 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 		float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
 		float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
 		if(currentCh>=0&&currentCh<TPlaneProperties::getNChannels(det))
-//			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened); // DA
 			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,settings->isSaturated(det,adcValue),isScreened); // DA
 	}
 	if((verbosity>10&&det==8)||verbosity>11)cout<<" ."<<cluster.size()<<". ";
@@ -266,7 +263,6 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 			float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
 			float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
 			float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
-//			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened); // DA
 			cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,settings->isSaturated(det,adcValue),isScreened); // DA
 		}
 		else{
@@ -279,7 +275,6 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 		float pedMeanCMN = eventReader->getPedestalMean(det,currentCh,true);
 		float pedSigma = eventReader->getPedestalSigma(det,currentCh,false);
 		float pedSigmaCMN = eventReader->getPedestalSigma(det,currentCh,true);
-//		cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,TPlaneProperties::isSaturated(det,adcValue),isScreened); // DA
 		cluster.addChannel(currentCh,pedMean,pedSigma,pedMeanCMN,pedSigmaCMN,adcValue,settings->isSaturated(det,adcValue),isScreened); // DA
 	}
 	cluster.checkCluster();
