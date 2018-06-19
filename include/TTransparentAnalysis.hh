@@ -285,6 +285,8 @@ private:
 	vector<TH1F*> hEtaCMNcorrectedIntegrals;
 	TH1F* hEtaIntegral_clustered;
 //	TH2F* hResidualEtaVsEstimatedHitPosition,hResidualChargeWeightedVsEstimatedHitPosition,hResidualHighest2CentroidVsEstimatedHitPosition;
+	static const int MaxNSignalStrips = 10;
+	vector<TH1F*> hLandauNHighest[MaxNSignalStrips];
 	
 	// fits
 	vector<TF1*> fitLandau;

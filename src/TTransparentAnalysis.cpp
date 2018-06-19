@@ -448,6 +448,11 @@ void TTransparentAnalysis::initHistograms() {
         histNameLandau2Highest<<"_noCMC";
         hLandau2Highest_nonCMC.push_back(new TH1F(histNameLandau2Highest.str().c_str(),histNameLandau2Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
         this->hLandau1Highest.push_back(new TH1F(histNameLandau1Highest.str().c_str(),histNameLandau1Highest.str().c_str(),settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+		for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+			stringstream histNameLandauNHighest;
+			histNameLandauNHighest << "hDiaTranspAnaPulseHeight" << n_strips+1 << "HighestIn" << clusterSize+1 << "Strips";
+			hLandauNHighest[n_strips].push_back(new TH1F(histNameLandauNHighest.str().c_str(), histNameLandauNHighest.str().c_str(), settings->getPulse_height_num_bins(), 0, settings->getPulse_height_max(subjectDetector)));
+		}
 
 
         hEta.push_back(new TH1F(histNameEta.str().c_str(),histNameEta.str().c_str(),bins,0,1));
@@ -804,6 +809,10 @@ void TTransparentAnalysis::fillHistograms() {
         hLandau2HighestPredX[clusterSize]->Fill(chargeOfTwo,predXPosition);
         hLandau2HighestPredY[clusterSize]->Fill(chargeOfTwo,predYPosition);
         Float_t eta = this->transparentClusters.getEta();
+		for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+			Float_t chargeNInX = this->transparentClusters.getCharge(n_strips+1, cmCorrected);
+			hLandauNHighest[n_strips][clusterSize]->Fill(chargeNInX);
+		}
 
         Float_t etaCMN = this->transparentClusters.getEta(true);
         if(eta>0&&eta<1)
@@ -1845,6 +1854,9 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogramLandau(hLandauFixedNoise[clusterSize]);
         histSaver->SaveHistogramLandau(hLandau2HighestFixedNoise[clusterSize]);
         histSaver->SaveHistogramLandau(hLandau1Highest[clusterSize]);
+		for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+			histSaver->SaveHistogramLandau(hLandauNHighest[n_strips][clusterSize]);
+		}
         histSaver->SaveHistogram(hResidualChargeWeighted[clusterSize]);
         histSaver->SaveHistogram(hResidualHighest2Centroid[clusterSize]);
         histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
@@ -2025,6 +2037,9 @@ void TTransparentAnalysis::deleteHistograms() {
         if(hLandau2Highest[clusterSize])delete hLandau2Highest[clusterSize];
         if(hLandau2Highest_nonCMC[clusterSize])delete hLandau2Highest_nonCMC[clusterSize];
         if(hLandau1Highest[clusterSize])delete hLandau1Highest[clusterSize];
+		for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+			if (hLandauNHighest[n_strips][clusterSize]) delete hLandauNHighest[n_strips][clusterSize];
+		}
         if ( hEta[clusterSize]) delete hEta[clusterSize];
         if ( hEtaCMNcorrected[clusterSize]) delete hEtaCMNcorrected[clusterSize];
         if (hResidualChargeWeighted[clusterSize]) delete hResidualChargeWeighted[clusterSize];
