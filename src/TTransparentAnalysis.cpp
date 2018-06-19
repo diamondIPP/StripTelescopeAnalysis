@@ -1101,6 +1101,9 @@ void TTransparentAnalysis::fitHistograms() {
 		if(fit==0){cout<<"PROBLEM with fit..."<<clusterSize<<endl;}
 		fitLandau.push_back(fit);
 		fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLandau2Highest[clusterSize],true));
+		for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+			fitLandauNHighest[n_strips].push_back(landauGauss->doLandauGaussFit(hLandauNHighest[n_strips][clusterSize], true));
+		}
         TF1* trash_fit = landauGauss->doLandauGaussFit(hLandau2Highest_nonCMC[clusterSize],true);
         if(clusterSize == TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)-1){
             Float_t mean;
@@ -2064,6 +2067,9 @@ void TTransparentAnalysis::deleteFits() {
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
 		delete fitLandau[clusterSize];
 		delete fitLandau2Highest[clusterSize];
+		for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+			delete fitLandauNHighest[n_strips][clusterSize];
+		}
 		delete fitResidualChargeWeighted[clusterSize];
 		delete fitResidualHighest2Centroid[clusterSize];
 	}

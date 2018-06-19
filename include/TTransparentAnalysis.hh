@@ -293,6 +293,7 @@ private:
 	vector<TF1*> fitLandauFixedNoise;
 	vector<TF1*> fitLandau2Highest;
 	vector<TF1*> fitLandau2HighestFixedNoise;
+	vector<TF1*> fitLandauNHighest[MaxNSignalStrips];
 	vector<TF1*> fitResidualChargeWeighted;
 	vector<TF1*> fitResidualHighest2Centroid;
 	vector<TF1*> fitResidualEtaCorrected;
