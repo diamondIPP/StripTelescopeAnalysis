@@ -60,7 +60,7 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 	if(nEvents<=0) nEvents=eventReader->GetEntries();
 	histSaver->SetNumberOfEvents(nEvents);
 	for(nEvent=0;nEvent<nEvents;nEvent++){
-	    TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
+	    TRawEventSaver::showStatusBar(nEvent,nEvents,100);
 		eventReader->LoadEvent(nEvent);
 		analyseEvent();
 	}
@@ -1155,7 +1155,8 @@ void TAnalysisOfSelection::saveHistos()
 
 void TAnalysisOfSelection::analyseEvent()
 {
-
+	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+		cout<< "\nSelection analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 	if(!eventReader->isValidTrack()) //just Tracks with Valid Silicon Track
 		return;
 

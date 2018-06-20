@@ -159,8 +159,10 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 	cout<<"fill first strip hit histo"<<eventReader->GetEntries()<<endl;
 
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
-		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
+		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries(), 100);
 		eventReader->LoadEvent(nEvent);
+		if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+			cout<< "\nAlignment analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 		if (!eventReader->useForAnalysis() && !eventReader->useForAlignment())
 			continue;
 		for (UInt_t subjectPlane = 0; subjectPlane < TPlaneProperties::getNSiliconPlanes(); subjectPlane++) {
@@ -201,8 +203,10 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 	vector<UInt_t>vecEventNo[9];
 	cout<<"create flattened strip hit histo "<<eventReader->GetEntries()<<endl;
 	for( nEvent=0;nEvent<eventReader->GetEntries();nEvent++){
-		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries());
+		TRawEventSaver::showStatusBar(nEvent,eventReader->GetEntries(), 100);
 		eventReader->LoadEvent(nEvent);
+		if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+			cout<< "\nAlignment analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 		if (!eventReader->useForAnalysis() && !eventReader->useForAlignment())
 			continue;
 
@@ -254,6 +258,8 @@ void TAnalysisOfAlignment::DoEtaCorrection(UInt_t correctionStep){
 		for(UInt_t i=0;i<vecEventNo[det].size();i++){
 			nEvent= vecEventNo[det].at(i);
 			eventReader->LoadEvent(nEvent);
+			if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+				cout<< "\nAlignment analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 
 			if(!eventReader->useForAlignment()&&!eventReader->useForAnalysis())
 				continue;

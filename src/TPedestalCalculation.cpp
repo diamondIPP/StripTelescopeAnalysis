@@ -159,6 +159,8 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 
 		eventReader->LoadEvent(nEvent);
 		//SILICON PLANES
+		if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+			cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 		updateSiliconPedestals();
 		doCmNoiseCalculation();
 		//DIAMOND PLANE
@@ -427,26 +429,8 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
     this->diaHitChs[ch] = false;
     this->diaSeedChs[ch] = false;
     this->diaSaturatedChs[ch] = false;
-    if((nEvent==391096||nEvent==391098||nEvent==391099||nEvent==391100||nEvent==391101||nEvent==391102||nEvent==391103||nEvent==391104||nEvent==391105||nEvent==391106||nEvent==391107)&&ch==0){
-        cout<<"event "<<nEvent<<" ch 0 has adc: "<<this->diaAdcValues[ch].back()<<"."<< endl;
-        cout<<"current value for saturation is: "<<int(this->diaSaturatedChs[ch])<< endl;
-        if(this->diaAdcValues[ch].back()>=4095){
-            cout<<"This event in ch 0 should be marked as saturated..."<<endl;
-        }
-        else{
-            cout<<"This event in ch0 should not be marked as saturated..."<< endl;
-        }
-    }
 	if(settings->isSaturated(8, this->diaAdcValues[ch].back())){
         this->diaSaturatedChs[ch] = true;
-        if((nEvent==391096||nEvent==391098||nEvent==391099||nEvent==391100||nEvent==391101||nEvent==391102||nEvent==391103||nEvent==391104||nEvent==391105||nEvent==391106||nEvent==391107)&&ch==0){
-            if(this->diaAdcValues[ch].back()!=4095) {
-                cout << "STUPID SAYS IT IS SATURATED!!!" << endl;
-            }
-            else{
-                cout << "IT should be saturated!" << endl;
-            }
-        }
 	}
 	else if(abs(this->diaAdcValues[ch].back()-mean) < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigma){
         this->diaPedChs[ch] = true;
@@ -719,13 +703,10 @@ void TPedestalCalculation::updateSiliconPedestals(){
 }
 
 void TPedestalCalculation::updateDiamondPedestals(){
+//	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//        cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
-		Float_t adcValue = (Float_t)eventReader->getDia_ADC(ch);
-        if(((nEvent==391096)||(nEvent==100000))&&ch==0){
-            cout<<"the reader has for ch 0 "<< adcValue<<endl;
-            cout<<"Nevent "<<nEvent<<" bla event reader "<<eventReader->getEvent_number() << " or current event " << eventReader->getCurrent_event()<<endl;
-
-        }
+        Float_t adcValue = (Float_t)eventReader->getDia_ADC(ch);
         this->diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
 		adcValue-=cmNoise;
         this->diaAdcValuesCMN[ch].push_back(adcValue);//eventReader->getDia_ADC(ch));

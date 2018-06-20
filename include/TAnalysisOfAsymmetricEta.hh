@@ -25,6 +25,8 @@
 #include "TMultiGraph.h"
 #include "TCutG.h"
 #include "THStack.h"
+#include "TMath.h"
+#include "TRandom3.h"
 
 #include "TSettings.class.hh"
 #include "TCluster.hh"
@@ -74,6 +76,7 @@ private:
 	vector <Float_t> vecTries;
 	UInt_t bestTry;
 	int verbosity;
+    TRandom3 *rand3;
 };
 
 #endif /* TANALYSISOFASYMMETRICETA_HH_ */

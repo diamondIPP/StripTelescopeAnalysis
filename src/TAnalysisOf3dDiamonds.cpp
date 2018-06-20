@@ -127,8 +127,10 @@ void TAnalysisOf3dDiamonds::doAnalysis(UInt_t nEvents) {
     histSaver->SetNumberOfEvents(nEvents);
     if(verbosity>5)settings->diamondPattern.Print();
     for(nEvent=0;nEvent<nEvents;nEvent++){
-        TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
+        TRawEventSaver::showStatusBar(nEvent,nEvents,100);
         eventReader->LoadEvent(nEvent);
+        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+            cout<< "\n3D analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
         if (!eventValid()) {
             if (verbosity > 7) cout << "don't use" << endl;
             continue;

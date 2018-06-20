@@ -27,6 +27,7 @@ TAnalysisOfAsymmetricEta::TAnalysisOfAsymmetricEta(TSettings *settings) {
 
 	hAsymmetricEta2D=0;
 	bestAlpha = 0;
+	rand3 = new TRandom3();
 }
 
 TAnalysisOfAsymmetricEta::~TAnalysisOfAsymmetricEta() {
@@ -244,7 +245,8 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		hAsymmetricEta2D=0;
 	}
 	if(verbosity>4)cout<<"hName"<<endl;
-	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
+//	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
+	hAsymmetricEta2D = new TH2F(hName,hName,513,0-1/(1024),1+1/(1024),nDiamonds+2,-0.5,nDiamonds+1.5);
 	if(hAsymmetricEta2D ==0){
 		cout<<"histo with name: '"<<hName<<"' was not created...."<<endl;//hAsymmetricEta2D<<
 	}
@@ -327,113 +329,154 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 }
 
 Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
-	if (verbosity>4){
-		cout<<"TAnalysisOfAsymmetricEta::checkConvergence: nTries "<<nTries<<"\t"<<histo->GetName()<<endl;
-		cout<<"entries: "<<histo->GetEntries()<<endl;
-	}
-	int leftHalf = 0;
-	int bin=0;
-	for (bin=0; histo->GetBinLowEdge(bin)<.5;bin++){
-		leftHalf+=histo->GetBinContent(bin);
-	}
-	int rightHalf = 0;
-	for (bin=bin; bin<histo->GetNbinsX();bin++){
-		rightHalf+=histo->GetBinContent(bin);
-	}
-	Float_t mean = histo->GetMean();
-	if(verbosity>4)cout<<"Analysising: "<<histo->GetName()<<endl;
-	if(verbosity>4)cout<<"Asymmetric eta with a charge share of "<<alpha*100<<"%"<<endl;
-	if(verbosity>4)cout<<"nentries: "<<histo->GetEntries()<<endl;
-	Float_t skewness = histo->GetSkewness();
-	if(verbosity>4)cout<<"skewness*100: "<<skewness*100<<endl;
-	if(verbosity>4)cout<<"left: "<<leftHalf<<"\tright: "<<rightHalf<<" "<<(Float_t)leftHalf/(Float_t)rightHalf*100<<endl;
-
-//	bool valid = TMath::Abs(mean-.5)<.005;
-	bool valid = TMath::Abs(mean-.5)<.001; // DA: more tight criteria for convergence!
-//	valid = valid || TMath::Abs(skewness)<0.005;
-	valid = valid && TMath::Abs(skewness)<0.001; // DA: more tight criteria for convergence!
-	if(verbosity>4)cout<<"Mean "<<mean*100<<" "<<valid<<endl;
-	TPolyMarker* pm = FindPeaks(histo,2);
-	Float_t p1=0;
-	Float_t p2=0;
-	if(pm){
-		for (int i=0;i< pm->GetN();i++){
-			Float_t peakPos = pm->GetX()[i];
-			if (peakPos>.5)
-				peakPos = TMath::Abs(peakPos-1);
-			if(i==0)
-				p1 = peakPos;
-			else if(i==1)
-				p2 = peakPos;
-			if(verbosity>4)cout<<"\tPeak - "<<i<<"\t"<<peakPos*100.<<": "<<pm->GetY()[i]<<"\n";
-		}
-		if (pm->GetN()==2){
-			if(verbosity>4)cout<< (TMath::Abs(p1/p2-1)*100);
-			valid = valid && TMath::Abs(p1/p2-1)*100<8;
-			if(verbosity>4)cout<<" "<<valid;
-		}
-		else
-			valid=false;
-		if(verbosity>4)cout<<" "<<valid<<"\n";
-	}
-	else
-		valid = false;
-	valid = TMath::Abs(mean-.5)<.001;
-	valid = valid && TMath::Abs(skewness)<0.0001; // DA: made it tighter
-	alphaValues.push_back(alpha*10);
-	Float_t value = (Float_t)leftHalf/(Float_t)rightHalf-1;
-	if(value!=value) value = -1;
+    Double_t xq[2];
+    Double_t yq[2];
+    yq[0] = 0.5;
+    yq[1] = 1.0;
+    histo->GetQuantiles(2, xq, yq);
+    Float_t medi = xq[0];
+    Float_t mean = histo->GetMean();
+    bool valid = false;
+    if(TMath::Abs(medi - 0.5) <= 0.0001)
+        valid = true;
+    alphaValues.push_back(alpha * 10);
+    Float_t value = 0;
+//	if(value!=value) value = -1;
 	rightLefts.push_back(value);
-	if(skewness!=skewness)skewness= -1;
-	skewnesses.push_back(skewness);
-	if(mean!=mean) mean = -1.5;
+//	if(skewness!=skewness)skewness= -1;
+//	else
+	skewnesses.push_back(0.5 - medi);
+//	if(mean!=mean) mean = -1.5;
 	means.push_back(mean-.5);
 	vecTries.push_back(nTries);
 	if (det>=8){
 		cout<<"\tAlpha: "<<alphaValues.back()<<endl;
 		cout<<"\tMean:  "<<means.back()<<endl;
-		cout<<"\tSkew:  "<<skewnesses.back()<<endl;
-		cout<<"\tL/RA:  "<<rightLefts.back()<<endl;
+		cout<<"\tMedian:  "<<skewnesses.back()<<endl;
+		cout<<"\tSkewness:  "<<histo->GetSkewness()<<endl;
+//		cout<<"\tL/RA:  "<<rightLefts.back()<<endl;
 	}
 	if(valid)
-		skewness=0;
-	return skewness;
+		medi=0.5;
+	return 0.5 - medi;
+
+//	if (verbosity>4){
+//		cout<<"TAnalysisOfAsymmetricEta::checkConvergence: nTries "<<nTries<<"\t"<<histo->GetName()<<endl;
+//		cout<<"entries: "<<histo->GetEntries()<<endl;
+//	}
+//	int leftHalf = 0;
+//	int bin=0; // DA line below
+//	for (bin=0; histo->GetBinCenter(bin)<.5;bin++){
+//		leftHalf+=histo->GetBinContent(bin);
+//	}
+//	int rightHalf = 0;
+//	for (bin=bin; bin<histo->GetNbinsX();bin++){
+//		rightHalf+=histo->GetBinContent(bin);
+//	}
+//	Float_t mean = histo->GetMean();
+//	if(verbosity>4)cout<<"Analysising: "<<histo->GetName()<<endl;
+//	if(verbosity>4)cout<<"Asymmetric eta with a charge share of "<<alpha*100<<"%"<<endl;
+//	if(verbosity>4)cout<<"nentries: "<<histo->GetEntries()<<endl;
+//	Float_t skewness = histo->GetSkewness();
+//	if(verbosity>4)cout<<"skewness*100: "<<skewness*100<<endl;
+//	if(verbosity>4)cout<<"left: "<<leftHalf<<"\tright: "<<rightHalf<<" "<<(Float_t)leftHalf/(Float_t)rightHalf*100<<endl;
+//
+////	bool valid = TMath::Abs(mean-.5)<.005;
+//	bool valid = TMath::Abs(mean-.5)<.003; // DA: more tight criteria for convergence!
+////	valid = valid || TMath::Abs(skewness)<0.005;
+//	valid = valid && TMath::Abs(skewness)<0.001; // DA: more tight criteria for convergence!
+//	if(verbosity>4)cout<<"Mean "<<mean*100<<" "<<valid<<endl;
+//	TPolyMarker* pm = FindPeaks(histo,2);
+//	Float_t p1=0;
+//	Float_t p2=0;
+//	if(pm){
+//		for (int i=0;i< pm->GetN();i++){
+//			Float_t peakPos = pm->GetX()[i];
+//			if (peakPos>.5)
+//				peakPos = TMath::Abs(peakPos-1);
+//			if(i==0)
+//				p1 = peakPos;
+//			else if(i==1)
+//				p2 = peakPos;
+//			if(verbosity>4)cout<<"\tPeak - "<<i<<"\t"<<peakPos*100.<<": "<<pm->GetY()[i]<<"\n";
+//		}
+//		if (pm->GetN()==2){
+//			if(verbosity>4)cout<< (TMath::Abs(p1/p2-1)*100);
+//			valid = valid && TMath::Abs(p1/p2-1)*100<8;
+//			if(verbosity>4)cout<<" "<<valid;
+//		}
+//		else
+//			valid=false;
+//		if(verbosity>4)cout<<" "<<valid<<"\n";
+//	}
+//	else
+//		valid = false;
+//	valid = TMath::Abs(mean-.5)<.003;
+//	valid = valid && TMath::Abs(skewness)<0.001; // DA: made it tighter
+//	alphaValues.push_back(alpha*10);
+//	Float_t value = (Float_t)leftHalf/(Float_t)rightHalf-1;
+//	if(value!=value) value = -1;
+//	rightLefts.push_back(value);
+//	if(skewness!=skewness)skewness= -1;
+//	else
+//		skewness = skewness + (0.5-mean)*5;
+//	skewnesses.push_back(skewness);
+//	if(mean!=mean) mean = -1.5;
+//	means.push_back(mean-.5);
+//	vecTries.push_back(nTries);
+//	if (det>=8){
+//		cout<<"\tAlpha: "<<alphaValues.back()<<endl;
+//		cout<<"\tMean:  "<<means.back()<<endl;
+//		cout<<"\tSkew:  "<<skewnesses.back()<<endl;
+//		cout<<"\tL/RA:  "<<rightLefts.back()<<endl;
+//	}
+//	if(valid)
+//		skewness=0;
+//	return skewness;
 }
 
-bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewness, Float_t mean){
+bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t median, Float_t mean){
 	if(verbosity>4||true){
-		cout<<"TAnalysisOfAsymmetricEta::updateAlpha for "<<det<<"\tMean:"<<mean<<" Skew:"<<skewness<<endl;
+		cout<<"TAnalysisOfAsymmetricEta::updateAlpha for "<<det<<"\tMean:"<<mean<<" Median-0.5:"<<median<<endl;
 		cout<<"Alpha: "<<alpha<<endl;
 	}
-	if (alpha == 0){
-			if(mean- .5>0)
-				alpha = -.01;
-			else
-				alpha = +.01;
-	}
-	else {
-//		if(det == 6 || det ==2)
-//			skewness*=-1;
-		//				if( TMath::Abs(mean-.5)>.05){
-			//					if(alpha<0)
-		//						alpha *= .5/mean*2;
-		//					else
-		//						alpha *= mean/.5/2;
-		//				}
-		//				else
-		if (skewness < 0 ){
-			if(alpha<0)
-				alpha*=1.02;
-			else
-				alpha *=.98;
-		}
-		else{//skewness<0
-			if (alpha<0)
-				alpha*=.98;
-			else
-				alpha*=1.02;
-		}
-	}
+	Float_t delta = 0.01;
+//    Float_t incr = skewness + (0.5-mean)*5;
+    Float_t incr = median;
+	Float_t rando = rand3->Uniform(0.001);
+    if(incr<0)
+        alpha = alpha + TMath::Min(incr*delta, -rando);
+    else
+        alpha = alpha + TMath::Max(incr*delta, rando);
+//	if (alpha == 0){
+//			if(mean- .5>0)
+//				alpha = -.01;
+//			else
+//				alpha = +.01;
+//	}
+//	else {
+////		if(det == 6 || det ==2)
+////			skewness*=-1;
+//		//				if( TMath::Abs(mean-.5)>.05){
+//			//					if(alpha<0)
+//		//						alpha *= .5/mean*2;
+//		//					else
+//		//						alpha *= mean/.5/2;
+//		//				}
+//		//				else
+//		if (skewness < 0 ){
+//			if(alpha<0)
+//				alpha*=1.02;
+//			else
+//				alpha *=.98;
+//		}
+//		else{//skewness<0
+//			if (alpha<0)
+//				alpha*=.98;
+//			else
+//				alpha*=1.02;
+//		}
+//	}
 	if (verbosity>4||true)
 		cout<<"Alpha: "<<alpha<<endl;
 	return true;
