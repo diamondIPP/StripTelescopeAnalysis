@@ -842,8 +842,8 @@ void TTransparentAnalysis::fillHistograms() {
 			if (clusterSize+1 == 10){
 				vecVecPhNHighestIn10[n_strips].push_back(chargeNInX);
 				if (clusterSize < hLandauNHighestIn10Profile2D.size())
-					if (hLandauNHighestIn10Profile2D[clusterSize])
-						hLandauNHighestIn10Profile2D[clusterSize]->Fill(predXPosition, predYPosition, chargeNInX);
+					if (hLandauNHighestIn10Profile2D[n_strips])
+						hLandauNHighestIn10Profile2D[n_strips]->Fill(predXPosition, predYPosition, chargeNInX);
 				fillPHNIn10vsEventNoAreaPlots(area, n_strips+1, chargeNInX);
 			}
 		}
