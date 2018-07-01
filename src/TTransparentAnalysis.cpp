@@ -413,6 +413,7 @@ void TTransparentAnalysis::initHistograms() {
 	vecvecEtaCMNcorrected.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecVecLandau.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecVecPh2Highest.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
+	vecVecPhNHighestIn10.resize(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector));
 	vecVecFidCutX.clear();
 	vecVecFidCutY.clear();
 	vecPredX.clear();
@@ -426,6 +427,7 @@ void TTransparentAnalysis::initHistograms() {
         vecvecRelPos.at(clusterSize).clear();
         vecvecRelPos2.at(clusterSize).clear();
         vecVecPh2Highest.at(clusterSize).clear();
+        vecVecPhNHighestIn10.at(clusterSize).clear();
         vecvecResXEtaCorrected.at(clusterSize).clear();
         vecvecResXChargeWeighted.at(clusterSize).clear();
         // TODO: take care of histogram names and bins!!
@@ -812,6 +814,9 @@ void TTransparentAnalysis::fillHistograms() {
 		for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
 			Float_t chargeNInX = this->transparentClusters.getCharge(n_strips+1, cmCorrected);
 			hLandauNHighest[n_strips][clusterSize]->Fill(chargeNInX);
+			if (clusterSize+1 == 10){
+				vecVecPhNHighestIn10[n_strips].push_back(chargeNInX);
+			}
 		}
 
         Float_t etaCMN = this->transparentClusters.getEta(true);
@@ -1508,13 +1513,16 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
     if (clusterSize==0)
         return;
     cout<<"SaveLandauVsEventNoPlots "<<clusterSize<<endl;
-    TString name;
+    TString name, name_Nin10;
     TH2F* hLandau2OutOfXVsEventNo=0;
+    TH2F* hLandauNOutOf10VsEventNo = 0;
     TString section = "TimeDependence";
 
     if(clusterSize-1 < vecVecPh2Highest.size()){
         name = (string)TString::Format("hLandauVsEventNo_2outOf%02d",clusterSize);
+        name_Nin10 = (string)TString::Format("hLandauVsEventNo_%dIn10", clusterSize);
         hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,nEvents/1e4,512,0,nEvents,0,3000);
+        hLandauNOutOf10VsEventNo = histSaver->CreateScatterHisto((string)name_Nin10, vecVecPhNHighestIn10.at(clusterSize-1), vectorEventNo, nEvents/1e4, 512, 0, nEvents, 0, 3000);
         cout<<"Save "<<name<<" "<<hLandau2OutOfXVsEventNo;
         if(hLandau2OutOfXVsEventNo) cout<<" "<<hLandau2OutOfXVsEventNo->GetEntries();
         cout<<endl;
@@ -1565,6 +1573,21 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
             if (hLandau2OutOfXVsEventNo)
                 delete hLandau2OutOfXVsEventNo;
         }
+
+        cout << "Save " << name_Nin10 << " " << hLandauNOutOf10VsEventNo;
+        if (verbosity>3) cout << name_Nin10 << ": " << vectorEventNo.size() << " " << vecVecPhNHighestIn10.at(clusterSize-1).size() << endl;
+        if(hLandauNOutOf10VsEventNo){
+            hLandauNOutOf10VsEventNo->GetXaxis()->SetTitle("Event no.");
+            hLandauNOutOf10VsEventNo->GetYaxis()->SetTitle("Pulse Height /ADC");
+            histSaver->SaveHistogram(hLandauNOutOf10VsEventNo);
+            TProfile* prof = histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hLandauNOutOf10VsEventNo, "pol1");
+//            prof->Rebin(2);
+            if (clusterSize == vecVecPhNHighestIn10.size() && alignMode == TSettings::normalMode){
+                AnalyzeLandauVsEventNo(hLandauNOutOf10VsEventNo);
+            }
+            if (hLandauNOutOf10VsEventNo)
+                delete hLandauNOutOf10VsEventNo;
+        }
     }
 }
 
@@ -1607,6 +1630,25 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
             histSaver->SaveHistogram(htemp);
             if(htemp)delete htemp;
             htemp=0;
+        }
+    }
+
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecVecFidCutX.size() > 2){
+        Float_t max = *max_element(vecVecFidCutX.begin(), vecVecFidCutX.end());
+        Float_t min = *min_element(vecVecFidCutX.begin(), vecVecFidCutX.end());
+        name = TString::Format("hLandauVsFidCutX_%dIn10", clusterSize);
+        if(min<max)
+            htemp = histSaver->CreateScatterHisto((string)name, vecVecFidCutX, vecVecPhNHighestIn10[clusterSize-1],
+                512,512,
+                0,2800,
+                min,max);
+        if(htemp){
+            htemp->GetXaxis()->SetTitle(TString::Format("pulse height, %d highest in 10", clusterSize));
+            htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position X/ch");
+            histSaver->Save1DProfileYWithFitAndInfluence(htemp, "pol1");
+            histSaver->SaveHistogram(htemp);
+            if(htemp) delete htemp;
+            htemp = 0;
         }
     }
 
@@ -1653,6 +1695,29 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
     	}
     }
 
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && vecPredictedChannel.size() > 2) {
+        name = TString::Format("hLandauVsPredRelChannel_%dIn10", clusterSize);
+        vector<Float_t> relPredChannel;
+        for (UInt_t i = 0; i < vecPredictedChannel.size(); i++)
+            relPredChannel.push_back(vecPredictedChannel[i] - (int)(vecPredictedChannel[i]+.5));
+        Float_t min = -.6;
+        Float_t max = +.6;
+        if(min<max)
+            htemp = histSaver->CreateScatterHisto((string)name, relPredChannel, vecVecPhNHighestIn10[clusterSize-1],
+                    512,64,
+                    0,2800,
+                    min,max);
+        if(htemp){
+            htemp->GetXaxis()->SetTitle(TString::Format("pulse height, %d highest in 10", clusterSize));
+            htemp->GetYaxis()->SetTitle("rel. predicted channel position (X)/ch");
+
+            histSaver->Save1DProfileYWithFitAndInfluence(htemp, "pol1");
+            histSaver->SaveHistogram(htemp);
+            if(htemp) delete htemp;
+            htemp = 0;
+        }
+    }
+
 
     if(clusterSize-1 < vecVecPh2Highest.size()&& clusterSize-1>=2&& vecPredictedChannel.size()>2){
         name = TString::Format("hLandauVsPredChannel_2OutOf%02d",clusterSize);
@@ -1671,6 +1736,26 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
             histSaver->SaveHistogram(htemp);
             if(htemp) delete htemp;
             htemp=0;
+        }
+    }
+
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecPredictedChannel.size() > 2){
+        name = TString::Format("hLandauVsPredChannel_%dIn10", clusterSize);
+        Float_t min = *min_element(vecPredictedChannel.begin(), vecPredictedChannel.end());
+        Float_t max = *max_element(vecPredictedChannel.begin(), vecPredictedChannel.end());
+        if(min<max)
+            htemp = histSaver->CreateScatterHisto((string)name, vecPredictedChannel, vecVecPhNHighestIn10[clusterSize-1],
+                512,512,
+                0,2800,
+                min,max);
+        if(htemp){
+            htemp->GetXaxis()->SetTitle(TString::Format("pulse height, %d highest in 10", clusterSize));
+            htemp->GetYaxis()->SetTitle("predicted channel position (X)/ch");
+
+            histSaver->Save1DProfileYWithFitAndInfluence(htemp, "pol1");
+            histSaver->SaveHistogram(htemp);
+            if(htemp) delete htemp;
+            htemp = 0;
         }
     }
 
@@ -1715,6 +1800,26 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
         }
     }
 
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && vecPredictedChannel.size() > 2){
+        name = TString::Format("hLandauVsPredDetPosY_%dIn10", clusterSize);
+        Float_t min =  *min_element(vecPredictedChannel.begin(), vecPredictedChannel.end());
+        Float_t max =  *max_element(vecPredictedChannel.begin(), vecPredictedChannel.end());
+        if(min<max)
+            htemp = histSaver->CreateScatterHisto((string)name, vecPredictedDetectorPositionY, vecVecPhNHighestIn10[clusterSize-1],
+                    512,512,
+                    0,2800,
+                    min,max);
+        if(htemp){
+            htemp->GetXaxis()->SetTitle(TString::Format("pulse height, %d highest in 10", clusterSize));
+            htemp->GetYaxis()->SetTitle("predicted det position (Y)/#mum");
+
+            histSaver->Save1DProfileYWithFitAndInfluence(htemp, "pol1");
+            histSaver->SaveHistogram(htemp);
+            if(htemp) delete htemp;
+            htemp = 0;
+        }
+    }
+
     if(clusterSize-1<vecVecLandau.size() && vecVecFidCutY.size()>2 ) {
         name = TString::Format("hLandauVsFidCutY_ClusterSize%02d",clusterSize);
         Float_t miny = *min_element(vecVecFidCutY.begin(),vecVecFidCutY.end() );
@@ -1756,6 +1861,27 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
 
     }
 
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecVecFidCutY.size() > 2) {
+        name = TString::Format("hLandauVsFidCutY_%dIn10", clusterSize);
+        Float_t miny = *min_element(vecVecFidCutY.begin(), vecVecFidCutY.end());
+        Float_t maxy = *max_element(vecVecFidCutY.begin(), vecVecFidCutY.end());
+        if(miny<maxy)
+            htemp = histSaver->CreateScatterHisto((string)name,
+                vecVecFidCutY, vecVecPhNHighestIn10[clusterSize-1],
+                512,512,
+                0,2800,
+                miny,maxy);
+        if(htemp){
+            htemp->GetXaxis()->SetTitle(TString::Format("pulse height, %d highest in 10", clusterSize));
+            htemp->GetYaxis()->SetTitle("avrg. Silicon Hit position /ch");
+            histSaver->SaveHistogram(htemp);
+            histSaver->Save1DProfileYWithFitAndInfluence(htemp, "pol1");
+            if (htemp) delete htemp;
+            htemp = 0;
+        }
+
+    }
+
     if( clusterSize-1<vecVecLandau.size() && vecPredX.size()>2){
         name =TString::Format("hLandauVsPredX_ClusterSize%02d",clusterSize);
         Float_t min = *min_element(vecPredX.begin(),vecPredX.end());
@@ -1793,6 +1919,24 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
         }
     }
 
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecPredX.size() > 2){
+        name =TString::Format("hLandauVsPredX_%dIn10", clusterSize);
+        Float_t min = *min_element(vecPredX.begin(), vecPredX.end());
+        Float_t max = *max_element(vecPredX.begin(), vecPredX.end());
+        if(min<max)
+            htemp = histSaver->CreateScatterHisto((string)name, vecPredX, vecVecPhNHighestIn10[clusterSize-1],
+                512,512,0,2800,
+                min,max);
+        if(htemp){
+            htemp->GetXaxis()->SetTitle(TString::Format("pulse height, %d highest in 10", clusterSize));
+            htemp->GetYaxis()->SetTitle("predicted hit position X /#mum");
+            histSaver->Save1DProfileYWithFitAndInfluence(htemp, "pol1");
+            histSaver->SaveHistogram(htemp);
+            if(htemp) delete htemp;
+            htemp = 0;
+        }
+    }
+
     if(clusterSize-1<vecVecLandau.size()&&vecPredX.size()>2){
         name =TString::Format("hLandauVsPredY_ClusterSize%02d",clusterSize);
         Float_t min = *min_element(vecPredX.begin(),vecPredX.end());
@@ -1825,6 +1969,23 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
             histSaver->SaveHistogram(htemp);
             if(htemp)delete htemp;
             htemp=0;
+        }
+    }
+
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecPredX.size() > 2){
+        name =TString::Format("hLandauVsPredY_%dIn10", clusterSize);
+        Float_t min = *min_element(vecPredX.begin(), vecPredX.end());
+        Float_t max = *max_element(vecPredX.begin(), vecPredX.end());
+        if(min<max)
+            htemp = histSaver->CreateScatterHisto((string)name, vecPredY, vecVecPhNHighestIn10[clusterSize-1],
+                512,512,0,2800,min,max);
+        if(htemp){
+            htemp->GetXaxis()->SetTitle(TString::Format("pulse height, %d highest in 10", clusterSize));
+            htemp->GetYaxis()->SetTitle("predicted hit position Y /#mum");
+            histSaver->Save1DProfileYWithFitAndInfluence(htemp, "pol1");
+            histSaver->SaveHistogram(htemp);
+            if(htemp) delete htemp;
+            htemp = 0;
         }
     }
 

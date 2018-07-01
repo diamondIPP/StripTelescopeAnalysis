@@ -330,6 +330,7 @@ private:
 	vector<Float_t> vectorEventNo;
 	vector<Float_t> vectorCMN;
 	vector< vector<Float_t> > vecVecPh2Highest;
+	vector< vector<Float_t> > vecVecPhNHighestIn10;
 	
 	vector<Float_t> vecPredictedPosition, vecRelPredictedPosition;
 	vector<Float_t> vecChi2;
