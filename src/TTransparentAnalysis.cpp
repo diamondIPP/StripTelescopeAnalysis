@@ -396,6 +396,31 @@ void TTransparentAnalysis::initHistograms2() {
         title = name + ";pulse height / ADC;PredHitY / ch";
         hLandau2HighestPredY.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
                 bins ,predYMin,predYMax));
+
+        // N highest in 10
+        nameProfile =  TString::Format("hLandau%dHighestIn10HitProfile", clusterSize+1);
+        hLandau2HighestHitProfile = new TProfile2D(nameProfile, nameProfile, bins ,predXMin, predXMax, bins, predYMin, predXMax);
+        hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
+        hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
+        hLandau2HighestHitProfile->GetXaxis()->SetTitle(TString::Format("Avrg Mean Charge, %d highest in 10", clusterSize+1));
+        hLandauNHighestIn10Profile2D.push_back(hLandau2HighestHitProfile);
+
+        name = TString::Format("hLandau2HighestFidCutX_%dIn10", clusterSize+1);
+        title = name + ";pulse height / ADC;FidCutX / ch";
+        hLandau2HighestFidCutX.push_back(new TH2F(name, title, settings->getPulse_height_num_bins(), 0, settings->getPulse_height_max(subjectDetector),
+                256, 0, 255));
+        name = TString::Format("hLandau2HighestFidCutY_%dIn10", clusterSize+1);
+        title = name + ";pulse height / ADC;FidCutY / ch";
+        hLandau2HighestFidCutY.push_back(new TH2F(name, title, settings->getPulse_height_num_bins(), 0, settings->getPulse_height_max(subjectDetector),
+                256, 0, 255));
+        name = TString::Format("hLandau2HighestPredHitX_%dIn10", clusterSize+1);
+        title = name + ";pulse height / ADC;PredHitX / ch";
+        hLandau2HighestPredX.push_back(new TH2F(name, title, settings->getPulse_height_num_bins(), 0, settings->getPulse_height_max(subjectDetector),
+                bins, predXMin,predXMax));
+        name = TString::Format("hLandau2HighestPredHitY_%dIn10", clusterSize+1);
+        title = name + ";pulse height / ADC;PredHitY / ch";
+        hLandau2HighestPredY.push_back(new TH2F(name, title, settings->getPulse_height_num_bins(), 0, settings->getPulse_height_max(subjectDetector),
+                bins, predYMin,predYMax));
     }
 }
 
@@ -816,6 +841,9 @@ void TTransparentAnalysis::fillHistograms() {
 			hLandauNHighest[n_strips][clusterSize]->Fill(chargeNInX);
 			if (clusterSize+1 == 10){
 				vecVecPhNHighestIn10[n_strips].push_back(chargeNInX);
+				if (clusterSize < hLandauNHighestIn10Profile2D.size())
+					if (hLandauNHighestIn10Profile2D[clusterSize])
+						hLandauNHighestIn10Profile2D[clusterSize]->Fill(predXPosition, predYPosition, chargeNInX);
 			}
 		}
 
@@ -2026,6 +2054,7 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
         TProfile* prof;
         histSaver->SaveHistogram(hLandau2HighestProfile2D[clusterSize],true,false);
+        histSaver->SaveHistogram(hLandauNHighestIn10Profile2D[clusterSize], true, false);
         histSaver->SaveHistogram(hLandau2HighestFidCutX[clusterSize],true,true);
         prof = hLandau2HighestFidCutX[clusterSize]->ProfileY();
         prof->GetYaxis()->SetTitle("avrg. Pulse Height /adc");
