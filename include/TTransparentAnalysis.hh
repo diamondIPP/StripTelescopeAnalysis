@@ -389,8 +389,10 @@ public:
 private:
 	void initPHvsEventNoAreaPlots(UInt_t nStart = 0, UInt_t nEnd = 1e6);
 	void fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterSize, UInt_t charge, UInt_t chargeOfTwo);
+	void fillPHNIn10vsEventNoAreaPlots(UInt_t area, UInt_t n_strips, UInt_t charge);
 	TH2D* hPHVsEventNo;
 	TH2D* hPH2OutOf10VsEventNo;
+	vector<TH2D*> hPHNIn10VsEventNo;
 	void savePHvsEventNoAreaPlots();
 	UInt_t xDivisions;
 	UInt_t yDivisions;

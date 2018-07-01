@@ -844,6 +844,7 @@ void TTransparentAnalysis::fillHistograms() {
 				if (clusterSize < hLandauNHighestIn10Profile2D.size())
 					if (hLandauNHighestIn10Profile2D[clusterSize])
 						hLandauNHighestIn10Profile2D[clusterSize]->Fill(predXPosition, predYPosition, chargeNInX);
+				fillPHNIn10vsEventNoAreaPlots(area, n_strips+1, chargeNInX);
 			}
 		}
 
@@ -3365,6 +3366,13 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
         vecPH2HighestVsEventNo_Areas.push_back(prof);
     }
     cout<<"."<<endl;
+
+	for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+		name = TString::Format("hPHVsEventNo_%dIn10", n_strips+1);
+		title = TString::Format("PH_{%d out of 10} vs eventNo", n_strips+1);
+		hPHNIn10VsEventNo.push_back(new TH2D(name,title,nBins,nStart,nEnd,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector)));
+		cout<<"."<<endl;
+	}
 }
 
 void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvents) {
@@ -3517,6 +3525,11 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     histSaver->SaveHistogram(hPH2OutOf10VsEventNo);
     histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hPH2OutOf10VsEventNo,"pol1",true);
     delete hPH2OutOf10VsEventNo;
+	for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+		histSaver->SaveHistogram(hPHNIn10VsEventNo[n_strips]);
+		histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hPHNIn10VsEventNo[n_strips], "pol1", true);
+		delete hPHNIn10VsEventNo[n_strips];
+	}
     histSaver->SaveHistogram(hPHVsEventNo);
     histSaver->CreateAndSave1DProfileXWithFitAndInfluence(hPHVsEventNo,"pol1",true);
     delete hPHVsEventNo;
@@ -3617,6 +3630,10 @@ void TTransparentAnalysis::fillPHvsEventNoAreaPlots(UInt_t area, UInt_t clusterS
         vecPHVsEventNo_Areas[i]->Fill(nEvent,area,charge);
     if (i < vecPH2HighestVsEventNo_Areas.size())
         vecPH2HighestVsEventNo_Areas[i]->Fill(nEvent,area,chargeOfTwo);
+}
+
+void TTransparentAnalysis::fillPHNIn10vsEventNoAreaPlots(UInt_t area, UInt_t n_strips, UInt_t charge) {
+	hPHNIn10VsEventNo[n_strips-1]->Fill(nEvent, charge);
 }
 
 
