@@ -241,6 +241,10 @@ private:
 	vector< TH2F*> hLandau2HighestFidCutY;
 	vector< TH2F*> hLandau2HighestPredX;
 	vector< TH2F*> hLandau2HighestPredY;
+	vector< TH2F*> hLandauNHighestIn10FidCutX;
+	vector< TH2F*> hLandauNHighestIn10FidCutY;
+	vector< TH2F*> hLandauNHighestIn10PredX;
+	vector< TH2F*> hLandauNHighestIn10PredY;
 	vector< vector< Float_t> > vecVecLandau;
 	vector< Float_t> vecPredictedChannel;
 	vector< Float_t> vecPredictedDetectorPositionY;
