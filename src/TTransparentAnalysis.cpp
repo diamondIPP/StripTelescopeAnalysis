@@ -841,7 +841,7 @@ void TTransparentAnalysis::fillHistograms() {
 			hLandauNHighest[n_strips][clusterSize]->Fill(chargeNInX);
 			if (clusterSize+1 == 10){
 				vecVecPhNHighestIn10[n_strips].push_back(chargeNInX);
-				if (clusterSize < hLandauNHighestIn10Profile2D.size())
+				if (n_strips < hLandauNHighestIn10Profile2D.size())
 					if (hLandauNHighestIn10Profile2D[n_strips])
 						hLandauNHighestIn10Profile2D[n_strips]->Fill(predXPosition, predYPosition, chargeNInX);
 				hLandauNHighestIn10FidCutX[n_strips]->Fill(chargeNInX, fidCutX      );
