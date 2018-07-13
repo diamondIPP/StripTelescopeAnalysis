@@ -1968,10 +1968,10 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
         }
     }
 
-    if(clusterSize-1<vecVecLandau.size()&&vecPredX.size()>2){
+    if(clusterSize-1<vecVecLandau.size()&&vecPredY.size()>2){
         name =TString::Format("hLandauVsPredY_ClusterSize%02d",clusterSize);
-        Float_t min = *min_element(vecPredX.begin(),vecPredX.end());
-        Float_t max = *max_element(vecPredX.begin(),vecPredX.end());
+        Float_t min = *min_element(vecPredY.begin(),vecPredY.end());
+        Float_t max = *max_element(vecPredY.begin(),vecPredY.end());
         if(min<max)
             htemp = histSaver->CreateScatterHisto((string)name,vecPredY,vecVecLandau[clusterSize-1],
                 512,512,0,2800,min,max);
@@ -2003,10 +2003,10 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
         }
     }
 
-    if(clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecPredX.size() > 2){
+    if(clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecPredY.size() > 2){
         name =TString::Format("hLandauVsPredY_%dIn10", clusterSize);
-        Float_t min = *min_element(vecPredX.begin(), vecPredX.end());
-        Float_t max = *max_element(vecPredX.begin(), vecPredX.end());
+        Float_t min = *min_element(vecPredY.begin(), vecPredY.end());
+        Float_t max = *max_element(vecPredY.begin(), vecPredY.end());
         if(min<max)
             htemp = histSaver->CreateScatterHisto((string)name, vecPredY, vecVecPhNHighestIn10[clusterSize-1],
                 512,512,0,2800,min,max);
