@@ -376,7 +376,6 @@ void TTransparentAnalysis::initHistograms2() {
         TString nameProfile =  TString::Format("hLandau2HighestHitProfile_2OutOf%02d",clusterSize+1);
         TProfile2D* hLandau2HighestHitProfile = new TProfile2D(nameProfile,nameProfile, bins ,predXMin,predXMax,bins,predYMin,predXMax);
         hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
-        hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
         hLandau2HighestHitProfile->GetXaxis()->SetTitle(TString::Format("Avrg Mean Charge, 2 highest in %d",clusterSize+1));
         hLandau2HighestProfile2D.push_back(hLandau2HighestHitProfile);
 
@@ -399,8 +398,7 @@ void TTransparentAnalysis::initHistograms2() {
 
         // N highest in 10
         nameProfile =  TString::Format("hLandau%dHighestIn10HitProfile", clusterSize+1);
-        hLandau2HighestHitProfile = new TProfile2D(nameProfile, nameProfile, bins ,predXMin, predXMax, bins, predYMin, predXMax);
-        hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
+        hLandau2HighestHitProfile = new TProfile2D(nameProfile, nameProfile, bins, predXMin, predXMax, bins, predYMin, predXMax);
         hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
         hLandau2HighestHitProfile->GetXaxis()->SetTitle(TString::Format("Avrg Mean Charge, %d highest in 10", clusterSize+1));
         hLandauNHighestIn10Profile2D.push_back(hLandau2HighestHitProfile);
