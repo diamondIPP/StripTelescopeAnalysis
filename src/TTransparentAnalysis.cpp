@@ -397,12 +397,6 @@ void TTransparentAnalysis::initHistograms2() {
                 bins ,predYMin,predYMax));
 
         // N highest in 10
-        nameProfile =  TString::Format("hLandau%dHighestIn10HitProfile", clusterSize+1);
-        hLandau2HighestHitProfile = new TProfile2D(nameProfile, nameProfile, bins, predXMin, predXMax, bins, predYMin, predXMax);
-        hLandau2HighestHitProfile->GetXaxis()->SetTitle("Pred. X Position");
-        hLandau2HighestHitProfile->GetXaxis()->SetTitle(TString::Format("Avrg Mean Charge, %d highest in 10", clusterSize+1));
-        hLandauNHighestIn10Profile2D.push_back(hLandau2HighestHitProfile);
-
         name = TString::Format("hLandauNHighestIn10FidCutX_%dIn10", clusterSize+1);
         title = name + ";pulse height / ADC;FidCutX / ch";
         hLandauNHighestIn10FidCutX.push_back(new TH2F(name, title, settings->getPulse_height_num_bins(), 0, settings->getPulse_height_max(subjectDetector),
@@ -839,9 +833,6 @@ void TTransparentAnalysis::fillHistograms() {
 			hLandauNHighest[n_strips][clusterSize]->Fill(chargeNInX);
 			if (clusterSize+1 == 10){
 				vecVecPhNHighestIn10[n_strips].push_back(chargeNInX);
-				if (n_strips < hLandauNHighestIn10Profile2D.size())
-					if (hLandauNHighestIn10Profile2D[n_strips])
-						hLandauNHighestIn10Profile2D[n_strips]->Fill(predXPosition, predYPosition, chargeNInX);
 				hLandauNHighestIn10FidCutX[n_strips]->Fill(chargeNInX, fidCutX      );
 				hLandauNHighestIn10FidCutY[n_strips]->Fill(chargeNInX, fidCutY      );
 				hLandauNHighestIn10PredX  [n_strips]->Fill(chargeNInX, predXPosition);
@@ -1626,6 +1617,7 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
     cout<<"saveLandausVsPositionPlots"<<endl;
     TString name;
     TH2F* htemp=0;
+    TProfile2D* tmp_profile = 0;
     if(clusterSize-1 < vecVecLandau.size() && vecVecFidCutX.size()>2){
         Float_t max = *max_element(vecVecFidCutX.begin(),vecVecFidCutX.end());
         Float_t min = *min_element(vecVecFidCutX.begin(),vecVecFidCutX.end());
@@ -2020,6 +2012,31 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
         }
     }
 
+	if (clusterSize-1 < vecVecPhNHighestIn10.size() && clusterSize > 0 && vecPredX.size() > 2 && vecPredY.size() > 2){
+		name = TString::Format("hLandau%dHighestIn10HitProfile", clusterSize);
+		Float_t xmin = *min_element(vecPredX.begin(), vecPredX.end());
+		Float_t xmax = *max_element(vecPredX.begin(), vecPredX.end());
+		Float_t ymin = *min_element(vecPredY.begin(), vecPredY.end());
+		Float_t ymax = *max_element(vecPredY.begin(), vecPredY.end());
+		Float_t zmin = 0.;
+		Float_t zmax = 1e9;
+		if (xmin < xmax && ymin < ymax && zmin < zmax)
+			tmp_profile = histSaver->CreateProfile2D((string)name, vecPredX, vecPredY, vecVecPhNHighestIn10[clusterSize-1],
+					128, 128,
+					xmin, xmax,
+					ymin, ymax,
+					zmin, zmax,
+					0.);
+		if (tmp_profile){
+			tmp_profile->GetXaxis()->SetTitle("predicted hit position X [#mum]");
+			tmp_profile->GetYaxis()->SetTitle("predicted hit position Y [#mum]");
+			tmp_profile->GetZaxis()->SetTitle(TString::Format("Avrg Mean Charge, %d highest in 10", clusterSize));
+			histSaver->SaveHistogram(tmp_profile, true, false);
+			if(tmp_profile) delete tmp_profile;
+			tmp_profile = 0;
+		}
+	}
+
 }
 
 void TTransparentAnalysis::saveHistograms() {
@@ -2057,7 +2074,6 @@ void TTransparentAnalysis::saveHistograms() {
         histSaver->SaveHistogram(hResidualHighestHit[clusterSize]);
         TProfile* prof;
         histSaver->SaveHistogram(hLandau2HighestProfile2D[clusterSize],true,false);
-        histSaver->SaveHistogram(hLandauNHighestIn10Profile2D[clusterSize], true, false);
         histSaver->SaveHistogram(hLandau2HighestFidCutX[clusterSize],true,true);
         prof = hLandau2HighestFidCutX[clusterSize]->ProfileY();
         prof->GetYaxis()->SetTitle("avrg. Pulse Height /adc");
