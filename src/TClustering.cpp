@@ -104,7 +104,7 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 			validEvents++;
 	}
 
-	cout<<"nvalid Events: "<<validEvents<<" of "<<nEvents<<endl;
+	cout<<"Valid Events: "<<validEvents<<" of "<<nEvents<<endl;
 }
 
 void TClustering::clusterEvent()

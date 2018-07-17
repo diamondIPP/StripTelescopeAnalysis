@@ -259,10 +259,10 @@ int createAsymmetricEtaSample(int runNo=0,Float_t silCor=999,float diaCor=999,in
 	}
 	TString command = ".! ln -s ";
 	command += outputfileName;
-    if (enter){
-        cout<<"Enter Cor Runno: "<<flush;
-        cin>>corRunNo;
-    }
+//    if (enter){
+//        cout<<"Enter Cor Runno: "<<flush;
+//        cin>>corRunNo;
+//    }
 	if (corRunNo == -1)
 	    corRunNo = runNumber*10+0;
     cout<<"Corrected Runno is "<<corRunNo<<endl;
