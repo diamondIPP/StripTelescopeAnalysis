@@ -953,7 +953,7 @@ TProfile2D* HistogrammSaver::CreateProfile2D(TString name,
     Float_t maxX = posX.at(0);
     Float_t maxY = posY.at(0);
     Float_t maxZ = posZ.at(0);
-    Float_t minX = posY.at(0);
+    Float_t minX = posX.at(0);
     Float_t minY = posY.at(0);
     Float_t minZ = posZ.at(0);
     //  cout<<" Create Histo: '"<<name<<"' - Range ("<<minRangeX<<"-"<<maxRangeX<<"),  ("
