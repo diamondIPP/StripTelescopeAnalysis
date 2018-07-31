@@ -164,10 +164,10 @@ void TAnalysisOfSelection::initialiseHistos()
 	hClusterSizeVsChannelPos->GetXaxis()->SetTitle("cluster size");
 	hClusterSizeVsChannelPos->GetYaxis()->SetTitle("channel of highest signal in cluster");
 
-	h3dDiamond = new TH1F("h3dDiamond","Sum of Charge for all 18 3d-channels",4096,0,4095);
-	h3dDiamond_hit = new TH1F("h3dDiamond_hit","Sum of Charge for all 18 3d-channels with a Hit",4096,0,4095);
-	hNoDiamond = new TH1F("hNoDiamond","Sum of Charge for all 18 no-channels",4096,0,4095);
-	hNoDiamond_hit = new TH1F("hNoDiamond_hit","Sum of Charge for all 18 no-channels with a Hit",4096,0,4095);
+	h3dDiamond = new TH1F("h3dDiamond","Sum of Charge for all 18 3d-channels",4096,0,4096);
+	h3dDiamond_hit = new TH1F("h3dDiamond_hit","Sum of Charge for all 18 3d-channels with a Hit",4096,0,4096);
+	hNoDiamond = new TH1F("hNoDiamond","Sum of Charge for all 18 no-channels",4096,0,4096);
+	hNoDiamond_hit = new TH1F("hNoDiamond_hit","Sum of Charge for all 18 no-channels with a Hit",4096,0,4096);
 
 
 	TString name = TString::Format("hEtaVsLeftChannelNo");
@@ -183,7 +183,7 @@ void TAnalysisOfSelection::initialiseHistos()
 		Float_t xMax = settings->getSelectionFidCuts()->getMaxFiducialX(i);
 		UInt_t xBins = (Int_t)(2*(xMax-xMin));
 		name = TString::Format("hChargeVsFidX_HitInFidCutNo%d",i);
-		TH2F* histo = new TH2F(name,name,4096,0,4095,xBins,xMax,xMin);
+		TH2F* histo = new TH2F(name,name,4096*2,0,4096,xBins,xMin,xMax);
 		histo->GetXaxis()->SetTitle("charge of diamond Hit");
 		histo->GetYaxis()->SetTitle("FiducialCut X/ch");
 		hChargeVsFidX.push_back(histo);
@@ -196,7 +196,7 @@ void TAnalysisOfSelection::initialiseHistos()
 		Float_t yMax =  settings->getSelectionFidCuts()->getMaxFiducialY(i);
 		xBins = (Int_t)(2*(yMax-yMin));
 		name = TString::Format("hChargeVsFidY_HitInFidCutNo%d",i);
-		histo = new TH2F(name,name,4096,0,4095,xBins,yMax,yMin);
+		histo = new TH2F(name,name,4096*2,0,4096,xBins,yMin,yMax);
 		histo->GetXaxis()->SetTitle("charge of diamond Hit");
 		histo->GetYaxis()->SetTitle("FiducialCut Y/ch");
 		hChargeVsFidY.push_back(histo);
@@ -617,12 +617,12 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 	for (UInt_t i=0;i<settings->getSelectionFidCuts()->getNFidCuts();i++){
 		if(i<hChargeVsFidX.size()){
 			if(verbosity)cout<<"save: "<<hChargeVsFidX[i]->GetTitle()<<endl;
-			histSaver->OptimizeXYRange(hChargeVsFidX[i]);
+//			histSaver->OptimizeXYRange(hChargeVsFidX[i]);
 			histSaver->SaveHistogram(hChargeVsFidX[i]);
 		}
 		if(i<hChargeVsFidY.size() ){
 			if(verbosity)cout<<"save: "<<hChargeVsFidY[i]->GetTitle()<<endl;
-			histSaver->OptimizeXYRange(hChargeVsFidY[i]);
+//			histSaver->OptimizeXYRange(hChargeVsFidY[i]);
 			histSaver->SaveHistogram(hChargeVsFidY[i]);
 		}
 		TString name  = TString::Format("hMeanChargeFiducialCutNo%d",i+1);
