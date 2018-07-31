@@ -1574,7 +1574,7 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
             Float_t sumSignals = signalLeft+signalRight;
             if(signalLeft==0&&signalRight==0)continue;
             if(sumSignals==0)continue;
-            Float_t allCharge=cluster.getCharge(false);
+            Float_t allCharge=cluster.getCharge(settings->doCommonModeNoiseCorrection());
             //			Float_t charge = cluster.getCharge(false);
             //			if (cluster.isHit())
             Float_t signalRatio=signal2ndHighest/signalHighest;

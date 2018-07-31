@@ -1166,7 +1166,7 @@ void TAnalysisOfSelection::analyseEvent()
 	if(nDiaClusters<=0) // at least one Diamond Cluster
 		return;
 	TCluster cluster = eventReader->getCluster(TPlaneProperties::getDetDiamond(),0);
-	Float_t charge = cluster.getCharge(false);
+	Float_t charge = cluster.getCharge(settings->doCommonModeNoiseCorrection());
 	UInt_t clustSize = cluster.size();
 	bool isMasked = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,false);
 	bool isMaskedAdjacentChannels = settings->isMaskedCluster(TPlaneProperties::getDetDiamond(),cluster,true);
