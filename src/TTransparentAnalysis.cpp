@@ -2334,7 +2334,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
         histo->GetYaxis()->SetTitle("number of entries #");
         hNonHitNoiseDistributionsNOutOfX.push_back(histo);
 
-        name = TString::Format("hNonHitPulseHeightDitribution%dOutOf%02d", nStrips, i+1);
+        name = TString::Format("hNonHitPulseHeightDitributionCMC%dOutOf%02d", nStrips, i+1);
         histo = new TH1F(name,name,1000,-499.5,499.5);
         histo->GetXaxis()->SetTitle(TString::Format("PH_{trans Clus - non Hit - %d out of %d } - cm corrected / ADC", nStrips, i+1));
         histo->GetYaxis()->SetTitle("number of entries #");
@@ -2346,7 +2346,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
         histo->GetYaxis()->SetTitle("number of entries #");
         hNonHitNoiseDistributions2OutOfX.push_back(histo);
 
-        name = TString::Format("hNonHitPulseHeightDitribution%dOutOf%02d", 2, i+1);
+        name = TString::Format("hNonHitPulseHeightDitributionCMC%dOutOf%02d", 2, i+1);
         histo = new TH1F(name,name,1000,-499.5,499.5);
         histo->GetXaxis()->SetTitle(TString::Format("PH_{trans Clus - non Hit - %d out of %d } - cm corrected / ADC", 2, i+1));
         histo->GetYaxis()->SetTitle("number of entries #");
