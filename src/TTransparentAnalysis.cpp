@@ -605,7 +605,6 @@ void TTransparentAnalysis::fillHistograms() {
         hLandauNHighest[clusterSize]->Fill(chargeOfN);
         hLandauNHighest_nonCMC[clusterSize]->Fill(chargeOfN_noCMC);
         vecVecPhNHighest[clusterSize].push_back(chargeOfN);
-        vecVecPh2Highest[clusterSize].push_back(chargeOf2);
         hLandau1Highest[clusterSize]->Fill(chargeOfOne);
         hLandau2Highest[clusterSize]->Fill(chargeOf2);
         hLandau2Highest_nonCMC[clusterSize]->Fill(chargeOf2_noCMC);
@@ -1432,13 +1431,9 @@ void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
         name2 = TString::Format("hLandauVsFidCutX_%dOutOf%02d", 2, clusterSize);
         if(min<max){
             htemp = histSaver->CreateScatterHisto((string)name,vecVecFidCutX,vecVecPhNHighest[clusterSize-1],
-                512,512,
-                0,2800,
-                min,max);
+                512,512,0,2800,min,max);
             htemp2 = histSaver->CreateScatterHisto((string)name2,vecVecFidCutX,vecVecPh2Highest[clusterSize-1],
-                512,512,
-                0,2800,
-                min,max);
+                512,512,0,2800,min,max);
         }
         if(htemp && htemp2){
             htemp->GetXaxis()->SetTitle(TString::Format("pulse height, clusterSize %02d",clusterSize));
