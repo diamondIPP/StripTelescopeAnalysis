@@ -3036,6 +3036,11 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
     hPHNOutOfMVsEventNo= new TH2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy));
     hPHVsEventNo->GetXaxis()->SetTitle("event no.");
     hPHVsEventNo->GetYaxis()->SetTitle("pulse height");
+    name = TString::Format("hPHVsEventNo_%doutOf%02d", 2, maxStrips);
+    title = TString::Format("PH_{%d out of %d} vs eventNo", 2, maxStrips);
+    hPH2OutOfMVsEventNo= new TH2D(name,title,nBins+1,nStart-(nEnd-nStart)/(2*(Float_t)nBins),nEnd+(nEnd-nStart)/(2*(Float_t)nBins),nBinsy+1,ymin-(ymax-ymin)/(2*(Float_t)nBinsy),ymax+(ymax-ymin)/(2*(Float_t)nBinsy));
+    hPHVsEventNo->GetXaxis()->SetTitle("event no.");
+    hPHVsEventNo->GetYaxis()->SetTitle("pulse height");
     for (UInt_t i = 0; i< settings->getMaxTransparentClusterSize(); i++){
         name = TString::Format("hPHvsEventNoArea_clusterSize_%02d",i+1);
         title = TString::Format("ph vs eventNo, clustersize %d",i+1);
@@ -3104,6 +3109,9 @@ void TTransparentAnalysis::savePHvsEventNoAreaPlots() {
     histSaver->SaveHistogram(hPHNOutOfMVsEventNo);
     histSaver->Save1DProfileYWithFitAndInfluence(hPHNOutOfMVsEventNo,"pol1",true);
     delete hPHNOutOfMVsEventNo;
+    histSaver->SaveHistogram(hPH2OutOfMVsEventNo);
+    histSaver->Save1DProfileYWithFitAndInfluence(hPH2OutOfMVsEventNo,"pol1",true);
+    delete hPH2OutOfMVsEventNo;
     histSaver->SaveHistogram(hPHVsEventNo);
     histSaver->Save1DProfileYWithFitAndInfluence(hPHVsEventNo,"pol1",true);
     delete hPHVsEventNo;

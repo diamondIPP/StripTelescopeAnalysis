@@ -727,7 +727,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	PathExtension3d="";
 	dia_saturation = 4095; // DA
 	max_transparent_cluster_size = 10; // DA
-    num_highest_transparent_cluster = 2; // DA
+    num_highest_transparent_cluster = 5; // DA
 
 	res_keep_factor=2;
 	alignmentPrecision_Offset = 0.01;
