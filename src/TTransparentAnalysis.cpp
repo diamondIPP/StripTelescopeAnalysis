@@ -3065,7 +3065,8 @@ void TTransparentAnalysis::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) 
 }
 
 void TTransparentAnalysis::initClusteredHistos(UInt_t startEvent,UInt_t maxEvents) {
-    Int_t nBins = (maxEvents-startEvent)/20000;
+    Int_t nentriesPerBin = 1000;
+    Int_t nBins = (maxEvents-startEvent)/nentriesPerBin;
     Float_t min = 0;
     Float_t max = settings->getPulse_height_max(subjectDetector);
     Int_t bins = settings->getPulse_height_num_bins();

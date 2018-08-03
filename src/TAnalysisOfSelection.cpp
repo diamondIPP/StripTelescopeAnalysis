@@ -70,36 +70,36 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 
 void TAnalysisOfSelection::initialiseHistos()
 {
-	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
+	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",4096,0,4096,8,0.5,8.5);
 	histoLandauDistribution->GetXaxis()->SetTitle("Charge in ADC counts");
 	histoLandauDistribution->GetYaxis()->SetTitle("ClusterSize");
 
-	histoLandauDistribution2D = new TH2F("histoLandauDistribution2D_Clustersize_1_2","histoLandauDistribution2D_Clustersize_1_2",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2D = new TH2F("histoLandauDistribution2D_Clustersize_1_2","histoLandauDistribution2D_Clustersize_1_2",4096,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2D->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderSeed = new TH2F("histoLandauDist2DNoBorderSeed","histoLandauDist2DNoBorderSeed",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderSeed = new TH2F("histoLandauDist2DNoBorderSeed","histoLandauDist2DNoBorderSeed",4096,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderSeed->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderSeed->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderSeed->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderHit = new TH2F("histoLandauDist2D_Clustersize_1_2_noBorderHit","histoLandauDist2D_Clustersize_1_2_noBorderHit",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderHit = new TH2F("histoLandauDist2D_Clustersize_1_2_noBorderHit","histoLandauDist2D_Clustersize_1_2_noBorderHit",4096,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderHit->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderHit->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderHit->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2D_unmasked = new TH2F("histoLandauDistribution2D_Clustersize_1_2_unmasked","histoLandauDistribution2D_Clustersize_1_2_unmasked",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2D_unmasked = new TH2F("histoLandauDistribution2D_Clustersize_1_2_unmasked","histoLandauDistribution2D_Clustersize_1_2_unmasked",4096,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2D_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D_unmasked->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderSeed_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderSeed-unmasked","hLandauDist2D_Clustersize_1_2NoBorderSeed",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderSeed_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderSeed-unmasked","hLandauDist2D_Clustersize_1_2NoBorderSeed",4096,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderSeed_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderSeed_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderSeed_unmasked->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderHit_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderHit-unmasked","hLandauDist2D_Clustersize_1_2NoBorderHit",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderHit_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderHit-unmasked","hLandauDist2D_Clustersize_1_2NoBorderHit",4096,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderHit_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderHit_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderHit_unmasked->GetZaxis()->SetTitle("number of entries");
