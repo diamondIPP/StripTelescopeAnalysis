@@ -219,7 +219,7 @@ private:
 	vector<TH1F*> hLandau1Highest;
 	vector<TH1F*> hLandauNHighest; // DA
 	vector<TH1F*> hLandauNHighest_nonCMC; // DA
-//	vector<TH1F*> hLandau2HighestFixedNoise; // DA
+	vector<TH1F*> hLandau2HighestFixedNoise; // DA
 	vector<TH1F*> hLandauNHighestFixedNoise; // DA
 	vector <TH1F*> hLandauFixedNoise;
 //	vector<TH1F*> hEta2Hightest;

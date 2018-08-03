@@ -456,7 +456,7 @@ void TTransparentAnalysis::initHistograms2() {
         hLandau2HighestHitProfile->GetZaxis()->SetTitle(TString::Format("Avrg Mean Charge, %d highest in %d", nStrips, clusterSize));
         hLandau2HighestHitProfile->SetMinimum(0);
         hLandau2HighestHitProfile->SetMaximum(4096); // DA
-        hLandau2HighestProfile2D.push_back(hLandauNHighestHitProfile);
+        hLandau2HighestProfile2D.push_back(hLandau2HighestHitProfile);
 
         name = TString::Format("hLandau%dHighestFidCutX_%doutOf%02d", nStrips, nStrips, clusterSize);
         title = name + ";pulse height / ADC;FidCutX / ch";
@@ -508,7 +508,7 @@ void TTransparentAnalysis::initHistograms() {
         vecvecResXEtaCorrected.at(clusterSize).clear();
         vecvecResXChargeWeighted.at(clusterSize).clear();
         // TODO: take care of histogram names and bins!!
-        stringstream histNameLandau,histNameLandau1Highest, histNameLandauNHighest, histNameEta, histNameResidualChargeWeighted, histNameResidualHighest2Centroid, histNameResidualEtaCorrected;
+        stringstream histNameLandau,histNameLandau1Highest, histNameLandauNHighest, histNameLandau2Highest, histNameEta, histNameResidualChargeWeighted, histNameResidualHighest2Centroid, histNameResidualEtaCorrected;
         // TODO: histogram naming!!
         histNameLandau << "hDiaTranspAnaPulseHeightOf" << clusterSize+1 << "Strips";
         histNameLandau1Highest<< "hDiaTranspAnaPulseHeightOf1HighestIn"<<clusterSize+1<<"Strips";
@@ -907,7 +907,7 @@ void TTransparentAnalysis::fitHistograms() {
         TH1F* hLandau2HighestFixedNoiseFit = (TH1F*) hLandau2Highest[clusterSize]->Clone(name);
         TF1* fit2HighestFixedNoise = landauGauss->doLandauGaussFitFixedNoise(hLandau2HighestFixedNoiseFit,noise,true);
         //		histSaver->SaveHistogram(hLandau2HighestFixedNoiseFit);
-        hLandau2HighestFixeNoise.push_back(hLandau2HighestFixedNoiseFit);
+        hLandau2HighestFixedNoise.push_back(hLandau2HighestFixedNoiseFit);
         fitLandau2HighestFixedNoise.push_back(fit2HighestFixedNoise);
         cout<<"$"<<flush;
 
@@ -1326,7 +1326,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
     if (clusterSize==0)
         return;
     cout<<"SaveLandauVsEventNoPlots "<<clusterSize<<endl;
-    TString name;
+    TString name, name2;
     TH2F* hLandauNOutOfXVsEventNo=0;
     TH2F* hLandau2OutOfXVsEventNo=0;
     TString section = "TimeDependence";
@@ -1402,7 +1402,7 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
 
 void TTransparentAnalysis::saveLandausVsPositionPlots(UInt_t clusterSize){
     cout<<"saveLandausVsPositionPlots"<<endl;
-    TString name;
+    TString name, name2;
     TH2F* htemp=0;
     TH2F* htemp2=0;
     UInt_t nStrips = settings->getNumHighestTransparentCluster();
@@ -2432,7 +2432,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
         histSaver->SaveTwoHistos((string)name,hNonHitNoiseDistributions[j],hNonHitNoiseDistributionsCMN[j]);
         name = TString::Format("cNonHitPulseHeightDitribution_%dOutOf%02d", nStrips, j+1);
         histSaver->SaveTwoHistos((string)name,hNonHitNoiseDistributionsNOutOfX[j],hNonHitNoiseDistributionsNOutOfXCMN[j]);
-        name2 = TString::Format("cNonHitPulseHeightDitribution_%dOutOf%02d", 2, j+1);
+        TString name2 = TString::Format("cNonHitPulseHeightDitribution_%dOutOf%02d", 2, j+1);
         histSaver->SaveTwoHistos((string)name2,hNonHitNoiseDistributions2OutOfX[j],hNonHitNoiseDistributions2OutOfXCMN[j]);
         delete hNonHitNoiseDistributions[j];
         delete hNonHitNoiseDistributionsCMN[j];
