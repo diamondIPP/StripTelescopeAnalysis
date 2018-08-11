@@ -10,6 +10,7 @@ ROOTGLIBS   	:= $(shell root-config --glibs) -lMinuit
 ROOTCINT		:= rootcint
 SVNDEV 			:= -D'SVN_REV="$(shell svnversion -n .)"'
 GITDEV          := -D'GIT_REV="$(shell git rev-parse --short HEAD)"'
+GITTIME         := -D'GIT_TIME="$(shell git log -1 --format=%ct)"'
 
 CC 				:= g++ 
 #-std=gnu++0x
@@ -22,7 +23,7 @@ DEBUG			:= -g3
 OPTIMAZATIONFLAG :=	-O2 $(DEBUG)
 CFLAGS  		:=  -I$(INCLUDEDIR) -D_REENTRANT 
 #CFLAGS			+= -Wall
-CFLAGS      	+= $(SVNDEV) $(GITDEV) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
+CFLAGS      	+= $(SVNDEV) $(GITDEV) $(GITTIME) $(ROOTCFLAGS) -fPIC $(OPTIMAZATIONFLAG)
 
 OBJ 			:= diamondAnalysis.cpp
 HEAD    		:= 
