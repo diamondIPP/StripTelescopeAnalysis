@@ -159,8 +159,8 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 
 		eventReader->LoadEvent(nEvent);
 		//SILICON PLANES
-//		if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-//			cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+		if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+			cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 		updateSiliconPedestals();
 		doCmNoiseCalculation();
 		//DIAMOND PLANE
@@ -703,8 +703,8 @@ void TPedestalCalculation::updateSiliconPedestals(){
 }
 
 void TPedestalCalculation::updateDiamondPedestals(){
-//	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-//        cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+        cout<< "\nPedestal calculation Event after cm: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 	for(int ch=0;ch<N_DIA_CHANNELS;ch++){
         Float_t adcValue = (Float_t)eventReader->getDia_ADC(ch);
         this->diaAdcValues[ch].push_back(eventReader->getDia_ADC(ch));
