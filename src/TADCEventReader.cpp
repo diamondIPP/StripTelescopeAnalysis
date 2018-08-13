@@ -424,6 +424,8 @@ bool TADCEventReader::LoadEvent(UInt_t EventNumber){
 	if(EventNumber<tree->GetEntries()){
 		current_event=EventNumber;
 		tree->GetEvent(current_event);
+		if((EventNumber != this->getEvent_number()) || (EventNumber != this->getCurrent_event()))
+			cout<< "\nExpecting Event: " << int(EventNumber) << ". Ev Reader Event Number: " << int(this->getEvent_number()) << ". Ev Reader Current Event: " << int(this->getCurrent_event()) << "\n" <<endl;
 		if(verbosity>=14)
 			cout<<"Got Event: "<<current_event<<endl;
 		return true;

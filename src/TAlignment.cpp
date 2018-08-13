@@ -194,8 +194,8 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
         if (!settings->useForAlignment(nEvent, nEvents))
             break;
         eventReader->LoadEvent(nEvent);
-        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-            cout<< "\nAlignment calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//            cout<< "\nAlignment calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 
         nAnalysedEvents++;
         if (!eventReader->isValidTrack()) {
@@ -305,8 +305,8 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
         if (!settings->useForAlignment(nEvent, nEvents))
             return;
         eventReader->LoadEvent(nEvent);
-        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-            cout<< "\nAlignment calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//            cout<< "\nAlignment calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
         if (!eventReader->isValidTrack()) {
             noHitDet++;
             continue;
@@ -2778,8 +2778,8 @@ void TAlignment::DoEtaCorrectionSilicon(UInt_t correctionStep) {
         for (UInt_t i = 0; i < vecEventNo[det].size(); i++) {
             nEvent = vecEventNo[det].at(i);
             eventReader->LoadEvent(nEvent);
-            if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-                cout<< "\nAlignment calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//            if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//                cout<< "\nAlignment calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 
             if (!eventReader->useForAlignment() && !eventReader->useForAnalysis()) continue;
             Float_t eta = eventReader->getCluster(det, 0).getEta();

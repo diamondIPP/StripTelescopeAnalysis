@@ -109,8 +109,8 @@ void TClustering::ClusterEvents(UInt_t nEvents)
 
 void TClustering::clusterEvent()
 {
-	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-		cout<< "\nClustering calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//		cout<< "\nClustering calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 	//Cluster Planes
 	for(unsigned int det=0;det<TPlaneProperties::getNDetectors();det++){
 		//clear vecCluster

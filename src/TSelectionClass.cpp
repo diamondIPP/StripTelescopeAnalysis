@@ -149,8 +149,8 @@ void TSelectionClass::MakeSelection(UInt_t nEvents){
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
         eventReader->LoadEvent(nEvent);
-        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-            cout<< "\nSelection calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//            cout<< "\nSelection calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
         if (verbosity > 10)cout << "Loaded Event " << nEvent << flush;
         resetVariables();
         if (verbosity > 10)cout << "." << flush;
@@ -231,8 +231,8 @@ bool TSelectionClass::createSelectionTree(int nEvents)
 
 
 void TSelectionClass::resetVariables(){
-    if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-        cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//    if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//        cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 
 
     isDetMasked = false;//one of the Silicon Planes contains a Cluster with a masked channel
@@ -976,8 +976,8 @@ void TSelectionClass::createFiducialCut(){
     for(nEvent=0;nEvent<nEvents;nEvent++){
         TRawEventSaver::showStatusBar(nEvent,nEvents,100,verbosity>=20);
         eventReader->LoadEvent(nEvent);
-        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-            cout<< "\nSelection calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//            cout<< "\nSelection calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
         if (verbosity > 10)cout << "Loaded Event " << nEvent << flush;
         resetVariables();
         if (verbosity > 10)cout << "." << flush;

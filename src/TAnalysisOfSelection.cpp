@@ -1155,8 +1155,8 @@ void TAnalysisOfSelection::saveHistos()
 
 void TAnalysisOfSelection::analyseEvent()
 {
-	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-		cout<< "\nSelection analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//		cout<< "\nSelection analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 	if(!eventReader->isValidTrack()) //just Tracks with Valid Silicon Track
 		return;
 

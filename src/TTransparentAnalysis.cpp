@@ -171,8 +171,8 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
         TRawEventSaver::showStatusBar(iEvent,eventNumbers.size(),100);
         nEvent = eventNumbers.at(iEvent);
         eventReader->LoadEvent(nEvent);
-        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-            cout<< "\nTransparent analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//            cout<< "\nTransparent analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
         if(!this->predictPositions(false))
             continue;
         Float_t etaClusSizeOf2 = -1;
@@ -2167,8 +2167,8 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         if(nEvent>eventReader->GetEntries())
             break;
         eventReader->LoadEvent(nEvent);
-        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-            cout<< "\nTransparent analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//        if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//            cout<< "\nTransparent analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
         if (eventReader->isValidTrack() == 0) {
             //		if (eventReader->useForAnalysis() == 0) {
             if (verbosity > 6) printEvent();

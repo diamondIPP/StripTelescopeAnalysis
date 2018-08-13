@@ -78,8 +78,8 @@ void TAnalysisOfClustering::doAnalysis(int nEvents)
 }
 
 void TAnalysisOfClustering::analyseEvent(){
-    if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-        cout<< "\nClustering analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//    if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//        cout<< "\nClustering analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
     if(eventReader->getEvent()->hasInvalidReadout()){
         //		cout<<nEvent<<": Invalid Readout..."<<endl;
         nInvalidReadout++;

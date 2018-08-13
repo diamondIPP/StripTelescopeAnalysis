@@ -96,8 +96,8 @@ void TAnalysisOfPedestal::doAnalysis(UInt_t nEvents)
 }
 
 void TAnalysisOfPedestal::analyseEvent(){
-    if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-        cout<< "\nPedestal analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
+//    if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
+//        cout<< "\nPedestal analysis Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
     for(UInt_t det=0;det<TPlaneProperties::getNDetectors();det++){
 
         TString name = "hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
