@@ -86,6 +86,7 @@ private:
 	TH1F* hSNR_BiggestSignal[9];
 	TH1F* hSNR_BiggestAdjacent[9];
 	TH1F* hCMNoiseDistribution;
+	TH2F* hCMNoiseDistributionEventNo;
 	TH2F* hNoiseDistribution[9];
 	TH2F* hNoiseDistributionCMN[9];
 	TADCEventReader* eventReader;

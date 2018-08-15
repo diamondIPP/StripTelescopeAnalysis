@@ -486,6 +486,12 @@ void TAnalysisOfPedestal::initialiseHistos()
     hCMNoiseDistribution= new TH1F("hCMNoiseDistribution","hCMNoiseDistribution",512,-20,20);
     hCMNoiseDistribution->GetXaxis()->SetTitle("Common Mode Noise [ADC]");
     hCMNoiseDistribution->GetYaxis()->SetTitle("number of entries [#]");
+    Int_t nEvents = eventReader->GetEntries();
+    Int_t nEventBins = (nEvents)/10000;
+    hCMNoiseDistributionEventNo = new TH2F("hCMNoiseDistributionEventNo", "hCMNoiseDistributionEventNo", nEventBins, 0., nEvents, 512, -20, 20);
+    hCMNoiseDistributionEventNo->GetXaxis()->SetTitle("Event number");
+    hCMNoiseDistributionEventNo->GetYaxis()->SetTitle("Common Mode Noise [ADC]");
+    hCMNoiseDistributionEventNo->GetZaxis()->SetTitle("number of entries [#]");
     for (UInt_t det =0;det<TPlaneProperties::getNDetectors();det++){
         TString name = "hADCProfiles_"+(TString)TPlaneProperties::getStringForDetector(det);
         Int_t ybins = TPlaneProperties::getNChannels(det);
@@ -525,8 +531,6 @@ void TAnalysisOfPedestal::initialiseHistos()
             hDiaAllAdcNoiseChannel->GetZaxis()->SetTitle(yTitle.str().c_str());
             hDiaAllAdcNoiseChannel->GetYaxis()->SetTitle("Channel no.");
 
-			Int_t nEvents = eventReader->GetEntries();
-			Int_t nEventBins = (nEvents)/10000;
 			hDiaAllAdcNoiseEventNo = new TH2F(hName + "_EventNo", hTitle + " Event Number", nEventBins, 0., nEvents, nBins, (-1)*width, width);
 			hDiaAllAdcNoiseEventNo->GetXaxis()->SetTitle("Event number");
 			hDiaAllAdcNoiseEventNo->GetYaxis()->SetTitle(xTitle.str().c_str());
@@ -1387,6 +1391,7 @@ void TAnalysisOfPedestal::saveHistos(){
 	if(res!=0) res->setCMN(cmn);
 	if(res!=0) res->setNoise(TPlaneProperties::getDetDiamond(),diaNoise);
 	histSaver->SaveHistogram(hCMNoiseDistribution,true);
+	histSaver->SaveHistogram(hCMNoiseDistributionEventNo, true);
 	stringstream name;
 	name<< "gADC_ch"<<setw(3)<<setfill('0')<<settings->getNoisePlotChannel();
 	TGraph gADC = histSaver->CreateDipendencyGraph(name.str(),adcValues,eventNumbers,20000);
@@ -1570,6 +1575,7 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 		nSumNoise=0;
         vecCMNoise.push_back(cmNoise);
         hCMNoiseDistribution->Fill(cmNoise);
+        hCMNoiseDistribution->Fill(nEvent, cmNoise);
     }
     cmNoise = eventReader->getCMNoise(det,ch);
 
