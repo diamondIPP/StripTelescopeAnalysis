@@ -525,6 +525,13 @@ void TAnalysisOfPedestal::initialiseHistos()
             hDiaAllAdcNoiseChannel->GetZaxis()->SetTitle(yTitle.str().c_str());
             hDiaAllAdcNoiseChannel->GetYaxis()->SetTitle("Channel no.");
 
+			Int_t nEvents = eventReader->GetEntries();
+			Int_t nEventBins = (nEvents)/10000;
+			hDiaAllAdcNoiseEventNo = new TH2F(hName + "_EventNo", hTitle + " Event Number", nEventBins, 0., nEvents, nBins, (-1)*width, width);
+			hDiaAllAdcNoiseEventNo->GetXaxis()->SetTitle("Event number");
+			hDiaAllAdcNoiseEventNo->GetYaxis()->SetTitle(xTitle.str().c_str());
+			hDiaAllAdcNoiseEventNo->GetZaxis()->SetTitle(yTitle.str().c_str());
+
             TString extName = "_CMNcorrected";
             TString extTitle = " CMN corrected";
             hDiaAllAdcNoiseCMN = new TH1F(hName+extName,
@@ -539,6 +546,11 @@ void TAnalysisOfPedestal::initialiseHistos()
             hDiaAllAdcNoiseCMNChannel->GetYaxis()->SetTitle("Channel no.");
             hDiaAllAdcNoiseCMNChannel->GetYaxis()->SetTitle(xTitle.str().c_str());
             hDiaAllAdcNoiseCMNChannel->GetZaxis()->SetTitle(yTitle.str().c_str());
+
+			hDiaAllAdcNoiseCMNEventNo = new TH2F(hName + "_EventNo" + extName, hTitle + " Event Number" + extTitle, nEventBins, 0., nEvents, nBins, (-1)*width, width);
+			hDiaAllAdcNoiseCMNEventNo->GetXaxis()->SetTitle("Event number");
+			hDiaAllAdcNoiseCMNEventNo->GetYaxis()->SetTitle(xTitle.str().c_str());
+			hDiaAllAdcNoiseCMNEventNo->GetZaxis()->SetTitle(yTitle.str().c_str());
         }
 
         Int_t nbins = 512;
@@ -1331,6 +1343,8 @@ void TAnalysisOfPedestal::saveHistos(){
 	histSaver->SaveHistogram(hDiaAllAdcNoiseCMN,true);
     histSaver->SaveHistogram(hDiaAllAdcNoiseCMNChannel,true);
     histSaver->SaveHistogram(hDiaAllAdcNoiseChannel,true);
+    histSaver->SaveHistogram(hDiaAllAdcNoiseEventNo, true);
+    histSaver->SaveHistogram(hDiaAllAdcNoiseCMNEventNo, true);
     THStack *hstack = new THStack("hStackNoise","Noise per Area;Noise / ADC; no. of entries");
     for (UInt_t area = 0; area<settings->getNDiaDetectorAreas();area++){
     	TString ext = TString::Format("_area%d",area);
@@ -1574,6 +1588,8 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
             hDiaAllAdcNoiseCMN->Fill(noiseCMN);
             hDiaAllAdcNoiseChannel->Fill(ch,noise);
             hDiaAllAdcNoiseCMNChannel->Fill(ch,noiseCMN);
+            hDiaAllAdcNoiseEventNo   ->Fill(nEvent, noise   );
+            hDiaAllAdcNoiseCMNEventNo->Fill(nEvent, noiseCMN);
             sumPed += pedestal;
             sumPedCMN+=pedestalCMN;
             nSumPed++;

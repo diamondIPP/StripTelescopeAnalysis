@@ -125,7 +125,9 @@ private:
 	TH1F *hDiaAllAdcNoise;
 	TH1F *hDiaAllAdcNoiseCMN;
 	TH2F *hDiaAllAdcNoiseChannel;
+	TH2F *hDiaAllAdcNoiseEventNo;
 	TH2F *hDiaAllAdcNoiseCMNChannel;
+	TH2F *hDiaAllAdcNoiseCMNEventNo;
 	TH2F *hLeftVsRightSignal[9];
 	TH2F *hLeftVsRightSignalCMN[9];
 	TH2F *hEtaVsCharge[9];
