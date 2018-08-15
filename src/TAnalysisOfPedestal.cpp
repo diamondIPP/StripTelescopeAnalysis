@@ -497,7 +497,7 @@ void TAnalysisOfPedestal::initialiseHistos()
         hHistoMap[name] = new TProfile2D(name,name,xbins,xstart,xend,ybins,ystart,yend);
         stringstream histoName,histoTitle,xTitle,yTitle;
         histoName<<"hNoiseDistributionOfAllNonHitChannels_"<<TPlaneProperties::getStringForDetector(det);
-        histoTitle<<"Noise Distribution  of all non hit channels in Plane"<<TPlaneProperties::getStringForDetector(det);
+        histoTitle<<"Noise Distribution of all non hit channels in Plane"<<TPlaneProperties::getStringForDetector(det);
         xTitle<<"non hit Noise (Adc-Ped.) in ADC counts";
         yTitle<<"Number of Entries #";
         Float_t width = settings->getNoise_si_max     ();
