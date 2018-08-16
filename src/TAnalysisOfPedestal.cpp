@@ -1575,7 +1575,7 @@ void TAnalysisOfPedestal::updateMeanCalulation(UInt_t det,UInt_t ch){
 		nSumNoise=0;
         vecCMNoise.push_back(cmNoise);
         hCMNoiseDistribution->Fill(cmNoise);
-        hCMNoiseDistribution->Fill(nEvent, cmNoise);
+        hCMNoiseDistributionEventNo->Fill(nEvent, cmNoise);
     }
     cmNoise = eventReader->getCMNoise(det,ch);
 
