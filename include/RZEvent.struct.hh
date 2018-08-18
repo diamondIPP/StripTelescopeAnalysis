@@ -3,7 +3,7 @@
 #ifndef RZEVENT_STRUCT_HH_
 #define RZEVENT_STRUCT_HH_
 //***Variables and Constants***//
-const int DIAMOND_MEM = 256; //263 appears to be the necessary number of 4-byte words that should be
+const int DIAMOND_MEM = 526; //263 appears to be the necessary number of 4-byte words that should be
                              //allotted for the diamond data so that the last 4-byte words is the Trailer.
                              //Or, it is 526 2-byte (16-bit) words.
 
@@ -14,7 +14,7 @@ const int DIAMOND_MEM = 256; //263 appears to be the necessary number of 4-byte 
 //For October 2006 Test beam OFFSET = 7, for August 2007, OFFSET = 0.
 
 //const Int_t DIA_OFFSET = 0; // 0 is usual but 7 is needed for 2006 data
-const int DIA_OFFSET = 0; // 0 is usual but 7 is needed for 2006 data
+const int DIA_OFFSET = 7; // 0 is usual but 7 is needed for 2006 data
 
 const int SILICON_MEM = 2048; //Number of bytes of memory for each 8-bit ADC input for the telescope detectors (4 detectors *  2 layers * 256 channels)
 
