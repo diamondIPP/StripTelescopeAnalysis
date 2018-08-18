@@ -57,7 +57,7 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 		}
 	}
 
-	//Read in event data (Header, Data, and Trailer) using Event structure as specified in Diamondstuct.h
+	//Read in event data (Header, Data, and Trailer) using Event structure as specified in Diamondstruct.h
 	current_rz_file.seekg(EventNumber%EventsPerFile * sizeof(rzEvent),ios::beg);
 	current_rz_file.read(reinterpret_cast<char*>(&rzEvent),sizeof(rzEvent));
 
