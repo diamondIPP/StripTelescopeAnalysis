@@ -57,6 +57,126 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 		}
 	}
 
+	//===============================//
+	// Read data in 2006 data format //
+	//===============================//
+
+	if (settings->getData_format() == 2006) {
+
+	//Read in event data (Header, Data, and Trailer) using Event structure as specified in Diamondstruct.h
+	current_rz_file.seekg(EventNumber%EventsPerFile * sizeof(rzEvent2006),ios::beg);
+	current_rz_file.read(reinterpret_cast<char*>(&rzEvent2006),sizeof(rzEvent2006));
+
+	//Changing Endianness of Event Header Read in Data
+	uendian_swap(rzEvent2006.EvTrig);
+	uendian_swap(rzEvent2006.EvNo);
+	uendian_swap(rzEvent2006.EvPos);
+	endian_swap(rzEvent2006.EvTag);
+	endian_swap(rzEvent2006.EvDate);
+	endian_swap(rzEvent2006.EvTime);
+	uendian_swap(rzEvent2006.TrigCnt);
+	uendian_swap(rzEvent2006.EvVmeTime);
+	for (int i=0; i<8; i++)
+	{
+		endian_swap(rzEvent2006.VFasCnt[i]);
+		endian_swap(rzEvent2006.VFasReg[i]);
+	}
+	endian_swap(rzEvent2006.EvNetTime);
+	short_endian_swap(rzEvent2006.MeasNo);
+	short_endian_swap(rzEvent2006.EvInMeasNo);
+	endian_swap(rzEvent2006.Reserved[0]);
+	endian_swap(rzEvent2006.Reserved[1]);
+
+	//Endian Swap for Diamond Data and Outputing the test values for the data following the Telescope Reference Detectors
+	for (int i=0; i<DIAMOND_MEM2006; i++)
+		ushort_endian_swap(rzEvent2006.RD42[i]);
+
+	//Swaping Endianness and then Outputing the Event Trailer data
+	uendian_swap(rzEvent2006.Eor);
+
+	if(false){
+		cout << "\nEVENT:   "<<EventNumber<<"\nHeader dump:" << endl;
+		cout << "EvTrig:    " << rzEvent2006.EvTrig << endl;
+		cout << "EvNo:      " << rzEvent2006.EvNo << endl;
+		cout << "EvPos:     " << rzEvent2006.EvPos << endl;
+		cout << "EvTag:     " << rzEvent2006.EvTag << endl;
+		cout << "EvDate:    " << std::bitset<32>(rzEvent2006.EvTime) << endl;
+		cout << "TrigCnt:   " << rzEvent2006.TrigCnt << endl;
+		cout << "EvVmeTime: " << std::bitset<32>(rzEvent2006.EvVmeTime) << endl;
+		cout << "EvNetTime: " << std::bitset<32>(rzEvent2006.EvNetTime) << endl;
+		cout << "MeasNo:    " << rzEvent2006.MeasNo << endl;
+		cout << "EvInMeasNo:" << rzEvent2006.EvInMeasNo << endl;
+	}
+	//Reading out Event Header Data to Screen
+	if(verbose) {
+		cout << "Header dump:" << endl;
+		cout << "EvTrig: " << rzEvent2006.EvTrig << endl;
+		cout << "EvNo: " << rzEvent2006.EvNo << endl;
+		cout << "EvPos: " << rzEvent2006.EvPos << endl;
+		cout << "EvTag: " << rzEvent2006.EvTag << endl;
+		cout << "EvDate: " << rzEvent2006.EvTime << endl;
+		cout << "TrigCnt: " << rzEvent2006.TrigCnt << endl;
+		cout << "EvVmeTime: " << rzEvent2006.EvVmeTime << endl;
+		for (int j=0; j<8; j++) cout << "VFasCnt[" << j << "]: " << rzEvent2006.VFasCnt[j] << endl;
+		for (int j=0; j<8; j++) cout << "VFasReg[" << j << "]: " << rzEvent2006.VFasReg[j] << endl;
+		cout << "EvNetTime: " << rzEvent2006.EvNetTime << endl;
+		cout << "MeasNo: " << rzEvent2006.MeasNo << endl;
+		cout << "EvInMeasNo: " << rzEvent2006.EvInMeasNo << endl;
+		cout << "Reserved[EVENT_HEADER_RESERVED_ESZ-2]: " << rzEvent2006.Reserved[0] << " and " << rzEvent2006.Reserved[1] << endl;
+		cout << "Eor: " << rzEvent2006.Eor<< endl;
+	}
+
+
+	//Sorting the values of intoutput into different columns for the x and y strips of the 4 detectors
+
+	/* ---------------------------------------------------------------------------------------------------------------------
+	   As described in the original DAQ readme, the 2048 bytes for each event of the silicon telescope data is read in the
+	   following order: To start, the first channel of the X layer ADC values are read in for each of the 4 detectors and
+	   then so on for each channel until 256. Then the Y layer ADC values are read in a similar manner. So explicitly, channel 0
+	   of the D0X is read in first, then channel 0 of D1X is next, then channel 0 of D2X, then channel 0 of D3X, then channel 1
+	   of D0X and so on. This explains the the way the values are then sorted into the 256 byte arrays for each Detector layer.
+	   ------------------------------------------------------------------------------------------------------------------------ */
+
+	//store the raw adc values in class member storage
+	for (int i=0; i<256; i++)
+	{
+		//NOTE: Realized that due to scrambling of the data (example 0x3615abcd written in header as 0x1536cdab)
+		//and realizing that both silicon and diamond data is written down as 4-byte words, detectors should be
+
+		//New way of mapping detectors
+		D0X.ADC_values[i]=rzEvent2006.Input[4*i+3]; //The 1X and 3X detectors are actually physically flipped so we need to reverse the values with the program
+		D1X.ADC_values[255-i]=rzEvent2006.Input[4*i+2];
+		D2X.ADC_values[i]=rzEvent2006.Input[4*i+1];
+		D3X.ADC_values[255-i]=rzEvent2006.Input[4*i];
+
+		D0Y.ADC_values[i]=rzEvent2006.Input[4*i+3+1024];
+		D1Y.ADC_values[i]=rzEvent2006.Input[4*i+2+1024];
+		D2Y.ADC_values[i]=rzEvent2006.Input[4*i+1+1024];
+		D3Y.ADC_values[i]=rzEvent2006.Input[4*i+1024];
+	}
+	for (int i=0; i<128;i++){
+		Dia0.ADC_values[i]=rzEvent2006.RD42[(i+DIA_OFFSET2006)*2+1];
+		Dia1.ADC_values[i]=rzEvent2006.RD42[(i+DIA_OFFSET2006)*2];
+		Dia0.ADC_values[i] *= settings->getDiaAdcScaleFactor();
+		Dia1.ADC_values[i] *= settings->getDiaAdcScaleFactor();
+		//if(i<20)cout<<rzEvent2006.RD42[i*2]<<" "<<Dia0.ADC_values[i]<<"  ";
+	}
+	// cout<<endl;
+
+	//Memory consistency check. If the amount of Diamond memory is not 263 bytes worth, then this will output a non sensible number.
+	if (verbosity&&(EventNumber%1000 == 0))
+	{
+		cout << "For requested event " << EventNumber << ", the current value of EvTrig and EvPos is: " << rzEvent2006.EvTrig << " and " << rzEvent2006.EvPos << endl;
+	}
+
+	}
+
+	//=================================//
+	// Read data in normal data format //
+	//=================================//
+
+	else {
+
 	//Read in event data (Header, Data, and Trailer) using Event structure as specified in Diamondstruct.h
 	current_rz_file.seekg(EventNumber%EventsPerFile * sizeof(rzEvent),ios::beg);
 	current_rz_file.read(reinterpret_cast<char*>(&rzEvent),sizeof(rzEvent));
@@ -161,6 +281,8 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 	if (verbosity&&(EventNumber%1000 == 0))
 	{
 		cout << "For requested event " << EventNumber << ", the current value of EvTrig and EvPos is: " << rzEvent.EvTrig << " and " << rzEvent.EvPos << endl;
+	}
+
 	}
 
 	return 0; //returning 0 signals Slide() to continue with the calculation
