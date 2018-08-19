@@ -85,6 +85,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
     addSection("Pulse Height of N hightest channels in 10 strips", sectionNHighest.str());
 
 	stringstream pXY;
+	pXY << "<h2>2 highest channels in 10 strips</h2>\n";
 	pXY << putImage((string)".",(string)"hLandau2HighestFidCutX_2outOf10")<<"\n";
 	pXY << putImage((string)".",(string)"hLandau2HighestFidCutY_2outOf10")<<"\n";
 	pXY <<"\n\n<br><br>\n\n";
@@ -92,6 +93,14 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
     pXY << putImage((string)".",(string)"hLandau2HighestPredHitY_2outOf10")<<"\n";
     pXY <<"\n\n<br><br>\n\n";
     pXY << putImage((string)".",(string)"hLandau2HighestHitProfile_2OutOf10")<<"\n";
+	pXY << "<h2>5 highest channels in 10 strips</h2>\n";
+	pXY << putImage((string)".", (string)"hLandauNHighestIn10FidCutX_5In10") << "\n";
+	pXY << putImage((string)".", (string)"hLandauNHighestIn10FidCutY_5In10") << "\n";
+	pXY <<"\n\n<br><br>\n\n";
+	pXY << putImage((string)".", (string)"hLandauNHighestIn10PredHitX_5In10") << "\n";
+	pXY << putImage((string)".", (string)"hLandauNHighestIn10PredHitY_5In10") << "\n";
+	pXY <<"\n\n<br><br>\n\n";
+	pXY << putImage((string)".", (string)"hLandau5HighestIn10HitProfile") << "\n";
     addSection("XY Pulse Height Distributions",pXY.str());
 }
 
