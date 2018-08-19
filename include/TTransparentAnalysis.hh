@@ -325,8 +325,10 @@ private:
 	vector<TCluster> vecTransparentClusters;
 	vector<Float_t> vecMPLandau;
 	vector<Float_t> vecMPLandau2Highest;
+	vector<Float_t> vecMPLandauNHighestIn10;
 	vector<Float_t> vecMeanLandau;
 	vector<Float_t> vecMeanLandau2Highest;
+	vector<Float_t> vecMeanLandauNHighestIn10;
 	vector< pair <Float_t,Float_t> > vecResidualChargeWeighted;
 	vector< pair <Float_t,Float_t> > vecResidualHighest2Centroid;
 	vector< pair <Float_t,Float_t> > vecResidualEtaCorrected;

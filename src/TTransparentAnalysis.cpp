@@ -75,9 +75,11 @@ TTransparentAnalysis::~TTransparentAnalysis() {
 
     mpPulseHeights.push_back(vecMPLandau);
     mpPulseHeights.push_back(vecMPLandau2Highest);
+    mpPulseHeights.push_back(vecMPLandauNHighestIn10);
     meanPulseHeights.push_back(vecMeanLandau);
 //	this->settings->res
     meanPulseHeights.push_back(vecMeanLandau2Highest);
+    meanPulseHeights.push_back(vecMeanLandauNHighestIn10);
     if(results) this->results->setPH_NoutOfN(vecMeanLandau, alignMode);
     resolutions.push_back(vecResidualChargeWeighted);
     resolutions.push_back(vecResidualHighest2Centroid);
@@ -1204,6 +1206,12 @@ void TTransparentAnalysis::fitHistograms() {
             vecResidualEtaCorrected_2ndGaus.push_back(tempPair);
         }
     }
+	for (UInt_t n_strips = 0; n_strips < MaxNSignalStrips; n_strips++) {
+		if (TPlaneProperties::getMaxTransparentClusterSize(subjectDetector) > 9) {
+			vecMeanLandauNHighestIn10.push_back(hLandauNHighest  [n_strips][9]->GetMean()      );
+			vecMPLandauNHighestIn10  .push_back(fitLandauNHighest[n_strips][9]->GetParameter(1));
+		}
+	}
     hLandauMean->Scale(1./hLandauMean->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
     hLandauMP->Scale(1./hLandauMP->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
     hLandau2HighestMean->Scale(1./hLandau2HighestMean->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
