@@ -496,6 +496,8 @@ void TTransparentAnalysis::initHistograms() {
     hLandauMP = new TH1F("hDiaTranspAnaPulseHeightMP","hDiaTranspAnaPulseHeightMP",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
     hLandau2HighestMean = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMean","hDiaTranspAnaPulseHeightOf2HighestMean",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
     hLandau2HighestMP = new TH1F("hDiaTranspAnaPulseHeightOf2HighestMP","hDiaTranspAnaPulseHeightOf2HighestMP",TPlaneProperties::getMaxTransparentClusterSize(subjectDetector),0.5,TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
+    hLandauNHighestIn10Mean = new TH1F("hDiaTranspAnaPulseHeightOfNHighestIn10Mean", "hDiaTranspAnaPulseHeightOfNHighestIn10Mean", TPlaneProperties::getMaxTransparentClusterSize(subjectDetector), 0.5, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
+    hLandauNHighestIn10MP   = new TH1F("hDiaTranspAnaPulseHeightOfNHighestIn10MP"  , "hDiaTranspAnaPulseHeightOfNHighestIn10MP"  , TPlaneProperties::getMaxTransparentClusterSize(subjectDetector), 0.5, TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+0.5);
     hPredictedPositionInStrip = new TH1F("hPredictedPositionInStrip","hPredictedPositionInStrip",2,-1.5,1.5);
 
 	UInt_t snr_nbinsx = 750;
@@ -1210,12 +1212,16 @@ void TTransparentAnalysis::fitHistograms() {
 		if (TPlaneProperties::getMaxTransparentClusterSize(subjectDetector) > 9) {
 			vecMeanLandauNHighestIn10.push_back(hLandauNHighest  [n_strips][9]->GetMean()      );
 			vecMPLandauNHighestIn10  .push_back(fitLandauNHighest[n_strips][9]->GetParameter(1));
+			hLandauNHighestIn10Mean->SetBinContent(n_strips+1, hLandauNHighest  [n_strips][9]->GetMean()      );
+			hLandauNHighestIn10MP  ->SetBinContent(n_strips+1, fitLandauNHighest[n_strips][9]->GetParameter(1));
 		}
 	}
     hLandauMean->Scale(1./hLandauMean->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
     hLandauMP->Scale(1./hLandauMP->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
     hLandau2HighestMean->Scale(1./hLandau2HighestMean->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
     hLandau2HighestMP->Scale(1./hLandau2HighestMP->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
+    hLandauNHighestIn10Mean->Scale(1. / hLandauNHighestIn10Mean->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
+    hLandauNHighestIn10MP  ->Scale(1. / hLandauNHighestIn10MP  ->GetBinContent(TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)));
     cout<<"#"<<endl;
 }
 
@@ -2123,6 +2129,8 @@ void TTransparentAnalysis::saveHistograms() {
     histSaver->SaveHistogram(hLandauMP);
     histSaver->SaveHistogram(hLandau2HighestMean);
     histSaver->SaveHistogram(hLandau2HighestMP);
+    histSaver->SaveHistogram(hLandauNHighestIn10Mean);
+    histSaver->SaveHistogram(hLandauNHighestIn10MP  );
 	histSaver->SaveHistogram(hSignalInSNR_Centroid2Strips_Dia             );
 	histSaver->SaveHistogram(hSignalInSNR_Centroid2Strips_Dia_cmnCor      );
 	histSaver->SaveHistogram(hSignalInSNR_Centroid2StripsSorted_Dia       );
@@ -2276,6 +2284,8 @@ void TTransparentAnalysis::deleteHistograms() {
     delete hLandauMP;
     delete hLandau2HighestMean;
     delete hLandau2HighestMP;
+    delete hLandauNHighestIn10Mean;
+    delete hLandauNHighestIn10MP;
 	delete hSignalInSNR_Centroid2Strips_Dia             ;
 	delete hSignalInSNR_Centroid2Strips_Dia_cmnCor      ;
 	delete hSignalInSNR_Centroid2StripsSorted_Dia       ;

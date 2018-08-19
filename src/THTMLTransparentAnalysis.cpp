@@ -60,7 +60,9 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	sectionSummary	<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMean")
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMP")
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMean")
-									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMP");
+									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOf2HighestMP"  )
+									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOfNHighestIn10Mean")
+									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOfNHighestIn10MP"  );
 	sectionSummary << "\n\n<br><br>\n\n";
     addSection("Pulse Height - Summary table",sectionSummary.str());
 	stringstream plots1, plots2, plots3;

@@ -284,6 +284,8 @@ private:
 	vector<TH2F*> hResidualVsHitPositionEtaCorrected;
 	TH1F* hLandau2HighestMean;
 	TH1F* hLandau2HighestMP;
+	TH1F* hLandauNHighestIn10Mean;
+	TH1F* hLandauNHighestIn10MP;
 	TH2F* hSelectedTracksAvrgSiliconHitPos;
 	vector<TH1F*> hEtaIntegrals;
 	vector<TH1F*> hEtaCMNcorrectedIntegrals;
