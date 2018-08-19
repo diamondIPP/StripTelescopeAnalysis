@@ -38,10 +38,10 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
 	vecTable.resize(7);
 	vecTable.at(0).push_back("number of used channels");
-	vecTable.at(1).push_back("PulseHeigth");
+	vecTable.at(1).push_back("Pulse height");
 	vecTable.at(2).push_back("mean");
 	vecTable.at(3).push_back("most probable");
-	vecTable.at(4).push_back("PulseHeigth 2 highest channels");
+	vecTable.at(4).push_back("Pulse height 2 highest channels");
 	vecTable.at(5).push_back("mean");
 	vecTable.at(6).push_back("most probable");
 	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) {
