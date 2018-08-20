@@ -1,5 +1,7 @@
 //*********************Diamond and Silicon Detectors Structure Header*****************//
 #include <string>
+#ifndef RZEVENT2006_STRUCT_HH_
+#define RZEVENT2006_STRUCT_HH_
 //***Variables and Constants***//
 const int DIAMOND_MEM2006 = 526; //263 appears to be the necessary number of 4-byte words that should be
                              //allotted for the diamond data so that the last 4-byte words is the Trailer.
@@ -69,7 +71,7 @@ struct RZEvent2006
 
       //Event Data Variables
       unsigned char Input[SILICON_MEM];  //The silicon reference telescope detectors read out an 8-bit ADC value.
-      unsigned short int RD42[DIAMOND_MEM]; //The diamond detectors read out a 16-bit ADC value although only the first 12 bits are significant.
+      unsigned short int RD42[DIAMOND_MEM2006]; //The diamond detectors read out a 16-bit ADC value although only the first 12 bits are significant.
 
 
 
@@ -79,3 +81,4 @@ struct RZEvent2006
 };
 
 //end of structure declaration
+#endif

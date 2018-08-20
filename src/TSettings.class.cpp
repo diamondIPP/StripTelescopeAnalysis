@@ -438,6 +438,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"Iter_Size"))Parse(key,value,Iter_Size);
 		if (TPlaneProperties::startsWith(key,"Taylor_speed_throttle")) Parse(key,value,Taylor_speed_throttle);
 		if (TPlaneProperties::startsWith(key,"dia_input")) Parse(key,value,dia_input);
+		if (TPlaneProperties::startsWith(key,"data_format")) Parse(key, value, data_format);
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_fraction")) Parse(key,value,alignment_training_track_fraction);
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_number")) Parse(key,value,alignment_training_track_number);
         if (TPlaneProperties::startsWith(key,"RerunSelection")) Parse(key,value,bRerunSelection);
@@ -712,6 +713,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	//default pedestal settings
 	fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
 	dia_input = 0; // 1 for 2006 and 0 for the rest
+	data_format = 0; // 2006 for 2006 and 0 for the rest
 	DO_CMC = 1;
 	CMN_cut = 5;  //Should be less than or equal to CMN_coor_high
 	Iter_Size = 500; //buffer size
@@ -1609,6 +1611,11 @@ Int_t TSettings::getDia_input() const
 	return dia_input;
 }
 
+Int_t TSettings::getData_format() const
+{
+	return data_format;
+}
+
 Float_t TSettings::getSi_Pedestal_Hit_Factor() const
 {
 	return Si_Pedestal_Hit_Factor;
@@ -1622,6 +1629,11 @@ void TSettings::setDi_Pedestal_Hit_Factor(Float_t Di_Pedestal_Hit_Factor)
 void TSettings::setDia_input(Int_t dia_input)
 {
 	this->dia_input = dia_input;
+}
+
+void TSettings::setData_format(Int_t data_format)
+{
+	this->data_format = data_format;
 }
 
 void TSettings::setSi_Pedestal_Hit_Factor(Float_t Si_Pedestal_Hit_Factor)

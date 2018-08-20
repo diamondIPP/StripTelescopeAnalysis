@@ -137,6 +137,7 @@ public:
 	Int_t getPedestalSildingLength(){return getIter_Size();};
 	Int_t getTaylor_speed_throttle() const;
 	Int_t getDia_input() const;
+	Int_t getData_format() const;
 	Float_t get_Pedestal_Hit_Factor(UInt_t det) const;
 	Float_t getDi_Pedestal_Hit_Factor() const;
 	Float_t getSi_Pedestal_Hit_Factor() const;
@@ -208,6 +209,7 @@ public:
 	void setTaylor_speed_throttle(Int_t Taylor_speed_throttle);
 	void setDi_Pedestal_Hit_Factor(Float_t Di_Pedestal_Hit_Factor);
 	void setDia_input(Int_t dia_input);
+	void setData_format(Int_t data_format);
 	void setSi_Pedestal_Hit_Factor(Float_t Si_Pedestal_Hit_Factor);
 	void setDO_CMC(Int_t DO_CMC);
 	void setCMN_cut(Int_t CMN_cut);
@@ -441,6 +443,7 @@ private:
 	Int_t Iter_Size;
 	Int_t Taylor_speed_throttle;
 	Int_t dia_input;
+	Int_t data_format;
 	Float_t Si_Pedestal_Hit_Factor;
 	Float_t Di_Pedestal_Hit_Factor;
 	bool single_channel_analysis_enable;

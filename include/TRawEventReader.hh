@@ -44,6 +44,7 @@ using namespace TMath;
 
 
 #include "RZEvent.struct.hh" //the header file that is connected to the Diamond/telescope data
+#include "RZEvent2006.struct.hh" //the header file that is connected to the Diamond/telescope data format used in 2006
 #include "TDetector_Data.hh"
 #include "TSettings.class.hh"
 #include "TSystem.h"
@@ -83,6 +84,7 @@ private:
     ifstream current_rz_file;
     int run_number;
     RZEvent rzEvent;
+    RZEvent2006 rzEvent2006;
     int verbosity;
 public://TODO: Get them in the private area...
     TDetector_Data D0X;
