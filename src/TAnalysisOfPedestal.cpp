@@ -707,8 +707,8 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
         sigma=TMath::Sqrt(sigma/entries-mean*mean);
         cout<< "Mean: "<<mean<<" +/- "<<sigma<<"\tMaximum SNR: "<<max<<" "<<entries<<endl;
         //define xrange and nbins
-        Float_t xRangeMax = TMath::Min(mean+3*sigma,max);
-        Float_t xRangeMin = 4;
+        Float_t xRangeMax = TMath::Min(mean+5*sigma,max); // DA: it was 3*sigma
+        Float_t xRangeMin = 0; // DA: it was 4
         xMinBiggest = xRangeMin;
         xMaxBiggest = xRangeMax;
         UInt_t nbins = 512;

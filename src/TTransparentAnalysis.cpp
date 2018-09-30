@@ -2030,14 +2030,19 @@ void TTransparentAnalysis::deleteHistograms() {
     delete hLandau2HighestMP;
 }
 
-void TTransparentAnalysis::deleteFits() {
+void TTransparentAnalysis::deleteFits() {/*
     for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) {
+	if(sizeof(fitLandau)/sizeof(fitLandau[0]) > clusterSize)
         delete fitLandau[clusterSize];
+	if(sizeof(fitLandauNHighest)/sizeof(fitLandauNHighest[0]) > clusterSize)
         delete fitLandauNHighest[clusterSize];
+	if(sizeof(fitLandau2Highest)/sizeof(fitLandau2Highest[0]))
         delete fitLandau2Highest[clusterSize];
+	if(sizeof(fitResidualChargeWeighted)/sizeof(fitResidualChargeWeighted[0]))
         delete fitResidualChargeWeighted[clusterSize];
+	if(sizeof(fitResidualHighest2Centroid)/sizeof(fitResidualHighest2Centroid[0]))
         delete fitResidualHighest2Centroid[clusterSize];
-    }
+    }*/
 }
 
 void TTransparentAnalysis::printCutFlow() {
