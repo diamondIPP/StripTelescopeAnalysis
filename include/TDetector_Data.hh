@@ -14,10 +14,10 @@ class TDetector_Data {
 public:
 	TDetector_Data();
 	virtual ~TDetector_Data();
-	int GetADC_value(Int_t index);
-	void SetADC_value(Int_t index, Int_t value);
+	uint16_t GetADC_value(Int_t index);
+	void SetADC_value(Int_t index, UShort_t value);
 
-	int ADC_values[256];
+	uint16_t ADC_values[256];
 };
 
 #endif /* TDETECTOR_DATA_HH_ */

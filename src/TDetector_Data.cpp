@@ -21,12 +21,12 @@ TDetector_Data::~TDetector_Data() {
 
 
 
-int TDetector_Data::GetADC_value(Int_t index)
+uint16_t TDetector_Data::GetADC_value(Int_t index)
 {
 	return ADC_values[index];
 }
 
-void TDetector_Data::SetADC_value(Int_t index, Int_t value)
+void TDetector_Data::SetADC_value(Int_t index, UShort_t value)
 {
 	ADC_values[index] = value;
 }

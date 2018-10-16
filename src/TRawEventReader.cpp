@@ -138,19 +138,19 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 		//and realizing that both silicon and diamond data is written down as 4-byte words, detectors should be
 
 		//New way of mapping detectors
-		D0X.ADC_values[i]=rzEvent.Input[4*i+3]; //The 1X and 3X detectors are actually physically flipped so we need to reverse the values with the program
-		D1X.ADC_values[255-i]=rzEvent.Input[4*i+2];
-		D2X.ADC_values[i]=rzEvent.Input[4*i+1];
-		D3X.ADC_values[255-i]=rzEvent.Input[4*i];
+		D0X.ADC_values[i]= (rzEvent.Input[4*i+3] < 256)? rzEvent.Input[4*i+3] : 255; //The 1X and 3X detectors are actually physically flipped so we need to reverse the values with the program
+		D1X.ADC_values[255-i]= (rzEvent.Input[4*i+2] < 256)? rzEvent.Input[4*i+2] : 255;
+		D2X.ADC_values[i]= (rzEvent.Input[4*i+1] < 256)? rzEvent.Input[4*i+1] : 255;
+		D3X.ADC_values[255-i]= (rzEvent.Input[4*i] < 256)? rzEvent.Input[4*i] : 255;
 
-		D0Y.ADC_values[i]=rzEvent.Input[4*i+3+1024];
-		D1Y.ADC_values[i]=rzEvent.Input[4*i+2+1024];
-		D2Y.ADC_values[i]=rzEvent.Input[4*i+1+1024];
-		D3Y.ADC_values[i]=rzEvent.Input[4*i+1024];
+		D0Y.ADC_values[i]= (rzEvent.Input[4*i+3+1024] < 256) ? rzEvent.Input[4*i+3+1024] : 255;
+		D1Y.ADC_values[i]= (rzEvent.Input[4*i+2+1024] < 256) ? rzEvent.Input[4*i+2+1024] : 255;
+		D2Y.ADC_values[i]= (rzEvent.Input[4*i+1+1024] < 256) ? rzEvent.Input[4*i+1+1024] : 255;
+		D3Y.ADC_values[i]= (rzEvent.Input[4*i+1024] < 256) ? rzEvent.Input[4*i+1024] : 255;
 	}
 	for (int i=0; i<128;i++){
-		Dia0.ADC_values[i]=rzEvent.RD42[i*2+1];
-		Dia1.ADC_values[i]=rzEvent.RD42[i*2];
+		Dia0.ADC_values[i]= (rzEvent.RD42[i*2+1] < 4096) ? rzEvent.RD42[i*2+1] : 4095;
+		Dia1.ADC_values[i]= (rzEvent.RD42[i*2] < 4096) ? rzEvent.RD42[i*2] : 4095;
 		//if(i<20)cout<<rzEvent.RD42[i*2]<<" "<<Dia0.ADC_values[i]<<"  ";
 	}
 	// cout<<endl;
