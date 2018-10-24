@@ -765,7 +765,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
         cout<<"BiggestHitSNR:\t"<<det<<"\t"<<hBiggestSignalInSigmaCMN[det]<<"\t"<<hBiggestSignalInSigmaCMN[det]->GetEntries()<<"\t"<<hBiggestSignalInSigmaCMN[det]->GetName()<<endl;
         histSaver->SaveHistogram(hBiggestSignalInSigma2D);
         cout<<"save "<<hBiggestSignalInSigmaCMN[det]->GetTitle()<<endl;
-        histSaver->SaveHistogram(hBiggestSignalInSigmaCMN[det], false, false, true, (TString)"logy");
+        histSaver->SaveHistogram(hBiggestSignalInSigmaCMN[det], false, false, true/*, (TString)"logy"*/);
         cout<<"save "<<hBiggestSignalInSigma2DCMN->GetTitle()<<endl;
         histSaver->SaveHistogram(hBiggestSignalInSigma2DCMN);
 //        yMaxBiggest = hBiggestSignalInSigma[det]->GetYaxis()->GetXmax();
@@ -1000,7 +1000,7 @@ void TAnalysisOfPedestal::savePHinSigmaHistos(){
             double yCor[] = {0.1, this->hBiggestAdjacentSignalInSigma[det]->GetMaximum() * 2};
             this->hBiggestAdjacentSignalInSigma[det]->GetXaxis()->SetTitle("Biggest Hit PH in units of sigma");
             this->hBiggestAdjacentSignalInSigma[det]->GetYaxis()->SetTitle("number of entries #");
-            findYPlotRangeForPHHisto(hBiggestAdjacentSignalInSigma[det], settings->getClusterHitFactor(det, 0));
+//            findYPlotRangeForPHHisto(hBiggestAdjacentSignalInSigma[det], settings->getClusterHitFactor(det, 0));
             xMinAdjacent = 0;
             xMaxAdjacent = hBiggestAdjacentSignalInSigma[det]->GetXaxis()->GetXmax();
             yMaxAdjacent = hBiggestAdjacentSignalInSigma[det]->GetYaxis()->GetXmax();
@@ -1168,22 +1168,22 @@ void TAnalysisOfPedestal::saveHistos(){
     map<Int_t,TH1F*>::iterator it;
     for(it=hBiggestSignalInSigmaDiaPattern.begin();it!=hBiggestSignalInSigmaDiaPattern.end();it++){
         SetYRangeForSignalInSigmaPlot((*it).second);
-        histSaver->SaveHistogram((*it).second,false,false,true, (TString)"logy");
+        histSaver->SaveHistogram((*it).second,false,false,true/*, (TString)"logy"*/);
         delete (*it).second;
     }
     for(it=hBiggestSignalInSigmaDiaPatternCMN.begin();it!=hBiggestSignalInSigmaDiaPatternCMN.end();it++){
         SetYRangeForSignalInSigmaPlot((*it).second);
-        histSaver->SaveHistogram((*it).second,false,false,true, (TString)"logy");
+        histSaver->SaveHistogram((*it).second,false,false,true/*, (TString)"logy"*/);
         delete (*it).second;
     }
     for(it=hBiggestAdjacentSignalInSigmaDiaPattern.begin();it!=hBiggestAdjacentSignalInSigmaDiaPattern.end();it++){
         SetYRangeForSignalInSigmaPlot((*it).second);
-        histSaver->SaveHistogram((*it).second,false,false,true, (TString)"logy");
+        histSaver->SaveHistogram((*it).second,false,false,true/*, (TString)"logy"*/);
         delete (*it).second;
     }
     for(it=hBiggestAdjacentSignalInSigmaDiaPatternCMN.begin();it!=hBiggestAdjacentSignalInSigmaDiaPatternCMN.end();it++){
         SetYRangeForSignalInSigmaPlot((*it).second);
-        histSaver->SaveHistogram((*it).second,false,false,true, (TString)"logy");
+        histSaver->SaveHistogram((*it).second,false,false,true/*, (TString)"logy"*/);
         delete (*it).second;
     }
 
