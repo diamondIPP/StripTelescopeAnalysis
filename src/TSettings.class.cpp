@@ -1112,6 +1112,7 @@ void TSettings::ParsePattern(std::string key, std::string value){
 	if(vecEntries.size()==4){
 		Float_t pos = vecEntries[0];
 		Float_t pitchWidth = vecEntries[1];
+		this->pitchWidthDia = pitchWidth;
 		UInt_t firstCh = vecEntries[2];
 		UInt_t lastCh = vecEntries[3];
 		if(verbosity)cout<<"Position: "<<pos<<"\tpw:"<<pitchWidth<<" first: "<<firstCh<<" last: lastCh"<<endl;

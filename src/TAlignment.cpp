@@ -1716,7 +1716,8 @@ void TAlignment::CreateDistributionPlotDeltaX(
     if(verb) cout<<"mean: "<<mean<<"+/-"<<sigma<<" / "<<fitWidth<<endl;
     TF1* fitX=0;
     if(TPlaneProperties::isDiamondPlane(subjectPlane) && this->mode == TSettings::transparentMode){
-        fitWidth = 3 * sigma;
+        fitWidth = settings->getDiamondPitchWidth();
+//        fitWidth = 3 * sigma;
         fitX = new TF1("doubleGausFit","gaus(0)+gaus(3)",mean-fitWidth,mean+fitWidth);
         //              fitX->SetParLimits(0,0,4*sigma);
         fitX->SetParLimits(1,-4*sigma,4*sigma);
@@ -1734,7 +1735,8 @@ void TAlignment::CreateDistributionPlotDeltaX(
     else if(TPlaneProperties::isDiamondPlane(subjectPlane)){
         Float_t xmin = mean-1* fitWidth;
         Float_t xmax = mean+1* fitWidth;
-        fitWidth = 3*sigma;
+        fitWidth = settings->getDiamondPitchWidth();
+//        fitWidth = 3*sigma;
         fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",mean-fitWidth,mean+fitWidth);
         fitX->FixParameter(3,settings->getDiamondPitchWidth()/2);//TODO
         fitX->SetParLimits(1,0,2*sigma);
