@@ -25,7 +25,7 @@ void THTMLTransparentAnalysis::createContent() {
 
 }
 
-void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > vecMeanPulseHeigths, vector<vector <Float_t> > vecMPPulseHeigths) {
+void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > vecMeanPulseHeights, vector<vector <Float_t> > vecMPPulseHeights) {
 	// TODO: change this:
 	subjectDetector = 8;
     UInt_t nStrips = settings->getNumHighestTransparentCluster();
@@ -34,22 +34,22 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	stringstream sectionAll;
 //	sectionSummary<<"<h2>\n"<<"Summary table"<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
-	//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
+	//	if(vecMeanPulseHeights.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeights.resize(TPlaneProperties::getNDetectors());
 	vecTable.resize(7);
 	vecTable.at(0).push_back("number of used channels");
-	vecTable.at(1).push_back("PulseHeigth");
+	vecTable.at(1).push_back("PulseHeight");
 	vecTable.at(2).push_back("mean");
 	vecTable.at(3).push_back("most probable");
-	vecTable.at(4).push_back(TString::Format("PulseHeigth %d highest channels", nStrips).Data()); // DA
+	vecTable.at(4).push_back(TString::Format("PulseHeight %d highest channels", nStrips).Data()); // DA
 	vecTable.at(5).push_back("mean");
 	vecTable.at(6).push_back("most probable");
 //	for (UInt_t clusterSize = 0; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector); clusterSize++) { // DA
 	for (UInt_t clusterSize = 0; clusterSize < settings->getMaxTransparentClusterSize(); clusterSize++) { // DA
 		vecTable.at(0).push_back(floatToString(clusterSize+1));
-		vecTable.at(2).push_back(floatToString(vecMeanPulseHeigths.at(0).at(clusterSize)));
-		vecTable.at(3).push_back(floatToString(vecMPPulseHeigths.at(0).at(clusterSize)));
-		vecTable.at(5).push_back(floatToString(vecMeanPulseHeigths.at(1).at(clusterSize)));
-		vecTable.at(6).push_back(floatToString(vecMPPulseHeigths.at(1).at(clusterSize)));
+		vecTable.at(2).push_back(floatToString(vecMeanPulseHeights.at(0).at(clusterSize)));
+		vecTable.at(3).push_back(floatToString(vecMPPulseHeights.at(0).at(clusterSize)));
+		vecTable.at(5).push_back(floatToString(vecMeanPulseHeights.at(1).at(clusterSize)));
+		vecTable.at(6).push_back(floatToString(vecMPPulseHeights.at(1).at(clusterSize)));
 	}
 	sectionSummary << createTable(vecTable);
 	sectionSummary	<< putImage(".",(TString)"hDiaTranspAnaPulseHeightMean")
@@ -108,7 +108,7 @@ void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_
 			"Summary table"
 			<<"</h2>\n";
 	std::vector< std::vector< std::string> > vecTable;
-	//	if(vecMeanPulseHeigths.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeigths.resize(TPlaneProperties::getNDetectors());
+	//	if(vecMeanPulseHeights.size()<TPlaneProperties::getNDetectors()) vecMeanPulseHeights.resize(TPlaneProperties::getNDetectors());
 	vecTable.resize(8);
 	vecTable.at(0).push_back("number of used channels");
 	vecTable.at(1).push_back("mean using charge weighted position  [&#956m]");

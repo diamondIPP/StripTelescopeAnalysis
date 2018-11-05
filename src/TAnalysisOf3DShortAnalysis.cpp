@@ -948,12 +948,12 @@ void TAnalysisOf3DShortAnalysis::SaveMeanChargeVector() {
     hMeanCharge->GetZaxis()->SetTitle("Avrg. pulse height /ADC");
     hMeanCharge->SetTitle("Avrg. pulse height in detector system");
     hMeanCharge->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-    TString name = "hAvrgPulseHeigthDetSystem";
+    TString name = "hAvrgPulseHeightDetSystem";
     name.Append(appendix);
     hMeanCharge->SetName(name);
     histSaver->SaveHistogram(hMeanCharge,false);
 
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer";
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer";
     name.Append(appendix);
     TCanvas *c1 = new TCanvas(name, name);
     c1->cd();
@@ -971,7 +971,7 @@ void TAnalysisOf3DShortAnalysis::SaveMeanChargeVector() {
     hMeanChargeEntries->Draw("colz");
     settings->get3dMetallisationFidCuts()->DrawFiducialCutsToCanvas(c1);
     settings->DrawMetallisationGrid(c1,3);
-    name = "cAvrgPulseHeigthDetSystemEntries_MetalizationLayer";
+    name = "cAvrgPulseHeightDetSystemEntries_MetalizationLayer";
     name.Append(appendix);
     c1->SetName(name);
     if (hMeanChargeEntries)
@@ -992,12 +992,12 @@ void TAnalysisOf3DShortAnalysis::SaveMeanChargeVector() {
     hMeanCharge->GetYaxis()->SetRangeUser(ymin-deltaY,ymax+deltaY);
     hMeanCharge->Draw("colz");
     c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom";
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_Zoom";
     name.Append(appendix);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
 
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_Zoom_rebinned";
     TProfile2D* hMeanCharge3D = histSaver->CreateProfile2D("hChargeDistribution3D_3D",
             vecPredDetX,vecPredDetY,vecPulseHeight,
             settings->getNColumns3d()*4,settings->getNRows3d()*4,
@@ -1005,12 +1005,12 @@ void TAnalysisOf3DShortAnalysis::SaveMeanChargeVector() {
     );
     hMeanCharge3D->Draw("colz");
     c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_Zoom_rebinned";
     name.Append(appendix);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
 
-    name = "hEntriesAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
+    name = "hEntriesAvrgPulseHeightDetSystem_MetalizationLayer_Zoom_rebinned";
     name.Append(appendix);
     hMeanChargeEntries = hMeanCharge3D->ProjectionXY(name,"B");
     hMeanChargeEntries->Draw("colz");

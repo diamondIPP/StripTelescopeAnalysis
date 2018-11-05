@@ -1695,11 +1695,13 @@ void TAlignment::CreateDistributionPlotDeltaX(
         Float_t pitchWidth = settings->getDiamondPitchWidth();
         Float_t xmin = -1.5*pitchWidth;
         Float_t xmax =  1.5*pitchWidth;
-        histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 512, HistogrammSaver::manual,xmin,xmax);
+        Float_t tempxbins = ((xmax - xmin)/4.0);
+        Int_t xbins = float(int(tempxbins)) == tempxbins ? int(tempxbins) : int(tempxbins) + 1;
+        histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, xbins, HistogrammSaver::manual,xmin,xmax);
         if (verb)cout<<"Pitch width "<< pitchWidth<<" "<<xmin<<"-"<<xmax<<endl;
     }
     else
-        histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 512, HistogrammSaver::threeSigma);
+        histo = histSaver->CreateDistributionHisto((string)histName, vecXLabDeltaMetric, 64, HistogrammSaver::threeSigma);
     if (!histo){
         cerr<<"Could not CreateDistributionHisto: "<<histName<<endl;
         return;
@@ -1735,10 +1737,10 @@ void TAlignment::CreateDistributionPlotDeltaX(
         fitWidth = 3*sigma;
         fitX = new TF1("fit","[0]*TMath::Sqrt(TMath::Pi()/2)*[1]*(TMath::Erf(([2]+[3]-x)/TMath::Sqrt(2)/[1])+TMath::Erf(([3]-[2]+x)/TMath::Sqrt(2)/[1]))",mean-fitWidth,mean+fitWidth);
         fitX->FixParameter(3,settings->getDiamondPitchWidth()/2);//TODO
-        fitX->SetParLimits(1,0,sigma);
+        fitX->SetParLimits(1,0,2*sigma);
         fitX->SetParNames("Integral","sigma of Gaus","position");
         fitX->SetParameter(2,0);
-        fitX->SetParameter(1,0.1);
+        fitX->SetParameter(1,sigma);
         if (verb) cout<<"Box Fit"<<endl;
     }
     else{
@@ -2876,7 +2878,7 @@ void TAlignment::CreateDistributionPlotDeltaY
         TString yTitle = "number fo entries #";
         if(verbosity>3)cout<<"Save: "<<name<<flush;
 
-        TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto((string)name, vecYLabDeltaMetric, 512, HistogrammSaver::threeSigma);
+        TH1F* histo = (TH1F*) histSaver->CreateDistributionHisto((string)name, vecYLabDeltaMetric, 64, HistogrammSaver::threeSigma);
         bool verb = name.BeginsWith("hSilicon_PostAlignment_Distribution_DeltaY_Plane_0");
         if(!histo)
             cerr<<"Could not CreateDistributionHisto: "<<name<<endl;

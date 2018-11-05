@@ -96,20 +96,20 @@ void THTMLCluster::createEtaDistributions()
 	this->addSection("Cross Talk Corrected Eta Distributions",sectionContent.str());
 }
 
-void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeigths)
+void THTMLCluster::createPulseHeightPlots(vector<double> meanPulseHeights)
 {
 	stringstream sectionContent;
 	sectionContent<<"<p>\n"<<
 			"Pulse Height Distribution for all ..."
 			<<"</p>\n";
 	std::vector< std::vector< std::string> > vecTable;
-	if(meanPulseHeigths.size()<TPlaneProperties::getNDetectors()) meanPulseHeigths.resize(TPlaneProperties::getNDetectors());
+	if(meanPulseHeights.size()<TPlaneProperties::getNDetectors()) meanPulseHeights.resize(TPlaneProperties::getNDetectors());
 	vecTable.resize(2);
 	vecTable.at(0).push_back("");
-	vecTable.at(1).push_back("mean PulseHeigth");
+	vecTable.at(1).push_back("mean PulseHeight");
 	for(UInt_t det=0;det <TPlaneProperties::getNDetectors();det++){
 		vecTable.at(0).push_back(TPlaneProperties::getStringForDetector(det));
-		vecTable.at(1).push_back(this->floatToString(meanPulseHeigths.at(det)));
+		vecTable.at(1).push_back(this->floatToString(meanPulseHeights.at(det)));
 	}
 	sectionContent<<createTable(vecTable);
 	sectionContent<<"\n\n<br><br>\n\n";

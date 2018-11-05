@@ -1361,12 +1361,12 @@ void TAnalysisOf3dDiamonds::initialise3DOverviewHistos() {
 
 void TAnalysisOf3dDiamonds::initialiseEdgeFreeHistos(){
     Int_t factor = 2;
-    TString name ="hPulseHeigthCentralRegion";
+    TString name ="hPulseHeightCentralRegion";
     name.Append(appendix);
-    hPulseHeigthCentralRegion = histSaver->GetProfile2dBinedInCells(name,factor);
-    name ="hPulseHeigthEdgeRegion";
+    hPulseHeightCentralRegion = histSaver->GetProfile2dBinedInCells(name,factor);
+    name ="hPulseHeightEdgeRegion";
     name.Append(appendix);
-    hPulseHeigthEdgeRegion =histSaver->GetProfile2dBinedInCells(name,factor);
+    hPulseHeightEdgeRegion =histSaver->GetProfile2dBinedInCells(name,factor);
 
     hEventsEdgeRegion = new TH2F("hEventsEdgeRegion","hEventsEdgeRegion",150,0,150,150,0,150);
     hEventsEdgeRegion->GetXaxis()->SetTitle("rel x predicted / #mum");
@@ -3197,14 +3197,14 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     hLandau3DWithColumns->SetTitle("3D");
     hLandau3DPhantom->SetTitle("3D Phantom");
     hLandau3DPhantomCentral->SetTitle("3D Phantom, central Region");
-    TString name = "sAllPulseHeigthDistributions";
+    TString name = "sAllPulseHeightDistributions";
     name.Append(appendix);
-    THStack sAllPulseHeigthDistributions(name,name);
-    sAllPulseHeigthDistributions.Add(hLandauStrip);
-    sAllPulseHeigthDistributions.Add(hLandau3DWithColumns);
-    sAllPulseHeigthDistributions.Add(hLandau3DPhantom);
-    sAllPulseHeigthDistributions.Add(hLandau3DPhantomCentral);
-    histSaver->SaveStack(&sAllPulseHeigthDistributions,"nostack",true,false);
+    THStack sAllPulseHeightDistributions(name,name);
+    sAllPulseHeightDistributions.Add(hLandauStrip);
+    sAllPulseHeightDistributions.Add(hLandau3DWithColumns);
+    sAllPulseHeightDistributions.Add(hLandau3DPhantom);
+    sAllPulseHeightDistributions.Add(hLandau3DPhantomCentral);
+    histSaver->SaveStack(&sAllPulseHeightDistributions,"nostack",true,false);
 
 
     Float_t max = hLandau3DWithColumns->GetBinContent(hLandau3DWithColumns->GetMaximumBin());
@@ -3220,20 +3220,20 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveRawPulseHeightPlots(){
     hStrip->Scale(1./max);
     hStrip->SetTitle("Strip");
 
-    name = "sAllPulseHeigthDistributions_scaled";
+    name = "sAllPulseHeightDistributions_scaled";
     name.Append(appendix);
-    THStack sAllPulseHeigthDistributions_normalized(name,name);
-    sAllPulseHeigthDistributions_normalized.Add(hStrip);
-    sAllPulseHeigthDistributions_normalized.Add(hLandau3DWithColumns);
-    sAllPulseHeigthDistributions_normalized.Add(hLandau3DPhantom);
-    sAllPulseHeigthDistributions_normalized.Add(hLandau3DPhantomCentral);
-    sAllPulseHeigthDistributions_normalized.Draw("");
+    THStack sAllPulseHeightDistributions_normalized(name,name);
+    sAllPulseHeightDistributions_normalized.Add(hStrip);
+    sAllPulseHeightDistributions_normalized.Add(hLandau3DWithColumns);
+    sAllPulseHeightDistributions_normalized.Add(hLandau3DPhantom);
+    sAllPulseHeightDistributions_normalized.Add(hLandau3DPhantomCentral);
+    sAllPulseHeightDistributions_normalized.Draw("");
     gPad->Update();;
-    if(sAllPulseHeigthDistributions_normalized.GetXaxis()) sAllPulseHeigthDistributions_normalized.GetXaxis()->SetTitle("charge / ADC");
-    if(sAllPulseHeigthDistributions_normalized.GetYaxis()) sAllPulseHeigthDistributions_normalized.GetYaxis()->SetTitle("entries a.u.");
-    histSaver->SaveStack(&sAllPulseHeigthDistributions_normalized,"nostack",true,false,"charge / ADC","entries a.u.");
+    if(sAllPulseHeightDistributions_normalized.GetXaxis()) sAllPulseHeightDistributions_normalized.GetXaxis()->SetTitle("charge / ADC");
+    if(sAllPulseHeightDistributions_normalized.GetYaxis()) sAllPulseHeightDistributions_normalized.GetYaxis()->SetTitle("entries a.u.");
+    histSaver->SaveStack(&sAllPulseHeightDistributions_normalized,"nostack",true,false,"charge / ADC","entries a.u.");
 
-    name = "ccAllPulseHeigthDistributions"+appendix;
+    name = "ccAllPulseHeightDistributions"+appendix;
     TCanvas *c1 = new TCanvas(name,name);
     c1->SetObjectStat(false);
     hLandau3DWithColumns->SetObjectStat(false);
@@ -3336,47 +3336,47 @@ void TAnalysisOf3dDiamonds::LongAnalysis_SaveEdgeFreeHistos() {
     histSaver->SaveHistogram(hEventsCentralRegion,true,false);
     histSaver->SaveHistogram(hEventsEdgeRegion,true,false);
 
-    hPulseHeigthCentralRegion->Sumw2();
-    hPulseHeigthEdgeRegion->Sumw2();
+    hPulseHeightCentralRegion->Sumw2();
+    hPulseHeightEdgeRegion->Sumw2();
 
-    histSaver->SaveHistogramWithCellGrid(hPulseHeigthCentralRegion);
-    histSaver->SaveHistogramWithCellGrid(hPulseHeigthEdgeRegion);
+    histSaver->SaveHistogramWithCellGrid(hPulseHeightCentralRegion);
+    histSaver->SaveHistogramWithCellGrid(hPulseHeightEdgeRegion);
 
     TProfile2D* hCompare;
-    TString name = "hPulseHeigthCompareRegion";
+    TString name = "hPulseHeightCompareRegion";
     name.Append(appendix);
-    hCompare = (TProfile2D*)hPulseHeigthCentralRegion->Clone(name);
+    hCompare = (TProfile2D*)hPulseHeightCentralRegion->Clone(name);
     if(hCompare){
         hCompare->Draw("goffcolz");
         hCompare->SetTitle("comparing pulse height of edge and central region");
         hCompare->GetZaxis()->SetTitle("avrg ph_{central} / avrg. ph_{edge}");
-        hCompare->Divide(hPulseHeigthEdgeRegion);
+        hCompare->Divide(hPulseHeightEdgeRegion);
         histSaver->SaveHistogramWithCellGrid(hCompare);
         delete hCompare;
     }
 
-    TProfile2D* hPulseHeigthCentralRegionCell = 0;
-    TProfile2D* hPulseHeigthEdgeRegionCell = 0;
-    if(hPulseHeigthCentralRegion){
-        TString name = (TString)hPulseHeigthCentralRegion->GetName()+"_Cell"+appendix;
-        hPulseHeigthCentralRegionCell = (TProfile2D*)hPulseHeigthCentralRegion->Rebin2D(2,2,name);
-        hPulseHeigthCentralRegionCell->Sumw2();
-        histSaver->SaveHistogramWithCellGrid(hPulseHeigthCentralRegionCell,hPulseHeigthCentralRegionCell);
+    TProfile2D* hPulseHeightCentralRegionCell = 0;
+    TProfile2D* hPulseHeightEdgeRegionCell = 0;
+    if(hPulseHeightCentralRegion){
+        TString name = (TString)hPulseHeightCentralRegion->GetName()+"_Cell"+appendix;
+        hPulseHeightCentralRegionCell = (TProfile2D*)hPulseHeightCentralRegion->Rebin2D(2,2,name);
+        hPulseHeightCentralRegionCell->Sumw2();
+        histSaver->SaveHistogramWithCellGrid(hPulseHeightCentralRegionCell,hPulseHeightCentralRegionCell);
     }
-    if(hPulseHeigthEdgeRegion){
-        TString name =(TString)hPulseHeigthEdgeRegion->GetName()+"_Cell"+appendix;
-        hPulseHeigthEdgeRegionCell = (TProfile2D*)hPulseHeigthEdgeRegion->Rebin2D(2,2,name);
-        hPulseHeigthEdgeRegionCell->Sumw2();
-        histSaver->SaveHistogramWithCellGrid(hPulseHeigthEdgeRegionCell,hPulseHeigthEdgeRegionCell);
+    if(hPulseHeightEdgeRegion){
+        TString name =(TString)hPulseHeightEdgeRegion->GetName()+"_Cell"+appendix;
+        hPulseHeightEdgeRegionCell = (TProfile2D*)hPulseHeightEdgeRegion->Rebin2D(2,2,name);
+        hPulseHeightEdgeRegionCell->Sumw2();
+        histSaver->SaveHistogramWithCellGrid(hPulseHeightEdgeRegionCell,hPulseHeightEdgeRegionCell);
     }
-    if(hPulseHeigthEdgeRegionCell && hPulseHeigthCentralRegionCell){
-        TString name = "hPulseHeigthCompareRegion_Cell"+appendix;
-        hCompare = (TProfile2D*)hPulseHeigthCentralRegionCell->Clone(name);
+    if(hPulseHeightEdgeRegionCell && hPulseHeightCentralRegionCell){
+        TString name = "hPulseHeightCompareRegion_Cell"+appendix;
+        hCompare = (TProfile2D*)hPulseHeightCentralRegionCell->Clone(name);
         if(hCompare){
             hCompare->Draw("goffcolz");
             hCompare->SetTitle("comparing pulse height of edge and central region");
             hCompare->GetZaxis()->SetTitle("avrg ph_{central} / avrg. ph_{edge}");
-            hCompare->Divide(hPulseHeigthEdgeRegionCell);
+            hCompare->Divide(hPulseHeightEdgeRegionCell);
             histSaver->SaveHistogramWithCellGrid(hCompare,hCompare);
             delete hCompare;
         }
@@ -3595,13 +3595,13 @@ void TAnalysisOf3dDiamonds::LongAnalysis_FillEdgeFreeHistos(Float_t xPredDet,Flo
     pair<Float_t,Float_t> relPos = settings->getRelativePositionInCell(xPredDet,yPredDet);
     isInEdgeRegion =  settings->IsOnTheEdgeOfCell(relPos.first,relPos.second);
     if (isInEdgeRegion){
-        if(hPulseHeigthEdgeRegion)
-            hPulseHeigthEdgeRegion->Fill(xPredDet,yPredDet,charge);
+        if(hPulseHeightEdgeRegion)
+            hPulseHeightEdgeRegion->Fill(xPredDet,yPredDet,charge);
         hEventsEdgeRegion->Fill(relPos.first,relPos.second);
     }
     else{
-        if(hPulseHeigthCentralRegion)
-            hPulseHeigthCentralRegion->Fill(xPredDet,yPredDet,charge);
+        if(hPulseHeightCentralRegion)
+            hPulseHeightCentralRegion->Fill(xPredDet,yPredDet,charge);
         hEventsCentralRegion->Fill(relPos.first,relPos.second);
     }
 }
@@ -5523,7 +5523,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
 
     TString name = "hNegativeChargeRatio"+appendix;
     TString title = "Negative Charge Ratio "+appendix;
-    title+="; signal ratio: S_{Min}/PH; Pulse Heigth / ADC;number of entries";
+    title+="; signal ratio: S_{Min}/PH; Pulse Height / ADC;number of entries";
     hNegativeChargeRatio = new TH2D(name,title,1000,.5,.5,PulseHeightBins/4,PulseHeightMin,PulseHeightMax);
 
     title = "Negative Charge Ratio "+appendix;
@@ -5533,7 +5533,7 @@ void TAnalysisOf3dDiamonds::initialiseLongAnalysisHistos() {
 
     name = "hNegativeChargeRatioMax"+appendix;
     title = "Negative Charge Ratio Max "+appendix;
-    title+="; signal ratio: S_{Min}/PH_{max}; Max. Pulse Heigth / ADC;number of entries";
+    title+="; signal ratio: S_{Min}/PH_{max}; Max. Pulse Height / ADC;number of entries";
     hNegativeChargeRatioMax = new TH2D(name,title,1000,-.5,.5,PulseHeightBins/4,PulseHeightMin,PulseHeightMax);
 
     name = "hNegativeChargeRatioOverlay"+appendix;
@@ -5619,11 +5619,11 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     hMeanCharge->GetZaxis()->SetTitle("Avrg. pulse height /ADC");
     hMeanCharge->SetTitle("Avrg. pulse height in detector system");
     hMeanCharge->GetZaxis()->SetRangeUser(PulseHeightMinMeanCharge,PulseHeightMaxMeanCharge);
-    TString name = "hAvrgPulseHeigthDetSystem";
+    TString name = "hAvrgPulseHeightDetSystem";
     name.Append(appendix);
     hMeanCharge->SetName(name);
     histSaver->SaveHistogram(hMeanCharge,false);
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer";
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer";
     name.Append(appendix);
     TCanvas *c1 = new TCanvas(name, name);
     c1->cd();
@@ -5651,12 +5651,12 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     hMeanCharge->GetYaxis()->SetRangeUser(ymin-deltaY,ymax+deltaY);
     hMeanCharge->Draw("colz");
     c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom";
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_Zoom";
     name.Append(appendix);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
 
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned"+appendix;
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_Zoom_rebinned"+appendix;
     TProfile2D* hMeanCharge3D = histSaver->CreateProfile2D("hChargeDistribution3D_3D",
               vecPredDetX_ShortAna,vecPredDetY_ShortAna,vecPulseHeight_ShortAna,
               settings->getNColumns3d()*15,settings->getNRows3d()*15,
@@ -5664,7 +5664,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
       );
     hMeanCharge3D->Draw("colz");
     c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned";
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_Zoom_rebinned";
     name.Append(appendix);
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
@@ -5684,7 +5684,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     settings->DrawMetallisationGrid(c1,3);
     hGridReferenceCellSpace->Draw("sameCOL");
     c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCells"+appendix;
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_ZoomGoodCells"+appendix;
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
 
@@ -5695,7 +5695,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     settings->DrawMetallisationGrid(c1,3);
     hGridReferenceCellSpace->Draw("sameCOL");
     c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCellsRebinned"+appendix;
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_ZoomGoodCellsRebinned"+appendix;
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
 
@@ -5706,7 +5706,7 @@ void TAnalysisOf3dDiamonds::ShortAnalysis_SaveMeanChargeVector() {
     settings->DrawMetallisationGrid(c1,3);
     hGridReferenceCellSpace->Draw("sameCOL");
     c1->Update();
-    name = "cAvrgPulseHeigthDetSystem_MetalizationLayer_ZoomGoodCellsRebinned2"+appendix;
+    name = "cAvrgPulseHeightDetSystem_MetalizationLayer_ZoomGoodCellsRebinned2"+appendix;
     c1->SetName(name);
     histSaver->SaveCanvas(c1);
 

@@ -29,8 +29,8 @@ void THTML3DAnalysis::createContent()
 
 void THTML3DAnalysis::createOverviewPlots(){
 	stringstream sectionContent;
-	sectionContent<<putImage(".",(string)"cAvrgPulseHeigthDetSystem_MetalizationLayer","png",45)<<" \n";
-	sectionContent<<putImage(".",(string)"cAvrgPulseHeigthDetSystem_MetalizationLayer_Zoom_rebinned","png",45)<<"<br> \n";
+	sectionContent<<putImage(".",(string)"cAvrgPulseHeightDetSystem_MetalizationLayer","png",45)<<" \n";
+	sectionContent<<putImage(".",(string)"cAvrgPulseHeightDetSystem_MetalizationLayer_Zoom_rebinned","png",45)<<"<br> \n";
 	sectionContent<<putImage(".",(string)"cProfRebinned","png",45)<<"\n";
 	sectionContent<<putImage(".",(string)"cPulseHeightVsDetectorHitPostionXY_rebinned","png",45)<<"\n";
     sectionContent<<putImage(".",(string)"cPulseHeightVsDetectorHitPostionXY_rebinned_trans","png",45)<<"\n";
@@ -56,8 +56,8 @@ void THTML3DAnalysis::createDistributionComparePlots(){
     sectionContent<<putImage(".",(string)"c_stackPulseHeights_GoodCells_good","png",45)<<" \n";
     sectionContent<<putImage(".",(string)"c_stack_NoNegativeCharge_PulseHeight_Comparision_good","png",45)<<" \n";
 //
-    sectionContent<<putImage(".",(string)"c_sAllPulseHeigthDistributions_scaled","png",45)<<" \n";
-    sectionContent<<putImage(".",(string)"c_sAllPulseHeigthDistributions_scaled_trans","png",45)<<" \n";
+    sectionContent<<putImage(".",(string)"c_sAllPulseHeightDistributions_scaled","png",45)<<" \n";
+    sectionContent<<putImage(".",(string)"c_sAllPulseHeightDistributions_scaled_trans","png",45)<<" \n";
     sectionContent<<" <br<br>\n";
     this->addSection("Distribution Compare",sectionContent.str());
 }

@@ -379,8 +379,8 @@ private:
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeMinusBadCellsAlignmentRelativeEventsBelowCut;
 	TProfile2D* hCellsOffsetOverlayUnEvenBinningAvrgChargeMinusBadCells;
 	vector<TProfile2D*> hCellsOffsetOverlayAvrgChargeGoodCells;
-	TProfile2D* hPulseHeigthCentralRegion;
-	TProfile2D* hPulseHeigthEdgeRegion;
+	TProfile2D* hPulseHeightCentralRegion;
+	TProfile2D* hPulseHeightEdgeRegion;
 	TH2F* hEventsCentralRegion;
 	TH2F* hEventsEdgeRegion;
 
