@@ -407,11 +407,11 @@ void TTransparentAnalysis::initHistograms1() {
         name = TString::Format("hLandau1HighestPredHitX_1outOf%02d",clusterSize+1);
         title = name + ";pulse height / ADC;PredHitX / ch";
         hLandau1HighestPredX.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                                                bins ,predXMin,predXMax));
+                                                binsx ,predXMin,predXMax));
         name = TString::Format("hLandau1HighestPredHitY_1outOf%02d",clusterSize+1);
         title = name + ";pulse height / ADC;PredHitY / ch";
         hLandau1HighestPredY.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                                                bins ,predYMin,predYMax));
+                                                binsy ,predYMin,predYMax));
     }
 }
 
@@ -445,11 +445,11 @@ void TTransparentAnalysis::initHistogramsN() {
         name = TString::Format("hLandau%dHighestPredHitX_%doutOf%02d", nStrips, nStrips, clusterSize);
         title = name + ";pulse height / ADC;PredHitX / ch";
         hLandauNHighestPredX.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                                                bins ,predXMin,predXMax));
+                                                binsx ,predXMin,predXMax));
         name = TString::Format("hLandau%dHighestPredHitY_%doutOf%02d", nStrips, nStrips, clusterSize);
         title = name + ";pulse height / ADC;PredHitY / ch";
         hLandauNHighestPredY.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                                                bins ,predYMin,predYMax));
+                                                binsy ,predYMin,predYMax));
     }
 }
 void TTransparentAnalysis::initHistograms2() {
@@ -481,11 +481,11 @@ void TTransparentAnalysis::initHistograms2() {
         name = TString::Format("hLandau%dHighestPredHitX_%doutOf%02d", nStrips, nStrips, clusterSize);
         title = name + ";pulse height / ADC;PredHitX / ch";
         hLandau2HighestPredX.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                                                bins ,predXMin,predXMax));
+                                                binsx ,predXMin,predXMax));
         name = TString::Format("hLandau%dHighestPredHitY_%doutOf%02d", nStrips, nStrips, clusterSize);
         title = name + ";pulse height / ADC;PredHitY / ch";
         hLandau2HighestPredY.push_back(new TH2F(name,title,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(subjectDetector),
-                                                bins ,predYMin,predYMax));
+                                                binsy ,predYMin,predYMax));
     }
 }
 
