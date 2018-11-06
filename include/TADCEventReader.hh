@@ -79,6 +79,8 @@ public:
 	bool isInCurrentFiducialCut();
 	bool isInOneFiducialArea();
 
+	void SelectBranchesForTransparent();
+
 	bool isDetMasked();
 	TEvent* getEvent();
 	void setVerbosity(UInt_t verbosity);
@@ -145,6 +147,9 @@ private:
 	TTree *tree;
 	UInt_t current_event;
 	TSystem* sys;
+
+//public:
+//    TTree *tree;
 
 protected:
 	TSettings* settings;

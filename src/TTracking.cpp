@@ -199,3 +199,22 @@ Float_t TTracking::getPositionInDetSystem(UInt_t det, Float_t xPred, Float_t yPr
 		return 0;
 	return myTrack->getPositionInDetSystem(det,xPred,yPred);
 }
+
+//void TTracking::SelectBranchesForTransparent(){
+//	tree->SetBranchStatus("*", 0);
+//	tree->SetBranchStatus("hasValidSiliconTrack", 1);
+//	tree->SetBranchStatus("IsInFiducialCut", 1);
+//	tree->SetBranchStatus("event*", 1);
+//	tree->SetBranchStatus("planes*", 1);
+//	tree->SetBranchStatus("DiaADC", 1);
+//	tree->SetBranchStatus("fiducialValueX", 1);
+//	tree->SetBranchStatus("fiducialValueY", 1);
+//	tree->SetBranchStatus("EventNumber", 1);
+//    tree->SetBranchStatus("eventNumber", 1);
+//    tree->SetBranchStatus("commonModeNoise", 1);
+//    tree->SetBranchStatus("useForAnalysis", 1);
+//    tree->SetBranchStatus("diaPedestalMean", 1);
+//    tree->SetBranchStatus("diaPedestalMeanCMN", 1);
+//    tree->SetBranchStatus("diaPedestalSigma", 1);
+//    tree->SetBranchStatus("diaPedestalSigmaCMN", 1);
+//}

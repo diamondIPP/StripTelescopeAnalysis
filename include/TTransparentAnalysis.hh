@@ -79,6 +79,7 @@ private:
 	void clearEventVector();
 	void createEventVector(Int_t startEvent = 0);
 	void analyseNonHitEvents();
+	void FindFiducialRegionBorders(Int_t startEvent = 0);
 	void initHistograms();
 	void initHistograms2(); // DA
 	void initHistograms1();

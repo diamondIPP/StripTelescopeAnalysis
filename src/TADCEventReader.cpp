@@ -829,3 +829,22 @@ Float_t TADCEventReader::getCMNoise(UInt_t det, UInt_t ch) const {
         return cmn_det[det*2+i];
     return cmNoise;
 }
+
+void TADCEventReader::SelectBranchesForTransparent(){
+    tree->SetBranchStatus("*", 0);
+    tree->SetBranchStatus("hasValidSiliconTrack", 1);
+    tree->SetBranchStatus("IsInFiducialCut", 1);
+    tree->SetBranchStatus("event*", 1);
+    tree->SetBranchStatus("planes*", 1);
+    tree->SetBranchStatus("DiaADC", 1);
+    tree->SetBranchStatus("fiducialValueX", 1);
+    tree->SetBranchStatus("fiducialValueY", 1);
+    tree->SetBranchStatus("EventNumber", 1);
+    tree->SetBranchStatus("eventNumber", 1);
+    tree->SetBranchStatus("commonModeNoise", 1);
+    tree->SetBranchStatus("useForAnalysis", 1);
+    tree->SetBranchStatus("diaPedestalMean", 1);
+    tree->SetBranchStatus("diaPedestalMeanCMN", 1);
+    tree->SetBranchStatus("diaPedestalSigma", 1);
+    tree->SetBranchStatus("diaPedestalSigmaCMN", 1);
+}

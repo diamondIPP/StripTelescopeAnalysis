@@ -23,6 +23,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
     results=0;
     settings->goToAlignmentRootDir();
     eventReader = new TTracking(settings->getSelectionTreeFilePath(),settings->getAlignmentFilePath(mode),settings->getEtaDistributionPath(),settings);
+    eventReader->SelectBranchesForTransparent();
     // TODO: load settings!!!
     histSaver = new HistogrammSaver(settings);
     //	settings->goToTransparentAnalysisDir();
@@ -44,7 +45,6 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
     }
     clusterCalcMode = TCluster::highest2Centroid;
     verbosity = settings->getVerbosity();
-
     initHistograms();
     cout<<"end initialise"<<endl;
     positionPrediction = 0;
@@ -92,6 +92,39 @@ TTransparentAnalysis::~TTransparentAnalysis() {
     settings->goToOutputDir();
 }
 
+void TTransparentAnalysis::FindFiducialRegionBorders(Int_t startEvent){
+    predXMin = 1e9;
+    predXMax = -1e9;
+    predYMin = 1e9;
+    predYMax = -1e9;
+    for (nEvent = startEvent; nEvent < nEvents; nEvent++){
+        TRawEventSaver::showStatusBar(nEvent,nEvents,1000);
+        if(settings->useForAlignment(nEvent,nEvents))
+            continue;
+        if(nEvent>eventReader->GetEntries())
+            break;
+        eventReader->LoadEvent(nEvent);
+        if(eventReader->isValidTrack() == 0)
+            continue;
+        Float_t fiducialValueX = eventReader->getFiducialValueX();
+        Float_t fiducialValueY = eventReader->getFiducialValueY();
+        if(!settings->getSelectionFidCuts()->IsInFiducialCut(fiducialValueX,fiducialValueY))
+            continue;
+        if (!this->predictPositions(false))
+            continue;
+        if(!this->checkPredictedRegion(subjectDetector,this->positionInDetSystemChannelSpace, settings->getMaxTransparentClusterSize()))
+            continue;
+        if(this->predXPosition < predXMin)
+            predXMin = this->predXPosition;
+        else if(this->predXPosition > predXMax)
+            predXMax = this->predXPosition;
+        if(this->predYPosition < predYMin)
+            predYMin = this->predYPosition;
+        else if(this->predYPosition > predYMax)
+            predYMax = this->predYPosition;
+    }
+}
+
 void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
     cout<<"\n\n******************************************\n";
     cout<<    "******Start Transparent Analysis...*******\n";
@@ -123,6 +156,7 @@ void TTransparentAnalysis::analyze(UInt_t nEvents, UInt_t startEvent) {
         cout<<"\nnEvents = "<<nEvents<<endl;
         cout<<"startEvent= "<<startEvent<<endl;
     }
+    FindFiducialRegionBorders(startEvent);
     initClusteredHistos(startEvent,nEvents+startEvent);
     initPedestalAndNoiseHistos(nEvents+startEvent);
     initPHvsEventNoAreaPlots(startEvent,nEvents+startEvent);
@@ -380,8 +414,8 @@ void TTransparentAnalysis::setSettings(TSettings* settings) {
 //}
 // DA: Adding 1 out of x cluster size histograms
 void TTransparentAnalysis::initHistograms1() {
-    Float_t temp_binsx = (predXMax-predXMin)*4.0/settings->getSiliconPitchWidth();
-    Float_t temp_binsy = (predYMax-predYMin)*4.0/settings->getSiliconPitchWidth();
+    Float_t temp_binsx = (predXMax-predXMin)*3/settings->getSiliconPitchWidth();
+    Float_t temp_binsy = (predYMax-predYMin)*3/settings->getSiliconPitchWidth();
     UInt_t binsx = float(int(temp_binsx)) == temp_binsx ? int(temp_binsx) : int(temp_binsx) + 1;
     UInt_t binsy = float(int(temp_binsy)) == temp_binsy ? int(temp_binsy) : int(temp_binsy) + 1;
 //    UInt_t bins = 128;
@@ -417,8 +451,8 @@ void TTransparentAnalysis::initHistograms1() {
 
 // DA: Adding N out of x cluster size histograms
 void TTransparentAnalysis::initHistogramsN() {
-    Float_t temp_binsx = (predXMax-predXMin)*4.0/settings->getSiliconPitchWidth();
-    Float_t temp_binsy = (predYMax-predYMin)*4.0/settings->getSiliconPitchWidth();
+    Float_t temp_binsx = (predXMax-predXMin)*3/settings->getSiliconPitchWidth();
+    Float_t temp_binsy = (predYMax-predYMin)*3/settings->getSiliconPitchWidth();
     UInt_t binsx = float(int(temp_binsx)) == temp_binsx ? int(temp_binsx) : int(temp_binsx) + 1;
     UInt_t binsy = float(int(temp_binsy)) == temp_binsy ? int(temp_binsy) : int(temp_binsy) + 1;
 //    UInt_t bins = 128;
@@ -453,8 +487,8 @@ void TTransparentAnalysis::initHistogramsN() {
     }
 }
 void TTransparentAnalysis::initHistograms2() {
-    Float_t temp_binsx = (predXMax-predXMin)*4.0/settings->getSiliconPitchWidth();
-    Float_t temp_binsy = (predYMax-predYMin)*4.0/settings->getSiliconPitchWidth();
+    Float_t temp_binsx = (predXMax-predXMin)*3/settings->getSiliconPitchWidth();
+    Float_t temp_binsy = (predYMax-predYMin)*3/settings->getSiliconPitchWidth();
     UInt_t binsx = float(int(temp_binsx)) == temp_binsx ? int(temp_binsx) : int(temp_binsx) + 1;
     UInt_t binsy = float(int(temp_binsy)) == temp_binsy ? int(temp_binsy) : int(temp_binsy) + 1;
 //    UInt_t bins = 128;
