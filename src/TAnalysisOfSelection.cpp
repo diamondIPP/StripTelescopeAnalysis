@@ -181,7 +181,7 @@ void TAnalysisOfSelection::initialiseHistos()
 	for (UInt_t i=1;i<=settings->getSelectionFidCuts()->getNFidCuts();i++){
 		Float_t xMin = settings->getSelectionFidCuts()->getMinFiducialX(i);
 		Float_t xMax = settings->getSelectionFidCuts()->getMaxFiducialX(i);
-		UInt_t xBins = (Int_t)(3.2*(xMax-xMin));
+		UInt_t xBins = (Int_t)(4*(xMax-xMin));
 		name = TString::Format("hChargeVsFidX_HitInFidCutNo%d",i);
 		TH2F* histo = new TH2F(name,name,512,0,4096,xBins,xMin,xMax);
 		histo->GetXaxis()->SetTitle("charge of diamond Hit");
@@ -194,7 +194,7 @@ void TAnalysisOfSelection::initialiseHistos()
 		}
 		Float_t yMin = settings->getSelectionFidCuts()->getMinFiducialY(i);
 		Float_t yMax =  settings->getSelectionFidCuts()->getMaxFiducialY(i);
-		xBins = (Int_t)(3.2*(yMax-yMin));
+		xBins = (Int_t)(4*(yMax-yMin));
 		name = TString::Format("hChargeVsFidY_HitInFidCutNo%d",i);
 		histo = new TH2F(name,name,512,0,4096,xBins,yMin,yMax);
 		histo->GetXaxis()->SetTitle("charge of diamond Hit");
@@ -222,8 +222,8 @@ void TAnalysisOfSelection::initialiseHistos()
 	Float_t deltaY = ymax - ymin;
 	ymin = ymin - 1; // .1 * deltaY;
 	ymax = ymax + 1; // .1 * deltaY;
-	Int_t xBins = (Int_t)(3.2*(xmax-xmin));// DA: resolution was 1/3 of a channel. Changed it to 1/4
-	Int_t yBins = (Int_t)(3.2*(ymax-ymin));// DA: resolution was 1/3 of a channel. Changed it to 1/4
+	Int_t xBins = (Int_t)(4*(deltaX + 2));// DA: resolution was 1/3 of a channel. Changed it to 1/4
+	Int_t yBins = (Int_t)(4*(deltaY + 2));// DA: resolution was 1/3 of a channel. Changed it to 1/4
 	hChargeVsFidCut = new TH3F(name,name,xBins,xmin,xmax,yBins,ymin,ymax,512,0,4096);
 	hChargeVsFidCut->GetXaxis()->SetTitle("FiducialValue X/ch");
 	hChargeVsFidCut->GetYaxis()->SetTitle("FiducialValue Y/ch");
@@ -235,7 +235,7 @@ void TAnalysisOfSelection::initialiseHistos()
 	chBegin -= 1; // 0.1 * deltaCh;
 	chEnd   += 1; // 0.1 * deltaCh;
 	name = TString::Format("hFidCutXvsDiamondClusterChannelPos");
-	yBins=3.2*(chEnd-chBegin);
+	yBins=int(4*(deltaCh + 2));
 	hFidCutXvsChannelPos = new TH2F(name,name,xBins,xmin,xmax,yBins,chBegin,chEnd);
 	hFidCutXvsChannelPos->GetXaxis()->SetTitle("FiducialValue X / ch");
 	hFidCutXvsChannelPos->GetYaxis()->SetTitle("DiamondCluster Channel Pos / ch");
