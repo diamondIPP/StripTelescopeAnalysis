@@ -212,10 +212,10 @@ void TTransparentAnalysis::calcEtaCorrectedResiduals() {
         Float_t etaClusSizeOf2 = -1;
         for (UInt_t clusterSize = 0; clusterSize < maxSize; clusterSize++) {
             vecTransparentClusters[iEvent].SetTransparentClusterSize(clusterSize+1);
-            if (clusterSize == 2 && false) {
-                cout << "using " << hEtaIntegrals[clusterSize]->GetName() << " to fill " << hResidualEtaCorrected[clusterSize]->GetName() << endl;
-                printCluster(vecTransparentClusters.at(iEvent));
-            }
+//            if (clusterSize == 2 && false) {
+//                cout << "using " << hEtaIntegrals[clusterSize]->GetName() << " to fill " << hResidualEtaCorrected[clusterSize]->GetName() << endl;
+//                printCluster(vecTransparentClusters.at(iEvent));
+//            }
 
             //			if (clusterSize == 1) printCluster(vecTransparentClusters.at(iEvent).at(clusterSize));
             Float_t metricPosInDetSystem = eventReader->getPositionInDetSystem(subjectDetector,predXPosition,predYPosition);
@@ -957,7 +957,7 @@ void TTransparentAnalysis::fitHistograms() {
         cout<<"$"<<flush;
 
         TF1* fit = landauGauss->doLandauGaussFit(hLandau[clusterSize],true);
-        if(fit==0){cout<<"PROBLEM with fit..."<<clusterSize<<endl;}
+//        if(fit==0){cout<<"PROBLEM with fit..."<<clusterSize<<endl;}
         fitLandau.push_back(fit);
         fitLandauNHighest.push_back(landauGauss->doLandauGaussFit(hLandauNHighest[clusterSize],true));
         fitLandau2Highest.push_back(landauGauss->doLandauGaussFit(hLandau2Highest[clusterSize],true));
@@ -979,7 +979,7 @@ void TTransparentAnalysis::fitHistograms() {
             if(results){
                 results->setPH_2outOf10(mean,mp,width,gSigma,alignMode); // DA TODO: change results for n strips out of M or sth like that
             }
-            else cout<<"setPH_2outOf10 DIDN'T WORK!!!"<<endl;
+//            else cout<<"setPH_2outOf10 DIDN'T WORK!!!"<<endl;
         }
         fitResidualChargeWeighted.push_back(doGaussFit(hResidualChargeWeighted[clusterSize]));
         fitResidualHighest2Centroid.push_back(doGaussFit(hResidualHighest2Centroid[clusterSize]));
@@ -1144,8 +1144,8 @@ void TTransparentAnalysis::analyseEtaDistributions(){
     TH1F* hEtaBoundedEtaCorrected = (TH1F*)hDeltaEtaVsEta->ProjectionX(hName,bin1,bin2);
     if(hEtaBoundedEtaCorrected)
         hEtaBoundedEtaCorrected->SetTitle(TString::Format("#eta_{2 of 10}, |#Delta#eta| < 0.2"));
-    else
-        cout<<"hEtaBoundedEtaCorrecte = 0"<<endl;
+//    else
+//        cout<<"hEtaBoundedEtaCorrecte = 0"<<endl;
     histSaver->SaveHistogram(hEtaBoundedEtaCorrected);
     if(hEtaBoundedEtaCorrected)delete hEtaBoundedEtaCorrected;
 
@@ -1244,12 +1244,12 @@ void TTransparentAnalysis::analyseEtaDistributions(){
     name<<"cSignalNextToHighest";
     if(histoLeft)
         histoLeft->SetLineColor(kBlue);
-    else
-        cout<<"histoLeft = 0"<<endl;
+//    else
+//        cout<<"histoLeft = 0"<<endl;
     if (histoRight)
         histoRight->SetLineColor(kRed);
-    else
-        cout<<"histoRight = 0"<<endl;
+//    else
+//        cout<<"histoRight = 0"<<endl;
     Float_t max = TMath::Max(histoLeft->GetMaximum(),histoRight->GetMaximum());
     if (histoLeft) histoLeft->SetMaximum(max);
     if (histoRight) histoRight->SetMaximum(max);
@@ -1304,7 +1304,7 @@ void TTransparentAnalysis::AnalyzeLandauVsEventNoMaxBin(TH2* hLandauVsEventNo){
            Float_t max = histo->GetMaximumBin();
            Float_t maxPos =  histo->GetBinCenter(max);
            Float_t pos = hLandauVsEventNo->GetXaxis()->GetBinCenter(bin);
-           cout<<bin <<" "<<pos<<" - "<<maxPos<<" "<<max<<endl;
+//           cout<<bin <<" "<<pos<<" - "<<maxPos<<" "<<max<<endl;
            hMaxBinPosition->Fill(pos,maxPos);
            delete histo;
        }
@@ -1383,10 +1383,10 @@ void TTransparentAnalysis::SaveLandauVsEventNoPlots(UInt_t clusterSize){
         hLandau2OutOfXVsEventNo = histSaver->CreateScatterHisto((string)name2,vecVecPh2Highest.at(clusterSize-1),vectorEventNo,nEvents/1e4,512,0,nEvents,0,4096); // DA
         cout<<"Save "<<name<<" "<<hLandauNOutOfXVsEventNo;
         cout<<"Save "<<name<<" "<<hLandau2OutOfXVsEventNo;
-        if(hLandauNOutOfXVsEventNo) cout<<" "<<hLandauNOutOfXVsEventNo->GetEntries();
-        cout<<endl;
-        if(hLandau2OutOfXVsEventNo) cout<<" "<<hLandau2OutOfXVsEventNo->GetEntries();
-        cout<<endl;
+//        if(hLandauNOutOfXVsEventNo) cout<<" "<<hLandauNOutOfXVsEventNo->GetEntries();
+//        cout<<endl;
+//        if(hLandau2OutOfXVsEventNo) cout<<" "<<hLandau2OutOfXVsEventNo->GetEntries();
+//        cout<<endl;
         if(vectorEventNo.size()!=vecVecPhNHighest.at(clusterSize-1).size())
             cerr<<"[TTransparentAnalysis::SaveLandauVsEventNoPlots]: Sizes of vectors are different for clusterSize "<<clusterSize<<endl;
 
@@ -1985,7 +1985,7 @@ void TTransparentAnalysis::saveHistograms() {
                 TString title = TString::Format("Resolution_{#eta-corrected} in %d channels, %.2f < #eta < %.2f",i+1,minEta,1-minEta);
                 TH1F* hProj = (TH1F*)hist->ProjectionX(hname,minBin,maxBin);
                 if (hProj) hProj->SetTitle(title);
-                if (hProj) cout<<hProj->GetEntries()<<"/"<<	hist->GetEntries()<<endl;
+//                if (hProj) cout<<hProj->GetEntries()<<"/"<<	hist->GetEntries()<<endl;
                 saveResolutionPlot(hProj,i,"SmallEtaRange");
                 if (hProj) delete hProj;
 
@@ -2473,7 +2473,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
                 case 5: noiseWidths2OutOfXCMN[j] = fit->GetParameter(2);break;
             }
         }
-        cout<<"ClusterSize "<<j<<": "<< noiseWidths[j]<<"/"<<noiseWidthsCMN[j]<<" "<<noiseWidthsNOutOfX[j]<<"/"<<noiseWidthsNOutOfXCMN[j]<<endl;
+//        cout<<"ClusterSize "<<j<<": "<< noiseWidths[j]<<"/"<<noiseWidthsCMN[j]<<" "<<noiseWidthsNOutOfX[j]<<"/"<<noiseWidthsNOutOfXCMN[j]<<endl;
         TString name = TString::Format("cNonHitPulseHeightDitribution_ClusterSize%02d",j+1);
         histSaver->SaveTwoHistos((string)name,hNonHitNoiseDistributions[j],hNonHitNoiseDistributionsCMN[j]);
         name = TString::Format("cNonHitPulseHeightDitribution_%dOutOf%02d", nStrips, j+1);
@@ -2519,7 +2519,7 @@ void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
     for(UInt_t ch = 0; ch< TPlaneProperties::getNChannelsDiamond();ch++){
         if(settings->IsMasked(subjectDetector,ch))
             continue;
-        cout<<" ch "<<ch<<flush;
+//        cout<<" ch "<<ch<<flush;
         TString name = TString::Format("hPedestalVsEventNo_det_%d_ch_%03d",subjectDetector,ch);
         TProfile* prof = new TProfile(name,name,nBins,start,maxEvents);
         prof->GetXaxis()->SetTitle("EventNo");
@@ -2527,7 +2527,7 @@ void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
         if(settings->doCommonModeNoiseCorrection()) title.Append(" CM corrected");
         prof->GetYaxis()->SetTitle(title);
         hPedestalVsEvenNo[ch] = prof;
-        cout<<"."<<flush;
+//        cout<<"."<<flush;
 
         //Noise of each channel
         name = TString::Format("hNoiseVsEventNo_det_%d_ch_%03d",subjectDetector,ch);
@@ -2537,14 +2537,14 @@ void TTransparentAnalysis::initPedestalAndNoiseHistos(UInt_t maxEvents) {
         if(settings->doCommonModeNoiseCorrection()) title.Append(" CM corrected");
         prof->GetYaxis()->SetTitle(title);
         hNoiseVsEvenNo[ch] = prof;
-        cout<<"."<<flush;
+//        cout<<"."<<flush;
     }
-    cout<<"#"<<flush;
+//    cout<<"#"<<flush;
     TString name = "hComonModeNoiseVsEventNo";
     hCmnVsEventNo = new TProfile(name,name,nBins,start,maxEvents);
     hCmnVsEventNo->GetXaxis()->SetTitle("EventNo");
     hCmnVsEventNo->GetYaxis()->SetTitle("common mode noise /ADC");
-    cout<<"."<<endl;
+//    cout<<"."<<endl;
 }
 
 void TTransparentAnalysis::fillPedestalsAndNoiseHistos() {
@@ -2637,25 +2637,25 @@ void TTransparentAnalysis::saveNoiseHistos() {
         hCmnVsEventNo=0;
     }
     if(color!=0){
-        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
+//        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
         stack->Draw("goff");
         stack->SetObjectStat(false);
         if(stack->GetXaxis()){
             stack->GetXaxis()->SetTitle("Event No");
-            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
+//            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
         }
         if(stack->GetYaxis()){
             stack->GetYaxis()->SetTitle("Noise /ADC");
-            cout<<"Set range"<<endl;
+//            cout<<"Set range"<<endl;
             stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
-            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
+//            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
         }
         stack->SetMinimum(minStack*.98);
         stack->SetMaximum(maxStack*1.05);
         stack->SetObjectStat(false);
     }
     histSaver->SaveStack(stack,"nostack",true);
-    cout<<"hNoiseSlopesVsChannel:MIN: "<<hNoiseSlopesVsChannel->GetBinContent(hNoiseSlopesVsChannel->GetMinimumBin())<<endl;
+//    cout<<"hNoiseSlopesVsChannel:MIN: "<<hNoiseSlopesVsChannel->GetBinContent(hNoiseSlopesVsChannel->GetMinimumBin())<<endl;
     hNoiseSlopesVsChannel->SetMinimum(hNoiseSlopesVsChannel->GetBinContent(hNoiseSlopesVsChannel->GetMinimumBin()));
     histSaver->SaveHistogram(hNoiseSlopesVsChannel,false,false);
     delete hNoiseSlopesVsChannel;
@@ -2707,7 +2707,7 @@ void TTransparentAnalysis::saveClusteredHistos(){
         hClusterSize_Clustered =0;
     }
     if(hLandauVsClusterSize_Clustered){
-        for (UInt_t i = 0; i < hLandauVsClusterSize_Clustered->GetNbinsX();i++){
+        for (UInt_t i = 0; i < hLandauVsClusterSize_Clustered->GetNbinsY();i++){
             TString name = hLandauVsClusterSize_Clustered->GetName();
             name.Append(TString::Format("_clusterSize_%d",i));
             TH1F* hProjection = (TH1F*)hLandauVsClusterSize_Clustered->ProjectionX(name,i,i);
@@ -2778,25 +2778,25 @@ void TTransparentAnalysis::savePedestalHistos() {
     histSaver->SaveHistogram(hSlopes);
     delete hSlopes;
     if(color!=0){
-        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
+//        cout<<"save stack "<<minStack<<"-"<<maxStack<<endl;
         stack->Draw("goff");
         stack->SetObjectStat(false);
         if(stack->GetXaxis()){
             stack->GetXaxis()->SetTitle("Event No");
-            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
+//            cout<<"Xaxis: "<<stack->GetXaxis()->GetTitle()<<endl;
         }
         if(stack->GetYaxis()){
             stack->GetYaxis()->SetTitle("Pedestal /ADC");
-            cout<<"Set range"<<endl;
+//            cout<<"Set range"<<endl;
             stack->GetYaxis()->SetRangeUser(minStack*.98,maxStack*1.05);
-            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
+//            cout<<"Yaxis: "<<stack->GetYaxis()->GetTitle()<<endl;
         }
         stack->SetMinimum(minStack*.98);
         stack->SetMaximum(maxStack*1.05);
         stack->SetObjectStat(false);
     }
     histSaver->SaveStack(stack,"nostack",true);
-    cout<<"hPedestalSlopesVsChannel:MIN: "<<hPedestalSlopesVsChannel->GetBinContent(hPedestalSlopesVsChannel->GetMinimumBin())<<endl;
+//    cout<<"hPedestalSlopesVsChannel:MIN: "<<hPedestalSlopesVsChannel->GetBinContent(hPedestalSlopesVsChannel->GetMinimumBin())<<endl;
     hPedestalSlopesVsChannel->SetMinimum(hPedestalSlopesVsChannel->GetBinContent(hPedestalSlopesVsChannel->GetMinimumBin()));
     histSaver->SaveHistogram(hPedestalSlopesVsChannel,false,false);
     delete hPedestalSlopesVsChannel;
@@ -2811,7 +2811,7 @@ std::pair<Float_t,Float_t >  TTransparentAnalysis::getFWCrossingPoint(TH1F* hRes
     Float_t m = (y2-y1)/(x2-x1);
     Float_t b = y1-m*x1;
     Float_t start = (cM-b)/m;
-    cout<<"START["<<cM<<"]: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<start<<endl;
+//    cout<<"START["<<cM<<"]: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<start<<endl;
     Int_t lastBin = hRes->FindLastBinAbove(cM);
     x1 = hRes->GetBinCenter(lastBin);
     y1 = hRes->GetBinContent(lastBin);
@@ -2820,7 +2820,7 @@ std::pair<Float_t,Float_t >  TTransparentAnalysis::getFWCrossingPoint(TH1F* hRes
     m = (y2-y1)/(x2-x1);
     b = y1-m*x1;
     Float_t end = (cM-b)/m;
-    cout<<"End[\"<<cM<<\"]: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<end<<endl;
+//    cout<<"End[\"<<cM<<\"]: "<<x1<<"("<<y1<<") - "<<x2<<"("<<y2<<") => "<<end<<endl;
     //   char t; cin>>t;
     return std::make_pair(start,end);
 }

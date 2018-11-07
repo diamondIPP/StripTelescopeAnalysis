@@ -260,7 +260,7 @@ void TAnalysisOfSelection::saveDiamondAreaHistos(){
 		Int_t chLow = settings->getDiaDetectorArea(area).first;
 		Int_t chHigh =  settings->getDiaDetectorArea(area).second;
 
-		cout <<" Area: " << area << ", ch: : "<< chLow <<" - "<< chHigh <<endl;
+//		cout <<" Area: " << area << ", ch: : "<< chLow <<" - "<< chHigh <<endl;
 
 		TString name = TString::Format("hEtaVsLeftChannelNoArea%d_ch_%d_%d",area,chLow,chHigh);
 		if(verbosity)cout<<"save: "<<name<<endl;
@@ -853,15 +853,15 @@ void TAnalysisOfSelection::saveHistos()
 		if(verbosity%2==1){char t; cin>>t;}
 	}
 	if(histo12==0){
-		cout<<"'hPulseHeightDiamond_1_2_ClusterSize' == 0"<<flush;
+//		cout<<"'hPulseHeightDiamond_1_2_ClusterSize' == 0"<<flush;
 		if(verbosity%2==1){char t; cin>>t;}
 	}
 	else if(histo12->GetEntries()==0){
-		cout<<"'hPulseHeightDiamond_1_2_ClusterSize' has 0 entries"<<flush;
+//		cout<<"'hPulseHeightDiamond_1_2_ClusterSize' has 0 entries"<<flush;
 		if(verbosity%2==1){char t; cin>>t;}
 	}
-	else
-		cout<<"'hPulseHeightDiamond_1_2_ClusterSize' has "<< histo12->GetEntries()<<" entries"<<endl;
+//	else
+//		cout<<"'hPulseHeightDiamond_1_2_ClusterSize' has "<< histo12->GetEntries()<<" entries"<<endl;
 	if(histo==0){
 		cout<<"histo does not exist!";
 		if(verbosity%2==1){
@@ -893,10 +893,10 @@ void TAnalysisOfSelection::saveHistos()
 			fitCS12 = landauGauss.doLandauGaussFit(histo);
 		}
 		else{
-			cout<<"1_2 Cluster plot is empty....."<<endl;
+//			cout<<"1_2 Cluster plot is empty....."<<endl;
 		}
 		if(histo12){
-			cout<<"Save HISTOGRAM: "<<histo12->GetName()<<endl;
+//			cout<<"Save HISTOGRAM: "<<histo12->GetName()<<endl;
 			histSaver->SaveHistogramLandau(histo12);
 			delete histo12;
 		}
@@ -1378,22 +1378,22 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
         TF1* fit = (TF1*) pol1Fit->Clone(prof->GetName()+(TString)"_fit");
         fit->SetLineColor(settings->GetColor(y));
         prof->SetTitle((TString)"Ph vs EventNo, " + TTransparentAnalysis::GetNameOfArea(y%xDivisions,y/xDivisions));
-        cout<<"Save: "<<prof->GetName()<<" "<<y<<" "<<prof->GetEntries()<< endl;
+//        cout<<"Save: "<<prof->GetName()<<" "<<y<<" "<<prof->GetEntries()<< endl;
         histSaver->Save1DProfileWithFitAndInfluence(prof,fit);
         TString title = (TString)"Ph vs EventNo, ";
         title.Append(TString::Format(", slope: %6.1f adc/1M, X",fit->GetParameter(1)*1.e6));
         title.Append(TTransparentAnalysis::GetNameOfArea(y%xDivisions,y/xDivisions));
         prof->SetTitle(title);
-        cout<<"save: "<<prof->GetName()<<endl;
+//        cout<<"save: "<<prof->GetName()<<endl;
         histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         vecStack.push_back(prof);
         TProfile* profX = hPHVsEventNo_AreasX[y%xDivisions];
         TProfile* profY = hPHVsEventNo_AreasY[y/xDivisions];
-        cout<<profX->GetNbinsX()<<"/"<<prof->GetNbinsX()<<" "<<profX->GetNbinsY()<<"/"<<prof->GetNbinsY()<<" "<<profX->GetNbinsZ()<<"/"<<prof->GetNbinsZ()<<" "<<endl;
+//        cout<<profX->GetNbinsX()<<"/"<<prof->GetNbinsX()<<" "<<profX->GetNbinsY()<<"/"<<prof->GetNbinsY()<<" "<<profX->GetNbinsZ()<<"/"<<prof->GetNbinsZ()<<" "<<endl;
         profX->Add(prof);
         profY->Add(prof);
-        cout<<"hPHVsEventNo_AreasX: "<<y%xDivisions<<" "<<profX->GetEntries()<<endl;
-        cout<<"hPHVsEventNo_AreasY: "<<y/xDivisions<<" "<<profY->GetEntries()<<endl;
+//        cout<<"hPHVsEventNo_AreasX: "<<y%xDivisions<<" "<<profX->GetEntries()<<endl;
+//        cout<<"hPHVsEventNo_AreasY: "<<y/xDivisions<<" "<<profY->GetEntries()<<endl;
     }
 
     TString name = (TString)"hStack"+prof2d->GetName() + (TString)"AllAreasX";
@@ -1402,13 +1402,13 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
         TF1* fit= (TF1*)pol1Fit->Clone();
         fit->SetLineColor(settings->GetColor(x));
         TProfile* prof = hPHVsEventNo_AreasX[x];
-        cout<<"save: "<<prof->GetName()<<endl;
+//        cout<<"save: "<<prof->GetName()<<endl;
         histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         TString title = (TString)"Ph vs EventNo, ";
         title.Append(TString::Format(", slope: %6.1f adc/1M, X",fit->GetParameter(1)*1.e6));
         title.Append(TTransparentAnalysis::GetNameOfArea(x,-1));
         prof->SetTitle(title);
-        cout<<"save: "<<prof->GetName()<<endl;
+//        cout<<"save: "<<prof->GetName()<<endl;
         histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         prof->SetLineColor(settings->GetColor(x));
         prof->SetMarkerColor(settings->GetColor(x));
@@ -1424,13 +1424,13 @@ void TAnalysisOfSelection::savePHvsEventNoAreaPlots(HistogrammSaver* histSaver,T
         TF1* fit= (TF1*)pol1Fit->Clone();
         fit->SetLineColor(settings->GetColor(y));
         TProfile* prof = hPHVsEventNo_AreasY[y];
-        cout<<"save: "<<prof->GetName()<<endl;
+//        cout<<"save: "<<prof->GetName()<<endl;
         histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         TString title = (TString)"Ph vs EventNo, ";
         title.Append(TString::Format(", slope: %6.1f adc/1M, y",fit->GetParameter(1)*1.e6));
         title.Append(TTransparentAnalysis::GetNameOfArea(-1,y));
         prof->SetTitle(title);
-        cout<<"save: "<<prof->GetName()<<endl;
+//        cout<<"save: "<<prof->GetName()<<endl;
         histSaver->Save1DProfileWithFitAndInfluence(prof,fit,true);
         prof->SetLineColor(settings->GetColor(y));
         prof->SetMarkerColor(settings->GetColor(y));

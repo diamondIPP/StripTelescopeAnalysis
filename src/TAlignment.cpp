@@ -222,9 +222,9 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
         Float_t predY = predictedPosition->getPositionY();
         Float_t metricPosInDetSystem = eventReader->getPositionInDetSystem(subjectDetector, predX, predY);
         Float_t centerPos = settings->convertMetricToChannelSpace(subjectDetector, metricPosInDetSystem);
-        if (centerPos < 0)
-            cout << nEvent << " " << predX << "/" << predY << ": " << metricPosInDetSystem << " -->" << centerPos <<
-            endl;
+//        if (centerPos < 0)
+//            cout << nEvent << " " << predX << "/" << predY << ": " << metricPosInDetSystem << " -->" << centerPos <<
+//            endl;
         //			cout<<nEvent<<" "<<predX<<"/"<<predY<<"\t"<<metricPosInDetSystem<< " - "<< centerPos<<endl;
         TCluster cluster = TTransparentAnalysis::makeTransparentCluster(eventReader, settings, subjectDetector,
                                                                         centerPos, 10);
@@ -242,7 +242,7 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
             Float_t clusPos = eventReader->getCluster(det, 0).getPosition(settings->doCommonModeNoiseCorrection());
             if (clusPos < 0 || clusPos >= TPlaneProperties::getNChannels(det) ||
                 eventReader->getNClusters(det) != 1) {
-                cout << "Do not take event clusPos is not valid...." << endl;
+//                cout << "Do not take event clusPos is not valid...." << endl;
                 continue;
             }
         }
@@ -298,10 +298,10 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
             telescopeAlignmentEvent.push_back(1);
             nTelescopeAlignmentEvents++;
         }
-        if (events.size() % (int) 100 == 0 || (nEvent - startEvent) % (int) 1000 == 0)
-            cout <<
-            TString::Format("\r%6d %6d", (int) events.size(), (int) (events.size() - nTelescopeAlignmentEvents)) <<
-            flush;
+//        if (events.size() % (int) 100 == 0 || (nEvent - startEvent) % (int) 1000 == 0)
+//            cout <<
+//            TString::Format("\r%6d %6d", (int) events.size(), (int) (events.size() - nTelescopeAlignmentEvents)) <<
+//            flush;
         TRawEventSaver::showStatusBar(nEvent - startEvent, nEvents, 100);
         if (!settings->useForAlignment(nEvent, nEvents))
             return;
@@ -361,7 +361,7 @@ void TAlignment::createEventVectors(UInt_t nEvents, UInt_t startEvent,enumDetect
                 if (clusPos < 0 || clusPos >= TPlaneProperties::getNChannels(det) ||
                     eventReader->getNClusters(det) != 1) {
                     bBreak = true;
-                    cout << "Do not take event clusPos is not valid...." << endl;
+//                    cout << "Do not take event clusPos is not valid...." << endl;
                 }
             }
             if (bBreak) {
@@ -611,7 +611,7 @@ bool TAlignment::siliconAlignmentStep(bool bPlot, bool bUpdateAlignment) {
 
     if(verbosity>3)	align->PrintResults(0);
     if(verbosity) cout<< xOff1<< "/" << yOff1 << "\t" << xOff2 <<"/"<< yOff2<<endl;
-    cout<<test1<<" "<<test2<<" "<<flush;
+//    cout<<test1<<" "<<test2<<" "<<flush;
     if (isAlignmentDone)
         cout << "AlignmentStep was successfully done" << endl;
     else
@@ -1030,19 +1030,19 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             if (!useEvent) nTelescoepAlignmentEvent++;
         }
 
-        if (isStripAlignment && false) {
-            cout <<
-            TString::Format("%6d %6.1f - %6.1f = % 6.2f,", nEvent, xLabMeasuredMetric, xLabPredictedMetric, xDelta);
-            cout << TString::Format("  %6.2f", xDetMeasuredMetric);
-            cout << TString::Format("   %5.2f, %5.2f  %6.2f", predHitPosDetCh, channelPosXMeas,
-                                    channelPosXMeas - predHitPosDetCh);
-            cout << TString::Format("  %6.1f/%5.1f", relHitPosPredictedMetric, relHitPosMeasuredMetric);
-            cout << TString::Format("  %+08.2f", xDetMeasuredMetric - xDetPredictedMetric);
-            cout << " ->" << useEvent << endl;
-
-        }
+//        if (isStripAlignment && false) {
+//            cout <<
+//            TString::Format("%6d %6.1f - %6.1f = % 6.2f,", nEvent, xLabMeasuredMetric, xLabPredictedMetric, xDelta);
+//            cout << TString::Format("  %6.2f", xDetMeasuredMetric);
+//            cout << TString::Format("   %5.2f, %5.2f  %6.2f", predHitPosDetCh, channelPosXMeas,
+//                                    channelPosXMeas - predHitPosDetCh);
+//            cout << TString::Format("  %6.1f/%5.1f", relHitPosPredictedMetric, relHitPosMeasuredMetric);
+//            cout << TString::Format("  %+08.2f", xDetMeasuredMetric - xDetPredictedMetric);
+//            cout << " ->" << useEvent << endl;
+//
+//        }
         if (useEvent && abs(xLabPredictedMetric) > maxXLabMetric) {
-            cout << " Invalid xLabPredictedMetric: " << xLabPredictedMetric << " / " << maxXLabMetric << endl;
+//            cout << " Invalid xLabPredictedMetric: " << xLabPredictedMetric << " / " << maxXLabMetric << endl;
             nInvalidxLabPredictedMetric++;
             useEvent = false;
         }
@@ -1052,14 +1052,14 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
             nInvalidyLabPredictedMetric++;
         }
         if (useEvent && nDiaAlignmentStep > 1 && relHitPosPredictedMetric == N_INVALID) {
-            cout << " Invalid relHitPosPredictedMetric" << nDiaAlignmentStep << " " << relHitPosPredictedMetric <<
-            "/" << subjectDet << "/" << xDetPredictedMetric << endl;
+//            cout << " Invalid relHitPosPredictedMetric" << nDiaAlignmentStep << " " << relHitPosPredictedMetric <<
+//            "/" << subjectDet << "/" << xDetPredictedMetric << endl;
             useEvent = false;
             nInvalidPredictedRelPos++;
         }
         if (useEvent && relHitPosMeasuredMetric == N_INVALID) {
-            cout << " Invalid relHitPosMeasuredMetric" << xDetMeasuredMetric << "/" << yDetMeasuredMetric <<
-            " -- " << relHitPosPredictedMetric << "/" << subjectDet << "/" << relHitPosMeasuredMetric << endl;
+//            cout << " Invalid relHitPosMeasuredMetric" << xDetMeasuredMetric << "/" << yDetMeasuredMetric <<
+//            " -- " << relHitPosPredictedMetric << "/" << subjectDet << "/" << relHitPosMeasuredMetric << endl;
             useEvent = false;
             nInvalidMeasuredRelPos++;
         }
@@ -1838,14 +1838,14 @@ void TAlignment::CreateScatterPlotPredYvsDeltaX(
         ymin = mean - 3 * sigma;
         ymax = mean + 3 * sigma;
         histo = histSaver->CreateScatterHisto((string)histName,vecXLabDeltaMetric,vecYLabPredMetric,256,512,xmin,xmax,ymin,ymax);
-        if(!histo || (histo->GetEntries() == 0))
-            cout<<"isSiliconPostAlignment: "<<xmin<<" "<<xmax<<" "<<ymin<<" "<<ymax<<" "<<mean<<"+/-"<<sigma<<endl;
+//        if(!histo || (histo->GetEntries() == 0))
+//            cout<<"isSiliconPostAlignment: "<<xmin<<" "<<xmax<<" "<<ymin<<" "<<ymax<<" "<<mean<<"+/-"<<sigma<<endl;
     }
     else
         histo = histSaver->CreateScatterHisto((string)histName, vecXLabDeltaMetric,vecYLabPredMetric, 256);
 
-    if (histo->GetEntries() == 0)
-        cout<<"entries == 0";
+//    if (histo->GetEntries() == 0)
+//        cout<<"entries == 0";
     histo->SetTitle(histo->GetTitle()+GetPlotPostTitle(postName));
     if(histo && histo->GetEntries()){
         histo->GetXaxis()->SetTitle("Y Predicted / #mum");
