@@ -15,7 +15,7 @@ HistogrammSaver::HistogrammSaver(TSettings * newSettings,int verbosity) {
         cerr<<"[HistogrammSaver::HistogrammSaver]: settings == NULL "<<endl;
         exit(-1);
     }
-
+    gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
     this->settings = newSettings;
     sys=NULL;
     pt=NULL;
@@ -1653,7 +1653,7 @@ TProfile* HistogrammSaver::GetProfileX(TProfile2D* prof2d, TString name, Int_t f
     Float_t xLow = prof2d->GetXaxis()->GetXmin();
     Float_t xHigh = prof2d->GetXaxis()->GetXmax();
     TProfile* prof = new TProfile(name,title,binsX,xLow,xHigh);
-    cout<<"new Prof: "<<prof->GetName()<<endl;
+//    cout<<"new Prof: "<<prof->GetName()<<endl;
     prof->Draw("goff");
     if(prof->GetXaxis())
         prof->GetXaxis()->SetTitle(prof2d->GetXaxis()->GetTitle());
@@ -1662,14 +1662,14 @@ TProfile* HistogrammSaver::GetProfileX(TProfile2D* prof2d, TString name, Int_t f
     if(firstybin!=1||lastybin!= prof2d->GetYaxis()->GetNbins())
         title.Append(TString::Format(" yrange: %f - %f",prof2d->GetYaxis()->GetBinLowEdge(firstybin),prof2d->GetYaxis()->GetBinLowEdge(lastybin)));
     if(prof->GetZaxis()) prof->GetYaxis()->SetTitle(title);
-    cout<<"xaxis: "<<prof->GetXaxis()->GetTitle()<<endl;
-    cout<<"yaxis: "<<prof->GetYaxis()->GetTitle()<<endl;
+//    cout<<"xaxis: "<<prof->GetXaxis()->GetTitle()<<endl;
+//    cout<<"yaxis: "<<prof->GetYaxis()->GetTitle()<<endl;
     Int_t firstxbin = 1;
     Int_t lastxbin = prof2d->GetXaxis()->GetNbins();
     for(Int_t biny = firstybin; biny <= lastybin; biny++){
         name = prof->GetName()+TString::Format("_biny%d:",biny);
         TProfile* profyBin = new TProfile(name,title,binsX,xLow,xHigh);
-        cout<<"new ybin: "<<biny<<" "<<prof->GetName()<<": "<<endl;
+//        cout<<"new ybin: "<<biny<<" "<<prof->GetName()<<": "<<endl;
         profyBin->Reset();
         Int_t nEntries =0;
         for(Int_t binx = firstxbin; binx <= lastxbin; binx++){
@@ -1686,10 +1686,10 @@ TProfile* HistogrammSaver::GetProfileX(TProfile2D* prof2d, TString name, Int_t f
         }
         profyBin->SetEntries(nEntries);
         prof->Add(profyBin);
-        cout<<""<<profyBin->GetEntries()<<" ---> "<<prof->GetEntries()<<endl;
+//        cout<<""<<profyBin->GetEntries()<<" ---> "<<prof->GetEntries()<<endl;
         delete profyBin;
     }
-    cout<<" final profile: "<<prof->GetEntries()<<"/"<<prof2d->GetEntries()<<endl;
+//    cout<<" final profile: "<<prof->GetEntries()<<"/"<<prof2d->GetEntries()<<endl;
     //    char t; cin>>t;
     return prof;
 }
@@ -1705,7 +1705,7 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
     Float_t xLow = prof2d->GetYaxis()->GetXmin();
     Float_t xHigh = prof2d->GetYaxis()->GetXmax();
     TProfile* prof = new TProfile(name,title,binsX,xLow,xHigh);
-    cout<<"new Prof: "<<prof->GetName()<<endl;
+//    cout<<"new Prof: "<<prof->GetName()<<endl;
     prof->Draw("goff");
     if(prof->GetXaxis())
         prof->GetXaxis()->SetTitle(prof2d->GetYaxis()->GetTitle());
@@ -1714,14 +1714,14 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
     if(firstxbin!=1||lastxbin!= prof2d->GetXaxis()->GetNbins())
         title.Append(TString::Format(" yrange: %f - %f",prof2d->GetYaxis()->GetBinLowEdge(firstxbin),prof2d->GetYaxis()->GetBinLowEdge(lastxbin)));
     if(prof->GetZaxis()) prof->GetYaxis()->SetTitle(title);
-    cout<<"xaxis: "<<prof->GetXaxis()->GetTitle()<<endl;
-    cout<<"yaxis: "<<prof->GetYaxis()->GetTitle()<<endl;
+//    cout<<"xaxis: "<<prof->GetXaxis()->GetTitle()<<endl;
+//    cout<<"yaxis: "<<prof->GetYaxis()->GetTitle()<<endl;
     Int_t firstybin = 1;
     Int_t lastybin = prof2d->GetXaxis()->GetNbins();
     for(Int_t binx = firstybin; binx <= lastybin; binx++){
         name = prof->GetName()+TString::Format("_binx%d:",binx);
         TProfile* profyBin = new TProfile(name,title,binsX,xLow,xHigh);
-        cout<<"new ybin: "<<binx<<" "<<prof->GetName()<<": "<<endl;
+//        cout<<"new ybin: "<<binx<<" "<<prof->GetName()<<": "<<endl;
         profyBin->Reset();
         Int_t nEntries =0;
         for(Int_t biny = firstxbin; biny <= lastxbin; biny++){
@@ -1738,10 +1738,10 @@ TProfile* HistogrammSaver::GetProfileY(TProfile2D* prof2d,TString name,Int_t fir
         }
         profyBin->SetEntries(nEntries);
         prof->Add(profyBin);
-        cout<<""<<profyBin->GetEntries()<<" ---> "<<prof->GetEntries()<<endl;
+//        cout<<""<<profyBin->GetEntries()<<" ---> "<<prof->GetEntries()<<endl;
         delete profyBin;
     }
-    cout<<" final profile: "<<prof->GetEntries()<<"/"<<prof2d->GetEntries()<<endl;
+//    cout<<" final profile: "<<prof->GetEntries()<<"/"<<prof2d->GetEntries()<<endl;
     //    char t; cin>>t;
     return prof;
 }

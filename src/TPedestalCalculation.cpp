@@ -22,6 +22,7 @@ TPedestalCalculation::TPedestalCalculation(TSettings *newSettings){
 	pedestalFile=NULL;
 	this->runNumber=settings->getRunNumber();
 	sys = gSystem;
+	gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
 	settings->goToPedestalTreeDir();
 	eventReader=new TADCEventReader(settings->getRawTreeFilePath(),settings);
 	if(verbosity)cout<<"TPedestalCalculation::TPedestalCalculation -> Set HistoSaver: "<<settings <<endl;

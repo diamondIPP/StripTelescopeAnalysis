@@ -5,7 +5,7 @@
  * Created by Lukas Baeni on 19.01.11.
  */
 
-//#include "TROOT.h"
+#include "TROOT.h"
 //#include "Clustering.class.cpp"
 //#include "SlidingPedestal.class.hh"
 //#include "Clustering.class.hh"
@@ -153,6 +153,7 @@ void process_mem_usage(double& vm_usage, double& resident_set)
 
 
 int main(int argc, char ** argv) {
+    gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
 	TStopwatch comulativeWatch;
 	comulativeWatch.Start(true);
 	readInputs(argc,argv);

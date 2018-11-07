@@ -20,6 +20,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *newSettings) {
     res = 0;
     UInt_t runNumber=settings->getRunNumber();
     sys = gSystem;
+    gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
     htmlClus= new THTMLCluster(settings);
 
     settings->goToClusterTreeDir();

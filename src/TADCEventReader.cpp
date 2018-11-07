@@ -30,6 +30,7 @@ void TADCEventReader::init(std::string FileName,UInt_t runNumber,int verb){
 	tree =NULL;
 	file=NULL;
 	sys = gSystem;
+    gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
 	if(verbosity>1)cout<<"SYS: "<<sys->pwd()<<endl;
 	if(verbosity>1)cout<<"OPEN: "<<FileName<<endl;
 	for(int i=0;i<9;i++)

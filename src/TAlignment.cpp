@@ -14,6 +14,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
     cout << "**********************************************************" << endl;
     this->mode = mode;
     sys = gSystem;
+    gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
     setSettings(inputSettings);
     runNumber = settings->getRunNumber();
     if(verbosity) cout << runNumber << endl;

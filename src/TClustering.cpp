@@ -23,6 +23,7 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 	setSettings(set);
 	UInt_t runNumber = settings->getRunNumber();
 	sys = gSystem;
+	gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
 	settings->goToPedestalTreeDir();
 	eventReader=new TADCEventReader(settings->getPedestalTreeFilePath(),settings);//settings->getRunNumber());
 	eventReader->SelectBranchesForClustering();

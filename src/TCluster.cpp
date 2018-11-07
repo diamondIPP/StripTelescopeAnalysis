@@ -581,6 +581,9 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries,bool cmnCorrected,bool useSma
 	else{
 	    clusPosStart= getClusterPosition((int)(isTransparentCluster+.5));
 	    dir = isTransparentCluster-(int)(isTransparentCluster+.5)>0?right:left;
+		if (nClusterEntries < GetTransparentClusterSize()) {
+			return getTransparentCharge(nClusterEntries, cmnCorrected, useSmallSignals);
+		}
 	}
 	Float_t clusterCharge = getChargeStartingAt(nClusterEntries,clusPosStart,dir,false,cmnCorrected,useSmallSignals);
 	return clusterCharge;

@@ -20,6 +20,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* newSettings) {
     res=0;
     htmlPedestal= new THTMLPedestal(settings);
     sys = gSystem;
+    gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
     UInt_t runNumber=settings->getRunNumber();
     sys->MakeDirectory(settings->getAbsoluteOuputPath().c_str());
     sys->cd(settings->getAbsoluteOuputPath().c_str());

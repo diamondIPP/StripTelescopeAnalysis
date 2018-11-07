@@ -18,6 +18,7 @@ TTransparentAnalysis::TTransparentAnalysis(TSettings* settings, TSettings::align
         cerr<<"Settings invalid:"<<settings<<endl;
         exit(-1);
     }
+    gROOT->ProcessLine("gErrorIgnoreLevel = 3000");
     sys = gSystem;
     setSettings(settings);
     results=0;
@@ -2499,7 +2500,7 @@ void TTransparentAnalysis::analyseNonHitEvents() {
     fit->SetLineColor(kBlue);
     fit->SetLineWidth(1);
     fit->SetLineStyle(2);
-    hTransparentNoiseCMN->Fit(fit);
+    hTransparentNoiseCMN->Fit(fit,"Q");
     minY = hTransparentNoiseCMN->GetBinContent(hTransparentNoiseCMN->GetMinimumBin());
     maxY = hTransparentNoiseCMN->GetBinContent(hTransparentNoiseCMN->GetMaximumBin());
     hTransparentNoiseCMN->GetYaxis()->SetRangeUser(minY-(maxY-minY)*.2,maxY+(maxY-minY)*.3);
