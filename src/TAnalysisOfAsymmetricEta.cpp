@@ -246,7 +246,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 	}
 	if(verbosity>4)cout<<"hName"<<endl;
 //	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
-	hAsymmetricEta2D = new TH2F(hName,hName,513,0-1/(1024),1+1/(1024),nDiamonds+2,-0.5,nDiamonds+1.5);
+	hAsymmetricEta2D = new TH2F(hName,hName,ETA_BINS+1,0-1/(2*ETA_BINS),1+1/(2*ETA_BINS),nDiamonds+2,-0.5,nDiamonds+1.5);
 	if(hAsymmetricEta2D ==0){
 		cout<<"histo with name: '"<<hName<<"' was not created...."<<endl;//hAsymmetricEta2D<<
 	}
@@ -614,15 +614,15 @@ void TAnalysisOfAsymmetricEta::saveAsymmetricEtaPerArea(TH2F* histo,  TH2F* hist
 			title.Append(TString::Format("%02.3f_All",alpha*100));
 		else
 			title.Append(TString::Format("%02.3f Area%d",alpha*100,(int)histo->GetYaxis()->GetBinCenter(dia)));
-		int nbins = 512;
+		int nbins = ETA_BINS;
 		TString histName2 = histName;
 		TString title2 = title;
 		histName2.Append("inverted");
 		title.Append(" inverted");
 //		hist->Smooth(4);
-		TH1F* histInverted = new TH1F(histName2,title2,nbins,0,1);
-		for(int bin = 1; bin <= nbins;bin++){
-			histInverted->SetBinContent(bin,hist->GetBinContent(nbins+1-bin));
+		TH1F* histInverted = new TH1F(histName2,title2,nbins+1,0-1.0/(2*nbins),1+1.0/(2*nbins));
+		for(int bin = 1; bin <= nbins+1;bin++){
+			histInverted->SetBinContent(bin,hist->GetBinContent(nbins+1+1-bin));
 		}
 		histInverted->SetLineColor(kBlue-7);
 //		if(hist)cout<<hist->GetName()<<": "<<hist<<endl;

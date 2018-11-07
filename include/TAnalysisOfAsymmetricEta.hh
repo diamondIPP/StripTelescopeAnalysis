@@ -35,6 +35,7 @@
 /*
  *
  */
+#define ETA_BINS 250
 class TAnalysisOfAsymmetricEta {
 public:
 	TAnalysisOfAsymmetricEta(TSettings* settings);

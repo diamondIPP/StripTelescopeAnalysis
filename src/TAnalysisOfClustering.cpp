@@ -24,6 +24,7 @@ TAnalysisOfClustering::TAnalysisOfClustering(TSettings *newSettings) {
 
     settings->goToClusterTreeDir();
     eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings);
+    eventReader->SelectBranchesForClusteringAnalysis();
     histSaver=new HistogrammSaver(settings);
 
 
@@ -400,7 +401,7 @@ void TAnalysisOfClustering::initialiseHistos()
 
     TString hName = "hEtaDistributionDia";
     int nDiamonds = settings->getNDiamonds();
-    hEtaDistributionDia = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
+    hEtaDistributionDia = new TH2F(hName,hName,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),nDiamonds+2,-0.5,nDiamonds+1.5);
 
     for(UInt_t det=0;det<9;det++){
         TString name = "hClusterPositionRelativeToNextIntegerCWM_"+(TString)TPlaneProperties::getStringForDetector(det);
@@ -444,51 +445,51 @@ void TAnalysisOfClustering::initialiseHistos()
         }
 
         name = "hEtaDistribution_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistribution[det]=new TH1F(name,name,1024,0,1);
+        hEtaDistribution[det]=new TH1F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS));
         hEtaDistribution[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistribution[det]->GetYaxis()->SetTitle("number of entries");
 
         name = "hEtaDistributionCMN_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionCMN[det]=new TH1F(name,name,1024,0,1);
+        hEtaDistributionCMN[det]=new TH1F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS));
         hEtaDistributionCMN[det]->GetXaxis()->SetTitle("#eta_{CMN-corrected}");
         hEtaDistributionCMN[det]->GetYaxis()->SetTitle("number of entries");
 
         name = "hEtaDistributionVsLeftChannel_"+ (TString) TPlaneProperties::getStringForDetector(det);
         if(TPlaneProperties::isDiamondDetector(det)){
             pair<Int_t,Int_t> pattern = settings->diamondPattern.getTotalInterval();
-            hEtaDistributionVsLeftChannel[det] = new TH2F(name,name,256,0,1,pattern.second-pattern.first,pattern.first,pattern.second);
+            hEtaDistributionVsLeftChannel[det] = new TH2F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),pattern.second-pattern.first,pattern.first,pattern.second);
         }
         else
-            hEtaDistributionVsLeftChannel[det] = new TH2F(name,name,256,0,1,256,0,255);
+            hEtaDistributionVsLeftChannel[det] = new TH2F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),256,0,255);
         hEtaDistributionVsLeftChannel[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistributionVsLeftChannel[det]->GetYaxis()->SetTitle("left channel of #eta position");
         hEtaDistributionVsLeftChannel[det]->GetZaxis()->SetTitle("number of entries #");
 
         name = "hEtaDistributionVsClusterSize_"+ (TString) TPlaneProperties::getStringForDetector(det);
 
-        hEtaDistributionVsClusterSize[det] = new TH2F(name,name,256,0,1,10,-.5,9.5);
+        hEtaDistributionVsClusterSize[det] = new TH2F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),10,-.5,9.5);
         hEtaDistributionVsClusterSize[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistributionVsClusterSize[det]->GetYaxis()->SetTitle("ClusterSize");
         hEtaDistributionVsClusterSize[det]->GetZaxis()->SetTitle("number of entries #");
 
         name = "hEtaDistributionVsCharge_"+ (TString) TPlaneProperties::getStringForDetector(det);
         Int_t maxCharge = TPlaneProperties::isDiamondDetector(det)?4096:512;
-        hEtaDistributionVsCharge[det] = new TH2F(name,name,512,0,1,512,0,maxCharge);
+        hEtaDistributionVsCharge[det] = new TH2F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),512,0,maxCharge);
         hEtaDistributionVsCharge[det]->GetXaxis()->SetTitle("#eta");
         hEtaDistributionVsCharge[det]->GetYaxis()->SetTitle("Charge of two highest Channels /ADC counts");
         hEtaDistributionVsCharge[det]->GetYaxis()->SetTitle("number of entries");
 
         name = "hEtaDistribution5Percent_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistribution5Percent[det]=new TH1F(name,name,1024,0,1);
+        hEtaDistribution5Percent[det]=new TH1F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS));
 
         name = "hEtaDistributionVsSignalLeft_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalLeft[det]=new TH2F(name,name,128,0,1,128,0,settings->getMaxSignalHeight(det)); // DA
+        hEtaDistributionVsSignalLeft[det]=new TH2F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),128,0,settings->getMaxSignalHeight(det)); // DA
 
         name = "hEtaDistributionVsSignalRight_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalRight[det]=new TH2F(name,name,128,0,1,128,0,settings->getMaxSignalHeight(det)); // DA
+        hEtaDistributionVsSignalRight[det]=new TH2F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),128,0,settings->getMaxSignalHeight(det)); // DA
 
         name = "hEtaDistributionVsSignalSum_"+ (TString) TPlaneProperties::getStringForDetector(det);
-        hEtaDistributionVsSignalSum[det]=new TH2F(name,name,128,0,1,128,0,settings->getMaxSignalHeight(det)*2); // DA
+        hEtaDistributionVsSignalSum[det]=new TH2F(name,name,ETA_BINS+1,0-1.0/(2*ETA_BINS),1+1.0/(2*ETA_BINS),128,0,settings->getMaxSignalHeight(det)*2); // DA
 
         name = "hSignalLeftVsSignalRight"+ (TString) TPlaneProperties::getStringForDetector(det);
         hSignalLeftVsSignalRight[det]=new TH2F(name,name,128,0,settings->getMaxSignalHeight(det),128,0,settings->getMaxSignalHeight(det)); // DA
@@ -1003,14 +1004,14 @@ void TAnalysisOfClustering::saveEtaPerArea() {
             title.Append(" All");
         else
             title.Append(TString::Format(" Area%d",(int)hEtaDistributionDia->GetYaxis()->GetBinCenter(dia)));
-        int nbins = 512;
+        int nbins = ETA_BINS;
         TString histName2 = histName;
         TString title2 = title;
         histName2.Append("inverted");
         title.Append(" inverted");
-        TH1F* histInverted = new TH1F(histName2,title2,nbins,0,1);
-        for(int bin = 1; bin <= nbins;bin++){
-            histInverted->SetBinContent(bin,hist->GetBinContent(nbins+1-bin));
+        TH1F* histInverted = new TH1F(histName2,title2,nbins+1,0-1.0/(2*nbins),1+1.0/(2*nbins));
+        for(int bin = 1; bin <= nbins+1;bin++){
+            histInverted->SetBinContent(bin,hist->GetBinContent(nbins+1+1-bin));
         }
         histInverted->SetLineColor(kBlue-7);
         if(hist){
@@ -1589,8 +1590,8 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
                 if(signalLeft>signalRight){
                     ratio=signalLeft/allCharge;
                     if(ratio>0.5||allCharge==0||ratio!=ratio){
-                        cout<<"\n2ndBiggestHitOverCharge>0.5: left "<<signalLeft<<" "<<allCharge<<endl;
-                        cluster.Print();
+//                        cout<<"\n2ndBiggestHitOverCharge>0.5: left "<<signalLeft<<" "<<allCharge<<endl;
+//                        cluster.Print();
                     }
                     else{
                         //					cout<<nEvent<<" "<<cl<<" "<<ratio<<endl;
@@ -1601,8 +1602,8 @@ void TAnalysisOfClustering::analyse2ndHighestHit(){
                 else{
                     ratio=signalRight/allCharge;
                     if(ratio>0.5||allCharge==0||ratio!=ratio){
-                        cout<<"\n2ndBiggestHitOverCharge>0.5: right"<<signalRight<<" "<<allCharge<<endl;
-                        cluster.Print();
+//                        cout<<"\n2ndBiggestHitOverCharge>0.5: right"<<signalRight<<" "<<allCharge<<endl;
+//                        cluster.Print();
                     }
                     else{
                         //					cout<<nEvent<<" "<<cl<<" "<<ratio<<endl;

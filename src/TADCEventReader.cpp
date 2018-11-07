@@ -951,6 +951,71 @@ void TADCEventReader::SelectBranchesForSelection(){
 //    EnableBranchStatus("clusterTree.event");
 }
 
+void TADCEventReader::SelectBranchesForClusteringAnalysis(){
+	tree->SetBranchStatus("*", 0);
+	EnableBranchStatus("eventNumber");
+	EnableBranchStatus("EventNumber");
+	EnableBranchStatus("event*");
+	EnableBranchStatus("planes*");
+	EnableBranchStatus("PedestalMean");
+	EnableBranchStatus("PedestalSigma");
+	EnableBranchStatus("diaPedestalMean");
+	EnableBranchStatus("diaPedestalMeanCMN");
+	EnableBranchStatus("diaPedestalSigma");
+	EnableBranchStatus("diaPedestalSigmaCMN");
+	EnableBranchStatus("commonModeNoise");
+//	EnableBranchStatus("DiaADC");
+//    EnableBranchStatus("D0X_ADC");
+//    EnableBranchStatus("D0Y_ADC");
+//    EnableBranchStatus("D1X_ADC");
+//    EnableBranchStatus("D1X_ADC");
+//    EnableBranchStatus("D2X_ADC");
+//    EnableBranchStatus("D2X_ADC");
+//    EnableBranchStatus("D3X_ADC");
+//    EnableBranchStatus("D3X_ADC");
+//	EnableBranchStatus("hasValidSiliconTrack");
+//	EnableBranchStatus("fiducialValueX");
+//	EnableBranchStatus("fiducialValueY");
+//    EnableBranchStatus("nDiamondHits");
+//    EnableBranchStatus("IsInFiducialCut");
+//    EnableBranchStatus("useForSiliconAlignment");
+//    EnableBranchStatus("useForAlignment");
+//    EnableBranchStatus("useForAnalysis");
+//    EnableBranchStatus("diaClusterSize");
+//    EnableBranchStatus("isDiaSaturated");
+//    EnableBranchStatus("fiducialRegion");
+//    EnableBranchStatus("clusterTree.nClusters");
+//    EnableBranchStatus("clusterTree.event");
+}
+
+void TADCEventReader::SelectBranchesForClustering(){
+    tree->SetBranchStatus("*", 0);
+    EnableBranchStatus("eventNumber");
+    EnableBranchStatus("EventNumber");
+    EnableBranchStatus("PedestalMean");
+    EnableBranchStatus("PedestalSigma");
+    EnableBranchStatus("diaPedestalMean");
+    EnableBranchStatus("diaPedestalMeanCMN");
+    EnableBranchStatus("diaPedestalSigma");
+    EnableBranchStatus("diaPedestalSigmaCMN");
+    EnableBranchStatus("commonModeNoise");
+//    EnableBranchStatus("planes*");
+//    EnableBranchStatus("event*");
+//	EnableBranchStatus("hasValidSiliconTrack");
+//	EnableBranchStatus("fiducialValueX");
+//	EnableBranchStatus("fiducialValueY");
+//    EnableBranchStatus("nDiamondHits");
+//    EnableBranchStatus("IsInFiducialCut");
+//    EnableBranchStatus("useForSiliconAlignment");
+//    EnableBranchStatus("useForAlignment");
+//    EnableBranchStatus("useForAnalysis");
+//    EnableBranchStatus("diaClusterSize");
+//    EnableBranchStatus("isDiaSaturated");
+//    EnableBranchStatus("fiducialRegion");
+//    EnableBranchStatus("clusterTree.nClusters");
+//    EnableBranchStatus("clusterTree.event");
+}
+
 void TADCEventReader::EnableBranchStatus(std::string branch){
     std::string branch2 = branch;
 	if(branch.compare(branch.length()-1,1,"*")==0)

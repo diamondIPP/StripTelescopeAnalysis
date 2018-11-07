@@ -41,6 +41,7 @@
 
 #define N_DET_CHANNELS 256
 #define N_DIA_CHANNELS 128
+#define ETA_BINS 250
 using namespace std;
 
 class TAnalysisOfClustering {

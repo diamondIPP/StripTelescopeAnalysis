@@ -85,6 +85,8 @@ public:
 	void SelectBranchesForAlignment();
 	void SelectBranchesForSelectionAnalysis();
 	void SelectBranchesForSelection();
+	void SelectBranchesForClusteringAnalysis();
+	void SelectBranchesForClustering();
 
 	bool isDetMasked();
 	TEvent* getEvent();
