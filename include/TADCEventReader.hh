@@ -83,6 +83,8 @@ public:
 	void DisableBranchStatus(std::string branch);
 	void SelectBranchesForTransparent();
 	void SelectBranchesForAlignment();
+	void SelectBranchesForSelectionAnalysis();
+	void SelectBranchesForSelection();
 
 	bool isDetMasked();
 	TEvent* getEvent();

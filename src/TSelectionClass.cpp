@@ -35,6 +35,7 @@ TSelectionClass::TSelectionClass(TSettings* newSettings) {
     settings->goToSelectionTreeDir();
     if(verbosity)cout<<"open Tree:"<<endl;
     eventReader=new TADCEventReader(settings->getClusterTreeFilePath(),settings);
+    eventReader->SelectBranchesForSelection();
     //settings->getRunNumber());
     if(verbosity)cout<<" DONE"<<endl;
 

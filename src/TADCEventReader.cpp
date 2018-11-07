@@ -909,6 +909,48 @@ void TADCEventReader::SelectBranchesForAlignment(){
 //    DisableBranchStatus("pedestalTree.eventNumber");
 }
 
+void TADCEventReader::SelectBranchesForSelectionAnalysis(){
+    tree->SetBranchStatus("*", 0);
+	EnableBranchStatus("hasValidSiliconTrack");
+	EnableBranchStatus("fiducialValueX");
+	EnableBranchStatus("fiducialValueY");
+    EnableBranchStatus("event*");
+	EnableBranchStatus("eventNumber");
+	EnableBranchStatus("EventNumber");
+    EnableBranchStatus("planes*");
+//    EnableBranchStatus("nDiamondHits");
+//    EnableBranchStatus("IsInFiducialCut");
+//    EnableBranchStatus("useForSiliconAlignment");
+//    EnableBranchStatus("useForAlignment");
+//    EnableBranchStatus("useForAnalysis");
+//    EnableBranchStatus("diaClusterSize");
+//    EnableBranchStatus("isDiaSaturated");
+//    EnableBranchStatus("fiducialRegion");
+//    EnableBranchStatus("clusterTree.nClusters");
+//    EnableBranchStatus("clusterTree.event");
+}
+
+void TADCEventReader::SelectBranchesForSelection(){
+	tree->SetBranchStatus("*", 0);
+	EnableBranchStatus("eventNumber");
+	EnableBranchStatus("EventNumber");
+	EnableBranchStatus("event*");
+	EnableBranchStatus("planes*");
+//	EnableBranchStatus("hasValidSiliconTrack");
+//	EnableBranchStatus("fiducialValueX");
+//	EnableBranchStatus("fiducialValueY");
+//    EnableBranchStatus("nDiamondHits");
+//    EnableBranchStatus("IsInFiducialCut");
+//    EnableBranchStatus("useForSiliconAlignment");
+//    EnableBranchStatus("useForAlignment");
+//    EnableBranchStatus("useForAnalysis");
+//    EnableBranchStatus("diaClusterSize");
+//    EnableBranchStatus("isDiaSaturated");
+//    EnableBranchStatus("fiducialRegion");
+//    EnableBranchStatus("clusterTree.nClusters");
+//    EnableBranchStatus("clusterTree.event");
+}
+
 void TADCEventReader::EnableBranchStatus(std::string branch){
     std::string branch2 = branch;
 	if(branch.compare(branch.length()-1,1,"*")==0)

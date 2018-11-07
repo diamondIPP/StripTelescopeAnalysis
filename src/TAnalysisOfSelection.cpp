@@ -20,6 +20,7 @@ TAnalysisOfSelection::TAnalysisOfSelection(TSettings *newSettings) {
 	htmlSelection = new THTMLSelectionAnalysis(settings);
 	settings->goToSelectionTreeDir();
 	eventReader=new TADCEventReader(settings->getSelectionTreeFilePath(),settings);
+	eventReader->SelectBranchesForSelectionAnalysis();
 	histSaver=new HistogrammSaver(settings);
 	settings->goToSelectionAnalysisDir();
 	//	htmlPedestal->setSubdirPath("selectionAnalysis");
