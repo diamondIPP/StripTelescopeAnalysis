@@ -32,6 +32,7 @@ TAlignment::TAlignment(TSettings* inputSettings,TSettings::alignmentMode mode) {
         eventReader->setEtaDistributionPath(settings->getEtaDistributionPath());
         //		cout<<"Eta dist path: "<<eventReader->getEtaDistributionPath()<<endl;
     }
+    eventReader->SelectBranchesForAlignment();
     histSaver = new HistogrammSaver(inputSettings);
     settings->goToAlignmentDir(mode);
     histSaver->SetPlotsPath(settings->getAlignmentDir(mode));
@@ -1070,8 +1071,8 @@ TResidual TAlignment::Residual(alignmentMode aligning, TPlaneProperties::enumCoo
         if (useEvent && silicon_chi2_cut) {
             useEvent = chi2x < maxChi2 && chi2y < maxChi2;
             if (!useEvent) {
-                predictedPostionMetric->Print();
-                cout << "Invalid Silicon Chi2 Cut: " << chi2x << "/" << chi2y << " with cut on " << maxChi2 << endl;
+//                predictedPostionMetric->Print();
+//                cout << "Invalid Silicon Chi2 Cut: " << chi2x << "/" << chi2y << " with cut on " << maxChi2 << endl;
                 nInvalidSiliconChi2Cut++;
             }
         }

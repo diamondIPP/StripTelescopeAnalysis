@@ -79,7 +79,10 @@ public:
 	bool isInCurrentFiducialCut();
 	bool isInOneFiducialArea();
 
+	void EnableBranchStatus(std::string branch);
+	void DisableBranchStatus(std::string branch);
 	void SelectBranchesForTransparent();
+	void SelectBranchesForAlignment();
 
 	bool isDetMasked();
 	TEvent* getEvent();

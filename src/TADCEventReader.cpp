@@ -832,19 +832,103 @@ Float_t TADCEventReader::getCMNoise(UInt_t det, UInt_t ch) const {
 
 void TADCEventReader::SelectBranchesForTransparent(){
     tree->SetBranchStatus("*", 0);
-    tree->SetBranchStatus("hasValidSiliconTrack", 1);
-    tree->SetBranchStatus("IsInFiducialCut", 1);
-    tree->SetBranchStatus("event*", 1);
-    tree->SetBranchStatus("planes*", 1);
-    tree->SetBranchStatus("DiaADC", 1);
-    tree->SetBranchStatus("fiducialValueX", 1);
-    tree->SetBranchStatus("fiducialValueY", 1);
-    tree->SetBranchStatus("EventNumber", 1);
-    tree->SetBranchStatus("eventNumber", 1);
-    tree->SetBranchStatus("commonModeNoise", 1);
-    tree->SetBranchStatus("useForAnalysis", 1);
-    tree->SetBranchStatus("diaPedestalMean", 1);
-    tree->SetBranchStatus("diaPedestalMeanCMN", 1);
-    tree->SetBranchStatus("diaPedestalSigma", 1);
-    tree->SetBranchStatus("diaPedestalSigmaCMN", 1);
+    EnableBranchStatus("hasValidSiliconTrack");
+    EnableBranchStatus("IsInFiducialCut");
+    EnableBranchStatus("event*");
+    EnableBranchStatus("planes*");
+    EnableBranchStatus("DiaADC");
+    EnableBranchStatus("fiducialValueX");
+    EnableBranchStatus("fiducialValueY");
+    EnableBranchStatus("EventNumber");
+    EnableBranchStatus("eventNumber");
+    EnableBranchStatus("commonModeNoise");
+    EnableBranchStatus("useForAnalysis");
+    EnableBranchStatus("diaPedestalMean");
+    EnableBranchStatus("diaPedestalMeanCMN");
+    EnableBranchStatus("diaPedestalSigma");
+    EnableBranchStatus("diaPedestalSigmaCMN");
+}
+
+void TADCEventReader::SelectBranchesForAlignment(){
+    tree->SetBranchStatus("*", 0);
+    EnableBranchStatus("nDiamondHits");
+    EnableBranchStatus("IsInFiducialCut");
+    EnableBranchStatus("hasValidSiliconTrack");
+    EnableBranchStatus("useForSiliconAlignment");
+    EnableBranchStatus("useForAlignment");
+    EnableBranchStatus("useForAnalysis");
+    EnableBranchStatus("diaClusterSize");
+    EnableBranchStatus("isDiaSaturated");
+    EnableBranchStatus("fiducialRegion");
+    EnableBranchStatus("fiducialValueX");
+    EnableBranchStatus("fiducialValueY");
+    EnableBranchStatus("clusterTree.nClusters");
+    EnableBranchStatus("clusterTree.event");
+    EnableBranchStatus("event*");
+    EnableBranchStatus("planes*");
+    EnableBranchStatus("eventNumber");
+    EnableBranchStatus("EventNumber");
+
+//    tree->SetBranchStatus("*", 1);
+//    DisableBranchStatus("DiaADC");
+//    DisableBranchStatus("D0X_ADC");
+//    DisableBranchStatus("D0Y_ADC");
+//    DisableBranchStatus("D1X_ADC");
+//    DisableBranchStatus("D1X_ADC");
+//    DisableBranchStatus("D2X_ADC");
+//    DisableBranchStatus("D2X_ADC");
+//    DisableBranchStatus("D3X_ADC");
+//    DisableBranchStatus("D3X_ADC");
+//    DisableBranchStatus("diaPedestalSigmaCMN");
+//    DisableBranchStatus("diaPedestalSigma");
+//    DisableBranchStatus("diaPedestalMeanCMN");
+//    DisableBranchStatus("diaPedestalMean");
+//    DisableBranchStatus("commonModeNoise");
+//    DisableBranchStatus("PedestalMean");
+//    DisableBranchStatus("PedestalSigma");
+//    DisableBranchStatus("diaSeedChsCmc");
+//    DisableBranchStatus("diaHitChsCmc");
+//    DisableBranchStatus("diaPedChsCmc");
+//    DisableBranchStatus("diaCmChs");
+//    DisableBranchStatus("diaSeedChs");
+//    DisableBranchStatus("diaHitChs");
+//    DisableBranchStatus("diaPedChs");
+//    DisableBranchStatus("diaSaturatedChs");
+//    DisableBranchStatus("diaMaskedChs");
+//    DisableBranchStatus("diaNcChs");
+//    DisableBranchStatus("diaChannel");
+//    DisableBranchStatus("silSaturatedChs");
+//    DisableBranchStatus("silMaskedChs");
+//    DisableBranchStatus("silSeedChs");
+//    DisableBranchStatus("silHitChs");
+//    DisableBranchStatus("silChannel");
+//    DisableBranchStatus("verbosity");
+//    DisableBranchStatus("isDetMasked");
+//    DisableBranchStatus("clusterTree.eventNumber");
+//    DisableBranchStatus("clusterTree.clusterRev");
+//    DisableBranchStatus("pedestalTree.eventNumber");
+}
+
+void TADCEventReader::EnableBranchStatus(std::string branch){
+    std::string branch2 = branch;
+	if(branch.compare(branch.length()-1,1,"*")==0)
+        branch2.pop_back();
+    if(tree->FindBranch(branch2.c_str())){
+        tree->SetBranchStatus(branch.c_str(), 1);
+        cout << "Branch " << branch << " enabled" << endl;
+    }
+    else
+        cout << "Branch " << branch << " does not exist in tree " << tree->GetName() << endl;
+}
+
+void TADCEventReader::DisableBranchStatus(std::string branch){
+    std::string branch2 = branch;
+    if(branch.compare(branch.length()-1,1,"*")==0)
+        branch2.pop_back();
+    if(tree->FindBranch(branch2.c_str())){
+        tree->SetBranchStatus(branch.c_str(), 0);
+        cout << "Branch " << branch << " disabled" << endl;
+    }
+    else
+        cout << "Branch " << branch << " does not exist in tree " << tree->GetName() << endl;
 }
