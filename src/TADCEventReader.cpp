@@ -787,7 +787,7 @@ void TADCEventReader::LoadEtaDistributions(UInt_t runNumber){
 		etaFileName<<"etaCorrection."<<runNumber<<".root";
 	else
 		etaFileName<<etaDistributionPath;
-//	if(verbosity) cout<<etaFileName<<endl;
+	if(verbosity) cout<<etaFileName.str()<<endl;
 	TFile *fEtaDis = TFile::Open(etaFileName.str().c_str());
 	if(fEtaDis==0){
 		cout<<"EtaDistribution File \""<<etaFileName.str()<<"\" do not exist"<<endl;
@@ -964,15 +964,15 @@ void TADCEventReader::SelectBranchesForClusteringAnalysis(){
 	EnableBranchStatus("diaPedestalSigma");
 	EnableBranchStatus("diaPedestalSigmaCMN");
 	EnableBranchStatus("commonModeNoise");
-//	EnableBranchStatus("DiaADC");
-//    EnableBranchStatus("D0X_ADC");
-//    EnableBranchStatus("D0Y_ADC");
-//    EnableBranchStatus("D1X_ADC");
-//    EnableBranchStatus("D1X_ADC");
-//    EnableBranchStatus("D2X_ADC");
-//    EnableBranchStatus("D2X_ADC");
-//    EnableBranchStatus("D3X_ADC");
-//    EnableBranchStatus("D3X_ADC");
+	EnableBranchStatus("DiaADC");
+    EnableBranchStatus("D0X_ADC");
+    EnableBranchStatus("D0Y_ADC");
+    EnableBranchStatus("D1X_ADC");
+    EnableBranchStatus("D1Y_ADC");
+    EnableBranchStatus("D2X_ADC");
+    EnableBranchStatus("D2Y_ADC");
+    EnableBranchStatus("D3X_ADC");
+    EnableBranchStatus("D3Y_ADC");
 //	EnableBranchStatus("hasValidSiliconTrack");
 //	EnableBranchStatus("fiducialValueX");
 //	EnableBranchStatus("fiducialValueY");
@@ -999,6 +999,15 @@ void TADCEventReader::SelectBranchesForClustering(){
     EnableBranchStatus("diaPedestalSigma");
     EnableBranchStatus("diaPedestalSigmaCMN");
     EnableBranchStatus("commonModeNoise");
+    EnableBranchStatus("DiaADC");
+    EnableBranchStatus("D0X_ADC");
+    EnableBranchStatus("D0Y_ADC");
+    EnableBranchStatus("D1X_ADC");
+    EnableBranchStatus("D1Y_ADC");
+    EnableBranchStatus("D2X_ADC");
+    EnableBranchStatus("D2Y_ADC");
+    EnableBranchStatus("D3X_ADC");
+    EnableBranchStatus("D3Y_ADC");
 //    EnableBranchStatus("planes*");
 //    EnableBranchStatus("event*");
 //	EnableBranchStatus("hasValidSiliconTrack");
@@ -1014,6 +1023,28 @@ void TADCEventReader::SelectBranchesForClustering(){
 //    EnableBranchStatus("fiducialRegion");
 //    EnableBranchStatus("clusterTree.nClusters");
 //    EnableBranchStatus("clusterTree.event");
+}
+
+void TADCEventReader::SelectBranchesForPedestalAnalysis(){
+	tree->SetBranchStatus("*", 0);
+	EnableBranchStatus("eventNumber");
+	EnableBranchStatus("EventNumber");
+	EnableBranchStatus("PedestalMean");
+	EnableBranchStatus("PedestalSigma");
+	EnableBranchStatus("diaPedestalMean");
+	EnableBranchStatus("diaPedestalMeanCMN");
+	EnableBranchStatus("diaPedestalSigma");
+	EnableBranchStatus("diaPedestalSigmaCMN");
+	EnableBranchStatus("commonModeNoise");
+	EnableBranchStatus("DiaADC");
+    EnableBranchStatus("D0X_ADC");
+    EnableBranchStatus("D0Y_ADC");
+    EnableBranchStatus("D1X_ADC");
+    EnableBranchStatus("D1Y_ADC");
+    EnableBranchStatus("D2X_ADC");
+    EnableBranchStatus("D2Y_ADC");
+    EnableBranchStatus("D3X_ADC");
+    EnableBranchStatus("D3Y_ADC");
 }
 
 void TADCEventReader::EnableBranchStatus(std::string branch){

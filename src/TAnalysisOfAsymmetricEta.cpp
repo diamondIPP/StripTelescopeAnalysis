@@ -337,7 +337,7 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
     Float_t medi = xq[0];
     Float_t mean = histo->GetMean();
     bool valid = false;
-    if(TMath::Abs(medi - 0.5) <= 0.0001)
+    if(TMath::Abs(medi - 0.5) <= 0.0005)
         valid = true;
     alphaValues.push_back(alpha * 10);
     Float_t value = 0;
@@ -440,7 +440,7 @@ bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t median, Float_t mean){
 		cout<<"TAnalysisOfAsymmetricEta::updateAlpha for "<<det<<"\tMean:"<<mean<<" Median-0.5:"<<median<<endl;
 		cout<<"Alpha: "<<alpha<<endl;
 	}
-	Float_t delta = 0.01;
+	Float_t delta = 0.02;
 //    Float_t incr = skewness + (0.5-mean)*5;
     Float_t incr = median;
 	Float_t rando = rand3->Uniform(0.001);

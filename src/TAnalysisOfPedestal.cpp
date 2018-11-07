@@ -55,6 +55,7 @@ TAnalysisOfPedestal::TAnalysisOfPedestal(TSettings* newSettings) {
     pedestalValues.clear();
     upperHitCutValues.clear();
     lowerHitCutValues.clear();
+    eventReader->SelectBranchesForPedestalAnalysis();
 }
 
 TAnalysisOfPedestal::~TAnalysisOfPedestal() {
@@ -1571,7 +1572,7 @@ void TAnalysisOfPedestal::createPedestalMeanHistos()
                 this->pedestalSigmaValue.at(det).at(ch)/=nPedestalHits.at(det).at(ch);
             }
             else {
-                cout<<"No channel non-hits in "<<det<<" "<<ch<<":"<<nPedestalHits.at(det).at(ch)<<endl;
+//                cout<<"No channel non-hits in "<<det<<" "<<ch<<":"<<nPedestalHits.at(det).at(ch)<<endl;
                 this->pedestalMeanValue.at(det).at(ch)=0;
                 this->pedestalSigmaValue.at(det).at(ch)=0;
             }
