@@ -76,23 +76,23 @@ $(PROGS): $(LIBFILES)  diamondAnalysis.cpp diamondAnalysis.h
         #
         # linking $@
         #
-        # Please do: export LD_LIBRARY_PATH+=:~/lib
+        # Please do: export LD_LIBRARY_PATH+=:$(LIBDIR)
 		#$(LD) $^ $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
 		$(LD) $(LIBFILES) $(LDFLAGS)  $(ROOTGLIBS) $(OBJ) $(CFLAGS) -o $@
-		@echo  "Please do: export LD_LIBRARY_PATH+=:~/lib"
+		@echo  "Please do: export LD_LIBRARY_PATH+=:$(LIBDIR)"
 
 
 libTEvent.so: $(ROOTLIBFILES)	
 		#
 		# Creating Shared ROOT Lib
 		#
-		# Please do: export LD_LIBRARY_PATH:=$$LD_LIBRARY_PATH:~/lib
+		# Please do: export LD_LIBRARY_PATH:=$$LD_LIBRARY_PATH:$(LIBDIR)
 		#
 		$(LD) -m64 -shared $(LDFLAGS) -o $@ $^
 		mkdir -p $(LIBDIR)
 		cp -rfv libTEvent.so $(LIBDIR) 
  		#
- 		# Please do: export LD_LIBRARY_PATH:=$$LD_LIBRARY_PATH:~/lib
+ 		# Please do: export LD_LIBRARY_PATH:=$$LD_LIBRARY_PATH:$(LIBDIR)
  		#
  
 TEventDict.cpp: $(INCLUDEDIR)/TEvent.hh $(INCLUDEDIR)/TEventLinkDef.h
