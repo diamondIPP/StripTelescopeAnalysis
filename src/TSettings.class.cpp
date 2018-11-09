@@ -756,8 +756,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	si_avg_fidcut_ylow = 80;
 	si_avg_fidcut_yhigh = 160;
 
-	pulse_height_num_bins = 300;
-	pulse_height_si_max = 300;
+	pulse_height_num_bins = 256;
+	pulse_height_si_max = 256;
 	pulse_height_di_max = 4096;
 
 	snr_distribution_si_max = 2500;

@@ -71,61 +71,61 @@ void TAnalysisOfSelection::doAnalysis(UInt_t nEvents)
 
 void TAnalysisOfSelection::initialiseHistos()
 {
-	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",512,0,4096,8,0.5,8.5);
+	histoLandauDistribution = new TH2F("hLandauDiamond_OneCluster","hLandauDiamond_OneCluster",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),8,0.5,8.5);
 	histoLandauDistribution->GetXaxis()->SetTitle("Charge in ADC counts");
 	histoLandauDistribution->GetYaxis()->SetTitle("ClusterSize");
 
-	histoLandauDistribution2D = new TH2F("histoLandauDistribution2D_Clustersize_1_2","histoLandauDistribution2D_Clustersize_1_2",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2D = new TH2F("histoLandauDistribution2D_Clustersize_1_2","histoLandauDistribution2D_Clustersize_1_2",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2D->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderSeed = new TH2F("histoLandauDist2DNoBorderSeed","histoLandauDist2DNoBorderSeed",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderSeed = new TH2F("histoLandauDist2DNoBorderSeed","histoLandauDist2DNoBorderSeed",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderSeed->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderSeed->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderSeed->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderHit = new TH2F("histoLandauDist2D_Clustersize_1_2_noBorderHit","histoLandauDist2D_Clustersize_1_2_noBorderHit",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderHit = new TH2F("histoLandauDist2D_Clustersize_1_2_noBorderHit","histoLandauDist2D_Clustersize_1_2_noBorderHit",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderHit->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderHit->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderHit->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2D_unmasked = new TH2F("histoLandauDistribution2D_Clustersize_1_2_unmasked","histoLandauDistribution2D_Clustersize_1_2_unmasked",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2D_unmasked = new TH2F("histoLandauDistribution2D_Clustersize_1_2_unmasked","histoLandauDistribution2D_Clustersize_1_2_unmasked",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2D_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2D_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2D_unmasked->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderSeed_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderSeed-unmasked","hLandauDist2D_Clustersize_1_2NoBorderSeed",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderSeed_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderSeed-unmasked","hLandauDist2D_Clustersize_1_2NoBorderSeed",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderSeed_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderSeed_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderSeed_unmasked->GetZaxis()->SetTitle("number of entries");
 
-	histoLandauDistribution2DNoBorderHit_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderHit-unmasked","hLandauDist2D_Clustersize_1_2NoBorderHit",512,0,4096,TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
+	histoLandauDistribution2DNoBorderHit_unmasked = new TH2F("hLandauDist2D_Clustersize_1_2NoBorderHit-unmasked","hLandauDist2D_Clustersize_1_2NoBorderHit",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),TPlaneProperties::getNChannelsDiamond(),0,TPlaneProperties::getNChannelsDiamond()-1);
 	histoLandauDistribution2DNoBorderHit_unmasked->GetXaxis()->SetTitle("Charge of Cluster in ADC counts");
 	histoLandauDistribution2DNoBorderHit_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderHit_unmasked->GetZaxis()->SetTitle("number of entries");
 
-	hValidSiliconAndDiamondHit = new TH2F("hValidSiliconAndDiamondHit","hValidSiliconAndDiamondHit",256*4,0,255,256*4,0,255);
+	hValidSiliconAndDiamondHit = new TH2F("hValidSiliconAndDiamondHit","hValidSiliconAndDiamondHit",256*3,0,256,256*3,0,256);
 	hValidSiliconAndDiamondHit->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndDiamondHit->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHit = new TH2F("hValidSiliconAndOneDiamondHit","hValidSiliconAndOneDiamondHit",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHit = new TH2F("hValidSiliconAndOneDiamondHit","hValidSiliconAndOneDiamondHit",256*3,0,256,256*3,0,256);
 	hValidSiliconAndOneDiamondHit->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHit->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitNotMasked  = new TH2F("hValidSiliconAndOneDiamondHitNotMasked","hValidSiliconAndOneDiamondHitNotMasked	",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitNotMasked  = new TH2F("hValidSiliconAndOneDiamondHitNotMasked","hValidSiliconAndOneDiamondHitNotMasked	",256*3,0,256,256*3,0,256);
 	hValidSiliconAndOneDiamondHitNotMasked->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitNotMasked->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels= new TH2F("hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels","hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels= new TH2F("hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels","hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels",256*3,0,256,256*3,0,256);
 	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitInOneArea  = new TH2F("hValidSiliconAndOneDiamondHitInOneArea","hValidSiliconAndOneDiamondHitInOneArea	",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitInOneArea  = new TH2F("hValidSiliconAndOneDiamondHitInOneArea","hValidSiliconAndOneDiamondHitInOneArea	",256*3,0,256,256*3,0,256);
 	hValidSiliconAndOneDiamondHitInOneArea->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitInOneArea->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut = new TH2F("hValidSiliconAndOneDiamondHitInSameAreaAndFidCut","hValidSiliconAndOneDiamondHitInSameAreaAndFidCut",256*4,0,255,256*4,0,255);
+	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut = new TH2F("hValidSiliconAndOneDiamondHitInSameAreaAndFidCut","hValidSiliconAndOneDiamondHitInSameAreaAndFidCut",256*3,0,256,256*3,0,256);
 	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
 
@@ -149,34 +149,34 @@ void TAnalysisOfSelection::initialiseHistos()
 	hOneClusterHitChannelAreaVsFiducialArea->GetXaxis()->SetTitle("areas");
 	hOneClusterHitChannelAreaVsFiducialArea->GetYaxis()->SetTitle("Fiducial Area");
 
-	hFidCut= new TH2F("hFidCut","hFidCut",256*4,0,255,256*4,0,255);
+	hFidCut= new TH2F("hFidCut","hFidCut",256*3,0,256,256*3,0,256);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hFidCutOneDiamondCluster= new TH2F("hFidCut_oneDiamondCluster","hFidCut_oneDiamondCluster",256*4,0,255,256*4,0,255);
+	hFidCutOneDiamondCluster= new TH2F("hFidCut_oneDiamondCluster","hFidCut_oneDiamondCluster",256*3,0,256,256*3,0,256);
 	hFidCutOneDiamondCluster->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCutOneDiamondCluster->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hClusterPosition=new TH1F("hClusterPositionDia","Events which have a valid Silicon Track",128,0,127);
+	hClusterPosition=new TH1F("hClusterPositionDia","Events which have a valid Silicon Track",128,0,128);
 	hClusterPosition->GetXaxis()->SetTitle("highes Cluster Channel Position");
 	hClusterPosition->GetYaxis()->SetTitle("number of Events #");
 
-	hClusterSizeVsChannelPos = new TH2F("hClusterSizeVsChannelPos","hClusterSizeVsChannelPos",10,-.5,9.5,128,0,127);
+	hClusterSizeVsChannelPos = new TH2F("hClusterSizeVsChannelPos","hClusterSizeVsChannelPos",10,-.5,9.5,128,0,128);
 	hClusterSizeVsChannelPos->GetXaxis()->SetTitle("cluster size");
 	hClusterSizeVsChannelPos->GetYaxis()->SetTitle("channel of highest signal in cluster");
 
-	h3dDiamond = new TH1F("h3dDiamond","Sum of Charge for all 18 3d-channels",512,0,4096);
-	h3dDiamond_hit = new TH1F("h3dDiamond_hit","Sum of Charge for all 18 3d-channels with a Hit",512,0,4096);
-	hNoDiamond = new TH1F("hNoDiamond","Sum of Charge for all 18 no-channels",512,0,4096);
-	hNoDiamond_hit = new TH1F("hNoDiamond_hit","Sum of Charge for all 18 no-channels with a Hit",512,0,4096);
+	h3dDiamond = new TH1F("h3dDiamond","Sum of Charge for all 18 3d-channels",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()));
+	h3dDiamond_hit = new TH1F("h3dDiamond_hit","Sum of Charge for all 18 3d-channels with a Hit",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()));
+	hNoDiamond = new TH1F("hNoDiamond","Sum of Charge for all 18 no-channels",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()));
+	hNoDiamond_hit = new TH1F("hNoDiamond_hit","Sum of Charge for all 18 no-channels with a Hit",settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()));
 
 
 	TString name = TString::Format("hEtaVsLeftChannelNo");
-	hEtaVsLeftChannelNo = new TH2F(name,name,256,0,1,128,0,127);
+	hEtaVsLeftChannelNo = new TH2F(name,name,256,0,1,128,0,128);
 	hEtaVsLeftChannelNo->GetXaxis()->SetTitle("#eta");
 	hEtaVsLeftChannelNo->GetYaxis()->SetTitle("left channel of #eta");
 	name = TString::Format("hEtaCMNcorrectedVsLeftChannelNo");
-	hEtaCMNcorrectedVsLeftChannelNo = new TH2F(name,name,256,0,1,128,0,127);
+	hEtaCMNcorrectedVsLeftChannelNo = new TH2F(name,name,256,0,1,128,0,128);
 	hEtaCMNcorrectedVsLeftChannelNo->GetXaxis()->SetTitle("#eta_{CMNcorrected}");
 	hEtaCMNcorrectedVsLeftChannelNo->GetYaxis()->SetTitle("left channel of #eta ");
 	for (UInt_t i=1;i<=settings->getSelectionFidCuts()->getNFidCuts();i++){
@@ -184,7 +184,7 @@ void TAnalysisOfSelection::initialiseHistos()
 		Float_t xMax = settings->getSelectionFidCuts()->getMaxFiducialX(i);
 		UInt_t xBins = (Int_t)(3*(xMax-xMin));
 		name = TString::Format("hChargeVsFidX_HitInFidCutNo%d",i);
-		TH2F* histo = new TH2F(name,name,512,0,4096,xBins,xMin,xMax);
+		TH2F* histo = new TH2F(name,name,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),xBins,xMin,xMax);
 		histo->GetXaxis()->SetTitle("charge of diamond Hit");
 		histo->GetYaxis()->SetTitle("FiducialCut X/ch");
 		hChargeVsFidX.push_back(histo);
@@ -197,7 +197,7 @@ void TAnalysisOfSelection::initialiseHistos()
 		Float_t yMax =  settings->getSelectionFidCuts()->getMaxFiducialY(i);
 		xBins = (Int_t)(3*(yMax-yMin));
 		name = TString::Format("hChargeVsFidY_HitInFidCutNo%d",i);
-		histo = new TH2F(name,name,512,0,4096,xBins,yMin,yMax);
+		histo = new TH2F(name,name,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()),xBins,yMin,yMax);
 		histo->GetXaxis()->SetTitle("charge of diamond Hit");
 		histo->GetYaxis()->SetTitle("FiducialCut Y/ch");
 		hChargeVsFidY.push_back(histo);
@@ -225,7 +225,7 @@ void TAnalysisOfSelection::initialiseHistos()
 	ymax = ymax + 1; // .1 * deltaY;
 	Int_t xBins = (Int_t)(3*(deltaX + 2));
 	Int_t yBins = (Int_t)(3*(deltaY + 2));
-	hChargeVsFidCut = new TH3F(name,name,xBins,xmin,xmax,yBins,ymin,ymax,512,0,4096);
+	hChargeVsFidCut = new TH3F(name,name,xBins,xmin,xmax,yBins,ymin,ymax,settings->getPulse_height_num_bins(),0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()));
 	hChargeVsFidCut->GetXaxis()->SetTitle("FiducialValue X/ch");
 	hChargeVsFidCut->GetYaxis()->SetTitle("FiducialValue Y/ch");
 	hChargeVsFidCut->GetZaxis()->SetTitle("charge");
@@ -642,7 +642,7 @@ void TAnalysisOfSelection::saveFidCutHistos(){
 		hMeanChargeArea->GetXaxis()->SetRangeUser(xmin-xCorrect,xmax+xCorrect);
 		hMeanChargeArea->GetYaxis()->SetRangeUser(ymin-yCorrect,ymax+yCorrect);
 		hMeanChargeArea->SetMinimum(0);
-		hMeanChargeArea->SetMaximum(4096);
+		hMeanChargeArea->SetMaximum(settings->getPulse_height_max(TPlaneProperties::getDetDiamond()));
 		if(verbosity)cout<<"."<<flush;
 		histSaver->SaveHistogram(hMeanChargeArea);
 		if(verbosity)cout<<"."<<flush;
@@ -782,7 +782,7 @@ void TAnalysisOfSelection::saveHistos()
 	vector <Float_t> vecHistoMeanLandau;
 	TH1F* histoClusSize=0;
 	if(histoLandauDistribution){
-		histoClusSize = (TH1F*)histoLandauDistribution->ProjectionY("ClusterSizeDiamond",0,4096);
+		histoClusSize = (TH1F*)histoLandauDistribution->ProjectionY("ClusterSizeDiamond",0,settings->getPulse_height_max(TPlaneProperties::getDetDiamond()));
 		histo = (TH1F*)histoLandauDistribution->ProjectionX("hPulseHeightDiamondAll",0,8);
 	}
 
