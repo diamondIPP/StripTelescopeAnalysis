@@ -415,8 +415,8 @@ void TTransparentAnalysis::setSettings(TSettings* settings) {
 //}
 // DA: Adding 1 out of x cluster size histograms
 void TTransparentAnalysis::initHistograms1() {
-    Float_t temp_binsx = (predXMax-predXMin)*3/settings->getSiliconPitchWidth();
-    Float_t temp_binsy = (predYMax-predYMin)*3/settings->getSiliconPitchWidth();
+    Float_t temp_binsx = (predXMax-predXMin)*2/settings->getSiliconPitchWidth();
+    Float_t temp_binsy = (predYMax-predYMin)*2/settings->getSiliconPitchWidth();
     UInt_t binsx = float(int(temp_binsx)) == temp_binsx ? int(temp_binsx) : int(temp_binsx) + 1;
     UInt_t binsy = float(int(temp_binsy)) == temp_binsy ? int(temp_binsy) : int(temp_binsy) + 1;
 //    UInt_t bins = 128;
@@ -452,8 +452,8 @@ void TTransparentAnalysis::initHistograms1() {
 
 // DA: Adding N out of x cluster size histograms
 void TTransparentAnalysis::initHistogramsN() {
-    Float_t temp_binsx = (predXMax-predXMin)*3/settings->getSiliconPitchWidth();
-    Float_t temp_binsy = (predYMax-predYMin)*3/settings->getSiliconPitchWidth();
+    Float_t temp_binsx = (predXMax-predXMin)*2/settings->getSiliconPitchWidth();
+    Float_t temp_binsy = (predYMax-predYMin)*2/settings->getSiliconPitchWidth();
     UInt_t binsx = float(int(temp_binsx)) == temp_binsx ? int(temp_binsx) : int(temp_binsx) + 1;
     UInt_t binsy = float(int(temp_binsy)) == temp_binsy ? int(temp_binsy) : int(temp_binsy) + 1;
 //    UInt_t bins = 128;
@@ -488,8 +488,8 @@ void TTransparentAnalysis::initHistogramsN() {
     }
 }
 void TTransparentAnalysis::initHistograms2() {
-    Float_t temp_binsx = (predXMax-predXMin)*3/settings->getSiliconPitchWidth();
-    Float_t temp_binsy = (predYMax-predYMin)*3/settings->getSiliconPitchWidth();
+    Float_t temp_binsx = (predXMax-predXMin)*2/settings->getSiliconPitchWidth();
+    Float_t temp_binsy = (predYMax-predYMin)*2/settings->getSiliconPitchWidth();
     UInt_t binsx = float(int(temp_binsx)) == temp_binsx ? int(temp_binsx) : int(temp_binsx) + 1;
     UInt_t binsy = float(int(temp_binsy)) == temp_binsy ? int(temp_binsy) : int(temp_binsy) + 1;
 //    UInt_t bins = 128;

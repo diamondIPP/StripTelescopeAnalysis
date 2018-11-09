@@ -66,6 +66,7 @@ TSelectionClass::TSelectionClass(TSettings* newSettings) {
     nValidSiliconTrack=0;
     nSiliconTrackNotFiducialCut=0;
     nValidDiamondTrack=0;
+    nToBigDiamondCluster=0;
     initialiseHistos();
     htmlSelection->createFiducialCuts();
 }
@@ -333,7 +334,7 @@ void TSelectionClass::checkDiamondTrack(){
 
     nDiamondClusters=eventReader->getNClusters(diaDet);
 
-    isDiaSaturated=this->isSaturated(diaDet);
+    isDiaSaturated=(this->isSaturated(diaDet)) && (nDiamondClusters != 0);
     if(verbosity>4&&nDiamondClusters>0&&!IsInFiducialCut)
         cout<<"\nThis event has diamond hit which is not in fid Cut"<<endl;
 
@@ -345,7 +346,7 @@ void TSelectionClass::checkDiamondTrack(){
         if(nDiaClusterSize>=3){
             hasBigDiamondCluster=true;
             oneAndOnlyOneDiamondCluster=false;
-            atLeastOneValidDiamondCluster=false;
+//            atLeastOneValidDiamondCluster=false;
         }
     }
     if(verbosity>3){
@@ -365,11 +366,12 @@ void TSelectionClass::setVariables(){
     checkDiamondTrack();
 
 
-    useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster&&IsInFiducialCut;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
+    useForSiliconAlignment = isValidSiliconTrack&& !oneAndOnlyOneDiamondCluster;//&&IsInFiducialCut;//isValidDiamondEvent;// one and only one hit in silicon but not exactly one hit in diamond
     //	useForAlignment = oneAndOnlyOneDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&IsInFiducialCut;//one and only one hit in all detectors (also diamond)
     //	useForAnalysis=oneAndOnlyOneDiamondCluster&&!useForAlignment&&IsInFiducialCut;;
     useForAlignment = atLeastOneValidDiamondCluster&&settings->useForAlignment(nEvent,nEvents)&&IsInFiducialCut;//one and only one hit in all detectors (also diamond)
     useForAnalysis=atLeastOneValidDiamondCluster&&!useForAlignment&&IsInFiducialCut;;
+//    useForAnalysis=atLeastOneValidDiamondCluster && !settings->useForAlignment(nEvents,nEvents) && IsInFiducialCut;
     validMoreThanOneClusterDiamondevent = atLeastOneValidDiamondCluster && !oneAndOnlyOneDiamondCluster&&IsInFiducialCut;
     doEventCounting();
     fillHitOccupancyPlots();
@@ -421,32 +423,73 @@ void TSelectionClass::fillHitOccupancyPlots(){
     //		cout<<nEvent<<" not Use for ana or alignment @ "<<setprecision(4) <<std::setw(5)<<fiducialValueX<<"/"<<setprecision (4) <<std::setw(5)<<fiducialValueY<<":\t"<<std::setw(3)<<fiducialCuts->getFidCutRegion(fiducialValueX,fiducialValueY)<<endl;;
 }
 void TSelectionClass::doEventCounting(){
-    if(isSiliconTrackNotFiducialCut)
-        nSiliconTrackNotFiducialCut++;
-    if(useForAnalysis){
-        nUseForAnalysis++;
-        nValidSiliconAndDiamondCluster++;
+    if(oneAndOnlyOneSiliconCluster) {
+        if (!IsInFiducialCut)
+            nSiliconTrackNotFiducialCut++;
+        else {
+            nValidSiliconTrack++;
+            if (!atLeastOneValidDiamondCluster)
+                nValidSiliconNoDiamondHit++;
+            else {
+                nValidSiliconAndDiamondCluster++;
+                if (!oneAndOnlyOneDiamondCluster)
+                    nValidButMoreThanOneDiaCluster++;
+                else if (hasBigDiamondCluster)
+                    nToBigDiamondCluster++;
+                else if(oneAndOnlyOneDiamondCluster)
+                    nValidDiamondTrack++;
+            }
+        }
     }
-    if(useForAlignment){
+    else
+        nNoValidSiliconTrack++;
+    if(useForAlignment && oneAndOnlyOneDiamondCluster)
         nUseForAlignment++;
-        nValidSiliconAndDiamondCluster++;
-    }
+    if(useForAnalysis && oneAndOnlyOneDiamondCluster)
+        nUseForAnalysis++;
     if(useForSiliconAlignment)
         nUseForSiliconAlignment++;
-    if(useForSiliconAlignment&&validMoreThanOneClusterDiamondevent){
-        nValidButMoreThanOneDiaCluster++;
-        nValidSiliconAndDiamondCluster++;
-    }
-    if(isValidSiliconTrack&&!atLeastOneValidDiamondCluster)
-        nValidSiliconNoDiamondHit++;
-    if(isValidSiliconTrack&&oneAndOnlyOneDiamondCluster)
-        nValidDiamondTrack++;
-    if(hasBigDiamondCluster)
-        nToBigDiamondCluster++;
-    if(!isValidSiliconTrack)
-        nNoValidSiliconTrack++;
-    else
-        nValidSiliconTrack++;
+
+
+//    if(isValidSiliconTrack){
+//        nValidSiliconTrack++;
+//        if(!atLeastOneValidDiamondCluster)
+//            nValidSiliconNoDiamondHit++;
+//        else
+//            if(hasBigDiamondCluster)
+//                nToBigDiamondCluster++;
+//        if(oneAndOnlyOneDiamondCluster)
+//            nValidDiamondTrack++;
+//    }
+//    else
+//        nNoValidSiliconTrack++;
+//
+//    if(isSiliconTrackNotFiducialCut)
+//        nSiliconTrackNotFiducialCut++;
+//    if(useForAnalysis){
+//        nUseForAnalysis++;
+//        nValidSiliconAndDiamondCluster++;
+//    }
+//    if(useForAlignment){
+//        nUseForAlignment++;
+//        nValidSiliconAndDiamondCluster++;
+//    }
+//    if(useForSiliconAlignment)
+//        nUseForSiliconAlignment++;
+//    if(useForSiliconAlignment&&validMoreThanOneClusterDiamondevent){
+//        nValidButMoreThanOneDiaCluster++;
+//        nValidSiliconAndDiamondCluster++;
+//    }
+//    if(isValidSiliconTrack&&!atLeastOneValidDiamondCluster)
+//        nValidSiliconNoDiamondHit++;
+//    if(isValidSiliconTrack&&oneAndOnlyOneDiamondCluster)
+//        nValidDiamondTrack++;
+//    if(isValidSiliconTrack && hasBigDiamondCluster && atLeastOneValidDiamondCluster)
+//        nToBigDiamondCluster++;
+//    if(!isValidSiliconTrack)
+//        nNoValidSiliconTrack++;
+//    else
+//        nValidSiliconTrack++;
     Int_t fidCutNo = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
     while (fidCutNo >=0 && fidCutNo >= vSiliconEventsInFidCutRegions.size() ){
         vSiliconEventsInFidCutRegions.push_back(0);
@@ -625,7 +668,7 @@ void TSelectionClass::createCutFlowDiagramm()
     if(results!=0){
         if(!results->IsZombie()){
             results->setAllEvents(nEvents);
-            results->setNoSiliconHit(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut);
+            results->setNoSiliconHit(nNoValidSiliconTrack);
             results->setOneAndOnlyOneSiliconNotFiducialCut(nSiliconTrackNotFiducialCut);
             results->setValidSiliconTrack(nValidSiliconTrack);
             results->setNoDiamondHit(nValidSiliconNoDiamondHit);
@@ -637,12 +680,12 @@ void TSelectionClass::createCutFlowDiagramm()
     }
     char output[4000];
     int n=0;
-    n+=sprintf(&output[n],"Finished with Selection with alignment training fraction of %f%%\n",settings->getAlignment_training_track_fraction()*100.);
+    n+=sprintf(&output[n],"Finished with Selection with alignment training fraction of %f%% or %d events for alignment\n",settings->getAlignment_training_track_fraction()*100.),settings->getAlignmentTrainingTrackNumber();
     n+=sprintf(&output[n],"Selection Result: \n\tfor Silicon Alignment: %4.1f %%  %6d\n",((float)nUseForSiliconAlignment*100./(Float_t)nEvents),nUseForSiliconAlignment);
     n+=sprintf(&output[n],"\tfor Diamond Alignment: %4.1f %%  %6d\n",(float)nUseForAlignment*100./(Float_t)nEvents,nUseForAlignment);
     n+=sprintf(&output[n],"\tfor Diamond  Analysis: %4.1f %%  %6d\n",(float)nUseForAnalysis*100./(Float_t)nEvents,nUseForAnalysis);
     n+=sprintf(&output[n],"\nCUT-FLOW:\n");
-    n+=sprintf(&output[n],"AllEvents: %6d ------>%6d (%4.1f%%) no only one and only one Silicon Hit\n",nEvents,(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut),(float)(nNoValidSiliconTrack-nSiliconTrackNotFiducialCut)*100./(float)nEvents);
+    n+=sprintf(&output[n],"AllEvents: %6d ------>%6d (%4.1f%%) no only one and only one Silicon Hit\n",nEvents,(nNoValidSiliconTrack),(float)(nNoValidSiliconTrack)*100./(float)nEvents);
     n+=sprintf(&output[n],"                    |\n");
     n+=sprintf(&output[n],"                    L--->%6d (%4.1f%%) one and only one silicon hit, not in Fiducial Cut\n",nSiliconTrackNotFiducialCut,(float)nSiliconTrackNotFiducialCut*100./(float)nEvents);
     n+=sprintf(&output[n],"                    |\n");
@@ -652,11 +695,11 @@ void TSelectionClass::createCutFlowDiagramm()
     n+=sprintf(&output[n],"                              |\n");
     n+=sprintf(&output[n],"                              L--->%6d (%4.1f%%) at least one Diamond Hit\n",nValidSiliconAndDiamondCluster,(float)nValidSiliconAndDiamondCluster*100./(float)nValidSiliconTrack);
     n+=sprintf(&output[n],"                                        |\n");
-    n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) more than one Diamond Hit\n",nValidButMoreThanOneDiaCluster,(float)nValidButMoreThanOneDiaCluster*100./(float)nValidSiliconAndDiamondCluster);
+    n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) more than one Diamond cluster\n",nValidButMoreThanOneDiaCluster,(float)nValidButMoreThanOneDiaCluster*100./(float)nValidSiliconAndDiamondCluster);
     n+=sprintf(&output[n],"                                        |\n");
-    n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) toBigClusters (absolute: %4.1f%%)\n",nToBigDiamondCluster,(float)nToBigDiamondCluster*100./(float)nValidSiliconAndDiamondCluster,(float)nToBigDiamondCluster*100./(float)nEvents);
+    n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) too big clusters (absolute: %4.1f%%)\n",nToBigDiamondCluster,(float)nToBigDiamondCluster*100./(float)nValidSiliconAndDiamondCluster,(float)nToBigDiamondCluster*100./(float)nEvents);
     n+=sprintf(&output[n],"                                        |\n");
-    n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) exactly one Diamond Hit\n",nValidDiamondTrack,(float)nValidDiamondTrack*100./(float)nValidSiliconAndDiamondCluster);
+    n+=sprintf(&output[n],"                                        L--->%6d (%4.1f%%) exactly one Diamond cluster\n",nValidDiamondTrack,(float)nValidDiamondTrack*100./(float)nValidSiliconAndDiamondCluster);
 
     n+=sprintf(&output[n],"                                                  |\n");
     n+=sprintf(&output[n],"                                                  L--->%6d (%4.1f%%) Alignment (absolute: %4.1f%%)\n",nUseForAlignment,(float)nUseForAlignment*100./(float)nValidDiamondTrack,(float)nUseForAlignment*100./(float)nEvents);

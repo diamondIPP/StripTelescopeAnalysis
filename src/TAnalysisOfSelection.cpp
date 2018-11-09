@@ -105,27 +105,27 @@ void TAnalysisOfSelection::initialiseHistos()
 	histoLandauDistribution2DNoBorderHit_unmasked->GetYaxis()->SetTitle("channel of highest Signal");
 	histoLandauDistribution2DNoBorderHit_unmasked->GetZaxis()->SetTitle("number of entries");
 
-	hValidSiliconAndDiamondHit = new TH2F("hValidSiliconAndDiamondHit","hValidSiliconAndDiamondHit",256*3,0,256,256*3,0,256);
+	hValidSiliconAndDiamondHit = new TH2F("hValidSiliconAndDiamondHit","hValidSiliconAndDiamondHit",256*4,0,256,256*4,0,256);
 	hValidSiliconAndDiamondHit->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndDiamondHit->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHit = new TH2F("hValidSiliconAndOneDiamondHit","hValidSiliconAndOneDiamondHit",256*3,0,256,256*3,0,256);
+	hValidSiliconAndOneDiamondHit = new TH2F("hValidSiliconAndOneDiamondHit","hValidSiliconAndOneDiamondHit",256*4,0,256,256*4,0,256);
 	hValidSiliconAndOneDiamondHit->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHit->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitNotMasked  = new TH2F("hValidSiliconAndOneDiamondHitNotMasked","hValidSiliconAndOneDiamondHitNotMasked	",256*3,0,256,256*3,0,256);
+	hValidSiliconAndOneDiamondHitNotMasked  = new TH2F("hValidSiliconAndOneDiamondHitNotMasked","hValidSiliconAndOneDiamondHitNotMasked	",256*4,0,256,256*4,0,256);
 	hValidSiliconAndOneDiamondHitNotMasked->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitNotMasked->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels= new TH2F("hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels","hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels",256*3,0,256,256*3,0,256);
+	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels= new TH2F("hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels","hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels",256*4,0,256,256*4,0,256);
 	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitNotMaskedAdjacentChannels->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitInOneArea  = new TH2F("hValidSiliconAndOneDiamondHitInOneArea","hValidSiliconAndOneDiamondHitInOneArea	",256*3,0,256,256*3,0,256);
+	hValidSiliconAndOneDiamondHitInOneArea  = new TH2F("hValidSiliconAndOneDiamondHitInOneArea","hValidSiliconAndOneDiamondHitInOneArea	",256*4,0,256,256*4,0,256);
 	hValidSiliconAndOneDiamondHitInOneArea->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitInOneArea->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut = new TH2F("hValidSiliconAndOneDiamondHitInSameAreaAndFidCut","hValidSiliconAndOneDiamondHitInSameAreaAndFidCut",256*3,0,256,256*3,0,256);
+	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut = new TH2F("hValidSiliconAndOneDiamondHitInSameAreaAndFidCut","hValidSiliconAndOneDiamondHitInSameAreaAndFidCut",256*4,0,256,256*4,0,256);
 	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
 
@@ -149,11 +149,11 @@ void TAnalysisOfSelection::initialiseHistos()
 	hOneClusterHitChannelAreaVsFiducialArea->GetXaxis()->SetTitle("areas");
 	hOneClusterHitChannelAreaVsFiducialArea->GetYaxis()->SetTitle("Fiducial Area");
 
-	hFidCut= new TH2F("hFidCut","hFidCut",256*3,0,256,256*3,0,256);
+	hFidCut= new TH2F("hFidCut","hFidCut",256*4,0,256,256*4,0,256);
 	hFidCut->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCut->GetYaxis()->SetTitle("FidCutValue in Y");
 
-	hFidCutOneDiamondCluster= new TH2F("hFidCut_oneDiamondCluster","hFidCut_oneDiamondCluster",256*3,0,256,256*3,0,256);
+	hFidCutOneDiamondCluster= new TH2F("hFidCut_oneDiamondCluster","hFidCut_oneDiamondCluster",256*4,0,256,256*4,0,256);
 	hFidCutOneDiamondCluster->GetXaxis()->SetTitle("FidCutValue in X");
 	hFidCutOneDiamondCluster->GetYaxis()->SetTitle("FidCutValue in Y");
 
