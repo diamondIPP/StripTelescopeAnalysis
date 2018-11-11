@@ -838,7 +838,7 @@ bool TAnalysisOf3dDiamonds::TransparentAnalysis() {
     //cout<<TString::Format("3DwH Start Channel: %i, Hit Channel Int: %i, Hit Channel Float: %.2f, clusterSize: %i", channels.first, XdetChannelSpaceInt, XdetChannelSpace, clusterSize)<<endl;
 
     transparentCluster.clear();
-    transparentCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,XdetChannelSpace,maxClusterSize3d);
+    transparentCluster = TTransparentAnalysis::makeTransparentCluster2(eventReader,settings,subjectDetector,XdetChannelSpace,maxClusterSize3d);
 
     if(transparentCluster.isSaturatedCluster()){
         if (bOutput) cout<<s<<"SaturatedCluster"<<endl;
@@ -3849,7 +3849,7 @@ void TAnalysisOf3dDiamonds::MakeGhostCluster(TCluster *diamondCluster, Int_t Clu
     while(ClusterStart<=ghostHit&&ghostHit<=ClusterEnd);
     ghostHit-=.5;
     if(verbosity>5)cout<<"new Ghost Hit at "<<ghostHit<<endl;
-    GhostCluster = TTransparentAnalysis::makeTransparentCluster(eventReader,settings,subjectDetector,ghostHit,ClusterSize);
+    GhostCluster = TTransparentAnalysis::makeTransparentCluster2(eventReader,settings,subjectDetector,ghostHit,ClusterSize);
     if(verbosity>5) GhostCluster.Print(1);
 }
 

@@ -227,7 +227,7 @@ void TAlignment::createTransparentEventVectors(UInt_t nEvents, UInt_t startEvent
 //            cout << nEvent << " " << predX << "/" << predY << ": " << metricPosInDetSystem << " -->" << centerPos <<
 //            endl;
         //			cout<<nEvent<<" "<<predX<<"/"<<predY<<"\t"<<metricPosInDetSystem<< " - "<< centerPos<<endl;
-        TCluster cluster = TTransparentAnalysis::makeTransparentCluster(eventReader, settings, subjectDetector,
+        TCluster cluster = TTransparentAnalysis::makeTransparentCluster2(eventReader, settings, subjectDetector,
                                                                         centerPos, 10);
         //			cluster.Print(1);
         TEvent *event = eventReader->getEvent();

@@ -73,7 +73,8 @@ public:
 	void analyze(UInt_t nEvents, UInt_t startEvent);
 	void calcEtaCorrectedResiduals();
 	void setSettings(TSettings* settings);
-	static TCluster makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize);
+    TCluster makeTransparentCluster(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize, Bool_t isNonHit=false);
+	static TCluster makeTransparentCluster2(TTracking *reader,TSettings* set, UInt_t det, Float_t centerPosition, UInt_t clusterSize);
 	void setResults(TResults* res){cout<<"Setting results!"<<endl;results=res;};
 private:
 	void clearEventVector();
@@ -299,7 +300,38 @@ private:
 	vector<Float_t> noiseWidths2OutOfX; // DA
 	vector<Float_t> noiseWidths2OutOfXCMN; // DA
 
-	std::map< UInt_t, TProfile* > hPedestalVsEvenNo;
+    UInt_t event;
+    Bool_t alignmentEvent;
+    Bool_t transparentEvent;
+    Bool_t noValidSilTrack;
+    Bool_t notInFidCut;
+    Bool_t tooHighChi2;
+    Bool_t notInPlane;
+    Bool_t hasScreenedCh;
+    Bool_t hasSaturatedCh;
+    Float_t fidX;
+    Float_t fidY;
+    Float_t diaChXPred;
+    Float_t diaChYPred;
+    Float_t xPredicted;
+    Float_t yPredicted;
+    Float_t chi_2;
+    Float_t clusterChargeAll;
+    Float_t clusterCharge1;
+    Float_t clusterCharge2;
+    Float_t clusterChargeN;
+    Float_t diaChSignal[128];
+    UChar_t diaChannels[128];
+    Bool_t diaChHighest[128];
+    Bool_t diaChSeed[128];
+    Bool_t diaChHits[128];
+    Bool_t diaChsScreened[128];
+    Bool_t diaChsNoisy[128];
+    Bool_t diaChsNC[128];
+    UInt_t suffix;
+
+
+    std::map< UInt_t, TProfile* > hPedestalVsEvenNo;
     std::map< UInt_t, TProfile* > hNoiseVsEvenNo;
 
 	TProfile* hCmnVsEventNo;
@@ -315,6 +347,13 @@ private:
 	TH1F* hNClusteres_Clustered;
 
 	Float_t minX,maxX,minY,maxY;
+
+	TTree *transpTree;
+	TFile *transpFile;
+
+	void CreateTransparentTree();
+	void InitializeTreeVectors();
+	void SetBranchAddresses();
 
 public:
 	static UInt_t GetHitArea(TSettings* set, Float_t xVal, Float_t yVal,UInt_t xDivisions,UInt_t yDivisions);

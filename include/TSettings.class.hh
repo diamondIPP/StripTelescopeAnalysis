@@ -60,6 +60,7 @@ public:
 	std::string getClusterTreeFilePath();
 	std::string getAlignmentFilePath(TSettings::alignmentMode mode = TSettings::normalMode);
 	std::string getSelectionTreeFilePath();
+	std::string getTransparentTreeFilePath(UInt_t suffix=0);
 	std::string getSelectionAnalysisPath(){return this->getAbsoluteOuputPath(true).append("/selectionAnalysis/");};
 	std::string getCrossTalkFactorsFileName();
 	std::string getSelectionPath(){return this->getAbsoluteOuputPath(true).append("/selectionss/");}
@@ -186,7 +187,8 @@ public:
 	ChannelScreen getDet_channel_screen(int i);
 	bool isDet_channel_screened(UInt_t det,UInt_t ch);
 	bool IsMasked(UInt_t det, UInt_t ch){return isDet_channel_screened(det,ch);}
-	bool IsMasked(UInt_t det, Float_t ch){return (IsMasked(det,(UInt_t)ch)||IsMasked(det,(UInt_t)ch+1));}
+	bool IsMasked(UInt_t det, Float_t ch){return IsMasked(det, UInt_t(std::floor(ch+0.5)));}
+//	bool IsMasked(UInt_t det, Float_t ch){return (IsMasked(det,(UInt_t)ch)||IsMasked(det,(UInt_t)ch+1));}
 	UInt_t getNoisePlotChannel(){return 48;}//todo: variable in setttings file
 	std::vector<int> getDet_channel_screen_channels(int i) const;
 	bool getAlternativeClustering() const;

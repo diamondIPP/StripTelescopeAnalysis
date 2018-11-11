@@ -259,6 +259,19 @@ std::string TSettings::getSelectionTreeFilePath()
 	return path.str();
 }
 
+std::string TSettings::getTransparentTreeFilePath(UInt_t suffix){
+	stringstream path;
+	path<<getAbsoluteOuputPath(false);
+	path<<"transparent";
+	if(suffix!=0)
+		path<<"2";
+	path<<"."<<getRunNumber();
+	if(this->isSpecialAnalysis())
+		path<<"-"<<getRunDescription();
+	path<<".root";
+	return path.str();
+}
+
 std::string TSettings::getCrossTalkFactorsFileName(){
 	string hName = this->getAbsoluteOuputPath(false);
 	hName.append(TString::Format("crossTalkCorrectionFactors.%d",runNumber));
@@ -509,6 +522,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"snr_distribution_si_max"))  Parse(key,value,snr_distribution_si_max);
 		if (TPlaneProperties::startsWith(key,"snr_distribution_di_max"))  Parse(key,value,snr_distribution_di_max);
 		if (TPlaneProperties::startsWith(key,"alignment_chi2")) Parse(key,value,alignment_chi2);
+		if (TPlaneProperties::startsWith(key,"transparentChi2")) Parse(key,value,transparentChi2);
 		if (TPlaneProperties::startsWith(key,"UseAutoFidCut")) Parse(key,value,UseAutoFidCut);
 		if (TPlaneProperties::startsWith(key,"nDiamonds")) this->setNDiamonds(ParseInt(key,value));
 		if (TPlaneProperties::startsWith(key,"AlternativeClustering")) Parse(key,value,AlternativeClustering);

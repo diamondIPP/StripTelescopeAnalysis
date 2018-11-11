@@ -308,26 +308,26 @@ void TCluster::addChannel(UInt_t ch, Float_t pedMean, Float_t pedSigma, Float_t 
  * @return
  */
 Float_t TCluster::getPosition(bool cmnCorrected, calculationMode_t mode,TH1F *histo){
-	if(mode == TCluster::corEta && histo==0)
-		cout<<"TCluster::getPosition::histo == 0"<<endl;
-	if(mode==maxValue)
-		return this->getHighestSignalChannel();
-	else if(mode==chargeWeighted)
-		return this->getChargeWeightedMean(cmnCorrected);
-	else if (mode == highest2CentroidNoSmallHits)
-		return this->getHighest2Centroid(cmnCorrected,false);
-	else if(mode==highest2Centroid)
-		return this->getHighest2Centroid(cmnCorrected,true);
-	else if(mode==eta)
-		return this->getEtaPostion(cmnCorrected);
-	else if(mode == corEta&&histo==0){
-		if(verbosity)cerr<<"mode = cor Eta, but histo =0, "<<endl;
-		//		this->Print();
-		return this->getEtaPostion(cmnCorrected);
-	}
-	else if(mode == corEta&&histo!=0)
-		return this->getPositionCorEta(cmnCorrected,histo);
 
+	if(mode==maxValue) {
+		return this->getHighestSignalChannel();}
+	else if(mode==chargeWeighted){
+		return this->getChargeWeightedMean(cmnCorrected);}
+	else if (mode == highest2CentroidNoSmallHits){
+		return this->getHighest2Centroid(cmnCorrected,false);}
+	else if(mode==highest2Centroid){
+		return this->getHighest2Centroid(cmnCorrected,true);}
+	else if(mode==eta){
+		return this->getEtaPostion(cmnCorrected);}
+	else if(mode == TCluster::corEta) {
+		if(histo == 0){
+			cout << "TCluster::getPosition::histo == 0" << endl;
+			if (verbosity)cerr << "mode = cor Eta, but histo =0, " << endl;
+			//		this->Print();
+			return this->getEtaPostion(cmnCorrected);}
+		else
+			return this->getPositionCorEta(cmnCorrected, histo);
+	}
 	return 0;//todo;
 }
 

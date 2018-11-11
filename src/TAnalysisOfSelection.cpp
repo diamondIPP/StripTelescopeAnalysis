@@ -1174,7 +1174,7 @@ void TAnalysisOfSelection::analyseEvent()
 	Float_t pos = cluster.getPosition(settings->doCommonModeNoiseCorrection(),TCluster::maxValue,0);
 	Int_t fidRegionIndex = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY)-1;
 	Int_t area = settings->getDiaDetectorAreaOfChannel(pos,0);
-	bool isInOneArea = !(area==-1);
+	bool isInOneArea = (area!=-1);
 //	if(verbosity && pos <= 20) settings->diamondPattern.showPatterns();
 //	if(verbosity && pos <= 13 && pos>0) cout<<"\n*****"<<(int)pos<< " "<< fidRegionIndex << " / " << area <<" "<<nDiaClusters<<" "<<eventReader->isInOneFiducialArea()<<"\t"<<flush;
 
@@ -1191,7 +1191,7 @@ void TAnalysisOfSelection::analyseEvent()
 			hValidSiliconAndOneDiamondHitInSameAreaAndFidCut->Fill(fiducialValueX,fiducialValueY);
 		hOneClusterHitChannel->Fill(pos);
 		hOneClusterHitChannelVsArea->Fill(pos,area);
-	}
+//	}
 	Int_t fiducial_area = settings->getSelectionFidCuts()->getFidCutRegion(fiducialValueX,fiducialValueY);
 	hOneClusterHitChannelVsFiducialArea->Fill(pos,fiducial_area);
 	hOneClusterHitChannelAreaVsFiducialArea->Fill(area,fiducial_area);
@@ -1205,6 +1205,8 @@ void TAnalysisOfSelection::analyseEvent()
 //	if(fidRegionIndex>0) cout<<"FidRegion: "<<fidRegionIndex<<" "<<endl;
 	hFidCut->Fill(fiducialValueX,fiducialValueY);
 	hNDiaClusters -> Fill(nDiaClusters);
+	hFidCutOneDiamondCluster->Fill(fiducialValueX,fiducialValueY);
+	}
 	if (nDiaClusters > 1){
 		TCluster cluster2 = eventReader->getCluster(TPlaneProperties::getDetDiamond(),1);
 		Float_t pos2 = cluster2.getPosition(settings->doCommonModeNoiseCorrection(),TCluster::maxValue,0);
@@ -1212,9 +1214,9 @@ void TAnalysisOfSelection::analyseEvent()
 		hTwoClustersArea->Fill(area,area2);
 //		if(verbosity && pos <= 20) {cluster.Print();cluster2.Print();}
 	}
-	else if(nDiaClusters>1)
+	else if(nDiaClusters>2)
 		return;
-	hFidCutOneDiamondCluster->Fill(fiducialValueX,fiducialValueY);
+//	hFidCutOneDiamondCluster->Fill(fiducialValueX,fiducialValueY);
 
 
 	if(clustSize>8) clustSize=8;
@@ -1306,7 +1308,7 @@ void TAnalysisOfSelection::initDividedAreaAxis(TAxis* axis){
 
 void TAnalysisOfSelection::initPHvsEventNoAreaPlots(UInt_t nStart, UInt_t nEnd) {
     if(verbosity) cout<<"initPHvsEventNoAreaPlots"<<endl;
-    Int_t nentriesPerBin = 20000;
+    Int_t nentriesPerBin = 1000;
 //    Int_t subjectDetector = TPlaneProperties::getDetDiamond();
     TString name = TString::Format("hPHvsEventNoArea");
     TString title = TString::Format("ph vs eventNo");
