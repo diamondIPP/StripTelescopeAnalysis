@@ -88,6 +88,7 @@ public:
 	void SelectBranchesForClusteringAnalysis();
 	void SelectBranchesForClustering();
 	void SelectBranchesForPedestalAnalysis();
+	void ResetArrays();
 
 	bool isDetMasked();
 	TEvent* getEvent();

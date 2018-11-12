@@ -229,7 +229,7 @@ void TADCEventReader::SetBranchAddresses(){
 	}
 	//tree->SetBranchAddress("Dia_ADC",&Dia_ADC);
 	if(tree->FindBranch("DiaADC")){
-		tree->SetBranchAddress("DiaADC",&Dia_ADC);
+		tree->SetBranchAddress("DiaADC",Dia_ADC);
 		if(verbosity>3)cout<<"Set Branch \"DiaADC\""<<endl;
 	}
 	if(tree->FindBranch("D0X_PedMean")){
@@ -423,6 +423,7 @@ bool TADCEventReader::GetNextEvent(){
 bool TADCEventReader::LoadEvent(UInt_t EventNumber){
 	if(tree==NULL) return false;
 	if(EventNumber<tree->GetEntries()){
+		ResetArrays();
 		current_event=EventNumber;
 		tree->GetEvent(current_event);
 		if((EventNumber != this->getEvent_number()) || (EventNumber != this->getCurrent_event()))
@@ -1070,4 +1071,23 @@ void TADCEventReader::DisableBranchStatus(std::string branch){
     }
     else
         cout << "Branch " << branch << " does not exist in tree " << tree->GetName() << endl;
+}
+
+void TADCEventReader::ResetArrays(){
+    event_number = 0;
+	cmNoise = 0;
+	for(int det = 0; det < TPlaneProperties::getNSiliconDetectors(); det++) {
+		for(int ch = 0; ch < TPlaneProperties::getNChannelsSilicon(); ch++){
+			Det_ADC[det][ch] = 0;
+			pedestalMean[det][ch] = 0;
+			pedestalSigma[det][ch] = 0;
+			if(det ==0 && ch < TPlaneProperties::getNChannelsDiamond()){
+				Dia_ADC[ch] = 0;
+				diaPedestalMean[ch] = 0;
+				diaPedestalSigma[ch] = 0;
+				diaPedestalMeanCMN[ch] = 0;
+				diaPedestalSigmaCMN[ch] = 0;
+			}
+		}
+	}
 }
