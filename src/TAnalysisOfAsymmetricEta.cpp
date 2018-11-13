@@ -73,6 +73,8 @@ void TAnalysisOfAsymmetricEta::FillEtaDistribution(TH2F* histo, Float_t correcti
 			isMasked ++;
 		    continue;
 		}
+		if(clus.isSaturatedCluster())
+			continue;
 		TCluster newClus = clus.getCrossTalkCorrectedCluster(correctionAlpha);
 		Int_t leftChannel,oldChannel;
 		Float_t newEta = newClus.getEta(leftChannel);
