@@ -339,7 +339,7 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
     Float_t medi = xq[0];
     Float_t mean = histo->GetMean();
     bool valid = false;
-    if(TMath::Abs(medi - 0.5) <= 0.0005)
+    if(TMath::Abs(medi - 0.5) <= settings->get_eta_corr_limit())
         valid = true;
     alphaValues.push_back(alpha * 10);
     Float_t value = 0;

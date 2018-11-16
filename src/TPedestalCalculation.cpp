@@ -158,10 +158,8 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 		//Add next Event to detAdcValues, diaAdcValues
 		//Remove first Event from Queue
 
-		eventReader->LoadEvent(nEvent);
+		LoadEvent(nEvent);
 		//SILICON PLANES
-		if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event()))
-			cout<< "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: " << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: " << int(eventReader->getCurrent_event()) << "\n" <<endl;
 		updateSiliconPedestals();
 		doCmNoiseCalculation();
 		//DIAMOND PLANE
@@ -174,6 +172,17 @@ void TPedestalCalculation::calculateSlidingPedestals(UInt_t nEvents){
 	watch.Stop();
 	if(verbosity)cout<<"\nTime needed for PedestalCalulation:"<<endl;
 	if(verbosity)watch.Print();
+}
+
+void TPedestalCalculation::LoadEvent(UInt_t nEvent){
+	eventReader->LoadEvent(nEvent);
+	if((nEvent != eventReader->getEvent_number()) || (nEvent != eventReader->getCurrent_event())) {
+		cout << "\nPedestal calculation Event: " << int(nEvent) << ". Ev Reader Event Number: "
+			 << int(eventReader->getEvent_number()) << ". Ev Reader Current Event: "
+			 << int(eventReader->getCurrent_event()) << "\n" << endl;
+		cout << "Loading the event again..." << endl;
+		LoadEvent(nEvent);
+	}
 }
 
 

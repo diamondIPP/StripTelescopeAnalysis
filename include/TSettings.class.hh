@@ -359,6 +359,7 @@ public:
     UInt_t getNEvents(){return nEvents;};
     const std::pair<float,float> get3DOverlayRange(){return OverlayRange3d;}
     bool RerunSelection(){return bRerunSelection;}
+	Float_t get_eta_corr_limit(){return eta_corr_limit;}
 private:
 
 	TString diamondName;
@@ -470,6 +471,7 @@ private:
 	Float_t eta_hiq_slice_hi;
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
+	Float_t eta_corr_limit;
 //	std::vector<Int_t> bSkipEvents;
 
 	UInt_t dia_saturation; // DA

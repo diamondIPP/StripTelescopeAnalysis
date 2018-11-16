@@ -449,6 +449,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"Taylor_speed_throttle")) Parse(key,value,Taylor_speed_throttle);
 		if (TPlaneProperties::startsWith(key,"dia_input")) Parse(key,value,dia_input);
 		if (TPlaneProperties::startsWith(key,"dia_saturation")) Parse(key,value,dia_saturation); // DA
+		if (TPlaneProperties::startsWith(key,"eta_corr_limit")) Parse(key,value,eta_corr_limit); // DA
 		if (TPlaneProperties::startsWith(key,"max_transparent_cluster_size")) Parse(key,value,max_transparent_cluster_size); // DA
 		if (TPlaneProperties::startsWith(key,"num_highest_transparent_cluster")) Parse(key,value,num_highest_transparent_cluster); // DA
 		if (TPlaneProperties::startsWith(key,"alignment_training_track_fraction")) Parse(key,value,alignment_training_track_fraction);
@@ -780,6 +781,8 @@ void TSettings::DefaultLoadDefaultSettings(){
 	UseAutoFidCut = 0;
 	nDiamonds=1;
 	AlternativeClustering = 0;
+
+	eta_corr_limit = 0.0005;
 
 	//Hi/low eta slices
 	eta_lowq_slice_low = 600;

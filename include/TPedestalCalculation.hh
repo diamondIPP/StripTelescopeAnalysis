@@ -60,6 +60,7 @@ private:
 	void initialiseDeques();
 	void updateDiamondPedestals();
 	void updateSiliconPedestals();
+	void LoadEvent(UInt_t nEvent);
 	TADCEventReader* eventReader;
 	TFile* pedestalFile;
 	TTree* pedestalTree;

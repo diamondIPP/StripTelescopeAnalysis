@@ -42,7 +42,7 @@ TClustering::TClustering(TSettings* set){//int runNumber,int seedDetSigma,int hi
 		stringstream histName;
 		histName<<"hEtaDistribution_"<<det;//<<TADCEventReader::getStringForPlane(det);
 //		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),1024,0,1);
-		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),125,0,1);
+		hEtaDistribution[det]=new TH1F(histName.str().c_str(),histName.str().c_str(),126,0-1/(2*125.0),1+1/(2*125.0));
 	}
 	nInvalidReadout=0;
 }
