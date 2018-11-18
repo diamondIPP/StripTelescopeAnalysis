@@ -447,6 +447,7 @@ void TSettings::LoadSettings(){
 		if (TPlaneProperties::startsWith(key,"CMN_cut")) Parse(key,value,CMN_cut);
 		if (TPlaneProperties::startsWith(key,"Iter_Size"))Parse(key,value,Iter_Size);
 		if (TPlaneProperties::startsWith(key,"Taylor_speed_throttle")) Parse(key,value,Taylor_speed_throttle);
+		if (TPlaneProperties::startsWith(key,"event_start")) Parse(key,value,event_start); // DA
 		if (TPlaneProperties::startsWith(key,"dia_input")) Parse(key,value,dia_input);
 		if (TPlaneProperties::startsWith(key,"dia_saturation")) Parse(key,value,dia_saturation); // DA
 		if (TPlaneProperties::startsWith(key,"eta_corr_limit")) Parse(key,value,eta_corr_limit); // DA
@@ -730,6 +731,7 @@ void TSettings::DefaultLoadDefaultSettings(){
 	store_threshold=2;
 	//default pedestal settings
 	fix_dia_noise = -1;//7.7; // fix_dia_noise<0 disables diamond noise-fixing
+	event_start = 0;
 	dia_input = 0; // 1 for 2006 and 0 for the rest
 	DO_CMC = 1;
 	CMN_cut = 4;  //Should be less than or equal to CMN_coor_high
@@ -1623,6 +1625,14 @@ void TSettings::setTaylor_speed_throttle(Int_t Taylor_speed_throttle)
 Float_t TSettings::getDi_Pedestal_Hit_Factor() const
 {
 	return Di_Pedestal_Hit_Factor;
+}
+
+UInt_t TSettings::getEventStart() const{
+	return event_start;
+}
+
+UInt_t TSettings::setEventStart(UInt_t ev) {
+	this->event_start = ev;
 }
 
 Int_t TSettings::getDia_input() const

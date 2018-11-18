@@ -212,7 +212,7 @@ int main(int argc, char ** argv) {
 		eventSaver->saveEvents(RunParameters[i].getEvents());
 		delete eventSaver;
 
-		Long64_t nEvents = RunParameters[i].getEvents();
+		Long64_t nEvents = RunParameters[i].getEvents() - settings->getEventStart();
 
 		//Calculate Pedestal
 		sys->cd(currentDir.c_str());

@@ -138,6 +138,8 @@ public:
 	Int_t getIter_Size() const;
 	Int_t getPedestalSildingLength(){return getIter_Size();};
 	Int_t getTaylor_speed_throttle() const;
+	UInt_t getEventStart() const;
+	UInt_t setEventStart(UInt_t ev);
 	Int_t getDia_input() const;
 	Float_t getDi_Pedestal_Hit_Factor() const;
 	Float_t getSi_Pedestal_Hit_Factor() const;
@@ -472,6 +474,7 @@ private:
 	Int_t etavsq_n_landau_slices;
 	Int_t snr_plots_enable;
 	Float_t eta_corr_limit;
+	UInt_t event_start;
 //	std::vector<Int_t> bSkipEvents;
 
 	UInt_t dia_saturation; // DA
