@@ -65,7 +65,7 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 									<< putImage(".",(TString)"hDiaTranspAnaPulseHeightOfNHighestIn10MP"  );
 	sectionSummary << "\n\n<br><br>\n\n";
     addSection("Pulse Height - Summary table",sectionSummary.str());
-	stringstream plots1, plots2, plots3;
+	stringstream plots1, plots2, plots3, plots4;
 	for (UInt_t clusterSize = 1; clusterSize < TPlaneProperties::getMaxTransparentClusterSize(subjectDetector)+1; clusterSize++) {
 		stringstream histoname1, histoname2;
 		histoname1 << "cDiaTranspAnaPulseHeightOf"<<clusterSize<<"Strips";
@@ -109,6 +109,16 @@ void THTMLTransparentAnalysis::createPulseHeightPlots(vector<vector <Float_t> > 
 	pXY <<"\n\n<br><br>\n\n";
 	pXY << putImage((string)".", (string)"hLandau5HighestIn10HitProfile") << "\n";
     addSection("XY Pulse Height Distributions",pXY.str());
+
+	stringstream PulseHeight_EventNumber;
+	PulseHeight_EventNumber << "<h2>N highest channels in 10 strips</h2>\n";
+	for (UInt_t n_strips = 0; n_strips < 10; n_strips++) {
+		stringstream histoname4;
+		histoname4 << "c_hPHVsEventNo_" << n_strips+1 << "In10_pfx";
+		plots4 << putImage(".",histoname4.str()) << " \n";
+	}
+	PulseHeight_EventNumber << plots4.str();
+	addSection("Pulse Height Stability", PulseHeight_EventNumber.str());
 }
 
 void THTMLTransparentAnalysis::createResolutionPlots(vector<vector <pair <Float_t,Float_t> > > resolutions) {
