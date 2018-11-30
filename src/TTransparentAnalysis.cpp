@@ -2358,6 +2358,8 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
                             transparentEvent = true;
                             for(int ch = 0; ch<128; ch++){
                                 diaChSignal[ch] = eventReader->getSignal(subjectDetector, ch, true, false);
+                                Float_t diaSignalInSigma = eventReader->getSignalInSigma(subjectDetector, ch, true, false);
+                                diaChSeed[ch] = (diaSignalInSigma >= settings->getClusterSeedFactor(subjectDetector, ch));
                             }
                             this->fillHistograms();
                             if (verbosity > 4) printEvent();
@@ -2422,12 +2424,12 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
         if (TPlaneProperties::IsValidChannel(det,currentChannel)) {
             transparentCluster.addChannel(currentChannel, pedMean, pedSigma, pedMeanCMN, pedSigmaCMN, adcValue,
                                           set->isSaturated(det, adcValue), isScreened);
-            if(!isNonHit) {
-                if (iChannel == 0)
-                    this->diaChSeed[int(currentChannel)] = true;
-                else
-                    this->diaChHits[int(currentChannel)] = true;
-            }
+//            if(!isNonHit) {
+//                if (iChannel == 0)
+//                    this->diaChSeed[int(currentChannel)] = true;
+//                else
+//                    this->diaChHits[int(currentChannel)] = true;
+//            }
         }
         //		else
         //			cout<<"\t cannot add invalid channel"<<currentChannel<<" @ "<<reader->getEvent_number()<<endl;
