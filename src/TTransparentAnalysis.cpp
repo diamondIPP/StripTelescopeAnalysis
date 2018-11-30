@@ -2424,12 +2424,12 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
         if (TPlaneProperties::IsValidChannel(det,currentChannel)) {
             transparentCluster.addChannel(currentChannel, pedMean, pedSigma, pedMeanCMN, pedSigmaCMN, adcValue,
                                           set->isSaturated(det, adcValue), isScreened);
-//            if(!isNonHit) {
+            if(!isNonHit) {
 //                if (iChannel == 0)
 //                    this->diaChSeed[int(currentChannel)] = true;
 //                else
-//                    this->diaChHits[int(currentChannel)] = true;
-//            }
+                    this->diaChHits[int(currentChannel)] = true;
+            }
         }
         //		else
         //			cout<<"\t cannot add invalid channel"<<currentChannel<<" @ "<<reader->getEvent_number()<<endl;
