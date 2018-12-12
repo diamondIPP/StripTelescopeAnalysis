@@ -19,6 +19,7 @@
 #include "TROOT.h"
 #include "TPlaneProperties.hh"
 #include "TH1F.h"
+#include "TMath.h"
 #include <math.h>
 #define TCLUSTER_REV  40
 #define INVALID_POSITION -9999

@@ -2259,12 +2259,15 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         xPredicted = -9999999;
         yPredicted = -9999999;
         chi_2 = -1;
-        clusterChargeAll = 0;
-        clusterCharge1 = 0;
-        clusterCharge2 = 0;
-        clusterChargeN = 0;
+        clusterChargeAll = -10000;
+        clusterCharge1 = -10000;
+        clusterCharge2 = -10000;
+        clusterChargeN = -10000;
         for(int ch=0; ch<128; ch++){
-            diaChSignal[ch] = 0;
+            clusterChannels[ch] = -1;
+            diaChSignal[ch] = -10000;
+            diaChPedMeanCmc[ch] = -10000;
+            diaChPedSigmaCmc[ch] = -10000;
             diaChHighest[ch] = false;
             diaChSeed[ch] = false;
             diaChHits[ch] = false;
@@ -2357,6 +2360,8 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
                             nAnalyzedEvents++;
                             transparentEvent = true;
                             for(int ch = 0; ch<128; ch++){
+                                diaChPedMeanCmc[ch] = eventReader->getDiaPedestalMean(ch, true);
+                                diaChPedSigmaCmc[ch] = eventReader->getDiaPedestalSigma(ch, true);
                                 diaChSignal[ch] = eventReader->getSignal(subjectDetector, ch, true, false);
                                 Float_t diaSignalInSigma = eventReader->getSignalInSigma(subjectDetector, ch, true, false);
                                 diaChSeed[ch] = (diaSignalInSigma >= settings->getClusterSeedFactor(subjectDetector, ch));
@@ -2429,6 +2434,7 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
 //                    this->diaChSeed[int(currentChannel)] = true;
 //                else
                     this->diaChHits[int(currentChannel)] = true;
+                    this->clusterChannels[int(iChannel)] = Short_t(currentChannel);
             }
         }
         //		else
@@ -2439,7 +2445,8 @@ TCluster TTransparentAnalysis::makeTransparentCluster(TTracking *reader,TSetting
     transparentCluster.UpdateHighestSignalChannel();
     transparentCluster.SetTransparentCluster(centerPosition);
     transparentCluster.SetTransparentClusterSize(clusterSize);
-    if(!isNonHit) this->diaChHighest[transparentCluster.getHighestChannelNumber()] = true;
+//    if(!isNonHit) this->diaChHighest[transparentCluster.getHighestChannelNumber()] = true;
+    if(!isNonHit) this->diaChHighest[int(transparentCluster.GetHighestSignalChannelTransparentCluster())] = true;
     return transparentCluster;
 }
 
@@ -3478,12 +3485,17 @@ void TTransparentAnalysis::InitializeTreeVectors(){
     xPredicted = -9999999;
     yPredicted = -9999999;
     chi_2 = -1;
-    clusterChargeAll = 0;
-    clusterCharge1 = 0;
-    clusterCharge2 = 0;
-    clusterChargeN = 0;
+    clusterChargeAll = -10000;
+    clusterCharge1 = -10000;
+    clusterCharge2 = -10000;
+    clusterChargeN = -10000;
+    clusterSize = settings->getMaxTransparentClusterSize();
+    numStrips = settings->getNumHighestTransparentCluster();
     for(int i = 0; i<128; i++) {
-        diaChSignal[i] = 0;
+        clusterChannels[i] = -1;
+        diaChSignal[i] = -10000;
+        diaChPedMeanCmc[i] = -10000;
+        diaChPedSigmaCmc[i] = -10000;
         diaChannels[i] = UChar_t(i);
         diaChHighest[i] = false;
         diaChSeed[i] = false;
@@ -3515,6 +3527,11 @@ void TTransparentAnalysis::SetBranchAddresses() {
     transpTree->Branch("clusterCharge1", &clusterCharge1, "clusterCharge1/F");;
     transpTree->Branch("clusterCharge2", &clusterCharge2, "clusterCharge2/F");;
     transpTree->Branch("clusterChargeN", &clusterChargeN, "clusterChargeN/F");;
+    transpTree->Branch("clusterSize", &clusterSize, "clusterSize/b");;
+    transpTree->Branch("numStrips", &numStrips, "numStrips/b");;
+    transpTree->Branch("clusterChannels", &clusterChannels, "clusterChannels[clusterSize]/S");;
+    transpTree->Branch("diaChPedMeanCmc", &diaChPedMeanCmc, "diaChPedMeanCmc[128]/F");;
+    transpTree->Branch("diaChPedSigmaCmc", &diaChPedSigmaCmc, "diaChPedSigmaCmc[128]/F");;
     transpTree->Branch("diaChSignal", &diaChSignal, "diaChSignal[128]/F");;
     transpTree->Branch("diaChannels", &diaChannels, "diaChannels[128]/b");;
     transpTree->Branch("diaChHighest", &diaChHighest, "diaChHighest[128]/O");;

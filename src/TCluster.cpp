@@ -579,8 +579,8 @@ Float_t TCluster::getCharge(UInt_t nClusterEntries,bool cmnCorrected,bool useSma
 	    dir = getSignal(clusPosStart-1,cmnCorrected)>getSignal(clusPosStart+1,cmnCorrected)?left:right;
 	}
 	else{
-	    clusPosStart= getClusterPosition((int)(isTransparentCluster+.5));
-	    dir = isTransparentCluster-(int)(isTransparentCluster+.5)>0?right:left;
+	    clusPosStart= getClusterPosition((int)(TMath::Floor(isTransparentCluster+.5)));
+	    dir = isTransparentCluster-(int)(TMath::Floor(isTransparentCluster+.5))>0?right:left;
 		if (nClusterEntries < GetTransparentClusterSize()) {
 			return getTransparentCharge(nClusterEntries, cmnCorrected, useSmallSignals);
 		}

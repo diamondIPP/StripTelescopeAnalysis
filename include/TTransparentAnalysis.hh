@@ -320,7 +320,12 @@ private:
     Float_t clusterCharge1;
     Float_t clusterCharge2;
     Float_t clusterChargeN;
+    UChar_t clusterSize;
+    UChar_t numStrips;
+    Short_t clusterChannels[128];
     Float_t diaChSignal[128];
+    Float_t diaChPedSigmaCmc[128];
+    Float_t diaChPedMeanCmc[128];
     UChar_t diaChannels[128];
     Bool_t diaChHighest[128];
     Bool_t diaChSeed[128];
