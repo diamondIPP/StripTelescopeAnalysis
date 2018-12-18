@@ -3529,7 +3529,9 @@ void TTransparentAnalysis::SetBranchAddresses() {
     transpTree->Branch("clusterChargeN", &clusterChargeN, "clusterChargeN/F");;
     transpTree->Branch("clusterSize", &clusterSize, "clusterSize/b");;
     transpTree->Branch("numStrips", &numStrips, "numStrips/b");;
-    transpTree->Branch("clusterChannels", &clusterChannels, "clusterChannels[clusterSize]/S");;
+    for(int i = 0; i<clusterSize; i++) {
+        transpTree->Branch(TString::Format("clusterChannel%d",i), &clusterChannels[i], TString::Format("clusterChannel%d/S",i));;
+    }
     transpTree->Branch("diaChPedMeanCmc", &diaChPedMeanCmc, "diaChPedMeanCmc[128]/F");;
     transpTree->Branch("diaChPedSigmaCmc", &diaChPedSigmaCmc, "diaChPedSigmaCmc[128]/F");;
     transpTree->Branch("diaChSignal", &diaChSignal, "diaChSignal[128]/F");;
