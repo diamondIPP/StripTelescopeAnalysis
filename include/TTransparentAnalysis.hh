@@ -326,6 +326,8 @@ private:
     Float_t diaChSignal[128];
     Float_t diaChPedSigmaCmc[128];
     Float_t diaChPedMeanCmc[128];
+	UShort_t diaChADC[128];
+	Float_t cmn;
     UChar_t diaChannels[128];
     Bool_t diaChHighest[128];
     Bool_t diaChSeed[128];

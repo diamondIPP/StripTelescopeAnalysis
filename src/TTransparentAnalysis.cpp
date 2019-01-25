@@ -2263,8 +2263,10 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
         clusterCharge1 = -10000;
         clusterCharge2 = -10000;
         clusterChargeN = -10000;
+        cmn = -10000;
         for(int ch=0; ch<128; ch++){
             clusterChannels[ch] = -1;
+            diaChADC[ch] = 0;
             diaChSignal[ch] = -10000;
             diaChPedMeanCmc[ch] = -10000;
             diaChPedSigmaCmc[ch] = -10000;
@@ -2359,7 +2361,9 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
                             //		cout<<"analyse("<<nEvent<<");"<<endl;
                             nAnalyzedEvents++;
                             transparentEvent = true;
+                            cmn = eventReader->getCMNoise();
                             for(int ch = 0; ch<128; ch++){
+                                diaChADC[ch] = UShort_t(eventReader->getDia_ADC(ch));
                                 diaChPedMeanCmc[ch] = eventReader->getDiaPedestalMean(ch, true);
                                 diaChPedSigmaCmc[ch] = eventReader->getDiaPedestalSigma(ch, true);
                                 diaChSignal[ch] = eventReader->getSignal(subjectDetector, ch, true, false);
@@ -3491,11 +3495,13 @@ void TTransparentAnalysis::InitializeTreeVectors(){
     clusterChargeN = -10000;
     clusterSize = settings->getMaxTransparentClusterSize();
     numStrips = settings->getNumHighestTransparentCluster();
+    cmn = -10000;
     for(int i = 0; i<128; i++) {
         clusterChannels[i] = -1;
         diaChSignal[i] = -10000;
         diaChPedMeanCmc[i] = -10000;
         diaChPedSigmaCmc[i] = -10000;
+        diaChADC[i] = 0;
         diaChannels[i] = UChar_t(i);
         diaChHighest[i] = false;
         diaChSeed[i] = false;
@@ -3532,6 +3538,8 @@ void TTransparentAnalysis::SetBranchAddresses() {
     for(int i = 0; i<clusterSize; i++) {
         transpTree->Branch(TString::Format("clusterChannel%d",i), &clusterChannels[i], TString::Format("clusterChannel%d/S",i));;
     }
+    transpTree->Branch("diaChADC", &diaChADC, "diaChADC[128]/s");
+    transpTree->Branch("cmn", &cmn, "cmn/F");
     transpTree->Branch("diaChPedMeanCmc", &diaChPedMeanCmc, "diaChPedMeanCmc[128]/F");;
     transpTree->Branch("diaChPedSigmaCmc", &diaChPedSigmaCmc, "diaChPedSigmaCmc[128]/F");;
     transpTree->Branch("diaChSignal", &diaChSignal, "diaChSignal[128]/F");;
