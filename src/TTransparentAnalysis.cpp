@@ -567,6 +567,8 @@ void TTransparentAnalysis::bookTransparentTree(){
 	transparentTree->Branch("StripPedestalSigmaCMC"           , &trTree_StripPedestalSigmaCMC           , "StripPedestalSigmaCMC[128]/F"       );
 	transparentTree->Branch("StripSignalCMC"                  , &trTree_StripSignalCMC                  , "StripSignalCMC[128]/F"              );
 	transparentTree->Branch("StripSNRCMC"                     , &trTree_StripSNRCMC                     , "StripSNRCMC[128]/F"                 );
+	transparentTree->Branch("SignalNin10Strips"               , &trTree_SignalNin10Strips               , "SignalNin10Strips[10]/F"            );
+	transparentTree->Branch("SignalNin10StripsCMC"            , &trTree_SignalNin10StripsCMC            , "SignalNin10StripsCMC[10]/F"         );
 }
 
 void TTransparentAnalysis::resetTransparentTree(){
@@ -619,6 +621,10 @@ void TTransparentAnalysis::resetTransparentTree(){
 		trTree_StripPedestalSigmaCMC[i] = -999.;
 		trTree_StripSignalCMC       [i] = -999.;
 		trTree_StripSNRCMC          [i] = -999.;
+	}
+	for (int i = 0; i < 10; i++){
+		trTree_SignalNin10Strips    [i] = -999.;
+		trTree_SignalNin10StripsCMC [i] = -999.;
 	}
 }
 
@@ -720,6 +726,14 @@ void TTransparentAnalysis::fillTransparentTree(){
 		trTree_PedestalSigmaCMNcorr[i] = eventReader->getPedestalSigma(subjectDetector, channel_it, true        );
 		trTree_SignalCMNcorr       [i] = eventReader->getSignal       (subjectDetector, channel_it, true , false);
 	}
+
+	// add transparent cluster charge
+	transparentClusters.SetTransparentClusterSize(10);
+	for (int i = 0; i < 10; i++){
+		trTree_SignalNin10Strips   [i] = this->transparentClusters.getCharge(i+1, false);
+		trTree_SignalNin10StripsCMC[i] = this->transparentClusters.getCharge(i+1, true );
+	}
+
 	transparentTree->Fill();
 }
 

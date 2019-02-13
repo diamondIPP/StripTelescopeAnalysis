@@ -231,6 +231,8 @@ private:
 	Float_t trTree_StripPedestalSigmaCMC           [128];
 	Float_t trTree_StripSignalCMC                  [128];
 	Float_t trTree_StripSNRCMC                     [128];
+	Float_t trTree_SignalNin10Strips               [10];
+	Float_t trTree_SignalNin10StripsCMC            [10];
 
 	Float_t inf;
 	// histograms
