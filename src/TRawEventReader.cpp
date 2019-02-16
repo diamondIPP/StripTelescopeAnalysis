@@ -268,6 +268,13 @@ int TRawEventReader::ReadRawEvent(int EventNumber, bool verbose)
 		D2Y.ADC_values[i]=rzEvent.Input[4*i+1+1024];
 		D3Y.ADC_values[i]=rzEvent.Input[4*i+1024];
 	}
+	//The D2 Si plane is duplicated to compensate for the not working D3 Si plane in July 2004.
+	if (settings->getData_format() == 2004) {
+		for (int i = 0; i < 256; i++) {
+			D3X.ADC_values[i] = rzEvent.Input[4*i+1];
+			D3Y.ADC_values[i] = rzEvent.Input[4*i+1+1024];
+		}
+	}
 	for (int i=0; i<128;i++){
 		Dia0.ADC_values[i]=rzEvent.RD42[(i+DIA_OFFSET)*2+1];
 		Dia1.ADC_values[i]=rzEvent.RD42[(i+DIA_OFFSET)*2];
