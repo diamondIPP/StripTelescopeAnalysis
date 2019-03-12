@@ -2270,6 +2270,8 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
             diaChSignal[ch] = -10000;
             diaChPedMeanCmc[ch] = -10000;
             diaChPedSigmaCmc[ch] = -10000;
+//            clusterChargeHighestN[ch] = -10000;
+            clusterChannelsHighestN[ch] = -1;
             diaChHighest[ch] = false;
             diaChSeed[ch] = false;
             diaChHits[ch] = false;
@@ -2370,6 +2372,7 @@ void TTransparentAnalysis::createEventVector(Int_t startEvent) {
                                 Float_t diaSignalInSigma = eventReader->getSignalInSigma(subjectDetector, ch, true, false);
                                 diaChSeed[ch] = (diaSignalInSigma >= settings->getClusterSeedFactor(subjectDetector, ch));
                             }
+                            this->SortChannelsPhHighest();
                             this->fillHistograms();
                             if (verbosity > 4) printEvent();
                             //		cout<<"push Back("<<nEvent<<");"<<endl;
@@ -3498,7 +3501,9 @@ void TTransparentAnalysis::InitializeTreeVectors(){
     cmn = -10000;
     for(int i = 0; i<128; i++) {
         clusterChannels[i] = -1;
+        clusterChannelsHighestN[i] = -1;
         diaChSignal[i] = -10000;
+//        clusterChargeHighestN[i] = -10000;
         diaChPedMeanCmc[i] = -10000;
         diaChPedSigmaCmc[i] = -10000;
         diaChADC[i] = 0;
@@ -3509,6 +3514,40 @@ void TTransparentAnalysis::InitializeTreeVectors(){
         diaChsScreened[i] = settings->IsScreenedChannel(i);
         diaChsNoisy[i] = settings->IsNoisyChannel(i);
         diaChsNC[i] = settings->IsNotConnectedChannel(i);
+    }
+}
+
+void TTransparentAnalysis::SortChannelsPhHighest() {
+    Short_t tempChs[128];
+    Float_t tempSig[128];
+    for (int ch = 0; ch < this->clusterSize; ch++){
+        Short_t cch = this->clusterChannels[ch];
+        tempChs[ch] = cch;
+        tempSig[ch] = this->diaChSignal[int(cch)];
+    }
+    int n = int(clusterSize);
+    bool swapped;
+    while(true) {
+        swapped = false;
+        for (int ch = 1; ch < n; ch++) {
+            if (tempSig[ch - 1] < tempSig[ch]) {
+                Float_t temps = tempSig[ch - 1];
+                Short_t tempc = tempChs[ch - 1];
+                tempSig[ch - 1] = tempSig[ch];
+                tempChs[ch - 1] = tempChs[ch];
+                tempSig[ch] = temps;
+                tempChs[ch] = tempc;
+                swapped = true;
+            }
+        }
+        n--;
+        if (!swapped) {
+            break;
+        }
+    }
+
+    for (int ch = 0; ch < this->clusterSize; ch++){
+        this->clusterChannelsHighestN[ch] = tempChs[ch];
     }
 }
 
@@ -3533,6 +3572,10 @@ void TTransparentAnalysis::SetBranchAddresses() {
     transpTree->Branch("clusterCharge1", &clusterCharge1, "clusterCharge1/F");;
     transpTree->Branch("clusterCharge2", &clusterCharge2, "clusterCharge2/F");;
     transpTree->Branch("clusterChargeN", &clusterChargeN, "clusterChargeN/F");;
+    for(int i=0; i<clusterSize; i++) {
+//        transpTree->Branch(TString::Format("clusterChargeHighest%d",i), &clusterChargeHighestN[i], TString::Format("clusterChargeHighest%d/F",i));;
+        transpTree->Branch(TString::Format("clusterChannelHighest%d",i+1), &clusterChannelsHighestN[i], TString::Format("clusterChannelHighest%d/S",i+1));;
+    }
     transpTree->Branch("clusterSize", &clusterSize, "clusterSize/b");;
     transpTree->Branch("numStrips", &numStrips, "numStrips/b");;
     for(int i = 0; i<clusterSize; i++) {
