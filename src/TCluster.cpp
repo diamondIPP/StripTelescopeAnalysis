@@ -408,7 +408,8 @@ TCluster TCluster::getCrossTalkCorrectedCluster(Float_t alpha){
 		str+= TString::Format("\t*%2d - %3d --> %4d - %6.1f = %6.1f, %6.1f", cl,channel,(Int_t)adc,ped,measured_signal,S_i);
         S_i = (measured_signal - S_i * alpha)/(1-alpha);
         Int_t old_adc = adc;
-        adc = (Int_t)(S_i+ped+0.5);
+        adc = (Int_t)floorl((S_i+ped+0.5));
+//        adc = (Int_t)floor((S_i+ped+0.5));
         str+=  TString::Format(" ==> %6.1f / %4d  - %1d\n", S_i,adc,(old_adc-adc));
 		bool isSaturated = this->getAdcValue(clPos)>=maxHeight; // DA
 		newClus.addChannel(channel,this->getPedestalMean(clPos),this->getPedestalSigma(clPos),

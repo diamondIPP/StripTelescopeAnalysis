@@ -77,9 +77,9 @@ void TAnalysisOfAsymmetricEta::FillEtaDistribution(TH2F* histo, Float_t correcti
 			continue;
 		TCluster newClus = clus.getCrossTalkCorrectedCluster(correctionAlpha);
 		Int_t leftChannel,oldChannel;
-		Float_t newEta = newClus.getEta(leftChannel);
+		Float_t newEta = newClus.getEta(leftChannel, newClus.getDetector() == TPlaneProperties::isDiamondDetector(newClus.getDetector()));
 		Int_t nDia = settings->getDiaDetectorAreaOfChannel(leftChannel)+1;
-		Float_t oldEta = clus.getEta(oldChannel);
+		Float_t oldEta = clus.getEta(oldChannel, clus.getDetector() == TPlaneProperties::isDiamondDetector(clus.getDetector()));
 		Int_t oldDia = settings->getDiaDetectorAreaOfChannel(oldChannel)+1;
 //		if (det >=8 && leftChannel!=oldChannel){
 		if (det >=8 && false)
@@ -91,7 +91,7 @@ void TAnalysisOfAsymmetricEta::FillEtaDistribution(TH2F* histo, Float_t correcti
 		    clus.Print();
 		}
 //        if (verbosity>4)
-		if(newEta>0&&newEta<1){
+		if(newEta>=0&&newEta<=1){
 			histo->Fill(newEta,nDia);
 			correct++;
 			if (det >= 8 && nDia==0){
@@ -101,7 +101,7 @@ void TAnalysisOfAsymmetricEta::FillEtaDistribution(TH2F* histo, Float_t correcti
 			//				cout<<i<<" nDia: "<<nDia<<" eta: "<<newEta<<endl;
 		}
 		else{
-			if (newEta<=0)
+			if (newEta<0)
 				toSmallEta++;
 			else
 				toBigEta++;
@@ -249,6 +249,7 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 	if(verbosity>4)cout<<"hName"<<endl;
 //	hAsymmetricEta2D = new TH2F(hName,hName,512,0,1,nDiamonds+2,-0.5,nDiamonds+1.5);
 	hAsymmetricEta2D = new TH2F(hName,hName,ETA_BINS+1,0-1/(2*ETA_BINS),1+1/(2*ETA_BINS),nDiamonds+2,-0.5,nDiamonds+1.5);
+//	hAsymmetricEta2D = new TH2F(hName,hName,ETA_BINS+1,0-1/(2*ETA_BINS),1+1/(2*ETA_BINS),nDiamonds,nDiamonds-0.5,nDiamonds+0.5);
 	if(hAsymmetricEta2D ==0){
 		cout<<"histo with name: '"<<hName<<"' was not created...."<<endl;//hAsymmetricEta2D<<
 	}
@@ -268,10 +269,10 @@ UInt_t TAnalysisOfAsymmetricEta::analyse() {
 		}
 		if(verbosity>4)cout<<hAsymmetricEta2D<<endl;
 		hAsymmetricEta_px = getProjection();
-		Float_t skewness  = checkConvergence(hAsymmetricEta_px,nTries);
+		Float_t skewnessish  = checkConvergence(hAsymmetricEta_px,nTries);
 		Float_t mean = hAsymmetricEta_px->GetMean();
-		valid = (skewness==0);
-		if(!valid ) updateAlpha(skewness,mean);
+		valid = (skewnessish==0);
+		if(!valid ) updateAlpha(skewnessish,mean);
 
 		nTries++;
 	}
@@ -354,7 +355,7 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
 	if (det>=8){
 		cout<<"\tAlpha: "<<alphaValues.back()<<endl;
 		cout<<"\tMean:  "<<means.back()<<endl;
-		cout<<"\tMedian:  "<<skewnesses.back()<<endl;
+		cout<<"\t0.5 - Median:  "<<skewnesses.back()<<endl;
 		cout<<"\tSkewness:  "<<histo->GetSkewness()<<endl;
 //		cout<<"\tL/RA:  "<<rightLefts.back()<<endl;
 	}
@@ -437,14 +438,14 @@ Float_t TAnalysisOfAsymmetricEta::checkConvergence(TH1F* histo, UInt_t nTries){
 //	return skewness;
 }
 
-bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t median, Float_t mean){
+bool TAnalysisOfAsymmetricEta::updateAlpha(Float_t skewnessish, Float_t mean){
 	if(verbosity>4||true){
-		cout<<"TAnalysisOfAsymmetricEta::updateAlpha for "<<det<<"\tMean:"<<mean<<" Median-0.5:"<<median<<endl;
+		cout<<"TAnalysisOfAsymmetricEta::updateAlpha for "<<det<<"\tMean:"<<mean<<" 0.5-Median:"<<skewnessish<<endl;
 		cout<<"Alpha: "<<alpha<<endl;
 	}
 	Float_t delta = 0.02;
 //    Float_t incr = skewness + (0.5-mean)*5;
-    Float_t incr = median;
+    Float_t incr = skewnessish;
 	Float_t rando = rand3->Uniform(0.001);
     if(incr<0)
         alpha = alpha + TMath::Min(incr*delta, -rando);
@@ -551,12 +552,12 @@ bool TAnalysisOfAsymmetricEta::checkBadConvergence(UInt_t nTries){
 				Float_t skewness = TMath::Abs(skewnesses.at(i));
 				if(skewness<minSkewness){
 					minSkewness = skewness;
-					newBestAlpha = alphaValues.at(i)/10;
+					newBestAlpha = alphaValues.at(i)/10.;
 //					cout<<"Set new alpha in step "<< i<<":"<<newBestAlpha<<endl;
 					bestTry = i;
 				}
 			}
-			cout<<"Found best Alpha in step no "<< bestTry <<"/"<<nTries << ": "<< newBestAlpha *10 <<"% with skewness of "<<minSkewness*100<<"%"<<endl;
+			cout<<"Found best Alpha in step no "<< bestTry <<"/"<<nTries << ": "<< newBestAlpha *100. <<"% with skewness of "<<minSkewness*100<<"%"<<endl;
 			alpha = newBestAlpha;
 
 		}

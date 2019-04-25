@@ -373,7 +373,7 @@ bool TTransparentAnalysis::checkPredictedRegion(UInt_t det, Float_t centerPositi
             if (verbosity > 5) cout << "\tchannel " << currentChannel << " has saturated.." << endl;
             saturatedChannel++;
             hasSaturatedCh = true;
-            return false;
+//            return false;
         }
     }
     return true;
