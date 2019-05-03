@@ -395,11 +395,7 @@ pair<Float_t,Float_t> TPedestalCalculation::checkPedestalDet(int det,int ch,int 
 	if(settings->isSaturated(det, this->detAdcValues[det][ch].back())){
         this->silSaturatedChs[det][ch] = true;
 	}
-	else if(abs(this->detAdcValues[det][ch].back()-mean) < settings->getClusterHitFactor(det, ch) * sigma){
-        this->silHitChs[det][ch] = false;
-        this->silSeedChs[det][ch] = false;
-	}
-	else if((settings->getClusterHitFactor(det, ch) * sigma <= this->detAdcValues[det][ch].back()-mean) && (this->detAdcValues[det][ch].back()-mean < settings->getClusterSeedFactor(det, ch) * sigma)){
+	if((settings->getClusterHitFactor(det, ch) * sigma <= this->detAdcValues[det][ch].back()-mean) && (this->detAdcValues[det][ch].back()-mean < settings->getClusterSeedFactor(det, ch) * sigma)){
         this->silHitChs[det][ch] = true;
 	}
 	else if((this->detAdcValues[det][ch].back()-mean >= settings->getClusterSeedFactor(det, ch) * sigma)){
@@ -431,21 +427,20 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 		this->diaSUM2[ch]+=this->diaAdcValues[ch].back()*this->diaAdcValues[ch].back();
 		this->diaEventsInSum[ch]++;
 		this->diaEventUsed[ch].push_back(true);
+		this->diaPedChs[ch] = true;
 	}
-	else
+	else {
 		this->diaEventUsed[ch].push_back(false);
+		this->diaPedChs[ch] = false;
+	}
 	// DA: flags to identify if hit or seed
-	this->diaPedChs[ch] = false;
     this->diaHitChs[ch] = false;
     this->diaSeedChs[ch] = false;
     this->diaSaturatedChs[ch] = false;
 	if(settings->isSaturated(8, this->diaAdcValues[ch].back())){
         this->diaSaturatedChs[ch] = true;
 	}
-	else if(abs(this->diaAdcValues[ch].back()-mean) < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigma){
-        this->diaPedChs[ch] = true;
-	}
-	else if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigma <= this->diaAdcValues[ch].back()-mean) && (this->diaAdcValues[ch].back()-mean < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigma)){
+	if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigma <= this->diaAdcValues[ch].back()-mean) && (this->diaAdcValues[ch].back()-mean < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigma)){
         this->diaHitChs[ch] = true;
 	}
 	else if ((this->diaAdcValues[ch].back()-mean >= settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigma)){
@@ -463,20 +458,16 @@ pair<float,float> TPedestalCalculation::checkPedestalDia(int ch,int maxSigma){
 		this->diaSUM2Cmn[ch]+=this->diaAdcValuesCMN[ch].back()*this->diaAdcValuesCMN[ch].back();
 		this->diaEventsInSumCMN[ch]++;
 		this->diaEventUsedCMN[ch].push_back(true);
+		this->diaPedChsCmc[ch] = true;
 	}
-	else
+	else {
 		this->diaEventUsedCMN[ch].push_back(false);
+		this->diaPedChsCmc[ch] = false;
+	}
 	// DA: flags to identify if hit or seed
-    this->diaPedChsCmc[ch] = false;
-    this->diaHitChsCmc[ch] = false;
-    this->diaSeedChsCmc[ch] = false;
-	if(this->diaSaturatedChs[ch]){
-		// Do nothing
-	}
-	else if(abs(this->diaAdcValuesCMN[ch].back()-meanCMN) < settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN){
-        this->diaPedChsCmc[ch] = true;
-	}
-	else if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN <= this->diaAdcValuesCMN[ch].back()-meanCMN) && (this->diaAdcValuesCMN[ch].back()-meanCMN < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN)){
+	this->diaHitChsCmc[ch] = false;
+	this->diaSeedChsCmc[ch] = false;
+	if((settings->getClusterHitFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN <= this->diaAdcValuesCMN[ch].back()-meanCMN) && (this->diaAdcValuesCMN[ch].back()-meanCMN < settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN)){
         this->diaHitChsCmc[ch] = true;
 	}
 	else if((this->diaAdcValuesCMN[ch].back()-meanCMN >= settings->getClusterSeedFactor(TPlaneProperties::getDetDiamond(), ch) * sigmaCMN)){

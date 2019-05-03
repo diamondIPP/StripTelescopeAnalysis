@@ -165,8 +165,8 @@ void TClustering::clusterDetector(UInt_t det){
 	for(int ch=0;ch<maxChannels;ch++){
 		//if(verbosity>30&&nEvent==0&&det==8&&ch<128)cout<<nEvent<<flush;
 
-		Float_t sigma=eventReader->getPedestalSigma(det,ch);
-		Float_t signal = eventReader->getSignal(det,ch);
+		Float_t sigma=eventReader->getPedestalSigma(det,ch,TPlaneProperties::isDiamondDetector(det));
+		Float_t signal = eventReader->getSignal(det,ch,TPlaneProperties::isDiamondDetector(det));
 
 		//if(verbosity>9&&nEvent==0&&det==8&&ch<128)cout<<" "<<det<<" "<<ch<<" "<<signal<<" "<<sigma<<" "<<flush;
 		//if(det==8)cout<<nEvent<<" # "<<det<<" # "<<ch<<" "<<signal<<" "<<sigma<<" "<<endl;
@@ -174,8 +174,8 @@ void TClustering::clusterDetector(UInt_t det){
 			if(verbosity>8 ||(det ==8 && verbosity>3))cout<<nEvent<<" # "<<det<<" # "<<ch<<" sigma==0"<<endl;
 			continue;
 		}
-		Float_t SNR=eventReader->getSignalInSigma(det,ch);
-		if(SNR!=eventReader->getSignalInSigma(det,ch))cout<<"in the SNR there is something wrong...";
+		Float_t SNR=eventReader->getSignalInSigma(det,ch,TPlaneProperties::isDiamondDetector(det));
+		if(SNR!=eventReader->getSignalInSigma(det,ch,TPlaneProperties::isDiamondDetector(det)))cout<<"in the SNR there is something wrong...";
 		//if(verbosity>2&&nEvent==0&&det==8&&ch<TPlaneProperties::getNChannels(det))cout<<SNR<<flush;
 
 
@@ -212,7 +212,7 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 
 	Float_t sigma=eventReader->getPedestalSigma(det,ch);
 	Float_t signal =eventReader->getSignal(det,ch);
-	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch);
+	Float_t adcValueInSigma=eventReader->getSignalInSigma(det,ch,TPlaneProperties::isDiamondDetector(det));
 	Int_t adcValue= eventReader->getAdcValue(det,ch);
 	Float_t cmNoise = eventReader->getCMNoise(det,ch);
 
@@ -227,11 +227,11 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	if(verbosity>10)cout<<cluster.size()<<" ";
 	UInt_t currentCh;
 	for(currentCh=ch;adcValueInSigma>hitSigma&&currentCh>=0&&currentCh<=TPlaneProperties::getNChannels(det);currentCh--){
-		sigma=eventReader->getPedestalSigma(det,currentCh);
+		sigma=eventReader->getPedestalSigma(det,currentCh,TPlaneProperties::isDiamondDetector(det));
 		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";
 		signal =eventReader->getSignal(det,currentCh);
-		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
+		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh,TPlaneProperties::isDiamondDetector(det));
 		isScreened=this->settings->isDet_channel_screened(det,currentCh)||adcValue==maxAdcValue;
 		if(sigma!=0&&adcValueInSigma>hitSigma){
 			float pedMean = eventReader->getPedestalMean(det,currentCh,false);
@@ -256,11 +256,11 @@ int TClustering::combineCluster(UInt_t det, UInt_t ch){
 	}
 	if((verbosity>10&&det==8)||verbosity>11)cout<<" ."<<cluster.size()<<". ";
 	for(currentCh=ch+1;currentCh<TPlaneProperties::getNChannels(det);currentCh++){
-		sigma=eventReader->getPedestalSigma(det,currentCh);
+		sigma=eventReader->getPedestalSigma(det,currentCh,TPlaneProperties::isDiamondDetector(det));
 		adcValue=eventReader->getAdcValue(det,currentCh);
 		if(verbosity&&sigma<=0)cout<<currentCh<<":sigma<0 ";
-		signal =eventReader->getSignal(det,currentCh);
-		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh);
+		signal =eventReader->getSignal(det,currentCh,TPlaneProperties::isDiamondDetector(det));
+		adcValueInSigma=eventReader->getSignalInSigma(det,currentCh,TPlaneProperties::isDiamondDetector(det));
 		isScreened=this->settings->isDet_channel_screened(det,currentCh);
 		if(sigma!=0&&adcValueInSigma>hitSigma&&sigma!=0){
 			float pedMean = eventReader->getPedestalMean(det,currentCh,false);
