@@ -603,6 +603,8 @@ void TResults::createOutputResultFile(){
     results["GIT_REV"] = GIT_REV;
     results["GIT_TIME"] = GIT_TIME;
     results["ROOT_version"] = gROOT->GetVersion();
+    gethostname(hostname, HOSTNAME_MAX);
+    results["Host"] = hostname;
     results["lastUpdate"] = lastUpdate.AsString();
     results["maskedChannels"] =  getChannelsStringList(maskedChannels);
     results["noisyChannels"] = getChannelsStringList(noisyChannels);

@@ -171,6 +171,8 @@ private:
     Int_t dia_input;
     Int_t voltage;
     TString diamondName;
+    static const int HOSTNAME_MAX = 50;
+    char hostname[HOSTNAME_MAX];
     std::pair<Int_t,Int_t> diamondChannels;
     std::set<Int_t> maskedChannels;
     std::set<Int_t> noisyChannels;
